@@ -186,9 +186,24 @@ end
 
                 [aAlphamap, sType]  = getVolAlphaMap('get', im, atMetaData);
                 aColormap = get3DColorMap('one', colorMapVolOffset('get'));
-                bLighting = volLighting('get');
-
-                aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}, 'Lighting', bLighting];
+                
+                sMatlabVersion = version();
+                sMatlabVersion = extractBefore(sMatlabVersion,' ');
+                
+                bLightingIsSupported = false;
+                if length(sMatlabVersion) > 3
+                    dMatlabVersion = str2double(sMatlabVersion(1:3));
+                    if dMatlabVersion >= 9.8
+                         bLightingIsSupported = true;
+                    end
+                end
+                
+                if bLightingIsSupported == true                
+                    bLighting = volLighting('get');
+                    aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}, 'Lighting', bLighting];
+                else
+                    aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
+                end
 
 %                    volshow(im, 'Parent', uiOneWindowPtr('get'), 'Renderer', sRenderer)
 
