@@ -32,24 +32,23 @@ function writeDICOMCallback(~, ~)
         return;
     end
 
-     sCurrentDir = pwd;
-     if integrateToBrowser('get') == true
-         sCurrentDir = [sCurrentDir '/TriDFusion'];
-     end
+    sCurrentDir = pwd;
+    if integrateToBrowser('get') == true
+        sCurrentDir = [sCurrentDir '/TriDFusion'];
+    end
 
-     sMatFile = [sCurrentDir '/' 'lastWriteDicomDir.mat'];
-     % load last data directory
-     if exist(sMatFile, 'file')
+    sMatFile = [sCurrentDir '/' 'lastWriteDicomDir.mat'];
+    % load last data directory
+    if exist(sMatFile, 'file')
                                 % lastDirMat mat file exists, load it
-        load('-mat', sMatFile);
-        if exist('exportDicomLastUsedDir', 'var')
-            sCurrentDir = exportDicomLastUsedDir;
-        end
-        if sCurrentDir == 0
-            sCurrentDir = pwd;
-        end
-     end
-
+       load('-mat', sMatFile);
+       if exist('exportDicomLastUsedDir', 'var')
+           sCurrentDir = exportDicomLastUsedDir;
+       end
+       if sCurrentDir == 0
+           sCurrentDir = pwd;
+       end
+    end
 
     sOutDir = uigetdir(sCurrentDir);
     if sOutDir == 0

@@ -29,16 +29,27 @@ function clickUp(~, ~)
 
     windowButton('set', 'up'); 
     set(fiMainWindowPtr('get'), 'UserData', 'up');
-
-    volICObj = volICObject('get');                
+            
     mipICObj = mipICObject('get');
     if ~isempty(mipICObj)
         mipICObj.mouseMode = 1;
         set(mipICObj.figureHandle, 'WindowButtonMotionFcn', '');
     end
 
+    volICObj = volICObject('get');                
     if ~isempty(volICObj)
         volICObj.mouseMode = 1;
         set(volICObj.figureHandle, 'WindowButtonMotionFcn', '');                
     end
+    
+    mipICFusionObj = mipICFusionObject('get');
+    if ~isempty(mipICFusionObj)
+        set(mipICFusionObj.figureHandle, 'WindowButtonMotionFcn', '');
+    end       
+
+    volICFusionObj = volICFusionObject('get');
+    if ~isempty(volICFusionObj)
+        set(volICFusionObj.figureHandle, 'WindowButtonMotionFcn', '');
+    end      
+    
 end
