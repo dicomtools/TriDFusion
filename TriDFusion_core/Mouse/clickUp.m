@@ -29,29 +29,34 @@ function clickUp(~, ~)
 
     windowButton('set', 'up'); 
     set(fiMainWindowPtr('get'), 'UserData', 'up');
-            
-    mipICObj = mipICObject('get');
-    if ~isempty(mipICObj)
-        mipICObj.mouseMode = 1;
-        set(mipICObj.figureHandle, 'WindowButtonMotionFcn', '');
-    end
-
-    volICObj = volICObject('get');                
-    if ~isempty(volICObj)
-        volICObj.mouseMode = 1;
-        set(volICObj.figureHandle, 'WindowButtonMotionFcn', '');                
-    end
     
-    mipICFusionObj = mipICFusionObject('get');
-    if ~isempty(mipICFusionObj)
-        mipICFusionObj.mouseMode = 1;
-        set(mipICFusionObj.figureHandle, 'WindowButtonMotionFcn', '');
-    end       
+    if switchTo3DMode('get')      == true || ...
+       switchToIsoSurface('get')  == true || ...
+       switchToMIPMode('get')     == true
+      
+        mipICObj = mipICObject('get');
+        if ~isempty(mipICObj)
+            mipICObj.mouseMode = 1;
+            set(mipICObj.figureHandle, 'WindowButtonMotionFcn', '');
+        end
 
-    volICFusionObj = volICFusionObject('get');
-    if ~isempty(volICFusionObj)
-        volICFusionObj.mouseMode = 1;
-        set(volICFusionObj.figureHandle, 'WindowButtonMotionFcn', '');
-    end      
+        volICObj = volICObject('get');                
+        if ~isempty(volICObj)
+            volICObj.mouseMode = 1;
+            set(volICObj.figureHandle, 'WindowButtonMotionFcn', '');                
+        end
+
+        mipICFusionObj = mipICFusionObject('get');
+        if ~isempty(mipICFusionObj)
+            mipICFusionObj.mouseMode = 1;
+            set(mipICFusionObj.figureHandle, 'WindowButtonMotionFcn', '');
+        end       
+
+        volICFusionObj = volICFusionObject('get');
+        if ~isempty(volICFusionObj)
+            volICFusionObj.mouseMode = 1;
+            set(volICFusionObj.figureHandle, 'WindowButtonMotionFcn', '');
+        end      
+    end
     
 end
