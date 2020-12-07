@@ -35,7 +35,7 @@ function  [aAlphaMap, sAlphaType] = getVolFusionAlphaMap(sAction, im, sTypeOrtMe
             if exist('aValue', 'var')
                 paAlphaMap   = aValue;
             else
-                paAlphaMap = linspace(0, volLinearAlphaValue('get'), 256)';                        
+                paAlphaMap = linspace(0, volLinearFusionAlphaValue('get'), 256)';                        
             end
             pasAlphaType = sTypeOrtMetaData;
             
@@ -70,7 +70,9 @@ function  [aAlphaMap, sAlphaType] = getVolFusionAlphaMap(sAction, im, sTypeOrtMe
             if ~isempty(volICObj)
                 paAlphaMap = computeAlphaMap(volICObj);
             end
-            
+        elseif strcmp(pasAlphaType, 'linear')
+            paAlphaMap = linspace(0, volLinearFusionAlphaValue('get'), 256)';                        
+           
         elseif strcmpi(pasAlphaType, 'auto')
             if strcmpi(sTypeOrtMetaData{1}.Modality, 'ct')
                 paAlphaMap   = defaultVolFusionAlphaMap(im, 'ct');

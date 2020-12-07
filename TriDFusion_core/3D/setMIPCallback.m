@@ -407,17 +407,19 @@ function setMIPCallback(hObject, ~)
                       ~(strcmpi(atFuseMetaData{1}.Modality, 'nm') || ...
                         strcmpi(atFuseMetaData{2}.Modality, 'pt'))                   
                    
-                        colorMapMipOffset('set', colorMapOffset('get')); %  % Set 3D Mip from 2D
+           %             colorMapMipOffset('set', colorMapOffset('get')); %  % Set 3D Mip from 2D
                         background3DOffset('set', 8); % Black
                     else
-                        colorMapMipOffset('set', 10); % Gray
+          %              colorMapMipOffset('set', 10); % Bone
                         background3DOffset('set', 7); % White
                    end
                 else
-                    colorMapMipOffset('set', 10); % Gray
+          %          colorMapMipOffset('set', 10); % Gray
                     background3DOffset('set', 7); % White                    
                 end
                 
+                colorMapMipOffset('set', colorMapOffset('get')); %  % Set 3D Mip from 2D
+                 
                 mipObj = initVolShow(dicomBuffer('get'), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atMetaData);
                 mipObject('set', mipObj);
                 
@@ -434,7 +436,7 @@ function setMIPCallback(hObject, ~)
                       ~(strcmpi(atMetaData{1}.Modality, 'nm') || ...
                         strcmpi(atMetaData{2}.Modality, 'pt'))  
                     
-                        colorMapMipFusionOffset('set', fusionColorMapOffset('get')); % Set 3D Mip from 2D
+              %          colorMapMipFusionOffset('set', fusionColorMapOffset('get')); % Set 3D Mip from 2D
                         background3DOffset('set', 8); % Black
                     else
                         if strcmpi(atMetaData{1}.Modality, 'nm') || ...
@@ -443,10 +445,12 @@ function setMIPCallback(hObject, ~)
                         else
                             background3DOffset('set', 7); % White                           
                         end
-                        colorMapMipFusionOffset('set', 10); % Gray
+              %          colorMapMipFusionOffset('set', 12); % Gray
                         
                     end
                     
+                    colorMapMipFusionOffset('set', fusionColorMapOffset('get')); % Set 3D Mip from 2D
+                  
                     set(ui3DBackgroundPtr('get'), 'Value', background3DOffset('get'));
                     
                     mipFusionObj = initVolShow(fusionBuffer('get'), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);

@@ -70,6 +70,8 @@ function [aAlphaMap, sAlphaType] = getVolAlphaMap(sAction, im, sTypeOrtMetaData,
             if ~isempty(volICObj)
                 paAlphaMap = computeAlphaMap(volICObj);
             end
+        elseif strcmp(pasAlphaType, 'linear')
+            paAlphaMap = linspace(0, volLinearAlphaValue('get'), 256)';                        
             
         elseif strcmpi(pasAlphaType, 'auto')
             if strcmpi(sTypeOrtMetaData{1}.Modality, 'ct')

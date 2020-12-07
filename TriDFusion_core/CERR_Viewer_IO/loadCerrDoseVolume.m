@@ -127,9 +127,6 @@ function loadCerrDoseVolume(sPathName, sFileName)
     roiTemplate('set', '');
     voiTemplate('set', '');
 
-    getMipAlphaMap('set', '', 'auto');    
-    getVolAlphaMap('set', '', 'auto');
-
     deleteAlphaCurve('vol');
     deleteAlphaCurve('volfusion');
 
@@ -348,10 +345,19 @@ function loadCerrDoseVolume(sPathName, sFileName)
 
     dicomViewerCore();
     
-    getMipFusionAlphaMap('set', '', 'linear');    
-    getVolFusionAlphaMap('set', '', 'linear');
-    
     setViewerDefaultColor(true, dicomMetaData('get'));    
+    
+    getMipAlphaMap('set', '', 'auto');    
+%    getVolAlphaMap('set', '', 'auto');   
+    
+    getMipFusionAlphaMap('set', '', 'linear');    
+%    getVolFusionAlphaMap('set', '', 'linear');
+    
+%    volLinearAlphaValue      ('set', 0.75);
+%    volLinearFusionAlphaValue('set', 0.75);
+    
+    mipLinearAlphaValue      ('set', 0.75);
+    mipLinearFuisonAlphaValue('set', 0.75);
     
     setPlaybackToolbar('on');
  

@@ -44,11 +44,13 @@ function clickUp(~, ~)
     
     mipICFusionObj = mipICFusionObject('get');
     if ~isempty(mipICFusionObj)
+        mipICFusionObj.mouseMode = 1;
         set(mipICFusionObj.figureHandle, 'WindowButtonMotionFcn', '');
     end       
 
     volICFusionObj = volICFusionObject('get');
     if ~isempty(volICFusionObj)
+        volICFusionObj.mouseMode = 1;
         set(volICFusionObj.figureHandle, 'WindowButtonMotionFcn', '');
     end      
     

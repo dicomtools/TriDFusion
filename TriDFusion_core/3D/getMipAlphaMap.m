@@ -71,6 +71,9 @@ function [aAlphaMap, sAlphaType] = getMipAlphaMap(sAction, im, sTypeOrtMetaData,
             if ~isempty(mipICObj)
                 paAlphaMap = computeAlphaMap(mipICObj);
             end
+        elseif strcmp(pasAlphaType, 'linear')
+            paAlphaMap = linspace(0, mipLinearAlphaValue('get'), 256)';                        
+            
         elseif strcmpi(pasAlphaType, 'auto')
             if strcmpi(sTypeOrtMetaData{1}.Modality, 'ct')
                 paAlphaMap   = defaultMipAlphaMap(im, 'ct');

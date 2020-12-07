@@ -35,7 +35,7 @@ function [aAlphaMap, sAlphaType] = getMipFusionAlphaMap(sAction, im, sTypeOrtMet
             if exist('aValue', 'var')
                 paAlphaMap   = aValue;
             else
-                paAlphaMap = linspace(0, mipLinearAlphaValue('get'), 256)';                        
+                paAlphaMap = linspace(0, mipLinearFuisonAlphaValue('get'), 256)';                        
             end
             pasAlphaType = sTypeOrtMetaData;
             
@@ -70,7 +70,9 @@ function [aAlphaMap, sAlphaType] = getMipFusionAlphaMap(sAction, im, sTypeOrtMet
             mipICObj = mipICFusionObject('get');
             if ~isempty(mipICObj)
                 paAlphaMap = computeAlphaMap(mipICObj);
-            end
+            end            
+        elseif strcmp(pasAlphaType, 'linear')
+            paAlphaMap = linspace(0, mipLinearFuisonAlphaValue('get'), 256)';                                  
         elseif strcmpi(pasAlphaType, 'auto')
             if strcmpi(sTypeOrtMetaData{1}.Modality, 'ct')
                 paAlphaMap   = defaultMipFusionAlphaMap(im, 'ct');
