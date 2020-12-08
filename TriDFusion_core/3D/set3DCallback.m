@@ -29,7 +29,18 @@ function set3DCallback(hObject, ~)
         
     if numel(dicomBuffer('get')) && ...
        size(dicomBuffer('get'), 3) ~= 1
+   
+        sMatlabVersion = version();
+        sMatlabVersion = extractBefore(sMatlabVersion,' ');
 
+        bLightingIsSupported = false;
+        if length(sMatlabVersion) > 3
+            dMatlabVersion = str2double(sMatlabVersion(1:3));
+            if dMatlabVersion >= 9.8
+                 bLightingIsSupported = true;
+            end
+        end
+    
 %                releaseRoiAxeWait();
         releaseRoiWait();
 
@@ -405,7 +416,10 @@ function set3DCallback(hObject, ~)
                     
                     [aAlphaMap, ~] = getVolFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
                     volFusionObj.Alphamap = aAlphaMap;
-                    volFusionObj.Lighting = volFusionLighting('get');
+                    
+                    if bLightingIsSupported == true
+                        volFusionObj.Lighting = volFusionLighting('get');
+                    end
                     
                     volFusionObject('set', volFusionObj);    
                                       
@@ -550,7 +564,9 @@ function set3DCallback(hObject, ~)
                         
                         [aAlphaMap, ~] = getVolFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
                         volFusionObj.Alphamap = aAlphaMap;
-                        volFusionObj.Lighting = volFusionLighting('get');
+                        if bLightingIsSupported == true
+                            volFusionObj.Lighting = volFusionLighting('get');
+                        end
                     
                         volFusionObject('set', volFusionObj);           
                         
@@ -610,7 +626,9 @@ function set3DCallback(hObject, ~)
                             end
 
                             set(ui3DVolColormapPtr('get') , 'Value', colorMapVolFusionOffset('get'));
-                            set(chk3DVolLightingPtr('get'), 'Value', volFusionLighting('get'));               
+                            if bLightingIsSupported == true
+                                set(chk3DVolLightingPtr('get'), 'Value', volFusionLighting('get'));               
+                            end
                         end                        
                     else
                         volObj = volObject('get');
@@ -643,8 +661,10 @@ function set3DCallback(hObject, ~)
                                 displayAlphaCurve(aMap, axe3DPanelVolAlphmapPtr('get'));                
                             end
 
-                            set(ui3DVolColormapPtr('get') , 'Value', colorMapVolOffset('get'));               
-                            set(chk3DVolLightingPtr('get'), 'Value', volLighting('get'));               
+                            set(ui3DVolColormapPtr('get') , 'Value', colorMapVolOffset('get'));    
+                            if bLightingIsSupported == true
+                                set(chk3DVolLightingPtr('get'), 'Value', volLighting('get'));               
+                            end
                         end                         
                     end
                     
