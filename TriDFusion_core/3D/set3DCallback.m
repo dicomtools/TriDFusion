@@ -401,7 +401,7 @@ function set3DCallback(hObject, ~)
                 
                 setViewerDefaultColor(false, dicomMetaData('get'));
 
-                volObj = initVolShow(dicomBuffer('get'), uiOneWindowPtr('get'), 'VolumeRendering', dicomMetaData('get'));
+                volObj = initVolShow(dicomBuffer('get'), uiOneWindowPtr('get'), 'VolumeRendering', dicomMetaData('get'));                               
                 volObject('set', volObj);
                 
                 if isFusion('get')          
@@ -415,10 +415,11 @@ function set3DCallback(hObject, ~)
                     volFusionObj = initVolShow(fusionBuffer('get'), uiOneWindowPtr('get'), 'VolumeRendering', atFuseMetaData);
                     
                     [aAlphaMap, ~] = getVolFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
-                    volFusionObj.Alphamap = aAlphaMap;
-                    
+                    set(volFusionObj, 'Alphamap', aAlphaMap );
+                    set(volFusionObj, 'Colormap', get3DColorMap('get', colorMapVolFusionOffset('get') ));
+                                            
                     if bLightingIsSupported == true
-                        volFusionObj.Lighting = volFusionLighting('get');
+                        set(volFusionObj, 'Lighting', volFusionLighting('get') );                        
                     end
                     
                     volFusionObject('set', volFusionObj);    
@@ -563,9 +564,13 @@ function set3DCallback(hObject, ~)
                         volFusionObj = initVolShow(fusionBuffer('get'), uiOneWindowPtr('get'), 'VolumeRendering', atFuseMetaData);
                         
                         [aAlphaMap, ~] = getVolFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
-                        volFusionObj.Alphamap = aAlphaMap;
+                        
+                        set(volFusionObj, 'Alphamap', aAlphaMap );
+                        set(volFusionObj, 'Colormap', get3DColorMap('get', colorMapVolFusionOffset('get') ));
+                        
                         if bLightingIsSupported == true
                             volFusionObj.Lighting = volFusionLighting('get');
+                            set(volFusionObj, 'Lighting', volFusionLighting('get') );
                         end
                     
                         volFusionObject('set', volFusionObj);           
