@@ -334,8 +334,11 @@ function loadCerrDoseVolume(sPathName, sFileName)
             set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
             set(uiFusedSeriesPtr('get'), 'Enable', 'on');
             set(uiFusedSeriesPtr('get'), 'Value', 2);
-       end
-
+        end
+        
+        set(btnVsplashPtr('get')   , 'Enable', 'on');
+        set(uiEditVsplahXPtr('get'), 'Enable', 'on');
+        set(uiEditVsplahYPtr('get'), 'Enable', 'on');
     end  
     
     setQuantification();

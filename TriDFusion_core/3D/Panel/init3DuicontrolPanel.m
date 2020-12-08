@@ -814,22 +814,26 @@ function init3DuicontrolPanel()
         end
         
         if get(ui3DVolume, 'Value') == 2 % Fusion
+            
             colorMapVolFusionOffset('set', get(hObject, 'Value'));
 
             volFusionObj = volFusionObject('get');
-            if ~isempty(volFusionObj)
-                set(volFusionObj, 'Colormap', get3DColorMap('get', get(hObject, 'Value')));
-                                
-                volColorObj = volColorObject('get');
-                if ~isempty(volColorObj) && ...
-                   get(chkDispVolColormap, 'Value') == 1
-
-                    delete(volColorObj);
-                    volColorObject('set', '');
-                    uivolColorbar = volColorbar(uiOneWindowPtr('get'), get(volFusionObj, 'Colormap'));
-                    volColorObject('set', uivolColorbar);
-                end                
+            if ~isempty(volFusionObj)                
                 
+                if switchTo3DMode('get') == true
+
+                    set(volFusionObj, 'Colormap', get3DColorMap('get', get(hObject, 'Value')));
+
+                    volColorObj = volColorObject('get');
+                    if ~isempty(volColorObj) && ...
+                       get(chkDispVolColormap, 'Value') == 1
+
+                        delete(volColorObj);
+                        volColorObject('set', '');
+                        uivolColorbar = volColorbar(uiOneWindowPtr('get'), get(volFusionObj, 'Colormap'));
+                        volColorObject('set', uivolColorbar);
+                    end                
+                end
             end                       
                 
         else
@@ -838,16 +842,19 @@ function init3DuicontrolPanel()
             volObj = volObject('get');
             if ~isempty(volObj)
 
-                set(volObj, 'Colormap', get3DColorMap('get', get(hObject, 'Value')));
+                if switchTo3DMode('get') == true
 
-                volColorObj = volColorObject('get');
-                if ~isempty(volColorObj) && ...
-                   get(chkDispVolColormap, 'Value') == 1
+                    set(volObj, 'Colormap', get3DColorMap('get', get(hObject, 'Value')));
 
-                    delete(volColorObj);
-                    volColorObject('set', '');
-                    uivolColorbar = volColorbar(uiOneWindowPtr('get'), get(volObj, 'Colormap'));
-                    volColorObject('set', uivolColorbar);
+                    volColorObj = volColorObject('get');
+                    if ~isempty(volColorObj) && ...
+                       get(chkDispVolColormap, 'Value') == 1
+
+                        delete(volColorObj);
+                        volColorObject('set', '');
+                        uivolColorbar = volColorbar(uiOneWindowPtr('get'), get(volObj, 'Colormap'));
+                        volColorObject('set', uivolColorbar);
+                    end
                 end
             end
         end
@@ -1285,19 +1292,25 @@ function init3DuicontrolPanel()
         end
         
         if get(ui3DVolume, 'Value') == 2 % Fusion
-            isoFusionObj = isoFusionObject('get');
-            if ~isempty(isoFusionObj)
-                set(isoFusionObj, 'IsosurfaceColor', surfaceColor('get', get(hObject, 'Value')));
-            end
-
+            
             isoColorFusionOffset('set', get(hObject, 'Value'));            
-        else
-            isoObj = isoObject('get');
-            if ~isempty(isoObj)
-                set(isoObj, 'IsosurfaceColor', surfaceColor('get', get(hObject, 'Value')));
-            end
 
-            isoColorOffset('set', get(hObject, 'Value'));
+            if switchToIsoSurface('get') == true && isFusion('get') == true   
+                isoFusionObj = isoFusionObject('get');
+                if ~isempty(isoFusionObj)
+                    set(isoFusionObj, 'IsosurfaceColor', surfaceColor('get', get(hObject, 'Value')));
+                end
+            end
+        else
+            
+           isoColorOffset('set', get(hObject, 'Value'));
+             
+           if switchToIsoSurface('get') == true
+                isoObj = isoObject('get');
+                if ~isempty(isoObj)
+                    set(isoObj, 'IsosurfaceColor', surfaceColor('get', get(hObject, 'Value')));
+                end
+            end
         end
         
         initGate3DObject('set', true);
@@ -1318,18 +1331,21 @@ function init3DuicontrolPanel()
             mipFusionObj = mipFusionObject('get');
             if ~isempty(mipFusionObj)
                 
-                set(mipFusionObj, 'Colormap', get3DColorMap('get', get(hObject, 'Value')));
-                
-                mipColorObj = mipColorObject('get');
-                if ~isempty(mipColorObj) && ...
-                   get(chkDispMipColormap, 'Value') == true
+                if switchToMIPMode('get') == true && isFusion('get') == true   
 
-                    delete(mipColorObj);
-                    mipColorObject('set', '');
+                    set(mipFusionObj, 'Colormap', get3DColorMap('get', get(hObject, 'Value')));
 
-                    uimipColorbar = mipColorbar(uiOneWindowPtr('get'), get(mipFusionObj, 'Colormap'));
-                    mipColorObject('set', uimipColorbar);
-                end                
+                    mipColorObj = mipColorObject('get');
+                    if ~isempty(mipColorObj) && ...
+                       get(chkDispMipColormap, 'Value') == true
+
+                        delete(mipColorObj);
+                        mipColorObject('set', '');
+
+                        uimipColorbar = mipColorbar(uiOneWindowPtr('get'), get(mipFusionObj, 'Colormap'));
+                        mipColorObject('set', uimipColorbar);
+                    end     
+                end
             end
                 
         else
@@ -1338,17 +1354,20 @@ function init3DuicontrolPanel()
             mipObj = mipObject('get');
             if ~isempty(mipObj)
                 
-                set(mipObj, 'Colormap', get3DColorMap('get', get(hObject, 'Value')));
+                if switchToMIPMode('get') == true
 
-                mipColorObj = mipColorObject('get');
-                if ~isempty(mipColorObj) && ...
-                   get(chkDispMipColormap, 'Value') == true
+                    set(mipObj, 'Colormap', get3DColorMap('get', get(hObject, 'Value')));
 
-                    delete(mipColorObj);
-                    mipColorObject('set', '');
+                    mipColorObj = mipColorObject('get');
+                    if ~isempty(mipColorObj) && ...
+                       get(chkDispMipColormap, 'Value') == true
 
-                    uimipColorbar = mipColorbar(uiOneWindowPtr('get'), get(mipObj, 'Colormap'));
-                    mipColorObject('set', uimipColorbar);
+                        delete(mipColorObj);
+                        mipColorObject('set', '');
+
+                        uimipColorbar = mipColorbar(uiOneWindowPtr('get'), get(mipObj, 'Colormap'));
+                        mipColorObject('set', uimipColorbar);
+                    end
                 end
             end
         end
@@ -1368,7 +1387,7 @@ function init3DuicontrolPanel()
         volObj       = volObject('get');
         volFusionObj = volFusionObject('get');
 
-        if strcmp(uiVolumeAlphaMapType.String{uiVolumeAlphaMapType.Value}, 'linear')
+        if strcmpi(uiVolumeAlphaMapType.String{uiVolumeAlphaMapType.Value}, 'linear')
 
 %%%            deleteAlphaCurve('vol');
 
@@ -1377,48 +1396,65 @@ function init3DuicontrolPanel()
             aAlphamap = linspace(0, get(uiSliderVolLinAlpha, 'Value'), 256)';
 
             if get(ui3DVolume, 'Value') == 2 % Fusion
-                if ~isempty(volFusionObj) 
-                    getVolFusionAlphaMap('set', fusionBuffer('get'), 'linear', aAlphamap);
-                    set(volFusionObj, 'Alphamap', aAlphamap);
-                end 
                 
+                getVolFusionAlphaMap('set', fusionBuffer('get'), 'linear', aAlphamap);
                 volLinearFusionAlphaValue('set',  get(uiSliderVolLinAlpha, 'Value'));
                 
-            else                
-                if ~isempty(volObj)
-                    getVolAlphaMap('set', dicomBuffer('get'), 'linear', aAlphamap);
-                    set(volObj, 'Alphamap', aAlphamap);
-                end                            
+                if switchTo3DMode('get') == true && isFusion('get') == true   
+                    if ~isempty(volFusionObj) 
+                        set(volFusionObj, 'Alphamap', aAlphamap);                    
+                    end 
+                end
                 
+            else             
+                
+                getVolAlphaMap('set', dicomBuffer('get'), 'linear', aAlphamap);
                 volLinearAlphaValue('set',  get(uiSliderVolLinAlpha, 'Value'));
+                
+                if switchTo3DMode('get') == true 
+                    if ~isempty(volObj)
+                        set(volObj, 'Alphamap', aAlphamap);
+                    end                            
+                end
                 
             end             
             
             displayAlphaCurve(aAlphamap, axeVolAlphmap);
            
-         elseif strcmp(uiVolumeAlphaMapType.String{uiVolumeAlphaMapType.Value}, 'custom')
+         elseif strcmpi(uiVolumeAlphaMapType.String{uiVolumeAlphaMapType.Value}, 'custom')
              
             set(uiSliderVolLinAlpha, 'Enable', 'off');
             
             if get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+                
                 getVolFusionAlphaMap('set', fusionBuffer('get'), 'custom');
                 
-                ic = customAlphaCurve(axeVolAlphmap,  volFusionObj, 'volfusion');
-                ic.surfObj = volFusionObj;  
-                
-                volICFusionObject('set', ic);
-                
-                alphaCurveMenu(axeVolAlphmap, 'volfusion');
+                if switchTo3DMode('get') == true && isFusion('get') == true   
+
+                    ic = customAlphaCurve(axeVolAlphmap,  volFusionObj, 'volfusion');
+                    ic.surfObj = volFusionObj;  
+
+                    volICFusionObject('set', ic);
+
+                    alphaCurveMenu(axeVolAlphmap, 'volfusion');
+                else
+                    displayAlphaCurve(get(volFusionObj, 'Alphamap'), axeVolAlphmap);                  
+                end
                 
             else
                 getVolAlphaMap('set', dicomBuffer('get'), 'custom');
                 
-                ic = customAlphaCurve(axeVolAlphmap,  volObj, 'vol');
-                ic.surfObj = volObj;                              
-                
-                volICObject('set', ic);
-                
-                alphaCurveMenu(axeVolAlphmap, 'vol');
+                if switchTo3DMode('get') == true 
+              
+                    ic = customAlphaCurve(axeVolAlphmap,  volObj, 'vol');
+                    ic.surfObj = volObj;                              
+
+                    volICObject('set', ic);
+                    alphaCurveMenu(axeVolAlphmap, 'vol');
+                else
+                    displayAlphaCurve(get(volObj, 'Alphamap'), axeVolAlphmap);                  
+                end
+                    
             end 
 
 
@@ -1434,16 +1470,19 @@ function init3DuicontrolPanel()
                     getVolFusionAlphaMap('set', fusionBuffer('get'), uiVolumeAlphaMapType.String{uiVolumeAlphaMapType.Value});
                     displayAlphaCurve(aAlphamap, axeVolAlphmap);
                     
-                    set(volFusionObj, 'Alphamap', aAlphamap);
+                    if switchTo3DMode('get') == true && isFusion('get') == true   
+                        set(volFusionObj, 'Alphamap', aAlphamap);
+                    end
                 end 
             else
                 if ~isempty(volObj)
-              
                     aAlphamap = defaultVolAlphaMap(dicomBuffer('get'), uiVolumeAlphaMapType.String{uiVolumeAlphaMapType.Value});
                     getVolAlphaMap('set', dicomBuffer('get'), uiVolumeAlphaMapType.String{uiVolumeAlphaMapType.Value});
                     displayAlphaCurve(aAlphamap, axeVolAlphmap);
-            
-                    set(volObj, 'Alphamap', aAlphamap);
+                    
+                    if switchTo3DMode('get') == true 
+                        set(volObj, 'Alphamap', aAlphamap);
+                    end
                 end                            
             end 
         end
@@ -1463,20 +1502,22 @@ function init3DuicontrolPanel()
         aAlphamap = linspace(0, get(uiSliderVolLinAlpha, 'Value'), 256)';
         
         if get(ui3DVolume, 'Value') == 2 % Fusion
-            volFusionObj = volFusionObject('get');
-            if ~isempty(volFusionObj)
-                set(volFusionObj, 'Alphamap', aAlphamap);
+            if switchTo3DMode('get') == true && isFusion('get') == true   
+                volFusionObj = volFusionObject('get');
+                if ~isempty(volFusionObj)
+                    set(volFusionObj, 'Alphamap', aAlphamap);
+                end
             end
-
+            
             volLinearFusionAlphaValue('set', get(uiSliderVolLinAlpha, 'Value'));
             getVolFusionAlphaMap('set', fusionBuffer('get'), 'linear', aAlphamap);            
         else
-
-            volObj = volObject('get');
-            if ~isempty(volObj)
-                set(volObj, 'Alphamap', aAlphamap);
+            if switchTo3DMode('get') == true
+                volObj = volObject('get');
+                if ~isempty(volObj)
+                    set(volObj, 'Alphamap', aAlphamap);
+                end
             end
-
             volLinearAlphaValue('set',  get(uiSliderVolLinAlpha, 'Value'));
             getVolAlphaMap('set', dicomBuffer('get'), 'linear', aAlphamap);
         end
@@ -1512,14 +1553,19 @@ function init3DuicontrolPanel()
             displayAlphaCurve(aAlphamap, axeMipAlphmap);
             
             if get(ui3DVolume, 'Value') == 2 % Fusion
-                if ~isempty(mipFusionObj)
-                    getMipFusionAlphaMap('set', fusionBuffer('get'), 'linear', aAlphamap);
-                    set(mipFusionObj, 'Alphamap', aAlphamap);
-                end 
+                getMipFusionAlphaMap('set', fusionBuffer('get'), 'linear', aAlphamap);
+                if switchToMIPMode('get') == true && isFusion('get') == true                 
+                    if ~isempty(mipFusionObj)
+                        set(mipFusionObj, 'Alphamap', aAlphamap);
+                    end 
+                end
             else
-                if ~isempty(mipObj)
-                    getMipAlphaMap('set', dicomBuffer('get'), 'linear', aAlphamap);
-                    set(mipObj, 'Alphamap', aAlphamap);
+                getMipAlphaMap('set', dicomBuffer('get'), 'linear', aAlphamap);
+                
+                if switchToMIPMode('get') == true
+                    if ~isempty(mipObj)
+                        set(mipObj, 'Alphamap', aAlphamap);
+                    end
                 end                            
             end
             
@@ -1528,24 +1574,34 @@ function init3DuicontrolPanel()
             set(uiSliderMipLinAlpha, 'Enable', 'off');
 
             if get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+                
                 getMipFusionAlphaMap('set', fusionBuffer('get'), 'custom');
                 
-                ic = customAlphaCurve(axeMipAlphmap,  mipFusionObj, 'mipfusion');
-                ic.surfObj = mipFusionObj;  
-                
-                mipICFusionObject('set', ic);
-                
-                alphaCurveMenu(axeMipAlphmap, 'mipfusion');
+                if switchToMIPMode('get') == true && isFusion('get') == true   
+               
+                    ic = customAlphaCurve(axeMipAlphmap,  mipFusionObj, 'mipfusion');
+                    ic.surfObj = mipFusionObj;  
+
+                    mipICFusionObject('set', ic);
+
+                    alphaCurveMenu(axeMipAlphmap, 'mipfusion');
+                else
+                    displayAlphaCurve(get(mipFusionObj, 'Alphamap'), axeMipAlphmap);                   
+                end
                
             else
                 getMipAlphaMap('set', dicomBuffer('get'), 'custom');
-                
-                ic = customAlphaCurve(axeMipAlphmap,  mipObj, 'mip');
-                ic.surfObj = mipObj;                              
-                
-                mipICObject('set', ic);
-                
-                alphaCurveMenu(axeMipAlphmap, 'mip');
+                if switchToMIPMode('get') == true
+
+                    ic = customAlphaCurve(axeMipAlphmap,  mipObj, 'mip');
+                    ic.surfObj = mipObj;                              
+
+                    mipICObject('set', ic);
+
+                    alphaCurveMenu(axeMipAlphmap, 'mip');
+                else
+                    displayAlphaCurve(get(mipObj, 'Alphamap'), axeMipAlphmap);                   
+               end
             
             end             
 
@@ -1563,7 +1619,9 @@ function init3DuicontrolPanel()
                     getMipFusionAlphaMap('set', fusionBuffer('get'), uiMipAlphaMapType.String{uiMipAlphaMapType.Value});
                     displayAlphaCurve(aAlphamap, axeMipAlphmap);
                     
-                    set(mipFusionObj, 'Alphamap', aAlphamap);
+                    if switchToMIPMode('get') == true && isFusion('get') == true   
+                        set(mipFusionObj, 'Alphamap', aAlphamap);
+                    end
                 end 
             else
                 if ~isempty(mipObj)
@@ -1572,7 +1630,9 @@ function init3DuicontrolPanel()
                     getMipAlphaMap('set', dicomBuffer('get'), uiMipAlphaMapType.String{uiMipAlphaMapType.Value});
                     displayAlphaCurve(aAlphamap, axeMipAlphmap);
             
-                    set(mipObj, 'Alphamap', aAlphamap);
+                    if switchToMIPMode('get') == true
+                        set(mipObj, 'Alphamap', aAlphamap);
+                    end
                 end                            
             end             
         end
@@ -1593,19 +1653,22 @@ function init3DuicontrolPanel()
         
         if get(ui3DVolume, 'Value') == 2 % Fusion
             
-            mipFusionObj = mipFusionObject('get');
-            if ~isempty(mipFusionObj)
-                set(mipFusionObj, 'Alphamap', linspace(0, get(uiSliderMipLinAlpha, 'Value'), 256)');
+            if switchToMIPMode('get') == true && isFusion('get') == true   
+                mipFusionObj = mipFusionObject('get');
+                if ~isempty(mipFusionObj)
+                    set(mipFusionObj, 'Alphamap', linspace(0, get(uiSliderMipLinAlpha, 'Value'), 256)');
+                end
             end
-
             mipLinearFuisonAlphaValue('set',  get(uiSliderMipLinAlpha, 'Value'));
             getMipFusionAlphaMap('set', fusionBuffer('get'), 'linear', aAlphamap);            
         else
-            mipObj = mipObject('get');
-            if ~isempty(mipObj)
-                set(mipObj, 'Alphamap', linspace(0, get(uiSliderMipLinAlpha, 'Value'), 256)');
+            if switchToMIPMode('get')    == true
+                mipObj = mipObject('get');
+                if ~isempty(mipObj)
+                    set(mipObj, 'Alphamap', linspace(0, get(uiSliderMipLinAlpha, 'Value'), 256)');
+                end
             end
-
+            
             mipLinearAlphaValue('set',  get(uiSliderMipLinAlpha, 'Value'));
             getMipAlphaMap('set', dicomBuffer('get'), 'linear', aAlphamap);
         end
@@ -1625,19 +1688,24 @@ function init3DuicontrolPanel()
         end
         
         if get(ui3DVolume, 'Value') == 2 % Fusion
-            isoFusionObj = isoFusionObject('get');
-            if ~isempty(isoFusionObj)
-                set(isoFusionObj, 'Isovalue', get(uiSliderIsoSurface, 'Value'));
+            
+            if switchToIsoSurface('get') == true && isFusion('get') == true   
+                isoFusionObj = isoFusionObject('get');
+                if ~isempty(isoFusionObj)
+                    set(isoFusionObj, 'Isovalue', get(uiSliderIsoSurface, 'Value'));
+                end
             end
-
+            
             isoSurfaceFusionValue('set', get(uiSliderIsoSurface, 'Value'));
 
         else
-            isoObj = isoObject('get');
-            if ~isempty(isoObj)
-                set(isoObj, 'Isovalue', get(uiSliderIsoSurface, 'Value'));
+            if switchToIsoSurface('get') == true          
+                isoObj = isoObject('get');
+                if ~isempty(isoObj)
+                    set(isoObj, 'Isovalue', get(uiSliderIsoSurface, 'Value'));
+                end
             end
-
+            
             isoSurfaceValue('set', get(uiSliderIsoSurface, 'Value'));
         end
         
@@ -1662,18 +1730,21 @@ function init3DuicontrolPanel()
         end
         
         if get(ui3DVolume, 'Value') == 2 % Fusion
+            
             isoFusionObj = isoFusionObject('get');
-            if ~isempty(isoFusionObj)
-                set(isoFusionObj, 'Isovalue', str2double(sValue) );
+            if switchToIsoSurface('get') == true  && isFusion('get') == true          
+                if ~isempty(isoFusionObj)
+                    set(isoFusionObj, 'Isovalue', str2double(sValue) );
+                end
             end
-
             isoSurfaceFusionValue('set', str2double(sValue));            
         else
-            isoObj = isoObject('get');
-            if ~isempty(isoObj)
-                set(isoObj, 'Isovalue', str2double(sValue) );
+            if switchToIsoSurface('get') == true          
+                isoObj = isoObject('get');
+                if ~isempty(isoObj)
+                    set(isoObj, 'Isovalue', str2double(sValue) );
+                end
             end
-
             isoSurfaceValue('set', str2double(sValue));
         end
         

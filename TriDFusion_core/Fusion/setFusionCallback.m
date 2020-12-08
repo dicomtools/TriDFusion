@@ -27,9 +27,6 @@ function setFusionCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    persistent pVolFusionAlphaMap;
-    persistent pMipFusionAlphaMap;
-    persistent pFusionIsoValue;
 
     if switchTo3DMode('get')     == true || ...
        switchToIsoSurface('get') == true || ...
@@ -42,19 +39,63 @@ function setFusionCallback(~, ~)
        if isFusion('get') == false         
             isFusion('set', true);
             set(btnFusionPtr('get'), 'BackgroundColor', 'white');
-                    
-            if ~isempty(volFusionObj)
-                volFusionObj.Alphamap = pVolFusionAlphaMap;
+            
+            tFuseInput  = inputTemplate('get');
+            iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');   
+            atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;                        
+                        
+            if ~isempty(volFusionObj) && switchTo3DMode('get') == true
+                [aFusionMap, sFusionType] = getVolFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
+
+                set(volFusionObj, 'Alphamap', aFusionMap);
+                set(volFusionObj, 'Colormap', get3DColorMap('get', colorMapVolFusionOffset('get') ));
+                
                 volFusionObject('set', volFusionObj);
+                
+                if get(ui3DVolumePtr('get'), 'Value') == 2
+                    if strcmpi(sFusionType, 'custom')
+                        ic = customAlphaCurve(axe3DPanelVolAlphmapPtr('get'),  volFusionObj, 'volfusion');
+                        ic.surfObj = volFusionObj;  
+
+                        volICFusionObject('set', ic);
+
+                        alphaCurveMenu(axe3DPanelVolAlphmapPtr('get'), 'volfusion');
+                    else
+                        displayAlphaCurve(aFusionMap, axe3DPanelMipAlphmapPtr('get'));                                                                           
+                    end
+                end               
+                
             end              
             
-            if ~isempty(mipFusionObj)
-                mipFusionObj.Alphamap = pMipFusionAlphaMap;
+            if ~isempty(mipFusionObj) && switchToMIPMode('get') == true
+                
+                [aFusionMap, sFusionType] = getMipFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
+                
+                set(mipFusionObj, 'Alphamap', aFusionMap);
+                set(mipFusionObj, 'Colormap', get3DColorMap('get', colorMapMipFusionOffset('get') ));
+                        
                 mipFusionObject('set', mipFusionObj);
+                
+                if get(ui3DVolumePtr('get'), 'Value') == 2 
+                    if strcmpi(sFusionType, 'custom')
+                        ic = customAlphaCurve(axe3DPanelMipAlphmapPtr('get'),  mipFusionObj, 'mipfusion');
+                        ic.surfObj = mipFusionObj;  
+
+                        mipICFusionObject('set', ic);
+
+                        alphaCurveMenu(axe3DPanelMipAlphmapPtr('get'), 'mipfusion');
+                    else
+                        displayAlphaCurve(aFusionMap, axe3DPanelMipAlphmapPtr('get'));                   
+                    end
+                end                
+                
             end 
             
-            if ~isempty(isoFusionObj)
-                isoFusionObj.Isovalue = pFusionIsoValue;
+            if ~isempty(isoFusionObj) && switchToIsoSurface('get')
+                
+                set(isoFusionObj, 'Isovalue', isoSurfaceFusionValue('get'));
+                set(isoFusionObj, 'IsosurfaceColor', surfaceColor('get', isoColorFusionOffset('get')) );
+                        
                 isoFusionObject('set', isoFusionObj);
             end            
             
@@ -63,19 +104,18 @@ function setFusionCallback(~, ~)
             set(btnFusionPtr('get'), 'BackgroundColor', 'default');
             
             if ~isempty(volFusionObj)
-                pVolFusionAlphaMap = volFusionObj.Alphamap;
                 volFusionObj.Alphamap = zeros(256,1);
                 volFusionObject('set', volFusionObj);
+                displayAlphaCurve(zeros(256,1), axe3DPanelVolAlphmapPtr('get'));                
             end  
             
             if ~isempty(mipFusionObj)
-                pMipFusionAlphaMap = mipFusionObj.Alphamap;
                 mipFusionObj.Alphamap = zeros(256,1);
                 mipFusionObject('set', mipFusionObj);
+                displayAlphaCurve(zeros(256,1), axe3DPanelMipAlphmapPtr('get'));                
             end            
             
             if ~isempty(isoFusionObj)
-                pFusionIsoValue = isoFusionObj.Isovalue;
                 isoFusionObj.Isovalue = 1;
                 isoFusionObject('set', isoFusionObj);
             end                        

@@ -188,8 +188,4 @@ function TriDFusion(varargin)
         end
     end
 
-
-  %  loadCerrDoseVolume();
-
-
 end

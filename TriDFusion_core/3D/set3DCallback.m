@@ -26,9 +26,6 @@ function set3DCallback(hObject, ~)
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-
-    persistent pVolAlphaMap;
-    persistent pVolFusionAlphaMap;
         
     if numel(dicomBuffer('get')) && ...
        size(dicomBuffer('get'), 3) ~= 1
@@ -326,18 +323,17 @@ function set3DCallback(hObject, ~)
 %                        robotClick();                       
             else                        
                 volObj = volObject('get'); 
-                pVolAlphaMap = volObj.Alphamap;
-                volObj.Alphamap = zeros(256,1);
-
+                volObj.Alphamap = zeros(256,1);               
                 volObject('set', volObj);
                 
                 volFusionObj = volFusionObject('get'); 
                 if ~isempty(volFusionObj)
-                    pVolFusionAlphaMap = volFusionObj.Alphamap;
                     volFusionObj.Alphamap = zeros(256,1);
                     volFusionObject('set', volFusionObj);
-                end               
+                end
                 
+                displayAlphaCurve(zeros(256,1), axe3DPanelVolAlphmapPtr('get'));
+
            %     deleteAlphaCurve('vol');
 
                 volColorObj = volColorObject('get');
@@ -469,15 +465,54 @@ function set3DCallback(hObject, ~)
                 volObj = volObject('get'); 
 
                 if ~isempty(volObj)
+                    [aMap, sType] = getVolAlphaMap('get', dicomBuffer('get'), dicomMetaData('get'));
+                    set(volObj, 'Alphamap', aMap);
+                    set(volObj, 'Colormap', get3DColorMap('get', colorMapVolOffset('get') ));
 
-                    volObj.Alphamap = pVolAlphaMap;
                     volObject('set', volObj);  
                     
-                    volFusionObj = volFusionObject('get'); 
-                    if ~isempty(volFusionObj)
-                        volFusionObj.Alphamap = pVolFusionAlphaMap;
-                        volFusionObject('set', volFusionObj);  
+                    if get(ui3DVolumePtr('get'), 'Value') == 1 
+                        if strcmpi(sType, 'custom')
+                            ic = customAlphaCurve(axe3DPanelVolAlphmapPtr('get'),  volObj, 'vol');
+                            ic.surfObj = volObj;                              
+
+                            volICObject('set', ic);
+                            alphaCurveMenu(axe3DPanelVolAlphmapPtr('get'), 'vol');
+                        else
+                            displayAlphaCurve(aMap, axe3DPanelMipAlphmapPtr('get'));                                                                           
+                        end
                     end
+                        
+                    volFusionObj = volFusionObject('get'); 
+                    if ~isempty(volFusionObj) && isFusion('get') == true
+                        tFuseInput  = inputTemplate('get');
+                        iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');   
+                        atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
+                        
+                        [aFusionMap, sFusionType] = getVolFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
+
+                        set(volFusionObj, 'Alphamap', aFusionMap);
+                        set(volFusionObj, 'Colormap', get3DColorMap('get', colorMapVolFusionOffset('get') ));
+                        
+                        volFusionObject('set', volFusionObj);  
+                        
+                        if get(ui3DVolumePtr('get'), 'Value') == 2
+                            if strcmpi(sFusionType, 'custom')
+                                ic = customAlphaCurve(axe3DPanelVolAlphmapPtr('get'),  volFusionObj, 'volfusion');
+                                ic.surfObj = volFusionObj;  
+
+                                volICFusionObject('set', ic);
+
+                                alphaCurveMenu(axe3DPanelVolAlphmapPtr('get'), 'volfusion');
+                            else
+                                displayAlphaCurve(aFusionMap, axe3DPanelMipAlphmapPtr('get'));                                                                           
+                            end
+                        end
+
+                    end
+                    
+
+                    
 
               %      deleteAlphaCurve('vol');
 
@@ -487,8 +522,14 @@ function set3DCallback(hObject, ~)
                         volColorObject('set', '');                                                            
                     end 
 
-                    if displayVolColorMap('get') == true    
-                        uivolColorbar = volColorbar(uiOneWindowPtr('get'), get3DColorMap('one', colorMapVolOffset('get')) );
+                    if displayVolColorMap('get') == true  
+                        
+                        if get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+                            uivolColorbar = volColorbar(uiOneWindowPtr('get'), get3DColorMap('one', colorMapVolFusionOffset('get')) );
+                        else
+                            uivolColorbar = volColorbar(uiOneWindowPtr('get'), get3DColorMap('one', colorMapVolOffset('get')) );
+                        end
+                        
                         volColorObject('set', uivolColorbar);                               
                     end
                 else

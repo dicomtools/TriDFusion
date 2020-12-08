@@ -326,16 +326,16 @@ function setMIPCallback(hObject, ~)
 
             else                                  
                 mipObj = mipObject('get');                     
-                pMipAlphaMap = mipObj.Alphamap;
                 mipObj.Alphamap = zeros(256, 1);
                 mipObject('set', mipObj);
                 
                 mipFusionObj = mipFusionObject('get'); 
                 if ~isempty(mipFusionObj)
-                    pMipFusionAlphaMap = mipFusionObj.Alphamap;
                     mipFusionObj.Alphamap = zeros(256,1);
                     mipFusionObject('set', mipFusionObj);
                 end  
+                
+                displayAlphaCurve(zeros(256,1), axe3DPanelMipAlphmapPtr('get'));
                 
          %       deleteAlphaCurve('mip');                        
 
@@ -517,14 +517,49 @@ function setMIPCallback(hObject, ~)
 
                 mipObj = mipObject('get'); 
                 if ~isempty(mipObj)
-
-                    mipObj.Alphamap = pMipAlphaMap;                            
+                    [aMap, sType] = getMipAlphaMap('get', dicomBuffer('get'), dicomMetaData('get'));
+                    set(mipObj, 'Alphamap', aMap);
+                    set(mipObj, 'Colormap', get3DColorMap('get', colorMapMipOffset('get') ));
+                    
                     mipObject('set', mipObj);
                     
+                    if get(ui3DVolumePtr('get'), 'Value') == 1 
+                        if strcmpi(sType, 'custom')
+                            ic = customAlphaCurve(axe3DPanelMipAlphmapPtr('get'),  mipObj, 'mip');
+                            ic.surfObj = mipObj;                              
+
+                            mipICObject('set', ic);
+                            alphaCurveMenu(axe3DPanelMipAlphmapPtr('get'), 'mip');
+                        else
+                            displayAlphaCurve(aMap, axe3DPanelMipAlphmapPtr('get'));                                               
+                        end
+                    end
+                    
                     mipFusionObj = mipFusionObject('get'); 
-                    if ~isempty(mipFusionObj)
-                        mipFusionObj.Alphamap = pMipFusionAlphaMap;
+                    if ~isempty(mipFusionObj) && isFusion('get') == true
+                        tFuseInput  = inputTemplate('get');
+                        iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');   
+                        atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
+                        
+                        [aFusionMap, sFusionType] = getMipFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);     
+                        
+                        set(mipFusionObj, 'Alphamap', aFusionMap);
+                        set(mipFusionObj, 'Colormap', get3DColorMap('get', colorMapMipFusionOffset('get') ));
+                        
                         mipFusionObject('set', mipFusionObj);  
+                        
+                        if get(ui3DVolumePtr('get'), 'Value') == 2 
+                            if strcmpi(sFusionType, 'custom')
+                                ic = customAlphaCurve(axe3DPanelMipAlphmapPtr('get'),  mipFusionObj, 'mipfusion');
+                                ic.surfObj = mipFusionObj;  
+
+                                mipICFusionObject('set', ic);
+
+                                alphaCurveMenu(axe3DPanelMipAlphmapPtr('get'), 'mipfusion');
+                            else
+                                displayAlphaCurve(aFusionMap, axe3DPanelMipAlphmapPtr('get'));                   
+                            end
+                        end
                     end
                     
                %     deleteAlphaCurve('mip');                        
@@ -535,8 +570,14 @@ function setMIPCallback(hObject, ~)
                         mipColorObject('set', '');                                                            
                     end 
 
-                    if displayMIPColorMap('get') == true       
-                        uimipColorbar = mipColorbar(uiOneWindowPtr('get'), get3DColorMap('one', colorMapMipOffset('get')));
+                    if displayMIPColorMap('get') == true     
+                        
+                        if get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+                            uimipColorbar = mipColorbar(uiOneWindowPtr('get'), get3DColorMap('one', colorMapMipFusionOffset('get')));
+                        else
+                            uimipColorbar = mipColorbar(uiOneWindowPtr('get'), get3DColorMap('one', colorMapMipOffset('get')));
+                        end
+                        
                         mipColorObject('set', uimipColorbar);                
                     end
 

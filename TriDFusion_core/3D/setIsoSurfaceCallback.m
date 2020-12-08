@@ -332,7 +332,6 @@ function setIsoSurfaceCallback(hObject, ~)
 
             else                        
                 isoObj = isoObject('get'); 
-                pIsoValue = isoObj.Isovalue;
                 isoObj.Isovalue = 1;
                 isoObject('set', isoObj);
                 
@@ -340,7 +339,6 @@ function setIsoSurfaceCallback(hObject, ~)
 
                 isoFusionObj = isoFusionObject('get'); 
                 if ~isempty(isoFusionObj)
-                    pFusionIsoValue = isoFusionObj.Isovalue;
                     isoFusionObj.Isovalue = 1;
                     isoFusionObject('set', isoFusionObj);
                 end
@@ -418,14 +416,21 @@ function setIsoSurfaceCallback(hObject, ~)
 
                 isoObj = isoObject('get'); 
                 if ~isempty(isoObj)  
-                    isoObj.Isovalue = pIsoValue;
-                    isoObject('set', isoObj); 
                     
-                    set(ui3DCreateIsoMaskPtr('get'), 'Enable', 'on');
-                  
+                    set(isoObj, 'Isovalue', isoSurfaceValue('get') );
+                    set(isoObj, 'IsosurfaceColor', surfaceColor('get', isoColorOffset('get')) );
+
+                    isoObject('set', isoObj); 
+                    if get(ui3DVolumePtr('get'), 'Value') == 1 % Not Fusion                   
+                        set(ui3DCreateIsoMaskPtr('get'), 'Enable', 'on');
+                    end
+                    
                     isoFusionObj = isoFusionObject('get'); 
-                    if ~isempty(isoFusionObj)
-                        isoFusionObj.Isovalue = pFusionIsoValue;
+                    if ~isempty(isoFusionObj)&& isFusion('get') == true
+                        
+                        set(isoFusionObj, 'Isovalue', isoSurfaceFusionValue('get'));
+                        set(isoFusionObj, 'IsosurfaceColor', surfaceColor('get', isoColorFusionOffset('get')) );
+                        
                         isoFusionObject('set', isoFusionObj);
                     end
                 else
