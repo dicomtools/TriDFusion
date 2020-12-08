@@ -106,13 +106,17 @@ function setFusionCallback(~, ~)
             if ~isempty(volFusionObj)
                 volFusionObj.Alphamap = zeros(256,1);
                 volFusionObject('set', volFusionObj);
-                displayAlphaCurve(zeros(256,1), axe3DPanelVolAlphmapPtr('get'));                
+                if get(ui3DVolumePtr('get'), 'Value') == 2
+                    displayAlphaCurve(zeros(256,1), axe3DPanelVolAlphmapPtr('get'));                
+                end
             end  
             
             if ~isempty(mipFusionObj)
                 mipFusionObj.Alphamap = zeros(256,1);
                 mipFusionObject('set', mipFusionObj);
-                displayAlphaCurve(zeros(256,1), axe3DPanelMipAlphmapPtr('get'));                
+                if get(ui3DVolumePtr('get'), 'Value') == 2
+                    displayAlphaCurve(zeros(256,1), axe3DPanelMipAlphmapPtr('get'));                
+                end
             end            
             
             if ~isempty(isoFusionObj)
