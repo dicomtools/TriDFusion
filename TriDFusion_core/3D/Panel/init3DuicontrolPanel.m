@@ -1438,7 +1438,13 @@ function init3DuicontrolPanel()
 
                     alphaCurveMenu(axeVolAlphmap, 'volfusion');
                 else
-                    displayAlphaCurve(get(volFusionObj, 'Alphamap'), axeVolAlphmap);                  
+                    tFuseInput  = inputTemplate('get');
+                    iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');   
+                    atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
+                    
+                    [aFusionAlphaMap, ~] = getVolFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
+
+                    displayAlphaCurve(aFusionAlphaMap, axeVolAlphmap);                  
                 end
                 
             else
@@ -1452,7 +1458,8 @@ function init3DuicontrolPanel()
                     volICObject('set', ic);
                     alphaCurveMenu(axeVolAlphmap, 'vol');
                 else
-                    displayAlphaCurve(get(volObj, 'Alphamap'), axeVolAlphmap);                  
+                    [aAlphaMap, ~] = getVolAlphaMap('get', dicomBuffer('get'), dicomMetaData('get'));
+                    displayAlphaCurve(aAlphaMap, axeVolAlphmap);                  
                 end
                     
             end 
@@ -1586,7 +1593,13 @@ function init3DuicontrolPanel()
 
                     alphaCurveMenu(axeMipAlphmap, 'mipfusion');
                 else
-                    displayAlphaCurve(get(mipFusionObj, 'Alphamap'), axeMipAlphmap);                   
+                    tFuseInput  = inputTemplate('get');
+                    iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');   
+                    atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
+                    
+                    [aFusionAlphaMap, ~] = getVolFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
+                    
+                    displayAlphaCurve(aFusionAlphaMap, axeMipAlphmap);                   
                 end
                
             else
@@ -1600,7 +1613,8 @@ function init3DuicontrolPanel()
 
                     alphaCurveMenu(axeMipAlphmap, 'mip');
                 else
-                    displayAlphaCurve(get(mipObj, 'Alphamap'), axeMipAlphmap);                   
+                    [aAlphaMap, ~] = getVolAlphaMap('get', dicomBuffer('get'), dicomMetaData('get'));                    
+                    displayAlphaCurve(aAlphaMap, axeMipAlphmap);                   
                end
             
             end             
