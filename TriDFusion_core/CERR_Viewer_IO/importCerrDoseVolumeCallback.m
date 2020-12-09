@@ -1,5 +1,5 @@
-function importCERRDoseCallback(~, ~)
-%function importCERRDoseCallback()
+function importCerrDoseVolumeCallback(~, ~)
+%function importCerrDoseVolumeCallback()
 %Import CERR Scan and Dose to TriDFusion.
 %See TriDFuison.doc (or pdf) for more information about options.
 %

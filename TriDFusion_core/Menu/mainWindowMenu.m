@@ -31,7 +31,8 @@ function mainWindowMenu()
     uimenu(mFile,'Label', 'Open...', 'Callback',@setSourceCallback);   
     uimenu(mFile,'Label', 'Import Dose Kernel...','Callback', @importDoseKernelCallback);
     uimenu(mFile,'Label', 'Import STL Model...','Callback', @importSTLCallback);
-    uimenu(mFile,'Label', 'Import CERR Dose...','Callback', @importCERRDoseCallback);
+    uimenu(mFile,'Label', 'Import CERR Dose Volume...','Callback', @importCerrDoseVolumeCallback);
+    uimenu(mFile,'Label', 'Import CERR Dose Constraint...','Callback', @importCerrDoseConstraintCallback);
 
     uimenu(mFile,'Label', 'Export DICOM...','Callback', @writeDICOMCallback, 'Separator','on');
     uimenu(mFile,'Label', 'Export DICOM All Series...','Callback', @writeDICOMAllSeriesCallback);
