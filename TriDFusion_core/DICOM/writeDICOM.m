@@ -109,7 +109,7 @@ function writeDICOM(sOutDir, iSeriesOffset)
     dSeriesInstanceUID = dicomuid;
     for ww=1: numel(tWriteMetaData)
         tWriteMetaData{ww}.InstanceNumber = tMetaData{ww}.InstanceNumber;                              
-        tWriteMetaData{ww}.PatientPosition = tMetaData{ww}.PatientPosition;                              
+        tWriteMetaData{ww}.PatientPosition = tMetaData{ww}.PatientPosition;                                                                  
 
         tWriteMetaData{ww}.PixelSpacing = tMetaData{ww}.PixelSpacing;                              
         tWriteMetaData{ww}.SliceThickness = tMetaData{ww}.SliceThickness;                 
@@ -136,6 +136,18 @@ function writeDICOM(sOutDir, iSeriesOffset)
             tWriteMetaData{ww}.InstanceNumber = tMetaData{ww}.InstanceNumber;
         end
 
+        if isfield(tWriteMetaData{ww}, 'RescaleIntercept')
+            tWriteMetaData{ww}.RescaleIntercept = tMetaData{ww}.RescaleIntercept;
+        end
+        
+        if isfield(tWriteMetaData{ww}, 'RescaleSlope')
+            tWriteMetaData{ww}.RescaleSlope = tMetaData{ww}.RescaleSlope;
+        end        
+        
+        if isfield(tWriteMetaData{ww}, 'Units')
+            tWriteMetaData{ww}.Units = tMetaData{ww}.Units;
+        end  
+        
         sWriteFile = sprintf('%s.%d', tWriteMetaData{ww}.SeriesInstanceUID, ww);                                             
         sOutFile = sprintf('%s%s',sWriteDir, sWriteFile);
 

@@ -314,6 +314,9 @@ function initKernelPanel()
                 if isfield(atCoreMetaData{jj}, 'RescaleIntercept')
                     atCoreMetaData{jj}.RescaleIntercept = 0;
                 end
+                if isfield(atCoreMetaData{jj}, 'Units')
+                    atCoreMetaData{jj}.Units = 'DOSE';
+                end
             end
             
             dicomMetaData('set', atCoreMetaData);
