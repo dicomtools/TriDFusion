@@ -174,7 +174,7 @@ function writeDICOM(sOutDir, iSeriesOffset)
             return;
         end
 
-        progressBar(ww / numel(tWriteTemplate(iSeriesOffset).asFilesList), sprintf('Writing dicom %d/%d, please waite', ww, numel(tWriteMetaData)));
+        progressBar(ww / numel(tWriteTemplate(iSeriesOffset).asFilesList), sprintf('Writing dicom %d/%d, please wait', ww, numel(tWriteMetaData)));
 
     end                   
 
