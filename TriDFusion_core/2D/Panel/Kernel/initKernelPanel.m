@@ -307,6 +307,17 @@ function initKernelPanel()
             acqDate     = atCoreMetaData{1}.SeriesDate;
             halfLife    = str2double(atCoreMetaData{1}.dose.RadionuclideHalfLife);
 
+            for jj=1:numel(atCoreMetaData)
+                if isfield(atCoreMetaData{jj}, 'RescaleSlope')
+                    atCoreMetaData{jj}.RescaleSlope = 0;
+                end
+                if isfield(atCoreMetaData{jj}, 'RescaleIntercept')
+                    atCoreMetaData{jj}.RescaleIntercept = 0;
+                end
+            end
+            
+            dicomMetaData('set', atCoreMetaData);
+            
             if numel(injDateTime) == 14
                 injDateTime = sprintf('%s.00', injDateTime);
             end
