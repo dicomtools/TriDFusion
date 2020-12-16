@@ -30,6 +30,8 @@ function loadCerrDoseVolume(sPathName, sFileName)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    progressBar(0.3, 'Loading CERR PlanC');
+
     scanNum = 1;
     doseNum = 1;
     structNamC = {'DL_HEART_MT','DL_AORTA','DL_LA','DL_LV','DL_RA',...
@@ -40,18 +42,23 @@ function loadCerrDoseVolume(sPathName, sFileName)
     % Load planC
     try
         planC = loadPlanC(cerrFileName,tempdir);
+        planC = quality_assure_planC(cerrFileName,planC);        
+        planC = updatePlanFields(planC);
     catch
-        return;
+        progressBar(1, 'Error: loadCerrDoseConstraint() Cant Load CERR PlanC!');
+       return;
     end
-    planC = updatePlanFields(planC);
-    planC = quality_assure_planC(cerrFileName,planC);
+
+    progressBar(0.5, 'Scaning Dose Volumes');
 
     % Get scan, dose, struct volumes
     [scan3M, dose3M, strMaskC, ~, ~] = getScanDoseStrVolumes(scanNum, doseNum, structNamC, planC);
 
-    RA = imref3d(size(scan3M));
-    RB = imref3d(size(dose3M));
+%    RA = imref3d(size(scan3M));
+%    RB = imref3d(size(dose3M));
 %       [D,RD] = imfuse(scan3M,RA,dose3M,RB,'ColorChannels',[1 2 0]);
+
+    progressBar(0.7, 'Initializing Viewer');
 
     for ii=1:numel(planC{1,3}(1).scanInfo)
         tTemplate{ii} = planC{1,3}(1).scanInfo(ii).DICOMHeaders;
@@ -363,5 +370,8 @@ function loadCerrDoseVolume(sPathName, sFileName)
     mipLinearFuisonAlphaValue('set', 0.75);
     
     setPlaybackToolbar('on');
- 
+    setRoiToolbar('on');
+    
+    progressBar(1, 'Ready');
+
 end

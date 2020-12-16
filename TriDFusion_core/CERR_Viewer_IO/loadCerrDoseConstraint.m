@@ -11,82 +11,95 @@
 % APA, 12/8/2020
 function loadCerrDoseConstraint(sPathName, sFileName)
 
-cerrFileName = sprintf('%s%s', sPathName, sFileName);
+    progressBar(0.1, 'Loading CERR PlanC');
 
-%sPathName = 'C:\Temp\DoseConstraintDisplay\';
-%sFileName = '0617-693410_09-09-2000-32821.mat';
+    cerrFileName = sprintf('%s%s', sPathName, sFileName);
 
-planC = loadPlanC(cerrFileName,tempdir);
-planC = updatePlanFields(planC);
-planC = quality_assure_planC(cerrFileName,planC);
+    %sPathName = 'C:\Temp\DoseConstraintDisplay\';
+    %sFileName = '0617-693410_09-09-2000-32821.mat';
+    
+    try
+        planC = loadPlanC(cerrFileName,tempdir);
+        planC = updatePlanFields(planC);
+        planC = quality_assure_planC(cerrFileName,planC);
+    catch
+        progressBar(1, 'Error: loadCerrDoseConstraint() Cant Load CERR PlanC!');
+        return;
+    end
+    
+    progressBar(0.3, 'Set Matching Index');
 
-indexS = planC{end};
+    indexS = planC{end};
 
-structNamC = {'Lung_IPSI','Lung_CNTR','PTV'};
-doseThreshold = 72;
+    structNamC = {'Lung_IPSI','Lung_CNTR','PTV'};
+    doseThreshold = 72;
 
-scanNum = 1;
-doseNum = 1;
+    scanNum = 1;
+    doseNum = 1;
 
-strC = {planC{indexS.structures}.structureName};
-strIndex = getMatchingIndex(structNamC{1},strC,'exact');
-[scan3M,dose3M,strMaskC,xyzGridC,strColorC] = ...
-    getScanDoseStrVolumes(scanNum,doseNum,structNamC,planC);
+    strC = {planC{indexS.structures}.structureName};
+    strIndex = getMatchingIndex(structNamC{1},strC,'exact');
+    [scan3M,dose3M,strMaskC,xyzGridC,strColorC] = ...
+        getScanDoseStrVolumes(scanNum,doseNum,structNamC,planC);
+    
+    sizV = size(strMaskC{1});
+    
+    progressBar(0.5, 'Set Matching Index');
 
-sizV = size(strMaskC{1});
+    % Generate mask for constraint
+    ptvInd = getMatchingIndex('PTV',structNamC,'exact');
+    maskConstr3M = false(sizV);
+    maskConstr3M(dose3M < doseThreshold & strMaskC{ptvInd}) = true;
 
-% Generate mask for constraint
-ptvInd = getMatchingIndex('PTV',structNamC,'exact');
-maskConstr3M = false(sizV);
-maskConstr3M(dose3M < doseThreshold & strMaskC{ptvInd}) = true;
-
-
-% Replace structure "volume mask" with "surface mask"
-for iStr = 1:length(structNamC)
-     surfRcsM = getSurfacePoints(strMaskC{iStr},1,1);
-     indSurfV = sub2ind(sizV,surfRcsM(:,1),surfRcsM(:,2),surfRcsM(:,3));
-     maskEdge3M = false(sizV);
-     maskEdge3M(indSurfV) = true;
-     maskEdgeC{iStr} = maskEdge3M;
-end
+    % Replace structure "volume mask" with "surface mask"
+    for iStr = 1:length(structNamC)
+         surfRcsM = getSurfacePoints(strMaskC{iStr},1,1);
+         indSurfV = sub2ind(sizV,surfRcsM(:,1),surfRcsM(:,2),surfRcsM(:,3));
+         maskEdge3M = false(sizV);
+         maskEdge3M(indSurfV) = true;
+         maskEdgeC{iStr} = maskEdge3M;
+    end
 
 
-ctOffset = planC{indexS.scan}(scanNum).scanInfo(1).CTOffset;
-scanArray3M = single(planC{indexS.scan}(scanNum).scanArray) - ctOffset;
+    ctOffset = planC{indexS.scan}(scanNum).scanInfo(1).CTOffset;
+    scanArray3M = single(planC{indexS.scan}(scanNum).scanArray) - ctOffset;
 
-numStructs = length(structNamC);
-numConstr = 1;
-labelColorM = ones(numStructs+numConstr+1,3);
-labelColorM(2:end-numConstr,:) = repmat([0,0.81,0.81],numStructs,1);
-labelColorM(numStructs+2:end,:) = repmat([1,0.41,0.38],numConstr,1);
+    numStructs = length(structNamC);
+    numConstr = 1;
+    labelColorM = ones(numStructs+numConstr+1,3);
+    labelColorM(2:end-numConstr,:) = repmat([0,0.81,0.81],numStructs,1);
+    labelColorM(numStructs+2:end,:) = repmat([1,0.41,0.38],numConstr,1);
 
-labelOpacityV = zeros(numStructs+numConstr+1,1);
-labelOpacityV(2:1+numStructs,1) = 0.03;
-labelOpacityV(numStructs+2:end) = 0.1;
+    labelOpacityV = zeros(numStructs+numConstr+1,1);
+    labelOpacityV(2:1+numStructs,1) = 0.03;
+    labelOpacityV(numStructs+2:end) = 0.1;
+    
+    progressBar(0.7, 'Masking Edge.');
 
-maskEdge3M = zeros(sizV,'uint16');
-for iStr = 1:numStructs
-    maskEdge3M(maskEdgeC{iStr}) = iStr;
-end
-maskEdge3M(maskConstr3M) = numStructs+1;
+    maskEdge3M = zeros(sizV,'uint16');
+    for iStr = 1:numStructs
+        maskEdge3M(maskEdgeC{iStr}) = iStr;
+    end
+    maskEdge3M(maskConstr3M) = numStructs+1;
 
-[minr, maxr, minc, maxc, mins, maxs]= compute_boundingbox(maskEdge3M);
-maskEdge3M = maskEdge3M(minr:maxr, minc:maxc, mins:maxs);
-scanArray3M = scanArray3M(minr:maxr, minc:maxc, mins:maxs);
+    [minr, maxr, minc, maxc, mins, maxs]= compute_boundingbox(maskEdge3M);
+    maskEdge3M = maskEdge3M(minr:maxr, minc:maxc, mins:maxs);
+    scanArray3M = scanArray3M(minr:maxr, minc:maxc, mins:maxs);
 
-[xV,yV,zV] = getScanXYZVals(planC{indexS.scan}(scanNum));
-dx = xV(2)-xV(1);
-dy = yV(1)-yV(2);
-dz = zV(2)-zV(1);
+    [xV,yV,zV] = getScanXYZVals(planC{indexS.scan}(scanNum));
+    dx = xV(2)-xV(1);
+    dy = yV(1)-yV(2);
+    dz = zV(2)-zV(1);
 
-sx = 1;
-sy = dy/dx;
-sz = dz/dx;
+    sx = 1;
+    sy = dy/dx;
+    sz = dz/dx;
 
-%figure, 
-%h = labelvolshow(maskEdge3M, scanArray3M, 'ScaleFactors',[sy,sx,sz],'BackgroundColor','w',...
-%    'LabelColor',labelColorM,'ShowIntensityVolume',false,'LabelOpacity',labelOpacityV);
-
+    %figure, 
+    %h = labelvolshow(maskEdge3M, scanArray3M, 'ScaleFactors',[sy,sx,sz],'BackgroundColor','w',...
+    %    'LabelColor',labelColorM,'ShowIntensityVolume',false,'LabelOpacity',labelOpacityV);
+    
+    progressBar(0.9, 'Initializing Viewer');
 
     for ii=1:numel(planC{1,3}(1).scanInfo)
         tTemplate{ii} = planC{1,3}(1).scanInfo(ii).DICOMHeaders;
@@ -401,6 +414,9 @@ sz = dz/dx;
     mipLinearFuisonAlphaValue('set', 0.75);
     
     setPlaybackToolbar('on');
+    setRoiToolbar('on');
+    
+    progressBar(1, 'Ready');
 
 end
 
