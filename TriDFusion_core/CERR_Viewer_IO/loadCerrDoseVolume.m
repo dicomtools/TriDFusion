@@ -115,6 +115,9 @@ function loadCerrDoseVolume(sPathName, sFileName)
     tNewInput(1).aDicomBuffer = scan3M;
     tNewInput(2).aDicomBuffer = dose3M;
 
+    tNewInput(1).asFilesList = '';
+    tNewInput(2).asFilesList = '';
+       
     inputTemplate('set', tNewInput);
     dicomBuffer  ('set', scan3M);
     
@@ -372,6 +375,23 @@ function loadCerrDoseVolume(sPathName, sFileName)
     setPlaybackToolbar('on');
     setRoiToolbar('on');
     
-    progressBar(1, 'Ready');
+    for mm=1:numel(strMaskC)
+        progressBar(0.7+(0.299999*mm/numel(strMaskC)), sprintf('Processing VOI %d/%d', mm, numel(strMaskC)));      
+        
+        aVoiColor = [];
+        for pp=1:numel(planC{4})
+            if strcmpi(planC{4}(pp).structureName, structNamC{mm})
+                aVoiColor = planC{4}(pp).structureColor;
+                break;
+            end
+        end
+               
+        maskToVoi(strMaskC{mm}, structNamC{mm}, aVoiColor);
+    end
+    
+    refreshImages();
+    
+    progressBar(1, 'Ready');        
+    
 
 end

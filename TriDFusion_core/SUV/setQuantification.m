@@ -140,9 +140,14 @@ function setQuantification(dSeriesOffset)
         inputTemplate('set', tInput);
         quantificationTemplate('set', tInput(1).tQuant);    
         cropValue('set', tInput(1).tQuant.tCount.dMin);
-
-        imageSegEditValue('set', 'lower', tInput(1).tQuant.tCount.dMin);
-        imageSegEditValue('set', 'upper', tInput(1).tQuant.tCount.dMax);
+        
+        if strcmpi(tInput(1).atDicomInfo{1}.Modality, 'ct')
+            imageSegEditValue('set', 'lower', 44 );
+            imageSegEditValue('set', 'upper', 100);            
+        else
+            imageSegEditValue('set', 'lower', tInput(1).tQuant.tCount.dMin);
+            imageSegEditValue('set', 'upper', tInput(1).tQuant.tCount.dMax);
+        end
     end
 
 end

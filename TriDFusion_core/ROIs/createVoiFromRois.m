@@ -1,5 +1,5 @@
-function createVoiFromRois(adTag)
-%function createVoiFromRois(adTag)
+function createVoiFromRois(adTag, sVoiName)
+%function createVoiFromRois(adTag, sVoiName)
 %Create VOI From Array Of ROIs tag.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -36,8 +36,8 @@ function createVoiFromRois(adTag)
     end
 
     if ~isempty(tInput(iSeriesOffset).tRoi)
-
-        if isfield(tInput(iSeriesOffset), 'tVoi')
+               
+       if isfield(tInput(iSeriesOffset), 'tVoi')
             if isempty(tInput(iSeriesOffset).tVoi)
                 dVoiOffset = 1;                         
             else
@@ -47,8 +47,12 @@ function createVoiFromRois(adTag)
         else
             dVoiOffset = 1; 
         end
-
-        tInput(iSeriesOffset).tVoi{dVoiOffset}.Label = sprintf('VOI %d', dVoiOffset);
+        
+        if exist('sVoiName', 'var')
+            tInput(iSeriesOffset).tVoi{dVoiOffset}.Label = sVoiName;
+        else
+            tInput(iSeriesOffset).tVoi{dVoiOffset}.Label = sprintf('VOI %d', dVoiOffset);
+        end
 
         dRoiNb = 0;
         for bb=1:numel(adTag)

@@ -60,7 +60,6 @@ function loadCerrDoseConstraint(sPathName, sFileName)
          maskEdgeC{iStr} = maskEdge3M;
     end
 
-
     ctOffset = planC{indexS.scan}(scanNum).scanInfo(1).CTOffset;
     scanArray3M = single(planC{indexS.scan}(scanNum).scanArray) - ctOffset;
 

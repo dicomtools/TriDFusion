@@ -553,7 +553,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bSegmented, dSubtraction)
                     save(sMatFile, 'saveHistLastUsedDir');
                 catch
                     progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-                    h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
+%                    h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
 %                    if integrateToBrowser('get') == true
 %                        sLogo = './TriDFusion/logo.png';
 %                    else
@@ -654,7 +654,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bSegmented, dSubtraction)
                     save(sMatFile, 'saveHistLastUsedDir');
                 catch
                     progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-                    h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
+%                    h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
 %                    if integrateToBrowser('get') == true
 %                        sLogo = './TriDFusion/logo.png';
 %                    else

@@ -252,7 +252,7 @@ function setPlaybackToolbar(sVisible)
                                     save(sMatFile, 'animatedGifLastUsedDir');
                                 catch
                                     progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-                                    h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
+%                                    h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
 %                                    if integrateToBrowser('get') == true
 %                                        sLogo = './TriDFusion/logo.png';
 %                                    else
@@ -434,7 +434,7 @@ function setPlaybackToolbar(sVisible)
                                     save(sMatFile, 'animatedGifLastUsedDir');
                                 catch
                                     progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-                                    h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
+%                                    h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
 %                                    if integrateToBrowser('get') == true
 %                                        sLogo = './TriDFusion/logo.png';
 %                                    else

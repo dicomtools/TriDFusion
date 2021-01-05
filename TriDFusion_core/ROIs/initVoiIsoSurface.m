@@ -50,7 +50,7 @@ function voiObj = initVoiIsoSurface(uiWindow)
     tVoiInput = voiTemplate('get');
 
     aInputArguments = {'Parent', uiWindow, 'Renderer', 'Isosurface', 'BackgroundColor', surfaceColor('one', background3DOffset('get'))};
-    aIsovalue = 0.15;
+    aIsovalue = 0.0000000000000001;
 
     if ~isempty(isoObj)
         aCamera = {'CameraPosition', get(isoObj, 'CameraPosition'), ...
@@ -110,6 +110,7 @@ function voiObj = initVoiIsoSurface(uiWindow)
             end             
 
             im = im(:,:,end:-1:1);
+            im = smooth3(im);
             voiObj{aa} = volshow(im, aInputArguments{:});                                                                  
         end                     
     end                        

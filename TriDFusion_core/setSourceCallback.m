@@ -57,7 +57,7 @@ function setSourceCallback(~, ~)
             save(sMatFile, 'openLastUsedDir');
         catch
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-            h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
+%            h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
 %            if integrateToBrowser('get') == true
 %                sLogo = './TriDFusion/logo.png';
 %            else
@@ -110,13 +110,13 @@ function setSourceCallback(~, ~)
             initFusionWindowLevel ('set', true);
             roiTemplate('set', '');
             voiTemplate('set', '');
-            
-            getMipAlphaMap('set', '', 'auto');    
+
+            getMipAlphaMap('set', '', 'auto');
             getVolAlphaMap('set', '', 'auto');
 
-            getMipFusionAlphaMap('set', '', 'auto');    
+            getMipFusionAlphaMap('set', '', 'auto');
             getVolFusionAlphaMap('set', '', 'auto');
-        
+
             deleteAlphaCurve('vol');
             deleteAlphaCurve('volfusion');
 
@@ -146,13 +146,13 @@ function setSourceCallback(~, ~)
                 delete(volObj);
                 volObject('set', '');
             end
-            
+
             volFuisonObj = volFusionObject('get');
             if ~isempty(volFuisonObj)
                 delete(volFuisonObj);
                 volFusionObject('set', '');
             end
-            
+
             isoObj = isoObject('get');
             if ~isempty(isoObj)
                 delete(isoObj);
@@ -164,13 +164,13 @@ function setSourceCallback(~, ~)
                 delete(mipObj);
                 mipObject('set', '');
             end
-            
+
             mipFusionObj = mipFusionObject('get');
             if ~isempty(mipFusionObj)
                 delete(mipFusionObj);
                 mipObject('set', '');
             end
-            
+
             voiObj = voiObject('get');
             if ~isempty(voiObj)
                 for vv=1:numel(voiObj)

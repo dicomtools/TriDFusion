@@ -159,7 +159,7 @@ function initSegPanel()
                   'Position', [195 290 65 20], ...
                   'String'  , imageSegEditValue('get', 'upper'), ...
                   'Enable'  , 'on', ...
-                  'CallBack', @editImageTreshCallback ...
+                  'CallBack', @editImageUpperTreshCallback ...
                   );    
     editVoiRoiUpperTresholdObject('set', uiEditImageUpperTreshold);
 
@@ -221,7 +221,7 @@ function initSegPanel()
                   'Position', [195 215 65 20], ...
                   'String'  , imageSegEditValue('get', 'lower'), ...
                   'Enable'  , 'on', ...
-                  'CallBack', @editImageTreshCallback ...
+                  'CallBack', @editImageLowerTreshCallback ...
                   );  
 
     if useCropEditValue('get', 'lower') == true
@@ -492,15 +492,21 @@ function initSegPanel()
         if isempty(tQuant)
             return;
         end    
-
-        dQuantDifference = tQuant.tCount.dMax - tQuant.tCount.dMin;
+        
+%        dMin = tQuant.tCount.dMin;
+%        dMax = tQuant.tCount.dMax;
+        
+        dMin = imageSegEditValue('get', 'lower');
+        dMax = imageSegEditValue('get', 'upper');
+        
+        dQuantDifference = dMax - dMin;
         dWindow = dQuantDifference /2;
 
-        dUpper = tQuant.tCount.dMax - ((dWindow - (dWindow * get(uiSliderImageUpperTreshold,'Value'))) / str2double(get(edtCoefficient, 'String')));
+        dUpper = dMax - ((dWindow - (dWindow * get(uiSliderImageUpperTreshold, 'Value'))) / str2double(get(edtCoefficient, 'String')));
 
         set(uiEditImageUpperTreshold, 'String', num2str(dUpper));
 
-        editImageTreshCallback();
+        editImageTreshold();
 
     end
 
@@ -510,18 +516,40 @@ function initSegPanel()
         if isempty(tQuant)
             return;
         end     
+                
+%        dMin = tQuant.tCount.dMin;
+%        dMax = tQuant.tCount.dMax;
+        
+        dMin = imageSegEditValue('get', 'lower');
+        dMax = imageSegEditValue('get', 'upper');
 
-        dQuantDifference = tQuant.tCount.dMax - tQuant.tCount.dMin;
+        dQuantDifference = dMax - dMin;
         dWindow = dQuantDifference /2;
 
-        dLower = tQuant.tCount.dMin + ((dWindow * get(uiSliderImageLowerTreshold,'Value') )  / str2double(get(edtCoefficient, 'String')));
+        dLower = dMin + ((dWindow * get(uiSliderImageLowerTreshold, 'Value') ) / str2double(get(edtCoefficient, 'String')));
 
         set(uiEditImageLowerTreshold, 'String', num2str(dLower));
 
-        editImageTreshCallback();
+        editImageTreshold();
     end
 
-    function editImageTreshCallback(~, ~)
+    function editImageUpperTreshCallback(hObject, ~)
+        
+        editImageTreshold();
+        
+        imageSegEditValue('set', 'upper', str2double(get(hObject, 'String')));
+
+    end
+
+    function editImageLowerTreshCallback(hObject, ~)
+        
+        editImageTreshold();
+        
+        imageSegEditValue('set', 'lower', str2double(get(hObject, 'String')));
+
+    end
+
+    function editImageTreshold()
 
         im = dicomBuffer('get');              
         if isempty(im)
@@ -707,7 +735,7 @@ function initSegPanel()
 
             end                    
 
-        end
+        end                       
     end
 
     function im = tresholdVoiRoi(im, objRoi, dSliceNb, bMathOperation, bUpdateScreen)                
