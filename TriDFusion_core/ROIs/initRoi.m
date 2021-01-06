@@ -36,6 +36,8 @@ function initRoi()
     if isfield(tInitInput(iOffset), 'tRoi')
 
         for bb=1:numel(tInitInput(iOffset).tRoi)
+            
+            progressBar(bb/numel(tInitInput(iOffset).tRoi), sprintf('processing ROI %d/%d', bb, numel(tInitInput(iOffset).tRoi)));
 
             if     strcmpi(tInitInput(iOffset).tRoi{bb}.Axe, 'axes1')
                 axRoi = axes1Ptr('get');
@@ -201,6 +203,9 @@ function initRoi()
 
         inputTemplate('set', tInitInput);
         roiTemplate('set', tInitInput(iOffset).tRoi);
+        
+        progressBar(1, 'Ready');
+        
     end
 
 end

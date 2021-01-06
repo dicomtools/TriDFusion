@@ -375,6 +375,8 @@ function loadCerrDoseVolume(sPathName, sFileName)
     setPlaybackToolbar('on');
     setRoiToolbar('on');
     
+    hold on;
+    
     for mm=1:numel(strMaskC)
         progressBar(0.7+(0.299999*mm/numel(strMaskC)), sprintf('Processing VOI %d/%d', mm, numel(strMaskC)));      
         
@@ -388,6 +390,8 @@ function loadCerrDoseVolume(sPathName, sFileName)
                
         maskToVoi(strMaskC{mm}, structNamC{mm}, aVoiColor);
     end
+    
+    hold off;
     
     refreshImages();
     

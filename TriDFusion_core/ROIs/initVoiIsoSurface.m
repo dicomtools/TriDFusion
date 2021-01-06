@@ -70,7 +70,13 @@ function voiObj = initVoiIsoSurface(uiWindow)
     end     
 
     if ~isempty(tVoiInput)
+        
+        aColormap = zeros(256,3);
+        aAlphamap = zeros(256,1);
+
         for aa=1:numel(tVoiInput)                       
+            
+            progressBar(aa/numel(tVoiInput), sprintf('Processing VOI %d/%d', aa, numel(tVoiInput) ) );      
 
             aBuffer = zeros(size(dicomBuffer('get')));
             if     strcmp(imageOrientation('get'), 'axial')
@@ -94,8 +100,14 @@ function voiObj = initVoiIsoSurface(uiWindow)
             end 
 
             aIsosurfaceColor = tVoiInput{aa}.Color;
-
-            aInputArguments = [aInputArguments(:)', {'Isovalue'}, {aIsovalue}, {'IsosurfaceColor'}, {aIsosurfaceColor}];
+            
+            aColormap(:,1) = aIsosurfaceColor(1);
+            aColormap(:,2) = aIsosurfaceColor(2);
+            aColormap(:,3) = aIsosurfaceColor(3);
+            
+            aAlphamap(:) = 0.041;
+                        
+            aInputArguments = [aInputArguments(:)', {'Isovalue'}, {aIsovalue}, {'IsosurfaceColor'}, {aIsosurfaceColor}, {'Colormap'}, {aColormap}, {'Alphamap'}, {aAlphamap}];
 
             for yy=1:numel(tVoiInput{aa}.tMask)                          
 
@@ -110,9 +122,22 @@ function voiObj = initVoiIsoSurface(uiWindow)
             end             
 
             im = im(:,:,end:-1:1);
+%            im = interp3(im);
             im = smooth3(im);
-            voiObj{aa} = volshow(im, aInputArguments{:});                                                                  
-        end                     
+            
+            voiObj{aa} = volshow(im, aInputArguments{:});   
+
+        end  
+        
+%        aVolSize = size(dicomBuffer('get'));
+        aDummyBuffer = zeros(10,10,10);
+        
+        voiObj{numel(voiObj)+1} = volshow(aDummyBuffer, aInputArguments{:});   
+        voiObj{numel(voiObj)}.Alphamap(:) = 0;
+        voiObj{numel(voiObj)}.InteractionsEnabled = 0;
+        
+        progressBar(1, 'Ready');      
+        
     end                        
 
 end     
