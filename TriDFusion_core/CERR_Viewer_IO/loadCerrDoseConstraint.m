@@ -414,7 +414,7 @@ function loadCerrDoseConstraint(sPathName, sFileName)
     
     setPlaybackToolbar('on');
     setRoiToolbar('on');
-    
+        
     refreshImages();
    
     progressBar(1, 'Ready');

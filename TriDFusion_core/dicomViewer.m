@@ -120,6 +120,8 @@ function resize = dicomViewer()
     multiFrame3DPlayback('set', false);
     multiFrame3DRecord  ('set', false);
     multiFrame3DZoom    ('set', 0    );
+    
+    slider3DVoiTransparencyValue('set', 0);
 
     gaussFilterValue('set', 'x', 0.1 );
     gaussFilterValue('set', 'y', 0.1 );

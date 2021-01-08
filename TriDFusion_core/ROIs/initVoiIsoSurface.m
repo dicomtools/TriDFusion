@@ -50,7 +50,8 @@ function voiObj = initVoiIsoSurface(uiWindow)
     tVoiInput = voiTemplate('get');
 
     aInputArguments = {'Parent', uiWindow, 'Renderer', 'Isosurface', 'BackgroundColor', surfaceColor('one', background3DOffset('get'))};
-    aIsovalue = 0.0000000000000001;
+%    aInputArguments = {'Parent', uiWindow, 'Renderer', 'VolumeRendering', 'BackgroundColor', surfaceColor('one', background3DOffset('get'))};
+    aIsovalue = compute3DVoiTransparency(slider3DVoiTransparencyValue('get'));
 
     if ~isempty(isoObj)
         aCamera = {'CameraPosition', get(isoObj, 'CameraPosition'), ...

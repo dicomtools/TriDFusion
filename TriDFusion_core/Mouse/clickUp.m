@@ -56,7 +56,10 @@ function clickUp(~, ~)
         if ~isempty(volICFusionObj)
             volICFusionObj.mouseMode = 1;
             set(volICFusionObj.figureHandle, 'WindowButtonMotionFcn', '');
-        end      
+        end
+        
+        updateObjet3DPosition();      
+ 
     end
     
 end

@@ -27,7 +27,7 @@ function wheelScroll(~, evnt)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-     windowButton('set', 'down');  
+    windowButton('set', 'down');  
 
     if size(dicomBuffer('get'), 3) ~= 1 && ...
        switchTo3DMode('get')      == false && ...
@@ -98,6 +98,8 @@ function wheelScroll(~, evnt)
         end
 
         refreshImages();
+    else
+        updateObjet3DPosition();              
     end
 
     windowButton('set', 'up');  
