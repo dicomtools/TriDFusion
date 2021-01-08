@@ -372,13 +372,16 @@ function setIsoSurfaceCallback(hObject, ~)
                 setViewerDefaultColor(false, dicomMetaData('get'));
 
                 isoObj = initVolShow(dicomBuffer('get'), uiOneWindowPtr('get'), 'Isosurface');
+                set(isoObj, 'InteractionsEnabled', true);
+                
                 isoObject('set', isoObj);
                 
                 set(ui3DCreateIsoMaskPtr('get'), 'Enable', 'on');
                 
                 if isFusion('get')
                     isoFusionObj = initVolShow(fusionBuffer('get'), uiOneWindowPtr('get'), 'Isosurface');
-                    
+                    set(isoFusionObj, 'InteractionsEnabled', false);
+                   
                     isoFusionObj.IsosurfaceColor  = surfaceColor('one', isoColorFusionOffset('get') );
                     isoFusionObj.Isovalue         = isoSurfaceFusionValue('get');
 
@@ -407,12 +410,6 @@ function setIsoSurfaceCallback(hObject, ~)
                 uiLogo = displayLogo(uiOneWindowPtr('get'));
                 logoObject('set', uiLogo);
             else
-                if switchTo3DMode('get')  == true && ...
-                   switchToMIPMode('get') == true
-                    surface3DPriority('set', 'Isosurface', 3);
-                else
-                    surface3DPriority('set', 'Isosurface', 2);
-                end
 
                 isoObj = isoObject('get'); 
                 if ~isempty(isoObj)  
@@ -434,13 +431,24 @@ function setIsoSurfaceCallback(hObject, ~)
                         isoFusionObject('set', isoFusionObj);
                     end
                 else
+                    
+                    if switchTo3DMode('get')  == true && ...
+                       switchToMIPMode('get') == true
+                        surface3DPriority('set', 'Isosurface', 3);
+                    else
+                        surface3DPriority('set', 'Isosurface', 2);
+                    end
+                
                     isoObj = initVolShow(dicomBuffer('get'), uiOneWindowPtr('get'), 'Isosurface');  
+                    set(isoObj, 'InteractionsEnabled', false);
+                    
                     isoObject('set', isoObj);
                     
                     set(ui3DCreateIsoMaskPtr('get'), 'Enable', 'on');
 
                     if isFusion('get')
                         isoFusionObj = initVolShow(fusionBuffer('get'), uiOneWindowPtr('get'), 'Isosurface');
+                        set(isoFusionObj, 'InteractionsEnabled', false);
                         
                         isoFusionObj.IsosurfaceColor  = surfaceColor('one', isoColorFusionOffset('get') );
                         isoFusionObj.Isovalue         = isoSurfaceFusionValue('get');

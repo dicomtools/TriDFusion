@@ -29,7 +29,7 @@ function mouseMove(~, ~)
 
     if strcmp(windowButton('get'), 'down')
 
-       if switchTo3DMode('get')      == false && ...
+        if switchTo3DMode('get')      == false && ...
           switchToIsoSurface('get')  == false && ...
           switchToMIPMode('get')     == false
 
@@ -42,7 +42,8 @@ function mouseMove(~, ~)
                     refreshImages();
                 end
             end
-       end
+        else            
+            updateObjet3DPosition();      
+        end
     end
-
 end  

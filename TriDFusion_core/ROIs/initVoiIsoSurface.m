@@ -76,7 +76,7 @@ function voiObj = initVoiIsoSurface(uiWindow)
 
         for aa=1:numel(tVoiInput)                       
             
-            progressBar(aa/numel(tVoiInput), sprintf('Processing VOI %d/%d', aa, numel(tVoiInput) ) );      
+            progressBar(aa/numel(tVoiInput)-0.0001, sprintf('Processing VOI %d/%d', aa, numel(tVoiInput) ) );      
 
             aBuffer = zeros(size(dicomBuffer('get')));
             if     strcmp(imageOrientation('get'), 'axial')
@@ -106,7 +106,7 @@ function voiObj = initVoiIsoSurface(uiWindow)
             aColormap(:,3) = aIsosurfaceColor(3);
             
             aAlphamap(:) = 0.041;
-                        
+            
             aInputArguments = [aInputArguments(:)', {'Isovalue'}, {aIsovalue}, {'IsosurfaceColor'}, {aIsosurfaceColor}, {'Colormap'}, {aColormap}, {'Alphamap'}, {aAlphamap}];
 
             for yy=1:numel(tVoiInput{aa}.tMask)                          
@@ -126,15 +126,18 @@ function voiObj = initVoiIsoSurface(uiWindow)
             im = smooth3(im);
             
             voiObj{aa} = volshow(im, aInputArguments{:});   
+            set(voiObj{aa}, 'InteractionsEnabled', false);
+        %    setVolume(voiObj{aa},im);
 
         end  
         
-%        aVolSize = size(dicomBuffer('get'));
-        aDummyBuffer = zeros(10,10,10);
         
-        voiObj{numel(voiObj)+1} = volshow(aDummyBuffer, aInputArguments{:});   
-        voiObj{numel(voiObj)}.Alphamap(:) = 0;
-        voiObj{numel(voiObj)}.InteractionsEnabled = 0;
+%        aVolSize = size(dicomBuffer('get'));
+%        aDummyBuffer = zeros(size(dicomBuffer('get')));
+        
+%        voiObj{numel(voiObj)+1} = volshow(aDummyBuffer, aInputArguments{:});   
+%        voiObj{numel(voiObj)}.Alphamap(:) = 0;
+%        voiObj{numel(voiObj)}.InteractionsEnabled = 0;
         
         progressBar(1, 'Ready');      
         

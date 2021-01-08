@@ -418,6 +418,8 @@ function setMIPCallback(hObject, ~)
                 colorMapMipOffset('set', colorMapOffset('get')); %  % Set 3D Mip from 2D
                  
                 mipObj = initVolShow(dicomBuffer('get'), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atMetaData);
+                set(mipObj, 'InteractionsEnabled', true);
+                
                 mipObject('set', mipObj);
                 
                 if isFusion('get')  
@@ -451,7 +453,8 @@ function setMIPCallback(hObject, ~)
                     set(ui3DBackgroundPtr('get'), 'Value', background3DOffset('get'));
                     
                     mipFusionObj = initVolShow(fusionBuffer('get'), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);
-                    
+                    set(mipFusionObj, 'InteractionsEnabled', false);
+
                     [aAlphaMap, ~] = getMipFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
                     mipFusionObj.Alphamap = aAlphaMap;                    
                     
@@ -505,12 +508,6 @@ function setMIPCallback(hObject, ~)
                 logoObject('set', uiLogo);
 
             else
-                if switchToIsoSurface('get') == true && ...
-                   switchTo3DMode('get')     == true
-                    surface3DPriority('set', 'MaximumIntensityProjection', 3);
-                else
-                    surface3DPriority('set', 'MaximumIntensityProjection', 2);
-                end
 
                 mipObj = mipObject('get'); 
                 if ~isempty(mipObj)
@@ -579,9 +576,17 @@ function setMIPCallback(hObject, ~)
                     end
 
                 else
+                    if switchToIsoSurface('get') == true && ...
+                       switchTo3DMode('get')     == true
+                        surface3DPriority('set', 'MaximumIntensityProjection', 3);
+                    else
+                        surface3DPriority('set', 'MaximumIntensityProjection', 2);
+                    end                    
 %                    getMipAlphaMap('set', dicomBuffer('get'), 'auto');
                                     
                     mipObj = initVolShow(dicomBuffer('get'), uiOneWindowPtr('get'), 'MaximumIntensityProjection', dicomMetaData('get')); 
+                    set(mipObj, 'InteractionsEnabled', false);
+
                     mipObject('set', mipObj);
                     
                     if isFusion('get')  
@@ -593,6 +598,7 @@ function setMIPCallback(hObject, ~)
                         atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
                     
                         mipFusionObj = initVolShow(fusionBuffer('get'), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);
+                        set(mipFusionObj, 'InteractionsEnabled', false);
                         
                         [aAlphaMap, ~] = getMipFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
                         

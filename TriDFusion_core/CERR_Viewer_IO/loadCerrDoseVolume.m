@@ -377,6 +377,10 @@ function loadCerrDoseVolume(sPathName, sFileName)
     
     hold on;
     
+    set(uiCorWindowPtr('get'), 'Visible', 'off');
+    set(uiSagWindowPtr('get'), 'Visible', 'off');
+    set(uiTraWindowPtr('get'), 'Visible', 'off');
+        
     for mm=1:numel(strMaskC)
         progressBar(0.7+(0.299999*mm/numel(strMaskC)), sprintf('Processing VOI %d/%d', mm, numel(strMaskC)));      
         
@@ -390,6 +394,10 @@ function loadCerrDoseVolume(sPathName, sFileName)
                
         maskToVoi(strMaskC{mm}, structNamC{mm}, aVoiColor);
     end
+    
+    set(uiCorWindowPtr('get'), 'Visible', 'on');
+    set(uiSagWindowPtr('get'), 'Visible', 'on');
+    set(uiTraWindowPtr('get'), 'Visible', 'on');
     
     hold off;
     

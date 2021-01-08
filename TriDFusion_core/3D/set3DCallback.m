@@ -402,6 +402,8 @@ function set3DCallback(hObject, ~)
                 setViewerDefaultColor(false, dicomMetaData('get'));
 
                 volObj = initVolShow(dicomBuffer('get'), uiOneWindowPtr('get'), 'VolumeRendering', dicomMetaData('get'));                               
+                set(volObj, 'InteractionsEnabled', true);
+                
                 volObject('set', volObj);
                 
                 if isFusion('get')          
@@ -413,6 +415,7 @@ function set3DCallback(hObject, ~)
                     atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
                     
                     volFusionObj = initVolShow(fusionBuffer('get'), uiOneWindowPtr('get'), 'VolumeRendering', atFuseMetaData);
+                    set(volFusionObj, 'InteractionsEnabled', false);
                     
                     [aAlphaMap, ~] = getVolFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
                     set(volFusionObj, 'Alphamap', aAlphaMap );
@@ -470,12 +473,6 @@ function set3DCallback(hObject, ~)
                 logoObject('set', uiLogo);
 
             else
-                if switchToIsoSurface('get') == true && ...
-                   switchToMIPMode('get')    == true
-                    surface3DPriority('set', 'VolumeRendering', 3);                         
-                else
-                    surface3DPriority('set', 'VolumeRendering', 2);                         
-                end
 
                 volObj = volObject('get'); 
 
@@ -548,9 +545,18 @@ function set3DCallback(hObject, ~)
                         volColorObject('set', uivolColorbar);                               
                     end
                 else
+                    if switchToIsoSurface('get') == true && ...
+                       switchToMIPMode('get')    == true
+                        surface3DPriority('set', 'VolumeRendering', 3);                         
+                    else
+                        surface3DPriority('set', 'VolumeRendering', 2);                         
+                    end
+                    
 %                    getVolAlphaMap('set', dicomBuffer('get'), 'auto');
                     
                     volObj = initVolShow(dicomBuffer('get'), uiOneWindowPtr('get'), 'VolumeRendering', dicomMetaData('get'));
+                    set(volObj, 'InteractionsEnabled', false);
+                    
                     volObject('set', volObj);
                     
                     if isFusion('get')           
@@ -562,6 +568,7 @@ function set3DCallback(hObject, ~)
                         atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
                     
                         volFusionObj = initVolShow(fusionBuffer('get'), uiOneWindowPtr('get'), 'VolumeRendering', atFuseMetaData);
+                        set(volFusionObj, 'InteractionsEnabled', false);
                         
                         [aAlphaMap, ~] = getVolFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
                         

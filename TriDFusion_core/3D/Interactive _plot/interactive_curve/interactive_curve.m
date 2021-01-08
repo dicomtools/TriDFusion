@@ -158,14 +158,13 @@ classdef interactive_curve < handle
             if ~isempty(aAlphamap)
                 ic.surfObj.Alphamap = aAlphamap;
             end
-               
          end
                   
          function button_up(ic,src,eventdata)
              % used when mouse button released
      %       figureHandle=src;
       %      set(figureHandle,'WindowButtonMotionFcn','');
-             set(src,'WindowButtonMotionFcn','');
+             set(src,'WindowButtonMotionFcn', @mouseMove);
   %                 windowButton('set', 'up');           
     
             ic.mouseMode=1;           
@@ -225,8 +224,8 @@ classdef interactive_curve < handle
              %gap=0.15;
                           
              
- %            set(figureHandle,'WindowButtonUpFcn',{@ic.button_up},...
- %                'HitTest','off');
+             set(figureHandle,'WindowButtonUpFcn',{@ic.button_up},...
+                 'HitTest','off');
              ic.MarkersInLine=true;
              if nargin<=2
                  numberOfMarkers=10;
