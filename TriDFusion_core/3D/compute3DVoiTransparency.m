@@ -1,5 +1,5 @@
 function dValue = compute3DVoiTransparency(dSliderValue)
-%function dValue = compute3DVoiTransparency()
+%function dValue = compute3DVoiTransparency(dSliderValue)
 %Get 3D VOI Transparency Iso Value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %

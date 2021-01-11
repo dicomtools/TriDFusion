@@ -27,7 +27,6 @@ function clickDown(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    windowButton('set', 'down');  
     set(fiMainWindowPtr('get'), 'UserData', 'down');
 
     if switchTo3DMode('get')     == false && ...
@@ -45,6 +44,8 @@ function clickDown(~, ~)
 
             windowButton('set', 'down');             
             adjWL(get(0, 'PointerLocation'));
+        else
+            windowButton('set', 'down');  
         end
 
     else
@@ -59,7 +60,7 @@ function clickDown(~, ~)
 
                 triangulateImages();
             else
-
+                windowButton('set', 'down');  
             end
         else
             if switchTo3DMode('get')     == false && ...

@@ -49,9 +49,14 @@ function voiObj = initVoiIsoSurface(uiWindow)
 
     tVoiInput = voiTemplate('get');
 
-    aInputArguments = {'Parent', uiWindow, 'Renderer', 'Isosurface', 'BackgroundColor', surfaceColor('one', background3DOffset('get'))};
-%    aInputArguments = {'Parent', uiWindow, 'Renderer', 'VolumeRendering', 'BackgroundColor', surfaceColor('one', background3DOffset('get'))};
+    if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
+        aInputArguments = {'Parent', uiWindow, 'Renderer', 'VolumeRendering', 'BackgroundColor', surfaceColor('one', background3DOffset('get'))};
+    else    
+        aInputArguments = {'Parent', uiWindow, 'Renderer', 'Isosurface', 'BackgroundColor', surfaceColor('one', background3DOffset('get'))};
+    end
+    
     aIsovalue = compute3DVoiTransparency(slider3DVoiTransparencyValue('get'));
+    aAlphamap = compute3DVoiAlphamap(slider3DVoiTransparencyValue('get'));
 
     if ~isempty(isoObj)
         aCamera = {'CameraPosition', get(isoObj, 'CameraPosition'), ...
@@ -73,7 +78,6 @@ function voiObj = initVoiIsoSurface(uiWindow)
     if ~isempty(tVoiInput)
         
         aColormap = zeros(256,3);
-        aAlphamap = zeros(256,1);
 
         for aa=1:numel(tVoiInput)                       
             
@@ -105,9 +109,7 @@ function voiObj = initVoiIsoSurface(uiWindow)
             aColormap(:,1) = aIsosurfaceColor(1);
             aColormap(:,2) = aIsosurfaceColor(2);
             aColormap(:,3) = aIsosurfaceColor(3);
-            
-            aAlphamap(:) = 0.041;
-            
+                        
             aInputArguments = [aInputArguments(:)', {'Isovalue'}, {aIsovalue}, {'IsosurfaceColor'}, {aIsosurfaceColor}, {'Colormap'}, {aColormap}, {'Alphamap'}, {aAlphamap}];
 
             for yy=1:numel(tVoiInput{aa}.tMask)                          
@@ -124,9 +126,15 @@ function voiObj = initVoiIsoSurface(uiWindow)
 
             im = im(:,:,end:-1:1);
 %            im = interp3(im);
-            im = smooth3(im);
-            
-            voiObj{aa} = volshow(im, aInputArguments{:});   
+%            im = smooth3(im, 'gaussian', 15);
+
+            im(im==1) = 999999;   
+            K1 = squeeze(im);
+            K2 = padarray(K1,[10 10 10],'both');
+            Ds = smooth3(K2);
+
+
+            voiObj{aa} = volshow(Ds, aInputArguments{:});   
             set(voiObj{aa}, 'InteractionsEnabled', false);
         %    setVolume(voiObj{aa},im);
 

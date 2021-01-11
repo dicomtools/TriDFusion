@@ -1,7 +1,10 @@
-function mouseMove(~, ~)
-%function  mouseMove(~, ~)
-%Mouse Move Action.
+function sRenderer = voi3DRenderer(sAction, sValue)
+%function sRenderer = voi3DRenderer(sAction, sValue)
+%Get\Set 3D VOI Renderer Type.
 %See TriDFuison.doc (or pdf) for more information about options.
+%
+%Note: option settings must fit on one line and can contain one semicolon at most.
+%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
@@ -25,26 +28,13 @@ function mouseMove(~, ~)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if strcmpi(windowButton('get'), 'down')
+     persistent psRenderer; 
 
-        if switchTo3DMode('get')     == false && ...
-           switchToIsoSurface('get') == false && ...
-           switchToMIPMode('get')    == false
-
-            if strcmp(get(fiMainWindowPtr('get'),'selectiontype'),'alt')
-                adjWL();
-            else
-                if size(dicomBuffer('get'), 3) ~= 1
-                    triangulateImages();  
-                else
-                    refreshImages();
-                end
-            end
-        else            
-            updateObjet3DPosition();      
-        end
-    end    
-    
-end  
+     if strcmpi('set', sAction)
+        psRenderer = sValue;            
+     end      
+     
+     sRenderer = psRenderer;
+end

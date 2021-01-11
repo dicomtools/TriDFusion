@@ -97,9 +97,13 @@ function updateObjet3DPosition()
     end
 
     if ~isempty(voiObj) && bFoundPosition == true 
+       % aAlphamap = voiObj{1}.Alphamap;
         for ff=1:numel(voiObj)
             voiObj{ff}.CameraPosition = aCameraPosition;
             voiObj{ff}.CameraUpVector = aCameraUpVector;
+%            if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
+%                voiObj{ff}.Alphamap = aAlphamap;
+%            end
         end
     end 
 end

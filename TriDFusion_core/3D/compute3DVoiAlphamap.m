@@ -1,6 +1,6 @@
-function mouseMove(~, ~)
-%function  mouseMove(~, ~)
-%Mouse Move Action.
+function aAlphamap = compute3DVoiAlphamap(dSliderValue)
+%function aAlphamap = compute3DVoiAlphamap(dSliderValue)
+%Get 3D VOI Transparency Iso Value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -25,26 +25,9 @@ function mouseMove(~, ~)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    if strcmpi(windowButton('get'), 'down')
+    dSliderValue = dSliderValue+0.065;
+    aAlphamap = linspace(0, dSliderValue, 256)';
 
-        if switchTo3DMode('get')     == false && ...
-           switchToIsoSurface('get') == false && ...
-           switchToMIPMode('get')    == false
-
-            if strcmp(get(fiMainWindowPtr('get'),'selectiontype'),'alt')
-                adjWL();
-            else
-                if size(dicomBuffer('get'), 3) ~= 1
-                    triangulateImages();  
-                else
-                    refreshImages();
-                end
-            end
-        else            
-            updateObjet3DPosition();      
-        end
-    end    
-    
-end  
+end

@@ -107,7 +107,7 @@ function init3DuicontrolPanel()
                   'Enable'  , 'on', ...
                   'CallBack', @slider3DVoiTransparencyCallback ...
                   );
-    addlistener(uislider3DVoiTransparency, 'Value', 'PreSet', @slider3DVoiTransparencyCallback);
+%    addlistener(uislider3DVoiTransparency, 'Value', 'PreSet', @slider3DVoiTransparencyCallback);
 
     % 3D Background
 
@@ -1118,16 +1118,35 @@ function init3DuicontrolPanel()
             voiObj = initVoiIsoSurface(uiOneWindowPtr('get'));
             voiObject('set', voiObj);
         else
-            for ll=1:numel(voiObj)
+            if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
+                
                 if get(chkDispVoi, 'Value') == true
-                    set(voiObj{ll}, 'Renderer', 'Isosurface');
+                    aAlphamap = compute3DVoiAlphamap(slider3DVoiTransparencyValue('get'));
                 else
-                    set(voiObj{ll}, 'Renderer', 'LabelOverlayRendering');
-               end
+                    aAlphamap = zeros(256,1);
+                end
+
+                for ll=1:numel(voiObj)
+                    progressBar(ll/numel(voiObj)-0.0001, sprintf('Processing VOI %d/%d', ll, numel(voiObj) ) );      
+                    set(voiObj{ll}, 'Alphamap', aAlphamap);
+                end                
+            else
+                if get(chkDispVoi, 'Value') == true
+                    sRenderer = 'Isosurface';
+                else
+                    sRenderer = 'LabelOverlayRendering';
+                end
+                    
+                for ll=1:numel(voiObj)
+                    progressBar(ll/numel(voiObj)-0.0001, sprintf('Processing VOI %d/%d', ll, numel(voiObj) ) );      
+                    set(voiObj{ll}, 'Renderer', sRenderer);
+                end
             end
         end
 
-        initGate3DObject('set', true);        
+       progressBar(1, 'Ready');      
+       
+       initGate3DObject('set', true);        
 
     end
 
@@ -1142,17 +1161,32 @@ function init3DuicontrolPanel()
         dSliderValue = get(uislider3DVoiTransparency, 'Value');
                                     
         if displayVoi('get') == true   
-                                    
-            dValue = compute3DVoiTransparency(dSliderValue);
             
-            voiObj = voiObject('get');
-            if ~isempty(voiObj)
-                for ll=1:numel(voiObj)
-                    set(voiObj{ll}, 'Isovalue', dValue);
-                end          
-            end
+            if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
+                
+                aAlphamap = compute3DVoiAlphamap(dSliderValue);
 
+                voiObj = voiObject('get');
+                if ~isempty(voiObj)
+                    for ll=1:numel(voiObj)
+                        progressBar(ll/numel(voiObj)-0.0001, sprintf('Processing VOI Transparency %d/%d', ll, numel(voiObj) ) );                              
+                        set(voiObj{ll}, 'Alphamap', aAlphamap);
+                    end          
+                end
+            else           
+                dIsoValue = compute3DVoiTransparency(dSliderValue);
+
+                voiObj = voiObject('get');
+                if ~isempty(voiObj)
+                    for ll=1:numel(voiObj)
+                        progressBar(ll/numel(voiObj)-0.0001, sprintf('Processing VOI Transparency %d/%d', ll, numel(voiObj) ) );                              
+                        set(voiObj{ll}, 'Isovalue', dIsoValue);
+                    end          
+                end
+            end
         end        
+        
+        progressBar(1, 'Ready');                              
         
         slider3DVoiTransparencyValue('set', dSliderValue);
       

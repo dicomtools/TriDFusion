@@ -63,8 +63,7 @@ function TriDFusion(varargin)
             otherwise
                 asMainDirArg{argLoop} = sSwitchAndArgument;
                 if asMainDirArg{argLoop}(end) ~= '/'
-                        asMainDirArg{argLoop} = [asMainDirArg{argLoop} '/'];
-                     
+                    asMainDirArg{argLoop} = [asMainDirArg{argLoop} '/'];                     
                 end
                 argLoop = argLoop+1; 
                 mainDir('set', asMainDirArg);                                 

@@ -380,7 +380,14 @@ function loadCerrDoseVolume(sPathName, sFileName)
     set(uiCorWindowPtr('get'), 'Visible', 'off');
     set(uiSagWindowPtr('get'), 'Visible', 'off');
     set(uiTraWindowPtr('get'), 'Visible', 'off');
-        
+    
+    set(uiSliderLevelPtr ('get'), 'Visible', 'off');
+    set(uiSliderWindowPtr('get'), 'Visible', 'off');
+    
+    set(uiSliderCorPtr('get'), 'Visible', 'off');
+    set(uiSliderSagPtr('get'), 'Visible', 'off');   
+    set(uiSliderTraPtr('get'), 'Visible', 'off');   
+      
     for mm=1:numel(strMaskC)
         progressBar(0.7+(0.299999*mm/numel(strMaskC)), sprintf('Processing VOI %d/%d', mm, numel(strMaskC)));      
         
@@ -398,6 +405,13 @@ function loadCerrDoseVolume(sPathName, sFileName)
     set(uiCorWindowPtr('get'), 'Visible', 'on');
     set(uiSagWindowPtr('get'), 'Visible', 'on');
     set(uiTraWindowPtr('get'), 'Visible', 'on');
+    
+    set(uiSliderLevelPtr ('get'), 'Visible', 'on');
+    set(uiSliderWindowPtr('get'), 'Visible', 'on');
+
+    set(uiSliderCorPtr('get'), 'Visible', 'on');
+    set(uiSliderSagPtr('get'), 'Visible', 'on');   
+    set(uiSliderTraPtr('get'), 'Visible', 'on');      
     
     hold off;
     
