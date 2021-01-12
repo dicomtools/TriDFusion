@@ -28,7 +28,7 @@ function figRoiDialogCallback(hObject, ~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     ROI_PANEL_X = 1350;
-    ROI_PANEL_Y = 400;
+    ROI_PANEL_Y = 600;
 
     if strcmpi(get(hObject, 'Tag'), 'toolbar')
        set(hObject, 'State', 'off');
@@ -845,6 +845,10 @@ function figRoiDialogCallback(hObject, ~)
     end
 
     function setRoiFigureName()
+        
+        if ~isvalid(lbVoiRoiWindow)
+            return;
+        end
 
         if isDoseKernel('get') == true
             sUnit =  'Unit: Dose';
@@ -934,6 +938,9 @@ end
 
         if ~isempty(tVoiInput)
             for aa=1:numel(tVoiInput)
+                
+                progressBar(aa/numel(tVoiInput)-0.0001, sprintf('Computing VOI %d/%d', aa, numel(tVoiInput) ) );      
+                
                 if ~isempty(tVoiInput{aa}.RoisTag)
                     [tVoiComputed, ~] = computeVoi(aInputBuffer, aDisplayBuffer, atVoiMetaData, tVoiInput{aa}, tRoiInput, dSUVScale, bSUVUnit, bSegmented);
 
@@ -1099,20 +1106,24 @@ end
             end
 
         end
+        
+        if isvalid(lbVoiRoiWindow)
+            if get(lbVoiRoiWindow, 'Value') > 1
+                set(lbVoiRoiWindow, 'Value', get(lbVoiRoiWindow, 'Value')-1);
+            else
+                set(lbVoiRoiWindow, 'Value', 1);
+            end
 
-        if get(lbVoiRoiWindow, 'Value') > 1
-            set(lbVoiRoiWindow, 'Value', get(lbVoiRoiWindow, 'Value')-1);
-        else
-            set(lbVoiRoiWindow, 'Value', 1);
+            set(lbVoiRoiWindow, 'String', sLbWindow);
         end
-
-        set(lbVoiRoiWindow, 'String', sLbWindow);
-
+        
         if exist('aVoiRoiTag', 'var')
             voiRoiTag('set', aVoiRoiTag);
         else
             voiRoiTag('set', '');
         end
+        
+        progressBar(1, 'Ready');
 
     end
 

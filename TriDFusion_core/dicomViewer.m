@@ -121,6 +121,7 @@ function resize = dicomViewer()
     multiFrame3DRecord  ('set', false);
     multiFrame3DZoom    ('set', 0    );
     
+    voi3DEnableList('set', '');
     voi3DRenderer('set', 'Isosurface'); 
     slider3DVoiTransparencyValue('set', 0);
 

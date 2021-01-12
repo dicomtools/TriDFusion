@@ -305,6 +305,8 @@ function setIsoSurfaceCallback(hObject, ~)
                     end   
                     ui3DGateWindowObject('set', '');                        
                 end   
+                
+                voi3DEnableList('set', '');
 
                 clearDisplay();                    
                 initDisplay(3);   

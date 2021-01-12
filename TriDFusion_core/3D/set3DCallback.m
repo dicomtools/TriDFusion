@@ -43,7 +43,7 @@ function set3DCallback(hObject, ~)
     
 %                releaseRoiAxeWait();
         releaseRoiWait();
-
+        
         set(zoomMenu('get'), 'Checked', 'off');
         set(btnZoomPtr('get'), 'BackgroundColor', 'default');
         set(btnZoomPtr('get'), 'Enable', 'off');
@@ -311,6 +311,8 @@ function set3DCallback(hObject, ~)
                     end   
                     ui3DGateWindowObject('set', '');                        
                 end   
+                
+                voi3DEnableList('set', '');
 
                 clearDisplay();                    
                 initDisplay(3);  

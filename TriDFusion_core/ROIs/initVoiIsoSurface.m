@@ -77,6 +77,13 @@ function voiObj = initVoiIsoSurface(uiWindow)
 
     if ~isempty(tVoiInput)
         
+        aVoiEnableList = voi3DEnableList('get');            
+        if isempty(aVoiEnableList)
+            for aa=1:numel(tVoiInput)
+                aVoiEnableList{aa} = true;
+            end
+        end
+            
         aColormap = zeros(256,3);
 
         for aa=1:numel(tVoiInput)                       
@@ -136,6 +143,15 @@ function voiObj = initVoiIsoSurface(uiWindow)
 
             voiObj{aa} = volshow(Ds, aInputArguments{:});   
             set(voiObj{aa}, 'InteractionsEnabled', false);
+            
+            if aVoiEnableList{aa} == false
+                if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
+                    set(voiObj{aa}, 'Alphamap', zeros(256,1));
+                else
+                    set(voiObj{aa}, 'Renderer', 'LabelOverlayRendering');
+                end                
+            end
+            
         %    setVolume(voiObj{aa},im);
 
         end  
