@@ -493,7 +493,7 @@ function set3DCallback(hObject, ~)
                             volICObject('set', ic);
                             alphaCurveMenu(axe3DPanelVolAlphmapPtr('get'), 'vol');
                         else
-                            displayAlphaCurve(aMap, axe3DPanelMipAlphmapPtr('get'));                                                                           
+                            displayAlphaCurve(aMap, axe3DPanelVolAlphmapPtr('get'));                                                                           
                         end
                     end
                         
@@ -519,14 +519,12 @@ function set3DCallback(hObject, ~)
 
                                 alphaCurveMenu(axe3DPanelVolAlphmapPtr('get'), 'volfusion');
                             else
-                                displayAlphaCurve(aFusionMap, axe3DPanelMipAlphmapPtr('get'));                                                                           
+                                displayAlphaCurve(aFusionMap, axe3DPanelVolAlphmapPtr('get'));                                                                           
                             end
                         end
 
                     end
-                    
-
-                    
+                                       
 
               %      deleteAlphaCurve('vol');
 
@@ -624,8 +622,8 @@ function set3DCallback(hObject, ~)
                             [dVolAlphaOffset, sVolMapSliderEnable] = ui3DPanelGetVolAlphaMapType(sType, atFuseMetaData);
 
                             set(ui3DVolAlphamapTypePtr('get')  , 'Value' , dVolAlphaOffset);
-                            set(ui3DSliderMipLinAlphaPtr('get'), 'Enable', sVolMapSliderEnable);               
-                            set(ui3DSliderMipLinAlphaPtr('get'), 'Value' , volLinearFusionAlphaValue('get'));
+                            set(ui3DSliderVolLinAlphaPtr('get'), 'Enable', sVolMapSliderEnable);               
+                            set(ui3DSliderVolLinAlphaPtr('get'), 'Value' , volLinearFusionAlphaValue('get'));
 
                             if strcmpi(sType, 'custom')
                                 
@@ -660,8 +658,8 @@ function set3DCallback(hObject, ~)
                             [dVolAlphaOffset, sVolMapSliderEnable] = ui3DPanelGetVolAlphaMapType(sType, atMetaData);
 
                             set(ui3DVolAlphamapTypePtr('get')  , 'Value' , dVolAlphaOffset);
-                            set(ui3DSliderMipLinAlphaPtr('get'), 'Enable', sVolMapSliderEnable);
-                            set(ui3DSliderMipLinAlphaPtr('get'), 'Value' , volLinearAlphaValue('get'));
+                            set(ui3DSliderVolLinAlphaPtr('get'), 'Enable', sVolMapSliderEnable);
+                            set(ui3DSliderVolLinAlphaPtr('get'), 'Value' , volLinearAlphaValue('get'));
 
                             if strcmpi(sType, 'custom')
                                 
