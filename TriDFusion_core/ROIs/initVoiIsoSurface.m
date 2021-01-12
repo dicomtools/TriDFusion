@@ -132,13 +132,13 @@ function voiObj = initVoiIsoSurface(uiWindow)
             end             
 
             im = im(:,:,end:-1:1);
-%            im = interp3(im);
-%            im = smooth3(im, 'gaussian', 15);
+%            Ds = interp3(im);
+            Ds = smooth3(im, 'gaussian', 15);
 
-            im(im==1) = 999999;   
-            K1 = squeeze(im);
-            K2 = padarray(K1,[10 10 10],'both');
-            Ds = smooth3(K2);
+%            im(im==1) = 999999;   
+%            K1 = squeeze(im);
+%            K2 = padarray(K1,[10 10 10],'both');
+%            Ds = smooth3(K2);
 
 
             voiObj{aa} = volshow(Ds, aInputArguments{:});   
