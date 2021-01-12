@@ -161,6 +161,9 @@ classdef interactive_curve < handle
          end
                   
          function button_up(ic,src,eventdata)
+             
+         windowButton('set', 'up'); 
+             
              % used when mouse button released
      %       figureHandle=src;
       %      set(figureHandle,'WindowButtonMotionFcn','');
@@ -172,6 +175,7 @@ classdef interactive_curve < handle
          
          function axes_button_down(ic,src,eventdata)
              % used when clicked in axes to create new makrer if ic.mouseMode=2
+            windowButton('set', 'down'); 
              
              if ~strcmp(ic.figureHandle.SelectionType,'alt')
 
