@@ -36,67 +36,59 @@ function updateObjet3DPosition()
     volFusionObj = volFusionObject('get');
     isoFusionObj = isoFusionObject('get');                        
     mipFusionObj = mipFusionObject('get');             
-
-    bFoundPosition = false;
-
-    if surface3DPriority('get', 'MaximumIntensityProjection') == 1    
-        if ~isempty(mipObj)                     
+        
+    if ~isempty(mipObj) 
+        if get(mipObj, 'InteractionsEnabled') == true
             aCameraPosition = mipObj.CameraPosition;
             aCameraUpVector = mipObj.CameraUpVector; 
-
-            bFoundPosition = true;                    
-        end                
-    end
-
-    if surface3DPriority('get', 'VolumeRendering') == 1
-        if ~isempty(volObj)                     
+        end
+    end      
+    
+    if ~isempty(volObj)                     
+        if get(volObj, 'InteractionsEnabled') == true
             aCameraPosition = volObj.CameraPosition;
             aCameraUpVector = volObj.CameraUpVector;
-
-            bFoundPosition = true;
         end
     end
-
-    if surface3DPriority('get', 'Isosurface') == 1    
-        if ~isempty(isoObj)                     
+    
+    if ~isempty(isoObj)                     
+        if get(isoObj, 'InteractionsEnabled') == true
             aCameraPosition = isoObj.CameraPosition;
             aCameraUpVector = isoObj.CameraUpVector; 
-
-            bFoundPosition = true;                    
         end                
-    end            
+    end
 
-    if ~isempty(mipObj) && bFoundPosition == true                    
+    if ~isempty(mipObj) 
         mipObj.CameraPosition = aCameraPosition;
         mipObj.CameraUpVector = aCameraUpVector;                   
     end
 
-    if ~isempty(isoObj) && bFoundPosition == true       
+    if ~isempty(isoObj) 
         isoObj.CameraPosition = aCameraPosition;
         isoObj.CameraUpVector = aCameraUpVector;
     end
 
-    if ~isempty(volObj) && bFoundPosition == true 
+    if ~isempty(volObj)
         volObj.CameraPosition = aCameraPosition;
         volObj.CameraUpVector = aCameraUpVector;
     end
 
-    if ~isempty(mipFusionObj) && bFoundPosition == true                    
+    if ~isempty(mipFusionObj)               
         mipFusionObj.CameraPosition = aCameraPosition;  
         mipFusionObj.CameraUpVector = aCameraUpVector;
     end
 
-    if ~isempty(isoFusionObj) && bFoundPosition == true                        
+    if ~isempty(isoFusionObj)                       
         isoFusionObj.CameraPosition = aCameraPosition;
         isoFusionObj.CameraUpVector = aCameraUpVector;
     end
 
-    if ~isempty(volFusionObj) && bFoundPosition == true 
+    if ~isempty(volFusionObj) 
         volFusionObj.CameraPosition = aCameraPosition;
         volFusionObj.CameraUpVector = aCameraUpVector;
     end
 
-    if ~isempty(voiObj) && bFoundPosition == true 
+    if ~isempty(voiObj) 
        % aAlphamap = voiObj{1}.Alphamap;
         for ff=1:numel(voiObj)
             voiObj{ff}.CameraPosition = aCameraPosition;
