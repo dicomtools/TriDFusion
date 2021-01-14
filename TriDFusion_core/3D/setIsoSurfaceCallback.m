@@ -307,6 +307,7 @@ function setIsoSurfaceCallback(hObject, ~)
                 end   
                 
                 voi3DEnableList('set', '');
+                voi3DTransparencyList('set', '');
 
                 clearDisplay();                    
                 initDisplay(3);   

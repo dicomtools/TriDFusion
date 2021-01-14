@@ -301,6 +301,7 @@ function setMIPCallback(hObject, ~)
                 end   
                 
                 voi3DEnableList('set', '');
+                voi3DTransparencyList('set', '');
 
                 clearDisplay();                    
                 initDisplay(3); 

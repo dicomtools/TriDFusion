@@ -55,9 +55,6 @@ function voiObj = initVoiIsoSurface(uiWindow)
         aInputArguments = {'Parent', uiWindow, 'Renderer', 'Isosurface', 'BackgroundColor', surfaceColor('one', background3DOffset('get'))};
     end
     
-    aIsovalue = compute3DVoiTransparency(slider3DVoiTransparencyValue('get'));
-    aAlphamap = compute3DVoiAlphamap(slider3DVoiTransparencyValue('get'));
-
     if ~isempty(isoObj)
         aCamera = {'CameraPosition', get(isoObj, 'CameraPosition'), ...
                    'CameraUpVector', get(isoObj, 'CameraUpVector'), ...
@@ -81,6 +78,13 @@ function voiObj = initVoiIsoSurface(uiWindow)
         if isempty(aVoiEnableList)
             for aa=1:numel(tVoiInput)
                 aVoiEnableList{aa} = true;
+            end
+        end
+        
+        aVoiTransparencyList = voi3DTransparencyList('get');            
+        if isempty(aVoiTransparencyList)
+            for aa=1:numel(tVoiInput)
+                aVoiTransparencyList{aa} = slider3DVoiTransparencyValue('get');
             end
         end
             
@@ -116,7 +120,10 @@ function voiObj = initVoiIsoSurface(uiWindow)
             aColormap(:,1) = aIsosurfaceColor(1);
             aColormap(:,2) = aIsosurfaceColor(2);
             aColormap(:,3) = aIsosurfaceColor(3);
-                        
+            
+            aIsovalue = compute3DVoiTransparency(aVoiTransparencyList{aa});
+            aAlphamap = compute3DVoiAlphamap(aVoiTransparencyList{aa});
+    
             aInputArguments = [aInputArguments(:)', {'Isovalue'}, {aIsovalue}, {'IsosurfaceColor'}, {aIsosurfaceColor}, {'Colormap'}, {aColormap}, {'Alphamap'}, {aAlphamap}];
 
             for yy=1:numel(tVoiInput{aa}.tMask)                          
