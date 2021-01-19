@@ -31,7 +31,7 @@ function TriDFusion(varargin)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     initViewerGlobal();
-    
+       
     arg3DEngine    = false;
     argGaussFilter = false; 
     argBorder      = false;
@@ -90,6 +90,8 @@ function TriDFusion(varargin)
     imageCropEditValue('set', 'lower', 0);
     imageCropEditValue('set', 'upper', 1); 
     
+    initViewerRootPath();
+
     dScreenSize  = get(groot, 'Screensize');
 
     xPosition = (dScreenSize(3) /2) - (620 /2);
@@ -144,40 +146,14 @@ function TriDFusion(varargin)
     
     set(fiMainWindowPtr('get'), 'doublebuffer', 'off'   );   
     set(fiMainWindowPtr('get'), 'Renderer'    , 'opengl'); 
-    
-    imSplash = zeros([300 620 3]);
-    
-    sScreenDir = pwd;
-    if sScreenDir(end) ~= '\' || ...
-       sScreenDir(end) ~= '/'     
-        sScreenDir = [sScreenDir '/'];
-    end   
-         
-    if argInternal == true
-        sSplashFile = sprintf('%sTriDFusion//screenDefault.png', sScreenDir);
-    else
-        sSplashFile = sprintf('%sscreenDefault.png', sScreenDir);
-    end
-    
-    if isfile(sSplashFile)
-        [imSplash, ~] = imread(sSplashFile);
-    else
-        sScreenDir = fileparts(mfilename('fullpath'));
-        if sScreenDir(end) ~= '\' || ...
-           sScreenDir(end) ~= '/'     
-            sScreenDir = [sScreenDir '/'];
-        end   
-
-        if argInternal == true
-            sSplashFile = sprintf('%sTriDFusion//screenDefault.png', sScreenDir);
-        else
-            sSplashFile = sprintf('%sscreenDefault.png', sScreenDir);
-        end
         
-        if isfile(sSplashFile)       
-            [imSplash, ~] = imread(sSplashFile);
-        end
-    end
+    sRootPath = viewerRootPath('get');
+    if isempty(sRootPath)
+        imSplash = zeros([300 620 3]);
+    else       
+        sSplashFile = sprintf('%sscreenDefault.png', sRootPath);
+        [imSplash, ~] = imread(sSplashFile);
+    end    
 
   %  imshow(imSplash, 'border', 'tight', 'Parent', uiSplashWindow);
     image(imSplash, 'Parent', uiSplashWindow);
