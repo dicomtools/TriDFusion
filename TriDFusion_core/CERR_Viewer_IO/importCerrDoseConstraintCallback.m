@@ -33,10 +33,7 @@ function importCerrDoseConstraintCallback(~, ~)
 
      filter = {'*.mat'};
 
-     sCurrentDir = pwd;
-     if integrateToBrowser('get') == true
-         sCurrentDir = [sCurrentDir '/TriDFusion'];
-     end
+     sCurrentDir  = viewerRootPath('get');
 
      sMatFile = [sCurrentDir '/' 'importCERRLastUsedDir.mat'];
      % load last data directory

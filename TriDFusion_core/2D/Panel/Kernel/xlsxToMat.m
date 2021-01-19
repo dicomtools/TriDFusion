@@ -72,13 +72,10 @@ function [tKernel, sMatFile] = xlsxToMat(sFileName)
 
         [~,sKernelName,~] = fileparts(sFileName);
 
-        if integrateToBrowser('get') == true                                        
-            sCurrentPath = './TriDFusion/';
-        else
-            sCurrentPath = './';
-        end  
-
-        sMatFile = [sCurrentPath '/kernel/' sKernelName '.mat'];
+        sRootPath   = viewerRootPath('get');
+        sKernelPath = sprintf('%s/kernel', sRootPath);
+         
+        sMatFile = sprintf('%s%s.mat', sKernelPath, sKernelName);
 
         if exist(sMatFile, 'file')                                       
             delete(sMatFile);

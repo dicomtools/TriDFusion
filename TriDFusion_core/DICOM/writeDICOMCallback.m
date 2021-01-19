@@ -32,10 +32,7 @@ function writeDICOMCallback(~, ~)
         return;
     end
 
-    sCurrentDir = pwd;
-    if integrateToBrowser('get') == true
-        sCurrentDir = [sCurrentDir '/TriDFusion'];
-    end
+    sCurrentDir  = viewerRootPath('get');
 
     sMatFile = [sCurrentDir '/' 'lastWriteDicomDir.mat'];
     % load last data directory

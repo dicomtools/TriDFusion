@@ -30,12 +30,9 @@ function setRoiToolbar(sVisible)
     tbRoi = roiMenuObject('get');
 
     if isempty(tbRoi) 
-
-        if integrateToBrowser('get') == true
-            sIconsPath = './TriDFusion/icons';
-        else
-            sIconsPath = './icons';
-        end
+        
+        sRootPath  = viewerRootPath('get');
+        sIconsPath = sprintf('%s/icons/', sRootPath);       
 
     %    f = figure('ToolBar','none');
         tbRoi = uitoolbar(fiMainWindowPtr('get'));

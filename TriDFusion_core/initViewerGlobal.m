@@ -167,6 +167,8 @@ function initViewerGlobal()
     sliderVoiRoiUpperTresholdObject('set', '');
     txtVoiRoiUpperTresholdObject   ('set', '');  
     
-    ui3DVolumePtr('set', '');    
+    ui3DVolumePtr('set', '');   
+    
+    viewerRootPath('set', './');
     
 end

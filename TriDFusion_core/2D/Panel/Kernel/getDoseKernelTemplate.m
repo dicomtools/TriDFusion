@@ -27,11 +27,8 @@ function tDoseKernel = getDoseKernelTemplate()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if integrateToBrowser('get') == true
-        sKernelPath = './TriDFusion/kernel/';
-    else
-        sKernelPath = './kernel/';
-    end       
+    sRootPath   = viewerRootPath('get');
+    sKernelPath = sprintf('%s/kernel/', sRootPath);
 
     dOffset = 1;
 %     atListing = dir([sKernelPath '*.mat']);

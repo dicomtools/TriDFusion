@@ -238,10 +238,7 @@ function importSTLCallback(~, ~)
 
          filter = {'*.stl'};
 
-         sCurrentDir = pwd;
-         if integrateToBrowser('get') == true
-             sCurrentDir = [sCurrentDir '/TriDFusion'];
-         end
+         sCurrentDir  = viewerRootPath('get');
 
          sMatFile = [sCurrentDir '/' 'exportIsoLastUsedDir.mat'];
          % load last data directory

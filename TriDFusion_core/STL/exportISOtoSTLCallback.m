@@ -45,10 +45,7 @@ function exportISOtoSTLCallback(~, ~)
      filter = {'*.stl'};
      info = dicomMetaData('get');
 
-     sCurrentDir = pwd;
-     if integrateToBrowser('get') == true
-         sCurrentDir = [sCurrentDir '/TriDFusion'];
-     end
+     sCurrentDir  = viewerRootPath('get');
 
      sMatFile = [sCurrentDir '/' 'exportIsoLastUsedDir.mat'];
      % load last data directory

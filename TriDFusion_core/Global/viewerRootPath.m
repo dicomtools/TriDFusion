@@ -1,7 +1,10 @@
-function initDcm4che3()
-%function initDcm4che3()
-%Initialize Dcm4che3 neeeded library.
+function sPath = viewerRootPath(sAction, sValue)
+%function sPath = viewerRootPath(sAction, sValue)
+%Get\Set Fusion Button Pointer.
 %See TriDFuison.doc (or pdf) for more information about options.
+%
+%Note: option settings must fit on one line and can contain one semicolon at most.
+%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
@@ -25,21 +28,13 @@ function initDcm4che3()
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    checkjava = which('org.dcm4che2.io.DicomInputStream');
-    if isempty(checkjava)
-        
-        sRootPath  = viewerRootPath('get');
-        libpath = sprintf('%s/lib/',sRootPath); 
-        
-        javaaddpath([libpath 'dcm4che-core-3.2.1.jar']);
-        javaaddpath([libpath 'dcm4che-image-3.2.1.jar']);
-        javaaddpath([libpath 'dcm4che-imageio-3.2.1.jar']);
-        javaaddpath([libpath 'dcm4che-net-3.2.1.jar'])
+    persistent psPath; 
 
-        javaaddpath([libpath 'slf4j-api-1.6.1.jar']);
-        javaaddpath([libpath 'slf4j-log4j12-1.6.1.jar']);
-        javaaddpath([libpath 'log4j-1.2.16.jar']);
-    end
+    if strcmpi('set', sAction)
+       psPath = sValue;            
+    end     
+    
+    sPath = psPath;
 end

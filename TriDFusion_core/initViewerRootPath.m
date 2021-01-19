@@ -1,6 +1,6 @@
-function initDcm4che3()
-%function initDcm4che3()
-%Initialize Dcm4che3 neeeded library.
+function initViewerRootPath()
+%function initViewerRootPath()
+%Initialize Viewer Root path.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -27,19 +27,29 @@ function initDcm4che3()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    checkjava = which('org.dcm4che2.io.DicomInputStream');
-    if isempty(checkjava)
+    viewerRootPath('set', '');
+             
+    sRootDir = pwd;
+    if sRootDir(end) ~= '\' || ...
+       sRootDir(end) ~= '/'     
+        sRootDir = [sRootDir '/'];
+    end   
         
-        sRootPath  = viewerRootPath('get');
-        libpath = sprintf('%s/lib/',sRootPath); 
-        
-        javaaddpath([libpath 'dcm4che-core-3.2.1.jar']);
-        javaaddpath([libpath 'dcm4che-image-3.2.1.jar']);
-        javaaddpath([libpath 'dcm4che-imageio-3.2.1.jar']);
-        javaaddpath([libpath 'dcm4che-net-3.2.1.jar'])
+    if isfile(sprintf('%sscreenDefault.png', sRootDir))
+        viewerRootPath('set', sRootDir);
+    else
+        if integrateToBrowser('get') == true
+            if isfile(sprintf('%sTriDFusion/screenDefault.png', sRootDir))
+                viewerRootPath('set', sprintf('%sTriDFusion/', sRootDir) );
+            end
+        else    
+            sRootDir = fileparts(mfilename('fullpath'));
+            sRootDir = erase(sRootDir, 'TriDFusion_core');        
+            sRootDir = [sRootDir '/'];
 
-        javaaddpath([libpath 'slf4j-api-1.6.1.jar']);
-        javaaddpath([libpath 'slf4j-log4j12-1.6.1.jar']);
-        javaaddpath([libpath 'log4j-1.2.16.jar']);
-    end
+            if isfile(sprintf('%sscreenDefault.png', sRootDir))
+                viewerRootPath('set', sRootDir);
+            end
+        end
+    end    
 end

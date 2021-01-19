@@ -845,7 +845,7 @@ function figRoiDialogCallback(hObject, ~)
     end
 
     function setRoiFigureName()
-        
+
         if ~isvalid(lbVoiRoiWindow)
             return;
         end
@@ -938,9 +938,9 @@ end
 
         if ~isempty(tVoiInput)
             for aa=1:numel(tVoiInput)
-                
-                progressBar(aa/numel(tVoiInput)-0.0001, sprintf('Computing VOI %d/%d', aa, numel(tVoiInput) ) );      
-                
+
+                progressBar(aa/numel(tVoiInput)-0.0001, sprintf('Computing VOI %d/%d', aa, numel(tVoiInput) ) );
+
                 if ~isempty(tVoiInput{aa}.RoisTag)
                     [tVoiComputed, ~] = computeVoi(aInputBuffer, aDisplayBuffer, atVoiMetaData, tVoiInput{aa}, tRoiInput, dSUVScale, bSUVUnit, bSegmented);
 
@@ -1106,7 +1106,7 @@ end
             end
 
         end
-        
+
         if isvalid(lbVoiRoiWindow)
             if get(lbVoiRoiWindow, 'Value') > 1
                 set(lbVoiRoiWindow, 'Value', get(lbVoiRoiWindow, 'Value')-1);
@@ -1116,13 +1116,13 @@ end
 
             set(lbVoiRoiWindow, 'String', sLbWindow);
         end
-        
+
         if exist('aVoiRoiTag', 'var')
             voiRoiTag('set', aVoiRoiTag);
         else
             voiRoiTag('set', '');
         end
-        
+
         progressBar(1, 'Ready');
 
     end
@@ -1173,10 +1173,7 @@ end
             filter = {'*.xlsx'};
      %       info = dicomMetaData('get');
 
-            sCurrentDir = pwd;
-            if integrateToBrowser('get') == true
-                sCurrentDir = [sCurrentDir '/TriDFusion'];
-            end
+            sCurrentDir  = viewerRootPath('get');
 
             sMatFile = [sCurrentDir '/' 'lastRoiDir.mat'];
             % load last data directory

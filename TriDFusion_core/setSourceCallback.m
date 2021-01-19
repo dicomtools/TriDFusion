@@ -27,10 +27,7 @@ function setSourceCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-     sCurrentDir = pwd;
-     if integrateToBrowser('get') == true
-         sCurrentDir = [sCurrentDir '/TriDFusion'];
-     end
+     sCurrentDir  = viewerRootPath('get');
 
      sMatFile = [sCurrentDir '/' 'lastOpenDir.mat'];
      % load last data directory

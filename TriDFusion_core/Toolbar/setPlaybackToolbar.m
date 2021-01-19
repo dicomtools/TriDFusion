@@ -40,11 +40,8 @@ function setPlaybackToolbar(sVisible)
 
     if isempty(tbPlayback)
 
-        if integrateToBrowser('get') == true
-            sIconsPath = './TriDFusion/icons';
-        else
-            sIconsPath = './icons';
-        end
+        sRootPath  = viewerRootPath('get');
+        sIconsPath = sprintf('%s/icons/', sRootPath);
 
         tbPlayback = uitoolbar(fiMainWindowPtr('get'));
         playbackMenuObject('set', tbPlayback);
@@ -210,10 +207,7 @@ function setPlaybackToolbar(sVisible)
                             filter = {'*.gif';'*.jpg';'*.bmp'};
                             info = dicomMetaData('get');
 
-                            sCurrentDir = pwd;
-                            if integrateToBrowser('get') == true
-                                sCurrentDir = [sCurrentDir '/TriDFusion'];
-                            end
+                            sCurrentDir  = viewerRootPath('get');
 
                             sMatFile = [sCurrentDir '/' 'lastGifDir.mat'];
                             % load last data directory
@@ -393,10 +387,7 @@ function setPlaybackToolbar(sVisible)
                             filter = {'*.gif';'*.jpg';'*.bmp'};
                             info = dicomMetaData('get');
 
-                            sCurrentDir = pwd;
-                            if integrateToBrowser('get') == true
-                                sCurrentDir = [sCurrentDir '/TriDFusion'];
-                            end
+                            sCurrentDir  = viewerRootPath('get');
 
                             sMatFile = [sCurrentDir '/' 'lastGifDir.mat'];
                             % load last data directory

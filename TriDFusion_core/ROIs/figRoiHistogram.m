@@ -527,10 +527,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bSegmented, dSubtraction)
             filter = {'*.xlsx'};
             info = dicomMetaData('get');
 
-            sCurrentDir = pwd;
-            if integrateToBrowser('get') == true
-                sCurrentDir = [sCurrentDir '/TriDFusion'];
-            end
+            sCurrentDir  = viewerRootPath('get');
 
             sMatFile = [sCurrentDir '/' 'lastHistDir.mat'];
             % load last data directory

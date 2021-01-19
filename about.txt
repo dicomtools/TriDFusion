@@ -2,20 +2,40 @@ TriDFusion Image Viewer Version 1.0
 
 Disclaimer Notice:
 
-This software is provided "as is" and "with all faults." We makes no representations or warranties of any kind concerning the safety, suitability, lack of viruses, inaccuracies, typographical errors, or other harmful components of this software. There are inherent dangers in the use of any software, and you are solely responsible for determining whether it is compatible with your equipment and other software installed on your equipment. You are also solely responsible for the protection of your equipment and backup of your data, and We will not be liable for any damages you may suffer in connection with using, modifying, or distributing it.
+TriDFusion is for educational, research, and not-for-profit purposes only.
 
-This software is for educational, research, and not-for-profit purposes only.
+TriDFusion is provided "as is" and "with all faults." We makes no representations or warranties of any kind concerning the safety, suitability, lack of viruses, inaccuracies, typographical errors, or other harmful components of this software. There are inherent dangers in the use of any software, and you are solely responsible for determining whether it is compatible with your equipment and other software installed on your equipment. You are also solely responsible for the protection of your equipment and backup of your data, and We will not be liable for any damages you may suffer in connection with using, modifying, or distributing it.
 
-Developers:
+This version of TriDFusion is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+TriDFusion development has been led by: Daniel Lafontaine
+
+Lead programmer:
    Daniel Lafontaine
    lafontad@mskcc.org
+   Memorial Sloan Kettering 
+   Department of Medical Physics
+   New York, NY, USA
 
- Contributors:  
+Contributors:  
    Ross Schmidtlein
-   schmidtr@mskcc.org 
+   Memorial Sloan Kettering 
+   Department of Medical Physics
+   New York, NY, USA
 		   
    Brad Beattie
-   beattieb@mskcc.org
+   Memorial Sloan Kettering 
+   Department of Medical Physics
+   New York, NY, USA
 
    Assen Kirov
-   kirova@mskcc.org
+   Memorial Sloan Kettering 
+   Department of Medical Physics
+   New York, NY, USA
+
+   Aditya Apte
+   Memorial Sloan Kettering 
+   Department of Medical Physics
+   New York, NY, USA
