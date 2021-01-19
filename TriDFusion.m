@@ -60,6 +60,9 @@ function TriDFusion(varargin)
             case '-i'
                 argInternal = true;                               
                 
+%            case '-cerr'
+%                planC option1, option2, ect...
+                
             otherwise
                 asMainDirArg{argLoop} = sSwitchAndArgument;
                 if asMainDirArg{argLoop}(end) ~= '/'
@@ -142,6 +145,8 @@ function TriDFusion(varargin)
     set(fiMainWindowPtr('get'), 'doublebuffer', 'off'   );   
     set(fiMainWindowPtr('get'), 'Renderer'    , 'opengl'); 
     
+    imSplash = zeros([300 620 3]);
+    
     sScreenDir = pwd;
     if sScreenDir(end) ~= '\' || ...
        sScreenDir(end) ~= '/'     
@@ -153,8 +158,27 @@ function TriDFusion(varargin)
     else
         sSplashFile = sprintf('%sscreenDefault.png', sScreenDir);
     end
+    
+    if isfile(sSplashFile)
+        [imSplash, ~] = imread(sSplashFile);
+    else
+        sScreenDir = fileparts(mfilename('fullpath'));
+        if sScreenDir(end) ~= '\' || ...
+           sScreenDir(end) ~= '/'     
+            sScreenDir = [sScreenDir '/'];
+        end   
 
-    [imSplash, ~] = imread(sSplashFile);
+        if argInternal == true
+            sSplashFile = sprintf('%sTriDFusion//screenDefault.png', sScreenDir);
+        else
+            sSplashFile = sprintf('%sscreenDefault.png', sScreenDir);
+        end
+        
+        if isfile(sSplashFile)       
+            [imSplash, ~] = imread(sSplashFile);
+        end
+    end
+
   %  imshow(imSplash, 'border', 'tight', 'Parent', uiSplashWindow);
     image(imSplash, 'Parent', uiSplashWindow);
                         
