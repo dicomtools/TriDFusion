@@ -1327,7 +1327,7 @@ end
                     if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
 
                         if aVoiEnableList{dVoiOffset} == true
-                            aAlphamap = compute3DVoiAlphamap(slider3DVoiTransparencyValue('get'));
+                            aAlphamap = compute3DVoiAlphamap(aVoiTransparencyList{dVoiOffset});
                         else
                             aAlphamap = zeros(256,1);
                         end
@@ -1340,7 +1340,7 @@ end
                             sRenderer = 'LabelOverlayRendering';
                         end
                         
-                        dIsoValue = compute3DVoiTransparency(slider3DVoiTransparencyValue('get'));
+                        dIsoValue = compute3DVoiTransparency(aVoiTransparencyList{dVoiOffset});
                         
                         set(voiObj{dVoiOffset}, 'Isovalue', dIsoValue);
                         set(voiObj{dVoiOffset}, 'Renderer', sRenderer);
