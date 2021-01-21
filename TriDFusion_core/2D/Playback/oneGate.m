@@ -106,6 +106,17 @@ function oneGate(sDirection)
     end  
 
     set(uiSeriesPtr('get'), 'Value', iOffset);
+    
+    tRefreshRoi = roiTemplate('get');
+    if ~isempty(tRefreshRoi) 
+        for bb=1:numel(tRefreshRoi)
+            if isvalid(tRefreshRoi{bb}.Object) 
+                tRefreshRoi{bb}.Object.Visible = 'off';
+            end
+        end
+    end      
+    
+    roiTemplate('set', tInput(iOffset).tRoi);
 
     aBuffer = dicomBuffer('get');                                  
     if isempty(aBuffer)    
