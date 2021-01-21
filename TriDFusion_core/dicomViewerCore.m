@@ -1951,33 +1951,36 @@ function dicomViewerCore()
     logoObject('set', uiLogo);
 
     mouseFcn('set');
+    
+    if isVsplash('get') == false
 
-    initRoi();            
-    initVoi();
+        initRoi();            
+        initVoi();
 
-    tRefreshRoi = roiTemplate('get');
-    if ~isempty(tRefreshRoi) 
-        for bb=1:numel(tRefreshRoi)
-           if isvalid(tRefreshRoi{bb}.Object) 
-               if (strcmpi(tRefreshRoi{bb}.Axe, 'Axes1') && ...
-                    iCoronal == tRefreshRoi{bb}.SliceNb) || ...
-                   (strcmpi(tRefreshRoi{bb}.Axe, 'Axes2')&& ...
-                    iSagittal == tRefreshRoi{bb}.SliceNb)|| ...
-                   (strcmpi(tRefreshRoi{bb}.Axe, 'Axes3') && ...
-                    iAxial == tRefreshRoi{bb}.SliceNb)
+        tRefreshRoi = roiTemplate('get');
+        if ~isempty(tRefreshRoi) 
+            for bb=1:numel(tRefreshRoi)
+               if isvalid(tRefreshRoi{bb}.Object) 
+                   if (strcmpi(tRefreshRoi{bb}.Axe, 'Axes1') && ...
+                        iCoronal == tRefreshRoi{bb}.SliceNb) || ...
+                       (strcmpi(tRefreshRoi{bb}.Axe, 'Axes2')&& ...
+                        iSagittal == tRefreshRoi{bb}.SliceNb)|| ...
+                       (strcmpi(tRefreshRoi{bb}.Axe, 'Axes3') && ...
+                        iAxial == tRefreshRoi{bb}.SliceNb)
 
-                    if isVsplash('get') == true
-                        tRefreshRoi{bb}.Object.Visible = 'off';
+                        if isVsplash('get') == true
+                            tRefreshRoi{bb}.Object.Visible = 'off';
+                        else
+                            tRefreshRoi{bb}.Object.Visible = 'on';
+                        end
                     else
-                        tRefreshRoi{bb}.Object.Visible = 'on';
-                    end
-                else
-                    tRefreshRoi{bb}.Object.Visible = 'off';
-                end    
-           end
-        end
-    end  
-
+                        tRefreshRoi{bb}.Object.Visible = 'off';
+                    end    
+               end
+            end
+        end  
+    end
+    
     set(uiSliderWindowPtr('get'), 'Visible', 'on');
     set(uiSliderLevelPtr('get') , 'Visible', 'on');
 

@@ -54,6 +54,14 @@ function loadCerrDoseVolume(sPathName, sFileName)
     % Get scan, dose, struct volumes
     [scan3M, dose3M, strMaskC, ~, ~] = getScanDoseStrVolumes(scanNum, doseNum, structNamC, planC);
 
+    if iscell(scan3M)
+        scan3M = cell2mat(scan3M);
+    end
+    
+    if iscell(dose3M)
+        dose3M = cell2mat(dose3M);
+    end
+    
 %    RA = imref3d(size(scan3M));
 %    RB = imref3d(size(dose3M));
 %       [D,RD] = imfuse(scan3M,RA,dose3M,RB,'ColorChannels',[1 2 0]);

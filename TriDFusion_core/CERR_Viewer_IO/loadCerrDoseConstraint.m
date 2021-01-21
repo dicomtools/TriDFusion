@@ -42,6 +42,14 @@ function loadCerrDoseConstraint(sPathName, sFileName)
     [scan3M,dose3M,strMaskC,xyzGridC,strColorC] = ...
         getScanDoseStrVolumes(scanNum,doseNum,structNamC,planC);
     
+     if iscell(scan3M)
+        scan3M = cell2mat(scan3M);
+    end
+    
+    if iscell(dose3M)
+        dose3M = cell2mat(dose3M);
+    end
+    
     sizV = size(strMaskC{1});
     
     progressBar(0.5, 'Set Matching Index');
