@@ -43,6 +43,10 @@ function dicomViewerCore()
         set(uiCorWindowPtr('get'), 'Visible', 'off');
         set(uiSagWindowPtr('get'), 'Visible', 'off');
         set(uiTraWindowPtr('get'), 'Visible', 'off');
+        
+        set(uiSliderCorPtr('get'), 'Visible', 'off');
+        set(uiSliderSagPtr('get'), 'Visible', 'off');   
+        set(uiSliderTraPtr('get'), 'Visible', 'off');          
     end
 
     if initWindowLevel('get') == true
@@ -1990,7 +1994,6 @@ function dicomViewerCore()
     if size(im, 3) == 1
         set(uiOneWindowPtr('get'), 'Visible', 'on');
     else
-
         if isVsplash('get') == true && ... 
            ~strcmpi(vSplahView('get'), 'all')
             if strcmpi(vSplahView('get'), 'coronal')
