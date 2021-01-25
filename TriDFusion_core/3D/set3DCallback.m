@@ -1,5 +1,5 @@
-function set3DCallback(hObject, ~)      
-%function set3DCallback(hObject, ~)   
+function set3DCallback(~, ~)      
+%function set3DCallback(~, ~)   
 %Activate/Deactivate 3D Volume. 
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -120,8 +120,8 @@ function set3DCallback(hObject, ~)
         if switchTo3DMode('get') == true
             switchTo3DMode('set', false);       
 
-            set(hObject, 'Enable', 'on');
-            set(hObject, 'BackgroundColor', 'default');                                        
+            set(btn3DPtr('get'), 'Enable', 'on');
+            set(btn3DPtr('get'), 'BackgroundColor', 'default');                                        
 
             if switchToIsoSurface('get') == false && ...
                switchToMIPMode('get')    == false
@@ -377,8 +377,8 @@ function set3DCallback(hObject, ~)
 
             switchTo3DMode('set', true);
 
-            set(hObject, 'Enable', 'on');
-            set(hObject, 'BackgroundColor', 'White');
+            set(btn3DPtr('get'), 'Enable', 'on');
+            set(btn3DPtr('get'), 'BackgroundColor', 'White');
             
             set(uiSeriesPtr('get'), 'Enable', 'off');
 

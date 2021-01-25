@@ -79,8 +79,9 @@ function init3DuicontrolPanel()
                      'enable'  , 'on',...
                      'value'   , displayVoi('get'),...
                      'position', [350 725 20 20],...
-                     'Callback', @displayVoiCallback...
+                     'Callback', @display3DVoiCallback...
                      );
+       ui3DDispVoiPtr('set', chkDispVoi); 
 
           uicontrol(ui3DPanelPtr('get'),...
                     'style'   , 'text',...
@@ -88,7 +89,7 @@ function init3DuicontrolPanel()
                     'horizontalalignment', 'left',...
                     'position', [375 722 250 20],...
                     'Enable', 'Inactive',...
-                    'ButtonDownFcn', @displayVoiCallback...
+                    'ButtonDownFcn', @display3DVoiTxtCallback...
                     );
                 
         uicontrol(ui3DPanelPtr('get'),...
@@ -536,6 +537,16 @@ end
     end
 
     hold off;
+    
+    function display3DVoiTxtCallback(~, ~)
+        if get(ui3DDispVoiPtr('get'), 'Value') == true
+            set(ui3DDispVoiPtr('get'), 'Value', false);
+            display3DVoiCallback();
+        else
+            set(ui3DDispVoiPtr('get'), 'Value', true);
+            display3DVoiCallback();
+        end
+    end
 
     function slider3DRatioCallback(~, ~)
 
@@ -1102,83 +1113,6 @@ end
         uiSliderMipLinAlphaListener = addlistener(uiSliderMipLinAlpha, 'Value', 'PreSet', @sliderMipLinearAlphaCallback);
         uiSliderVolLinAlphaListener = addlistener(uiSliderVolLinAlpha, 'Value', 'PreSet', @sliderVolLinearAlphaCallback);
         uiSliderIsoSurfaceListener  = addlistener(uiSliderIsoSurface , 'Value', 'PreSet', @sliderIsoCallback);
-    end
-
-    function displayVoiCallback(hObject, ~)
-
-        if switchTo3DMode('get')     == false && ...
-           switchToIsoSurface('get') == false && ...
-           switchToMIPMode('get')    == false
-            return;
-        end
-
-         if get(chkDispVoi, 'Value') == true
-            if strcmpi(get(hObject, 'Style'), 'Checkbox')
-                set(chkDispVoi, 'Value', true);
-            else
-                set(chkDispVoi, 'Value', false);
-            end
-        else
-            if strcmpi(hObject.Style, 'Checkbox')
-                set(chkDispVoi, 'Value', false);
-            else
-                set(chkDispVoi, 'Value', true);
-            end
-         end
-
-        displayVoi('set', get(chkDispVoi, 'Value'));
-                 
-        voiObj = voiObject('get');
-        if isempty(voiObj)
-            voiObj = initVoiIsoSurface(uiOneWindowPtr('get'));
-            voiObject('set', voiObj);
-        else          
-            
-            aVoiEnableList = voi3DEnableList('get');            
-            if isempty(aVoiEnableList)
-                for aa=1:numel(voiObj)
-                    aVoiEnableList{aa} = true;
-                end
-            end
-            
-            aVoiTransparencyList = voi3DTransparencyList('get');            
-            if isempty(aVoiTransparencyList)
-                for aa=1:numel(voiObj)
-                    aVoiTransparencyList{aa} = slider3DVoiTransparencyValue('get');
-                end
-            end
-            
-            if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
-                
-                for ll=1:numel(voiObj)
-                    
-                    if get(chkDispVoi, 'Value') == true && aVoiEnableList{ll} == true
-                        aAlphamap = compute3DVoiAlphamap(aVoiTransparencyList{ll});
-                    else
-                        aAlphamap = zeros(256,1);
-                    end                    
-                    
-                    progressBar(ll/numel(voiObj)-0.0001, sprintf('Processing VOI %d/%d', ll, numel(voiObj) ) );      
-                    set(voiObj{ll}, 'Alphamap', aAlphamap);
-                end                
-            else                    
-                for ll=1:numel(voiObj)
-                    if get(chkDispVoi, 'Value') == true && aVoiEnableList{ll} == true
-                        sRenderer = 'Isosurface';
-                    else
-                        sRenderer = 'LabelOverlayRendering';
-                    end                    
-                    
-                    progressBar(ll/numel(voiObj)-0.0001, sprintf('Processing VOI %d/%d', ll, numel(voiObj) ) );      
-                    set(voiObj{ll}, 'Renderer', sRenderer);
-                end
-            end
-        end
-
-       progressBar(1, 'Ready');      
-       
-       initGate3DObject('set', true);        
-
     end
 
     function voiEnableListCallback(~, ~)

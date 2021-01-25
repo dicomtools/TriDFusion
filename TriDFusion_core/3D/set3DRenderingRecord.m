@@ -1,6 +1,6 @@
-function dValue = compute3DVoiTransparency(dSliderValue)
-%function dValue = compute3DVoiTransparency(dSliderValue)
-%Get 3D VOI Transparency Iso Value.
+function set3DRenderingRecord(sRecFileName)        
+%function set3DRenderingRecord(sRecFileName) 
+%Record 3D rendering to a file. 
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -25,20 +25,17 @@ function dValue = compute3DVoiTransparency(dSliderValue)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    dMin = 0.000001;
-    dMax = 0.1;
+    [sPath, sName, sExt] = fileparts(sRecFileName);
 
-    dDiff = dMax - dMin;
-
-    dValue = dSliderValue * dDiff;
-    if dValue == 0
-        dValue = dMin;
-    end
+     sPathName = sprintf('%s/', sPath);
+     sFileName = sprintf('%s%s', sName, sExt);
+     sExtName  = erase(sExt, '.'); 
     
-    if dValue >=1
-        dValue = dMax;
-    end
-    
+     multiFrame3DRecord('set', true);
+     
+     set(recordIconMenuObject('get'), 'State', 'on');
+     recordMultiFrame3D(recordIconMenuObject('get'), sPathName, sFileName, sExtName);
+     set(recordIconMenuObject('get'), 'State', 'off');     
 end

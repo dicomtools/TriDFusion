@@ -144,10 +144,14 @@ function recordMultiFrame3D(mRecord, sPath, sFileName, sExtention)
 
         if idx == 1
 
-            if strcmpi('*.gif', sExtention)     
+            if strcmpi('*.gif', sExtention) || ...
+               strcmpi('gif', sExtention) 
+           
                 imwrite(indI, cm, [sPath sFileName], 'gif', 'Loopcount', inf, 'DelayTime', multiFrame3DSpeed('get'));
-            elseif strcmpi('*.jpg', sExtention)  
-
+                
+            elseif strcmpi('*.jpg', sExtention) || ...
+                   strcmpi('jpg', sExtention)
+               
                 sDirName = sprintf('%s_%s_%s_JPG_3D', atCoreMetaData{1}.PatientName, atCoreMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
                 sImgDirName = [sPath sDirName '//' ];
 
@@ -159,7 +163,9 @@ function recordMultiFrame3D(mRecord, sPath, sFileName, sExtention)
                 newName = sprintf('%s-%d.jpg', newName, idx);
                 imwrite(indI, cm, [sImgDirName newName], 'jpg');
 
-            elseif strcmpi('*.bmp', sExtention) 
+            elseif strcmpi('*.bmp', sExtention) || ...
+                   strcmpi('bmp', sExtention) 
+               
                 sDirName = sprintf('%s_%s_%s_BMP_3D', atCoreMetaData{1}.PatientName, atCoreMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
                 sImgDirName = [sPath sDirName '//' ];
 
@@ -172,13 +178,21 @@ function recordMultiFrame3D(mRecord, sPath, sFileName, sExtention)
                 imwrite(indI, cm, [sImgDirName newName], 'bmp');                        
             end
         else
-            if strcmpi('*.gif', sExtention)     
+            if strcmpi('*.gif', sExtention) || ...
+               strcmpi('gif', sExtention)       
+           
                 imwrite(indI, cm, [sPath sFileName], 'gif', 'WriteMode', 'append', 'DelayTime', multiFrame3DSpeed('get'));
-            elseif strcmpi('*.jpg', sExtention)   
+                
+            elseif strcmpi('*.jpg', sExtention) || ...  
+                   strcmpi('jpg', sExtention)       
+              
                 newName = erase(sFileName, '.jpg');
                 newName = sprintf('%s-%d.jpg', newName, idx);
                 imwrite(indI, cm, [sImgDirName newName], 'jpg');
-            elseif strcmpi('*.bmp', sExtention)   
+                
+            elseif strcmpi('*.bmp', sExtention) || ...
+                   strcmpi('bmp', sExtention)
+               
                 newName = erase(sFileName, '.bmp');
                 newName = sprintf('%s-%d.bmp', newName, idx);
                 imwrite(indI, cm, [sImgDirName newName], 'bmp');
@@ -189,10 +203,12 @@ function recordMultiFrame3D(mRecord, sPath, sFileName, sExtention)
 
     end
 
-    if strcmpi('*.gif', sExtention) 
+    if strcmpi('*.gif', sExtention) || strcmpi('gif', sExtention )
         progressBar(1, sprintf('Write %s completed', sFileName));
     elseif strcmpi('*.jpg', sExtention) || ...
-           strcmpi('*.bmp', sExtention)
+           strcmpi('*.bmp', sExtention) || ...
+           strcmpi('jpg', sExtention) || ...
+           strcmpi('bmp', sExtention)            
         progressBar(1, sprintf('Write 120 files to %s completed', sImgDirName));
     end                          
 end   

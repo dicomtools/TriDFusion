@@ -1,37 +1,39 @@
-% visualizeDoseConstraint.m
+function loadCerrDoseConstraint(planC, structNamC)
+%function loadCerrDoseConstraint(planC, structNamC)
+%Load CERR Scan and Dose to TriDFusion.
+%See TriDFuison.doc (or pdf) for more information about options.
 %
-% This script produces visualization of regions violating dosimetric
-% constraints. 
+%Note: option settings must fit on one line and can contain one semicolon at most.
+%Options can be strings, cell arrays of strings, or numerical arrays.
 %
-% User inputs:
-%   structNamC: cell array of structure names to visualize. PTV is required.
-%   doseThreshold: constraint violations are regions recieving dose less
-%   than this threshold.
+%Author: Daniel Lafontaine, lafontad@mskcc.org
 %
-% APA, 12/8/2020
-function loadCerrDoseConstraint(sPathName, sFileName)
-
-    progressBar(0.1, 'Loading CERR PlanC');
-
-    cerrFileName = sprintf('%s%s', sPathName, sFileName);
-
-    %sPathName = 'C:\Temp\DoseConstraintDisplay\';
-    %sFileName = '0617-693410_09-09-2000-32821.mat';
-    
-    try
-        planC = loadPlanC(cerrFileName,tempdir);
-        planC = updatePlanFields(planC);
-        planC = quality_assure_planC(cerrFileName,planC);
-    catch
-        progressBar(1, 'Error: loadCerrDoseConstraint() Cant Load CERR PlanC!');
-        return;
-    end
+%Last specifications modified:
+%
+% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% 
+% This file is part of The Triple Dimention Fusion (TriDFusion).
+% 
+% TriDFusion development has been led by: Daniel Lafontaine
+% 
+% TriDFusion is distributed under the terms of the Lesser GNU Public License. 
+% 
+%     This version of TriDFusion is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+% 
+% TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+% without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+% See the GNU General Public License for more details.
+% 
+% You should have received a copy of the GNU General Public License
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
     
     progressBar(0.3, 'Set Matching Index');
 
     indexS = planC{end};
 
-    structNamC = {'Lung_IPSI','Lung_CNTR','PTV'};
     doseThreshold = 72;
 
     scanNum = 1;
@@ -174,9 +176,7 @@ function loadCerrDoseConstraint(sPathName, sFileName)
    
     inputBuffer  ('set', aBuffer);
     dicomMetaData('set', tTemplate);          
-         
-    mainDir('set', sPathName);
-    
+             
     isDoseKernel('set', false);
     isFusion('set', false);
 

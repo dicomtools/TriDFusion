@@ -47,11 +47,11 @@ function importCerrDoseVolumeCallback(~, ~)
         end
      end
 
-     [file, path] = uigetfile(sprintf('%s%s', char(sCurrentDir), char(filter)), 'Import CERR Dose');
-     if file ~= 0
+     [sFileName, sPathName] = uigetfile(sprintf('%s%s', char(sCurrentDir), char(filter)), 'Import CERR Dose');
+     if sFileName ~= 0
 
         try
-            importCERRLastUsedDir = path;
+            importCERRLastUsedDir = sPathName;
             save(sMatFile, 'importCERRLastUsedDir');
         catch
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
@@ -65,8 +65,27 @@ function importCerrDoseVolumeCallback(~, ~)
 %                javaFrame = get(h, 'JavaFrame');
 %                javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
         end
+        
+        mainDir('set', sPathName);
+        
+        progressBar(0.3, 'Loading CERR PlanC');
 
-        loadCerrDoseVolume(path, file);
+        structNamC = {'DL_HEART_MT','DL_AORTA','DL_LA','DL_LV','DL_RA',...
+                      'DL_RV','DL_IVC','DL_SVC','DL_PA'};
+
+        cerrFileName = sprintf('%s%s', sPathName, sFileName);
+              
+        % Load planC
+        try
+            planC = loadPlanC(cerrFileName,tempdir);
+            planC = quality_assure_planC(cerrFileName,planC);        
+            planC = updatePlanFields(planC);
+        catch
+            progressBar(1, 'Error: loadCerrDoseConstraint() Cant Load CERR PlanC!');
+           return;
+        end
+        
+        loadCerrDoseVolume(planC, structNamC);
 
      end
 

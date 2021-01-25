@@ -28,6 +28,9 @@ function aAlphamap = compute3DVoiAlphamap(dSliderValue)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
     dSliderValue = dSliderValue+0.065;
+    if dSliderValue >1
+        dSliderValue = 1;
+    end
     aAlphamap = linspace(0, dSliderValue, 256)';
 
 end

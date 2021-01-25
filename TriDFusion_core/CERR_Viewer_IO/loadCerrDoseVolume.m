@@ -1,5 +1,5 @@
-function loadCerrDoseVolume(sPathName, sFileName)
-%function loadCerrDoseVolume(cerrFileName)
+function loadCerrDoseVolume(planC, structNamC)
+%function loadCerrDoseVolume(planC, structNamC)
 %Load CERR Scan and Dose to TriDFusion.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -30,24 +30,8 @@ function loadCerrDoseVolume(sPathName, sFileName)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    progressBar(0.3, 'Loading CERR PlanC');
-
     scanNum = 1;
     doseNum = 1;
-    structNamC = {'DL_HEART_MT','DL_AORTA','DL_LA','DL_LV','DL_RA',...
-                  'DL_RV','DL_IVC','DL_SVC','DL_PA'};
-              
-    cerrFileName = sprintf('%s%s', sPathName, sFileName);
-              
-    % Load planC
-    try
-        planC = loadPlanC(cerrFileName,tempdir);
-        planC = quality_assure_planC(cerrFileName,planC);        
-        planC = updatePlanFields(planC);
-    catch
-        progressBar(1, 'Error: loadCerrDoseConstraint() Cant Load CERR PlanC!');
-       return;
-    end
 
     progressBar(0.5, 'Scaning Dose Volumes');
 
@@ -134,9 +118,7 @@ function loadCerrDoseVolume(sPathName, sFileName)
    
     inputBuffer  ('set', aBuffer);
     dicomMetaData('set', tTemplate);          
-         
-    mainDir('set', sPathName);
-    
+             
     isDoseKernel('set', false);
     isFusion('set', false);
 

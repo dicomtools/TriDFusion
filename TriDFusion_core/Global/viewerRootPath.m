@@ -1,6 +1,6 @@
 function sPath = viewerRootPath(sAction, sValue)
 %function sPath = viewerRootPath(sAction, sValue)
-%Get\Set Fusion Button Pointer.
+%Get\Set Browser Root Path.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.

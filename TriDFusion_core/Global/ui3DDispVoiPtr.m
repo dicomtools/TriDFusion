@@ -1,7 +1,10 @@
-function dValue = compute3DVoiTransparency(dSliderValue)
-%function dValue = compute3DVoiTransparency(dSliderValue)
-%Get 3D VOI Transparency Iso Value.
+function aObject = ui3DDispVoiPtr(sAction, aValue)
+%function aObject = ui3DDispVoiPtr(sAction, aValue)
+%Get\Set 3D Display VOI Pointer.
 %See TriDFuison.doc (or pdf) for more information about options.
+%
+%Note: option settings must fit on one line and can contain one semicolon at most.
+%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
@@ -25,20 +28,12 @@ function dValue = compute3DVoiTransparency(dSliderValue)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    dMin = 0.000001;
-    dMax = 0.1;
+    persistent paObject; 
 
-    dDiff = dMax - dMin;
-
-    dValue = dSliderValue * dDiff;
-    if dValue == 0
-        dValue = dMin;
-    end
-    
-    if dValue >=1
-        dValue = dMax;
-    end
-    
+    if strcmpi('set', sAction)
+       paObject = aValue;            
+    end      
+    aObject = paObject;
 end

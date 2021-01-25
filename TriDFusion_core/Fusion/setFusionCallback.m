@@ -127,6 +127,12 @@ function setFusionCallback(~, ~)
     else
 
         tFuseInput = inputTemplate('get');
+        if numel(tFuseInput) == 1
+            isFusion('set', false);               
+            set(btnFusionPtr('get'), 'BackgroundColor', 'default');                
+            fusionBuffer('reset');             
+            return
+        end
 
         iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
         if iSeriesOffset > numel(tFuseInput)  

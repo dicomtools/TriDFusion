@@ -1,6 +1,6 @@
 function importCerrDoseConstraintCallback(~, ~)
 %function importCerrDoseConstraintCallback()
-%Import CERR Scan and Dose to TriDFusion.
+%Import CERR Scan and Dose Constraint to TriDFusion.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.
@@ -47,11 +47,11 @@ function importCerrDoseConstraintCallback(~, ~)
         end
      end
 
-     [file, path] = uigetfile(sprintf('%s%s', char(sCurrentDir), char(filter)), 'Import CERR Dose');
-     if file ~= 0
+     [sFileName, sPathName] = uigetfile(sprintf('%s%s', char(sCurrentDir), char(filter)), 'Import CERR Dose');
+     if sFileName ~= 0
 
         try
-            importCERRLastUsedDir = path;
+            importCERRLastUsedDir = sPathName;
             save(sMatFile, 'importCERRLastUsedDir');
         catch
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
@@ -65,8 +65,28 @@ function importCerrDoseConstraintCallback(~, ~)
 %                javaFrame = get(h, 'JavaFrame');
 %                javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
         end
+        
+        mainDir('set', sPathName);
+        
+        progressBar(0.1, 'Loading CERR PlanC');
 
-        loadCerrDoseConstraint(path, file);
+        cerrFileName = sprintf('%s%s', sPathName, sFileName);
+
+        %sPathName = 'C:\Temp\DoseConstraintDisplay\';
+        %sFileName = '0617-693410_09-09-2000-32821.mat';
+
+        try
+            planC = loadPlanC(cerrFileName,tempdir);
+            planC = updatePlanFields(planC);
+            planC = quality_assure_planC(cerrFileName,planC);
+        catch
+            progressBar(1, 'Error: loadCerrDoseConstraint() Cant Load CERR PlanC!');
+            return;
+        end
+        
+        structNamC = {'Lung_IPSI','Lung_CNTR','PTV'};
+
+        loadCerrDoseConstraint(planC, structNamC);
 
      end
 

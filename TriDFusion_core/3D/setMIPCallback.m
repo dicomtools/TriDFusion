@@ -1,5 +1,5 @@
-function setMIPCallback(hObject, ~)      
-%function setMIPCallback(hObject, ~)   
+function setMIPCallback(~, ~)      
+%function setMIPCallback(~, ~)   
 %Activate/Deactivate 3D MIP. 
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -108,8 +108,8 @@ function setMIPCallback(hObject, ~)
 
             switchToMIPMode('set', false);  
 
-            set(hObject, 'Enable', 'on');
-            set(hObject, 'BackgroundColor', 'default');                                        
+            set(btnMIPPtr('get'), 'Enable', 'on');
+            set(btnMIPPtr('get'), 'BackgroundColor', 'default');                                        
 
             if switchToIsoSurface('get') == false && ...
                switchTo3DMode('get')     == false 
@@ -365,8 +365,8 @@ function setMIPCallback(hObject, ~)
 
             switchToMIPMode('set', true);
 
-            set(hObject, 'Enable', 'on');
-            set(hObject, 'BackgroundColor', 'White');
+            set(btnMIPPtr('get'), 'Enable', 'on');
+            set(btnMIPPtr('get'), 'BackgroundColor', 'White');
             
             set(uiSeriesPtr('get'), 'Enable', 'off');            
 

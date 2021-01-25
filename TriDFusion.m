@@ -4,7 +4,14 @@ function TriDFusion(varargin)
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.
-%Options can be strings, cell arrays of strings, or numerical arrays.
+% -3d    : Display 2D View using 3D engine
+% -b     : Display 2D Border
+% -g     : Apply 3D Gauss Filter
+% -i     : TriDFusion is integrated with DIDOM Database Browser
+% -fusion: Activate the fusion. *Require 2 volumes 
+% -mip   : Activate the 3D mip. *The order of activation of the mip, vol and iso dictates the emphasis of each feature of the 3D resulting image
+% -iso   : Activate the 3D volume rendering. *The order of activation of the mip, vol and iso dictates the emphasis of each feature of the 3D resulting image
+% -vol   : Activate the 3D iso surface. *The order of activation of the mip, vol and iso dictates the emphasis of each feature of the 3D resulting image
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
@@ -36,41 +43,50 @@ function TriDFusion(varargin)
     argGaussFilter = false; 
     argBorder      = false;
     argInternal    = false;
-   
+    argFusion      = false;
+    
+    asRendererPriority = [];
+    
     varargin = replace(varargin, '"', '');
     varargin = replace(varargin, ']', '');
     varargin = replace(varargin, '[', '');
     
     argLoop=1;
     for k = 1 : length(varargin)
-        sSwitchAndArgument = varargin{k};
-        
-        cSwitch = sSwitchAndArgument(1:2);
-        
-        switch cSwitch
-            case '-3d'
+   
+        switch lower(varargin{k})
+            case '-3d' % 2D display using 3D engine
                 arg3DEngine = true;
-                
-            case '-b'
+
+            case '-b' % Show Border 2D
                 argBorder = true; 
-                
-            case '-g'
+
+            case '-g' % Apply Gauss Filter
                 argGaussFilter = true;                
-                
-            case '-i'
+
+            case '-i' % Viewer Integrate With DICOM DB Browser
                 argInternal = true;                               
+
+            case '-fusion' % Activate Fusion
+                argFusion = true;                
                 
-%            case '-cerr'
-%                planC option1, option2, ect...
+            case '-vol' % Activate 3D Volume Rendering
+                asRendererPriority{numel(asRendererPriority)+1} = 'vol';
+                    
+            case '-iso' % Activate 3D ISO Surface
+                asRendererPriority{numel(asRendererPriority)+1} = 'iso';
+                
+            case '-mip' % Activate 3D MIP
+                asRendererPriority{numel(asRendererPriority)+1} = 'mip';                                                
                 
             otherwise
-                asMainDirArg{argLoop} = sSwitchAndArgument;
+                asMainDirArg{argLoop} = varargin{k};
                 if asMainDirArg{argLoop}(end) ~= '/'
                     asMainDirArg{argLoop} = [asMainDirArg{argLoop} '/'];                     
                 end
                 argLoop = argLoop+1; 
                 mainDir('set', asMainDirArg);                                 
-        end                          
+        end
     end            
     
     is3DEngine   ('set', arg3DEngine    );
@@ -78,7 +94,7 @@ function TriDFusion(varargin)
     gaussFilter  ('set', argGaussFilter ); 
     seriesDescription ('set', ' ');
     integrateToBrowser('set', argInternal);
-    
+
     cropValue('set', 0);
     
     imageSegEditValue('set', 'lower', 0);
@@ -89,7 +105,7 @@ function TriDFusion(varargin)
 
     imageCropEditValue('set', 'lower', 0);
     imageCropEditValue('set', 'upper', 1); 
-    
+     
     initViewerRootPath();
 
     dScreenSize  = get(groot, 'Screensize');
@@ -180,8 +196,29 @@ function TriDFusion(varargin)
     
     waitfor(fiMainWindowPtr('get'), 'WindowState', 'maximized');
     
-    resizeViewer = dicomViewer();  
-                                 
+    resizeViewer = dicomViewer(); 
+        
+    if argFusion == true && ... % Init 2D Fuison
+       numel(inputTemplate('get')) > 1
+   
+        setFusionCallback();        
+    end
+    
+    for rr=1:numel(asRendererPriority) 
+        
+        if strcmpi(asRendererPriority{rr}, 'vol') % Init 3D Volume
+            set3DCallback(); 
+        end
+        
+        if strcmpi(asRendererPriority{rr}, 'iso') % Init 3D ISO 
+            setIsoSurfaceCallback();
+        end
+        
+        if strcmpi(asRendererPriority{rr}, 'mip') % Init 3D MIP
+            setMIPCallback();
+        end        
+    end                    
+    
     function resizeFigureCallback(~,~)
         if exist('resizeViewer', 'var')
             resizeViewer();

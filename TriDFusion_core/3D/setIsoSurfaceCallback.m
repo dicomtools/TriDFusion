@@ -1,5 +1,5 @@
-function setIsoSurfaceCallback(hObject, ~)
-%function setIsoSurfaceCallback(hObject, ~)   
+function setIsoSurfaceCallback(~, ~)
+%function setIsoSurfaceCallback(~, ~)   
 %Activate/Deactivate 3D ISO Surface. 
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -114,8 +114,8 @@ function setIsoSurfaceCallback(hObject, ~)
 
             switchToIsoSurface('set', false);      
 
-            set(hObject, 'Enable', 'on');
-            set(hObject, 'BackgroundColor', 'default');                                        
+            set(btnIsoSurfacePtr('get'), 'Enable', 'on');
+            set(btnIsoSurfacePtr('get'), 'BackgroundColor', 'default');                                        
 
             if switchTo3DMode('get')  == false && ...
                switchToMIPMode('get') == false
@@ -347,8 +347,8 @@ function setIsoSurfaceCallback(hObject, ~)
 
             switchToIsoSurface('set', true);
 
-            set(hObject, 'Enable', 'on');
-            set(hObject, 'BackgroundColor', 'White');
+            set(btnIsoSurfacePtr('get'), 'Enable', 'on');
+            set(btnIsoSurfacePtr('get'), 'BackgroundColor', 'White');
             
             set(uiSeriesPtr('get'), 'Enable', 'off');
 
