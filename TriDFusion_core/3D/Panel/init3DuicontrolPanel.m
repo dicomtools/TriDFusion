@@ -923,7 +923,7 @@ end
             % Volume
             
             volFusionObj = volFusionObject('get');
-            if ~isempty(volFusionObj)
+            if ~isempty(volFusionObj) 
                 ic = volICFusionObject('get');
                 if ~isempty(ic)                
                     ic.surfObj = volFusionObj;
@@ -937,7 +937,10 @@ end
                 set(uiSliderVolLinAlpha , 'Enable', sVolMapSliderEnable);               
                 set(uiSliderVolLinAlpha , 'Value' , volLinearFusionAlphaValue('get'));
 
-                if strcmpi(sType, 'custom')
+                if strcmpi(sType, 'custom') && ...
+                   isFusion('get')       == true &&...
+                   switchTo3DMode('get') == true
+               
                     ic = customAlphaCurve(axeVolAlphmap,  volFusionObj, 'volfusion');            
                     ic.surfObj = volFusionObj;  
 
@@ -945,7 +948,12 @@ end
 
                     alphaCurveMenu(axeVolAlphmap, 'volfusion');
                 else
-                    displayAlphaCurve(aMap, axeVolAlphmap);                
+                    if isFusion('get') == false || ...
+                       switchTo3DMode('get') == false
+                        displayAlphaCurve(zeros(256,1), axeVolAlphmap);                
+                    else
+                        displayAlphaCurve(aMap, axeVolAlphmap);                
+                    end
                 end
                 
                 set(uiColorVol, 'Value', colorMapVolFusionOffset('get'));
@@ -967,7 +975,7 @@ end
             % Mip
             
             mipFusionObj = mipFusionObject('get');
-            if ~isempty(mipFusionObj)
+            if ~isempty(mipFusionObj) 
                 ic = mipICFusionObject('get');
                 if ~isempty(ic)
                     ic.surfObj = mipFusionObj;
@@ -981,7 +989,10 @@ end
                 set(uiSliderMipLinAlpha , 'Enable', sMipMapSliderEnable);
                 set(uiSliderMipLinAlpha , 'Value' , mipLinearFuisonAlphaValue('get'));
 
-                if strcmpi(sType, 'custom')
+                if strcmpi(sType, 'custom') && ...
+                   isFusion('get')        == true && ...
+                   switchToMIPMode('get') == true 
+               
                     ic = customAlphaCurve(axeMipAlphmap,  mipFusionObj, 'mipfusion');     
                     ic.surfObj = mipFusionObj;  
 
@@ -989,7 +1000,12 @@ end
 
                     alphaCurveMenu(axeMipAlphmap, 'mipfusion');
                 else
-                    displayAlphaCurve(aMap, axeMipAlphmap);                
+                    if isFusion('get') == false || ...
+                       switchToMIPMode('get') == false
+                        displayAlphaCurve(zeros(256,1), axeMipAlphmap); 
+                    else
+                        displayAlphaCurve(aMap, axeMipAlphmap);                
+                    end
                 end
                 
                 set(uiColorMip, 'Value', colorMapMipFusionOffset('get'));               
@@ -1035,7 +1051,8 @@ end
                 set(uiSliderVolLinAlpha , 'Enable', sVolMapSliderEnable);
                 set(uiSliderVolLinAlpha , 'Value' , volLinearAlphaValue('get'));
 
-                if strcmpi(sType, 'custom')
+                if strcmpi(sType, 'custom') && switchTo3DMode('get') == true
+
                     ic = customAlphaCurve(axeVolAlphmap,  volObj, 'vol');            
                     ic.surfObj = volObj;  
 
@@ -1043,7 +1060,11 @@ end
 
                     alphaCurveMenu(axeVolAlphmap, 'vol');
                 else
-                    displayAlphaCurve(aMap, axeVolAlphmap);                
+                    if switchTo3DMode('get') == false                        
+                        displayAlphaCurve(zeros(256,1), axeVolAlphmap);
+                    else
+                        displayAlphaCurve(aMap, axeVolAlphmap);                
+                    end
                 end
                 
                 volColorObj = volColorObject('get');
@@ -1077,7 +1098,7 @@ end
                 set(uiSliderMipLinAlpha , 'Enable', sMipMapSliderEnable);
                 set(uiSliderMipLinAlpha , 'Value' , mipLinearAlphaValue('get'));
 
-                if strcmpi(sType, 'custom')
+                if strcmpi(sType, 'custom') && switchToMIPMode('get') == true 
                     ic = customAlphaCurve(axeMipAlphmap,  mipObj, 'mip');            
                     ic.surfObj = mipObj;  
 
@@ -1085,7 +1106,11 @@ end
 
                     alphaCurveMenu(axeMipAlphmap, 'mip');
                 else
-                    displayAlphaCurve(aMap, axeMipAlphmap);                
+                    if switchToMIPMode('get') == false
+                        displayAlphaCurve(zeros(256,1), axeMipAlphmap);
+                    else
+                        displayAlphaCurve(aMap, axeMipAlphmap);                
+                    end
                 end
                 
                 mipColorObj = mipColorObject('get');
