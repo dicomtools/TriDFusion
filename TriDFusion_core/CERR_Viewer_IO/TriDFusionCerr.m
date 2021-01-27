@@ -199,9 +199,10 @@ function fiMainWindow = TriDFusionCerr(asArgument, cerrPlanC, cerrStructNamC, ce
 
     % Activate Fusion. 
     if argFusion == true
+        
         setFusionCallback(); 
         
-        % Set 3D Fusion Colormap. *Optional
+        % Set 2D Fusion Colormap. *Optional
         if numel(sFusionColormap)
             fusionColorMapOffset('set', str2double(sFusionColormap)); % Set Jet Fusion Colormap. *Default is 19 Pet    
             
@@ -213,7 +214,13 @@ function fiMainWindow = TriDFusionCerr(asArgument, cerrPlanC, cerrStructNamC, ce
     for rr=1:numel(asRendererPriority) 
         
         if strcmpi(asRendererPriority{rr}, 'vol') % Init 3D Volume
+            
+            if argFusion == true 
+                colorMapVolFusionOffset('set', str2double(sFusionColormap)); % Set Jet Fusion Colormap. *Default is 19 Pet    
+            end
+            
             set3DCallback(); 
+
         end
         
         if strcmpi(asRendererPriority{rr}, 'iso') % Init 3D ISO 
@@ -221,6 +228,10 @@ function fiMainWindow = TriDFusionCerr(asArgument, cerrPlanC, cerrStructNamC, ce
         end
         
         if strcmpi(asRendererPriority{rr}, 'mip') % Init 3D MIP
+            if argFusion == true 
+                colorMapMipFusionOffset('set', str2double(sFusionColormap)); % Set Jet Fusion Colormap. *Default is 19 Pet    
+            end
+            
             setMIPCallback();
         end        
     end  
