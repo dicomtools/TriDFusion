@@ -203,7 +203,9 @@ function fiMainWindow = TriDFusionCerr(asArgument, cerrPlanC, cerrStructNamC, ce
         
         % Set 3D Fusion Colormap. *Optional
         if numel(sFusionColormap)
-            fusionColorMapOffset('set', str2double(sFusionColormap)); % Set Jet Fusion Colormap. *Default is 19 Pet        
+            fusionColorMapOffset('set', str2double(sFusionColormap)); % Set Jet Fusion Colormap. *Default is 19 Pet    
+            
+            refreshColorMap();
         end
     end
           
