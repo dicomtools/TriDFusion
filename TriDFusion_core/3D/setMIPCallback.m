@@ -578,9 +578,9 @@ function setMIPCallback(~, ~)
                         mipColorObject('set', uimipColorbar);                
                     end
 
-                else
-                    if switchToIsoSurface('get') == true && ...
-                       switchTo3DMode('get')     == true
+                else 
+                    if ~isempty(isoObject('get')) && ...
+                       ~isempty(volObject('get'))
                         surface3DPriority('set', 'MaximumIntensityProjection', 3);
                     else
                         surface3DPriority('set', 'MaximumIntensityProjection', 2);

@@ -432,8 +432,8 @@ function setIsoSurfaceCallback(~, ~)
                     end
                 else
                     
-                    if switchTo3DMode('get')  == true && ...
-                       switchToMIPMode('get') == true
+                    if ~isempty(volObject('get')) && ...
+                       ~isempty(mipObject('get'))                     
                         surface3DPriority('set', 'Isosurface', 3);
                     else
                         surface3DPriority('set', 'Isosurface', 2);

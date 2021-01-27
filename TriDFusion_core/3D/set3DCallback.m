@@ -546,8 +546,8 @@ function set3DCallback(~, ~)
                         volColorObject('set', uivolColorbar);                               
                     end
                 else
-                    if switchToIsoSurface('get') == true && ...
-                       switchToMIPMode('get')    == true
+                    if ~isempty(isoObject('get')) && ...
+                       ~isempty(mipObject('get'))                   
                         surface3DPriority('set', 'VolumeRendering', 3);                         
                     else
                         surface3DPriority('set', 'VolumeRendering', 2);                         
