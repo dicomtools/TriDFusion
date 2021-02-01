@@ -123,7 +123,7 @@ function setQuantification(dSeriesOffset)
                 tInput(cc).tQuant.tSUV.dMin =  tInput(cc).tQuant.tCount.dMin * dScale;
                 tInput(cc).tQuant.tSUV.dMax =  tInput(cc).tQuant.tCount.dMax * dScale;
                 tInput(cc).tQuant.tSUV.dTot =  voxVolume * nbVoxels * volMean * dScale;
-                tInput(cc).tQuant.tSUV.dmCi =  (voxVolume * nbVoxels * volMean) / 3.7E7;
+                tInput(cc).tQuant.tSUV.dmCi =  (voxVolume * nbVoxels * volMean) / 3.7E7 / 10;
             end
             otherwise
         end
