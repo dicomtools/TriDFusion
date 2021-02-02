@@ -98,6 +98,7 @@ function setRoiToolbar(sVisible)
         img = double(img)/255;
 
         tContinuous = uitoggletool(tbRoi,'CData',img,'TooltipString','Continuous', 'Separator', 'on');           
+        tContinuous.ClickedCallback = @setContinuousCallback;
 
         [img,~] = imread(sprintf('%s//result.png', sIconsPath));
         img = double(img)/255;
@@ -942,6 +943,22 @@ function setRoiToolbar(sVisible)
             else                        
                 sLabelName = 'ROI 1';
         end
-    end                                  
+    end    
+
+    function setContinuousCallback(~, ~)
+        
+        axeClicked('set', true);
+        uiresume(fiMainWindowPtr('get'));
+
+        set(t,  'State', 'off');
+        set(t2, 'State', 'off');
+        set(t3, 'State', 'off');
+  %      set(t4, 'State', 'off');
+        set(t5, 'State', 'off');
+        set(t6, 'State', 'off');
+      %  set(t7, 'State', 'off'); 
+        set(t8, 'State', 'off'); 
+        
+    end
 
 end

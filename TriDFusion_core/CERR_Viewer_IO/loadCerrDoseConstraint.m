@@ -167,7 +167,10 @@ function loadCerrDoseConstraint(planC, structNamC)
     
     tNewInput(1).aDicomBuffer = scan3M;
     tNewInput(2).aDicomBuffer = dose3M;
-
+    
+    tNewInput(1).asFilesList = '';
+    tNewInput(2).asFilesList = '';
+    
     inputTemplate('set', tNewInput);
     dicomBuffer  ('set', scan3M);
     
