@@ -31,6 +31,104 @@ function catchKeyPress(~,evnt)
         return;
     end
 
+    if strcmpi(evnt.Key,'add')
+        if switchTo3DMode('get')     == true || ...
+           switchToIsoSurface('get') == true || ...
+           switchToMIPMode('get')    == true 
+       
+            if multiFrame3DZoom('get') > 1.2
+                multiFrame3DZoom('set', multiFrame3DZoom('get')/1.2);
+            end
+
+            if multiFrame3DPlayback('get') == false && ...
+                multiFrame3DRecord('get')  == false
+            
+                zoom3D('in', 1.2);
+            end         
+            
+            initGate3DObject('set', true);
+        else
+            if size(dicomBuffer('get'), 3) ~=1
+
+                multiFrameZoom('set', 'out', 1);
+
+                if multiFrameZoom('get', 'axe') ~= gca
+                    multiFrameZoom('set', 'in', 1);
+                end
+
+                dZFactor = multiFrameZoom('get', 'in');
+                dZFactor = dZFactor+0.025;
+                multiFrameZoom('set', 'in', dZFactor);
+
+                switch gca
+                    case axes1Ptr('get')
+                        zoom(axes1Ptr('get'), dZFactor);
+                        multiFrameZoom('set', 'axe', axes1Ptr('get'));
+
+                    case axes2Ptr('get')
+                        zoom(axes2Ptr('get'), dZFactor);
+                        multiFrameZoom('set', 'axe', axes2Ptr('get'));
+                    case axes3Ptr('get')
+                        zoom(axes3Ptr('get'), dZFactor);
+                        multiFrameZoom('set', 'axe', axes3Ptr('get'));
+                    otherwise
+                        zoom(axes3Ptr('get'), dZFactor);
+                        multiFrameZoom('set', 'axe', axes3Ptr('get'));
+                end
+
+            end            
+
+        end
+    end
+    
+    if strcmpi(evnt.Key,'subtract')
+        if switchTo3DMode('get')     == true || ...
+           switchToIsoSurface('get') == true || ...
+           switchToMIPMode('get')    == true 
+       
+            multiFrame3DZoom('set', multiFrame3DZoom('get')*1.2);
+
+             if multiFrame3DPlayback('get') == false && ...
+                multiFrame3DRecord('get')   == false
+            
+                zoom3D('out', 1.2);
+             end
+
+             initGate3DObject('set', true);     
+        else
+            if size(dicomBuffer('get'), 3) ~=1
+
+                multiFrameZoom('set', 'in', 1);
+
+                if multiFrameZoom('get', 'axe') ~= gca
+                    multiFrameZoom('set', 'out', 1);
+                end
+
+                dZFactor = multiFrameZoom('get', 'out');
+                if dZFactor > 0.025
+                    dZFactor = dZFactor-0.025;
+                    multiFrameZoom('set', 'out', dZFactor);
+                end
+
+                switch gca
+                    case axes1Ptr('get')
+                        zoom(axes1Ptr('get'), dZFactor);
+                        multiFrameZoom('set', 'axe', axes1Ptr('get'));
+
+                    case axes2Ptr('get')
+                        zoom(axes2Ptr('get'), dZFactor);
+                        multiFrameZoom('set', 'axe', axes2Ptr('get'));
+                    case axes3Ptr('get')
+                        zoom(axes3Ptr('get'), dZFactor);
+                        multiFrameZoom('set', 'axe', axes3Ptr('get'));
+                    otherwise
+                        zoom(axes3Ptr('get'), dZFactor);
+                        multiFrameZoom('set', 'axe', axes3Ptr('get'));
+                end            
+            end
+        end
+    end    
+    
     if strcmpi(evnt.Key,'uparrow')
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
