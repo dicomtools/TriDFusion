@@ -194,7 +194,8 @@ function figRoiDialogCallback(hObject, ~)
         bSUVUnit = false;
     end
 
-    if strcmpi(mSegmented.Checked, 'on')
+    if strcmpi(mSegmented.Checked, 'on') && ...
+       isDoseKernel('get') == false     
         bSegmented = true;
     else
         bSegmented = false;
@@ -677,7 +678,8 @@ function figRoiDialogCallback(hObject, ~)
                         bSUVUnit = false;
                     end
 
-                    if strcmpi(get(mSegmented, 'Checked'), 'on')
+                    if strcmpi(get(mSegmented, 'Checked'), 'on') && ...
+                       isDoseKernel('get') == false     
                         bSegmented = true;
                     else
                         bSegmented = false;

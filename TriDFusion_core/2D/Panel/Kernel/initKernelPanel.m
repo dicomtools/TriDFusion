@@ -523,6 +523,8 @@ if 0
             end
         end
 end
+        isDoseKernel('set', false);
+        
         dicomBuffer('set',aBuffer);
 
         dicomMetaData('set', tInitInput(iOffset).atDicomInfo);

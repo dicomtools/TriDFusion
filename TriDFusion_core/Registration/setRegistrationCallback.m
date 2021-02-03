@@ -471,6 +471,8 @@ end
         fusionBuffer('reset');
         isFusion('set', false);
         set(btnFusionPtr('get'), 'BackgroundColor', 'default');
+        
+        isDoseKernel('set', false);
 
         delete(dlgRegister);
 

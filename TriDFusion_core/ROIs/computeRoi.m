@@ -311,8 +311,10 @@ function tRoiComputed = computeRoi(imInput, imRoi, atRoiMetaData, tSliceMeta, pt
 %         tRoiComputed.area = bwarea(mask) * (xPixel/10) * (yPixel/10);
         tRoiComputed.area   = numel(imCDataMasked) * (xPixel/10) * (yPixel/10);
 
-        if size(imCInput) == size(imCData)
-            tRoiComputed.subtraction = max(imCInput(mask)-imCData(mask), [], 'all');
+        if size(imCInput) == size(imCData) 
+            if bSegmented == true
+                tRoiComputed.subtraction = max(imCInput(mask)-imCData(mask), [], 'all');
+            end
         end
     end   
 

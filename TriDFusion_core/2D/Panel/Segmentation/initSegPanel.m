@@ -1376,7 +1376,9 @@ if 0
                 aBuffer = aBuffer(:,:,end:-1:1);                   
             end
         end  
-end                                                                                                                                  
+end                
+        isDoseKernel('set', false);
+
         dicomBuffer('set',aBuffer);    
 
         dicomMetaData('set', tInitInput(iOffset).atDicomInfo);
