@@ -61,7 +61,14 @@ function [imRegistered, atRegisteredMetaData, Rregistered, Rmoving, Rfixed] = re
     optimizer.GrowthFactor = tOptimizer.GrowthFactor;
     optimizer.MaximumIterations = tOptimizer.MaximumIterations;
 
-    [imRegistered, Rregistered] = imregister(imMoving, Rmoving, imFixed, Rfixed, sType, optimizer, metric);        
+    if double(min(imMoving,[],'all')) == 0
+        [imRegistered, Rregistered] = imregister(imMoving, Rmoving, imFixed, Rfixed, sType, optimizer, metric);  
+    else    
+        [~, Rregistered] = imregister(imMoving, Rmoving, imFixed, Rfixed, sType, optimizer, metric);  
+    
+        geomtform = imregtform(imMoving, Rmoving, imFixed, Rregistered, sType, optimizer, metric);
+        imRegistered = imwarp(imMoving, Rmoving, geomtform, 'bicubic', 'OutputView', Rregistered, 'FillValues', double(min(imMoving,[],'all')) );
+    end
 
     dimsReg = size(imRegistered);
 

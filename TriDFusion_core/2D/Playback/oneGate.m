@@ -116,7 +116,11 @@ function oneGate(sDirection)
         end
     end      
     
-    roiTemplate('set', tInput(iOffset).tRoi);
+    if isfield(tInput(iOffset), 'tRoi')
+        roiTemplate('set', tInput(iOffset).tRoi);
+    else
+        roiTemplate('set', '');        
+    end
 
     aBuffer = dicomBuffer('get');                                  
     if isempty(aBuffer)    
