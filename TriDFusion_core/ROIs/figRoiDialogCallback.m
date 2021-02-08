@@ -29,6 +29,8 @@ function figRoiDialogCallback(hObject, ~)
 
     ROI_PANEL_X = 1350;
     ROI_PANEL_Y = 600;
+    
+    releaseRoiWait();
 
     if strcmpi(get(hObject, 'Tag'), 'toolbar')
        set(hObject, 'State', 'off');

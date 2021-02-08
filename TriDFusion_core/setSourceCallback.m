@@ -98,6 +98,7 @@ function setSourceCallback(~, ~)
 
             inputTemplate('set', '');
             inputBuffer('set', '');
+            inputContours('set', '');
 
             dicomMetaData('reset');
             dicomBuffer  ('reset');
@@ -289,9 +290,16 @@ function setSourceCallback(~, ~)
             for jj=1: numel(asMainDir)
 
                 tNewDatasets = dicomInfoSortFolder(asMainDir{jj});
-                if numel(tNewDatasets)
+                
+                if isfield(tNewDatasets, 'Contours')
+                    inputContours('add', tNewDatasets.Contours{:});
+                end
 
-                     atNewFrameInfo = dicomInfoComputeFrames(tNewDatasets.DicomInfos);
+                if isfield(tNewDatasets, 'FileNames'   ) && ...
+                   isfield(tNewDatasets, 'DicomInfos'  ) && ...       
+                   isfield(tNewDatasets, 'DicomBuffers')                     
+                    
+                    atNewFrameInfo = dicomInfoComputeFrames(tNewDatasets.DicomInfos);
 
            %         sFileList = datasets.FileNames;
                     if strcmpi(tNewDatasets.DicomInfos{1}.SeriesType{1}, 'GATED'  ) || ...
@@ -387,7 +395,21 @@ function setSourceCallback(~, ~)
                 if numel(inputTemplate('get')) ~= 0
 
                     for ii = 1 : numel(inputTemplate('get'))
-                        sNewVolSeriesDate = [tNewInput(ii).atDicomInfo{1}.SeriesDate tNewInput(ii).atDicomInfo{1}.SeriesTime];
+                        
+                        if isempty(tNewInput(ii).atDicomInfo{1}.SeriesDate)
+                            sSeriesDate = '00010101';
+                        else
+                            sSeriesDate = tNewInput(ii).atDicomInfo{1}.SeriesDate;
+                        end
+                        
+                        if isempty(tNewInput(ii).atDicomInfo{1}.SeriesTime)                            
+                            sSeriesTime = '000000';
+                        else
+                            sSeriesTime = tNewInput(ii).atDicomInfo{1}.SeriesTime;
+                        end
+                        
+                        sNewVolSeriesDate = sprintf('%s%s', sSeriesDate, sSeriesTime); 
+                        
                         if contains(sNewVolSeriesDate,'.')
                             sNewVolSeriesDate = extractBefore(sNewVolSeriesDate,'.');
                         end
@@ -425,11 +447,13 @@ function setSourceCallback(~, ~)
                 end
 
                 setQuantification();
-
+                
                 clearDisplay();
                 initDisplay(3);
 
                 dicomViewerCore();
+                
+                setContours();
 
                 setViewerDefaultColor(true, dicomMetaData('get'));
 

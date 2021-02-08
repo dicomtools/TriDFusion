@@ -70,7 +70,10 @@ function info = dicominfo4che3(fileInput)
 
     info.SeriesInstanceUID = char(dataset.getString(org.dcm4che.data.Tag.SeriesInstanceUID, 0));
     info.StudyInstanceUID  = char(dataset.getString(org.dcm4che.data.Tag.StudyInstanceUID, 0));
-
+    
+    info.SOPClassUID = char(dataset.getString(org.dcm4che.data.Tag.SOPClassUID, 0));
+    info.SOPInstanceUID  = char(dataset.getString(org.dcm4che.data.Tag.SOPInstanceUID, 0));
+    
     info.AccessionNumber   = char(dataset.getString(org.dcm4che.data.Tag.AccessionNumber, 0));
 
     info.ActualFrameDuration = dataset.getInt(org.dcm4che.data.Tag.ActualFrameDuration,0);

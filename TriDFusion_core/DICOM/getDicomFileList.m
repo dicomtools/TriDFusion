@@ -27,7 +27,8 @@ function [tFileList, iNbFiles] = getDicomFileList(sDirName, tFileList)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    iNbFiles = 0;
+    iNbFiles    = 0;
+    iNbContours = 0;
     
     f = java.io.File(char(sDirName));
     asFileList = f.listFiles();
@@ -42,28 +43,33 @@ function [tFileList, iNbFiles] = getDicomFileList(sDirName, tFileList)
 
             if ~isempty(tInfo)
                 
-                dInstanceNumber = 0;
-                adImagePositionPatient = [0 0 0];
-                sFileName = asFileList(iLoop);
+                if strcmpi(tInfo.Modality, 'RTSTRUCT')
+                    iNbContours = iNbContours+1;
+                    tContours = readDicomContours(asFileList(iLoop)); 
+                    tFileList.Contours{iNbContours} = tContours;
+                else
+                    dInstanceNumber = 0;
+                    adImagePositionPatient = [0 0 0];
+                    sFileName = asFileList(iLoop);
 
-                if (isfield(tInfo,'InstanceNumber'))
-                    if numel(tInfo.InstanceNumber)                        
-                        dInstanceNumber=tInfo.InstanceNumber; 
-                    end    
-                end
-
-                if (isfield(tInfo,'ImagePositionPatient'))
-                    if ~isempty(tInfo.ImagePositionPatient)
-                        adImagePositionPatient = tInfo.ImagePositionPatient;  
+                    if (isfield(tInfo,'InstanceNumber'))
+                        if numel(tInfo.InstanceNumber)                        
+                            dInstanceNumber=tInfo.InstanceNumber; 
+                        end    
                     end
+
+                    if (isfield(tInfo,'ImagePositionPatient'))
+                        if ~isempty(tInfo.ImagePositionPatient)
+                            adImagePositionPatient = tInfo.ImagePositionPatient;  
+                        end
+                    end
+
+                    iNbFiles = iNbFiles+1; 
+                    tFileList.FileName {iNbFiles}              = sFileName;
+                    tFileList.DicomInfo{iNbFiles}              = tInfo;
+                    tFileList.InstanceNumber(iNbFiles)         = dInstanceNumber;
+                    tFileList.ImagePositionPatient(iNbFiles,:) = adImagePositionPatient(:)';
                 end
-
-                iNbFiles = iNbFiles+1; 
-                tFileList.FileName {iNbFiles}              = sFileName;
-                tFileList.DicomInfo{iNbFiles}              = tInfo;
-                tFileList.InstanceNumber(iNbFiles)         = dInstanceNumber;
-                tFileList.ImagePositionPatient(iNbFiles,:) = adImagePositionPatient(:)';
-
             end
         end
     end

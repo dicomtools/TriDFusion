@@ -34,10 +34,15 @@ function initTemplates()
         for dDirLoop=1: numel(asMainDirectory)
          %   datasets = folderInfo4che3(asMainDir{ii}, true);
 
-            tDatasets = ...
-                dicomInfoSortFolder(asMainDirectory{dDirLoop});
+            tDatasets = dicomInfoSortFolder(asMainDirectory{dDirLoop});                
+            
+            if isfield(tDatasets, 'Contours')
+                inputContours('add', tDatasets.Contours{:});
+            end
 
-            if numel(tDatasets)
+            if isfield(tDatasets, 'FileNames'   ) && ...
+               isfield(tDatasets, 'DicomInfos'  ) && ...       
+               isfield(tDatasets, 'DicomBuffers')                              
 
                 atFrameInfo = dicomInfoComputeFrames(tDatasets.DicomInfos);
 
@@ -126,12 +131,27 @@ function initTemplates()
             if numel(inputTemplate('get')) ~= 0
 
                 for dTemplateLoop = 1 : numel(inputTemplate('get'))
-                    sVolSeriesDate = [tSetInputTemplate(dTemplateLoop).atDicomInfo{1}.SeriesDate tSetInputTemplate(dTemplateLoop).atDicomInfo{1}.SeriesTime];
-                    if contains(sVolSeriesDate,'.')
-                        sVolSeriesDate = extractBefore(sVolSeriesDate,'.');
-                    end
-                    sVolSeriesDate = datetime(sVolSeriesDate,'InputFormat','yyyyMMddHHmmss');
+                    
+                    if isempty(tSetInputTemplate(dTemplateLoop).atDicomInfo{1}.SeriesDate)
+                        sVolSeriesDate = '';
+                    else
+                        sSeriesDate = tSetInputTemplate(dTemplateLoop).atDicomInfo{1}.SeriesDate;
+                        if isempty(tSetInputTemplate(dTemplateLoop).atDicomInfo{1}.SeriesTime)                            
+                            sSeriesTime = '000000';
+                        else
+                            sSeriesTime = tSetInputTemplate(dTemplateLoop).atDicomInfo{1}.SeriesTime;
+                        end
 
+                        sVolSeriesDate = sprintf('%s%s', sSeriesDate, sSeriesTime);                         
+                    end
+                        
+                    if ~isempty(sVolSeriesDate)
+                        if contains(sVolSeriesDate,'.')
+                            sVolSeriesDate = extractBefore(sVolSeriesDate,'.');
+                        end
+                        sVolSeriesDate = datetime(sVolSeriesDate,'InputFormat','yyyyMMddHHmmss');
+                    end
+                    
                     sVolSeriesDescription = tSetInputTemplate(dTemplateLoop).atDicomInfo{1}.SeriesDescription;
 
                     asVolumes{dTemplateLoop} = sprintf('%s %s', sVolSeriesDescription, sVolSeriesDate);
@@ -144,7 +164,7 @@ function initTemplates()
             setDisplayBuffer();
 
             setQuantification();
-
+            
         else
             progressBar(1 , 'Error: TriDFusion: no volumes detected!');
             h = msgbox('Error: TriDFusion(): no volumes detected!', 'Error');

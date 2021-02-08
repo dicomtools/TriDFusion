@@ -1,5 +1,5 @@
 function tInput = inputTemplate(sAction, tValue)
-%function aTag = voiRoiTag(sAction, aValue)
+%function tInput = inputTemplate(sAction, aValue)
 %Get\Set Input Template.
 %See TriDFuison.doc (or pdf) for more information about options.
 %

@@ -43,7 +43,7 @@ function tDataSets = dicomInfoSortFolder(link)
     tFileList.ImagePositionPatient = zeros(100000,3);
     tFileList.aHash                = zeros(1,100000);
 
-    [tFileList,iNbFiles] = getDicomFileList(sDirName, tFileList);
+    [tFileList, iNbFiles] = getDicomFileList(sDirName, tFileList);
 
     if(iNbFiles == 0) 
         tDataSets = []; 

@@ -373,11 +373,27 @@ function loadCerrDoseConstraint(planC, structNamC)
     if numel(inputTemplate('get')) ~= 0
 
         for ii = 1 : numel(inputTemplate('get'))
-            sNewVolSeriesDate = [tNewInput(ii).atDicomInfo{1}.SeriesDate tNewInput(ii).atDicomInfo{1}.SeriesTime];
-            if contains(sNewVolSeriesDate,'.')
-                sNewVolSeriesDate = extractBefore(sNewVolSeriesDate,'.');
+            
+            if isempty(tNewInput(ii).atDicomInfo{1}.SeriesDate)
+                sNewVolSeriesDate = '';
+            else
+                sSeriesDate = tNewInput(ii).atDicomInfo{1}.SeriesDate;
+                if isempty(tNewInput(ii).atDicomInfo{1}.SeriesTime)                            
+                    sSeriesTime = '000000';
+                else
+                    sSeriesTime = tNewInput(ii).atDicomInfo{1}.SeriesTime;
+                end
+
+                sNewVolSeriesDate = sprintf('%s%s', sSeriesDate, sSeriesTime);                 
             end
-            sNewVolSeriesDate = datetime(sNewVolSeriesDate,'InputFormat','yyyyMMddHHmmss');
+
+            if ~isempty(sNewVolSeriesDate)
+                if contains(sNewVolSeriesDate,'.')
+                    sNewVolSeriesDate = extractBefore(sNewVolSeriesDate,'.');
+                end
+                sNewVolSeriesDate = datetime(sNewVolSeriesDate,'InputFormat','yyyyMMddHHmmss');
+            end
+            
             sNewVolSeriesDescription = tNewInput(ii).atDicomInfo{1}.SeriesDescription;
 
             sNewVolumes{ii} = sprintf('%s %s', sNewVolSeriesDescription, sNewVolSeriesDate);

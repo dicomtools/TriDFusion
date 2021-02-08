@@ -98,7 +98,10 @@ function initViewerGlobal()
     dicomMetaData('reset');    
     dicomBuffer  ('reset');    
     fusionBuffer ('reset');    
-    inputBuffer  ('set', '');    
+    inputBuffer  ('set', ''); 
+    
+    inputTemplate('set', '');
+    inputContours('set', '');
 
     mainDir     ('set', '');
     roiTemplate ('set', '');

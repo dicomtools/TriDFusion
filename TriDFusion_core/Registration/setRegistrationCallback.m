@@ -447,12 +447,26 @@ if 0
                 end
             end
 end
-            sInitSeriesDate = [tInitInput(jj).atDicomInfo{1}.SeriesDate tInitInput(jj).atDicomInfo{1}.SeriesTime];
-            if contains(sInitSeriesDate,'.')
-                sInitSeriesDate = extractBefore(sInitSeriesDate,'.');
-            end
+            if isempty(tInitInput{jj}.SeriesDate)
+                sInitSeriesDate = '';
+            else
+                sSeriesDate = tInitInput{jj}.SeriesDate;
+                if isempty(tInitInput{jj}.SeriesTime)                            
+                    sSeriesTime = '000000';
+                else
+                    sSeriesTime = tInitInput{jj}.SeriesTime;
+                end
 
-            sInitSeriesDate = datetime(sInitSeriesDate,'InputFormat','yyyyMMddHHmmss');
+                sInitSeriesDate = sprintf('%s%s', sSeriesDate, sSeriesTime);                 
+            end
+          
+            if ~isempty(sInitSeriesDate)
+                if contains(sInitSeriesDate,'.')
+                    sInitSeriesDate = extractBefore(sInitSeriesDate,'.');
+                end
+
+                sInitSeriesDate = datetime(sInitSeriesDate,'InputFormat','yyyyMMddHHmmss');
+            end
 
             sInitSeriesDescription = tInitInput(jj).atDicomInfo{1}.SeriesDescription;
 
@@ -614,6 +628,8 @@ end
         set(btnFusionPtr('get'), 'BackgroundColor', 'default');
 
         delete(dlgRegister);
+        
+        setQuantification(dInitOffset);
 
         clearDisplay();
         initDisplay(3);
@@ -621,7 +637,7 @@ end
     %    dicomViewerCore();
 
     %    initWindowLevel('set', true);
-    %    quantificationTemplate('set', tInput(dInitOffset).tQuant);
+        quantificationTemplate('set', tInput(dInitOffset).tQuant);
 
         dicomViewerCore();
 
@@ -799,12 +815,14 @@ end
         set(btnFusionPtr('get'), 'BackgroundColor', 'default');
 
         delete(dlgRegister);
+        
+        setQuantification(dInitOffset);
 
         clearDisplay();
         initDisplay(3);
 
   %      initWindowLevel('set', true);
-  %      quantificationTemplate('set', tInput(dInitOffset).tQuant);
+        quantificationTemplate('set', tInput(dInitOffset).tQuant);
 
         dicomViewerCore();
 

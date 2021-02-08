@@ -59,11 +59,25 @@ function refreshImages()
         end
 
         if isfield(atMetaData{1}, 'SeriesDate')
-            sSeriesDate = [atMetaData{1}.SeriesDate atMetaData{1}.SeriesTime];
-            if contains(sSeriesDate,'.') 
-                sSeriesDate = extractBefore(sSeriesDate,'.');
+            
+            if isempty(atMetaData{1}.SeriesDate)
+                sSeriesDate = '';
+            else
+                sSeriesDate = atMetaData{1}.SeriesDate;
+                if isempty(atMetaData{1}.SeriesTime)                            
+                    sSeriesTime = '000000';
+                else
+                    sSeriesTime = atMetaData{1}.SeriesTime;
+                end                
+                sSeriesDate = sprintf('%s%s', sSeriesDate, sSeriesTime); 
             end
-            sSeriesDate = datetime(sSeriesDate,'InputFormat','yyyyMMddHHmmss');                                       
+
+            if ~isempty(sSeriesDate)
+                if contains(sSeriesDate,'.') 
+                    sSeriesDate = extractBefore(sSeriesDate,'.');
+                end
+                sSeriesDate = datetime(sSeriesDate,'InputFormat','yyyyMMddHHmmss');                                       
+            end
         else
             sSeriesDate = '';
         end
