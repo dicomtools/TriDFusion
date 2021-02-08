@@ -197,7 +197,9 @@ function TriDFusion(varargin)
     waitfor(fiMainWindowPtr('get'), 'WindowState', 'maximized');
     
     resizeViewer = dicomViewer(); 
-        
+    
+    setContours();
+       
     if argFusion == true && ... % Init 2D Fuison
        numel(inputTemplate('get')) > 1
    
