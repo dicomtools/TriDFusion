@@ -37,6 +37,19 @@ function [imRegistered, atRegisteredMetaData, Rregistered, Rmoving, Rfixed] = re
     % 'affine' Affine transformation consisting of translation, rotation, scale, and shear.        
 
     fixedSliceThickness = computeSliceSpacing(atFixedMetaData);
+    
+    if fixedSliceThickness == 0           
+        fixedSliceThickness = 1;
+    end
+    
+    if atFixedMetaData{1}.PixelSpacing(1) == 0 && ...
+       atFixedMetaData{1}.PixelSpacing(2) == 0 
+        for jj=1:numel(atFixedMetaData)
+            atFixedMetaData{1}.PixelSpacing(1) =1;
+            atFixedMetaData{1}.PixelSpacing(2) =1;
+        end       
+    end
+        
     if size(imFixed, 3) == 1
        Rfixed  = imref2d(size(imFixed),atFixedMetaData{1}.PixelSpacing(2),atFixedMetaData{1}.PixelSpacing(1));  
     else
@@ -44,6 +57,20 @@ function [imRegistered, atRegisteredMetaData, Rregistered, Rmoving, Rfixed] = re
     end
 
     movingSliceThickness = computeSliceSpacing(atMovingMetaData);        
+    
+    if movingSliceThickness == 0           
+        movingSliceThickness = 1;
+    end
+    
+    if atMovingMetaData{1}.PixelSpacing(1) == 0 && ...
+       atMovingMetaData{1}.PixelSpacing(2) == 0 
+        for jj=1:numel(atMovingMetaData)
+            atMovingMetaData{1}.PixelSpacing(1) =1;
+            atMovingMetaData{1}.PixelSpacing(2) =1;
+        end       
+    end
+      
+        
     if size(imMoving, 3) == 1
        Rmoving = imref2d(size(imMoving),atMovingMetaData{1}.PixelSpacing(2),atMovingMetaData{1}.PixelSpacing(1));                 
     else         

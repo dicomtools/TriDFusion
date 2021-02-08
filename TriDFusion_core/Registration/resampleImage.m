@@ -49,8 +49,20 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
           0      xScale 0      0
           0      0      zScale 0
           0      0      0      1];
+      
+    if dcmSliceThickness == 0  
+        dcmSliceThickness = 1;
+    end
+      
+    if atDcmMetaData{1}.PixelSpacing(1) == 0 && ...
+       atDcmMetaData{1}.PixelSpacing(2) == 0 
+        for jj=1:numel(atDcmMetaData)
+            atDcmMetaData{1}.PixelSpacing(1) =1;
+            atDcmMetaData{1}.PixelSpacing(2) =1;
+        end       
+    end
 
-    Rdcm  = imref3d(size(dcmImage),atDcmMetaData{1}.PixelSpacing(2),atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
+    Rdcm  = imref3d(size(dcmImage), atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
     % Rref  = imref3d(size(refImage),atRefMetaData{1}.PixelSpacing(2),atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
 
      TF = affine3d(f);

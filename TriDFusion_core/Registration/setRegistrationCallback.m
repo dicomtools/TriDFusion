@@ -407,6 +407,8 @@ function setRegistrationCallback(~, ~)
         if dInitOffset > numel(tInitInput)
             return;
         end
+        
+        releaseRoiWait();
 
         set(uiSeriesPtr('get'), 'Enable', 'off');
 
@@ -515,6 +517,8 @@ end
 %            javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
             return;
         end
+        
+        releaseRoiWait();
 
         tInput = inputTemplate('get');
         aInput = inputBuffer('get');
@@ -630,6 +634,8 @@ end
     end
 
     function registerCallback(~, ~)
+        
+        releaseRoiWait();
 
         asInterpolation = get(uiInterpolation, 'String');
         sInterpolation  = asInterpolation{get(uiInterpolation, 'Value')};
