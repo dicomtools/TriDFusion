@@ -1,5 +1,5 @@
 
-if 1 % CERR Dose Volume Example 
+if 0 % CERR Dose Volume Example 
     
 cerrStructNamC = {'DL_HEART_MT','DL_AORTA','DL_LA','DL_LV','DL_RA', 'DL_RV','DL_IVC','DL_SVC','DL_PA'}; 
 cerrStructEnaC = {true, true, true, true, true, true, true, false, true};  

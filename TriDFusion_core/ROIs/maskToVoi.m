@@ -1,5 +1,5 @@
-function maskToVoi(aMask, sLabel, aColor)
-%function maskToVoi(aMask, aColor)
+function maskToVoi(aMask, sLabel, aColor, sPlane)
+%function maskToVoi(aMask, sLabel, aColor, sPlane)
 %Create a VOI from a 3D mask.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -36,26 +36,57 @@ function maskToVoi(aMask, sLabel, aColor)
         return;
     end
     
-    axRoi = axes3Ptr('get');
+    if strcmpi(sPlane, 'coronal')
+        axRoi = axes1Ptr('get');
+        dMaskSize = aMaskSize(1);
+    elseif strcmpi(sPlane, 'sagittal')
+        axRoi = axes2Ptr('get');
+        dMaskSize = aMaskSize(2);
+    else
+        axRoi = axes3Ptr('get');
+        dMaskSize = aMaskSize(3);
+    end
      
     asTag = [];
-    
-    for mm=1: aMaskSize(3)
-        if any(aMask(:,:,mm), 'all')
-            
-            sliceNumber('set', 'axial', mm);
+        
+    for mm=1: dMaskSize
+        
+        if strcmpi(sPlane, 'coronal')
+            aSlice = aMask(mm,:,:);
+        elseif strcmpi(sPlane, 'sagittal')
+            aSlice = aMask(:,mm,:);
+        else
+            aSlice = aMask(:,:,mm);
+        end       
+        
+        if any(aSlice, 'all') 
+                        
+            if strcmpi(sPlane, 'coronal')
+                sliceNumber('set', 'coronal', mm);
+            elseif strcmpi(sPlane, 'sagittal')
+                sliceNumber('set', 'sagittal', mm);
+            else
+                sliceNumber('set', 'axial', mm);
+            end
             
             sTag = num2str(rand);
 
             B = bwboundaries(aMask(:,:,mm));
             pRoi = drawfreehand(axRoi, 'Position', flip(B{1}, 2), 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'off');         
             
-            gca = axes3Ptr('get');
+            if strcmpi(sPlane, 'coronal')
+                gca = axes1Ptr('get');
+            elseif strcmpi(sPlane, 'sagittal')
+                gca = axes2Ptr('get');
+            else
+                gca = axes3Ptr('get');
+            end
+   
             addRoi(pRoi);                  
 
             roiDefaultMenu(pRoi);
 
-            uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData',pRoi, 'Callback', @clearWaypointsCallback); 
+            uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', pRoi, 'Callback', @clearWaypointsCallback); 
 
             cropMenu(pRoi);
 

@@ -29,7 +29,8 @@ function createVoiFromRois(adTag, sVoiName)
 
     tInput = inputTemplate('get');
     atMetaData = dicomMetaData('get');
-
+    
+    
     iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
     if iSeriesOffset > numel(tInput)  
         return;
@@ -75,10 +76,24 @@ function createVoiFromRois(adTag, sVoiName)
                 end
             end
         end
-
+            
         aDisplayBuffer = dicomBuffer('get');
+        aInput = inputBuffer('get');
+        
+        if isempty(atMetaData)
+            atMetaData = tInput(iSeriesOffset).atDicomInfo;
+        end
+        
+        if isempty(aDisplayBuffer)
+            if     strcmp(imageOrientation('get'), 'axial')
+                aDisplayBuffer = permute(aInput{iSeriesOffset}, [1 2 3]);
+            elseif strcmp(imageOrientation('get'), 'coronal') 
+                aDisplayBuffer = permute(aInput{iSeriesOffset}, [3 2 1]);    
+            elseif strcmp(imageOrientation('get'), 'sagittal')
+                aDisplayBuffer = permute(aInput{iSeriesOffset}, [3 1 2]);
+            end              
+        end
 
-        aInput   = inputBuffer('get');
         if     strcmp(imageOrientation('get'), 'axial')
             aInputBuffer = permute(aInput{iSeriesOffset}, [1 2 3]);
         elseif strcmp(imageOrientation('get'), 'coronal') 

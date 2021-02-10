@@ -405,7 +405,7 @@ function loadCerrDoseVolume(planC, structNamC)
             end
         end
                
-        maskToVoi(strMaskC{mm}, structNamC{mm}, aVoiColor);
+        maskToVoi(strMaskC{mm}, structNamC{mm}, aVoiColor, 'axial');
     end
     
     set(uiCorWindowPtr('get'), 'Visible', 'on');

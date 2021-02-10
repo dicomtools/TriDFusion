@@ -46,7 +46,9 @@ function tDataSets = sortDicomFileList(tFileList, iNbFiles)
         
         tDataSets(iLoop).FileNames    = cell(length(h),1);
         tDataSets(iLoop).DicomInfos   = cell(length(h),1);
-        tDataSets(iLoop).DicomBuffers = cell(length(h),1);
+        if ~isfield(tFileList, 'Contours')         
+            tDataSets(iLoop).DicomBuffers = cell(length(h),1);
+        end
 
 
         for jLoop=1:length(h)
@@ -55,7 +57,9 @@ function tDataSets = sortDicomFileList(tFileList, iNbFiles)
 
             tDataSets(iLoop).FileNames{jLoop}    = tFileList.FileName{h(jLoop)} ;
             tDataSets(iLoop).DicomInfos{jLoop}   = tFileList.DicomInfo{h(jLoop)} ;
-            tDataSets(iLoop).DicomBuffers{jLoop} = readDcm4che3(tFileList.FileName{h(jLoop)}, tFileList.DicomInfo{h(jLoop)}.din);                    
+            if ~isfield(tFileList, 'Contours') 
+                tDataSets(iLoop).DicomBuffers{jLoop} = readDcm4che3(tFileList.FileName{h(jLoop)}, tFileList.DicomInfo{h(jLoop)}.din);                    
+            end
 
         end
         

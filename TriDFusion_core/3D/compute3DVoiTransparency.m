@@ -28,7 +28,7 @@ function dValue = compute3DVoiTransparency(dSliderValue)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
     dMin = 0.000001;
-    dMax = 0.1;
+    dMax = 0.0009;
 
     dDiff = dMax - dMin;
 

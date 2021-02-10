@@ -45,9 +45,16 @@ function [tFileList, iNbFiles] = getDicomFileList(sDirName, tFileList)
                 
                 if strcmpi(tInfo.Modality, 'RTSTRUCT')
                     iNbContours = iNbContours+1;
+                    sFileName = asFileList(iLoop);
+
                     tContours = readDicomContours(asFileList(iLoop)); 
-                    tFileList.Contours{iNbContours} = tContours;
-                else
+                    
+                    tFileList.Contours {iNbContours} = tContours;
+                    tFileList.FileName {iNbContours} = sFileName;
+                    tFileList.DicomInfo{iNbContours} = tInfo;
+                    
+                    iNbFiles = iNbFiles+1; 
+               else
                     dInstanceNumber = 0;
                     adImagePositionPatient = [0 0 0];
                     sFileName = asFileList(iLoop);

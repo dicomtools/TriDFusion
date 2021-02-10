@@ -199,6 +199,8 @@ function TriDFusion(varargin)
     resizeViewer = dicomViewer(); 
     
     setContours();
+    
+ %   refreshImages();
        
     if argFusion == true && ... % Init 2D Fuison
        numel(inputTemplate('get')) > 1
