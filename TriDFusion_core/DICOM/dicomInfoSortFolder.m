@@ -46,7 +46,11 @@ function tDataSets = dicomInfoSortFolder(link)
     [tFileList, iNbFiles] = getDicomFileList(sDirName, tFileList);
 
     if(iNbFiles == 0) 
-        tDataSets = []; 
+        if isfield(tFileList, 'Contours') 
+            tDataSets.Contours = tFileList.Contours;
+        else
+            tDataSets = [];
+        end
         return; 
     end
 

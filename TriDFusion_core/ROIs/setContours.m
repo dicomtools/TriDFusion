@@ -81,7 +81,7 @@ function setContours()
                                         
                     for j=1:numel(segments)
                         
-                        progressBar( j/numel(segments), sprintf('Processing Contour ROI %d/%d', j, numel(segments)) );      
+                        progressBar( j/numel(segments), sprintf('Volume %d: Processing contour ROI %d/%d', bb, j, numel(segments)) );      
                         
                         out = pctransform(pointCloud(segments{j}),invert(affine3d(xfm')));
 
