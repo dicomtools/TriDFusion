@@ -45,7 +45,7 @@ function figRoiDialogCallback(hObject, ~)
                (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-ROI_PANEL_Y/2) ...
                ROI_PANEL_X ...
                ROI_PANEL_Y],...
-               'Name', 'ROI/VOI result',...
+               'Name', 'ROIs/VOIs result',...
                'NumberTitle','off',...
                'MenuBar', 'none',...
                'Resize', 'off', ...
@@ -80,10 +80,17 @@ function figRoiDialogCallback(hObject, ~)
     else
         sSuvEnable = 'on';
     end
-
-    mSUVUnit   = uimenu(mRoiOptions,'Label', 'SUV Unit', 'Checked', sSuvChecked, 'Enable', sSuvEnable, 'Callback', @SUVUnitCallback);
-    mSegmented = uimenu(mRoiOptions,'Label', 'Segmented Values', 'Checked', sSegChecked, 'Callback', @segmentedCallback);
     
+    if isFigRoiInColor('get') == true
+        sFigRoiInColor = 'on';
+    else
+        sFigRoiInColor = 'off';
+    end
+    
+    mSUVUnit         = uimenu(mRoiOptions,'Label', 'SUV Unit', 'Checked', sSuvChecked, 'Enable', sSuvEnable, 'Callback', @SUVUnitCallback);
+    mSegmented       = uimenu(mRoiOptions,'Label', 'Segmented Values', 'Checked', sSegChecked, 'Callback', @segmentedCallback);
+    mColorBackground = uimenu(mRoiOptions,'Label', 'Display in Color', 'Checked', sFigRoiInColor, 'Callback', @figRoiColorCallback);
+   
     mRoiReset    = uimenu(figRoiWindow,'Label','Reset');
     mRoiResetAll = uimenu(mRoiReset,'Label', 'Clear All ROIs', 'Checked', 'off', 'Callback', @clearAllRoisCallback);
 
@@ -110,12 +117,19 @@ function figRoiDialogCallback(hObject, ~)
                 'HighlightColor', [0 1 1],...
                 'position', [0 0 ROI_PANEL_X ROI_PANEL_Y]...
                );
-
+           
+    if isFigRoiInColor('get') == true
+        aBackgroundColor = [0 0 0];
+    else
+        aBackgroundColor = [0.9400 0.9400 0.9400];
+    end
+    
     lbVoiRoiWindow =  ...
         uicontrol(uiVoiRoiWindow,...
                   'style'   , 'listbox',...
                   'position', [0 0 uiVoiRoiWindow.Position(3) uiVoiRoiWindow.Position(4)-20],...
                   'fontsize', 10.1,...
+                  'BackgroundColor', aBackgroundColor,...
                   'Fontname', 'Monospaced',...
                   'Value'   , 1 ,...
                   'Selected', 'on',...
@@ -889,6 +903,21 @@ function figRoiDialogCallback(hObject, ~)
                 end
 
                 inputTemplate('set', tEditLabelInput);
+                
+                if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+                    bSUVUnit = true;
+                else
+                    bSUVUnit = false;
+                end
+
+                if strcmpi(get(mSegmented, 'Checked'), 'on')
+                    bSegmented = true;
+                else
+                    bSegmented = false;
+                end
+
+                setVoiRoiListbox(bSUVUnit, bSegmented); 
+                
             end
         end
 
@@ -937,9 +966,11 @@ function figRoiDialogCallback(hObject, ~)
     end
 
     function setVoiRoiListbox(bSUVUnit, bSegmented)
-
+        
         sLbWindow = '';
         aVoiRoiTag = [];
+        
+        sFontName = get(lbVoiRoiWindow, 'FontName');
 
         atVoiMetaData = dicomMetaData('get');
 
@@ -996,7 +1027,7 @@ end
 
                     sVoiName = tVoiInput{aa}.Label;
 
-                    sLbWindow = sprintf('%s%-18s %-11s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s\n', sLbWindow, ...
+                    sLine = sprintf('%-18s %-11s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s', ...
                         maxLength(sVoiName, 17), ...
                         ' ', ...
                         num2str(tVoiComputed.cells), ...
@@ -1009,7 +1040,17 @@ end
                         num2str(tVoiComputed.peak), ...
                         ' ', ...
                         num2str(tVoiComputed.volume));
+                    
+                    if isFigRoiInColor('get') == true                    
+                        sLine = strrep(sLine, ' ', '&nbsp;');   
 
+                        aColor = tVoiInput{aa}.Color;
+                        sColor = reshape(dec2hex([aColor(1)*255 aColor(2)*255 aColor(3)*255], 2)',1, 6);
+                        sLine  = sprintf('<HTML><FONT color="%s" face="%s">%s', sColor, sFontName, sLine);
+                    end
+                    
+                    sLbWindow = sprintf('%s%s\n', sLbWindow, sLine);
+                                     
                     if exist('aVoiRoiTag', 'var')
 
                         dResizeArray = numel(aVoiRoiTag)+1;
@@ -1058,7 +1099,8 @@ end
                                     else
                                         sSubtraction = 'N/A';
                                     end
-                                    sLbWindow = sprintf('%s%-18s %-11s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s\n', sLbWindow, ...
+                                    
+                                    sLine = sprintf('%-18s %-11s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s', ...
                                         ' ', ...
                                         sSliceNb, ...
                                         num2str(tRoiComputed.cells), ...
@@ -1072,7 +1114,17 @@ end
                                         num2str(tRoiComputed.area), ...
                                         ' ', ...
                                         sSubtraction);
+                                    
+                                     if isFigRoiInColor('get') == true                                                       
+                                         sLine = strrep(sLine, ' ', '&nbsp;');   
 
+                                         aColor = tRoiInput{bb}.Color;
+                                         sColor = reshape(dec2hex([aColor(1)*255 aColor(2)*255 aColor(3)*255], 2)',1, 6);
+                                         sLine  = sprintf('<HTML><FONT color="%s" face="%s">%s', sColor, sFontName, sLine);
+                                     end
+                                     
+                                     sLbWindow = sprintf('%s%s\n', sLbWindow, sLine);
+                        
                                      dResizeArray = numel(aVoiRoiTag)+1;
 
                                      aVoiRoiTag{dResizeArray}.Tag = tRoiInput{bb}.Tag;
@@ -1120,7 +1172,8 @@ end
                         else
                             sSubtraction = 'N/A';
                         end
-                        sLbWindow = sprintf('%s%-18s %-11s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s\n', sLbWindow, ...
+                        
+                        sLine = sprintf('%-18s %-11s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s', ...
                             maxLength(sRoiName, 17), ...
                             sSliceNb, ...
                             num2str(tRoiComputed.cells), ...
@@ -1133,7 +1186,17 @@ end
                             num2str(tRoiComputed.peak), ...
                             num2str(tRoiComputed.area), ...
                             ' ', ...
-                            sSubtraction);
+                            sSubtraction);                        
+                        
+                        if isFigRoiInColor('get') == true                                            
+                            sLine = strrep(sLine, ' ', '&nbsp;');   
+
+                            aColor = tRoiInput{bb}.Color;
+                            sColor = reshape(dec2hex([aColor(1)*255 aColor(2)*255 aColor(3)*255], 2)',1, 6);
+                            sLine = sprintf('<HTML><FONT color="%s" face="%s">%s', sColor, sFontName, sLine);
+                        end
+                        
+                        sLbWindow = sprintf('%s%s\n', sLbWindow, sLine);
 
                         if exist('aVoiRoiTag', 'var')
                             dResizeArray = numel(aVoiRoiTag)+1;
@@ -1174,6 +1237,7 @@ end
         end
 
         progressBar(1, 'Ready');
+        
 
     end
 
@@ -1584,8 +1648,7 @@ end
             
             inputTemplate('set', tDeleteInput);  
             
-            setVoiRoiSegPopup();
-            
+            setVoiRoiSegPopup();            
 
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                 bSUVUnit = true;
@@ -1603,6 +1666,40 @@ end
                                    
         end
         
+    end
+
+    function figRoiColorCallback(~, ~)
+
+        if strcmpi(get(mColorBackground, 'Checked'), 'on')
+            set(mColorBackground, 'Checked', 'off');
+            isFigRoiInColor('set', false);
+        else
+            set(mColorBackground, 'Checked', 'on');
+            isFigRoiInColor('set', true);
+        end        
+        
+        if isFigRoiInColor('get') == true        
+            aBackgroundColor = [0 0 0];
+        else
+            aBackgroundColor = [0.9400 0.9400 0.9400];
+        end
+
+        set(lbVoiRoiWindow, 'BackgroundColor', aBackgroundColor);
+        
+        if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+            bSUVUnit = true;
+        else
+            bSUVUnit = false;
+        end
+
+        if strcmpi(get(mSegmented, 'Checked'), 'on')
+            bSegmented = true;
+        else
+            bSegmented = false;
+        end
+
+        setVoiRoiListbox(bSUVUnit, bSegmented);          
+                
     end
 
     function sOutput = maxLength(sString, iMaxLength)

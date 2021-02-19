@@ -144,6 +144,7 @@ function resize = dicomViewer()
 
     suvMenuUnitOption('set', true);
     segMenuOption    ('set', true);  
+    isFigRoiInColor  ('set', true);
 
     registrationTemplate('init');
     registrationReport('set', '');
