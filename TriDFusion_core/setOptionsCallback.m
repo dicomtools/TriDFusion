@@ -706,7 +706,7 @@ function setOptionsCallback(~, ~)
             else
                 set(uiCorWindowPtr('get'), 'BorderWidth', showBorder('get'));
                 set(uiSagWindowPtr('get'), 'BorderWidth', showBorder('get'));
-                set(uitraWindowPtr('get'), 'BorderWidth', showBorder('get'));
+                set(uiTraWindowPtr('get'), 'BorderWidth', showBorder('get'));
 
                 if aspectRatio('get')
 

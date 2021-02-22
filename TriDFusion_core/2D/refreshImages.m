@@ -273,7 +273,7 @@ function refreshImages()
             iPointerOffset=1;
             for hh=1:dVsplashLayoutY
                 for jj=1:dVsplashLayoutX
-                    ptMontageAxes1{iPointerOffset} = text(axes1Ptr('get'), (jj-1)*xOffset, (hh-1)*yOffset, sprintf('\n%s', num2str(lFirst+iPointerOffset-1)), 'Color', overlayColor('get'));
+                    ptMontageAxes1{iPointerOffset} = text(axes1Ptr('get'), ((jj-1)*xOffset)+1, ((hh-1)*yOffset)+1, sprintf('\n%s', num2str(lFirst+iPointerOffset-1)), 'Color', overlayColor('get'));
                     if overlayActivate('get') == false
                         set(ptMontageAxes1{iPointerOffset}, 'Visible', 'off');    
                     end                            
@@ -296,7 +296,7 @@ function refreshImages()
             iPointerOffset=1;
             for hh=1:dVsplashLayoutY
                 for jj=1:dVsplashLayoutX
-                    ptMontageAxes2{iPointerOffset} = text(axes2Ptr('get'), (jj-1)*xOffset, (hh-1)*yOffset, sprintf('\n%s', num2str(lFirst+iPointerOffset-1)), 'Color', overlayColor('get'));
+                    ptMontageAxes2{iPointerOffset} = text(axes2Ptr('get'), ((jj-1)*xOffset)+1, ((hh-1)*yOffset)+1, sprintf('\n%s', num2str(lFirst+iPointerOffset-1)), 'Color', overlayColor('get'));
                     if overlayActivate('get') == false
                         set(ptMontageAxes2{iPointerOffset}, 'Visible', 'off');    
                     end
@@ -319,7 +319,7 @@ function refreshImages()
             iPointerOffset=1;
             for hh=1:dVsplashLayoutY
                 for jj=1:dVsplashLayoutX
-                    ptMontageAxes3{iPointerOffset} = text(axes3Ptr('get'), (jj-1)*xOffset, (hh-1)*yOffset, sprintf('\n%s', num2str(lFirst+iPointerOffset-1)), 'Color', overlayColor('get'));
+                    ptMontageAxes3{iPointerOffset} = text(axes3Ptr('get'), ((jj-1)*xOffset)+1 , ((hh-1)*yOffset)+1, sprintf('\n%s', num2str(lFirst+iPointerOffset-1)), 'Color', overlayColor('get'));
                     if overlayActivate('get') == false
                         set(ptMontageAxes3{iPointerOffset}, 'Visible', 'off');    
                     end                            

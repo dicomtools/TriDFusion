@@ -776,30 +776,22 @@ function dicomViewerCore()
 
             [lFirst, lLast] = computeVsplashLayout(im, 'coronal', iCoronal);
 
-            if gaussFilter('get') == true
-                imCoronalF = montage(imgaussfilt(permute(imf(:,:,:), [3 2 1])), ...
-                                     'Size'   , [dVsplashLayoutY dVsplashLayoutX], ...
-                                     'Indices', lFirst:lLast, ...
-                                     'Parent' , axes1fPtr('get') ...
-                                     );  
-                                
-                imCoronal  = montage(imgaussfilt(permute(im (:,:,:), [3 2 1])), ...
-                                     'Size'   , [dVsplashLayoutY dVsplashLayoutX], ...
-                                     'Indices', lFirst:lLast, ...
-                                     'Parent' , axes1Ptr('get') ...
-                                     );                         
+            if gaussFilter('get') == true   
+                imCoronalF = imagesc(permute(imgaussfilt(imf(iCoronal,:,:)), [3 2 1]),  ...
+                                     'Parent', axes1fPtr('get') ...
+                                     );        
+
+                imCoronal  = imagesc(permute(imgaussfilt(im (iCoronal,:,:)), [3 2 1]), ...
+                                     'Parent', axes1Ptr('get') ...
+                                     );                                   
             else
-                imCoronalF = montage(permute(imf(:,:,:), [3 2 1]), ...
-                                     'Size'   , [dVsplashLayoutY dVsplashLayoutX], ...
-                                     'Indices', lFirst:lLast, ...
-                                     'Parent' , axes1fPtr('get') ...
-                                     );  
-                                 
-                imCoronal  = montage(permute(im (:,:,:), [3 2 1]), ...
-                                     'Size'   , [dVsplashLayoutY dVsplashLayoutX], ...
-                                     'Indices', lFirst:lLast, ...
-                                     'Parent' , axes1Ptr('get') ...
-                                     );                    
+                imCoronalF = imagesc(permute(imf(iCoronal,:,:), [3 2 1]),  ...
+                                     'Parent', axes1fPtr('get') ...
+                                     );        
+
+                imCoronal  = imagesc(permute(im (iCoronal,:,:), [3 2 1]), ...
+                                     'Parent', axes1Ptr('get') ...
+                                     );                   
             end
 
             imCoronalPtr ('set', imCoronal );
@@ -807,16 +799,16 @@ function dicomViewerCore()
 
             imComputed = computeMontage(im, 'coronal', iCoronal);
 
-            imAxSize = size(imCoronal.CData);
-            imComputed = imresize(imComputed, [imAxSize(1) imAxSize(2)]);    
+%            imAxSize = size(imCoronal.CData);
+%            imComputed = imresize(imComputed, [imAxSize(1) imAxSize(2)]);    
 
             imCoronal.CData = imComputed; 
 
             if isFusion('get') == true
                 imComputed = computeMontage(imf, 'coronal', iCoronal);
 
-                imAxSize = size(imCoronalF.CData);
-                imComputed = imresize(imComputed, [imAxSize(1) imAxSize(2)]);    
+%                imAxSize = size(imCoronalF.CData);
+%                imComputed = imresize(imComputed, [imAxSize(1) imAxSize(2)]);    
 
                 imCoronalF.CData = imComputed;                         
             end
@@ -830,7 +822,8 @@ function dicomViewerCore()
                     
                     ptMontageAxes1{iPointerOffset} = ...
                         text(axes1Ptr('get'), ...
-                             (jj-1)*xOffset, (hh-1)*yOffset, ...
+                             ((jj-1)*xOffset)+1, ...
+                             ((hh-1)*yOffset)+1, ...
                              sprintf('\n%s', num2str(lFirst+iPointerOffset-1)), ...
                              'Color'       , overlayColor('get') ...
                              );
@@ -1016,9 +1009,11 @@ function dicomViewerCore()
                                'Color', overlayColor('get') ...
                                );
         end 
+        
         if overlayActivate('get') == false
             set(tAxes1Text, 'Visible', 'off');
         end                
+        
         axesText('set', 'axes1', tAxes1Text);
 
         axesText('set', 'axes2', '');
@@ -1090,45 +1085,38 @@ function dicomViewerCore()
             [lFirst, lLast] = computeVsplashLayout(im, 'sagittal', iSagittal);
 
             if gaussFilter('get') == true
-                imSagittalF = montage(imgaussfilt(permute(imf(:,:,:), [3 1 2])), ...
-                                      'Size'   , [dVsplashLayoutY dVsplashLayoutX], ...
-                                      'Indices', lFirst:lLast, ...
-                                      'Parent' , axes2fPtr('get') ...
-                                      );  
-                                  
-                imSagittal  = montage(imgaussfilt(permute(im (:,:,:), [3 1 2])), ...
-                                      'Size'   , [dVsplashLayoutY dVsplashLayoutX], ...
-                                      'Indices', lFirst:lLast, ...
-                                      'Parent' , axes2Ptr('get') ...
-                                      );                          
+                imSagittalF  = imagesc(permute(imgaussfilt(imf(:,iSagittal,:)), [3 1 2]), ...
+                                       'Parent', axes2fPtr('get') ...
+                                       );                                                                
+
+                imSagittal   = imagesc(permute(imgaussfilt(im (:,iSagittal,:)), [3 1 2]), ...
+                                       'Parent', axes2Ptr('get') ...
+                                       );                                    
             else                    
-                imSagittalF = montage(permute(imf(:,:,:), [3 1 2]), ...
-                                      'Size'   , [dVsplashLayoutY dVsplashLayoutX], ...
-                                      'Indices', lFirst:lLast, ...
-                                      'Parent' , axes2fPtr('get') ...
-                                      );  
-                                  
-                imSagittal  = montage(permute(im (:,:,:), [3 1 2]), ...
-                                      'Size'   , [dVsplashLayoutY dVsplashLayoutX], ...
-                                      'Indices', lFirst:lLast, ...
-                                      'Parent' , axes2Ptr('get') ...
-                                      );                    
+                imSagittalF  = imagesc(permute(imf(:,iSagittal,:), [3 1 2]), ...
+                                       'Parent', axes2fPtr('get') ...
+                                       );                                                                
+
+                imSagittal   = imagesc(permute(im (:,iSagittal,:), [3 1 2]), ...
+                                       'Parent', axes2Ptr('get') ...
+                                       );                                    
             end
+            
             imSagittalPtr ('set', imSagittal );
             imSagittalFPtr('set', imSagittalF);
 
             imComputed = computeMontage(im, 'sagittal', iSagittal);
 
-            imAxSize = size(imSagittal.CData);
-            imComputed = imresize(imComputed, [imAxSize(1) imAxSize(2)]);    
+%            imAxSize = size(imSagittal.CData);
+%            imComputed = imresize(imComputed, [imAxSize(1) imAxSize(2)]);    
 
             imSagittal.CData = imComputed; 
 
             if isFusion('get') == true
                 imComputed = computeMontage(imf, 'sagittal', iSagittal);
 
-                imAxSize = size(imSagittalF.CData);
-                imComputed = imresize(imComputed, [imAxSize(1) imAxSize(2)]);    
+ %               imAxSize = size(imSagittalF.CData);
+ %               imComputed = imresize(imComputed, [imAxSize(1) imAxSize(2)]);    
 
                 imSagittalF.CData = imComputed;                         
             end
@@ -1142,8 +1130,8 @@ function dicomViewerCore()
                     
                     ptMontageAxes2{iPointerOffset} = ...
                         text(axes2Ptr('get'), ...
-                             (jj-1)*xOffset , ...
-                             (hh-1)*yOffset , ...
+                             ((jj-1)*xOffset)+1 , ...
+                             ((hh-1)*yOffset)+1 , ...
                              sprintf('\n%s' , ...
                              num2str(lFirst+iPointerOffset-1)), ...
                              'Color', overlayColor('get') ...
@@ -1328,7 +1316,7 @@ function dicomViewerCore()
 
         cla(axes3fPtr('get'),'reset');
         cla(axes3Ptr('get') ,'reset');
-
+        
         set(axes3fPtr('get'), ...
             'Units'   , 'normalized', ...
             'Position', [0 0 1 1], ...
@@ -1348,7 +1336,7 @@ function dicomViewerCore()
             'YLim'    , [0 inf], ...
             'CLim'    , [0 inf] ...
             );              
-
+        
         if isVsplash('get') == true && ...
            (strcmpi(vSplahView('get'), 'axial') || ...
             strcmpi(vSplahView('get'), 'all'))
@@ -1391,32 +1379,23 @@ function dicomViewerCore()
             dVsplashLayoutX = vSplashLayout('get', 'x');
             dVsplashLayoutY = vSplashLayout('get', 'y');
 
-            [lFirst, lLast] = computeVsplashLayout(im, 'axial', iAxial);
-
             if gaussFilter('get') == true                    
-                imAxialF = montage(imgaussfilt(imf), ...
-                                   'Size'   , [dVsplashLayoutY dVsplashLayoutX], ...
-                                   'Indices', lFirst:lLast, ...
-                                   'Parent' , axes3fPtr('get') ...
-                                   );  
+               imAxialF = imagesc(imgaussfilt(imf(:,:,iAxial)),  ...
+                                  'Parent', axes3fPtr('get') ...
+                                  );                                                                
+
+               imAxial  = imagesc(imgaussfilt(im (:,:,iAxial)),  ...
+                                  'Parent', axes3Ptr('get') ...
+                                  );                      
                                
-                imAxial  = montage(imgaussfilt(im ), ...
-                                   'Size'   , [dVsplashLayoutY dVsplashLayoutX], ...
-                                   'Indices', lFirst:lLast, ...
-                                   'Parent' , axes3Ptr('get') ...
-                                   ); 
-            else                
-                imAxialF = montage(imf     , ...
-                                  'Size'   , [dVsplashLayoutY dVsplashLayoutX], ...
-                                  'Indices', lFirst:lLast, ...
-                                  'Parent' , axes3fPtr('get') ...
-                                  );  
-                              
-                imAxial  = montage(im , ...
-                                   'Size'   , [dVsplashLayoutY dVsplashLayoutX], ...
-                                   'Indices', lFirst:lLast, ...
-                                   'Parent' , axes3Ptr('get') ...
-                                   );                    
+            else     
+               imAxialF = imagesc(imf(:,:,iAxial),  ...
+                                  'Parent', axes3fPtr('get') ...
+                                  );                                                                
+
+               imAxial  = imagesc(im (:,:,iAxial),  ...
+                                  'Parent', axes3Ptr('get') ...
+                                  );                      
             end
 
             imAxialPtr ('set', imAxial );
@@ -1427,8 +1406,8 @@ function dicomViewerCore()
                                         size(dicomBuffer('get'), 3)-sliceNumber('get', 'axial')+1 ...
                                         );
 
-            imAxSize = size(imAxial.CData);
-            imComputed = imresize(imComputed, [imAxSize(1) imAxSize(2)]);   
+%            imAxSize = size(imAxial.CData);
+%            imComputed = imresize(imComputed, [imAxSize(1) imAxSize(2)]);   
 
             imAxial.CData = imComputed; 
             if isFusion('get') == true
@@ -1436,8 +1415,8 @@ function dicomViewerCore()
                                             'axial', size(dicomBuffer('get'), 3)-sliceNumber('get', 'axial')+1 ...
                                             );
 
-                imAxSize = size(imAxialF.CData);
-                imComputed = imresize(imComputed, [imAxSize(1) imAxSize(2)]);   
+%                imAxSize = size(imAxialF.CData);
+%                imComputed = imresize(imComputed, [imAxSize(1) imAxSize(2)]);   
 
                 imAxialF.CData = imComputed;
             end
@@ -1455,8 +1434,8 @@ function dicomViewerCore()
                 for jj=1:dVsplashLayoutX
                     ptMontageAxes3{iPointerOffset} = ...
                         text(axes3Ptr('get'), ...
-                             (jj-1)*xOffset , ...
-                             (hh-1)*yOffset , ...
+                             ((jj-1)*xOffset)+1 , ...
+                             ((hh-1)*yOffset)+1 , ...
                              sprintf('\n%s', num2str(lFirst+iPointerOffset-1)), ...
                              'Color', overlayColor('get') ...
                              );
@@ -1625,8 +1604,25 @@ function dicomViewerCore()
         if overlayActivate('get') == false
             set(tAxes3Text, 'Visible', 'off');
         end                  
-        axesText('set', 'axes3', tAxes3Text);                  
-
+        axesText('set', 'axes3', tAxes3Text);       
+        
+        if isVsplash('get') == true
+            aAxeXLim = get(axes1fPtr('get'), 'XLim');
+            aAxeYLim = get(axes1fPtr('get'), 'YLim');            
+            set(axes1fPtr('get'), 'XLim', [aAxeXLim(1) aAxeXLim(2)*dVsplashLayoutX]);
+            set(axes1fPtr('get'), 'YLim', [aAxeYLim(1) aAxeYLim(2)*dVsplashLayoutY]);            
+            
+            aAxeXLim = get(axes2fPtr('get'), 'XLim');
+            aAxeYLim = get(axes2fPtr('get'), 'YLim');            
+            set(axes2fPtr('get'), 'XLim', [aAxeXLim(1) aAxeXLim(2)*dVsplashLayoutX]);
+            set(axes2fPtr('get'), 'YLim', [aAxeYLim(1) aAxeYLim(2)*dVsplashLayoutY]);                        
+            
+            aAxeXLim = get(axes3fPtr('get'), 'XLim');
+            aAxeYLim = get(axes3fPtr('get'), 'YLim');            
+            set(axes3fPtr('get'), 'XLim', [aAxeXLim(1) aAxeXLim(2)*dVsplashLayoutX]);
+            set(axes3fPtr('get'), 'YLim', [aAxeYLim(1) aAxeYLim(2)*dVsplashLayoutY]);
+        end
+              
         if aspectRatio('get') == true
 
             atCoreMetaData = dicomMetaData('get');         
@@ -1653,21 +1649,26 @@ function dicomViewerCore()
                 y = computeAspectRatio('y', atCoreMetaData);
                 z = 1;                      
             end
-
+            
+               
            if strcmp(imageOrientation('get'), 'axial') 
+
                 daspect(axes1Ptr('get'), [z x y]); 
                 daspect(axes2Ptr('get'), [z y x]); 
                 daspect(axes3Ptr('get'), [x y z]); 
+               
+            elseif strcmp(imageOrientation('get'), 'coronal') 
 
-           elseif strcmp(imageOrientation('get'), 'coronal') 
                 daspect(axes1Ptr('get'), [x y z]); 
                 daspect(axes2Ptr('get'), [y z x]); 
                 daspect(axes3Ptr('get'), [z x y]);       
+                
 
             elseif strcmp(imageOrientation('get'), 'sagittal')  
+  
                 daspect(axes1Ptr('get'), [y x z]); 
                 daspect(axes2Ptr('get'), [x z y]); 
-                daspect(axes3Ptr('get'), [z x y]);                                                                        
+                daspect(axes3Ptr('get'), [z x y]);                 
            end
 
            if isFusion('get') == true
@@ -1676,27 +1677,32 @@ function dicomViewerCore()
                yf = fusionAspectRatioValue('get', 'y');
                zf = fusionAspectRatioValue('get', 'z');
 
-               if strcmp(imageOrientation('get'), 'axial') 
-                    daspect(axes1fPtr('get'), [zf xf yf]); 
-                    daspect(axes2fPtr('get'), [zf yf xf]); 
-                    daspect(axes3fPtr('get'), [xf yf zf]); 
+               if strcmp(imageOrientation('get'), 'axial')                    
 
+                    daspect(axes1fPtr('get'), [zf xf yf]); 
+                    daspect(axes2fPtr('get'), [zf yf xf]);                         
+                    daspect(axes3fPtr('get'), [xf yf zf]); 
+                    
                elseif strcmp(imageOrientation('get'), 'coronal') 
+
                     daspect(axes1fPtr('get'), [xf yf zf]); 
                     daspect(axes2fPtr('get'), [yf zf xf]); 
                     daspect(axes3fPtr('get'), [zf xf yf]);       
+                    
 
                 elseif strcmp(imageOrientation('get'), 'sagittal')  
-                    daspect(axes1fPtr('get'), [yf xf zf]); 
+
+                    daspect(axes1fPtr('get'), [yf xf zf]);                     
                     daspect(axes2fPtr('get'), [xf zf yf]); 
                     daspect(axes3fPtr('get'), [zf xf yf]);                                                                        
+                    
                end 
             end
         else
             x =1;
             y =1;
-            z =1;
-
+            z =1;            
+            
             daspect(axes1Ptr('get'), [z x y]); 
             daspect(axes2Ptr('get'), [z y x]); 
             daspect(axes3Ptr('get'), [x y z]);                    
