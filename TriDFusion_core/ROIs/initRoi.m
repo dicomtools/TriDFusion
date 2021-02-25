@@ -52,9 +52,10 @@ function initRoi()
 
             end
 
-            set(fiMainWindowPtr('get'),'CurrentAxes',axRoi)
+            set(fiMainWindowPtr('get'), 'CurrentAxes', axRoi)
 
             switch lower(tInitInput(iOffset).tRoi{bb}.Type)
+                
                 case lower('images.roi.line')
 
                     roiPtr = drawline(axRoi, ...
@@ -64,8 +65,11 @@ function initRoi()
                                       'Label'       , tInitInput(iOffset).tRoi{bb}.Label, ...
                                       'LabelVisible', tInitInput(iOffset).tRoi{bb}.LabelVisible, ...
                                       'Tag'         , tInitInput(iOffset).tRoi{bb}.Tag);  
+                                  
+                    uimenu(roiPtr.UIContextMenu, 'Label', 'Copy Object' , 'UserData', roiPtr, 'Callback' , @copyRoiCallback, 'Separator', 'on');
+                    uimenu(roiPtr.UIContextMenu, 'Label', 'Paste Object', 'UserData', roiPtr, 'Callback', @pasteRoiCallback);               
 
-                    uimenu(roiPtr.UIContextMenu,'Label', 'Snap To Circles', 'UserData',roiPtr, 'Callback',@snapLinesToCirclesCallback); 
+                    uimenu(roiPtr.UIContextMenu,'Label', 'Snap To Circles'   , 'UserData',roiPtr, 'Callback',@snapLinesToCirclesCallback, 'Separator', 'on'); 
                     uimenu(roiPtr.UIContextMenu,'Label', 'Snap To Rectangles', 'UserData',roiPtr, 'Callback',@snapLinesToRectanglesCallback); 
 
                     uimenu(roiPtr.UIContextMenu,'Label', 'Edit Label'     , 'UserData',roiPtr, 'Callback',@editLabelCallback, 'Separator', 'on');         

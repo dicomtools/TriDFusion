@@ -1,6 +1,6 @@
-function aObject = logoObject(sAction, aValue)
-%function aObject = logoObject(sAction, aValue)
-%Get\Set Logo Object.
+function rightClickMenu(sAction, objectPtr)
+%function aObject = rightClickMenu(sAction, objectPtr)
+%Get\Set R Pointer.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.
@@ -30,11 +30,31 @@ function aObject = logoObject(sAction, aValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent paObject; 
+    persistent paContextMenu; 
 
-    if strcmpi('set', sAction)
-        paObject = aValue;            
-    end      
-    
-    aObject = paObject;
+    if     strcmpi('reset', sAction)
+        paContextMenu = '';
+        
+    elseif strcmpi('on', sAction)        
+        for ff=1:numel(paContextMenu)
+            for gg=1:numel(paContextMenu{ff}.Children)
+                paContextMenu{ff}.Children(gg).Visible = 'on';          
+            end
+        end         
+        
+    elseif strcmpi('off', sAction)
+        for ff=1:numel(paContextMenu)
+            for gg=1:numel(paContextMenu{ff}.Children)
+                paContextMenu{ff}.Children(gg).Visible = 'off';          
+            end
+        end           
+        
+    elseif strcmpi('add', sAction)
+        cm = uicontextmenu(fiMainWindowPtr('get'));
+        uimenu(cm, 'Text', 'Paste Object', 'Callback', @pasteRoiCallback);
+        objectPtr.ContextMenu = cm;
+                
+        paContextMenu{numel(paContextMenu)+1} = objectPtr.ContextMenu;            
+    end
 end
+

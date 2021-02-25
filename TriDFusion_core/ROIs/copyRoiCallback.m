@@ -1,6 +1,6 @@
-function mainToolBarEnable(sEnable)
-%function mainToolBarEnable(sEnable)
-%Activate/Deactivate all toolbar btn.
+function copyRoiCallback(hObject, ~)
+%function copyRoiCallback(hObject, ~)
+%Copy ROI form Default Right Click menu.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -27,17 +27,11 @@ function mainToolBarEnable(sEnable)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    set(btn3DPtr('get')          , 'Enable', sEnable);
-    set(btnIsoSurfacePtr('get')  , 'Enable', sEnable);
-    set(btnTriangulatePtr('get') , 'Enable', sEnable);        
-    set(btnMIPPtr('get')         , 'Enable', sEnable);            
-    set(btnPanPtr('get')         , 'Enable', sEnable);
-    set(btnZoomPtr('get')        , 'Enable', sEnable);
-    
-    if numel(inputTemplate('get')) > 1
-        set(btnRegisterPtr('get')    , 'Enable', sEnable); 
+    tRoi = roiTemplate('get');
+    if isempty(tRoi)
+        return;
     end
-    
-%        set(uiSliderWindowPtr('get') , 'Enable', sEnable);
-%        set(uiSliderLevel  , 'Enable', sEnable);           
+
+    copyRoiPtr('set',  hObject.UserData);
+
 end

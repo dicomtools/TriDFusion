@@ -93,6 +93,11 @@ function setSourceCallback(~, ~)
         end
 
         if(numel(mainDir('get')))
+            
+            copyRoiPtr('set', '');
+            
+            releaseRoiWait();
+
             isDoseKernel('set', false);
             isFusion('set', false);
 

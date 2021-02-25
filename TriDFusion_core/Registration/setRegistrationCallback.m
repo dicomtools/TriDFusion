@@ -447,14 +447,14 @@ if 0
                 end
             end
 end
-            if isempty(tInitInput{jj}.SeriesDate)
+            if isempty(tInitInput(jj).atDicomInfo{1}.SeriesDate)
                 sInitSeriesDate = '';
             else
-                sSeriesDate = tInitInput{jj}.SeriesDate;
-                if isempty(tInitInput{jj}.SeriesTime)                            
+                sSeriesDate = tInitInput(jj).atDicomInfo{1}.SeriesDate;
+                if isempty(tInitInput(jj).atDicomInfo{1}.SeriesTime)                            
                     sSeriesTime = '000000';
                 else
-                    sSeriesTime = tInitInput{jj}.SeriesTime;
+                    sSeriesTime = tInitInput(jj).atDicomInfo{1}.SeriesTime;
                 end
 
                 sInitSeriesDate = sprintf('%s%s', sSeriesDate, sSeriesTime);                 

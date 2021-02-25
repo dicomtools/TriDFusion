@@ -1,5 +1,5 @@
-function editLabelCallback(hObject,~)
-%function editLabelCallback(hObject,~)
+function editLabelCallback(hObject, ~)
+%function editLabelCallback(hObject, ~)
 %Edit ROIs VOIs Label.
 %See TriDFuison.doc (or pdf) for more information about options.
 %

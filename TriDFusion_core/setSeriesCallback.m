@@ -31,6 +31,8 @@ function setSeriesCallback(~,~)
     iOffset = get(uiSeriesPtr('get'), 'Value');
 
     if iOffset <= numel(tInput)
+        
+        copyRoiPtr('set', '');
 
         releaseRoiWait();
 

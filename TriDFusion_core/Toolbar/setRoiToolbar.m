@@ -276,20 +276,24 @@ function setRoiToolbar(sVisible)
                     dLength = computeRoiLineLength(a);                            
                     a.Label = [num2str(dLength) ' mm'];
 
-                    addRoi(a);                  
-                    uimenu(a.UIContextMenu,'Label', 'Snap To Circles', 'UserData',a, 'Callback',@snapLinesToCirclesCallback); 
+                    addRoi(a);     
+                    
+                    uimenu(a.UIContextMenu, 'Label', 'Copy Object' , 'UserData', a, 'Callback', @copyRoiCallback, 'Separator', 'on');
+                    uimenu(a.UIContextMenu, 'Label', 'Paste Object', 'UserData', a, 'Callback', @pasteRoiCallback);
+                    
+                    uimenu(a.UIContextMenu,'Label', 'Snap To Circles'   , 'UserData',a, 'Callback',@snapLinesToCirclesCallback, 'Separator', 'on'); 
                     uimenu(a.UIContextMenu,'Label', 'Snap To Rectangles', 'UserData',a, 'Callback',@snapLinesToRectanglesCallback); 
 
                     uimenu(a.UIContextMenu,'Label', 'Edit Label' , 'UserData',a, 'Callback',@editLabelCallback, 'Separator', 'on');         
 
-                    uimenu(a.UIContextMenu,'Label', 'Hide/View Label' , 'UserData',a, 'Callback',@hideViewLabelCallback); 
-                    uimenu(a.UIContextMenu,'Label', 'Edit Color' , 'UserData',a, 'Callback',@editColorCallback); 
+                    uimenu(a.UIContextMenu,'Label', 'Hide/View Label', 'UserData',a, 'Callback',@hideViewLabelCallback); 
+                    uimenu(a.UIContextMenu,'Label', 'Edit Color'     , 'UserData',a, 'Callback',@editColorCallback); 
 
                     cropMenu(a);
 
                     uimenu(a.UIContextMenu,'Label', 'Display Result' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on'); 
 
-                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
+%                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
                     refreshImages();
 
                     if strcmpi(get(tContinuous, 'State'), 'off')
@@ -412,7 +416,7 @@ function setRoiToolbar(sVisible)
 
                     uimenu(a.UIContextMenu,'Label', 'Display Result' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on'); 
 
-                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
+%                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
                     refreshImages();
 
                     if strcmpi(get(tContinuous, 'State'), 'off')
@@ -529,7 +533,7 @@ function setRoiToolbar(sVisible)
 
                     uimenu(a.UIContextMenu,'Label', 'Display Result' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on'); 
 
-                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
+%                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
                     refreshImages();
 
                     if strcmpi(get(tContinuous, 'State'), 'off')
@@ -676,7 +680,7 @@ function setRoiToolbar(sVisible)
 
                     uimenu(a.UIContextMenu,'Label', 'Display Result' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on'); 
 
-                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll  );
+%                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll  );
                     refreshImages();
 
                     if strcmpi(get(tContinuous, 'State'), 'off')
@@ -789,7 +793,7 @@ function setRoiToolbar(sVisible)
 
                     uimenu(a.UIContextMenu,'Label', 'Display Result' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on'); 
 
-                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
+%                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
                     refreshImages();
 
                     if strcmpi(get(tContinuous, 'State'), 'off')
@@ -903,7 +907,7 @@ function setRoiToolbar(sVisible)
 
                     uimenu(a.UIContextMenu,'Label', 'Display Result' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on'); 
 
-                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
+%                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
                     refreshImages();
 
                     if strcmpi(get(tContinuous, 'State'), 'off')
@@ -927,22 +931,6 @@ function setRoiToolbar(sVisible)
             setCrossVisibility(true);
         end
 
-    end
-
-    function sLabelName = roiLabelName()
-
-        tRoiInput = inputTemplate('get');        
-        iOffset = get(uiSeriesPtr('get'), 'Value');
-        if iOffset > numel(tRoiInput)  
-            sLabelName = 'null';
-            return;
-        end  
-
-        if isfield( tRoiInput(iOffset), 'tRoi' )            
-                sLabelName = sprintf('ROI %d', numel(tRoiInput(iOffset).tRoi)+1);
-            else                        
-                sLabelName = 'ROI 1';
-        end
     end    
 
     function setContinuousCallback(~, ~)

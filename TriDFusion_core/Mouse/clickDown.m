@@ -1,4 +1,4 @@
-function clickDown(~, ~)
+function clickDown(hObject, ~)
 %function  clickDown(~, ~)
 %Mouse Click Down Action.
 %See TriDFuison.doc (or pdf) for more information about options.
@@ -32,20 +32,23 @@ function clickDown(~, ~)
     if switchTo3DMode('get')     == false && ...
        switchToIsoSurface('get') == false && ...
        switchToMIPMode('get')    == false             
+             
+   
 %                axeClicked('set', true);
 %                uiresume(gcf);
     end
 
-    if strcmp(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
+    if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
 
         if switchTo3DMode('get')     == false && ...
            switchToIsoSurface('get') == false && ...
-           switchToMIPMode('get')    == false     
+           switchToMIPMode('get')    == false          
 
             windowButton('set', 'down');             
             adjWL(get(0, 'PointerLocation'));
+            
         else
-            windowButton('set', 'down');  
+            windowButton('set', 'down');                      
         end
 
     else
@@ -85,6 +88,7 @@ function clickDown(~, ~)
 
             end
         end
-    end        
+    end      
+    
 end 
 

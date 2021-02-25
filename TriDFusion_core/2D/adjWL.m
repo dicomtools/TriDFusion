@@ -39,7 +39,7 @@ function adjWL(dInitCoord)
     dWLAdjCoe = (dMax + 1)/1024;
 
     aPosDiff = get(0,'PointerLocation') - pdInitialCoord;
-
+    
     dMax = dMax + aPosDiff(2) * dWLAdjCoe;
     dMIn = dMIn + aPosDiff(1) * dWLAdjCoe;
 
@@ -47,7 +47,21 @@ function adjWL(dInitCoord)
         dMax = 1;
     end
 
-    if(dMax > dMIn)  
+    if aPosDiff(1) == 0 && aPosDiff(2) == 0 
+        
+        if ~isempty(copyRoiPtr('get'))
+            rightClickMenu('on');
+        else
+            rightClickMenu('off');            
+        end
+   
+    else
+        rightClickMenu('off');
+    end        
+    
+    if dMax > dMIn
+                        
+        
         aCLim(1) = dMIn;
         aCLim(2) = dMax;
 
@@ -62,7 +76,8 @@ function adjWL(dInitCoord)
             set(axes1Ptr('get'),'CLim', aCLim);
             set(axes2Ptr('get'),'CLim', aCLim);
             set(axes3Ptr('get'),'CLim', aCLim);
-        end
+        end        
+        
     end
 
     pdInitialCoord = get(0,'PointerLocation');

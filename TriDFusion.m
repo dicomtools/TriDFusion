@@ -129,6 +129,8 @@ function TriDFusion(varargin)
              );
     fiMainWindowPtr('set', fiMainWindow);
     
+
+
 %    warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');  
     
 %    if argInternal == true

@@ -1,6 +1,6 @@
-function mainToolBarEnable(sEnable)
-%function mainToolBarEnable(sEnable)
-%Activate/Deactivate all toolbar btn.
+function sLabelName = roiLabelName()
+%function sLabelName = roiLabelName()
+%Return new roi label name.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -27,17 +27,16 @@ function mainToolBarEnable(sEnable)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    set(btn3DPtr('get')          , 'Enable', sEnable);
-    set(btnIsoSurfacePtr('get')  , 'Enable', sEnable);
-    set(btnTriangulatePtr('get') , 'Enable', sEnable);        
-    set(btnMIPPtr('get')         , 'Enable', sEnable);            
-    set(btnPanPtr('get')         , 'Enable', sEnable);
-    set(btnZoomPtr('get')        , 'Enable', sEnable);
-    
-    if numel(inputTemplate('get')) > 1
-        set(btnRegisterPtr('get')    , 'Enable', sEnable); 
+    tRoiInput = inputTemplate('get');        
+    iOffset = get(uiSeriesPtr('get'), 'Value');
+    if iOffset > numel(tRoiInput)  
+        sLabelName = 'null';
+        return;
+    end  
+
+    if isfield( tRoiInput(iOffset), 'tRoi' )            
+            sLabelName = sprintf('ROI %d', numel(tRoiInput(iOffset).tRoi)+1);
+        else                        
+            sLabelName = 'ROI 1';
     end
-    
-%        set(uiSliderWindowPtr('get') , 'Enable', sEnable);
-%        set(uiSliderLevel  , 'Enable', sEnable);           
 end

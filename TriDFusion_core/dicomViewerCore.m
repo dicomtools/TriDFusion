@@ -27,11 +27,13 @@ function dicomViewerCore()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    rightClickMenu('reset');
+
     im  = dicomBuffer('get');
     imf = fusionBuffer('get');
 
     atMetaData = dicomMetaData('get');     
-
+    
 %            if isempty(fusionBuffer('get')) 
     if isFusion('get') == false
         imf = im;
@@ -530,7 +532,10 @@ function dicomViewerCore()
             end
 
         end
-
+        
+        rightClickMenu('add', imAxe);
+        rightClickMenu('add', imAxeF);
+        
         imAxePtr ('set', imAxe );
         imAxeFPtr('set', imAxeF);
 
@@ -907,6 +912,9 @@ function dicomViewerCore()
             imCoronalFPtr('set', imCoronalF); 
 
         end
+        
+        rightClickMenu('add', imCoronal);
+        rightClickMenu('add', imCoronalF);
 
         linkaxes([axes1Ptr('get') axes1fPtr('get')],'xy');                
         set(axes1Ptr('get') , 'Visible', 'off');
@@ -926,31 +934,44 @@ function dicomViewerCore()
                  [iSagittalSize/2 iSagittalSize/2], ...
                  [iAxial+1 iAxial-1], ...
                  'Color', crossColor('get'));
+             
+            rightClickMenu('add', alAxes1Line{1});
 
             alAxes1Line{2} = line(axes1Ptr('get'), ...
                  [iSagittalSize/2+1 iSagittalSize/2-1], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
+             
+            rightClickMenu('add', alAxes1Line{2});
 
             alAxes1Line{3} = line(axes1Ptr('get'), ...
                  [0 iSagittalSize/2-crossSize('get')], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
+             
+            rightClickMenu('add', alAxes1Line{3});
 
             alAxes1Line{4} = line(axes1Ptr('get'), ...
                  [iSagittalSize  /2+crossSize('get') iSagittalSize], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
+             
+            rightClickMenu('add', alAxes1Line{4});
 
             alAxes1Line{5} = line(axes1Ptr('get'), ...
                  [iSagittal iSagittal], ...
                  [0 iAxialSize/2-crossSize('get')], ...
                  'Color', crossColor('get'));
+             
+            rightClickMenu('add', alAxes1Line{5});
 
             alAxes1Line{6} = line(axes1Ptr('get'), ...
                  [iSagittal iSagittal], ...
                  [iAxialSize/2+crossSize('get') iAxialSize], ...
                  'Color', crossColor('get'));                  
+             
+            rightClickMenu('add', alAxes1Line{6});
+             
 %                    hold off    
              axesLine('set', 'axes1', alAxes1Line);
 %            end
@@ -1216,8 +1237,11 @@ function dicomViewerCore()
 
             imSagittalPtr ('set', imSagittal );
             imSagittalFPtr('set', imSagittalF);
-       end
-
+        end
+       
+        rightClickMenu('add', imSagittal);
+        rightClickMenu('add', imSagittalF);
+        
         linkaxes([axes2Ptr('get') axes2fPtr('get')],'xy');                
         set(axes2Ptr('get') , 'Visible', 'off');
         set(axes2fPtr('get'), 'Visible', 'off');
@@ -1233,31 +1257,43 @@ function dicomViewerCore()
                  [iCoronalSize/2 iCoronalSize/2], ...
                  [iAxial+1 iAxial-1], ...
                  'Color', crossColor('get'));
+             
+            rightClickMenu('add', alAxes2Line{1});
 
             alAxes2Line{2} = line(axes2Ptr('get'), ...
                  [iCoronalSize/2+1 iCoronalSize/2-1], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
+             
+            rightClickMenu('add', alAxes2Line{2});
 
             alAxes2Line{3} = line(axes2Ptr('get'), ...
                  [0 iCoronalSize/2-crossSize('get')], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
+             
+            rightClickMenu('add', alAxes2Line{3});
 
             alAxes2Line{4} = line(axes2Ptr('get'), ...
                  [iCoronalSize/2+crossSize('get') iCoronalSize], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
+             
+            rightClickMenu('add', alAxes2Line{4});
 
             alAxes2Line{5} = line(axes2Ptr('get'), ...
                  [iCoronal iCoronal], ...
                  [0 iAxialSize/2-crossSize('get')], ...
                  'Color', crossColor('get'));
+             
+            rightClickMenu('add', alAxes2Line{5});
 
             alAxes2Line{6} = line(axes2Ptr('get'), ...
                  [iCoronal iCoronal], ...
                  [iAxialSize/2+crossSize('get') iAxialSize], ...
                  'Color', crossColor('get'));  
+             
+            rightClickMenu('add', alAxes2Line{6});
 
             axesLine('set', 'axes2', alAxes2Line);
 
@@ -1335,8 +1371,8 @@ function dicomViewerCore()
             'XLim'    , [0 inf], ...
             'YLim'    , [0 inf], ...
             'CLim'    , [0 inf] ...
-            );              
-        
+            ); 
+                
         if isVsplash('get') == true && ...
            (strcmpi(vSplahView('get'), 'axial') || ...
             strcmpi(vSplahView('get'), 'all'))
@@ -1506,7 +1542,10 @@ function dicomViewerCore()
             imAxialFPtr('set', imAxialF);
 
         end
-
+        
+        rightClickMenu('add', imAxial );
+        rightClickMenu('add', imAxialF);
+        
         linkaxes([axes3Ptr('get') axes3fPtr('get')],'xy');                
         set(axes3Ptr('get') , 'Visible', 'off');
         set(axes3fPtr('get'), 'Visible', 'off');
@@ -1522,31 +1561,43 @@ function dicomViewerCore()
                  [iSagittalSize/2 iSagittalSize/2], ...
                  [iCoronal+1 iCoronal-1], ...
                  'Color', crossColor('get'));
+             
+            rightClickMenu('add', alAxes3Line{1});
 
             alAxes3Line{2} = line(axes3Ptr('get'), ...
                  [iSagittalSize/2+1 iSagittalSize/2-1], ...
                  [iCoronal iCoronal], ...
                  'Color', crossColor('get'));
+             
+            rightClickMenu('add', alAxes3Line{2});
 
             alAxes3Line{3} = line(axes3Ptr('get'), ...
                  [0 iSagittalSize/2-crossSize('get')], ...
                  [iCoronal iCoronal], ...
                  'Color', crossColor('get'));
+             
+            rightClickMenu('add', alAxes3Line{3});
 
             alAxes3Line{4} = line(axes3Ptr('get'), ...
                  [iSagittalSize/2+crossSize('get') iSagittalSize], ...
                  [iCoronal iCoronal], ...
                  'Color', crossColor('get'));
+             
+            rightClickMenu('add', alAxes3Line{4});
 
             alAxes3Line{5} = line(axes3Ptr('get'), ...
                  [iSagittal iSagittal], ...
                  [0 iCoronalSize/2-crossSize('get')], ...
                  'Color', crossColor('get'));
+             
+            rightClickMenu('add', alAxes3Line{5});
 
             alAxes3Line{6} = line(axes3Ptr('get'), ...
                  [iSagittal iSagittal], ...
                  [iCoronalSize/2+crossSize('get') iCoronalSize], ...
                  'Color', crossColor('get'));
+             
+            rightClickMenu('add', alAxes3Line{6});
 
             axesLine('set', 'axes3', alAxes3Line);
 

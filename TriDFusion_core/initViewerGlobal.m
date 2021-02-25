@@ -174,4 +174,6 @@ function initViewerGlobal()
     
     viewerRootPath('set', './');
     
+    copyRoiPtr('set', '');
+    
 end

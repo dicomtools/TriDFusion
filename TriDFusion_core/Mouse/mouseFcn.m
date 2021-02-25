@@ -40,6 +40,6 @@ function mouseFcn(sAction)
         set(fiMainWindowPtr('get'), 'WindowButtonMotionFcn', @mouseMove    );
         set(fiMainWindowPtr('get'), 'WindowButtonUpFcn'    , @clickUp      );
         set(fiMainWindowPtr('get'), 'CloseRequestFcn'      , @closeFigure  );
-
     end
+    
 end

@@ -59,7 +59,7 @@ function clickUp(~, ~)
         end
         
         updateObjet3DPosition();      
- 
+        
     end
     
 end

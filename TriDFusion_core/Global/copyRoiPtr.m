@@ -1,7 +1,10 @@
-function mainToolBarEnable(sEnable)
-%function mainToolBarEnable(sEnable)
-%Activate/Deactivate all toolbar btn.
+function aObject = copyRoiPtr(sAction, aValue)
+%function aObject = copyRoiPtr(sAction, aValue)
+%Get\Set Copied ROI Pointer Object.
 %See TriDFuison.doc (or pdf) for more information about options.
+%
+%Note: option settings must fit on one line and can contain one semicolon at most.
+%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
@@ -27,17 +30,11 @@ function mainToolBarEnable(sEnable)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    set(btn3DPtr('get')          , 'Enable', sEnable);
-    set(btnIsoSurfacePtr('get')  , 'Enable', sEnable);
-    set(btnTriangulatePtr('get') , 'Enable', sEnable);        
-    set(btnMIPPtr('get')         , 'Enable', sEnable);            
-    set(btnPanPtr('get')         , 'Enable', sEnable);
-    set(btnZoomPtr('get')        , 'Enable', sEnable);
+    persistent paObject; 
+
+    if strcmpi('set', sAction)
+        paObject = aValue;            
+    end    
     
-    if numel(inputTemplate('get')) > 1
-        set(btnRegisterPtr('get')    , 'Enable', sEnable); 
-    end
-    
-%        set(uiSliderWindowPtr('get') , 'Enable', sEnable);
-%        set(uiSliderLevel  , 'Enable', sEnable);           
+    aObject = paObject;
 end

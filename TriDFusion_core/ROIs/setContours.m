@@ -111,7 +111,7 @@ function setContours()
 
                         uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on'); 
 
-                        set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
+ %                       set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
 
                         asTag{numel(asTag)+1} = sTag;                        
                     end
