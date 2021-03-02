@@ -1,5 +1,5 @@
-function setFusionCallback(~, ~)  
-%function setFusionCallback(~, ~) 
+function setFusionCallback(~, ~)
+%function setFusionCallback(~, ~)
 %Activate/Deactivate Fusion Main Function.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -8,147 +8,147 @@ function setFusionCallback(~, ~)
 %Last specifications modified:
 %
 % Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
-% 
+%
 % This file is part of The Triple Dimention Fusion (TriDFusion).
-% 
+%
 % TriDFusion development has been led by:  Daniel Lafontaine
-% 
-% TriDFusion is distributed under the terms of the Lesser GNU Public License. 
-% 
+%
+% TriDFusion is distributed under the terms of the Lesser GNU Public License.
+%
 %     This version of TriDFusion is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 % TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 % without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 % See the GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
 
     if switchTo3DMode('get')     == true || ...
        switchToIsoSurface('get') == true || ...
-       switchToMIPMode('get')    == true 
-   
-       volFusionObj = volFusionObject('get'); 
-       mipFusionObj = mipFusionObject('get'); 
-       isoFusionObj = isoFusionObject('get'); 
-            
-       if isFusion('get') == false         
+       switchToMIPMode('get')    == true
+
+       volFusionObj = volFusionObject('get');
+       mipFusionObj = mipFusionObject('get');
+       isoFusionObj = isoFusionObject('get');
+
+       if isFusion('get') == false
             isFusion('set', true);
             set(btnFusionPtr('get'), 'BackgroundColor', 'white');
-            
+
             tFuseInput  = inputTemplate('get');
-            iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');   
-            atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;                        
-                        
+            iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
+            atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
+
             if ~isempty(volFusionObj) && switchTo3DMode('get') == true
                 [aFusionMap, sFusionType] = getVolFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
 
                 set(volFusionObj, 'Alphamap', aFusionMap);
                 set(volFusionObj, 'Colormap', get3DColorMap('get', colorMapVolFusionOffset('get') ));
-                
+
                 volFusionObject('set', volFusionObj);
-                
+
                 if get(ui3DVolumePtr('get'), 'Value') == 2
                     if strcmpi(sFusionType, 'custom')
                         ic = customAlphaCurve(axe3DPanelVolAlphmapPtr('get'),  volFusionObj, 'volfusion');
-                        ic.surfObj = volFusionObj;  
+                        ic.surfObj = volFusionObj;
 
                         volICFusionObject('set', ic);
 
                         alphaCurveMenu(axe3DPanelVolAlphmapPtr('get'), 'volfusion');
                     else
-                        displayAlphaCurve(aFusionMap, axe3DPanelMipAlphmapPtr('get'));                                                                           
+                        displayAlphaCurve(aFusionMap, axe3DPanelMipAlphmapPtr('get'));
                     end
-                end               
-                
-            end              
-            
+                end
+
+            end
+
             if ~isempty(mipFusionObj) && switchToMIPMode('get') == true
-                
+
                 [aFusionMap, sFusionType] = getMipFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
-                
+
                 set(mipFusionObj, 'Alphamap', aFusionMap);
                 set(mipFusionObj, 'Colormap', get3DColorMap('get', colorMapMipFusionOffset('get') ));
-                        
+
                 mipFusionObject('set', mipFusionObj);
-                
-                if get(ui3DVolumePtr('get'), 'Value') == 2 
+
+                if get(ui3DVolumePtr('get'), 'Value') == 2
                     if strcmpi(sFusionType, 'custom')
                         ic = customAlphaCurve(axe3DPanelMipAlphmapPtr('get'),  mipFusionObj, 'mipfusion');
-                        ic.surfObj = mipFusionObj;  
+                        ic.surfObj = mipFusionObj;
 
                         mipICFusionObject('set', ic);
 
                         alphaCurveMenu(axe3DPanelMipAlphmapPtr('get'), 'mipfusion');
                     else
-                        displayAlphaCurve(aFusionMap, axe3DPanelMipAlphmapPtr('get'));                   
+                        displayAlphaCurve(aFusionMap, axe3DPanelMipAlphmapPtr('get'));
                     end
-                end                
-                
-            end 
-            
+                end
+
+            end
+
             if ~isempty(isoFusionObj) && switchToIsoSurface('get')
-                
+
                 set(isoFusionObj, 'Isovalue', isoSurfaceFusionValue('get'));
                 set(isoFusionObj, 'IsosurfaceColor', surfaceColor('get', isoColorFusionOffset('get')) );
-                        
+
                 isoFusionObject('set', isoFusionObj);
-            end            
-            
-        else
+            end
+
+       else
             isFusion('set', false);
             set(btnFusionPtr('get'), 'BackgroundColor', 'default');
-            
+
             if ~isempty(volFusionObj)
                 volFusionObj.Alphamap = zeros(256,1);
                 volFusionObject('set', volFusionObj);
                 if get(ui3DVolumePtr('get'), 'Value') == 2
-                    displayAlphaCurve(zeros(256,1), axe3DPanelVolAlphmapPtr('get'));                
+                    displayAlphaCurve(zeros(256,1), axe3DPanelVolAlphmapPtr('get'));
                 end
-            end  
-            
+            end
+
             if ~isempty(mipFusionObj)
                 mipFusionObj.Alphamap = zeros(256,1);
                 mipFusionObject('set', mipFusionObj);
                 if get(ui3DVolumePtr('get'), 'Value') == 2
-                    displayAlphaCurve(zeros(256,1), axe3DPanelMipAlphmapPtr('get'));                
+                    displayAlphaCurve(zeros(256,1), axe3DPanelMipAlphmapPtr('get'));
                 end
-            end            
-            
+            end
+
             if ~isempty(isoFusionObj)
                 isoFusionObj.Isovalue = 1;
                 isoFusionObject('set', isoFusionObj);
-            end                        
-       end    
+            end
+       end
     else
 
         tFuseInput = inputTemplate('get');
         if numel(tFuseInput) == 1
-            isFusion('set', false);               
-            set(btnFusionPtr('get'), 'BackgroundColor', 'default');                
-            fusionBuffer('reset');             
+            isFusion('set', false);
+            set(btnFusionPtr('get'), 'BackgroundColor', 'default');
+            fusionBuffer('reset');
             return
         end
 
         iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-        if iSeriesOffset > numel(tFuseInput)  
-            isFusion('set', false);               
-            set(btnFusionPtr('get'), 'BackgroundColor', 'default');                
-            fusionBuffer('reset');                
+        if iSeriesOffset > numel(tFuseInput)
+            isFusion('set', false);
+            set(btnFusionPtr('get'), 'BackgroundColor', 'default');
+            fusionBuffer('reset');
             return;
-        end  
+        end
 
-        iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');                
-        if iFuseOffset > numel(tFuseInput)                
-            isFusion('set', false);               
-            set(btnFusionPtr('get'), 'BackgroundColor', 'default');                
-            fusionBuffer('reset');                
+        iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
+        if iFuseOffset > numel(tFuseInput)
+            isFusion('set', false);
+            set(btnFusionPtr('get'), 'BackgroundColor', 'default');
+            fusionBuffer('reset');
             return;
-        end 
+        end
 
         set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
         tMetaData  = dicomMetaData('get');
@@ -163,34 +163,34 @@ function setFusionCallback(~, ~)
         end
         set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
 
-        if isFusion('get') == false         
+        if isFusion('get') == false
 
-            aInput = inputBuffer('get');  
+            aInput = inputBuffer('get');
 
             set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
-            A = dicomBuffer('get');                   
+            A = dicomBuffer('get');
 
-            set(uiSeriesPtr('get'), 'Value', iFuseOffset);                
-            B = dicomBuffer('get');                                    
+            set(uiSeriesPtr('get'), 'Value', iFuseOffset);
+            B = dicomBuffer('get');
             if isempty(B)
-                B = aInput{iFuseOffset};                   
-            end   
-            set(uiSeriesPtr('get'), 'Value', iSeriesOffset); 
+                B = aInput{iFuseOffset};
+            end
+            set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
 
             if numel(size(A))~=numel(size(B)) %Fuse 2D with 3D
-if 1                    
-                isFusion('set', false);               
-                set(btnFusionPtr('get'), 'BackgroundColor', 'default');                
-                fusionBuffer('reset');    
+if 1
+                isFusion('set', false);
+                set(btnFusionPtr('get'), 'BackgroundColor', 'default');
+                fusionBuffer('reset');
                 return;
 
-else                   
+else
                 if numel(size(A))>numel(size(B))
                     [x1,y1,z1]=size(A);
                     [x2,y2,~]=size(B);
                     aTemp = zeros(x2,y2,z1);
                     for nn=1:z1
-                        aTemp(:,:,nn)=B(:,:);    
+                        aTemp(:,:,nn)=B(:,:);
                     end
                     B = imresize(aTemp, [x1 y1]);
 
@@ -202,7 +202,7 @@ else
                 else
 
                 end
-end                    
+end
             end
 
             initFusionWindowLevel('set', true); % Need to be fix
@@ -215,27 +215,41 @@ end
                 progressBar(0.999, 'Processing fusion, please wait');
 
                 [x1,y1,~] = size(A);
-                [x2,y2,~] = size(B);                    
+                [x2,y2,~] = size(B);
 
-                B = imresize(B, [x1 y1]);    
+                B = imresize(B, [x1 y1]);
 
-             %   B = resampleImage(A, B);    
+                if iSeriesOffset ~= iFuseOffset
+                    if tFuseInput(iSeriesOffset).bFlipLeftRight == true
+                        B=B(:,end:-1:1);
+                    end
+
+                    if tFuseInput(iSeriesOffset).bFlipAntPost == true
+                        B=B(end:-1:1,:);
+                    end
+                end
+                
+                tFuseInput(iFuseOffset).bEdgeDetection = false;
+                
+                inputTemplate('set', tFuseInput);
+
+             %   B = resampleImage(A, B);
 
                 fusionBuffer('set', B);
 
-                if aspectRatio('get') == true      
+                if aspectRatio('get') == true
 
                     xf = computeAspectRatio('x', tFuseMetaData);
                     yf = computeAspectRatio('y', tFuseMetaData);
 
-                    daspect(axefPtr('get'), [xf yf 1]);                     
+                    daspect(axefPtr('get'), [xf yf 1]);
 
                 else
                     xf =1;
-                    yf =1;   
+                    yf =1;
 
-                    daspect(axefPtr('get'), [1 1 1]);                 
-                    axis(axefPtr('get'), 'normal');                       
+                    daspect(axefPtr('get'), [1 1 1]);
+                    axis(axefPtr('get'), 'normal');
                 end
 
                 fusionAspectRatioValue('set', 'x', xf);
@@ -243,20 +257,38 @@ end
 
             else
 
-                progressBar(0.999, 'Processing fusion, please wait');                     
+                progressBar(0.999, 'Processing fusion, please wait');
 
                 set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
 
                 if strcmp(imageOrientation('get'), 'coronal')
-                    B = permute(B, [3 2 1]);  
+                    B = permute(B, [3 2 1]);
                 elseif strcmp(imageOrientation('get'), 'sagittal')
-                    B = permute(B, [2 3 1]); 
+                    B = permute(B, [2 3 1]);
                 else
                     B = permute(B, [1 2 3]);
                 end
+                
+                if iSeriesOffset ~= iFuseOffset
+
+                    if tFuseInput(iSeriesOffset).bFlipLeftRight == true
+                        B=B(:,end:-1:1,:);
+                    end
+
+                    if tFuseInput(iSeriesOffset).bFlipAntPost == true
+                        B=B(end:-1:1,:,:);
+                    end
+
+                    if tFuseInput(iSeriesOffset).bFlipHeadFeet == true
+                        B=B(:,:,end:-1:1);
+                    end
+                end
+                
+                tFuseInput(iFuseOffset).bEdgeDetection = false;
+                inputTemplate('set', tFuseInput);
 
                 [x1,y1,z1] = size(A);
-                [x2,y2,z2] = size(B);                    
+                [x2,y2,z2] = size(B);
 
                 if (z1 ~= z2 && strcmpi(imageOrientation('get'), 'axial'))  ||...
                    (x1 ~= x2 && strcmpi(imageOrientation('get'), 'coronal'))||...
@@ -264,10 +296,10 @@ end
 
     %                 msgbox('Warning: Reslice is not yet supported, the fusion may be wrong!');
                     if ( ( tMetaData{1}.ReconstructionDiameter ~= 700 && ...
-                           strcmpi(tMetaData{1}.Modality, 'ct') ) || ... 
+                           strcmpi(tMetaData{1}.Modality, 'ct') ) || ...
                        ( tFuseMetaData{1}.ReconstructionDiameter ~= 700 && ...
                          strcmpi(tFuseMetaData{1}.Modality, 'ct') ) ) && ...
-                       numel(tMetaData) ~= 1 && ...  
+                       numel(tMetaData) ~= 1 && ...
                        numel(tFuseMetaData) ~= 1
                         [B, tFuseMetaData] = ...
                             resampleImageTransformMatrix(B, ...
@@ -275,7 +307,7 @@ end
                                                          A, ...
                                                          tMetaData, ...
                                                          'linear' ...
-                                                         );  
+                                                         );
                    else
                         [B, tFuseMetaData] = ...
                             resampleImage(B, ...
@@ -283,16 +315,16 @@ end
                                           A, ...
                                           tMetaData, ...
                                           'linear' ...
-                                          );  
+                                          );
                     end
 
                 else
-                %    B = imresize3(B, [x1 y1 z1]); % path z should be z2    
+                %    B = imresize3(B, [x1 y1 z1]); % path z should be z2
                     if ( ( tMetaData{1}.ReconstructionDiameter ~= 700 && ...
-                           strcmpi(tMetaData{1}.Modality, 'ct') ) || ... 
+                           strcmpi(tMetaData{1}.Modality, 'ct') ) || ...
                        ( tFuseMetaData{1}.ReconstructionDiameter ~= 700 && ...
                           strcmpi(tFuseMetaData{1}.Modality, 'ct') ) ) && ...
-                       numel(tMetaData) ~= 1 && ...  
+                       numel(tMetaData) ~= 1 && ...
                        numel(tFuseMetaData) ~= 1
                         [B, tFuseMetaData] = ...
                             resampleImageTransformMatrix(B, ...
@@ -300,7 +332,7 @@ end
                                                          A, ...
                                                          tMetaData, ...
                                                          'linear' ...
-                                                         );    
+                                                         );
                     else
                         [B, tFuseMetaData] = ...
                             resampleImage(B, ...
@@ -308,7 +340,7 @@ end
                                           A, ...
                                           tMetaData, ...
                                           'linear' ...
-                                          );    
+                                          );
                     end
                 end
 
@@ -318,8 +350,8 @@ end
 
                     if ~isempty(tFuseMetaData{1}.PixelSpacing)
                         xf = tFuseMetaData{1}.PixelSpacing(1);
-                        yf = tFuseMetaData{1}.PixelSpacing(2);                                                   
-                        zf = computeSliceSpacing(tFuseMetaData);                   
+                        yf = tFuseMetaData{1}.PixelSpacing(2);
+                        zf = computeSliceSpacing(tFuseMetaData);
 
                         if xf == 0
                             xf = 1;
@@ -327,7 +359,7 @@ end
 
                         if yf == 0
                             yf = 1;
-                        end                    
+                        end
 
                         if zf == 0
                             zf = xf;
@@ -336,40 +368,40 @@ end
 
                         xf = computeAspectRatio('x', tFuseMetaData) ;
                         yf = computeAspectRatio('y', tFuseMetaData) ;
-                        zf = 1;                      
-                    end       
+                        zf = 1;
+                    end
 
-                   if strcmp(imageOrientation('get'), 'axial') 
-                        daspect(axes1fPtr('get'), [zf xf yf]); 
-                        daspect(axes2fPtr('get'), [zf yf xf]); 
-                        daspect(axes3fPtr('get'), [xf yf zf]);                        
-                   elseif strcmp(imageOrientation('get'), 'coronal')      
-                        daspect(axes1fPtr('get'), [xf yf zf]); 
-                        daspect(axes2fPtr('get'), [yf zf xf]); 
-                        daspect(axes3fPtr('get'), [zf xf yf]);                          
-                    elseif strcmp(imageOrientation('get'), 'sagittal')  
-                        daspect(axes1fPtr('get'), [yf xf zf]); 
-                        daspect(axes2fPtr('get'), [xf zf yf]); 
-                        daspect(axes3fPtr('get'), [zf xf yf]);                                                 
-                    end     
+                   if strcmp(imageOrientation('get'), 'axial')
+                        daspect(axes1fPtr('get'), [zf xf yf]);
+                        daspect(axes2fPtr('get'), [zf yf xf]);
+                        daspect(axes3fPtr('get'), [xf yf zf]);
+                   elseif strcmp(imageOrientation('get'), 'coronal')
+                        daspect(axes1fPtr('get'), [xf yf zf]);
+                        daspect(axes2fPtr('get'), [yf zf xf]);
+                        daspect(axes3fPtr('get'), [zf xf yf]);
+                    elseif strcmp(imageOrientation('get'), 'sagittal')
+                        daspect(axes1fPtr('get'), [yf xf zf]);
+                        daspect(axes2fPtr('get'), [xf zf yf]);
+                        daspect(axes3fPtr('get'), [zf xf yf]);
+                    end
                 else
                     xf =1;
                     yf =1;
-                    zf =1; 
+                    zf =1;
 
-                    daspect(axes1fPtr('get'), [1 1 1]); 
+                    daspect(axes1fPtr('get'), [1 1 1]);
                     daspect(axes2fPtr('get'), [1 1 1]);
-                    daspect(axes3fPtr('get'), [1 1 1]);                 
+                    daspect(axes3fPtr('get'), [1 1 1]);
 
                     axis(axes1fPtr('get'), 'normal');
                     axis(axes2fPtr('get'), 'normal');
-                    axis(axes3fPtr('get'), 'normal');                    
+                    axis(axes3fPtr('get'), 'normal');
                 end
 
                 fusionAspectRatioValue('set', 'x', xf);
                 fusionAspectRatioValue('set', 'y', yf);
-                fusionAspectRatioValue('set', 'z', zf);                   
-            end     
+                fusionAspectRatioValue('set', 'z', zf);
+            end
 
             progressBar(1, 'Ready');
 
@@ -380,6 +412,9 @@ end
             set(btnFusionPtr('get'), 'BackgroundColor', 'white');
 
         else
+           tFuseInput(iFuseOffset).bEdgeDetection = false;
+           inputTemplate('set', tFuseInput);
+
            isFusion('set', false);
 
            initFusionWindowLevel('set', false); % Need to be fix
@@ -396,7 +431,7 @@ end
                 [dMax, dMin] = computeWindowLevel(2000, 0);
             elseif strcmpi(tFuseMetaData{1}.Modality, 'pt')
                 dMax = max(B, [], 'all');
-                dMin = min(B, [], 'all');                    
+                dMin = min(B, [], 'all');
             else
                 dMax = max(B, [], 'all');
                 dMin = min(B, [], 'all');
@@ -416,7 +451,7 @@ end
             sliderAlphaValue('set', 0.5);
             set(uiAlphaSliderPtr('get') , 'Value', 0.5);
 
-            if size(fusionBuffer('get'), 3) == 1            
+            if size(fusionBuffer('get'), 3) == 1
                 set(axefPtr('get'), 'CLim', [dMin dMax]);
             else
                 set(axes1fPtr('get'), 'CLim', [dMin dMax]);
@@ -425,20 +460,20 @@ end
             end
 
         else
-            lFusionMin = fusionWindowLevel('get', 'min');   
-            lFusionMax = fusionWindowLevel('get', 'max'); 
+            lFusionMin = fusionWindowLevel('get', 'min');
+            lFusionMax = fusionWindowLevel('get', 'max');
             if size(dicomBuffer('get'), 3) == 1
                 set(axefPtr('get'), 'CLim', [lFusionMin lFusionMax]);
             else
                 set(axes1fPtr('get'), 'CLim', [lFusionMin lFusionMax]);
                 set(axes2fPtr('get'), 'CLim', [lFusionMin lFusionMax]);
-                set(axes3fPtr('get'), 'CLim', [lFusionMin lFusionMax]);                
+                set(axes3fPtr('get'), 'CLim', [lFusionMin lFusionMax]);
             end
-        end    
+        end
 
         uiAlphaSlider = uiAlphaSliderPtr('get');
         aAxePosition = uiAlphaSlider.Parent.Position;
-        if size(dicomBuffer('get'), 3) == 1 
+        if size(dicomBuffer('get'), 3) == 1
 
             set(uiAlphaSlider, ...
                 'Position', [10 ...
@@ -450,7 +485,7 @@ end
         else
            if isVsplash('get') == true && ...
                ~strcmpi(vSplahView('get'), 'all')
-                if viewSegPanel('get') 
+                if viewSegPanel('get')
 
                     set(uiAlphaSlider, ...
                         'Position', [uiSegMainPanel.Position(3)+10 ...
@@ -459,7 +494,7 @@ end
                                      15 ...
                                      ] ...
                         );
-                elseif viewKernelPanel('get') == true                 
+                elseif viewKernelPanel('get') == true
 
                     set(uiAlphaSlider, ...
                         'Position', [uiKernelMainPanel.Position(3)+10 ...
@@ -468,7 +503,7 @@ end
                                      15 ...
                                      ] ...
                         );
-                else                
+                else
                     set(uiAlphaSlider, ...
                         'Position', [10 ...
                                      addOnWidth('get')+50 ...
@@ -477,7 +512,7 @@ end
                                      ] ...
                         );
                 end
-           else            
+           else
                 set(uiAlphaSlider, ...
                     'Position', [aAxePosition(3)/2+10 ...
                                  addOnWidth('get')+50 ...
@@ -510,8 +545,8 @@ end
                                      40 ...
                                      ((aAxePosition(4))/2)-35-20 ...
                                      ] ...
-                        );                
-                elseif viewKernelPanel('get') == true 
+                        );
+                elseif viewKernelPanel('get') == true
 
                     set(ptrFusionColorbar, ...
                         'Position', [aAxePosition(3)-(uiKernelMainPanel.Position(3)/2)-49 ...
@@ -541,7 +576,7 @@ end
         end
 
         uiFusionSliderWindow = uiFusionSliderWindowPtr('get');
-        aAxePosition = uiFusionSliderWindow.Parent.Position;                                                                 
+        aAxePosition = uiFusionSliderWindow.Parent.Position;
         if size(dicomBuffer('get'), 3) == 1
 
             set(uiFusionSliderWindow, ...
@@ -559,13 +594,13 @@ end
                              (aAxePosition(4)/2)-75-20 ...
                              ] ...
                 );
-        end   
+        end
         set(uiFusionSliderWindow, ...
             'BackgroundColor', backgroundColor('get') ...
             );
 
         uiFusionSliderLevel = uiFusionSliderLevelPtr('get');
-        aAxePosition = uiFusionSliderLevel.Parent.Position;                                                                 
+        aAxePosition = uiFusionSliderLevel.Parent.Position;
         if size(dicomBuffer('get'), 3) == 1
             set(uiFusionSliderLevel, ...
                 'Position', [aAxePosition(3)-21 ...
@@ -582,15 +617,15 @@ end
                              (aAxePosition(4)/2)-75-20 ...
                              ] ...
                 );
-        end           
+        end
         set(uiFusionSliderLevel, ...
             'BackgroundColor', backgroundColor('get') ...
-            );            
+            );
 
         if isFusion('get') == true
 
             uiSliderWindow = uiSliderWindowPtr('get');
-            aAxePosition = uiSliderWindow.Parent.Position;                                                                
+            aAxePosition = uiSliderWindow.Parent.Position;
             if size(dicomBuffer('get'), 3) == 1
                 set(uiSliderWindow, ...
                     'Position', [aAxePosition(3)-50 ...
@@ -598,7 +633,7 @@ end
                                  12 ...
                                  (aAxePosition(4)/2)-30-20 ...
                                  ] ...
-                    );                    
+                    );
             else
                 set(uiSliderWindow, ...
                     'Position', [aAxePosition(3)-50 ...
@@ -606,14 +641,14 @@ end
                                  12 ...
                                  (aAxePosition(4)/2)-45-20 ...
                                  ] ...
-                    );                   
-            end                
+                    );
+            end
             set(uiSliderWindow, ...
                 'BackgroundColor', backgroundColor('get') ...
                 );
 
             uiSliderLevel = uiSliderLevelPtr('get');
-            aAxePosition = uiSliderLevel.Parent.Position;                                                                
+            aAxePosition = uiSliderLevel.Parent.Position;
             if size(dicomBuffer('get'), 3) == 1
 
                 set(uiSliderLevel, ...
@@ -631,7 +666,7 @@ end
                                  (aAxePosition(4)/2)-45-20 ...
                                  ] ...
                     );
-            end  
+            end
             set(uiSliderLevel, ...
                 'BackgroundColor', backgroundColor('get') ...
                 );
@@ -646,12 +681,12 @@ end
                                  40 ...
                                  (aAxePosition(4)/2)+5-20 ...
                                  ] ...
-                    );                    
-            else                    
+                    );
+            else
                 if isVsplash('get') == true && ...
                   ~strcmpi(vSplahView('get'), 'all')
 
-                    if viewSegPanel('get') 
+                    if viewSegPanel('get')
 
                         set(ptrColorbar, ...
                             'Position', [aAxePosition(3)-(uiSegMainPanel.Position(3)/2)-49 ...
@@ -660,7 +695,7 @@ end
                                          (aAxePosition(4)/2)-4-20 ...
                                          ] ...
                             );
-                    elseif viewKernelPanel('get') == true 
+                    elseif viewKernelPanel('get') == true
 
                         set(ptrColorbar, ...
                             'Position', [aAxePosition(3)-(uiKernelMainPanel.Position(3)/2)-49 ...
@@ -678,7 +713,7 @@ end
                                          ] ...
                             );
                     end
-                else                        
+                else
                     set(ptrColorbar, ...
                         'Position', [aAxePosition(3)-49 ...
                                      (aAxePosition(4)/2) ...
@@ -691,7 +726,7 @@ end
         else
 
             uiSliderWindow = uiSliderWindowPtr('get');
-            aAxePosition = uiSliderWindow.Parent.Position;                                                                
+            aAxePosition = uiSliderWindow.Parent.Position;
             if size(dicomBuffer('get'), 3) == 1
 
                 set(uiSliderWindow, ...
@@ -700,7 +735,7 @@ end
                                  12 ...
                                  aAxePosition(4)-80-20 ...
                                  ] ...
-                    );                    
+                    );
             else
                 set(uiSliderWindow, ...
                     'Position', [aAxePosition(3)-50 ...
@@ -708,11 +743,11 @@ end
                                  12 ...
                                  aAxePosition(4)-95-20 ...
                                  ] ...
-                    );                   
-            end    
+                    );
+            end
 
             uiSliderLevel = uiSliderLevelPtr('get');
-            aAxePosition = uiSliderLevel.Parent.Position;                                                                
+            aAxePosition = uiSliderLevel.Parent.Position;
             if size(dicomBuffer('get'), 3) == 1
 
                 set(uiSliderLevel, ...
@@ -730,7 +765,7 @@ end
                                  aAxePosition(4)-95-20 ...
                                  ] ...
                    );
-            end     
+            end
 
             ptrColorbar = uiColorbarPtr('get');
             aAxePosition = ptrColorbar.Parent.Position;
@@ -742,11 +777,11 @@ end
                                  40 ...
                                  aAxePosition(4)-11-20 ...
                                  ] ...
-                    );                    
-            else                    
+                    );
+            else
                 if isVsplash('get') == true && ...
                   ~strcmpi(vSplahView('get'), 'all')
-                    if viewSegPanel('get') 
+                    if viewSegPanel('get')
 
                         set(ptrColorbar, ...
                             'Position', [aAxePosition(3)-(uiSegMainPanel.Position(3)/2)-49 ...
@@ -755,7 +790,7 @@ end
                                          aAxePosition(4)-11-20 ...
                                          ] ...
                             );
-                    elseif viewKernelPanel('get') == true 
+                    elseif viewKernelPanel('get') == true
                         set(ptrColorbar, ...
                             'Position', [aAxePosition(3)-(uiKernelMainPanel.Position(3)/2)-49 ...
                                          7 ...
@@ -772,7 +807,7 @@ end
                                          ] ...
                             );
                     end
-                else                             
+                else
                     set(ptrColorbar, ...
                         'Position', [aAxePosition(3)-49 ...
                                      7 ...
@@ -788,13 +823,13 @@ end
 
             set(uiFusionColorbarPtr('get')    , 'Visible', 'on');
             set(uiFusionSliderWindowPtr('get'), 'Visible', 'on');
-            set(uiFusionSliderLevelPtr('get') , 'Visible', 'on');                
-            set(uiAlphaSliderPtr('get')       , 'Visible', 'on');  
-        else    
+            set(uiFusionSliderLevelPtr('get') , 'Visible', 'on');
+            set(uiAlphaSliderPtr('get')       , 'Visible', 'on');
+        else
             set(uiFusionColorbarPtr('get')    , 'Visible', 'off');
             set(uiFusionSliderWindowPtr('get'), 'Visible', 'off');
-            set(uiFusionSliderLevelPtr('get') , 'Visible', 'off');                
-            set(uiAlphaSliderPtr('get')       , 'Visible', 'off');                
+            set(uiFusionSliderLevelPtr('get') , 'Visible', 'off');
+            set(uiAlphaSliderPtr('get')       , 'Visible', 'off');
         end
 
         if size(dicomBuffer('get'), 3) == 1
@@ -805,14 +840,14 @@ end
                 alpha(axePtr('get'), 0.5);
             else
                 set(imAxeFPtr('get') , 'Visible', 'off');
-                alpha(axePtr('get'), 1);                    
+                alpha(axePtr('get'), 1);
             end
         else
             if isFusion('get') == true
 
                 set(imCoronalFPtr('get') , 'Visible', 'on');
                 set(imSagittalFPtr('get'), 'Visible', 'on');
-                set(imAxialFPtr('get')   , 'Visible', 'on');    
+                set(imAxialFPtr('get')   , 'Visible', 'on');
 
                 alpha(axes1Ptr('get'), 0.5);
                 alpha(axes2Ptr('get'), 0.5);
@@ -820,33 +855,33 @@ end
             else
                 set(imCoronalFPtr('get') , 'Visible', 'off');
                 set(imSagittalFPtr('get'), 'Visible', 'off');
-                set(imAxialFPtr('get')   , 'Visible', 'off');    
+                set(imAxialFPtr('get')   , 'Visible', 'off');
 
                 alpha(axes1Ptr('get'), 1);
                 alpha(axes2Ptr('get'), 1);
-                alpha(axes3Ptr('get'), 1);                    
+                alpha(axes3Ptr('get'), 1);
             end
         end
 
         uiLogo = logoObject('get');
         if (size(dicomBuffer('get'), 3) == 1 && ...
-            isFusion('get') == true) || ...           
+            isFusion('get') == true) || ...
            (isFusion('get') == true  && ...
-            isVsplash('get') == true && ... 
+            isVsplash('get') == true && ...
             strcmpi(vSplahView('get'), 'axial')) || ...
            (isFusion('get') == true  && ...
-            isVsplash('get') == true && ... 
+            isVsplash('get') == true && ...
             strcmpi(vSplahView('get'), 'coronal')) || ...
            (isFusion('get') == true  && ...
-            isVsplash('get') == true && ... 
+            isVsplash('get') == true && ...
             strcmpi(vSplahView('get'), 'sagittal'))
 
-            set(uiLogo, 'Position', [5 35 70 30]); 
+            set(uiLogo, 'Position', [5 35 70 30]);
         else
-            set(uiLogo, 'Position', [5 15 70 30]);                 
+            set(uiLogo, 'Position', [5 15 70 30]);
         end
 
-        setViewerDefaultColor(true, tMetaData, tFuseMetaData);        
+        setViewerDefaultColor(true, tMetaData, tFuseMetaData);
 
         refreshImages();
     end

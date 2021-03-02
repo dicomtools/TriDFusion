@@ -93,14 +93,6 @@ function refreshImages()
 
         im=im(:,:);
 
-%              if flipHeadFeet('get') == true
-%                  im=im(end:-1:1,:);
-%              end               
-
-%              if flipLeftRight('get') == true
-%                  im=im(:,end:-1:1);
-%              end 
-
 %               imshow(im, [lMin lMax], 'Parent', axe);
 %           if exist('axe')
 %               cla(axe,'reset');

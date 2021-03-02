@@ -120,12 +120,18 @@ function initTemplates()
            exist('atDicomInfo' , 'var') && ...
            exist('aDicomBuffer', 'var')
 
-            for dFliesLoop=1: numel(asFilesList)
-                tSetInputTemplate(dFliesLoop).asFilesList  = asFilesList{dFliesLoop};
-                tSetInputTemplate(dFliesLoop).atDicomInfo  = atDicomInfo{dFliesLoop};
-                tSetInputTemplate(dFliesLoop).aDicomBuffer = aDicomBuffer{dFliesLoop};
-            end
-
+            for dSeriesLoop=1: numel(asFilesList)
+                tSetInputTemplate(dSeriesLoop).asFilesList  = asFilesList{dSeriesLoop};
+                tSetInputTemplate(dSeriesLoop).atDicomInfo  = atDicomInfo{dSeriesLoop};
+                tSetInputTemplate(dSeriesLoop).aDicomBuffer = aDicomBuffer{dSeriesLoop};
+                
+                tSetInputTemplate(dSeriesLoop).bEdgeDetection = false;
+                tSetInputTemplate(dSeriesLoop).bFlipLeftRight = false;
+                tSetInputTemplate(dSeriesLoop).bFlipAntPost   = false;
+                tSetInputTemplate(dSeriesLoop).bFlipHeadFeet  = false;
+                tSetInputTemplate(dSeriesLoop).bDoseKernel    = false;                
+            end 
+                    
             inputTemplate('set', tSetInputTemplate);
 
             if numel(inputTemplate('get')) ~= 0

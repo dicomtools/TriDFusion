@@ -538,13 +538,26 @@ end
            switchToMIPMode('get')    == true 
            return;
         end
-
-        if flipHeadFeet('get') == false
-            flipHeadFeet('set', true);                    
-        else    
-            flipHeadFeet('set', false);
+        
+        if size(dicomBuffer('get'), 3) == 1            
+            return;
+        end   
+        
+        tInput = inputTemplate('get');
+        
+        dOffset = get(uiSeriesPtr('get'), 'Value');
+        if dOffset > numel(tInput)
+            return;
+        end                      
+        
+        if tInput(dOffset).bFlipHeadFeet == true
+            tInput(dOffset).bFlipHeadFeet = false;
+        else
+            tInput(dOffset).bFlipHeadFeet = true;
         end
 
+        inputTemplate('set', tInput);  
+                
         im = dicomBuffer('get');   
         im=im(:,:,end:-1:1);
         dicomBuffer('set', im);
@@ -565,20 +578,39 @@ end
            switchToMIPMode('get')    == true 
             return;
         end
-
-        if flipLeftRight('get') == false
-            flipLeftRight('set', true);
-        else    
-            flipLeftRight('set', false);
-        end
-
+        
+        tInput = inputTemplate('get');
+        
+        dOffset = get(uiSeriesPtr('get'), 'Value');
+        if dOffset > numel(tInput)
+            return;
+        end                      
+        
+        if tInput(dOffset).bFlipLeftRight == true
+            tInput(dOffset).bFlipLeftRight = false;
+        else
+            tInput(dOffset).bFlipLeftRight = true;
+        end     
+        
+        inputTemplate('set', tInput);        
+        
         im = dicomBuffer('get');                   
-        im=im(:,end:-1:1,:);                
+
+        if size(dicomBuffer('get'), 3) == 1                              
+            im=im(:,end:-1:1);     
+        else
+            im=im(:,end:-1:1,:);     
+        end
+        
         dicomBuffer('set', im);
 
         if isFusion('get')
             imf = fusionBuffer('get');   
-            imf=imf(:,end:-1:1,:);
+            if size(fusionBuffer('get'), 3) == 1                              
+                imf=imf(:,end:-1:1);
+            else
+                imf=imf(:,end:-1:1,:);
+            end
             fusionBuffer('set', imf);                    
         end        
 
@@ -592,20 +624,38 @@ end
            switchToMIPMode('get')    == true 
             return;
         end
-
-        if flipAntPost('get') == false
-            flipAntPost('set', true);                                       
-        else    
-            flipAntPost('set', false);
-        end
-
+        
+        tInput = inputTemplate('get');
+        
+        dOffset = get(uiSeriesPtr('get'), 'Value');
+        if dOffset > numel(tInput)
+            return;
+        end                      
+        
+        if tInput(dOffset).bFlipAntPost == true
+            tInput(dOffset).bFlipAntPost = false;
+        else
+            tInput(dOffset).bFlipAntPost = true;
+        end      
+        
+        inputTemplate('set', tInput);
+        
         im = dicomBuffer('get');   
-        im=im(end:-1:1,:,:);
+        if size(dicomBuffer('get'), 3) == 1                              
+            im=im(end:-1:1,:);
+        else
+            im=im(end:-1:1,:,:);
+        end
         dicomBuffer('set', im);
 
         if isFusion('get')
-            imf = fusionBuffer('get');   
-            imf=imf(end:-1:1,:,:);
+            imf = fusionBuffer('get'); 
+            if size(fusionBuffer('get'), 3) == 1                              
+                imf=imf(end:-1:1,:);
+            else
+                imf=imf(end:-1:1,:,:);
+            end
+            
             fusionBuffer('set', imf);                    
         end   
 

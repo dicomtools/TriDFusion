@@ -407,7 +407,7 @@ function setRegistrationCallback(~, ~)
         if dInitOffset > numel(tInitInput)
             return;
         end
-        
+
         releaseRoiWait();
 
         set(uiSeriesPtr('get'), 'Enable', 'off');
@@ -451,15 +451,15 @@ end
                 sInitSeriesDate = '';
             else
                 sSeriesDate = tInitInput(jj).atDicomInfo{1}.SeriesDate;
-                if isempty(tInitInput(jj).atDicomInfo{1}.SeriesTime)                            
+                if isempty(tInitInput(jj).atDicomInfo{1}.SeriesTime)
                     sSeriesTime = '000000';
                 else
                     sSeriesTime = tInitInput(jj).atDicomInfo{1}.SeriesTime;
                 end
 
-                sInitSeriesDate = sprintf('%s%s', sSeriesDate, sSeriesTime);                 
+                sInitSeriesDate = sprintf('%s%s', sSeriesDate, sSeriesTime);
             end
-          
+
             if ~isempty(sInitSeriesDate)
                 if contains(sInitSeriesDate,'.')
                     sInitSeriesDate = extractBefore(sInitSeriesDate,'.');
@@ -472,13 +472,19 @@ end
 
             asDescription{jj} = sprintf('%s %s', sInitSeriesDescription, sInitSeriesDate);
 
-
             dicomBuffer('set',aBuffer);
 
             dicomMetaData('set', tInitInput(jj).atDicomInfo);
 
             setQuantification(jj);
+
+            tInitInput(jj).bEdgeDetection = false;
+            tInitInput(jj).bFlipLeftRight = false;
+            tInitInput(jj).bFlipAntPost   = false;
+            tInitInput(jj).bFlipHeadFeet  = false;
+            tInitInput(jj).bDoseKernel    = false; 
         end
+
         seriesDescription('set', asDescription);
 
         set(uiSeriesPtr('get'), 'Value', dInitOffset);
@@ -487,8 +493,10 @@ end
         fusionBuffer('reset');
         isFusion('set', false);
         set(btnFusionPtr('get'), 'BackgroundColor', 'default');
-        
+
         isDoseKernel('set', false);
+
+        inputTemplate('set', tInitInput);
 
         delete(dlgRegister);
 
@@ -520,7 +528,7 @@ end
 
         if dNbElements < 2
             progressBar(1, 'Error: At least 2 volumes must be selected!');
-            h = msgbox('Error: registerCallback(): At least 2 volumes must be selected!', 'Error');
+            h = msgbox('Error: resampleCallback(): At least 2 volumes must be selected!', 'Error');
 %            if integrateToBrowser('get') == true
 %                sLogo = './TriDFusion/logo.png';
 %            else
@@ -531,7 +539,7 @@ end
 %            javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
             return;
         end
-        
+
         releaseRoiWait();
 
         tInput = inputTemplate('get');
@@ -562,23 +570,6 @@ end
                         elseif strcmp(imageOrientation('get'), 'sagittal')
                             aBuffer = permute(aInput{kk}, [3 1 2]);
                         end
-if 0
-                        if numel(tInput(kk).asFilesList) ~= 1
-
-                            if ~isempty(tInput(kk).atDicomInfo{1}.ImagePositionPatient)
-
-                                if tInput(kk).atDicomInfo{2}.ImagePositionPatient(3) - ...
-                                   tInput(kk).atDicomInfo{1}.ImagePositionPatient(3) > 0
-                                    aBuffer = aBuffer(:,:,end:-1:1);
-
-                                end
-                            end
-                        else
-                            if strcmpi(tInput(kk).atDicomInfo{1}.PatientPosition, 'FFS')
-                                aBuffer = aBuffer(:,:,end:-1:1);
-                            end
-                        end
-end
                     end
                 end
 
@@ -587,6 +578,9 @@ end
                 end
 
                 if adLbSeries(kk) == 1 && bInitRef == true
+
+                    tInput(adLbSeries(kk)).bEdgeDetection = false;
+
               %      dInitOffset = kk;
                     bInitRef = false;
                     atRefMetaData = atMetaData;
@@ -602,6 +596,8 @@ end
 
                 if dNextSeries >1
                     if adLbSeries(kk) == dNextSeries
+
+                        tInput(adLbSeries(kk)).bEdgeDetection = false;
 
                         progressBar(dNextSeries/dNbElements-0.000001, sprintf('Processing resampling %d/%d, please wait', dNextSeries-1, dNbElements-1));
 
@@ -621,6 +617,8 @@ end
 
         progressBar(1, 'Ready');
 
+        inputTemplate('set', tInput);
+
         set(uiSeriesPtr('get'), 'Value', dInitOffset);
         set(uiSeriesPtr('get'), 'Enable', 'on');
 
@@ -628,7 +626,7 @@ end
         set(btnFusionPtr('get'), 'BackgroundColor', 'default');
 
         delete(dlgRegister);
-        
+
         setQuantification(dInitOffset);
 
         clearDisplay();
@@ -650,7 +648,7 @@ end
     end
 
     function registerCallback(~, ~)
-        
+
         releaseRoiWait();
 
         asInterpolation = get(uiInterpolation, 'String');
@@ -757,6 +755,9 @@ end
                 end
 
                 if adLbSeries(kk) == 1 && bInitRef == true
+
+                    tInput(adLbSeries(kk)).bEdgeDetection = false;
+
              %       dInitOffset = kk;
                     bInitRef = false;
                     atRefMetaData = atMetaData;
@@ -783,6 +784,8 @@ end
                 if dNextSeries >1
                     if adLbSeries(kk) == dNextSeries
 
+                        tInput(adLbSeries(kk)).bEdgeDetection = false;
+
                         progressBar(dNextSeries/dNbElements-0.000001, sprintf('Processing registration %d/%d, please wait', dNextSeries-1, dNbElements-1));
                         [aBuffer, atMetaData, Rregistered, Rmoving] = registerImage(aBuffer, atMetaData, refImage, atRefMetaData, sMode, optimizer, metric, updateDescription('get'));
 
@@ -808,6 +811,8 @@ end
 
         progressBar(1, 'Ready');
 
+        inputTemplate('set', tInput);
+
         set(uiSeriesPtr('get'), 'Value', dInitOffset);
         set(uiSeriesPtr('get'), 'Enable', 'on');
 
@@ -815,7 +820,7 @@ end
         set(btnFusionPtr('get'), 'BackgroundColor', 'default');
 
         delete(dlgRegister);
-        
+
         setQuantification(dInitOffset);
 
         clearDisplay();

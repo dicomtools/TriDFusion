@@ -67,8 +67,12 @@ function lOffset = getColorMapOffset(sLabel)
         case 'pet'
             lOffset = 19;
         case 'hot metal'
-            lOffset = 20;                            
+            lOffset = 20;    
+        case 'angio'
+            lOffset = 21;            
+              
         otherwise
             lOffset = 0;
     end
+    
 end

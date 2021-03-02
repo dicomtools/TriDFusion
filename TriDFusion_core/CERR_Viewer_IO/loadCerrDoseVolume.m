@@ -107,9 +107,16 @@ function loadCerrDoseVolume(planC, structNamC)
     tNewInput(1).aDicomBuffer = scan3M;
     tNewInput(2).aDicomBuffer = dose3M;
 
-    tNewInput(1).asFilesList = '';
-    tNewInput(2).asFilesList = '';
-       
+    for ii=1:numel(tNewInput)
+        tNewInput(ii).asFilesList = '';
+
+        tNewInput(ii).bEdgeDetection = false;
+        tNewInput(ii).bFlipLeftRight = false;
+        tNewInput(ii).bFlipAntPost   = false;
+        tNewInput(ii).bFlipHeadFeet  = false;
+        tNewInput(ii).bDoseKernel    = false;
+    end
+        
     inputTemplate('set', tNewInput);
     dicomBuffer  ('set', scan3M);
     
@@ -295,8 +302,8 @@ function loadCerrDoseVolume(planC, structNamC)
     
     switchTo3DMode    ('set', false);
     switchToIsoSurface('set', false);
-    switchToMIPMode   ('set', false);
-
+    switchToMIPMode   ('set', false);    
+        
     rotate3d off
 
     set(btnFusionPtr('get'), 'BackgroundColor', 'default');

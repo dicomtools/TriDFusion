@@ -130,7 +130,6 @@ function TriDFusion(varargin)
     fiMainWindowPtr('set', fiMainWindow);
     
 
-
 %    warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');  
     
 %    if argInternal == true
@@ -224,6 +223,7 @@ function TriDFusion(varargin)
             setMIPCallback();
         end        
     end                    
+    
     
     function resizeFigureCallback(~,~)
         if exist('resizeViewer', 'var')

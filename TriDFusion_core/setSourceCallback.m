@@ -97,7 +97,7 @@ function setSourceCallback(~, ~)
             copyRoiPtr('set', '');
             
             releaseRoiWait();
-
+            
             isDoseKernel('set', false);
             isFusion('set', false);
 
@@ -393,8 +393,14 @@ function setSourceCallback(~, ~)
                     tNewInput(ii).asFilesList  = asNewFilesList{ii};
                     tNewInput(ii).atDicomInfo  = atNewDicomInfo{ii};
                     tNewInput(ii).aDicomBuffer = aNewDicomBuffer{ii};
+                    
+                    tNewInput(ii).bEdgeDetection = false;
+                    tNewInput(ii).bFlipLeftRight = false;
+                    tNewInput(ii).bFlipAntPost   = false;
+                    tNewInput(ii).bFlipHeadFeet  = false;
+                    tNewInput(ii).bDoseKernel    = false;
                 end
-
+  
                 inputTemplate('set', tNewInput);
 
                 if numel(inputTemplate('get')) ~= 0

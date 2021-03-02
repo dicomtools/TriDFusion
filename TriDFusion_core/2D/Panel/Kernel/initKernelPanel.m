@@ -318,9 +318,9 @@ function initKernelPanel()
                     atCoreMetaData{jj}.Units = 'DOSE';
                 end
             end
-            
+
             dicomMetaData('set', atCoreMetaData);
-            
+
             if numel(injDateTime) == 14
                 injDateTime = sprintf('%s.00', injDateTime);
             end
@@ -524,7 +524,20 @@ if 0
         end
 end
         isDoseKernel('set', false);
-        
+
+        tInitInput(iOffset).bEdgeDetection = false;
+        tInitInput(iOffset).bFlipLeftRight = false;
+        tInitInput(iOffset).bFlipAntPost   = false;
+        tInitInput(iOffset).bFlipHeadFeet  = false;
+        tInitInput(iOffset).bDoseKernel    = false; 
+
+        dFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
+        if dFuseOffset <= numel(tInitInput)
+            tInitInput(dFuseOffset).bEdgeDetection = false;
+        end
+
+        inputTemplate('set', tInitInput);
+
         dicomBuffer('set',aBuffer);
 
         dicomMetaData('set', tInitInput(iOffset).atDicomInfo);

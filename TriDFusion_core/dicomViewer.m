@@ -47,13 +47,12 @@ function resize = dicomViewer()
     windowLevel('set', 'max', 0);
     windowLevel('set', 'min', 0);
 
-    flipHeadFeet ('set', false);
-    flipAntPost  ('set', false);
-    flipLeftRight('set', false);
-
     imageSegTreshValue('set', 'lower', 0);
     imageSegTreshValue('set', 'upper', 1);
     lungSegTreshValue ('set', 0.5       );
+    
+    edgeSegMethod      ('set', 'sobel');
+    fudgeFactorSegValue('set', 0.3);
 
     crossSize       ('set', 10      );
     crossColor      ('set', 'Cyan'  );
