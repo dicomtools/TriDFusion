@@ -51,6 +51,9 @@ function adjWL(dInitCoord)
         
         if ~isempty(copyRoiPtr('get'))
             rightClickMenu('on');
+            
+    %        windowButton('set', 'up'); % Fix for Linux
+
         else
             rightClickMenu('off');            
         end

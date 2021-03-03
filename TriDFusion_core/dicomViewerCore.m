@@ -566,9 +566,10 @@ function dicomViewerCore()
                      'Box'          , 'off', ...
                      'Location'     , 'east', ...
                      'ButtonDownFcn', @colorbarCallback ...
-                     );  
-                                 
+                     );                                   
         uiFusionColorbarPtr('set', ptrFusionColorbar);
+        colorbarCallback(ptrFusionColorbar); % Fix for Linux
+        
         aAxePosition = ptrFusionColorbar.Parent.Position;                
         set(ptrFusionColorbar, ...
             'Position', [aAxePosition(3)-49 ...
@@ -599,6 +600,7 @@ function dicomViewerCore()
                     'ButtonDownFcn', @colorbarCallback ...
                     );                           
         uiColorbarPtr('set', ptrColorbar);
+        colorbarCallback(ptrColorbar); % Fix for Linux
 
         aAxePosition = ptrColorbar.Parent.Position;
         if isFusion('get') == true
@@ -1854,6 +1856,8 @@ function dicomViewerCore()
                          );            
         end
         uiFusionColorbarPtr('set', ptrFusionColorbar);
+        colorbarCallback(ptrFusionColorbar); % Fix for Linux
+        
         aAxePosition = ptrFusionColorbar.Parent.Position;
         set(ptrFusionColorbar, 'Position', [aAxePosition(3)-49 29 40 ((aAxePosition(4))/2)-35-20]);
 
@@ -1917,6 +1921,7 @@ function dicomViewerCore()
                          );  
          end
          uiColorbarPtr('set', ptrColorbar);
+        colorbarCallback(ptrColorbar); % Fix for Linux
 
          aAxePosition = ptrColorbar.Parent.Position;
          if isFusion('get') == true

@@ -27,6 +27,8 @@ function colorbarCallback(hObject, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    windowButton('set', 'up'); % Fix for Linux
+
     tEdgeInput = inputTemplate('get');
     
     dEdgeFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');

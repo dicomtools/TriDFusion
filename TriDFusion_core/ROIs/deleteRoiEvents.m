@@ -64,7 +64,14 @@ function deleteRoiEvents(hObject, ~)
             end
 
             tDeleteInput(iOffset).tRoi{bb} = [];
-            tDeleteInput(iOffset).tRoi(cellfun(@isempty, tDeleteInput(iOffset).tRoi)) = [];                                                                   
+            tDeleteInput(iOffset).tRoi(cellfun(@isempty, tDeleteInput(iOffset).tRoi)) = [];     
+            
+            if ~isempty(copyRoiPtr('get'))
+                if strcmpi(get(hObject, 'Tag'), get(copyRoiPtr('get'), 'Tag'))
+                    copyRoiPtr('set', '');
+                end
+                
+            end
 
             if isempty(tDeleteInput(iOffset).tRoi)
                 roiTemplate('set', '');

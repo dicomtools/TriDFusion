@@ -52,9 +52,15 @@ function rightClickMenu(sAction, objectPtr)
     elseif strcmpi('add', sAction)
         cm = uicontextmenu(fiMainWindowPtr('get'));
         uimenu(cm, 'Text', 'Paste Object', 'Callback', @pasteRoiCallback);
+        uimenu(cm, 'Text', 'Hide Menu', 'Separator', 'on', 'Callback', @hideRoiMenuCallback);
         objectPtr.ContextMenu = cm;
                 
         paContextMenu{numel(paContextMenu)+1} = objectPtr.ContextMenu;            
     end
+    
+    function hideRoiMenuCallback(~, ~)
+        roiTemplate('set', '');
+    end
+    
 end
 
