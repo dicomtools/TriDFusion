@@ -1,5 +1,5 @@
-function figRoiHistogram(ptrObject, bSUVUnit, bSegmented, dSubtraction)
-%function figRoiHistogram(ptrObject, bSUVUnit, bSegmented, dSubtraction)
+function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtraction)
+%function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtraction)
 %Figure ROI Histogram Main Function.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -227,7 +227,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bSegmented, dSubtraction)
     set(dcmObject, 'Enable', 'on');
 
     function setHistFigureName()
-
+        
        sType = '';
        if isfield(ptrObject, 'Type')
             if strcmpi(ptrObject.Type, 'voi')
@@ -260,7 +260,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bSegmented, dSubtraction)
             sSegmented = '';
         end
 
-        if isDoseKernel('get') == true
+        if bDoseKernel == true
             sUnit = 'Unit: Dose';
         else
 

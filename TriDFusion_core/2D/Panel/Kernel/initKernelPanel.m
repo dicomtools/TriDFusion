@@ -120,9 +120,10 @@ function initKernelPanel()
                   'Callback', @uiKernelIsotopeCallback...
                   );
 
-   if ~isempty(tDoseKernel)
-    set(uiKernelIsotope, 'String', tDoseKernel.Isotope{get(uiKernelModel, 'Value')}{get(uiKernelTissue, 'Value')});
-  end
+    if ~isempty(tDoseKernel)
+        set(uiKernelIsotope, 'String', tDoseKernel.Isotope{get(uiKernelModel, 'Value')}{get(uiKernelTissue, 'Value')});
+    end
+    
         uicontrol(uiKernelPanelPtr('get'),...
                   'Enable'  , sEnable, ...
                   'String', 'Apply',...
@@ -234,15 +235,15 @@ function initKernelPanel()
 
         function setDoseKernel()
 
-            isDoseKernel('set', false);
-
             tInput = inputTemplate('get');
             dOffset = get(uiSeriesPtr('get'), 'Value');
 
             if dOffset > numel(tInput)
                 return;
             end
-
+            
+            tInput(dOffset).bDoseKernel = false;
+            
             progressBar(0.999, 'Processing kernel, please wait');
 
             dModel   = get(uiKernelModel   , 'Value');
@@ -399,8 +400,9 @@ function initKernelPanel()
 
             setWindowMinMax(dMax, dMin);
 
-            isDoseKernel('set', true);
-
+            tInput(dOffset).bDoseKernel = true;           
+            inputTemplate('set', tInput);
+ 
             refreshImages();
 
             progressBar(1, 'Ready');
@@ -523,8 +525,6 @@ if 0
             end
         end
 end
-        isDoseKernel('set', false);
-
         tInitInput(iOffset).bEdgeDetection = false;
         tInitInput(iOffset).bFlipLeftRight = false;
         tInitInput(iOffset).bFlipAntPost   = false;

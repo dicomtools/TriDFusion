@@ -29,6 +29,13 @@ function refreshImages()
 
     im  = dicomBuffer('get');
     imf = fusionBuffer('get');
+    
+    tInput = inputTemplate('get');        
+
+    dOffset = get(uiSeriesPtr('get'), 'Value');
+    if dOffset > numel(tInput)
+        return;
+    end   
 
     if overlayActivate('get') == true
 
@@ -591,9 +598,9 @@ function refreshImages()
 
                     switch lower(atMetaData{1}.Modality)
                         case {'pt', 'nm'}
-
+         
                             if strcmpi(atMetaData{1}.Units, 'BQML') && ...
-                               isDoseKernel('get') == false && ...    
+                               tInput(dOffset).bDoseKernel == false && ...    
                                isfield(tOverlayQuant, 'tSUV') 
                                 suvValue = im(iCoronal,iSagittal,iAxial) * tOverlayQuant.tSUV.dScale;
                                 sAxe3Text = sprintf('\n\n\n\n\n\n%s\n%s\n%s\n%s\n(SUV is decay-corrected to the scan start time)\nMin SUV/W: %s -- %s Bq/cc\nMax SUV/W: %s -- %s Bq/cc\nTotal SUV/W: %s -- %s mCi\nCurrent SUV/W: %s -- %s Bq/cc\nA: %s/%s', ...

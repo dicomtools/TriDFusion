@@ -126,7 +126,6 @@ function loadCerrDoseVolume(planC, structNamC)
     inputBuffer  ('set', aBuffer);
     dicomMetaData('set', tTemplate);          
              
-    isDoseKernel('set', false);
     isFusion('set', false);
 
     initWindowLevel('set', true);

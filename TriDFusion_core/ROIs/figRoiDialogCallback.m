@@ -30,6 +30,13 @@ function figRoiDialogCallback(hObject, ~)
     ROI_PANEL_X = 1350;
     ROI_PANEL_Y = 600;
     
+    tInput = inputTemplate('get');
+
+    dOffset = get(uiSeriesPtr('get'), 'Value');
+    if dOffset > numel(tInput)
+        return;
+    end
+        
     releaseRoiWait();
 
     if strcmpi(get(hObject, 'Tag'), 'toolbar')
@@ -61,21 +68,21 @@ function figRoiDialogCallback(hObject, ~)
     mRoiOptions = uimenu(figRoiWindow,'Label','Options');
 
     if suvMenuUnitOption('get') == true && ...
-       isDoseKernel('get') == false
+       tInput(dOffset).bDoseKernel == false
         sSuvChecked = 'on';
     else
         sSuvChecked = 'off';
     end
 
     if segMenuOption('get') == true && ...
-        isDoseKernel('get') == false
+        tInput(dOffset).bDoseKernel == false
 
         sSegChecked = 'on';
     else
         sSegChecked = 'off';
     end
 
-    if isDoseKernel('get') == true
+    if tInput(dOffset).bDoseKernel == true
         sSuvEnable = 'off';
     else
         sSuvEnable = 'on';
@@ -214,7 +221,7 @@ function figRoiDialogCallback(hObject, ~)
     end
 
     if strcmpi(mSegmented.Checked, 'on') && ...
-       isDoseKernel('get') == false     
+       tInput(dOffset).bDoseKernel == false     
         bSegmented = true;
     else
         bSegmented = false;
@@ -296,7 +303,8 @@ function figRoiDialogCallback(hObject, ~)
             end
         end
 
-        function figRoiHistogramCallback(hObject, ~)
+        function figRoiHistogramCallback(hObject, ~)            
+                        
             aVoiRoiTag = voiRoiTag('get');
 
             tRoiInput = roiTemplate('get');
@@ -337,7 +345,7 @@ function figRoiDialogCallback(hObject, ~)
                         end
 
 
-                        figRoiHistogram(tVoiInput{aa}, bSUVUnit, bSegmented, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Sub);
+                        figRoiHistogram(tVoiInput{aa}, bSUVUnit, tInput(dOffset).bDoseKernel, bSegmented, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Sub);
                         return;
                     end
 
@@ -364,7 +372,7 @@ function figRoiDialogCallback(hObject, ~)
                                 bSegmented = false;
                             end
 
-                            figRoiHistogram(tRoiInput{cc}, bSUVUnit, bSegmented, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Sub);
+                            figRoiHistogram(tRoiInput{cc}, bSUVUnit, tInput(dOffset).bDoseKernel, bSegmented, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Sub);
                             return;
                        end
                     end
@@ -741,7 +749,7 @@ function figRoiDialogCallback(hObject, ~)
                     end
 
                     if strcmpi(get(mSegmented, 'Checked'), 'on') && ...
-                       isDoseKernel('get') == false     
+                       tInput(dOffset).bDoseKernel == false     
                         bSegmented = true;
                     else
                         bSegmented = false;
@@ -927,9 +935,9 @@ function figRoiDialogCallback(hObject, ~)
 
         if ~isvalid(lbVoiRoiWindow)
             return;
-        end
+        end       
 
-        if isDoseKernel('get') == true
+        if tInput(dOffset).bDoseKernel == true
             sUnit =  'Unit: Dose';
         else
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')

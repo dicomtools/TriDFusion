@@ -8,24 +8,24 @@ function initViewerGlobal()
 %Last specifications modified:
 %
 % Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
-% 
+%
 % This file is part of The Triple Dimention Fusion (TriDFusion).
-% 
+%
 % TriDFusion development has been led by:  Daniel Lafontaine
-% 
-% TriDFusion is distributed under the terms of the Lesser GNU Public License. 
-% 
+%
+% TriDFusion is distributed under the terms of the Lesser GNU Public License.
+%
 %     This version of TriDFusion is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 % TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 % without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 % See the GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     axePtr ('set', '');
     axefPtr('set', '');
@@ -45,16 +45,16 @@ function initViewerGlobal()
     imAxialPtr   ('set', '');
 
     imCoronalFPtr ('set', '');
-    imSagittalFPtr('set', '');   
+    imSagittalFPtr('set', '');
     imAxialFPtr   ('set', '');
 
     fiMainWindowPtr       ('set', '');
     uiTopWindowPtr        ('set', '');
     uiSegMainPanelPtr     ('set', '');
     uiSegPanelSliderPtr   ('set', '');
-    uiSegPanelPtr         ('set', '');    
+    uiSegPanelPtr         ('set', '');
     uiKernelMainPanelPtr  ('set', '');
-    uiKernelPanelSliderPtr('set', ''); 
+    uiKernelPanelSliderPtr('set', '');
     uiKernelPanelPtr      ('set', '');
     uiMain3DPanelPtr      ('set', '');
     ui3DPanelPtr          ('set', '');
@@ -81,11 +81,11 @@ function initViewerGlobal()
     uiSliderTraPtr('set', '');
 
     uiSeriesPtr('set', '');
-    uiFusedSeriesPtr('set', '');    
+    uiFusedSeriesPtr('set', '');
 
     uiSliderWindowPtr('set', '');
     uiSliderLevelPtr ('set', '');
-    uiColorbarPtr    ('set', '');   
+    uiColorbarPtr    ('set', '');
 
     uiFusionSliderWindowPtr('set', '');
     uiFusionSliderLevelPtr ('set', '');
@@ -95,11 +95,11 @@ function initViewerGlobal()
     uiProgressWindowPtr('set', '');
     uiBarPtr('set', '');
 
-    dicomMetaData('reset');    
-    dicomBuffer  ('reset');    
-    fusionBuffer ('reset');    
-    inputBuffer  ('set', ''); 
-    
+    dicomMetaData('reset');
+    dicomBuffer  ('reset');
+    fusionBuffer ('reset');
+    inputBuffer  ('set', '');
+
     inputTemplate('set', '');
     inputContours('set', '');
 
@@ -107,15 +107,15 @@ function initViewerGlobal()
     roiTemplate ('set', '');
     voiTemplate ('set', '');
 
-    volObject('set', '');                       
-    isoObject('set', '');    
-    mipObject('set', ''); 
+    volObject('set', '');
+    isoObject('set', '');
+    mipObject('set', '');
     voiObject('set', '');
 
-    volFusionObject('set', '');                       
-    isoFusionObject('set', '');    
-    mipFusionObject('set', ''); 
-    
+    volFusionObject('set', '');
+    isoFusionObject('set', '');
+    mipFusionObject('set', '');
+
     voiGateObject('set', '');
     ui3DGateWindowObject('set', '');
     ui3DLogoObject('set', '');
@@ -124,15 +124,14 @@ function initViewerGlobal()
     volumeScaleFator('set', 'y', 1);
     volumeScaleFator('set', 'z', 1);
 
-    volGateObject('set', '');                       
-    isoGateObject('set', '');    
+    volGateObject('set', '');
+    isoGateObject('set', '');
     mipGateObject('set', '');
-    
-    volGateFusionObject('set', '');                       
-    isoGateFusionObject('set', '');    
+
+    volGateFusionObject('set', '');
+    isoGateFusionObject('set', '');
     mipGateFusionObject('set', '');
-    
-    isDoseKernel   ('set', false);
+
     isFusion       ('set', false);
     isVsplash      ('set', false);
     init3DPanel    ('set', true );
@@ -140,8 +139,8 @@ function initViewerGlobal()
     viewSegPanel   ('set', false);
     viewKernelPanel('set', false);
 
-    optionsPanelMenuObject   ('set', '');     
-    viewRoiObject            ('set', '');    
+    optionsPanelMenuObject   ('set', '');
+    viewRoiObject            ('set', '');
     viewSegPanelMenuObject   ('set', '');
     viewKernelPanelMenuObject('set', '');
     view3DPanelMenuObject    ('set', '');
@@ -153,10 +152,10 @@ function initViewerGlobal()
     roiMenuObject            ('set', '');
 
     volICObject('set', '');
-    mipICObject('set', '');    
+    mipICObject('set', '');
     volICFusionObject('set', '');
-    mipICFusionObject('set', '');  
-    
+    mipICFusionObject('set', '');
+
     mipColorObject('set', '');
     volColorObject('set', '');
 
@@ -165,15 +164,15 @@ function initViewerGlobal()
     voiRoiSegObject('set', '');
     voiRoiActObject('set', '');
 
-    chkVoiRoiSubstractObject       ('set', '');   
+    chkVoiRoiSubstractObject       ('set', '');
     editVoiRoiUpperTresholdObject  ('set', '');
     sliderVoiRoiUpperTresholdObject('set', '');
-    txtVoiRoiUpperTresholdObject   ('set', '');  
-    
-    ui3DVolumePtr('set', '');   
-    
+    txtVoiRoiUpperTresholdObject   ('set', '');
+
+    ui3DVolumePtr('set', '');
+
     viewerRootPath('set', './');
-    
+
     copyRoiPtr('set', '');
-    
+
 end

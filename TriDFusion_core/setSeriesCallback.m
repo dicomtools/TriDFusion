@@ -8,48 +8,46 @@ function setSeriesCallback(~,~)
 %Last specifications modified:
 %
 % Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
-% 
+%
 % This file is part of The Triple Dimention Fusion (TriDFusion).
-% 
+%
 % TriDFusion development has been led by:  Daniel Lafontaine
-% 
-% TriDFusion is distributed under the terms of the Lesser GNU Public License. 
-% 
+%
+% TriDFusion is distributed under the terms of the Lesser GNU Public License.
+%
 %     This version of TriDFusion is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 % TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 % without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 % See the GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tInput  = inputTemplate('get');            
+    tInput  = inputTemplate('get');
     iOffset = get(uiSeriesPtr('get'), 'Value');
 
     if iOffset <= numel(tInput)
-        
+
         copyRoiPtr('set', '');
 
         releaseRoiWait();
 
-        isDoseKernel('set', false);
-
         set(zoomMenu('get'), 'Checked', 'off');
         set(btnZoomPtr('get'), 'BackgroundColor', 'default');
         zoomTool('set', false);
-        zoom('off');  
+        zoom('off');
 
         set(panMenu('get'), 'Checked', 'off');
-        set(btnPanPtr('get'), 'BackgroundColor', 'default'); 
+        set(btnPanPtr('get'), 'BackgroundColor', 'default');
         panTool('set', false);
-        pan('off');  
+        pan('off');
 
         rotate3DTool('set', false);
-        rotate3d('off');   
+        rotate3d('off');
 
         isFusion('set', false);
         fusionBuffer('reset');
@@ -82,51 +80,51 @@ function setSeriesCallback(~,~)
         multiFrame3DRecord  ('set', false);
         multiFrame3DIndex   ('set', 1);
 %                multiFrame3DZoom    ('set', 0);
-%             setPlaybackToolbar('off');  
+%             setPlaybackToolbar('off');
 
         multiFramePlayback('set', false);
-        multiFrameRecord  ('set', false);                
+        multiFrameRecord  ('set', false);
         multiFrameZoom    ('set', 'in' , 1);
         multiFrameZoom    ('set', 'out', 1);
         multiFrameZoom    ('set', 'axe', []);
 
         rotate3d('off');
 
-        switchTo3DMode('set', false);       
+        switchTo3DMode('set', false);
         set(btn3DPtr('get'), 'Enable', 'on');
         set(btn3DPtr('get'), 'BackgroundColor', 'default');
 
-        switchToMIPMode('set', false);                  
+        switchToMIPMode('set', false);
         set(btnIsoSurfacePtr('get'), 'Enable', 'on');
         set(btnIsoSurfacePtr('get'), 'BackgroundColor', 'default');
 
-        switchToIsoSurface('set', false);                
+        switchToIsoSurface('set', false);
         set(btnMIPPtr('get'), 'Enable', 'on');
         set(btnMIPPtr('get'), 'BackgroundColor', 'default');
 
         set(btnTriangulatePtr('get'), 'Enable', 'on');
         set(btnTriangulatePtr('get'), 'BackgroundColor', 'white');
 
-        if isempty(dicomMetaData('get'))    
+        if isempty(dicomMetaData('get'))
             atMetaData = tInput(iOffset).atDicomInfo;
             dicomMetaData('set', atMetaData);
         end
 
-        aInput  = inputBuffer('get');      
-        aBuffer = dicomBuffer('get');                                
+        aInput  = inputBuffer('get');
+        aBuffer = dicomBuffer('get');
 
         if isempty(aBuffer)
             if     strcmp(imageOrientation('get'), 'axial')
                 aBuffer = permute(aInput{iOffset}, [1 2 3]);
-            elseif strcmp(imageOrientation('get'), 'coronal') 
-                aBuffer = permute(aInput{iOffset}, [3 2 1]);    
+            elseif strcmp(imageOrientation('get'), 'coronal')
+                aBuffer = permute(aInput{iOffset}, [3 2 1]);
             elseif strcmp(imageOrientation('get'), 'sagittal')
                 aBuffer = permute(aInput{iOffset}, [3 1 2]);
-            end     
+            end
 
-            dicomBuffer('set', aBuffer);  
-        end 
-        
+            dicomBuffer('set', aBuffer);
+        end
+
         quantificationTemplate('set', tInput(iOffset).tQuant);
         cropValue('set', tInput(iOffset).tQuant.tCount.dMin);
 
@@ -135,29 +133,29 @@ function setSeriesCallback(~,~)
 
         imageSegEditValue('set', 'lower', tInput(iOffset).tQuant.tCount.dMin);
         imageSegEditValue('set', 'upper', tInput(iOffset).tQuant.tCount.dMax);
-        
-        getMipAlphaMap('set', '', 'auto');    
+
+        getMipAlphaMap('set', '', 'auto');
         getVolAlphaMap('set', '', 'auto');
-        
-        getMipFusionAlphaMap('set', '', 'auto');    
+
+        getMipFusionAlphaMap('set', '', 'auto');
         getVolFusionAlphaMap('set', '', 'auto');
-        
+
         deleteAlphaCurve('vol');
         deleteAlphaCurve('volfusion');
 
         volColorObj = volColorObject('get');
         if ~isempty(volColorObj)
             delete(volColorObj);
-            volColorObject('set', '');                       
-        end                    
+            volColorObject('set', '');
+        end
 
-        deleteAlphaCurve('mip');                        
-        deleteAlphaCurve('mipfusion');                        
+        deleteAlphaCurve('mip');
+        deleteAlphaCurve('mipfusion');
 
         mipColorObj = mipColorObject('get');
         if ~isempty(mipColorObj)
             delete(mipColorObj);
-            mipColorObject('set', '');                       
+            mipColorObject('set', '');
         end
 
         logoObj = logoObject('get');
@@ -166,48 +164,48 @@ function setSeriesCallback(~,~)
             logoObject('set', '');
         end
 
-        volObj = volObject('get');  
+        volObj = volObject('get');
         if ~isempty(volObj)
             delete(volObj);
             volObject('set', '');
         end
-        
-        volFuisonObj = volFusionObject('get');  
+
+        volFuisonObj = volFusionObject('get');
         if ~isempty(volFuisonObj)
             delete(volFuisonObj);
             volFusionObject('set', '');
         end
-        
-        isoObj = isoObject('get');                         
+
+        isoObj = isoObject('get');
         if ~isempty(isoObj)
             delete(isoObj);
             isoObject('set', '');
-        end                        
+        end
 
-        mipObj = mipObject('get');                         
+        mipObj = mipObject('get');
         if ~isempty(mipObj)
             delete(mipObj);
             mipObject('set', '');
-        end  
-        
-        mipFusionObj = mipFusionObject('get');                         
+        end
+
+        mipFusionObj = mipFusionObject('get');
         if ~isempty(mipFusionObj)
             delete(mipFusionObj);
             mipFusionObject('set', '');
-        end  
-        
+        end
+
         voiObj = voiObject('get');
         if ~isempty(voiObj)
             for vv=1:numel(voiObj)
                 delete(voiObj{vv})
-            end   
-            voiObject('set', '');                        
-        end     
+            end
+            voiObject('set', '');
+        end
 
         if size(dicomBuffer('get'), 3) == 1 || ...
-           ~numel(dicomBuffer('get')) 
+           ~numel(dicomBuffer('get'))
 
-            isVsplash('set', false);                
+            isVsplash('set', false);
 
             set(btnVsplashPtr('get'), 'BackgroundColor', 'default');
 
@@ -216,10 +214,10 @@ function setSeriesCallback(~,~)
             set(uiEditVsplahYPtr('get'), 'Enable', 'off');
         end
 
-        clearDisplay();                       
-        initDisplay(3);                 
+        clearDisplay();
+        initDisplay(3);
 
-        dicomViewerCore();     
+        dicomViewerCore();
 
         setViewerDefaultColor(true, dicomMetaData('get'));
 

@@ -1455,8 +1455,6 @@ if 0
             end
         end
 end
-        isDoseKernel('set', false);
-
         tInitInput(iOffset).bEdgeDetection = false;
         tInitInput(iOffset).bFlipLeftRight = false;
         tInitInput(iOffset).bFlipAntPost   = false;

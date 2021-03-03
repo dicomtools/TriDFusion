@@ -482,7 +482,7 @@ end
             tInitInput(jj).bFlipLeftRight = false;
             tInitInput(jj).bFlipAntPost   = false;
             tInitInput(jj).bFlipHeadFeet  = false;
-            tInitInput(jj).bDoseKernel    = false; 
+            tInitInput(jj).bDoseKernel    = false;
         end
 
         seriesDescription('set', asDescription);
@@ -493,8 +493,6 @@ end
         fusionBuffer('reset');
         isFusion('set', false);
         set(btnFusionPtr('get'), 'BackgroundColor', 'default');
-
-        isDoseKernel('set', false);
 
         inputTemplate('set', tInitInput);
 
