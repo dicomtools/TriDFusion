@@ -89,7 +89,7 @@ function setContours()
                         z = round(abs(out.Location(:,3)));   % Axial                    
                         
                         ROI.Position = [points{j}(:,1), points{j}(:,2)];
-                                                                                                
+
                         sliceNumber('set', 'axial', z(1)+1);
 
                         sTag   = num2str(rand);

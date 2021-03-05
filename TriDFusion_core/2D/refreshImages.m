@@ -677,5 +677,10 @@ function refreshImages()
             end   
         end                                          
     end
-
+    
+    setColorbarLabel();    
+    if isFusion('get') == true        
+        setFusionColorbarLabel();
+    end
+    
 end

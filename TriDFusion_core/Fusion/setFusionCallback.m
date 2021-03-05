@@ -127,7 +127,7 @@ function setFusionCallback(~, ~)
     else
 
         tFuseInput = inputTemplate('get');
-        if numel(tFuseInput) == 1
+        if numel(tFuseInput) == 0
             isFusion('set', false);
             set(btnFusionPtr('get'), 'BackgroundColor', 'default');
             fusionBuffer('reset');
@@ -229,9 +229,9 @@ end
                     end
                 end
                 
-                tFuseInput(iFuseOffset).bEdgeDetection = false;
+ %               tFuseInput(iFuseOffset).bEdgeDetection = false;
                 
-                inputTemplate('set', tFuseInput);
+ %               inputTemplate('set', tFuseInput);
 
              %   B = resampleImage(A, B);
 
@@ -284,8 +284,8 @@ end
                     end
                 end
                 
-                tFuseInput(iFuseOffset).bEdgeDetection = false;
-                inputTemplate('set', tFuseInput);
+%                tFuseInput(iFuseOffset).bEdgeDetection = false;
+%                inputTemplate('set', tFuseInput);
 
                 [x1,y1,z1] = size(A);
                 [x2,y2,z2] = size(B);
@@ -412,7 +412,15 @@ end
             set(btnFusionPtr('get'), 'BackgroundColor', 'white');
 
         else
-           tFuseInput(iFuseOffset).bEdgeDetection = false;
+            if numel(tFuseInput) == 1
+                if tFuseInput(iFuseOffset).bEdgeDetection == false
+                    tFuseInput(iFuseOffset).bFusedEdgeDetection = false;
+                end
+            else
+                tFuseInput(iFuseOffset).bEdgeDetection = false;
+            end
+            
+%           tFuseInput(iFuseOffset).bEdgeDetection = false;
            inputTemplate('set', tFuseInput);
 
            isFusion('set', false);

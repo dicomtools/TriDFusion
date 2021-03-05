@@ -203,9 +203,7 @@ function TriDFusion(varargin)
     
  %   refreshImages();
        
-    if argFusion == true && ... % Init 2D Fuison
-       numel(inputTemplate('get')) > 1
-   
+    if argFusion == true % Init 2D Fuison   
         setFusionCallback();        
     end
     

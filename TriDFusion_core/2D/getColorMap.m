@@ -47,6 +47,11 @@ function aColorMap = getColorMap(sAction, lOffset)
     if strcmpi(sAction, 'all')
         aColorMap = pasColorMap;
     else
-        aColorMap = paColorMap{lOffset};                     
+        if invertColor('get')
+            aColorMap = flipud(paColorMap{lOffset});
+
+        else
+            aColorMap = paColorMap{lOffset};                     
+        end
     end  
 end    

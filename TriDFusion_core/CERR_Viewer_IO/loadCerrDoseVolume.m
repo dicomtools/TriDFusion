@@ -115,6 +115,8 @@ function loadCerrDoseVolume(planC, structNamC)
         tNewInput(ii).bFlipAntPost   = false;
         tNewInput(ii).bFlipHeadFeet  = false;
         tNewInput(ii).bDoseKernel    = false;
+        tNewInput(ii).bFusedDoseKernel    = false;
+        tNewInput(ii).bFusedEdgeDetection = false;
     end
         
     inputTemplate('set', tNewInput);
@@ -356,6 +358,12 @@ function loadCerrDoseVolume(planC, structNamC)
             set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
             set(uiFusedSeriesPtr('get'), 'Enable', 'on');
             set(uiFusedSeriesPtr('get'), 'Value', 2);
+        else
+            set(btnFusionPtr('get')  , 'Enable', 'on');
+
+            set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
+            set(uiFusedSeriesPtr('get'), 'Enable', 'on');
+            set(uiFusedSeriesPtr('get'), 'Value', 1);            
         end
         
         set(btnVsplashPtr('get')   , 'Enable', 'on');

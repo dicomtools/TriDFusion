@@ -1460,7 +1460,9 @@ end
         tInitInput(iOffset).bFlipAntPost   = false;
         tInitInput(iOffset).bFlipHeadFeet  = false;
         tInitInput(iOffset).bDoseKernel    = false; 
-
+        tInitInput(iOffset).bFusedDoseKernel    = false; 
+        tInitInput(iOffset).bFusedEdgeDetection = false;
+            
         dFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
         if dFuseOffset <= numel(tInitInput)
             tInitInput(dFuseOffset).bEdgeDetection = false;
@@ -1477,7 +1479,7 @@ end
         fusionBuffer('reset');
         isFusion('set', false);
         set(btnFusionPtr('get'), 'BackgroundColor', 'default');
-
+        
         clearDisplay();
         initDisplay(3);
 
@@ -1629,6 +1631,9 @@ end
         imEdge = getEdgeDetection(im, aMethod{dValue}, dFudgeFactor);
 
         tInput(dSerieOffset).bEdgeDetection = true;
+        if numel(tInput) == 1 && isFusion('get') == false
+            tInput(dSerieOffset).bFusedEdgeDetection = true;
+        end
 
         inputTemplate('set', tInput);
 

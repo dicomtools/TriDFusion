@@ -243,7 +243,10 @@ function initKernelPanel()
             end
             
             tInput(dOffset).bDoseKernel = false;
-            
+            if numel(tInput) == 1 && isFusion('get') == false
+                tInput(dOffset).bFusedDoseKernel = false;
+            end
+        
             progressBar(0.999, 'Processing kernel, please wait');
 
             dModel   = get(uiKernelModel   , 'Value');
@@ -400,7 +403,11 @@ function initKernelPanel()
 
             setWindowMinMax(dMax, dMin);
 
-            tInput(dOffset).bDoseKernel = true;           
+            tInput(dOffset).bDoseKernel = true;     
+            if numel(tInput) == 1 && isFusion('get') == false
+                tInput(dOffset).bFusedDoseKernel = true;
+            end
+            
             inputTemplate('set', tInput);
  
             refreshImages();
@@ -530,7 +537,9 @@ end
         tInitInput(iOffset).bFlipAntPost   = false;
         tInitInput(iOffset).bFlipHeadFeet  = false;
         tInitInput(iOffset).bDoseKernel    = false; 
-
+        tInitInput(iOffset).bFusedDoseKernel    = false; 
+        tInitInput(iOffset).bFusedEdgeDetection = false;
+        
         dFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
         if dFuseOffset <= numel(tInitInput)
             tInitInput(dFuseOffset).bEdgeDetection = false;

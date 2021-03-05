@@ -680,7 +680,6 @@ end
     if strcmpi(evnt.Key,'f2')
         [dMax, dMin] = computeWindowLevel(500, 50);
         setFkeyWindowMinMax(dMax, dMin);
-
     end
 
     if strcmpi(evnt.Key,'f3')

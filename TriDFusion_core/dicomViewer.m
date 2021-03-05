@@ -51,8 +51,8 @@ function resize = dicomViewer()
     imageSegTreshValue('set', 'upper', 1);
     lungSegTreshValue ('set', 0.5       );
     
-    edgeSegMethod      ('set', 'sobel');
-    fudgeFactorSegValue('set', 0.3);
+    edgeSegMethod      ('set', 'canny');
+    fudgeFactorSegValue('set', 0.4);
 
     crossSize       ('set', 10      );
     crossColor      ('set', 'Cyan'  );
@@ -544,8 +544,8 @@ function resize = dicomViewer()
         sFusionDescription = seriesDescription('get');
         dFusionValue       = 2;
     else
-        sFusionEnable      = 'off';
-        sFusionDescription = ' ';
+        sFusionEnable      = 'on';
+        sFusionDescription = seriesDescription('get');
         dFusionValue       = 1;
     end
 

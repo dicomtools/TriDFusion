@@ -86,17 +86,17 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                     colorMapOffset('set', 10); 
                     fusionColorMapOffset('set', 10); 
                 elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'pt')    
-                    colorMapOffset('set', 11); 
-                    fusionColorMapOffset('set', 11); 
+                    colorMapOffset('set', 10); 
+                    fusionColorMapOffset('set', 10); 
                 elseif strcmpi(sModality, 'nm')&&strcmpi(sFuseModality, 'pt')    
-                    colorMapOffset('set', 11); 
-                    fusionColorMapOffset('set', 11); 
+                    colorMapOffset('set', 10); 
+                    fusionColorMapOffset('set', 10); 
                 elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'nm')    
-                    colorMapOffset('set', 11); 
-                    fusionColorMapOffset('set', 11); 
+                    colorMapOffset('set', 10); 
+                    fusionColorMapOffset('set', 10); 
                 elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'pt')    
-                    colorMapOffset('set', 11); 
-                    fusionColorMapOffset('set', 11); 
+                    colorMapOffset('set', 10); 
+                    fusionColorMapOffset('set', 10); 
                 elseif strcmpi(sModality, 'ct')&&strcmpi(sFuseModality, 'ct')    
                     colorMapOffset('set', 10); 
                     fusionColorMapOffset('set', 10);                                         
@@ -113,7 +113,7 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                         colorMapOffset('set', 19); 
                         fusionColorMapOffset('set', 10);   
                     else
-                        colorMapOffset('set', 11); 
+                        colorMapOffset('set', 10); 
                         fusionColorMapOffset('set', 19);                                 
                     end 
                 else                                           
@@ -153,7 +153,7 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                         end
 
                     else
-                        colorMapOffset('set', 11); 
+                        % colorMapOffset('set', 11); 
 
                         invertColor('set', true);
 

@@ -1,6 +1,6 @@
-function sliderAlphaCallback(~, ~)
-%function sliderAlphaCallback(~, ~)
-%Set Fusion Alpha Slider.
+function setColorbarLabel() 
+%function setColorbarLabel() 
+%Set 2D Fusion Colorbar Label.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -25,18 +25,26 @@ function sliderAlphaCallback(~, ~)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if size(dicomBuffer('get'), 3) == 1
-        alpha( axePtr('get'), 1-get(uiAlphaSliderPtr('get'), 'Value') );
-    else
-        alpha( axes1Ptr('get'), 1-get(uiAlphaSliderPtr('get'), 'Value') );
-        alpha( axes2Ptr('get'), 1-get(uiAlphaSliderPtr('get'), 'Value') );
-        alpha( axes3Ptr('get'), 1-get(uiAlphaSliderPtr('get'), 'Value') );
-    end            
-
-    sliderAlphaValue('set', get(uiAlphaSliderPtr('get'), 'Value') );
+    tInput = inputTemplate('get');
+    dOffset = get(uiSeriesPtr('get'), 'Value');
+    if dOffset > numel(tInput)
+        return;
+    end
     
-    setFusionColorbarLabel();
+    sLabel = '';
+    
+    if tInput(dOffset).bDoseKernel == true
+        sLabel = sprintf('%s, Dose', sLabel);
+    end
+    
+    if tInput(dOffset).bEdgeDetection == true
+        sLabel = sprintf('%s, Edge', sLabel);
+    end    
+                    
+    ptrColorbar = uiColorbarPtr('get');
 
+    ptrColorbar.Label.String = sLabel;         
+    uiColorbarPtr('set', ptrColorbar);
 end

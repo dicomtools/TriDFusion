@@ -52,17 +52,86 @@ function colorbarCallback(hObject, ~)
     uimenu(d,'Label','Edge Detection', 'Callback',@setColorbarEdgeDetection);
 
     if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
+        if numel(tEdgeInput) == 1
+            if tEdgeInput(dEdgeFuseOffset).bFusedEdgeDetection == true
+                set(findall(d, 'Label', 'Edge Detection'), 'Checked', 'on');
+            end   
+        else
+            if tEdgeInput(dEdgeFuseOffset).bEdgeDetection == true
+                set(findall(d, 'Label', 'Edge Detection'), 'Checked', 'on');
+            end
+        end
+        sModality = tEdgeInput(dEdgeFuseOffset).atDicomInfo{1}.Modality;
         
-        if tEdgeInput(dEdgeFuseOffset).bEdgeDetection == true
-            set(findall(d, 'Label', 'Edge Detection'), 'Checked', 'on');
-        end        
     else
-
         if tEdgeInput(dEdgeOffset).bEdgeDetection == true
             set(findall(d, 'Label', 'Edge Detection'), 'Checked', 'on');
         end
+        
+        sModality = tEdgeInput(dEdgeOffset).atDicomInfo{1}.Modality;
+ 
     end
 
+    if strcmpi(sModality, 'CT')
+        e = uimenu(c,'Label','Window');
+        set(e, 'tag', get(hObject, 'Tag'));
+        
+        mF1 = uimenu(e,'Label','(F1) Lung'          , 'Callback',@setColorbarWindowLevel);
+        mF2 = uimenu(e,'Label','(F2) Soft'          , 'Callback',@setColorbarWindowLevel);
+        mF3 = uimenu(e,'Label','(F3) Bone'          , 'Callback',@setColorbarWindowLevel);
+        mF4 = uimenu(e,'Label','(F4) Liver'         , 'Callback',@setColorbarWindowLevel);
+        mF5 = uimenu(e,'Label','(F5) Brain'         , 'Callback',@setColorbarWindowLevel);
+        mF6 = uimenu(e,'Label','(F6) Head and Neck' , 'Callback',@setColorbarWindowLevel);
+        mF7 = uimenu(e,'Label','(F7) Enchanced Lung', 'Callback',@setColorbarWindowLevel);
+        mF8 = uimenu(e,'Label','(F8) Mediastinum'   , 'Callback',@setColorbarWindowLevel);
+        mF91 = uimenu(e,'Label','(F9) Temporal Bone', 'Callback',@setColorbarWindowLevel);
+        mF92 = uimenu(e,'Label','(F9) Vertebra'     , 'Callback',@setColorbarWindowLevel);
+        mF93 = uimenu(e,'Label','(F9) Scout CT'     , 'Callback',@setColorbarWindowLevel);
+        mF34 = uimenu(e,'Label','(F9) All'          , 'Callback',@setColorbarWindowLevel);
+        mCtm = uimenu(e,'Label','Custom'            , 'Enable', 'off','Callback',@setColorbarWindowLevel);
+        
+        if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
+            dMax = fusionWindowLevel('get', 'max');
+            dMin = fusionWindowLevel('get', 'min');            
+        else     
+            dMax = windowLevel('get', 'max');
+            dMin = windowLevel('get', 'min');
+        end
+        
+        [dWindow, dLevel] = computeWindowMinMax(dMax, dMin);
+        sWindowName = getWindowName(dWindow, dLevel);
+        
+        switch lower(sWindowName)
+            case lower('Lung')
+                set(mF1, 'Checked', 'on');
+            case lower('Soft')
+                set(mF2, 'Checked', 'on');
+            case lower('Bone')
+                set(mF3, 'Checked', 'on');
+            case lower('Liver')
+                set(mF4, 'Checked', 'on');
+            case lower('Brain')
+                set(mF5, 'Checked', 'on');
+            case lower('Head and Neck')
+                set(mF6, 'Checked', 'on');
+            case lower('Enchanced Lung')
+                set(mF7, 'Checked', 'on');
+            case lower('Mediastinum')
+                set(mF8, 'Checked', 'on');
+            case lower('Temporal Bone')
+                set(mF91, 'Checked', 'on');
+            case lower('Vertebra')
+                set(mF92, 'Checked', 'on');
+            case lower('Scout CT')
+                set(mF93, 'Checked', 'on');
+            case lower('All')
+                set(mF34, 'Checked', 'on');
+            otherwise
+                set(mCtm, 'Checked', 'on');
+        end       
+                
+    end
+    
     uimenu(c,'Label','parula'       ,'Callback',@setColorOffset);
     uimenu(c,'Label','jet'          ,'Callback',@setColorOffset);
     uimenu(c,'Label','hsv'          ,'Callback',@setColorOffset);
@@ -167,10 +236,19 @@ function colorbarCallback(hObject, ~)
             if dFuseOffset > numel(tInput)
                 return;
             end
-
-            if tInput(dFuseOffset).bEdgeDetection == true
-
-                tInput(dFuseOffset).bEdgeDetection = false;
+            
+            if numel(tInput) == 1
+                bEdge = tInput(dFuseOffset).bFusedEdgeDetection;
+            else
+                bEdge = tInput(dFuseOffset).bEdgeDetection;
+            end
+            
+            if bEdge == true
+                if numel(tInput) == 1
+                    tInput(dFuseOffset).bFusedEdgeDetection = false;
+                else
+                    tInput(dFuseOffset).bEdgeDetection = false;
+                end
 
                 if size(imBak{dFuseOffset}, 3) == 1 % 2D planar Image
 
@@ -197,8 +275,13 @@ function colorbarCallback(hObject, ~)
                 end
 
                 fusionBuffer('set', imBak{dFuseOffset});
+                        
             else
-                tInput(dFuseOffset).bEdgeDetection = true;
+                if numel(tInput) == 1
+                    tInput(dFuseOffset).bFusedEdgeDetection = true;
+                else
+                    tInput(dFuseOffset).bEdgeDetection = true;
+                end
 
                 dFudgeFactor = fudgeFactorSegValue('get');
                 sMethod = edgeSegMethod('get');
@@ -209,9 +292,9 @@ function colorbarCallback(hObject, ~)
                 imEdge = getEdgeDetection(imf, sMethod, dFudgeFactor);
 
                 fusionBuffer('set', imEdge);
-
+                
             end
-
+                        
             inputTemplate('set', tInput);
 
             refreshImages();
@@ -219,7 +302,10 @@ function colorbarCallback(hObject, ~)
         else
 
             if tInput(dSerieOffset).bEdgeDetection == true
-
+                if numel(tInput) == 1 && isFusion('get') == false
+                    tInput(dSerieOffset).bFusedEdgeDetection = false;
+                end
+                
                 tInput(dSerieOffset).bEdgeDetection = false;
 
                 if size(imBak{dSerieOffset}, 3) == 1
@@ -246,6 +332,10 @@ function colorbarCallback(hObject, ~)
                 end
                 dicomBuffer('set', imBak{dSerieOffset});
             else
+                if numel(tInput) == 1 && isFusion('get') == false
+                    tInput(dSerieOffset).bFusedEdgeDetection = true;
+                end
+                
                 tInput(dSerieOffset).bEdgeDetection = true;
 
                 dFudgeFactor = fudgeFactorSegValue('get');
@@ -265,4 +355,63 @@ function colorbarCallback(hObject, ~)
 
         end
     end
+
+    function setColorbarWindowLevel(hObject, ~)
+        
+        switch lower(get(hObject, 'Label'))
+            case lower('(F1) Lung')
+                [lMax, lMin] = computeWindowLevel(1200, -500);
+            case lower('(F2) Soft')
+                [lMax, lMin] = computeWindowLevel(500, 50);
+            case lower('(F3) Bone')
+                [lMax, lMin] = computeWindowLevel(500, 200);
+            case lower('(F4) Liver')
+                [lMax, lMin] = computeWindowLevel(240, 40);
+            case lower('(F5) Brain')
+                [lMax, lMin] = computeWindowLevel(80, 40);
+            case lower('(F6) Head and Neck')
+                [lMax, lMin] = computeWindowLevel(350, 90);
+            case lower('(F7) Enchanced Lung')
+                [lMax, lMin] = computeWindowLevel(2000, -600);
+            case lower('(F8) Mediastinum')
+                [lMax, lMin] = computeWindowLevel(350, 50);
+            case lower('(F9) Temporal Bone')
+                [lMax, lMin] = computeWindowLevel(2000, 0);
+            case lower('(F9) Vertebra')
+                [lMax, lMin] = computeWindowLevel(2500, 415);
+            case lower('(F9) Scout CT')
+                [lMax, lMin] = computeWindowLevel(350, 50);
+            case lower('(F9) All')
+                [lMax, lMin] = computeWindowLevel(1000, 350);
+            otherwise
+                % to do
+        end        
+             
+        if strcmpi(get(get(hObject, 'Parent'), 'Tag'), 'Fusion Colorbar')
+            
+            fusionWindowLevel('set', 'max', lMax);
+            fusionWindowLevel('set', 'min' ,lMin);
+                
+            if size(fusionBuffer('get'), 3) == 1            
+                set(axefPtr('get'), 'CLim', [lMin lMax]);
+            else
+                set(axes1fPtr('get'), 'CLim', [lMin lMax]);
+                set(axes2fPtr('get'), 'CLim', [lMin lMax]);
+                set(axes3fPtr('get'), 'CLim', [lMin lMax]);
+            end            
+        else    
+            windowLevel('set', 'max', lMax);
+            windowLevel('set', 'min' ,lMin);
+            
+            if size(dicomBuffer('get'), 3) == 1            
+                set(axePtr('get'), 'CLim', [lMin lMax]);
+            else
+                set(axes1Ptr('get'), 'CLim', [lMin lMax]);
+                set(axes2Ptr('get'), 'CLim', [lMin lMax]);
+                set(axes3Ptr('get'), 'CLim', [lMin lMax]);
+            end
+        end              
+        
+    end
+
 end

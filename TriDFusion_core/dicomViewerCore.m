@@ -566,7 +566,7 @@ function dicomViewerCore()
                      'Box'          , 'off', ...
                      'Location'     , 'east', ...
                      'ButtonDownFcn', @colorbarCallback ...
-                     );                                   
+                     );   
         uiFusionColorbarPtr('set', ptrFusionColorbar);
         colorbarCallback(ptrFusionColorbar); % Fix for Linux
         
@@ -2059,15 +2059,20 @@ function dicomViewerCore()
     
     set(uiSliderWindowPtr('get'), 'Visible', 'on');
     set(uiSliderLevelPtr('get') , 'Visible', 'on');
+    
+    setColorbarLabel();
 
     if isFusion('get') == true
         set(uiFusionSliderWindowPtr('get'), 'Visible', 'on');
         set(uiFusionSliderLevelPtr('get') , 'Visible', 'on');
-        set(uiAlphaSliderPtr('get'), 'Visible', 'on');                
+        set(uiAlphaSliderPtr('get'), 'Visible', 'on');  
+        
+        setFusionColorbarLabel();
+
     else
         set(uiFusionSliderWindowPtr('get'), 'Visible', 'off');
         set(uiFusionSliderLevelPtr('get') , 'Visible', 'off');
-        set(uiAlphaSliderPtr('get'), 'Visible', 'off');
+        set(uiAlphaSliderPtr('get'), 'Visible', 'off');        
     end
 
     if size(im, 3) == 1
@@ -2115,7 +2120,7 @@ function dicomViewerCore()
             set(uiSliderTraPtr('get'), 'Visible', 'on');                    
         end
     end
-
+    
     if bInitSegPanel == true
        setViewSegPanel();
     end

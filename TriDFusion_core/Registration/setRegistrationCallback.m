@@ -483,6 +483,8 @@ end
             tInitInput(jj).bFlipAntPost   = false;
             tInitInput(jj).bFlipHeadFeet  = false;
             tInitInput(jj).bDoseKernel    = false;
+            tInitInput(jj).bFusedDoseKernel    = false;
+            tInitInput(jj).bFusedEdgeDetection = false;
         end
 
         seriesDescription('set', asDescription);

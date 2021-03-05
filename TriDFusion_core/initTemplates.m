@@ -126,10 +126,12 @@ function initTemplates()
                 tSetInputTemplate(dSeriesLoop).aDicomBuffer = aDicomBuffer{dSeriesLoop};
                 
                 tSetInputTemplate(dSeriesLoop).bEdgeDetection = false;
+                tSetInputTemplate(dSeriesLoop).bDoseKernel    = false;    
                 tSetInputTemplate(dSeriesLoop).bFlipLeftRight = false;
                 tSetInputTemplate(dSeriesLoop).bFlipAntPost   = false;
                 tSetInputTemplate(dSeriesLoop).bFlipHeadFeet  = false;
-                tSetInputTemplate(dSeriesLoop).bDoseKernel    = false;                
+                tSetInputTemplate(dSeriesLoop).bFusedEdgeDetection = false;
+                tSetInputTemplate(dSeriesLoop).bFusedEdgeDetection = false;
             end 
                     
             inputTemplate('set', tSetInputTemplate);
