@@ -130,7 +130,7 @@ function initTemplates()
                 tSetInputTemplate(dSeriesLoop).bFlipLeftRight = false;
                 tSetInputTemplate(dSeriesLoop).bFlipAntPost   = false;
                 tSetInputTemplate(dSeriesLoop).bFlipHeadFeet  = false;
-                tSetInputTemplate(dSeriesLoop).bFusedEdgeDetection = false;
+                tSetInputTemplate(dSeriesLoop).bFusedDoseKernel    = false;
                 tSetInputTemplate(dSeriesLoop).bFusedEdgeDetection = false;
             end 
                     
