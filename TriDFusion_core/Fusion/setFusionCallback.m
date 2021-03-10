@@ -37,8 +37,11 @@ function setFusionCallback(~, ~)
        isoFusionObj = isoFusionObject('get');
 
        if isFusion('get') == false
+           
             isFusion('set', true);
-            set(btnFusionPtr('get'), 'BackgroundColor', 'white');
+            
+            set(btnFusionPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+            set(btnFusionPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));          
 
             tFuseInput  = inputTemplate('get');
             iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
@@ -101,8 +104,10 @@ function setFusionCallback(~, ~)
 
        else
             isFusion('set', false);
-            set(btnFusionPtr('get'), 'BackgroundColor', 'default');
 
+            set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+            set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        
             if ~isempty(volFusionObj)
                 volFusionObj.Alphamap = zeros(256,1);
                 volFusionObject('set', volFusionObj);
@@ -129,7 +134,8 @@ function setFusionCallback(~, ~)
         tFuseInput = inputTemplate('get');
         if numel(tFuseInput) == 0
             isFusion('set', false);
-            set(btnFusionPtr('get'), 'BackgroundColor', 'default');
+            set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+            set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
             fusionBuffer('reset');
             return
         end
@@ -137,7 +143,8 @@ function setFusionCallback(~, ~)
         iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
         if iSeriesOffset > numel(tFuseInput)
             isFusion('set', false);
-            set(btnFusionPtr('get'), 'BackgroundColor', 'default');
+            set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+            set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
             fusionBuffer('reset');
             return;
         end
@@ -145,7 +152,8 @@ function setFusionCallback(~, ~)
         iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
         if iFuseOffset > numel(tFuseInput)
             isFusion('set', false);
-            set(btnFusionPtr('get'), 'BackgroundColor', 'default');
+            set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+            set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
             fusionBuffer('reset');
             return;
         end
@@ -180,7 +188,8 @@ function setFusionCallback(~, ~)
             if numel(size(A))~=numel(size(B)) %Fuse 2D with 3D
 if 1
                 isFusion('set', false);
-                set(btnFusionPtr('get'), 'BackgroundColor', 'default');
+                set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+                set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
                 fusionBuffer('reset');
                 return;
 
@@ -409,8 +418,9 @@ end
             set(uiFusedSeriesPtr('get'), 'Enable', 'on');
 
             isFusion('set', true);
-            set(btnFusionPtr('get'), 'BackgroundColor', 'white');
 
+            set(btnFusionPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+            set(btnFusionPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
         else
             if numel(tFuseInput) == 1
                 if tFuseInput(iFuseOffset).bEdgeDetection == false
@@ -427,7 +437,8 @@ end
 
            initFusionWindowLevel('set', false); % Need to be fix
 
-           set(btnFusionPtr('get'), 'BackgroundColor', 'default');
+            set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+            set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
     %         fusionBuffer('set', '');
         end
@@ -480,20 +491,42 @@ end
         end
 
         uiAlphaSlider = uiAlphaSliderPtr('get');
-        aAxePosition = uiAlphaSlider.Parent.Position;
+        aAxePosition  = uiAlphaSlider.Parent.Position;
+        
+        uiSegMainPanel    = uiSegMainPanelPtr('get');
+        uiKernelMainPanel = uiKernelMainPanelPtr('get');
+        
         if size(dicomBuffer('get'), 3) == 1
-
-            set(uiAlphaSlider, ...
-                'Position', [10 ...
-                             35 ...
-                             aAxePosition(3)-20 ...
-                             15 ...
-                             ] ...
-               );
+            
+            if viewSegPanel('get') == true
+                set(uiAlphaSlider, ...
+                    'Position', [uiSegMainPanel.Position(3)+10 ...
+                                 35 ...
+                                 aAxePosition(3)-uiSegMainPanel.Position(3)-20 ...
+                                 15 ...
+                                 ] ...
+                   );                  
+            elseif viewKernelPanel('get') == true
+                set(uiAlphaSlider, ...
+                    'Position', [uiKernelMainPanel.Position(3)+10 ...
+                                 35 ...
+                                 aAxePosition(3)-uiKernelMainPanel.Position(3)-20 ...
+                                 15 ...
+                                 ] ...
+                   );                
+            else
+                set(uiAlphaSlider, ...
+                    'Position', [10 ...
+                                 35 ...
+                                 aAxePosition(3)-20 ...
+                                 15 ...
+                                 ] ...
+                   );
+            end
         else
            if isVsplash('get') == true && ...
                ~strcmpi(vSplahView('get'), 'all')
-                if viewSegPanel('get')
+                if viewSegPanel('get') == true
 
                     set(uiAlphaSlider, ...
                         'Position', [uiSegMainPanel.Position(3)+10 ...

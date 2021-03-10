@@ -36,7 +36,8 @@ function setPanCallback(~, ~)
     if panTool('get')
         set(panMenu('get'), 'Checked', 'off');
 
-        set(btnPanPtr('get'), 'BackgroundColor', 'default');
+        set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
         panTool('set', false);
         pan('off'); 
@@ -47,7 +48,8 @@ function setPanCallback(~, ~)
 
             rotate3d on
         else
-            set(btnTriangulatePtr('get'), 'BackgroundColor', 'white');
+            set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+            set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
         end
     else
         set(panMenu('get'), 'Checked', 'on');
@@ -63,10 +65,13 @@ function setPanCallback(~, ~)
         if dataCursorTool('get')
             setDataCursorCallback();
         end  
-
-        set(btnTriangulatePtr('get'), 'BackgroundColor', 'default');
-
-        set(btnPanPtr('get'), 'BackgroundColor', 'White');
+        
+        set(btnTriangulatePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnTriangulatePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+            
+        set(btnPanPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+        set(btnPanPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+        
         panTool('set', true);
 
         hCMZ = uicontextmenu;

@@ -35,17 +35,20 @@ function triangulateCallback(~, ~)
        switchToIsoSurface('get') == false && ...  
        switchToMIPMode('get')    == false
 
-        set(btnTriangulatePtr('get'), 'BackgroundColor', 'white');
-
+        set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+        set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+            
         set(zoomMenu('get'), 'Checked', 'off');
         set(btnZoomPtr('get'), 'Enable', 'on');
-        set(btnZoomPtr('get'), 'BackgroundColor', 'default');
+        set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
         zoomTool('set', false);
         zoom('off');           
 
         set(panMenu('get'), 'Checked', 'off');
         set(btnPanPtr('get'), 'Enable', 'on');
-        set(btnPanPtr('get'), 'BackgroundColor', 'default');            
+        set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
         panTool('set', false);
         pan('off');     
 

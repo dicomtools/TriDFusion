@@ -36,6 +36,10 @@ function setRoiToolbar(sVisible)
 
     %    f = figure('ToolBar','none');
         tbRoi = uitoolbar(fiMainWindowPtr('get'));
+        
+%        jToolbar = tbRoi.JavaContainer.getComponentPeer; 
+%        jToolbar.setBackground();
+        
         roiMenuObject('set', tbRoi);
 
         mViewRoi = viewRoiObject('get');

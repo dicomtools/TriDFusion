@@ -38,7 +38,14 @@ function TriDFusion(varargin)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     initViewerGlobal();
-       
+    
+    viewerBackgroundColor('set', [0.16 0.18 0.20]);
+    viewerForegroundColor('set', [0.94 0.94 0.94]);
+    viewerHighlightColor ('set', [0.94 0.94 0.94]);
+    viewerShadowColor    ('set', [0.94 0.94 0.94]);
+    viewerButtonPushedBackgroundColor('set', [0.53 0.63 0.40]);
+    viewerButtonPushedForegroundColor('set', [0.10 0.10 0.10]);
+    
     arg3DEngine    = false;
     argGaussFilter = false; 
     argBorder      = false;
@@ -152,13 +159,22 @@ function TriDFusion(varargin)
                             
     uiProgressWindow = ...
         uipanel(fiMainWindowPtr('get'),...
-                'Units'   , 'pixels',...
-                'position', [0 0 620 30],...
-                'title'   , 'Ready'...
+                'Units'          , 'pixels',...
+                'position'       , [0 0 620 30],...
+                'title'          , 'Ready',...
+                'BackgroundColor', viewerBackgroundColor ('get'), ...
+                'ForegroundColor', viewerForegroundColor('get'), ...
+                'ShadowColor'    , viewerShadowColor('get'), ...     
+                'HighlightColor' , viewerHighlightColor('get') ...     
                 );       
     uiProgressWindowPtr('set', uiProgressWindow);
     
     uiBar = uipanel(uiProgressWindow);
+    
+    set(uiBar, 'BackgroundColor', viewerBackgroundColor ('get'));
+    set(uiBar, 'ForegroundColor', viewerForegroundColor('get'));     
+    set(uiBar, 'ShadowColor', viewerBackgroundColor ('get'));
+    set(uiBar, 'HighlightColor', viewerBackgroundColor('get'));         
     uiBarPtr('set', uiBar);
     
     set(fiMainWindowPtr('get'), 'doublebuffer', 'off'   );   

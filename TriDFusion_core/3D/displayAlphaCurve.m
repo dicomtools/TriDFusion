@@ -34,4 +34,11 @@ function displayAlphaCurve(aAlphamap, axeAlphmap)
 
     axeAlphmap.XLim = [0 size(x,2)];
     axeAlphmap.YLim = [0 1]; 
+    axeAlphmap.Color = [0.98 0.98 0.98];
+    axeAlphmap.XColor = viewerForegroundColor('get');
+    axeAlphmap.YColor = viewerForegroundColor('get');
+    axeAlphmap.ZColor = viewerForegroundColor('get');
+    
+    
+    
 end

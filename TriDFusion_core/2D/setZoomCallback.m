@@ -36,8 +36,9 @@ function setZoomCallback(~, ~)
     if zoomTool('get')
         set(zoomMenu('get'), 'Checked', 'off');
 
-        set(btnZoomPtr('get'), 'BackgroundColor', 'default');
-
+        set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        
         zoomTool('set', false);
         zoom('off');           
 
@@ -47,7 +48,8 @@ function setZoomCallback(~, ~)
 
             rotate3d('on');
         else
-            set(btnTriangulatePtr('get'), 'BackgroundColor', 'white');
+            set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+            set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
         end
 
     else    
@@ -67,9 +69,12 @@ function setZoomCallback(~, ~)
 
         set(zoomMenu('get'), 'Checked', 'on');
 
-        set(btnTriangulatePtr('get'), 'BackgroundColor', 'default');
-
-        set(btnZoomPtr('get'), 'BackgroundColor', 'White');
+        set(btnTriangulatePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnTriangulatePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+            
+        set(btnZoomPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+        set(btnZoomPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+        
         zoomTool('set', true);
 
         hCMZ = uicontextmenu;

@@ -1,7 +1,10 @@
-function progressBar(lProgress, sStatus, sColor)
-%function progressBar(lProgress, sStatus, sColor)
-%Set the status of the Viewer progress bar.
+function aColor = viewerHighlightColor(sAction, aValue)
+%function aColor = viewerHighlightColor(sAction, aValue)
+%Get\Set Viewer Highlight Color.
 %See TriDFuison.doc (or pdf) for more information about options.
+%
+%Note: option settings must fit on one line and can contain one semicolon at most.
+%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
@@ -25,28 +28,12 @@ function progressBar(lProgress, sStatus, sColor)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if ~exist('sColor', 'var')
-        sColor = 'cyan';
-    end
+    persistent paColor; 
 
-    set(uiProgressWindowPtr('get'), 'title'   , sStatus);
-
-    if lProgress == 1
-        set(uiBarPtr('get'), 'BackgroundColor', viewerBackgroundColor ('get'));
-    elseif lProgress == -1
-        lProgress = 1;
-        set(uiBarPtr('get'), 'BackgroundColor', 'red');
-    else 
-        set(uiBarPtr('get'), 'BackgroundColor', sColor);
-    end
-
-    x = get(uiBarPtr('get'), 'Position');
-
-    x(3) = lProgress;       % Corresponds to % progress if unit = normalized
-    set(uiBarPtr('get'), 'Position', x);
-
-    drawnow;
-
-end  
+    if strcmpi('set', sAction)
+       paColor = aValue;            
+    end      
+    aColor = paColor;
+end

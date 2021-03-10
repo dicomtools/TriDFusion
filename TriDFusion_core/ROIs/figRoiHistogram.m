@@ -36,7 +36,9 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
     else
         dSUVScale = 0;
     end
-
+    
+    paAxeBackgroundColor = [0 0 0];
+    
     ptrBar  = '';
     ptrHist = '';
     ptrLine = '';
@@ -58,6 +60,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                'NumberTitle','off',...
                'MenuBar', 'none',...
                'Resize', 'off', ...
+               'Color', viewerBackgroundColor('get'), ...
                'Toolbar','none'...
                );
 
@@ -116,15 +119,21 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
         axes(figRoiHistogramWindow, ...
              'Units'   , 'pixels', ...
              'Position', [60 60 HIST_PANEL_X-130 HIST_PANEL_y-90], ...
-             'Visible' , 'on'...
+             'Color'   , paAxeBackgroundColor,...
+             'XColor'  , viewerForegroundColor('get'),...
+             'YColor'  , viewerForegroundColor('get'),...
+             'ZColor'  , viewerForegroundColor('get'),...             
+             'Visible' , 'on'...             
              );
-
+        
     sliBins = ...
         uicontrol(figRoiHistogramWindow, ...
                   'Style'   , 'Slider', ...
                   'Position', [HIST_PANEL_X-60 110 20 HIST_PANEL_y-140], ...
                   'Value'   , 0.5, ...
                   'Enable'  , 'on', ...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @sliderBinsCallback ...
                   );
      addlistener(sliBins,'Value','PreSet',@sliderBinsCallback);
@@ -134,16 +143,20 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                   'style'   , 'text',...
                   'string'  , 'Bin Counts',...
                   'horizontalalignment', 'left',...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...                  
                   'position', [HIST_PANEL_X-60 80 60 20]...
                   );
 
      edtBinsValue = ...
-         uicontrol(figRoiHistogramWindow,...
-                   'style'     , 'edit',...
-                   'Background', 'white',...
-                   'string'    , 256,...
-                   'position'  , [HIST_PANEL_X-60 60 50 20], ...
-                   'CallBack', @editBinsCallback ...
+        uicontrol(figRoiHistogramWindow,...
+                  'style'     , 'edit',...
+                  'Background', 'white',...
+                  'string'    , 256,...
+                  'position'  , [HIST_PANEL_X-60 60 50 20], ...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...                   
+                  'CallBack', @editBinsCallback ...
                   );
 
     [imCData, logicalMask] = computeHistogram(dicomBuffer('get'), atRoiVoiMetaData, ptrObject, tRoiInput, dSUVScale, bSUVUnit);
@@ -157,6 +170,10 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
     if histogramMenuOption('get') == true
 
         ptrHist = histogram(axeHistogram, imCDataMasked, dInitialBinsValue, 'EdgeColor', 'none', 'FaceColor', ptrObject.Color);
+        
+        axeHistogram.XColor = viewerForegroundColor('get');
+        axeHistogram.YColor = viewerForegroundColor('get');
+        axeHistogram.ZColor = viewerForegroundColor('get');
 
         axeHistogram.XLabel.String = 'Intensity';
         axeHistogram.YLabel.String = 'Frequency';
@@ -165,6 +182,8 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
         else
             axeHistogram.Title.String  = ['Region Histogram - ' ptrObject.Label];
         end
+        axeHistogram.Title.Color = viewerForegroundColor('get');
+        axeHistogram.Color = paAxeBackgroundColor;
 
     elseif cummulativeMenuOption('get') == true
 
@@ -183,7 +202,11 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
             ptrBar = '';
         end
         ptrLine = line(axeHistogram, aXSum, aYSum, 'Color', ptrObject.Color);
-
+        
+        axeHistogram.XColor = viewerForegroundColor('get');
+        axeHistogram.YColor = viewerForegroundColor('get');
+        axeHistogram.ZColor = viewerForegroundColor('get');
+        
         axeHistogram.XLabel.String = 'Intensity (dose)';
         axeHistogram.YLabel.String = 'Volume (cells)';
         if strcmpi(ptrObject.ObjectType, 'voi')
@@ -191,6 +214,8 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
         else
             axeHistogram.Title.String  = ['Cummulative Region - ' ptrObject.Label];
         end
+        axeHistogram.Title.Color = viewerForegroundColor('get');
+        axeHistogram.Color = paAxeBackgroundColor;
 
         set(sliBins     , 'Visible', 'off');
         set(txtBins     , 'Visible', 'off');
@@ -209,7 +234,11 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
         aProfile = improfile(imCData, xValues, yValues);
         ptrPlot = plot(axeHistogram, aProfile);
         set(ptrPlot, 'Color', ptrObject.Color);
-
+        
+        axeHistogram.XColor = viewerForegroundColor('get');
+        axeHistogram.YColor = viewerForegroundColor('get');
+        axeHistogram.ZColor = viewerForegroundColor('get');
+        
         axeHistogram.XLabel.String = 'cells';
         axeHistogram.YLabel.String = 'Intensity';
         if strcmpi(ptrObject.ObjectType, 'voi')
@@ -217,6 +246,8 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
         else
             axeHistogram.Title.String  = ['Region Profile - ' ptrObject.Label];
         end
+        axeHistogram.Title.Color = viewerForegroundColor('get');
+        axeHistogram.Color = paAxeBackgroundColor;
 
         set(sliBins     , 'Visible', 'off');
         set(txtBins     , 'Visible', 'off');
@@ -296,6 +327,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
         figRoiHistogramWindow.Name = [sTitle ' - ' atRoiVoiMetaData{1}.SeriesDescription ' - ' sUnit sSegmented];
 
     end
+
     function histogramTypeCallback(hObject, ~)
 
         if strcmpi(get(hObject, 'Label'), 'Cummulative')
@@ -334,7 +366,11 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
             end
 
             ptrLine = line(axeHistogram, aXSum, aYSum, 'Color', ptrObject.Color);
-
+            
+            axeHistogram.XColor = viewerForegroundColor('get');
+            axeHistogram.YColor = viewerForegroundColor('get');
+            axeHistogram.ZColor = viewerForegroundColor('get');
+        
             axeHistogram.XLabel.String = 'Intensity (dose)';
             axeHistogram.YLabel.String = 'Volume (cells)';
             if strcmpi(ptrObject.ObjectType, 'voi')
@@ -342,6 +378,8 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
             else
                 axeHistogram.Title.String  = ['Cummulative Region - ' ptrObject.Label];
             end
+            axeHistogram.Title.Color = viewerForegroundColor('get');
+            axeHistogram.Color = paAxeBackgroundColor;
 
             set(sliBins     , 'Visible', 'off');
             set(txtBins     , 'Visible', 'off');
@@ -381,7 +419,11 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
             set(sliBins, 'Value', 0.5);
 
             ptrHist = histogram(axeHistogram, imCDataMasked, dInitialBinsValue, 'EdgeColor', 'none', 'FaceColor', ptrObject.Color);
-
+            
+            axeHistogram.XColor = viewerForegroundColor('get');
+            axeHistogram.YColor = viewerForegroundColor('get');
+            axeHistogram.ZColor = viewerForegroundColor('get');
+            
             axeHistogram.XLabel.String = 'Intensity';
             axeHistogram.YLabel.String = 'Frequency';
             if strcmpi(ptrObject.ObjectType, 'voi')
@@ -389,6 +431,8 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
             else
                 axeHistogram.Title.String  = ['Region Histogram - ' ptrObject.Label];
             end
+            axeHistogram.Title.Color = viewerForegroundColor('get');
+            axeHistogram.Color = paAxeBackgroundColor;
 
             set(sliBins     , 'Visible', 'on');
             set(txtBins     , 'Visible', 'on');
@@ -428,7 +472,11 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
             aProfile = improfile(imCData, xValues, yValues);
             ptrPlot = plot(axeHistogram, aProfile);
             set(ptrPlot, 'Color', ptrObject.Color);
-
+            
+            axeHistogram.XColor = viewerForegroundColor('get');
+            axeHistogram.YColor = viewerForegroundColor('get');
+            axeHistogram.ZColor = viewerForegroundColor('get');
+            
             axeHistogram.XLabel.String = 'Cells';
             axeHistogram.YLabel.String = 'Intensity';
             if strcmpi(ptrObject.ObjectType, 'voi')
@@ -436,6 +484,8 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
             else
                 axeHistogram.Title.String  = ['Region Profile - ' ptrObject.Label];
             end
+            axeHistogram.Title.Color = viewerForegroundColor('get');
+            axeHistogram.Color = paAxeBackgroundColor;
 
             set(sliBins     , 'Visible', 'off');
             set(txtBins     , 'Visible', 'off');

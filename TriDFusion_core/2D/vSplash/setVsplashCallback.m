@@ -61,17 +61,21 @@ function setVsplashCallback(~, ~)
         releaseRoiWait();                
 
         isVsplash('set', true);                
-        set(btnVsplashPtr('get'), 'BackgroundColor', 'white');
-
+        
+        set(btnVsplashPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+        set(btnVsplashPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));            
+            
         clearDisplay();                    
         initDisplay(3);  
 
         dicomViewerCore();                      
 
     else
-        isVsplash('set', false);                
-        set(btnVsplashPtr('get'), 'BackgroundColor', 'default');                
-
+        isVsplash('set', false);      
+        
+        set(btnVsplashPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnVsplashPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        
         clearDisplay();                    
         initDisplay(3);  
 

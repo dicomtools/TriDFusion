@@ -34,26 +34,30 @@ function setIsoSurfaceCallback(~, ~)
         releaseRoiWait();
 
         set(zoomMenu('get'), 'Checked', 'off');
-        set(btnZoomPtr('get'), 'BackgroundColor', 'default');
+        set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
         set(btnZoomPtr('get'), 'Enable', 'off');
         zoomTool('set', false);
         zoom('off');
 
         set(panMenu('get'), 'Checked', 'off');
-        set(btnPanPtr('get'), 'BackgroundColor', 'default');
-        set(btnPanPtr('get')     , 'Enable', 'off');
+        set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnPanPtr('get'), 'Enable', 'off');
         panTool('set', false);
         pan('off');
-
-   %     set(rotate3DMenu('get'), 'Checked', 'off');
-        set(btnRegisterPtr('get'), 'BackgroundColor', 'default');
-        set(btnRegisterPtr('get'), 'Enable', 'off');
-        rotate3DTool('set', false);
-        rotate3d('off');
 
         set(btnVsplashPtr('get')   , 'Enable', 'off');
         set(uiEditVsplahXPtr('get'), 'Enable', 'off');
         set(uiEditVsplahYPtr('get'), 'Enable', 'off');
+
+        set(btnRegisterPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnRegisterPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));        
+        set(btnRegisterPtr('get'), 'Enable', 'off');
+        
+   %     set(rotate3DMenu('get'), 'Checked', 'off');
+        rotate3DTool('set', false);
+        rotate3d('off');
 
         set(dataCursorMenu('get'), 'Checked', 'off');
         dataCursorTool('set', false);
@@ -115,8 +119,9 @@ function setIsoSurfaceCallback(~, ~)
             switchToIsoSurface('set', false);
 
             set(btnIsoSurfacePtr('get'), 'Enable', 'on');
-            set(btnIsoSurfacePtr('get'), 'BackgroundColor', 'default');
-
+            set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+            set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));  
+        
             if switchTo3DMode('get')  == false && ...
                switchToMIPMode('get') == false
 
@@ -152,9 +157,10 @@ function setIsoSurfaceCallback(~, ~)
                     set(uiFusedSeriesPtr('get'), 'Enable', 'on');
 %                end
 
-                set(btnTriangulatePtr('get'), 'Enable', 'on');
-                set(btnTriangulatePtr('get'), 'BackgroundColor', 'white');
-
+                set(btnTriangulatePtr('get'), 'Enable', 'on');  
+                set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+                set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+            
                 set(btnZoomPtr('get')    , 'Enable', 'on');
                 set(btnPanPtr('get')     , 'Enable', 'on');                
                 if numel(inputTemplate('get')) >1
@@ -166,11 +172,13 @@ function setIsoSurfaceCallback(~, ~)
                 set(uiEditVsplahYPtr('get'), 'Enable', 'on');
 
                 set(btn3DPtr('get'), 'Enable', 'on');
-                set(btn3DPtr('get'), 'BackgroundColor', 'default');
+                set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+                set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
 
                 set(btnMIPPtr('get'), 'Enable', 'on');
-                set(btnMIPPtr('get'), 'BackgroundColor', 'default');
-
+                set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+                set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
+                
                 mOptions = optionsPanelMenuObject('get');
                 if ~isempty(mOptions)
                     mOptions.Enable = 'on';
@@ -350,14 +358,16 @@ function setIsoSurfaceCallback(~, ~)
             switchToIsoSurface('set', true);
 
             set(btnIsoSurfacePtr('get'), 'Enable', 'on');
-            set(btnIsoSurfacePtr('get'), 'BackgroundColor', 'White');
-
+            set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+            set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+            
             set(uiSeriesPtr('get'), 'Enable', 'off');
 
             set(uiFusedSeriesPtr('get'), 'Enable', 'off');
 
             set(btnTriangulatePtr('get'), 'Enable', 'off');
-            set(btnTriangulatePtr('get'), 'BackgroundColor', 'default');
+            set(btnTriangulatePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+            set(btnTriangulatePtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
 
             if switchTo3DMode('get')  == false && ...
                switchToMIPMode('get') == false
