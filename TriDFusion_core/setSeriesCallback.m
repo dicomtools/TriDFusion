@@ -37,12 +37,14 @@ function setSeriesCallback(~,~)
         releaseRoiWait();
 
         set(zoomMenu('get'), 'Checked', 'off');
-        set(btnZoomPtr('get'), 'BackgroundColor', 'default');
+        set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
         zoomTool('set', false);
         zoom('off');
 
         set(panMenu('get'), 'Checked', 'off');
-        set(btnPanPtr('get'), 'BackgroundColor', 'default');
+        set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
         panTool('set', false);
         pan('off');
 
@@ -51,8 +53,9 @@ function setSeriesCallback(~,~)
 
         isFusion('set', false);
         fusionBuffer('reset');
-        set(btnFusionPtr('get'), 'BackgroundColor', 'default');
-
+        set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        
         initWindowLevel ('set', true);
         initFusionWindowLevel ('set', true);
 
@@ -92,18 +95,22 @@ function setSeriesCallback(~,~)
 
         switchTo3DMode('set', false);
         set(btn3DPtr('get'), 'Enable', 'on');
-        set(btn3DPtr('get'), 'BackgroundColor', 'default');
-
+        set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        
         switchToMIPMode('set', false);
         set(btnIsoSurfacePtr('get'), 'Enable', 'on');
-        set(btnIsoSurfacePtr('get'), 'BackgroundColor', 'default');
-
+        set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        
         switchToIsoSurface('set', false);
         set(btnMIPPtr('get'), 'Enable', 'on');
-        set(btnMIPPtr('get'), 'BackgroundColor', 'default');
+        set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));        
 
         set(btnTriangulatePtr('get'), 'Enable', 'on');
-        set(btnTriangulatePtr('get'), 'BackgroundColor', 'white');
+        set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+        set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
 
         if isempty(dicomMetaData('get'))
             atMetaData = tInput(iOffset).atDicomInfo;
@@ -206,8 +213,8 @@ function setSeriesCallback(~,~)
            ~numel(dicomBuffer('get'))
 
             isVsplash('set', false);
-
-            set(btnVsplashPtr('get'), 'BackgroundColor', 'default');
+            set(btnVsplashPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+            set(btnVsplashPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));     
 
             set(btnVsplashPtr('get')   , 'Enable', 'off');
             set(uiEditVsplahXPtr('get'), 'Enable', 'off');

@@ -355,7 +355,8 @@ function loadCerrDoseConstraint(planC, structNamC)
     set(uiFusedSeriesPtr('get'), 'Enable', 'off');
 
     isVsplash('set', false);
-    set(btnVsplashPtr('get')   , 'BackgroundColor', 'default');
+    set(btnVsplashPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+    set(btnVsplashPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
     set(btnVsplashPtr('get')   , 'Enable', 'off');
     set(uiEditVsplahXPtr('get'), 'Enable', 'off');
     set(uiEditVsplahYPtr('get'), 'Enable', 'off');
@@ -368,13 +369,20 @@ function loadCerrDoseConstraint(planC, structNamC)
 
     rotate3d off
 
-    set(btnFusionPtr('get'), 'BackgroundColor', 'default');
+    set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+    set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
-    set(btn3DPtr('get')        , 'BackgroundColor', 'default');
-    set(btnIsoSurfacePtr('get'), 'BackgroundColor', 'default');
-    set(btnMIPPtr('get')       , 'BackgroundColor', 'default');
+    set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+    set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
-    set(btnTriangulatePtr('get'), 'BackgroundColor', 'white');
+    set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+    set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+
+    set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+    set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+
+    set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+    set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
 
     imageOrientation('set', 'axial');
 
@@ -421,10 +429,10 @@ function loadCerrDoseConstraint(planC, structNamC)
             set(uiFusedSeriesPtr('get'), 'Value', 2);
         else
             set(btnFusionPtr('get')  , 'Enable', 'on');
-                        
+
             set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
             set(uiFusedSeriesPtr('get'), 'Enable', 'on');
-            set(uiFusedSeriesPtr('get'), 'Value', 1);            
+            set(uiFusedSeriesPtr('get'), 'Value', 1);
         end
 
         set(btnVsplashPtr('get')   , 'Enable', 'on');

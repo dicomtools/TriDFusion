@@ -171,10 +171,10 @@ function TriDFusion(varargin)
     
     uiBar = uipanel(uiProgressWindow);
     
-    set(uiBar, 'BackgroundColor', viewerBackgroundColor ('get'));
+    set(uiBar, 'BackgroundColor', viewerBackgroundColor('get'));
     set(uiBar, 'ForegroundColor', viewerForegroundColor('get'));     
-    set(uiBar, 'ShadowColor', viewerBackgroundColor ('get'));
-    set(uiBar, 'HighlightColor', viewerBackgroundColor('get'));         
+    set(uiBar, 'ShadowColor'    , viewerBackgroundColor('get'));
+    set(uiBar, 'HighlightColor' , viewerBackgroundColor('get'));         
     uiBarPtr('set', uiBar);
     
     set(fiMainWindowPtr('get'), 'doublebuffer', 'off'   );   
