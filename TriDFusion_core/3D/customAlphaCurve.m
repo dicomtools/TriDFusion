@@ -48,7 +48,7 @@ function ic = customAlphaCurve(objEditorAxe, surfObj, sType)
     yMarkers = zeros(1,size(aAlphamap,1));
     yMarkers(1,:) = aAlphamap(:,1);
     
-    objEditorAxe.Color = [0 0 0];
+    objEditorAxe.Color  = viewerAxesColor('get'); 
     objEditorAxe.XColor = viewerForegroundColor('get');
     objEditorAxe.YColor = viewerForegroundColor('get');
     objEditorAxe.ZColor = viewerForegroundColor('get');

@@ -61,7 +61,7 @@ function resize = dicomViewer()
     overlayColor    ('set', 'black' );
     windowButton    ('set', 'up'    );
     invertColor     ('set', true    );    
-    backgroundColor ('set', 'white' );
+    backgroundColor ('set', viewerAxesColor('get') );
     background3DOffset('set', 7     ); % white
     colorMapOffset  ('set', 10      );  
     fusionColorMapOffset('set', 19  );         

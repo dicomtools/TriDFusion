@@ -126,7 +126,7 @@ function figRoiDialogCallback(hObject, ~)
                );
            
     if isFigRoiInColor('get') == true
-        aBackgroundColor = [0 0 0];
+        aBackgroundColor = viewerAxesColor('get');
     else
         aBackgroundColor = [0.9800 0.9800 0.9800];
     end
@@ -1722,7 +1722,7 @@ end
         end        
         
         if isFigRoiInColor('get') == true        
-            aBackgroundColor = [0 0 0];
+            aBackgroundColor = viewerAxesColor('get');
         else
             aBackgroundColor = [0.9800 0.9800 0.9800];
         end

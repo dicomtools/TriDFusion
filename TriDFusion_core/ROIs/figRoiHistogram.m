@@ -37,7 +37,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
         dSUVScale = 0;
     end
     
-    paAxeBackgroundColor = [0 0 0];
+    paAxeBackgroundColor = viewerAxesColor('get');
     
     ptrBar  = '';
     ptrHist = '';

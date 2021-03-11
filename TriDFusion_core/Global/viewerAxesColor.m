@@ -1,7 +1,10 @@
-function displayAlphaCurve(aAlphamap, axeAlphmap)
-%function displayAlphaCurve(aAlphamap, axeAlphmap)
-%Display 3D Alpha Curve.
+function aColor = viewerAxesColor(sAction, aValue)
+%function aColor = viewerAxesColor(sAction, aValue)
+%Get\Set Viewer Axes Color.
 %See TriDFuison.doc (or pdf) for more information about options.
+%
+%Note: option settings must fit on one line and can contain one semicolon at most.
+%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
@@ -25,20 +28,12 @@ function displayAlphaCurve(aAlphamap, axeAlphmap)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    cla(axeAlphmap, 'reset');
+    persistent paColor; 
 
-    x = 1:size(aAlphamap, 1);               
-    plot(axeAlphmap, x,aAlphamap(:,1),'c-');     
-
-    axeAlphmap.XLim = [0 size(x,2)];
-    axeAlphmap.YLim = [0 1]; 
-    axeAlphmap.Color  = viewerAxesColor('get');
-    axeAlphmap.XColor = viewerForegroundColor('get');
-    axeAlphmap.YColor = viewerForegroundColor('get');
-    axeAlphmap.ZColor = viewerForegroundColor('get');
-    
-    
-    
+    if strcmpi('set', sAction)
+       paColor = aValue;            
+    end      
+    aColor = paColor;
 end

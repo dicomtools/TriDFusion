@@ -1,5 +1,5 @@
 function mainWindowMenu()
-%function mainWindowMenu(~, ~)
+%function mainWindowMenu()
 %Set Figure Main Menu.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
