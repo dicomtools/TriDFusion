@@ -45,7 +45,6 @@ function initViewerRootPath()
         else    
             sRootDir = fileparts(mfilename('fullpath'));
             sRootDir = erase(sRootDir, 'TriDFusion_core');        
-            sRootDir = [sRootDir '/'];
 
             if isfile(sprintf('%sscreenDefault.png', sRootDir))
                 viewerRootPath('set', sRootDir);
