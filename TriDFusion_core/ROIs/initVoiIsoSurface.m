@@ -140,7 +140,7 @@ function voiObj = initVoiIsoSurface(uiWindow)
 
             im = im(:,:,end:-1:1);
 %            Ds = interp3(im);
-            Ds = smooth3(im, 'gaussian', 15);
+%            Ds = smooth3(im, 'gaussian', 15);
 
 %            im(im==1) = 999999;   
 %            K1 = squeeze(im);
@@ -148,7 +148,7 @@ function voiObj = initVoiIsoSurface(uiWindow)
 %            Ds = smooth3(K2);
 
 
-            voiObj{aa} = volshow(Ds, aInputArguments{:});   
+            voiObj{aa} = volshow(im, aInputArguments{:});   
             set(voiObj{aa}, 'InteractionsEnabled', false);
             
             if aVoiEnableList{aa} == false

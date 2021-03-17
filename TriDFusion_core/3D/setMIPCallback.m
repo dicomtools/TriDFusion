@@ -378,7 +378,7 @@ function setMIPCallback(~, ~)
         else
 
             switchToMIPMode('set', true);
-
+                       
             set(btnMIPPtr('get'), 'Enable', 'on');
             set(btnMIPPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnMIPPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
@@ -726,6 +726,72 @@ function setMIPCallback(~, ~)
             end
 
         end
+        
+        if switchTo3DMode('get') == false && ...
+           (switchToMIPMode('get') == true || ...
+            switchToIsoSurface('get') == true)   
+        
+            set(ui3DVolColormapPtr('get')      , 'Enable', 'off');
+            set(ui3DVolAlphamapTypePtr('get')  , 'Enable', 'off');
+            set(ui3DSliderVolLinAlphaPtr('get'), 'Enable', 'off');           
+        end       
+        
+        if switchToMIPMode('get') == false && ...
+           (switchTo3DMode('get') == true || ...
+            switchToIsoSurface('get') == true)                   
+        
+            set(ui3DMipColormapPtr('get')      , 'Enable', 'off');
+            set(ui3DMipAlphamapTypePtr('get')  , 'Enable', 'off');
+            set(ui3DSliderMipLinAlphaPtr('get'), 'Enable', 'off');              
+            
+            mipObj = mipObject('get');
+            set(mipObj, 'InteractionsEnabled', false);
+            mipObject('set', mipObj);
+            
+            if switchTo3DMode('get') == true && ...
+               switchToIsoSurface('get') == true
+          
+                if surface3DPriority('get', 'VolumeRendering') < ...
+                   surface3DPriority('get', 'Isosurface')
+               
+                    volObj = volObject('get');
+                    set(volObj, 'InteractionsEnabled', true);
+                    volObject('set', volObj);               
+                    
+                    isoObj = isoObject('get');
+                    set(isoObj, 'InteractionsEnabled', false);
+                    isoObject('set', isoObj);  
+                else    
+                    volObj = volObject('get');
+                    set(volObj, 'InteractionsEnabled', false);
+                    volObject('set', volObj);               
+                    
+                    isoObj = isoObject('get');
+                    set(isoObj, 'InteractionsEnabled', true);
+                    isoObject('set', isoObj);                      
+                end
+            else
+                if switchTo3DMode('get') == true
+                    volObj = volObject('get');
+                    set(volObj, 'InteractionsEnabled', true);
+                    volObject('set', volObj);   
+                end
+                                        
+                if switchToIsoSurface('get') == true
+                    isoObj = isoObject('get');
+                    set(isoObj, 'InteractionsEnabled', true);
+                    isoObject('set', isoObj);                     
+                end          
+            end
+
+        else
+            if switchToMIPMode('get') == true
+                set(ui3DMipColormapPtr('get')      , 'Enable', 'on');
+                set(ui3DMipAlphamapTypePtr('get')  , 'Enable', 'on');
+                set(ui3DSliderMipLinAlphaPtr('get'), 'Enable', 'on');               
+            end
+        end
+
     end
 
 end

@@ -485,5 +485,67 @@ end
             end
 
         end
+        
+        if switchToMIPMode('get') == false && ...
+           (switchTo3DMode('get') == true || ...
+            switchToIsoSurface('get') == true)   
+        
+            set(ui3DMipColormapPtr('get')      , 'Enable', 'off');
+            set(ui3DMipAlphamapTypePtr('get')  , 'Enable', 'off');
+            set(ui3DSliderMipLinAlphaPtr('get'), 'Enable', 'off');           
+        end       
+        
+        if switchTo3DMode('get') == false && ...
+           (switchToMIPMode('get') == true || ...
+            switchToIsoSurface('get') == true)   
+        
+            set(ui3DVolColormapPtr('get')      , 'Enable', 'off');
+            set(ui3DVolAlphamapTypePtr('get')  , 'Enable', 'off');
+            set(ui3DSliderVolLinAlphaPtr('get'), 'Enable', 'off');              
+        end  
+        
+        if switchToIsoSurface('get') == false && ...
+           (switchToMIPMode('get') == true || ...
+            switchTo3DMode('get') == true)  
+        
+            isoObj = isoObject('get');
+            set(isoObj, 'InteractionsEnabled', false);
+            isoObject('set', isoObj);             
+            
+            if switchTo3DMode('get') == true && ...
+               switchToMIPMode('get') == true   
+                if surface3DPriority('get', 'VolumeRendering') < ...
+                   surface3DPriority('get', 'MaximumIntensityProjection')    
+               
+                    volObj = volObject('get');
+                    set(volObj, 'InteractionsEnabled', true);
+                    volObject('set', volObj);               
+                    
+                    mipObj = mipObject('get');
+                    set(mipObj, 'InteractionsEnabled', false);
+                    mipObject('set', mipObj);                      
+                else
+                    volObj = volObject('get');
+                    set(volObj, 'InteractionsEnabled', false);
+                    volObject('set', volObj);               
+                    
+                    mipObj = mipObject('get');
+                    set(mipObj, 'InteractionsEnabled', true);
+                    mipObject('set', mipObj);                      
+                end
+            else
+                if switchTo3DMode('get') == true
+                    volObj = volObject('get');
+                    set(volObj, 'InteractionsEnabled', true);
+                    volObject('set', volObj);   
+                end
+                
+                if switchToMIPMode('get') == true    
+                    mipObj = mipObject('get');
+                    set(mipObj, 'InteractionsEnabled', true);
+                    mipObject('set', mipObj);                      
+                end           
+            end
+        end        
     end
 end
