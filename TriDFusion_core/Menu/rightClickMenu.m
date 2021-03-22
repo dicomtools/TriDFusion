@@ -53,9 +53,14 @@ function rightClickMenu(sAction, objectPtr)
         cm = uicontextmenu(fiMainWindowPtr('get'));
         uimenu(cm, 'Text', 'Paste Object', 'Callback', @pasteRoiCallback);
         uimenu(cm, 'Text', 'Hide Menu', 'Separator', 'on', 'Callback', @hideRoiMenuCallback);
-        objectPtr.ContextMenu = cm;
-                
-        paContextMenu{numel(paContextMenu)+1} = objectPtr.ContextMenu;            
+        
+        if isfield(objectPtr, 'ContextMenu')
+            objectPtr.ContextMenu = cm;                
+            paContextMenu{numel(paContextMenu)+1} = objectPtr.ContextMenu;            
+        else
+            objectPtr.UIContextMenu = cm;                
+            paContextMenu{numel(paContextMenu)+1} = objectPtr.UIContextMenu;            
+        end
     end
     
     function hideRoiMenuCallback(~, ~)
