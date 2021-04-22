@@ -121,6 +121,4 @@ function addRoi(ptrRoi, iOffset)
         
     roiTemplate('set', atRoiInput);
 
-    setVoiRoiSegPopup();
-
 end  

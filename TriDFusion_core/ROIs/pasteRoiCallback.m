@@ -196,5 +196,8 @@ function pasteRoiCallback(~, ~)
     end
 
     addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'));                  
+    
+    setVoiRoiSegPopup();
+
 
 end

@@ -282,6 +282,8 @@ function setRoiToolbar(sVisible)
 
                     addRoi(a, get(uiSeriesPtr('get'), 'Value'));     
                     
+                    setVoiRoiSegPopup();
+                    
                     uimenu(a.UIContextMenu, 'Label', 'Copy Object' , 'UserData', a, 'Callback', @copyRoiCallback, 'Separator', 'on');
                     uimenu(a.UIContextMenu, 'Label', 'Paste Object', 'UserData', a, 'Callback', @pasteRoiCallback);
                     
@@ -415,6 +417,8 @@ function setRoiToolbar(sVisible)
                     end
 
                     addRoi(a, get(uiSeriesPtr('get'), 'Value'));                  
+                    
+                    setVoiRoiSegPopup();
 
                     roiDefaultMenu(a);
 
@@ -534,7 +538,9 @@ function setRoiToolbar(sVisible)
                         return;
                     end 
 
-                    addRoi(a, get(uiSeriesPtr('get'), 'Value'));                  
+                    addRoi(a, get(uiSeriesPtr('get'), 'Value'));      
+                    
+                    setVoiRoiSegPopup();
 
                     roiDefaultMenu(a);
                     
@@ -684,6 +690,8 @@ function setRoiToolbar(sVisible)
                     end 
 
                     addRoi(a, get(uiSeriesPtr('get'), 'Value'));                  
+                    
+                    setVoiRoiSegPopup();
 
                     roiDefaultMenu(a);
                     
@@ -799,6 +807,8 @@ function setRoiToolbar(sVisible)
                     end 
 
                     addRoi(a, get(uiSeriesPtr('get'), 'Value'));                  
+                    
+                    setVoiRoiSegPopup();
 
                     roiDefaultMenu(a);
                     
@@ -915,6 +925,8 @@ function setRoiToolbar(sVisible)
                     end 
 
                     addRoi(a, get(uiSeriesPtr('get'), 'Value'));       
+                    
+                    setVoiRoiSegPopup();
                     
                     uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback); 
 

@@ -27,7 +27,6 @@ function setVoiRoiSegPopup()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-
     uiSegActRoiPanel = uiSegActRoiPanelObject('get');
     uiRoiVoiRoiPanel = uiRoiVoiRoiPanelObject('get');
 
@@ -42,12 +41,7 @@ function setVoiRoiSegPopup()
     if strcmpi(uiSegActRoiPanel.String{uiSegActRoiPanel.Value}, 'Entire Image') 
         set(uiRoiVoiRoiPanel, 'Value' , 1);
         set(uiRoiVoiRoiPanel, 'Enable', 'off');                        
-        set(uiRoiVoiRoiPanel, 'String', ' ');    
-  
-        roiPanelMinValue('set', min(double(dicomBuffer('get')),[], 'all'));
-        roiPanelMaxValue('set', max(double(dicomBuffer('get')),[], 'all'));         
-        
-        
+        set(uiRoiVoiRoiPanel, 'String', ' ');                         
     else
          asList = '';
 
@@ -74,22 +68,12 @@ function setVoiRoiSegPopup()
         %    set(uiChkSubtractVoiRoi, 'Enable', 'on');     
 
             set(uiRoiVoiRoiPanel, 'Enable', 'on');
-            set(uiRoiVoiRoiPanel, 'String', asList);
-            
-           [dComputedMin, dComputedMax] = computeRoiPanelMinMax();
-           
-            roiPanelMinValue('set', dComputedMin);
-            roiPanelMaxValue('set', dComputedMax);            
-
+            set(uiRoiVoiRoiPanel, 'String', asList);                      
         else
             set(uiSegActRoiPanel, 'Value' , 1);
             set(uiRoiVoiRoiPanel, 'Enable', 'off');
-            set(uiRoiVoiRoiPanel, 'String', ' ');  
-            
-            roiPanelMinValue('set', min(double(dicomBuffer('get')),[], 'all'));
-            roiPanelMaxValue('set', max(double(dicomBuffer('get')),[], 'all'));                          
-        end       
-                     
+            set(uiRoiVoiRoiPanel, 'String', ' ');                                    
+        end                            
     end
     
     

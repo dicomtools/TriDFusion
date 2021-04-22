@@ -61,9 +61,33 @@ function movedRoiEvents(hObject, ~)
 
             roiTemplate('set', atRoi);
             inputTemplate('set', tInput);
-            
-            setVoiRoiSegPopup();
 
+            % Set ROIs Panel Min/Max
+            
+            uiSegActRoiPanel = uiSegActRoiPanelObject('get');
+            uiRoiVoiRoiPanel = uiRoiVoiRoiPanelObject('get');
+   
+            if strcmpi(uiSegActRoiPanel.String{uiSegActRoiPanel.Value}, 'Entire Image') 
+
+                roiPanelMinValue('set', min(double(dicomBuffer('get')),[], 'all'));
+                roiPanelMaxValue('set', max(double(dicomBuffer('get')),[], 'all'));                         
+            else
+                 asList = get(uiRoiVoiRoiPanel, 'String');
+
+                if numel(asList) ~= 0
+
+                   [dComputedMin, dComputedMax] = computeRoiPanelMinMax();
+
+                    roiPanelMinValue('set', dComputedMin);
+                    roiPanelMaxValue('set', dComputedMax);            
+
+                else
+
+                    roiPanelMinValue('set', min(double(dicomBuffer('get')),[], 'all'));
+                    roiPanelMaxValue('set', max(double(dicomBuffer('get')),[], 'all'));                          
+                end       
+            end
+            
             break;
         end
     end

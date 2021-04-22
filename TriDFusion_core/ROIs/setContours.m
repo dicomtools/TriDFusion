@@ -130,7 +130,7 @@ function setContours(tContours)
                     end
 
                     if ~isempty(asTag)
-                        createVoiFromRois(asTag, sLabel);
+                        createVoiFromRois(asTag, sLabel);                        
                     end            
                
                 end
@@ -157,6 +157,7 @@ function setContours(tContours)
         set(uiSliderTraPtr('get'), 'Visible', 'on');      
 
 %        hold off;
+        setVoiRoiSegPopup();                        
     
         refreshImages();
         

@@ -64,8 +64,8 @@ function initRoiPanel()
          asSegOptions = {'Entire Image', 'Inside ROI\VOI', 'Outside ROI\VOI'};
      else
          asSegOptions = {'Entire Image', 'Inside ROI\VOI', 'Outside ROI\VOI', 'Inside all slices ROI\VOI', 'Outside all slices ROI\VOI'};
-     end
-     
+     end     
+            
      uiSegActRoiPanel = ...
         uicontrol(uiRoiPanelPtr('get'), ...
                   'Style'   , 'popup', ...
@@ -808,7 +808,10 @@ function initRoiPanel()
         aActionType = get(uiSegActRoiPanelObj, 'String');
         dActionType = get(uiSegActRoiPanelObj, 'Value' );
         sActionType = aActionType{dActionType};
-            
+        
+        uiRoiVoiRoiPanelObj   = uiRoiVoiRoiPanelObject('get');
+        uiRoiVoiRoiPanelValue = get(uiRoiVoiRoiPanelObj, 'Value');
+        
         bRelativeToMax = relativeToMaxRoiPanelValue('get');
  
         dSliderMin = minTresholdSliderRoiPanelValue('get');
@@ -866,9 +869,9 @@ function initRoiPanel()
                     end
                 end                
                 
-                if strcmpi(aobjList{get(uiRoiVoiRoiPanel, 'Value')}.ObjectType, 'voi')
+                if strcmpi(aobjList{uiRoiVoiRoiPanelValue}.ObjectType, 'voi')
                     
-                    dNbRois = numel(aobjList{get(uiRoiVoiRoiPanel, 'Value')}.RoisTag);             
+                    dNbRois = numel(aobjList{uiRoiVoiRoiPanelValue}.RoisTag);             
                     
                     aVoiBuffer = zeros(size(aBuffer));
                     aVoiBuffer(aVoiBuffer==0) = cropValue('get');
@@ -877,7 +880,7 @@ function initRoiPanel()
 
                         for cc=1:numel(tRoiInput)
                             if isvalid(tRoiInput{cc}.Object) && ...
-                                strcmpi(tRoiInput{cc}.Tag, aobjList{get(uiRoiVoiRoiPanel, 'Value')}.RoisTag{bb})
+                                strcmpi(tRoiInput{cc}.Tag, aobjList{uiRoiVoiRoiPanelValue}.RoisTag{bb})
                             
                                 objRoi   = tRoiInput{cc}.Object;
 
@@ -901,7 +904,7 @@ function initRoiPanel()
                     end
                     aAxe = aVoiBuffer(:,:);                
                 else
-                    objRoi   = aobjList{uiRoiVoiRoiPanel.Value}.Object;
+                    objRoi   = aobjList{uiRoiVoiRoiPanelValue}.Object;
                     
                     aVoiBuffer = zeros(size(aBuffer));
                     
@@ -1051,9 +1054,9 @@ function initRoiPanel()
                     end
                 end                
                 
-                if strcmpi(aobjList{get(uiRoiVoiRoiPanel, 'Value')}.ObjectType, 'voi')
+                if strcmpi(aobjList{uiRoiVoiRoiPanelValue}.ObjectType, 'voi')
                     
-                    dNbRois = numel(aobjList{get(uiRoiVoiRoiPanel, 'Value')}.RoisTag);             
+                    dNbRois = numel(aobjList{uiRoiVoiRoiPanelValue}.RoisTag);             
                     
                     if strcmpi(sActionType, 'Inside ROI\VOI') || ...
                        strcmpi(sActionType, 'Outside ROI\VOI')     
@@ -1067,7 +1070,7 @@ function initRoiPanel()
 
                         for cc=1:numel(tRoiInput)
                             if isvalid(tRoiInput{cc}.Object) && ...
-                                strcmpi(tRoiInput{cc}.Tag, aobjList{get(uiRoiVoiRoiPanel, 'Value')}.RoisTag{bb})
+                                strcmpi(tRoiInput{cc}.Tag, aobjList{uiRoiVoiRoiPanelValue}.RoisTag{bb})
                             
                                 objRoi   = tRoiInput{cc}.Object;
                                 dSliceNb = tRoiInput{cc}.SliceNb;
@@ -1336,19 +1339,24 @@ function initRoiPanel()
             return;
         end    
         
-        try  
-                       
+        try                     
+            
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
         
-        refreshImages();
+        uiSeries = uiSeriesPtr('get');
+        uiSeriesValue = get(uiSeries, 'Value');
+%        refreshImages();
         
         uiSegActRoiPanelObj = uiSegActRoiPanelObject('get');
         
         aActionType = get(uiSegActRoiPanelObj, 'String');
         dActionType = get(uiSegActRoiPanelObj, 'Value' );
         sActionType = aActionType{dActionType};
-            
+        
+        uiRoiVoiRoiPanelObj   = uiRoiVoiRoiPanelObject('get');
+        uiRoiVoiRoiPanelValue = get(uiRoiVoiRoiPanelObj, 'Value');
+
         bRelativeToMax = relativeToMaxRoiPanelValue('get');
         bInPercent     = inPercentRoiPanelValue('get');
         
@@ -1436,47 +1444,48 @@ function initRoiPanel()
                         end
 
                         aAxial = B(:,:,aa);   
-                        
-                        if bPixelEdge == true
-                            aAxial = imresize(aAxial,3, 'nearest'); % do not go directly through pixel centers
-                        end
-                         
-                        [maskAxial,~,~,~] = bwboundaries(aAxial, 'noholes', 4);  
-                        if ~isempty(maskAxial)
-                            for jj=1:numel(maskAxial)
-                                
-                                if cancelCreateVoiRoiPanel('get') == true
-                                    break;
+                        if aAxial(aAxial==1)
+                            if bPixelEdge == true
+                                aAxial = imresize(aAxial,3, 'nearest'); % do not go directly through pixel centers
+                            end
+
+                            [maskAxial,~,~,~] = bwboundaries(aAxial, 'noholes', 4);  
+                            if ~isempty(maskAxial)
+                                for jj=1:numel(maskAxial)
+
+                                    if cancelCreateVoiRoiPanel('get') == true
+                                        break;
+                                    end
+
+                                    curentMask = maskAxial(jj); 
+
+                                    if bPixelEdge == true
+                                        curentMask{1} = (curentMask{1} +1)/3;                                
+                                    end
+
+                                    sliceNumber('set', 'axial', aa);
+
+                                    sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+
+     %                               pRoi = drawfreehand(axes3Ptr('get') , 'Position', curentMask, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', 0);
+                                    aPosition = flip(curentMask{1}, 2);
+
+                                    pRoi = drawfreehand(axes3Ptr('get') , 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', 0);
+                                    pRoi.Waypoints(:) = false;
+
+                                    addRoi(pRoi, uiSeriesValue);                  
+
+                                    roiDefaultMenu(pRoi);
+
+                                    uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback); 
+                                    uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback); 
+
+                                    cropMenu(pRoi);
+
+                                    uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');                     
+
+                                    asTag{numel(asTag)+1} = sTag; 
                                 end
-                        
-                                curentMask = maskAxial(jj); 
-                                
-                                if bPixelEdge == true
-                                    curentMask{1} = (curentMask{1} +1)/3;                                
-                                end
-                                    
-                                sliceNumber('set', 'axial', aa);
-
-                                sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
-
- %                               pRoi = drawfreehand(axes3Ptr('get') , 'Position', curentMask, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', 0);
-                                aPosition = flip(curentMask{1}, 2);
-                                                                                                
-                                pRoi = drawfreehand(axes3Ptr('get') , 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', 0);
-                                pRoi.Waypoints(:) = false;
-
-                                addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'));                  
-
-                                roiDefaultMenu(pRoi);
-
-                                uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback); 
-                                uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback); 
-
-                                cropMenu(pRoi);
-
-                                uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');                     
-
-                                asTag{numel(asTag)+1} = sTag; 
                             end
                         end
                     end
@@ -1506,8 +1515,11 @@ function initRoiPanel()
                         end
                             
                         createVoiFromRois(asTag, sLabel);
+                        
                     end                     
                 end
+                
+                setVoiRoiSegPopup();
                 
                 refreshImages();
                 
@@ -1535,9 +1547,9 @@ function initRoiPanel()
                     end
                 end                
                 
-                if strcmpi(aobjList{get(uiRoiVoiRoiPanel, 'Value')}.ObjectType, 'voi')
+                if strcmpi(aobjList{uiRoiVoiRoiPanelValue}.ObjectType, 'voi')
                     
-                    dNbRois = numel(aobjList{get(uiRoiVoiRoiPanel, 'Value')}.RoisTag);             
+                    dNbRois = numel(aobjList{uiRoiVoiRoiPanelValue}.RoisTag);             
                       
                     aVoiBuffer = zeros(size(aBuffer));
                     aVoiBuffer(aVoiBuffer==0) = cropValue('get');
@@ -1555,7 +1567,7 @@ function initRoiPanel()
                             end                            
                             
                             if isvalid(tRoiInput{cc}.Object) && ...
-                                strcmpi(tRoiInput{cc}.Tag, aobjList{get(uiRoiVoiRoiPanel, 'Value')}.RoisTag{bb})
+                                strcmpi(tRoiInput{cc}.Tag, aobjList{uiRoiVoiRoiPanelValue}.RoisTag{bb})
                             
                                 objRoi   = tRoiInput{cc}.Object;
                                 dSliceNb = tRoiInput{cc}.SliceNb;
@@ -1636,8 +1648,8 @@ function initRoiPanel()
                     end                     
                 else 
                     
-                    objRoi   = aobjList{uiRoiVoiRoiPanel.Value}.Object;
-                    dSliceNb = aobjList{uiRoiVoiRoiPanel.Value}.SliceNb;                    
+                    objRoi   = aobjList{uiRoiVoiRoiPanelValue}.Object;
+                    dSliceNb = aobjList{uiRoiVoiRoiPanelValue}.SliceNb;                    
                     
                     aVoiBuffer = zeros(size(aBuffer));
                     aVoiBuffer(aVoiBuffer==0) = cropValue('get');
@@ -1835,46 +1847,48 @@ function initRoiPanel()
 %                            end
 
                         aSlice = B(:,:,aa);
+                        
+                        if aSlice(aSlice==1)
+                            if bPixelEdge == true
+                                aSlice = imresize(aSlice,3,'nearest'); % do not go directly through pixel centers
+                            end
 
-                        if bPixelEdge == true
-                            aSlice = imresize(aSlice,3,'nearest'); % do not go directly through pixel centers
-                        end
+                            [maskSlice, ~,~,~] = bwboundaries(aSlice, 'noholes', 4); 
 
-                        [maskSlice, ~,~,~] = bwboundaries(aSlice, 'noholes', 4); 
+                            if ~isempty(maskSlice)
+                                for jj=1:numel(maskSlice)
 
-                        if ~isempty(maskSlice)
-                            for jj=1:numel(maskSlice)
+                                    if cancelCreateVoiRoiPanel('get') == true
+                                        break;
+                                    end
 
-                                if cancelCreateVoiRoiPanel('get') == true
-                                    break;
+                                    curentMask = maskSlice(jj);
+                                    if bPixelEdge == true
+                                        curentMask{1} = (curentMask{1} +1)/3;                                
+                                    end
+
+                                    sliceNumber('set', 'axial', aa);
+
+                                    sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+
+                                    aPosition = flip(curentMask{1}, 2);
+
+                                    pRoi = drawfreehand(axes3Ptr('get') , 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', 0);
+                                    pRoi.Waypoints(:) = false;
+
+                                    addRoi(pRoi, uiSeriesValue);                  
+
+                                    roiDefaultMenu(pRoi);
+
+                                    uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback); 
+                                    uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback); 
+
+                                    cropMenu(pRoi);
+
+                                    uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');                     
+
+                                    asTag{numel(asTag)+1} = sTag;   
                                 end
-
-                                curentMask = maskSlice(jj);
-                                if bPixelEdge == true
-                                    curentMask{1} = (curentMask{1} +1)/3;                                
-                                end
-
-                                sliceNumber('set', 'axial', aa);
-
-                                sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
-
-                                aPosition = flip(curentMask{1}, 2);
-
-                                pRoi = drawfreehand(axes3Ptr('get') , 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', 0);
-                                pRoi.Waypoints(:) = false;
-
-                                addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'));                  
-
-                                roiDefaultMenu(pRoi);
-
-                                uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback); 
-                                uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback); 
-
-                                cropMenu(pRoi);
-
-                                uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');                     
-
-                                asTag{numel(asTag)+1} = sTag;   
                             end
                         end
                     end
@@ -1904,8 +1918,11 @@ function initRoiPanel()
                         end
 
                         createVoiFromRois(asTag, sLabel);
+                        
                     end                     
                 end
+                
+                setVoiRoiSegPopup();
 
                 progressBar(1, 'Ready');  
 

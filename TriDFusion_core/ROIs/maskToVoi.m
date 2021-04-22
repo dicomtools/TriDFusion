@@ -121,6 +121,7 @@ function maskToVoi(aMask, sLabel, aColor, sPlane, dSeriesOffset, bPixelEdge)
     
     if ~isempty(asTag)
         createVoiFromRois(asTag, sLabel);
+        setVoiRoiSegPopup();
     end
     
     progressBar(1, 'Ready' );      
