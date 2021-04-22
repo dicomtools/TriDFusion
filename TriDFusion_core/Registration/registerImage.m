@@ -35,7 +35,8 @@ function [imRegistered, atRegisteredMetaData, Rregistered, Rmoving, Rfixed] = re
     % 'rigid'	Rigid transformation consisting of translation and rotation.
     % 'similarity'	Nonreflective similarity transformation consisting of translation, rotation, and scale.
     % 'affine' Affine transformation consisting of translation, rotation, scale, and shear.        
-
+    
+    
     fixedSliceThickness = computeSliceSpacing(atFixedMetaData);
     
     if fixedSliceThickness == 0           
@@ -184,4 +185,5 @@ function [imRegistered, atRegisteredMetaData, Rregistered, Rmoving, Rfixed] = re
         asDescription{iOffset} = sprintf('MOV-COREG %s', asDescription{iOffset});
         seriesDescription('set', asDescription);
     end  
+      
 end

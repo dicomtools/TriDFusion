@@ -27,19 +27,13 @@ function waypointEvents(hObject, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    tWaypointInput = inputTemplate('get');        
-    iOffset = get(uiSeriesPtr('get'), 'Value');
-    if iOffset > numel(tWaypointInput)  
-        return;
-    end
-
-    for bb=1:numel(tWaypointInput(iOffset).tRoi)
-        if strcmpi(hObject.Tag, tWaypointInput(iOffset).tRoi{bb}.Tag)
-            tWaypointInput(iOffset).tRoi{bb}.Waypoints = hObject.Waypoints;
-            inputTemplate('set', tWaypointInput);
-            roiTemplate('set', tWaypointInput(iOffset).tRoi);
+    atRoi = roiTemplate('get');
+    
+    for bb=1:numel(atRoi)
+        if strcmpi(hObject.Tag, atRoi{bb}.Tag)
+            atRoi{bb}.Waypoints = hObject.Waypoints;
+            roiTemplate('set', atRoi);
             break;
         end
-    end
-
+    end 
 end 

@@ -30,6 +30,11 @@ function writeISOtoSTL(sStlFileName)
     isoObj = isoObject('get');
     if ~isempty(isoObj)
 
+        try
+                      
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;  
+    
         progressBar(0.999999, 'Processing write stl, please wait');
 
         aSurfaceColor = surfaceColor('all');
@@ -83,7 +88,14 @@ function writeISOtoSTL(sStlFileName)
         stlwrite(sStlFileName, fv, 'FaceColor', fCols8bit);
 
         progressBar(1, sprintf('Write %s completed', sStlFileName));
+        
+        catch
+            progressBar(1, 'Error:writeISOtoSTL()');                
+        end
 
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow; 
+    
     else
         progressBar(1, 'Error: Please initiate the iso surface!');
         h = msgbox('Error: writeISOtoSTL(): Please initiate the iso surface!', 'Error');

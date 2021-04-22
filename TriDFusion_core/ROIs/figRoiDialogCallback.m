@@ -284,6 +284,7 @@ function figRoiDialogCallback(hObject, ~)
                 end
 
                 uimenu(c,'Label', 'Edit Color', 'Callback',@figRoiEditColorCallback);
+                uimenu(c,'Label', 'Hide/View Face Alpha', 'Callback', @figRoiHideViewFaceAlhaCallback); 
 
                 uimenu(c,'Label', 'Histogram'  , 'Separator', 'on' , 'Callback',@figRoiHistogramCallback);
                 uimenu(c,'Label', 'Cummulative', 'Separator', 'off', 'Callback',@figRoiHistogramCallback);
@@ -435,6 +436,7 @@ function figRoiDialogCallback(hObject, ~)
         end
 
         function figRoiDeleteObjectCallback(~, ~)
+            
             aVoiRoiTag = voiRoiTag('get');
 
             tRoiInput = roiTemplate('get');
@@ -498,98 +500,137 @@ function figRoiDialogCallback(hObject, ~)
 
             function figRoiDeleteObject(ptrObject, sType)
 
+                iOffset = get(uiSeriesPtr('get'), 'Value');    
                 tDeleteInput = inputTemplate('get');
-                iOffset = get(uiSeriesPtr('get'), 'Value');
-                if iOffset > numel(tDeleteInput)
-                    return;
-                end
-    %                if strcmpi(tVoiInput{aa}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
     
+                tRoiInput = roiTemplate('get');
+                tVoiInput = voiTemplate('get');
+            
                 if strcmpi(sType, 'voi')
                     if isfield(tDeleteInput(iOffset), 'tVoi')
                         for vv=1:numel(ptrObject.RoisTag)
                             for rr=1:numel(tDeleteInput(iOffset).tRoi)    
                                 if strcmpi(ptrObject.RoisTag{vv}, tDeleteInput(iOffset).tRoi{rr}.Tag)
                                     
-                                    delete(tDeleteInput(iOffset).tRoi{rr}.Object);                                                                                   
                                     tDeleteInput(iOffset).tRoi{rr} = []; 
+                                    break;
                                 end
                                
                             end    
                             
-                            tDeleteInput(iOffset).tRoi(cellfun(@isempty, tDeleteInput(iOffset).tRoi)) = [];
-                           
+                            tDeleteInput(iOffset).tRoi(cellfun(@isempty, tDeleteInput(iOffset).tRoi)) = [];                           
                         end
                         
-                        tDeleteInput(iOffset).tRoi(cellfun(@isempty, tDeleteInput(iOffset).tRoi)) = [];                                
+                        inputTemplate('set', tDeleteInput);
+                                                
+                        for vv=1:numel(ptrObject.RoisTag)
+                            for rr=1:numel(tRoiInput)    
+                                if strcmpi(ptrObject.RoisTag{vv}, tRoiInput{rr}.Tag)
+                                    
+                                    delete(tRoiInput{rr}.Object);                                                                                   
+                                    tRoiInput{rr} = []; 
+                                    break;
+                                end
+                               
+                            end    
+                            
+                            tRoiInput(cellfun(@isempty, tRoiInput)) = [];                           
+                        end                        
                         
-                        if isempty(tDeleteInput(iOffset).tRoi)
-                            roiTemplate('set', '');
-                        else
-                            roiTemplate('set', tDeleteInput(iOffset).tRoi);
-                        end
+                        roiTemplate('set', tRoiInput);
                         
                         for vv=1:numel(tDeleteInput(iOffset).tVoi)
                             if strcmpi(ptrObject.Tag, tDeleteInput(iOffset).tVoi{vv}.Tag)
                                 tDeleteInput(iOffset).tVoi{vv} = [];
+                                break;
                             end                            
                         end
                         
-                        tDeleteInput(iOffset).tVoi(cellfun(@isempty, tDeleteInput(iOffset).tVoi)) = [];                                
-
-                        if isempty(tDeleteInput(iOffset).tVoi)
-                           voiTemplate('set', '');
-                        else
-                           voiTemplate('set', tDeleteInput(iOffset).tVoi);
-                        end                       
-                                                
+                        tDeleteInput(iOffset).tVoi(cellfun(@isempty, tDeleteInput(iOffset).tVoi)) = [];                                                        
                         inputTemplate('set', tDeleteInput);
+
+                        for vv=1:numel(tVoiInput)
+                            if strcmpi(ptrObject.Tag, tVoiInput{vv}.Tag)
+                                tVoiInput{vv} = [];
+                                break;
+                            end                            
+                        end
+                        
+                        tVoiInput(cellfun(@isempty, tVoiInput)) = [];                                
+                        voiTemplate('set', tVoiInput);
+                        
                     end                    
                 else
-                    for bb=1:numel(tDeleteInput(iOffset).tRoi)
-                        if strcmpi(ptrObject.Tag, tDeleteInput(iOffset).tRoi{bb}.Tag)
+                    if isfield(tDeleteInput(iOffset), 'tVoi')
+                        for vv=1:numel(tDeleteInput(iOffset).tVoi)
+                            for tt=1: numel(tDeleteInput(iOffset).tVoi{vv}.RoisTag)
+                                if strcmpi(tDeleteInput(iOffset).tVoi{vv}.RoisTag{tt}, ptrObject.Tag)
 
-                            if isfield(tDeleteInput(iOffset), 'tVoi')
-                                for vv=1:numel(tDeleteInput(iOffset).tVoi)
-                                    for tt=1:numel(tDeleteInput(iOffset).tVoi{vv}.RoisTag)
-                                        if strcmpi(tDeleteInput(iOffset).tVoi{vv}.RoisTag{tt}, ptrObject.Tag)
-                                            tDeleteInput(iOffset).tVoi{vv}.RoisTag{tt} = [];
-                                            tDeleteInput(iOffset).tVoi{vv}.RoisTag(cellfun(@isempty, tDeleteInput(iOffset).tVoi{vv}.RoisTag)) = [];
+                                    tDeleteInput(iOffset).tVoi{vv}.RoisTag{tt} = [];
+                                    tDeleteInput(iOffset).tVoi{vv}.RoisTag(cellfun(@isempty, tDeleteInput(iOffset).tVoi{vv}.RoisTag)) = [];
 
-                                            tDeleteInput(iOffset).tVoi{vv}.tMask{tt} = [];
-                                            tDeleteInput(iOffset).tVoi{vv}.tMask(cellfun(@isempty, tDeleteInput(iOffset).tVoi{vv}.tMask)) = [];
+                                    tDeleteInput(iOffset).tVoi{vv}.tMask{tt} = [];
+                                    tDeleteInput(iOffset).tVoi{vv}.tMask(cellfun(@isempty, tDeleteInput(iOffset).tVoi{vv}.tMask)) = [];
 
-                                            if isempty(tDeleteInput(iOffset).tVoi{vv}.RoisTag)
-                                                tDeleteInput(iOffset).tVoi{vv} = [];
-                                                tDeleteInput(iOffset).tVoi(cellfun(@isempty, tDeleteInput(iOffset).tVoi)) = [];
-                                            end
-
-                                            if isempty(tDeleteInput(iOffset).tVoi)
-                                               voiTemplate('set', '');
-                                            else
-                                               voiTemplate('set', tDeleteInput(iOffset).tVoi);
-                                            end
-
-                                            break;
-                                        end
+                                    if isempty(tDeleteInput(iOffset).tVoi{vv}.RoisTag)
+                                        tDeleteInput(iOffset).tVoi{vv} = [];
+                                        tDeleteInput(iOffset).tVoi(cellfun(@isempty, tDeleteInput(iOffset).tVoi)) = [];
                                     end
+
+                                    inputTemplate('set', tDeleteInput);
+                                    break;
                                 end
                             end
+                        end 
+                    end
+                    
+                    if isfield(tDeleteInput(iOffset), 'tRoi')                   
+                        for rr=1:numel(tDeleteInput(iOffset).tRoi)    
+                            if strcmpi(ptrObject.Tag, tDeleteInput(iOffset).tRoi{rr}.Tag)
 
-                            tDeleteInput(iOffset).tRoi{bb} = [];
-                            tDeleteInput(iOffset).tRoi(cellfun(@isempty, tDeleteInput(iOffset).tRoi)) = [];
+                                tDeleteInput(iOffset).tRoi{rr} = []; 
+                                tDeleteInput(iOffset).tRoi(cellfun(@isempty, tDeleteInput(iOffset).tRoi)) = [];                           
 
-                            if isempty(tDeleteInput(iOffset).tRoi)
-                                roiTemplate('set', '');
-                            else
-                                roiTemplate('set', tDeleteInput(iOffset).tRoi);
+                                inputTemplate('set', tDeleteInput);
+                                break;
                             end
-                            
-                            inputTemplate('set', tDeleteInput);
-                            delete(ptrObject.Object);
-                            break;
                         end
                     end
+                    
+                    for vv=1:numel(tVoiInput)
+                        for tt=1:numel(tVoiInput{vv}.RoisTag)
+                            if strcmpi(tVoiInput{vv}.RoisTag{tt}, ptrObject.Tag)
+
+                                tVoiInput{vv}.RoisTag{tt} = [];
+                                tVoiInput{vv}.RoisTag(cellfun(@isempty, tVoiInput{vv}.RoisTag)) = [];
+
+                                tVoiInput{vv}.tMask{tt} = [];
+                                tVoiInput{vv}.tMask(cellfun(@isempty, tVoiInput{vv}.tMask)) = [];
+
+                                if isempty(tVoiInput{vv}.RoisTag)
+                                    tVoiInput{vv} = [];
+                                    tVoiInput(cellfun(@isempty, tVoiInput)) = [];
+                                end
+                                
+                                voiTemplate('set', tVoiInput);
+                                break;
+                            end
+                        end
+                      
+                    end                    
+                    
+                    for rr=1:numel(tRoiInput)    
+                        if strcmpi(ptrObject.Tag, tRoiInput{rr}.Tag)
+
+                            delete(tRoiInput{rr}.Object);                                                                                   
+                            tRoiInput{rr} = []; 
+                            tRoiInput(cellfun(@isempty, tRoiInput)) = [];                           
+
+                            roiTemplate('set', tRoiInput);
+                            break;
+                        end
+                    end 
+                                        
                 end
                 
                 setVoiRoiSegPopup();
@@ -799,60 +840,55 @@ function figRoiDialogCallback(hObject, ~)
         end
 
         function figRoiSetLabel(ptrObject, sLabel)
-
-            tEditLabelInput = inputTemplate('get');
-
-            iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-            if iSeriesOffset > numel(tEditLabelInput)
-                return;
-            end
+                                        
+            tRoiInput = roiTemplate('get');
+            tVoiInput = voiTemplate('get');
 
             if strcmpi(ptrObject.ObjectType, 'voi')
 
                 % Set voi Label
-                for ff=1:numel(tEditLabelInput(iSeriesOffset).tVoi)
-                    if strcmpi(tEditLabelInput(iSeriesOffset).tVoi{ff}.Tag, ptrObject.Tag)
+                for ff=1:numel(tVoiInput)
+                    if strcmpi(tVoiInput{ff}.Tag, ptrObject.Tag)
 
-                        tEditLabelInput(iSeriesOffset).tVoi{ff}.Label = sLabel;
-                        voiTemplate('set', tEditLabelInput(iSeriesOffset).tVoi);
+                        tVoiInput{ff}.Label = sLabel;
+                        voiTemplate('set', tVoiInput);
+                        break
                     end
                 end
-
+                
                 % Set rois label
                 dRoiNb = 0;
                 for bb=1:numel(ptrObject.RoisTag)
 
-                    for vv=1:numel(tEditLabelInput(iSeriesOffset).tRoi)
-                        if isvalid(tEditLabelInput(iSeriesOffset).tRoi{vv}.Object)
-                            if strcmpi(tEditLabelInput(iSeriesOffset).tRoi{vv}.Tag, ptrObject.RoisTag{bb})
+                    for vv=1:numel(tRoiInput)
+                        if isvalid(tRoiInput{vv}.Object)
+                            if strcmpi(tRoiInput{vv}.Tag, ptrObject.RoisTag{bb})
 
                                 dRoiNb = dRoiNb+1;
                                 sRoiLabel =  sprintf('%s (roi %d/%d)', sLabel, dRoiNb, numel(ptrObject.RoisTag));
-                                tEditLabelInput(iSeriesOffset).tRoi{vv}.Label = sRoiLabel;
-                                tEditLabelInput(iSeriesOffset).tRoi{vv}.Object.Label = sRoiLabel;
+                                tRoiInput{vv}.Label = sRoiLabel;
+                                tRoiInput{vv}.Object.Label = sRoiLabel;
 
-                                roiTemplate('set', tEditLabelInput(iSeriesOffset).tRoi);
-
+                                roiTemplate('set', tRoiInput);
+                                break;
                             end
                         end
-                    end
+                    end                                                           
                 end
             else
-                for vv=1:numel(tEditLabelInput(iSeriesOffset).tRoi)
-                    if isvalid(tEditLabelInput(iSeriesOffset).tRoi{vv}.Object)
-                        if strcmpi(tEditLabelInput(iSeriesOffset).tRoi{vv}.Tag, ptrObject.Tag)
+                for vv=1:numel(tRoiInput)
+                    if isvalid(tRoiInput{vv}.Object)
+                        if strcmpi(tRoiInput{vv}.Tag, ptrObject.Tag)
 
-                            tEditLabelInput(iSeriesOffset).tRoi{vv}.Label = sLabel;
-                            tEditLabelInput(iSeriesOffset).tRoi{vv}.Object.Label = sLabel;
+                            tRoiInput{vv}.Label = sLabel;
+                            tRoiInput{vv}.Object.Label = sLabel;
 
-                            roiTemplate('set', tEditLabelInput(iSeriesOffset).tRoi);
-
+                            roiTemplate('set', tRoiInput);
+                            break;
                         end
                     end
-                end
+                end                  
             end
-
-            inputTemplate('set', tEditLabelInput);
         end
 
         function figRoiEditColorCallback(~, ~)
@@ -894,58 +930,56 @@ function figRoiDialogCallback(hObject, ~)
             end
 
             function figRoiSetColor(ptrObject, sColor)
-
-                tEditLabelInput = inputTemplate('get');
-
-                iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-                if iSeriesOffset > numel(tEditLabelInput)
-                    return;
-                end
-
+                                                
+                tRoiInput = roiTemplate('get');
+                tVoiInput = voiTemplate('get');
+            
                 if strcmpi(ptrObject.ObjectType, 'voi')
 
                     % Set voi color
-                    for ff=1:numel(tEditLabelInput(iSeriesOffset).tVoi)
-                        if strcmpi(tEditLabelInput(iSeriesOffset).tVoi{ff}.Tag, ptrObject.Tag)
+                    
+                    for ff=1:numel(tVoiInput)
+                        if strcmpi(tVoiInput{ff}.Tag, ptrObject.Tag)
 
-                            tEditLabelInput(iSeriesOffset).tVoi{ff}.Color = sColor;
-                            voiTemplate('set', tEditLabelInput(iSeriesOffset).tVoi);
+                            tVoiInput{ff}.Color = sColor;
+                            voiTemplate('set', tVoiInput);
+                            break;
                         end
-                    end
+                    end                  
 
                     % Set rois color
 
                     for bb=1:numel(ptrObject.RoisTag)
 
-                        for vv=1:numel(tEditLabelInput(iSeriesOffset).tRoi)
-                            if isvalid(tEditLabelInput(iSeriesOffset).tRoi{vv}.Object)
-                                if strcmpi(tEditLabelInput(iSeriesOffset).tRoi{vv}.Tag, ptrObject.RoisTag{bb})
+                        for vv=1:numel(tRoiInput)
+                            if isvalid(tRoiInput{vv}.Object)
+                                if strcmpi(tRoiInput{vv}.Tag, ptrObject.RoisTag{bb})
 
-                                    tEditLabelInput(iSeriesOffset).tRoi{vv}.Color = sColor;
-                                    tEditLabelInput(iSeriesOffset).tRoi{vv}.Object.Color = sColor;
+                                    tRoiInput{vv}.Color = sColor;
+                                    tRoiInput{vv}.Object.Color = sColor;
 
-                                    roiTemplate('set', tEditLabelInput(iSeriesOffset).tRoi);
-
+                                    roiTemplate('set', tRoiInput);
+                                    break;
                                 end
                             end
                         end
+                       
                     end
                 else
-                    for vv=1:numel(tEditLabelInput(iSeriesOffset).tRoi)
-                        if isvalid(tEditLabelInput(iSeriesOffset).tRoi{vv}.Object)
-                            if strcmpi(tEditLabelInput(iSeriesOffset).tRoi{vv}.Tag, ptrObject.Tag)
+                    for vv=1:numel(tRoiInput)
+                        if isvalid(tRoiInput{vv}.Object)
+                            if strcmpi(tRoiInput{vv}.Tag, ptrObject.Tag)
 
-                                tEditLabelInput(iSeriesOffset).tRoi{vv}.Color = sColor;
-                                tEditLabelInput(iSeriesOffset).tRoi{vv}.Object.Color = sColor;
+                                tRoiInput.Color = sColor;
+                                tRoiInput{vv}.Object.Color = sColor;
 
-                                roiTemplate('set', tEditLabelInput(iSeriesOffset).tRoi);
-
+                                roiTemplate('set', tRoiInput);
+                                break;
                             end
                         end
-                    end
+                    end                                      
+                    
                 end
-
-                inputTemplate('set', tEditLabelInput);
                 
                 if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                     bSUVUnit = true;
@@ -964,6 +998,102 @@ function figRoiDialogCallback(hObject, ~)
             end
         end
 
+        function figRoiHideViewFaceAlhaCallback(~, ~)
+
+            aVoiRoiTag = voiRoiTag('get');
+
+            tRoiInput = roiTemplate('get');
+            tVoiInput = voiTemplate('get');
+
+            if ~isempty(tVoiInput) && ...
+               ~isempty(aVoiRoiTag)
+                for aa=1:numel(tVoiInput)
+                    if strcmpi(tVoiInput{aa}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+
+                        figRoiSetRoiFaceAlpha(tVoiInput{aa})
+                        return;
+                    end
+
+                end
+
+            end
+
+            if ~isempty(tRoiInput) && ...
+               ~isempty(aVoiRoiTag)
+
+                for cc=1:numel(tRoiInput)
+                    if isvalid(tRoiInput{cc}.Object)
+                        if strcmpi(tRoiInput{cc}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+        
+                            figRoiSetRoiFaceAlpha(tRoiInput{cc});                            
+                            return;
+                        end
+                    end
+                end
+            end
+
+            function figRoiSetRoiFaceAlpha(ptrObject)                                
+
+                tRoiInput = roiTemplate('get');
+                tVoiInput = voiTemplate('get');
+                
+                if strcmpi(ptrObject.ObjectType, 'voi')
+
+                    % Set rois alpha
+                    bSetAlpha = true;    
+                    dAlpha = 0;
+                    for bb=1:numel(ptrObject.RoisTag)
+
+                        for vv=1:numel(tRoiInput)
+                            if strcmpi(tRoiInput{vv}.Tag, ptrObject.RoisTag{bb})
+                                if ~strcmpi(tRoiInput{vv}.Object.Type, 'images.roi.line')
+                                    if bSetAlpha == true
+                                        bSetAlpha = false;
+                                        if tRoiInput{vv}.FaceAlpha == 0 
+                                            dAlpha = 0.2;
+                                        else
+                                            dAlpha = 0;
+                                        end
+                                    end   
+                                    
+                                    tRoiInput{vv}.FaceAlpha = dAlpha;
+                                    tRoiInput{vv}.Object.FaceAlpha = dAlpha;                                    
+                                end
+                            end  
+                            
+                        end
+                        
+                        roiTemplate('set', tRoiInput);                                                                                    
+
+                    end
+                else
+                                                            
+                    bSetAlpha = true;    
+                    dAlpha = 0;
+                    for vv=1:numel(tRoiInput)
+                        if strcmpi(tRoiInput{vv}.Tag, ptrObject.Tag)
+                            if ~strcmpi(tRoiInput{vv}.Object.Type, 'images.roi.line')
+                                if bSetAlpha == true
+                                    bSetAlpha = false;
+                                    if tRoiInput{vv}.FaceAlpha == 0 
+                                        dAlpha = 0.2;
+                                    else
+                                        dAlpha = 0;
+                                    end
+                                end   
+
+                                tRoiInput{vv}.FaceAlpha = dAlpha;
+                                tRoiInput{vv}.Object.FaceAlpha = dAlpha;     
+                                break;
+                            end
+                        end  
+                    end                    
+                    
+                    roiTemplate('set', tRoiInput);                                                                                                                      
+                    
+                end
+            end
+        end        
     end
 
     function setRoiFigureName()
@@ -1023,6 +1153,11 @@ function figRoiDialogCallback(hObject, ~)
             return;
         end
 
+        try  
+
+        set(figRoiWindow, 'Pointer', 'watch');
+        drawnow;        
+        
         tVoiInput = voiTemplate('get');
         tRoiInput = roiTemplate('get');
         tQuant = quantificationTemplate('get');
@@ -1041,25 +1176,9 @@ function figRoiDialogCallback(hObject, ~)
         elseif strcmp(imageOrientation('get'), 'sagittal')
             aInputBuffer = permute(aInput{iOffset}, [3 1 2]);
         end
-if 0
-        if numel(tInput(iOffset).asFilesList) ~= 1
 
-            if ~isempty(atVoiMetaData{1}.ImagePositionPatient)
-
-                if atVoiMetaData{2}.ImagePositionPatient(3) - ...
-                   atVoiMetaData{1}.ImagePositionPatient(3) > 0
-                    aInputBuffer = aInputBuffer(:,:,end:-1:1);
-
-                end
-            end
-        else
-            if strcmpi(atVoiMetaData{1}.PatientPosition, 'FFS')
-                aInputBuffer = aInputBuffer(:,:,end:-1:1);
-            end
-        end
-end
         aDisplayBuffer = dicomBuffer('get');
-
+        
         if ~isempty(tVoiInput)
             for aa=1:numel(tVoiInput)
 
@@ -1088,7 +1207,7 @@ end
                         sLine = strrep(sLine, ' ', '&nbsp;');   
 
                         aColor = tVoiInput{aa}.Color;
-                        sColor = reshape(dec2hex([aColor(1)*255 aColor(2)*255 aColor(3)*255], 2)',1, 6);
+                        sColor = reshape(dec2hex([int32(aColor(1)*255) int32(aColor(2)*255) int32(aColor(3)*255)], 2)',1, 6);
                         sLine  = sprintf('<HTML><FONT color="%s" face="%s">%s', sColor, sFontName, sLine);
                     end
                     
@@ -1118,7 +1237,7 @@ end
                         for bb=1:numel(tRoiInput)
                            if isvalid(tRoiInput{bb}.Object)
                                 if strcmpi(tVoiInput{aa}.RoisTag{cc}, tRoiInput{bb}.Tag)
-
+                                                                        
                                     if tRoiInput{bb}.SliceNb <= numel(atVoiMetaData)
                                         tSliceMeta = atVoiMetaData{tRoiInput{bb}.SliceNb};
                                     else
@@ -1162,7 +1281,7 @@ end
                                          sLine = strrep(sLine, ' ', '&nbsp;');   
 
                                          aColor = tRoiInput{bb}.Color;
-                                         sColor = reshape(dec2hex([aColor(1)*255 aColor(2)*255 aColor(3)*255], 2)',1, 6);
+                                         sColor = reshape(dec2hex([int32(aColor(1)*255) int32(aColor(2)*255) int32(aColor(3)*255)], 2)',1, 6);
                                          sLine  = sprintf('<HTML><FONT color="%s" face="%s">%s', sColor, sFontName, sLine);
                                      end
                                      
@@ -1176,7 +1295,8 @@ end
                                      else
                                         aVoiRoiTag{dResizeArray}.Sub = 0;
                                      end
-
+                                     
+                                     break;
                                 end
                             end
                         end
@@ -1184,8 +1304,8 @@ end
                 end
             end
         end
-
-        if ~isempty(tRoiInput)
+        
+        if ~isempty(tRoiInput) 
             for bb=1:numel(tRoiInput)
                if isvalid(tRoiInput{bb}.Object)
                     if strcmpi(tRoiInput{bb}.ObjectType, 'roi')
@@ -1215,7 +1335,7 @@ end
                         else
                             sSubtraction = 'N/A';
                         end
-                        
+
                         sLine = sprintf('%-18s %-11s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s', ...
                             maxLength(sRoiName, 17), ...
                             sSliceNb, ...
@@ -1230,15 +1350,15 @@ end
                             num2str(tRoiComputed.area), ...
                             ' ', ...
                             sSubtraction);                        
-                        
+
                         if isFigRoiInColor('get') == true                                            
                             sLine = strrep(sLine, ' ', '&nbsp;');   
 
                             aColor = tRoiInput{bb}.Color;
-                            sColor = reshape(dec2hex([aColor(1)*255 aColor(2)*255 aColor(3)*255], 2)',1, 6);
+                            sColor = reshape(dec2hex([int32(aColor(1)*255) int32(aColor(2)*255) int32(aColor(3)*255)], 2)',1, 6);
                             sLine = sprintf('<HTML><FONT color="%s" face="%s">%s', sColor, sFontName, sLine);
                         end
-                        
+
                         sLbWindow = sprintf('%s%s\n', sLbWindow, sLine);
 
                         if exist('aVoiRoiTag', 'var')
@@ -1260,17 +1380,22 @@ end
                     end
                end
             end
-
         end
-
+        
         if isvalid(lbVoiRoiWindow)
-            if get(lbVoiRoiWindow, 'Value') > 1
-                set(lbVoiRoiWindow, 'Value', get(lbVoiRoiWindow, 'Value')-1);
-            else
-                set(lbVoiRoiWindow, 'Value', 1);
-            end
-
+            
+            dListboxTop   = get(lbVoiRoiWindow, 'ListboxTop');
+            dListboxValue = get(lbVoiRoiWindow, 'Value');
+            
+            set(lbVoiRoiWindow, 'Value', 1);               
             set(lbVoiRoiWindow, 'String', sLbWindow);
+            set(lbVoiRoiWindow, 'ListboxTop', dListboxTop);
+            
+            if dListboxValue < size(lbVoiRoiWindow.String, 1)                
+                set(lbVoiRoiWindow, 'Value', dListboxValue);
+            else
+                set(lbVoiRoiWindow, 'Value', size(lbVoiRoiWindow.String, 1));
+            end
         end
 
         if exist('aVoiRoiTag', 'var')
@@ -1281,6 +1406,12 @@ end
 
         progressBar(1, 'Ready');
         
+        catch
+            progressBar(1, 'Error:setVoiRoiListbox()');           
+        end
+
+        set(figRoiWindow, 'Pointer', 'default');
+        drawnow;        
 
     end
 
@@ -1307,23 +1438,7 @@ end
         elseif strcmp(imageOrientation('get'), 'sagittal')
             aInputBuffer = permute(aInput{iOffset}, [3 1 2]);
         end
-if 0
-        if numel(tInput(iOffset).asFilesList) ~= 1
 
-            if ~isempty(atMetaData{1}.ImagePositionPatient)
-
-                if atMetaData{2}.ImagePositionPatient(3) - ...
-                   atMetaData{1}.ImagePositionPatient(3) > 0
-                    aInputBuffer = aInputBuffer(:,:,end:-1:1);
-
-                end
-            end
-        else
-            if strcmpi(atMetaData{1}.PatientPosition, 'FFS')
-                aInputBuffer = aInputBuffer(:,:,end:-1:1);
-            end
-        end
-end
         if ~isempty(tRoiInput) || ...
            ~isempty(tVoiInput)
 
@@ -1670,11 +1785,13 @@ end
                 
         sAnswer = questdlg('Pressing will delete all ROIs', 'Warning', 'Delete', 'Exit', 'Exit');
         
+        atRoi = roiTemplate('get');
+
         if strcmpi(sAnswer, 'Delete')
                                    
             if isfield(tDeleteInput(iOffset), 'tRoi')
-                for rr=1:numel(tDeleteInput(iOffset).tRoi)
-                    delete(tDeleteInput(iOffset).tRoi{rr}.Object);                                                                                   
+                for rr=1:numel(atRoi)
+                    delete(atRoi{rr}.Object);                                                                                   
                 end
                                      
                 tDeleteInput(iOffset).tRoi = [];
@@ -1686,8 +1803,8 @@ end
             
             voiRoiTag('set', '');
                 
-            roiTemplate('set', '');
-            voiTemplate('set', '');
+            roiTemplate('reset');
+            voiTemplate('reset');
             
             inputTemplate('set', tDeleteInput);  
             

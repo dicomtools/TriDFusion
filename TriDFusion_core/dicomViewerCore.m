@@ -27,6 +27,10 @@ function dicomViewerCore()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        
+    isMoveImageActivated('set', false);
+
     rightClickMenu('reset');
 
     im  = dicomBuffer('get');
@@ -50,17 +54,33 @@ function dicomViewerCore()
         set(uiSliderSagPtr('get'), 'Visible', 'off');   
         set(uiSliderTraPtr('get'), 'Visible', 'off');          
     end
-
+    
     if initWindowLevel('get') == true
+        
+       sUnitDisplay = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));                        
+
        initWindowLevel('set', false);
         if strcmpi(atMetaData{1}.Modality, 'ct')
-            [lMax, lMin] = computeWindowLevel(2000, 0);
-        elseif strcmpi(atMetaData{1}.Modality, 'pt')
-            lMin = min(im, [], 'all');
-            lMax = max(im, [], 'all');                    
+            if min(im, [], 'all') >= 0
+                lMin = min(im, [], 'all');
+                lMax = max(im, [], 'all');                 
+            else
+                [lMax, lMin] = computeWindowLevel(2000, 0);
+            end
         else
-            lMin = min(im, [], 'all');
-            lMax = max(im, [], 'all');
+            if strcmpi(sUnitDisplay, 'SUV')
+                tQuant = quantificationTemplate('get');                                
+                if tQuant.tSUV.dScale                
+                    lMin = suvWindowLevel('get', 'min')/tQuant.tSUV.dScale;  
+                    lMax = suvWindowLevel('get', 'max')/tQuant.tSUV.dScale;                        
+                else
+                    lMin = min(im, [], 'all');
+                    lMax = max(im, [], 'all');                     
+                end
+            else            
+                lMin = min(im, [], 'all');
+                lMax = max(im, [], 'all');                    
+            end
         end
 
         windowLevel('set', 'min', lMin); 
@@ -423,7 +443,17 @@ function dicomViewerCore()
             objKernelPanel.Checked = 'off';
         end
     end
-
+    
+    bInitRoiPanel = false;
+    if  viewRoiPanel('get')
+        bInitRoiPanel = true;
+        viewRoiPanel('set', false);
+        objRoiPanel = viewRoiPanelMenuObject('get');
+        if ~isempty(objRoiPanel)
+            objRoiPanel.Checked = 'off';
+        end
+    end
+    
     if size(im, 3) == 1
 
         set(btn3DPtr('get')        , 'Enable', 'off');                        
@@ -920,13 +950,13 @@ function dicomViewerCore()
 
             alAxes1Line{1} = line(axes1Ptr('get'), ...
                  [iSagittalSize/2 iSagittalSize/2], ...
-                 [iAxial+1 iAxial-1], ...
+                 [iAxial+0.5 iAxial-0.5], ...
                  'Color', crossColor('get'));
              
             rightClickMenu('add', alAxes1Line{1});
 
             alAxes1Line{2} = line(axes1Ptr('get'), ...
-                 [iSagittalSize/2+1 iSagittalSize/2-1], ...
+                 [iSagittalSize/2+0.5 iSagittalSize/2-0.5], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
              
@@ -1243,13 +1273,13 @@ function dicomViewerCore()
 
             alAxes2Line{1} = line(axes2Ptr('get'), ...
                  [iCoronalSize/2 iCoronalSize/2], ...
-                 [iAxial+1 iAxial-1], ...
+                 [iAxial+0.5 iAxial-0.5], ...
                  'Color', crossColor('get'));
              
             rightClickMenu('add', alAxes2Line{1});
 
             alAxes2Line{2} = line(axes2Ptr('get'), ...
-                 [iCoronalSize/2+1 iCoronalSize/2-1], ...
+                 [iCoronalSize/2+0.5 iCoronalSize/2-0.5], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
              
@@ -1547,13 +1577,13 @@ function dicomViewerCore()
 %                    hold on
             alAxes3Line{1} = line(axes3Ptr('get'), ...
                  [iSagittalSize/2 iSagittalSize/2], ...
-                 [iCoronal+1 iCoronal-1], ...
+                 [iCoronal+0.5 iCoronal-0.5], ...
                  'Color', crossColor('get'));
              
             rightClickMenu('add', alAxes3Line{1});
 
             alAxes3Line{2} = line(axes3Ptr('get'), ...
-                 [iSagittalSize/2+1 iSagittalSize/2-1], ...
+                 [iSagittalSize/2+0.5 iSagittalSize/2-0.5], ...
                  [iCoronal iCoronal], ...
                  'Color', crossColor('get'));
              
@@ -2114,4 +2144,11 @@ function dicomViewerCore()
     if bInitKernelPanel == true
        setViewKernelPanel();
     end  
+    
+    if bInitRoiPanel == true
+       setViewRoiPanel();
+    end  
+    
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    
 end     

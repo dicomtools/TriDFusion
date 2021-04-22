@@ -48,9 +48,12 @@ function tDataSets = sortDicomFileList(tFileList, iNbFiles)
         tDataSets(iLoop).DicomInfos   = cell(length(h),1);
         tDataSets(iLoop).DicomBuffers = cell(length(h),1);
 
-        for jLoop=1:length(h)
-
-            progressBar(jLoop / length(h), 'Sorting file list');
+        endJloop = length(h);
+        for jLoop=1:endJloop
+            
+            if mod(jLoop,5)==1 || jLoop == endJloop         
+                progressBar(jLoop / endJloop, 'Sorting file list');
+            end
 
             tDataSets(iLoop).FileNames{jLoop}    = tFileList.FileName{h(jLoop)} ;
             tDataSets(iLoop).DicomInfos{jLoop}   = tFileList.DicomInfo{h(jLoop)} ;

@@ -47,6 +47,9 @@ function progressBar(lProgress, sStatus, sColor)
     x(3) = lProgress;       % Corresponds to % progress if unit = normalized
     set(uiBarPtr('get'), 'Position', x);
 
-    drawnow;
+   drawnow update;
+  % refreshdata;
+  % refreshdata(uiBarPtr('get'));
+  % refreshdata(uiProgressWindowPtr('get'));
 
 end  

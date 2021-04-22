@@ -83,7 +83,6 @@ function [tVoiComputed, tVoiMask] = computeVoi(imInput, imRoi, atVoiMetaData, pt
 
                 roiMask = createMask(tRoiInput{cc}.Object, imCData);
 
-                tVoiMask{bb}.RoiMask = roiMask;
                 tVoiMask{bb}.SliceNb = tRoiInput{cc}.SliceNb;
                 tVoiMask{bb}.Axe     = tRoiInput{cc}.Axe;
 
@@ -112,6 +111,7 @@ function [tVoiComputed, tVoiMask] = computeVoi(imInput, imRoi, atVoiMetaData, pt
                 zAxial = zAxial + (dSpacing/10); % To do, use slice location for CT and MR
 
                 dNbRoi = dNbRoi+1;
+                break;
             end
         end
     end          

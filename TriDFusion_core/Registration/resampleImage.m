@@ -29,7 +29,7 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-
+        
     dimsRef = size(refImage);        
     dimsDcm = size(dcmImage);
 
@@ -38,8 +38,8 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
             resampImage = dcmImage;
             return;
         end
-    end   
-
+    end 
+     
     dcmSliceThickness = computeSliceSpacing(atDcmMetaData);
 
     yScale = size(refImage,1)/size(dcmImage,1);
@@ -101,6 +101,7 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
     for cc=1:numel(atDcmMetaData)-1
         atDcmMetaData{cc+1}.ImagePositionPatient(3) = atDcmMetaData{cc}.ImagePositionPatient(3) + newSliceThickness;               
         atDcmMetaData{cc+1}.SliceLocation = atDcmMetaData{cc}.SliceLocation + newSliceThickness; 
-    end  
+    end         
+    
 end  
 

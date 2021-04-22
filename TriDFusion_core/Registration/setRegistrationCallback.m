@@ -464,7 +464,13 @@ function setRegistrationCallback(~, ~)
         if dInitOffset > numel(tInitInput)
             return;
         end
-
+        
+        try
+            
+        set(dlgRegister, 'Pointer', 'watch');
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow; 
+        
         releaseRoiWait();
 
         set(uiSeriesPtr('get'), 'Enable', 'off');
@@ -487,23 +493,7 @@ function setRegistrationCallback(~, ~)
             elseif strcmp(imageOrientation('get'), 'sagittal')
                 aBuffer = permute(aInput{jj}, [3 1 2]);
             end
-if 0
-            if numel(tInitInput(jj).asFilesList) ~= 1
 
-                if ~isempty(tInitInput(jj).atDicomInfo{1}.ImagePositionPatient)
-
-                    if tInitInput(jj).atDicomInfo{2}.ImagePositionPatient(3) - ...
-                       tInitInput(jj).atDicomInfo{1}.ImagePositionPatient(3) > 0
-                        aBuffer = aBuffer(:,:,end:-1:1);
-
-                    end
-                end
-            else
-                if strcmpi(tInitInput(jj).atDicomInfo{1}.PatientPosition, 'FFS')
-                    aBuffer = aBuffer(:,:,end:-1:1);
-                end
-            end
-end
             if isempty(tInitInput(jj).atDicomInfo{1}.SeriesDate)
                 sInitSeriesDate = '';
             else
@@ -542,6 +532,16 @@ end
             tInitInput(jj).bDoseKernel    = false;
             tInitInput(jj).bFusedDoseKernel    = false;
             tInitInput(jj).bFusedEdgeDetection = false;
+            
+            if isfield(tInitInput(jj), 'tRoi')
+                atRoi = roiTemplate('get');
+                for kk=1:numel(atRoi)
+                    atRoi{kk}.SliceNb = tInitInput(jj).tRoi{kk}.SliceNb;
+                    atRoi{kk}.Position = tInitInput(jj).tRoi{kk}.Position;
+                    atRoi{kk}.Object.Position = tInitInput(jj).tRoi{kk}.Position;
+                end
+                roiTemplate('set', atRoi);
+            end
         end
 
         seriesDescription('set', asDescription);
@@ -555,7 +555,8 @@ end
         set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
         inputTemplate('set', tInitInput);
-
+         
+        set(dlgRegister, 'Pointer', 'default');
         delete(dlgRegister);
 
         clearDisplay();
@@ -569,10 +570,23 @@ end
 %              triangulateCallback();
 
         refreshImages();
+        
+        catch
+            progressBar(1, 'Error:resetRegistrationCallback()');           
+        end
+        
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;         
     end
 
     function resampleCallback(~, ~)
-
+        
+        try
+                      
+        set(dlgRegister, 'Pointer', 'watch');
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;             
+            
         asInterpolation = get(uiInterpolation, 'String');
         sInterpolation  = asInterpolation{get(uiInterpolation, 'Value')};
         registrationTemplate('set', tRegistration);
@@ -658,14 +672,20 @@ end
                         tInput(adLbSeries(kk)).bEdgeDetection = false;
 
                         progressBar(dNextSeries/dNbElements-0.000001, sprintf('Processing resampling %d/%d, please wait', dNextSeries-1, dNbElements-1));
+                        
+               %         try 
+                        [aResampledBuffer, atResampledMetaData] = resampleImage(aBuffer, atMetaData, refImage, atRefMetaData, sInterpolation);
+                        resampleROIs(aBuffer, atMetaData, aResampledBuffer, atResampledMetaData, sInterpolation);
 
-                        [aBuffer, atMetaData] = resampleImage(aBuffer, atMetaData, refImage, atRefMetaData, sInterpolation);
-                        dicomMetaData('set', atMetaData);
-                        dicomBuffer('set', aBuffer);
+                %        catch
+                %        end
+                        
+                        dicomMetaData('set', atResampledMetaData);
+                        dicomBuffer('set', aResampledBuffer);
 
                         setQuantification(kk);
 
-                        dNextSeries = dNextSeries+1;
+                        dNextSeries = dNextSeries+1;                                                                        
 
                     end
                 end
@@ -684,6 +704,7 @@ end
         set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
+        set(dlgRegister, 'Pointer', 'default');
         delete(dlgRegister);
 
         setQuantification(dInitOffset);
@@ -704,10 +725,23 @@ end
 
         refreshImages();
 %            refreshImages();
+        catch
+            progressBar(1, 'Error:resampleCallback()');           
+        end
+        
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;  
+        
     end
 
     function registerCallback(~, ~)
-
+        
+        try
+                       
+        set(dlgRegister, 'Pointer', 'watch');
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;    
+        
         releaseRoiWait();
 
         asInterpolation = get(uiInterpolation, 'String');
@@ -757,6 +791,9 @@ end
         end
 
         if dNbElements < 2
+            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            drawnow; 
+            
             progressBar(1, 'Error: At least 2 volumes must be selected!');
             h = msgbox('Error: registerCallback(): At least 2 volumes must be selected!', 'Error');
 %            if integrateToBrowser('get') == true
@@ -879,6 +916,7 @@ end
         set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
 
+        set(dlgRegister, 'Pointer', 'default');
         delete(dlgRegister);
 
         setQuantification(dInitOffset);
@@ -899,7 +937,12 @@ end
 
 %        refreshImages();
  %       aBuffer = registerImage(aBuffer, atMetaData, refImage, tInput(iRefOffset).atDicomInfo, sMode, optimizer, metric);
-
+        catch
+            progressBar(1, 'Error:registerCallback()');           
+        end
+        
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;  
     end
 
     function updateDescriptionCallback(hObject, ~)

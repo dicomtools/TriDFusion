@@ -1,5 +1,5 @@
-function addRoi(ptrRoi)
-%function addRoi(ptrRoi)
+function addRoi(ptrRoi, iOffset)
+%function addRoi(ptrRoi, iOffset)
 %Add ROI to input template. 
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -28,10 +28,12 @@ function addRoi(ptrRoi)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     tAddInput = inputTemplate('get');        
-    iOffset = get(uiSeriesPtr('get'), 'Value');
+%    iOffset = get(uiSeriesPtr('get'), 'Value');
     if iOffset > numel(tAddInput)  
         return;
     end
+    
+    atRoiInput = roiTemplate('get');
 
     addlistener(ptrRoi, 'DeletingROI', @deleteRoiEvents );
     addlistener(ptrRoi, 'ROIMoved'   , @movedRoiEvents  );
@@ -41,7 +43,7 @@ function addRoi(ptrRoi)
        switchToIsoSurface('get') == false && ...
        switchToMIPMode('get')    == false
 
-        switch gca
+        switch get(ptrRoi, 'Parent')
             case axes1Ptr('get')   
                 dSliceNb = sliceNumber('get', 'coronal' );
                 sAxe = 'Axes1';
@@ -58,7 +60,6 @@ function addRoi(ptrRoi)
     end
 
     tRoi.Axe          = sAxe;
-    tRoi.Object       = ptrRoi;              
     tRoi.SliceNb      = dSliceNb;
     tRoi.Type         = ptrRoi.Type;
     tRoi.Position     = ptrRoi.Position;
@@ -67,7 +68,7 @@ function addRoi(ptrRoi)
     tRoi.Color        = ptrRoi.Color;
     tRoi.LineWidth    = ptrRoi.LineWidth;
     tRoi.Tag          = ptrRoi.Tag; 
-    tRoi.ObjectType      = 'roi'; 
+    tRoi.ObjectType   = 'roi'; 
 
     switch lower(tRoi.Type)
         case lower('images.roi.line')
@@ -76,23 +77,29 @@ function addRoi(ptrRoi)
                lower('images.roi.assistedfreehand') }
             tRoi.FaceAlpha = ptrRoi.FaceAlpha;
             tRoi.Waypoints = ptrRoi.Waypoints;
+            tRoi.FaceSelectable = ptrRoi.FaceSelectable; 
+            
             addlistener(ptrRoi, 'WaypointAdded'  , @waypointEvents);
             addlistener(ptrRoi, 'WaypointRemoved', @waypointEvents);
 
         case lower('images.roi.polygon')
             tRoi.FaceAlpha = ptrRoi.FaceAlpha;
+            tRoi.FaceSelectable = ptrRoi.FaceSelectable; 
 
         case lower('images.roi.circle')
             tRoi.FaceAlpha = ptrRoi.FaceAlpha;
             tRoi.Radius    = ptrRoi.Radius;    
+            tRoi.FaceSelectable = ptrRoi.FaceSelectable; 
 
         case lower('images.roi.ellipse')
-            tRoi.FaceAlpha     = ptrRoi.FaceAlpha;
-            tRoi.SemiAxes      = ptrRoi.SemiAxes;
-            tRoi.RotationAngle = ptrRoi.RotationAngle;
+            tRoi.FaceAlpha      = ptrRoi.FaceAlpha;
+            tRoi.SemiAxes       = ptrRoi.SemiAxes;
+            tRoi.RotationAngle  = ptrRoi.RotationAngle;
+            tRoi.FaceSelectable = ptrRoi.FaceSelectable; 
 
         case lower('images.roi.rectangle')
-             tRoi.FaceAlpha = ptrRoi.FaceAlpha;
+            tRoi.FaceAlpha = ptrRoi.FaceAlpha;
+            tRoi.FaceSelectable = ptrRoi.FaceSelectable; 
 
     end
 
@@ -101,10 +108,18 @@ function addRoi(ptrRoi)
     else
         tAddInput(iOffset).tRoi{1} = tRoi;
     end
-
+    
+    tRoi.Object = ptrRoi;              
+  
+    if isempty(atRoiInput)
+        atRoiInput{1} = tRoi;
+    else
+        atRoiInput{numel(atRoiInput)+1} = tRoi;
+    end
+    
     inputTemplate('set', tAddInput);
-
-    roiTemplate('set', tAddInput(iOffset).tRoi);
+        
+    roiTemplate('set', atRoiInput);
 
     setVoiRoiSegPopup();
 

@@ -31,60 +31,93 @@ function deleteRoiEvents(hObject, ~)
     iOffset = get(uiSeriesPtr('get'), 'Value');
     if iOffset > numel(tDeleteInput)  
         return;
+    end   
+            
+    tRoiInput = roiTemplate('get'); 
+    tVoiInput = voiTemplate('get'); 
+        
+    if isfield(tDeleteInput(iOffset), 'tVoi')
+        bFoundRoi = false;
+        for vv=1:numel(tDeleteInput(iOffset).tVoi)
+            for tt=1:numel(tDeleteInput(iOffset).tVoi{vv}.RoisTag)
+                if strcmpi(tDeleteInput(iOffset).tVoi{vv}.RoisTag{tt}, hObject.Tag)
+
+                    tDeleteInput(iOffset).tVoi{vv}.RoisTag{tt} = [];
+                    tDeleteInput(iOffset).tVoi{vv}.RoisTag(cellfun(@isempty, tDeleteInput(iOffset).tVoi{vv}.RoisTag)) = [];
+
+                    tDeleteInput(iOffset).tVoi{vv}.tMask{tt} = [];
+                    tDeleteInput(iOffset).tVoi{vv}.tMask(cellfun(@isempty, tDeleteInput(iOffset).tVoi{vv}.tMask)) = [];
+
+                    if isempty(tDeleteInput(iOffset).tVoi{vv}.RoisTag)
+                        tDeleteInput(iOffset).tVoi{vv} = [];
+                        tDeleteInput(iOffset).tVoi(cellfun(@isempty, tDeleteInput(iOffset).tVoi)) = [];
+                    end
+
+                    inputTemplate('set', tDeleteInput);
+                    bFoundRoi = true;
+                    break;
+                end
+            end
+
+            if bFoundRoi == true
+                break;
+            end
+        end 
     end
 
-    for bb=1:numel(tDeleteInput(iOffset).tRoi)
-        if strcmpi(hObject.Tag, tDeleteInput(iOffset).tRoi{bb}.Tag)
+    if isfield(tDeleteInput(iOffset), 'tRoi')                   
+        for rr=1:numel(tDeleteInput(iOffset).tRoi)    
+            if strcmpi(hObject.Tag, tDeleteInput(iOffset).tRoi{rr}.Tag)
 
-            if isfield(tDeleteInput(iOffset), 'tVoi')
-                for vv=1:numel(tDeleteInput(iOffset).tVoi)
-                    for tt=1:numel(tDeleteInput(iOffset).tVoi{vv}.RoisTag)
-                        if strcmpi(tDeleteInput(iOffset).tVoi{vv}.RoisTag{tt}, hObject.Tag)
-                            tDeleteInput(iOffset).tVoi{vv}.RoisTag{tt} = [];
-                            tDeleteInput(iOffset).tVoi{vv}.RoisTag(cellfun(@isempty, tDeleteInput(iOffset).tVoi{vv}.RoisTag)) = [];  
+                tDeleteInput(iOffset).tRoi{rr} = []; 
+                tDeleteInput(iOffset).tRoi(cellfun(@isempty, tDeleteInput(iOffset).tRoi)) = [];                           
 
-                            tDeleteInput(iOffset).tVoi{vv}.tMask{tt} = [];
-                            tDeleteInput(iOffset).tVoi{vv}.tMask(cellfun(@isempty, tDeleteInput(iOffset).tVoi{vv}.tMask)) = [];  
-
-                            if isempty(tDeleteInput(iOffset).tVoi{vv}.RoisTag)
-                                tDeleteInput(iOffset).tVoi{vv} = [];
-                                tDeleteInput(iOffset).tVoi(cellfun(@isempty, tDeleteInput(iOffset).tVoi)) = [];  
-                            end
-
-                            if isempty(tDeleteInput(iOffset).tVoi)
-                               voiTemplate('set', '');
-                            else
-                               voiTemplate('set', tDeleteInput(iOffset).tVoi);
-                            end    
-
-                            break;
-                        end
-                    end
-                end
+                inputTemplate('set', tDeleteInput);
+                break;
             end
-
-            tDeleteInput(iOffset).tRoi{bb} = [];
-            tDeleteInput(iOffset).tRoi(cellfun(@isempty, tDeleteInput(iOffset).tRoi)) = [];     
-            
-            if ~isempty(copyRoiPtr('get'))
-                if strcmpi(get(hObject, 'Tag'), get(copyRoiPtr('get'), 'Tag'))
-                    copyRoiPtr('set', '');
-                end
-                
-            end
-
-            if isempty(tDeleteInput(iOffset).tRoi)
-                roiTemplate('set', '');
-            else
-                roiTemplate('set', tDeleteInput(iOffset).tRoi);
-            end     
-
-            inputTemplate('set', tDeleteInput);
-
-            break;
         end
     end
 
+    for vv=1:numel(tVoiInput)
+        bFoundRoi = false;
+        for tt=1:numel(tVoiInput{vv}.RoisTag)
+            if strcmpi(tVoiInput{vv}.RoisTag{tt}, hObject.Tag)
+
+                tVoiInput{vv}.RoisTag{tt} = [];
+                tVoiInput{vv}.RoisTag(cellfun(@isempty, tVoiInput{vv}.RoisTag)) = [];
+
+                tVoiInput{vv}.tMask{tt} = [];
+                tVoiInput{vv}.tMask(cellfun(@isempty, tVoiInput{vv}.tMask)) = [];
+
+                if isempty(tVoiInput{vv}.RoisTag)
+                    tVoiInput{vv} = [];
+                    tVoiInput(cellfun(@isempty, tVoiInput)) = [];
+                end
+
+                voiTemplate('set', tVoiInput);
+                bFoundRoi = true;
+                break;
+            end
+        end
+
+        if bFoundRoi == true
+            break
+        end                        
+    end                    
+
+    for rr=1:numel(tRoiInput)    
+        if strcmpi(hObject.Tag, tRoiInput{rr}.Tag)
+
+            tRoiInput{rr} = []; 
+            tRoiInput(cellfun(@isempty, tRoiInput)) = [];                           
+
+            roiTemplate('set', tRoiInput);
+            break;
+        end
+    end
+    
+    delete(hObject);
+       
     setVoiRoiSegPopup();
 
 end

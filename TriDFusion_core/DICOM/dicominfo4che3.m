@@ -92,22 +92,22 @@ function info = dicominfo4che3(fileInput)
     if isempty(info.PixelSpacing) 
         info.PixelSpacing = zeros(2,1);
     end
+    
     info.PatientWeight = char(dataset.getString(org.dcm4che.data.Tag.PatientWeight, 0));
     info.PatientSize   = char(dataset.getString(org.dcm4che.data.Tag.PatientSize, 0));
-
 
     % Dose information
 
     datasetDose = dataset.getNestedDataset(org.dcm4che.data.Tag.RadiopharmaceuticalInformationSequence, 0);
 
     if ~isempty(datasetDose)
-        info.dose.RadiopharmaceuticalStartTime     = char(datasetDose.getString(org.dcm4che.data.Tag.RadiopharmaceuticalStartTime, 0));
-        info.dose.RadiopharmaceuticalStopTime      = char(datasetDose.getString(org.dcm4che.data.Tag.RadiopharmaceuticalStopTime, 0));
-        info.dose.RadionuclideTotalDose            = char(datasetDose.getString(org.dcm4che.data.Tag.RadionuclideTotalDose, 0));
-        info.dose.RadionuclideHalfLife             = char(datasetDose.getString(org.dcm4che.data.Tag.RadionuclideHalfLife, 0));
-        info.dose.RadionuclidePositronFraction     = char(datasetDose.getString(org.dcm4che.data.Tag.RadionuclidePositronFraction, 0));
-        info.dose.RadiopharmaceuticalStartDateTime = char(datasetDose.getString(org.dcm4che.data.Tag.RadiopharmaceuticalStartDateTime, 0));
-        info.dose.RadiopharmaceuticalStopDateTime  = char(datasetDose.getString(org.dcm4che.data.Tag.RadiopharmaceuticalStopDateTime, 0));
+        info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartTime     = char(datasetDose.getString(org.dcm4che.data.Tag.RadiopharmaceuticalStartTime, 0));
+        info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStopTime      = char(datasetDose.getString(org.dcm4che.data.Tag.RadiopharmaceuticalStopTime, 0));
+        info.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose            = char(datasetDose.getString(org.dcm4che.data.Tag.RadionuclideTotalDose, 0));
+        info.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife             = char(datasetDose.getString(org.dcm4che.data.Tag.RadionuclideHalfLife, 0));
+        info.RadiopharmaceuticalInformationSequence.Item_1.RadionuclidePositronFraction     = char(datasetDose.getString(org.dcm4che.data.Tag.RadionuclidePositronFraction, 0));
+        info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime = char(datasetDose.getString(org.dcm4che.data.Tag.RadiopharmaceuticalStartDateTime, 0));
+        info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStopDateTime  = char(datasetDose.getString(org.dcm4che.data.Tag.RadiopharmaceuticalStopDateTime, 0));
     end
 
     info.Units = char(dataset.getString(org.dcm4che.data.Tag.Units, 0));        

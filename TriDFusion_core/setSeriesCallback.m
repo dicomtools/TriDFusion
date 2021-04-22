@@ -132,7 +132,9 @@ function setSeriesCallback(~,~)
             dicomBuffer('set', aBuffer);
         end
 
-        quantificationTemplate('set', tInput(iOffset).tQuant);
+%        quantificationTemplate('set', tInput(iOffset).tQuant);
+        setQuantification(iOffset);
+        
         cropValue('set', tInput(iOffset).tQuant.tCount.dMin);
 
         imageSegTreshValue('set', 'lower', 0);

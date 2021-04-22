@@ -29,7 +29,12 @@ function set3DCallback(~, ~)
 
     if numel(dicomBuffer('get')) && ...
        size(dicomBuffer('get'), 3) ~= 1
-
+   
+        try
+            
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;            
+            
         sMatlabVersion = version();
         sMatlabVersion = extractBefore(sMatlabVersion,' ');
 
@@ -124,7 +129,18 @@ function set3DCallback(~, ~)
         if ~isempty(objKernelPanel)
             objKernelPanel.Checked = 'off';
         end
+        
+        uiRoiMainPanel = uiRoiMainPanelPtr('get');
+        if ~isempty(uiRoiMainPanel)
+            set(uiRoiMainPanel, 'Visible', 'off');
+        end
 
+        viewRoiPanel('set', false);
+        objRoiPanel = viewRoiPanelMenuObject('get');
+        if ~isempty(objRoiPanel)
+            objRoiPanel.Checked = 'off';
+        end
+        
         if switchTo3DMode('get') == true
             switchTo3DMode('set', false);
 
@@ -768,6 +784,12 @@ function set3DCallback(~, ~)
                 set(ui3DSliderVolLinAlphaPtr('get'), 'Enable', 'on');               
             end
         end        
+        
+        catch
+            progressBar(1, 'Error:set3DCallback()');          
+        end  
+        
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;          
     end
-
 end

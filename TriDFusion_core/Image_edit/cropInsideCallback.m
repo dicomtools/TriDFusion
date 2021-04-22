@@ -28,7 +28,22 @@ function cropInsideCallback(hObject,~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     im = dicomBuffer('get');     
+    if isempty(im)        
+        return;
+    end
+    
+    if switchTo3DMode('get')     == true ||  ...
+       switchToIsoSurface('get') == true || ...
+       switchToMIPMode('get')    == true
 
+        return;
+    end
+
+    try  
+            
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    drawnow;
+    
     axe = axePtr('get');
     if ~isempty(axe)
         imAxe = imAxePtr('get');
@@ -91,5 +106,11 @@ function cropInsideCallback(hObject,~)
     setQuantification(iOffset);
 
     refreshImages();
+    
+    catch
+        progressBar(1, 'Error:cropInsideCallback()');           
+    end
 
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    drawnow; 
 end

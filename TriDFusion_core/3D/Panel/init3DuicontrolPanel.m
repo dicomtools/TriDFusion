@@ -1364,6 +1364,11 @@ end
                 
         function chkVoiListCallback(hObject, ~)
             
+            try
+                
+            set(dlgVoiListEnable, 'Pointer', 'watch');
+            drawnow;             
+            
             sUiStyle   = get(hObject, 'Style'   ); 
             dVoiOffset = get(hObject, 'UserData');            
             dVoiValue  = get(chkVoiList{dVoiOffset}, 'Value'); 
@@ -1408,6 +1413,13 @@ end
                     end
                 end                
             end
+            
+            catch
+                progressBar(1, 'Error:chkVoiListCallback()');                
+            end
+
+            set(dlgVoiListEnable, 'Pointer', 'default');
+            drawnow;             
             
         end
         
@@ -1602,6 +1614,10 @@ end
         isoObj = isoObject('get');
         if ~isempty(isoObj)
 
+            try 
+            set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+            drawnow;                 
+                
             set(uiSeriesPtr('get'), 'Enable', 'off');
             set(btnIsoSurfacePtr('get'), 'Enable', 'off');
             set(btn3DPtr('get'), 'Enable', 'off');
@@ -1687,6 +1703,13 @@ end
             set(btnIsoSurfacePtr('get'), 'Enable', 'on');
             set(btn3DPtr('get'), 'Enable', 'on');
             set(btnMIPPtr('get'), 'Enable', 'on');
+            
+            catch
+                progressBar(1, 'Error:createIsoMaskCallback()');                
+            end
+
+            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            drawnow;            
         else
             progressBar(1, 'Error: Please initiate the iso surface!');
             h = msgbox('Error: writeISOtoSTL(): Please initiate the iso surface!', 'Error');

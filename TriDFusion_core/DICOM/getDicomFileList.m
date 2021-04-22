@@ -32,10 +32,13 @@ function [tFileList, iNbFiles] = getDicomFileList(sDirName, tFileList)
     
     f = java.io.File(char(sDirName));
     asFileList = f.listFiles();
-
-    for iLoop=1:length(asFileList)
-
-        progressBar(iLoop / length(asFileList), 'Acquiring file list');
+    
+    endIloop = length(asFileList);
+    for iLoop=1:endIloop
+        
+        if mod(iLoop,5)==1 || iLoop == endIloop         
+            progressBar(iLoop / endIloop, 'Acquiring file list');
+        end
 
         if ~asFileList(iLoop).isDirectory               
             

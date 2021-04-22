@@ -52,8 +52,8 @@ function recordMultiGate(mRecord, sPath, sFileName, sExtention)
         multiFrameRecord('set', false);  
         mRecord.State = 'off';           
         return
-    end
-
+    end    
+    
     lMinBak = windowLevel('get', 'min');
     lMaxBak = windowLevel('get', 'max');
 
@@ -277,15 +277,29 @@ end
         if gateUseSeriesUID('get') == false && ...
            gateLookupTable('get') == true 
             if strcmpi(atCoreMetaData{1}.Modality, 'ct')
-                [lMax, lMin] = computeWindowLevel(2000, 0);
+                if min(aBuffer, [], 'all') >= 0
+                    lMin = min(aBuffer, [], 'all');
+                    lMax = max(aBuffer, [], 'all');                 
+                else
+                    [lMax, lMin] = computeWindowLevel(2000, 0);
+                end    
             else  
-                if strcmpi(gateLookupType('get'), 'Relative')                   
-                    if strcmpi(atCoreMetaData{1}.Modality, 'pt')
+                if strcmpi(gateLookupType('get'), 'Relative')      
+                    
+                    sUnitDisplay = getSerieUnitValue(iOffset);                        
+
+                    if strcmpi(sUnitDisplay, 'SUV')
+                        tQuant = quantificationTemplate('get');                                
+                        if tQuant.tSUV.dScale                
+                            lMin = suvWindowLevel('get', 'min')/tQuant.tSUV.dScale;  
+                            lMax = suvWindowLevel('get', 'max')/tQuant.tSUV.dScale;                        
+                        else
+                            lMin = min(aBuffer, [], 'all');
+                            lMax = max(aBuffer, [], 'all');                     
+                        end
+                    else            
                         lMin = min(aBuffer, [], 'all');
-                        lMax = max(aBuffer, [], 'all');
-                    else
-                        lMin = min(aBuffer, [], 'all');
-                        lMax = max(aBuffer, [], 'all');
+                        lMax = max(aBuffer, [], 'all');                    
                     end
                 else
                     lMin = lAbsoluteMin;
@@ -425,7 +439,9 @@ end
         end
 
         refreshImages();                                         
+        
 
+    
         I = getframe(aAxe);
         [indI,cm] = rgb2ind(I.cdata, 256);
 
@@ -471,7 +487,18 @@ end
                 imwrite(indI, cm, [sImgDirName newName], 'bmp');
             end                        
         end
-
+        
+        try
+            tRefreshRoi = roiTemplate('get');
+            if ~isempty(tRefreshRoi) 
+                for bb=1:numel(tRefreshRoi)
+                    if isvalid(tRefreshRoi{bb}.Object) 
+                        tRefreshRoi{bb}.Object.Visible = 'off';
+                    end
+                end
+            end  
+        catch
+        end
         progressBar(idx / iNbSeries, 'Recording', 'red');               
 
 

@@ -59,6 +59,42 @@ function clickUp(~, ~)
         end
         
         updateObjet3DPosition();      
+    else
+        if isMoveImageActivated('get') == true
+if 0            
+            [bApplyMovement, aAxe, aPosition] =  fusedImageMovementValues('get');
+            if bApplyMovement == true
+                set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+                progressBar(0.999, 'Resampling Image, please wait');
+                
+                moveFusedImage(false, true);
+     
+                aResampledImage = resampleImageMovement(fusionBuffer('get'), aAxe, aPosition);
+                fusionBuffer('set', aResampledImage);                
+                
+                refreshImages();
+                
+                progressBar(1, 'Ready');               
+            end
+end            
+            [bApplyRotation, aAxe, dRotation] = fusedImageRotationValues('get');            
+            if bApplyRotation == true
+                
+                set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+                progressBar(0.999, 'Resampling Image, please wait');
+                
+                aResampledImage = resampleImageRotation(fusionBuffer('get'), aAxe, dRotation);
+                fusionBuffer('set', aResampledImage);
+                
+                refreshImages();
+                
+                progressBar(1, 'Ready');
+                
+            end
+            
+            set(fiMainWindowPtr('get'), 'Pointer', 'fleur');
+
+        end
         
     end
     

@@ -29,24 +29,17 @@ function voiObj = initVoiIsoSurface(uiWindow)
 
     voiObj = '';
 
-    atMetaData = dicomMetaData('get');            
-    tInput = inputTemplate('get');
-
-    iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-    if iSeriesOffset > numel(tInput)
-        return;
-    end
-
     if switchTo3DMode('get')     == false && ...
        switchToIsoSurface('get') == false && ...
        switchToMIPMode('get')    == false
         return;
     end
-
+    
     volObj = volObject('get');
     isoObj = isoObject('get');
     mipObj = mipObject('get');
 
+    tRoiInput = roiTemplate('get');
     tVoiInput = voiTemplate('get');
 
     if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
@@ -72,8 +65,8 @@ function voiObj = initVoiIsoSurface(uiWindow)
         aInputArguments = [aInputArguments(:)', aCamera(:)'];                                                           
     end     
 
-    if ~isempty(tVoiInput)
-        
+    if ~isempty(tVoiInput)        
+    
         aVoiEnableList = voi3DEnableList('get');            
         if isempty(aVoiEnableList)
             for aa=1:numel(tVoiInput)
@@ -95,26 +88,7 @@ function voiObj = initVoiIsoSurface(uiWindow)
             progressBar(aa/numel(tVoiInput)-0.0001, sprintf('Processing VOI %d/%d', aa, numel(tVoiInput) ) );      
 
             aBuffer = zeros(size(dicomBuffer('get')));
-            if     strcmp(imageOrientation('get'), 'axial')
-                im = permute(aBuffer, [1 2 3]);
-            elseif strcmp(imageOrientation('get'), 'coronal') 
-                im = permute(aBuffer, [3 2 1]);    
-            elseif strcmp(imageOrientation('get'), 'sagittal')
-                im = permute(aBuffer, [3 1 2]);
-            end        
-
-            if numel(tInput(iSeriesOffset).asFilesList) ~= 1
-                if atMetaData{2}.ImagePositionPatient(3) - ...
-                   atMetaData{1}.ImagePositionPatient(3) > 0                    
-
-                     im = im(:,:,end:-1:1);                   
-                end
-            else
-                if strcmpi(atMetaData{1}.PatientPosition, 'FFS')
-                     im = im(:,:,end:-1:1);                   
-                end                       
-            end 
-
+            
             aIsosurfaceColor = tVoiInput{aa}.Color;
             
             aColormap(:,1) = aIsosurfaceColor(1);
@@ -126,19 +100,99 @@ function voiObj = initVoiIsoSurface(uiWindow)
     
             aInputArguments = [aInputArguments(:)', {'Isovalue'}, {aIsovalue}, {'IsosurfaceColor'}, {aIsosurfaceColor}, {'Colormap'}, {aColormap}, {'Alphamap'}, {aAlphamap}];
 
-            for yy=1:numel(tVoiInput{aa}.tMask)                          
+            for yy=1:numel(tVoiInput{aa}.RoisTag)                       
+                for rr=1:numel(tRoiInput)
+                    if strcmpi(tVoiInput{aa}.RoisTag{yy}, tRoiInput{rr}.Tag)
+                        sAxe = tRoiInput{rr}.Axe;
+                        dSliceNb = tRoiInput{rr}.SliceNb;
+                        aPosition = tRoiInput{rr}.Position;
+                        sType = tRoiInput{rr}.Type;
+                        
+                        switch sType
+                            case lower('images.roi.ellipse')
+                                dRotationAngle = tRoiInput{rr}.RotationAngle;
+                                aSemiAxes =  tRoiInput{rr}.SemiAxes;
+                                
+                            case lower('images.roi.circle')
+                                dRadius = tRoiInput{rr}.Radius;
+                        end
+                        
+                        if     strcmpi(sAxe, 'Axes1')
+                            im = permute(aBuffer(dSliceNb,:,:), [3 2 1]);
+                        elseif strcmpi(sAxe, 'Axes2')
+                            im = permute(aBuffer(:,dSliceNb,:), [3 1 2]);                               
+                        else 
+                            im = aBuffer(:,:,dSliceNb);
+                        end        
+                        
+                        break;
+                    end
+                end                           
+                
+                
+                switch sType
+                    case lower('images.roi.rectangle')
+                        
+                        rectMask = zeros(size(im, 1), size(im, 2)); % generate grid of ones
+                        
+                        top    = int32(aPosition(2));
+                        bottom = int32(aPosition(2)+aPosition(4));
+                        left   = int32(aPosition(1));
+                        right  = int32(aPosition(1)+aPosition(3));
+                        
+                        rectMask(top:bottom,left:right) = 1; % rectMask( Y values, X values)     
+                        
+                        bw = logical(rectMask);
 
-                if strcmpi(tVoiInput{aa}.tMask{yy}.Axe, 'Axes1')
-                    im(tVoiInput{aa}.tMask{yy}.SliceNb, :, :) = permuteBuffer(tVoiInput{aa}.tMask{yy}.RoiMask, 'coronal');
-                elseif strcmpi(tVoiInput{aa}.tMask{yy}.Axe, 'Axes2')    
-                    im(:, tVoiInput{aa}.tMask{yy}.SliceNb, :) = permuteBuffer(tVoiInput{aa}.tMask{yy}.RoiMask, 'sagittal');
-                else                                 
-                    im(:, :, tVoiInput{aa}.tMask{yy}.SliceNb) = tVoiInput{aa}.tMask{yy}.RoiMask;
+                        
+                    case lower('images.roi.ellipse')
+                        
+                        phi  = dRotationAngle;
+
+                        xCenter = aPosition(1);
+                        yCenter = aPosition(2);
+                        xRadius = aSemiAxes(1);
+                        yRadius = aSemiAxes(2);
+                        theta = 0 : 0.01 : 2*pi;
+                        X_cen = [xCenter;yCenter];
+                        X = [xRadius * cos(theta);
+                             yRadius * sin(theta)];
+                        R = [cos(phi) -sin(phi);
+                             sin(phi) cos(phi)];
+                        Xr = R*X + X_cen;
+                        x = Xr(1,:);
+                        y = Xr(2,:);
+                        
+                        bw = poly2mask(x(:),y(:), size(im,1), size(im,2));                        
+                        
+                    case lower('images.roi.circle')           
+                        
+                        xCenter = aPosition(1);
+                        yCenter = aPosition(2);
+                        
+                        theta = 0 : 0.01 : 2*pi;
+                        radius = dRadius;
+                        x = radius * cos(theta) + xCenter;
+                        y = radius * sin(theta) + yCenter;  
+                                             
+                        bw = poly2mask(x(:),y(:), size(im,1), size(im,2));                        
+                                                
+                    otherwise
+
+                        bw = poly2mask(aPosition(:,1),aPosition(:,2), size(im,1), size(im,2));                        
+                end
+                
+                if strcmpi(sAxe, 'Axes1')
+                    aBuffer(dSliceNb, :, :) = permuteBuffer(bw, 'coronal');
+                elseif strcmpi(sAxe, 'Axes2')     
+                    aBuffer(:, dSliceNb, :) = permuteBuffer(bw, 'sagittal');
+                else
+                    aBuffer(:, :, dSliceNb) = bw;
                 end
 
             end             
-
-            im = im(:,:,end:-1:1);
+            
+            aBuffer = aBuffer(:,:,end:-1:1);
 %            Ds = interp3(im);
 %            Ds = smooth3(im, 'gaussian', 15);
 
@@ -148,7 +202,7 @@ function voiObj = initVoiIsoSurface(uiWindow)
 %            Ds = smooth3(K2);
 
 
-            voiObj{aa} = volshow(im, aInputArguments{:});   
+            voiObj{aa} = volshow(aBuffer, aInputArguments{:});   
             set(voiObj{aa}, 'InteractionsEnabled', false);
             
             if aVoiEnableList{aa} == false
@@ -173,6 +227,7 @@ function voiObj = initVoiIsoSurface(uiWindow)
         
         progressBar(1, 'Ready');      
         
+
     end                        
 
 end     

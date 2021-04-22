@@ -28,7 +28,22 @@ function cropOutsideAllSlicesCallback(hObject,~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     im = dicomBuffer('get');     
+    if isempty(im)        
+        return;
+    end
+    
+    if switchTo3DMode('get')     == true ||  ...
+       switchToIsoSurface('get') == true || ...
+       switchToMIPMode('get')    == true
 
+        return;
+    end
+
+    try  
+            
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    drawnow;
+    
     dBufferSize = size(im);   
 
     axe = axePtr('get');
@@ -91,6 +106,12 @@ function cropOutsideAllSlicesCallback(hObject,~)
     iOffset = get(uiSeriesPtr('get'), 'Value');
     setQuantification(iOffset);
 
-    refreshImages();          
+    refreshImages();   
+    
+    catch
+        progressBar(1, 'Error:cropOutsideAllSlicesCallback()');           
+    end
 
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    drawnow; 
 end                        

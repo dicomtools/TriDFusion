@@ -261,7 +261,7 @@ function setRoiToolbar(sVisible)
 
          %       while strcmpi(get(t8, 'State'), 'on')
 
-                    a = drawline(gca, 'Color', 'cyan', 'lineWidth', 1, 'Tag', num2str(rand), 'LabelVisible', 'on');  
+                    a = drawline(gca, 'Color', 'cyan', 'lineWidth', 1, 'Tag', num2str(randi([-(2^52/2),(2^52/2)],1)), 'LabelVisible', 'on');  
                     a.LabelVisible = 'on';
                     if ~isvalid(t8) 
                         return;                    
@@ -280,7 +280,7 @@ function setRoiToolbar(sVisible)
                     dLength = computeRoiLineLength(a);                            
                     a.Label = [num2str(dLength) ' mm'];
 
-                    addRoi(a);     
+                    addRoi(a, get(uiSeriesPtr('get'), 'Value'));     
                     
                     uimenu(a.UIContextMenu, 'Label', 'Copy Object' , 'UserData', a, 'Callback', @copyRoiCallback, 'Separator', 'on');
                     uimenu(a.UIContextMenu, 'Label', 'Paste Object', 'UserData', a, 'Callback', @pasteRoiCallback);
@@ -395,11 +395,15 @@ function setRoiToolbar(sVisible)
 
    %              while strcmpi(get(t, 'State'), 'on')
 
-                    a = drawfreehand(gca, 'Color', 'cyan', 'LineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', num2str(rand));  
+                    a = drawfreehand(gca, 'Color', 'cyan', 'LineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', num2str(randi([-(2^52/2),(2^52/2)],1)), 'FaceSelectable', 1, 'FaceAlpha', 0);  
+  %                  a.Waypoints(:) = false;
+
                     if ~isvalid(t)
                         return;                    
-                    end                            
-                    if strcmpi(get(t, 'State'), 'off')    
+                    end 
+                    
+                    if strcmpi(get(t, 'State'), 'off')  
+                        
                         roiSetAxeBorder(false);                    
 
                  %       windowButton('set', 'up');
@@ -410,10 +414,11 @@ function setRoiToolbar(sVisible)
                         return;
                     end
 
-                    addRoi(a);                  
+                    addRoi(a, get(uiSeriesPtr('get'), 'Value'));                  
 
                     roiDefaultMenu(a);
 
+                    uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback); 
                     uimenu(a.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData',a, 'Callback', @clearWaypointsCallback); 
 
                     cropMenu(a);
@@ -514,7 +519,7 @@ function setRoiToolbar(sVisible)
 
           %      while strcmpi(get(t2, 'State'), 'on')
 
-                    a = drawcircle(gca, 'Color', 'cyan', 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', num2str(rand));  
+                    a = drawcircle(gca, 'Color', 'cyan', 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', num2str(randi([-(2^52/2),(2^52/2)],1)), 'FaceSelectable', 1, 'FaceAlpha', 0);  
                     if ~isvalid(t2)
                         return;                    
                     end    
@@ -529,9 +534,11 @@ function setRoiToolbar(sVisible)
                         return;
                     end 
 
-                    addRoi(a);                  
+                    addRoi(a, get(uiSeriesPtr('get'), 'Value'));                  
 
                     roiDefaultMenu(a);
+                    
+                    uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback); 
 
                     cropMenu(a);
 
@@ -661,7 +668,7 @@ function setRoiToolbar(sVisible)
 
          %       while strcmpi(get(t5, 'State'), 'on')
 
-                    a = drawellipse(gca, 'Color', 'cyan', 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', num2str(rand)); 
+                    a = drawellipse(gca, 'Color', 'cyan', 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', num2str(randi([-(2^52/2),(2^52/2)],1)), 'FaceSelectable', 1, 'FaceAlpha', 0); 
                     if ~isvalid(t5)
                         return;                    
                     end    
@@ -676,9 +683,11 @@ function setRoiToolbar(sVisible)
                         return;
                     end 
 
-                    addRoi(a);                  
+                    addRoi(a, get(uiSeriesPtr('get'), 'Value'));                  
 
                     roiDefaultMenu(a);
+                    
+                    uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback); 
 
                     cropMenu(a);
 
@@ -774,7 +783,7 @@ function setRoiToolbar(sVisible)
 
             %    while strcmpi(get(t3, 'State'), 'on')
 
-                    a = drawrectangle(gca, 'Color', 'cyan', 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', num2str(rand)); 
+                    a = drawrectangle(gca, 'Color', 'cyan', 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', num2str(randi([-(2^52/2),(2^52/2)],1)), 'FaceSelectable', 1, 'FaceAlpha', 0); 
                     if ~isvalid(t3)
                         return;                    
                     end 
@@ -789,9 +798,11 @@ function setRoiToolbar(sVisible)
                         return;
                     end 
 
-                    addRoi(a);                  
+                    addRoi(a, get(uiSeriesPtr('get'), 'Value'));                  
 
                     roiDefaultMenu(a);
+                    
+                    uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback); 
 
                     cropMenu(a);
 
@@ -888,7 +899,7 @@ function setRoiToolbar(sVisible)
 
             %    while strcmpi(get(t6, 'State'), 'on')
 
-                    a = drawpolygon(gca, 'Color', 'cyan', 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', num2str(rand));  
+                    a = drawpolygon(gca, 'Color', 'cyan', 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', num2str(randi([-(2^52/2),(2^52/2)],1)), 'FaceSelectable', 1, 'FaceAlpha', 0);  
                     if ~isvalid(t6)
                         return;                    
                     end    
@@ -903,7 +914,9 @@ function setRoiToolbar(sVisible)
                         return;
                     end 
 
-                    addRoi(a);                  
+                    addRoi(a, get(uiSeriesPtr('get'), 'Value'));       
+                    
+                    uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback); 
 
                     roiDefaultMenu(a);
 

@@ -34,12 +34,21 @@ function mouseMove(~, ~)
            switchToMIPMode('get')    == false
 
             if strcmp(get(fiMainWindowPtr('get'),'selectiontype'),'alt')
-                adjWL();
-            else
-                if size(dicomBuffer('get'), 3) ~= 1
-                    triangulateImages();  
+                if isMoveImageActivated('get') == true
+                    rotateFusedImage(false);                    
                 else
-                    refreshImages();
+                    adjWL();
+                end
+            else
+                if isMoveImageActivated('get') == true
+                    
+                    moveFusedImage(false, false);
+                else
+                    if size(dicomBuffer('get'), 3) ~= 1
+                        triangulateImages();  
+                    else
+                        refreshImages();
+                    end
                 end
             end
         else            

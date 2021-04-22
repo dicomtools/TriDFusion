@@ -135,7 +135,50 @@ function catchKeyPress(~,evnt)
            switchToMIPMode('get')    == true 
 
             flip3Dobject('up');    
-        else
+        else               
+            if size(dicomBuffer('get'), 3) ~= 1
+                
+                windowButton('set', 'down');  
+                switch gca
+                    case axes1Ptr('get')
+                        if sliceNumber('get', 'coronal') == size(dicomBuffer('get'), 1)
+                            iSliceNumber = 1;
+                        else
+                            iSliceNumber = sliceNumber('get', 'coronal')+1;
+                        end
+
+                        sliceNumber('set', 'coronal', iSliceNumber);    
+
+                        set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get'), 1));
+                        
+                    case axes2Ptr('get')
+                        if sliceNumber('get', 'sagittal') == size(dicomBuffer('get'), 2)
+                            iSliceNumber = 1;
+                        else
+                            iSliceNumber = sliceNumber('get', 'sagittal')+1;
+                        end
+
+                        sliceNumber('set', 'sagittal', iSliceNumber);    
+
+                        set(uiSliderSagPtr('get'), 'Value', sliceNumber('get', 'sagittal') / size(dicomBuffer('get'), 2));
+                        
+                    otherwise  
+                        if sliceNumber('get', 'axial') == 1
+                            iSliceNumber = size(dicomBuffer('get'), 3);
+                        else
+                            iSliceNumber = sliceNumber('get', 'axial')-1;
+                        end
+
+                        sliceNumber('set', 'axial', iSliceNumber);    
+                end
+                set(uiSliderTraPtr('get'), 'Value', 1 - (sliceNumber('get', 'axial') / size(dicomBuffer('get'), 3)));
+                
+                refreshImages();                
+                
+                windowButton('set', 'up');  
+
+            end
+            
 if 0                    
             im = dicomBuffer('get');
 
@@ -151,7 +194,50 @@ end
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true 
 
-            flip3Dobject('down');                              
+            flip3Dobject('down');   
+        else
+            if size(dicomBuffer('get'), 3) ~= 1
+                
+                windowButton('set', 'down');  
+                switch gca
+                    case axes1Ptr('get')
+                        if sliceNumber('get', 'coronal') == 1
+                            iSliceNumber = size(dicomBuffer('get'), 1);
+                        else
+                            iSliceNumber = sliceNumber('get', 'coronal')-1;
+                        end
+
+                        sliceNumber('set', 'coronal', iSliceNumber);    
+
+                        set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get'), 1));
+                        
+                    case axes2Ptr('get')
+                        if sliceNumber('get', 'sagittal') == 1
+                            iSliceNumber = size(dicomBuffer('get'), 2);
+                        else
+                            iSliceNumber = sliceNumber('get', 'sagittal')-1;
+                        end
+
+                        sliceNumber('set', 'sagittal', iSliceNumber);    
+
+                        set(uiSliderSagPtr('get'), 'Value', sliceNumber('get', 'sagittal') / size(dicomBuffer('get'), 2));
+                        
+                    otherwise                
+                        if sliceNumber('get', 'axial') == size(dicomBuffer('get'), 3)
+                            iSliceNumber = 1;
+                        else
+                            iSliceNumber = sliceNumber('get', 'axial')+1;
+                        end
+
+                        sliceNumber('set', 'axial', iSliceNumber);    
+
+                        set(uiSliderTraPtr('get'), 'Value', 1 - (sliceNumber('get', 'axial') / size(dicomBuffer('get'), 3)));                       
+                end
+                
+                refreshImages();
+                
+                windowButton('set', 'up'); 
+            end            
         end
     end            
     if strcmpi(evnt.Key,'leftarrow')
@@ -179,10 +265,12 @@ end
             return;
         end
 
-        atMetaData = dicomMetaData('get');                
-        if strcmpi(atMetaData{1}.Modality, 'pt')
-            lMin = min(dicomBuffer('get'), [], 'all');
-            lMax = max(dicomBuffer('get'), [], 'all');                    
+%        atMetaData = dicomMetaData('get');                
+        sUnitDisplay = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));                        
+         if strcmpi(sUnitDisplay, 'SUV')
+            tQuant = quantificationTemplate('get');   
+            lMin = suvWindowLevel('get', 'min')/tQuant.tSUV.dScale;  
+            lMax = suvWindowLevel('get', 'max')/tQuant.tSUV.dScale;                   
         else
             lMin = min(dicomBuffer('get'), [], 'all');
             lMax = max(dicomBuffer('get'), [], 'all');

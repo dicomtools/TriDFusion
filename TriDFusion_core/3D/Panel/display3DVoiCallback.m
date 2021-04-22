@@ -32,7 +32,12 @@ function display3DVoiCallback(~, ~)
        switchToMIPMode('get')    == false
         return;
     end
+    
+    try
 
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    drawnow; 
+        
     displayVoi('set', get(ui3DDispVoiPtr('get'), 'Value'));
 
     voiObj = voiObject('get');
@@ -82,8 +87,15 @@ function display3DVoiCallback(~, ~)
         end
     end
 
-   progressBar(1, 'Ready');      
+    progressBar(1, 'Ready');      
+    
+    initGate3DObject('set', true);        
+   
+    catch
+        progressBar(1, 'Error:display3DVoiCallback()');                
+    end
 
-   initGate3DObject('set', true);        
-
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    drawnow; 
+    
 end

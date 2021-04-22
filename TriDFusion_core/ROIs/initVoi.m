@@ -27,6 +27,7 @@ function initVoi()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+if 0
     tInitInput = inputTemplate('get');        
     iOffset = get(uiSeriesPtr('get'), 'Value');
     if iOffset > numel(tInitInput)  
@@ -38,4 +39,5 @@ function initVoi()
     else   
          voiTemplate('set', '');
     end
+end
 end

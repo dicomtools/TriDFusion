@@ -34,7 +34,12 @@ function readSTLModel(sPath, sFile, xBufSize, yBufSize, zBufSize, dPixelValue, b
     if iSeriesOffset > numel(inputTemplate('get'))  
         return;
     end 
-
+    
+    try
+                
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    drawnow; 
+        
     progressBar(0.999999, 'Processing import stl, please wait');
 
     FV = stlread(sprintf('%s%s', sPath, sFile));            
@@ -127,10 +132,14 @@ end
 
     dicomViewerCore();  
 
-    triangulateCallback();            
-
     refreshImages();     
 
     progressBar(1, sprintf('Import %s completed', sFile));
+    
+    catch
+        progressBar(1, 'Error:readSTLModel()');                
+    end
 
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    drawnow; 
 end

@@ -1,5 +1,5 @@
-function maskToVoi(aMask, sLabel, aColor, sPlane)
-%function maskToVoi(aMask, sLabel, aColor, sPlane)
+function maskToVoi(aMask, sLabel, aColor, sPlane, dSeriesOffset, bPixelEdge)
+%function maskToVoi(aMask, sLabel, aColor, sPlane, dSeriesOffset, bPixelEdge)
 %Create a VOI from a 3D mask.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -30,11 +30,17 @@ function maskToVoi(aMask, sLabel, aColor, sPlane)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+
     aMaskSize = size(aMask);
 
     if numel(aMaskSize) ~= 3 % Must be 3D array
         return;
     end
+    
+    try
+        
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');            
+    drawnow;   
     
     if strcmpi(sPlane, 'coronal')
         axRoi = axes1Ptr('get');
@@ -51,6 +57,8 @@ function maskToVoi(aMask, sLabel, aColor, sPlane)
         
     for mm=1: dMaskSize
         
+%         progressBar(mm/dMaskSize, sprintf('Processing Mask ROI %d/%d', mm, dMaskSize ) );      
+  
         if strcmpi(sPlane, 'coronal')
             aSlice = aMask(mm,:,:);
         elseif strcmpi(sPlane, 'sagittal')
@@ -69,32 +77,44 @@ function maskToVoi(aMask, sLabel, aColor, sPlane)
                 sliceNumber('set', 'axial', mm);
             end
             
-            sTag = num2str(rand);
+            sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
 
-            B = bwboundaries(aMask(:,:,mm));
-            pRoi = drawfreehand(axRoi, 'Position', flip(B{1}, 2), 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'off');         
-            
-            if strcmpi(sPlane, 'coronal')
-                gca = axes1Ptr('get');
-            elseif strcmpi(sPlane, 'sagittal')
-                gca = axes2Ptr('get');
-            else
-                gca = axes3Ptr('get');
+            if bPixelEdge == true
+                aSlice = imresize(aSlice,3, 'nearest'); % do not go directly through pixel centers
             end
-   
-            addRoi(pRoi);                  
-
-            roiDefaultMenu(pRoi);
-
-            uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', pRoi, 'Callback', @clearWaypointsCallback); 
-
-            cropMenu(pRoi);
-
-            uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on'); 
-
-            set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
             
-            asTag{numel(asTag)+1} = sTag;
+            [maskSlice, L,N,A] = bwboundaries(aSlice, 'noholes', 4); 
+
+            if ~isempty(maskSlice)
+                for jj=1:numel(maskSlice)
+
+                    curentMask = maskSlice(jj);
+                    
+                    if bPixelEdge == true                    
+                        curentMask{1} = (curentMask{1} +1)/3; 
+                    end
+                    
+                    aPosition = flip(curentMask{1}, 2);
+           
+                    pRoi = drawfreehand(axRoi, 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'off', 'FaceSelectable', 0, 'FaceAlpha', 0);  
+                    pRoi.Waypoints(:) = false;
+
+                    addRoi(pRoi, dSeriesOffset);                  
+
+                    roiDefaultMenu(pRoi);
+
+                    uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback); 
+                    uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', pRoi, 'Callback', @clearWaypointsCallback); 
+
+                    cropMenu(pRoi);
+
+                    uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on'); 
+
+               %     set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
+
+                    asTag{numel(asTag)+1} = sTag;
+                end
+            end
             
         end
     end
@@ -103,4 +123,13 @@ function maskToVoi(aMask, sLabel, aColor, sPlane)
         createVoiFromRois(asTag, sLabel);
     end
     
+    progressBar(1, 'Ready' );      
+   
+    catch
+        progressBar(1, 'Error:maskToVoi()');          
+    end  
+
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    drawnow;           
+ 
 end

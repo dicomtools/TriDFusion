@@ -31,6 +31,8 @@ function mainWindowMenu()
     uimenu(mFile,'Label', 'Open...', 'Callback',@setSourceCallback);
     uimenu(mFile,'Label', 'Import Dose Kernel...','Callback', @importDoseKernelCallback);
     uimenu(mFile,'Label', 'Import STL Model...','Callback', @importSTLCallback);
+    uimenu(mFile,'Label', 'Import Contours...','Callback', @importContoursCallback);    
+    uimenu(mFile,'Label', 'Import CERR planC...','Callback', @importCerrPlanCCallback, 'Separator','on');
     uimenu(mFile,'Label', 'Import CERR Dose Volume...','Callback', @importCerrDoseVolumeCallback);
     uimenu(mFile,'Label', 'Import CERR Dose Constraint...','Callback', @importCerrDoseConstraintCallback);
 
@@ -44,13 +46,14 @@ function mainWindowMenu()
 
     mEdit = uimenu(fiMainWindowPtr('get'),'Label','Edit');
     uimenu(mEdit,'Label', 'Copy Display', 'Callback', 'editmenufcn(gcbf,''EditCopyFigure'')');
-    mOptions = uimenu(mEdit,'Label', 'Viewer Properties...', 'Callback', @setOptionsCallback, 'Separator','on');
+    uimenu(mEdit,'Label', 'Patient Dose...', 'Callback', @setPatientDoseCallback, 'Separator','on');    
+    mOptions = uimenu(mEdit,'Label', 'Viewer Properties...', 'Callback', @setOptionsCallback);
     optionsPanelMenuObject('set', mOptions);
 
     mView = uimenu(fiMainWindowPtr('get'),'Label','View');
-    mAxial    = uimenu(mView, 'Label','Axial View'   , 'Callback', @setOrientationCallback);
-    mSagittal = uimenu(mView, 'Label','Sagittal View', 'Callback', @setOrientationCallback);
-    mCoronal  = uimenu(mView, 'Label','Coronal View' , 'Callback', @setOrientationCallback);
+    mAxial    = uimenu(mView, 'Label','Axial Plane'   , 'Callback', @setOrientationCallback);
+    mSagittal = uimenu(mView, 'Label','Sagittal Plane', 'Callback', @setOrientationCallback);
+    mCoronal  = uimenu(mView, 'Label','Coronal plane' , 'Callback', @setOrientationCallback);
 
     mVsplashAxial    = uimenu(mView, 'Label','V-Splash Axial'   , 'Callback', @setVsplashViewCallback, 'Separator','on');
     mVsplashSagittal = uimenu(mView, 'Label','V-Splash Sagittal', 'Callback', @setVsplashViewCallback);
@@ -93,21 +96,23 @@ function mainWindowMenu()
         set(mVslashAll      , 'Checked', 'on');
     end
 
-    mViewCam      = uimenu(mView, 'Label','Camera Toolbar'      , 'Callback', @setViewToolbar, 'Separator','on');
-    mViewEdit     = uimenu(mView, 'Label','Plot Edit Toolbar'   , 'Callback', @setViewToolbar);
+    mViewCam      = uimenu(mView, 'Label','Camera Toolbar'   , 'Callback', @setViewToolbar, 'Separator','on');
+    mViewEdit     = uimenu(mView, 'Label','Plot Edit Toolbar', 'Callback', @setViewToolbar);
     mViewPlayback = uimenu(mView, 'Label','Playback Toolbar' , 'Callback', @setViewToolbar);
     viewPlaybackObject('set', mViewPlayback);
 
     mViewRoi = uimenu(mView, 'Label','ROI Toolbar' , 'Callback', @setViewToolbar);
     viewRoiObject('set', mViewRoi);
 
-    mViewSeg = uimenu(mView, 'Label','Segmentation Panel' , 'Callback', @setViewSegPanel, 'Separator', 'on');
-    viewSegPanelMenuObject('set', mViewSeg);
+    mViewSegPanel = uimenu(mView, 'Label','Segmentation Panel' , 'Callback', @setViewSegPanel, 'Separator', 'on');
+    viewSegPanelMenuObject('set', mViewSegPanel);
 
-    mViewKernel = uimenu(mView, 'Label','Kernel Panel', 'Callback', @setViewKernelPanel);
-    viewKernelPanelMenuObject('set', mViewKernel);
+    mViewKernelPanel = uimenu(mView, 'Label','Kernel Panel', 'Callback', @setViewKernelPanel);
+    viewKernelPanelMenuObject('set', mViewKernelPanel);
 
-
+    mViewRoiPanel = uimenu(mView, 'Label','ROI Panel', 'Callback', @setViewRoiPanel);
+    viewRoiPanelMenuObject('set', mViewRoiPanel);
+    
     m3DPanel = uimenu(mView, 'Label','3D Edit Panel', 'Callback', @setView3DPanel);
     view3DPanelMenuObject('set', m3DPanel);
 
@@ -129,7 +134,7 @@ function mainWindowMenu()
     panMenu       ('set', uimenu(mTools, 'Label','Pan'        , 'Callback', @setPanCallback));
     zoomMenu      ('set', uimenu(mTools, 'Label','Zoom'       , 'Callback', @setZoomCallback));
     rotate3DMenu  ('set', uimenu(mTools, 'Label','Rotate 3D'  , 'Callback', @setRotate3DCallback));
-    dataCursorMenu('set', uimenu(mTools, 'Label','Data Cursor', 'Callback', @setDataCursorCallback));
+ %   dataCursorMenu('set', uimenu(mTools, 'Label','Data Cursor', 'Callback', @setDataCursorCallback));
     uimenu(mTools, 'Label','Reset View', 'Callback','toolsmenufcn ResetView');
 
 
@@ -155,7 +160,7 @@ function mainWindowMenu()
                 aInput  = dicomBuffer('get');
                 aFusion = fusionBuffer('get');
 
-                if strcmpi(get(hObject, 'Label'), 'Axial View') && ...
+                if strcmpi(get(hObject, 'Label'), 'Axial Plane') && ...
                   ~strcmpi(imageOrientation('get'), 'axial')
 
                     set(mAxial   , 'Checked', 'on' );
@@ -198,7 +203,7 @@ function mainWindowMenu()
 
                     bRefresh = true;
 
-                elseif strcmpi(get(hObject, 'Label'), 'Coronal View') && ...
+                elseif strcmpi(get(hObject, 'Label'), 'Coronal Plane') && ...
                       ~strcmpi(imageOrientation('get'), 'coronal')
 
                     set(mAxial   , 'Checked', 'off');
@@ -235,7 +240,7 @@ function mainWindowMenu()
 
                     bRefresh = true;
 
-               elseif strcmpi(get(hObject, 'Label'), 'Sagittal View') && ...
+               elseif strcmpi(get(hObject, 'Label'), 'Sagittal Plane') && ...
                       ~strcmp(imageOrientation('get'), 'sagittal')
 
                     set(mAxial   , 'Checked', 'off');

@@ -32,19 +32,14 @@ function hideViewLabelCallback(hObject,~)
     else
         hObject.UserData.LabelVisible = 'on';
     end
-
-    tLabelVisibleInput = inputTemplate('get');        
-    iOffset = get(uiSeriesPtr('get'), 'Value');
-    if iOffset > numel(tLabelVisibleInput)  
-        return;
-    end
-
-    for bb=1:numel(tLabelVisibleInput(iOffset).tRoi)
-        if strcmpi(hObject.UserData.Tag, tLabelVisibleInput(iOffset).tRoi{bb}.Tag)
-            tLabelVisibleInput(iOffset).tRoi{bb}.LabelVisible = hObject.UserData.LabelVisible;
-            inputTemplate('set', tLabelVisibleInput);
-            roiTemplate('set', tLabelVisibleInput(iOffset).tRoi);
+    
+    atRoi = roiTemplate('get');
+    
+    for bb=1:numel(atRoi)
+        if strcmpi(hObject.UserData.Tag, atRoi{bb}.Tag)
+            atRoi{bb}.LabelVisible = hObject.UserData.LabelVisible;
+            roiTemplate('set', atRoi);
             break;
         end
-    end                
+    end 
 end

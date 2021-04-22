@@ -29,7 +29,11 @@ function setMIPCallback(~, ~)
 
     if numel(dicomBuffer('get')) && ...
        size(dicomBuffer('get'), 3) ~= 1
-
+   
+        try   
+            
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
 %                releaseRoiAxeWait();
         releaseRoiWait();
 
@@ -85,16 +89,16 @@ function setMIPCallback(~, ~)
         multiFrameZoom    ('set', 'out', 1);
         multiFrameZoom    ('set', 'axe', []);
 
-        uiSegMainPanel = uiSegMainPanelPtr('get');
-        if ~isempty(uiSegMainPanel)
-            set(uiSegMainPanel, 'Visible', 'off');
-        end
-
         mOptions = optionsPanelMenuObject('get');
         if ~isempty(mOptions)
             mOptions.Enable = 'off';
         end
-
+        
+        uiSegMainPanel = uiSegMainPanelPtr('get');
+        if ~isempty(uiSegMainPanel)
+            set(uiSegMainPanel, 'Visible', 'off');
+        end
+        
         viewSegPanel('set', false);
         objSegPanel = viewSegPanelMenuObject('get');
         if ~isempty(objSegPanel)
@@ -111,7 +115,18 @@ function setMIPCallback(~, ~)
         if ~isempty(objKernelPanel)
             objKernelPanel.Checked = 'off';
         end
+        
+        uiRoiMainPanel = uiRoiMainPanelPtr('get');
+        if ~isempty(uiRoiMainPanel)
+            set(uiRoiMainPanel, 'Visible', 'off');
+        end
 
+        viewRoiPanel('set', false);
+        objRoiPanel = viewRoiPanelMenuObject('get');
+        if ~isempty(objRoiPanel)
+            objRoiPanel.Checked = 'off';
+        end
+        
         if switchToMIPMode('get') == true
 
             switchToMIPMode('set', false);
@@ -417,23 +432,27 @@ function setMIPCallback(~, ~)
                     tFuseInput     = inputTemplate('get');
                     iFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
                     atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
-
+                    
                     if (strcmpi(atMetaData{1}.Modality, 'nm') || ...
-                        strcmpi(atMetaData{2}.Modality, 'pt')) && ...
-                      ~(strcmpi(atFuseMetaData{1}.Modality, 'nm') || ...
-                        strcmpi(atFuseMetaData{2}.Modality, 'pt'))
+                        strcmpi(atMetaData{1}.Modality, 'pt')) && ...
+                       (strcmpi(atFuseMetaData{1}.Modality, 'nm') || ...
+                        strcmpi(atFuseMetaData{1}.Modality, 'pt'))
 
            %             colorMapMipOffset('set', colorMapOffset('get')); %  % Set 3D Mip from 2D
-                        background3DOffset('set', 8); % Black
+                        background3DOffset('set', 7); % White
                     else
           %              colorMapMipOffset('set', 10); % Bone
-                        background3DOffset('set', 7); % White
-                   end
+                        background3DOffset('set', 8); % Black
+                    end
                 else
           %          colorMapMipOffset('set', 10); % Gray
-                    background3DOffset('set', 7); % White
+                    if (strcmpi(atMetaData{1}.Modality, 'nm') || ...
+                        strcmpi(atMetaData{1}.Modality, 'pt'))
+                        background3DOffset('set', 7); % White
+                   else
+                        background3DOffset('set', 8); % Black
+                    end
                 end
-
                 colorMapMipOffset('set', colorMapOffset('get')); %  % Set 3D Mip from 2D
 
                 mipObj = initVolShow(dicomBuffer('get'), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atMetaData);
@@ -448,25 +467,19 @@ function setMIPCallback(~, ~)
                     tFuseInput     = inputTemplate('get');
                     iFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
                     atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
-
+                   
+                    
                     if (strcmpi(atFuseMetaData{1}.Modality, 'nm') || ...
-                        strcmpi(atFuseMetaData{2}.Modality, 'pt')) && ...
-                      ~(strcmpi(atMetaData{1}.Modality, 'nm') || ...
-                        strcmpi(atMetaData{2}.Modality, 'pt'))
+                        strcmpi(atFuseMetaData{1}.Modality, 'pt')) && ...
+                       (strcmpi(atMetaData{1}.Modality, 'nm') || ...
+                        strcmpi(atMetaData{1}.Modality, 'pt'))
 
               %          colorMapMipFusionOffset('set', fusionColorMapOffset('get')); % Set 3D Mip from 2D
-                        background3DOffset('set', 8); % Black
+                        background3DOffset('set', 7); % White
                     else
-                        if strcmpi(atMetaData{1}.Modality, 'nm') || ...
-                           strcmpi(atMetaData{2}.Modality, 'pt')
-                            background3DOffset('set', 8); % Black
-                        else
-                            background3DOffset('set', 7); % White
-                        end
-              %          colorMapMipFusionOffset('set', 12); % Gray
 
+                        background3DOffset('set', 8); % Black
                     end
-
                     colorMapMipFusionOffset('set', fusionColorMapOffset('get')); % Set 3D Mip from 2D
 
                     set(ui3DBackgroundPtr('get'), 'Value', background3DOffset('get'));
@@ -791,7 +804,12 @@ function setMIPCallback(~, ~)
                 set(ui3DSliderMipLinAlphaPtr('get'), 'Enable', 'on');               
             end
         end
-
-    end
-
+        
+        catch
+            progressBar(1, 'Error:setMIPCallback()');           
+        end
+        
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;        
+    end    
 end

@@ -83,23 +83,19 @@ function editLabelCallback(hObject, ~)
    end
 
    function acceptEditLabelCallback(~, ~)
+       
         hObject.UserData.Label = get(edtLabelName, 'String');
+        
+        atRoi = roiTemplate('get');
 
-        tEditLabelInput = inputTemplate('get');
-        iOffset = get(uiSeriesPtr('get'), 'Value');
-        if iOffset > numel(tEditLabelInput)
-            return;
-        end
-
-        for bb=1:numel(tEditLabelInput(iOffset).tRoi)
-            if strcmpi(hObject.UserData.Tag, tEditLabelInput(iOffset).tRoi{bb}.Tag)
-                tEditLabelInput(iOffset).tRoi{bb}.Label = hObject.UserData.Label;
-                inputTemplate('set', tEditLabelInput);
-                roiTemplate('set', tEditLabelInput(iOffset).tRoi);
+        for bb=1:numel(atRoi)
+            if strcmpi(hObject.UserData.Tag, atRoi{bb}.Tag)
+                atRoi{bb}.Label = hObject.UserData.Label;
+                roiTemplate('set', atRoi);
                 break;
             end
-        end
-
+        end 
+    
         delete(editLabelWindow);
    end
 

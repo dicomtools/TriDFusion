@@ -72,8 +72,13 @@ function tRoiComputed = computeRoi(imInput, imRoi, atRoiMetaData, tSliceMeta, pt
         imCDataMasked = imCDataMasked(imCDataMasked>cropValue('get'));
     else    
         imCDataMasked = imCData(mask);
-    end
 
+    end
+    
+    if numel(double(imCDataMasked)) == 0
+        % smaler than 1 pixel
+    end
+        
     tRoiComputed.cells = numel(double(imCDataMasked));
 
     if (strcmpi(tSliceMeta.Modality, 'pt') || ...

@@ -29,22 +29,17 @@ function predefinedLabelCallback(hObject,~)
 
 %    hObject.Checked = 'on';
     hObject.UserData.Label = hObject.Text;
-
-    tPredefinedLabelInput = inputTemplate('get');        
-    iOffset = get(uiSeriesPtr('get'), 'Value');
-    if iOffset > numel(tPredefinedLabelInput)  
-        return;
-    end
-
-    for bb=1:numel(tPredefinedLabelInput(iOffset).tRoi)
-        if strcmpi(hObject.UserData.Tag, tPredefinedLabelInput(iOffset).tRoi{bb}.Tag)
-            tPredefinedLabelInput(iOffset).tRoi{bb}.Label = hObject.UserData.Label;
-            inputTemplate('set', tPredefinedLabelInput);
-            roiTemplate('set', tPredefinedLabelInput(iOffset).tRoi);
+    
+    atRoi = roiTemplate('get');
+    
+    for bb=1:numel(atRoi)
+        if strcmpi(hObject.UserData.Tag, atRoi{bb}.Tag)
+            atRoi{bb}.Label = hObject.UserData.Label;
+            roiTemplate('set', atRoi);
             break;
         end
     end 
-
+    
     setVoiRoiSegPopup();
 
 end

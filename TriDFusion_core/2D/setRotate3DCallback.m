@@ -30,7 +30,10 @@ function setRotate3DCallback(~, ~)
     if isempty(dicomBuffer('get'))
         return;
     end
-
+    
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');            
+    isMoveImageActivated('set', false);
+    
     releaseRoiWait();
 
     if rotate3DTool('get')

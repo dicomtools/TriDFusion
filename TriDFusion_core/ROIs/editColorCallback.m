@@ -29,19 +29,14 @@ function editColorCallback(hObject,~)
 
     c = uisetcolor([hObject.UserData.Color],'Select a color');
     hObject.UserData.Color = c;
+    
+    atRoi = roiTemplate('get');
 
-    tEditColorInput = inputTemplate('get');        
-    iOffset = get(uiSeriesPtr('get'), 'Value');
-    if iOffset > numel(tEditColorInput)  
-        return;
-    end
-
-    for bb=1:numel(tEditColorInput(iOffset).tRoi)
-        if strcmpi(hObject.UserData.Tag, tEditColorInput(iOffset).tRoi{bb}.Tag)
-            tEditColorInput(iOffset).tRoi{bb}.Color = hObject.UserData.Color;
-            inputTemplate('set', tEditColorInput);
-            roiTemplate('set', tEditColorInput(iOffset).tRoi);
-           break;
+    for bb=1:numel(atRoi)
+        if strcmpi(hObject.UserData.Tag, atRoi{bb}.Tag)
+            atRoi{bb}.Color = hObject.UserData.Color;
+            roiTemplate('set', atRoi);
+            break;
         end
-    end                                  
+    end     
 end

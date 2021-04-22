@@ -27,17 +27,22 @@ function writeDICOM(sOutDir, iSeriesOffset)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
+    tWriteTemplate = inputTemplate('get');
+    if iSeriesOffset > numel(tWriteTemplate)  
+        return;
+    end  
+    
     sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                
     sWriteDir = char(sOutDir) + "TriDFusion_" + char(sDate) + '/';              
     if ~(exist(char(sWriteDir), 'dir'))
         mkdir(char(sWriteDir));
     end
-
-    tWriteTemplate = inputTemplate('get');
-    if iSeriesOffset > numel(tWriteTemplate)  
-        return;
-    end  
-
+    
+    try
+                
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    drawnow;  
+        
     dicomdict('factory');  
 
     aBuffer = dicomBuffer('get');
@@ -107,7 +112,9 @@ function writeDICOM(sOutDir, iSeriesOffset)
     end  
 
     dSeriesInstanceUID = dicomuid;
-    for ww=1: numel(tWriteMetaData)
+    
+    dWriteEndLoop = numel(tWriteMetaData);
+    for ww=1:dWriteEndLoop
         tWriteMetaData{ww}.InstanceNumber = tMetaData{ww}.InstanceNumber;                              
         tWriteMetaData{ww}.PatientPosition = tMetaData{ww}.PatientPosition;                                                                  
 
@@ -170,14 +177,25 @@ function writeDICOM(sOutDir, iSeriesOffset)
                            );                            
             end
         catch
+            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            drawnow;             
+            
             progressBar(1, 'Error: Write dicom fail!');
             return;
         end
-
-        progressBar(ww / numel(tWriteTemplate(iSeriesOffset).asFilesList), sprintf('Writing dicom %d/%d, please wait', ww, numel(tWriteMetaData)));
-
+        
+        if mod(ww,5)==1 || ww == dWriteEndLoop         
+            progressBar(ww / dWriteEndLoop, sprintf('Writing dicom %d/%d, please wait', ww, dWriteEndLoop));
+        end
     end                   
-
+    
+    catch
+        progressBar(1, 'Error:writeDICOM()');                
+    end
+    
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    drawnow; 
+    
     progressBar(1, sprintf('Export %d files completed %s', ww, char(sWriteDir)));
 
 end        

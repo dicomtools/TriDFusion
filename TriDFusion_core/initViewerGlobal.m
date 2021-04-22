@@ -37,6 +37,11 @@ function initViewerGlobal()
     axes3Ptr ('set', '');
     axes3fPtr('set', '');
 
+    axesText('set', 'axe', '');
+    axesText('set', 'axes1', '');
+    axesText('set', 'axes2', '');
+    axesText('set', 'axes3', '');
+
     imAxePtr ('set', '');
     imAxeFPtr('set', '');
 
@@ -47,7 +52,12 @@ function initViewerGlobal()
     imCoronalFPtr ('set', '');
     imSagittalFPtr('set', '');
     imAxialFPtr   ('set', '');
-
+    
+    visBoundAxePtr  ('set', '');
+    visBoundAxes1Ptr('set', '');
+    visBoundAxes2Ptr('set', '');
+    visBoundAxes3Ptr('set', '');
+                
     fiMainWindowPtr       ('set', '');
     uiTopWindowPtr        ('set', '');
     uiSegMainPanelPtr     ('set', '');
@@ -59,7 +69,7 @@ function initViewerGlobal()
     uiMain3DPanelPtr      ('set', '');
     ui3DPanelPtr          ('set', '');
     ui3DPanelSliderPtr    ('set', '');
-
+    
     btn3DPtr         ('set', '');
     btnIsoSurfacePtr ('set', '');
     btnMIPPtr        ('set', '');
@@ -104,8 +114,8 @@ function initViewerGlobal()
     inputContours('set', '');
 
     mainDir     ('set', '');
-    roiTemplate ('set', '');
-    voiTemplate ('set', '');
+    roiTemplate ('reset');
+    voiTemplate ('reset');
 
     volObject('set', '');
     isoObject('set', '');
@@ -138,11 +148,16 @@ function initViewerGlobal()
     view3DPanel    ('set', false);
     viewSegPanel   ('set', false);
     viewKernelPanel('set', false);
+    viewRoiPanel('set', false);
+    
+    roiPanelMinValue('set', []);
+    roiPanelMaxValue('set', []);
 
     optionsPanelMenuObject   ('set', '');
     viewRoiObject            ('set', '');
     viewSegPanelMenuObject   ('set', '');
     viewKernelPanelMenuObject('set', '');
+    viewRoiPanelMenuObject   ('set', '');
     view3DPanelMenuObject    ('set', '');
     playIconMenuObject       ('set', '');
     recordIconMenuObject     ('set', '');
@@ -160,14 +175,6 @@ function initViewerGlobal()
     volColorObject('set', '');
 
     logoObject('set', '');
-
-    voiRoiSegObject('set', '');
-    voiRoiActObject('set', '');
-
-    chkVoiRoiSubstractObject       ('set', '');
-    editVoiRoiUpperTresholdObject  ('set', '');
-    sliderVoiRoiUpperTresholdObject('set', '');
-    txtVoiRoiUpperTresholdObject   ('set', '');
 
     ui3DVolumePtr('set', '');
 

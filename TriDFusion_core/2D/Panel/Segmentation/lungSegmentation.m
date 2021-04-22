@@ -30,16 +30,29 @@ function lungSegmentation(sPlane, dTreshold)
     if isempty(dicomBuffer('get'))
         return;
     end
+    
+    if switchTo3DMode('get')     == true ||  ...
+       switchToIsoSurface('get') == true || ...
+       switchToMIPMode('get')    == true
 
+        return;
+    end
+
+    try  
+        
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    drawnow;
+    
     tSegmentMetaData = dicomMetaData('get');   
 
     % Axial 
-    if strcmpi(sPlane, 'axial') ||  strcmpi(sPlane, 'all') 
+    if strcmpi(sPlane, 'Axial') ||  strcmpi(sPlane, 'All') 
 
         im = dicomBuffer('get');            
         imSingle = im2single(im);
         sizeOf = size(im);
-
+        mask = zeros(sizeOf);
+        
         for iAxial=1:sizeOf(3)               
 
             b = im(:,:,iAxial);   
@@ -64,18 +77,23 @@ function lungSegmentation(sPlane, dTreshold)
             b(c == 0) = cropValue('get')-c(c == 0); % crop outside                
             im(:,:,iAxial) = b;     
 
-            progressBar(iAxial / sizeOf(3), 'Computing lung segmentation axial plane');
+            if mod(iAxial,5)==1 || iAxial == sizeOf(3)         
+                progressBar(iAxial / sizeOf(3), sprintf('Computing lung segmentation axial plane %d/%d', iAxial, sizeOf(3)));
+            end
 
         end
 
         imPlane = im;
+        
+        clear mask;        
     end
 
-    if strcmpi(sPlane, 'coronal')  ||  strcmpi(sPlane, 'all') 
+    if strcmpi(sPlane, 'Coronal')  ||  strcmpi(sPlane, 'All') 
 
         im = dicomBuffer('get');            
         imSingle = im2single(im);
         sizeOf = size(im);
+        maskc = zeros(sizeOf);
 
         for iCoronal=1:sizeOf(1)               
 
@@ -94,31 +112,36 @@ function lungSegmentation(sPlane, dTreshold)
             maskedImageXY = XY;
             maskedImageXY(~BW) = 0;        
 
-            maskc(iCoronal,:,:) = maskedImageXY;
+            maskc(iCoronal,:,:) = permuteBuffer(maskedImageXY, 'coronal');
 
             c = maskc(iCoronal,:,:);
             b(c == 0) = cropValue('get')-c(c == 0); % crop outside                
             im(iCoronal,:,:) = permuteBuffer(b, 'coronal'); 
 
-            progressBar(iCoronal / sizeOf(1), 'Computing lung segmentation coronal plane');
+            if mod(iCoronal,5)==1 || iCoronal == sizeOf(1)         
+                progressBar(iCoronal / sizeOf(1), sprintf('Computing lung segmentation coronal plane %d/%d', iCoronal, sizeOf(1)));
+            end
 
         end
-
-        if strcmpi(sPlane, 'all') 
+                
+        if strcmpi(sPlane, 'All') 
             for idx = find(imPlane == cropValue('get'))
                 imPlane(idx) = im(idx);
             end
         else                    
             imPlane = imCoronalPlane;
         end
+        
+        clear maskc;
 
     end
 
-    if strcmpi(sPlane, 'sagittal')  ||  strcmpi(sPlane, 'all') 
+    if strcmpi(sPlane, 'Sagittal')  ||  strcmpi(sPlane, 'All') 
 
         im = dicomBuffer('get');            
         imSingle = im2single(im);
         sizeOf = size(im);
+        masks = zeros(sizeOf);
 
         for iSagittal=1:sizeOf(2)               
 
@@ -137,22 +160,26 @@ function lungSegmentation(sPlane, dTreshold)
             maskedImageXY = XY;
             maskedImageXY(~BW) = 0;        
 
-            masks(:,iSagittal,:) = maskedImageXY;
+            masks(:,iSagittal,:) = permuteBuffer(maskedImageXY, 'sagittal');
 
             c = masks(:,iSagittal,:);
             b(c == 0) = cropValue('get')-c(c == 0); % crop outside                
             im(:,iSagittal,:) = permuteBuffer(b, 'sagittal');             
 
-            progressBar(iSagittal / sizeOf(2), 'Computing lung segmentation sagittal plane');
+            if mod(iSagittal,5)==1 || iSagittal == sizeOf(2)         
+                progressBar(iSagittal / sizeOf(2), sprintf('Computing lung segmentation sagittal plane %d/%d', iSagittal, sizeOf(2)));
+            end
         end
 
-        if strcmpi(sPlane, 'all') 
+        if strcmpi(sPlane, 'All') 
             for idx = find(imPlane == cropValue('get'))
                 imPlane(idx) = im(idx);
             end  
         else
             imPlane = imSagittalPlane;
         end
+        
+        clear masks;
 
     end                        
 
@@ -164,5 +191,11 @@ function lungSegmentation(sPlane, dTreshold)
     setQuantification(iOffset);
 
     refreshImages();
+    
+    catch
+        progressBar(1, 'Error:lungSegmentation()');           
+    end
 
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    drawnow; 
 end        

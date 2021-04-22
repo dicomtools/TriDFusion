@@ -38,8 +38,8 @@ function adjWL(dInitCoord)
 
     dWLAdjCoe = (dMax + 1)/1024;
 
-    aPosDiff = get(0,'PointerLocation') - pdInitialCoord;
-    
+    aPosDiff = get(0, 'PointerLocation') - pdInitialCoord;
+               
     dMax = dMax + aPosDiff(2) * dWLAdjCoe;
     dMIn = dMIn + aPosDiff(1) * dWLAdjCoe;
 

@@ -32,7 +32,7 @@ function setVsplashCallback(~, ~)
     if isempty(im)
         return;
     end
-
+        
     iCoronalSize  = size(im,1);
     iSagittalSize = size(im,2);
     iAxialSize    = size(im,3);   
@@ -68,7 +68,13 @@ function setVsplashCallback(~, ~)
         clearDisplay();                    
         initDisplay(3);  
 
-        dicomViewerCore();                      
+        dicomViewerCore();  
+        
+        if isFusion('get') == false
+            set(btnFusionPtr('get')    , 'Enable', 'off');                          
+            set(uiFusedSeriesPtr('get'), 'Enable', 'off');                          
+        end
+        
 
     else
         isVsplash('set', false);      
@@ -80,7 +86,9 @@ function setVsplashCallback(~, ~)
         initDisplay(3);  
 
         dicomViewerCore();                   
-
+        
+        set(btnFusionPtr('get')    , 'Enable', 'on');                          
+        set(uiFusedSeriesPtr('get'), 'Enable', 'on');
     end
 
     % restore position

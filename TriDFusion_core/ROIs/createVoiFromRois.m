@@ -28,102 +28,58 @@ function createVoiFromRois(adTag, sVoiName)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     tInput = inputTemplate('get');
-    atMetaData = dicomMetaData('get');
-    
-    
+        
     iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
     if iSeriesOffset > numel(tInput)  
         return;
     end
-
-    if ~isempty(tInput(iSeriesOffset).tRoi)
-               
-       if isfield(tInput(iSeriesOffset), 'tVoi')
-            if isempty(tInput(iSeriesOffset).tVoi)
-                dVoiOffset = 1;                         
-            else
-                dVoiOffset = numel(tInput(iSeriesOffset).tVoi)+1; 
-            end
-
+    
+    atRoi = roiTemplate('get');    
+    if isempty(atRoi)
+        return;
+    end
+                       
+    if isfield(tInput(iSeriesOffset), 'tVoi')
+        if isempty(tInput(iSeriesOffset).tVoi)
+            dVoiOffset = 1;                         
         else
-            dVoiOffset = 1; 
-        end
-        
-        if exist('sVoiName', 'var')
-            tInput(iSeriesOffset).tVoi{dVoiOffset}.Label = sVoiName;
-        else
-            tInput(iSeriesOffset).tVoi{dVoiOffset}.Label = sprintf('VOI %d', dVoiOffset);
+            dVoiOffset = numel(tInput(iSeriesOffset).tVoi)+1; 
         end
 
-        dRoiNb = 0;
-        for bb=1:numel(adTag)
-            for cc=1:numel(tInput(iSeriesOffset).tRoi)
-                if isvalid(tInput(iSeriesOffset).tRoi{cc}.Object)
-                    if strcmpi(tInput(iSeriesOffset).tRoi{cc}.Tag, adTag{bb})                           
+    else
+        dVoiOffset = 1; 
+    end
 
-                        tInput(iSeriesOffset).tRoi{cc}.ObjectType  = 'voi-roi';
-                        tInput(iSeriesOffset).tVoi{dVoiOffset}.RoisTag{bb} = tInput(iSeriesOffset).tRoi{cc}.Tag; 
-                        tInput(iSeriesOffset).tVoi{dVoiOffset}.Tag = num2str(rand);
-                        tInput(iSeriesOffset).tVoi{dVoiOffset}.ObjectType = 'voi';
-                        tInput(iSeriesOffset).tVoi{dVoiOffset}.Color = tInput(iSeriesOffset).tRoi{cc}.Color;
+    if exist('sVoiName', 'var')
+        tInput(iSeriesOffset).tVoi{dVoiOffset}.Label = sVoiName;
+    else
+        tInput(iSeriesOffset).tVoi{dVoiOffset}.Label = sprintf('VOI %d', dVoiOffset);
+    end
 
-                        dRoiNb = dRoiNb+1;
-                        sLabel =  sprintf('%s (roi %d/%d)', tInput(iSeriesOffset).tVoi{dVoiOffset}.Label, dRoiNb, numel(adTag));
+    dRoiNb = 0;
+    for bb=1:numel(adTag)
+        for cc=1:numel(atRoi)
+            if isvalid(atRoi{cc}.Object)
+                if strcmpi(atRoi{cc}.Tag, adTag{bb})                           
 
-                        tInput(iSeriesOffset).tRoi{cc}.Label = sLabel;
-                        tInput(iSeriesOffset).tRoi{cc}.Object.Label = sLabel; 
-                    end
+                    atRoi{cc}.ObjectType  = 'voi-roi';
+                    tInput(iSeriesOffset).tRoi{cc}.ObjectType = atRoi{cc}.ObjectType;
+                    tInput(iSeriesOffset).tVoi{dVoiOffset}.RoisTag{bb} = atRoi{cc}.Tag; 
+                    tInput(iSeriesOffset).tVoi{dVoiOffset}.Tag = num2str(randi([-(2^52/2),(2^52/2)],1));
+                    tInput(iSeriesOffset).tVoi{dVoiOffset}.ObjectType = 'voi';
+                    tInput(iSeriesOffset).tVoi{dVoiOffset}.Color = atRoi{cc}.Color;
+
+                    dRoiNb = dRoiNb+1;
+                    sLabel =  sprintf('%s (roi %d/%d)', tInput(iSeriesOffset).tVoi{dVoiOffset}.Label, dRoiNb, numel(adTag));
+
+                    atRoi{cc}.Label = sLabel;
+                    atRoi{cc}.Object.Label = sLabel; 
                 end
             end
         end
-            
-        aDisplayBuffer = dicomBuffer('get');
-        aInput = inputBuffer('get');
-        
-        if isempty(atMetaData)
-            atMetaData = tInput(iSeriesOffset).atDicomInfo;
-        end
-        
-        if isempty(aDisplayBuffer)
-            if     strcmp(imageOrientation('get'), 'axial')
-                aDisplayBuffer = permute(aInput{iSeriesOffset}, [1 2 3]);
-            elseif strcmp(imageOrientation('get'), 'coronal') 
-                aDisplayBuffer = permute(aInput{iSeriesOffset}, [3 2 1]);    
-            elseif strcmp(imageOrientation('get'), 'sagittal')
-                aDisplayBuffer = permute(aInput{iSeriesOffset}, [3 1 2]);
-            end              
-        end
+    end
 
-        if     strcmp(imageOrientation('get'), 'axial')
-            aInputBuffer = permute(aInput{iSeriesOffset}, [1 2 3]);
-        elseif strcmp(imageOrientation('get'), 'coronal') 
-            aInputBuffer = permute(aInput{iSeriesOffset}, [3 2 1]);    
-        elseif strcmp(imageOrientation('get'), 'sagittal')
-            aInputBuffer = permute(aInput{iSeriesOffset}, [3 1 2]);
-        end   
-if 0
-        if numel(tInput(iSeriesOffset).asFilesList) ~= 1
-
-            if ~isempty(atMetaData{1}.ImagePositionPatient)
-
-                if atMetaData{2}.ImagePositionPatient(3) - ...
-                   atMetaData{1}.ImagePositionPatient(3) > 0
-                    aInputBuffer = aInputBuffer(:,:,end:-1:1);                   
-
-                end
-            end            
-        else
-            if strcmpi(atMetaData{1}.PatientPosition, 'FFS')
-                aInputBuffer = aInputBuffer(:,:,end:-1:1);                   
-            end
-        end  
-end                
-        [~, tVoiMask] = computeVoi(aInputBuffer, aDisplayBuffer, atMetaData, tInput(iSeriesOffset).tVoi{dVoiOffset}, tInput(iSeriesOffset).tRoi, 1, 1, 1);
-        tInput(iSeriesOffset).tVoi{dVoiOffset}.tMask = tVoiMask;
-
-    end            
-
-    roiTemplate('set', tInput(iSeriesOffset).tRoi);            
+    roiTemplate('set', atRoi);            
     voiTemplate('set', tInput(iSeriesOffset).tVoi);
 
     inputTemplate('set', tInput);            

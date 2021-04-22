@@ -30,7 +30,10 @@ function triangulateCallback(~, ~)
     if isempty(dicomBuffer('get'))
         return;
     end
-
+    
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');            
+    isMoveImageActivated('set', false);
+            
     if switchTo3DMode('get')     == false && ...
        switchToIsoSurface('get') == false && ...  
        switchToMIPMode('get')    == false

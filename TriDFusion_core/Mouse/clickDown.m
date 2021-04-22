@@ -27,6 +27,9 @@ function clickDown(hObject, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
+    fusedImageRotationValues('set', false);
+    fusedImageMovementValues('set', false);
+
     set(fiMainWindowPtr('get'), 'UserData', 'down');
 
     if switchTo3DMode('get')     == false && ...
@@ -44,9 +47,16 @@ function clickDown(hObject, ~)
            switchToIsoSurface('get') == false && ...
            switchToMIPMode('get')    == false          
 
-            windowButton('set', 'down');             
-            adjWL(get(0, 'PointerLocation'));
-            
+            windowButton('set', 'down');                         
+            if isMoveImageActivated('get') == true
+                
+                set(fiMainWindowPtr('get'), 'Pointer', 'circle');
+                
+                rotateFusedImage(true);
+            else
+                adjWL(get(0, 'PointerLocation'));
+            end
+
         else
             windowButton('set', 'down');                      
         end
@@ -60,8 +70,14 @@ function clickDown(hObject, ~)
                switchToMIPMode('get')    == false
 
                 windowButton('set', 'down');
-
-                triangulateImages();
+                if isMoveImageActivated('get') == true
+                    
+                    set(fiMainWindowPtr('get'), 'Pointer', 'fleur');
+     
+                    moveFusedImage(true, false);
+                else
+                    triangulateImages();
+                end
             else
                 windowButton('set', 'down');  
             end

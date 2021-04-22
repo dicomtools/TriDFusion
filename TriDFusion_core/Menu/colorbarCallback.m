@@ -50,6 +50,14 @@ function colorbarCallback(hObject, ~)
     set(d, 'tag', get(hObject, 'Tag'));
 
     uimenu(d,'Label','Edge Detection', 'Callback',@setColorbarEdgeDetection);
+    if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar') && isVsplash('get') == false
+        mMove = uimenu(d,'Label','Move Image', 'Callback',@setColorbarMoveImage);
+        if isMoveImageActivated('get') == true
+            set(mMove, 'Checked', true);
+        else
+            set(mMove, 'Checked', false);
+        end
+    end
 
     if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
         if numel(tEdgeInput) == 1
@@ -71,24 +79,26 @@ function colorbarCallback(hObject, ~)
         sModality = tEdgeInput(dEdgeOffset).atDicomInfo{1}.Modality;
  
     end
-
-    if strcmpi(sModality, 'CT')
-        e = uimenu(c,'Label','Window');
-        set(e, 'tag', get(hObject, 'Tag'));
+    
+    e = uimenu(c,'Label','Window');
+    set(e, 'tag', get(hObject, 'Tag'));
+    mSetWindow = uimenu(e,'Label','Manual Input', 'Callback',@setColorbarWindowLevel);
         
-        mF1 = uimenu(e,'Label','(F1) Lung'          , 'Callback',@setColorbarWindowLevel);
-        mF2 = uimenu(e,'Label','(F2) Soft'          , 'Callback',@setColorbarWindowLevel);
-        mF3 = uimenu(e,'Label','(F3) Bone'          , 'Callback',@setColorbarWindowLevel);
-        mF4 = uimenu(e,'Label','(F4) Liver'         , 'Callback',@setColorbarWindowLevel);
-        mF5 = uimenu(e,'Label','(F5) Brain'         , 'Callback',@setColorbarWindowLevel);
-        mF6 = uimenu(e,'Label','(F6) Head and Neck' , 'Callback',@setColorbarWindowLevel);
-        mF7 = uimenu(e,'Label','(F7) Enchanced Lung', 'Callback',@setColorbarWindowLevel);
-        mF8 = uimenu(e,'Label','(F8) Mediastinum'   , 'Callback',@setColorbarWindowLevel);
-        mF91 = uimenu(e,'Label','(F9) Temporal Bone', 'Callback',@setColorbarWindowLevel);
-        mF92 = uimenu(e,'Label','(F9) Vertebra'     , 'Callback',@setColorbarWindowLevel);
-        mF93 = uimenu(e,'Label','(F9) Scout CT'     , 'Callback',@setColorbarWindowLevel);
-        mF34 = uimenu(e,'Label','(F9) All'          , 'Callback',@setColorbarWindowLevel);
-        mCtm = uimenu(e,'Label','Custom'            , 'Enable', 'off','Callback',@setColorbarWindowLevel);
+    if strcmpi(sModality, 'CT')
+        
+        mF1 = uimenu(e,'Label','(F1) Lung'          , 'Callback',@setCTColorbarWindowLevel);
+        mF2 = uimenu(e,'Label','(F2) Soft'          , 'Callback',@setCTColorbarWindowLevel);
+        mF3 = uimenu(e,'Label','(F3) Bone'          , 'Callback',@setCTColorbarWindowLevel);
+        mF4 = uimenu(e,'Label','(F4) Liver'         , 'Callback',@setCTColorbarWindowLevel);
+        mF5 = uimenu(e,'Label','(F5) Brain'         , 'Callback',@setCTColorbarWindowLevel);
+        mF6 = uimenu(e,'Label','(F6) Head and Neck' , 'Callback',@setCTColorbarWindowLevel);
+        mF7 = uimenu(e,'Label','(F7) Enchanced Lung', 'Callback',@setCTColorbarWindowLevel);
+        mF8 = uimenu(e,'Label','(F8) Mediastinum'   , 'Callback',@setCTColorbarWindowLevel);
+        mF91 = uimenu(e,'Label','(F9) Temporal Bone', 'Callback',@setCTColorbarWindowLevel);
+        mF92 = uimenu(e,'Label','(F9) Vertebra'     , 'Callback',@setCTColorbarWindowLevel);
+        mF93 = uimenu(e,'Label','(F9) Scout CT'     , 'Callback',@setCTColorbarWindowLevel);
+        mF34 = uimenu(e,'Label','(F9) All'          , 'Callback',@setCTColorbarWindowLevel);
+        mCtm = uimenu(e,'Label','Custom'            , 'Enable', 'off','Callback',@setCTColorbarWindowLevel);
         
         if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
             dMax = fusionWindowLevel('get', 'max');
@@ -129,7 +139,7 @@ function colorbarCallback(hObject, ~)
             otherwise
                 set(mCtm, 'Checked', 'on');
         end       
-                
+        
     end
     
     uimenu(c,'Label','parula'       ,'Callback',@setColorOffset);
@@ -287,7 +297,7 @@ function colorbarCallback(hObject, ~)
                 sMethod = edgeSegMethod('get');
 
                 imf = fusionBuffer('get');
-                imBak{dFuseOffset} =imf;
+                imBak{dFuseOffset} = imf;
 
                 imEdge = getEdgeDetection(imf, sMethod, dFudgeFactor);
 
@@ -356,7 +366,288 @@ function colorbarCallback(hObject, ~)
         end
     end
 
-    function setColorbarWindowLevel(hObject, ~)
+    function setColorbarWindowLevel(hObject,~)
+        
+        tInput = inputTemplate('get');                
+
+        if strcmpi(get(get(hObject, 'Parent'), 'Tag'), 'Fusion Colorbar')
+            dMax = fusionWindowLevel('get', 'max');
+            dMin = fusionWindowLevel('get', 'min');
+            
+            dOffset = get(uiFusedSeriesPtr('get'), 'Value');
+        
+            sUnitDisplay = getSerieUnitValue(dOffset);            
+        else        
+            dMax = windowLevel('get', 'max');
+            dMin = windowLevel('get', 'min');
+            
+            dOffset = get(uiSeriesPtr('get'), 'Value');
+        
+            sUnitDisplay = getSerieUnitValue(dOffset);                        
+        end
+        
+                       
+        dlgWindowLevel = ...
+            dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-380/2) ...
+                                (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-165/2) ...
+                                380 ...
+                                165 ...
+                                ],...
+                  'Color', viewerBackgroundColor('get'), ...
+                  'Name', 'Set Window Level'...
+                   );      
+               
+    if strcmpi(sUnitDisplay, 'SUV') ||  strcmpi(sUnitDisplay, 'HU') 
+        if strcmpi(sUnitDisplay, 'HU') 
+            sUnitDisplay = 'Window Level';            
+            
+            [dWindow, dLevel] = computeWindowMinMax(dMax, dMin);
+        else
+            dMax = dMax*tInput(dOffset).tQuant.tSUV.dScale;
+            dMin = dMin*tInput(dOffset).tQuant.tSUV.dScale;
+                       
+        end
+        bUnitEnable = 'on';
+    else
+        bUnitEnable = 'off';
+    end
+    
+    sUnitType = sprintf('Unit in %s', sUnitDisplay);
+    
+    chkUnitType = ...
+        uicontrol(dlgWindowLevel,...
+                  'style'   , 'checkbox',...
+                  'enable'  , bUnitEnable,...
+                  'value'   , 1,...
+                  'position', [20 115 20 20],...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'Callback', @chkUnitTypeCallback...
+                  );
+
+    txtUnitType = ...
+         uicontrol(dlgWindowLevel,...
+                  'style'   , 'text',...
+                  'string'  , sUnitType,...
+                  'horizontalalignment', 'left',...
+                  'position', [40 112 200 20],...
+                  'Enable', 'Inactive',...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ButtonDownFcn', @chkUnitTypeCallback...
+                  );
+                                
+  if strcmpi(sUnitDisplay, 'Window Level')
+      sMaxDisplay = 'Window Value';
+      sMaxValue = num2str(dWindow);
+  else
+      sMaxDisplay = 'Max Value';
+      sMaxValue = num2str(dMax);
+  end
+  
+         uicontrol(dlgWindowLevel,...
+                  'style'   , 'text',...
+                  'string'  , sMaxDisplay,...
+                  'horizontalalignment', 'left',...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...                   
+                  'position', [20 87 150 20]...
+                  );
+              
+  edtMaxValue = ...
+      uicontrol(dlgWindowLevel,...
+                'style'     , 'edit',...
+                'Background', 'white',...
+                'string'    , sMaxValue,...
+                'BackgroundColor', viewerBackgroundColor('get'), ...
+                'ForegroundColor', viewerForegroundColor('get'), ...                 
+                'position'  , [200 90 150 20]...
+                );
+            
+  if strcmpi(sUnitDisplay, 'Window Level')
+      sMinDisplay = 'Level Value';
+      sMinValue = num2str(dLevel);
+  else
+      sMinDisplay = 'Min Value';
+      sMinValue = num2str(dMin);
+  end            
+         uicontrol(dlgWindowLevel,...
+                  'style'   , 'text',...
+                  'string'  , sMinDisplay,...
+                  'horizontalalignment', 'left',...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...                   
+                  'position', [20 62 150 20]...
+                  );
+
+  edtMinValue = ...
+      uicontrol(dlgWindowLevel,...
+                'style'     , 'edit',...
+                'Background', 'white',...
+                'string'    , sMinValue,...
+                'BackgroundColor', viewerBackgroundColor('get'), ...
+                'ForegroundColor', viewerForegroundColor('get'), ...                 
+                'position'  , [200 65 150 20]...
+                );
+            
+     % Cancel or Proceed
+
+     uicontrol(dlgWindowLevel,...
+               'String','Cancel',...
+               'Position',[285 7 75 25],...
+               'BackgroundColor', viewerBackgroundColor('get'), ...
+               'ForegroundColor', viewerForegroundColor('get'), ...                
+               'Callback', @cancelWindowLCallback...
+               );
+
+     uicontrol(dlgWindowLevel,...
+              'String','Proceed',...
+              'Position',[200 7 75 25],...
+              'BackgroundColor', viewerBackgroundColor('get'), ...
+              'ForegroundColor', viewerForegroundColor('get'), ...               
+              'Callback', @proceedWindowLCallback...
+              );               
+               
+          
+        function chkUnitTypeCallback(hChkObject, ~)            
+            
+            if strcmpi(get(chkUnitType, 'Enable'), 'off')
+                return;
+            end
+            
+            if strcmpi(get(hChkObject, 'Style'), 'text')
+                if get(chkUnitType, 'Value') == true
+
+                    set(chkUnitType, 'Value', false);
+                    
+                else
+                    set(chkUnitType, 'Value', true);                  
+                end
+            end 
+            
+            if  get(chkUnitType, 'Value') == false               
+                if strcmpi(sUnitDisplay, 'SUV')
+                    sUnitDisplay = 'BQML';
+                else
+                    sUnitDisplay = 'HU';
+                end            
+            else
+                if strcmpi(sUnitDisplay, 'BQML')
+                    sUnitDisplay = 'SUV';
+                else
+                    sUnitDisplay = 'Window Level';
+                end             
+            end
+            
+            sUnitType = sprintf('Unit in %s', sUnitDisplay);
+                                            
+            set(txtUnitType, 'String', sUnitType);            
+            
+            if strcmpi(get(get(hObject, 'Parent'), 'Tag'), 'Fusion Colorbar')
+                dMaxValue = fusionWindowLevel('get', 'max');
+                dMinValue = fusionWindowLevel('get', 'min');  
+            else
+                dMaxValue = windowLevel('get', 'max');
+                dMinValue = windowLevel('get', 'min');                  
+            end
+            
+            switch (sUnitDisplay)
+                case 'Window Level'
+                    
+                    [dWindow, dLevel] = computeWindowMinMax(dMaxValue, dMinValue);
+                    
+                    sMinValue = num2str(dLevel);
+                    sMaxValue = num2str(dWindow);
+                    
+                case 'HU'
+                                        
+                    sMinValue = num2str(dMinValue);
+                    sMaxValue = num2str(dMaxValue);                  
+                    
+                case 'SUV'
+                    sMinValue = dMinValue*tInput(dOffset).tQuant.tSUV.dScale;
+                    sMaxValue = dMaxValue*tInput(dOffset).tQuant.tSUV.dScale;
+                    
+                case 'BQML'
+                    sMinValue = num2str(dMinValue);
+                    sMaxValue = num2str(dMaxValue);                     
+            end
+            
+            set(edtMinValue, 'String', sMinValue);           
+            set(edtMaxValue, 'String', sMaxValue);           
+                        
+        end
+            
+        function cancelWindowLCallback(~, ~)               
+            delete(dlgWindowLevel)
+        end
+        
+        function proceedWindowLCallback(~, ~)     
+            
+            lMax = str2double(get(edtMaxValue, 'String'));
+            lMin = str2double(get(edtMinValue, 'String'));
+            
+            if strcmpi(sUnitDisplay, 'SUV') 
+                lMin = lMin/tInput(dOffset).tQuant.tSUV.dScale;
+                lMax = lMax/tInput(dOffset).tQuant.tSUV.dScale;
+            end
+                
+            if strcmpi(sUnitDisplay, 'Window Level') 
+                [lMax, lMin] = computeWindowLevel(lMax, lMin);
+            end
+                    
+            if strcmpi(get(get(hObject, 'Parent'), 'Tag'), 'Fusion Colorbar')
+                
+                fusionWindowLevel('set', 'max', lMax);
+                fusionWindowLevel('set', 'min' ,lMin);
+
+                set(uiFusionSliderWindowPtr('get'), 'value', 0.5);
+                set(uiFusionSliderLevelPtr('get') , 'value', 0.5);
+
+                if switchTo3DMode('get')     == false && ...
+                   switchToIsoSurface('get') == false && ...
+                   switchToMIPMode('get')    == false
+
+                    if size(dicomBuffer('get'), 3) == 1            
+                        set(axefPtr('get'), 'CLim', [lMin lMax]);
+                    else
+                        set(axes1fPtr('get'), 'CLim', [lMin lMax]);
+                        set(axes2fPtr('get'), 'CLim', [lMin lMax]);
+                        set(axes3fPtr('get'), 'CLim', [lMin lMax]);
+                    end
+
+                    refreshImages();
+                end                 
+            else    
+                    
+                windowLevel('set', 'max', lMax);
+                windowLevel('set', 'min' ,lMin);
+
+                set(uiSliderWindowPtr('get'), 'value', 0.5);
+                set(uiSliderLevelPtr('get') , 'value', 0.5);
+
+                if switchTo3DMode('get')     == false && ...
+                   switchToIsoSurface('get') == false && ...
+                   switchToMIPMode('get')    == false
+
+                    if size(dicomBuffer('get'), 3) == 1            
+                        set(axePtr('get'), 'CLim', [lMin lMax]);
+                    else
+                        set(axes1Ptr('get'), 'CLim', [lMin lMax]);
+                        set(axes2Ptr('get'), 'CLim', [lMin lMax]);
+                        set(axes3Ptr('get'), 'CLim', [lMin lMax]);
+                    end
+
+                    refreshImages();
+                end              
+            end
+            
+            delete(dlgWindowLevel)
+        end
+        
+    end
+
+    function setCTColorbarWindowLevel(hObject, ~)
         
         switch lower(get(hObject, 'Label'))
             case lower('(F1) Lung')
@@ -413,5 +704,24 @@ function colorbarCallback(hObject, ~)
         end              
         
     end
+
+    function setColorbarMoveImage(~, ~)
+      %  set(gcf,'Pointer','watch');
+      %  set(gcf,'Pointer','circle');
+        
+        if isMoveImageActivated('get') == false
+            
+            set(fiMainWindowPtr('get'), 'Pointer', 'fleur');           
+            
+            isMoveImageActivated('set', true);
+            
+        else
+            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            
+            isMoveImageActivated('set', false);
+        end
+             
+    end
+
 
 end

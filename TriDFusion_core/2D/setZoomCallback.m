@@ -30,7 +30,10 @@ function setZoomCallback(~, ~)
     if isempty(dicomBuffer('get'))
         return;
     end     
-
+    
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');            
+    isMoveImageActivated('set', false);
+    
     releaseRoiWait();
 
     if zoomTool('get')

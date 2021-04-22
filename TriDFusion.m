@@ -214,7 +214,7 @@ function TriDFusion(varargin)
     waitfor(fiMainWindowPtr('get'), 'WindowState', 'maximized');
     
     resizeViewer = dicomViewer(); 
-    
+            
     setContours();
     
  %   refreshImages();
@@ -237,8 +237,7 @@ function TriDFusion(varargin)
             setMIPCallback();
         end        
     end                    
-    
-    
+        
     function resizeFigureCallback(~,~)
         if exist('resizeViewer', 'var')
             resizeViewer();

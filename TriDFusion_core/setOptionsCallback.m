@@ -29,7 +29,7 @@ function setOptionsCallback(~, ~)
 
     dlgOptions = ...
         dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-380/2) ...
-                            (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-240/2) ...
+                            (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-280/2) ...
                             380 ...
                             280 ...
                             ],...
@@ -919,7 +919,17 @@ function setOptionsCallback(~, ~)
                     objKernelPanel.Checked = 'off';
                 end
             end
-
+            
+            bInitRoiPanel = false;
+            if  viewRoiPanel('get') == true
+                bInitRoiPanel = true;
+                viewRoiPanel('set', false);
+                objRoiPanel = viewRoiPanelMenuObject('get');
+                if ~isempty(objRoiPanel)
+                    objRoiPanel.Checked = 'off';
+                end
+            end
+            
  %            triangulateCallback();
 
              clearDisplay();
@@ -934,6 +944,10 @@ function setOptionsCallback(~, ~)
              if bInitKernelPanel == true
                 setViewKernelPanel();
              end
+             
+             if bInitRoiPanel == true
+                setViewRoiPanel();
+             end             
          end
 
 %        if bRefreshImages == true

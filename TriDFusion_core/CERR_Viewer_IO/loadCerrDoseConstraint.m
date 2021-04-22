@@ -30,6 +30,28 @@ function loadCerrDoseConstraint(planC, structNamC)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');            
+    drawnow;
+    
+    set(uiSeriesPtr('get'), 'Value' , 1);
+    
+    copyRoiPtr('set', '');
+    
+    isMoveImageActivated('set', false);
+
+    releaseRoiWait();
+    
+    dicomMetaData('reset');            
+    dicomBuffer  ('reset');
+    fusionBuffer ('reset');
+    inputBuffer  ('set', '');
+
+    inputTemplate('set', '');
+    inputContours('set', '');
+
+    roiTemplate ('reset');
+    voiTemplate ('reset');
+    
     progressBar(0.3, 'Set Matching Index');
 
     indexS = planC{end};
@@ -300,10 +322,20 @@ function loadCerrDoseConstraint(planC, structNamC)
         ui3DGateWindowObject('set', '');
     end
 
+    uiSegMainPanel = uiSegMainPanelPtr('get');
+    if ~isempty(uiSegMainPanel)
+        set(uiSegMainPanel, 'Visible', 'off');
+    end
+
     viewSegPanel('set', false);
     objSegPanel = viewSegPanelMenuObject('get');
     if ~isempty(objSegPanel)
         objSegPanel.Checked = 'off';
+    end
+
+    uiKernelMainPanel = uiKernelMainPanelPtr('get');
+    if ~isempty(uiKernelMainPanel)
+        set(uiKernelMainPanel, 'Visible', 'off');
     end
 
     viewKernelPanel('set', false);
@@ -312,6 +344,17 @@ function loadCerrDoseConstraint(planC, structNamC)
         objKernelPanel.Checked = 'off';
     end
 
+    uiRoiMainPanel = uiRoiMainPanelPtr('get');
+    if ~isempty(uiRoiMainPanel)
+        set(uiRoiMainPanel, 'Visible', 'off');
+    end
+
+    viewRoiPanel('set', false);
+    objRoiPanel = viewRoiPanelMenuObject('get');
+    if ~isempty(objRoiPanel)
+        objRoiPanel.Checked = 'off';
+    end
+        
     view3DPanel('set', false);
     init3DPanel('set', true);
 
@@ -366,8 +409,6 @@ function loadCerrDoseConstraint(planC, structNamC)
     switchTo3DMode    ('set', false);
     switchToIsoSurface('set', false);
     switchToMIPMode   ('set', false);
-
-    rotate3d off
 
     set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
@@ -464,8 +505,6 @@ function loadCerrDoseConstraint(planC, structNamC)
     setPlaybackToolbar('on');
     setRoiToolbar('on');
 
-    hold on;
-
     set(uiCorWindowPtr('get'), 'Visible', 'off');
     set(uiSagWindowPtr('get'), 'Visible', 'off');
     set(uiTraWindowPtr('get'), 'Visible', 'off');
@@ -476,7 +515,7 @@ function loadCerrDoseConstraint(planC, structNamC)
     set(uiSliderCorPtr('get'), 'Visible', 'off');
     set(uiSliderSagPtr('get'), 'Visible', 'off');
     set(uiSliderTraPtr('get'), 'Visible', 'off');
-
+    
 %    for mm=1:numel(strMaskC)
 %        progressBar(0.7+(0.299999*mm/numel(strMaskC)), sprintf('Processing VOI %d/%d', mm, numel(strMaskC)));
 %
@@ -501,9 +540,10 @@ function loadCerrDoseConstraint(planC, structNamC)
     set(uiSliderCorPtr('get'), 'Visible', 'on');
     set(uiSliderSagPtr('get'), 'Visible', 'on');
     set(uiSliderTraPtr('get'), 'Visible', 'on');
-
-    hold off;
-
+    
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');            
+    drawnow;
+    
     refreshImages();
 
     progressBar(1, 'Ready');

@@ -28,19 +28,15 @@ function clearWaypointsCallback(hObject,~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
     hObject.UserData.Waypoints(:) = false;
+            
+    atRoi = roiTemplate('get');
 
-    tClearWaypointsInput = inputTemplate('get');        
-    iOffset = get(uiSeriesPtr('get'), 'Value');
-    if iOffset > numel(tClearWaypointsInput)  
-        return;
-    end
-
-    for bb=1:numel(tClearWaypointsInput(iOffset).tRoi)
-        if strcmpi(hObject.UserData.Tag, tClearWaypointsInput(iOffset).tRoi{bb}.Tag)
-            if strcmpi(hObject.UserData.Type, 'images.roi.freehand')                        
-                tClearWaypointsInput(iOffset).tRoi{bb}.Waypoints = hObject.UserData.Waypoints;
-                inputTemplate('set', tClearWaypointsInput);
-                roiTemplate('set', tClearWaypointsInput(iOffset).tRoi);
+    for bb=1:numel(atRoi)
+        if strcmpi(hObject.UserData.Tag,atRoi{bb}.Tag)
+            if strcmpi(hObject.UserData.Type, 'images.roi.freehand')     
+                
+                atRoi{bb}.Waypoints = hObject.UserData.Waypoints;
+                roiTemplate('set', atRoi);
                 break;
             end
         end

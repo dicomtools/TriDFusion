@@ -32,6 +32,18 @@ function lungSegmentationPreview(dTreshold)
         return;
     end
 
+    if switchTo3DMode('get')     == true ||  ...
+       switchToIsoSurface('get') == true || ...
+       switchToMIPMode('get')    == true
+
+        return;
+    end
+
+    try  
+    
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    drawnow;
+        
     progressBar(1 / 3, 'Computing axial preview');
 
     tSegmentMetaData = dicomMetaData('get');   
@@ -134,5 +146,11 @@ function lungSegmentationPreview(dTreshold)
     imSagittal.CData = permute(im(:,iSagittal,:), [3 1 2]);
 
     progressBar(1, 'Ready');
+    
+    catch
+        progressBar(1, 'Error:lungSegmentationPreview()');           
+    end
 
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    drawnow; 
 end

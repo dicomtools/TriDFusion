@@ -28,8 +28,11 @@ function initTemplates()
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     asMainDirectory = mainDir('get');
-    if(numel(asMainDirectory))
-
+    if(numel(asMainDirectory))        
+        try
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;               
+            
         dNbEntry = 1;
         for dDirLoop=1: numel(asMainDirectory)
          %   datasets = folderInfo4che3(asMainDir{ii}, true);
@@ -174,6 +177,9 @@ function initTemplates()
             setQuantification();
             
         else
+            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            drawnow;              
+            
             progressBar(1 , 'Error: TriDFusion: no volumes detected!');
             h = msgbox('Error: TriDFusion(): no volumes detected!', 'Error');
 %            if integrateToBrowser('get') == true
@@ -186,5 +192,12 @@ function initTemplates()
 %            javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
             return;
         end
+        
+        catch
+            progressBar(1, 'Error:initTemplates()');          
+        end  
+        
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;           
     end
 end

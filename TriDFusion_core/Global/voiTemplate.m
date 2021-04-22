@@ -1,5 +1,5 @@
-function tVoi = voiTemplate(sAction, tValue)
-%function tVoi = voiTemplate(sAction, tValue)
+function atVoi = voiTemplate(sAction, tValue)
+%function atVoi = voiTemplate(sAction, tValue)
 %Get\Set VOI Template.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -30,11 +30,28 @@ function tVoi = voiTemplate(sAction, tValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent ptVoi; 
-
-    if strcmpi('set', sAction)
-        ptVoi = tValue;            
+    persistent patVoi;  
+    
+    uiSeries = uiSeriesPtr('get');
+    
+    if ~isempty(uiSeries)
+        iOffset = get(uiSeries, 'Value');
+    else
+        iOffset = 1;
     end
 
-    tVoi = ptVoi;    
+    if strcmpi('set', sAction)
+        patVoi{iOffset} = tValue; 
+    elseif strcmpi('reset', sAction)    
+        for aa=1:numel(patVoi)
+            patVoi{aa} = [];
+        end
+    end
+
+    if numel(patVoi) < iOffset
+        atVoi = '';
+    else
+        atVoi = patVoi{iOffset};
+    end    
+    
 end  

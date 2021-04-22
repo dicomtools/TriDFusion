@@ -341,8 +341,20 @@ function setViewSegPanel(~, ~)
             if ~isempty(objKernelPanel)
                 objKernelPanel.Checked = 'off';
             end  
+            
+            uiRoiMainPanel = uiRoiMainPanelPtr('get');
+             if ~isempty(uiRoiMainPanel)
+                uiRoiMainPanel.Visible = 'off'; 
+            end
 
-            viewSegPanel('set', true);
+            objRoiPanel = viewRoiPanelMenuObject('get');
+            if ~isempty(objRoiPanel)
+                objRoiPanel.Checked = 'off';
+            end  
+            
+            viewRoiPanel   ('set', false);            
+            viewKernelPanel('set', false);           
+            viewSegPanel   ('set', true);
 
             hObject.Checked = 'on';
 

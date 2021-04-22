@@ -28,7 +28,7 @@ function initSegPanel()
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     if isempty(dicomBuffer('get'))
-         sEnable = 'on';
+         return;
     else
         if size(dicomBuffer('get'), 3) == 1
             sEnable = 'off';
@@ -41,7 +41,7 @@ function initSegPanel()
 
         uicontrol(uiSegPanelPtr('get'),...
                   'String','Reset',...
-                  'Position',[15 600 100 25],...
+                  'Position',[15 625 100 25],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @resetSegmentationCallback...
@@ -56,7 +56,7 @@ function initSegPanel()
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [15 550 250 20]...
+                  'position', [15 575 250 20]...
                   );
 
 
@@ -66,13 +66,13 @@ function initSegPanel()
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [15 525 200 20]...
+                  'position', [15 550 200 20]...
                   );
 
     uiSliderFudgeFactor = ...
         uicontrol(uiSegPanelPtr('get'), ...
                   'Style'   , 'Slider', ...
-                  'Position', [15 510 175 14], ...
+                  'Position', [15 535 175 14], ...
                   'Value'   , fudgeFactorSegValue('get'), ...
                   'Enable'  , 'on', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -85,7 +85,7 @@ function initSegPanel()
     uiFudgeFactorValue = ...
         uicontrol(uiSegPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
-                  'Position', [195 510 65 20], ...
+                  'Position', [195 535 65 20], ...
                   'String'  , num2str(fudgeFactorSegValue('get')), ...
                   'Enable'  , 'on', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -95,7 +95,7 @@ function initSegPanel()
 
         uicontrol(uiSegPanelPtr('get'),...
                   'String'  , 'Segment',...
-                  'Position', [160 470 100 25],...
+                  'Position', [160 495 100 25],...
                   'Enable'  , 'on', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
@@ -108,7 +108,7 @@ function initSegPanel()
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [15 470 60 20]...
+                  'position', [15 495 60 20]...
                   );
 
     aEdgeMethod = {'Sobel', 'Prewitt', 'Canny', 'Approxcanny'};
@@ -130,7 +130,7 @@ function initSegPanel()
     uiEdgeMethod = ...
         uicontrol(uiSegPanelPtr('get'), ...
                   'Style'   , 'popup', ...
-                  'position'  , [70 473 85 20],...
+                  'position'  , [70 498 85 20],...
                   'String'  , aEdgeMethod, ...
                   'Value'   , dEdgeMethod,...
                   'Enable'  , 'on', ...
@@ -140,7 +140,7 @@ function initSegPanel()
                   );
 
     % Image segmentation
-
+    
         uicontrol(uiSegPanelPtr('get'),...
                   'style'   , 'text',...
                   'FontWeight', 'bold',...
@@ -148,8 +148,47 @@ function initSegPanel()
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [15 420 200 20]...
+                  'position', [15 445 200 20]...
                   );
+          
+    sUnitDisplay = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));                        
+
+    if strcmpi(sUnitDisplay, 'SUV') ||  strcmpi(sUnitDisplay, 'HU') 
+        bUnitEnable = 'on';
+    else
+        bUnitEnable = 'off';
+    end    
+    
+    if strcmpi(sUnitDisplay, 'HU')
+        bChkValue = false;
+    else
+        bChkValue = true;       
+    end
+    
+    sUnitType = sprintf('Unit in %s', sUnitDisplay);
+    
+    chkUnitTypeVoiRoi = ...
+        uicontrol(uiSegPanelPtr('get'),...
+                  'style'   , 'checkbox',...
+                  'enable'  , bUnitEnable,...
+                  'value'   , bChkValue,...
+                  'position', [20 420 20 20],...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'Callback', @chkUnitTypeVoiRoiCallback...
+                  );
+
+    txtUnitTypeVoiRoi = ...
+         uicontrol(uiSegPanelPtr('get'),...
+                  'style'   , 'text',...
+                  'string'  , sUnitType,...
+                  'horizontalalignment', 'left',...
+                  'position', [40 417 200 20],...
+                  'Enable', 'Inactive',...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ButtonDownFcn', @chkUnitTypeVoiRoiCallback...
+                  );              
 
     chkClipVoiRoi = ...
         uicontrol(uiSegPanelPtr('get'),...
@@ -262,14 +301,37 @@ function initSegPanel()
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @sliderImageUpperTreshCallback ...
                   );
-    addlistener(uiSliderImageUpperTreshold,'Value','PreSet',@sliderImageUpperTreshCallback);
+    lstSliderImageUpperTresh = addlistener(uiSliderImageUpperTreshold,'Value','PreSet',@sliderImageUpperTreshCallback);
     sliderVoiRoiUpperTresholdObject('set', uiSliderImageUpperTreshold);
-
+        
+    tQuant = quantificationTemplate('get');                                
+        
+    dUpperValue = imageSegEditValue('get', 'upper');
+    dLowerValue = imageSegEditValue('get', 'lower');
+    if strcmpi(sUnitDisplay, 'SUV') ||  strcmpi(sUnitDisplay, 'Window Level') 
+         if strcmpi(sUnitDisplay, 'Window Level') 
+            
+             [dCTWindow, dCTLevel] = computeWindowMinMax(dUpperValue, dLowerValue);
+             dUpperValue = dCTWindow;
+             dLowerValue = dCTLevel;
+         else
+             dUpperValue = dUpperValue*tQuant.tSUV.dScale;
+             dLowerValue = dLowerValue*tQuant.tSUV.dScale;
+                       
+         end
+         
+         imageSegEditValue('set', 'upper', dUpperValue);
+         imageSegEditValue('set', 'lower', dLowerValue);
+    end
+    
+    dInitUpperValue = imageSegEditValue('get', 'upper');
+    dInitLowerValue = imageSegEditValue('get', 'lower');
+    
     uiEditImageUpperTreshold = ...
         uicontrol(uiSegPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
                   'Position', [195 290 65 20], ...
-                  'String'  , imageSegEditValue('get', 'upper'), ...
+                  'String'  , num2str(dUpperValue), ...
                   'Enable'  , 'on', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
@@ -336,13 +398,13 @@ function initSegPanel()
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @sliderImageLowerTreshCallback ...
                   );
-    addlistener(uiSliderImageLowerTreshold,'Value','PreSet',@sliderImageLowerTreshCallback);
+    lstSliderImageLowerTresh = addlistener(uiSliderImageLowerTreshold,'Value','PreSet',@sliderImageLowerTreshCallback);
 
     uiEditImageLowerTreshold = ...
         uicontrol(uiSegPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
                   'Position', [195 215 65 20], ...
-                  'String'  , imageSegEditValue('get', 'lower'), ...
+                  'String'  ,  num2str(dLowerValue), ...
                   'Enable'  , 'on', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
@@ -469,11 +531,12 @@ function initSegPanel()
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @proceedLungSegCallback...
                   );
+              
      uiLungPlane = ...
         uicontrol(uiSegPanelPtr('get'), ...
                   'Style'   , 'popup', ...
                   'position'  , [70 33 85 20],...
-                  'String'  , {'axial', 'coronal', 'sagittal', 'all'}, ...
+                  'String'  , {'Axial', 'Coronal', 'Sagittal', 'All'}, ...
                   'Value'   , 4,...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
@@ -488,6 +551,88 @@ function initSegPanel()
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [15 30 35 20]...
                   );
+              
+    function chkUnitTypeVoiRoiCallback(hObject, ~)
+        
+            if strcmpi(get(chkUnitTypeVoiRoi, 'Enable'), 'off')
+                return;
+            end
+            
+            if strcmpi(get(hObject, 'Style'), 'text')
+                if get(chkUnitTypeVoiRoi, 'Value') == true
+
+                    set(chkUnitTypeVoiRoi, 'Value', false);
+                    
+                else
+                    set(chkUnitTypeVoiRoi, 'Value', true);                  
+                end
+            end 
+            
+            if  get(chkUnitTypeVoiRoi, 'Value') == false               
+                if strcmpi(sUnitDisplay, 'SUV')
+                    sUnitDisplay = 'BQML';
+                else
+                    sUnitDisplay = 'HU';
+                end            
+            else
+                if strcmpi(sUnitDisplay, 'BQML')
+                    sUnitDisplay = 'SUV';
+                else
+                    sUnitDisplay = 'Window Level';
+                end             
+            end
+          
+            sUnitType = sprintf('Unit in %s', sUnitDisplay);
+                                            
+            set(txtUnitTypeVoiRoi, 'String', sUnitType);            
+            
+            dLowerValue = imageSegEditValue('get', 'lower');                            
+            dUpperValue = imageSegEditValue('get', 'upper');
+            
+            switch (sUnitDisplay)
+                case 'Window Level'
+                    
+                    [dWindow, dLevel] = computeWindowMinMax(dUpperValue, dLowerValue);
+                    
+                    dLowerValue = dLevel;
+                    dUpperValue = dWindow;
+                    
+                    [dInitWindow, dInitLevel] = computeWindowMinMax(dInitUpperValue, dInitLowerValue);
+
+                    dInitLowerValue = dInitLevel;
+                    dInitUpperValue = dInitWindow;
+                    
+                case 'HU'
+                   [dUpperValue, dLowerValue] = computeWindowLevel(dUpperValue, dLowerValue);
+                   [dInitUpperValue, dInitLowerValue] = computeWindowLevel(dInitUpperValue, dInitLowerValue);
+                                    
+                    
+                case 'SUV'
+                    tQuant = quantificationTemplate('get');                                
+
+                    dLowerValue = dLowerValue*tQuant.tSUV.dScale;
+                    dUpperValue = dUpperValue*tQuant.tSUV.dScale;
+                    
+                    dInitLowerValue = dInitLowerValue*tQuant.tSUV.dScale;
+                    dInitUpperValue = dInitUpperValue*tQuant.tSUV.dScale;                   
+                case 'BQML'
+                    
+                    tQuant = quantificationTemplate('get');                                
+
+                    dLowerValue = dLowerValue/tQuant.tSUV.dScale;
+                    dUpperValue = dUpperValue/tQuant.tSUV.dScale;     
+                    
+                    dInitLowerValue = dInitLowerValue/tQuant.tSUV.dScale;
+                    dInitUpperValue = dInitUpperValue/tQuant.tSUV.dScale;                      
+            end
+            
+            set(uiEditImageLowerTreshold, 'String', num2str(dLowerValue));           
+            set(uiEditImageUpperTreshold, 'String', num2str(dUpperValue));           
+            
+            imageSegEditValue('set', 'lower', dLowerValue);                            
+            imageSegEditValue('set', 'upper', dUpperValue);
+            
+    end
 
     function uiUpperCropValueCallback(hObject, ~)
         dValue = str2double(get(hObject, 'string'));
@@ -629,18 +774,10 @@ function initSegPanel()
     end
 
     function sliderImageUpperTreshCallback(~, ~)
-
-        tQuant = quantificationTemplate('get');
-        if isempty(tQuant)
-            return;
-        end
-
-%        dMin = tQuant.tCount.dMin;
-%        dMax = tQuant.tCount.dMax;
-
-        dMin = imageSegEditValue('get', 'lower');
-        dMax = imageSegEditValue('get', 'upper');
-
+        
+        dMax = dInitUpperValue;
+        dMin = dInitLowerValue; 
+        
         dQuantDifference = dMax - dMin;
         dWindow = dQuantDifference /2;
 
@@ -648,22 +785,16 @@ function initSegPanel()
 
         set(uiEditImageUpperTreshold, 'String', num2str(dUpper));
 
+        imageSegEditValue('set', 'upper', dUpper);
+                
         editImageTreshold();
 
     end
 
     function sliderImageLowerTreshCallback(~, ~)
 
-        tQuant = quantificationTemplate('get');
-        if isempty(tQuant)
-            return;
-        end
-
-%        dMin = tQuant.tCount.dMin;
-%        dMax = tQuant.tCount.dMax;
-
-        dMin = imageSegEditValue('get', 'lower');
-        dMax = imageSegEditValue('get', 'upper');
+        dMax = dInitUpperValue;
+        dMin = dInitLowerValue;   
 
         dQuantDifference = dMax - dMin;
         dWindow = dQuantDifference /2;
@@ -671,23 +802,41 @@ function initSegPanel()
         dLower = dMin + ((dWindow * get(uiSliderImageLowerTreshold, 'Value') ) / str2double(get(edtCoefficient, 'String')));
 
         set(uiEditImageLowerTreshold, 'String', num2str(dLower));
+        
+        imageSegEditValue('set', 'lower', dLower);
 
         editImageTreshold();
     end
 
     function editImageUpperTreshCallback(hObject, ~)
-
-        editImageTreshold();
+        
+        delete(lstSliderImageUpperTresh);
+        
+        set(uiSliderImageUpperTreshold, 'Value', 1);
+        
+        dInitUpperValue = str2double(get(hObject, 'String'));
 
         imageSegEditValue('set', 'upper', str2double(get(hObject, 'String')));
+
+        editImageTreshold();
+        
+        lstSliderImageUpperTresh = addlistener(uiSliderImageUpperTreshold,'Value','PreSet',@sliderImageUpperTreshCallback);
 
     end
 
     function editImageLowerTreshCallback(hObject, ~)
+        
+        delete(lstSliderImageLowerTresh);
+        
+        set(uiSliderImageLowerTreshold, 'Value', 0);
+        
+        dInitLowerValue = str2double(get(hObject, 'String'));
+        
+        imageSegEditValue('set', 'lower', str2double(get(hObject, 'String')));
 
         editImageTreshold();
-
-        imageSegEditValue('set', 'lower', str2double(get(hObject, 'String')));
+        
+        lstSliderImageLowerTresh = addlistener(uiSliderImageLowerTreshold,'Value','PreSet',@sliderImageLowerTreshCallback);
 
     end
 
@@ -697,7 +846,19 @@ function initSegPanel()
         if isempty(im)
             return;
         end
+        
+        if switchTo3DMode('get')     == true ||  ...
+           switchToIsoSurface('get') == true || ...
+           switchToMIPMode('get')    == true
 
+            return;
+        end
+        
+        try   
+            
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+        
         aobjList = '';
 
         tRoiInput = roiTemplate('get');
@@ -716,7 +877,25 @@ function initSegPanel()
                 end
             end
         end
+        
+        dLowerTreshold = imageSegEditValue('get', 'lower');
+        dUpperTreshold = imageSegEditValue('get', 'upper');
+        switch (sUnitDisplay)
+            case 'Window Level'
 
+                [dUpperTreshold, dLowerTreshold] = computeWindowLevel(dUpperTreshold, dLowerTreshold);
+
+            case 'HU'              
+
+            case 'SUV'
+                tQuant = quantificationTemplate('get');                                
+
+                dLowerTreshold = dLowerTreshold/tQuant.tSUV.dScale;
+                dUpperTreshold = dUpperTreshold/tQuant.tSUV.dScale;
+
+            case 'BQML'                  
+        end
+            
         if size(im, 3) == 1
 
             imAxe = imAxePtr('get');
@@ -724,15 +903,15 @@ function initSegPanel()
             if strcmpi(uiSegAction.String{uiSegAction.Value}, 'Entire Image')
 
                 if useCropEditValue('get', 'upper') == true
-                    im(im  > str2double(get(uiEditImageUpperTreshold, 'String'))) = imageCropEditValue('get', 'upper');
+                    im(im  > dUpperTreshold) = imageCropEditValue('get', 'upper');
                 else
-                    im(im  > str2double(get(uiEditImageUpperTreshold, 'String'))) = cropValue('get');
+                    im(im  > dUpperTreshold) = cropValue('get');
                 end
 
                 if useCropEditValue('get', 'lower') == true
-                    im(im  < str2double(get(uiEditImageLowerTreshold, 'String'))) = imageCropEditValue('get', 'lower');
+                    im(im  < dLowerTreshold) = imageCropEditValue('get', 'lower');
                else
-                    im(im  < str2double(get(uiEditImageLowerTreshold, 'String'))) = cropValue('get');
+                    im(im  < dLowerTreshold) = cropValue('get');
                end
 
             else
@@ -746,15 +925,15 @@ function initSegPanel()
 
                 aTreshold = im;
                 if useCropEditValue('get', 'upper') == true
-                    aTreshold(aTreshold > str2double(get(uiEditImageUpperTreshold, 'String')) ) = imageCropEditValue('get', 'upper');
+                    aTreshold(aTreshold > dUpperTreshold ) = imageCropEditValue('get', 'upper');
                 else
-                    aTreshold(aTreshold > str2double(get(uiEditImageUpperTreshold, 'String')) ) = cropValue('get');
+                    aTreshold(aTreshold > dUpperTreshold ) = cropValue('get');
                 end
 
                 if useCropEditValue('get', 'lower') == true
-                    aTreshold(aTreshold < str2double(get(uiEditImageLowerTreshold, 'String')) ) = imageCropEditValue('get', 'lower');
+                    aTreshold(aTreshold < dLowerTreshold ) = imageCropEditValue('get', 'lower');
                 else
-                    aTreshold(aTreshold < str2double(get(uiEditImageLowerTreshold, 'String')) ) = cropValue('get');
+                    aTreshold(aTreshold < dLowerTreshold ) = cropValue('get');
                 end
 
                 im(roiMask == 0 ) = aTreshold(roiMask == 0);
@@ -778,15 +957,15 @@ function initSegPanel()
 
                     imVsplash = im;
                     if useCropEditValue('get', 'upper') == true
-                        imVsplash(imVsplash > str2double(get(uiEditImageUpperTreshold, 'String')) ) = imageCropEditValue('get', 'upper');
+                        imVsplash(imVsplash > dUpperTreshold ) = imageCropEditValue('get', 'upper');
                     else
-                        imVsplash(imVsplash > str2double(get(uiEditImageUpperTreshold, 'String')) ) = cropValue('get');
+                        imVsplash(imVsplash > dUpperTreshold ) = cropValue('get');
                     end
 
                     if useCropEditValue('get', 'lower') == true
-                        imVsplash(imVsplash < str2double(get(uiEditImageLowerTreshold, 'String')) ) = imageCropEditValue('get', 'lower');
+                        imVsplash(imVsplash < dLowerTreshold ) = imageCropEditValue('get', 'lower');
                     else
-                        imVsplash(imVsplash < str2double(get(uiEditImageLowerTreshold, 'String')) ) = cropValue('get');
+                        imVsplash(imVsplash < dLowerTreshold ) = cropValue('get');
                     end
 
                     imComputed = computeMontage(imVsplash, 'coronal', iCoronal);
@@ -816,23 +995,23 @@ function initSegPanel()
                     aAxial    = im(:,:,iAxial);
 
                     if useCropEditValue('get', 'upper') == true
-                        aCoronal(aCoronal > str2double(get(uiEditImageUpperTreshold, 'String')) )   = imageCropEditValue('get', 'upper');
-                        aSagittal(aSagittal > str2double(get(uiEditImageUpperTreshold, 'String')) ) = imageCropEditValue('get', 'upper');
-                        aAxial(aAxial > str2double(get(uiEditImageUpperTreshold, 'String')) )       = imageCropEditValue('get', 'upper');
+                        aCoronal(aCoronal > dUpperTreshold )   = imageCropEditValue('get', 'upper');
+                        aSagittal(aSagittal > dUpperTreshold ) = imageCropEditValue('get', 'upper');
+                        aAxial(aAxial > dUpperTreshold )       = imageCropEditValue('get', 'upper');
                     else
-                        aCoronal(aCoronal > str2double(get(uiEditImageUpperTreshold, 'String')) )   = cropValue('get');
-                        aSagittal(aSagittal > str2double(get(uiEditImageUpperTreshold, 'String')) ) = cropValue('get');
-                        aAxial(aAxial > str2double(get(uiEditImageUpperTreshold, 'String')) )       = cropValue('get');
+                        aCoronal(aCoronal > dUpperTreshold )   = cropValue('get');
+                        aSagittal(aSagittal > dUpperTreshold ) = cropValue('get');
+                        aAxial(aAxial > dUpperTreshold )       = cropValue('get');
                     end
 
                     if useCropEditValue('get', 'lower') == true
-                        aCoronal(aCoronal < str2double(get(uiEditImageLowerTreshold, 'String')) )   = imageCropEditValue('get', 'lower');
-                        aSagittal(aSagittal < str2double(get(uiEditImageLowerTreshold, 'String')) ) = imageCropEditValue('get', 'lower');
-                        aAxial(aAxial < str2double(get(uiEditImageLowerTreshold, 'String')) )       = imageCropEditValue('get', 'lower');
+                        aCoronal(aCoronal < dLowerTreshold )   = imageCropEditValue('get', 'lower');
+                        aSagittal(aSagittal < dLowerTreshold ) = imageCropEditValue('get', 'lower');
+                        aAxial(aAxial < dLowerTreshold )       = imageCropEditValue('get', 'lower');
                     else
-                        aCoronal(aCoronal < str2double(get(uiEditImageLowerTreshold, 'String')) )   = cropValue('get');
-                        aSagittal(aSagittal < str2double(get(uiEditImageLowerTreshold, 'String')) ) = cropValue('get');
-                        aAxial(aAxial < str2double(get(uiEditImageLowerTreshold, 'String')) )       = cropValue('get');
+                        aCoronal(aCoronal < dLowerTreshold )   = cropValue('get');
+                        aSagittal(aSagittal < dLowerTreshold ) = cropValue('get');
+                        aAxial(aAxial < dLowerTreshold )       = cropValue('get');
                     end
 
                     imCoronal.CData  = aCoronal;
@@ -852,16 +1031,30 @@ function initSegPanel()
 
                                 if objRoi.Parent  == axes1Ptr('get') && ...
                                    iCoronal == dSliceNb
-                                    tresholdVoiRoi(im, objRoi, dSliceNb, false, false);
+                               
+                                    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+                                    drawnow;                                 
+                                    
+                                    tresholdVoiRoi(im, objRoi, dSliceNb, false, false);                                    
                                     return;
                                 end
+                                
                                 if objRoi.Parent  == axes2Ptr('get') && ...
                                    iSagittal == dSliceNb
+                               
+                                    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+                                    drawnow;   
+                                    
                                     tresholdVoiRoi(im, objRoi, dSliceNb, false, false);
                                     return;
                                 end
+                                
                                 if objRoi.Parent  == axes3Ptr('get') && ...
                                    iAxial == dSliceNb
+                               
+                                    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+                                    drawnow;   
+                                    
                                     tresholdVoiRoi(im, objRoi, dSliceNb, false, false);
                                     return;
                                 end
@@ -878,10 +1071,52 @@ function initSegPanel()
             end
 
         end
+        
+        catch
+            progressBar(1, 'Error:editImageTreshold()');           
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;  
+        
     end
 
     function im = tresholdVoiRoi(im, objRoi, dSliceNb, bMathOperation, bUpdateScreen)
+        
+        if isempty(im)
+            return;
+        end
+        
+        if switchTo3DMode('get')     == true ||  ...
+           switchToIsoSurface('get') == true || ...
+           switchToMIPMode('get')    == true
 
+            return;
+        end
+        
+        try  
+                       
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+        
+        dLowerTreshold = imageSegEditValue('get', 'lower');
+        dUpperTreshold = imageSegEditValue('get', 'upper');
+        switch (sUnitDisplay)
+            case 'Window Level'
+
+                [dUpperTreshold, dLowerTreshold] = computeWindowLevel(dUpperTreshold, dLowerTreshold);
+
+            case 'HU'              
+
+            case 'SUV'
+                tQuant = quantificationTemplate('get');                                
+
+                dLowerTreshold = dLowerTreshold/tQuant.tSUV.dScale;
+                dUpperTreshold = dUpperTreshold/tQuant.tSUV.dScale;
+
+            case 'BQML'                  
+        end
+        
         if isempty(axes1Ptr('get')) && ...
            isempty(axes2Ptr('get')) && ...
            isempty(axes3Ptr('get'))
@@ -896,17 +1131,17 @@ function initSegPanel()
                 switch uiSegOperation.String{get(uiSegOperation, 'Value')}
                     case 'Subtract'
 
-                       im(roiMask) = im(roiMask) - str2double(get(uiEditImageLowerTreshold, 'String'));
+                       im(roiMask) = im(roiMask) - dLowerTreshold;
 
                     case 'Add'
-                        im(roiMask) = im(roiMask) + str2double(get(uiEditImageLowerTreshold, 'String'));
+                        im(roiMask) = im(roiMask) + dLowerTreshold;
 
                     case 'Multiply'
-                        im(roiMask) = im(roiMask) * str2double(get(uiEditImageLowerTreshold, 'String'));
+                        im(roiMask) = im(roiMask) * dLowerTreshold;
 
                     case 'Divide'
 
-                        im(roiMask) = im(roiMask) / str2double(get(uiEditImageLowerTreshold, 'String'));
+                        im(roiMask) = im(roiMask) / dLowerTreshold;
 
                     otherwise
                 end
@@ -940,16 +1175,16 @@ function initSegPanel()
 
                             switch uiSegOperation.String{get(uiSegOperation, 'Value')}
                                 case 'Subtract'
-                                    aCoronal(roiMask) = aCoronal(roiMask) - str2double(get(uiEditImageLowerTreshold, 'String'));
+                                    aCoronal(roiMask) = aCoronal(roiMask) - dLowerTreshold;
 
                                 case 'Add'
-                                    aCoronal(roiMask) = aCoronal(roiMask) + str2double(get(uiEditImageLowerTreshold, 'String'));
+                                    aCoronal(roiMask) = aCoronal(roiMask) + dLowerTreshold;
 
                                 case 'Multiply'
-                                    aCoronal(roiMask) = aCoronal(roiMask) * str2double(get(uiEditImageLowerTreshold, 'String'));
+                                    aCoronal(roiMask) = aCoronal(roiMask) * dLowerTreshold;
 
                                 case 'Divide'
-                                    aCoronal(roiMask) = aCoronal(roiMask) / str2double(get(uiEditImageLowerTreshold, 'String'));
+                                    aCoronal(roiMask) = aCoronal(roiMask) / dLowerTreshold;
 
                                 otherwise
                             end
@@ -968,15 +1203,15 @@ function initSegPanel()
                             aTreshold = aCoronal;
 
                             if useCropEditValue('get', 'upper') == true
-                                aTreshold(aTreshold > str2double(get(uiEditImageUpperTreshold, 'String')) ) = imageCropEditValue('get', 'upper');
+                                aTreshold(aTreshold > dUpperTreshold ) = imageCropEditValue('get', 'upper');
                             else
-                                aTreshold(aTreshold > str2double(get(uiEditImageUpperTreshold, 'String')) ) = cropValue('get');
+                                aTreshold(aTreshold > dUpperTreshold ) = cropValue('get');
                             end
 
                             if useCropEditValue('get', 'lower') == true
-                                aTreshold(aTreshold < str2double(get(uiEditImageLowerTreshold, 'String')) ) = imageCropEditValue('get', 'lower');
+                                aTreshold(aTreshold < dLowerTreshold ) = imageCropEditValue('get', 'lower');
                             else
-                                aTreshold(aTreshold < str2double(get(uiEditImageLowerTreshold, 'String')) ) = cropValue('get');
+                                aTreshold(aTreshold < dLowerTreshold ) = cropValue('get');
                             end
 
                             aCoronal(roiMask == 0) = aTreshold(roiMask == 0);
@@ -1003,16 +1238,16 @@ function initSegPanel()
 
                         switch uiSegOperation.String{get(uiSegOperation, 'Value')}
                             case 'Subtract'
-                                aCoronal(roiMask) = aCoronal(roiMask) - str2double(get(uiEditImageLowerTreshold, 'String'));
+                                aCoronal(roiMask) = aCoronal(roiMask) - dLowerTreshold;
 
                             case 'Add'
-                                aCoronal(roiMask) = aCoronal(roiMask) + str2double(get(uiEditImageLowerTreshold, 'String'));
+                                aCoronal(roiMask) = aCoronal(roiMask) + dLowerTreshold;
 
                            case 'Multiply'
-                                aCoronal(roiMask) = aCoronal(roiMask) * str2double(get(uiEditImageLowerTreshold, 'String'));
+                                aCoronal(roiMask) = aCoronal(roiMask) * dLowerTreshold;
 
                             case 'Divide'
-                                aCoronal(roiMask) = aCoronal(roiMask) / str2double(get(uiEditImageLowerTreshold, 'String'));
+                                aCoronal(roiMask) = aCoronal(roiMask) / dLowerTreshold;
 
                             otherwise
                         end
@@ -1033,15 +1268,15 @@ function initSegPanel()
 
                         aTreshold = aCoronal;
                         if useCropEditValue('get', 'upper') == true
-                            aTreshold(aTreshold > str2double(get(uiEditImageUpperTreshold, 'String')) ) = imageCropEditValue('get', 'upper');
+                            aTreshold(aTreshold > dUpperTreshold ) = imageCropEditValue('get', 'upper');
                         else
-                            aTreshold(aTreshold > str2double(get(uiEditImageUpperTreshold, 'String')) ) = cropValue('get');
+                            aTreshold(aTreshold > dUpperTreshold ) = cropValue('get');
                         end
 
                         if useCropEditValue('get', 'lower') == true
-                            aTreshold(aTreshold < str2double(get(uiEditImageLowerTreshold, 'String')) ) = imageCropEditValue('get', 'lower');
+                            aTreshold(aTreshold < dLowerTreshold ) = imageCropEditValue('get', 'lower');
                         else
-                            aTreshold(aTreshold < str2double(get(uiEditImageLowerTreshold, 'String')) ) = cropValue('get');
+                            aTreshold(aTreshold < dLowerTreshold ) = cropValue('get');
                         end
 
                         aCoronal(roiMask == 0) = aTreshold(roiMask == 0);
@@ -1080,16 +1315,16 @@ function initSegPanel()
 
                             switch uiSegOperation.String{get(uiSegOperation, 'Value')}
                                 case 'Subtract'
-                                    aSagittal(roiMask) = aSagittal(roiMask) - str2double(get(uiEditImageLowerTreshold, 'String'));
+                                    aSagittal(roiMask) = aSagittal(roiMask) - dLowerTreshold;
 
                                 case 'Add'
-                                    aSagittal(roiMask) = aSagittal(roiMask) + str2double(get(uiEditImageLowerTreshold, 'String'));
+                                    aSagittal(roiMask) = aSagittal(roiMask) + dLowerTreshold;
 
                                case 'Multiply'
-                                    aSagittal(roiMask) = aSagittal(roiMask) * str2double(get(uiEditImageLowerTreshold, 'String'));
+                                    aSagittal(roiMask) = aSagittal(roiMask) * dLowerTreshold;
 
                                 case 'Divide'
-                                    aSagittal(roiMask) = aSagittal(roiMask) / str2double(get(uiEditImageLowerTreshold, 'String'));
+                                    aSagittal(roiMask) = aSagittal(roiMask) / dLowerTreshold;
 
                                 otherwise
                             end
@@ -1109,15 +1344,15 @@ function initSegPanel()
 
                             aTreshold = aSagittal;
                             if useCropEditValue('get', 'upper') == true
-                                aTreshold(aTreshold > str2double(get(uiEditImageUpperTreshold, 'String')) ) = imageCropEditValue('get', 'upper');
+                                aTreshold(aTreshold > dUpperTreshold ) = imageCropEditValue('get', 'upper');
                             else
-                                aTreshold(aTreshold > str2double(get(uiEditImageUpperTreshold, 'String')) ) = cropValue('get');
+                                aTreshold(aTreshold > dUpperTreshold ) = cropValue('get');
                             end
 
                             if useCropEditValue('get', 'lower') == true
-                                aTreshold(aTreshold < str2double(get(uiEditImageLowerTreshold, 'String')) ) = imageCropEditValue('get', 'lower');
+                                aTreshold(aTreshold < dLowerTreshold ) = imageCropEditValue('get', 'lower');
                             else
-                                aTreshold(aTreshold < str2double(get(uiEditImageLowerTreshold, 'String')) ) = cropValue('get');
+                                aTreshold(aTreshold < dLowerTreshold ) = cropValue('get');
                             end
 
                             aSagittal(roiMask == 0) = aTreshold(roiMask == 0);
@@ -1145,16 +1380,16 @@ function initSegPanel()
                         switch uiSegOperation.String{get(uiSegOperation, 'Value')}
 
                             case 'Subtract'
-                                aSagittal(roiMask) = aSagittal(roiMask) - str2double(get(uiEditImageLowerTreshold, 'String'));
+                                aSagittal(roiMask) = aSagittal(roiMask) - dLowerTreshold;
 
                             case 'Add'
-                                aSagittal(roiMask) = aSagittal(roiMask) + str2double(get(uiEditImageLowerTreshold, 'String'));
+                                aSagittal(roiMask) = aSagittal(roiMask) + dLowerTreshold;
 
                            case 'Multiply'
-                                aSagittal(roiMask) = aSagittal(roiMask) * str2double(get(uiEditImageLowerTreshold, 'String'));
+                                aSagittal(roiMask) = aSagittal(roiMask) * dLowerTreshold;
 
                             case 'Divide'
-                                aSagittal(roiMask) = aSagittal(roiMask) / str2double(get(uiEditImageLowerTreshold, 'String'));
+                                aSagittal(roiMask) = aSagittal(roiMask) / dLowerTreshold;
 
                             otherwise
                         end
@@ -1175,15 +1410,15 @@ function initSegPanel()
 
                         aTreshold = aSagittal;
                         if useCropEditValue('get', 'upper') == true
-                            aTreshold(aTreshold > str2double(get(uiEditImageUpperTreshold, 'String')) ) = imageCropEditValue('get', 'upper');
+                            aTreshold(aTreshold > dUpperTreshold ) = imageCropEditValue('get', 'upper');
                         else
-                            aTreshold(aTreshold > str2double(get(uiEditImageUpperTreshold, 'String')) ) = cropValue('get');
+                            aTreshold(aTreshold > dUpperTreshold ) = cropValue('get');
                         end
 
                         if useCropEditValue('get', 'lower') == true
-                            aTreshold(aTreshold < str2double(get(uiEditImageLowerTreshold, 'String')) ) = imageCropEditValue('get', 'lower');
+                            aTreshold(aTreshold < dLowerTreshold ) = imageCropEditValue('get', 'lower');
                         else
-                            aTreshold(aTreshold < str2double(get(uiEditImageLowerTreshold, 'String')) ) = cropValue('get');
+                            aTreshold(aTreshold < dLowerTreshold ) = cropValue('get');
                         end
 
                         aSagittal(roiMask == 0) = aTreshold(roiMask == 0);
@@ -1219,16 +1454,16 @@ function initSegPanel()
                             end
                             switch uiSegOperation.String{get(uiSegOperation, 'Value')}
                                 case 'Subtract'
-                                    aAxial(roiMask) = aAxial(roiMask) - str2double(get(uiEditImageLowerTreshold, 'String'));
+                                    aAxial(roiMask) = aAxial(roiMask) - dLowerTreshold;
 
                                 case 'Add'
-                                    aAxial(roiMask) = aAxial(roiMask) + str2double(get(uiEditImageLowerTreshold, 'String'));
+                                    aAxial(roiMask) = aAxial(roiMask) + dLowerTreshold;
 
                                case 'Multiply'
-                                    aAxial(roiMask) = aAxial(roiMask) * str2double(get(uiEditImageLowerTreshold, 'String'));
+                                    aAxial(roiMask) = aAxial(roiMask) * dLowerTreshold;
 
                                 case 'Divide'
-                                    aAxial(roiMask) = aAxial(roiMask) / str2double(get(uiEditImageLowerTreshold, 'String'));
+                                    aAxial(roiMask) = aAxial(roiMask) / dLowerTreshold;
 
                                 otherwise
                             end
@@ -1248,15 +1483,15 @@ function initSegPanel()
 
                             aTreshold = aAxial;
                             if useCropEditValue('get', 'upper') == true
-                                aTreshold(aTreshold > str2double(get(uiEditImageUpperTreshold, 'String')) ) = imageCropEditValue('get', 'upper');
+                                aTreshold(aTreshold > dUpperTreshold ) = imageCropEditValue('get', 'upper');
                             else
-                                aTreshold(aTreshold > str2double(get(uiEditImageUpperTreshold, 'String')) ) = cropValue('get');
+                                aTreshold(aTreshold > dUpperTreshold ) = cropValue('get');
                             end
 
                             if useCropEditValue('get', 'lower') == true
-                                aTreshold(aTreshold < str2double(get(uiEditImageLowerTreshold, 'String')) ) = imageCropEditValue('get', 'lower');
+                                aTreshold(aTreshold < dLowerTreshold ) = imageCropEditValue('get', 'lower');
                             else
-                                aTreshold(aTreshold < str2double(get(uiEditImageLowerTreshold, 'String')) ) = cropValue('get');
+                                aTreshold(aTreshold < dLowerTreshold ) = cropValue('get');
                             end
 
                             aAxial(roiMask == 0) = aTreshold(roiMask == 0);
@@ -1285,16 +1520,16 @@ function initSegPanel()
                         switch uiSegOperation.String{get(uiSegOperation, 'Value')}
 
                             case 'Subtract'
-                                aAxial(roiMask) = aAxial(roiMask) - str2double(get(uiEditImageLowerTreshold, 'String'));
+                                aAxial(roiMask) = aAxial(roiMask) - dLowerTreshold;
 
                             case 'Add'
-                                aAxial(roiMask) = aAxial(roiMask) + str2double(get(uiEditImageLowerTreshold, 'String'));
+                                aAxial(roiMask) = aAxial(roiMask) + dLowerTreshold;
 
                            case 'Multiply'
-                                aAxial(roiMask) = aAxial(roiMask) * str2double(get(uiEditImageLowerTreshold, 'String'));
+                                aAxial(roiMask) = aAxial(roiMask) * dLowerTreshold;
 
                             case 'Divide'
-                                aAxial(roiMask) = aAxial(roiMask) / str2double(get(uiEditImageLowerTreshold, 'String'));
+                                aAxial(roiMask) = aAxial(roiMask) / dLowerTreshold;
 
                             otherwise
                         end
@@ -1315,15 +1550,15 @@ function initSegPanel()
 
                         aTreshold = aAxial;
                         if useCropEditValue('get', 'upper') == true
-                            aTreshold(aTreshold > str2double(get(uiEditImageUpperTreshold, 'String')) ) = imageCropEditValue('get', 'upper');
+                            aTreshold(aTreshold > dUpperTreshold ) = imageCropEditValue('get', 'upper');
                         else
-                            aTreshold(aTreshold > str2double(get(uiEditImageUpperTreshold, 'String')) ) = cropValue('get');
+                            aTreshold(aTreshold > dUpperTreshold ) = cropValue('get');
                         end
 
                         if useCropEditValue('get', 'lower') == true
-                            aTreshold(aTreshold < str2double(get(uiEditImageLowerTreshold, 'String')) ) = imageCropEditValue('get', 'lower');
+                            aTreshold(aTreshold < dLowerTreshold ) = imageCropEditValue('get', 'lower');
                         else
-                            aTreshold(aTreshold < str2double(get(uiEditImageLowerTreshold, 'String')) ) = cropValue('get');
+                            aTreshold(aTreshold < dLowerTreshold ) = cropValue('get');
                         end
 
                         aAxial(roiMask == 0) = aTreshold(roiMask == 0);
@@ -1345,6 +1580,13 @@ function initSegPanel()
                 end
             end
         end
+        
+        catch
+            progressBar(1, 'Error:tresholdVoiRoi()');           
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;        
     end
 
     function proceedImageSegCallback(~, ~)
@@ -1353,7 +1595,19 @@ function initSegPanel()
         if isempty(im)
             return;
         end
+        
+        if switchTo3DMode('get')     == true ||  ...
+           switchToIsoSurface('get') == true || ...
+           switchToMIPMode('get')    == true
 
+            return;
+        end
+        
+        try  
+                        
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+        
         aobjList = '';
 
         tRoiInput = roiTemplate('get');
@@ -1372,22 +1626,40 @@ function initSegPanel()
                 end
             end
         end
+        
+        dLowerTreshold = imageSegEditValue('get', 'lower');
+        dUpperTreshold = imageSegEditValue('get', 'upper');
+        switch (sUnitDisplay)
+            case 'Window Level'
 
+                [dUpperTreshold, dLowerTreshold] = computeWindowLevel(dUpperTreshold, dLowerTreshold);
+
+            case 'HU'              
+
+            case 'SUV'
+                tQuant = quantificationTemplate('get');                                
+
+                dLowerTreshold = dLowerTreshold/tQuant.tSUV.dScale;
+                dUpperTreshold = dUpperTreshold/tQuant.tSUV.dScale;
+
+            case 'BQML'                  
+        end
+        
         if strcmpi(uiSegAction.String{uiSegAction.Value}, 'Entire Image')
             if get(chkSegmentVoiRoi, 'Value') == true
 
                 switch uiSegOperation.String{get(uiSegOperation, 'Value')}
                     case 'Subtract'
-                        im = im - str2double(get(uiEditImageLowerTreshold, 'String'));
+                        im = im - dLowerTreshold;
 
                     case 'Add'
-                        im = im + str2double(get(uiEditImageLowerTreshold, 'String'));
+                        im = im + dLowerTreshold;
 
                     case 'Multiply'
-                        im = im * str2double(get(uiEditImageLowerTreshold, 'String'));
+                        im = im * dLowerTreshold;
 
                     case 'Divide'
-                        im = im / str2double(get(uiEditImageLowerTreshold, 'String'));
+                        im = im / dLowerTreshold;
 
                     otherwise
                 end
@@ -1402,15 +1674,15 @@ function initSegPanel()
 
             else
                 if useCropEditValue('get', 'upper') == true
-                    im(im  > str2double(get(uiEditImageUpperTreshold, 'String'))) = imageCropEditValue('get', 'upper');
+                    im(im  > dUpperTreshold) = imageCropEditValue('get', 'upper');
                 else
-                    im(im  > str2double(get(uiEditImageUpperTreshold, 'String'))) = cropValue('get');
+                    im(im  > dUpperTreshold) = cropValue('get');
                 end
 
                 if useCropEditValue('get', 'lower') == true
-                    im(im  < str2double(get(uiEditImageLowerTreshold, 'String'))) = imageCropEditValue('get', 'lower');
+                    im(im  < dLowerTreshold) = imageCropEditValue('get', 'lower');
                 else
-                    im(im  < str2double(get(uiEditImageLowerTreshold, 'String'))) = cropValue('get');
+                    im(im  < dLowerTreshold) = cropValue('get');
                 end
             end
         else
@@ -1451,7 +1723,13 @@ function initSegPanel()
         setQuantification(iOffset);
 
         refreshImages();
+        
+        catch
+            progressBar(1, 'Error:proceedImageSegCallback()');           
+        end
 
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow; 
     end
 
     function sliderLungTreshCallback(hObject, ~)
@@ -1488,7 +1766,19 @@ function initSegPanel()
         if iOffset > numel(tInitInput)
             return;
         end
+       
+        if switchTo3DMode('get')     == true ||  ...
+           switchToIsoSurface('get') == true || ...
+           switchToMIPMode('get')    == true
 
+            return;
+        end
+        
+        try  
+            
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+        
         aInput = inputBuffer('get');
 
         if ~strcmp(imageOrientation('get'), 'axial')
@@ -1502,23 +1792,7 @@ function initSegPanel()
         elseif strcmp(imageOrientation('get'), 'sagittal')
             aBuffer = permute(aInput{iOffset}, [3 1 2]);
         end
-if 0
-        if numel(tInitInput(iOffset).asFilesList) ~= 1
 
-            if ~isempty(tInitInput(iOffset).atDicomInfo{1}.ImagePositionPatient)
-
-                if tInitInput(iOffset).atDicomInfo{2}.ImagePositionPatient(3) - ...
-                   tInitInput(iOffset).atDicomInfo{1}.ImagePositionPatient(3) > 0
-                    aBuffer = aBuffer(:,:,end:-1:1);
-
-                end
-            end
-        else
-            if strcmpi(tInitInput(iOffset).atDicomInfo{1}.PatientPosition, 'FFS')
-                aBuffer = aBuffer(:,:,end:-1:1);
-            end
-        end
-end
         tInitInput(iOffset).bEdgeDetection = false;
         tInitInput(iOffset).bFlipLeftRight = false;
         tInitInput(iOffset).bFlipAntPost   = false;
@@ -1533,8 +1807,18 @@ end
         end
 
         inputTemplate('set', tInitInput);
-
-        dicomBuffer('set',aBuffer);
+        
+        if isfield(tInitInput(iOffset), 'tRoi')
+            atRoi = roiTemplate('get');
+            for kk=1:numel(atRoi)
+                atRoi{kk}.SliceNb  = tInitInput(iOffset).tRoi{kk}.SliceNb;
+                atRoi{kk}.Position = tInitInput(iOffset).tRoi{kk}.Position;
+                atRoi{kk}.Object.Position = tInitInput(iOffset).tRoi{kk}.Position;
+            end
+            roiTemplate('set', atRoi);
+        end
+        
+        dicomBuffer('set', aBuffer);
 
         dicomMetaData('set', tInitInput(iOffset).atDicomInfo);
 
@@ -1562,12 +1846,19 @@ end
 
 
         refreshImages();
+        
+        catch
+            progressBar(1, 'Error:resetSegmentationCallback()');           
+        end
 
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow; 
     end
 
     function proceedLungSegCallback(~, ~)
 
         lungSegmentation(uiLungPlane.String{get(uiLungPlane, 'Value')}, str2double(get(uiEditLungTreshold, 'String')));
+        
         lungSegTreshValue('set', str2double(get(uiEditLungTreshold, 'String')));
 
     end
@@ -1606,8 +1897,25 @@ end
     end
 
     function edgeDetectionPreview()
+        
+        if switchTo3DMode('get')     == true ||  ...
+           switchToIsoSurface('get') == true || ...
+           switchToMIPMode('get')    == true
 
+            return;
+        end
+        
         im = dicomBuffer('get');
+        if isempty(im)
+            
+            return;
+        end
+       
+        try  
+                        
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+        
 
         aMethod = get(uiEdgeMethod, 'String');
         dValue  = get(uiEdgeMethod, 'Value' );
@@ -1669,7 +1977,13 @@ end
             imSagittal.CData = permute(im(:,iSagittal,:), [3 1 2]) ;
             imAxial.CData    = im(:,:,iAxial);
         end
+        
+        catch
+            progressBar(1, 'Error:edgeDetectionPreview()');           
+        end
 
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow; 
     end
 
     function proceedEdgeDetectionCallback(hObject, ~)
@@ -1680,7 +1994,19 @@ end
         if dSerieOffset > numel(tInput)
             return;
         end
+        
+        if switchTo3DMode('get')     == true ||  ...
+           switchToIsoSurface('get') == true || ...
+           switchToMIPMode('get')    == true
 
+            return;
+        end        
+       
+        try  
+                        
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+        
         set(hObject, 'Enable', 'off');
 
         aMethod = get(uiEdgeMethod, 'String');
@@ -1707,6 +2033,13 @@ end
         refreshImages();
 
         set(hObject, 'Enable', 'on');
+        
+        catch
+            progressBar(1, 'Error:proceedEdgeDetectionCallback()');           
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;         
 
     end
 

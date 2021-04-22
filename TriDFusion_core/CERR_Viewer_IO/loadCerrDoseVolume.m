@@ -30,6 +30,28 @@ function loadCerrDoseVolume(planC, structNamC)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');            
+    drawnow;
+    
+    set(uiSeriesPtr('get'), 'Value' , 1);
+    
+    copyRoiPtr('set', '');
+
+    isMoveImageActivated('set', false);
+
+    releaseRoiWait();
+            
+    dicomMetaData('reset');
+    dicomBuffer  ('reset');
+    fusionBuffer ('reset');
+    inputBuffer  ('set', '');
+
+    inputTemplate('set', '');
+    inputContours('set', '');
+
+    roiTemplate ('reset');
+    voiTemplate ('reset');
+    
     scanNum = 1;
     doseNum = 1;
 
@@ -239,16 +261,37 @@ function loadCerrDoseVolume(planC, structNamC)
         ui3DGateWindowObject('set', '');
     end
 
+    uiSegMainPanel = uiSegMainPanelPtr('get');
+    if ~isempty(uiSegMainPanel)
+        set(uiSegMainPanel, 'Visible', 'off');
+    end
+
     viewSegPanel('set', false);
     objSegPanel = viewSegPanelMenuObject('get');
     if ~isempty(objSegPanel)
         objSegPanel.Checked = 'off';
     end
 
+    uiKernelMainPanel = uiKernelMainPanelPtr('get');
+    if ~isempty(uiKernelMainPanel)
+        set(uiKernelMainPanel, 'Visible', 'off');
+    end
+
     viewKernelPanel('set', false);
     objKernelPanel = viewKernelPanelMenuObject('get');
     if ~isempty(objKernelPanel)
         objKernelPanel.Checked = 'off';
+    end
+
+    uiRoiMainPanel = uiRoiMainPanelPtr('get');
+    if ~isempty(uiRoiMainPanel)
+        set(uiRoiMainPanel, 'Visible', 'off');
+    end
+
+    viewRoiPanel('set', false);
+    objRoiPanel = viewRoiPanelMenuObject('get');
+    if ~isempty(objRoiPanel)
+        objRoiPanel.Checked = 'off';
     end
 
     view3DPanel('set', false);
@@ -403,8 +446,6 @@ function loadCerrDoseVolume(planC, structNamC)
     setPlaybackToolbar('on');
     setRoiToolbar('on');
 
-    hold on;
-
     set(uiCorWindowPtr('get'), 'Visible', 'off');
     set(uiSagWindowPtr('get'), 'Visible', 'off');
     set(uiTraWindowPtr('get'), 'Visible', 'off');
@@ -415,7 +456,9 @@ function loadCerrDoseVolume(planC, structNamC)
     set(uiSliderCorPtr('get'), 'Visible', 'off');
     set(uiSliderSagPtr('get'), 'Visible', 'off');
     set(uiSliderTraPtr('get'), 'Visible', 'off');
-
+    
+    drawnow;
+    
     for mm=1:numel(strMaskC)
         progressBar(0.7+(0.299999*mm/numel(strMaskC)), sprintf('Processing VOI %d/%d', mm, numel(strMaskC)));
 
@@ -426,8 +469,13 @@ function loadCerrDoseVolume(planC, structNamC)
                 break;
             end
         end
-
-        maskToVoi(strMaskC{mm}, structNamC{mm}, aVoiColor, 'axial');
+        
+        if get(uiSeriesPtr('get'), 'Value') ~= planC{4}(mm).associatedScan
+            set(uiSeriesPtr('get'), 'Value', planC{4}(mm).associatedScan);
+            setSeriesCallback();            
+        end
+        
+        maskToVoi(strMaskC{mm}, structNamC{mm}, aVoiColor, 'axial',  planC{4}(mm).associatedScan, true);
     end
 
     set(uiCorWindowPtr('get'), 'Visible', 'on');
@@ -440,12 +488,12 @@ function loadCerrDoseVolume(planC, structNamC)
     set(uiSliderCorPtr('get'), 'Visible', 'on');
     set(uiSliderSagPtr('get'), 'Visible', 'on');
     set(uiSliderTraPtr('get'), 'Visible', 'on');
-
-    hold off;
-
+    
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');            
+    drawnow;
+    
     refreshImages();
 
     progressBar(1, 'Ready');
-
 
 end

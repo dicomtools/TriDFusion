@@ -28,7 +28,7 @@ function initKernelPanel()
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     if isempty(dicomBuffer('get'))
-         sEnable = 'on';
+         return;
     else
         if size(dicomBuffer('get'), 3) == 1
             sEnable = 'off';
@@ -266,12 +266,28 @@ function initKernelPanel()
         function setDoseKernel()
 
             tInput = inputTemplate('get');
+            
             dOffset = get(uiSeriesPtr('get'), 'Value');
-
             if dOffset > numel(tInput)
                 return;
             end
+            
+            if switchTo3DMode('get')     == true ||  ...
+               switchToIsoSurface('get') == true || ...
+               switchToMIPMode('get')    == true
 
+                return;
+            end
+            
+            if isempty(dicomBuffer('get'))
+                return;
+            end
+        
+            try   
+                               
+            set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+            drawnow;
+        
             tInput(dOffset).bDoseKernel = false;
             if numel(tInput) == 1 && isFusion('get') == false
                 tInput(dOffset).bFusedDoseKernel = false;
@@ -320,9 +336,13 @@ function initKernelPanel()
                 zPixel = sigmaZ;
             end
 
-%atCoreMetaData{1}.dose.RadiopharmaceuticalStartDateTime = '20200219193453.00';
+%atCoreMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime = '20200219193453.00';
 
-            if isempty(atCoreMetaData{1}.dose.RadiopharmaceuticalStartDateTime)
+            if isempty(atCoreMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime)
+                
+                set(fiMainWindowPtr('get'), 'Pointer', 'default');
+                drawnow;
+                    
                 progressBar(1, 'Error: Dose RadiopharmaceuticalStartDateTime is missing!');
                 h = msgbox('Error: setDoseKernel(): Dose RadiopharmaceuticalStartDateTime is missing!', 'Error');
 %                if integrateToBrowser('get') == true
@@ -336,10 +356,10 @@ function initKernelPanel()
                 return;
             end
 
-            injDateTime = atCoreMetaData{1}.dose.RadiopharmaceuticalStartDateTime;
+            injDateTime = atCoreMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;
             acqTime     = atCoreMetaData{1}.SeriesTime;
             acqDate     = atCoreMetaData{1}.SeriesDate;
-            halfLife    = str2double(atCoreMetaData{1}.dose.RadionuclideHalfLife);
+            halfLife    = str2double(atCoreMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife);
 
             for jj=1:numel(atCoreMetaData)
                 if isfield(atCoreMetaData{jj}, 'RescaleSlope')
@@ -380,7 +400,11 @@ function initKernelPanel()
                     betaYield = 0.92; %Beta yield Y-90
                     betaFactor = 4E7;
 
-                 otherwise
+                otherwise
+                    
+                    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+                    drawnow;
+            
                      progressBar(1, 'Error: This isotope is not yet validated!');
                      h = msgbox('Error: setDoseKernel(): This isotope is not yet validated!', 'Error');
 %                     if integrateToBrowser('get') == true
@@ -443,95 +467,129 @@ function initKernelPanel()
             refreshImages();
 
             progressBar(1, 'Ready');
+            
+            catch
+                progressBar(1, 'Error:setDoseKernel()');           
+            end
 
+            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            drawnow; 
+        
         end
 
     end
 
     function gaussFilterCallback(~, ~)
-
+        
         if isempty(dicomBuffer('get'))
             return;
         end
+        
+        if switchTo3DMode('get')     == true ||  ...
+           switchToIsoSurface('get') == true || ...
+           switchToMIPMode('get')    == true
 
+            return;
+        end
+                
         tInput = inputTemplate('get');
         dOffset = get(uiSeriesPtr('get'), 'Value');
-
-        if dOffset <= numel(tInput)
-
-            aInput = dicomBuffer('get');
-            if numel(aInput)
-                x = str2double(get(edtGaussFilterX, 'String'));
-                y = str2double(get(edtGaussFilterY, 'String'));
-                z = str2double(get(edtGaussFilterZ, 'String'));
-
-                atCoreMetaData = dicomMetaData('get');
-
-                if x <= 0
-                    set(edtGaussFilterX, 'String', '0.1');
-                    x = 0.1;
-                end
-
-                if y <= 0
-                    set(edtGaussFilterY, 'String', '0.1');
-                    y = 0.1;
-                end
-
-                if z <= 0
-                    set(edtGaussFilterZ, 'String', '0.1');
-                    z = 0.1;
-                end
-
-                sigmaX = x/atCoreMetaData{1}.PixelSpacing(1);
-                sigmaY = y/atCoreMetaData{1}.PixelSpacing(2);
-
-                if size(dicomBuffer('get'), 3) == 1
-                    sigmaZ = 1;
-                else
-                    dComputed = computeSliceSpacing(atCoreMetaData);
-                    if dComputed == 0
-                        sigmaZ = z/1;
-                    else
-                        sigmaZ = z/dComputed;
-                   end
-                end
-
-                if strcmp(imageOrientation('get'), 'coronal')
-                    xPixel = sigmaX;
-                    yPixel = sigmaZ;
-                    zPixel = sigmaY;
-                end
-                if strcmp(imageOrientation('get'), 'sagittal')
-                    xPixel = sigmaY;
-                    yPixel = sigmaZ;
-                    zPixel = sigmaX;
-                end
-                if strcmp(imageOrientation('get'), 'axial')
-                    xPixel = sigmaX;
-                    yPixel = sigmaY;
-                    zPixel = sigmaZ;
-                end
-
-                dicomBuffer('set', imgaussfilt3(aInput,[xPixel,yPixel,zPixel]));
-
-                if switchTo3DMode('get')     == false &&  ...
-                   switchToIsoSurface('get') == false  && ...
-                   switchToMIPMode('get')    == false
-
-                    refreshImages();
-                end
-            end
+        if dOffset > numel(tInput)
+            return;
         end
+                        
+        try   
+            
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+
+        aBuffer = dicomBuffer('get');
+        
+        x = str2double(get(edtGaussFilterX, 'String'));
+        y = str2double(get(edtGaussFilterY, 'String'));
+        z = str2double(get(edtGaussFilterZ, 'String'));
+
+        atCoreMetaData = dicomMetaData('get');
+
+        if x <= 0
+            set(edtGaussFilterX, 'String', '0.1');
+            x = 0.1;
+        end
+
+        if y <= 0
+            set(edtGaussFilterY, 'String', '0.1');
+            y = 0.1;
+        end
+
+        if z <= 0
+            set(edtGaussFilterZ, 'String', '0.1');
+            z = 0.1;
+        end
+
+        sigmaX = x/atCoreMetaData{1}.PixelSpacing(1);
+        sigmaY = y/atCoreMetaData{1}.PixelSpacing(2);
+
+        if size(dicomBuffer('get'), 3) == 1
+            sigmaZ = 1;
+        else
+            dComputed = computeSliceSpacing(atCoreMetaData);
+            if dComputed == 0
+                sigmaZ = z/1;
+            else
+                sigmaZ = z/dComputed;
+           end
+        end
+
+        if strcmp(imageOrientation('get'), 'coronal')
+            xPixel = sigmaX;
+            yPixel = sigmaZ;
+            zPixel = sigmaY;
+        end
+        if strcmp(imageOrientation('get'), 'sagittal')
+            xPixel = sigmaY;
+            yPixel = sigmaZ;
+            zPixel = sigmaX;
+        end
+        if strcmp(imageOrientation('get'), 'axial')
+            xPixel = sigmaX;
+            yPixel = sigmaY;
+            zPixel = sigmaZ;
+        end
+
+        dicomBuffer('set', imgaussfilt3(aBuffer,[xPixel,yPixel,zPixel]));
+
+        refreshImages();
+        
+        catch
+            progressBar(1, 'Error:setDoseKernel()');           
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;             
+        
     end
 
     function resetKernelCallback(~, ~)
 
         tInitInput = inputTemplate('get');
+        
         iOffset = get(uiSeriesPtr('get'), 'Value');
         if iOffset > numel(tInitInput)
             return;
         end
+        
+        if switchTo3DMode('get')     == true ||  ...
+           switchToIsoSurface('get') == true || ...
+           switchToMIPMode('get')    == true
 
+            return;
+        end
+        
+        try   
+            
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+        
         aInput = inputBuffer('get');
 
         if ~strcmp(imageOrientation('get'), 'axial')
@@ -545,23 +603,7 @@ function initKernelPanel()
         elseif strcmp(imageOrientation('get'), 'sagittal')
             aBuffer = permute(aInput{iOffset}, [3 1 2]);
         end
-if 0
-        if numel(tInitInput(iOffset).asFilesList) ~= 1
 
-            if ~isempty(tInitInput(iOffset).atDicomInfo{1}.ImagePositionPatient)
-
-                if tInitInput(iOffset).atDicomInfo{2}.ImagePositionPatient(3) - ...
-                   tInitInput(iOffset).atDicomInfo{1}.ImagePositionPatient(3) > 0
-                    aBuffer = aBuffer(:,:,end:-1:1);
-
-                end
-            end
-        else
-            if strcmpi(tInitInput(iOffset).atDicomInfo{1}.PatientPosition, 'FFS')
-                aBuffer = aBuffer(:,:,end:-1:1);
-            end
-        end
-end
         tInitInput(iOffset).bEdgeDetection = false;
         tInitInput(iOffset).bFlipLeftRight = false;
         tInitInput(iOffset).bFlipAntPost   = false;
@@ -575,8 +617,18 @@ end
             tInitInput(dFuseOffset).bEdgeDetection = false;
         end
 
-        inputTemplate('set', tInitInput);
-
+        inputTemplate('set', tInitInput);        
+        
+        if isfield(tInitInput(iOffset), 'tRoi')
+            atRoi = roiTemplate('get');
+            for kk=1:numel(atRoi)
+                atRoi{kk}.SliceNb  = tInitInput(iOffset).tRoi{kk}.SliceNb;
+                atRoi{kk}.Position = tInitInput(iOffset).tRoi{kk}.Position;
+                atRoi{kk}.Object.Position = tInitInput(iOffset).tRoi{kk}.Position;
+            end
+            roiTemplate('set', atRoi);
+        end
+            
         dicomBuffer('set',aBuffer);
 
         dicomMetaData('set', tInitInput(iOffset).atDicomInfo);
@@ -599,7 +651,13 @@ end
         triangulateCallback();
 
         refreshImages();
+        
+        catch
+            progressBar(1, 'Error:resetKernelCallback()');           
+        end
 
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;   
     end
 
 end

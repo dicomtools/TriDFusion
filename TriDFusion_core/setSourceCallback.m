@@ -93,9 +93,14 @@ function setSourceCallback(~, ~)
         end
 
         if(numel(mainDir('get')))
-
+            
+            set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+            drawnow; 
+        
             copyRoiPtr('set', '');
-
+            
+            isMoveImageActivated('set', false);
+    
             releaseRoiWait();
 
             isFusion('set', false);
@@ -110,8 +115,8 @@ function setSourceCallback(~, ~)
 
             initWindowLevel('set', true);
             initFusionWindowLevel ('set', true);
-            roiTemplate('set', '');
-            voiTemplate('set', '');
+            roiTemplate('reset');
+            voiTemplate('reset');
 
             getMipAlphaMap('set', '', 'auto');
             getVolAlphaMap('set', '', 'auto');
@@ -223,16 +228,37 @@ function setSourceCallback(~, ~)
                 ui3DGateWindowObject('set', '');
             end
 
+            uiSegMainPanel = uiSegMainPanelPtr('get');
+            if ~isempty(uiSegMainPanel)
+                set(uiSegMainPanel, 'Visible', 'off');
+            end
+
             viewSegPanel('set', false);
             objSegPanel = viewSegPanelMenuObject('get');
             if ~isempty(objSegPanel)
                 objSegPanel.Checked = 'off';
             end
 
+            uiKernelMainPanel = uiKernelMainPanelPtr('get');
+            if ~isempty(uiKernelMainPanel)
+                set(uiKernelMainPanel, 'Visible', 'off');
+            end
+
             viewKernelPanel('set', false);
             objKernelPanel = viewKernelPanelMenuObject('get');
             if ~isempty(objKernelPanel)
                 objKernelPanel.Checked = 'off';
+            end
+
+            uiRoiMainPanel = uiRoiMainPanelPtr('get');
+            if ~isempty(uiRoiMainPanel)
+                set(uiRoiMainPanel, 'Visible', 'off');
+            end
+
+            viewRoiPanel('set', false);
+            objRoiPanel = viewRoiPanelMenuObject('get');
+            if ~isempty(objRoiPanel)
+                objRoiPanel.Checked = 'off';
             end
 
             view3DPanel('set', false);
@@ -471,14 +497,14 @@ function setSourceCallback(~, ~)
                     set(uiEditVsplahXPtr('get'), 'Enable', 'on');
                     set(uiEditVsplahYPtr('get'), 'Enable', 'on');
                 end
-
+                    
                 setQuantification();
 
                 clearDisplay();
                 initDisplay(3);
-
+                
                 dicomViewerCore();
-
+                
                 setContours();
 
                 setViewerDefaultColor(true, dicomMetaData('get'));
@@ -493,9 +519,13 @@ function setSourceCallback(~, ~)
 %                end
 %                javaFrame = get(h, 'JavaFrame');
 %                javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
-
+                set(fiMainWindowPtr('get'), 'Pointer', 'default');
+                drawnow; 
                 return;
             end
+            
+            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            drawnow;             
         end
     end
 end

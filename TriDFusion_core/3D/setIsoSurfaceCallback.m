@@ -29,7 +29,9 @@ function setIsoSurfaceCallback(~, ~)
 
     if numel(dicomBuffer('get')) && ...
        size(dicomBuffer('get'), 3) ~= 1
-
+        try
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;            
 %             releaseRoiAxeWait();
         releaseRoiWait();
 
@@ -87,16 +89,16 @@ function setIsoSurfaceCallback(~, ~)
         multiFrameZoom    ('set', 'out', 1);
         multiFrameZoom    ('set', 'axe', []);
 
-        uiSegMainPanel = uiSegMainPanelPtr('get');
-        if ~isempty(uiSegMainPanel)
-            set(uiSegMainPanel, 'Visible', 'off');
-        end
-
         mOptions = optionsPanelMenuObject('get');
         if ~isempty(mOptions)
             mOptions.Enable = 'off';
         end
-
+        
+        uiSegMainPanel = uiSegMainPanelPtr('get');
+        if ~isempty(uiSegMainPanel)
+            set(uiSegMainPanel, 'Visible', 'off');
+        end
+        
         viewSegPanel('set', false);
         objSegPanel = viewSegPanelMenuObject('get');
         if ~isempty(objSegPanel)
@@ -113,7 +115,18 @@ function setIsoSurfaceCallback(~, ~)
         if ~isempty(objKernelPanel)
             objKernelPanel.Checked = 'off';
         end
+        
+        uiRoiMainPanel = uiRoiMainPanelPtr('get');
+        if ~isempty(uiRoiMainPanel)
+            set(uiRoiMainPanel, 'Visible', 'off');
+        end
 
+        viewRoiPanel('set', false);
+        objRoiPanel = viewRoiPanelMenuObject('get');
+        if ~isempty(objRoiPanel)
+            objRoiPanel.Checked = 'off';
+        end
+        
         if switchToIsoSurface('get') == true
 
             switchToIsoSurface('set', false);
@@ -546,6 +559,12 @@ end
                     mipObject('set', mipObj);                      
                 end           
             end
-        end        
+        end       
+        catch
+            progressBar(1, 'Error:setIsoSurfaceCallback()');          
+        end  
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;        
     end
+      
 end

@@ -53,7 +53,7 @@ function multiGate(mPlay)
         mPlay.State = 'off';                
         return;
     end
-
+        
     lMinBak = windowLevel('get', 'min');
     lMaxBak = windowLevel('get', 'max');
 
@@ -139,16 +139,31 @@ function multiGate(mPlay)
 
         if gateUseSeriesUID('get') == false && ...
            gateLookupTable('get') == true 
+             
             if strcmpi(atCoreMetaData{1}.Modality, 'ct')
-                [lMax, lMin] = computeWindowLevel(2000, 0);
+                if min(aBuffer, [], 'all') >= 0
+                    lMin = min(aBuffer, [], 'all');
+                    lMax = max(aBuffer, [], 'all');                 
+                else
+                    [lMax, lMin] = computeWindowLevel(2000, 0);
+                end         
             else  
                 if strcmpi(gateLookupType('get'), 'Relative')                   
-                    if strcmpi(atCoreMetaData{1}.Modality, 'pt')
+                    
+                    sUnitDisplay = getSerieUnitValue(iOffset);                        
+
+                    if strcmpi(sUnitDisplay, 'SUV')
+                        tQuant = quantificationTemplate('get');                                
+                        if tQuant.tSUV.dScale                
+                            lMin = suvWindowLevel('get', 'min')/tQuant.tSUV.dScale;  
+                            lMax = suvWindowLevel('get', 'max')/tQuant.tSUV.dScale;                        
+                        else
+                            lMin = min(aBuffer, [], 'all');
+                            lMax = max(aBuffer, [], 'all');                     
+                        end
+                    else            
                         lMin = min(aBuffer, [], 'all');
-                        lMax = max(aBuffer, [], 'all');                                
-                    else
-                        lMin = min(aBuffer, [], 'all');
-                        lMax = max(aBuffer, [], 'all');
+                        lMax = max(aBuffer, [], 'all');                    
                     end
                 else
                     lMin = lAbsoluteMin;
@@ -229,22 +244,7 @@ end
             elseif strcmp(imageOrientation('get'), 'sagittal')
                 aBuffer = permute(aInput{iOffset}, [3 1 2]);
             end   
-if 0
-            if numel(atCoreMetaData) ~= 1
-                if ~isempty(atCoreMetaData{1}.ImagePositionPatient)
-
-                    if atCoreMetaData{2}.ImagePositionPatient(3) - ...
-                       atCoreMetaData{1}.ImagePositionPatient(3) > 0
-                        aBuffer = aBuffer(:,:,end:-1:1);                   
-
-                    end
-                end            
-            else
-                if strcmpi(atCoreMetaData{1}.PatientPosition, 'FFS')
-                    aBuffer = aBuffer(:,:,end:-1:1);                   
-                end
-            end 
-end                    
+                
             dicomBuffer('set', aBuffer);                      
         end
  %       if numel(tInput(iOffset).asFilesList) ~= 1
@@ -336,9 +336,20 @@ end
                 iOffset = 1;
             end
         end
-
-        refreshImages();                                         
+            
+        refreshImages();      
         pause(multiFrameSpeed('get'));
+        try
+            tRefreshRoi = roiTemplate('get');
+            if ~isempty(tRefreshRoi) 
+                for bb=1:numel(tRefreshRoi)
+                    if isvalid(tRefreshRoi{bb}.Object) 
+                        tRefreshRoi{bb}.Object.Visible = 'off';
+                    end
+                end
+            end
+        catch
+        end
     end
 
     if isvalid(pAxes3Text)

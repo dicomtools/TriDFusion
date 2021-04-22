@@ -29,15 +29,9 @@ function snapLinesToRectanglesCallback(hObject,~)
 
     dObjectOffset = '';
 
-    tlInput = inputTemplate('get');        
-    iOffset = get(uiSeriesPtr('get'), 'Value');
-    if iOffset > numel(tlInput)  
-        return;
-    end
-
-    tRoi = roiTemplate('get');
-    for bb=1:numel(tlInput(iOffset).tRoi)
-        if strcmpi(hObject.UserData.Tag, tlInput(iOffset).tRoi{bb}.Tag)
+    atRoi = roiTemplate('get');
+    for bb=1:numel(atRoi)
+        if strcmpi(hObject.UserData.Tag, atRoi{bb}.Tag)
             dObjectOffset = bb;
             break;
         end
@@ -48,40 +42,39 @@ function snapLinesToRectanglesCallback(hObject,~)
     end
 
     bFindFirst = false;
-    for bb=1:numel(tRoi)
-        if strcmpi(tRoi{bb}.Type, 'images.roi.rectangle') && ...
-           strcmpi(tRoi{bb}.Axe, tlInput(iOffset).tRoi{dObjectOffset}.Axe) && ...
-           tRoi{bb}.SliceNb == tlInput(iOffset).tRoi{dObjectOffset}.SliceNb
+    for bb=1:numel(atRoi)
+        if strcmpi(atRoi{bb}.Type, 'images.roi.rectangle') && ...
+           strcmpi(atRoi{bb}.Axe, atRoi{dObjectOffset}.Axe) && ...
+           atRoi{bb}.SliceNb == atRoi{dObjectOffset}.SliceNb
 
             if bFindFirst == true
-                xCentroid = tRoi{bb}.Object.Position(1)+tRoi{bb}.Object.Position(3)/2;
-                yCentroid = tRoi{bb}.Object.Position(2)+tRoi{bb}.Object.Position(4)/2;
+                xCentroid = atRoi{bb}.Object.Position(1)+atRoi{bb}.Object.Position(3)/2;
+                yCentroid = atRoi{bb}.Object.Position(2)+atRoi{bb}.Object.Position(4)/2;
 
                 hObject.UserData.Position(2,1) = xCentroid;
                 hObject.UserData.Position(2,2) = yCentroid; 
 
-                tlInput(iOffset).tRoi{dObjectOffset}.Position(2,1) = xCentroid;
-                tlInput(iOffset).tRoi{dObjectOffset}.Position(2,2) = yCentroid;
+                atRoi{dObjectOffset}.Position(2,1) = xCentroid;
+                atRoi{dObjectOffset}.Position(2,2) = yCentroid;
 
                 dLength = computeRoiLineLength(hObject.UserData);
                 hObject.UserData.Label = [num2str(dLength) ' mm'];
-                tlInput(iOffset).tRoi{dObjectOffset}.Label = [num2str(dLength) ' mm'];
-                tlInput(iOffset).tRoi{dObjectOffset}.Object.Label = [num2str(dLength) ' mm'];
+                atRoi{dObjectOffset}.Label = [num2str(dLength) ' mm'];
+                atRoi{dObjectOffset}.Object.Label = [num2str(dLength) ' mm'];
 
-                inputTemplate('set', tlInput);
-                roiTemplate('set', tlInput(iOffset).tRoi);
+                roiTemplate('set', atRoi);
                 break;
             end
 
             if bFindFirst == false
-                xCentroid = tRoi{bb}.Object.Position(1)+tRoi{bb}.Object.Position(3)/2;
-                yCentroid = tRoi{bb}.Object.Position(2)+tRoi{bb}.Object.Position(4)/2;
+                xCentroid = atRoi{bb}.Object.Position(1)+atRoi{bb}.Object.Position(3)/2;
+                yCentroid = atRoi{bb}.Object.Position(2)+atRoi{bb}.Object.Position(4)/2;
 
                 hObject.UserData.Position(1,1) = xCentroid;
                 hObject.UserData.Position(1,2) = yCentroid;
 
-                tlInput(iOffset).tRoi{dObjectOffset}.Position(1,1) = xCentroid;
-                tlInput(iOffset).tRoi{dObjectOffset}.Position(1,2) = yCentroid;
+                atRoi{dObjectOffset}.Position(1,1) = xCentroid;
+                atRoi{dObjectOffset}.Position(1,2) = yCentroid;
                 bFindFirst = true;
             end
         end

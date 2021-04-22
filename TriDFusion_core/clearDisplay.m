@@ -26,7 +26,7 @@ function clearDisplay()
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-
+    
     ptrFusionColorbar = uiFusionColorbarPtr('get');
     if ~isempty(ptrFusionColorbar) 
         ptrFusionColorbar.Position = [0 0 0 0];                
@@ -117,7 +117,21 @@ function clearDisplay()
         clear uiKernelMainPanel;
         uiKernelMainPanelPtr('set', '');
     end  
+    
+    uiRoiPanel = uiRoiPanelPtr('get');
+    if ~isempty(uiRoiPanel)
+        delete(uiRoiPanel);            
+        clear uiRoiPanel;
+        uiRoiPanelPtr('set', '');
+    end
 
+    uiRoiMainPanel = uiRoiMainPanelPtr('get');
+    if ~isempty(uiRoiMainPanel)
+        delete(uiRoiMainPanel);            
+        clear uiRoiMainPanel;
+        uiRoiMainPanelPtr('set', '');
+    end 
+    
     uiSliderCor = uiSliderCorPtr('get');
     if ~isempty(uiSliderCor)
         delete(uiSliderCor);
@@ -139,6 +153,34 @@ function clearDisplay()
         uiSliderTraPtr('set', '');
     end   
 
+    txt = axesText('get', 'axe');
+    if ~isempty(txt)
+        delete(txt);
+        clear txt;
+        axesText('set', 'axe', '');
+    end      
+    
+    txt1 = axesText('get', 'axes1');
+    if ~isempty(txt1)
+        delete(txt1);
+        clear txt1;
+        axesText('set', 'axes1', '');
+    end    
+    
+    txt2 = axesText('get', 'axes2');
+    if ~isempty(txt2)
+        delete(txt2);
+        clear txt2;
+        axesText('set', 'axes2', '');
+    end    
+    
+    txt3 = axesText('get', 'axes3');
+    if ~isempty(txt3)
+        delete(txt3);
+        clear txt3;
+        axesText('set', 'axes3', '');
+    end    
+    
     axef = axefPtr('get');
     if ~isempty(axef)
         delete(axef);

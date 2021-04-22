@@ -35,8 +35,8 @@ function sLabelName = roiLabelName()
     end  
 
     if isfield( tRoiInput(iOffset), 'tRoi' )            
-            sLabelName = sprintf('ROI %d', numel(tRoiInput(iOffset).tRoi)+1);
-        else                        
-            sLabelName = 'ROI 1';
+        sLabelName = sprintf('ROI %d', numel(tRoiInput(iOffset).tRoi)+1);
+    else                        
+        sLabelName = 'ROI 1';
     end
 end

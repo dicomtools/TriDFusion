@@ -45,7 +45,16 @@ function oneGate(sDirection)
        gateUseSeriesUID('get') == true                        
         return
     end     
-
+    
+    tRefreshRoi = roiTemplate('get');
+    if ~isempty(tRefreshRoi) 
+        for bb=1:numel(tRefreshRoi)
+            if isvalid(tRefreshRoi{bb}.Object) 
+                tRefreshRoi{bb}.Object.Visible = 'off';
+            end
+        end
+    end  
+    
     set(uiSeriesPtr('get'), 'Enable', 'off');
 
     aInput = inputBuffer('get');                     
@@ -106,21 +115,14 @@ function oneGate(sDirection)
     end  
 
     set(uiSeriesPtr('get'), 'Value', iOffset);
-    
-    tRefreshRoi = roiTemplate('get');
-    if ~isempty(tRefreshRoi) 
-        for bb=1:numel(tRefreshRoi)
-            if isvalid(tRefreshRoi{bb}.Object) 
-                tRefreshRoi{bb}.Object.Visible = 'off';
-            end
-        end
-    end      
-    
-    if isfield(tInput(iOffset), 'tRoi')
-        roiTemplate('set', tInput(iOffset).tRoi);
-    else
-        roiTemplate('set', '');        
-    end
+        
+
+%    if isfield(tInput(iOffset), 'tRoi')
+%        atRoi = roiTemplate('get');
+%        if isempty(atRoi)
+%            roiTemplate('set', tInput(iOffset).tRoi);
+%        end     
+%    end
 
     aBuffer = dicomBuffer('get');                                  
     if isempty(aBuffer)    
@@ -149,17 +151,32 @@ function oneGate(sDirection)
 
     if gateUseSeriesUID('get') == false && ...
        gateLookupTable('get') == true
+   
         if strcmpi(atCoreMetaData{1}.Modality, 'ct')
-            [lMax, lMin] = computeWindowLevel(2000, 0);
+            if min(aBuffer, [], 'all') >= 0
+                lMin = min(aBuffer, [], 'all');
+                lMax = max(aBuffer, [], 'all');                 
+            else
+                [lMax, lMin] = computeWindowLevel(2000, 0);
+            end    
         else
             if strcmpi(gateLookupType('get'), 'Relative')
-                if strcmpi(atCoreMetaData{1}.Modality, 'pt')
+                
+                sUnitDisplay = getSerieUnitValue(iOffset);                        
+
+                if strcmpi(sUnitDisplay, 'SUV')
+                    tQuant = quantificationTemplate('get');                                
+                    if tQuant.tSUV.dScale                
+                        lMin = suvWindowLevel('get', 'min')/tQuant.tSUV.dScale;  
+                        lMax = suvWindowLevel('get', 'max')/tQuant.tSUV.dScale;                        
+                    else
+                        lMin = min(aBuffer, [], 'all');
+                        lMax = max(aBuffer, [], 'all');                     
+                    end
+                else            
                     lMin = min(aBuffer, [], 'all');
-                    lMax = max(aBuffer, [], 'all');
-                else
-                    lMin = min(aBuffer, [], 'all');
-                    lMax = max(aBuffer, [], 'all');
-                end
+                    lMax = max(aBuffer, [], 'all');                    
+                end                              
             else
                 for jj=1:numel(aInput)
                     set(uiSeriesPtr('get'), 'Value', jj);

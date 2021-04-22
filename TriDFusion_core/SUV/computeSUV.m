@@ -33,19 +33,22 @@ function dSUVconv = computeSUV(tSUVMetaData)
 
     dSUVconv = 0;
 
-    if isfield(tSUVMetaData, 'dose') 
+    if isfield(tSUVMetaData, 'RadiopharmaceuticalInformationSequence') 
 
-        if isempty(tSUVMetaData.dose.RadionuclideTotalDose) || ...
-           isempty(tSUVMetaData.dose.RadiopharmaceuticalStartDateTime) ...
+        if isempty(tSUVMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose) || ...
+           isempty(tSUVMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime) ...
             return; 
         end
 
-        injDose     = str2double(tSUVMetaData.dose.RadionuclideTotalDose);
-        injDateTime = tSUVMetaData.dose.RadiopharmaceuticalStartDateTime;      
+        injDose     = str2double(tSUVMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose);
+        injDateTime = tSUVMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;      
         acqTime     = tSUVMetaData.SeriesTime;
         acqDate     = tSUVMetaData.SeriesDate;
         patWeight   = str2double(tSUVMetaData.PatientWeight);
-        halfLife    = str2double(tSUVMetaData.dose.RadionuclideHalfLife);
+        if patWeight == 0 || isnan(patWeight)
+            patWeight =1;
+        end
+        halfLife    = str2double(tSUVMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife);
 
         if numel(injDateTime) == 14
             injDateTime = sprintf('%s.00', injDateTime);
@@ -65,7 +68,7 @@ function dSUVconv = computeSUV(tSUVMetaData)
 
         % calculate conversion factor
 
-        if strcmpi(tSUVMetaData.Units,'bqml')
+        if strcmpi(tSUVMetaData.Units, 'bqml')
             corrInj = injDose / exp(log(2) * relT / halfLife); %in Bq and seconds
             dSUVconv = patWeight / corrInj; %assuming massDensity = 1kg/L
             dSUVconv = dSUVconv * 1e3; %because image values mL -> L

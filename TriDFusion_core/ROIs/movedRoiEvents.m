@@ -27,31 +27,42 @@ function movedRoiEvents(hObject, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    tMovedInput = inputTemplate('get');        
+    tInput = inputTemplate('get');        
     iOffset = get(uiSeriesPtr('get'), 'Value');
-    if iOffset > numel(tMovedInput)  
+    if iOffset > numel(tInput)  
         return;
     end
+    
+    atRoi = roiTemplate('get'); 
 
-    for bb=1:numel(tMovedInput(iOffset).tRoi)
-        if strcmpi(hObject.Tag, tMovedInput(iOffset).tRoi{bb}.Tag)
-            tMovedInput(iOffset).tRoi{bb}.Position = hObject.Position;
+    for bb=1:numel(atRoi)
+        if strcmpi(hObject.Tag, atRoi{bb}.Tag)
+            
+            atRoi{bb}.Position = hObject.Position;
+            tInput(iOffset).tRoi{bb}.Position = hObject.Position;
 
             switch lower(hObject.Type)
                 case lower('images.roi.circle')
-                    tMovedInput(iOffset).tRoi{bb}.Radius = hObject.Radius;
+                    atRoi{bb}.Radius = hObject.Radius;
+                    tInput(iOffset).tRoi{bb}.Radius = hObject.Radius;
 
                  case lower('images.roi.ellipse')
-                    tMovedInput(iOffset).tRoi{bb}.SemiAxes      = hObject.SemiAxes;
-                    tMovedInput(iOffset).tRoi{bb}.RotationAngle = hObject.RotationAngle;                                       
+                    atRoi{bb}.SemiAxes      = hObject.SemiAxes;
+                    atRoi{bb}.RotationAngle = hObject.RotationAngle;  
+                    tInput(iOffset).tRoi{bb}.SemiAxes = hObject.SemiAxes;
+                    tInput(iOffset).tRoi{bb}.RotationAngle = hObject.RotationAngle;
+                    
                  case lower('images.roi.line')
                     dLength = computeRoiLineLength(hObject);
-                    tMovedInput(iOffset).tRoi{bb}.Label = [num2str(dLength) ' mm'];     
-                    tMovedInput(iOffset).tRoi{bb}.Object.Label = [num2str(dLength) ' mm']; 
+                    atRoi{bb}.Label = [num2str(dLength) ' mm'];     
+                    atRoi{bb}.Object.Label = [num2str(dLength) ' mm']; 
+                    tInput(iOffset).tRoi{bb}.Label =  [num2str(dLength) ' mm'];
              end
 
-            inputTemplate('set', tMovedInput);
-            roiTemplate('set', tMovedInput(iOffset).tRoi);
+            roiTemplate('set', atRoi);
+            inputTemplate('set', tInput);
+            
+            setVoiRoiSegPopup();
 
             break;
         end

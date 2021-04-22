@@ -1,5 +1,5 @@
-function setContours()
-%function setContours()
+function setContours(tContours)
+%function setContours(tContours)
 %Set Contours to Input Template.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -31,7 +31,11 @@ function setContours()
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     atInput    = inputTemplate('get');
-    atContours = inputContours('get');
+    if exist('tContours','var')
+        atContours = tContours;
+    else
+        atContours = inputContours('get');
+    end
      
     bNbContours = 0;
     bMultipleSeries = false;
@@ -41,7 +45,12 @@ function setContours()
     if isempty(atContours)
         return;
     end
-        
+    
+    try
+            
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+%    drawnow; 
+    
     for bb=1:numel(atInput)
         
         for cc=1:numel(atContours)
@@ -51,7 +60,7 @@ function setContours()
                 if strcmpi(atInput(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Find matching series
                            atContours{cc}(dd).Referenced.SeriesInstanceUID)
                        
-                    hold on;                        
+ %                   hold on;                        
                        
                     bNbContours = bNbContours+1;
                     
@@ -78,33 +87,37 @@ function setContours()
                     xfm = getAffineXfm(atInput(bb).atDicomInfo);
                                         
                     asTag = [];
-                                        
+                    
+                    set(uiSeriesPtr('get'), 'Value', bb);
+                    
+                    drawnow;
+                    
+                    progressBar( bNbContours/numel(atContours{cc})-0.0001, sprintf('Volume %d: Processing contour %d/%d', bb, bNbContours, numel(atContours{cc}) ));  
+                    
                     for j=1:numel(segments)
-                        
-                        progressBar( j/numel(segments), sprintf('Volume %d: Processing contour ROI %d/%d', bb, j, numel(segments)) );      
-                        
+                                                                        
                         out = pctransform(pointCloud(segments{j}),invert(affine3d(xfm')));
 
                         points{j} = [abs(out.Location(:,1)) abs(out.Location(:,2))] ;
                         z = round(abs(out.Location(:,3)));   % Axial                    
                         
-                        ROI.Position = [points{j}(:,1), points{j}(:,2)];
+                        ROI.Position = [points{j}(:,1)+1, points{j}(:,2)+1];
 
                         sliceNumber('set', 'axial', z(1)+1);
 
-                        sTag   = num2str(rand);
+                        sTag   = num2str(randi([-(2^52/2),(2^52/2)],1));
                         axRoi  = axes3Ptr('get');
                         aColor = [atContours{cc}(dd).Color(1)/255 atContours{cc}(dd).Color(2)/255 atContours{cc}(dd).Color(3)/255];
                         sLabel = atContours{cc}(dd).ROIName;
-                        
-                        pRoi = drawfreehand(axRoi, 'Position', ROI.Position, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'off');    
-                        
-                        gca = axes3Ptr('get');
+                       
+                        pRoi = drawfreehand(axRoi, 'Position', ROI.Position, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'off', 'FaceSelectable', 0, 'FaceAlpha', 0);  
+                        pRoi.Waypoints(:) = false;
                                             
-                        addRoi(pRoi);                  
+                        addRoi(pRoi, bb);                  
 
                         roiDefaultMenu(pRoi);
 
+                        uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback); 
                         uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', pRoi, 'Callback', @clearWaypointsCallback); 
 
                         cropMenu(pRoi);
@@ -124,13 +137,13 @@ function setContours()
             end
         end
     end
-    
+      
     if bMultipleSeries == true
         set(uiSeriesPtr('get'), 'Value', dSeriesValue);
         setSeriesCallback();
-    end    
-    
-    if bNbContours ~= 0
+    end       
+        
+    if bNbContours ~= 0 && ~exist('tContours','var')
         
         set(uiCorWindowPtr('get'), 'Visible', 'on');
         set(uiSagWindowPtr('get'), 'Visible', 'on');
@@ -143,13 +156,20 @@ function setContours()
         set(uiSliderSagPtr('get'), 'Visible', 'on');   
         set(uiSliderTraPtr('get'), 'Visible', 'on');      
 
-        hold off;
+%        hold off;
     
         refreshImages();
         
         progressBar( 1, 'Ready');      
 
     end
+    
+    catch
+        progressBar(1, 'Error:setContours()');          
+    end  
+
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    drawnow; 
     
     % From Use DICOM RT for 3D Semantic Segmentation of Medical images
     % by Takuji Fukumoto

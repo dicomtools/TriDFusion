@@ -26,7 +26,23 @@ function imEdge = getEdgeDetection(im, sMethod, dFudgeFactor)
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
-               
+    
+    if isempty(im)
+        return;
+    end
+
+    if switchTo3DMode('get')     == true ||  ...
+       switchToIsoSurface('get') == true || ...
+       switchToMIPMode('get')    == true
+
+        return;
+    end
+
+    try  
+            
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    drawnow;
+    
     aSize = size(im);
     imMask = zeros(aSize);
 
@@ -57,5 +73,11 @@ function imEdge = getEdgeDetection(im, sMethod, dFudgeFactor)
     
     imEdge(imMask == 0) = lMin;
     imEdge(imMask ~= 0) = lMax;
+    
+    catch
+        progressBar(1, 'Error:getEdgeDetection()');           
+    end
 
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    drawnow; 
 end
