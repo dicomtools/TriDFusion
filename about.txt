@@ -12,7 +12,7 @@ TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WA
 
 TriDFusion development has been led by: Daniel Lafontaine
 
-Lead programmer:
+Project Manager and Programmer:
    Daniel Lafontaine
    lafontad@mskcc.org
    Memorial Sloan Kettering 

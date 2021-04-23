@@ -1399,10 +1399,12 @@ function initRoiPanel()
                     aBuffer(aBuffer>=dMaxTreshold) = cropValue('get');                                        
                 end                    
                 
-                BW = aBuffer;                
-                BW(BW == cropValue('get'))=0;
-                BW(BW ~= cropValue('get'))=1;
-
+%                BW = aBuffer;                
+%                BW(BW == cropValue('get'))=0;
+%                BW(BW ~= 0)=1;
+                
+                BW = imbinarize(aBuffer);
+                
                 if bMultipleObjects == true                    
                     CC = bwconncomp(BW, 6);
 %                    S = regionprops(CC, 'Area');
@@ -1776,9 +1778,11 @@ function initRoiPanel()
                     aVoiBuffer(aVoiBuffer>=dMaxTreshold) = cropValue('get');                                        
                 end   
 
-                BW = aVoiBuffer;                
-                BW(BW == cropValue('get'))=0;
-                BW(BW ~= cropValue('get'))=1;
+%                BW = aVoiBuffer;                
+%                BW(BW == cropValue('get'))=0;
+%                BW(BW ~= 0)=1;
+                
+                BW = imbinarize(aVoiBuffer);
 
                 if bMultipleObjects == true                    
                     CC = bwconncomp(BW, 6);

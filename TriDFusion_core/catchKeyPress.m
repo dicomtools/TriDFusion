@@ -268,9 +268,11 @@ end
 %        atMetaData = dicomMetaData('get');                
         sUnitDisplay = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));                        
          if strcmpi(sUnitDisplay, 'SUV')
-            tQuant = quantificationTemplate('get');   
-            lMin = suvWindowLevel('get', 'min')/tQuant.tSUV.dScale;  
-            lMax = suvWindowLevel('get', 'max')/tQuant.tSUV.dScale;                   
+%            tQuant = quantificationTemplate('get');   
+%            lMin = suvWindowLevel('get', 'min')/tQuant.tSUV.dScale;  
+%            lMax = suvWindowLevel('get', 'max')/tQuant.tSUV.dScale;   
+            lMin = min(dicomBuffer('get'), [], 'all');
+            lMax = max(dicomBuffer('get'), [], 'all');
         else
             lMin = min(dicomBuffer('get'), [], 'all');
             lMax = max(dicomBuffer('get'), [], 'all');
