@@ -315,9 +315,10 @@ function initSegPanel()
              dUpperValue = dCTWindow;
              dLowerValue = dCTLevel;
          else
-             dUpperValue = dUpperValue*tQuant.tSUV.dScale;
-             dLowerValue = dLowerValue*tQuant.tSUV.dScale;
-                       
+             if isfield(tQuant, 'tSUV')
+                dUpperValue = dUpperValue*tQuant.tSUV.dScale;
+                dLowerValue = dLowerValue*tQuant.tSUV.dScale;
+             end                       
          end
          
          imageSegEditValue('set', 'upper', dUpperValue);

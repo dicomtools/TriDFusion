@@ -286,8 +286,8 @@ function figRoiDialogCallback(hObject, ~)
                 uimenu(c,'Label', 'Edit Color', 'Callback',@figRoiEditColorCallback);
                 uimenu(c,'Label', 'Hide/View Face Alpha', 'Callback', @figRoiHideViewFaceAlhaCallback); 
 
-                uimenu(c,'Label', 'Histogram'  , 'Separator', 'on' , 'Callback',@figRoiHistogramCallback);
-                uimenu(c,'Label', 'Cummulative', 'Separator', 'off', 'Callback',@figRoiHistogramCallback);
+                uimenu(c,'Label', 'Bar Histogram'  , 'Separator', 'on' , 'Callback',@figRoiHistogramCallback);
+                uimenu(c,'Label', 'Cummulative DVH', 'Separator', 'off', 'Callback',@figRoiHistogramCallback);
 
                 aVoiRoiTag = voiRoiTag('get');
                 tRoiInput = roiTemplate('get');
@@ -319,15 +319,17 @@ function figRoiDialogCallback(hObject, ~)
                 end
             end
 
-            imMenu = dicomBuffer('get');
-            if bDispayMenu == true && size(imMenu, 3) ~= 1
+            if bDispayMenu == true && size(dicomBuffer('get'), 3) ~= 1
                 c = uicontextmenu(figRoiWindow);
                 lbVoiRoiWindow.UIContextMenu = c;
 
-                uimenu(c,'Label', 'Create Volume', 'Callback',@figRoiCreateVolumeCallback);
+                uimenu(c,'Label', 'Create Volume', 'Separator', 'off', 'Callback',@figRoiCreateVolumeCallback);
+                uimenu(c,'Label', 'Cummulative DVH', 'Separator', 'on' , 'Callback',@figRoiMultiplePlotCallback);
+                
             else
                 lbVoiRoiWindow.UIContextMenu = [];
             end
+                        
         end
 
         function figRoiHistogramCallback(hObject, ~)            
@@ -337,12 +339,12 @@ function figRoiDialogCallback(hObject, ~)
             tRoiInput = roiTemplate('get');
             tVoiInput = voiTemplate('get');
 
-            if     strcmpi(get(hObject, 'Label'), 'Histogram')
+            if     strcmpi(get(hObject, 'Label'), 'Bar Histogram')
 
                 histogramMenuOption('set', true);
                 cummulativeMenuOption('set', false);
                 profileMenuOption('set', false);
-            elseif strcmpi(get(hObject, 'Label'), 'Cummulative')
+            elseif strcmpi(get(hObject, 'Label'), 'Cummulative DVH')
 
                 histogramMenuOption('set', false);
                 cummulativeMenuOption('set', true);
@@ -432,6 +434,34 @@ function figRoiDialogCallback(hObject, ~)
             setVoiRoiListbox(bSUVUnit, bSegmented);
 
             setVoiRoiSegPopup();
+
+        end
+        
+        function figRoiMultiplePlotCallback(hObject, ~)
+            
+            aVoiRoiTag = voiRoiTag('get');
+            
+            if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+                bSUVUnit = true;
+            else
+                bSUVUnit = false;
+            end
+
+            if strcmpi(get(mSegmented, 'Checked'), 'on')
+                bSegmented = true;
+            else
+                bSegmented = false;
+            end          
+            
+            sType = get(hObject, 'Label');
+            atVoiRoiTag = aVoiRoiTag(get(lbVoiRoiWindow, 'Value'));
+         
+            figRoiMultiplePlot(sType, ...
+                               atVoiRoiTag, ...
+                               bSUVUnit, ...
+                               tInput(dOffset).bDoseKernel, ...
+                               bSegmented ...
+                               );
 
         end
 
@@ -970,7 +1000,7 @@ function figRoiDialogCallback(hObject, ~)
                         if isvalid(tRoiInput{vv}.Object)
                             if strcmpi(tRoiInput{vv}.Tag, ptrObject.Tag)
 
-                                tRoiInput.Color = sColor;
+                                tRoiInput{vv}.Color = sColor;
                                 tRoiInput{vv}.Object.Color = sColor;
 
                                 roiTemplate('set', tRoiInput);
@@ -1422,6 +1452,14 @@ function figRoiDialogCallback(hObject, ~)
         if iOffset > numel(tInput)
             return;
         end
+        
+        try            
+            matlab.io.internal.getExcelInstance;
+            bUseWritecell = false; 
+        catch exception %#ok<NASGU>
+%            warning(message('MATLAB:xlswrite:NoCOMServer'));
+            bUseWritecell = true; 
+        end    
 
         atMetaData = dicomMetaData('get');
 
@@ -1505,8 +1543,12 @@ function figRoiDialogCallback(hObject, ~)
                 asVoiRoiHeader{4,1} = sprintf('Accession Number: %s', atMetaData{1}.AccessionNumber);
                 asVoiRoiHeader{5,1} = sprintf('Series Date: %s', atMetaData{1}.SeriesDate);
                 asVoiRoiHeader{6,1} = sprintf('Series Time: %s', atMetaData{1}.SeriesTime);
-
-                writecell(asVoiRoiHeader(:),sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A1');
+                
+                if bUseWritecell == true
+                    writecell(asVoiRoiHeader(:),sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A1');
+                else
+                    xlswrite(sprintf('%s%s', path, file), asVoiRoiHeader, 1, 'A1');
+                end
 
                 asVoiRoiTable{1,1}  = 'Name';
                 asVoiRoiTable{1,2}  = 'Image number';
@@ -1522,7 +1564,11 @@ function figRoiDialogCallback(hObject, ~)
                 asVoiRoiTable{1,12} = 'Volume cm3';
                 asVoiRoiTable{1,13} = 'Subtraction';
 
-                writecell(asVoiRoiTable(1,:),sprintf('%s%s', path, file), 'Sheet',1, 'Range', 'A8');
+                if bUseWritecell == true
+                    writecell(asVoiRoiTable(1,:),sprintf('%s%s', path, file), 'Sheet',1, 'Range', 'A8');
+                else
+                    xlswrite(sprintf('%s%s', path, file), asVoiRoiTable, 1, 'A8');
+                end
 
                 dLineOffset = 9;
                 if ~isempty(tVoiInput)
@@ -1546,7 +1592,12 @@ function figRoiDialogCallback(hObject, ~)
                             asVoiCell{12,aa} = tVoiComputed.volume;
 
                             sCell = sprintf('A%d', dLineOffset);
-                            writecell([asVoiCell{:,aa}],sprintf('%s%s', path, file), 'Sheet',1, 'Range', sCell);
+                            if bUseWritecell == true                            
+                                writecell([asVoiCell{:,aa}],sprintf('%s%s', path, file), 'Sheet',1, 'Range', sCell);
+                            else
+                                xlswrite(sprintf('%s%s', path, file), [asVoiCell{:,aa}], 1, sCell);
+                            end
+                            
                             dLineOffset = dLineOffset+1;
 
                             for cc=1:numel(tVoiInput{aa}.RoisTag)
@@ -1590,7 +1641,12 @@ function figRoiDialogCallback(hObject, ~)
                                             end
 
                                             sCell = sprintf('A%d', dLineOffset);
-                                            writecell([asRoiCell{:,bb}],sprintf('%s%s', path, file), 'Sheet',1, 'Range', sCell);
+                                            if bUseWritecell == true                            
+                                                writecell([asRoiCell{:,bb}],sprintf('%s%s', path, file), 'Sheet',1, 'Range', sCell);
+                                            else
+                                                xlswrite(sprintf('%s%s', path, file), [asRoiCell{:,bb}], 1, sCell);
+                                            end
+                                            
                                             dLineOffset = dLineOffset+1;
 
                                         end
@@ -1642,7 +1698,11 @@ function figRoiDialogCallback(hObject, ~)
                             end
 
                             sCell = sprintf('A%d', dLineOffset);
-                            writecell([asRoiCell{:,bb}],sprintf('%s%s', path, file), 'Sheet',1, 'Range', sCell);
+                            if bUseWritecell == true                            
+                                writecell([asRoiCell{:,bb}],sprintf('%s%s', path, file), 'Sheet',1, 'Range', sCell);
+                            else
+                                xlswrite(sprintf('%s%s', path, file), [asRoiCell{:,bb}], 1, sCell);
+                            end
                             dLineOffset = dLineOffset+1;
 
                         end

@@ -39,10 +39,9 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
     
     paAxeBackgroundColor = viewerAxesColor('get');
     
-    ptrBar  = '';
     ptrHist = '';
-    ptrLine = '';
-    ptrPlot = '';
+    ptrPlotCummulative = '';
+    ptrPlotProfile = '';
 
     dLastSliderValue = '';
     dInitialBinsValue = 256;
@@ -78,7 +77,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
         sHistogramOption = 'off';
     end
 
-    mHistogram = uimenu(mHistOptions,'Label', 'Histogram', 'Checked',sHistogramOption, 'Callback', @histogramTypeCallback);
+    mHistogram = uimenu(mHistOptions,'Label', 'Bar Histogram', 'Checked',sHistogramOption, 'Callback', @histogramTypeCallback);
 
     if cummulativeMenuOption('get') == true
         sCummulativeOption = 'on';
@@ -86,7 +85,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
         sCummulativeOption = 'off';
     end
 
-    mCummulative = uimenu(mHistOptions,'Label', 'Cummulative', 'Checked',sCummulativeOption, 'Callback', @histogramTypeCallback);
+    mCummulative = uimenu(mHistOptions,'Label', 'Cummulative DVH', 'Checked',sCummulativeOption, 'Callback', @histogramTypeCallback);
 
     if profileMenuOption('get') == true
         sProfileOption = 'on';
@@ -103,8 +102,8 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
         set(mProfile, 'Visible', 'off');
     end
 
-    mHistTools = uimenu(figRoiHistogramWindow,'Label','Data Cursor');
-    uimenu(mHistTools, 'Label','Data Cursor', 'Checked', 'on', 'Callback', @setHistogramDataCursorCallback);
+%    mHistTools = uimenu(figRoiHistogramWindow,'Label','Data Cursor');
+%    uimenu(mHistTools, 'Label','Data Cursor', 'Checked', 'on', 'Callback', @setHistogramDataCursorCallback);
 
 %    if integrateToBrowser('get') == true
 %        sLogo = './TriDFusion/logo.png';
@@ -178,9 +177,9 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
         axeHistogram.XLabel.String = 'Intensity';
         axeHistogram.YLabel.String = 'Frequency';
         if strcmpi(ptrObject.ObjectType, 'voi')
-            axeHistogram.Title.String  = ['Volume Histogram - ' ptrObject.Label];
+            axeHistogram.Title.String  = ['Volume Bar Histogram - ' ptrObject.Label];
         else
-            axeHistogram.Title.String  = ['Region Histogram - ' ptrObject.Label];
+            axeHistogram.Title.String  = ['Region Bar Histogram - ' ptrObject.Label];
         end
         axeHistogram.Title.Color = viewerForegroundColor('get');
         axeHistogram.Color = paAxeBackgroundColor;
@@ -191,28 +190,38 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
         set(txtBins, 'String', 'Bar Width');
 
         dLastSliderValue = 0;
-        set(sliBins, 'Value', 0);
+        set(sliBins, 'Value', 0);     
+        
 
-        aXSum = cumsum(imCDataMasked, 'reverse');
-        aYSum = 1:1:numel(imCDataMasked);
-
+      %      aXSum = cumsum(imCDataMasked, 'reverse');
+      %      aYSum = 1:1:numel(imCDataMasked);
+      
         try
-            ptrBar = bar(axeHistogram, aXSum, aYSum, dInitialBarWidth, 'EdgeColor', 'none', 'FaceColor', ptrObject.Color);
+            ptrPlotCummulative = plotCummulative(axeHistogram, imCDataMasked, ptrObject.Color);
+        
+            set(axeHistogram, 'XLim', [min(double(imCDataMasked),[],'all') max(double(imCDataMasked),[],'all')]);
+            set(axeHistogram, 'YLim', [0 1]);
         catch
-            ptrBar = '';
+            ptrPlotCummulative = '';
         end
-        ptrLine = line(axeHistogram, aXSum, aYSum, 'Color', ptrObject.Color);
+        
+%        try
+%            ptrBar = bar(axeHistogram, aXSum, aYSum, dInitialBarWidth, 'EdgeColor', 'none', 'FaceColor', ptrObject.Color);
+%        catch
+%            ptrBar = '';
+%        end
+%        ptrLine = line(axeHistogram, aXSum, aYSum, 'Color', ptrObject.Color);
         
         axeHistogram.XColor = viewerForegroundColor('get');
         axeHistogram.YColor = viewerForegroundColor('get');
         axeHistogram.ZColor = viewerForegroundColor('get');
         
-        axeHistogram.XLabel.String = 'Intensity (dose)';
-        axeHistogram.YLabel.String = 'Volume (cells)';
+        axeHistogram.XLabel.String = 'Intensity';
+        axeHistogram.YLabel.String = 'Probability';
         if strcmpi(ptrObject.ObjectType, 'voi')
-            axeHistogram.Title.String  = ['Cummulative Volume - ' ptrObject.Label];
+            axeHistogram.Title.String  = ['Cummulative DVH Volume - ' ptrObject.Label];
         else
-            axeHistogram.Title.String  = ['Cummulative Region - ' ptrObject.Label];
+            axeHistogram.Title.String  = ['Cummulative DVH Region - ' ptrObject.Label];
         end
         axeHistogram.Title.Color = viewerForegroundColor('get');
         axeHistogram.Color = paAxeBackgroundColor;
@@ -232,8 +241,8 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
         yValues = ptrObject.Position(:,2);
 
         aProfile = improfile(imCData, xValues, yValues);
-        ptrPlot = plot(axeHistogram, aProfile);
-        set(ptrPlot, 'Color', ptrObject.Color);
+        ptrPlotProfile = plot(axeHistogram, aProfile);
+        set(ptrPlotProfile, 'Color', ptrObject.Color);
         
         axeHistogram.XColor = viewerForegroundColor('get');
         axeHistogram.YColor = viewerForegroundColor('get');
@@ -277,9 +286,9 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
         end
 
         if histogramMenuOption('get') == true
-            sTitle = [sType ' Histogram'];
+            sTitle = [sType ' Bar Histogram'];
         elseif cummulativeMenuOption('get') == true
-            sTitle = ['Cummulative ' sType];
+            sTitle = ['Cummulative DVH' sType];
         else
             sTitle = [sType ' Profile'];
        end
@@ -330,16 +339,16 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
 
     function histogramTypeCallback(hObject, ~)
 
-        if strcmpi(get(hObject, 'Label'), 'Cummulative')
+        if strcmpi(get(hObject, 'Label'), 'Cummulative DVH')
 
             if ~isempty(ptrHist)
                 delete(ptrHist);
                 ptrHist = '';
             end
 
-            if ~isempty(ptrPlot)
-                delete(ptrPlot);
-                ptrPlot = '';
+            if ~isempty(ptrPlotProfile)
+                delete(ptrPlotProfile);
+                ptrPlotProfile = '';
             end
 
             histogramMenuOption  ('set', false);
@@ -356,27 +365,39 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
             dLastSliderValue = 0;
             set(sliBins, 'Value', 0);
 
-            aXSum = cumsum(imCDataMasked, 'reverse');
-            aYSum = 1:1:numel(imCDataMasked);
+       %     [counts, bins] = histcounts(imCDataMasked);
+        %    cdf = cumsum(counts);           
+            
 
+      %      aXSum = cumsum(imCDataMasked, 'reverse');
+      %      aYSum = 1:1:numel(imCDataMasked);
             try
-                ptrBar = bar(axeHistogram, aXSum, aYSum, dInitialBarWidth, 'EdgeColor', 'none', 'FaceColor', ptrObject.Color);
-            catch
-                ptrBar = '';
-            end
+                ptrPlotCummulative = plotCummulative(axeHistogram, imCDataMasked, ptrObject.Color);
 
-            ptrLine = line(axeHistogram, aXSum, aYSum, 'Color', ptrObject.Color);
+                set(axeHistogram, 'XLim', [min(double(imCDataMasked),[],'all') max(double(imCDataMasked),[],'all')]);
+                set(axeHistogram, 'YLim', [0 1]);
+            catch
+                ptrPlotCummulative = '';
+            end
+           
+%            try
+%                ptrBar = bar(axeHistogram, aXSum, aYSum, dInitialBarWidth, 'EdgeColor', 'none', 'FaceColor', ptrObject.Color);
+%            catch
+%                ptrBar = '';
+%            end
+
+      %      ptrLine = line(axeHistogram, aXSum, aYSum, 'Color', ptrObject.Color);
             
             axeHistogram.XColor = viewerForegroundColor('get');
             axeHistogram.YColor = viewerForegroundColor('get');
             axeHistogram.ZColor = viewerForegroundColor('get');
         
-            axeHistogram.XLabel.String = 'Intensity (dose)';
-            axeHistogram.YLabel.String = 'Volume (cells)';
+            axeHistogram.XLabel.String = 'Intensity';
+            axeHistogram.YLabel.String = 'Probability';
             if strcmpi(ptrObject.ObjectType, 'voi')
-                axeHistogram.Title.String  = ['Cummulative Volume - ' ptrObject.Label];
+                axeHistogram.Title.String  = ['Cummulative DVH Volume - ' ptrObject.Label];
             else
-                axeHistogram.Title.String  = ['Cummulative Region - ' ptrObject.Label];
+                axeHistogram.Title.String  = ['Cummulative DVH Region - ' ptrObject.Label];
             end
             axeHistogram.Title.Color = viewerForegroundColor('get');
             axeHistogram.Color = paAxeBackgroundColor;
@@ -385,21 +406,16 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
             set(txtBins     , 'Visible', 'off');
             set(edtBinsValue, 'Visible', 'off');
 
-        elseif strcmpi(get(hObject, 'Label'), 'Histogram')
+        elseif strcmpi(get(hObject, 'Label'), 'Bar Histogram')
 
-            if ~isempty(ptrBar)
-                delete(ptrBar);
-                ptrBar = '';
+            if ~isempty(ptrPlotCummulative)
+                delete(ptrPlotCummulative);
+                ptrPlotCummulative = '';
             end
 
-            if ~isempty(ptrLine)
-                delete(ptrLine);
-                ptrLine = '';
-            end
-
-            if ~isempty(ptrPlot)
-                delete(ptrPlot);
-                ptrPlot = '';
+            if ~isempty(ptrPlotProfile)
+                delete(ptrPlotProfile);
+                ptrPlotProfile = '';
             end
 
             histogramMenuOption  ('set', true);
@@ -427,9 +443,9 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
             axeHistogram.XLabel.String = 'Intensity';
             axeHistogram.YLabel.String = 'Frequency';
             if strcmpi(ptrObject.ObjectType, 'voi')
-                axeHistogram.Title.String  = ['Volume Histogram - ' ptrObject.Label];
+                axeHistogram.Title.String  = ['Volume Bar Histogram - ' ptrObject.Label];
             else
-                axeHistogram.Title.String  = ['Region Histogram - ' ptrObject.Label];
+                axeHistogram.Title.String  = ['Region Bar Histogram - ' ptrObject.Label];
             end
             axeHistogram.Title.Color = viewerForegroundColor('get');
             axeHistogram.Color = paAxeBackgroundColor;
@@ -445,14 +461,9 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                 ptrHist = '';
             end
 
-            if ~isempty(ptrBar)
-                delete(ptrBar);
-                ptrBar = '';
-            end
-
-            if ~isempty(ptrLine)
-                delete(ptrLine);
-                ptrLine = '';
+            if ~isempty(ptrPlotCummulative)
+                delete(ptrPlotCummulative);
+                ptrPlotCummulative = '';
             end
 
             histogramMenuOption  ('set', false);
@@ -470,8 +481,8 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
             yValues = ptrObject.Position(:,2);
 
             aProfile = improfile(imCData, xValues, yValues);
-            ptrPlot = plot(axeHistogram, aProfile);
-            set(ptrPlot, 'Color', ptrObject.Color);
+            ptrPlotProfile = plot(axeHistogram, aProfile);
+            set(ptrPlotProfile, 'Color', ptrObject.Color);
             
             axeHistogram.XColor = viewerForegroundColor('get');
             axeHistogram.YColor = viewerForegroundColor('get');
@@ -532,18 +543,6 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
 
         end
 
-        if ~isempty(ptrBar) % Cummulative histogram
-
-            dBarWidth = round((dInitialBinsValue*2)*dSliderValue);
-            if dBarWidth == 0
-                dBarWidth =1;
-            end
-            ptrBar.BarWidth = dBarWidth;
-
-            set(edtBinsValue, 'String', num2str(dBarWidth));
-
-        end
-
         dLastSliderValue = dSliderValue;
 
     end
@@ -574,6 +573,14 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
            cummulativeMenuOption('get') == true || ...
            profileMenuOption('get')     == true
 
+            try            
+                matlab.io.internal.getExcelInstance;
+                bUseWritecell = false; 
+            catch exception %#ok<NASGU>
+    %            warning(message('MATLAB:xlswrite:NoCOMServer'));
+                bUseWritecell = true; 
+            end   
+       
             filter = {'*.xlsx'};
             info = dicomMetaData('get');
 
@@ -622,75 +629,161 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                 asHistHeader{5,1} = sprintf('Series Date: %s', info{1}.SeriesDate);
                 asHistHeader{6,1} = sprintf('Series Time: %s', info{1}.SeriesTime);
 
-                writecell(asHistHeader(:),sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A1');
+                if bUseWritecell == true              
+                    writecell(asHistHeader(:),sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A1');
+                else
+                    xlswrite(sprintf('%s%s', path, file), asHistHeader, 1, 'A1');
+                end
 
                 asXDataHeader{1,1} = 'XData';
-                asYDataHeader{1,1} = 'YData';
-
-                writecell(asXDataHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A8');
-                writecell(asYDataHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A9');
+                asYDataHeader{1,1} = 'YData';                
+                if bUseWritecell == true              
+                    writecell(asXDataHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A8');
+                    writecell(asYDataHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A9');
+                else                
+                    xlswrite(sprintf('%s%s', path, file), asXDataHeader, 1, 'A8');
+                    xlswrite(sprintf('%s%s', path, file), asYDataHeader, 1, 'A9');
+                end
 
                 if cummulativeMenuOption('get') == true && ...
-                   ~isempty(ptrBar)
-
-                    writetable(table(ptrBar.XData), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B8');
-                    writetable(table(ptrBar.YData), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B9');
-
+                   ~isempty(ptrPlotCummulative)
+                    
+                    dNbElements = numel(ptrPlotCummulative.XData);
+                    if dNbElements >= 10
+                        aXDataToDisplay{1}  = ptrPlotCummulative.XData(1);
+                        aXDataToDisplay{10} = ptrPlotCummulative.XData(10);
+                       
+                        aYDataToDisplay{1}  = ptrPlotCummulative.YData(1);
+                        aYDataToDisplay{10} = ptrPlotCummulative.YData(10);      
+                                                
+                        dOffsetValue = 1;
+                        for jj=2:9
+                            aXDataToDisplay{jj} =  ptrPlotCummulative.XData(round(dOffsetValue+1));
+                            aYDataToDisplay{jj} =  ptrPlotCummulative.YData(round(dOffsetValue+1));                          
+                            dOffsetValue = dOffsetValue+1;
+                        end                        
+                    else 
+                        aXDataToDisplay = ptrPlotCummulative.XData;
+                        aYDataToDisplay = ptrPlotCummulative.YData;
+                    end                              
+                    
+                    if bUseWritecell == true              
+                        writetable(table(aXDataToDisplay), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B8');
+                        writetable(table(aYDataToDisplay), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B9');
+                    else
+                        xlswrite(sprintf('%s%s', path, file), aXDataToDisplay, 1, 'B8:J8');
+                        xlswrite(sprintf('%s%s', path, file), aYDataToDisplay, 1, 'B9:J9');     
+                    end
+                    
                     asXLimitsHeader{1,1} = 'XLimits';
-                    writecell(asXLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A10');
-                    writetable(table(ptrBar.Parent.XLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B10');
-
+                    if bUseWritecell == true                                  
+                        writecell(asXLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A10');
+                        writetable(table(ptrPlotCummulative.Parent.XLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B10');
+                    else                    
+                        xlswrite(sprintf('%s%s', path, file), asXLimitsHeader, 1, 'A10');
+                        xlswrite(sprintf('%s%s', path, file), ptrPlotCummulative.Parent.XLim, 1, 'B10:C10'); 
+                    end
+                    
                     asYLimitsHeader{1,1} = 'YLimits';
-                    writecell(asYLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A11');
-                    writetable(table(ptrBar.Parent.YLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B11');
-
-                    asBarWidthHeader{1,1} = 'Bar Width';
-                    writecell(asBarWidthHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A12');
-                    writetable(table(ptrBar.BarWidth), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B12');
-
-                    xlswritefig(figRoiHistogramWindow, sprintf('%s%s', path, file), 'Sheet1', 'A14');
+                    if bUseWritecell == true                                  
+                        writecell(asYLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A11');
+                        writetable(table(ptrPlotCummulative.Parent.YLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B11');
+                    else
+                        xlswrite(sprintf('%s%s', path, file), asYLimitsHeader, 1, 'A11');
+                        xlswrite(sprintf('%s%s', path, file), ptrPlotCummulative.Parent.YLim, 1, 'B11:C11'); 
+                    end                    
+                   
+                    if bUseWritecell == false % Need excel to copy the figure                                 
+                        xlswritefig(figRoiHistogramWindow, sprintf('%s%s', path, file), 'Sheet1', 'A14');                       
+                    end
+                    
                 elseif histogramMenuOption('get') == true && ...
                        ~isempty(ptrHist)
 
                     for ff=1:numel(ptrHist.Values)
                         aXData{ff} = ff;
                     end
-
-                     writetable(table(aXData), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B8');
-                     writetable(table(ptrHist.Values), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B9');
-
-                     asXLimitsHeader{1,1} = 'XLimits';
-                     writecell(asXLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A10');
-                     writetable(table(ptrHist.Parent.XLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B10');
-
-                     asYLimitsHeader{1,1} = 'YLimits';
-                     writecell(asYLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A11');
-                     writetable(table(ptrHist.Parent.YLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B11');
-
-                     asNbBinsHeader{1,1} = 'Number of Bins';
-                     writecell(asNbBinsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A12');
-                     writetable(table(ptrHist.NumBins), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B12');
-
-                     asBinWidthHeader{1,1} = 'Bin Width';
-                     writecell(asBinWidthHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A13');
-                     writetable(table(ptrHist.BinWidth), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B13');
-
-                     xlswritefig(figRoiHistogramWindow, sprintf('%s%s', path, file), 'Sheet1', 'A15');
-                else
-                    if ~isempty(ptrPlot)
-
-                        writetable(table(ptrPlot.XData), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B8');
-                        writetable(table(ptrPlot.YData), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B9');
-
-                        asXLimitsHeader{1,1} = 'XLimits';
+                    
+                    if bUseWritecell == true                                                      
+                        writetable(table(aXData), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B8');
+                        writetable(table(ptrHist.Values), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B9');
+                    else                    
+                        xlswrite(sprintf('%s%s', path, file), aXData, 1, 'B8');
+                        xlswrite(sprintf('%s%s', path, file), ptrHist.Values, 1, 'B9');                  
+                    end
+                    
+                    asXLimitsHeader{1,1} = 'XLimits';
+                    if bUseWritecell == true                                                                          
                         writecell(asXLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A10');
-                        writetable(table(ptrPlot.Parent.XLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B10');
-
-                        asYLimitsHeader{1,1} = 'YLimits';
+                        writetable(table(ptrHist.Parent.XLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B10');
+                    else
+                        xlswrite(sprintf('%s%s', path, file), asXLimitsHeader, 1, 'A10');
+                        xlswrite(sprintf('%s%s', path, file), ptrHist.Parent.XLim, 1, 'B10:C10'); 
+                    end
+                    
+                    asYLimitsHeader{1,1} = 'YLimits';
+                    if bUseWritecell == true                                                                                              
                         writecell(asYLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A11');
-                        writetable(table(ptrPlot.Parent.YLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B11');
-
-                        xlswritefig(figRoiHistogramWindow, sprintf('%s%s', path, file), 'Sheet1', 'A13');
+                        writetable(table(ptrHist.Parent.YLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B11');
+                    else
+                        xlswrite(sprintf('%s%s', path, file), asYLimitsHeader, 1, 'A11');
+                        xlswrite(sprintf('%s%s', path, file), ptrHist.Parent.YLim, 1, 'B11:C11'); 
+                    end
+                    
+                    asNbBinsHeader{1,1} = 'Number of Bins';
+                    if bUseWritecell == true                                                                                                                  
+                        writecell(asNbBinsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A12');
+                        writetable(table(ptrHist.NumBins), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B12');
+                    else
+                        xlswrite(sprintf('%s%s', path, file), asNbBinsHeader, 1, 'A12');
+                        xlswrite(sprintf('%s%s', path, file), ptrHist.NumBins, 1, 'B12'); 
+                    end
+                    
+                    asBinWidthHeader{1,1} = 'Bin Width';
+                    if bUseWritecell == true                                                                                                                                      
+                        writecell(asBinWidthHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A13');
+                        writetable(table(ptrHist.BinWidth), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B13');
+                    else
+                        xlswrite(sprintf('%s%s', path, file), asBinWidthHeader, 1, 'A13');
+                        xlswrite(sprintf('%s%s', path, file), ptrHist.BinWidth, 1, 'B13'); 
+                    end
+                    
+                    if bUseWritecell == false % Need excel to copy the figure                                 
+                        xlswritefig(figRoiHistogramWindow, sprintf('%s%s', path, file), 'Sheet1', 'A15');
+                    end
+                     
+                else
+                    if ~isempty(ptrPlotProfile)
+                        if bUseWritecell == true                                                                                                                                      
+                            writetable(table(ptrPlotProfile.XData), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B8');
+                            writetable(table(ptrPlotProfile.YData), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B9');
+                        else
+                            xlswrite(sprintf('%s%s', path, file), ptrPlotProfile.XData, 1, 'B8');
+                            xlswrite(sprintf('%s%s', path, file), ptrPlotProfile.YData, 1, 'B9');  
+                        end
+                        
+                        asXLimitsHeader{1,1} = 'XLimits';
+                        if bUseWritecell == true                                                                                                                                                              
+                            writecell(asXLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A10');
+                            writetable(table(ptrPlotProfile.Parent.XLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B10');
+                        else
+                            xlswrite(sprintf('%s%s', path, file), asXLimitsHeader, 1, 'A10');
+                            xlswrite(sprintf('%s%s', path, file), ptrPlotProfile.Parent.XLim, 1, 'B10:C10'); 
+                        end
+                    
+                        asYLimitsHeader{1,1} = 'YLimits';
+                        if bUseWritecell == true                                                                                                                                                              
+                            writecell(asYLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A11');
+                            writetable(table(ptrPlotProfile.Parent.YLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B11');
+                        else
+                            xlswrite(sprintf('%s%s', path, file), asYLimitsHeader, 1, 'A11');
+                            xlswrite(sprintf('%s%s', path, file), ptrPlotProfile.Parent.YLim, 1, 'B11:C11'); 
+                        end
+                        
+                        if bUseWritecell == false % Need excel to copy the figure                                 
+                            xlswritefig(figRoiHistogramWindow, sprintf('%s%s', path, file), 'Sheet1', 'A13');                          
+                        end
+                        
                     end
                 end
 
@@ -715,98 +808,6 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                 progressBar(1, sprintf('Write %s%s completed', path, file));
 
             end
-        end
-
-        function xlswritefig(hFig,filename,sheetname,xlcell)
-
-            if nargin==0 || isempty(hFig)
-                hFig = gcf;
-            end
-
-            if nargin<2 || isempty(filename)
-                filename ='';
-                dontsave = true;
-            else
-                dontsave = false;
-
-                % Create full file name with path
-                filename = fullfilename(filename);
-            end
-
-            if nargin < 3 || isempty(sheetname)
-                sheetname = 'Sheet1';
-            end
-
-            if nargin<4
-                xlcell = 'A1';
-            end
-
-            % Put figure in clipboard
-            % New graphics system in R2014b changed the default renderer from painters
-            % to opengl, which impacts figure export. Manually setting to Painters
-            % seems to work pretty well.
-            r = get(hFig,'Renderer');
-            set(hFig,'Renderer','Painters')
-            drawnow
-            hgexport(hFig,'-clipboard')
-            set(hFig,'Renderer',r)
-            % Open Excel, add workbook, change active worksheet,
-            % get/put array, save.
-            % First, open an Excel Server.
-            Excel = actxserver('Excel.Application');
-            % Two cases:
-            % * Open a new workbook, save with given file name
-            % * Open an existing workbook
-            if exist(filename,'file')==0
-                % The following case if file does not exist (Creating New File)
-                op = invoke(Excel.Workbooks,'Add');
-                %     invoke(op, 'SaveAs', [pwd filesep filename]);
-                new=1;
-            else
-                % The following case if file does exist (Opening File)
-                %     disp(['Opening Excel File ...(' filename ')']);
-                op = invoke(Excel.Workbooks, 'open', filename);
-                new=0;
-            end
-
-            % set(Excel, 'Visible', 0);
-            % Make the specified sheet active.
-            try
-                Sheets = Excel.ActiveWorkBook.Sheets;
-                target_sheet = get(Sheets, 'Item', sheetname);
-            catch %#ok<CTCH>   Suppress so that this function works in releases without MException
-                % Add the sheet if it doesn't exist
-                target_sheet = Excel.ActiveWorkBook.Worksheets.Add();
-                target_sheet.Name = sheetname;
-            end
-
-            invoke(target_sheet, 'Activate');
-            Activesheet = Excel.Activesheet;
-            % Paste to specified cell
-            Paste(Activesheet,get(Activesheet,'Range',xlcell,xlcell))
-            % Save and clean up
-            if new && ~dontsave
-                invoke(op, 'SaveAs', filename);
-            elseif ~new
-                invoke(op, 'Save');
-            else  % New, but don't save
-                set(Excel, 'Visible', 1);
-                return  % Bail out before quitting Excel
-            end
-
-            invoke(Excel, 'Quit');
-            delete(Excel)
-        end
-
-        function filename = fullfilename(filename)
-            [filepath, filename, fileext] = fileparts(filename);
-            if isempty(filepath)
-                filepath = pwd;
-            end
-            if isempty(fileext)
-                fileext = '.xlsx';
-            end
-            filename = fullfile(filepath, [filename fileext]);
         end
 
     end

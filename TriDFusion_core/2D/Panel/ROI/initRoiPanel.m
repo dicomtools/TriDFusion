@@ -1803,7 +1803,7 @@ function initRoiPanel()
                         B = zeros(size(aVoiBuffer));  
                         B(CC.PixelIdxList{bb}) = 1;                
                     else
-                        B = aVoiBuffer;
+                        B = BW;
                     end
 
                     asTag = [];
@@ -1852,12 +1852,18 @@ function initRoiPanel()
 
                         aSlice = B(:,:,aa);
                         
-                        if aSlice(aSlice==1)
+                        if aSlice(aSlice~=0)
                             if bPixelEdge == true
                                 aSlice = imresize(aSlice,3,'nearest'); % do not go directly through pixel centers
                             end
 
                             [maskSlice, ~,~,~] = bwboundaries(aSlice, 'noholes', 4); 
+                            
+                            if bMultipleObjects == false
+                                if mod(aa, 5)==1 || aa == aBufferSize         
+                                    progressBar( aa/aBufferSize-0.0001, sprintf('Computing slice %d/%d, please wait', aa, aBufferSize) );  
+                                end
+                            end
 
                             if ~isempty(maskSlice)
                                 for jj=1:numel(maskSlice)

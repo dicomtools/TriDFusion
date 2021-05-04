@@ -45,7 +45,7 @@ function mainWindowMenu()
     uimenu(mFile,'Label', 'Exit' ,'Callback', 'close', 'Separator','on');
 
     mEdit = uimenu(fiMainWindowPtr('get'),'Label','Edit');
-    uimenu(mEdit,'Label', 'Copy Display', 'Callback', 'editmenufcn(gcbf,''EditCopyFigure'')');
+    uimenu(mEdit,'Label', 'Copy Display', 'Callback', @copyDisplayCallback);
     uimenu(mEdit,'Label', 'Patient Dose...', 'Callback', @setPatientDoseCallback, 'Separator','on');    
     mOptions = uimenu(mEdit,'Label', 'Viewer Properties...', 'Callback', @setOptionsCallback);
     optionsPanelMenuObject('set', mOptions);
@@ -142,6 +142,32 @@ function mainWindowMenu()
     uimenu(mHelp,'Label', 'User Manual', 'Callback', @helpViewerCallback);
     uimenu(mHelp,'Label', 'About', 'Callback', @aboutViewerCallback, 'Separator','on');
 
+    
+    function copyDisplayCallback(~, ~)
+        
+        try
+            hFig = fiMainWindowPtr('get');
+            
+            set(hFig, 'Pointer', 'watch');
+            
+%            rdr = get(hFig,'Renderer');
+            inv = get(hFig,'InvertHardCopy');
+
+%            set(hFig,'Renderer','Painters');
+            set(hFig,'InvertHardCopy','Off');
+
+            drawnow;
+            hgexport(hFig,'-clipboard');
+
+%            set(hFig,'Renderer',rdr);        
+            set(hFig,'InvertHardCopy',inv);        
+        catch
+        end
+        
+        set(hFig, 'Pointer', 'default');
+        
+    end   
+    
     function setOrientationCallback(hObject, ~)
 
         bRefresh = false;
