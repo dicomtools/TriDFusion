@@ -83,56 +83,56 @@ function setContours(tContours)
                     set(uiSliderTraPtr('get'), 'Visible', 'off'); 
                     
                     segments = atContours{cc}(dd).ContourData;   
-                    
-                    xfm = getAffineXfm(atInput(bb).atDicomInfo);
-                                        
-                    asTag = [];
-                    
-                    set(uiSeriesPtr('get'), 'Value', bb);
-                    
-                    drawnow;
-                    
-                    progressBar( bNbContours/numel(atContours{cc})-0.0001, sprintf('Volume %d: Processing contour %d/%d', bb, bNbContours, numel(atContours{cc}) ));  
-                    
-                    for j=1:numel(segments)
-                                                                        
-                        out = pctransform(pointCloud(segments{j}),invert(affine3d(xfm')));
+                    if ~cellfun(@isempty,segments)
+                        xfm = getAffineXfm(atInput(bb).atDicomInfo);
 
-                        points{j} = [abs(out.Location(:,1)) abs(out.Location(:,2))] ;
-                        z = round(abs(out.Location(:,3)));   % Axial                    
-                        
-                        ROI.Position = [points{j}(:,1)+1, points{j}(:,2)+1];
+                        asTag = [];
 
-                        sliceNumber('set', 'axial', z(1)+1);
+                        set(uiSeriesPtr('get'), 'Value', bb);
 
-                        sTag   = num2str(randi([-(2^52/2),(2^52/2)],1));
-                        axRoi  = axes3Ptr('get');
-                        aColor = [atContours{cc}(dd).Color(1)/255 atContours{cc}(dd).Color(2)/255 atContours{cc}(dd).Color(3)/255];
-                        sLabel = atContours{cc}(dd).ROIName;
-                       
-                        pRoi = drawfreehand(axRoi, 'Position', ROI.Position, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'off', 'FaceSelectable', 0, 'FaceAlpha', 0);  
-                        pRoi.Waypoints(:) = false;
-                                            
-                        addRoi(pRoi, bb);                  
+                        drawnow;
 
-                        roiDefaultMenu(pRoi);
+                        progressBar( bNbContours/numel(atContours{cc})-0.0001, sprintf('Volume %d: Processing contour %d/%d', bb, bNbContours, numel(atContours{cc}) ));  
 
-                        uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback); 
-                        uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', pRoi, 'Callback', @clearWaypointsCallback); 
+                        for j=1:numel(segments)
 
-                        cropMenu(pRoi);
+                            out = pctransform(pointCloud(segments{j}),invert(affine3d(xfm')));
 
-                        uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on'); 
+                            points{j} = [abs(out.Location(:,1)) abs(out.Location(:,2))] ;
+                            z = round(abs(out.Location(:,3)));   % Axial                    
 
- %                       set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
+                            ROI.Position = [points{j}(:,1)+1, points{j}(:,2)+1];
 
-                        asTag{numel(asTag)+1} = sTag;                        
+                            sliceNumber('set', 'axial', z(1)+1);
+
+                            sTag   = num2str(randi([-(2^52/2),(2^52/2)],1));
+                            axRoi  = axes3Ptr('get');
+                            aColor = [atContours{cc}(dd).Color(1)/255 atContours{cc}(dd).Color(2)/255 atContours{cc}(dd).Color(3)/255];
+                            sLabel = atContours{cc}(dd).ROIName;
+
+                            pRoi = drawfreehand(axRoi, 'Position', ROI.Position, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'off', 'FaceSelectable', 0, 'FaceAlpha', 0);  
+                            pRoi.Waypoints(:) = false;
+
+                            addRoi(pRoi, bb);                  
+
+                            roiDefaultMenu(pRoi);
+
+                            uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback); 
+                            uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', pRoi, 'Callback', @clearWaypointsCallback); 
+
+                            cropMenu(pRoi);
+
+                            uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on'); 
+
+     %                       set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
+
+                            asTag{numel(asTag)+1} = sTag;                        
+                        end
+
+                        if ~isempty(asTag)
+                            createVoiFromRois(asTag, sLabel);                        
+                        end            
                     end
-
-                    if ~isempty(asTag)
-                        createVoiFromRois(asTag, sLabel);                        
-                    end            
-               
                 end
             end
         end

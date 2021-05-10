@@ -37,7 +37,7 @@ function [tFileList, iNbFiles] = getDicomFileList(sDirName, tFileList)
     for iLoop=1:endIloop
         
         if mod(iLoop,5)==1 || iLoop == endIloop         
-            progressBar(iLoop / endIloop, 'Acquiring file list');
+            progressBar( iLoop / endIloop, sprintf('Acquiring file list %d/%d', iLoop, endIloop) );
         end
 
         if ~asFileList(iLoop).isDirectory               

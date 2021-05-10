@@ -159,6 +159,10 @@ function resize = dicomViewer()
 
     updateDescription('set', true);
     
+    multipleObjectsRoiPanel('set', true);
+    pixelEdgeRoiPanel('set', true);
+    holesRoiPanel('set', false);
+    
     rng('shuffle');
 
     clearDisplay();

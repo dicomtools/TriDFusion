@@ -183,11 +183,11 @@ function voiObj = initVoiIsoSurface(uiWindow)
                 end
                 
                 if strcmpi(sAxe, 'Axes1')
-                    aBuffer(dSliceNb, :, :) = permuteBuffer(bw, 'coronal');
+                    aBuffer(dSliceNb, :, :) = aBuffer(dSliceNb, :, :)|permuteBuffer(bw, 'coronal');
                 elseif strcmpi(sAxe, 'Axes2')     
-                    aBuffer(:, dSliceNb, :) = permuteBuffer(bw, 'sagittal');
+                    aBuffer(:, dSliceNb, :) = aBuffer(:, dSliceNb, :)|permuteBuffer(bw, 'sagittal');
                 else
-                    aBuffer(:, :, dSliceNb) = bw;
+                    aBuffer(:, :, dSliceNb) = aBuffer(:, :, dSliceNb)|bw;
                 end
 
             end             

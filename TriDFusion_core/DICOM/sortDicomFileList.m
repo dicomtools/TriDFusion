@@ -52,7 +52,7 @@ function tDataSets = sortDicomFileList(tFileList, iNbFiles)
         for jLoop=1:endJloop
             
             if mod(jLoop,5)==1 || jLoop == endJloop         
-                progressBar(jLoop / endJloop, 'Sorting file list');
+                progressBar(jLoop / endJloop, sprintf('Sorting file list %d/%d', jLoop, endJloop) );
             end
 
             tDataSets(iLoop).FileNames{jLoop}    = tFileList.FileName{h(jLoop)} ;
