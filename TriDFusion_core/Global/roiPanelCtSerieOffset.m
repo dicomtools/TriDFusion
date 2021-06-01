@@ -1,6 +1,6 @@
-function lStatus = kernelCtDoseMap(sAction, lValue)
-%function lStatus = kernelCtDoseMap(sAction, lValue)
-%Get/Set use CT Dose Map.
+function dKernelOffset = roiPanelCtSerieOffset(sAction, dValue)
+%function dKernelOffset = roiPanelCtSerieOffset(sAction, dValue)
+%Get/Set ROI Panel CT Offset.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -27,11 +27,12 @@ function lStatus = kernelCtDoseMap(sAction, lValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent plStatus; 
+    persistent pdKernelOffset; 
 
     if strcmpi('set', sAction)
-        plStatus = lValue;            
+        pdKernelOffset = dValue;            
     end
-    lStatus = plStatus;
+    
+    dKernelOffset = pdKernelOffset;
 
 end 

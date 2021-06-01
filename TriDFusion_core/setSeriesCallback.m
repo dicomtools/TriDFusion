@@ -55,7 +55,7 @@ function setSeriesCallback(~,~)
         fusionBuffer('reset');
         set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        
+
         initWindowLevel ('set', true);
         initFusionWindowLevel ('set', true);
 
@@ -97,16 +97,16 @@ function setSeriesCallback(~,~)
         set(btn3DPtr('get'), 'Enable', 'on');
         set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        
+
         switchToMIPMode('set', false);
         set(btnIsoSurfacePtr('get'), 'Enable', 'on');
         set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        
+
         switchToIsoSurface('set', false);
         set(btnMIPPtr('get'), 'Enable', 'on');
         set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-        set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));        
+        set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
         set(btnTriangulatePtr('get'), 'Enable', 'on');
         set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
@@ -134,15 +134,15 @@ function setSeriesCallback(~,~)
 
 %        quantificationTemplate('set', tInput(iOffset).tQuant);
         setQuantification(iOffset);
-        
-        cropValue('set', tInput(iOffset).tQuant.tCount.dMin);
+
+%        cropValue('set', tInput(iOffset).tQuant.tCount.dMin);
 
         imageSegTreshValue('set', 'lower', 0);
         imageSegTreshValue('set', 'upper', 1);
 
-        imageSegEditValue('set', 'lower', tInput(iOffset).tQuant.tCount.dMin);
-        imageSegEditValue('set', 'upper', tInput(iOffset).tQuant.tCount.dMax);
-
+%        imageSegEditValue('set', 'lower', tInput(iOffset).tQuant.tCount.dMin);
+%        imageSegEditValue('set', 'upper', tInput(iOffset).tQuant.tCount.dMax);
+    
         getMipAlphaMap('set', '', 'auto');
         getVolAlphaMap('set', '', 'auto');
 
@@ -216,7 +216,7 @@ function setSeriesCallback(~,~)
 
             isVsplash('set', false);
             set(btnVsplashPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-            set(btnVsplashPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));     
+            set(btnVsplashPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
             set(btnVsplashPtr('get')   , 'Enable', 'off');
             set(uiEditVsplahXPtr('get'), 'Enable', 'off');

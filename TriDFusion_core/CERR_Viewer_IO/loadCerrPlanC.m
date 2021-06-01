@@ -313,8 +313,8 @@ function loadCerrPlanC(planC)
     if ~isempty(mRecord)
         mRecord.State = 'off';
   %      recordIconMenuObject('set', '');
-    end
-
+    end   
+   
     multiFrame3DPlayback('set', false);
     multiFrame3DRecord  ('set', false);
     multiFrame3DIndex   ('set', 1);

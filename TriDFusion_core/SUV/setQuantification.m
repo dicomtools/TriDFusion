@@ -8,37 +8,37 @@ function setQuantification(dSeriesOffset)
 %Last specifications modified:
 %
 % Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
-% 
+%
 % This file is part of The Triple Dimention Fusion (TriDFusion).
-% 
+%
 % TriDFusion development has been led by:  Daniel Lafontaine
-% 
-% TriDFusion is distributed under the terms of the Lesser GNU Public License. 
-% 
+%
+% TriDFusion is distributed under the terms of the Lesser GNU Public License.
+%
 %     This version of TriDFusion is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 % TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 % without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 % See the GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tInput = inputTemplate('get');        
+    tInput = inputTemplate('get');
 
     if exist('dSeriesOffset', 'var')
-        aInputBuffer  = dicomBuffer('get');        
+        aInputBuffer  = dicomBuffer('get');
 
         dLoopBegin = dSeriesOffset;
         dLoopEnd   = dSeriesOffset;
     else
-        aInputBuffer = inputBuffer('get');        
+        aInputBuffer = inputBuffer('get');
 
         dLoopBegin = 1;
-        dLoopEnd   = numel(tInput); 
+        dLoopEnd   = numel(tInput);
     end
 
     for cc=dLoopBegin:dLoopEnd
@@ -65,7 +65,7 @@ function setQuantification(dSeriesOffset)
             xPixel = 0;
             yPixel = 0;
             zPixel = 0;
-            for jj=1: numel(atQuantDicomInfo)-1                    
+            for jj=1: numel(atQuantDicomInfo)-1
 
                 xPixel = xPixel + (atQuantDicomInfo{jj}.PixelSpacing(1)/10);
                 yPixel = yPixel + (atQuantDicomInfo{jj}.PixelSpacing(2)/10);
@@ -77,29 +77,29 @@ function setQuantification(dSeriesOffset)
                              zPixel;
 
                 elseif atQuantDicomInfo{jj+1}.SliceLocation - ...
-                       atQuantDicomInfo{jj  }.SliceLocation > 0 
+                       atQuantDicomInfo{jj  }.SliceLocation > 0
                     zPixel = atQuantDicomInfo{jj+1}.SliceLocation - ...
                              atQuantDicomInfo{jj  }.SliceLocation + ...
-                             zPixel;                   
+                             zPixel;
                 end
 
             %    zPixel = zPixel + (tInput(cc).atDicomInfo{jj}.SliceThickness /10);
-            end                
+            end
             xPixel = xPixel / numel(atQuantDicomInfo);
             yPixel = yPixel / numel(atQuantDicomInfo);
-            zPixel = zPixel / (numel(atQuantDicomInfo)-1);                                
+            zPixel = zPixel / (numel(atQuantDicomInfo)-1);
 
             voxVolume = xPixel * yPixel * zPixel;
             nbVoxels = numel(aInput);
             volMean =  mean(aInput,'all');
 
             tInput(cc).tQuant.tHU.dMin = tInput(cc).tQuant.tCount.dMin;
-            tInput(cc).tQuant.tHU.dMax = tInput(cc).tQuant.tCount.dMax;   
+            tInput(cc).tQuant.tHU.dMax = tInput(cc).tQuant.tCount.dMax;
             tInput(cc).tQuant.tHU.dTot = voxVolume * nbVoxels * volMean;
 
             case {'pt', 'nm'}
 
-            dScale = computeSUV(atQuantDicomInfo{1});       
+            dScale = computeSUV(atQuantDicomInfo{1});
 
             if dScale ~= 0
                 xPixel = 0;
@@ -113,7 +113,7 @@ function setQuantification(dSeriesOffset)
 
                 xPixel = xPixel / numel(atQuantDicomInfo);
                 yPixel = yPixel / numel(atQuantDicomInfo);
-                zPixel = computeSliceSpacing(atQuantDicomInfo);    
+                zPixel = computeSliceSpacing(atQuantDicomInfo);
 
                 voxVolume = xPixel * yPixel * zPixel;
                 nbVoxels = numel(aInput);
@@ -133,21 +133,26 @@ function setQuantification(dSeriesOffset)
 
         quantificationTemplate('set', tInput(dSeriesOffset).tQuant);
 %            inputTemplate('set', tInput);
-   %     cropValue('set', tInput(dSeriesOffset).tQuant.tCount.dMin);
-   %     imageSegEditValue('set', 'lower', tInput(dSeriesOffset).tQuant.tCount.dMin);
-   %     imageSegEditValue('set', 'upper', tInput(dSeriesOffset).tQuant.tCount.dMax);
+        cropValue('set', tInput(dSeriesOffset).tQuant.tCount.dMin);
+        imageSegEditValue('set', 'lower', tInput(dSeriesOffset).tQuant.tCount.dMin);
+        imageSegEditValue('set', 'upper', tInput(dSeriesOffset).tQuant.tCount.dMax);
     else
         inputTemplate('set', tInput);
-        quantificationTemplate('set', tInput(1).tQuant);    
+        quantificationTemplate('set', tInput(1).tQuant);
         cropValue('set', tInput(1).tQuant.tCount.dMin);
-        
+
         if strcmpi(tInput(1).atDicomInfo{1}.Modality, 'ct')
             imageSegEditValue('set', 'lower', 44 );
-            imageSegEditValue('set', 'upper', 100);            
+            imageSegEditValue('set', 'upper', 100);
+
         else
             imageSegEditValue('set', 'lower', tInput(1).tQuant.tCount.dMin);
             imageSegEditValue('set', 'upper', tInput(1).tQuant.tCount.dMax);
         end
+
+        setKernelCtDoseMapUiValues();            
+        setRoiPanelCtUiValues();
     end
+
 
 end

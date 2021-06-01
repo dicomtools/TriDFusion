@@ -32,6 +32,8 @@ function [imCData, logicalMask] = computeHistogram(imRoiVoi, atRoiVoiMetaData, p
 
     if strcmpi(ptrRoiVoi.ObjectType, 'roi') || ...
        strcmpi(ptrRoiVoi.ObjectType, 'voi-roi')
+   
+        progressBar(0.99, 'Computing Histogram, please wait!');          
 
         if size(imRoiVoi, 3) == 1 
             if strcmpi(ptrRoiVoi.Axe, 'Axe')
@@ -55,6 +57,9 @@ function [imCData, logicalMask] = computeHistogram(imRoiVoi, atRoiVoiMetaData, p
         logicalMask = createMask(ptrRoiVoi.Object, imCData); 
     else
         for bb=1: numel(ptrRoiVoi.RoisTag)
+            
+            progressBar(bb/numel(ptrRoiVoi.RoisTag), sprintf('Computing Histogram ROI %d/%d, please wait!', bb, numel(ptrRoiVoi.RoisTag)));          
+
             for cc=1:numel(tRoiInput)
                 if strcmpi(ptrRoiVoi.RoisTag{bb}, tRoiInput{cc}.Tag)
 
@@ -110,5 +115,8 @@ function [imCData, logicalMask] = computeHistogram(imRoiVoi, atRoiVoiMetaData, p
          bSUVUnit == true                 
         imCData = imCData * dSUVScale;              
     end   
+    
+    progressBar(1, 'Ready');          
+    
 
 end

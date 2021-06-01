@@ -1,13 +1,16 @@
-function lStatus = kernelCtDoseMap(sAction, lValue)
-%function lStatus = kernelCtDoseMap(sAction, lValue)
-%Get/Set use CT Dose Map.
+function dSegmentValue = kernelSegEditValue(sAction, sMode, dValue)
+%function aTag = voiRoiTag(sAction, aValue)
+%Get\Set Kernel Segmentation Value.
 %See TriDFuison.doc (or pdf) for more information about options.
+%
+%Note: option settings must fit on one line and can contain one semicolon at most.
+%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2021, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -27,11 +30,20 @@ function lStatus = kernelCtDoseMap(sAction, lValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent plStatus; 
+    persistent pdLowerSegmentValue; 
+    persistent pdUpperSegmentValue; 
 
     if strcmpi('set', sAction)
-        plStatus = lValue;            
+        if strcmpi('lower', sMode)
+            pdLowerSegmentValue = dValue;
+        else    
+            pdUpperSegmentValue = dValue;
+        end
+    else    
+        if strcmpi('lower', sMode)
+            dSegmentValue = double(pdLowerSegmentValue);
+        else
+            dSegmentValue = double(pdUpperSegmentValue);
+        end
     end
-    lStatus = plStatus;
-
-end 
+end  

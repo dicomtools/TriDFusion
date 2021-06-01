@@ -7,7 +7,7 @@ function [bIsPurcentValue, sUnitValue, dValue] = minTresholdRoiPanelValue(sActio
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2021, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 

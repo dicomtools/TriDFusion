@@ -27,6 +27,8 @@ function figRoiMultiplePlot(sType, atVoiRoiTag, bSUVUnit, bDoseKernel, bSegmente
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    gtxtRoiList = [];
+
     tRoiInput = roiTemplate('get');
     atRoiVoiMetaData = dicomMetaData('get');
 
@@ -36,7 +38,7 @@ function figRoiMultiplePlot(sType, atVoiRoiTag, bSUVUnit, bDoseKernel, bSegmente
     else
         dSUVScale = 0;
     end
-    
+        
     HIST_PANEL_X = 840;
     HIST_PANEL_y = 480;
 
@@ -55,6 +57,10 @@ function figRoiMultiplePlot(sType, atVoiRoiTag, bSUVUnit, bDoseKernel, bSegmente
                );
            
     setMultiplePlotFigureName();
+    
+    mHistFile = uimenu(figRoiMultiplePlot,'Label','File');
+    uimenu(mHistFile,'Label', 'Export to Excel...','Callback', @exportCurrentMultiplePlotCallback);
+    uimenu(mHistFile,'Label', 'Close' ,'Callback', 'close', 'Separator','on');
     
     aFigurePosition = get(figRoiMultiplePlot, 'Position');
             
@@ -245,6 +251,11 @@ function figRoiMultiplePlot(sType, atVoiRoiTag, bSUVUnit, bDoseKernel, bSegmente
 
     function setMultiplePlotRoiVoi(atVoiRoiTag)
         
+        try
+        
+        set(figRoiWindowPtr('get'), 'Pointer', 'watch');            
+        drawnow;           
+               
         tRoiInput = roiTemplate('get');
         tVoiInput = voiTemplate('get');
         atRoiVoiMetaData = dicomMetaData('get');
@@ -384,7 +395,14 @@ function figRoiMultiplePlot(sType, atVoiRoiTag, bSUVUnit, bDoseKernel, bSegmente
             pCursor = datacursormode(figRoiMultiplePlot);
             pCursor.Enable = 'on';
         end
-            
+        
+        catch       
+            progressBar(1, 'Error:figRoiHistogram()');          
+        end
+
+        set(figRoiWindowPtr('get'), 'Pointer', 'default');
+        drawnow; 
+        
         function highlightPlotCallback(hObject, ~)
             
             for tt=1:numel(txtRoiList)
@@ -394,9 +412,170 @@ function figRoiMultiplePlot(sType, atVoiRoiTag, bSUVUnit, bDoseKernel, bSegmente
             
             hObject.UserData.LineWidth = 2;
             hObject.FontWeight = 'bold';
-        end
-                
+        end  
+        
+        gtxtRoiList = txtRoiList;
+                 
     end
 
+    function exportCurrentMultiplePlotCallback(~, ~)
+        
+        try            
+            matlab.io.internal.getExcelInstance;
+            bUseWritecell = false; 
+        catch exception %#ok<NASGU>
+%            warning(message('MATLAB:xlswrite:NoCOMServer'));
+            bUseWritecell = true; 
+        end   
+
+        filter = {'*.xlsx'};
+        info = dicomMetaData('get');
+
+        sCurrentDir  = viewerRootPath('get');
+
+        sMatFile = [sCurrentDir '/' 'lastHistDir.mat'];
+        % load last data directory
+        if exist(sMatFile, 'file')
+            load('-mat', sMatFile); % lastDirMat mat file exists, load it
+            if exist('saveHistLastUsedDir', 'var')
+                sCurrentDir = saveHistLastUsedDir;
+            end
+            if sCurrentDir == 0
+                sCurrentDir = pwd;
+            end
+        end
+
+        [file, path] = uiputfile(filter, 'Save Histogram Result', sprintf('%s/%s_%s_%s_multiCummulativeDVH_TriDFusion.xlsx' , ...
+            sCurrentDir, cleanString(info{1}.PatientName), cleanString(info{1}.PatientID), cleanString(info{1}.SeriesDescription)) );
+
+        if file ~= 0
+            
+            try
+                saveHistLastUsedDir = [path '/'];
+                save(sMatFile, 'saveHistLastUsedDir');
+            catch
+                progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
+%                    h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
+%                    if integrateToBrowser('get') == true
+%                        sLogo = './TriDFusion/logo.png';
+%                    else
+%                        sLogo = './logo.png';
+%                    end
+
+%                    javaFrame = get(h, 'JavaFrame');
+%                    javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
+            end
+
+            if exist(sprintf('%s%s', path, file), 'file')
+                delete(sprintf('%s%s', path, file));
+            end
+            
+            try
+        
+            set(figRoiMultiplePlot, 'Pointer', 'watch');            
+            drawnow;             
+            
+            asHistHeader{1,1} = sprintf('Patient Name: %s'      , info{1}.PatientName);
+            asHistHeader{2,1} = sprintf('Patient ID: %s'        , info{1}.PatientID);
+            asHistHeader{3,1} = sprintf('Series Description: %s', info{1}.SeriesDescription);
+            asHistHeader{4,1} = sprintf('Accession Number: %s'  , info{1}.AccessionNumber);
+            asHistHeader{5,1} = sprintf('Series Date: %s'       , info{1}.SeriesDate);
+            asHistHeader{6,1} = sprintf('Series Time: %s'       , info{1}.SeriesTime);
+
+            if bUseWritecell == true              
+                writecell(asHistHeader(:),sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A1');
+            else
+                xlswrite(sprintf('%s%s', path, file), asHistHeader, 1, 'A1');
+            end  
+            
+            dOffset = 0;
+            
+            for jj=1:numel(gtxtRoiList)
+                
+                asXDataHeader{1,1} = sprintf('%s XData', get(gtxtRoiList{jj}, 'String') );
+                asYDataHeader{1,1} = sprintf('%s YData', get(gtxtRoiList{jj}, 'String') );  
+                
+                if bUseWritecell == true              
+                    writecell(asXDataHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', sprintf('A%d',8+dOffset) ); % Start at A8
+                    writecell(asYDataHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', sprintf('A%d',9+dOffset) ); % STrat at A9
+                else                
+                    xlswrite(sprintf('%s%s', path, file), asXDataHeader, 1, sprintf('A%d',8+dOffset) );
+                    xlswrite(sprintf('%s%s', path, file), asYDataHeader, 1, sprintf('A%d',9+dOffset) );
+                end      
+                
+                aXDataToDisplay = [];
+                aYDataToDisplay = [];
+            
+                ptrPlotCummulative = gtxtRoiList{jj}.UserData;
+                
+                dNbElements = numel(ptrPlotCummulative.XData);
+                if dNbElements >= 20
+                    aXDataToDisplay{1}  = ptrPlotCummulative.XData(1);
+                    aXDataToDisplay{20} = ptrPlotCummulative.XData(end);
+
+                    aYDataToDisplay{1}  = ptrPlotCummulative.YData(1);
+                    aYDataToDisplay{20} = ptrPlotCummulative.YData(end);      
+
+                    dOffsetValue = dNbElements/20;
+                    for kk=2:19
+                        aXDataToDisplay{kk} =  ptrPlotCummulative.XData(round(kk*dOffsetValue));
+                        aYDataToDisplay{kk} =  ptrPlotCummulative.YData(round(kk*dOffsetValue));                          
+                    end                        
+                else 
+                    aXDataToDisplay = ptrPlotCummulative.XData;
+                    aYDataToDisplay = ptrPlotCummulative.YData;
+                end                  
+                
+                if bUseWritecell == true              
+                    writetable(table(aXDataToDisplay), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range',  sprintf('B%d',8+dOffset) );  % Start at B8
+                    writetable(table(aYDataToDisplay), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range',  sprintf('B%d',9+dOffset) );  % Start at B8
+                else
+                    xlswrite(sprintf('%s%s', path, file), aXDataToDisplay, 1, sprintf('B%d:U%d',8+dOffset, 8+dOffset) );
+                    xlswrite(sprintf('%s%s', path, file), aYDataToDisplay, 1, sprintf('B%d:U%d',9+dOffset, 9+dOffset));     
+                end
+                
+                dOffset = dOffset+3;                    
+                    
+            end
+            
+            if dOffset ~= 0
+                dOffset = dOffset-2;
+            
+                asXLimitsHeader{1,1} = 'XLimits';
+                if bUseWritecell == true                                  
+                    writecell(asXLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range',  sprintf('A%d',10+dOffset) );  % Start at A10
+                    writetable(table(ptrPlotCummulative.Parent.XLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', sprintf('B%d',10+dOffset));
+                else                    
+                    xlswrite(sprintf('%s%s', path, file), asXLimitsHeader, 1, sprintf('A%d',10+dOffset) );
+                    xlswrite(sprintf('%s%s', path, file), ptrPlotCummulative.Parent.XLim, 1, sprintf('B%d:C%d',10+dOffset, 10+dOffset) ); 
+                end
+
+                asYLimitsHeader{1,1} = 'YLimits';
+                if bUseWritecell == true                                  
+                    writecell(asYLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', sprintf('A%d',11+dOffset) ); % Start at A11
+                    writetable(table(ptrPlotCummulative.Parent.YLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', sprintf('B%d',11+dOffset) );
+                else
+                    xlswrite(sprintf('%s%s', path, file), asYLimitsHeader, 1, sprintf('A%d',11+dOffset));
+                    xlswrite(sprintf('%s%s', path, file), ptrPlotCummulative.Parent.YLim, 1, sprintf('B%d:C%d',11+dOffset, 11+dOffset)); 
+                end                    
+
+                if bUseWritecell == false % Need excel to copy the figure                                 
+                    xlswritefig(figRoiMultiplePlot, sprintf('%s%s', path, file), 'Sheet1', sprintf('A%d',13+dOffset) );   % Start at A13                    
+                end                        
+            end
+            
+            winopen(sprintf('%s%s', path, file));
+                
+            progressBar(1, sprintf('Write %s%s completed', path, file));   
+            
+            catch                
+                progressBar(1, 'Error: exportCurrentMultiplePlotCallback()');   
+            end
+            
+            set(figRoiMultiplePlot, 'Pointer', 'default');            
+            drawnow;               
+        end
+        
+    end
 
 end

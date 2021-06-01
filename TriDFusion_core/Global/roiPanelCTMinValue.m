@@ -1,7 +1,10 @@
-function lStatus = kernelCtDoseMap(sAction, lValue)
-%function lStatus = kernelCtDoseMap(sAction, lValue)
-%Get/Set use CT Dose Map.
+function dMinValue = roiPanelCTMinValue(sAction, dValue)
+%function dMinValue = roiPanelCTMinValue(sAction, dValue)
+%Get\Set ROI Panel VT Min Value.
 %See TriDFuison.doc (or pdf) for more information about options.
+%
+%Note: option settings must fit on one line and can contain one semicolon at most.
+%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
@@ -27,11 +30,11 @@ function lStatus = kernelCtDoseMap(sAction, lValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent plStatus; 
+    persistent pdMinValue; 
 
     if strcmpi('set', sAction)
-        plStatus = lValue;            
+        pdMinValue = dValue;            
     end
-    lStatus = plStatus;
 
+    dMinValue = pdMinValue;    
 end 

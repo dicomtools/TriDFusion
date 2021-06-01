@@ -1,13 +1,13 @@
-function lStatus = kernelCtDoseMap(sAction, lValue)
-%function lStatus = kernelCtDoseMap(sAction, lValue)
-%Get/Set use CT Dose Map.
+function dTreshValue = kernelSegTreshValue(sAction, sType, dValue)
+%function dTreshValue = kernelSegTreshValue(sAction, sType, dValue)
+%Get/Set Kernel Segmentation Value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2021, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -27,11 +27,20 @@ function lStatus = kernelCtDoseMap(sAction, lValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent plStatus; 
+    persistent pdLowerTreshValue;              
+    persistent pdUpperTreshValue; 
 
     if strcmpi('set', sAction)
-        plStatus = lValue;            
+        if strcmpi(sType, 'lower')
+            pdLowerTreshValue = dValue;            
+        else                
+            pdUpperTreshValue = dValue;            
+        end
+    else
+        if strcmpi(sType, 'lower')            
+            dTreshValue = pdLowerTreshValue;
+        else
+            dTreshValue = pdUpperTreshValue;
+        end
     end
-    lStatus = plStatus;
-
-end 
+end

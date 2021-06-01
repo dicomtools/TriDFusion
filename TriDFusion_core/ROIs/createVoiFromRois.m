@@ -55,25 +55,47 @@ function createVoiFromRois(adTag, sVoiName)
     else
         tInput(iSeriesOffset).tVoi{dVoiOffset}.Label = sprintf('VOI %d', dVoiOffset);
     end
-
+    
     dRoiNb = 0;
-    for bb=1:numel(adTag)
+    dNbTags = numel(adTag);   
+    
+    for bb=1:dNbTags
+        for cc=1:numel(atRoi) % Set VOI tag, type and color
+            if isvalid(atRoi{cc}.Object)
+                if strcmpi(atRoi{cc}.Tag, adTag{bb}) 
+                    tInput(iSeriesOffset).tVoi{dVoiOffset}.Tag = num2str(randi([-(2^52/2),(2^52/2)],1));
+                    tInput(iSeriesOffset).tVoi{dVoiOffset}.ObjectType = 'voi';
+                    tInput(iSeriesOffset).tVoi{dVoiOffset}.Color = atRoi{cc}.Color;
+                    
+                    tInput(iSeriesOffset).tVoi{dVoiOffset}.RoisTag = num2cell(zeros(1,numel(atRoi)));
+                    break;
+                end
+            end
+        end      
+    end
+    
+    for bb=1:dNbTags
+        
+        if dNbTags > 100
+            if mod(bb, 10)==1 || bb == dNbTags         
+                progressBar( bb/dNbTags, sprintf('Computing ROI %d/%d, please wait', bb, dNbTags) );  
+            end        
+        end        
+                    
         for cc=1:numel(atRoi)
             if isvalid(atRoi{cc}.Object)
                 if strcmpi(atRoi{cc}.Tag, adTag{bb})                           
 
                     atRoi{cc}.ObjectType  = 'voi-roi';
                     tInput(iSeriesOffset).tRoi{cc}.ObjectType = atRoi{cc}.ObjectType;
-                    tInput(iSeriesOffset).tVoi{dVoiOffset}.RoisTag{bb} = atRoi{cc}.Tag; 
-                    tInput(iSeriesOffset).tVoi{dVoiOffset}.Tag = num2str(randi([-(2^52/2),(2^52/2)],1));
-                    tInput(iSeriesOffset).tVoi{dVoiOffset}.ObjectType = 'voi';
-                    tInput(iSeriesOffset).tVoi{dVoiOffset}.Color = atRoi{cc}.Color;
+                    tInput(iSeriesOffset).tVoi{dVoiOffset}.RoisTag{bb} = atRoi{cc}.Tag;                                         
 
                     dRoiNb = dRoiNb+1;
-                    sLabel =  sprintf('%s (roi %d/%d)', tInput(iSeriesOffset).tVoi{dVoiOffset}.Label, dRoiNb, numel(adTag));
+                    sLabel = sprintf('%s (roi %d/%d)', tInput(iSeriesOffset).tVoi{dVoiOffset}.Label, dRoiNb, dNbTags);
 
                     atRoi{cc}.Label = sLabel;
                     atRoi{cc}.Object.Label = sLabel; 
+                    break;
                 end
             end
         end
@@ -83,5 +105,9 @@ function createVoiFromRois(adTag, sVoiName)
     voiTemplate('set', tInput(iSeriesOffset).tVoi);
 
     inputTemplate('set', tInput);            
+    
+    if dNbTags > 100
+        progressBar( 1, 'Ready' );  
+    end
 
 end

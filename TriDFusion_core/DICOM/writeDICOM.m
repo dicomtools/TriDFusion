@@ -60,12 +60,21 @@ function writeDICOM(sOutDir, iSeriesOffset)
     if numel(aBufferSize) > 2
         array4d = zeros(aBufferSize(1), aBufferSize(2),1, aBufferSize(3));
         for slice = 1:aBufferSize(3)
-            if isfield(tMetaData{slice}, 'RescaleIntercept') && ...
-               isfield(tMetaData{slice}, 'RescaleSlope')     
-                if tMetaData{slice}.RescaleSlope ~= 0
-                    aBuffer(:,:,slice) = (aBuffer(:,:,slice) / tMetaData{slice}.RescaleSlope) - tMetaData{slice}.RescaleIntercept;
-                end
-            end                            
+            if numel(tMetaData) == aBufferSize(3)
+                if isfield(tMetaData{slice}, 'RescaleIntercept') && ...
+                   isfield(tMetaData{slice}, 'RescaleSlope')     
+                    if tMetaData{slice}.RescaleSlope ~= 0
+                        aBuffer(:,:,slice) = (aBuffer(:,:,slice) / tMetaData{slice}.RescaleSlope) - tMetaData{slice}.RescaleIntercept;
+                    end
+                end                            
+            else
+                if isfield(tMetaData{1}, 'RescaleIntercept') && ...
+                   isfield(tMetaData{1}, 'RescaleSlope')     
+                    if tMetaData{1}.RescaleSlope ~= 0
+                        aBuffer(:,:,slice) = (aBuffer(:,:,slice) / tMetaData{1}.RescaleSlope) - tMetaData{1}.RescaleIntercept;
+                    end
+                end                  
+            end
            array4d(:,:,1,slice) = aBuffer(:,:,slice);
         end            
     else

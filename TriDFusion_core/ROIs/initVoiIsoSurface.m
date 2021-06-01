@@ -99,8 +99,16 @@ function voiObj = initVoiIsoSurface(uiWindow)
             aAlphamap = compute3DVoiAlphamap(aVoiTransparencyList{aa});
     
             aInputArguments = [aInputArguments(:)', {'Isovalue'}, {aIsovalue}, {'IsosurfaceColor'}, {aIsosurfaceColor}, {'Colormap'}, {aColormap}, {'Alphamap'}, {aAlphamap}];
-
-            for yy=1:numel(tVoiInput{aa}.RoisTag)                       
+            
+            dNbTags = numel(tVoiInput{aa}.RoisTag);
+            for yy=1:dNbTags 
+                
+                if dNbTags > 100
+                    if mod(yy, 10)==1 || yy == dNbTags         
+                        progressBar( yy/dNbTags, sprintf('Computing ROI %d/%d, please wait', yy, dNbTags) );  
+                    end                  
+                end
+                
                 for rr=1:numel(tRoiInput)
                     if strcmpi(tVoiInput{aa}.RoisTag{yy}, tRoiInput{rr}.Tag)
                         sAxe = tRoiInput{rr}.Axe;

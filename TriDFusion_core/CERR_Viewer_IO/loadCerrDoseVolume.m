@@ -313,7 +313,7 @@ function loadCerrDoseVolume(planC, structNamC)
         mRecord.State = 'off';
   %      recordIconMenuObject('set', '');
     end
-
+   
     multiFrame3DPlayback('set', false);
     multiFrame3DRecord  ('set', false);
     multiFrame3DIndex   ('set', 1);

@@ -37,10 +37,10 @@ function resize = dicomViewer()
     vSplahView      ('set', 'Axial');
 
     imageOrientation('set', 'axial');
-    
+
     suvWindowLevel('set', 'max', 7);
     suvWindowLevel('set', 'min', 0);
-    
+
     fusionWindowLevel('set', 'max', 0);
     fusionWindowLevel('set', 'min', 0);
 
@@ -50,16 +50,24 @@ function resize = dicomViewer()
     windowLevel('set', 'max', 0);
     windowLevel('set', 'min', 0);
 
+    kernelCtSerieOffset('set', 1);
+
+    kernelUseCtDoseMap('set', false);
+    kernelUnitTypeWindow('set', false);
+
+    kernelSegTreshValue('set', 'lower', 0);
+    kernelSegTreshValue('set', 'upper', 1);
+
     imageSegTreshValue('set', 'lower', 0);
     imageSegTreshValue('set', 'upper', 1);
     lungSegTreshValue ('set', 0.5       );
 
     edgeSegMethod      ('set', 'canny');
     fudgeFactorSegValue('set', 0.4    );
-    
+
     minTresholdRoiPanelValue('set', true, '', 0);
     maxTresholdRoiPanelValue('set', true, '', 0);
-    
+
     minTresholdSliderRoiPanelValue('set', 0);
     maxTresholdSliderRoiPanelValue('set', 0.42) ;
 
@@ -158,11 +166,15 @@ function resize = dicomViewer()
     registrationReport('set', '');
 
     updateDescription('set', true);
-    
-    multipleObjectsRoiPanel('set', true);
+
+    roiPanelCtSerieOffset('set', 1);
+    roiPanelUseCt('set', false);
+    roiPanelUnitTypeWindow('set', false);
+    smalestRegionRoiPanelValue('set', 25);
+    multipleObjectsRoiPanel('set', false);
     pixelEdgeRoiPanel('set', true);
     holesRoiPanel('set', false);
-    
+
     rng('shuffle');
 
     clearDisplay();

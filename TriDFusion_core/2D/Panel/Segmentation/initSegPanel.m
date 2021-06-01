@@ -80,7 +80,7 @@ function initSegPanel()
                   'CallBack', @sliderFudgeFactorCallback ...
                   );
 %    addlistener(uiSliderFudgeFactor,'Value','PreSet',@sliderImageUpperTreshCallback);
-%    sliderVoiRoiUpperTresholdObject('set', uiSliderImageUpperTreshold);
+%    sliderImageVoiRoiUpperTresholdObject('set', uiSliderImageUpperTreshold);
 
     uiFudgeFactorValue = ...
         uicontrol(uiSegPanelPtr('get'), ...
@@ -149,8 +149,98 @@ function initSegPanel()
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [15 445 200 20]...
+                  );                     
+
+    chkClipVoiRoi = ...
+        uicontrol(uiSegPanelPtr('get'),...
+                  'style'   , 'checkbox',...
+                  'enable'  , 'off',...
+                  'value'   , 0,...
+                  'position', [240 420 20 20],...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'Callback', @chkClipVoiRoiCallback...
                   );
-          
+
+        uicontrol(uiSegPanelPtr('get'),...
+                  'style'   , 'text',...
+                  'enable'  , 'Inactive',...
+                  'string'  , 'Crop Under Crop to Value',...
+                  'horizontalalignment', 'left',...
+                  'position', [15 417 225 20],...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'ButtonDownFcn', @chkClipVoiRoiCallback...
+                  );
+
+    chkSegmentVoiRoi = ...
+        uicontrol(uiSegPanelPtr('get'),...
+                  'style'   , 'checkbox',...
+                  'enable'  , 'on',...
+                  'value'   , 0,...
+                  'position', [240 395 20 20],...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'Callback', @chkSegmentVoiRoiCallback...
+                  );
+    chkImageVoiRoiSubstractObject('set', chkSegmentVoiRoi);
+
+        uicontrol(uiSegPanelPtr('get'),...
+                  'style'   , 'text',...
+                  'enable'  , 'Inactive',...
+                  'string'  , 'Lower Treshold Value',...
+                  'horizontalalignment', 'left',...
+                  'position', [95 392 125 20],...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'ButtonDownFcn', @chkSegmentVoiRoiCallback...
+                  );
+
+    asSegOperation = {'Subtract', 'Add', 'Multiply', 'Divide'};
+    uiSegOperation = ...
+        uicontrol(uiSegPanelPtr('get'), ...
+                  'Style'   , 'popup', ...
+                  'position'  , [15 395 75 20],...
+                  'String'  , asSegOperation, ...
+                  'Value'   , 1,...
+                  'Enable'  , 'off', ...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'Callback', @uiSegmentOperationCallback...
+                  );
+
+     uiRoiVoiSeg = ...
+        uicontrol(uiSegPanelPtr('get'), ...
+                  'Style'   , 'popup', ...
+                  'position'  , [95 365 160 20],...
+                  'String'  , ' ', ...
+                  'Value'   , 1,...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'Enable'  , 'off' ...
+                  );
+     voiRoiSegObject('set', uiRoiVoiSeg);
+
+     imSeg = dicomBuffer('get');
+     if size(imSeg, 3) == 1
+         asSegOptions = {'Entire Image', 'Inside ROI\VOI', 'Outside ROI\VOI'};
+     else
+         asSegOptions = {'Entire Image', 'Inside ROI\VOI', 'Outside ROI\VOI', 'Inside all slices ROI\VOI', 'Outside all slices ROI\VOI'};
+     end
+
+     uiSegAction = ...
+        uicontrol(uiSegPanelPtr('get'), ...
+                  'Style'   , 'popup', ...
+                  'position'  , [15 365 75 20],...
+                  'String'  , asSegOptions, ...
+                  'Value'   , 1,...
+                  'Enable'  , 'on', ...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'Callback', @segActionCallback...
+                  );
+    voiRoiActObject('set', uiSegAction);
+    
     sUnitDisplay = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));                        
 
     if strcmpi(sUnitDisplay, 'SUV') ||  strcmpi(sUnitDisplay, 'HU') 
@@ -172,7 +262,7 @@ function initSegPanel()
                   'style'   , 'checkbox',...
                   'enable'  , bUnitEnable,...
                   'value'   , bChkValue,...
-                  'position', [20 420 20 20],...
+                  'position', [15 335 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...                    
                   'Callback', @chkUnitTypeVoiRoiCallback...
@@ -183,103 +273,13 @@ function initSegPanel()
                   'style'   , 'text',...
                   'string'  , sUnitType,...
                   'horizontalalignment', 'left',...
-                  'position', [40 417 200 20],...
+                  'position', [35 332 200 20],...
                   'Enable', 'Inactive',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...                    
                   'ButtonDownFcn', @chkUnitTypeVoiRoiCallback...
-                  );              
-
-    chkClipVoiRoi = ...
-        uicontrol(uiSegPanelPtr('get'),...
-                  'style'   , 'checkbox',...
-                  'enable'  , 'off',...
-                  'value'   , 0,...
-                  'position', [240 395 20 20],...
-                  'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...
-                  'Callback', @chkClipVoiRoiCallback...
-                  );
-
-        uicontrol(uiSegPanelPtr('get'),...
-                  'style'   , 'text',...
-                  'enable'  , 'Inactive',...
-                  'string'  , 'Crop Under Crop to Value',...
-                  'horizontalalignment', 'left',...
-                  'position', [15 392 225 20],...
-                  'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...
-                  'ButtonDownFcn', @chkClipVoiRoiCallback...
-                  );
-
-    chkSegmentVoiRoi = ...
-        uicontrol(uiSegPanelPtr('get'),...
-                  'style'   , 'checkbox',...
-                  'enable'  , 'on',...
-                  'value'   , 0,...
-                  'position', [240 370 20 20],...
-                  'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...
-                  'Callback', @chkSegmentVoiRoiCallback...
-                  );
-    chkVoiRoiSubstractObject('set', chkSegmentVoiRoi);
-
-        uicontrol(uiSegPanelPtr('get'),...
-                  'style'   , 'text',...
-                  'enable'  , 'Inactive',...
-                  'string'  , 'Lower Treshold Value',...
-                  'horizontalalignment', 'left',...
-                  'position', [95 367 125 20],...
-                  'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...
-                  'ButtonDownFcn', @chkSegmentVoiRoiCallback...
-                  );
-
-    asSegOperation = {'Subtract', 'Add', 'Multiply', 'Divide'};
-    uiSegOperation = ...
-        uicontrol(uiSegPanelPtr('get'), ...
-                  'Style'   , 'popup', ...
-                  'position'  , [15 370 75 20],...
-                  'String'  , asSegOperation, ...
-                  'Value'   , 1,...
-                  'Enable'  , 'off', ...
-                  'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...
-                  'Callback', @uiSegmentOperationCallback...
-                  );
-
-     uiRoiVoiSeg = ...
-        uicontrol(uiSegPanelPtr('get'), ...
-                  'Style'   , 'popup', ...
-                  'position'  , [95 340 160 20],...
-                  'String'  , ' ', ...
-                  'Value'   , 1,...
-                  'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...
-                  'Enable'  , 'off' ...
-                  );
-     voiRoiSegObject('set', uiRoiVoiSeg);
-
-     imSeg = dicomBuffer('get');
-     if size(imSeg, 3) == 1
-         asSegOptions = {'Entire Image', 'Inside ROI\VOI', 'Outside ROI\VOI'};
-     else
-         asSegOptions = {'Entire Image', 'Inside ROI\VOI', 'Outside ROI\VOI', 'Inside all slices ROI\VOI', 'Outside all slices ROI\VOI'};
-     end
-
-     uiSegAction = ...
-        uicontrol(uiSegPanelPtr('get'), ...
-                  'Style'   , 'popup', ...
-                  'position'  , [15 340 75 20],...
-                  'String'  , asSegOptions, ...
-                  'Value'   , 1,...
-                  'Enable'  , 'on', ...
-                  'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...
-                  'Callback', @segActionCallback...
-                  );
-     voiRoiActObject('set', uiSegAction);
-
+                  );   
+              
     uiTxtUpperTreshold = ...
          uicontrol(uiSegPanelPtr('get'),...
                   'style'   , 'text',...
@@ -289,7 +289,7 @@ function initSegPanel()
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [15 305 200 20]...
                   );
-     txtVoiRoiUpperTresholdObject('set', uiTxtUpperTreshold);
+    txtImageVoiRoiUpperTresholdObject('set', uiTxtUpperTreshold);
 
     uiSliderImageUpperTreshold = ...
         uicontrol(uiSegPanelPtr('get'), ...
@@ -302,7 +302,7 @@ function initSegPanel()
                   'CallBack', @sliderImageUpperTreshCallback ...
                   );
     lstSliderImageUpperTresh = addlistener(uiSliderImageUpperTreshold,'Value','PreSet',@sliderImageUpperTreshCallback);
-    sliderVoiRoiUpperTresholdObject('set', uiSliderImageUpperTreshold);
+    sliderImageVoiRoiUpperTresholdObject('set', uiSliderImageUpperTreshold);
         
     tQuant = quantificationTemplate('get');                                
         
@@ -338,7 +338,7 @@ function initSegPanel()
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @editImageUpperTreshCallback ...
                   );
-    editVoiRoiUpperTresholdObject('set', uiEditImageUpperTreshold);
+    editImageVoiRoiUpperTresholdObject('set', uiEditImageUpperTreshold);
 
     if useCropEditValue('get', 'upper') == true
         sCropEditUpperEnable = 'on';
@@ -816,8 +816,12 @@ function initSegPanel()
         set(uiSliderImageUpperTreshold, 'Value', 1);
         
         dInitUpperValue = str2double(get(hObject, 'String'));
+        if isnan(dInitUpperValue)
+            dInitUpperValue = imageSegEditValue('get', 'upper');
+            set(hObject, 'String', num2str(dInitUpperValue));
+        end
 
-        imageSegEditValue('set', 'upper', str2double(get(hObject, 'String')));
+        imageSegEditValue('set', 'upper', dInitUpperValue);
 
         editImageTreshold();
         
@@ -832,8 +836,12 @@ function initSegPanel()
         set(uiSliderImageLowerTreshold, 'Value', 0);
         
         dInitLowerValue = str2double(get(hObject, 'String'));
+        if isnan(dInitLowerValue)
+            dInitLowerValue = imageSegEditValue('get', 'lower');
+            set(hObject, 'String', num2str(dInitLowerValue));
+        end
         
-        imageSegEditValue('set', 'lower', str2double(get(hObject, 'String')));
+        imageSegEditValue('set', 'lower', dInitLowerValue);
 
         editImageTreshold();
         
@@ -904,15 +912,15 @@ function initSegPanel()
             if strcmpi(uiSegAction.String{uiSegAction.Value}, 'Entire Image')
 
                 if useCropEditValue('get', 'upper') == true
-                    im(im  > dUpperTreshold) = imageCropEditValue('get', 'upper');
+                    im(im  >= dUpperTreshold) = imageCropEditValue('get', 'upper');
                 else
-                    im(im  > dUpperTreshold) = cropValue('get');
+                    im(im  >= dUpperTreshold) = cropValue('get');
                 end
 
                 if useCropEditValue('get', 'lower') == true
-                    im(im  < dLowerTreshold) = imageCropEditValue('get', 'lower');
+                    im(im  <= dLowerTreshold) = imageCropEditValue('get', 'lower');
                else
-                    im(im  < dLowerTreshold) = cropValue('get');
+                    im(im  <= dLowerTreshold) = cropValue('get');
                end
 
             else
@@ -926,15 +934,15 @@ function initSegPanel()
 
                 aTreshold = im;
                 if useCropEditValue('get', 'upper') == true
-                    aTreshold(aTreshold > dUpperTreshold ) = imageCropEditValue('get', 'upper');
+                    aTreshold(aTreshold >= dUpperTreshold ) = imageCropEditValue('get', 'upper');
                 else
-                    aTreshold(aTreshold > dUpperTreshold ) = cropValue('get');
+                    aTreshold(aTreshold >= dUpperTreshold ) = cropValue('get');
                 end
 
                 if useCropEditValue('get', 'lower') == true
-                    aTreshold(aTreshold < dLowerTreshold ) = imageCropEditValue('get', 'lower');
+                    aTreshold(aTreshold <= dLowerTreshold ) = imageCropEditValue('get', 'lower');
                 else
-                    aTreshold(aTreshold < dLowerTreshold ) = cropValue('get');
+                    aTreshold(aTreshold <= dLowerTreshold ) = cropValue('get');
                 end
 
                 im(roiMask == 0 ) = aTreshold(roiMask == 0);
@@ -958,15 +966,15 @@ function initSegPanel()
 
                     imVsplash = im;
                     if useCropEditValue('get', 'upper') == true
-                        imVsplash(imVsplash > dUpperTreshold ) = imageCropEditValue('get', 'upper');
+                        imVsplash(imVsplash >= dUpperTreshold ) = imageCropEditValue('get', 'upper');
                     else
-                        imVsplash(imVsplash > dUpperTreshold ) = cropValue('get');
+                        imVsplash(imVsplash >= dUpperTreshold ) = cropValue('get');
                     end
 
                     if useCropEditValue('get', 'lower') == true
-                        imVsplash(imVsplash < dLowerTreshold ) = imageCropEditValue('get', 'lower');
+                        imVsplash(imVsplash <= dLowerTreshold ) = imageCropEditValue('get', 'lower');
                     else
-                        imVsplash(imVsplash < dLowerTreshold ) = cropValue('get');
+                        imVsplash(imVsplash <= dLowerTreshold ) = cropValue('get');
                     end
 
                     imComputed = computeMontage(imVsplash, 'coronal', iCoronal);
@@ -996,23 +1004,23 @@ function initSegPanel()
                     aAxial    = im(:,:,iAxial);
 
                     if useCropEditValue('get', 'upper') == true
-                        aCoronal(aCoronal > dUpperTreshold )   = imageCropEditValue('get', 'upper');
-                        aSagittal(aSagittal > dUpperTreshold ) = imageCropEditValue('get', 'upper');
-                        aAxial(aAxial > dUpperTreshold )       = imageCropEditValue('get', 'upper');
+                        aCoronal(aCoronal >= dUpperTreshold )   = imageCropEditValue('get', 'upper');
+                        aSagittal(aSagittal >= dUpperTreshold ) = imageCropEditValue('get', 'upper');
+                        aAxial(aAxial >= dUpperTreshold )       = imageCropEditValue('get', 'upper');
                     else
-                        aCoronal(aCoronal > dUpperTreshold )   = cropValue('get');
-                        aSagittal(aSagittal > dUpperTreshold ) = cropValue('get');
-                        aAxial(aAxial > dUpperTreshold )       = cropValue('get');
+                        aCoronal(aCoronal >= dUpperTreshold )   = cropValue('get');
+                        aSagittal(aSagittal >= dUpperTreshold ) = cropValue('get');
+                        aAxial(aAxial >= dUpperTreshold )       = cropValue('get');
                     end
 
                     if useCropEditValue('get', 'lower') == true
-                        aCoronal(aCoronal < dLowerTreshold )   = imageCropEditValue('get', 'lower');
-                        aSagittal(aSagittal < dLowerTreshold ) = imageCropEditValue('get', 'lower');
-                        aAxial(aAxial < dLowerTreshold )       = imageCropEditValue('get', 'lower');
+                        aCoronal(aCoronal <= dLowerTreshold )   = imageCropEditValue('get', 'lower');
+                        aSagittal(aSagittal <= dLowerTreshold ) = imageCropEditValue('get', 'lower');
+                        aAxial(aAxial <= dLowerTreshold )       = imageCropEditValue('get', 'lower');
                     else
-                        aCoronal(aCoronal < dLowerTreshold )   = cropValue('get');
-                        aSagittal(aSagittal < dLowerTreshold ) = cropValue('get');
-                        aAxial(aAxial < dLowerTreshold )       = cropValue('get');
+                        aCoronal(aCoronal <= dLowerTreshold )   = cropValue('get');
+                        aSagittal(aSagittal <= dLowerTreshold ) = cropValue('get');
+                        aAxial(aAxial <= dLowerTreshold )       = cropValue('get');
                     end
 
                     imCoronal.CData  = aCoronal;
@@ -1031,33 +1039,21 @@ function initSegPanel()
                                 dSliceNb = tRoiInput{cc}.SliceNb;
 
                                 if objRoi.Parent  == axes1Ptr('get') && ...
-                                   iCoronal == dSliceNb
-                               
-                                    set(fiMainWindowPtr('get'), 'Pointer', 'default');
-                                    drawnow;                                 
+                                   iCoronal == dSliceNb                                                             
                                     
-                                    tresholdVoiRoi(im, objRoi, dSliceNb, false, false);                                    
-                                    return;
+                                    im = tresholdVoiRoi(im, objRoi, dSliceNb, false, false);                                    
                                 end
                                 
                                 if objRoi.Parent  == axes2Ptr('get') && ...
-                                   iSagittal == dSliceNb
-                               
-                                    set(fiMainWindowPtr('get'), 'Pointer', 'default');
-                                    drawnow;   
+                                   iSagittal == dSliceNb                               
                                     
-                                    tresholdVoiRoi(im, objRoi, dSliceNb, false, false);
-                                    return;
+                                    im = tresholdVoiRoi(im, objRoi, dSliceNb, false, false);
                                 end
                                 
                                 if objRoi.Parent  == axes3Ptr('get') && ...
                                    iAxial == dSliceNb
-                               
-                                    set(fiMainWindowPtr('get'), 'Pointer', 'default');
-                                    drawnow;   
                                     
-                                    tresholdVoiRoi(im, objRoi, dSliceNb, false, false);
-                                    return;
+                                    im = tresholdVoiRoi(im, objRoi, dSliceNb, false, false);
                                 end
                             end
                         end
@@ -1125,6 +1121,7 @@ function initSegPanel()
             roiMask = createMask(objRoi, im);
 
             if bMathOperation == true
+                
                 if strcmpi(uiSegAction.String{get(uiSegAction, 'Value')}, 'Outside ROI\VOI')
                     roiMask = ~roiMask;
                 end
@@ -1149,7 +1146,7 @@ function initSegPanel()
 
                 aTreshold = im;
                 if get(chkClipVoiRoi, 'value') == true % Clip under crop value
-                    aTreshold(aTreshold < cropValue('get') ) = cropValue('get');
+                    aTreshold(aTreshold <= cropValue('get') ) = cropValue('get');
                 end
                 im(roiMask) = aTreshold(roiMask);
             end
@@ -1192,7 +1189,7 @@ function initSegPanel()
 
                             aTreshold = aCoronal;
                             if get(chkClipVoiRoi, 'value')  == true % Clip under crop value
-                                aTreshold(aTreshold < cropValue('get') ) = cropValue('get');
+                                aTreshold(aTreshold <= cropValue('get') ) = cropValue('get');
                             end
                             aCoronal(roiMask) = aTreshold(roiMask);
 
@@ -1204,15 +1201,15 @@ function initSegPanel()
                             aTreshold = aCoronal;
 
                             if useCropEditValue('get', 'upper') == true
-                                aTreshold(aTreshold > dUpperTreshold ) = imageCropEditValue('get', 'upper');
+                                aTreshold(aTreshold >= dUpperTreshold ) = imageCropEditValue('get', 'upper');
                             else
-                                aTreshold(aTreshold > dUpperTreshold ) = cropValue('get');
+                                aTreshold(aTreshold >= dUpperTreshold ) = cropValue('get');
                             end
 
                             if useCropEditValue('get', 'lower') == true
-                                aTreshold(aTreshold < dLowerTreshold ) = imageCropEditValue('get', 'lower');
+                                aTreshold(aTreshold <= dLowerTreshold ) = imageCropEditValue('get', 'lower');
                             else
-                                aTreshold(aTreshold < dLowerTreshold ) = cropValue('get');
+                                aTreshold(aTreshold <= dLowerTreshold ) = cropValue('get');
                             end
 
                             aCoronal(roiMask == 0) = aTreshold(roiMask == 0);
@@ -1256,7 +1253,7 @@ function initSegPanel()
                         aTreshold = aCoronal;
 
                         if get(chkClipVoiRoi, 'value') == true % Clip under crop value
-                            aTreshold(aTreshold < cropValue('get') ) = cropValue('get');
+                            aTreshold(aTreshold <= cropValue('get') ) = cropValue('get');
                         end
 
                         aCoronal(roiMask) = aTreshold(roiMask);
@@ -1269,15 +1266,15 @@ function initSegPanel()
 
                         aTreshold = aCoronal;
                         if useCropEditValue('get', 'upper') == true
-                            aTreshold(aTreshold > dUpperTreshold ) = imageCropEditValue('get', 'upper');
+                            aTreshold(aTreshold >= dUpperTreshold ) = imageCropEditValue('get', 'upper');
                         else
-                            aTreshold(aTreshold > dUpperTreshold ) = cropValue('get');
+                            aTreshold(aTreshold >= dUpperTreshold ) = cropValue('get');
                         end
 
                         if useCropEditValue('get', 'lower') == true
-                            aTreshold(aTreshold < dLowerTreshold ) = imageCropEditValue('get', 'lower');
+                            aTreshold(aTreshold <= dLowerTreshold ) = imageCropEditValue('get', 'lower');
                         else
-                            aTreshold(aTreshold < dLowerTreshold ) = cropValue('get');
+                            aTreshold(aTreshold <= dLowerTreshold ) = cropValue('get');
                         end
 
                         aCoronal(roiMask == 0) = aTreshold(roiMask == 0);
@@ -1333,7 +1330,7 @@ function initSegPanel()
                             aTreshold = aSagittal;
 
                             if get(chkClipVoiRoi, 'value') == true % Clip under crop value
-                                aTreshold(aTreshold < cropValue('get') ) = cropValue('get');
+                                aTreshold(aTreshold <= cropValue('get') ) = cropValue('get');
                             end
 
                             aSagittal(roiMask) = aTreshold(roiMask);
@@ -1345,15 +1342,15 @@ function initSegPanel()
 
                             aTreshold = aSagittal;
                             if useCropEditValue('get', 'upper') == true
-                                aTreshold(aTreshold > dUpperTreshold ) = imageCropEditValue('get', 'upper');
+                                aTreshold(aTreshold >= dUpperTreshold ) = imageCropEditValue('get', 'upper');
                             else
-                                aTreshold(aTreshold > dUpperTreshold ) = cropValue('get');
+                                aTreshold(aTreshold >= dUpperTreshold ) = cropValue('get');
                             end
 
                             if useCropEditValue('get', 'lower') == true
-                                aTreshold(aTreshold < dLowerTreshold ) = imageCropEditValue('get', 'lower');
+                                aTreshold(aTreshold <= dLowerTreshold ) = imageCropEditValue('get', 'lower');
                             else
-                                aTreshold(aTreshold < dLowerTreshold ) = cropValue('get');
+                                aTreshold(aTreshold <= dLowerTreshold ) = cropValue('get');
                             end
 
                             aSagittal(roiMask == 0) = aTreshold(roiMask == 0);
@@ -1398,7 +1395,7 @@ function initSegPanel()
                         aTreshold = aSagittal;
 
                         if get(chkClipVoiRoi, 'value')  == true % Clip under crop value
-                            aTreshold(aTreshold < cropValue('get') ) = cropValue('get');
+                            aTreshold(aTreshold <= cropValue('get') ) = cropValue('get');
                         end
 
                         aSagittal(roiMask) = aTreshold(roiMask);
@@ -1411,15 +1408,15 @@ function initSegPanel()
 
                         aTreshold = aSagittal;
                         if useCropEditValue('get', 'upper') == true
-                            aTreshold(aTreshold > dUpperTreshold ) = imageCropEditValue('get', 'upper');
+                            aTreshold(aTreshold >= dUpperTreshold ) = imageCropEditValue('get', 'upper');
                         else
-                            aTreshold(aTreshold > dUpperTreshold ) = cropValue('get');
+                            aTreshold(aTreshold >= dUpperTreshold ) = cropValue('get');
                         end
 
                         if useCropEditValue('get', 'lower') == true
-                            aTreshold(aTreshold < dLowerTreshold ) = imageCropEditValue('get', 'lower');
+                            aTreshold(aTreshold <= dLowerTreshold ) = imageCropEditValue('get', 'lower');
                         else
-                            aTreshold(aTreshold < dLowerTreshold ) = cropValue('get');
+                            aTreshold(aTreshold <= dLowerTreshold ) = cropValue('get');
                         end
 
                         aSagittal(roiMask == 0) = aTreshold(roiMask == 0);
@@ -1472,7 +1469,7 @@ function initSegPanel()
                             aTreshold = aAxial;
 
                             if get(chkClipVoiRoi, 'value') == true % Clip under crop value
-                                aTreshold(aTreshold < cropValue('get') ) = cropValue('get');
+                                aTreshold(aTreshold <= cropValue('get') ) = cropValue('get');
                             end
 
                             aAxial(roiMask) = aTreshold(roiMask);
@@ -1484,15 +1481,15 @@ function initSegPanel()
 
                             aTreshold = aAxial;
                             if useCropEditValue('get', 'upper') == true
-                                aTreshold(aTreshold > dUpperTreshold ) = imageCropEditValue('get', 'upper');
+                                aTreshold(aTreshold >= dUpperTreshold ) = imageCropEditValue('get', 'upper');
                             else
-                                aTreshold(aTreshold > dUpperTreshold ) = cropValue('get');
+                                aTreshold(aTreshold >= dUpperTreshold ) = cropValue('get');
                             end
 
                             if useCropEditValue('get', 'lower') == true
-                                aTreshold(aTreshold < dLowerTreshold ) = imageCropEditValue('get', 'lower');
+                                aTreshold(aTreshold <= dLowerTreshold ) = imageCropEditValue('get', 'lower');
                             else
-                                aTreshold(aTreshold < dLowerTreshold ) = cropValue('get');
+                                aTreshold(aTreshold <= dLowerTreshold ) = cropValue('get');
                             end
 
                             aAxial(roiMask == 0) = aTreshold(roiMask == 0);
@@ -1538,7 +1535,7 @@ function initSegPanel()
                         aTreshold = aAxial;
 
                         if get(chkClipVoiRoi, 'value') == true % Clip under crop value
-                            aTreshold(aTreshold < cropValue('get') ) = cropValue('get');
+                            aTreshold(aTreshold <= cropValue('get') ) = cropValue('get');
                         end
 
                         aAxial(roiMask) = aTreshold(roiMask);
@@ -1551,15 +1548,15 @@ function initSegPanel()
 
                         aTreshold = aAxial;
                         if useCropEditValue('get', 'upper') == true
-                            aTreshold(aTreshold > dUpperTreshold ) = imageCropEditValue('get', 'upper');
+                            aTreshold(aTreshold >= dUpperTreshold ) = imageCropEditValue('get', 'upper');
                         else
-                            aTreshold(aTreshold > dUpperTreshold ) = cropValue('get');
+                            aTreshold(aTreshold >= dUpperTreshold ) = cropValue('get');
                         end
 
                         if useCropEditValue('get', 'lower') == true
-                            aTreshold(aTreshold < dLowerTreshold ) = imageCropEditValue('get', 'lower');
+                            aTreshold(aTreshold <= dLowerTreshold ) = imageCropEditValue('get', 'lower');
                         else
-                            aTreshold(aTreshold < dLowerTreshold ) = cropValue('get');
+                            aTreshold(aTreshold <= dLowerTreshold ) = cropValue('get');
                         end
 
                         aAxial(roiMask == 0) = aTreshold(roiMask == 0);
@@ -1668,22 +1665,22 @@ function initSegPanel()
                 aTreshold = im;
 
                 if get(chkClipVoiRoi, 'value') == true % Clip under crop value
-                    aTreshold(aTreshold < cropValue('get') ) = cropValue('get');
+                    aTreshold(aTreshold <= cropValue('get') ) = cropValue('get');
                 end
 
                 im = aTreshold;
 
             else
                 if useCropEditValue('get', 'upper') == true
-                    im(im  > dUpperTreshold) = imageCropEditValue('get', 'upper');
+                    im(im  >= dUpperTreshold) = imageCropEditValue('get', 'upper');
                 else
-                    im(im  > dUpperTreshold) = cropValue('get');
+                    im(im  >= dUpperTreshold) = cropValue('get');
                 end
 
                 if useCropEditValue('get', 'lower') == true
-                    im(im  < dLowerTreshold) = imageCropEditValue('get', 'lower');
+                    im(im  <= dLowerTreshold) = imageCropEditValue('get', 'lower');
                 else
-                    im(im  < dLowerTreshold) = cropValue('get');
+                    im(im  <= dLowerTreshold) = cropValue('get');
                 end
             end
         else
@@ -1736,28 +1733,41 @@ function initSegPanel()
     function sliderLungTreshCallback(hObject, ~)
 
    %     resetSegmentationCallback();
+        dValue = get(hObject, 'Value');
+        
+        lungSegTreshValue('set', dValue);
 
-        lungSegmentationPreview(hObject.Value)
+        lungSegmentationPreview(dValue);
 
-        set(uiEditLungTreshold, 'String', num2str(hObject.Value) );
+        set(uiEditLungTreshold, 'String', num2str(dValue) );
 
     end
 
     function editLungTreshCallback(hObject, ~)
-
-        if str2double(hObject.String) < 0
-            hObject.String = '0';
+        
+        dValue = str2double(get(hObject, 'String'));
+        if isnan(dValue)
+            dValue = lungSegTreshValue('get');
+            set(hObject, 'String', num2str(dValue));
         end
-
+        
+        if dValue < 0
+            dValue = 0;
+            set(hObject, 'String', num2str(dValue));
+        end
+        
+        if dValue > 1
+            dValue = 1;
+            set(hObject, 'String', num2str(dValue));
+        end
+        
+        lungSegTreshValue('set', dValue);
   %      resetSegmentationCallback();
 
-        lungSegmentationPreview(str2double(hObject.String));
+        lungSegmentationPreview(dValue);
 
-        if str2double(hObject.String) > 1
-            set(uiSliderLungTreshold, 'Value', 1);
-        else
-            set(uiSliderLungTreshold, 'Value', str2double(hObject.String) );
-        end
+        set(uiSliderLungTreshold, 'Value', dValue);
+        
     end
 
     function resetSegmentationCallback(~, ~)
@@ -1867,7 +1877,11 @@ function initSegPanel()
     function editFudgeFactorCallback(hObject, ~)
 
         dFactor = str2double(get(hObject, 'String'));
-
+        if isnan(dFactor)
+            dFactor = fudgeFactorSegValue('get');
+            set(hObject, 'String', num2str(dFactor));
+        end
+        
         fudgeFactorSegValue('set', dFactor);
 
         set(uiSliderFudgeFactor, 'Value', dFactor);

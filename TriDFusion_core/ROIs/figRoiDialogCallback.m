@@ -58,6 +58,7 @@ function figRoiDialogCallback(hObject, ~)
                'Resize', 'off', ...
                'Toolbar','none'...
                );
+    figRoiWindowPtr('set', figRoiWindow);       
 
     set(figRoiWindow, 'WindowButtonDownFcn', @roiClickDown);
 
@@ -165,7 +166,7 @@ function figRoiDialogCallback(hObject, ~)
                'Position', [250 uiVoiRoiWindow.Position(4)-20 100 20],...
                'BackgroundColor', viewerBackgroundColor('get'), ...
                'ForegroundColor', viewerForegroundColor('get'), ...                    
-               'String'  , 'Cells'...
+               'String'  , 'NB Pixels'...
                );
 
      uicontrol(uiVoiRoiWindow,...
@@ -259,6 +260,7 @@ function figRoiDialogCallback(hObject, ~)
 
 
     function roiClickDown(~, ~)
+        
         if strcmp(get(figRoiWindow,'selectiontype'),'alt')
 
             bDispayMenu = false;
@@ -1263,7 +1265,13 @@ function figRoiDialogCallback(hObject, ~)
                          end
                     end
 
-                    for cc=1:numel(tVoiInput{aa}.RoisTag)
+                    dNbTags = numel(tVoiInput{aa}.RoisTag);
+                    for cc=1:dNbTags
+                        if dNbTags > 100
+                            if mod(cc, 10)==1 || cc == dNbTags         
+                                progressBar( cc/dNbTags-0.0001, sprintf('Computing ROI %d/%d, please wait', cc, dNbTags) );  
+                            end             
+                        end
                         for bb=1:numel(tRoiInput)
                            if isvalid(tRoiInput{bb}.Object)
                                 if strcmpi(tVoiInput{aa}.RoisTag{cc}, tRoiInput{bb}.Tag)
@@ -1336,7 +1344,13 @@ function figRoiDialogCallback(hObject, ~)
         end
         
         if ~isempty(tRoiInput) 
-            for bb=1:numel(tRoiInput)
+            dNbTags = numel(tRoiInput);
+            for bb=1:dNbTags
+               if dNbTags > 100
+                   if mod(bb, 10)==1 || bb == dNbTags         
+                       progressBar( bb/dNbTags-0.0001, sprintf('Computing ROI %d/%d, please wait', bb, dNbTags) );  
+                   end         
+               end
                if isvalid(tRoiInput{bb}.Object)
                     if strcmpi(tRoiInput{bb}.ObjectType, 'roi')
 
@@ -1419,6 +1433,9 @@ function figRoiDialogCallback(hObject, ~)
             
             set(lbVoiRoiWindow, 'Value', 1);               
             set(lbVoiRoiWindow, 'String', sLbWindow);
+            if size(lbVoiRoiWindow.String, 1) > 0
+                lbVoiRoiWindow.String(end,:) = [];
+            end
             set(lbVoiRoiWindow, 'ListboxTop', dListboxTop);
             
             if dListboxValue < size(lbVoiRoiWindow.String, 1)                
@@ -1552,7 +1569,7 @@ function figRoiDialogCallback(hObject, ~)
 
                 asVoiRoiTable{1,1}  = 'Name';
                 asVoiRoiTable{1,2}  = 'Image number';
-                asVoiRoiTable{1,3}  = 'Cells';
+                asVoiRoiTable{1,3}  = 'NB Pixels';
                 asVoiRoiTable{1,4}  = 'Total';
                 asVoiRoiTable{1,5}  = 'Mean';
                 asVoiRoiTable{1,6}  = 'Min';

@@ -1,5 +1,5 @@
-function lStatus = kernelCtDoseMap(sAction, lValue)
-%function lStatus = kernelCtDoseMap(sAction, lValue)
+function bUseDoseMap = kernelUseCtDoseMap(sAction, bValue)
+%function bUseDoseMap = kernelUseCtDoseMap(sAction, dValue)
 %Get/Set use CT Dose Map.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,11 +27,12 @@ function lStatus = kernelCtDoseMap(sAction, lValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent plStatus; 
+    persistent pbUseDoseMap; 
 
     if strcmpi('set', sAction)
-        plStatus = lValue;            
+        pbUseDoseMap = bValue;            
     end
-    lStatus = plStatus;
+    
+    bUseDoseMap = pbUseDoseMap;
 
 end 

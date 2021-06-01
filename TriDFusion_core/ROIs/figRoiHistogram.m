@@ -157,7 +157,12 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                   'ForegroundColor', viewerForegroundColor('get'), ...                   
                   'CallBack', @editBinsCallback ...
                   );
-
+    
+    try
+        
+    set(figRoiWindowPtr('get'), 'Pointer', 'watch');            
+    drawnow;           
+        
     [imCData, logicalMask] = computeHistogram(dicomBuffer('get'), atRoiVoiMetaData, ptrObject, tRoiInput, dSUVScale, bSUVUnit);
     if bSegmented == true
         imCDataMasked = imCData(logicalMask);
@@ -265,7 +270,14 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
 
     dcmObject = datacursormode(figRoiHistogramWindow);
     set(dcmObject, 'Enable', 'on');
-
+    
+    catch       
+        progressBar(1, 'Error:figRoiHistogram()');          
+    end
+    
+    set(figRoiWindowPtr('get'), 'Pointer', 'default');
+    drawnow;  
+        
     function setHistFigureName()
         
        sType = '';
@@ -338,7 +350,11 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
     end
 
     function histogramTypeCallback(hObject, ~)
-
+        try
+            
+        set(figRoiHistogramWindow, 'Pointer', 'watch');            
+        drawnow;  
+    
         if strcmpi(get(hObject, 'Label'), 'Cummulative DVH')
 
             if ~isempty(ptrHist)
@@ -504,7 +520,13 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
         end
 
         setHistFigureName();
+        
+        catch       
+            progressBar(1, 'Error:histogramTypeCallback()');          
+        end
 
+        set(figRoiHistogramWindow, 'Pointer', 'default');
+        drawnow;  
     end
 
     function setHistogramDataCursorCallback(hObject, ~)
@@ -597,9 +619,19 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                     sCurrentDir = pwd;
                 end
             end
+            
+            if     histogramMenuOption('get') == true
+                sHystogramType = 'barHystogram';
+            elseif cummulativeMenuOption('get') == true
+                sHystogramType = 'cummulativeDVH';
+            elseif profileMenuOption ('get') == true
+                sHystogramType = 'profile';
+            else
+                sHystogramType = '';
+            end
 
-            [file, path] = uiputfile(filter, 'Save Histogram result', sprintf('%s/%s_%s_%s_histogram_TriDFusion.xlsx' , ...
-                sCurrentDir, cleanString(info{1}.PatientName), cleanString(info{1}.PatientID), cleanString(info{1}.SeriesDescription)) );
+            [file, path] = uiputfile(filter, 'Save Histogram Result', sprintf('%s/%s_%s_%s_%s_TriDFusion.xlsx' , ...
+                sCurrentDir, cleanString(info{1}.PatientName), cleanString(info{1}.PatientID), cleanString(info{1}.SeriesDescription), sHystogramType ));
 
             if file ~= 0
                 try
@@ -622,12 +654,17 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                     delete(sprintf('%s%s', path, file));
                 end
 
-                asHistHeader{1,1} = sprintf('Patient Name: %s', info{1}.PatientName);
-                asHistHeader{2,1} = sprintf('Patient ID: %s', info{1}.PatientID);
+                try
+
+                set(figRoiHistogramWindow, 'Pointer', 'watch');            
+                drawnow;                  
+                                
+                asHistHeader{1,1} = sprintf('Patient Name: %s'      , info{1}.PatientName);
+                asHistHeader{2,1} = sprintf('Patient ID: %s'        , info{1}.PatientID);
                 asHistHeader{3,1} = sprintf('Series Description: %s', info{1}.SeriesDescription);
-                asHistHeader{4,1} = sprintf('Accession Number: %s', info{1}.AccessionNumber);
-                asHistHeader{5,1} = sprintf('Series Date: %s', info{1}.SeriesDate);
-                asHistHeader{6,1} = sprintf('Series Time: %s', info{1}.SeriesTime);
+                asHistHeader{4,1} = sprintf('Accession Number: %s'  , info{1}.AccessionNumber);
+                asHistHeader{5,1} = sprintf('Series Date: %s'       , info{1}.SeriesDate);
+                asHistHeader{6,1} = sprintf('Series Time: %s'       , info{1}.SeriesTime);
 
                 if bUseWritecell == true              
                     writecell(asHistHeader(:),sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A1');
@@ -649,18 +686,17 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                    ~isempty(ptrPlotCummulative)
                     
                     dNbElements = numel(ptrPlotCummulative.XData);
-                    if dNbElements >= 10
+                    if dNbElements >= 20
                         aXDataToDisplay{1}  = ptrPlotCummulative.XData(1);
-                        aXDataToDisplay{10} = ptrPlotCummulative.XData(10);
+                        aXDataToDisplay{20} = ptrPlotCummulative.XData(end);
                        
                         aYDataToDisplay{1}  = ptrPlotCummulative.YData(1);
-                        aYDataToDisplay{10} = ptrPlotCummulative.YData(10);      
+                        aYDataToDisplay{20} = ptrPlotCummulative.YData(end);      
                                                 
-                        dOffsetValue = 1;
-                        for jj=2:9
-                            aXDataToDisplay{jj} =  ptrPlotCummulative.XData(round(dOffsetValue+1));
-                            aYDataToDisplay{jj} =  ptrPlotCummulative.YData(round(dOffsetValue+1));                          
-                            dOffsetValue = dOffsetValue+1;
+                        dOffsetValue = dNbElements/20;
+                        for jj=2:19
+                            aXDataToDisplay{jj} =  ptrPlotCummulative.XData(round(jj*dOffsetValue));
+                            aYDataToDisplay{jj} =  ptrPlotCummulative.YData(round(jj*dOffsetValue));                          
                         end                        
                     else 
                         aXDataToDisplay = ptrPlotCummulative.XData;
@@ -671,26 +707,26 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                         writetable(table(aXDataToDisplay), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B8');
                         writetable(table(aYDataToDisplay), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B9');
                     else
-                        xlswrite(sprintf('%s%s', path, file), aXDataToDisplay, 1, 'B8:J8');
-                        xlswrite(sprintf('%s%s', path, file), aYDataToDisplay, 1, 'B9:J9');     
+                        xlswrite(sprintf('%s%s', path, file), aXDataToDisplay, 1, 'B8:U8');
+                        xlswrite(sprintf('%s%s', path, file), aYDataToDisplay, 1, 'B9:U9');     
                     end
                     
                     asXLimitsHeader{1,1} = 'XLimits';
                     if bUseWritecell == true                                  
-                        writecell(asXLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A10');
-                        writetable(table(ptrPlotCummulative.Parent.XLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B10');
+                        writecell(asXLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A11');
+                        writetable(table(ptrPlotCummulative.Parent.XLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B11');
                     else                    
-                        xlswrite(sprintf('%s%s', path, file), asXLimitsHeader, 1, 'A10');
-                        xlswrite(sprintf('%s%s', path, file), ptrPlotCummulative.Parent.XLim, 1, 'B10:C10'); 
+                        xlswrite(sprintf('%s%s', path, file), asXLimitsHeader, 1, 'A11');
+                        xlswrite(sprintf('%s%s', path, file), ptrPlotCummulative.Parent.XLim, 1, 'B11:C11'); 
                     end
                     
                     asYLimitsHeader{1,1} = 'YLimits';
                     if bUseWritecell == true                                  
-                        writecell(asYLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A11');
-                        writetable(table(ptrPlotCummulative.Parent.YLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B11');
+                        writecell(asYLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A12');
+                        writetable(table(ptrPlotCummulative.Parent.YLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B12');
                     else
-                        xlswrite(sprintf('%s%s', path, file), asYLimitsHeader, 1, 'A11');
-                        xlswrite(sprintf('%s%s', path, file), ptrPlotCummulative.Parent.YLim, 1, 'B11:C11'); 
+                        xlswrite(sprintf('%s%s', path, file), asYLimitsHeader, 1, 'A12');
+                        xlswrite(sprintf('%s%s', path, file), ptrPlotCummulative.Parent.YLim, 1, 'B12:C12'); 
                     end                    
                    
                     if bUseWritecell == false % Need excel to copy the figure                                 
@@ -714,42 +750,42 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                     
                     asXLimitsHeader{1,1} = 'XLimits';
                     if bUseWritecell == true                                                                          
-                        writecell(asXLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A10');
-                        writetable(table(ptrHist.Parent.XLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B10');
+                        writecell(asXLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A11');
+                        writetable(table(ptrHist.Parent.XLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B11');
                     else
-                        xlswrite(sprintf('%s%s', path, file), asXLimitsHeader, 1, 'A10');
-                        xlswrite(sprintf('%s%s', path, file), ptrHist.Parent.XLim, 1, 'B10:C10'); 
+                        xlswrite(sprintf('%s%s', path, file), asXLimitsHeader, 1, 'A11');
+                        xlswrite(sprintf('%s%s', path, file), ptrHist.Parent.XLim, 1, 'B11:C11'); 
                     end
                     
                     asYLimitsHeader{1,1} = 'YLimits';
                     if bUseWritecell == true                                                                                              
-                        writecell(asYLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A11');
+                        writecell(asYLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A12');
                         writetable(table(ptrHist.Parent.YLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B11');
                     else
-                        xlswrite(sprintf('%s%s', path, file), asYLimitsHeader, 1, 'A11');
-                        xlswrite(sprintf('%s%s', path, file), ptrHist.Parent.YLim, 1, 'B11:C11'); 
+                        xlswrite(sprintf('%s%s', path, file), asYLimitsHeader, 1, 'A12');
+                        xlswrite(sprintf('%s%s', path, file), ptrHist.Parent.YLim, 1, 'B12:C12'); 
                     end
                     
                     asNbBinsHeader{1,1} = 'Number of Bins';
                     if bUseWritecell == true                                                                                                                  
-                        writecell(asNbBinsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A12');
-                        writetable(table(ptrHist.NumBins), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B12');
+                        writecell(asNbBinsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A14');
+                        writetable(table(ptrHist.NumBins), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B14');
                     else
-                        xlswrite(sprintf('%s%s', path, file), asNbBinsHeader, 1, 'A12');
-                        xlswrite(sprintf('%s%s', path, file), ptrHist.NumBins, 1, 'B12'); 
+                        xlswrite(sprintf('%s%s', path, file), asNbBinsHeader, 1, 'A14');
+                        xlswrite(sprintf('%s%s', path, file), ptrHist.NumBins, 1, 'B14'); 
                     end
                     
                     asBinWidthHeader{1,1} = 'Bin Width';
                     if bUseWritecell == true                                                                                                                                      
-                        writecell(asBinWidthHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A13');
-                        writetable(table(ptrHist.BinWidth), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B13');
+                        writecell(asBinWidthHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A15');
+                        writetable(table(ptrHist.BinWidth), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B15');
                     else
-                        xlswrite(sprintf('%s%s', path, file), asBinWidthHeader, 1, 'A13');
-                        xlswrite(sprintf('%s%s', path, file), ptrHist.BinWidth, 1, 'B13'); 
+                        xlswrite(sprintf('%s%s', path, file), asBinWidthHeader, 1, 'A15');
+                        xlswrite(sprintf('%s%s', path, file), ptrHist.BinWidth, 1, 'B15'); 
                     end
                     
                     if bUseWritecell == false % Need excel to copy the figure                                 
-                        xlswritefig(figRoiHistogramWindow, sprintf('%s%s', path, file), 'Sheet1', 'A15');
+                        xlswritefig(figRoiHistogramWindow, sprintf('%s%s', path, file), 'Sheet1', 'A17');
                     end
                      
                 else
@@ -764,49 +800,40 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                         
                         asXLimitsHeader{1,1} = 'XLimits';
                         if bUseWritecell == true                                                                                                                                                              
-                            writecell(asXLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A10');
-                            writetable(table(ptrPlotProfile.Parent.XLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B10');
+                            writecell(asXLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A11');
+                            writetable(table(ptrPlotProfile.Parent.XLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B11');
                         else
-                            xlswrite(sprintf('%s%s', path, file), asXLimitsHeader, 1, 'A10');
-                            xlswrite(sprintf('%s%s', path, file), ptrPlotProfile.Parent.XLim, 1, 'B10:C10'); 
+                            xlswrite(sprintf('%s%s', path, file), asXLimitsHeader, 1, 'A11');
+                            xlswrite(sprintf('%s%s', path, file), ptrPlotProfile.Parent.XLim, 1, 'B11:C11'); 
                         end
                     
                         asYLimitsHeader{1,1} = 'YLimits';
                         if bUseWritecell == true                                                                                                                                                              
-                            writecell(asYLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A11');
-                            writetable(table(ptrPlotProfile.Parent.YLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B11');
+                            writecell(asYLimitsHeader,sprintf('%s%s', path, file), 'Sheet', 1, 'Range', 'A12');
+                            writetable(table(ptrPlotProfile.Parent.YLim), sprintf('%s%s', path, file), 'WriteVariableNames', false, 'Sheet', 1, 'Range', 'B12');
                         else
-                            xlswrite(sprintf('%s%s', path, file), asYLimitsHeader, 1, 'A11');
-                            xlswrite(sprintf('%s%s', path, file), ptrPlotProfile.Parent.YLim, 1, 'B11:C11'); 
+                            xlswrite(sprintf('%s%s', path, file), asYLimitsHeader, 1, 'A12');
+                            xlswrite(sprintf('%s%s', path, file), ptrPlotProfile.Parent.YLim, 1, 'B12:C12'); 
                         end
                         
                         if bUseWritecell == false % Need excel to copy the figure                                 
-                            xlswritefig(figRoiHistogramWindow, sprintf('%s%s', path, file), 'Sheet1', 'A13');                          
+                            xlswritefig(figRoiHistogramWindow, sprintf('%s%s', path, file), 'Sheet1', 'A14');                          
                         end
                         
                     end
                 end
 
                 winopen(sprintf('%s%s', path, file));
-
-                try
-                    saveHistLastUsedDir = path;
-                    save(sMatFile, 'saveHistLastUsedDir');
-                catch
-                    progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-%                    h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
-%                    if integrateToBrowser('get') == true
-%                        sLogo = './TriDFusion/logo.png';
-%                    else
-%                        sLogo = './logo.png';
-%                    end
-
-%                    javaFrame = get(h, 'JavaFrame');
-%                    javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
-                end
-
+                
                 progressBar(1, sprintf('Write %s%s completed', path, file));
-
+                
+                catch
+                    progressBar(1, 'Error: exportCurrentHistogramCallback()');
+                end
+                
+                set(figRoiHistogramWindow, 'Pointer', 'default');            
+                drawnow;  
+                
             end
         end
 

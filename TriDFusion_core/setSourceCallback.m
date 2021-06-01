@@ -292,7 +292,7 @@ function setSourceCallback(~, ~)
             multiFrameZoom    ('set', 'in' , 1);
             multiFrameZoom    ('set', 'out', 1);
             multiFrameZoom    ('set', 'axe', []);
-
+    
             clearDisplay();
             initDisplay(3);
 

@@ -181,5 +181,7 @@ function initViewerGlobal()
     viewerRootPath('set', './');
 
     copyRoiPtr('set', '');
+    
+    kernelCtDoseMapUiValues('set', []);
 
 end
