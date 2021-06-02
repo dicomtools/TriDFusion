@@ -50,12 +50,31 @@ function info = dicominfo4che3(fileInput)
     info.PatientPosition         = char(dataset.getStrings(org.dcm4che.data.Tag.PatientPosition));      
     info.ImagePositionPatient    = dataset.getDoubles(org.dcm4che.data.Tag.ImagePositionPatient);
     info.ImageOrientationPatient = dataset.getDoubles(org.dcm4che.data.Tag.ImageOrientationPatient);
+    
     if isempty(info.ImagePositionPatient) 
-        info.ImagePositionPatient = zeros(3,1);
+        datasetDetector = dataset.getNestedDataset(org.dcm4che.data.Tag.DetectorInformationSequence); % NM
+        if ~isempty(datasetDetector)
+            info.ImagePositionPatient = datasetDetector.getDoubles(org.dcm4che.data.Tag.ImagePositionPatient);
+            if isempty(info.ImagePositionPatient) 
+                info.ImagePositionPatient = zeros(3,1);
+            end
+        else
+            info.ImagePositionPatient = zeros(3,1);
+        end
     end
+    
     if isempty(info.ImageOrientationPatient) 
-        info.ImageOrientationPatient = zeros(6,1);
+        datasetDetector = dataset.getNestedDataset(org.dcm4che.data.Tag.DetectorInformationSequence); % NM
+        if ~isempty(datasetDetector)         
+            info.ImageOrientationPatient = datasetDetector.getDoubles(org.dcm4che.data.Tag.ImageOrientationPatient);      
+            if isempty(info.ImageOrientationPatient)         
+                info.ImageOrientationPatient = zeros(6,1);
+            end
+        else
+            info.ImageOrientationPatient = zeros(6,1);
+        end
     end
+    
     info.SeriesDate = char(dataset.getString(org.dcm4che.data.Tag.SeriesDate, 0));
     info.StudyDate  = char(dataset.getString(org.dcm4che.data.Tag.StudyDate , 0));
 

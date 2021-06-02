@@ -861,7 +861,7 @@ function setRegistrationCallback(~, ~)
                     dNextSeries = 2;
 
                     if get(chkSeriesDescription, 'Value') == true
-                        atRefMetaData{kk}.SeriesDescription  = sprintf('REF-COREG %s', atRefMetaData{kk}.SeriesDescription);
+                        atRefMetaData{1}.SeriesDescription  = sprintf('REF-COREG %s', atRefMetaData{1}.SeriesDescription);
                         asDescription = seriesDescription('get');
                         asDescription{kk} = sprintf('REF-COREG %s', asDescription{kk});
 
