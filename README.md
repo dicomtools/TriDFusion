@@ -1,8 +1,9 @@
-# A DICOM Multi-Fusion Viewer for Research
+# TriDFusion (3DF) is a DICOM Multi-Fusion Viewer for Research
 
 ## Features:
 
 * Dose Kernel Monte Carlo Voxel base dosimetry 
+* Threshold base ROIs segmentation
 * Threshold base Image segmentation, Lung Segmentation & Image cropping
 * Fix issues related to image orientation, voxel size or field-of-view
 * Image resampling & registration
