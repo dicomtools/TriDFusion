@@ -4,6 +4,8 @@ function initKernelPanel()
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
+%        Brad Beattie, beattieb@mskcc.org
+%        C. Ross Schmidtlein, schmidtr@mskcc.org
 %
 %Last specifications modified:
 %
@@ -1450,7 +1452,7 @@ function initKernelPanel()
 
             for jj=1:numel(atCoreMetaData)
                 if isfield(atCoreMetaData{jj}, 'RescaleSlope')
-                    atCoreMetaData{jj}.RescaleSlope = 0;
+                    atCoreMetaData{jj}.RescaleSlope = 1;
                 end
                 if isfield(atCoreMetaData{jj}, 'RescaleIntercept')
                     atCoreMetaData{jj}.RescaleIntercept = 0;
@@ -1467,7 +1469,7 @@ function initKernelPanel()
             end
 
             datetimeInjDate = datetime(injDateTime,'InputFormat','yyyyMMddHHmmss.SS');
-            daateInjDate = datenum(datetimeInjDate);
+            dateInjDate = datenum(datetimeInjDate);
 
             if numel(acqTime) == 6
                 acqTime = sprintf('%s.00', acqTime);
@@ -1476,12 +1478,12 @@ function initKernelPanel()
             datetimeAcqDate = datetime([acqDate acqTime],'InputFormat','yyyyMMddHHmmss.SS');
             dayAcqDate = datenum(datetimeAcqDate);
 
-            relT = (dayAcqDate - daateInjDate)*(24*60*60); % Acquisition start time
+            relT = (dayAcqDate - dateInjDate)*(24*60*60); % Acquisition start time
 
             switch lower(asIsotope{dIsotope})
                 case 'y90'
                     betaYield = 1; %Beta yield Y-90
-                    betaFactor = 4E7;
+                    betaFactor = 4E7; % To double check
 
                 case 'i124'
                     betaYield = 0.92; %Beta yield I124
@@ -1508,7 +1510,7 @@ function initKernelPanel()
 
 %                     aActivity = aActivity*xPixel*yPixel*zPixel; % in mm
              aActivity = aActivity*xPixel*yPixel*zPixel/1000; % in cn
-             aActivity = aActivity*2^(relT/halfLife)*halfLife/log(2)*betaYield/betaFactor;
+             aActivity = aActivity*2^(relT/halfLife)*halfLife/log(2)*betaYield/betaFactor; %%%To double check
 
              aDose = zeros(numel(aDoseR2),1);
              for kk=1:numel(aDoseR2)
@@ -1529,7 +1531,7 @@ function initKernelPanel()
             aXYZPixel(3)=zPixel;
 
             fromTo = ceil(dDistance/min(aXYZPixel, [], 'all'));
-            from = 0-abs(fromTo);
+            from = -abs(fromTo);
             to = abs(fromTo);
             [X,Y,Z] = meshgrid(from:to,from:to,from:to);
 

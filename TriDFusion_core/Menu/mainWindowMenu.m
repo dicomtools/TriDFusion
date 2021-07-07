@@ -29,6 +29,7 @@ function mainWindowMenu()
 
     mFile = uimenu(fiMainWindowPtr('get'),'Label','File');
     uimenu(mFile,'Label', 'Open...', 'Callback',@setSourceCallback);
+    uimenu(mFile,'Label', 'Import .raw file...','Callback', @importRawCallback);
     uimenu(mFile,'Label', 'Import Dose Kernel...','Callback', @importDoseKernelCallback);
     uimenu(mFile,'Label', 'Import STL Model...','Callback', @importSTLCallback);
     uimenu(mFile,'Label', 'Import Contours...','Callback', @importContoursCallback);    
@@ -39,7 +40,9 @@ function mainWindowMenu()
     uimenu(mFile,'Label', 'Export DICOM...','Callback', @writeDICOMCallback, 'Separator','on');
     uimenu(mFile,'Label', 'Export DICOM All Series...','Callback', @writeDICOMAllSeriesCallback);
  %   uimenu(mFile,'Label', 'Export to Excel...','Callback', @exportAllSeriesResultCallback);
+    uimenu(mFile,'Label', 'Export ROIs to RT-Structure...','Callback', @writeRTStructCallback);
     uimenu(mFile,'Label', 'Export ISO Model to STL...','Callback', @exportISOtoSTLCallback);
+    
     uimenu(mFile,'Label', 'Print Preview...','Callback', 'filemenufcn(gcbf,''FilePrintPreview'')', 'Separator','on');
     uimenu(mFile,'Label', 'Print...','Callback', 'printdlg(gcbf)');
     uimenu(mFile,'Label', 'Exit' ,'Callback', 'close', 'Separator','on');

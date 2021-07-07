@@ -99,8 +99,13 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
        
     newSliceThickness = dcmSliceThickness * (dimsDcm(3)/dimsRef(3));        
     for cc=1:numel(atDcmMetaData)-1
-        atDcmMetaData{cc+1}.ImagePositionPatient(3) = atDcmMetaData{cc}.ImagePositionPatient(3) + newSliceThickness;               
-        atDcmMetaData{cc+1}.SliceLocation = atDcmMetaData{cc}.SliceLocation + newSliceThickness; 
+        if atDcmMetaData{1}.ImagePositionPatient(3) < atDcmMetaData{2}.ImagePositionPatient(3)
+            atDcmMetaData{cc+1}.ImagePositionPatient(3) = atDcmMetaData{cc}.ImagePositionPatient(3) + newSliceThickness;               
+            atDcmMetaData{cc+1}.SliceLocation = atDcmMetaData{cc}.SliceLocation + newSliceThickness; 
+        else
+            atDcmMetaData{cc+1}.ImagePositionPatient(3) = atDcmMetaData{cc}.ImagePositionPatient(3) - newSliceThickness;               
+            atDcmMetaData{cc+1}.SliceLocation = atDcmMetaData{cc}.SliceLocation - newSliceThickness;             
+        end
     end         
     
 end  

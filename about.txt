@@ -1,4 +1,4 @@
-TriDFusion (3DF) Image Viewer Version 1.0
+TriDFusion Image Viewer Version 1.0
 
 Disclaimer Notice:
 
@@ -12,7 +12,7 @@ TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WA
 
 TriDFusion development has been led by: Daniel Lafontaine
 
-Project Manager and Programmer:
+Project Manager & Programmer:
    Daniel Lafontaine
    lafontad@mskcc.org
    Memorial Sloan Kettering 
@@ -20,7 +20,7 @@ Project Manager and Programmer:
    New York, NY, USA
 
 Contributors:  
-   Ross Schmidtlein
+   C. Ross Schmidtlein
    Memorial Sloan Kettering 
    Department of Medical Physics
    New York, NY, USA
@@ -36,6 +36,11 @@ Contributors:
    New York, NY, USA
 
    Aditya Apte
+   Memorial Sloan Kettering 
+   Department of Medical Physics
+   New York, NY, USA
+   
+   Joseph O'Donoghue
    Memorial Sloan Kettering 
    Department of Medical Physics
    New York, NY, USA

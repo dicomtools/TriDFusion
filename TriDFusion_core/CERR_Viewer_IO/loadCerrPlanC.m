@@ -60,6 +60,10 @@ function loadCerrPlanC(planC)
             
             tTemplate{ii} = planC{1,3}(hh).scanInfo(ii).DICOMHeaders;
             
+            if isfield(planC{1,3}(hh).scanInfo(ii).DICOMHeaders, 'FrameofReferenceUID')
+                tTemplate{ii}.FrameOfReferenceUID = planC{1,3}(hh).scanInfo(ii).DICOMHeaders.FrameofReferenceUID;
+            end
+            
             if isfield(planC{1,3}(1).scanInfo(ii).DICOMHeaders, 'PatientName')
             
                 sPatientName = sprintf('%s^%s^%s^%s^%s', ...

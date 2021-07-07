@@ -136,8 +136,7 @@ function voiObj = initVoiIsoSurface(uiWindow)
                         break;
                     end
                 end                           
-                
-                
+                               
                 switch sType
                     case lower('images.roi.rectangle')
                         

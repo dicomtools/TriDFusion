@@ -30,12 +30,13 @@ function info = dicominfo4che3(fileInput)
     try 
         din = org.dcm4che.io.DicomInputStream(...
                 java.io.BufferedInputStream(java.io.FileInputStream(char(fileInput))));    
+            
+        dataset = din.readDataset(-1, -1);                  
     catch 
        info = ''; 
        return;
     end  
 
-    dataset = din.readDataset(-1, -1);      
 
     % Patient information
 
@@ -92,6 +93,7 @@ function info = dicominfo4che3(fileInput)
     
     info.SOPClassUID = char(dataset.getString(org.dcm4che.data.Tag.SOPClassUID, 0));
     info.SOPInstanceUID  = char(dataset.getString(org.dcm4che.data.Tag.SOPInstanceUID, 0));
+    info.FrameOfReferenceUID = char(dataset.getString(org.dcm4che.data.Tag.FrameOfReferenceUID, 0));    
     
     info.AccessionNumber   = char(dataset.getString(org.dcm4che.data.Tag.AccessionNumber, 0));
 

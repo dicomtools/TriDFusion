@@ -127,7 +127,8 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
             if bUpdateColorMap == true    
 
                 if strcmpi(sModality, 'nm') || ...
-                   strcmpi(sModality, 'pt') 
+                   strcmpi(sModality, 'pt') || ...
+                   strcmpi(sModality, 'ot') 
 
                     if isFusion('get') == true && get(uiAlphaSliderPtr('get'), 'Value')
                         if strcmpi(sFuseModality, 'mr') || ...

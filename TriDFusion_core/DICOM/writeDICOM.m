@@ -33,7 +33,7 @@ function writeDICOM(sOutDir, iSeriesOffset)
     end  
     
     sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                
-    sWriteDir = char(sOutDir) + "TriDFusion_" + char(sDate) + '/';              
+    sWriteDir = char(sOutDir) + "TriDFusion_DCM_" + char(sDate) + '/';              
     if ~(exist(char(sWriteDir), 'dir'))
         mkdir(char(sWriteDir));
     end
@@ -86,14 +86,19 @@ function writeDICOM(sOutDir, iSeriesOffset)
         end
         array4d = aBuffer;
     end
+    
+    if numel(tWriteTemplate(iSeriesOffset).asFilesList)
+        for ww=1: numel(tWriteTemplate(iSeriesOffset).asFilesList)
 
-    for ww=1: numel(tWriteTemplate(iSeriesOffset).asFilesList)
-
-        tWriteMetaData{ww} = ...
-            dicominfo(char(tWriteTemplate(iSeriesOffset).asFilesList{ww}), 'UseVRHeuristic', false);
-        progressBar(ww / numel(tWriteTemplate(iSeriesOffset).asFilesList), sprintf('Processing header %d/%d, please wait', ww, numel(tWriteTemplate(iSeriesOffset).asFilesList)));
-
-    end 
+            tWriteMetaData{ww} = ...
+                dicominfo(char(tWriteTemplate(iSeriesOffset).asFilesList{ww}), 'UseVRHeuristic', false);
+            progressBar(ww / numel(tWriteTemplate(iSeriesOffset).asFilesList), sprintf('Processing header %d/%d, please wait', ww, numel(tWriteTemplate(iSeriesOffset).asFilesList)));
+        end         
+    else
+        for ww=1: numel(tWriteTemplate(iSeriesOffset).atDicomInfo)
+            tWriteMetaData{ww} = tWriteTemplate(iSeriesOffset).atDicomInfo{ww};
+        end        
+    end
 
     if numel(tMetaData) < numel(tWriteMetaData) && ...
        numel(tMetaData) ~= 1   
@@ -108,16 +113,22 @@ function writeDICOM(sOutDir, iSeriesOffset)
     end    
 
     if numel(tWriteMetaData) ~= 1
-        if tWriteMetaData{2}.ImagePositionPatient(3) - ...
-           tWriteMetaData{1}.ImagePositionPatient(3) > 0                    
-             array4d = array4d(:,:,:,end:-1:1);   
-             tWriteMetaData = flip(tWriteMetaData);
+        if isfield(tWriteMetaData{1}, 'ImagePositionPatient') && ...
+           isfield(tWriteMetaData{2}, 'ImagePositionPatient')
+
+            if tWriteMetaData{2}.ImagePositionPatient(3) - ...
+               tWriteMetaData{1}.ImagePositionPatient(3) > 0                    
+                 array4d = array4d(:,:,:,end:-1:1);   
+                 tWriteMetaData = flip(tWriteMetaData);
+            end
         end
     else
-        if strcmpi(tWriteMetaData{1}.PatientPosition, 'FFS')
-             array4d = array4d(:,:,:,end:-1:1);    
-             tWriteMetaData = flip(tWriteMetaData);
-        end                       
+        if isfield(tWriteMetaData{1}, 'PatientPosition')
+            if strcmpi(tWriteMetaData{1}.PatientPosition, 'FFS')
+                 array4d = array4d(:,:,:,end:-1:1);    
+                 tWriteMetaData = flip(tWriteMetaData);
+            end                       
+        end
     end  
 
     dSeriesInstanceUID = dicomuid;
@@ -168,7 +179,7 @@ function writeDICOM(sOutDir, iSeriesOffset)
         sOutFile = sprintf('%s%s',sWriteDir, sWriteFile);
 
         try        
-            if numel(tWriteTemplate(iSeriesOffset).asFilesList) == 1    
+            if numel(tWriteMetaData) == 1    
                 dicomwrite(int16(array4d(:,:,:,:))  , ...
                            sOutFile          , ...
                            tWriteMetaData{ww}, ...
@@ -198,6 +209,8 @@ function writeDICOM(sOutDir, iSeriesOffset)
         end
     end                   
     
+    progressBar(1, sprintf('Export %d files completed %s', ww, char(sWriteDir)));
+    
     catch
         progressBar(1, 'Error:writeDICOM()');                
     end
@@ -205,6 +218,5 @@ function writeDICOM(sOutDir, iSeriesOffset)
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow; 
     
-    progressBar(1, sprintf('Export %d files completed %s', ww, char(sWriteDir)));
 
 end        

@@ -27,6 +27,50 @@ function importSTLCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+     if switchTo3DMode('get')     == true ||  ...
+        switchToIsoSurface('get') == true || ...
+        switchToMIPMode('get')    == true
+
+         return;
+     end
+
+     filter = {'*.stl'};
+
+     sCurrentDir  = viewerRootPath('get');
+
+     sMatFile = [sCurrentDir '/' 'exportIsoLastUsedDir.mat'];
+     % load last data directory
+     if exist(sMatFile, 'file')
+                                % lastDirMat mat file exists, load it
+        load('-mat', sMatFile);
+        if exist('exportIsoLastUsedDir', 'var')
+            sCurrentDir = exportIsoLastUsedDir;
+        end
+        if sCurrentDir == 0
+            sCurrentDir = pwd;
+        end
+     end
+
+     [file, path] = uigetfile(sprintf('%s%s', char(sCurrentDir), char(filter)), 'Import STL');
+     if file ~= 0
+
+        try
+            exportIsoLastUsedDir = path;
+            save(sMatFile, 'exportIsoLastUsedDir');
+        catch
+            progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
+%                h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
+%                if integrateToBrowser('get') == true
+%                    sLogo = './TriDFusion/logo.png';
+%                else
+%                    sLogo = './logo.png';
+%                end
+
+%                javaFrame = get(h, 'JavaFrame');
+%                javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
+        end
+     
+         
     dlgSTLsize = ...
         dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-380/2) ...
                             (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-190/2) ...
@@ -97,21 +141,30 @@ function importSTLCallback(~, ~)
         ySize = 100;
         zSize = 100;
     else
-        aSerieSize = size(dicomBuffer('get'));        
-        if aSerieSize(3) == 1 
+        aSerieSize = size(dicomBuffer('get'));  
+        if numel(aSerieSize) < 3
             sChkEnable = 'off';
             bChkValue = false;
-            
+
             xSize = 100;
             ySize = 100;
-            zSize = 100;
+            zSize = 100;            
         else
-            sChkEnable = 'on';
-            bChkValue = true;
+            if aSerieSize(3) == 1 
+                sChkEnable = 'off';
+                bChkValue = false;
 
-            xSize = aSerieSize(1);
-            ySize = aSerieSize(2);
-            zSize = aSerieSize(3);
+                xSize = 100;
+                ySize = 100;
+                zSize = 100;
+            else
+                sChkEnable = 'on';
+                bChkValue = true;
+
+                xSize = aSerieSize(1);
+                ySize = aSerieSize(2);
+                zSize = aSerieSize(3);
+            end
         end
     end
 
@@ -207,7 +260,8 @@ function importSTLCallback(~, ~)
               'ForegroundColor', viewerForegroundColor('get'), ...                 
               'Callback', @okImportSTLCallback...
               );
-
+     end
+    
     function stlFillHolesCallback(hObject, ~)
 
         if get(chkFillHoles, 'Value') == true
@@ -260,82 +314,35 @@ function importSTLCallback(~, ~)
 
      function okImportSTLCallback(~, ~)
          
-         if switchTo3DMode('get')     == true ||  ...
-           switchToIsoSurface('get') == true || ...
-             switchToMIPMode('get')    == true
-
-             return;
-         end
-
          try  
  
          set(fiMainWindowPtr('get'), 'Pointer', 'watch');
          drawnow;
-    
-         filter = {'*.stl'};
 
-         sCurrentDir  = viewerRootPath('get');
-
-         sMatFile = [sCurrentDir '/' 'exportIsoLastUsedDir.mat'];
-         % load last data directory
-         if exist(sMatFile, 'file')
-                                    % lastDirMat mat file exists, load it
-            load('-mat', sMatFile);
-            if exist('exportIsoLastUsedDir', 'var')
-                sCurrentDir = exportIsoLastUsedDir;
-            end
-            if sCurrentDir == 0
-                sCurrentDir = pwd;
-            end
-         end
-
-         [file, path] = uigetfile(sprintf('%s%s', char(sCurrentDir), char(filter)), 'Import STL');
-         if file ~= 0
-
-            try
-                exportIsoLastUsedDir = path;
-                save(sMatFile, 'exportIsoLastUsedDir');
-            catch
-                progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-%                h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
-%                if integrateToBrowser('get') == true
-%                    sLogo = './TriDFusion/logo.png';
-%                else
-%                    sLogo = './logo.png';
-%                end
-
-%                javaFrame = get(h, 'JavaFrame');
-%                javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
-            end
-
-            aSerieSize = size(dicomBuffer('get'));
-            if ~isempty(aSerieSize) && ...
-               get(chkUseSeries, 'Value') == true
-                if aSerieSize(3) == 1
-                    XBufSize = str2double(get(edtVoxelSizeX, 'string'));
-                    yBufSize = str2double(get(edtVoxelSizeY, 'string'));
-                    zBufSize = str2double(get(edtVoxelSizeZ, 'string'));
-                else
-                    xBufSize = aSerieSize(1);
-                    yBufSize = aSerieSize(2);
-                    zBufSize = aSerieSize(3);
-                end
-            else
-                xBufSize = str2double(get(edtVoxelSizeX, 'string'));
+         aSerieSize = size(dicomBuffer('get'));
+         if ~isempty(aSerieSize) && ...
+           get(chkUseSeries, 'Value') == true
+            if aSerieSize(3) == 1
+                XBufSize = str2double(get(edtVoxelSizeX, 'string'));
                 yBufSize = str2double(get(edtVoxelSizeY, 'string'));
                 zBufSize = str2double(get(edtVoxelSizeZ, 'string'));
+            else
+                xBufSize = aSerieSize(1);
+                yBufSize = aSerieSize(2);
+                zBufSize = aSerieSize(3);
             end
+        else
+            xBufSize = str2double(get(edtVoxelSizeX, 'string'));
+            yBufSize = str2double(get(edtVoxelSizeY, 'string'));
+            zBufSize = str2double(get(edtVoxelSizeZ, 'string'));
+        end
 
-            bFillHoles = get(chkFillHoles, 'Value');
-            dPixelValue = str2double(get(edtPixelValue, 'String'));
+        bFillHoles = get(chkFillHoles, 'Value');
+        dPixelValue = str2double(get(edtPixelValue, 'String'));
 
-            delete(dlgSTLsize);
+        delete(dlgSTLsize);
 
-            readSTLModel(path, file, xBufSize, yBufSize, zBufSize, dPixelValue, bFillHoles);
-
-         else
-            delete(dlgSTLsize);
-         end
+        readSTLModel(path, file, xBufSize, yBufSize, zBufSize, dPixelValue, bFillHoles);
          
         catch
             progressBar(1, 'Error:okImportSTLCallback()');           
@@ -347,6 +354,7 @@ function importSTLCallback(~, ~)
      end
 
      function cancelImportSTLCallback(~, ~)
+         
         delete(dlgSTLsize);
      end
 end

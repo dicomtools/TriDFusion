@@ -31,9 +31,9 @@ function readSTLModel(sPath, sFile, xBufSize, yBufSize, zBufSize, dPixelValue, b
     atDcmMetaData = dicomMetaData('get');   
 
     iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-    if iSeriesOffset > numel(inputTemplate('get'))  
-        return;
-    end 
+%    if iSeriesOffset > numel(inputTemplate('get'))  
+%        return;
+%    end 
     
     try
                 
@@ -87,34 +87,70 @@ if 0
         [resampImage, ~] = imwarp(aVolume, Rdcm, TF, 'Interp', sMode, 'FillValues', cropValue('get'));          
         aVolume = resampImage;
 end        
+    
+    if ~isempty(tInput)
+        tInput(numel(tInput)+1) = tInput(iSeriesOffset);
+        tInput(numel(tInput)).atDicomInfo = atDcmMetaData;        
 
-    tInput(numel(tInput)+1) = tInput(iSeriesOffset);
-    tInput(numel(tInput)).atDicomInfo = atDcmMetaData;
+        asSeriesDescription = seriesDescription('get');
+        asSeriesDescription{numel(asSeriesDescription)+1}=sprintf('STL-%s', sFile);
 
-    asSeriesDescription = seriesDescription('get');
-    asSeriesDescription{numel(asSeriesDescription)+1}=sprintf('STL-%s', sFile);
+        for jj=1:numel(tInput(numel(tInput)).atDicomInfo)
+            tInput(numel(tInput)).atDicomInfo{jj}.SeriesDescription = asSeriesDescription{numel(asSeriesDescription)};
+            tInput(numel(tInput)).atDicomInfo{jj}.Modality = 'ot';            
+       %     tInput(numel(tInput)).atDicomInfo{jj}.PixelSpacing(1) = 1;
+       %     tInput(numel(tInput)).atDicomInfo{jj}.PixelSpacing(2) = 1;
+       %     tInput(numel(tInput)).atDicomInfo{jj}.ImagePositionPatient(1)=0;
+       %     tInput(numel(tInput)).atDicomInfo{jj}.ImagePositionPatient(2)=0;
+       %     tInput(numel(tInput)).atDicomInfo{jj}.ImagePositionPatient(3)=jj;
+        end
+        
+        tInput(numel(tInput)).bEdgeDetection = false;
+        tInput(numel(tInput)).bFlipLeftRight = false;
+        tInput(numel(tInput)).bFlipAntPost   = false;
+        tInput(numel(tInput)).bFlipHeadFeet  = false;
+        tInput(numel(tInput)).bDoseKernel    = false;
+        tInput(numel(tInput)).bFusedDoseKernel    = false;
+        tInput(numel(tInput)).bFusedEdgeDetection = false;
+    
+        asSeries = get(uiSeriesPtr('get'), 'String');
+        asSeries{numel(asSeries)+1} = asSeriesDescription{numel(asSeriesDescription)};        
+    else
+        
+        asSeriesDescription{1}=sprintf('STL-%s', sFile);
+        
+        tInput(1).atDicomInfo{1}.PixelSpacing(1) = 1;
+        tInput(1).atDicomInfo{1}.PixelSpacing(2) = 1;
+        tInput(1).atDicomInfo{1}.SpacingBetweenSlices = 1;
+       
+        tInput(1).atDicomInfo{1}.Modality = 'ot';
+        tInput(1).atDicomInfo{1}.SeriesDescription = asSeriesDescription{1}; 
+        tInput(1).atDicomInfo{1}.Units = '';
+        tInput(1).atDicomInfo{1}.ReconstructionDiameter = [];
+        
+        tInput(1).bEdgeDetection = false;
+        tInput(1).bFlipLeftRight = false;
+        tInput(1).bFlipAntPost   = false;
+        tInput(1).bFlipHeadFeet  = false;
+        tInput(1).bDoseKernel    = false;
+        tInput(1).bFusedDoseKernel    = false;
+        tInput(1).bFusedEdgeDetection = false;
+        
+        asSeries{1} = asSeriesDescription{1};              
+    end    
+    
     seriesDescription('set', asSeriesDescription);
-
-    for jj=1:numel(tInput(numel(tInput)).atDicomInfo)
-        tInput(numel(tInput)).atDicomInfo{jj}.SeriesDescription = asSeriesDescription{numel(asSeriesDescription)};
-        tInput(numel(tInput)).atDicomInfo{jj}.Modality = 'OT';
-   %     tInput(numel(tInput)).atDicomInfo{jj}.PixelSpacing(1) = 1;
-   %     tInput(numel(tInput)).atDicomInfo{jj}.PixelSpacing(2) = 1;
-   %     tInput(numel(tInput)).atDicomInfo{jj}.ImagePositionPatient(1)=0;
-   %     tInput(numel(tInput)).atDicomInfo{jj}.ImagePositionPatient(2)=0;
-   %     tInput(numel(tInput)).atDicomInfo{jj}.ImagePositionPatient(3)=jj;
-    end
-
+   
     inputTemplate('set', tInput);
 
     aInputBuffer = inputBuffer('get');        
     aInputBuffer{numel(aInputBuffer)+1} = aVolume;    
     inputBuffer('set', aInputBuffer);
-
-    asSeries = get(uiSeriesPtr('get'), 'String');
-    asSeries{numel(asSeries)+1} = asSeriesDescription{numel(asSeriesDescription)};
+        
     set(uiSeriesPtr('get'), 'String', asSeries);
     set(uiFusedSeriesPtr('get'), 'String', asSeries);
+    
+    set(uiSeriesPtr('get'), 'Enable', 'on');
 
     set(uiSeriesPtr('get'), 'Value', numel(tInput));
     dicomMetaData('set', tInput(numel(tInput)).atDicomInfo);
@@ -131,13 +167,15 @@ end
     initWindowLevel('set', true);
 
     dicomViewerCore();  
+    
+    setViewerDefaultColor(1, tInput(numel(tInput)).atDicomInfo);
 
     refreshImages();     
 
     progressBar(1, sprintf('Import %s completed', sFile));
     
     catch
-        progressBar(1, 'Error:readSTLModel()');                
+        progressBar(1, 'Error:readSTLModel()');                        
     end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');

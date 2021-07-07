@@ -32,11 +32,15 @@ function addRoi(ptrRoi, iOffset)
     if iOffset > numel(tAddInput)  
         return;
     end
-    
+        
     atRoiInput = roiTemplate('get');
 
     addlistener(ptrRoi, 'DeletingROI', @deleteRoiEvents );
     addlistener(ptrRoi, 'ROIMoved'   , @movedRoiEvents  );
+    
+    sSOPClassUID    = '';
+    sSOPInstanceUID = '';
+    sFrameOfReferenceUID = '';
 
     if size(dicomBuffer('get'), 3) ~= 1 && ...
        switchTo3DMode('get')     == false && ...
@@ -53,22 +57,37 @@ function addRoi(ptrRoi, iOffset)
             otherwise                 
                 dSliceNb = sliceNumber('get', 'axial'   );
                 sAxe = 'Axes3';
+                
+                atDicomInfo = tAddInput(iOffset).atDicomInfo;
+                if numel(atDicomInfo) >= dSliceNb
+                    sSOPClassUID    = atDicomInfo{dSliceNb}.SOPClassUID;
+                    sSOPInstanceUID = atDicomInfo{dSliceNb}.SOPInstanceUID;
+                    sFrameOfReferenceUID = atDicomInfo{dSliceNb}.FrameOfReferenceUID;
+                else
+                    sSOPClassUID    = atDicomInfo{1}.SOPClassUID;
+                    sSOPInstanceUID = atDicomInfo{1}.SOPInstanceUID;    
+                    sFrameOfReferenceUID = atDicomInfo{1}.FrameOfReferenceUID;                    
+                end
+           
         end
      else
         dSliceNb = 1;
         sAxe = 'Axe';
     end
-
-    tRoi.Axe          = sAxe;
-    tRoi.SliceNb      = dSliceNb;
-    tRoi.Type         = ptrRoi.Type;
-    tRoi.Position     = ptrRoi.Position;
-    tRoi.Label        = ptrRoi.Label;
-    tRoi.LabelVisible = ptrRoi.LabelVisible;
-    tRoi.Color        = ptrRoi.Color;
-    tRoi.LineWidth    = ptrRoi.LineWidth;
-    tRoi.Tag          = ptrRoi.Tag; 
-    tRoi.ObjectType   = 'roi'; 
+    
+    tRoi.Axe            = sAxe;
+    tRoi.SliceNb        = dSliceNb;
+    tRoi.SOPClassUID    = sSOPClassUID;
+    tRoi.SOPInstanceUID = sSOPInstanceUID;
+    tRoi.sFrameOfReferenceUID = sFrameOfReferenceUID;
+    tRoi.Type           = ptrRoi.Type;
+    tRoi.Position       = ptrRoi.Position;
+    tRoi.Label          = ptrRoi.Label;
+    tRoi.LabelVisible   = ptrRoi.LabelVisible;
+    tRoi.Color          = ptrRoi.Color;
+    tRoi.LineWidth      = ptrRoi.LineWidth;
+    tRoi.Tag            = ptrRoi.Tag; 
+    tRoi.ObjectType     = 'roi'; 
 
     switch lower(tRoi.Type)
         case lower('images.roi.line')
