@@ -120,7 +120,6 @@ function info = dicominfo4che3(fileInput)
     % Dose information
 
     datasetDose = dataset.getNestedDataset(org.dcm4che.data.Tag.RadiopharmaceuticalInformationSequence, 0);
-
     if ~isempty(datasetDose)
         info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartTime     = char(datasetDose.getString(org.dcm4che.data.Tag.RadiopharmaceuticalStartTime, 0));
         info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStopTime      = char(datasetDose.getString(org.dcm4che.data.Tag.RadiopharmaceuticalStopTime, 0));
@@ -130,7 +129,23 @@ function info = dicominfo4che3(fileInput)
         info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime = char(datasetDose.getString(org.dcm4che.data.Tag.RadiopharmaceuticalStartDateTime, 0));
         info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStopDateTime  = char(datasetDose.getString(org.dcm4che.data.Tag.RadiopharmaceuticalStopDateTime, 0));
     end
-
+    
+    % Real World Value (SUV SPECT)
+    
+    realWorldValue = dataset.getNestedDataset(org.dcm4che.data.Tag.RealWorldValueMappingSequence, 0);
+    if ~isempty(realWorldValue)    
+         measurementUnits = realWorldValue.getNestedDataset(org.dcm4che.data.Tag.MeasurementUnitsCodeSequence, 0);
+         if ~isempty(measurementUnits)    
+            info.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue              = char(measurementUnits.getString(org.dcm4che.data.Tag.CodeValue, 0));
+            info.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodingSchemeDesignator = char(measurementUnits.getString(org.dcm4che.data.Tag.CodingSchemeDesignator, 0));
+            info.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeMeaning            = char(measurementUnits.getString(org.dcm4che.data.Tag.CodeMeaning, 0));
+         end
+         info.RealWorldValueMappingSequence.Item_1.RealWorldValueLastValueMapped  = realWorldValue.getFloat(org.dcm4che.data.Tag.RealWorldValueLastValueMapped, 0);
+         info.RealWorldValueMappingSequence.Item_1.RealWorldValueFirstValueMapped = realWorldValue.getFloat(org.dcm4che.data.Tag.RealWorldValueFirstValueMapped, 0);
+         info.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept        = realWorldValue.getFloat(org.dcm4che.data.Tag.RealWorldValueIntercept, 0);
+         info.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope            = realWorldValue.getFloat(org.dcm4che.data.Tag.RealWorldValueSlope, 0);               
+    end
+    
     info.Units = char(dataset.getString(org.dcm4che.data.Tag.Units, 0));        
 
     % Image information

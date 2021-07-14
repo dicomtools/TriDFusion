@@ -48,7 +48,7 @@ function dSUVconv = computeSUV(tSUVMetaData)
         if patWeight == 0 || isnan(patWeight)
             patWeight =1;
         end
-        halfLife    = str2double(tSUVMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife);
+        halfLife = str2double(tSUVMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife);
 
         if numel(injDateTime) == 14
             injDateTime = sprintf('%s.00', injDateTime);
@@ -73,9 +73,16 @@ function dSUVconv = computeSUV(tSUVMetaData)
             dSUVconv = patWeight / corrInj; %assuming massDensity = 1kg/L
             dSUVconv = dSUVconv * 1e3; %because image values mL -> L
         else
-         %   msgbox('ERROR: computeSUV(): Account for activity units!');
-            return;
+            if isfield(tSUVMetaData, 'RealWorldValueMappingSequence')
+                if isfield(tSUVMetaData.RealWorldValueMappingSequence.Item_1, 'MeasurementUnitsCodeSequence')
+                    sUnit = tSUVMetaData.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue;
+                    if strcmpi(sUnit, 'Bq/ml')
+                        corrInj = injDose / exp(log(2) * relT / halfLife); %in Bq and seconds
+                        dSUVconv = patWeight / corrInj; %assuming massDensity = 1kg/L
+                        dSUVconv = dSUVconv * 1e3; %because image values mL -> L                        
+                    end
+                end
+            end
         end
     end
-
 end

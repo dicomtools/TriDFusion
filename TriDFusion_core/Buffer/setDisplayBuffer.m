@@ -47,6 +47,14 @@ function setDisplayBuffer()
 
                         if tInput(i).atDicomInfo{ii}.RescaleSlope ~= 0
                             aInput{i}(:,:,ii) = tInput(i).atDicomInfo{ii}.RescaleIntercept + (aInput{i}(:,:,ii) * tInput(i).atDicomInfo{ii}.RescaleSlope);
+                        else
+                            if isfield(tInput(i).atDicomInfo{ii}, 'RealWorldValueMappingSequence') % SUV Spect
+                                if tInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
+                                    fSlope = tInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
+                                    fIntercept = tInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
+                                    aInput{i}(:,:,ii) = fIntercept + (double(aInput{i}(:,:,ii)) * fSlope);                            
+                                end                        
+                            end                            
                         end
                     end
                  end  
@@ -58,6 +66,14 @@ function setDisplayBuffer()
 
                         if tInput(i).atDicomInfo{ii}.RescaleSlope ~= 0
                             aInput{i} = tInput(i).atDicomInfo{ii}.RescaleIntercept + (aInput{i} * tInput(i).atDicomInfo{ii}.RescaleSlope);
+                        else
+                            if isfield(tInput(i).atDicomInfo{ii}, 'RealWorldValueMappingSequence') % SUV Spect
+                                if tInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
+                                    fSlope = tInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
+                                    fIntercept = tInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
+                                    aInput{i} = fIntercept + (double(aInput{i}) * fSlope);                            
+                                end                        
+                            end
                         end
                     end
                  end
@@ -72,9 +88,18 @@ function setDisplayBuffer()
             aInput{i} = tInput(i).aDicomBuffer{1}(:,:,:);
 
             if isfield(tInput(i).atDicomInfo{1}, 'RescaleIntercept') && ...
-               isfield(tInput(i).atDicomInfo{1}, 'RescaleSlope')     
+               isfield(tInput(i).atDicomInfo{1}, 'RescaleSlope')
+                      
                 if tInput(i).atDicomInfo{1}.RescaleSlope ~= 0
                     aInput{i} = tInput(1).atDicomInfo{1}.RescaleIntercept + (aInput * tInput(1).atDicomInfo{1}.RescaleSlope);
+                else
+                    if isfield(tInput(i).atDicomInfo{1}, 'RealWorldValueMappingSequence') % SUV Spect
+                        if tInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
+                            fSlope = tInput(1).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
+                            fIntercept = tInput(1).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
+                            aInput{i} = fIntercept + (double(aInput) * fSlope);                            
+                        end                        
+                    end
                 end
             end  
         end      

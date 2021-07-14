@@ -27,10 +27,10 @@ function setFusionCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
     try
-        
+
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
-        
+
     if switchTo3DMode('get')     == true || ...
        switchToIsoSurface('get') == true || ...
        switchToMIPMode('get')    == true
@@ -40,11 +40,11 @@ function setFusionCallback(~, ~)
        isoFusionObj = isoFusionObject('get');
 
        if isFusion('get') == false
-           
+
             isFusion('set', true);
-            
+
             set(btnFusionPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
-            set(btnFusionPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));          
+            set(btnFusionPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
 
             tFuseInput  = inputTemplate('get');
             iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
@@ -110,7 +110,7 @@ function setFusionCallback(~, ~)
 
             set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        
+
             if ~isempty(volFusionObj)
                 volFusionObj.Alphamap = zeros(256,1);
                 volFusionObject('set', volFusionObj);
@@ -183,9 +183,9 @@ function setFusionCallback(~, ~)
 
             set(uiSeriesPtr('get'), 'Value', iFuseOffset);
             B = dicomBuffer('get');
-            if isempty(B) 
-                B = aInput{iFuseOffset};    
-            end            
+            if isempty(B)
+                B = aInput{iFuseOffset};
+            end
             set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
 
             if numel(size(A))~=numel(size(B)) %Fuse 2D with 3D
@@ -240,9 +240,9 @@ end
                         B=B(end:-1:1,:);
                     end
                 end
-                
+
  %               tFuseInput(iFuseOffset).bEdgeDetection = false;
-                
+
  %               inputTemplate('set', tFuseInput);
 
              %   B = resampleImage(A, B);
@@ -280,7 +280,7 @@ end
                 else
                     B = permute(B, [1 2 3]);
                 end
-                
+
                 if iSeriesOffset ~= iFuseOffset
 
                     if tFuseInput(iSeriesOffset).bFlipLeftRight == true
@@ -295,7 +295,7 @@ end
                         B=B(:,:,end:-1:1);
                     end
                 end
-                
+
 %                tFuseInput(iFuseOffset).bEdgeDetection = false;
 %                inputTemplate('set', tFuseInput);
 
@@ -318,7 +318,8 @@ end
                                                          tFuseMetaData, ...
                                                          A, ...
                                                          tMetaData, ...
-                                                         'linear' ...
+                                                         'linear', ...
+                                                         false ...
                                                          );
                    else
                         [B, tFuseMetaData] = ...
@@ -326,7 +327,8 @@ end
                                           tFuseMetaData, ...
                                           A, ...
                                           tMetaData, ...
-                                          'linear' ...
+                                          'linear', ...
+                                          false ...
                                           );
                     end
 
@@ -343,7 +345,8 @@ end
                                                          tFuseMetaData, ...
                                                          A, ...
                                                          tMetaData, ...
-                                                         'linear' ...
+                                                         'linear', ...
+                                                         false ...
                                                          );
                     else
                         [B, tFuseMetaData] = ...
@@ -351,7 +354,8 @@ end
                                           tFuseMetaData, ...
                                           A, ...
                                           tMetaData, ...
-                                          'linear' ...
+                                          'linear', ...
+                                          false ...
                                           );
                     end
                 end
@@ -432,7 +436,7 @@ end
             else
                 tFuseInput(iFuseOffset).bEdgeDetection = false;
             end
-            
+
 %           tFuseInput(iFuseOffset).bEdgeDetection = false;
            inputTemplate('set', tFuseInput);
 
@@ -449,27 +453,27 @@ end
         if initFusionWindowLevel('get') == true
             initFusionWindowLevel('set', false);
 
-            if strcmpi(tFuseMetaData{1}.Modality, 'ct')                
+            if strcmpi(tFuseMetaData{1}.Modality, 'ct')
                 if min(B, [], 'all') >= 0
                     dMax = max(B, [], 'all');
-                    dMin = min(B, [], 'all');                    
+                    dMin = min(B, [], 'all');
                 else
                     [dMax, dMin] = computeWindowLevel(2000, 0);
                 end
             else
-                sUnitDisplay = getSerieUnitValue(iFuseOffset);                        
+                sUnitDisplay = getSerieUnitValue(iFuseOffset);
                 if strcmpi(sUnitDisplay, 'SUV')
-                    if tFuseInput(iFuseOffset).tQuant.tSUV.dScale                
-                        dMin = suvWindowLevel('get', 'min')/tFuseInput(iFuseOffset).tQuant.tSUV.dScale;  
-                        dMax = suvWindowLevel('get', 'max')/tFuseInput(iFuseOffset).tQuant.tSUV.dScale;                        
+                    if tFuseInput(iFuseOffset).tQuant.tSUV.dScale
+                        dMin = suvWindowLevel('get', 'min')/tFuseInput(iFuseOffset).tQuant.tSUV.dScale;
+                        dMax = suvWindowLevel('get', 'max')/tFuseInput(iFuseOffset).tQuant.tSUV.dScale;
                     else
                         dMin = min(B, [], 'all');
-                        dMax = max(B, [], 'all');                     
+                        dMax = max(B, [], 'all');
                     end
-                else            
+                else
                     dMin = min(B, [], 'all');
-                    dMax = max(B, [], 'all');                    
-                end 
+                    dMax = max(B, [], 'all');
+                end
             end
 
             fusionWindowLevel('set', 'max', dMax);
@@ -508,13 +512,13 @@ end
 
         uiAlphaSlider = uiAlphaSliderPtr('get');
         aAxePosition  = uiAlphaSlider.Parent.Position;
-        
+
         uiSegMainPanel    = uiSegMainPanelPtr('get');
         uiKernelMainPanel = uiKernelMainPanelPtr('get');
         uiRoiMainPanel    = uiRoiMainPanelPtr('get');
-        
+
         if size(dicomBuffer('get'), 3) == 1
-            
+
             if viewSegPanel('get') == true
                 set(uiAlphaSlider, ...
                     'Position', [uiSegMainPanel.Position(3)+10 ...
@@ -522,7 +526,7 @@ end
                                  aAxePosition(3)-uiSegMainPanel.Position(3)-20 ...
                                  15 ...
                                  ] ...
-                   );                  
+                   );
             elseif viewKernelPanel('get') == true
                 set(uiAlphaSlider, ...
                     'Position', [uiKernelMainPanel.Position(3)+10 ...
@@ -530,7 +534,7 @@ end
                                  aAxePosition(3)-uiKernelMainPanel.Position(3)-20 ...
                                  15 ...
                                  ] ...
-                   );   
+                   );
             elseif viewRoiPanel('get') == true
                 set(uiAlphaSlider, ...
                     'Position', [uiRoiMainPanel.Position(3)+10 ...
@@ -538,7 +542,7 @@ end
                                  aAxePosition(3)-uiRoiMainPanel.Position(3)-20 ...
                                  15 ...
                                  ] ...
-                   );                 
+                   );
             else
                 set(uiAlphaSlider, ...
                     'Position', [10 ...
@@ -577,7 +581,7 @@ end
                                      aAxePosition(3)-uiRoiMainPanel.Position(3)-20 ...
                                      15 ...
                                      ] ...
-                        );                    
+                        );
                 else
                     set(uiAlphaSlider, ...
                         'Position', [10 ...
@@ -638,7 +642,7 @@ end
                                      40 ...
                                      ((aAxePosition(4))/2)-35-20 ...
                                      ] ...
-                        );                    
+                        );
                 else
                     set(ptrFusionColorbar, ...
                         'Position', [aAxePosition(3)-49 ...
@@ -796,7 +800,7 @@ end
                                          40 ...
                                          (aAxePosition(4)/2)-4-20 ...
                                          ] ...
-                            );                        
+                            );
                     else
                         set(ptrColorbar, ...
                             'Position', [aAxePosition(3)-49 ...
@@ -898,7 +902,7 @@ end
                                          40 ...
                                          aAxePosition(4)-11-20 ...
                                          ] ...
-                            );                        
+                            );
                     else
                         set(ptrColorbar, ...
                             'Position', [aAxePosition(3)-49 ...
@@ -927,10 +931,10 @@ end
             set(uiFusionSliderLevelPtr('get') , 'Visible', 'on');
             set(uiAlphaSliderPtr('get')       , 'Visible', 'on');
         else
-            
-            set(fiMainWindowPtr('get'), 'Pointer', 'default');            
+
+            set(fiMainWindowPtr('get'), 'Pointer', 'default');
             isMoveImageActivated('set', false);
-    
+
             set(uiFusionColorbarPtr('get')    , 'Visible', 'off');
             set(uiFusionSliderWindowPtr('get'), 'Visible', 'off');
             set(uiFusionSliderLevelPtr('get') , 'Visible', 'off');
@@ -991,8 +995,8 @@ end
         refreshImages();
     end
     catch
-        progressBar(1, 'Error:setFusionCallback()');          
-    end  
+        progressBar(1, 'Error:setFusionCallback()');
+    end
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
-    drawnow; 
+    drawnow;
 end

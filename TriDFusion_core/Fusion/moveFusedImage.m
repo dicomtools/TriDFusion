@@ -127,74 +127,8 @@ function moveFusedImage(bInitCoordinate, bRestoreXYData)
                     fusedImageMovementValues('set', false);                       
                     return;                                                    
             end 
-            
-            
-
+                        
         end        
     end  
-if 0       
- %   pxMoveOffset = pxMoveOffset + (aPosDiff(2))
- %   pyMoveOffset = pyMoveOffset + (aPosDiff(1))  
-   
-   %     clickedPt = get(gca,'CurrentPoint');
-   %     clickedPtX = num2str(round(clickedPt(1,1)));
-   %     clickedPtY = num2str(round(clickedPt(1,2)));     
-    
-    if 0
-    shiftedImage = circshift(paBuffer, [pxMoveOffset pyMoveOffset pzMoveOffset]);
-    
-    fusionBuffer('set', shiftedImage);
-        
-    refreshImages();    
-    else
-        imCoronalF  = imCoronalFPtr ('get'); 
-        imSagittalF = imSagittalFPtr('get'); 
-        imAxialF    = imAxialFPtr   ('get'); 
-
-        imAxialF.XData = [1+aPosDiff(2) pxMoveOffset+aPosDiff(2)];
-        imAxialF.YData = [1+aPosDiff(1) pxMoveOffset+aPosDiff(1)];
-    
-    end
-end
-   
-if 0
-    iCoronal  = sliceNumber('get', 'coronal' );
-    iSagittal = sliceNumber('get', 'sagittal');
-    iAxial    = sliceNumber('get', 'axial'   ); 
-        
-    sizX = paSize(1);
-    sizY = paSize(2);
-    sizZ = paSize(3);
-    
-    pxMoveOffset = pxMoveOffset + ( aPosDiff(2));
-    pyMoveOffset = pyMoveOffset + (-aPosDiff(1));
-    pzMoveOffset = 0;
-    
-    [Xq,Yq,Zq] = meshgrid([1:sizX]+pyMoveOffset,[1:sizY]+pxMoveOffset,[1:sizZ]+pzMoveOffset);
-    Vq = interp3(paBuffer, Xq, Yq, Zq, 'linear');
-    fusionBuffer('set', Vq);
-    
-    refreshImages();
-end
-if 0
-
-    sizX = paSize(1);
-    sizY = paSize(2);
-    sizZ = paSize(3);
-    
-    pxMoveOffset = pxMoveOffset + (-aPosDiff(1));
-    pyMoveOffset = pyMoveOffset + (aPosDiff(2));
-    pzMoveOffset = 0;
-    
-    [X1, X2, X3] = ndgrid(1:sizY,1:sizX);
-    [X1n, X2n, X3n] = ndgrid([1:sizY]+pyMoveOffset,[1:sizX]+pxMoveOffset,[1:sizZ]+pzMoveOffset);
-    F = griddedInterpolant(X1, X2, X3, paBuffer, 'linear');
-    aData = F(X1n, X2n, X3n);
-    fusionBuffer('set', aData);
-    
-    refreshImages();
-
-end   
-
     
 end

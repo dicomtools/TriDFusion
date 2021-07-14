@@ -1,4 +1,4 @@
-function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode)
+function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, bUpdateDescription)
 %function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode)
 %Resample any modalities.
 %See TriDFuison.doc (or pdf) for more information about options.
@@ -95,6 +95,10 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
         atDcmMetaData{jj}.PixelSpacing(2) = dimsDcm(2)/dimsRef(2)*atDcmMetaData{jj}.PixelSpacing(2);
         atDcmMetaData{jj}.SliceThickness  = dimsDcm(3)/dimsRef(3)*atDcmMetaData{jj}.SliceThickness;
         atDcmMetaData{jj}.SpacingBetweenSlices  = dimsDcm(3)/dimsRef(3)*atDcmMetaData{jj}.SpacingBetweenSlices;
+        
+        if bUpdateDescription == true 
+            atDcmMetaData{jj}.SeriesDescription  = sprintf('RSP %s', atDcmMetaData{1}.SeriesDescription);
+        end           
     end
        
     newSliceThickness = dcmSliceThickness * (dimsDcm(3)/dimsRef(3));        
@@ -106,7 +110,13 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
             atDcmMetaData{cc+1}.ImagePositionPatient(3) = atDcmMetaData{cc}.ImagePositionPatient(3) - newSliceThickness;               
             atDcmMetaData{cc+1}.SliceLocation = atDcmMetaData{cc}.SliceLocation - newSliceThickness;             
         end
-    end         
+    end        
     
+    iOffset = get(uiSeriesPtr('get'), 'Value');
+    if iOffset <= numel(inputTemplate('get')) && bUpdateDescription == true 
+        asDescription = seriesDescription('get');
+        asDescription{iOffset} = sprintf('RSP %s', asDescription{iOffset});
+        seriesDescription('set', asDescription);
+    end   
 end  
 

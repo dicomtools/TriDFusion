@@ -1138,10 +1138,10 @@ function figRoiDialogCallback(hObject, ~)
             sUnit =  'Unit: Dose';
         else
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
-
+                sUnit = getSerieUnitValue(dOffset);
                 if (strcmpi(tRoiMetaData{1}.Modality, 'pt') || ...
                     strcmpi(tRoiMetaData{1}.Modality, 'nm'))&& ...
-                    strcmpi(tRoiMetaData{1}.Units, 'BQML' )
+                    strcmpi(sUnit, 'SUV' )
                     sUnit =  'Unit: SUV Weight';
                 else
                     if (strcmpi(tRoiMetaData{1}.Modality, 'ct'))
@@ -1154,9 +1154,10 @@ function figRoiDialogCallback(hObject, ~)
                  if (strcmpi(tRoiMetaData{1}.Modality, 'ct'))
                     sUnit =  'Unit: HU';
                  else
+                    sUnit = getSerieUnitValue(dOffset);                     
                     if (strcmpi(tRoiMetaData{1}.Modality, 'pt') || ...
                         strcmpi(tRoiMetaData{1}.Modality, 'nm'))&& ...
-                        strcmpi(tRoiMetaData{1}.Units, 'BQML' )
+                        strcmpi(sUnit, 'SUV' )
                         sUnit =  'Unit: BQML';
                     else
 

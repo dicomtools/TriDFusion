@@ -47,10 +47,35 @@ function sUnit = getSerieUnitValue(dOffset)
                isfield(tInput(dOffset).tQuant, 'tSUV')   
                 sUnit = 'Dose';
             else
-                if isempty(tInput(dOffset).atDicomInfo{1}.Units)
-                    sUnit = 'Counts';                            
+                if isfield(tInput(dOffset).atDicomInfo{1}, 'RealWorldValueMappingSequence') % SUV SPECT
+                    if isfield(tInput(dOffset).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1, 'MeasurementUnitsCodeSequence')
+                        if strcmpi(tInput(dOffset).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue, 'Bq/ml')
+                            sUnit = 'SUV';
+                        elseif strcmpi(tInput(dOffset).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue, 'Bq/ml') && ...
+                            tInput(dOffset).bDoseKernel == true && ...                   
+                            isfield(tInput(dOffset).tQuant, 'tSUV')   
+                             sUnit = 'Dose';                            
+                        else
+                            if isempty(tInput(dOffset).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue)
+                                sUnit = 'Counts';                            
+                            else
+                                sUnit = tInput(dOffset).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue;           
+                            end                             
+                        end
+                        
+                    else
+                        if isempty(tInput(dOffset).atDicomInfo{1}.Units)
+                            sUnit = 'Counts';                            
+                        else
+                            sUnit = tInput(dOffset).atDicomInfo{1}.Units;           
+                        end                        
+                    end
                 else
-                    sUnit = tInput(dOffset).atDicomInfo{1}.Units;           
+                    if isempty(tInput(dOffset).atDicomInfo{1}.Units)
+                        sUnit = 'Counts';                            
+                    else
+                        sUnit = tInput(dOffset).atDicomInfo{1}.Units;           
+                    end
                 end
             end
 

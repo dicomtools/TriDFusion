@@ -39,10 +39,10 @@ function initKernelPanel()
             sEnable = 'on';
         end
     end
-    
-%    tQuant = quantificationTemplate('get');                                
-    
-        
+
+%    tQuant = quantificationTemplate('get');
+
+
     % Reset or Proceed
 
         uicontrol(uiKernelPanelPtr('get'),...
@@ -56,7 +56,7 @@ function initKernelPanel()
     % 3D Dose Kernel
 
     tDoseKernel = getDoseKernelTemplate();
-    
+
          uicontrol(uiKernelPanelPtr('get'),...
                   'Enable'    , 'On', ...
                   'style'     , 'text',...
@@ -67,7 +67,7 @@ function initKernelPanel()
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [15 460 200 20]...
                   );
-              
+
       uiRoiVoiKernelPanel = ...
         uicontrol(uiKernelPanelPtr('get'), ...
                   'Style'   , 'popup', ...
@@ -80,13 +80,13 @@ function initKernelPanel()
                   'Callback', @segActionKernelPanelCallback...
                   );
      uiRoiVoiKernelPanelObject('set', uiRoiVoiKernelPanel);
-     
+
      if size(aBuffer, 3) == 1
          asSegOptions = {'Entire Image', 'Inside ROI\VOI', 'Outside ROI\VOI'};
      else
          asSegOptions = {'Entire Image', 'Inside ROI\VOI', 'Outside ROI\VOI', 'Inside all slices ROI\VOI', 'Outside all slices ROI\VOI'};
-     end     
-            
+     end
+
      uiSegActKernelPanel = ...
         uicontrol(uiKernelPanelPtr('get'), ...
                   'Style'   , 'popup', ...
@@ -98,45 +98,45 @@ function initKernelPanel()
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @segActionKernelPanelCallback...
                   );
-    uiSegActKernelPanelObject('set', uiSegActKernelPanel); 
-        
+    uiSegActKernelPanelObject('set', uiSegActKernelPanel);
+
     tKernelCtDoseMap = kernelCtDoseMapUiValues('get');
-    
+
     if isempty(tKernelCtDoseMap) || size(aBuffer, 3) == 1
         dUpperValue = 0;
-        dLowerValue = 0;      
-        
+        dLowerValue = 0;
+
         sUseCtDoseMapEnable = 'off';
         sChkUseCTdoseMapEnable = 'off';
         sTxtUseCTdoseMapEnable = 'on';
-        
+
         asKernelSeries = {' '};
     else
-        
+
         dUpperValue = kernelSegEditValue('get', 'upper');
         dLowerValue = kernelSegEditValue('get', 'lower');
-    
+
         sChkUseCTdoseMapEnable = 'on';
         sTxtUseCTdoseMapEnable = 'Inactive';
         if kernelUseCtDoseMap('get') == true
             sUseCtDoseMapEnable = 'on';
         else
             sUseCtDoseMapEnable = 'off';
-        end  
-        
+        end
+
         asKernelSeries = num2cell(zeros(1,numel(tKernelCtDoseMap)));
         for ll=1:numel(tKernelCtDoseMap)
             asKernelSeries{ll} = tKernelCtDoseMap{ll}.sSeriesDescription;
-        end 
-        
+        end
+
         if kernelUnitTypeWindow('get') == true
             [dCTWindow, dCTLevel] = computeWindowMinMax(dUpperValue, dLowerValue);
             dUpperValue = dCTWindow;
-            dLowerValue = dCTLevel;            
+            dLowerValue = dCTLevel;
         end
-        
+
     end
-    
+
     chkUseCTdoseMapKernel = ...
         uicontrol(uiKernelPanelPtr('get'),...
                   'style'   , 'checkbox',...
@@ -144,10 +144,10 @@ function initKernelPanel()
                   'value'   , kernelUseCtDoseMap('get'),...
                   'position', [15 400 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @chkUseCTdoseMapKernelCallback...
                   );
-              
+
     txtUseCTdoseMapKernel = ...
          uicontrol(uiKernelPanelPtr('get'),...
                   'style'   , 'text',...
@@ -156,10 +156,10 @@ function initKernelPanel()
                   'position', [35 397 200 20],...
                   'Enable', sTxtUseCTdoseMapEnable,...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'ButtonDownFcn', @chkUseCTdoseMapKernelCallback...
-                  );                  
-    
+                  );
+
     uiKernelSeries = ...
          uicontrol(uiKernelPanelPtr('get'), ...
                   'Style'   , 'popup', ...
@@ -171,8 +171,8 @@ function initKernelPanel()
                   'BackgroundColor', viewerBackgroundColor ('get'), ...
                   'ForegroundColor', viewerForegroundColor('get') ...
                   );
-    uiKernelSeriesObject('set', uiKernelSeries); 
-              
+    uiKernelSeriesObject('set', uiKernelSeries);
+
     chkUnitTypeKernel = ...
         uicontrol(uiKernelPanelPtr('get'),...
                   'style'   , 'checkbox',...
@@ -180,11 +180,11 @@ function initKernelPanel()
                   'value'   , kernelUnitTypeWindow('get'),...
                   'position', [15 340 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @chkUnitTypeKernelCallback...
                   );
-    chkUnitTypeKernelObject('set', chkUnitTypeKernel); 
-                           
+    chkUnitTypeKernelObject('set', chkUnitTypeKernel);
+
     txtUnitTypeKernel = ...
          uicontrol(uiKernelPanelPtr('get'),...
                   'style'   , 'text',...
@@ -193,10 +193,10 @@ function initKernelPanel()
                   'position', [35 337 200 20],...
                   'Enable', 'On',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'ButtonDownFcn', @chkUnitTypeKernelCallback...
-                  );                    
-              
+                  );
+
     uiTxtUpperTreshold = ...
          uicontrol(uiKernelPanelPtr('get'),...
                   'style'   , 'text',...
@@ -219,8 +219,8 @@ function initKernelPanel()
                   'CallBack', @sliderKernelUpperTreshCallback ...
                   );
 %    addlistener(uiSliderKernelUpperTreshold,'Value','PreSet',@sliderKernelUpperTreshCallback);
-    sliderKernelVoiRoiUpperTresholdObject('set', uiSliderKernelUpperTreshold);    
-        
+    sliderKernelVoiRoiUpperTresholdObject('set', uiSliderKernelUpperTreshold);
+
     uiEditKernelUpperTreshold = ...
         uicontrol(uiKernelPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
@@ -232,7 +232,7 @@ function initKernelPanel()
                   'CallBack', @editKernelUpperTreshCallback ...
                   );
     editKernelVoiRoiUpperTresholdObject('set', uiEditKernelUpperTreshold);
- 
+
         uicontrol(uiKernelPanelPtr('get'),...
                   'style'   , 'text',...
                   'Enable'  , 'on', ...
@@ -264,7 +264,7 @@ function initKernelPanel()
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @editKernelLowerTreshCallback ...
-                  );                
+                  );
     editKernelVoiRoiLowerTresholdObject('set', uiEditKernelLowerTreshold);
 
          uicontrol(uiKernelPanelPtr('get'),...
@@ -415,58 +415,58 @@ function initKernelPanel()
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @gaussFilterCallback...
                   );
-              
+
     function setKernelSeriesCallback(hObject, ~)
-        
+
         dSerieOffset = get(hObject, 'Value');
-        
+
         tKernelCtDoseMap = kernelCtDoseMapUiValues('get');
 
         kernelCtSerieOffset('set', get(hObject, 'Value') );
-        
+
         dUpperValue = tKernelCtDoseMap{dSerieOffset}.dMax;
-        dLowerValue = tKernelCtDoseMap{dSerieOffset}.dMin;  
-        
-        if get(chkUnitTypeKernel, 'Value') == true            
+        dLowerValue = tKernelCtDoseMap{dSerieOffset}.dMin;
+
+        if get(chkUnitTypeKernel, 'Value') == true
             [dCTWindow, dCTLevel] = computeWindowMinMax(dUpperValue, dLowerValue);
             dUpperValue = dCTWindow;
-            dLowerValue = dCTLevel;           
+            dLowerValue = dCTLevel;
         end
-        
+
         kernelSegEditValue('set', 'upper', dUpperValue);
-        kernelSegEditValue('set', 'lower', dLowerValue);   
-        
+        kernelSegEditValue('set', 'lower', dLowerValue);
+
         set(uiEditKernelUpperTreshold, 'String', num2str(dUpperValue));
         set(uiEditKernelLowerTreshold, 'String', num2str(dLowerValue));
-        
+
         kernelSegTreshValue('get', 'upper', 1);
         kernelSegTreshValue('get', 'lower', 0);
-        
-        set(uiSliderKernelUpperTreshold, 'Value', 1);        
+
+        set(uiSliderKernelUpperTreshold, 'Value', 1);
         set(uiSliderKernelLowerTreshold, 'Value', 0);
-        
+
     end
-    
+
     function chkUseCTdoseMapKernelCallback(hObject, ~)
-        
+
         if strcmpi(get(hObject, 'Style'), 'text')
             if get(chkUseCTdoseMapKernel, 'Value') == true
-                
+
                 set(chkUseCTdoseMapKernel, 'Value', false);
             else
                 set(chkUseCTdoseMapKernel, 'Value', true);
             end
-        end 
-        
-        if get(chkUseCTdoseMapKernel, 'Value') == true  
-            
+        end
+
+        if get(chkUseCTdoseMapKernel, 'Value') == true
+
             set(txtUnitTypeKernel          , 'Enable', 'Inactive');
             set(chkUnitTypeKernel          , 'Enable', 'On');
             set(uiKernelSeries             , 'Enable', 'On');
             set(uiSliderKernelUpperTreshold, 'Enable', 'On');
             set(uiEditKernelUpperTreshold  , 'Enable', 'On');
             set(uiSliderKernelLowerTreshold, 'Enable', 'On');
-            set(uiEditKernelLowerTreshold  , 'Enable', 'On');      
+            set(uiEditKernelLowerTreshold  , 'Enable', 'On');
         else
             set(txtUnitTypeKernel          , 'Enable', 'On');
             set(chkUnitTypeKernel          , 'Enable', 'Off');
@@ -474,56 +474,56 @@ function initKernelPanel()
             set(uiSliderKernelUpperTreshold, 'Enable', 'Off');
             set(uiEditKernelUpperTreshold  , 'Enable', 'Off');
             set(uiSliderKernelLowerTreshold, 'Enable', 'Off');
-            set(uiEditKernelLowerTreshold  , 'Enable', 'Off');                
-        end          
-        
-        kernelUseCtDoseMap('set', get(chkUseCTdoseMapKernel, 'Value'));       
-        
+            set(uiEditKernelLowerTreshold  , 'Enable', 'Off');
+        end
+
+        kernelUseCtDoseMap('set', get(chkUseCTdoseMapKernel, 'Value'));
+
     end
-              
+
     function chkUnitTypeKernelCallback(hObject, ~)
-        
-        if strcmpi(get(hObject, 'Style'), 'text')            
+
+        if strcmpi(get(hObject, 'Style'), 'text')
             if get(chkUnitTypeKernel, 'Value') == true
-                
+
                 set(chkUnitTypeKernel, 'Value', false);
             else
                 set(chkUnitTypeKernel, 'Value', true);
             end
-        end 
-        
+        end
+
         dUpperValue = kernelSegEditValue('get', 'upper');
         dLowerValue = kernelSegEditValue('get', 'lower');
-        
-        if get(chkUnitTypeKernel, 'Value') == true  
+
+        if get(chkUnitTypeKernel, 'Value') == true
             set(txtUnitTypeKernel, 'String', 'Unit in Window Level');
-          
+
             [dCTWindow, dCTLevel] = computeWindowMinMax(dUpperValue, dLowerValue);
             dUpperValue = dCTWindow;
-            dLowerValue = dCTLevel;           
-          
+            dLowerValue = dCTLevel;
+
         else
             set(txtUnitTypeKernel, 'String', 'Unit in HU');
             [dUpperValue, dLowerValue] = computeWindowLevel(dUpperValue, dLowerValue);
         end
-        
-        kernelUnitTypeWindow('set', get(chkUnitTypeKernel, 'Value'));        
-        
+
+        kernelUnitTypeWindow('set', get(chkUnitTypeKernel, 'Value'));
+
         kernelSegEditValue('set', 'upper', dUpperValue);
-        kernelSegEditValue('set', 'lower', dLowerValue);   
-        
+        kernelSegEditValue('set', 'lower', dLowerValue);
+
         set(uiEditKernelUpperTreshold, 'String', num2str(dUpperValue));
         set(uiEditKernelLowerTreshold, 'String', num2str(dLowerValue));
-        
+
     end
 
     function previewCTdoseMapKernel()
-        
-        try   
+
+        try
 
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
-            
+
         vBoundAxes1Ptr = visBoundAxes1Ptr('get');
         vBoundAxes2Ptr = visBoundAxes2Ptr('get');
         vBoundAxes3Ptr = visBoundAxes3Ptr('get');
@@ -539,41 +539,41 @@ function initKernelPanel()
         if ~isempty(vBoundAxes3Ptr)
             delete(vBoundAxes3Ptr);
         end
-            
+
         aRefBuffer = dicomBuffer('get');
         atRefMetaData = dicomMetaData('get');
-        
+
         tInput = inputTemplate('get');
-        
+
         tKernelCtDoseMap = kernelCtDoseMapUiValues('get');
-        
+
         dCtOffset = get(uiKernelSeries, 'Value');
-        
+
         dSerieOffset = get(uiSeriesPtr('get'), 'Value');
 
         set(uiSeriesPtr('get'), 'Value', tKernelCtDoseMap{dCtOffset}.dSeriesNumber);
-        
+
         aCtBuffer = dicomBuffer('get');
-        
+
         atCtMetaData = dicomMetaData('get');
         if isempty(atCtMetaData)
-            
+
             atCtMetaData = tInput(tKernelCtDoseMap{dCtOffset}.dSeriesNumber).atDicomInfo;
-            dicomMetaData('set', atCtMetaData);            
-        end        
-    
-        if isempty(aCtBuffer)   
-            
+            dicomMetaData('set', atCtMetaData);
+        end
+
+        if isempty(aCtBuffer)
+
             aInput = inputBuffer('get');
-            aCtBuffer = aInput{tKernelCtDoseMap{dCtOffset}.dSeriesNumber};    
+            aCtBuffer = aInput{tKernelCtDoseMap{dCtOffset}.dSeriesNumber};
             if strcmp(imageOrientation('get'), 'coronal')
                 aCtBuffer = permute(aCtBuffer, [3 2 1]);
             elseif strcmp(imageOrientation('get'), 'sagittal')
                 aCtBuffer = permute(aCtBuffer, [2 3 1]);
             else
                 aCtBuffer = permute(aCtBuffer, [1 2 3]);
-            end    
-            
+            end
+
             if tInput(dSerieOffset).bFlipLeftRight == true
                 aCtBuffer=aCtBuffer(:,end:-1:1,:);
             end
@@ -585,40 +585,40 @@ function initKernelPanel()
             if tInput(dSerieOffset).bFlipHeadFeet == true
                 aCtBuffer=aCtBuffer(:,:,end:-1:1);
             end
-            
+
             dicomBuffer('set', aCtBuffer);
- 
-        end   
-        
+
+        end
+
         set(uiSeriesPtr('get'), 'Value', dSerieOffset);
-               
+
         dUpperValue = str2double( get(uiEditKernelUpperTreshold, 'String') );
         dLowerValue = str2double( get(uiEditKernelLowerTreshold, 'String') );
-        if get(chkUnitTypeKernel, 'Value') == true  
+        if get(chkUnitTypeKernel, 'Value') == true
             [dUpperValue, dLowerValue] = computeWindowLevel(dUpperValue, dLowerValue);
         end
-        
+
         dCtMIn = min(double(aCtBuffer),[], 'all');
-        
-        aCtBuffer(aCtBuffer<=dLowerValue) = dCtMIn; 
-        aCtBuffer(aCtBuffer>=dUpperValue) = dCtMIn;   
-        
+
+        aCtBuffer(aCtBuffer<=dLowerValue) = dCtMIn;
+        aCtBuffer(aCtBuffer>=dUpperValue) = dCtMIn;
+
         aCtBuffer(aCtBuffer==dCtMIn)=0;
-        aCtBuffer(aCtBuffer~=0)=1; 
-        
-        [aResamCt, ~] = resampleImage(aCtBuffer, atCtMetaData, aRefBuffer, atRefMetaData, 'Linear');
-                            
+        aCtBuffer(aCtBuffer~=0)=1;
+
+        [aResamCt, ~] = resampleImage(aCtBuffer, atCtMetaData, aRefBuffer, atRefMetaData, 'Linear', false);
+
         uiSegActString = get(uiSegActKernelPanel, 'String');
         uiSegActValue  = get(uiSegActKernelPanel, 'Value' );
         sActionType = uiSegActString{uiSegActValue};
-        
+
         iCoronal  = sliceNumber('get', 'coronal' );
         iSagittal = sliceNumber('get', 'sagittal');
         iAxial    = sliceNumber('get', 'axial'   );
-        
+
         dResampMIn = min(double(aResamCt),[], 'all');
-           
-        if ~strcmpi(sActionType, 'Entire Image') 
+
+        if ~strcmpi(sActionType, 'Entire Image')
 
             uiRoiVoiKernelValue = get(uiRoiVoiKernelPanel, 'Value');
 
@@ -639,11 +639,11 @@ function initKernelPanel()
                         aobjList{numel(aobjList)+1} = tRoiInput{cc};
                     end
                 end
-            end                
+            end
 
             if strcmpi(aobjList{uiRoiVoiKernelValue}.ObjectType, 'voi')
 
-                dNbRois = numel(aobjList{uiRoiVoiKernelValue}.RoisTag);             
+                dNbRois = numel(aobjList{uiRoiVoiKernelValue}.RoisTag);
 
                 aVoiBuffer = zeros(size(aResamCt));
 
@@ -660,16 +660,16 @@ function initKernelPanel()
 
                                 case axes1Ptr('get')
                                     if strcmpi(sActionType, 'Inside ROI\VOI') || ...
-                                       strcmpi(sActionType, 'Outside ROI\VOI')  
+                                       strcmpi(sActionType, 'Outside ROI\VOI')
 
                                         if dSliceNb == iCoronal
                                             aSlice =  permute(aResamCt(dSliceNb,:,:), [3 2 1]);
-                                            roiMask = createMask(objRoi, aSlice);                                   
+                                            roiMask = createMask(objRoi, aSlice);
 
                                             aSlice( roiMask) =1;
-                                            aSlice(~roiMask) =0;  
+                                            aSlice(~roiMask) =0;
 
-                                            aSliceMask =  permute(aVoiBuffer(dSliceNb,:,:), [3 2 1]);                                         
+                                            aSliceMask =  permute(aVoiBuffer(dSliceNb,:,:), [3 2 1]);
                                             aSlice = aSlice|aSliceMask;
                                             aVoiBuffer(dSliceNb,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
 
@@ -678,30 +678,30 @@ function initKernelPanel()
                                         for ccc=1:size(aResamCt, 1)
 
                                             aSlice = permute(aResamCt(ccc,:,:), [3 2 1]);
-                                            roiMask = createMask(objRoi, aSlice);    
+                                            roiMask = createMask(objRoi, aSlice);
 
                                             aSlice( roiMask) =1;
-                                            aSlice(~roiMask) =0;    
+                                            aSlice(~roiMask) =0;
 
-                                            aSliceMask =  permute(aVoiBuffer(dSliceNb,:,:), [3 2 1]);                                         
+                                            aSliceMask =  permute(aVoiBuffer(dSliceNb,:,:), [3 2 1]);
                                             aSlice = aSlice|aSliceMask;
                                             aVoiBuffer(ccc,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
-                                        end                                            
+                                        end
                                     end
 
                                 case axes2Ptr('get')
 
                                     if strcmpi(sActionType, 'Inside ROI\VOI') || ...
-                                       strcmpi(sActionType, 'Outside ROI\VOI')   
+                                       strcmpi(sActionType, 'Outside ROI\VOI')
 
                                         if dSliceNb == iSagittal
                                             aSlice = permute(aResamCt(:,dSliceNb,:), [3 1 2]);
-                                            roiMask = createMask(objRoi, aSlice);     
+                                            roiMask = createMask(objRoi, aSlice);
 
                                             aSlice( roiMask) =1;
-                                            aSlice(~roiMask) =0;                                        
+                                            aSlice(~roiMask) =0;
 
-                                            aSliceMask =  permute(aVoiBuffer(:,dSliceNb,:), [3 1 2]);                                         
+                                            aSliceMask =  permute(aVoiBuffer(:,dSliceNb,:), [3 1 2]);
                                             aSlice = aSlice|aSliceMask;
                                             aVoiBuffer(:,dSliceNb,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
 
@@ -709,47 +709,47 @@ function initKernelPanel()
                                     else
                                         for sss=1:size(aResamCt, 2)
                                             aSlice = permute(aResamCt(:,sss,:), [3 1 2]);
-                                            roiMask = createMask(objRoi, aSlice);        
+                                            roiMask = createMask(objRoi, aSlice);
 
                                             aSlice( roiMask) =1;
-                                            aSlice(~roiMask) =0;   
+                                            aSlice(~roiMask) =0;
 
-                                            aSliceMask =  permute(aVoiBuffer(:,dSliceNb,:), [3 1 2]);                                         
+                                            aSliceMask =  permute(aVoiBuffer(:,dSliceNb,:), [3 1 2]);
                                             aSlice = aSlice|aSliceMask;
                                             aVoiBuffer(:,sss,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
 
-                                        end                                            
+                                        end
                                     end
 
                                 case axes3Ptr('get')
                                     if strcmpi(sActionType, 'Inside ROI\VOI') || ...
-                                       strcmpi(sActionType, 'Outside ROI\VOI')   
+                                       strcmpi(sActionType, 'Outside ROI\VOI')
 
-                                        aSlice = aResamCt(:,:,dSliceNb); 
-                                        roiMask = createMask(objRoi, aSlice); 
+                                        aSlice = aResamCt(:,:,dSliceNb);
+                                        roiMask = createMask(objRoi, aSlice);
 
                                         aSlice( roiMask) =1;
-                                        aSlice(~roiMask) =0; 
+                                        aSlice(~roiMask) =0;
 
-                                        aSliceMask =  aVoiBuffer(:,:,dSliceNb);                                                                                  
-                                        aVoiBuffer(:,:,dSliceNb) = aSlice|aSliceMask;  
-                                    else                                            
+                                        aSliceMask =  aVoiBuffer(:,:,dSliceNb);
+                                        aVoiBuffer(:,:,dSliceNb) = aSlice|aSliceMask;
+                                    else
                                         for aaa=1:size(aResamCt, 3)
-                                            aSlice = aResamCt(:,:,aaa); 
-                                            roiMask = createMask(objRoi, aSlice);  
+                                            aSlice = aResamCt(:,:,aaa);
+                                            roiMask = createMask(objRoi, aSlice);
 
                                             aSlice( roiMask) =1;
-                                            aSlice(~roiMask) =0;  
+                                            aSlice(~roiMask) =0;
 
-                                            aSliceMask =  aVoiBuffer(:,:,dSliceNb);                                                                                  
+                                            aSliceMask =  aVoiBuffer(:,:,dSliceNb);
                                             aVoiBuffer(:,:,aaa) = aSlice|aSliceMask;
                                         end
                                     end
                             end
                         end
                     end
-                end 
-                                            
+                end
+
             else
                 objRoi   = aobjList{uiRoiVoiKernelValue}.Object;
                 dSliceNb = aobjList{uiRoiVoiKernelValue}.SliceNb;
@@ -765,31 +765,31 @@ function initKernelPanel()
                             for cc=1:size(aResamCt, 1)
 
                                 aSlice = permute(aResamCt(cc,:,:), [3 2 1]);
-                                roiMask = createMask(objRoi, aSlice);    
+                                roiMask = createMask(objRoi, aSlice);
 
                                 aSlice( roiMask) =1;
                                 aSlice(~roiMask) =0;
 
                                 aVoiBuffer(cc,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
                             end
-                        else                                
+                        else
                             aSlice = permute(aResamCt(dSliceNb,:,:), [3 2 1]);
-                            roiMask = createMask(objRoi, aSlice); 
+                            roiMask = createMask(objRoi, aSlice);
 
                             aSlice( roiMask) =1;
                             aSlice(~roiMask) =0;
 
-                            aVoiBuffer(dSliceNb,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);                               
+                            aVoiBuffer(dSliceNb,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
                         end
 
                     case axes2Ptr('get')
 
                         if strcmpi(sActionType, 'Inside all slices ROI\VOI') || ...
-                           strcmpi(sActionType, 'Outside all slices ROI\VOI') 
+                           strcmpi(sActionType, 'Outside all slices ROI\VOI')
 
                             for ss=1:size(aResamCt, 2)
                                 aSlice = permute(aResamCt(:,ss,:), [3 1 2]);
-                                roiMask = createMask(objRoi, aSlice);        
+                                roiMask = createMask(objRoi, aSlice);
 
                                 aSlice( roiMask) =1;
                                 aSlice(~roiMask) =0;
@@ -797,12 +797,12 @@ function initKernelPanel()
                                 aVoiBuffer(:,ss,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
 
                             end
-                        else                                
+                        else
                             aSlice = permute(aResamCt(:,dSliceNb,:), [3 1 2]);
-                            roiMask = createMask(objRoi, aSlice); 
+                            roiMask = createMask(objRoi, aSlice);
 
                             aSlice( roiMask) =1;
-                            aSlice(~roiMask) =0;                                   
+                            aSlice(~roiMask) =0;
 
                             aVoiBuffer(:,dSliceNb,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
 
@@ -811,243 +811,243 @@ function initKernelPanel()
                     case axes3Ptr('get')
 
                         if strcmpi(sActionType, 'Inside all slices ROI\VOI') || ...
-                           strcmpi(sActionType, 'Outside all slices ROI\VOI') 
+                           strcmpi(sActionType, 'Outside all slices ROI\VOI')
 
                             for aa=1:size(aResamCt, 3)
-                                aSlice = aResamCt(:,:,aa); 
-                                roiMask = createMask(objRoi, aSlice);  
+                                aSlice = aResamCt(:,:,aa);
+                                roiMask = createMask(objRoi, aSlice);
 
                                 aSlice( roiMask) =1;
                                 aSlice(~roiMask) =0;
 
                                 aVoiBuffer(:,:,aa) = aSlice;
-                            end   
+                            end
                         else
-                            aSlice = aResamCt(:,:,dSliceNb); 
-                            roiMask = createMask(objRoi, aSlice);  
+                            aSlice = aResamCt(:,:,dSliceNb);
+                            roiMask = createMask(objRoi, aSlice);
 
                             aSlice( roiMask) =1;
                             aSlice(~roiMask) =0;
 
-                            aVoiBuffer(:,:,dSliceNb) = aSlice;                                
+                            aVoiBuffer(:,:,dSliceNb) = aSlice;
                         end
                 end
             end
-                                                                                    
+
             if strcmpi(sActionType, 'Outside ROI\VOI') || ...
-               strcmpi(sActionType, 'Outside all slices ROI\VOI')                    
-                aVoiBuffer = ~aVoiBuffer;                   
-            end             
-            
+               strcmpi(sActionType, 'Outside all slices ROI\VOI')
+                aVoiBuffer = ~aVoiBuffer;
+            end
+
             aResamCt(aVoiBuffer == 0) = dResampMIn; % Apply Mask
-                      
+
         end
-                       
+
         aResamCt(aResamCt==dResampMIn)=0;
-        aResamCt(aResamCt~=0)=1;   
-                
+        aResamCt(aResamCt~=0)=1;
+
         aCtCoronal  =  permute(aResamCt(iCoronal,:,:), [3 2 1]);
         aCtSagittal =  permute(aResamCt(:,iSagittal,:), [3 1 2]);
         aCtAxial    =  aResamCt(:,:,iAxial);
 
         [maskCoronal ,~,~,~] = bwboundaries(aCtCoronal , 'holes', 8);
-        [maskSagittal,~,~,~] = bwboundaries(aCtSagittal, 'holes', 8);           
-        [maskAxial   ,~,~,~] = bwboundaries(aCtAxial   , 'holes', 8);            
+        [maskSagittal,~,~,~] = bwboundaries(aCtSagittal, 'holes', 8);
+        [maskAxial   ,~,~,~] = bwboundaries(aCtAxial   , 'holes', 8);
 
         if ~isempty(maskCoronal)
-            vBoundAxes1Ptr = visboundaries(axes1Ptr('get'), maskCoronal );                    
-            visBoundAxes1Ptr('set', vBoundAxes1Ptr);              
+            vBoundAxes1Ptr = visboundaries(axes1Ptr('get'), maskCoronal );
+            visBoundAxes1Ptr('set', vBoundAxes1Ptr);
         end
 
         if ~isempty(maskSagittal)
-            vBoundAxes2Ptr = visboundaries(axes2Ptr('get'), maskSagittal );                    
-            visBoundAxes2Ptr('set', vBoundAxes2Ptr);              
-        end     
+            vBoundAxes2Ptr = visboundaries(axes2Ptr('get'), maskSagittal );
+            visBoundAxes2Ptr('set', vBoundAxes2Ptr);
+        end
 
         if ~isempty(maskAxial)
-            vBoundAxes3Ptr = visboundaries(axes3Ptr('get'), maskAxial );                    
-            visBoundAxes3Ptr('set', vBoundAxes3Ptr);              
+            vBoundAxes3Ptr = visboundaries(axes3Ptr('get'), maskAxial );
+            visBoundAxes3Ptr('set', vBoundAxes3Ptr);
         end
-        
+
         catch
-            progressBar(1, 'Error:previewCTdoseMapKernel()');           
+            progressBar(1, 'Error:previewCTdoseMapKernel()');
         end
 
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
-        drawnow;         
+        drawnow;
     end
 
     function editKernelLowerTreshCallback(~, ~)
-        
+
         dUpperTreshold = str2double(get(uiEditKernelUpperTreshold, 'String'));
-        
+
         dLowerTreshold = str2double(get(uiEditKernelLowerTreshold, 'String'));
         if isnan(dLowerTreshold)
             dLowerTreshold = kernelSegEditValue('get', 'lower');
             set(uiEditKernelLowerTreshold, 'String', num2str(dLowerTreshold));
         end
-        
+
         if dLowerTreshold > dUpperTreshold
             dLowerTreshold = dUpperTreshold;
             set(uiEditKernelLowerTreshold, 'String', num2str(dLowerTreshold));
         end
-        
-        if get(chkUnitTypeKernel, 'Value') == true  
-            [~, dLowerTreshold] = computeWindowLevel(dUpperTreshold, dLowerTreshold);            
+
+        if get(chkUnitTypeKernel, 'Value') == true
+            [~, dLowerTreshold] = computeWindowLevel(dUpperTreshold, dLowerTreshold);
         end
-        
+
         dSerieOffset = get(uiKernelSeries, 'Value');
-        
+
         tKernelCtDoseMap = kernelCtDoseMapUiValues('get');
-        
+
         dMaxValue = tKernelCtDoseMap{dSerieOffset}.dMax;
-        dMinValue = tKernelCtDoseMap{dSerieOffset}.dMin;  
-        
+        dMinValue = tKernelCtDoseMap{dSerieOffset}.dMin;
+
         if dLowerTreshold < dMinValue
             dLowerTreshold = dMinValue;
             set(uiEditKernelLowerTreshold, 'String', num2str(dLowerTreshold));
         end
-        
+
         dDiff = dMaxValue - dMinValue;
-        dLowerSliderValue = (dLowerTreshold-dMinValue)/dDiff;            
-              
+        dLowerSliderValue = (dLowerTreshold-dMinValue)/dDiff;
+
         set(uiSliderKernelLowerTreshold, 'Value', dLowerSliderValue);
 
-        if get(chkUnitTypeKernel, 'Value') == true  
+        if get(chkUnitTypeKernel, 'Value') == true
             [~, dCTLevel] = computeWindowMinMax(dUpperTreshold, dLowerTreshold);
-            dLowerTreshold = dCTLevel;              
-        end        
-        
-        kernelSegTreshValue('set', 'lower', dLowerSliderValue);   
+            dLowerTreshold = dCTLevel;
+        end
+
+        kernelSegTreshValue('set', 'lower', dLowerSliderValue);
         kernelSegEditValue('set', 'lower', dLowerTreshold);
-                
+
         previewCTdoseMapKernel();
-        
+
     end
 
     function editKernelUpperTreshCallback(~, ~)
-        
+
         dLowerTreshold = str2double(get(uiEditKernelLowerTreshold, 'String'));
-                
+
         dUpperTreshold = str2double(get(uiEditKernelUpperTreshold, 'String'));
         if isnan(dUpperTreshold)
             dUpperTreshold = kernelSegEditValue('get', 'upper');
             set(uiEditKernelUpperTreshold, 'String', num2str(dUpperTreshold));
         end
-        
+
         if dUpperTreshold < dLowerTreshold
             dUpperTreshold = dLowerTreshold;
             set(uiEditKernelUpperTreshold, 'String', num2str(dUpperTreshold));
         end
-       
-        if get(chkUnitTypeKernel, 'Value') == true  
-            [dUpperTreshold, ~] = computeWindowLevel(dUpperTreshold, dLowerTreshold);            
+
+        if get(chkUnitTypeKernel, 'Value') == true
+            [dUpperTreshold, ~] = computeWindowLevel(dUpperTreshold, dLowerTreshold);
         end
-        
+
         dSerieOffset = get(uiKernelSeries, 'Value');
-        
+
         tKernelCtDoseMap = kernelCtDoseMapUiValues('get');
-        
+
         dMaxValue = tKernelCtDoseMap{dSerieOffset}.dMax;
-        dMinValue = tKernelCtDoseMap{dSerieOffset}.dMin;  
-        
+        dMinValue = tKernelCtDoseMap{dSerieOffset}.dMin;
+
         if dUpperTreshold > dMaxValue
             dUpperTreshold = dMaxValue;
             set(uiEditKernelUpperTreshold, 'String', num2str(dUpperTreshold));
         end
-        
+
         dDiff = dMaxValue - dMinValue;
-        dUpperSliderValue = (dUpperTreshold-dMinValue)/dDiff;            
-                
+        dUpperSliderValue = (dUpperTreshold-dMinValue)/dDiff;
+
         set(uiSliderKernelUpperTreshold, 'Value', dUpperSliderValue);
 
-        if get(chkUnitTypeKernel, 'Value') == true  
+        if get(chkUnitTypeKernel, 'Value') == true
             [dCTWindow, ~] = computeWindowMinMax(dUpperTreshold, dLowerTreshold);
-            dUpperTreshold = dCTWindow;              
-        end        
-        
-        kernelSegTreshValue('set', 'upper', dUpperSliderValue);   
+            dUpperTreshold = dCTWindow;
+        end
+
+        kernelSegTreshValue('set', 'upper', dUpperSliderValue);
         kernelSegEditValue('set', 'upper', dUpperTreshold);
-        
+
         previewCTdoseMapKernel();
     end
 
     function sliderKernelUpperTreshCallback(~, ~)
-        
+
         dUpperSliderValue = get(uiSliderKernelUpperTreshold, 'Value');
         dLowerSliderValue = get(uiSliderKernelLowerTreshold, 'Value');
-        
+
         if dUpperSliderValue < dLowerSliderValue
             set(uiSliderKernelUpperTreshold, 'Value', dLowerSliderValue);
             dUpperSliderValue = dLowerSliderValue;
         end
-        
+
         dSerieOffset = get(uiKernelSeries, 'Value');
-        
+
         tKernelCtDoseMap = kernelCtDoseMapUiValues('get');
-        
+
         dMaxValue = tKernelCtDoseMap{dSerieOffset}.dMax;
-        dMinValue = tKernelCtDoseMap{dSerieOffset}.dMin;          
-        
+        dMinValue = tKernelCtDoseMap{dSerieOffset}.dMin;
+
         dDiff = dMaxValue - dMinValue;
         dUpperValue =  dMinValue + (dDiff * dUpperSliderValue);
-            
-        if get(chkUnitTypeKernel, 'Value') == true  
+
+        if get(chkUnitTypeKernel, 'Value') == true
             dLowerValue =  dMinValue + (dDiff * dLowerSliderValue);
-                     
+
             [dCTWindow, dCTLevel] = computeWindowMinMax(dUpperValue, dLowerValue);
-            dUpperValue = dCTWindow;          
+            dUpperValue = dCTWindow;
         end
-        
-        kernelSegTreshValue('set', 'upper', dUpperSliderValue);   
+
+        kernelSegTreshValue('set', 'upper', dUpperSliderValue);
         kernelSegEditValue('set', 'upper', dUpperValue);
-        
+
         set(uiEditKernelUpperTreshold, 'String', num2str(dUpperValue));
-        
+
         previewCTdoseMapKernel();
-      
+
     end
 
     function sliderKernelLowerTreshCallback(~, ~)
-        
+
         dUpperSliderValue = get(uiSliderKernelUpperTreshold, 'Value');
         dLowerSliderValue = get(uiSliderKernelLowerTreshold, 'Value');
-        
+
         if dLowerSliderValue > dUpperSliderValue
             set(uiSliderKernelLowerTreshold, 'Value', dUpperSliderValue);
             dLowerSliderValue = dUpperSliderValue;
         end
-        
+
         dSerieOffset = get(uiKernelSeries, 'Value');
-        
+
         tKernelCtDoseMap = kernelCtDoseMapUiValues('get');
-        
+
         dMaxValue = tKernelCtDoseMap{dSerieOffset}.dMax;
-        dMinValue = tKernelCtDoseMap{dSerieOffset}.dMin;          
-        
+        dMinValue = tKernelCtDoseMap{dSerieOffset}.dMin;
+
         dDiff = dMaxValue - dMinValue;
         dLowerValue =  dMinValue + (dDiff * dLowerSliderValue);
-            
-        if get(chkUnitTypeKernel, 'Value') == true  
+
+        if get(chkUnitTypeKernel, 'Value') == true
             dUpperValue =  dMinValue + (dDiff * dUpperSliderValue);
-                     
+
             [dCTWindow, dCTLevel] = computeWindowMinMax(dUpperValue, dLowerValue);
-            dLowerValue = dCTLevel;          
+            dLowerValue = dCTLevel;
         end
-        
-        kernelSegTreshValue('set', 'lower', dLowerSliderValue);   
+
+        kernelSegTreshValue('set', 'lower', dLowerSliderValue);
         kernelSegEditValue('set', 'lower', dLowerValue);
-        
+
         set(uiEditKernelLowerTreshold, 'String', num2str(dLowerValue));
-        
+
         previewCTdoseMapKernel();
-      
+
     end
 
-    function segActionKernelPanelCallback(~, ~)        
-        
-        setVoiRoiSegPopup();                     
-    end 
+    function segActionKernelPanelCallback(~, ~)
+
+        setVoiRoiSegPopup();
+    end
 
     function uiKernelModelCallback(~, ~)
         if ~isempty(tDoseKernel)
@@ -1077,8 +1077,8 @@ function initKernelPanel()
         end
 
         set(uiRoiVoiKernelPanel, 'Enable', 'off');
-        set(uiSegActKernelPanel, 'Enable', 'off');                
-        
+        set(uiSegActKernelPanel, 'Enable', 'off');
+
         set(uiKernelTissue , 'Enable', 'off');
         set(uiKernelIsotope, 'Enable', 'off');
         set(uiKernelModel  , 'Enable', 'off');
@@ -1098,15 +1098,15 @@ function initKernelPanel()
 %            javaFrame = get(h, 'JavaFrame');
 %            javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
         end
-        
+
         uiSegActString = get(uiSegActKernelPanel, 'String');
         uiSegActValue  = get(uiSegActKernelPanel, 'Value' );
-                
-        if ~strcmpi(uiSegActString{uiSegActValue}, 'Entire Image') 
+
+        if ~strcmpi(uiSegActString{uiSegActValue}, 'Entire Image')
             set(uiRoiVoiKernelPanel, 'Enable', 'on');
-        end        
-        set(uiSegActKernelPanel, 'Enable', 'on'); 
-        
+        end
+        set(uiSegActKernelPanel, 'Enable', 'on');
+
         set(uiKernelTissue , 'Enable', 'on');
         set(uiKernelIsotope, 'Enable', 'on');
         set(uiKernelModel  , 'Enable', 'on');
@@ -1115,28 +1115,28 @@ function initKernelPanel()
         function setDoseKernel()
 
             tInput = inputTemplate('get');
-            
+
             dOffset = get(uiSeriesPtr('get'), 'Value');
             if dOffset > numel(tInput)
                 return;
             end
-            
+
             if switchTo3DMode('get')     == true ||  ...
                switchToIsoSurface('get') == true || ...
                switchToMIPMode('get')    == true
 
                 return;
             end
-            
+
             if isempty(dicomBuffer('get'))
                 return;
             end
-        
-            try   
-                               
+
+            try
+
             set(fiMainWindowPtr('get'), 'Pointer', 'watch');
             drawnow;
-            
+
             vBoundAxes1Ptr = visBoundAxes1Ptr('get');
             vBoundAxes2Ptr = visBoundAxes2Ptr('get');
             vBoundAxes3Ptr = visBoundAxes3Ptr('get');
@@ -1152,7 +1152,7 @@ function initKernelPanel()
             if ~isempty(vBoundAxes3Ptr)
                 delete(vBoundAxes3Ptr);
             end
-        
+
             tInput(dOffset).bDoseKernel = false;
             if numel(tInput) == 1 && isFusion('get') == false
                 tInput(dOffset).bFusedDoseKernel = false;
@@ -1177,16 +1177,16 @@ function initKernelPanel()
                 aDoseR2   = tKernel.(asField{2});
             end
 
-            aActivity = dicomBuffer('get');
-            
+            aActivity = double(dicomBuffer('get'));
+
             uiSegActString = get(uiSegActKernelPanel, 'String');
             uiSegActValue  = get(uiSegActKernelPanel, 'Value' );
             sActionType = uiSegActString{uiSegActValue};
-            
-            if ~strcmpi(sActionType, 'Entire Image') 
-                
+
+            if ~strcmpi(sActionType, 'Entire Image')
+
                 uiRoiVoiKernelValue = get(uiRoiVoiKernelPanel, 'Value');
-                
+
                 aobjList = '';
 
                 tRoiInput = roiTemplate('get');
@@ -1204,109 +1204,109 @@ function initKernelPanel()
                             aobjList{numel(aobjList)+1} = tRoiInput{cc};
                         end
                     end
-                end                
-                
+                end
+
                 if strcmpi(aobjList{uiRoiVoiKernelValue}.ObjectType, 'voi')
-                    
-                    dNbRois = numel(aobjList{uiRoiVoiKernelValue}.RoisTag);             
-                       
+
+                    dNbRois = numel(aobjList{uiRoiVoiKernelValue}.RoisTag);
+
                     aVoiBuffer = zeros(size(aActivity));
-                    
+
                     for bb=1:dNbRois
 
                         for cc=1:numel(tRoiInput)
                             if isvalid(tRoiInput{cc}.Object) && ...
                                 strcmpi(tRoiInput{cc}.Tag, aobjList{uiRoiVoiKernelValue}.RoisTag{bb})
-                            
+
                                 objRoi   = tRoiInput{cc}.Object;
                                 dSliceNb = tRoiInput{cc}.SliceNb;
 
                                 switch objRoi.Parent
-                                        
+
                                     case axes1Ptr('get')
                                         if strcmpi(sActionType, 'Inside ROI\VOI') || ...
-                                           strcmpi(sActionType, 'Outside ROI\VOI')  
-                                       
+                                           strcmpi(sActionType, 'Outside ROI\VOI')
+
                                             if dSliceNb == iCoronal
                                                 aSlice =  permute(aBuffer(dSliceNb,:,:), [3 2 1]);
-                                                roiMask = createMask(objRoi, aSlice);                                   
+                                                roiMask = createMask(objRoi, aSlice);
 
                                                 aSlice( roiMask) =1;
-                                                aSlice(~roiMask) =0;  
+                                                aSlice(~roiMask) =0;
 
-                                                aSliceMask =  permute(aVoiBuffer(dSliceNb,:,:), [3 2 1]);                                         
+                                                aSliceMask =  permute(aVoiBuffer(dSliceNb,:,:), [3 2 1]);
                                                 aSlice = aSlice|aSliceMask;
                                                 aVoiBuffer(dSliceNb,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
-                                                
+
                                             end
                                         else
                                             for ccc=1:size(aBuffer, 1)
 
                                                 aSlice = permute(aBuffer(ccc,:,:), [3 2 1]);
-                                                roiMask = createMask(objRoi, aSlice);    
+                                                roiMask = createMask(objRoi, aSlice);
 
                                                 aSlice( roiMask) =1;
-                                                aSlice(~roiMask) =0;    
-                                                
-                                                aSliceMask =  permute(aVoiBuffer(dSliceNb,:,:), [3 2 1]);                                         
+                                                aSlice(~roiMask) =0;
+
+                                                aSliceMask =  permute(aVoiBuffer(dSliceNb,:,:), [3 2 1]);
                                                 aSlice = aSlice|aSliceMask;
                                                 aVoiBuffer(ccc,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
-                                            end                                            
+                                            end
                                         end
-                                        
+
                                     case axes2Ptr('get')
-                                        
+
                                         if strcmpi(sActionType, 'Inside ROI\VOI') || ...
-                                           strcmpi(sActionType, 'Outside ROI\VOI')   
-                                       
+                                           strcmpi(sActionType, 'Outside ROI\VOI')
+
                                             if dSliceNb == iSagittal
                                                 aSlice = permute(aBuffer(:,dSliceNb,:), [3 1 2]);
-                                                roiMask = createMask(objRoi, aSlice);     
+                                                roiMask = createMask(objRoi, aSlice);
 
                                                 aSlice( roiMask) =1;
-                                                aSlice(~roiMask) =0;                                        
+                                                aSlice(~roiMask) =0;
 
-                                                aSliceMask =  permute(aVoiBuffer(:,dSliceNb,:), [3 1 2]);                                         
+                                                aSliceMask =  permute(aVoiBuffer(:,dSliceNb,:), [3 1 2]);
                                                 aSlice = aSlice|aSliceMask;
                                                 aVoiBuffer(:,dSliceNb,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
-                                                
+
                                             end
                                         else
                                             for sss=1:size(aBuffer, 2)
                                                 aSlice = permute(aBuffer(:,sss,:), [3 1 2]);
-                                                roiMask = createMask(objRoi, aSlice);        
+                                                roiMask = createMask(objRoi, aSlice);
 
                                                 aSlice( roiMask) =1;
-                                                aSlice(~roiMask) =0;   
-                                                
-                                                aSliceMask =  permute(aVoiBuffer(:,dSliceNb,:), [3 1 2]);                                         
+                                                aSlice(~roiMask) =0;
+
+                                                aSliceMask =  permute(aVoiBuffer(:,dSliceNb,:), [3 1 2]);
                                                 aSlice = aSlice|aSliceMask;
                                                 aVoiBuffer(:,sss,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
 
-                                            end                                            
+                                            end
                                         end
-                                        
+
                                     case axes3Ptr('get')
                                         if strcmpi(sActionType, 'Inside ROI\VOI') || ...
-                                           strcmpi(sActionType, 'Outside ROI\VOI')   
-                                       
-                                            aSlice = aBuffer(:,:,dSliceNb); 
-                                            roiMask = createMask(objRoi, aSlice); 
+                                           strcmpi(sActionType, 'Outside ROI\VOI')
+
+                                            aSlice = aBuffer(:,:,dSliceNb);
+                                            roiMask = createMask(objRoi, aSlice);
 
                                             aSlice( roiMask) =1;
-                                            aSlice(~roiMask) =0; 
+                                            aSlice(~roiMask) =0;
 
-                                            aSliceMask =  aVoiBuffer(:,:,dSliceNb);                                                                                  
-                                            aVoiBuffer(:,:,dSliceNb) = aSlice|aSliceMask;  
-                                        else                                            
+                                            aSliceMask =  aVoiBuffer(:,:,dSliceNb);
+                                            aVoiBuffer(:,:,dSliceNb) = aSlice|aSliceMask;
+                                        else
                                             for aaa=1:size(aBuffer, 3)
-                                                aSlice = aBuffer(:,:,aaa); 
-                                                roiMask = createMask(objRoi, aSlice);  
+                                                aSlice = aBuffer(:,:,aaa);
+                                                roiMask = createMask(objRoi, aSlice);
 
                                                 aSlice( roiMask) =1;
-                                                aSlice(~roiMask) =0;  
+                                                aSlice(~roiMask) =0;
 
-                                                aSliceMask =  aVoiBuffer(:,:,dSliceNb);                                                                                  
+                                                aSliceMask =  aVoiBuffer(:,:,dSliceNb);
                                                 aVoiBuffer(:,:,aaa) = aSlice|aSliceMask;
                                             end
                                         end
@@ -1317,43 +1317,43 @@ function initKernelPanel()
                 else
                     objRoi   = aobjList{uiRoiVoiKernelValue}.Object;
                     dSliceNb = aobjList{uiRoiVoiKernelValue}.SliceNb;
-                    
+
                     aVoiBuffer = zeros(size(aBuffer));
-                    
+
                     switch objRoi.Parent
 
                         case axes1Ptr('get')
-                            
+
                             if strcmpi(sActionType, 'Inside all slices ROI\VOI') || ...
                                strcmpi(sActionType, 'Outside all slices ROI\VOI')
                                 for cc=1:size(aBuffer, 1)
-                                    
+
                                     aSlice = permute(aBuffer(cc,:,:), [3 2 1]);
-                                    roiMask = createMask(objRoi, aSlice);    
-                                    
+                                    roiMask = createMask(objRoi, aSlice);
+
                                     aSlice( roiMask) =1;
                                     aSlice(~roiMask) =0;
-                                    
+
                                     aVoiBuffer(cc,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
                                 end
-                            else                                
+                            else
                                 aSlice = permute(aBuffer(dSliceNb,:,:), [3 2 1]);
-                                roiMask = createMask(objRoi, aSlice); 
+                                roiMask = createMask(objRoi, aSlice);
 
                                 aSlice( roiMask) =1;
                                 aSlice(~roiMask) =0;
 
-                                aVoiBuffer(dSliceNb,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);                               
+                                aVoiBuffer(dSliceNb,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
                             end
 
                         case axes2Ptr('get')
 
                             if strcmpi(sActionType, 'Inside all slices ROI\VOI') || ...
-                               strcmpi(sActionType, 'Outside all slices ROI\VOI') 
-                           
+                               strcmpi(sActionType, 'Outside all slices ROI\VOI')
+
                                 for ss=1:size(aBuffer, 2)
                                     aSlice = permute(aBuffer(:,ss,:), [3 1 2]);
-                                    roiMask = createMask(objRoi, aSlice);        
+                                    roiMask = createMask(objRoi, aSlice);
 
                                     aSlice( roiMask) =1;
                                     aSlice(~roiMask) =0;
@@ -1361,50 +1361,69 @@ function initKernelPanel()
                                     aVoiBuffer(:,ss,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
 
                                 end
-                            else                                
+                            else
                                 aSlice = permute(aBuffer(:,dSliceNb,:), [3 1 2]);
-                                roiMask = createMask(objRoi, aSlice); 
+                                roiMask = createMask(objRoi, aSlice);
 
                                 aSlice( roiMask) =1;
-                                aSlice(~roiMask) =0;                                   
+                                aSlice(~roiMask) =0;
 
                                 aVoiBuffer(:,dSliceNb,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
-                              
+
                             end
-                            
+
                         case axes3Ptr('get')
 
                             if strcmpi(sActionType, 'Inside all slices ROI\VOI') || ...
-                               strcmpi(sActionType, 'Outside all slices ROI\VOI') 
-                           
+                               strcmpi(sActionType, 'Outside all slices ROI\VOI')
+
                                 for aa=1:size(aBuffer, 3)
-                                    aSlice = aBuffer(:,:,aa); 
-                                    roiMask = createMask(objRoi, aSlice);  
+                                    aSlice = aBuffer(:,:,aa);
+                                    roiMask = createMask(objRoi, aSlice);
 
                                     aSlice( roiMask) =1;
                                     aSlice(~roiMask) =0;
 
                                     aVoiBuffer(:,:,aa) = aSlice;
-                                end   
+                                end
                             else
-                                aSlice = aBuffer(:,:,dSliceNb); 
-                                roiMask = createMask(objRoi, aSlice);  
+                                aSlice = aBuffer(:,:,dSliceNb);
+                                roiMask = createMask(objRoi, aSlice);
 
                                 aSlice( roiMask) =1;
                                 aSlice(~roiMask) =0;
 
-                                aVoiBuffer(:,:,dSliceNb) = aSlice;                                
+                                aVoiBuffer(:,:,dSliceNb) = aSlice;
                             end
                     end
                 end
-                
+
                 if strcmpi(sActionType, 'Outside ROI\VOI') || ...
-                   strcmpi(sActionType, 'Outside all slices ROI\VOI')                    
-                    aVoiBuffer = ~aVoiBuffer;                   
-                end                
-                
-            end              
-                                    
+                   strcmpi(sActionType, 'Outside all slices ROI\VOI')
+                    aVoiBuffer = ~aVoiBuffer;
+                end
+
+            end
+
+            % For radioembolization using microspheres loaded with isotope with half-life T1/2
+            % 1)	From PET image – Activity A in kBq for each voxel at time of scan: Ascan= Bq/mL * Vvox(mL)
+            % 2)	Activity at injection of microspheres: A0=A*2[(Tscan-Tinjection)/T1/2]
+            % 3)	Calculate the total number of disintegrations in the voxel  [Bq * s] =
+            % = Cumulative activity Acum= A0 * T1/2(s) / ln(2) = A0 (Bq) *1.442695* T1/2 (s)
+            % 4)	Calculate total number of beta-particles (e.g. beta) using the yield Yb
+            % Nb= Acum * Yb
+            % 5)	Nb,scaled = Nb/(4*107  )    ; (4*10^7 primaries used per George Kagadis e-mail 5-14-20)
+
+            % 6)	Cumulative Dose to point at distance r (mm), D(r) = Nb,scaled * DPKr2(r) / r2
+
+            % For Y-90:
+            % T1/2 = 2.6684 d
+            % Yb = 1.0
+
+            % Note for non-microsphere tracers:  There will be:
+            % - uptake curve which will change step 2
+            % - effective half-life due to biological clearance which will change step 3 and trapezoidal integration may be used instead
+
             atCoreMetaData = dicomMetaData('get');
 
             sigmaX = atCoreMetaData{1}.PixelSpacing(1)/10;
@@ -1428,10 +1447,10 @@ function initKernelPanel()
             end
 
             if isempty(atCoreMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime)
-                
+
                 set(fiMainWindowPtr('get'), 'Pointer', 'default');
                 drawnow;
-                    
+
                 progressBar(1, 'Error: Dose RadiopharmaceuticalStartDateTime is missing!');
                 h = msgbox('Error: setDoseKernel(): Dose RadiopharmaceuticalStartDateTime is missing!', 'Error');
 %                if integrateToBrowser('get') == true
@@ -1490,10 +1509,10 @@ function initKernelPanel()
                     betaFactor = 4E7;
 
                 otherwise
-                    
+
                     set(fiMainWindowPtr('get'), 'Pointer', 'default');
                     drawnow;
-            
+
                      progressBar(1, 'Error: This isotope is not yet validated!');
                      h = msgbox('Error: setDoseKernel(): This isotope is not yet validated!', 'Error');
 %                     if integrateToBrowser('get') == true
@@ -1509,21 +1528,33 @@ function initKernelPanel()
              end
 
 %                     aActivity = aActivity*xPixel*yPixel*zPixel; % in mm
-             aActivity = aActivity*xPixel*yPixel*zPixel/1000; % in cn
+             aActivity = aActivity*xPixel*yPixel*zPixel/1000; % in cm
              aActivity = aActivity*2^(relT/halfLife)*halfLife/log(2)*betaYield/betaFactor; %%%To double check
 
-             aDose = zeros(numel(aDoseR2),1);
-             for kk=1:numel(aDoseR2)
-                 aDose(kk) = aDoseR2(kk)/aDistance(kk)^2;
-             end
-             % aDose = aDoseR2./aDistance.^2;
+%             aDose = zeros(numel(aDoseR2),1);
+%             for kk=1:numel(aDoseR2)
+%                 aDose(kk) = aDoseR2(kk)/aDistance(kk)^2;
+%             end
+            aDose = aDoseR2./aDistance.^2;
 
-            dMax = max(aDose)/1000;
+if 0
+            dMax = max(aDose, [], 'all')/1000;
             aVector = find(aDose<dMax);
 
             dFirst = aVector(1);
+
             dDistance = aDistance(dFirst);
-            %  dDistance = max(aDistance, [], 'all');
+else
+
+%            dMax = max(aDose, [], 'all')/10;
+%            aVector = find(aDose<dMax);
+
+%            dFirst = aVector(1);
+
+%            dDistance = aDistance(dFirst);
+            dDistance = max(aDistance, [], 'all')/10;
+
+end
 
             aXYZPixel = zeros(3,1);
             aXYZPixel(1)=xPixel;
@@ -1536,17 +1567,17 @@ function initKernelPanel()
             [X,Y,Z] = meshgrid(from:to,from:to,from:to);
 
             distanceMatrix = sqrt((X*xPixel).^2+(Y*yPixel).^2+(Z*zPixel).^2);
-            vqKernel = interp1(aDistance, aDose, distanceMatrix, 'nearest', 'extrap');
+            vqKernel = interp1(aDistance, aDose, distanceMatrix, 'linear', 'extrap'); %%% Linear, cubic, nearest...
             doseBuffer = convn(aActivity, vqKernel, 'same');
 
-            if ~strcmpi(sActionType, 'Entire Image') 
-                aBuffer = dicomBuffer('get');                 
+            if ~strcmpi(sActionType, 'Entire Image')
+                aBuffer = dicomBuffer('get');
                 doseBuffer(aVoiBuffer==0) = aBuffer(aVoiBuffer==0);
             end
-            
+
             bUseCtMap = get(chkUseCTdoseMapKernel, 'Value'); % CT Guided
             if bUseCtMap == true
-                                        
+
                 aRefBuffer = dicomBuffer('get');
                 atRefMetaData = dicomMetaData('get');
 
@@ -1566,20 +1597,20 @@ function initKernelPanel()
                 if isempty(atCtMetaData)
 
                     atCtMetaData = tInput(tKernelCtDoseMap{dCtOffset}.dSeriesNumber).atDicomInfo;
-                    dicomMetaData('set', atCtMetaData);            
-                end      
-                
-                if isempty(aCtBuffer)   
+                    dicomMetaData('set', atCtMetaData);
+                end
+
+                if isempty(aCtBuffer)
 
                     aInput = inputBuffer('get');
-                    aCtBuffer = aInput{tKernelCtDoseMap{dCtOffset}.dSeriesNumber};    
+                    aCtBuffer = aInput{tKernelCtDoseMap{dCtOffset}.dSeriesNumber};
                     if strcmp(imageOrientation('get'), 'coronal')
                         aCtBuffer = permute(aCtBuffer, [3 2 1]);
                     elseif strcmp(imageOrientation('get'), 'sagittal')
                         aCtBuffer = permute(aCtBuffer, [2 3 1]);
                     else
                         aCtBuffer = permute(aCtBuffer, [1 2 3]);
-                    end    
+                    end
 
                     if tInput(dSerieOffset).bFlipLeftRight == true
                         aCtBuffer=aCtBuffer(:,end:-1:1,:);
@@ -1595,35 +1626,35 @@ function initKernelPanel()
 
                     dicomBuffer('set', aCtBuffer);
 
-                end   
+                end
 
                 set(uiSeriesPtr('get'), 'Value', dSerieOffset);
 
                 dUpperValue = str2double( get(uiEditKernelUpperTreshold, 'String') );
                 dLowerValue = str2double( get(uiEditKernelLowerTreshold, 'String') );
-                if get(chkUnitTypeKernel, 'Value') == true  
+                if get(chkUnitTypeKernel, 'Value') == true
                     [dUpperValue, dLowerValue] = computeWindowLevel(dUpperValue, dLowerValue);
                 end
 
                 dCtMIn = min(double(aCtBuffer),[], 'all');
 
-                aCtBuffer(aCtBuffer<=dLowerValue) = dCtMIn; 
-                aCtBuffer(aCtBuffer>=dUpperValue) = dCtMIn;   
+                aCtBuffer(aCtBuffer<=dLowerValue) = dCtMIn;
+                aCtBuffer(aCtBuffer>=dUpperValue) = dCtMIn;
 
                 aCtBuffer(aCtBuffer==dCtMIn)=0;
-                aCtBuffer(aCtBuffer~=0)=1; 
+                aCtBuffer(aCtBuffer~=0)=1;
 
-                [aResamCt, ~] = resampleImage(aCtBuffer, atCtMetaData, aRefBuffer, atRefMetaData, 'Linear');                
-                
+                [aResamCt, ~] = resampleImage(aCtBuffer, atCtMetaData, aRefBuffer, atRefMetaData, 'Linear', false);
+
                 dResampMIn = min(double(aResamCt),[], 'all');
-                
+
                 aResamCt(aResamCt==dResampMIn)=0;
-                aResamCt(aResamCt~=0)=1;  
-                
-                aBuffer = dicomBuffer('get');                 
-                doseBuffer(aResamCt==0) = aBuffer(aResamCt==0);                
+                aResamCt(aResamCt~=0)=1;
+
+                aBuffer = dicomBuffer('get');
+                doseBuffer(aResamCt==0) = aBuffer(aResamCt==0);
             end
-            
+
             dicomBuffer('set', doseBuffer);
 
             dMin = min(doseBuffer, [], 'all');
@@ -1641,44 +1672,44 @@ function initKernelPanel()
             refreshImages();
 
             progressBar(1, 'Ready');
-            
+
             catch
-                progressBar(1, 'Error:setDoseKernel()');           
+                progressBar(1, 'Error:setDoseKernel()');
             end
 
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
-            drawnow; 
-        
+            drawnow;
+
         end
 
     end
 
     function gaussFilterCallback(~, ~)
-        
+
         if isempty(dicomBuffer('get'))
             return;
         end
-        
+
         if switchTo3DMode('get')     == true ||  ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true
 
             return;
         end
-                
+
         tInput = inputTemplate('get');
         dOffset = get(uiSeriesPtr('get'), 'Value');
         if dOffset > numel(tInput)
             return;
         end
-                        
-        try   
-            
+
+        try
+
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
 
         aBuffer = dicomBuffer('get');
-        
+
         x = str2double(get(edtGaussFilterX, 'String'));
         y = str2double(get(edtGaussFilterY, 'String'));
         z = str2double(get(edtGaussFilterZ, 'String'));
@@ -1733,37 +1764,37 @@ function initKernelPanel()
         dicomBuffer('set', imgaussfilt3(aBuffer,[xPixel,yPixel,zPixel]));
 
         refreshImages();
-        
+
         catch
-            progressBar(1, 'Error:setDoseKernel()');           
+            progressBar(1, 'Error:setDoseKernel()');
         end
 
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
-        drawnow;             
-        
+        drawnow;
+
     end
 
     function resetKernelCallback(~, ~)
 
         tInitInput = inputTemplate('get');
-        
+
         iOffset = get(uiSeriesPtr('get'), 'Value');
         if iOffset > numel(tInitInput)
             return;
         end
-        
+
         if switchTo3DMode('get')     == true ||  ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true
 
             return;
         end
-        
-        try   
-            
+
+        try
+
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
-        
+
         aInput = inputBuffer('get');
 
         if ~strcmp(imageOrientation('get'), 'axial')
@@ -1791,8 +1822,8 @@ function initKernelPanel()
             tInitInput(dFuseOffset).bEdgeDetection = false;
         end
 
-        inputTemplate('set', tInitInput);        
-        
+        inputTemplate('set', tInitInput);
+
         if isfield(tInitInput(iOffset), 'tRoi')
             atRoi = roiTemplate('get');
             for kk=1:numel(atRoi)
@@ -1802,7 +1833,7 @@ function initKernelPanel()
             end
             roiTemplate('set', atRoi);
         end
-            
+
         dicomBuffer('set',aBuffer);
 
         dicomMetaData('set', tInitInput(iOffset).atDicomInfo);
@@ -1825,13 +1856,13 @@ function initKernelPanel()
         triangulateCallback();
 
         refreshImages();
-        
+
         catch
-            progressBar(1, 'Error:resetKernelCallback()');           
+            progressBar(1, 'Error:resetKernelCallback()');
         end
 
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
-        drawnow;   
+        drawnow;
     end
 
 end

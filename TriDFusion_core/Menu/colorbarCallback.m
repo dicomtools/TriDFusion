@@ -706,19 +706,81 @@ function colorbarCallback(hObject, ~)
     end
 
     function setColorbarMoveImage(~, ~)
-      %  set(gcf,'Pointer','watch');
-      %  set(gcf,'Pointer','circle');
         
         if isMoveImageActivated('get') == false
-            
+                        
             set(fiMainWindowPtr('get'), 'Pointer', 'fleur');           
             
             isMoveImageActivated('set', true);
             
+            fusedImageRotationValues('set', false);
+            fusedImageMovementValues('set', false);      
+            
+            tInput = inputTemplate('get');
+            aInput = inputBuffer('get');
+            
+            iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+            iFuseOffset   = get(uiFusedSeriesPtr('get'), 'Value');
+                        
+            set(uiSeriesPtr('get'), 'Value', iFuseOffset);
+            aMoveImage = dicomBuffer('get');
+            if isempty(aMoveImage)
+                aMoveImage = aInput{iFuseOffset};
+            end
+            
+            if size(aMoveImage, 3) == 1
+                if iSeriesOffset ~= iFuseOffset
+                    if tInput(iSeriesOffset).bFlipLeftRight == true
+                        aMoveImage=aMoveImage(:,end:-1:1);
+                    end
+
+                    if tInput(iSeriesOffset).bFlipAntPost == true
+                        aMoveImage=aMoveImage(end:-1:1,:);
+                    end
+                end                
+            else
+                if iSeriesOffset ~= iFuseOffset                
+                    if tInput(iSeriesOffset).bFlipLeftRight == true
+                        aMoveImage=aMoveImage(:,end:-1:1,:);
+                    end
+
+                    if tInput(iSeriesOffset).bFlipAntPost == true
+                        aMoveImage=aMoveImage(end:-1:1,:,:);
+                    end
+
+                    if tInput(iSeriesOffset).bFlipHeadFeet == true
+                        aMoveImage=aMoveImage(:,:,end:-1:1);
+                    end
+                end
+                
+                if strcmp(imageOrientation('get'), 'coronal')
+                    aMoveImage = permute(aMoveImage, [3 2 1]);
+                elseif strcmp(imageOrientation('get'), 'sagittal')
+                    aMoveImage = permute(aMoveImage, [2 3 1]);
+                else
+                    aMoveImage = permute(aMoveImage, [1 2 3]);
+                end                
+            end
+            
+            set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
+            
+            moveImageBuffer('set', aMoveImage);
+
         else
-            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+         
+            set(fiMainWindowPtr('get'), 'Pointer', 'default');   
             
             isMoveImageActivated('set', false);
+            
+            iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+            iFuseOffset   = get(uiFusedSeriesPtr('get'), 'Value');
+            
+            set(uiSeriesPtr('get'), 'Value', iFuseOffset);
+            dicomBuffer('set', moveImageBuffer('get'));
+            set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
+            
+            moveImageBuffer('reset');
+          
         end
              
     end

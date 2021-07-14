@@ -1,7 +1,10 @@
-function aResampledImage = resampleImageRotation(aImage, aAxe, dRotation)
-%function  resampleImageRotation(aAxe, dRotation)
-%Resample the Rotation of an Image. 
+function aBuffer = moveImageBuffer(sAction, aValue)
+%function aBuffer = moveImageBuffer(sAction, aValue)
+%Get\Set Move Image Buffer.
 %See TriDFuison.doc (or pdf) for more information about options.
+%
+%Note: option settings must fit on one line and can contain one semicolon at most.
+%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
@@ -27,25 +30,14 @@ function aResampledImage = resampleImageRotation(aImage, aAxe, dRotation)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if size(aImage, 3) == 1 
-    else
-        switch aAxe
-            case axes1Ptr('get') % Coronal    
+    persistent paBuffer;   
 
-                aResampledImage = imrotate3(aImage, dRotation,[0 -1 0], 'linear','crop', 'FillValues', min(aImage, [], 'all'));
-
-            case axes2Ptr('get') % Sagittal  
-
-                aResampledImage = imrotate3(aImage, dRotation,[1 0 0], 'linear','crop', 'FillValues', min(aImage, [], 'all'));
-
-            case axes3Ptr('get') % Axial       
-
-                aResampledImage = imrotate3(aImage, dRotation,[0 0 1], 'linear','crop', 'FillValues', min(aImage, [], 'all')); 
-
-            otherwise
-                aResampledImage = [];
-                return;
-        end
+    if strcmpi('set', sAction)
+        paBuffer = aValue; 
+    elseif strcmpi('reset', sAction)    
+        paBuffer = '';
     end
 
+    aBuffer = paBuffer;
+    
 end

@@ -61,30 +61,50 @@ function clickUp(~, ~)
         updateObjet3DPosition();      
     else
         if isMoveImageActivated('get') == true
-if 0            
-            [bApplyMovement, aAxe, aPosition] =  fusedImageMovementValues('get');
+            
+            set(fiMainWindowPtr('get'), 'Pointer', 'fleur');
+            
+if 1               
+            [bApplyMovement, aAxe, aPosition] =  fusedImageMovementValues('get');    
             if bApplyMovement == true
                 set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-                progressBar(0.999, 'Resampling Image, please wait');
+                progressBar(0.999, 'Resampling Image Translation, please wait');
                 
                 moveFusedImage(false, true);
      
                 aResampledImage = resampleImageMovement(fusionBuffer('get'), aAxe, aPosition);
                 fusionBuffer('set', aResampledImage);                
                 
+                yScale = size(moveImageBuffer('get'),1)/size(dicomBuffer('get'),1);
+                xScale = size(moveImageBuffer('get'),2)/size(dicomBuffer('get'),2);
+                                     
+                f = [ yScale 0            0
+                      0      xScale       0
+                      0      0            1];    
+
+                TF = maketform('affine', f);
+                aPosition = tformfwd(TF,aPosition(:,1), aPosition(:,2));  
+                            
+                aResampledImage = resampleImageMovement(moveImageBuffer('get'), aAxe, aPosition);
+                moveImageBuffer('set', aResampledImage);                   
+                
                 refreshImages();
                 
                 progressBar(1, 'Ready');               
             end
 end            
+if 1
             [bApplyRotation, aAxe, dRotation] = fusedImageRotationValues('get');            
             if bApplyRotation == true
                 
                 set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-                progressBar(0.999, 'Resampling Image, please wait');
+                progressBar(0.999, 'Resampling Image Rotation, please wait');
                 
                 aResampledImage = resampleImageRotation(fusionBuffer('get'), aAxe, dRotation);
                 fusionBuffer('set', aResampledImage);
+                
+                aResampledImage = resampleImageRotation(moveImageBuffer('get'), aAxe, dRotation);
+                moveImageBuffer('set', aResampledImage);
                 
                 refreshImages();
                 
@@ -93,6 +113,7 @@ end
             end
             
             set(fiMainWindowPtr('get'), 'Pointer', 'fleur');
+end
 
         end
         

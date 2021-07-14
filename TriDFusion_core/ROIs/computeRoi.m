@@ -80,10 +80,22 @@ function tRoiComputed = computeRoi(imInput, imRoi, atRoiMetaData, tSliceMeta, pt
     end
         
     tRoiComputed.cells = numel(double(imCDataMasked));
-
+    
+    if isfield(tSliceMeta, 'RealWorldValueMappingSequence') % SUV SPECT
+        if isfield(tSliceMeta.RealWorldValueMappingSequence.Item_1, 'MeasurementUnitsCodeSequence')
+            if strcmpi(tSliceMeta.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue, 'Bq/ml')
+                sUnits = 'BQML';
+            end
+        else
+            sUnits = tSliceMeta.Units;            
+        end
+    else
+        sUnits = tSliceMeta.Units;
+    end
+    
     if (strcmpi(tSliceMeta.Modality, 'pt') || ...
         strcmpi(tSliceMeta.Modality, 'nm'))&& ...
-        strcmpi(tSliceMeta.Units, 'BQML' ) && ...     
+        strcmpi(sUnits, 'BQML' ) && ...     
         bSUVUnit == true 
 
         xAxial = tSliceMeta.PixelSpacing(1)/10;
@@ -165,7 +177,7 @@ function tRoiComputed = computeRoi(imInput, imRoi, atRoiMetaData, tSliceMeta, pt
         tRoiComputed.mean   = mean(double(imCDataMasked), 'all') * dSUVScale;
         tRoiComputed.median = median(double(imCDataMasked), 'all') * dSUVScale;
 
-        volMean = mean(double(imCDataMasked));               
+        volMean = mean(double(imCDataMasked), 'all');               
         tRoiComputed.sum    = voxVolume * nbVoxels * volMean * dSUVScale;
         tRoiComputed.std    = std(double(imCDataMasked),[],'all') * dSUVScale;           
 

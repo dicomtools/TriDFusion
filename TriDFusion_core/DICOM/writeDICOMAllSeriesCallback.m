@@ -70,10 +70,16 @@ function writeDICOMAllSeriesCallback(~, ~)
     end
 
     set(uiSeriesPtr('get'), 'Enable', 'off');
-
+    
+    sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                
+    sWriteDir = char(sOutDir) + "TriDFusion_ALL_DCM_" + char(sDate) + '/';              
+    if ~(exist(char(sWriteDir), 'dir'))
+        mkdir(char(sWriteDir));
+    end
+    
     for jj=1: numel(inputTemplate('get'))
         set(uiSeriesPtr('get'), 'Value', jj);
-        writeDICOM(sOutDir, jj);
+        writeDICOM(sWriteDir, jj);
     end
 
     set(uiSeriesPtr('get'), 'Value', iOffset);

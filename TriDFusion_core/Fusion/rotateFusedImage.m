@@ -71,7 +71,7 @@ function rotateFusedImage(bInitCoordinate)
             end
             
             fusedImageRotationValues('set', true, clickedAxe, aDiffClickedPtX);                       
-            
+                                    
         end
     end
 

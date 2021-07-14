@@ -192,10 +192,22 @@ function [tVoiComputed, tVoiMask] = computeVoi(imInput, imRoi, atVoiMetaData, pt
         end         
 
         tVoiComputed.cells  = numel(double(voiCDataMasked));
-
+        
+        if isfield(atVoiMetaData{1}, 'RealWorldValueMappingSequence') % SUV SPECT
+            if isfield(atVoiMetaData{1}.RealWorldValueMappingSequence.Item_1, 'MeasurementUnitsCodeSequence')
+                if strcmpi(atVoiMetaData{1}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue, 'Bq/ml')
+                    sUnits = 'BQML';
+                end
+            else
+                sUnits = atVoiMetaData{1}.Units;            
+            end
+        else
+            sUnits = atVoiMetaData{1}.Units;
+        end
+    
         if (strcmpi(atVoiMetaData{1}.Modality, 'pt') || ...
             strcmpi(atVoiMetaData{1}.Modality, 'nm'))&& ...
-            strcmpi(atVoiMetaData{1}.Units, 'BQML' ) && ...     
+            strcmpi(sUnits, 'BQML' ) && ...     
             bSUVUnit == true 
 
             voxVolume = xPixel * yPixel * zPixel;
@@ -206,9 +218,9 @@ function [tVoiComputed, tVoiMask] = computeVoi(imInput, imRoi, atVoiMetaData, pt
             tVoiComputed.mean   = mean(double(voiCDataMasked), 'all') * dSUVScale;
             tVoiComputed.median = median(double(voiCDataMasked), 'all') * dSUVScale;
 
-            volMean =  mean(double(voiCDataMasked));                  
-            tVoiComputed.sum    = voxVolume * nbVoxels * volMean * dSUVScale;
-            tVoiComputed.std    = std(double(voiCDataMasked),[],'all') * dSUVScale;  
+            volMean =  mean(double(voiCDataMasked), 'all');                  
+            tVoiComputed.sum  = voxVolume * nbVoxels * volMean * dSUVScale;
+            tVoiComputed.std  = std(double(voiCDataMasked),[],'all') * dSUVScale;  
 
             if ~isempty(tVoiComputed.max)
 
