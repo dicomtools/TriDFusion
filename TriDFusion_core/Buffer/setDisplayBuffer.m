@@ -97,7 +97,7 @@ function setDisplayBuffer()
                         if tInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
                             fSlope = tInput(1).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
                             fIntercept = tInput(1).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
-                            aInput{i} = fIntercept + (double(aInput) * fSlope);                            
+                            aInput{i} = fIntercept + (double(aInput{i}) * fSlope);                            
                         end                        
                     end
                 end
