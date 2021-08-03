@@ -27,6 +27,10 @@ function setRegistrationCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    if numel(seriesDescription('get')) < 2
+        return;
+    end
+
     tRegistration = registrationTemplate('get');
 
     dlgRegister = ...
@@ -51,7 +55,7 @@ function setRegistrationCallback(~, ~)
     lbRegWindow = ...
         uicontrol(dlgRegister,...
                   'style'   , 'listbox',...
-                  'position', [325 0 485 545],...
+                  'position', [325 0 485 570],...
                   'fontsize', 10,...
                   'Fontname', 'Monospaced',...
                   'Value'   , 1 ,...
@@ -73,7 +77,7 @@ function setRegistrationCallback(~, ~)
                   'Callback', @resetRegistrationCallback...
                   );
 
-     chkSeriesDescription = ...
+     chkRegSeriesDescription = ...
           uicontrol(dlgRegister,...
                   'style'   , 'checkbox',...
                   'enable'  , 'on',...
@@ -81,7 +85,7 @@ function setRegistrationCallback(~, ~)
                   'position', [180 475 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'Callback', @updateDescriptionCallback...
+                  'Callback', @updateRegDescriptionCallback...
                   );
 
           uicontrol(dlgRegister,...
@@ -93,7 +97,7 @@ function setRegistrationCallback(~, ~)
                   'Enable', 'Inactive',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'ButtonDownFcn', @updateDescriptionCallback...
+                  'ButtonDownFcn', @updateRegDescriptionCallback...
                   );
               
         uicontrol(dlgRegister,...
@@ -357,7 +361,7 @@ function setRegistrationCallback(~, ~)
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @registerCallback...
                   );
-
+              
     adLbSeries = zeros(size(seriesDescription('get')));
     dNextPosition = 1;
 
@@ -664,7 +668,7 @@ function setRegistrationCallback(~, ~)
                     dicomMetaData('set', atRefMetaData);
                     setQuantification(kk);
                     
-                    updateDescription('set', get(chkSeriesDescription, 'Value'));
+                    updateDescription('set', get(chkRegSeriesDescription, 'Value'));
 
                     break;
                 end
@@ -863,7 +867,7 @@ function setRegistrationCallback(~, ~)
                     refImage = aBuffer;
                     dNextSeries = 2;
 
-                    if get(chkSeriesDescription, 'Value') == true
+                    if get(chkRegSeriesDescription, 'Value') == true
                         atRefMetaData{1}.SeriesDescription  = sprintf('REF-COREG %s', atRefMetaData{1}.SeriesDescription);
                         asDescription = seriesDescription('get');
                         asDescription{kk} = sprintf('REF-COREG %s', asDescription{kk});
@@ -875,7 +879,7 @@ function setRegistrationCallback(~, ~)
                     dicomMetaData('set', atRefMetaData);
                     setQuantification(kk);
 
-                    updateDescription('set', get(chkSeriesDescription, 'Value'));
+                    updateDescription('set', get(chkRegSeriesDescription, 'Value'));
 
                     break;
                 end
@@ -948,19 +952,19 @@ function setRegistrationCallback(~, ~)
         drawnow;  
     end
 
-    function updateDescriptionCallback(hObject, ~)
+    function updateRegDescriptionCallback(hObject, ~)
 
-         if get(chkSeriesDescription, 'Value') == true
+         if get(chkRegSeriesDescription, 'Value') == true
             if strcmpi(get(hObject, 'Style'), 'Checkbox')
-                set(chkSeriesDescription, 'Value', true);
+                set(chkRegSeriesDescription, 'Value', true);
             else
-                set(chkSeriesDescription, 'Value', false);
+                set(chkRegSeriesDescription, 'Value', false);
             end
         else
             if strcmpi(hObject.Style, 'Checkbox')
-                set(chkSeriesDescription, 'Value', false);
+                set(chkRegSeriesDescription, 'Value', false);
             else
-                set(chkSeriesDescription, 'Value', true);
+                set(chkRegSeriesDescription, 'Value', true);
             end
          end
 

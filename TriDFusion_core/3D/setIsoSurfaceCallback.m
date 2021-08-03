@@ -57,6 +57,10 @@ function setIsoSurfaceCallback(~, ~)
         set(btnRegisterPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));        
         set(btnRegisterPtr('get'), 'Enable', 'off');
         
+        set(btnMathPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnMathPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));        
+        set(btnMathPtr('get'), 'Enable', 'off');
+        
    %     set(rotate3DMenu('get'), 'Checked', 'off');
         rotate3DTool('set', false);
         rotate3d('off');
@@ -179,6 +183,7 @@ function setIsoSurfaceCallback(~, ~)
                 if numel(inputTemplate('get')) >1
                     set(btnRegisterPtr('get'), 'Enable', 'on');
                 end
+                set(btnMathPtr('get'), 'Enable', 'on');
 
                 set(btnVsplashPtr('get')   , 'Enable', 'on');
                 set(uiEditVsplahXPtr('get'), 'Enable', 'on');

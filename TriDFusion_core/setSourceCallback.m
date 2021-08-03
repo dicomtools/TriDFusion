@@ -302,6 +302,7 @@ function setSourceCallback(~, ~)
 
             set(btnFusionPtr    ('get'), 'Enable', 'off');
             set(btnRegisterPtr  ('get'), 'Enable', 'off');
+            set(btnMathPtr      ('get'), 'Enable', 'off');
             set(uiFusedSeriesPtr('get'), 'Value' , 1    );
             set(uiFusedSeriesPtr('get'), 'String', ' '  );
             set(uiFusedSeriesPtr('get'), 'Enable', 'off');
@@ -477,7 +478,7 @@ function setSourceCallback(~, ~)
                         set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
                         set(uiFusedSeriesPtr('get'), 'Enable', 'on');
                         set(uiFusedSeriesPtr('get'), 'Value', 2);
-                    else
+                    else                        
                         set(btnFusionPtr('get')  , 'Enable', 'on');
 
                         set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
@@ -490,6 +491,10 @@ function setSourceCallback(~, ~)
                 setInputOrientation();
 
                 setDisplayBuffer();
+                
+                if numel(dicomBuffer('get'))
+                    set(btnMathPtr('get'), 'Enable', 'on');
+                end
 
                 if size(dicomBuffer('get'), 3) ~= 1 && ...
                    numel(dicomBuffer('get'))

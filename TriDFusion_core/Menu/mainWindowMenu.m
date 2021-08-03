@@ -137,8 +137,11 @@ function mainWindowMenu()
     panMenu       ('set', uimenu(mTools, 'Label','Pan'        , 'Callback', @setPanCallback));
     zoomMenu      ('set', uimenu(mTools, 'Label','Zoom'       , 'Callback', @setZoomCallback));
     rotate3DMenu  ('set', uimenu(mTools, 'Label','Rotate 3D'  , 'Callback', @setRotate3DCallback));
- %   dataCursorMenu('set', uimenu(mTools, 'Label','Data Cursor', 'Callback', @setDataCursorCallback));
+ %   dataCursorMenu('set', uimenu(mTools, 'Label','Data Cursor', 'Callback', @setDataCursorCallback)); 
     uimenu(mTools, 'Label','Reset View', 'Callback','toolsmenufcn ResetView');
+  
+    uimenu(mTools, 'Label','Registration', 'Callback', @setRegistrationCallback, 'Separator','on');
+    uimenu(mTools, 'Label','Mathematic'  , 'Callback', @setMathCallback);
 
 
     mHelp = uimenu(fiMainWindowPtr('get'),'Label','Help');

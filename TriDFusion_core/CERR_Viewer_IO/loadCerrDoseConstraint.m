@@ -393,6 +393,7 @@ function loadCerrDoseConstraint(planC, structNamC)
 
     set(btnFusionPtr    ('get'), 'Enable', 'off');
     set(btnRegisterPtr  ('get'), 'Enable', 'off');
+    set(btnMathPtr      ('get'), 'Enable', 'off');
     set(uiFusedSeriesPtr('get'), 'Value' , 1    );
     set(uiFusedSeriesPtr('get'), 'String', ' '  );
     set(uiFusedSeriesPtr('get'), 'Enable', 'off');
@@ -475,6 +476,7 @@ function loadCerrDoseConstraint(planC, structNamC)
             set(uiFusedSeriesPtr('get'), 'Enable', 'on');
             set(uiFusedSeriesPtr('get'), 'Value', 1);
         end
+        set(btnMathPtr('get'), 'Enable', 'on');
 
         set(btnVsplashPtr('get')   , 'Enable', 'on');
         set(uiEditVsplahXPtr('get'), 'Enable', 'on');

@@ -77,6 +77,7 @@ function initViewerGlobal()
     btnPanPtr        ('set', '');
     btnZoomPtr       ('set', '');
     btnRegisterPtr   ('set', '');
+    btnMathPtr       ('set', '');
     btnVsplashPtr    ('set', '');
     uiEditVsplahXPtr ('set', '');
     uiEditVsplahYPtr ('set', '');

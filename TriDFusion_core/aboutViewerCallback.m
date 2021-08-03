@@ -41,7 +41,7 @@ function aboutViewerCallback(~, ~)
         end
         fclose(fFileID);
 
-        h = msgbox(sDisplayBuffer);
+        h = msgbox(sDisplayBuffer, 'About');
 %        if integrateToBrowser('get') == true
 %            sLogo = './TriDFusion/logo.png';
 %        else

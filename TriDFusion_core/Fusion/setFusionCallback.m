@@ -230,7 +230,7 @@ end
                 [x2,y2,~] = size(B);
 
                 B = imresize(B, [x1 y1]);
-
+if 0
                 if iSeriesOffset ~= iFuseOffset
                     if tFuseInput(iSeriesOffset).bFlipLeftRight == true
                         B=B(:,end:-1:1);
@@ -240,7 +240,7 @@ end
                         B=B(end:-1:1,:);
                     end
                 end
-
+end
  %               tFuseInput(iFuseOffset).bEdgeDetection = false;
 
  %               inputTemplate('set', tFuseInput);
@@ -281,6 +281,7 @@ end
                     B = permute(B, [1 2 3]);
                 end
 
+if 0                
                 if iSeriesOffset ~= iFuseOffset
 
                     if tFuseInput(iSeriesOffset).bFlipLeftRight == true
@@ -295,7 +296,7 @@ end
                         B=B(:,:,end:-1:1);
                     end
                 end
-
+end
 %                tFuseInput(iFuseOffset).bEdgeDetection = false;
 %                inputTemplate('set', tFuseInput);
 

@@ -35,9 +35,19 @@ function mainToolBarEnable(sEnable)
     set(btnZoomPtr('get')        , 'Enable', sEnable);
     
     if numel(inputTemplate('get')) > 1
-        set(btnRegisterPtr('get')    , 'Enable', sEnable); 
+        set(btnRegisterPtr('get'), 'Enable', sEnable); 
     end
     
+    if numel(dicomBuffer('get'))
+        set(btnMathPtr('get'), 'Enable', 'on');
+    end
+
+    if size(dicomBuffer('get'), 3) ~= 1 && ...
+       numel(dicomBuffer('get'))
+        set(btnVsplashPtr('get')   , 'Enable', 'on');
+        set(uiEditVsplahXPtr('get'), 'Enable', 'on');
+        set(uiEditVsplahYPtr('get'), 'Enable', 'on');
+    end    
 %        set(uiSliderWindowPtr('get') , 'Enable', sEnable);
 %        set(uiSliderLevel  , 'Enable', sEnable);           
 end
