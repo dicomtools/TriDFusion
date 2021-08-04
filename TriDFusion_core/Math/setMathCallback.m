@@ -374,7 +374,7 @@ function setMathCallback(~, ~)
         initDisplay(3);
 
         initWindowLevel('set', true);
-%        quantificationTemplate('set', tInitInput(dInitOffset).tQuant);
+        quantificationTemplate('set', tInitInput(dInitOffset).tQuant);
 
         dicomViewerCore();
 
@@ -447,7 +447,8 @@ function setMathCallback(~, ~)
                 case 'y'; y=double(aBuffer);
                 case 'z'; z=double(aBuffer);
                 otherwise
-                    progressBar(1,'Error:executeMathCallback() Associated set serie cant be found!');                                                                                   
+                    progressBar(1,'Error:executeMathCallback() Associated set serie cant be found!'); 
+                    break;
             end
 
         end         

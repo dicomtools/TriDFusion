@@ -35,51 +35,50 @@ function dSUVconv = computeSUV(tSUVMetaData)
 
     if isfield(tSUVMetaData, 'RadiopharmaceuticalInformationSequence') 
 
-        if isempty(tSUVMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose) || ...
-           isempty(tSUVMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime) ...
-            return; 
-        end
+        if ~isempty(tSUVMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose) && ...
+           ~isempty(tSUVMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime) 
+        
+            injDose     = str2double(tSUVMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose);
+            injDateTime = tSUVMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;      
+            acqTime     = tSUVMetaData.SeriesTime;
+            acqDate     = tSUVMetaData.SeriesDate;
+            patWeight   = str2double(tSUVMetaData.PatientWeight);
+            if patWeight == 0 || isnan(patWeight)
+                patWeight =1;
+            end
+            halfLife = str2double(tSUVMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife);
 
-        injDose     = str2double(tSUVMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose);
-        injDateTime = tSUVMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;      
-        acqTime     = tSUVMetaData.SeriesTime;
-        acqDate     = tSUVMetaData.SeriesDate;
-        patWeight   = str2double(tSUVMetaData.PatientWeight);
-        if patWeight == 0 || isnan(patWeight)
-            patWeight =1;
-        end
-        halfLife = str2double(tSUVMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife);
+            if numel(injDateTime) == 14
+                injDateTime = sprintf('%s.00', injDateTime);
+            end
 
-        if numel(injDateTime) == 14
-            injDateTime = sprintf('%s.00', injDateTime);
-        end
+            datetimeInjDate = datetime(injDateTime,'InputFormat','yyyyMMddHHmmss.SS');
+            dateInjDate = datenum(datetimeInjDate);
 
-        datetimeInjDate = datetime(injDateTime,'InputFormat','yyyyMMddHHmmss.SS');
-        dateInjDate = datenum(datetimeInjDate);
+            if numel(acqTime) == 6
+                acqTime = sprintf('%s.00', acqTime);
+            end
 
-        if numel(acqTime) == 6
-            acqTime = sprintf('%s.00', acqTime);
-        end
+            datetimeAcqDate = datetime([acqDate acqTime],'InputFormat','yyyyMMddHHmmss.SS');
+            dayAcqDate = datenum(datetimeAcqDate);
 
-        datetimeAcqDate = datetime([acqDate acqTime],'InputFormat','yyyyMMddHHmmss.SS');
-        dayAcqDate = datenum(datetimeAcqDate);
+            relT = (dayAcqDate - dateInjDate)*(24*60*60); % Acquisition start time
 
-        relT = (dayAcqDate - dateInjDate)*(24*60*60); % Acquisition start time
+            % calculate conversion factor
 
-        % calculate conversion factor
-
-        if strcmpi(tSUVMetaData.Units, 'bqml')
-            corrInj = injDose / exp(log(2) * relT / halfLife); %in Bq and seconds
-            dSUVconv = patWeight / corrInj; %assuming massDensity = 1kg/L
-            dSUVconv = dSUVconv * 1e3; %because image values mL -> L
-        else
-            if isfield(tSUVMetaData, 'RealWorldValueMappingSequence')
-                if isfield(tSUVMetaData.RealWorldValueMappingSequence.Item_1, 'MeasurementUnitsCodeSequence')
-                    sUnit = tSUVMetaData.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue;
-                    if strcmpi(sUnit, 'Bq/ml')
-                        corrInj = injDose / exp(log(2) * relT / halfLife); %in Bq and seconds
-                        dSUVconv = patWeight / corrInj; %assuming massDensity = 1kg/L
-                        dSUVconv = dSUVconv * 1e3; %because image values mL -> L                        
+            if strcmpi(tSUVMetaData.Units, 'bqml')
+                corrInj = injDose / exp(log(2) * relT / halfLife); %in Bq and seconds
+                dSUVconv = patWeight / corrInj; %assuming massDensity = 1kg/L
+                dSUVconv = dSUVconv * 1e3; %because image values mL -> L
+            else
+                if isfield(tSUVMetaData, 'RealWorldValueMappingSequence')
+                    if isfield(tSUVMetaData.RealWorldValueMappingSequence.Item_1, 'MeasurementUnitsCodeSequence')
+                        sUnit = tSUVMetaData.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue;
+                        if strcmpi(sUnit, 'Bq/ml')
+                            corrInj = injDose / exp(log(2) * relT / halfLife); %in Bq and seconds
+                            dSUVconv = patWeight / corrInj; %assuming massDensity = 1kg/L
+                            dSUVconv = dSUVconv * 1e3; %because image values mL -> L                        
+                        end
                     end
                 end
             end

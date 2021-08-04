@@ -569,7 +569,7 @@ function setRegistrationCallback(~, ~)
         initDisplay(3);
 
         initWindowLevel('set', true);
-    %    quantificationTemplate('set', tInitInput(dInitOffset).tQuant);
+        quantificationTemplate('set', tInitInput(dInitOffset).tQuant);
 
         dicomViewerCore();
 

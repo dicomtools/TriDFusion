@@ -1850,7 +1850,7 @@ end
         initDisplay(3);
 
         initWindowLevel('set', true);
-%        quantificationTemplate('set', tInitInput(iOffset).tQuant);
+        quantificationTemplate('set', tInitInput(iOffset).tQuant);
 
         dicomViewerCore();
 
