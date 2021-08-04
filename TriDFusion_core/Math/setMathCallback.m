@@ -340,6 +340,7 @@ function setMathCallback(~, ~)
             tInitInput(jj).bFlipAntPost   = false;
             tInitInput(jj).bFlipHeadFeet  = false;
             tInitInput(jj).bDoseKernel    = false;
+            tInitInput(jj).bMathApplied   = false;
             tInitInput(jj).bFusedDoseKernel    = false;
             tInitInput(jj).bFusedEdgeDetection = false;
             
@@ -373,7 +374,7 @@ function setMathCallback(~, ~)
         initDisplay(3);
 
         initWindowLevel('set', true);
-        quantificationTemplate('set', tInitInput(dInitOffset).tQuant);
+%        quantificationTemplate('set', tInitInput(dInitOffset).tQuant);
 
         dicomViewerCore();
 
@@ -469,7 +470,7 @@ function setMathCallback(~, ~)
             
             tMException = [];
             sInput = sprintf('try, %s; catch tMException; end', sEquation);
-            evalc(sInput);
+            eval(sInput);
             
             if isempty(tMException)
                 aPosition = strfind(sEquation, '=');
@@ -522,7 +523,8 @@ function setMathCallback(~, ~)
                             case 'y'; aBuffer = double(y);
                             case 'z'; aBuffer = double(z);
                         otherwise
-                            progressBar(1,'Error:executeMathCallback() Associated result serie cant be found!');                         
+                            progressBar(1,'Error:executeMathCallback() Associated result serie cant be found!');    
+                            break;
                         end
 
                         dicomBuffer('set', aBuffer);
@@ -535,7 +537,7 @@ function setMathCallback(~, ~)
                             end
 
                             for dd=1:numel(atMetaData)
-                                atMetaData{dd}.SeriesDescription  = sprintf('MATH %s', atMetaData{1}.SeriesDescription);
+                                atMetaData{dd}.SeriesDescription  = sprintf('MATH %s', atMetaData{1}.SeriesDescription);                                                                                                
                             end
                             asDescription = seriesDescription('get');
                             asDescription{dCurOffset} = sprintf('MATH %s', asDescription{dCurOffset});
@@ -545,6 +547,13 @@ function setMathCallback(~, ~)
                         end
                         
                         updateDescription('set', get(chkMathSeriesDescription, 'Value'));
+                        
+                        tInput(dCurOffset).bMathApplied = true;
+                        inputTemplate('set', tInput);
+                        
+                        setQuantification(dCurOffset);
+
+                        % quantificationTemplate('set', tInput(dCurOffset).tQuant);
                         
                     end
                 end
@@ -562,12 +571,18 @@ function setMathCallback(~, ~)
         
         set(dlgMathematic, 'Pointer', 'default');
         drawnow;
-    
-        set(uiSeriesPtr('get'), 'Value', iOffset);
-        
+            
         if isempty(tMException)        
+            
             progressBar(1,'Ready');                       
             delete(dlgMathematic);
+                        
+            clearDisplay();
+            initDisplay(3);
+
+            dicomViewerCore();
+
+            setViewerDefaultColor(true, dicomMetaData('get'));
             
             refreshImages();
         end

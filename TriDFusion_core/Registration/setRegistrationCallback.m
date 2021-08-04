@@ -535,6 +535,7 @@ function setRegistrationCallback(~, ~)
             tInitInput(jj).bFlipAntPost   = false;
             tInitInput(jj).bFlipHeadFeet  = false;
             tInitInput(jj).bDoseKernel    = false;
+            tInitInput(jj).bMathApplied   = false;
             tInitInput(jj).bFusedDoseKernel    = false;
             tInitInput(jj).bFusedEdgeDetection = false;
             
@@ -568,7 +569,7 @@ function setRegistrationCallback(~, ~)
         initDisplay(3);
 
         initWindowLevel('set', true);
-        quantificationTemplate('set', tInitInput(dInitOffset).tQuant);
+    %    quantificationTemplate('set', tInitInput(dInitOffset).tQuant);
 
         dicomViewerCore();
 
@@ -722,7 +723,7 @@ function setRegistrationCallback(~, ~)
     %    dicomViewerCore();
 
     %    initWindowLevel('set', true);
-        quantificationTemplate('set', tInput(dInitOffset).tQuant);
+    %    quantificationTemplate('set', tInput(dInitOffset).tQuant);
 
         dicomViewerCore();
 
@@ -932,7 +933,7 @@ function setRegistrationCallback(~, ~)
         initDisplay(3);
 
   %      initWindowLevel('set', true);
-        quantificationTemplate('set', tInput(dInitOffset).tQuant);
+  %      quantificationTemplate('set', tInput(dInitOffset).tQuant);
 
         dicomViewerCore();
 

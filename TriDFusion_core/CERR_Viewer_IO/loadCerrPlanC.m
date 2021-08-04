@@ -143,6 +143,7 @@ function loadCerrPlanC(planC)
         tNewInput(ii).bFlipAntPost   = false;
         tNewInput(ii).bFlipHeadFeet  = false;
         tNewInput(ii).bDoseKernel    = false;
+        tNewInput(ii).bMathApplied   = false;
         tNewInput(ii).bFusedDoseKernel    = false;
         tNewInput(ii).bFusedEdgeDetection = false;
     end

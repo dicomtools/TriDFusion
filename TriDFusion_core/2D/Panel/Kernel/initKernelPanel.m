@@ -1814,6 +1814,7 @@ end
         tInitInput(iOffset).bFlipAntPost   = false;
         tInitInput(iOffset).bFlipHeadFeet  = false;
         tInitInput(iOffset).bDoseKernel    = false;
+        tInitInput(iOffset).bMathApplied   = false;
         tInitInput(iOffset).bFusedDoseKernel    = false;
         tInitInput(iOffset).bFusedEdgeDetection = false;
 
@@ -1849,7 +1850,7 @@ end
         initDisplay(3);
 
         initWindowLevel('set', true);
-        quantificationTemplate('set', tInitInput(iOffset).tQuant);
+%        quantificationTemplate('set', tInitInput(iOffset).tQuant);
 
         dicomViewerCore();
 

@@ -85,6 +85,8 @@ function tRoiComputed = computeRoi(imInput, imRoi, atRoiMetaData, tSliceMeta, pt
         if isfield(tSliceMeta.RealWorldValueMappingSequence.Item_1, 'MeasurementUnitsCodeSequence')
             if strcmpi(tSliceMeta.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue, 'Bq/ml')
                 sUnits = 'BQML';
+            else
+                sUnits = tSliceMeta.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue;
             end
         else
             sUnits = tSliceMeta.Units;            

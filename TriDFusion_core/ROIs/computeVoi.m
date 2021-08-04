@@ -197,6 +197,8 @@ function [tVoiComputed, tVoiMask] = computeVoi(imInput, imRoi, atVoiMetaData, pt
             if isfield(atVoiMetaData{1}.RealWorldValueMappingSequence.Item_1, 'MeasurementUnitsCodeSequence')
                 if strcmpi(atVoiMetaData{1}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue, 'Bq/ml')
                     sUnits = 'BQML';
+                else
+                    sUnits = tSliceMeta.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue;                                   
                 end
             else
                 sUnits = atVoiMetaData{1}.Units;            

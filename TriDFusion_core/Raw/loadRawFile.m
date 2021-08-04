@@ -91,6 +91,7 @@ function loadRawFile( sPathName, sFileName, dimX, dimY)
         tInput(numel(tInput)).bFlipAntPost   = false;
         tInput(numel(tInput)).bFlipHeadFeet  = false;
         tInput(numel(tInput)).bDoseKernel    = false;
+        tInput(numel(tInput)).bMathApplied   = false;
         tInput(numel(tInput)).bFusedDoseKernel    = false;
         tInput(numel(tInput)).bFusedEdgeDetection = false;
     
@@ -114,6 +115,7 @@ function loadRawFile( sPathName, sFileName, dimX, dimY)
         tInput(1).bFlipAntPost   = false;
         tInput(1).bFlipHeadFeet  = false;
         tInput(1).bDoseKernel    = false;
+        tInput(1).bMathApplied   = false;
         tInput(1).bFusedDoseKernel    = false;
         tInput(1).bFusedEdgeDetection = false;
         

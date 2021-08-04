@@ -65,6 +65,14 @@ function writeDICOM(sOutDir, iSeriesOffset)
                    isfield(tMetaData{slice}, 'RescaleSlope')     
                     if tMetaData{slice}.RescaleSlope ~= 0
                         aBuffer(:,:,slice) = (aBuffer(:,:,slice) / tMetaData{slice}.RescaleSlope) - tMetaData{slice}.RescaleIntercept;
+                    else
+                        if isfield(tMetaData{slice}, 'RealWorldValueMappingSequence') % SUV Spect
+                            if tMetaData{slice}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
+                                fSlope = tMetaData{slice}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
+                                fIntercept = tMetaData{slice}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
+                                aBuffer(:,:,slice) = (aBuffer(:,:,slice) / fSlope) - fIntercept;
+                            end                        
+                        end                           
                     end
                 end                            
             else
@@ -72,6 +80,14 @@ function writeDICOM(sOutDir, iSeriesOffset)
                    isfield(tMetaData{1}, 'RescaleSlope')     
                     if tMetaData{1}.RescaleSlope ~= 0
                         aBuffer(:,:,slice) = (aBuffer(:,:,slice) / tMetaData{1}.RescaleSlope) - tMetaData{1}.RescaleIntercept;
+                    else                        
+                        if isfield(tMetaData{1}, 'RealWorldValueMappingSequence') % SUV Spect
+                            if tMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
+                                fSlope =  tMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
+                                fIntercept = tMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
+                                aBuffer(:,:,slice) = (aBuffer(:,:,slice) / fSlope) - fIntercept;
+                            end                        
+                        end                                                 
                     end
                 end                  
             end
@@ -82,8 +98,17 @@ function writeDICOM(sOutDir, iSeriesOffset)
            isfield(tMetaData{1}, 'RescaleSlope') 
             if tMetaData{1}.RescaleSlope ~= 0
                 aBuffer = (aBuffer / tMetaData{1}.RescaleSlope) - tMetaData{1}.RescaleIntercept;
+            else
+                if isfield(tMetaData{1}, 'RealWorldValueMappingSequence') % SUV Spect
+                    if tMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
+                        fSlope = tMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
+                        fIntercept = tMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
+                        aBuffer = (aBuffer / fSlope) - fIntercept;
+                    end                        
+                end                
             end
-        end
+        end               
+        
         array4d = aBuffer;
     end
     
@@ -178,21 +203,58 @@ function writeDICOM(sOutDir, iSeriesOffset)
         sWriteFile = sprintf('%s.%d', tWriteMetaData{ww}.SeriesInstanceUID, ww);                                             
         sOutFile = sprintf('%s%s',sWriteDir, sWriteFile);
 
-        try        
+        try      
+            tWriteMetaData{ww}.BitsAllocated = 16;
+            tWriteMetaData{ww}.BitsStored = 16;
+            tWriteMetaData{ww}.HighBit = 15;
+
+            if tWriteTemplate(iSeriesOffset).bMathApplied == true
+                
+                if strcmpi(tWriteMetaData{ww}.Modality, 'NM')
+                    if numel(tWriteMetaData) == 1                    
+
+                        dTrueMin = min(array4d, [],'all');
+                        dTrueMax = max(array4d, [],'all');
+                        dTrueRange = dTrueMax-dTrueMin;
+                        fSlope = dTrueRange/65535;
+
+                        array4d = array4d.*inv(fSlope);
+                    else
+                        dTrueMin = min(array4d(:,:,:,ww), [],'all');
+                        dTrueMax = max(array4d(:,:,:,ww), [],'all');
+                        dTrueRange = dTrueMax-dTrueMin;
+                        fSlope = dTrueRange/65535;
+
+                        array4d(:,:,:,ww) = array4d(:,:,:,ww).*inv(fSlope);
+                    end    
+
+                    tWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.RealWorldValueLastValueMapped = 65535; 
+                    tWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.RealWorldValueFirstValueMapped = 0;
+                    tWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept = 0;  
+                    tWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope = fSlope; 
+
+                    tWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue = '{counts}';
+                    tWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodingSchemeDesignator  = 'UCUM';
+                    tWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeMeaning =  'Counts';                    
+                end
+            end
+                
             if numel(tWriteMetaData) == 1    
-                dicomwrite(int16(array4d(:,:,:,:))  , ...
+                
+                dicomwrite(uint16(array4d) , ...
                            sOutFile          , ...
                            tWriteMetaData{ww}, ...
                            'CreateMode'      , ...
-                           'copy'            , ...
+                           'Copy'            , ...
                            'WritePrivate'    , true ...
                            ); 
-            else           
-                dicomwrite(int16(array4d(:,:,:,ww)) , ...
+            else       
+                
+                dicomwrite(uint16(array4d(:,:,:,ww)) , ...
                            sOutFile          , ...
                            tWriteMetaData{ww}, ...
                            'CreateMode'      , ...
-                           'copy'            , ...
+                           'Copy'          , ...
                            'WritePrivate'    , true ...
                            );                            
             end
