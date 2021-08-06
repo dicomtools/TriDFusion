@@ -1668,7 +1668,7 @@ end
             tInput(numel(tInput)).atDicomInfo = atDcmMetaData;
 
             asSeriesDescription = seriesDescription('get');
-            asSeriesDescription{numel(asSeriesDescription)+1}=sprintf('MASK-%s', asSeriesDescription{iSeriesOffset});
+            asSeriesDescription{numel(asSeriesDescription)+1}=sprintf('MASK %s', asSeriesDescription{iSeriesOffset});
             seriesDescription('set', asSeriesDescription);
 
             for jj=1:numel(tInput(numel(tInput)).atDicomInfo)

@@ -26,7 +26,10 @@ function moveFusedImage(bInitCoordinate, bRestoreXYData)
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-        
+ 
+    persistent pInitImAxeFXData;       
+    persistent pInitImAxeFYData;  
+    
     persistent pInitImCoronalFXData;       
     persistent pInitImCoronalFYData;  
     
@@ -42,6 +45,33 @@ function moveFusedImage(bInitCoordinate, bRestoreXYData)
     clickedAxe = gca;
           
     if size(fusionBuffer('get'), 3) == 1 
+        
+        imAxeF = imAxeFPtr('get');
+        
+        if bInitCoordinate == true
+            
+            clickedPt = get(clickedAxe, 'CurrentPoint');
+            
+            paInitClickedPtX = clickedPt(1,1);
+            paInitClickedPtY = clickedPt(1,2);
+                    
+            pInitImAxeFXData =  get(imAxeF,'XData');       
+            pInitImAxeFYData =  get(imAxeF,'YData');                        
+
+        else
+            clickedPt = get(clickedAxe,'CurrentPoint');
+            
+            aClickedPtX = clickedPt(1,1);
+            aClickedPtY = clickedPt(1,2);  
+
+            aDiffClickedPtX = aClickedPtX-paInitClickedPtX;
+            aDiffClickedPtY = aClickedPtY-paInitClickedPtY;      
+
+            imAxeF.XData = [pInitImAxeFXData(1)+aDiffClickedPtX pInitImAxeFXData(2)+aDiffClickedPtX];
+            imAxeF.YData = [pInitImAxeFYData(1)+aDiffClickedPtY pInitImAxeFYData(2)+aDiffClickedPtY];
+
+            fusedImageMovementValues('set', true, clickedAxe, [-aDiffClickedPtX -aDiffClickedPtY]);            
+        end
     else
         imCoronalF  = imCoronalFPtr ('get'); 
         imSagittalF = imSagittalFPtr('get'); 

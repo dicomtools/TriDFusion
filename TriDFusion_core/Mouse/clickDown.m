@@ -87,7 +87,15 @@ function clickDown(hObject, ~)
                switchToMIPMode('get')    == false
 
                 windowButton('set', 'down');
-
+                if isMoveImageActivated('get') == true
+                    
+                    set(fiMainWindowPtr('get'), 'Pointer', 'fleur');
+     
+                    moveFusedImage(true, false);
+                else
+                    triangulateImages();
+                end
+                
                 clickedPt = get(gca, 'CurrentPoint');
 
                 clickedPtX = round(clickedPt(1  ));

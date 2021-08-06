@@ -32,6 +32,29 @@ function rotateFusedImage(bInitCoordinate)
     clickedAxe = gca;
        
     if size(fusionBuffer('get'), 3) == 1 
+        
+        imAxeF = imAxeFPtr('get');
+        
+        if bInitCoordinate == true
+            
+            clickedPt = get(clickedAxe, 'CurrentPoint');
+            
+            paInitClickedPtX = clickedPt(1,1);                                        
+
+        else
+            clickedPt = get(clickedAxe,'CurrentPoint');
+            
+            aClickedPtX = clickedPt(1,1);
+
+            aDiffClickedPtX = aClickedPtX-paInitClickedPtX;            
+        
+            FF = fusionBuffer('get');
+            
+            imAxeF.CData = imrotate(FF(:,:), aDiffClickedPtX, 'nearest', 'crop');             
+            
+            fusedImageRotationValues('set', true, clickedAxe, aDiffClickedPtX);                       
+            
+        end        
     else
         imCoronalF  = imCoronalFPtr ('get'); 
         imSagittalF = imSagittalFPtr('get'); 
@@ -58,13 +81,13 @@ function rotateFusedImage(bInitCoordinate)
                     
             switch clickedAxe
                 case axes1Ptr('get')        
-                    imCoronalF.CData = imrotate(permute(FF(iCoronal,:,:), [3 2 1]), aDiffClickedPtX, 'bilinear', 'crop');  
+                    imCoronalF.CData = imrotate(permute(FF(iCoronal,:,:), [3 2 1]), aDiffClickedPtX, 'nearest', 'crop');  
    
                 case axes2Ptr('get')   
-                    imSagittalF.CData = imrotate(permute(FF(:,iSagittal,:), [3 1 2]), aDiffClickedPtX, 'bilinear', 'crop');  
+                    imSagittalF.CData = imrotate(permute(FF(:,iSagittal,:), [3 1 2]), aDiffClickedPtX, 'nearest', 'crop');  
                     
                 case axes3Ptr('get')        
-                    imAxialF.CData = imrotate(FF(:,:,iAxial), aDiffClickedPtX, 'bilinear', 'crop');             
+                    imAxialF.CData = imrotate(FF(:,:,iAxial), aDiffClickedPtX, 'nearest', 'crop');             
                 otherwise
                     fusedImageRotationValues('set', false);                       
                     return;

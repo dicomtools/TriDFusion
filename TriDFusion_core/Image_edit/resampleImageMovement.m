@@ -31,7 +31,7 @@ function aResampledImage = resampleImageMovement(aImage, aAxe, aPosition)
     yMoveOffset = aPosition(2);
         
     if size(aImage, 3) == 1 
-        aResampledImage = imtranslate(aImage,[-xMoveOffset,-yMoveOffset], 'nearest', 'OutputView', 'Same', 'FillValues', min(aImage, [], 'all'));    
+        aResampledImage = imtranslate(aImage,[-xMoveOffset,-yMoveOffset], 'nearest', 'OutputView', 'same', 'FillValues', min(aImage, [], 'all'));    
     else        
         
         switch aAxe
@@ -50,7 +50,6 @@ function aResampledImage = resampleImageMovement(aImage, aAxe, aPosition)
                 return;
         end
                 
-    end
-    
+    end    
     
 end

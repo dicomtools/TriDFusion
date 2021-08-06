@@ -28,6 +28,7 @@ function aResampledImage = resampleImageRotation(aImage, aAxe, dRotation)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     if size(aImage, 3) == 1 
+        aResampledImage = imrotate(aImage(:,:), dRotation, 'nearest','crop');
     else
         switch aAxe
             case axes1Ptr('get') % Coronal    
