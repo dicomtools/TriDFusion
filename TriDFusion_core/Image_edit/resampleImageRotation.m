@@ -32,15 +32,15 @@ function aResampledImage = resampleImageRotation(aImage, aAxe, dRotation)
         switch aAxe
             case axes1Ptr('get') % Coronal    
 
-                aResampledImage = imrotate3(aImage, dRotation,[0 -1 0], 'linear','crop', 'FillValues', min(aImage, [], 'all'));
+                aResampledImage = imrotate3(aImage, dRotation,[0 -1 0], 'nearest','crop', 'FillValues', min(aImage, [], 'all'));
 
             case axes2Ptr('get') % Sagittal  
 
-                aResampledImage = imrotate3(aImage, dRotation,[1 0 0], 'linear','crop', 'FillValues', min(aImage, [], 'all'));
+                aResampledImage = imrotate3(aImage, dRotation,[1 0 0], 'nearest','crop', 'FillValues', min(aImage, [], 'all'));
 
             case axes3Ptr('get') % Axial       
 
-                aResampledImage = imrotate3(aImage, dRotation,[0 0 1], 'linear','crop', 'FillValues', min(aImage, [], 'all')); 
+                aResampledImage = imrotate3(aImage, dRotation,[0 0 1], 'nearest','crop', 'FillValues', min(aImage, [], 'all')); 
 
             otherwise
                 aResampledImage = [];

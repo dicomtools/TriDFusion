@@ -31,19 +31,19 @@ function aResampledImage = resampleImageMovement(aImage, aAxe, aPosition)
     yMoveOffset = aPosition(2);
         
     if size(aImage, 3) == 1 
-        aResampledImage = imtranslate(aImage,[-xMoveOffset,-yMoveOffset], 'OutputView', 'Same', 'FillValues', min(aImage, [], 'all'));    
+        aResampledImage = imtranslate(aImage,[-xMoveOffset,-yMoveOffset], 'nearest', 'OutputView', 'Same', 'FillValues', min(aImage, [], 'all'));    
     else        
         
         switch aAxe
             case axes1Ptr('get') % Coronal    
-                aResampledImage = imtranslate(aImage,[-xMoveOffset,0,-yMoveOffset], 'OutputView', 'same', 'FillValues', min(aImage, [], 'all'));    
+                aResampledImage = imtranslate(aImage,[-xMoveOffset,0,-yMoveOffset], 'nearest', 'OutputView', 'same', 'FillValues', min(aImage, [], 'all'));    
 
             case axes2Ptr('get') % Sagittal  
-                aResampledImage = imtranslate(aImage,[0,-xMoveOffset,-yMoveOffset], 'OutputView', 'same', 'FillValues', min(aImage, [], 'all'));    
+                aResampledImage = imtranslate(aImage,[0,-xMoveOffset,-yMoveOffset], 'nearest', 'OutputView', 'same', 'FillValues', min(aImage, [], 'all'));    
 
             case axes3Ptr('get') % Axial                  
     
-                aResampledImage = imtranslate(aImage,[-xMoveOffset,-yMoveOffset,0], 'OutputView', 'same', 'FillValues', min(aImage, [], 'all'));    
+                aResampledImage = imtranslate(aImage,[-xMoveOffset,-yMoveOffset,0], 'nearest', 'OutputView', 'same', 'FillValues', min(aImage, [], 'all') );    
 
             otherwise
                 aResampledImage = [];
@@ -51,4 +51,6 @@ function aResampledImage = resampleImageMovement(aImage, aAxe, aPosition)
         end
                 
     end
+    
+    
 end
