@@ -13,9 +13,9 @@
 * 3D isosurface base model 3D mask DICOM image
 * 3D Multi-Fusion of Volume Rendering, ISO surface and MIP
 
-
-See https://daniellafontaine.com/ for more information
-
 ## Optional:
 
 * https://github.com/cerr/CERR
+
+See https://daniellafontaine.com/ for more information
+
