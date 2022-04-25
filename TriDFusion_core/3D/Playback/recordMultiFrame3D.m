@@ -139,7 +139,7 @@ function recordMultiFrame3D(mRecord, sPath, sFileName, sExtention)
             idxOffset =1;
         end
 
-        I = getframe(axePtr('get'));
+        I = getframe(axePtr('get', [], get(uiSeriesPtr('get'), 'Value') ));
         [indI,cm] = rgb2ind(I.cdata, 256);
 
         if idx == 1

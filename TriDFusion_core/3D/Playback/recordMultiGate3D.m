@@ -119,7 +119,9 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
     set(btnMIPPtr('get')       , 'Enable', 'off');
 
     if isFusion('get') == true
-        set(btnFusionPtr('get'), 'Enable', 'off');
+        set(btnFusionPtr ('get')   , 'Enable', 'off');
+        set(btnLinkMipPtr('get')   , 'Enable', 'off');
+        set(uiFusedSeriesPtr('get'), 'Enable', 'off');
     end
 
     set(uiOneWindowPtr('get'), 'Visible', 'off');
@@ -246,7 +248,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
             dicomMetaData('set', atCoreMetaData);
         end
 
-        aBuffer = dicomBuffer('get');
+        aBuffer = squeeze(dicomBuffer('get'));
         if isempty(aBuffer)
             if     strcmp(imageOrientation('get'), 'axial')
                 aBuffer = permute(aInput{iOffset}, [1 2 3]);
@@ -270,7 +272,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
                     mipObj{tt} = initVolShow(aBuffer, ui3DWindow{tt}, 'MaximumIntensityProjection', atCoreMetaData);
                     if isFusion('get') == true
                         if isempty(mipGateFusionObj)
-                            mipFusionObj{tt} = initVolShow(fusionBuffer('get'), ui3DWindow{tt}, 'MaximumIntensityProjection', atFuseMetaData);
+                            mipFusionObj{tt} = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), ui3DWindow{tt}, 'MaximumIntensityProjection', atFuseMetaData);
                         end
                     end
                 end
@@ -285,7 +287,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
                     isoObj{tt} = initVolShow(aBuffer, ui3DWindow{tt}, 'Isosurface', atCoreMetaData);
                     if isFusion('get') == true
                         if isempty(isoGateFusionObj)
-                            isoFusionObj{tt} = initVolShow(fusionBuffer('get'), ui3DWindow{tt}, 'Isosurface', atFuseMetaData);
+                            isoFusionObj{tt} = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), ui3DWindow{tt}, 'Isosurface', atFuseMetaData);
                         end
                     end
                 end
@@ -299,7 +301,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
                     volObj{tt} = initVolShow(aBuffer, ui3DWindow{tt}, 'VolumeRendering', atCoreMetaData);
                     if isFusion('get') == true
                         if isempty(volGateFusionObj)
-                            volFusionObj{tt} = initVolShow(fusionBuffer('get'), ui3DWindow{tt}, 'VolumeRendering', atFuseMetaData);
+                            volFusionObj{tt} = initVolShow(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ui3DWindow{tt}, 'VolumeRendering', atFuseMetaData);
                         end
                     end
                 end
@@ -309,7 +311,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
 
         if isempty(voiGateObj)
             if isfield(tInput(iOffset), 'tVoi')
-%                voiTemplate('set', tInput(iOffset).tVoi);             
+%                voiTemplate('set', tInput(iOffset).tVoi);
                 voiGate{iOffset} = initVoiIsoSurface(ui3DWindow{tt});
             else
                 voiGate{iOffset} = '';
@@ -577,11 +579,18 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
     progressBar(1, 'Ready');
 
     for tt=1:iNbSeries
+        
        if ~multiFrame3DRecord('get')
             break;
        end
 
+       if isempty( axePtr('get', [], tt) )
+           axe = axePtr('get', [], iSeriesOffset);
+           axePtr('set', axe, tt);
+       end
+              
        set(uiSeriesPtr('get'), 'Value', tt);
+       
        atCoreMetaData = dicomMetaData('get');
        if isempty(atCoreMetaData)
            atCoreMetaData = tInput(iOffset).atDicomInfo;
@@ -590,7 +599,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
 
         set(ui3DWindow{tt}, 'Visible', 'on');
 
-        I = getframe(axePtr('get'));
+        I = getframe(axePtr('get', [], tt ));
         [indI,cm] = rgb2ind(I.cdata, 256);
         if tt == 1
 
@@ -801,7 +810,9 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
     set(btnMIPPtr('get')       , 'Enable', 'on');
 
     if isFusion('get') == true
-        set(btnFusionPtr('get'), 'Enable', 'on');
+        set(btnFusionPtr ('get')   , 'Enable', 'on');
+        set(btnLinkMipPtr('get')   , 'Enable', 'on');
+        set(uiFusedSeriesPtr('get'), 'Enable', 'on');
     end
 
     if strcmpi('*.gif', sExtention)

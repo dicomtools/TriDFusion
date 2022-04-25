@@ -1,5 +1,5 @@
-function atRoi = roiTemplate(sAction, tValue)
-%function atRoi = roiTemplate(sAction, tValue)
+function atRoi = roiTemplate(sAction, iOffset, tValue)
+%function atRoi = roiTemplate(sAction, iOffset, tValue)
 %Get\Set ROI Template.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -30,28 +30,23 @@ function atRoi = roiTemplate(sAction, tValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent patRoi; 
-          
-    uiSeries = uiSeriesPtr('get');
-    
-    if ~isempty(uiSeries)
-        iOffset = get(uiSeries, 'Value');
-    else
-        iOffset = 1;
-    end
+    persistent patRoi;           
 
     if strcmpi('set', sAction)
         patRoi{iOffset} = tValue; 
     elseif strcmpi('reset', sAction)    
-        for aa=1:numel(patRoi)
-            patRoi{aa} = [];
+        if exist('iOffset', 'var') % Clear one series
+            patRoi{iOffset} = [];
+        else    
+            for aa=1:numel(patRoi)
+                patRoi{aa} = [];
+            end
         end
-    end
-
-    if numel(patRoi) < iOffset
-        atRoi = '';
     else
-        atRoi = patRoi{iOffset};
-    end      
-    
+        if numel(patRoi) < iOffset
+            atRoi = '';
+        else
+            atRoi = patRoi{iOffset};
+        end      
+    end
 end  

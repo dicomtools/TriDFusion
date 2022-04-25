@@ -31,7 +31,7 @@ function setIsoSurfaceCallback(~, ~)
        size(dicomBuffer('get'), 3) ~= 1
         try
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-        drawnow;            
+        drawnow;
 %             releaseRoiAxeWait();
         releaseRoiWait();
 
@@ -54,13 +54,13 @@ function setIsoSurfaceCallback(~, ~)
         set(uiEditVsplahYPtr('get'), 'Enable', 'off');
 
         set(btnRegisterPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-        set(btnRegisterPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));        
+        set(btnRegisterPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
         set(btnRegisterPtr('get'), 'Enable', 'off');
-        
+
         set(btnMathPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-        set(btnMathPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));        
+        set(btnMathPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
         set(btnMathPtr('get'), 'Enable', 'off');
-        
+
    %     set(rotate3DMenu('get'), 'Checked', 'off');
         rotate3DTool('set', false);
         rotate3d('off');
@@ -97,12 +97,12 @@ function setIsoSurfaceCallback(~, ~)
         if ~isempty(mOptions)
             mOptions.Enable = 'off';
         end
-        
+
         uiSegMainPanel = uiSegMainPanelPtr('get');
         if ~isempty(uiSegMainPanel)
             set(uiSegMainPanel, 'Visible', 'off');
         end
-        
+
         viewSegPanel('set', false);
         objSegPanel = viewSegPanelMenuObject('get');
         if ~isempty(objSegPanel)
@@ -119,7 +119,7 @@ function setIsoSurfaceCallback(~, ~)
         if ~isempty(objKernelPanel)
             objKernelPanel.Checked = 'off';
         end
-        
+
         uiRoiMainPanel = uiRoiMainPanelPtr('get');
         if ~isempty(uiRoiMainPanel)
             set(uiRoiMainPanel, 'Visible', 'off');
@@ -130,15 +130,15 @@ function setIsoSurfaceCallback(~, ~)
         if ~isempty(objRoiPanel)
             objRoiPanel.Checked = 'off';
         end
-        
+
         if switchToIsoSurface('get') == true
 
             switchToIsoSurface('set', false);
 
             set(btnIsoSurfacePtr('get'), 'Enable', 'on');
             set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-            set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));  
-        
+            set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+
             if switchTo3DMode('get')  == false && ...
                switchToMIPMode('get') == false
 
@@ -170,16 +170,17 @@ function setIsoSurfaceCallback(~, ~)
                 set(uiSeriesPtr('get'), 'Enable', 'on');
 
 %                if numel(seriesDescription('get')) > 1
-                    set(btnFusionPtr('get')    , 'Enable', 'on');
-                    set(uiFusedSeriesPtr('get'), 'Enable', 'on');
+                     set(btnFusionPtr('get')    , 'Enable', 'on');
+                     set(btnLinkMipPtr('get')   , 'Enable', 'on');
+                     set(uiFusedSeriesPtr('get'), 'Enable', 'on');
 %                end
 
-                set(btnTriangulatePtr('get'), 'Enable', 'on');  
+                set(btnTriangulatePtr('get'), 'Enable', 'on');
                 set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
                 set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-            
+
                 set(btnZoomPtr('get')    , 'Enable', 'on');
-                set(btnPanPtr('get')     , 'Enable', 'on');                
+                set(btnPanPtr('get')     , 'Enable', 'on');
                 if numel(inputTemplate('get')) >1
                     set(btnRegisterPtr('get'), 'Enable', 'on');
                 end
@@ -191,12 +192,12 @@ function setIsoSurfaceCallback(~, ~)
 
                 set(btn3DPtr('get'), 'Enable', 'on');
                 set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-                set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
+                set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
                 set(btnMIPPtr('get'), 'Enable', 'on');
                 set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-                set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
-                
+                set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+
                 mOptions = optionsPanelMenuObject('get');
                 if ~isempty(mOptions)
                     mOptions.Enable = 'on';
@@ -340,20 +341,34 @@ function setIsoSurfaceCallback(~, ~)
                 clearDisplay();
                 initDisplay(3);
 
+%                link2DMip('set', true);
+
+%                set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+%                set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get')); 
+                
                 dicomViewerCore();
+                
+                atMetaData = dicomMetaData('get');
 
                 if isFusion('get')
                     tFuseInput    = inputTemplate('get');
                     iFuseOffset   = get(uiFusedSeriesPtr('get'), 'Value');
                     tFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
 
-                    setViewerDefaultColor(true, dicomMetaData('get'), tFuseMetaData);
+                    setViewerDefaultColor(true, atMetaData, tFuseMetaData);
                 else
-                    setViewerDefaultColor(true, dicomMetaData('get'));
+                    setViewerDefaultColor(true, atMetaData);
                 end
 
                 refreshImages();
+                
+%                if strcmpi(atMetaData{1}.Modality, 'ct')
+%                    link2DMip('set', false);
 
+%                    set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+%                    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));         
+%                end 
+                
                 setRoiToolbar('on');
 
 %                       robotClick();
@@ -361,9 +376,24 @@ function setIsoSurfaceCallback(~, ~)
             else
                 isoObj = isoObject('get');
                 isoObj.Isovalue = 1;
-                isoObject('set', isoObj);
-
-                set(ui3DCreateIsoMaskPtr('get'), 'Enable', 'off');
+                isoObject('set', isoObj);                
+                            
+                set(ui3DCreateIsoMaskPtr       ('get'), 'Enable', 'off');                 
+                set(txtAddVoiIsoMaskPtr        ('get'), 'Enable', 'On' );
+                set(chkPixelEdgeIsoMaskPtr     ('get'), 'Enable', 'off');
+                set(txtPixelEdgeIsoMaskPtr     ('get'), 'Enable', 'on' );                   
+                set(chkAddVoiIsoMaskPtr        ('get'), 'Enable', 'off');
+                set(chkPercentOfPeakIsoMaskPtr ('get'), 'Enable', 'off');
+                set(txtPercentOfPeakIsoMaskPtr ('get'), 'Enable', 'on' );
+                set(uiEditAddVoiIsoMaskPtr     ('get'), 'Enable', 'off');
+                set(chkMultiplePeaksIsoMaskPtr ('get'), 'Enable', 'off'); 
+                set(txtMultiplePeaksIsoMaskPtr ('get'), 'Enable', 'on' );                     
+                set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'off');  
+                set(uiEditSmalestIsoMaskPtr    ('get'), 'Enable', 'off');                 
+                set(txtResampleToCTIsoMaskPtr  ('get'), 'Enable', 'On' );
+                set(chkResampleToCTIsoMaskPtr  ('get'), 'Enable', 'off');
+                set(uiResampleToCTIsoMaskPtr   ('get'), 'Enable', 'off');
+                set(uiEditSmalestIsoMaskPtr    ('get'), 'Enable', 'off');
 
                 isoFusionObj = isoFusionObject('get');
                 if ~isempty(isoFusionObj)
@@ -378,38 +408,105 @@ function setIsoSurfaceCallback(~, ~)
             set(btnIsoSurfacePtr('get'), 'Enable', 'on');
             set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-            
+
             set(uiSeriesPtr('get'), 'Enable', 'off');
 
+            set(btnLinkMipPtr('get')   , 'Enable', 'off');
             set(uiFusedSeriesPtr('get'), 'Enable', 'off');
 
             set(btnTriangulatePtr('get'), 'Enable', 'off');
             set(btnTriangulatePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-            set(btnTriangulatePtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
+            set(btnTriangulatePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
             if switchTo3DMode('get')  == false && ...
                switchToMIPMode('get') == false
 
                 if isFusion('get') == false
-                    set(btnFusionPtr('get'), 'Enable', 'off');
+                    set(btnFusionPtr('get')    , 'Enable', 'off');
                 end
 
                 surface3DPriority('set', 'Isosurface', 1);
+                
+                isPlotContours('set', false);
 
                 clearDisplay();
                 initDisplay(1);
 
                 setViewerDefaultColor(false, dicomMetaData('get'));
 
-                isoObj = initVolShow(dicomBuffer('get'), uiOneWindowPtr('get'), 'Isosurface');
+                isoObj = initVolShow(squeeze(dicomBuffer('get')), uiOneWindowPtr('get'), 'Isosurface');
                 set(isoObj, 'InteractionsEnabled', true);
 
                 isoObject('set', isoObj);
 
-                set(ui3DCreateIsoMaskPtr('get'), 'Enable', 'on');
+                set(ui3DCreateIsoMaskPtr       ('get'), 'Enable', 'on');
+                set(txtAddVoiIsoMaskPtr        ('get'), 'Enable', 'Inactive');
+                set(chkAddVoiIsoMaskPtr        ('get'), 'Enable', 'on');
+                
+                if addVoiIsoMask('get') == true                    
+                                
+                    set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'on');
+                    
+                    set(chkPixelEdgeIsoMaskPtr('get'), 'Enable', 'on');
+                    set(txtPixelEdgeIsoMaskPtr('get'), 'Enable', 'Inactive' );                     
+                    
+                    sUnitDisplay = getSerieUnitValue( get(uiSeriesPtr('get'), 'Value'));                    
+                    if ~strcmpi(sUnitDisplay, 'SUV')
+                        percentOfPeakIsoMask('set', true);
+                        set(chkPercentOfPeakIsoMaskPtr('get'), 'Enable', 'off');
+                        set(txtPercentOfPeakIsoMaskPtr('get'), 'Enable', 'on');
+                    else
+                        set(chkPercentOfPeakIsoMaskPtr('get'), 'Enable', 'on');
+                        set(txtPercentOfPeakIsoMaskPtr('get'), 'Enable', 'Inactive');                        
+                    end  
+                    
+                    if percentOfPeakIsoMask('get') == true
+                        set(uiEditAddVoiIsoMaskPtr('get')    , 'String', num2str(voiIsoMaskMax('get')));      
+                        set(txtPercentOfPeakIsoMaskPtr('get'), 'String', 'Percent of Peak'); 
+                        
+                        set(chkMultiplePeaksIsoMaskPtr('get'), 'Enable', 'on'); 
+                        set(txtMultiplePeaksIsoMaskPtr('get'), 'Enable', 'Inactive');
+                            
+                        if multiplePeaksIsoMask('get') == true 
+                            set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'on');             
+                        else
+                            set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'off');             
+                        end
+                        
+                    else
+                        set(uiEditAddVoiIsoMaskPtr('get')    , 'String', num2str(peakSUVMaxIsoMask('get')));      
+                        set(txtPercentOfPeakIsoMaskPtr('get'), 'String', 'Min SUV Value');     
+                        
+                        set(chkMultiplePeaksIsoMaskPtr('get'), 'Enable', 'off'); 
+                        set(txtMultiplePeaksIsoMaskPtr('get'), 'Enable', 'on'); 
+                        set(uiEditPeakPercentIsoMaskPtr        ('get'), 'Enable', 'off');                                     
+                    end                 
 
+                    set(uiEditSmalestIsoMaskPtr('get'), 'Enable', 'on');
+                else
+                    set(chkPixelEdgeIsoMaskPtr     ('get'), 'Enable', 'off');
+                    set(txtPixelEdgeIsoMaskPtr     ('get'), 'Enable', 'on' );                       
+                    set(chkPercentOfPeakIsoMaskPtr ('get'), 'Enable', 'off');
+                    set(txtPercentOfPeakIsoMaskPtr ('get'), 'Enable', 'on' );
+                    set(uiEditAddVoiIsoMaskPtr     ('get'), 'Enable', 'off');
+                    set(chkMultiplePeaksIsoMaskPtr ('get'), 'Enable', 'off'); 
+                    set(txtMultiplePeaksIsoMaskPtr ('get'), 'Enable', 'on' );                     
+                    set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'off');  
+                    set(uiEditSmalestIsoMaskPtr    ('get'), 'Enable', 'off');            
+                end                
+    
+                tResampleToCT = resampleToCTIsoMaskUiValues('get');
+                if ~isempty(tResampleToCT)       
+                    set(txtResampleToCTIsoMaskPtr('get'), 'Enable', 'Inactive');
+                    
+                    set(chkResampleToCTIsoMaskPtr('get'), 'Enable', 'on');
+                    set(uiResampleToCTIsoMaskPtr ('get'), 'Enable', 'on');
+                else
+                    set(txtResampleToCTIsoMaskPtr('get'), 'Enable', 'on');
+                end
+                
                 if isFusion('get')
-                    isoFusionObj = initVolShow(fusionBuffer('get'), uiOneWindowPtr('get'), 'Isosurface');
+                    isoFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'Isosurface');
                     set(isoFusionObj, 'InteractionsEnabled', false);
 
                     isoFusionObj.IsosurfaceColor  = surfaceColor('one', isoColorFusionOffset('get') );
@@ -437,6 +534,7 @@ function setIsoSurfaceCallback(~, ~)
 
             %    setPlaybackToolbar('on');
                 oneFrame3D();
+                flip3Dobject('right');                             
                 uiLogo = displayLogo(uiOneWindowPtr('get'));
                 logoObject('set', uiLogo);
             else
@@ -449,7 +547,73 @@ function setIsoSurfaceCallback(~, ~)
 
                     isoObject('set', isoObj);
                     if get(ui3DVolumePtr('get'), 'Value') == 1 % Not Fusion
-                        set(ui3DCreateIsoMaskPtr('get'), 'Enable', 'on');
+                        
+                        set(ui3DCreateIsoMaskPtr       ('get'), 'Enable', 'on');
+                        set(txtAddVoiIsoMaskPtr        ('get'), 'Enable', 'Inactive');
+                        set(chkAddVoiIsoMaskPtr        ('get'), 'Enable', 'on');
+                        
+                        if addVoiIsoMask('get') == true
+                            
+                            set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'on');
+                            
+                            set(chkPixelEdgeIsoMaskPtr('get'), 'Enable', 'on');
+                            set(txtPixelEdgeIsoMaskPtr('get'), 'Enable', 'Inactive' );   
+                    
+                            sUnitDisplay = getSerieUnitValue( get(uiSeriesPtr('get'), 'Value'));                    
+                            if ~strcmpi(sUnitDisplay, 'SUV')
+                                percentOfPeakIsoMask('set', true);
+                                set(chkPercentOfPeakIsoMaskPtr('get'), 'Enable', 'off');
+                                set(txtPercentOfPeakIsoMaskPtr('get'), 'Enable', 'on');
+                            else
+                                set(chkPercentOfPeakIsoMaskPtr('get'), 'Enable', 'on');
+                                set(txtPercentOfPeakIsoMaskPtr('get'), 'Enable', 'Inactive');                        
+                            end 
+
+                            if percentOfPeakIsoMask('get') == true
+                                set(uiEditAddVoiIsoMaskPtr('get')    , 'String', num2str(voiIsoMaskMax('get')));      
+                                set(txtPercentOfPeakIsoMaskPtr('get'), 'String', 'Percent of Peak'); 
+
+                                set(chkMultiplePeaksIsoMaskPtr('get'), 'Enable', 'on'); 
+                                set(txtMultiplePeaksIsoMaskPtr('get'), 'Enable', 'Inactive');
+
+                                if multiplePeaksIsoMask('get') == true 
+                                    set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'on');             
+                                else
+                                    set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'off');             
+                                end
+
+                            else
+                                set(uiEditAddVoiIsoMaskPtr('get')    , 'String', num2str(peakSUVMaxIsoMask('get')));      
+                                set(txtPercentOfPeakIsoMaskPtr('get'), 'String', 'Min SUV Value');     
+
+                                set(chkMultiplePeaksIsoMaskPtr('get'), 'Enable', 'off'); 
+                                set(txtMultiplePeaksIsoMaskPtr('get'), 'Enable', 'on'); 
+                                set(uiEditPeakPercentIsoMaskPtr        ('get'), 'Enable', 'off');                                     
+                            end                 
+
+                            set(uiEditSmalestIsoMaskPtr('get'), 'Enable', 'on');
+                        else
+                            set(chkPixelEdgeIsoMaskPtr     ('get'), 'Enable', 'off');
+                            set(txtPixelEdgeIsoMaskPtr     ('get'), 'Enable', 'on' );                               
+                            set(chkPercentOfPeakIsoMaskPtr ('get'), 'Enable', 'off');
+                            set(txtPercentOfPeakIsoMaskPtr ('get'), 'Enable', 'on' );
+                            set(uiEditAddVoiIsoMaskPtr     ('get'), 'Enable', 'off');
+                            set(chkMultiplePeaksIsoMaskPtr ('get'), 'Enable', 'off'); 
+                            set(txtMultiplePeaksIsoMaskPtr ('get'), 'Enable', 'on' );                     
+                            set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'off');  
+                            set(uiEditSmalestIsoMaskPtr    ('get'), 'Enable', 'off');            
+                        end 
+                
+                        tResampleToCT = resampleToCTIsoMaskUiValues('get');
+                        if ~isempty(tResampleToCT)                                 
+                            set(txtResampleToCTIsoMaskPtr('get'), 'Enable', 'Inactive');
+                            
+                            set(chkResampleToCTIsoMaskPtr('get'), 'Enable', 'on');
+                            set(uiResampleToCTIsoMaskPtr ('get'), 'Enable', 'on');
+                        else
+                            set(txtResampleToCTIsoMaskPtr('get'), 'Enable', 'on');
+                        end
+                
                     end
 
                     isoFusionObj = isoFusionObject('get');
@@ -469,15 +633,79 @@ function setIsoSurfaceCallback(~, ~)
                         surface3DPriority('set', 'Isosurface', 2);
                     end
 
-                    isoObj = initVolShow(dicomBuffer('get'), uiOneWindowPtr('get'), 'Isosurface');
+                    isoObj = initVolShow(squeeze(dicomBuffer('get')), uiOneWindowPtr('get'), 'Isosurface');
                     set(isoObj, 'InteractionsEnabled', false);
 
                     isoObject('set', isoObj);
 
-                    set(ui3DCreateIsoMaskPtr('get'), 'Enable', 'on');
+                    set(ui3DCreateIsoMaskPtr  ('get'), 'Enable', 'on');
+                    set(txtAddVoiIsoMaskPtr   ('get'), 'Enable', 'Inactive');
+                    set(chkAddVoiIsoMaskPtr   ('get'), 'Enable', 'on');
+                    
+                     if addVoiIsoMask('get') == true
+                         
+                        set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'on');
+                        
+                        set(chkPixelEdgeIsoMaskPtr('get'), 'Enable', 'on');
+                        set(txtPixelEdgeIsoMaskPtr('get'), 'Enable', 'Inactive' );   
+                    
+                        sUnitDisplay = getSerieUnitValue( get(uiSeriesPtr('get'), 'Value'));                    
+                        if ~strcmpi(sUnitDisplay, 'SUV')
+                            percentOfPeakIsoMask('set', true);
+                            set(chkPercentOfPeakIsoMaskPtr('get'), 'Enable', 'off');
+                            set(txtPercentOfPeakIsoMaskPtr('get'), 'Enable', 'on');
+                        else
+                            set(chkPercentOfPeakIsoMaskPtr('get'), 'Enable', 'on');
+                            set(txtPercentOfPeakIsoMaskPtr('get'), 'Enable', 'Inactive');                        
+                        end  
 
+                        if percentOfPeakIsoMask('get') == true
+                            set(uiEditAddVoiIsoMaskPtr('get')    , 'String', num2str(voiIsoMaskMax('get')));      
+                            set(txtPercentOfPeakIsoMaskPtr('get'), 'String', 'Percent of Peak'); 
+
+                            set(chkMultiplePeaksIsoMaskPtr('get'), 'Enable', 'on'); 
+                            set(txtMultiplePeaksIsoMaskPtr('get'), 'Enable', 'Inactive');
+
+                            if multiplePeaksIsoMask('get') == true 
+                                set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'on');             
+                            else
+                                set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'off');             
+                            end
+
+                        else
+                            set(uiEditAddVoiIsoMaskPtr('get')    , 'String', num2str(peakSUVMaxIsoMask('get')));      
+                            set(txtPercentOfPeakIsoMaskPtr('get'), 'String', 'Min SUV Value');     
+
+                            set(chkMultiplePeaksIsoMaskPtr('get'), 'Enable', 'off'); 
+                            set(txtMultiplePeaksIsoMaskPtr('get'), 'Enable', 'on'); 
+                            set(uiEditPeakPercentIsoMaskPtr        ('get'), 'Enable', 'off');                                     
+                        end                 
+
+                        set(uiEditSmalestIsoMaskPtr('get'), 'Enable', 'on');
+                     else
+                        set(chkPixelEdgeIsoMaskPtr     ('get'), 'Enable', 'off');
+                        set(txtPixelEdgeIsoMaskPtr     ('get'), 'Enable', 'on' );                           
+                        set(chkPercentOfPeakIsoMaskPtr ('get'), 'Enable', 'off');
+                        set(txtPercentOfPeakIsoMaskPtr ('get'), 'Enable', 'on' );
+                        set(uiEditAddVoiIsoMaskPtr     ('get'), 'Enable', 'off');
+                        set(chkMultiplePeaksIsoMaskPtr ('get'), 'Enable', 'off'); 
+                        set(txtMultiplePeaksIsoMaskPtr ('get'), 'Enable', 'on' );                     
+                        set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'off');  
+                        set(uiEditSmalestIsoMaskPtr    ('get'), 'Enable', 'off');            
+                    end 
+                
+                    tResampleToCT = resampleToCTIsoMaskUiValues('get');
+                    if ~isempty(tResampleToCT)                               
+                        set(txtResampleToCTIsoMaskPtr('get'), 'Enable', 'Inactive');
+                        
+                        set(chkResampleToCTIsoMaskPtr('get'), 'Enable', 'on');
+                        set(uiResampleToCTIsoMaskPtr ('get'), 'Enable', 'on');
+                    else
+                        set(txtResampleToCTIsoMaskPtr('get'), 'Enable', 'on');                        
+                    end
+                
                     if isFusion('get')
-                        isoFusionObj = initVolShow(fusionBuffer('get'), uiOneWindowPtr('get'), 'Isosurface');
+                        isoFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'Isosurface');
                         set(isoFusionObj, 'InteractionsEnabled', false);
 
                         isoFusionObj.IsosurfaceColor  = surfaceColor('one', isoColorFusionOffset('get') );
@@ -503,73 +731,73 @@ end
             end
 
         end
-        
+
         if switchToMIPMode('get') == false && ...
            (switchTo3DMode('get') == true || ...
-            switchToIsoSurface('get') == true)   
-        
+            switchToIsoSurface('get') == true)
+
             set(ui3DMipColormapPtr('get')      , 'Enable', 'off');
             set(ui3DMipAlphamapTypePtr('get')  , 'Enable', 'off');
-            set(ui3DSliderMipLinAlphaPtr('get'), 'Enable', 'off');           
-        end       
-        
+            set(ui3DSliderMipLinAlphaPtr('get'), 'Enable', 'off');
+        end
+
         if switchTo3DMode('get') == false && ...
            (switchToMIPMode('get') == true || ...
-            switchToIsoSurface('get') == true)   
-        
+            switchToIsoSurface('get') == true)
+
             set(ui3DVolColormapPtr('get')      , 'Enable', 'off');
             set(ui3DVolAlphamapTypePtr('get')  , 'Enable', 'off');
-            set(ui3DSliderVolLinAlphaPtr('get'), 'Enable', 'off');              
-        end  
-        
+            set(ui3DSliderVolLinAlphaPtr('get'), 'Enable', 'off');
+        end
+
         if switchToIsoSurface('get') == false && ...
            (switchToMIPMode('get') == true || ...
-            switchTo3DMode('get') == true)  
-        
+            switchTo3DMode('get') == true)
+
             isoObj = isoObject('get');
             set(isoObj, 'InteractionsEnabled', false);
-            isoObject('set', isoObj);             
-            
+            isoObject('set', isoObj);
+
             if switchTo3DMode('get') == true && ...
-               switchToMIPMode('get') == true   
+               switchToMIPMode('get') == true
                 if surface3DPriority('get', 'VolumeRendering') < ...
-                   surface3DPriority('get', 'MaximumIntensityProjection')    
-               
+                   surface3DPriority('get', 'MaximumIntensityProjection')
+
                     volObj = volObject('get');
                     set(volObj, 'InteractionsEnabled', true);
-                    volObject('set', volObj);               
-                    
+                    volObject('set', volObj);
+
                     mipObj = mipObject('get');
                     set(mipObj, 'InteractionsEnabled', false);
-                    mipObject('set', mipObj);                      
+                    mipObject('set', mipObj);
                 else
                     volObj = volObject('get');
                     set(volObj, 'InteractionsEnabled', false);
-                    volObject('set', volObj);               
-                    
+                    volObject('set', volObj);
+
                     mipObj = mipObject('get');
                     set(mipObj, 'InteractionsEnabled', true);
-                    mipObject('set', mipObj);                      
+                    mipObject('set', mipObj);
                 end
             else
                 if switchTo3DMode('get') == true
                     volObj = volObject('get');
                     set(volObj, 'InteractionsEnabled', true);
-                    volObject('set', volObj);   
+                    volObject('set', volObj);
                 end
-                
-                if switchToMIPMode('get') == true    
+
+                if switchToMIPMode('get') == true
                     mipObj = mipObject('get');
                     set(mipObj, 'InteractionsEnabled', true);
-                    mipObject('set', mipObj);                      
-                end           
+                    mipObject('set', mipObj);
+                end
             end
-        end       
+        end
         catch
-            progressBar(1, 'Error:setIsoSurfaceCallback()');          
-        end  
+            progressBar(1, 'Error:setIsoSurfaceCallback()');
+        end
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
-        drawnow;        
+        drawnow;
     end
-      
+
 end

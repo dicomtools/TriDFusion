@@ -1,5 +1,5 @@
-function aBuffer = fusionBuffer(sAction, aValue)
-%function aBuffer = fusionBuffer(sAction, aValue)
+function aBuffer = fusionBuffer(sAction, aValue, iOffset)
+%function aBuffer = fusionBuffer(sAction, aValue, iOffset)
 %Get\Set Fusion Buffer.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -11,46 +11,40 @@ function aBuffer = fusionBuffer(sAction, aValue)
 %Last specifications modified:
 %
 % Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
-% 
+%
 % This file is part of The Triple Dimention Fusion (TriDFusion).
-% 
+%
 % TriDFusion development has been led by:  Daniel Lafontaine
-% 
-% TriDFusion is distributed under the terms of the Lesser GNU Public License. 
-% 
+%
+% TriDFusion is distributed under the terms of the Lesser GNU Public License.
+%
 %     This version of TriDFusion is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 % TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 % without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 % See the GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent paBuffer; 
-    
-    uiFusedSeries = uiFusedSeriesPtr('get');
-    if ~isempty(uiFusedSeries)
-        iOffset = get(uiFusedSeries, 'Value');
-    else
-        iOffset = 1;
-    end    
+    persistent paBuffer;
+
+    aBuffer = '';
 
     if strcmpi('set', sAction)
-        paBuffer{iOffset} = aValue; 
-    elseif strcmpi('reset', sAction)    
-        for aa=1:numel(paBuffer)
+        paBuffer{iOffset} = aValue;
+    elseif strcmpi('reset', sAction)
+        for aa=1:numel(paBuffer)   
             paBuffer{aa} = '';
-        end            
-    end
-
-    if numel(paBuffer) < iOffset
-        aBuffer = '';
+        end
     else
-        aBuffer = paBuffer{iOffset};
+        if ~isempty(paBuffer) && ...
+           numel(paBuffer) >= iOffset    
+            aBuffer = paBuffer{iOffset};
+        end
     end
 
 end

@@ -29,15 +29,15 @@ function colorbarCallback(hObject, ~)
 
     windowButton('set', 'up'); % Fix for Linux
 
-    tEdgeInput = inputTemplate('get');
+    tInput = inputTemplate('get');
     
-    dEdgeFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
-    if dEdgeFuseOffset > numel(tEdgeInput)
+    dFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
+    if dFuseOffset > numel(tInput)
         return;
     end
     
-    dEdgeOffset = get(uiSeriesPtr('get'), 'Value');
-    if dEdgeOffset > numel(tEdgeInput)
+    dOffset = get(uiSeriesPtr('get'), 'Value');
+    if dOffset > numel(tInput)
         return;
     end
         
@@ -45,45 +45,238 @@ function colorbarCallback(hObject, ~)
     set(c, 'tag', get(hObject, 'Tag'));
 
     hObject.UIContextMenu = c;
-
-    d = uimenu(c,'Label','Tools');
-    set(d, 'tag', get(hObject, 'Tag'));
-
-    uimenu(d,'Label','Edge Detection', 'Callback',@setColorbarEdgeDetection);
+    
     if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar') && isVsplash('get') == false
-        mMove = uimenu(d,'Label','Move Image', 'Callback',@setColorbarMoveImage);
-        if isMoveImageActivated('get') == true
-            set(mMove, 'Checked', true);
+        
+        d = uimenu(c,'Label','Tools');
+        set(d, 'tag', get(hObject, 'Tag'));  
+        if isCombineMultipleFusion('get') == true
+            set(d, 'Enable', 'off');
         else
-            set(mMove, 'Checked', false);
+            set(d, 'Enable', 'on');
         end
+        
+        mEdge = uimenu(d,'Label','Edge Detection', 'Callback',@setColorbarEdgeDetection);   
+        
+        mManualSync = uimenu(d,'Label','Manual Alignment');
+        
+        mMoveImage         = uimenu(mManualSync,'Label','Move Image'               , 'Callback',@setMoveImageCallback);       
+        mMoveAssociated    = uimenu(mManualSync,'Label','Move Associated Series'   , 'Callback',@setMoveAssociatedSeriesCallback);
+        mUpdateDescription = uimenu(mManualSync,'Label','Update Series Description', 'Callback',@setMoveUpdateSeriesDescriptionCallback);
+        
+        if associateRegistrationModality('get') == true
+            set(mMoveAssociated, 'Checked', true);
+        else
+            set(mMoveAssociated, 'Checked', false);            
+        end
+        
+        if updateDescription('get') == true
+            set(mUpdateDescription, 'Checked', true);
+        else
+            set(mUpdateDescription, 'Checked', false);            
+        end
+        
+        if isMoveImageActivated('get') == true
+            set(mEdge             , 'Enable' , 'off');
+            set(mMoveImage        , 'Checked', true);
+            set(mMoveAssociated   , 'Enable' , 'on');
+            set(mUpdateDescription, 'Enable' , 'on');
+        else
+            set(mEdge             , 'Enable' , 'on');
+            set(mMoveImage        , 'Checked', false);
+            set(mMoveAssociated   , 'Enable' , 'off');
+            set(mUpdateDescription, 'Enable' , 'off');
+        end                
+        
+        sModality = tInput(dFuseOffset).atDicomInfo{1}.Modality;       
+        if ~strcmpi(sModality, 'CT')
+
+            mPlot = uimenu(d,'Label','Plot Contours');
+      %      set(mPlot, 'tag', get(hObject, 'Tag'));
+
+            mPlotContours = uimenu(mPlot,'Label','Show Contours', 'Callback', @setPlotContoursCallback);
+            if isPlotContours('get') == true
+                set(mPlotContours, 'Checked', true);
+            else
+                set(mPlotContours, 'Checked', false);
+            end        
+
+            mPlotFace = uimenu(mPlot,'Label','Show Face Alpha', 'Callback', @setShowFaceAlphContoursCallback);
+            if isShowFaceAlphaContours('get') == true
+                set(mPlotFace, 'Checked', true);           
+            else
+                set(mPlotFace, 'Checked', false);
+            end 
+
+            mLevelList = uimenu(mPlot,'Label','Set Level List', 'Callback', @setLevelListContoursCallback);
+            set(mLevelList, 'Checked', false);
+
+            mLevelStep = uimenu(mPlot,'Label','Set Level Step', 'Callback', @setLevelStepContoursCallback);
+            set(mLevelStep, 'Checked', false);
+
+            mLineWidth = uimenu(mPlot,'Label','Set Line Width', 'Callback', @setLineWidthContoursCallback);
+            set(mLineWidth, 'Checked', false);
+
+            mPlotText = uimenu(mPlot,'Label','Show Text', 'Callback', @setShowTextContoursCallback);
+            if size(dicomBuffer('get'), 3) == 1 % 2D Image
+                if isShowTextContours('get', 'axe') == true
+                    set(mPlotText, 'Checked', true);           
+                else
+                    set(mPlotText, 'Checked', false);
+                end  
+            else
+                set(mPlotText, 'Checked', false);
+            end
+
+            mTextList = uimenu(mPlot,'Label','Set Text List', 'Callback', @setTextListContoursCallback);
+            set(mTextList, 'Checked', false);
+
+            if isPlotContours('get') == true
+                set(mPlotText , 'Enable', 'on');           
+                set(mPlotFace , 'Enable', 'on');           
+                set(mLevelList, 'Enable', 'on');           
+                set(mLevelStep, 'Enable', 'on');
+                set(mLineWidth, 'Enable', 'on');   
+                if size(dicomBuffer('get'), 3) == 1 % 2D Image                
+                    if isShowTextContours('get', 'axe') == true
+                        set(mTextList , 'Enable', 'on');           
+                    else
+                        set(mTextList , 'Enable', 'off');           
+                    end
+                else
+                    if isShowTextContours('get', 'coronal')  == true || ...
+                       isShowTextContours('get', 'sagittal') == true || ...
+                       isShowTextContours('get', 'axial')    == true || ...
+                       isShowTextContours('get', 'mip')      == true 
+                        set(mTextList , 'Enable', 'on');           
+                    else
+                        set(mTextList , 'Enable', 'off');           
+                    end
+                end
+            else
+                set(mPlotText , 'Enable', 'off');           
+                set(mPlotFace , 'Enable', 'off');  
+                set(mLevelList, 'Enable', 'off');           
+                set(mLevelStep, 'Enable', 'off');           
+                set(mLineWidth, 'Enable', 'off');           
+                set(mTextList , 'Enable', 'off');            
+            end
+        end    
     end
 
     if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
-        if numel(tEdgeInput) == 1
-            if tEdgeInput(dEdgeFuseOffset).bFusedEdgeDetection == true
+        if numel(tInput) == 1
+            if tInput(dFuseOffset).bFusedEdgeDetection == true
                 set(findall(d, 'Label', 'Edge Detection'), 'Checked', 'on');
             end   
         else
-            if tEdgeInput(dEdgeFuseOffset).bEdgeDetection == true
+            if tInput(dFuseOffset).bEdgeDetection == true
                 set(findall(d, 'Label', 'Edge Detection'), 'Checked', 'on');
             end
         end
-        sModality = tEdgeInput(dEdgeFuseOffset).atDicomInfo{1}.Modality;
+        sModality = tInput(dFuseOffset).atDicomInfo{1}.Modality;
         
     else
-        if tEdgeInput(dEdgeOffset).bEdgeDetection == true
-            set(findall(d, 'Label', 'Edge Detection'), 'Checked', 'on');
-        end
+%        if tInput(dOffset).bEdgeDetection == true
+%            set(findall(d, 'Label', 'Edge Detection'), 'Checked', 'on');
+%        end
         
-        sModality = tEdgeInput(dEdgeOffset).atDicomInfo{1}.Modality;
- 
+        sModality = tInput(dOffset).atDicomInfo{1}.Modality; 
     end
     
     e = uimenu(c,'Label','Window');
     set(e, 'tag', get(hObject, 'Tag'));
-    mSetWindow = uimenu(e,'Label','Manual Input', 'Callback',@setColorbarWindowLevel);
+    
+    if isCombineMultipleFusion('get') == true && strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
+        set(e, 'Enable', 'off');
+    else
+        set(e, 'Enable', 'on');
+    end
+    
+    uimenu(e,'Label','Manual Input', 'Callback',@setColorbarWindowLevel);
+ 
+    if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
         
+        i = uimenu(c,'Label','Multi-Fusion');
+        set(i, 'tag', get(hObject, 'Tag'));        
+        
+        mCombineRGB = uimenu(i,'Label','Combine RGB', 'Callback',@setFusionCombineRGB); 
+        if isCombineMultipleFusion('get') == true
+            set(mCombineRGB, 'Checked', true);
+        else
+            set(mCombineRGB, 'Checked', false);
+        end       
+        set(mCombineRGB, 'Enable', 'on'); 
+        
+        mNormalizeToLiver = uimenu(i,'Label','Normalize to Liver', 'Callback',@setFusionNormalizeToLiverCallback); 
+        set(mNormalizeToLiver, 'Checked', false);
+        if isCombineMultipleFusion('get') == true && ...
+           isVsplash('get') == false
+            if isRGBFusionNormalizeToLiver('get') == false
+                set(mNormalizeToLiver, 'Enable', 'on');       
+            else
+                set(mNormalizeToLiver, 'Enable', 'off');       
+            end
+        else
+            set(mNormalizeToLiver, 'Enable', 'off');        
+        end          
+        
+        mIntensity = uimenu(i,'Label','Intensity & Min\Max', 'Callback',@setFusionImagesIntensity); 
+        set(mIntensity, 'Checked', false);
+        if isCombineMultipleFusion('get') == true
+            set(mIntensity, 'Enable', 'on');        
+        else
+            set(mIntensity, 'Enable', 'off');        
+        end  
+        
+        mShowRGBColormap = uimenu(i,'Label','Show RGB Colormap', 'Separator','on','Callback',@showRGBColormapImageCallback); 
+        if size(dicomBuffer('get'), 3) == 1 || ...
+           isVsplash('get') == true
+            set(mShowRGBColormap , 'Enable', 'off');   
+        else
+            set(mShowRGBColormap , 'Enable', 'on');   
+        end
+       
+        axeRGBImage = axeRGBImagePtr('get');    
+        if ~isempty(axeRGBImage)           
+            set(mShowRGBColormap, 'Checked', true);
+        else
+            set(mShowRGBColormap, 'Checked', false);
+        end                         
+           
+        mRGBplus  = uimenu(i,'Label','RGB plus' , 'Callback', @changeRGBColormapImageCallback);
+        mRGBblock = uimenu(i,'Label','RGB block', 'Callback', @changeRGBColormapImageCallback);
+        mRGBwheel = uimenu(i,'Label','RGB wheel', 'Callback', @changeRGBColormapImageCallback);
+        mRGBcube  = uimenu(i,'Label','RGB cube' , 'Callback', @changeRGBColormapImageCallback);
+        
+        if ~isempty(axeRGBImage) && ...
+           size(dicomBuffer('get'), 3) ~= 1 && ...   
+           isVsplash('get') == false
+            set(mRGBplus , 'Enable', 'on');        
+            set(mRGBblock, 'Enable', 'on');        
+            set(mRGBwheel, 'Enable', 'on');        
+            set(mRGBcube , 'Enable', 'on');        
+        else
+            set(mRGBplus , 'Enable', 'off');        
+            set(mRGBblock, 'Enable', 'off');        
+            set(mRGBwheel, 'Enable', 'off');        
+            set(mRGBcube , 'Enable', 'off');        
+        end
+        
+        sImageName = getRGBColormapImage('get');
+        
+        if    strcmpi(sImageName, 'rgb-plus.png')
+            set(mRGBplus, 'Checked', 'on');
+        elseif strcmpi(sImageName, 'rgb-block.png')
+            set(mRGBblock, 'Checked', 'on');
+        elseif strcmpi(sImageName, 'rgb-wheel.png')
+            set(mRGBwheel, 'Checked', 'on');            
+        elseif strcmpi(sImageName, 'rgb-cube.png')
+            set(mRGBcube, 'Checked', 'on');        
+        else
+        end       
+    end
+    
     if strcmpi(sModality, 'CT')
         
         mF1 = uimenu(e,'Label','(F1) Lung'          , 'Callback',@setCTColorbarWindowLevel);
@@ -142,28 +335,34 @@ function colorbarCallback(hObject, ~)
         
     end
     
-    uimenu(c,'Label','parula'       ,'Callback',@setColorOffset);
-    uimenu(c,'Label','jet'          ,'Callback',@setColorOffset);
-    uimenu(c,'Label','hsv'          ,'Callback',@setColorOffset);
-    uimenu(c,'Label','hot'          ,'Callback',@setColorOffset);
-    uimenu(c,'Label','cool'         ,'Callback',@setColorOffset);
-    uimenu(c,'Label','spring'       ,'Callback',@setColorOffset);
-    uimenu(c,'Label','summer'       ,'Callback',@setColorOffset);
-    uimenu(c,'Label','autumn'       ,'Callback',@setColorOffset);
-    uimenu(c,'Label','winter'       ,'Callback',@setColorOffset);
-    uimenu(c,'Label','gray'         ,'Callback',@setColorOffset);
-    uimenu(c,'Label','invert linear','Callback',@setColorOffset);
-    uimenu(c,'Label','bone'         ,'Callback',@setColorOffset);
-    uimenu(c,'Label','copper'       ,'Callback',@setColorOffset);
-    uimenu(c,'Label','pink'         ,'Callback',@setColorOffset);
-    uimenu(c,'Label','lines'        ,'Callback',@setColorOffset);
-    uimenu(c,'Label','colorcube'    ,'Callback',@setColorOffset);
-    uimenu(c,'Label','prism'        ,'Callback',@setColorOffset);
-    uimenu(c,'Label','flag'         ,'Callback',@setColorOffset);
-    uimenu(c,'Label','pet'          ,'Callback',@setColorOffset);
-    uimenu(c,'Label','hot metal'    ,'Callback',@setColorOffset);
-    uimenu(c,'Label','angio'        ,'Callback',@setColorOffset);
-
+    uimenu(c,'Label','Parula'       ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Jet'          ,'Callback',@setColorOffset);
+    uimenu(c,'Label','HSV'          ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Hot'          ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Cool'         ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Spring'       ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Summer'       ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Autumn'       ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Winter'       ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Gray'         ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Invert Linear','Callback',@setColorOffset);
+    uimenu(c,'Label','Bone'         ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Copper'       ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Pink'         ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Lines'        ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Colorcube'    ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Prism'        ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Flag'         ,'Callback',@setColorOffset);
+    uimenu(c,'Label','PET'          ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Hot Metal'    ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Angio'        ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Yellow'       ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Magenta'      ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Cyan'         ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Red'          ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Green'        ,'Callback',@setColorOffset);
+    uimenu(c,'Label','Blue'         ,'Callback',@setColorOffset);
+    
     if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
         dOffset = fusionColorMapOffset('get');
     else
@@ -172,47 +371,59 @@ function colorbarCallback(hObject, ~)
 
     switch dOffset
         case 1
-            set(findall(c,'Label','parula'), 'Checked', 'on');
+            set(findall(c,'Label','Parula'), 'Checked', 'on');
         case 2
-            set(findall(c,'Label','jet'), 'Checked', 'on');
+            set(findall(c,'Label','Jet'), 'Checked', 'on');
         case 3
-            set(findall(c,'Label','hsv'), 'Checked', 'on');
+            set(findall(c,'Label','HSV'), 'Checked', 'on');
         case 4
-            set(findall(c,'Label','hot'), 'Checked', 'on');
+            set(findall(c,'Label','Hot'), 'Checked', 'on');
         case 5
-            set(findall(c,'Label','cool'), 'Checked', 'on');
+            set(findall(c,'Label','Cool'), 'Checked', 'on');
         case 6
-            set(findall(c,'Label','spring'), 'Checked', 'on');
+            set(findall(c,'Label','Spring'), 'Checked', 'on');
         case 7
-            set(findall(c,'Label','summer'), 'Checked', 'on');
+            set(findall(c,'Label','Summer'), 'Checked', 'on');
         case 8
-            set(findall(c,'Label','autumn'), 'Checked', 'on');
+            set(findall(c,'Label','Autumn'), 'Checked', 'on');
         case 9
-            set(findall(c,'Label','winter'), 'Checked', 'on');
+            set(findall(c,'Label','Winter'), 'Checked', 'on');
         case 10
-            set(findall(c,'Label','gray'), 'Checked', 'on');
+            set(findall(c,'Label','Gray'), 'Checked', 'on');
         case 11
-            set(findall(c,'Label','invert linear'), 'Checked', 'on');
+            set(findall(c,'Label','Invert Linear'), 'Checked', 'on');
         case 12
-            set(findall(c,'Label','bone'), 'Checked', 'on');
+            set(findall(c,'Label','Bone'), 'Checked', 'on');
         case 13
-            set(findall(c,'Label','copper'), 'Checked', 'on');
+            set(findall(c,'Label','Copper'), 'Checked', 'on');
         case 14
-            set(findall(c,'Label','pink'), 'Checked', 'on');
+            set(findall(c,'Label','Pink'), 'Checked', 'on');
         case 15
-            set(findall(c,'Label','lines'), 'Checked', 'on');
+            set(findall(c,'Label','Lines'), 'Checked', 'on');
         case 16
-            set(findall(c,'Label','colorcube'), 'Checked', 'on');
+            set(findall(c,'Label','Colorcube'), 'Checked', 'on');
         case 17
-            set(findall(c,'Label','prism'), 'Checked', 'on');
+            set(findall(c,'Label','Prism'), 'Checked', 'on');
         case 18
-            set(findall(c,'Label','flag'), 'Checked', 'on');
+            set(findall(c,'Label','Flag'), 'Checked', 'on');
         case 19
-            set(findall(c,'Label','pet'), 'Checked', 'on');
+            set(findall(c,'Label','PET'), 'Checked', 'on');
         case 20
-            set(findall(c,'Label','hot metal'), 'Checked', 'on');
+            set(findall(c,'Label','Hot Metal'), 'Checked', 'on');
         case 21
-            set(findall(c,'Label','angio'), 'Checked', 'on');
+            set(findall(c,'Label','Angio'), 'Checked', 'on');
+        case 22
+            set(findall(c,'Label','Yellow'), 'Checked', 'on');
+        case 23
+            set(findall(c,'Label','Magenta'), 'Checked', 'on');
+        case 24
+            set(findall(c,'Label','Cyan'), 'Checked', 'on');
+        case 25
+            set(findall(c,'Label','Red'), 'Checked', 'on');
+        case 26
+            set(findall(c,'Label','Green'), 'Checked', 'on');
+        case 27
+            set(findall(c,'Label','Blue'), 'Checked', 'on');                                                
     end
 
     function setColorOffset(hObject, ~)
@@ -232,133 +443,148 @@ function colorbarCallback(hObject, ~)
     function setColorbarEdgeDetection(hObject, ~)
 
         tInput = inputTemplate('get');
+        aInput = inputBuffer('get');
 
-        dSerieOffset = get(uiSeriesPtr('get'), 'Value');
-        if dSerieOffset > numel(tInput)
+        iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+        if iSeriesOffset > numel(tInput)
             return;
         end
 
-        persistent imBak;
-
         if strcmpi(get(get(hObject, 'Parent'), 'Tag'), 'Fusion Colorbar')
 
-            dFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
-            if dFuseOffset > numel(tInput)
+            iFusionOffset   = get(uiFusedSeriesPtr('get'), 'Value');            
+            if iFusionOffset > numel(tInput)
                 return;
             end
             
             if numel(tInput) == 1
-                bEdge = tInput(dFuseOffset).bFusedEdgeDetection;
+                bEdge = tInput(iFusionOffset).bFusedEdgeDetection;
             else
-                bEdge = tInput(dFuseOffset).bEdgeDetection;
+                bEdge = tInput(iFusionOffset).bEdgeDetection;
             end
             
             if bEdge == true
+                
+                aBufferImage = dicomBuffer('get');
+                
+                tMetaData  = dicomMetaData('get');
+                if isempty(tMetaData)
+                    tMetaData = tFuseInput(iSeriesOffset).atDicomInfo;
+                end
+                    
                 if numel(tInput) == 1
-                    tInput(dFuseOffset).bFusedEdgeDetection = false;
+                    tInput(iFusionOffset).bFusedEdgeDetection = false;
                 else
-                    tInput(dFuseOffset).bEdgeDetection = false;
+                    tInput(iFusionOffset).bEdgeDetection = false;
+                end
+                
+                set(uiSeriesPtr('get'), 'Value', iFusionOffset);
+                aFuseImage = dicomBuffer('get');
+                if isempty(aFuseImage)
+                    aFuseImage = aInput{iFusionOffset};
+                end
+                
+                tFuseMetaData = dicomMetaData('get');
+                if isempty(tFuseMetaData)
+                    tFuseMetaData = tInput(iFusionOffset).atDicomInfo;
+                end
+        
+                if size(aFuseImage, 3) == 1
+                
+                    if iSeriesOffset ~= iFusionOffset
+                        if tInput(iSeriesOffset).bFlipLeftRight == true
+                            aFuseImage=aFuseImage(:,end:-1:1);
+                        end
+
+                        if tInput(iSeriesOffset).bFlipAntPost == true
+                            aFuseImage=aFuseImage(end:-1:1,:);
+                        end
+                    end                
+                    
+                    [x1,y1,~] = size(aBufferImage);
+                    aFuseImage = imresize(aFuseImage, [x1 y1]);
+                    
+                else
+                                                            
+                    if iSeriesOffset ~= iFusionOffset                
+                        if tInput(iSeriesOffset).bFlipLeftRight == true
+                            aFuseImage=aFuseImage(:,end:-1:1,:);
+                        end
+
+                        if tInput(iSeriesOffset).bFlipAntPost == true
+                            aFuseImage=aFuseImage(end:-1:1,:,:);
+                        end
+
+                        if tInput(iSeriesOffset).bFlipHeadFeet == true
+                            aFuseImage=aFuseImage(:,:,end:-1:1);
+                        end
+                    end
+                                        
+                    if strcmp(imageOrientation('get'), 'coronal')
+                        aFuseImage = permute(aFuseImage, [3 2 1]);
+                    elseif strcmp(imageOrientation('get'), 'sagittal')
+                        aFuseImage = permute(aFuseImage, [2 3 1]);
+                    else
+                        aFuseImage = permute(aFuseImage, [1 2 3]);
+                    end  
+                    
+                    
+%                    if ( ( tMetaData{1}.ReconstructionDiameter ~= 700 && ...
+%                           strcmpi(tMetaData{1}.Modality, 'ct') ) || ...
+%                       ( tFuseMetaData{1}.ReconstructionDiameter ~= 700 && ...
+%                         strcmpi(tFuseMetaData{1}.Modality, 'ct') ) ) && ...
+%                       numel(tMetaData) ~= 1 && ...
+%                       numel(tFuseMetaData) ~= 1
+                 
+                    if numel(aFuseImage) ~= numel(aBufferImage) % Resample image                 
+                        [aFuseImage, ~] = ...
+                            resampleImageTransformMatrix(aFuseImage, ...
+                                                         tFuseMetaData, ...
+                                                         aBufferImage, ...
+                                                         tMetaData, ...
+                                                         'linear' ...
+                                                         );
+                    end
+
+%                    else
+
+%                        [aFuseImage, ~] = ...
+%                            resampleImage(aFuseImage, ...
+%                                          tFuseMetaData, ...
+%                                          aBufferImage, ...
+%                                          tMetaData, ...
+%                                          'linear', ...
+%                                          false ...
+%                                          );
+
+%                    end
+                
+              
                 end
 
-                if size(imBak{dFuseOffset}, 3) == 1 % 2D planar Image
+                set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
 
-                    if tInput(dSerieOffset).bFlipLeftRight == true
-                        imBak{dFuseOffset}=imBak{dFuseOffset}(:,end:-1:1);
-                    end
-
-                    if tInput(dSerieOffset).bFlipAntPost == true
-                        imBak{dFuseOffset}=imBak{dFuseOffset}(end:-1:1,:);
-                    end
-                else % 3D Volume
-
-                    if tInput(dSerieOffset).bFlipLeftRight == true
-                        imBak{dFuseOffset}=imBak{dFuseOffset}(:,end:-1:1,:);
-                    end
-
-                    if tInput(dSerieOffset).bFlipAntPost == true
-                        imBak{dFuseOffset}=imBak{dFuseOffset}(end:-1:1,:,:);
-                    end
-
-                    if tInput(dSerieOffset).bFlipHeadFeet == true
-                        imBak{dFuseOffset}=imBak{dFuseOffset}(:,:,end:-1:1);
-                    end
-                end
-
-                fusionBuffer('set', imBak{dFuseOffset});
+                fusionBuffer('set', aFuseImage, get(uiFusedSeriesPtr('get'), 'Value'));           
                         
             else
+                
                 if numel(tInput) == 1
-                    tInput(dFuseOffset).bFusedEdgeDetection = true;
+                    tInput(iFusionOffset).bFusedEdgeDetection = true;
                 else
-                    tInput(dFuseOffset).bEdgeDetection = true;
+                    tInput(iFusionOffset).bEdgeDetection = true;
                 end
 
                 dFudgeFactor = fudgeFactorSegValue('get');
                 sMethod = edgeSegMethod('get');
 
-                imf = fusionBuffer('get');
-                imBak{dFuseOffset} = imf;
+                imf = fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
 
                 imEdge = getEdgeDetection(imf, sMethod, dFudgeFactor);
 
-                fusionBuffer('set', imEdge);
+                fusionBuffer('set', imEdge, get(uiFusedSeriesPtr('get'), 'Value'));
                 
             end
                         
-            inputTemplate('set', tInput);
-
-            refreshImages();
-
-        else
-
-            if tInput(dSerieOffset).bEdgeDetection == true
-                if numel(tInput) == 1 && isFusion('get') == false
-                    tInput(dSerieOffset).bFusedEdgeDetection = false;
-                end
-                
-                tInput(dSerieOffset).bEdgeDetection = false;
-
-                if size(imBak{dSerieOffset}, 3) == 1
-
-                    if tInput(dSerieOffset).bFlipLeftRight == true
-                        imBak{dSerieOffset}=imBak{dSerieOffset}(:,end:-1:1);
-                    end
-
-                    if tInput(dSerieOffset).bFlipAntPost == true
-                        imBak{dSerieOffset}=imBak{dSerieOffset}(end:-1:1,:);
-                    end
-                else
-                    if tInput(dSerieOffset).bFlipLeftRight == true
-                        imBak{dSerieOffset}=imBak{dSerieOffset}(:,end:-1:1,:);
-                    end
-
-                    if tInput(dSerieOffset).bFlipAntPost == true
-                        imBak{dSerieOffset}=imBak{dSerieOffset}(end:-1:1,:,:);
-                    end
-
-                    if tInput(dSerieOffset).bFlipHeadFeet == true
-                        imBak{dSerieOffset}=imBak{dSerieOffset}(:,:,end:-1:1);
-                    end
-                end
-                dicomBuffer('set', imBak{dSerieOffset});
-            else
-                if numel(tInput) == 1 && isFusion('get') == false
-                    tInput(dSerieOffset).bFusedEdgeDetection = true;
-                end
-                
-                tInput(dSerieOffset).bEdgeDetection = true;
-
-                dFudgeFactor = fudgeFactorSegValue('get');
-                sMethod = edgeSegMethod('get');
-
-                im = dicomBuffer('get');
-                imBak{dSerieOffset}=im;
-
-                imEdge = getEdgeDetection(im, sMethod, dFudgeFactor);
-
-                dicomBuffer('set', imEdge);
-            end
-
             inputTemplate('set', tInput);
 
             refreshImages();
@@ -384,8 +610,7 @@ function colorbarCallback(hObject, ~)
             dOffset = get(uiSeriesPtr('get'), 'Value');
         
             sUnitDisplay = getSerieUnitValue(dOffset);                        
-        end
-        
+        end        
                        
         dlgWindowLevel = ...
             dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-380/2) ...
@@ -397,53 +622,58 @@ function colorbarCallback(hObject, ~)
                   'Name', 'Set Window Level'...
                    );      
                
-    if strcmpi(sUnitDisplay, 'SUV') ||  strcmpi(sUnitDisplay, 'HU') 
-        if strcmpi(sUnitDisplay, 'HU') 
-            sUnitDisplay = 'Window Level';            
-            
-            [dWindow, dLevel] = computeWindowMinMax(dMax, dMin);
-        else
-            dMax = dMax*tInput(dOffset).tQuant.tSUV.dScale;
-            dMin = dMin*tInput(dOffset).tQuant.tSUV.dScale;
-                       
-        end
-        bUnitEnable = 'on';
-    else
-        bUnitEnable = 'off';
-    end
-    
-    sUnitType = sprintf('Unit in %s', sUnitDisplay);
-    
-    chkUnitType = ...
-        uicontrol(dlgWindowLevel,...
-                  'style'   , 'checkbox',...
-                  'enable'  , bUnitEnable,...
-                  'value'   , 1,...
-                  'position', [20 115 20 20],...
-                  'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
-                  'Callback', @chkUnitTypeCallback...
-                  );
+        if strcmpi(sUnitDisplay, 'SUV') ||  strcmpi(sUnitDisplay, 'HU') 
+            if strcmpi(sUnitDisplay, 'HU') 
+                sUnitDisplay = 'Window Level';            
 
-    txtUnitType = ...
-         uicontrol(dlgWindowLevel,...
-                  'style'   , 'text',...
-                  'string'  , sUnitType,...
-                  'horizontalalignment', 'left',...
-                  'position', [40 112 200 20],...
-                  'Enable', 'Inactive',...
-                  'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
-                  'ButtonDownFcn', @chkUnitTypeCallback...
-                  );
+                [dWindow, dLevel] = computeWindowMinMax(dMax, dMin);
+            else
+                dMax = dMax*tInput(dOffset).tQuant.tSUV.dScale;
+                dMin = dMin*tInput(dOffset).tQuant.tSUV.dScale;
+
+            end
+            bUnitEnable = 'on';
+        else
+            bUnitEnable = 'off';
+        end
+
+        if strcmpi(sUnitDisplay, 'SUV')
+            sSUVtype = viewerSUVtype('get');
+            sUnitType = sprintf('Unit in SUV/%s', sSUVtype);
+        else
+            sUnitType = sprintf('Unit in %s', sUnitDisplay);
+        end
+    
+        chkUnitType = ...
+            uicontrol(dlgWindowLevel,...
+                      'style'   , 'checkbox',...
+                      'enable'  , bUnitEnable,...
+                      'value'   , 1,...
+                      'position', [20 115 20 20],...
+                      'BackgroundColor', viewerBackgroundColor('get'), ...
+                      'ForegroundColor', viewerForegroundColor('get'), ...                    
+                      'Callback', @chkUnitTypeCallback...
+                      );
+
+        txtUnitType = ...
+             uicontrol(dlgWindowLevel,...
+                      'style'   , 'text',...
+                      'string'  , sUnitType,...
+                      'horizontalalignment', 'left',...
+                      'position', [40 112 200 20],...
+                      'Enable', 'Inactive',...
+                      'BackgroundColor', viewerBackgroundColor('get'), ...
+                      'ForegroundColor', viewerForegroundColor('get'), ...                    
+                      'ButtonDownFcn', @chkUnitTypeCallback...
+                      );
                                 
-  if strcmpi(sUnitDisplay, 'Window Level')
-      sMaxDisplay = 'Window Value';
-      sMaxValue = num2str(dWindow);
-  else
-      sMaxDisplay = 'Max Value';
-      sMaxValue = num2str(dMax);
-  end
+      if strcmpi(sUnitDisplay, 'Window Level')
+          sMaxDisplay = 'Window Value';
+          sMaxValue = num2str(dWindow);
+      else
+          sMaxDisplay = 'Max Value';
+          sMaxValue = num2str(dMax);
+      end
   
          uicontrol(dlgWindowLevel,...
                   'style'   , 'text',...
@@ -454,23 +684,23 @@ function colorbarCallback(hObject, ~)
                   'position', [20 87 150 20]...
                   );
               
-  edtMaxValue = ...
-      uicontrol(dlgWindowLevel,...
-                'style'     , 'edit',...
-                'Background', 'white',...
-                'string'    , sMaxValue,...
-                'BackgroundColor', viewerBackgroundColor('get'), ...
-                'ForegroundColor', viewerForegroundColor('get'), ...                 
-                'position'  , [200 90 150 20]...
-                );
-            
-  if strcmpi(sUnitDisplay, 'Window Level')
-      sMinDisplay = 'Level Value';
-      sMinValue = num2str(dLevel);
-  else
-      sMinDisplay = 'Min Value';
-      sMinValue = num2str(dMin);
-  end            
+      edtMaxValue = ...
+          uicontrol(dlgWindowLevel,...
+                    'style'     , 'edit',...
+                    'Background', 'white',...
+                    'string'    , sMaxValue,...
+                    'BackgroundColor', viewerBackgroundColor('get'), ...
+                    'ForegroundColor', viewerForegroundColor('get'), ...                 
+                    'position'  , [200 90 150 20]...
+                    );
+
+      if strcmpi(sUnitDisplay, 'Window Level')
+          sMinDisplay = 'Level Value';
+          sMinValue = num2str(dLevel);
+      else
+          sMinDisplay = 'Min Value';
+          sMinValue = num2str(dMin);
+      end            
          uicontrol(dlgWindowLevel,...
                   'style'   , 'text',...
                   'string'  , sMinDisplay,...
@@ -480,15 +710,15 @@ function colorbarCallback(hObject, ~)
                   'position', [20 62 150 20]...
                   );
 
-  edtMinValue = ...
-      uicontrol(dlgWindowLevel,...
-                'style'     , 'edit',...
-                'Background', 'white',...
-                'string'    , sMinValue,...
-                'BackgroundColor', viewerBackgroundColor('get'), ...
-                'ForegroundColor', viewerForegroundColor('get'), ...                 
-                'position'  , [200 65 150 20]...
-                );
+      edtMinValue = ...
+          uicontrol(dlgWindowLevel,...
+                    'style'     , 'edit',...
+                    'Background', 'white',...
+                    'string'    , sMinValue,...
+                    'BackgroundColor', viewerBackgroundColor('get'), ...
+                    'ForegroundColor', viewerForegroundColor('get'), ...                 
+                    'position'  , [200 65 150 20]...
+                    );
             
      % Cancel or Proceed
 
@@ -539,7 +769,12 @@ function colorbarCallback(hObject, ~)
                 end             
             end
             
-            sUnitType = sprintf('Unit in %s', sUnitDisplay);
+            if strcmpi(sUnitDisplay, 'SUV')
+                sSUVtype = viewerSUVtype('get');
+                sUnitType = sprintf('Unit in SUV/%s', sSUVtype);
+            else
+                sUnitType = sprintf('Unit in %s', sUnitDisplay);
+            end
                                             
             set(txtUnitType, 'String', sUnitType);            
             
@@ -552,6 +787,7 @@ function colorbarCallback(hObject, ~)
             end
             
             switch (sUnitDisplay)
+                
                 case 'Window Level'
                     
                     [dWindow, dLevel] = computeWindowMinMax(dMaxValue, dMinValue);
@@ -609,11 +845,14 @@ function colorbarCallback(hObject, ~)
                    switchToMIPMode('get')    == false
 
                     if size(dicomBuffer('get'), 3) == 1            
-                        set(axefPtr('get'), 'CLim', [lMin lMax]);
+                        set(axefPtr('get'), 'CLim', [lMin lMax]);                      
                     else
-                        set(axes1fPtr('get'), 'CLim', [lMin lMax]);
-                        set(axes2fPtr('get'), 'CLim', [lMin lMax]);
-                        set(axes3fPtr('get'), 'CLim', [lMin lMax]);
+                        set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);
+                        set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);
+                        set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);                        
+                        if link2DMip('get') == true && isVsplash('get') == false
+                            set(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                        end                                                                        
                     end
 
                     refreshImages();
@@ -631,11 +870,14 @@ function colorbarCallback(hObject, ~)
                    switchToMIPMode('get')    == false
 
                     if size(dicomBuffer('get'), 3) == 1            
-                        set(axePtr('get'), 'CLim', [lMin lMax]);
+                        set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
                     else
-                        set(axes1Ptr('get'), 'CLim', [lMin lMax]);
-                        set(axes2Ptr('get'), 'CLim', [lMin lMax]);
-                        set(axes3Ptr('get'), 'CLim', [lMin lMax]);
+                        set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                        set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                        set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                        if link2DMip('get') == true && isVsplash('get') == false
+                            set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);                  
+                        end 
                     end
 
                     refreshImages();
@@ -683,107 +925,54 @@ function colorbarCallback(hObject, ~)
             fusionWindowLevel('set', 'max', lMax);
             fusionWindowLevel('set', 'min' ,lMin);
                 
-            if size(fusionBuffer('get'), 3) == 1            
+            if size(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 3) == 1            
                 set(axefPtr('get'), 'CLim', [lMin lMax]);
             else
-                set(axes1fPtr('get'), 'CLim', [lMin lMax]);
-                set(axes2fPtr('get'), 'CLim', [lMin lMax]);
-                set(axes3fPtr('get'), 'CLim', [lMin lMax]);
+                set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);                
+                if link2DMip('get') == true && isVsplash('get') == false
+                    set(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                end                
             end            
         else    
             windowLevel('set', 'max', lMax);
             windowLevel('set', 'min' ,lMin);
             
             if size(dicomBuffer('get'), 3) == 1            
-                set(axePtr('get'), 'CLim', [lMin lMax]);
+                set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
             else
-                set(axes1Ptr('get'), 'CLim', [lMin lMax]);
-                set(axes2Ptr('get'), 'CLim', [lMin lMax]);
-                set(axes3Ptr('get'), 'CLim', [lMin lMax]);
+                set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                if link2DMip('get') == true && isVsplash('get') == false
+                    set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);                   
+                end 
             end
         end              
         
     end
 
-    function setColorbarMoveImage(~, ~)
+    function setMoveAssociatedSeriesCallback(hObject, ~)
         
-        if isMoveImageActivated('get') == false
-                        
-            set(fiMainWindowPtr('get'), 'Pointer', 'fleur');           
-            
-            isMoveImageActivated('set', true);
-            
-            fusedImageRotationValues('set', false);
-            fusedImageMovementValues('set', false);      
-            
-            tInput = inputTemplate('get');
-            aInput = inputBuffer('get');
-            
-            iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-            iFuseOffset   = get(uiFusedSeriesPtr('get'), 'Value');
-                        
-            set(uiSeriesPtr('get'), 'Value', iFuseOffset);
-            aMoveImage = dicomBuffer('get');
-            if isempty(aMoveImage)
-                aMoveImage = aInput{iFuseOffset};
-            end
-            
-            if size(aMoveImage, 3) == 1
-                if iSeriesOffset ~= iFuseOffset
-                    if tInput(iSeriesOffset).bFlipLeftRight == true
-                        aMoveImage=aMoveImage(:,end:-1:1);
-                    end
-
-                    if tInput(iSeriesOffset).bFlipAntPost == true
-                        aMoveImage=aMoveImage(end:-1:1,:);
-                    end
-                end                
-            else
-                if iSeriesOffset ~= iFuseOffset                
-                    if tInput(iSeriesOffset).bFlipLeftRight == true
-                        aMoveImage=aMoveImage(:,end:-1:1,:);
-                    end
-
-                    if tInput(iSeriesOffset).bFlipAntPost == true
-                        aMoveImage=aMoveImage(end:-1:1,:,:);
-                    end
-
-                    if tInput(iSeriesOffset).bFlipHeadFeet == true
-                        aMoveImage=aMoveImage(:,:,end:-1:1);
-                    end
-                end
-                
-                if strcmp(imageOrientation('get'), 'coronal')
-                    aMoveImage = permute(aMoveImage, [3 2 1]);
-                elseif strcmp(imageOrientation('get'), 'sagittal')
-                    aMoveImage = permute(aMoveImage, [2 3 1]);
-                else
-                    aMoveImage = permute(aMoveImage, [1 2 3]);
-                end                
-            end
-            
-            set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
-            
-            moveImageBuffer('set', aMoveImage);
-
+        bMoveAssociatedSeries = get(hObject, 'Checked');
+        
+        if bMoveAssociatedSeries == true
+            associateRegistrationModality('set', false);
         else
-         
-            set(fiMainWindowPtr('get'), 'Pointer', 'default');   
-            
-            isMoveImageActivated('set', false);
-            
-            iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-            iFuseOffset   = get(uiFusedSeriesPtr('get'), 'Value');
-            
-            set(uiSeriesPtr('get'), 'Value', iFuseOffset);
-            dicomBuffer('set', moveImageBuffer('get'));
-            set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
-            
-            moveImageBuffer('reset');
-          
-        end
-             
+            associateRegistrationModality('set', true);
+        end        
     end
 
+    function setMoveUpdateSeriesDescriptionCallback(hObject, ~)
+        
+        bUpdateSeriesDescription = get(hObject, 'Checked');
+        
+        if bUpdateSeriesDescription == true
+            updateDescription('set', false);
+        else
+            updateDescription('set', true);
+        end        
+    end
 
 end

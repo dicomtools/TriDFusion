@@ -1,4 +1,31 @@
 function importContoursCallback(~, ~)
+%function importContoursCallback(~, ~)
+%Import RT Structure.
+%See TriDFuison.doc (or pdf) for more information about options.
+%
+%Author: Daniel Lafontaine, lafontad@mskcc.org
+%
+%Last specifications modified:
+%
+% Copyright 2021, Daniel Lafontaine, on behalf of the TriDFusion development team.
+%
+% This file is part of The Triple Dimention Fusion (TriDFusion).
+%
+% TriDFusion development has been led by:  Daniel Lafontaine
+%
+% TriDFusion is distributed under the terms of the Lesser GNU Public License.
+%
+%     This version of TriDFusion is free software: you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation, either version 3 of the License, or
+%     (at your option) any later version.
+%
+% TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+% without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+% See the GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     atInput = inputTemplate('get');
     if isempty(atInput)
@@ -8,7 +35,7 @@ function importContoursCallback(~, ~)
     if size(dicomBuffer('get'), 3) == 1
         return;
     end
-    
+  
     filter = {'*.dcm'};
 
     sCurrentDir  = viewerRootPath('get');
@@ -57,8 +84,10 @@ function importContoursCallback(~, ~)
 
         tInfo = dicominfo4che3(sContourFileName);
                         
-        if strcmpi(tInfo.Modality, 'RTSTRUCT')                   
-        
+        if strcmpi(tInfo.Modality, 'RTSTRUCT')    
+            
+            dSeriesValue = get(uiSeriesPtr('get'), 'Value');
+
             atContours = readDicomContours(sContourFileName); 
             
             aContourImported = zeros(size(atContours));            
@@ -67,18 +96,25 @@ function importContoursCallback(~, ~)
                 for dd=1:numel(atContours)
                     
                     progressBar(bb+dd/(numel(atInput)+numel(atContours)), sprintf('Volume %d: Scanning contour ROI %d/%d', bb, dd, numel(atContours)) );      
-             
-                    if strcmpi(atInput(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Find matching series
-                               atContours(dd).Referenced.SeriesInstanceUID)
 
-                        inputContours('add', atContours(dd));
-                        
-                        setContours({atContours(dd)});
-                        aContourImported(dd) = true;
+                    if ~isempty(atContours(dd).Referenced)
+                        if strcmpi(atInput(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Find matching series
+                                   atContours(dd).Referenced.SeriesInstanceUID)
+    
+                            inputContours('add', atContours(dd));
+                            
+                            setContours({atContours(dd)});
+                            aContourImported(dd) = true;
+                        end
                     end
                 end
             end
-            
+
+       
+            set(uiSeriesPtr('get'), 'Value', dSeriesValue);
+
+            setSeriesCallback();
+        
             progressBar( 1, 'Ready');                
             
             if numel(aContourImported(aContourImported==true))
@@ -86,6 +122,7 @@ function importContoursCallback(~, ~)
                 set(uiCorWindowPtr('get'), 'Visible', 'on');
                 set(uiSagWindowPtr('get'), 'Visible', 'on');
                 set(uiTraWindowPtr('get'), 'Visible', 'on');
+                set(uiMipWindowPtr('get'), 'Visible', 'on');
 
                 set(uiSliderLevelPtr ('get'), 'Visible', 'on');
                 set(uiSliderWindowPtr('get'), 'Visible', 'on');
@@ -93,8 +130,10 @@ function importContoursCallback(~, ~)
                 set(uiSliderCorPtr('get'), 'Visible', 'on');
                 set(uiSliderSagPtr('get'), 'Visible', 'on');   
                 set(uiSliderTraPtr('get'), 'Visible', 'on');      
+                set(uiSliderMipPtr('get'), 'Visible', 'on');      
 
 %                hold off;
+                setVoiRoiSegPopup();                        
 
                 refreshImages();
             end
@@ -124,11 +163,25 @@ function importContoursCallback(~, ~)
                                 480 ...
                                 190 ...
                                 ],...
+                  'MenuBar', 'none',...
+                  'Resize', 'off', ...    
+                  'NumberTitle','off',...
+                  'MenuBar', 'none',...
                   'Color', viewerBackgroundColor('get'), ...
-                  'Name', 'Associate Contours'...
+                  'Name', 'Associate Contours',...
+                  'Toolbar','none'...   
                    );  
                
-                  
+            axes(dlgAssociate, ...
+                 'Units'   , 'pixels', ...
+                 'Position', get(dlgAssociate, 'Position'), ...
+                 'Color'   , viewerBackgroundColor('get'),...
+                 'XColor'  , viewerForegroundColor('get'),...
+                 'YColor'  , viewerForegroundColor('get'),...
+                 'ZColor'  , viewerForegroundColor('get'),...             
+                 'Visible' , 'off'...             
+                 ); 
+         
          sFact = sprintf('%d/%d contours have not been imported', numel(aContourImported(aContourImported==false)), numel(atContours));     
                  
              uicontrol(dlgAssociate,...
@@ -219,6 +272,7 @@ function importContoursCallback(~, ~)
             set(uiCorWindowPtr('get'), 'Visible', 'on');
             set(uiSagWindowPtr('get'), 'Visible', 'on');
             set(uiTraWindowPtr('get'), 'Visible', 'on');
+            set(uiMipWindowPtr('get'), 'Visible', 'on');
 
             set(uiSliderLevelPtr ('get'), 'Visible', 'on');
             set(uiSliderWindowPtr('get'), 'Visible', 'on');
@@ -226,6 +280,7 @@ function importContoursCallback(~, ~)
             set(uiSliderCorPtr('get'), 'Visible', 'on');
             set(uiSliderSagPtr('get'), 'Visible', 'on');   
             set(uiSliderTraPtr('get'), 'Visible', 'on');      
+            set(uiSliderMipPtr('get'), 'Visible', 'on');      
 
 %            hold off;
 

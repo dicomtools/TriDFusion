@@ -1,10 +1,9 @@
-function writeRtStruct(sOutDir, dOffset)
+function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dOffset)
 %function writeRtStruct(sOutDir, tMetaData)
 %Export ROIs To DICOM RT-Structure.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
-%        C. Ross Schmidtlein, schmidtr@mskcc.org
 %
 %Last specifications modified:
 %
@@ -30,101 +29,116 @@ function writeRtStruct(sOutDir, dOffset)
 
     PIXEL_EDGE_RATIO = 3;
 
-    tInput = inputTemplate('get');        
+    tInput = inputTemplate('get');
     if dOffset > numel(tInput)
         return;
     end
-    
-    try
-                
-    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-    drawnow;  
-    
-    aInputBuffer = inputBuffer('get');
-    aBuffer = aInputBuffer{dOffset};
 
-    atDicomInfo = tInput(dOffset).atDicomInfo;
+    try
+
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    drawnow;
+
+    tRoiInput = roiTemplate('get', dOffset);
+    tVoiInput = voiTemplate('get', dOffset);
     
-    tRoiInput = roiTemplate('get');
-    tVoiInput = voiTemplate('get');   
+    for pp=1:numel(tVoiInput) % Patch, don't export total-mask
+        if strcmpi(tVoiInput{pp}.Label, 'TOTAL-MASK')
+            tVoiInput{pp} = [];
+            tVoiInput(cellfun(@isempty, tVoiInput)) = [];       
+        end
+    end
     
+    bUseRoiTemplate = false;
+    if modifiedImagesContourMatrix('get') == false
+        if numel(aInputBuffer) ~= numel(aDicomBuffer)  
+            
+            tRoiInput = resampleROIs(aDicomBuffer, atDicomMeta, aInputBuffer, atInputMeta, tRoiInput, false); 
+            
+            atDicomMeta  = atInputMeta;          
+            aDicomBuffer = aInputBuffer;
+            
+            bUseRoiTemplate = true;
+        end        
+    end
+                
     if ~isempty(tInput(dOffset).asFilesList)
         sInputFile = tInput(dOffset).asFilesList{1};
         tMetaData = dicominfo(string(sInputFile));
     else % CERR
-        tMetaData = tInput(dOffset).atDicomInfo{1};
+        tMetaData = tInput(dOffset).atDicomMeta{1};
     end
-    
-    sRootPath  = viewerRootPath('get');    
+
+    sRootPath  = viewerRootPath('get');
     info = dicominfo(sprintf('%s/imdata/rtstruct.dcm', sRootPath));
-    
+
     info.Filename = [];
-    info.FileModDate = datetime;   
+    info.FileModDate = datetime;
     info.ManufacturerModelName = 'TriDFusion1.0';
-    
+
     info.StudyDate = tMetaData.StudyDate;
     info.StudyTime = tMetaData.StudyTime;
-    
+
     info.PatientName = tMetaData.PatientName;
     info.PatientID = tMetaData.PatientID;
-    
+
     if isfield(tMetaData, 'PatientBirthDate')
         info.PatientBirthDate = tMetaData.PatientBirthDate;
     else
-        info.PatientBirthDate = '';       
+        info.PatientBirthDate = '';
     end
-    
+
     if isfield(tMetaData, 'PatientSex')
         info.PatientSex = tMetaData.PatientSex;
     else
         info.PatientSex = '';
     end
-    
-    if isfield(tMetaData, 'ReferringPhysicianName')    
+
+    if isfield(tMetaData, 'ReferringPhysicianName')
         info.ReferringPhysicianName = tMetaData.ReferringPhysicianName;
     else
-        info.ReferringPhysicianName = '';       
+        info.ReferringPhysicianName = '';
     end
-    
+
     info.StudyInstanceUID  = tMetaData.StudyInstanceUID;
     info.SeriesInstanceUID = dicomuid;
-    
-    info.SeriesDescription = sprintf('RT-%s', tMetaData.SeriesDescription);   
+
+    info.SeriesDescription = sprintf('RT-%s', tMetaData.SeriesDescription);
     info.StudyDescription  = tMetaData.StudyDescription;
 
-    if isfield(tMetaData, 'StudyID')    
+    if isfield(tMetaData, 'StudyID')
         info.StudyID = tMetaData.StudyID;
     else
         info.StudyID = '';
     end
-    
+
     info.SeriesNumber = 1;
     info.StructureSetLabel = 'TriDFusion1.0';
-        
-    info.StructureSetDate = datestr(now, 'yyyymmdd'); 
+
+    info.StructureSetDate = datestr(now, 'yyyymmdd');
     info.StructureSetTime = datestr(now,'HHMMSS.FFF');
-    
+
     info.ReferencedFrameOfReferenceSequence = [];
     info.StructureSetROISequence = [];
     info.ROIContourSequence = [];
     info.RTROIObservationsSequence = [];
-    
+
     % set ReferencedFrameOfReferenceSequence %
-    
+
     info.ReferencedFrameOfReferenceSequence.Item_1.FrameOfReferenceUID = tMetaData.FrameOfReferenceUID;
-    info.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.ReferencedSOPClassUID = '1.2.840.10008.3.1.2.3.1';   
-    info.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.ReferencedSOPInstanceUID = tMetaData.StudyInstanceUID;    
-    info.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.RTReferencedSeriesSequence.Item_1.SeriesInstanceUID = tMetaData.SeriesInstanceUID;    
-    
-    nbFrames = numel(atDicomInfo); % Simplified DICOM using 1 file have the same SOPClassUID & SOPInstanceUID
-    for ii=1:nbFrames                
+    info.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.ReferencedSOPClassUID = '1.2.840.10008.3.1.2.3.1';
+    info.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.ReferencedSOPInstanceUID = tMetaData.StudyInstanceUID;
+    info.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.RTReferencedSeriesSequence.Item_1.SeriesInstanceUID = tMetaData.SeriesInstanceUID;
+
+    nbFrames = numel(atDicomMeta); % Simplified DICOM using 1 file have the same SOPClassUID & SOPInstanceUID
+    for ii=1:nbFrames
         sVOIitemName = sprintf('Item_%d', ii);
-        info.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.RTReferencedSeriesSequence.Item_1.ContourImageSequence.(sVOIitemName).ReferencedSOPClassUID = atDicomInfo{ii}.SOPClassUID;   
-        info.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.RTReferencedSeriesSequence.Item_1.ContourImageSequence.(sVOIitemName).ReferencedSOPInstanceUID = atDicomInfo{ii}.SOPInstanceUID;   
+        info.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.RTReferencedSeriesSequence.Item_1.ContourImageSequence.(sVOIitemName).ReferencedSOPClassUID = atDicomMeta{ii}.SOPClassUID;
+        info.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.RTReferencedSeriesSequence.Item_1.ContourImageSequence.(sVOIitemName).ReferencedSOPInstanceUID = atDicomMeta{ii}.SOPInstanceUID;
     end
-    
+
     % set StructureSetROISequence *
-    
+
     nbContours = numel(tVoiInput);
     for cc=1:nbContours
         sVOIitemName = sprintf('Item_%d', cc);
@@ -138,38 +152,99 @@ function writeRtStruct(sOutDir, dOffset)
     % set ROIContourSequence *
 
     for cc=1:nbContours
+        
         sVOIitemName = sprintf('Item_%d', cc);
+            
         info.ROIContourSequence.(sVOIitemName).ROIDisplayColor = tVoiInput{cc}.Color * 255;
         info.ROIContourSequence.(sVOIitemName).ReferencedROINumber = cc;
-        
-        if mod(cc,5)==1 || cc == 1 || cc == nbContours       
-            progressBar( cc / nbContours, sprintf('Processing contour %d/%d, please wait', cc, nbContours) );
+
+        if mod(cc,5)==1 || cc == 1 || cc == nbContours
+            progressBar( cc / nbContours - 0.000001, sprintf('Processing contour %d/%d, please wait', cc, nbContours) );
         end
-            
+
         nbRois = numel(tVoiInput{cc}.RoisTag);
         for rr=1:nbRois
-                    
+
             sROIitemName = sprintf('Item_%d', rr);
             for tt=1:numel(tRoiInput)
-                if strcmpi(tVoiInput{cc}.RoisTag{rr}, tRoiInput{tt}.Tag) 
-                    
+                if strcmpi(tVoiInput{cc}.RoisTag{rr}, tRoiInput{tt}.Tag)
+
                     if strcmpi(tRoiInput{tt}.Axe, 'Axes3') % Only axial plane is supported
-              
-                        bw = createMask(tRoiInput{tt}.Object);
 
-                        aBw  = imresize(bw , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+                         if strcmpi(tRoiInput{tt}.Type, 'images.roi.rectangle') || ...
+                            strcmpi(tRoiInput{tt}.Type, 'images.roi.circle')    || ...
+                            strcmpi(tRoiInput{tt}.Type, 'images.roi.ellipse')
 
-                        aBoundaries = bwboundaries(aBw);
-                        if ~isempty(aBoundaries)
-                            aBoundaries = aBoundaries{:};
-                            aBoundaries = aBoundaries/PIXEL_EDGE_RATIO;                                                            
+                             if bUseRoiTemplate == true
+                                 bw = roiTemplateToMask(tRoiInput{tt}, aDicomBuffer(:,:,tRoiInput{tt}.SliceNb));      
+                             else
+                                 bw = createMask(tRoiInput{tt}.Object);         
+                             end
+        
+                             aBw  = imresize(bw , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+    
+                             aBoundaries = bwboundaries(aBw);
+                             if ~isempty(aBoundaries)
+                                 aBoundaries = aBoundaries{:};
+                                 aBoundaries = aBoundaries/PIXEL_EDGE_RATIO;
+
+                                 aX = (aBoundaries(:,2)-(size(aDicomBuffer,1)/2)) * atDicomMeta{tRoiInput{tt}.SliceNb}.PixelSpacing(1);
+                                 aY = (aBoundaries(:,1)-(size(aDicomBuffer,2)/2)) * atDicomMeta{tRoiInput{tt}.SliceNb}.PixelSpacing(2);
+
+                                 dNBoundaries = size(aBoundaries,1);
+
+                                 aZ = zeros(dNBoundaries, 1);
+                                 aZ(:) = atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation;
+    
+                                 dXOffset=1;
+                                 dYOffset=1;
+                                 dZOffset=1;
+                                 aXYZ = zeros(dNBoundaries*3, 1);
+                                 for xx=1:3:size(aXYZ,1)
+                                    aXYZ(xx)=aX(dXOffset);
+                                    dXOffset = dXOffset+1;
+                                 end
+    
+                                 for yy=2:3:size(aXYZ,1)
+                                    aXYZ(yy)=aY(dYOffset);
+                                    dYOffset = dYOffset+1;
+                                 end
+    
+                                 for zz=3:3:size(aXYZ,1)
+                                    aXYZ(zz)=aZ(dZOffset);
+                                    dZOffset = dZOffset+1;
+                                 end  
+
+                                 info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPClassUID = tRoiInput{tt}.SOPClassUID;
+                                 info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPInstanceUID = tRoiInput{tt}.SOPInstanceUID;
+                                 info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourGeometricType = 'CLOSED_PLANAR';
+        
+                                 info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).NumberOfContourPoints = dNBoundaries; % To revisit
+                                 info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourData = aXYZ; % TO DO [NumberOfContourPoints * xyz]                                 
+                             end
+                         else
+                            aBoundaries = zeros(size(tRoiInput{tt}.Position, 1),2);
+
+                            aBoundaries(:,1)=tRoiInput{tt}.Position(:,2);
+                            aBoundaries(:,2)=tRoiInput{tt}.Position(:,1);
 
                             dNBoundaries = size(aBoundaries,1);
 
-                            aX = (aBoundaries(:,2)-(size(aBuffer,1)/2)) * tMetaData.PixelSpacing(1); 
-                            aY = (aBoundaries(:,1)-(size(aBuffer,2)/2)) * tMetaData.PixelSpacing(2); 
+                            a3DOffset = zeros(size(tRoiInput{tt}.Position, 1),3);
+                
+                            a3DOffset(:,1)=tRoiInput{tt}.Position(:,1)-1;
+                            a3DOffset(:,2)=tRoiInput{tt}.Position(:,2)-1;
+                            a3DOffset(:,3)=tRoiInput{tt}.SliceNb;
+
+                            sliceThikness = computeSliceSpacing(atDicomMeta);       
+                            [xfm,~] = TransformMatrix(atDicomMeta{1}, sliceThikness);
+                            out = pctransform(pointCloud(a3DOffset), affine3d(xfm'));
+
+                            aX = out.Location(:,1);
+                            aY = out.Location(:,2);
+
                             aZ = zeros(dNBoundaries, 1);
-                            aZ(:) = atDicomInfo{tRoiInput{tt}.SliceNb}.SliceLocation; 
+                            aZ(:) = atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation;
 
                             dXOffset=1;
                             dYOffset=1;
@@ -177,26 +252,26 @@ function writeRtStruct(sOutDir, dOffset)
                             aXYZ = zeros(dNBoundaries*3, 1);
                             for xx=1:3:size(aXYZ,1)
                                 aXYZ(xx)=aX(dXOffset);
-                                dXOffset = dXOffset+1;                       
+                                dXOffset = dXOffset+1;
                             end
 
                             for yy=2:3:size(aXYZ,1)
                                 aXYZ(yy)=aY(dYOffset);
-                                dYOffset = dYOffset+1;                       
+                                dYOffset = dYOffset+1;
                             end
 
                             for zz=3:3:size(aXYZ,1)
                                 aXYZ(zz)=aZ(dZOffset);
-                                dZOffset = dZOffset+1;                       
+                                dZOffset = dZOffset+1;
                             end
 
-                            info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPClassUID = tRoiInput{tt}.SOPClassUID;
-                            info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPInstanceUID = tRoiInput{tt}.SOPInstanceUID;
-                            info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourGeometricType = 'CLOSED_PLANAR';   
-
-                            info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).NumberOfContourPoints = dNBoundaries; % To revisit
-                            info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourData = aXYZ; % TO DO [NumberOfContourPoints * xyz]
-                        end
+                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPClassUID = tRoiInput{tt}.SOPClassUID;
+                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPInstanceUID = tRoiInput{tt}.SOPInstanceUID;
+                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourGeometricType = 'CLOSED_PLANAR';
+    
+                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).NumberOfContourPoints = dNBoundaries; % To revisit
+                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourData = aXYZ; % TO DO [NumberOfContourPoints * xyz]                            
+                         end
                     end
                     break;
                 end
@@ -205,38 +280,43 @@ function writeRtStruct(sOutDir, dOffset)
     end
 
     % RTROIObservationsSequence %
-    
+
     for cc=1:nbContours
         sVOIitemName = sprintf('Item_%d', cc);
-        info.RTROIObservationsSequence.(sVOIitemName).ObservationNumber = cc;
-        info.RTROIObservationsSequence.(sVOIitemName).ReferencedROINumber = cc;
-        info.RTROIObservationsSequence.(sVOIitemName).ROIObservationLabel = tVoiInput{cc}.Label;
+        info.RTROIObservationsSequence.(sVOIitemName).ObservationNumber    = cc;
+        info.RTROIObservationsSequence.(sVOIitemName).ReferencedROINumber  = cc;
+        info.RTROIObservationsSequence.(sVOIitemName).ROIObservationLabel  = tVoiInput{cc}.Label;
         info.RTROIObservationsSequence.(sVOIitemName).RTROIInterpretedType = 'ORGAN';
 
         info.RTROIObservationsSequence.(sVOIitemName).ROIInterpreter.FamilyName = '';
         info.RTROIObservationsSequence.(sVOIitemName).ROIInterpreter.GivenName = '';
         info.RTROIObservationsSequence.(sVOIitemName).ROIInterpreter.MiddleName = '';
         info.RTROIObservationsSequence.(sVOIitemName).ROIInterpreter.NamePrefix = '';
-        info.RTROIObservationsSequence.(sVOIitemName).ROIInterpreter.NameSuffix = '';        
- 
+        info.RTROIObservationsSequence.(sVOIitemName).ROIInterpreter.NameSuffix = '';
+
     end
     
-    sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                
-    sWriteDir = char(sOutDir) + "TriDFusion_RT_" + char(sDate) + '/';              
-    if ~(exist(char(sWriteDir), 'dir'))
-        mkdir(char(sWriteDir));
+    if bSubDir == true
+        sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
+        sWriteDir = char(sOutDir) + "TriDFusion_RT_" + char(sDate) + '/';
+        if ~(exist(char(sWriteDir), 'dir'))
+            mkdir(char(sWriteDir));
+        end
+    else
+        sWriteDir = char(sOutDir);       
     end
     
     sOutFile = sprintf('%s%s.dcm', sWriteDir, info.SeriesInstanceUID);
     dicomwrite([], sOutFile, info, 'CreateMode', 'copy');
-    
+
     progressBar( 1, sprintf('Export %s completed %s', sOutFile) );
-    
+
     catch
-        progressBar(1, 'Error:writeRtStruct()');                
+        progressBar(1, sprintf('Error:writeRtStruct(), %s', sOutDir) );
     end
-    
+
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
-    drawnow;  
- 
+    drawnow;
+
 end
+

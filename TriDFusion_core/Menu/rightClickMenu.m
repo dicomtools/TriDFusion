@@ -11,61 +11,60 @@ function rightClickMenu(sAction, objectPtr)
 %Last specifications modified:
 %
 % Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
-% 
+%
 % This file is part of The Triple Dimention Fusion (TriDFusion).
-% 
+%
 % TriDFusion development has been led by:  Daniel Lafontaine
-% 
-% TriDFusion is distributed under the terms of the Lesser GNU Public License. 
-% 
+%
+% TriDFusion is distributed under the terms of the Lesser GNU Public License.
+%
 %     This version of TriDFusion is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 % TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 % without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 % See the GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent paContextMenu; 
+    persistent paContextMenu;
 
     if     strcmpi('reset', sAction)
         paContextMenu = '';
-        
-    elseif strcmpi('on', sAction)        
+
+    elseif strcmpi('on', sAction)
         for ff=1:numel(paContextMenu)
             for gg=1:numel(paContextMenu{ff}.Children)
-                paContextMenu{ff}.Children(gg).Visible = 'on';          
+                paContextMenu{ff}.Children(gg).Visible = 'on';
             end
-        end         
-        
+        end
+
     elseif strcmpi('off', sAction)
         for ff=1:numel(paContextMenu)
             for gg=1:numel(paContextMenu{ff}.Children)
-                paContextMenu{ff}.Children(gg).Visible = 'off';          
+                paContextMenu{ff}.Children(gg).Visible = 'off';
             end
-        end           
-        
+        end
+
     elseif strcmpi('add', sAction)
         cm = uicontextmenu(fiMainWindowPtr('get'));
-        uimenu(cm, 'Text', 'Paste Object', 'Callback', @pasteRoiCallback);
+        uimenu(cm, 'Text', 'Paste Contour', 'Callback', @pasteRoiCallback);
         uimenu(cm, 'Text', 'Hide Menu', 'Separator', 'on', 'Callback', @hideRoiMenuCallback);
-        
+
         if isfield(objectPtr, 'ContextMenu')
-            objectPtr.ContextMenu = cm;                
-            paContextMenu{numel(paContextMenu)+1} = objectPtr.ContextMenu;            
+            objectPtr.ContextMenu = cm;
+            paContextMenu{numel(paContextMenu)+1} = objectPtr.ContextMenu;
         else
-            objectPtr.UIContextMenu = cm;                
-            paContextMenu{numel(paContextMenu)+1} = objectPtr.UIContextMenu;            
+            objectPtr.UIContextMenu = cm;
+            paContextMenu{numel(paContextMenu)+1} = objectPtr.UIContextMenu;
         end
     end
-    
-    function hideRoiMenuCallback(~, ~)
-        roiTemplate('set', '');
-    end
-    
-end
 
+    function hideRoiMenuCallback(~, ~)
+        roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), '');
+    end
+
+end

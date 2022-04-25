@@ -1,5 +1,5 @@
-function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, bUpdateDescription)
-%function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode)
+function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, bRefOutputView, bUpdateDescription)
+%function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, bRefOutputView, bUpdateDescription)
 %Resample any modalities.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -31,25 +31,11 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
         
     dimsRef = size(refImage);        
-    dimsDcm = size(dcmImage);
-
-    if numel(dimsRef)==numel(dimsDcm)
-        if dimsRef == dimsDcm
-            resampImage = dcmImage;
-            return;
-        end
-    end 
-     
+    dimsDcm = size(dcmImage);        
+    
     dcmSliceThickness = computeSliceSpacing(atDcmMetaData);
-
-    yScale = size(refImage,1)/size(dcmImage,1);
-    xScale = size(refImage,2)/size(dcmImage,2);
-    zScale = size(refImage,3)/size(dcmImage,3);
-    f = [ yScale 0      0      0
-          0      xScale 0      0
-          0      0      zScale 0
-          0      0      0      1];
-      
+    refSliceThickness = computeSliceSpacing(atRefMetaData);
+          
     if dcmSliceThickness == 0  
         dcmSliceThickness = 1;
     end
@@ -62,28 +48,38 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
         end       
     end
 
-    Rdcm  = imref3d(size(dcmImage), atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
-    % Rref  = imref3d(size(refImage),atRefMetaData{1}.PixelSpacing(2),atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
-
-     TF = affine3d(f);
-
-    [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')) );  
-
-    if dimsRef(3) < numel(atDcmMetaData) && ...
+    Rdcm = imref3d(size(dcmImage), atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
+%    Rref = imref3d(size(refImage), atRefMetaData{1}.PixelSpacing(2), atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
+    
+    [M, ~] = getTransformMatrix(atDcmMetaData{1}, dcmSliceThickness, atRefMetaData{1}, refSliceThickness);
+    TF = affine3d(M);
+    
+    if bRefOutputView == true
+        if dimsDcm(3) ~= dimsRef(3)
+            [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
+        else
+            [resampImage, ~] = imwarp(dcmImage, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef));  
+        end
+    else
+        [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
+    end
+        
+    if numel(atRefMetaData) < numel(atDcmMetaData) && ...
        numel(atDcmMetaData) ~= 1   
-        atDcmMetaData = atDcmMetaData(1:dimsRef(3));
+        atDcmMetaData = atDcmMetaData(1:numel(atRefMetaData));
 
-    elseif dimsRef(3) > numel(atDcmMetaData) && ...
+    elseif numel(atRefMetaData) > numel(atDcmMetaData) && ...
            numel(atDcmMetaData) ~= 1   
 
-        for cc=1:dimsRef(3)- numel(atDcmMetaData)
+        for cc=1:numel(atRefMetaData)- numel(atDcmMetaData)
             atDcmMetaData{end+1} = atDcmMetaData{end}; %Add missing slice
         end
     end
 
     for jj=1:numel(atDcmMetaData)
+        
         if numel(atRefMetaData)==numel(atDcmMetaData)
-            atDcmMetaData{jj}.PatientPosition = atRefMetaData{jj}.PatientPosition;  
+            atDcmMetaData{jj}.PatientPosition = atDcmMetaData{jj}.PatientPosition;  
             atDcmMetaData{jj}.InstanceNumber  = atRefMetaData{jj}.InstanceNumber;               
             atDcmMetaData{jj}.NumberOfSlices  = atRefMetaData{jj}.NumberOfSlices;
         else
@@ -91,26 +87,33 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
             atDcmMetaData{jj}.InstanceNumber  = jj;               
             atDcmMetaData{jj}.NumberOfSlices  = numel(atRefMetaData);                
         end
-        atDcmMetaData{jj}.PixelSpacing(1) = dimsDcm(1)/dimsRef(1)*atDcmMetaData{jj}.PixelSpacing(1);
-        atDcmMetaData{jj}.PixelSpacing(2) = dimsDcm(2)/dimsRef(2)*atDcmMetaData{jj}.PixelSpacing(2);
-        atDcmMetaData{jj}.SliceThickness  = dimsDcm(3)/dimsRef(3)*atDcmMetaData{jj}.SliceThickness;
-        atDcmMetaData{jj}.SpacingBetweenSlices  = dimsDcm(3)/dimsRef(3)*atDcmMetaData{jj}.SpacingBetweenSlices;
-        
+
+        atDcmMetaData{jj}.PixelSpacing(1) = atRefMetaData{jj}.PixelSpacing(1);
+        atDcmMetaData{jj}.PixelSpacing(2) = atRefMetaData{jj}.PixelSpacing(2);
+        atDcmMetaData{jj}.SliceThickness  = atRefMetaData{jj}.SliceThickness;
+        atDcmMetaData{jj}.SpacingBetweenSlices  = refSliceThickness;
+
         if bUpdateDescription == true 
             atDcmMetaData{jj}.SeriesDescription  = sprintf('RSP %s', atDcmMetaData{1}.SeriesDescription);
         end           
     end
        
-    newSliceThickness = dcmSliceThickness * (dimsDcm(3)/dimsRef(3));        
-    for cc=1:numel(atDcmMetaData)-1
-        if atDcmMetaData{1}.ImagePositionPatient(3) < atDcmMetaData{2}.ImagePositionPatient(3)
-            atDcmMetaData{cc+1}.ImagePositionPatient(3) = atDcmMetaData{cc}.ImagePositionPatient(3) + newSliceThickness;               
-            atDcmMetaData{cc+1}.SliceLocation = atDcmMetaData{cc}.SliceLocation + newSliceThickness; 
-        else
-            atDcmMetaData{cc+1}.ImagePositionPatient(3) = atDcmMetaData{cc}.ImagePositionPatient(3) - newSliceThickness;               
-            atDcmMetaData{cc+1}.SliceLocation = atDcmMetaData{cc}.SliceLocation - newSliceThickness;             
+    if bRefOutputView == false
+        for cc=1:numel(atDcmMetaData)-1
+            if atDcmMetaData{1}.ImagePositionPatient(3) < atDcmMetaData{2}.ImagePositionPatient(3)
+                atDcmMetaData{cc+1}.ImagePositionPatient(3) = atDcmMetaData{cc}.ImagePositionPatient(3) + refSliceThickness;               
+                atDcmMetaData{cc+1}.SliceLocation = atDcmMetaData{cc}.SliceLocation + refSliceThickness; 
+            else
+                atDcmMetaData{cc+1}.ImagePositionPatient(3) = atDcmMetaData{cc}.ImagePositionPatient(3) - refSliceThickness;               
+                atDcmMetaData{cc+1}.SliceLocation = atDcmMetaData{cc}.SliceLocation - refSliceThickness;             
+            end
         end
-    end        
+    else
+        for cc=1:numel(atDcmMetaData)        
+            atDcmMetaData{cc}.ImagePositionPatient = atRefMetaData{cc}.ImagePositionPatient;               
+            atDcmMetaData{cc}.SliceLocation = atDcmMetaData{cc}.SliceLocation - refSliceThickness;                                      
+        end
+    end
     
     iOffset = get(uiSeriesPtr('get'), 'Value');
     if iOffset <= numel(inputTemplate('get')) && bUpdateDescription == true 

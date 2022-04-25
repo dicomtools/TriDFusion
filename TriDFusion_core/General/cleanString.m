@@ -1,4 +1,4 @@
-function sCleanString = cleanString(sInputString)
+function sCleanString = cleanString(sInputString, sDelimiter)
 %function sCleanString = cleanString(sInputString)
 %Remove illegal character from string.
 %See TriDFuison.doc (or pdf) for more information about options.
@@ -30,5 +30,9 @@ function sCleanString = cleanString(sInputString)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    sCleanString = regexprep(sInputString, {' ','[',',','<','>','{','}','/','\',',^','%','!','$','*','(',')','@','#',']',':'}, '');
+    if ~exist('sDelimiter', 'var')
+        sDelimiter ='';
+    end
+    
+    sCleanString = regexprep(sInputString, {' ','[',',','<','>','{','}','/','\',',^','%','!','$','*','(',')','@','#',']',':'}, sDelimiter);
 end

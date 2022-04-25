@@ -31,8 +31,10 @@ function oneFrame(sDirection)
         progressBar(1, 'Error: Require a 3D Volume!');               
         return;
     end               
+    
+    windowButton('set', 'down');  
 
-    if gca == axes1Ptr('get') || ...
+    if (gca == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  && playback2DMipOnly('get') == false) || ...
        (isVsplash('get') == true && ...
         strcmpi(vSplahView('get'), 'coronal'))
 
@@ -56,10 +58,13 @@ function oneFrame(sDirection)
             end
 
             sliceNumber('set', 'coronal', iCurrentSlice);
+            
+            set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get'), 1));
 
-    elseif gca == axes2Ptr('get') || ...
+    elseif (gca == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  && playback2DMipOnly('get') == false) || ...
        (isVsplash('get') == true && ...
         strcmpi(vSplahView('get'), 'sagittal'))
+    
 %              set(uiSliderSagPtr('get'), 'Value', iSlider);
             iLastSlice = size(dicomBuffer('get'), 2);    
             iCurrentSlice = sliceNumber('get', 'sagittal'); 
@@ -81,8 +86,13 @@ function oneFrame(sDirection)
             end  
 
             sliceNumber('set', 'sagittal', iCurrentSlice);
+            
+            set(uiSliderSagPtr('get'), 'Value', sliceNumber('get', 'sagittal') / size(dicomBuffer('get'), 2));
 
-    else
+    elseif (gca == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  && playback2DMipOnly('get') == false) || ...
+       (isVsplash('get') == true && ...
+        strcmpi(vSplahView('get'), 'axial'))
+    
             iLastSlice = size(dicomBuffer('get'), 3);            
             iCurrentSlice = sliceNumber('get', 'axial');
 
@@ -103,12 +113,40 @@ function oneFrame(sDirection)
 
             sliceNumber('set', 'axial', iCurrentSlice);
 
-   %         iSlider = iCurrentSlice/iLastSlice; 
+           set(uiSliderTraPtr('get'), 'Value', 1 - (sliceNumber('get', 'axial') / size(dicomBuffer('get'), 3)));                       
 
-   %         set(uiSliderTraPtr('get'), 'Value', iSlider);
+    else
+        if isVsplash('get') == false
+            iMipAngleValue = mipAngle('get');
 
+            if strcmpi(sDirection, 'Foward')
+                iMipAngleValue = iMipAngleValue+1;
+            else
+                iMipAngleValue = iMipAngleValue-1;
+            end
+            
+            if iMipAngleValue <=0
+                iMipAngleValue = 32;
+            end   
+                
+            if iMipAngleValue > 32
+                iMipAngleValue = 1;
+            end    
+
+            mipAngle('set', iMipAngleValue);                    
+
+            if iMipAngleValue == 1
+                dMipSliderValue = 0;
+            else
+                dMipSliderValue = mipAngle('get')/32;
+            end
+
+            set(uiSliderMipPtr('get'), 'Value', dMipSliderValue);
+        end
     end
 
-    refreshImages();                        
+    refreshImages();        
+    
+    windowButton('set', 'up');  
 
 end  

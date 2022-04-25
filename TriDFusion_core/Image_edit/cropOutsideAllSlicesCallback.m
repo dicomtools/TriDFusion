@@ -46,55 +46,64 @@ function cropOutsideAllSlicesCallback(hObject,~)
     
     dBufferSize = size(im);   
 
-    axe = axePtr('get');
-    if ~isempty(axe)
-        imAxe = imAxePtr('get');
-        if gca == axe                        
-            b = imAxe.CData;
-            c = createMask(hObject.UserData, b);
-            b(c == 0) = cropValue('get')-c(c == 0); % crop outside
-            imAxe.CData = b;                
-            im = b;                           
-        end
-    end
-
-    if ~isempty(axes1Ptr('get')) && ...
-       ~isempty(axes2Ptr('get')) && ...
-       ~isempty(axes3Ptr('get'))
-
-        if gca == axes1Ptr('get')         
-
-            for iCoronal=1:dBufferSize(1)
-                b = permute(im(iCoronal,:,:), [3 2 1]);
-                c = createMask(hObject.UserData, b);
-                b(c == 0) = cropValue('get')-c(c == 0); % crop outside
-                im(iCoronal,:,:) = permuteBuffer(b, 'coronal');     
-
-                progressBar(iCoronal / dBufferSize(1), 'Croping outside progress');
+    if dBufferSize(3) == 1
+        
+        axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+        if ~isempty(axe)
+            if gca == axe        
+                
+                im = cropOutside(hObject.UserData, ...
+                                im, ...
+                                [], ...
+                                'Axe' ...
+                                );                          
             end
         end
+    else
+        if ~isempty(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
+           ~isempty(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
+           ~isempty(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')))
 
-        if gca == axes2Ptr('get')        
+            if gca == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))         
 
-            for iSagittal=1:dBufferSize(2)
-                b = permute(im(:,iSagittal,:), [3 1 2]);
-                c = createMask(hObject.UserData,b);
-                b(c == 0) = cropValue('get')-c(c == 0); % crop outside
-                im(:,iSagittal,:) = permuteBuffer(b, 'sagittal');  
+                for iCoronal=1:dBufferSize(1)
+                    
+                    im = cropOutside(hObject.UserData, ...
+                                    im, ...
+                                    iCoronal, ...
+                                    'Axes1' ...
+                                    );     
 
-                progressBar(iSagittal / dBufferSize(2), 'Croping outside progress');
+                    progressBar(iCoronal / dBufferSize(1), 'Mask outside in progress');
+                end
             end
-        end
 
-        if gca == axes3Ptr('get')      
+            if gca == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))        
 
-            for iAxial=1:dBufferSize(3)
-                b = im(:,:,iAxial);       
-                c = createMask(hObject.UserData,b);
-                b(c == 0) = cropValue('get')-c(c == 0); % crop outside                
-                im(:,:,iAxial) = b;     
+                for iSagittal=1:dBufferSize(2)
+                    
+                    im = cropOutside(hObject.UserData, ...
+                                    im, ...
+                                    iSagittal, ...
+                                    'Axes2' ...
+                                    );  
 
-                progressBar(iAxial / dBufferSize(3), 'Croping outside progress');
+                    progressBar(iSagittal / dBufferSize(2), 'Mask outside in progress');
+                end
+            end
+
+            if gca == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))      
+
+                for iAxial=1:dBufferSize(3)
+                    
+                    im = cropOutside(hObject.UserData, ...
+                                    im, ...
+                                    iAxial, ...
+                                    'Axes3' ...
+                                    );    
+
+                    progressBar(iAxial / dBufferSize(3), 'Mask outside in progress');
+                end
             end
         end
     end

@@ -39,7 +39,7 @@ function  [aAlphaMap, sAlphaType] = getVolFusionAlphaMap(sAction, im, sTypeOrtMe
             end
             pasAlphaType = sTypeOrtMetaData;
             
-        elseif strcmpi(sTypeOrtMetaData, 'custom')
+        elseif strcmpi(sTypeOrtMetaData, 'Custom')
             volICObj = volICFusionObject('get');
             if isempty(volICObj)
                 paAlphaMap = linspace(0, 1, 256)';
@@ -48,41 +48,41 @@ function  [aAlphaMap, sAlphaType] = getVolFusionAlphaMap(sAction, im, sTypeOrtMe
             end
             pasAlphaType = sTypeOrtMetaData;   
             
-        elseif strcmpi(sTypeOrtMetaData, 'mr')
-           paAlphaMap = defaultVolFusionAlphaMap(im, 'mr');
+        elseif strcmpi(sTypeOrtMetaData, 'MR')
+           paAlphaMap = defaultVolFusionAlphaMap(im, 'MR');
            pasAlphaType = sTypeOrtMetaData;
 
-        elseif strcmpi(sTypeOrtMetaData, 'ct')     
-            paAlphaMap = defaultVolFusionAlphaMap(im, 'ct');
+        elseif strcmpi(sTypeOrtMetaData, 'CT')     
+            paAlphaMap = defaultVolFusionAlphaMap(im, 'CT');
             pasAlphaType = sTypeOrtMetaData;
       
-        elseif strcmpi(sTypeOrtMetaData, 'pt')     
-            paAlphaMap = defaultVolFusionAlphaMap(im, 'pt');
+        elseif strcmpi(sTypeOrtMetaData, 'PET')     
+            paAlphaMap = defaultVolFusionAlphaMap(im, 'PET');
             pasAlphaType = sTypeOrtMetaData;   
             
-         elseif strcmp(sTypeOrtMetaData, 'auto')               
+         elseif strcmpi(sTypeOrtMetaData, 'Auto')               
             paAlphaMap   = '';
-            pasAlphaType = 'auto';             
+            pasAlphaType = 'Auto';             
         end
     else
-        if strcmpi(pasAlphaType, 'custom')
+        if strcmpi(pasAlphaType, 'Custom')
             volICObj = volICFusionObject('get');                    
             if ~isempty(volICObj)
                 paAlphaMap = computeAlphaMap(volICObj);
             end
-        elseif strcmp(pasAlphaType, 'linear')
+        elseif strcmpi(pasAlphaType, 'linear')
             paAlphaMap = linspace(0, volLinearFusionAlphaValue('get'), 256)';                        
            
-        elseif strcmpi(pasAlphaType, 'auto')
-            if strcmpi(sTypeOrtMetaData{1}.Modality, 'ct')
-                paAlphaMap   = defaultVolFusionAlphaMap(im, 'ct');
-                pasAlphaType = 'auto';
-            elseif strcmpi(sTypeOrtMetaData{1}.Modality, 'mr')
-                paAlphaMap   = defaultVolFusionAlphaMap(im, 'mr');
-                pasAlphaType = 'auto';    
+        elseif strcmpi(pasAlphaType, 'Auto')
+            if strcmpi(sTypeOrtMetaData{1}.Modality, 'CT')
+                paAlphaMap   = defaultVolFusionAlphaMap(im, 'CT');
+                pasAlphaType = 'Auto';
+            elseif strcmpi(sTypeOrtMetaData{1}.Modality, 'MR')
+                paAlphaMap   = defaultVolFusionAlphaMap(im, 'MR');
+                pasAlphaType = 'Auto';    
             else
-                paAlphaMap   = defaultVolFusionAlphaMap(im, 'pt');
-                pasAlphaType = 'auto';                  
+                paAlphaMap   = defaultVolFusionAlphaMap(im, 'PET');
+                pasAlphaType = 'Auto';                  
             end
         end
 

@@ -1,6 +1,6 @@
-function imEdge = getEdgeDetection(im, sMethod, dFudgeFactor)      
-%function imEdge = getEdgeDetection(im, sMethod, dFudgeFactor)
-%Get 2D/3D edge image from a method and factor.
+function aBufferEdge = getEdgeDetection(aBuffer, sMethod, dFudgeFactor)      
+%function aBuffer = getEdgeDetection(aBuffer, sMethod, dFudgeFactor)
+%Get 2D/3D edge aBufferage from a method and factor.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -9,7 +9,7 @@ function imEdge = getEdgeDetection(im, sMethod, dFudgeFactor)
 %
 % Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
-% This file is part of The Triple Dimention Fusion (TriDFusion).
+% This file is part of The Triple DaBufferention Fusion (TriDFusion).
 % 
 % TriDFusion development has been led by:  Daniel Lafontaine
 % 
@@ -21,13 +21,15 @@ function imEdge = getEdgeDetection(im, sMethod, dFudgeFactor)
 %     (at your option) any later version.
 % 
 % TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-% without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+% without even the aBufferplied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
+
+    aBufferInit = aBuffer;
     
-    if isempty(im)
+    if isempty(aBuffer)
         return;
     end
 
@@ -43,41 +45,57 @@ function imEdge = getEdgeDetection(im, sMethod, dFudgeFactor)
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
     
-    aSize = size(im);
-    imMask = zeros(aSize);
+    aSize = size(aBuffer);
+    aBufferMask = zeros(aSize);
 
-    if size(im, 3) == 1
-        im2D = im(:,:);
+    if size(aBuffer, 3) == 1
         
-        [~, dThreshold] = edge(im2D, sMethod);        
-        imEdge = double(edge(im2D, sMethod, dThreshold * dFudgeFactor));  
+        [~, dThreshold] = edge(aBuffer, sMethod);        
+        aBufferEdge = double(edge(aBuffer, sMethod, dThreshold * dFudgeFactor));  
         
-        imMask(:,:) = imEdge;            
+        aBufferMask(:,:) = aBufferEdge;            
     else
         for aa=1:aSize(3)
             progressBar(aa/aSize(3), sprintf('Processing %s Step %d/%d', sMethod, aa, aSize(3)));
-            im2D = im(:,:,aa);
+            aBuffer2D = aBuffer(:,:,aa);
             
-            [~, dThreshold] = edge(im2D, sMethod);        
-            imEdge = double(edge(im2D, sMethod, dThreshold * dFudgeFactor));  
+            [~, dThreshold] = edge(aBuffer2D, sMethod);        
+            aBufferEdge = double(edge(aBuffer2D, sMethod, dThreshold * dFudgeFactor));  
         
-            imMask(:,:,aa) = imEdge;
+            aBufferMask(:,:,aa) = aBufferEdge;
         end
         progressBar(1, 'Ready');
     end
 
-    lMin = min(im, [], 'all');
-    lMax = max(im, [], 'all');
+    lMin = min(aBuffer, [], 'all');
+    lMax = max(aBuffer, [], 'all');
+        
+    aBuffer(aBufferMask == 0) = lMin;
+    aBuffer(aBufferMask ~= 0) = lMax;
     
-    imEdge = im;
+    % Get constraint 
+
+    [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value'));
+
+    bInvertMask = invertConstraint('get');
+
+    tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
+    aLogicalMask = roiConstraintToMask(aBufferInit, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);        
+
+    aBuffer(aLogicalMask==0) = aBufferInit(aLogicalMask==0); % Set the constraint
     
-    imEdge(imMask == 0) = lMin;
-    imEdge(imMask ~= 0) = lMax;
+    aBufferEdge = aBuffer;
     
     catch
         progressBar(1, 'Error:getEdgeDetection()');           
     end
-
-    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    
+    if isMoveImageActivated('get') == true
+        set(fiMainWindowPtr('get'), 'Pointer', 'fleur');
+    else
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    end
+    
     drawnow; 
 end

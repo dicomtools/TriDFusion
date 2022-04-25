@@ -117,10 +117,15 @@ function oneGate3D(sDirection)
             end
         end
     end
-
+    
+    if isempty( axePtr('get', [], iOffset) )
+        axe = axePtr('get', [], iSeriesOffset);
+        axePtr('set', axe, iOffset);
+    end
+       
     set(uiSeriesPtr('get'), 'Value', iOffset);
 
-    aBuffer = dicomBuffer('get');
+    aBuffer = squeeze(dicomBuffer('get'));
 
     if isempty(aBuffer)
         if     strcmp(imageOrientation('get'), 'axial')
@@ -235,7 +240,7 @@ function oneGate3D(sDirection)
 
                 mipObj = initVolShow(aBuffer, uiOneWindowPtr('get'), 'MaximumIntensityProjection', tInput(iSeriesOffset).atDicomInfo);
                 if isFusion('get') == true
-                    mipFusionObj = initVolShow(fusionBuffer('get'), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);
+                    mipFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);
                 end
             end
         end
@@ -245,7 +250,7 @@ function oneGate3D(sDirection)
             if dPriority == dPriorityLoop
                 isoObj = initVolShow(aBuffer, uiOneWindowPtr('get'), 'Isosurface', tInput(iSeriesOffset).atDicomInfo);
                 if isFusion('get') == true
-                    isoFusionObj = initVolShow(fusionBuffer('get'), uiOneWindowPtr('get'), 'Isosurface', atFuseMetaData);
+                    isoFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'Isosurface', atFuseMetaData);
                 end
             end
         end
@@ -255,7 +260,7 @@ function oneGate3D(sDirection)
             if dPriority == dPriorityLoop
                 volObj = initVolShow(aBuffer, uiOneWindowPtr('get'), 'VolumeRendering', tInput(iSeriesOffset).atDicomInfo);
                 if isFusion('get') == true
-                    volFusionObj = initVolShow(fusionBuffer('get'), uiOneWindowPtr('get'), 'VolumeRendering', atFuseMetaData);
+                    volFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'VolumeRendering', atFuseMetaData);
                 end
             end
         end

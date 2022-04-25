@@ -45,7 +45,7 @@ function editLabelCallback(hObject, ~)
 %    end
 
 %    javaFrame = get(editLabelWindow, 'JavaFrame');
-%    javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));  
+%    javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
 
     uicontrol(editLabelWindow,...
               'style'   , 'text',...
@@ -83,19 +83,19 @@ function editLabelCallback(hObject, ~)
    end
 
    function acceptEditLabelCallback(~, ~)
-       
+
         hObject.UserData.Label = get(edtLabelName, 'String');
-        
-        atRoi = roiTemplate('get');
+
+        atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
         for bb=1:numel(atRoi)
             if strcmpi(hObject.UserData.Tag, atRoi{bb}.Tag)
                 atRoi{bb}.Label = hObject.UserData.Label;
-                roiTemplate('set', atRoi);
+                roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoi);
                 break;
             end
-        end 
-    
+        end
+
         delete(editLabelWindow);
    end
 

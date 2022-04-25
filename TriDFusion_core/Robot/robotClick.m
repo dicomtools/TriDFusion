@@ -36,4 +36,6 @@ function robotClick()
 
     pRobot.mouseRelease(MouseEvent.BUTTON1_MASK);
     pRobot.mousePress(MouseEvent.BUTTON1_MASK);
+%    pRobot.mouseRelease(MouseEvent.BUTTON1_MASK);
+    
 end  

@@ -43,13 +43,13 @@ function maskToVoi(aMask, sLabel, aColor, sPlane, dSeriesOffset, bPixelEdge)
     drawnow;   
     
     if strcmpi(sPlane, 'coronal')
-        axRoi = axes1Ptr('get');
+        axRoi = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
         dMaskSize = aMaskSize(1);
     elseif strcmpi(sPlane, 'sagittal')
-        axRoi = axes2Ptr('get');
+        axRoi = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
         dMaskSize = aMaskSize(2);
     else
-        axRoi = axes3Ptr('get');
+        axRoi = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
         dMaskSize = aMaskSize(3);
     end
      
@@ -83,7 +83,7 @@ function maskToVoi(aMask, sLabel, aColor, sPlane, dSeriesOffset, bPixelEdge)
                 aSlice = imresize(aSlice,3, 'nearest'); % do not go directly through pixel centers
             end
             
-            [maskSlice, L,N,A] = bwboundaries(aSlice, 'noholes', 4); 
+            [maskSlice, ~,~,~] = bwboundaries(aSlice, 'noholes', 4); 
 
             if ~isempty(maskSlice)
                 for jj=1:numel(maskSlice)
@@ -96,7 +96,7 @@ function maskToVoi(aMask, sLabel, aColor, sPlane, dSeriesOffset, bPixelEdge)
                     
                     aPosition = flip(curentMask{1}, 2);
            
-                    pRoi = drawfreehand(axRoi, 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'off', 'FaceSelectable', 0, 'FaceAlpha', 0);  
+                    pRoi = drawfreehand(axRoi, 'Smoothing', 1, 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'off', 'FaceSelectable', 0, 'FaceAlpha', 0);  
                     pRoi.Waypoints(:) = false;
 
                     addRoi(pRoi, dSeriesOffset);                  
@@ -105,9 +105,13 @@ function maskToVoi(aMask, sLabel, aColor, sPlane, dSeriesOffset, bPixelEdge)
 
                     uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback); 
                     uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', pRoi, 'Callback', @clearWaypointsCallback); 
+                    
+                    constraintMenu(pRoi);
 
                     cropMenu(pRoi);
 
+                    voiMenu(pRoi);
+                
                     uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on'); 
 
                %     set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
@@ -120,7 +124,7 @@ function maskToVoi(aMask, sLabel, aColor, sPlane, dSeriesOffset, bPixelEdge)
     end
     
     if ~isempty(asTag)
-        createVoiFromRois(asTag, sLabel);
+        createVoiFromRois(dSeriesOffset, asTag, sLabel);
         setVoiRoiSegPopup();
     end
     

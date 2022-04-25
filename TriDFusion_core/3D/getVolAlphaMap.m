@@ -31,7 +31,7 @@ function [aAlphaMap, sAlphaType] = getVolAlphaMap(sAction, im, sTypeOrtMetaData,
     persistent pasAlphaType;
 
     if strcmpi('set', sAction)
-        if strcmpi(sTypeOrtMetaData, 'linear')
+        if strcmpi(sTypeOrtMetaData, 'Linear')
             if exist('aValue', 'var')
                 paAlphaMap   = aValue;
             else
@@ -39,7 +39,7 @@ function [aAlphaMap, sAlphaType] = getVolAlphaMap(sAction, im, sTypeOrtMetaData,
             end
             pasAlphaType = sTypeOrtMetaData;
             
-        elseif strcmpi(sTypeOrtMetaData, 'custom')
+        elseif strcmpi(sTypeOrtMetaData, 'Custom')
             volICObj = volICObject('get');
             if isempty(volICObj)
                 paAlphaMap = linspace(0, 1, 256)';
@@ -48,41 +48,41 @@ function [aAlphaMap, sAlphaType] = getVolAlphaMap(sAction, im, sTypeOrtMetaData,
             end
             pasAlphaType = sTypeOrtMetaData;   
             
-        elseif strcmpi(sTypeOrtMetaData, 'mr')
-           paAlphaMap = defaultVolAlphaMap(im, 'mr');
+        elseif strcmpi(sTypeOrtMetaData, 'MR')
+           paAlphaMap = defaultVolAlphaMap(im, 'MR');
            pasAlphaType = sTypeOrtMetaData;
 
-        elseif strcmpi(sTypeOrtMetaData, 'ct')     
-            paAlphaMap = defaultVolAlphaMap(im, 'ct');
+        elseif strcmpi(sTypeOrtMetaData, 'CT')     
+            paAlphaMap = defaultVolAlphaMap(im, 'CT');
             pasAlphaType = sTypeOrtMetaData;
       
-        elseif strcmpi(sTypeOrtMetaData, 'pt')     
-            paAlphaMap = defaultVolAlphaMap(im, 'pt');
+        elseif strcmpi(sTypeOrtMetaData, 'PET')     
+            paAlphaMap = defaultVolAlphaMap(im, 'PET');
             pasAlphaType = sTypeOrtMetaData;   
             
-         elseif strcmp(sTypeOrtMetaData, 'auto')               
+         elseif strcmpi(sTypeOrtMetaData, 'Auto')               
             paAlphaMap   = '';
-            pasAlphaType = 'auto';             
+            pasAlphaType = 'Auto';             
         end
     else
-        if strcmpi(pasAlphaType, 'custom')
+        if strcmpi(pasAlphaType, 'Custom')
             volICObj = volICObject('get');                    
             if ~isempty(volICObj)
                 paAlphaMap = computeAlphaMap(volICObj);
             end
-        elseif strcmp(pasAlphaType, 'linear')
+        elseif strcmpi(pasAlphaType, 'Linear')
             paAlphaMap = linspace(0, volLinearAlphaValue('get'), 256)';                        
             
-        elseif strcmpi(pasAlphaType, 'auto')
-            if strcmpi(sTypeOrtMetaData{1}.Modality, 'ct')
-                paAlphaMap   = defaultVolAlphaMap(im, 'ct');
-                pasAlphaType = 'auto';
-            elseif strcmpi(sTypeOrtMetaData{1}.Modality, 'mr')
-                paAlphaMap   = defaultVolAlphaMap(im, 'mr');
-                pasAlphaType = 'auto';    
+        elseif strcmpi(pasAlphaType, 'Auto')
+            if strcmpi(sTypeOrtMetaData{1}.Modality, 'CT')
+                paAlphaMap   = defaultVolAlphaMap(im, 'CT');
+                pasAlphaType = 'Auto';
+            elseif strcmpi(sTypeOrtMetaData{1}.Modality, 'MR')
+                paAlphaMap   = defaultVolAlphaMap(im, 'MR');
+                pasAlphaType = 'Auto';    
             else
-                paAlphaMap   = defaultVolAlphaMap(im, 'pt');
-                pasAlphaType = 'auto';                  
+                paAlphaMap   = defaultVolAlphaMap(im, 'PET');
+                pasAlphaType = 'Auto';                  
             end
         end
 

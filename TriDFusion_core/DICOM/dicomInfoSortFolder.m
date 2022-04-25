@@ -55,5 +55,6 @@ function tDataSets = dicomInfoSortFolder(link)
     end
 
     tDataSets = sortDicomFileList(tFileList, iNbFiles);
+%    tDataSets.DicomBuffers = squeeze(dicomreadVolume(fullfile(link)));
 
 end

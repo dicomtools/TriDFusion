@@ -33,10 +33,10 @@ function multiFrame(mPlay)
         mPlay.State = 'off';
         return;
     end   
-
+               
     while multiFramePlayback('get')                       
-
-        if gca == axes1Ptr('get') || ...
+        
+        if (gca == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  && playback2DMipOnly('get') == false) || ...
            (isVsplash('get') == true && ...
             strcmpi(vSplahView('get'), 'coronal'))
 
@@ -51,7 +51,7 @@ function multiFrame(mPlay)
 
             sliceNumber('set', 'coronal', iCurrentSlice);
 
-        elseif gca == axes2Ptr('get') || ...
+        elseif (gca == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) && playback2DMipOnly('get') == false) || ...
            (isVsplash('get') == true && ...
             strcmpi(vSplahView('get'), 'sagittal'))
 %              set(uiSliderSagPtr('get'), 'Value', iSlider);
@@ -66,7 +66,10 @@ function multiFrame(mPlay)
 
             sliceNumber('set', 'sagittal', iCurrentSlice);
 
-        else
+        elseif (gca == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) && playback2DMipOnly('get') == false) || ...
+           (isVsplash('get') == true && ...
+            strcmpi(vSplahView('get'), 'axial'))
+
             iLastSlice = size(dicomBuffer('get'), 3);            
             iCurrentSlice = sliceNumber('get', 'axial');
 
@@ -83,13 +86,32 @@ function multiFrame(mPlay)
    %         iSlider = iCurrentSlice/iLastSlice; 
 
    %         set(uiSliderTraPtr('get'), 'Value', iSlider);
+        else
+            if isVsplash('get') == false
+                iMipAngleValue = mipAngle('get');
 
+                iMipAngleValue = iMipAngleValue+1;
+
+                if iMipAngleValue > 32
+                    iMipAngleValue = 1;
+                end    
+
+                mipAngle('set', iMipAngleValue);                    
+
+        %        if iMipAngleValue == 1
+        %            dMipSliderValue = 0;
+        %        else
+        %            dMipSliderValue = mipAngle('get')/32;
+        %        end
+
+        %        set(uiSliderMipPtr('get'), 'Value', dMipSliderValue);
+            end
         end
 
         refreshImages();                        
 
         pause(multiFrameSpeed('get'));
-
+        
     end
 
 end

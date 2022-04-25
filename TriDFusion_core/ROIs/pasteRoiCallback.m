@@ -58,8 +58,8 @@ function pasteRoiCallback(~, ~)
                             'Tag'         , sTag ...
                             );
 
-            uimenu(pRoi.UIContextMenu, 'Label', 'Copy Object' , 'UserData', pRoi, 'Callback', @copyRoiCallback, 'Separator', 'on');
-            uimenu(pRoi.UIContextMenu, 'Label', 'Paste Object', 'UserData', pRoi, 'Callback', @pasteRoiCallback);
+            uimenu(pRoi.UIContextMenu, 'Label', 'Copy Contour' , 'UserData', pRoi, 'Callback', @copyRoiCallback, 'Separator', 'on');
+            uimenu(pRoi.UIContextMenu, 'Label', 'Paste Contour', 'UserData', pRoi, 'Callback', @pasteRoiCallback);
 
             uimenu(pRoi.UIContextMenu,'Label', 'Snap To Circles'   , 'UserData',pRoi, 'Callback',@snapLinesToCirclesCallback, 'Separator', 'on');
             uimenu(pRoi.UIContextMenu,'Label', 'Snap To Rectangles', 'UserData',pRoi, 'Callback',@snapLinesToRectanglesCallback);
@@ -67,6 +67,8 @@ function pasteRoiCallback(~, ~)
             uimenu(pRoi.UIContextMenu,'Label', 'Edit Label'     , 'UserData',pRoi, 'Callback',@editLabelCallback, 'Separator', 'on');
             uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Label', 'UserData',pRoi, 'Callback',@hideViewLabelCallback);
             uimenu(pRoi.UIContextMenu,'Label', 'Edit Color'     , 'UserData',pRoi, 'Callback',@editColorCallback);
+
+            constraintMenu(pRoi);
 
             cropMenu(pRoi);
 
@@ -77,6 +79,7 @@ function pasteRoiCallback(~, ~)
 
             pRoi = drawfreehand(ptrRoi.Parent, ...
                                 'Position'      , ptrRoi.Position, ...
+                                'Smoothing'     , ptrRoi.Smoothing, ...
                                 'Color'         , ptrRoi.Color, ...
                                 'LineWidth'     , ptrRoi.LineWidth, ...
                                 'Label'         , roiLabelName(), ...
@@ -93,7 +96,11 @@ function pasteRoiCallback(~, ~)
             uimenu(pRoi.UIContextMenu, 'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
             uimenu(pRoi.UIContextMenu, 'Label', 'Clear Waypoints', 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
 
+            constraintMenu(pRoi);
+
             cropMenu(pRoi);
+            
+            voiMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
 
@@ -117,7 +124,11 @@ function pasteRoiCallback(~, ~)
 
             uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
 
+            constraintMenu(pRoi);
+
             cropMenu(pRoi);
+            
+            voiMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
 
@@ -139,7 +150,11 @@ function pasteRoiCallback(~, ~)
 
             roiDefaultMenu(pRoi);
 
+            constraintMenu(pRoi);
+
             cropMenu(pRoi);
+            
+            voiMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
 
@@ -164,7 +179,11 @@ function pasteRoiCallback(~, ~)
 
             uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
 
+            constraintMenu(pRoi);
+
             cropMenu(pRoi);
+            
+            voiMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
 
@@ -173,6 +192,8 @@ function pasteRoiCallback(~, ~)
 
             pRoi = drawrectangle(ptrRoi.Parent, ...
                                 'Position'      , ptrRoi.Position, ...
+                                'Rotatable'     , ptrRoi.Rotatable, ...
+                                'RotationAngle' , ptrRoi.RotationAngle, ...
                                 'Color'         , ptrRoi.Color, ...
                                 'FaceAlpha'     , ptrRoi.FaceAlpha, ...
                                 'LineWidth'     , ptrRoi.LineWidth, ...
@@ -187,7 +208,11 @@ function pasteRoiCallback(~, ~)
 
             uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
 
+            constraintMenu(pRoi);
+
             cropMenu(pRoi);
+            
+            voiMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
 
@@ -195,8 +220,8 @@ function pasteRoiCallback(~, ~)
             return;
     end
 
-    addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'));                  
-    
+    addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'));
+
     setVoiRoiSegPopup();
 
 

@@ -11,7 +11,7 @@ function lOffset = colorMapOffset(sAction, lValue)
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
-% TriDFusion development has been led by:  Daniel Lafontaine
+% TriDFusion development has been led by: Daniel Lafontaine
 % 
 % TriDFusion is distributed under the terms of the Lesser GNU Public License. 
 % 
@@ -29,8 +29,9 @@ function lOffset = colorMapOffset(sAction, lValue)
 
     persistent plColorMapOffset; 
 
-    if strcmp('set', sAction)
+    if strcmpi('set', sAction)
         plColorMapOffset = lValue;            
     end
+    
     lOffset = plColorMapOffset;
 end

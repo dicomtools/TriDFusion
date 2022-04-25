@@ -28,13 +28,16 @@ function cropMenu(ptrRoi)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     imCrop = dicomBuffer('get');
+    
+    mCrop = uimenu(ptrRoi.UIContextMenu,'Label', 'Mask', 'Separator', 'on');
+    
     if size(imCrop, 3) == 1 
-        uimenu(ptrRoi.UIContextMenu,'Label', 'Crop Inside' , 'UserData',ptrRoi, 'Callback',@cropInsideCallback, 'Separator', 'on'); 
-        uimenu(ptrRoi.UIContextMenu,'Label', 'Crop Outside', 'UserData',ptrRoi, 'Callback',@cropOutsideCallback); 
+        uimenu(mCrop,'Label', 'Inside This Contour' , 'UserData',ptrRoi, 'Callback',@cropInsideCallback); 
+        uimenu(mCrop,'Label', 'Outside This Contour', 'UserData',ptrRoi, 'Callback',@cropOutsideCallback); 
     else
-        uimenu(ptrRoi.UIContextMenu,'Label', 'Crop Inside' , 'UserData',ptrRoi, 'Callback',@cropInsideCallback, 'Separator', 'on'); 
-        uimenu(ptrRoi.UIContextMenu,'Label', 'Crop Outside', 'UserData',ptrRoi, 'Callback',@cropOutsideCallback); 
-        uimenu(ptrRoi.UIContextMenu,'Label', 'Crop Inside all slices'    , 'UserData',ptrRoi, 'Callback',@cropInsideAllSlicesCallback); 
-        uimenu(ptrRoi.UIContextMenu,'Label', 'Crop Outside all slices'   , 'UserData',ptrRoi, 'Callback',@cropOutsideAllSlicesCallback); 
+        uimenu(mCrop,'Label', 'Inside This Contour' , 'UserData',ptrRoi, 'Callback',@cropInsideCallback); 
+        uimenu(mCrop,'Label', 'Outside This Contour', 'UserData',ptrRoi, 'Callback',@cropOutsideCallback); 
+        uimenu(mCrop,'Label', 'Inside Every Slice'  , 'UserData',ptrRoi, 'Callback',@cropInsideAllSlicesCallback); 
+        uimenu(mCrop,'Label', 'Outside Every Slice' , 'UserData',ptrRoi, 'Callback',@cropOutsideAllSlicesCallback); 
     end
 end    

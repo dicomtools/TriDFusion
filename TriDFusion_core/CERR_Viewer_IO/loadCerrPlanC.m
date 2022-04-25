@@ -30,20 +30,32 @@ function loadCerrPlanC(planC)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    set(fiMainWindowPtr('get'), 'Pointer', 'watch');            
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+
     drawnow;
-    
+
+    if isFusion('get') == true % Deactivate fusion
+         setFusionCallback();
+    end
+
     set(uiSeriesPtr('get'), 'Value' , 1);
-    
+
     copyRoiPtr('set', '');
 
     isMoveImageActivated('set', false);
 
     releaseRoiWait();
     
+    outputDir('set', '');
+
     dicomMetaData('reset');
+
     dicomBuffer  ('reset');
     fusionBuffer ('reset');
+
+    mipBuffer      ('reset');
+    mipFusionBuffer('reset');
+
     inputBuffer  ('set', '');
 
     inputTemplate('set', '');
@@ -51,21 +63,21 @@ function loadCerrPlanC(planC)
 
     roiTemplate ('reset');
     voiTemplate ('reset');
-    
+
     progressBar(0.5, 'Scaning CERR planC');
-    
+
     for hh=1:numel(planC{1,3}) % Loop all series
         tTemplate = [];
         for ii=1:numel(planC{1,3}(hh).scanInfo) % Loop all dicom files
-            
+
             tTemplate{ii} = planC{1,3}(hh).scanInfo(ii).DICOMHeaders;
-            
+
             if isfield(planC{1,3}(hh).scanInfo(ii).DICOMHeaders, 'FrameofReferenceUID')
                 tTemplate{ii}.FrameOfReferenceUID = planC{1,3}(hh).scanInfo(ii).DICOMHeaders.FrameofReferenceUID;
             end
-            
+
             if isfield(planC{1,3}(1).scanInfo(ii).DICOMHeaders, 'PatientName')
-            
+
                 sPatientName = sprintf('%s^%s^%s^%s^%s', ...
                                    planC{1,3}(hh).scanInfo(ii).DICOMHeaders.PatientName.FamilyName, ...
                                    planC{1,3}(hh).scanInfo(ii).DICOMHeaders.PatientName.GivenName, ...
@@ -75,7 +87,7 @@ function loadCerrPlanC(planC)
             else
                 sPatientName = sprintf('CERR planC scan %d', hh);
             end
-            
+
             tTemplate{ii}.PatientName     = sPatientName;
             tTemplate{ii}.AcquisitionTime = planC{1,3}(hh).scanInfo(ii).acquisitionTime;
             tTemplate{ii}.NumberOfSlices  = numel(planC{1,3}(hh).scanInfo);
@@ -108,9 +120,13 @@ function loadCerrPlanC(planC)
             if ~isfield(tTemplate{ii}, 'SpacingBetweenSlices')
                 tTemplate{ii}.SpacingBetweenSlices = 0;
             end
-            
+
+            if ~isfield(tTemplate{ii}, 'Units')
+                tTemplate{ii}.Units = '';
+            end
+
             if isfield(planC{1,3}(hh).scanInfo(ii).DICOMHeaders, 'RadiopharmaceuticalInformationSequence')
-            
+
                 tTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartTime  = planC{1,3}(hh).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartTime;
                 tTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStopTime   = planC{1,3}(hh).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStopTime;
                 tTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose         = num2str(planC{1,3}(hh).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose);
@@ -128,13 +144,13 @@ function loadCerrPlanC(planC)
                 tTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStopDateTime  = sFormatedDate;
             end
         end
-        
+
         tNewInput(hh).atDicomInfo = tTemplate;
-        
+
         aBuffer{hh}=planC{1,3}(hh).scanArray;
 
     end
-        
+
     for ii=1:numel(tNewInput)
         tNewInput(ii).asFilesList = '';
 
@@ -146,22 +162,35 @@ function loadCerrPlanC(planC)
         tNewInput(ii).bMathApplied   = false;
         tNewInput(ii).bFusedDoseKernel    = false;
         tNewInput(ii).bFusedEdgeDetection = false;
+        tNewInput(ii).tMovement = [];
+        tNewInput(ii).tMovement.bMovementApplied = false;
+        tNewInput(ii).tMovement.aGeomtform = []; 
+        tNewInput(ii).tMovement.atSeq{1}.sAxe = [];
+        tNewInput(ii).tMovement.atSeq{1}.aTranslation = [];
+        tNewInput(ii).tMovement.atSeq{1}.dRotation = [];         
+    end
+
+    for mm=1:numel(aBuffer)
+        aMip = computeMIP(aBuffer{mm});
+        mipBuffer('set', aMip, mm);
+        tNewInput(mm).aMip = aMip;
     end
 
     inputTemplate('set', tNewInput);
-    
-    inputBuffer  ('set', aBuffer);
-   
-    dicomBuffer  ('set', aBuffer{1});
-    
-    dicomMetaData('set', tNewInput(1).atDicomInfo);    
 
+    inputBuffer  ('set', aBuffer);
+
+    dicomBuffer  ('set', aBuffer{1});
+
+    dicomMetaData('set', tNewInput(1).atDicomInfo);
+
+    if isFusion('get') == true
+        setFusionCallback();
+    end
     isFusion('set', false);
 
     initWindowLevel('set', true);
     initFusionWindowLevel ('set', true);
-    roiTemplate('set', '');
-    voiTemplate('set', '');
 
     deleteAlphaCurve('vol');
     deleteAlphaCurve('volfusion');
@@ -318,8 +347,12 @@ function loadCerrPlanC(planC)
     if ~isempty(mRecord)
         mRecord.State = 'off';
   %      recordIconMenuObject('set', '');
-    end   
-   
+    end
+
+    isoMaskCtSerieOffset ('set', 1);
+    kernelCtSerieOffset  ('set', 1);
+    mipFusionBufferOffset('set', 1);
+
     multiFrame3DPlayback('set', false);
     multiFrame3DRecord  ('set', false);
     multiFrame3DIndex   ('set', 1);
@@ -337,6 +370,7 @@ function loadCerrPlanC(planC)
     set(uiSeriesPtr('get'), 'Enable', 'off');
 
     set(btnFusionPtr    ('get'), 'Enable', 'off');
+    set(btnLinkMipPtr   ('get'), 'Enable', 'off');
     set(btnRegisterPtr  ('get'), 'Enable', 'off');
     set(btnMathPtr      ('get'), 'Enable', 'off');
     set(uiFusedSeriesPtr('get'), 'Value' , 1    );
@@ -374,7 +408,7 @@ function loadCerrPlanC(planC)
     set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
 
     imageOrientation('set', 'axial');
-       
+
     if numel(inputTemplate('get')) ~= 0
 
         for ii = 1 : numel(inputTemplate('get'))
@@ -411,13 +445,15 @@ function loadCerrPlanC(planC)
 
         if  numel(sNewVolumes) > 1
             set(btnRegisterPtr('get'), 'Enable', 'on');
-            set(btnFusionPtr('get')  , 'Enable', 'on');
+            set(btnFusionPtr  ('get'), 'Enable', 'on');
+            set(btnLinkMipPtr ('get'), 'Enable', 'on');
 
             set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
             set(uiFusedSeriesPtr('get'), 'Enable', 'on');
             set(uiFusedSeriesPtr('get'), 'Value', 2);
         else
-            set(btnFusionPtr('get')  , 'Enable', 'on');
+            set(btnFusionPtr('get') , 'Enable', 'on');
+            set(btnLinkMipPtr('get'), 'Enable', 'on');
 
             set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
             set(uiFusedSeriesPtr('get'), 'Enable', 'on');
@@ -434,6 +470,11 @@ function loadCerrPlanC(planC)
 
     clearDisplay();
     initDisplay(3);
+
+%    link2DMip('set', true);
+
+%    set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+%    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
 
     dicomViewerCore();
 
@@ -457,6 +498,7 @@ function loadCerrPlanC(planC)
     set(uiCorWindowPtr('get'), 'Visible', 'off');
     set(uiSagWindowPtr('get'), 'Visible', 'off');
     set(uiTraWindowPtr('get'), 'Visible', 'off');
+    set(uiMipWindowPtr('get'), 'Visible', 'off');
 
     set(uiSliderLevelPtr ('get'), 'Visible', 'off');
     set(uiSliderWindowPtr('get'), 'Visible', 'off');
@@ -464,19 +506,20 @@ function loadCerrPlanC(planC)
     set(uiSliderCorPtr('get'), 'Visible', 'off');
     set(uiSliderSagPtr('get'), 'Visible', 'off');
     set(uiSliderTraPtr('get'), 'Visible', 'off');
-    
+    set(uiSliderMipPtr('get'), 'Visible', 'off');
+
     drawnow;
-    
+
     for mm=1:numel(planC{1,4})
         [strMaskC{mm}, planC] = getStrMask(mm,planC);
     end
-    
+
     for mm=1:numel(strMaskC)
         progressBar(0.7+(0.299999*mm/numel(strMaskC)), sprintf('Processing VOI %d/%d', mm, numel(strMaskC)));
-            
+
         if get(uiSeriesPtr('get'), 'Value') ~= planC{4}(mm).associatedScan
             set(uiSeriesPtr('get'), 'Value', planC{4}(mm).associatedScan);
-            setSeriesCallback();            
+            setSeriesCallback();
         end
 
         aVoiColor   = planC{4}(mm).structureColor;
@@ -488,6 +531,7 @@ function loadCerrPlanC(planC)
     set(uiCorWindowPtr('get'), 'Visible', 'on');
     set(uiSagWindowPtr('get'), 'Visible', 'on');
     set(uiTraWindowPtr('get'), 'Visible', 'on');
+    set(uiMipWindowPtr('get'), 'Visible', 'on');
 
     set(uiSliderLevelPtr ('get'), 'Visible', 'on');
     set(uiSliderWindowPtr('get'), 'Visible', 'on');
@@ -495,11 +539,28 @@ function loadCerrPlanC(planC)
     set(uiSliderCorPtr('get'), 'Visible', 'on');
     set(uiSliderSagPtr('get'), 'Visible', 'on');
     set(uiSliderTraPtr('get'), 'Visible', 'on');
-    
-    set(fiMainWindowPtr('get'), 'Pointer', 'default');            
+    set(uiSliderMipPtr('get'), 'Visible', 'on');
+
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+
     drawnow;
-    
+
     refreshImages();
+
+%    atMetaData = dicomMetaData('get');
+
+%    if strcmpi(atMetaData{1}.Modality, 'ct')
+%        link2DMip('set', false);
+
+%        set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+%        set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+%    end
+
+    if size(dicomBuffer('get'), 3) ~= 1
+        setPlaybackToolbar('on');
+    end
+
+    setRoiToolbar('on');
 
     progressBar(1, 'Ready');
 

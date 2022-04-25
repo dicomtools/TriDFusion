@@ -31,7 +31,108 @@ function setSeriesCallback(~,~)
     iOffset = get(uiSeriesPtr('get'), 'Value');
 
     if iOffset <= numel(tInput)
+               
+        if isFusion('get') == true % Deactivate fusion
+            
+            isFusion('set', false);
+            
+            set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+            set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+            
+            delete(uiFusionSliderWindowPtr('get'));
+            delete(uiFusionSliderLevelPtr('get'));
+            delete(uiFusionColorbarPtr('get'));
+            delete(uiAlphaSliderPtr('get'));
 
+            uiFusionColorbarPtr    ('set', '');
+            uiFusionSliderWindowPtr('set', '');
+            uiFusionSliderLevelPtr ('set', '');
+            uiAlphaSliderPtr       ('set', '');                  
+            
+            if size(dicomBuffer('get'), 3) == 1
+                
+                imAxeFcPtr('reset');                                
+                imAxeFPtr ('reset');                                
+                axefPtr   ('reset');
+                axefcPtr  ('reset');
+                
+                axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                if ~isempty(axe)                        
+                    alpha( axe, 1);                
+                end
+            else
+                imCoronalFcPtr ('reset');                
+                imSagittalFcPtr('reset');                
+                imAxialFcPtr   ('reset');
+                
+                imCoronalFPtr ('reset');                
+                imSagittalFPtr('reset');                
+                imAxialFPtr   ('reset');                
+               
+                axes1fPtr('reset');
+                axes2fPtr('reset');
+                axes3fPtr('reset');
+                
+                axes1fcPtr('reset');
+                axes2fcPtr('reset');
+                axes3fcPtr('reset');
+                
+                if link2DMip('get') == true && isVsplash('get') == false          
+                    imMipFcPtr  ('reset');                                    
+                    imMipFPtr   ('reset');                                    
+                    axesMipfPtr ('reset');
+                    axesMipfcPtr('reset');
+                end
+                
+                axes1 = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                axes2 = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                axes3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                
+                if ~isempty(axes1) && ...
+                   ~isempty(axes2) && ...
+                   ~isempty(axes3)
+                    alpha( axes1, 1 );
+                    alpha( axes2, 1 );
+                    alpha( axes3, 1 );
+                end
+                
+                if link2DMip('get') == true && isVsplash('get') == false      
+                    axesMip = axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                    if ~isempty(axesMip)
+                        alpha(axesMip, 1 );                                
+                    end
+                end                 
+            end  
+            
+            fusionBuffer('reset');            
+            
+        end
+        
+        set(uiColorbarPtr('get'), 'Visible', 'off');
+        set(uiSliderWindowPtr('get'), 'Visible', 'off');
+        set(uiSliderLevelPtr('get'), 'Visible', 'off'); 
+        
+        if isFusion('get')
+            set(uiAlphaSliderPtr('get'), 'Visible', 'off');
+            set(uiFusionColorbarPtr('get'), 'Visible', 'off');
+            set(uiFusionSliderWindowPtr('get'), 'Visible', 'off');
+            set(uiFusionSliderLevelPtr('get'), 'Visible', 'off');             
+        end
+               
+        if size(dicomBuffer('get'), 3) == 1
+            set(uiOneWindowPtr('get'), 'Visible', 'off');
+        else
+            set(uiCorWindowPtr('get'), 'Visible', 'off');
+            set(uiSagWindowPtr('get'), 'Visible', 'off');
+            set(uiTraWindowPtr('get'), 'Visible', 'off');
+            set(uiMipWindowPtr('get'), 'Visible', 'off');
+
+            set(uiSliderCorPtr('get'), 'Visible', 'off');
+            set(uiSliderSagPtr('get'), 'Visible', 'off');   
+            set(uiSliderTraPtr('get'), 'Visible', 'off');          
+            set(uiSliderMipPtr('get'), 'Visible', 'off');                
+        end
+    
         copyRoiPtr('set', '');
 
         releaseRoiWait();
@@ -50,11 +151,12 @@ function setSeriesCallback(~,~)
 
         rotate3DTool('set', false);
         rotate3d('off');
-
-        isFusion('set', false);
-        fusionBuffer('reset');
-        set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-        set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        
+        
+%        isFusion('set', false);
+%        fusionBuffer('reset');
+%       set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+%        set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
         initWindowLevel ('set', true);
         initFusionWindowLevel ('set', true);
@@ -221,16 +323,32 @@ function setSeriesCallback(~,~)
             set(btnVsplashPtr('get')   , 'Enable', 'off');
             set(uiEditVsplahXPtr('get'), 'Enable', 'off');
             set(uiEditVsplahYPtr('get'), 'Enable', 'off');
-        end
-
+        end         
+        
+%        isPlotContours('set', false);
+        
         clearDisplay();
         initDisplay(3);
+        
+%        link2DMip('set', true);
 
-        dicomViewerCore();
-
+%        set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+%        set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+        
+        dicomViewerCore();                  
+            
         setViewerDefaultColor(true, dicomMetaData('get'));
-
+        
         refreshImages();
+        
+%        atMetaData = dicomMetaData('get');
+        
+%        if strcmpi(atMetaData{1}.Modality, 'ct')
+%            link2DMip('set', false);
+
+%            set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+%            set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
+%        end         
 
     end
 end

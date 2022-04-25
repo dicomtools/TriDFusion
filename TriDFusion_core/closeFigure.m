@@ -54,47 +54,70 @@ function closeFigure(~, ~)
 
         deleteObject(mipColorObject('get'));
         deleteObject(volColorObject('get'));
+    
+        imAxePtr  ('reset');                
+        imAxeFcPtr('reset');                
+        imAxeFPtr ('reset');                
 
-        axe = axePtr('get');
-        if ~isempty(axe)
-            delete(axe);
+        axePtr  ('reset');
+        axefcPtr('reset');
+        axefPtr ('reset');
+
+        uiOneWindow = uiOneWindowPtr('get');
+        if ~isempty(uiOneWindow)
+           delete(uiOneWindow);
         end
-
-        axef = axefPtr('get');
-        if ~isempty(axef)
-            delete(axef);
+        
+        imCoronalPtr ('reset');                
+        imSagittalPtr('reset');                
+        imAxialPtr   ('reset'); 
+        imMipPtr     ('reset');  
+        
+        axes1Ptr  ('reset');
+        axes2Ptr  ('reset');
+        axes3Ptr  ('reset');
+        axesMipPtr('reset');
+        
+        imCoronalFPtr ('reset');                
+        imSagittalFPtr('reset');                
+        imAxialFPtr   ('reset'); 
+        imMipFPtr     ('reset');                                    
+              
+        axes1fPtr  ('reset');
+        axes2fPtr  ('reset');
+        axes3fPtr  ('reset');
+        axesMipfPtr('reset');       
+        
+        imCoronalFcPtr ('reset');                
+        imSagittalFcPtr('reset');                
+        imAxialFcPtr   ('reset'); 
+        imMipFcPtr     ('reset');  
+        
+        axes1fcPtr  ('reset');
+        axes2fcPtr  ('reset');
+        axes3fcPtr  ('reset');
+        axesMipfcPtr('reset');         
+        
+        uiCorWindow = uiCorWindowPtr('get');
+        if ~isempty(uiCorWindow)
+            delete(uiCorWindow);
         end
-
-        axes1 = axes1Ptr('get');
-        if ~isempty(axes1)
-            delete(axes1);
+    
+        uiSagWindow = uiSagWindowPtr('get');
+        if ~isempty(uiSagWindow)
+            delete(uiSagWindow); 
+        end 
+    
+        uiTraWindow = uiTraWindowPtr('get');
+        if ~isempty(uiTraWindow)
+            delete(uiTraWindow); 
         end
-
-        axes2 = axes2Ptr('get');
-        if ~isempty(axes2)
-            delete(axes2);
-        end
-
-        axes3 = axes3Ptr('get');
-        if ~isempty(axes3)
-            delete(axes3);
-        end
-
-        axes1f = axes1fPtr('get');
-        if ~isempty(axes1f)
-            delete(axes1f);
-        end
-
-        axes2f = axes2fPtr('get');
-        if ~isempty(axes2f)
-            delete(axes2f);
-        end
-
-        axes3f = axes3fPtr('get');
-        if ~isempty(axes3f)
-            delete(axes3f);
-        end
-
+        
+        uiMipWindow = uiMipWindowPtr('get');
+        if ~isempty(uiMipWindow)
+            delete(uiMipWindow); 
+        end          
+    
         delete(uiSegPanelPtr       ('get'));
         delete(uiSegMainPanelPtr   ('get'));
         delete(uiKernelPanelPtr    ('get'));
@@ -102,6 +125,18 @@ function closeFigure(~, ~)
         delete(uiRoiPanelPtr       ('get'));
         delete(uiRoiMainPanelPtr   ('get'));
         delete(fiMainWindowPtr     ('get'));
+        
+        dicomMetaData('reset');
+        dicomBuffer  ('reset');
+        fusionBuffer ('reset');
+        inputBuffer  ('set', '');
+
+        mipBuffer      ('reset');
+        mipFusionBuffer('reset');
+        
+%        clear('all');
+  
     catch
     end
+
 end

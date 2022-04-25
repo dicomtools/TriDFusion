@@ -61,19 +61,25 @@ function catchKeyPress(~,evnt)
                 multiFrameZoom('set', 'in', dZFactor);
 
                 switch gca
-                    case axes1Ptr('get')
-                        zoom(axes1Ptr('get'), dZFactor);
-                        multiFrameZoom('set', 'axe', axes1Ptr('get'));
+                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        zoom(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                        multiFrameZoom('set', 'axe', axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
 
-                    case axes2Ptr('get')
-                        zoom(axes2Ptr('get'), dZFactor);
-                        multiFrameZoom('set', 'axe', axes2Ptr('get'));
-                    case axes3Ptr('get')
-                        zoom(axes3Ptr('get'), dZFactor);
-                        multiFrameZoom('set', 'axe', axes3Ptr('get'));
+                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        zoom(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                        multiFrameZoom('set', 'axe', axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                        
+                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        zoom(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                        multiFrameZoom('set', 'axe', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                        
+                    case axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        zoom(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                        multiFrameZoom('set', 'axe', axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                        
                     otherwise
-                        zoom(axes3Ptr('get'), dZFactor);
-                        multiFrameZoom('set', 'axe', axes3Ptr('get'));
+                        zoom(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                        multiFrameZoom('set', 'axe', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
                 end
 
             end            
@@ -82,6 +88,7 @@ function catchKeyPress(~,evnt)
     end
     
     if strcmpi(evnt.Key,'subtract')
+        
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true 
@@ -111,25 +118,32 @@ function catchKeyPress(~,evnt)
                 end
 
                 switch gca
-                    case axes1Ptr('get')
-                        zoom(axes1Ptr('get'), dZFactor);
-                        multiFrameZoom('set', 'axe', axes1Ptr('get'));
+                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        zoom(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                        multiFrameZoom('set', 'axe', axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
 
-                    case axes2Ptr('get')
-                        zoom(axes2Ptr('get'), dZFactor);
-                        multiFrameZoom('set', 'axe', axes2Ptr('get'));
-                    case axes3Ptr('get')
-                        zoom(axes3Ptr('get'), dZFactor);
-                        multiFrameZoom('set', 'axe', axes3Ptr('get'));
+                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        zoom(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                        multiFrameZoom('set', 'axe', axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                        
+                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        zoom(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                        multiFrameZoom('set', 'axe', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                        
+                    case axesMIpPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        zoom(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                        multiFrameZoom('set', 'axe', axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                        
                     otherwise
-                        zoom(axes3Ptr('get'), dZFactor);
-                        multiFrameZoom('set', 'axe', axes3Ptr('get'));
+                        zoom(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                        multiFrameZoom('set', 'axe', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
                 end            
             end
         end
     end    
     
     if strcmpi(evnt.Key,'uparrow')
+        
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true 
@@ -140,7 +154,7 @@ function catchKeyPress(~,evnt)
                 
                 windowButton('set', 'down');  
                 switch gca
-                    case axes1Ptr('get')
+                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                         if sliceNumber('get', 'coronal') == size(dicomBuffer('get'), 1)
                             iSliceNumber = 1;
                         else
@@ -151,7 +165,7 @@ function catchKeyPress(~,evnt)
 
                         set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get'), 1));
                         
-                    case axes2Ptr('get')
+                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                         if sliceNumber('get', 'sagittal') == size(dicomBuffer('get'), 2)
                             iSliceNumber = 1;
                         else
@@ -188,8 +202,10 @@ if 0
             refreshImages();
 end                    
         end
-    end            
+    end   
+    
     if strcmpi(evnt.Key,'downarrow')
+        
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true 
@@ -200,7 +216,7 @@ end
                 
                 windowButton('set', 'down');  
                 switch gca
-                    case axes1Ptr('get')
+                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                         if sliceNumber('get', 'coronal') == 1
                             iSliceNumber = size(dicomBuffer('get'), 1);
                         else
@@ -211,7 +227,7 @@ end
 
                         set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get'), 1));
                         
-                    case axes2Ptr('get')
+                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                         if sliceNumber('get', 'sagittal') == 1
                             iSliceNumber = size(dicomBuffer('get'), 2);
                         else
@@ -239,25 +255,84 @@ end
                 windowButton('set', 'up'); 
             end            
         end
-    end            
+    end     
+    
     if strcmpi(evnt.Key,'leftarrow')
+        
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true 
 
              flip3Dobject('left');                             
+        else
+            if size(dicomBuffer('get'), 3) ~= 1 && isVsplash('get') == false    
+                
+                windowButton('set', 'down');  
+
+                iMipAngleValue = mipAngle('get');
+
+                iMipAngleValue = iMipAngleValue-1;
+
+                if iMipAngleValue <=0
+                    iMipAngleValue = 32;
+                end    
+
+                mipAngle('set', iMipAngleValue);                    
+
+                if iMipAngleValue == 1
+                    dMipSliderValue = 0;
+                else
+                    dMipSliderValue = mipAngle('get')/32;
+                end
+
+                set(uiSliderMipPtr('get'), 'Value', dMipSliderValue);                
+                
+                refreshImages();
+                
+                windowButton('set', 'up'); 
+                
+            end  
         end
     end
+    
     if strcmpi(evnt.Key,'rightarrow')
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true 
 
               flip3Dobject('right');                             
+        else
+            if size(dicomBuffer('get'), 3) ~= 1 && isVsplash('get') == false    
+                
+                windowButton('set', 'down');  
+                
+                iMipAngleValue = mipAngle('get');
+
+                iMipAngleValue = iMipAngleValue+1;
+
+                if iMipAngleValue > 32
+                    iMipAngleValue = 1;
+                end    
+
+                mipAngle('set', iMipAngleValue);                    
+
+                if iMipAngleValue == 1
+                    dMipSliderValue = 0;
+                else
+                    dMipSliderValue = mipAngle('get')/32;
+                end
+
+                set(uiSliderMipPtr('get'), 'Value', dMipSliderValue);
+                
+                refreshImages();
+                
+                windowButton('set', 'up');                
+            end            
         end
     end 
 
     if strcmpi(evnt.Key,'space')
+        
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
@@ -282,11 +357,11 @@ end
     end
 
     if strcmpi(evnt.Key,'c')
+        
        if switchTo3DMode('get')     == true || ...
           switchToIsoSurface('get') == true || ...
           switchToMIPMode('get')    == true || ...
           isVsplash('get') == true        
-
             return;
         end
 
@@ -309,9 +384,10 @@ end
         if size(dicomBuffer('get'), 3) == 1
         %    delete(findobj(axe, 'Type', 'line'))
         else
-            alAxes1Line = axesLine('get', 'axes1');
-            alAxes2Line = axesLine('get', 'axes2');
-            alAxes3Line = axesLine('get', 'axes3');
+            alAxes1Line   = axesLine('get', 'axes1');
+            alAxes2Line   = axesLine('get', 'axes2');
+            alAxes3Line   = axesLine('get', 'axes3');
+            alAxesMipLine = axesLine('get', 'axesMip');
 
             for ii1=1:numel(alAxes1Line)    
                 alAxes1Line{ii1}.Visible = crossActivate('get');
@@ -323,7 +399,11 @@ end
 
             for ii3=1:numel(alAxes3Line)    
                 alAxes3Line{ii3}.Visible = crossActivate('get');
-            end   
+            end 
+            
+            for iiMip=1:numel(alAxesMipLine)    
+                alAxesMipLine{iiMip}.Visible = crossActivate('get');
+            end             
         %    delete(findobj(axes1, 'Type', 'line'))
         %    delete(findobj(axes2, 'Type', 'line'))
         %    delete(findobj(axes3, 'Type', 'line'))
@@ -342,18 +422,20 @@ end
     persistent pdInvertColor;
     persistent pdBackgroundColor;
     persistent pdOverlayColor;
+    persistent pdAlphaSlider;
 
     if strcmpi(evnt.Key,'f')
+        
+        if switchTo3DMode('get')     == true || ...
+           switchToIsoSurface('get') == true || ...
+           switchToMIPMode('get')    == true
+            return;
+        end
+        
         if isFusion('get')== true
-            if get(uiAlphaSliderPtr('get') , 'Value') ~= 0
-                set(uiAlphaSliderPtr('get') , 'Value', 0);
-                if size(dicomBuffer('get'), 3) == 1
-                    alpha( axePtr('get'), 1 );
-                else
-                    alpha( axes1Ptr('get'), 1 );
-                    alpha( axes2Ptr('get'), 1 );
-                    alpha( axes3Ptr('get'), 1 );
-                end       
+                                
+            if keyPressFusionStatus('get') ~= 0 && ...
+               keyPressFusionStatus('get') ~= 1     
 
                 pdColorOffset       = colorMapOffset('get');
                 pdFusionColorOffset = fusionColorMapOffset('get');
@@ -362,30 +444,83 @@ end
                 pdBackgroundColor = backgroundColor('get');
                 pdOverlayColor    = overlayColor   ('get');
 
-                setViewerDefaultColor(true, dicomMetaData('get'));
-            else
-                dAlphaSlider = sliderAlphaValue('get');   
-                set(uiAlphaSliderPtr('get') , 'Value', dAlphaSlider);     
+                pdAlphaSlider = sliderAlphaValue('get');   
+                
+                keyPressFusionStatus('set', 1);
+
+%                set(uiAlphaSliderPtr('get') , 'Value', 1);
+%                sliderAlphaValue('set', 1);   
 
                 if size(dicomBuffer('get'), 3) == 1
-                    alpha( axePtr('get'), 1-dAlphaSlider );
+                    alpha( axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
                 else
-                    alpha( axes1Ptr('get'), 1-dAlphaSlider );
-                    alpha( axes2Ptr('get'), 1-dAlphaSlider );
-                    alpha( axes3Ptr('get'), 1-dAlphaSlider );
-                end   
+                    alpha( axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
+                    alpha( axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
+                    alpha( axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
+                    if link2DMip('get') == true  && isVsplash('get') == false                                        
+                        alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
+                    end                      
+                end
 
-                colorMapOffset('set', pdColorOffset);
-                fusionColorMapOffset('set', pdFusionColorOffset);
+                iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
 
-                invertColor('set', pdInvertColor);
+                tFuseInput  = inputTemplate('get');
+                atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
 
-                backgroundColor ('set', pdBackgroundColor);
-                overlayColor    ('set', pdOverlayColor);
+                setViewerDefaultColor(true, dicomMetaData('get'), atFuseMetaData);                        
 
-                setViewerDefaultColor(false, dicomMetaData('get'));
+            else
+                if keyPressFusionStatus('get') == 1
 
-            end                     
+                    keyPressFusionStatus('set', 0);
+                
+%                    set(uiAlphaSliderPtr('get') , 'Value', 0);
+%                    sliderAlphaValue('set', 0);   
+
+                    if size(dicomBuffer('get'), 3) == 1
+                        alpha( axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
+                    else
+                        alpha( axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
+                        alpha( axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
+                        alpha( axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
+                        if link2DMip('get') == true  && isVsplash('get') == false                                        
+                            alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
+                        end                      
+                    end
+
+                    setViewerDefaultColor(true, dicomMetaData('get'));                           
+                else
+                    keyPressFusionStatus('set', 2);
+
+%                    set(uiAlphaSliderPtr('get') , 'Value', pdAlphaSlider);     
+%                    sliderAlphaValue('set', pdAlphaSlider);
+
+                    if size(dicomBuffer('get'), 3) == 1
+                        alpha( axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
+                    else
+                        alpha( axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
+                        alpha( axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
+                        alpha( axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
+                        if link2DMip('get') == true && isVsplash('get') == false                       
+                            alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
+                        end
+                   end   
+
+                    colorMapOffset('set', pdColorOffset);
+                    fusionColorMapOffset('set', pdFusionColorOffset);
+
+                    invertColor('set', pdInvertColor);
+
+                    backgroundColor ('set', pdBackgroundColor);
+                    overlayColor    ('set', pdOverlayColor);
+
+                    setViewerDefaultColor(false, dicomMetaData('get'));
+                end
+            end
+            
+%            sliderAlphaCallback();
+
+            setFusionColorbarLabel();
 
             refreshImages();   
 
@@ -393,6 +528,7 @@ end
     end
 
     if strcmpi(evnt.Key,'i')
+        
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true
@@ -401,48 +537,124 @@ end
 
         uiLogo = logoObject('get');
 
-        if(invertColor('get'))   
+        if(invertColor('get'))               
+            
             invertColor('set', false);
 
-            set(uiLogo.Children, 'Color', [0.8500 0.8500 0.8500]); 
-
-            set(fiMainWindowPtr('get'), 'Color', 'black');
-       %     background3DOffset('set', 8); % black
-
             if size(dicomBuffer('get'), 3) == 1
+                
                 set(uiOneWindowPtr('get'), 'BackgroundColor', 'black');
-                colormap(axePtr('get'), getColorMap('one', colorMapOffset('get')));
-                colormap(axefPtr('get'), getColorMap('one', fusionColorMapOffset('get')));                        
+                
+               cmap = flipud(colormap(axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))));
+               colormap(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), cmap);
+                
+                if isFusion('get') == true 
+                
+                    dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+                    for rr=1:dNbFusedSeries   
+                        axef = axefPtr('get', [], rr);
+                        if ~isempty(axef)     
+                           cmapf = flipud(colormap(axef));
+                           colormap(axef, cmapf);                        
+                        end
+                    end
+                end
+                
+                if isPlotContours('get') == true 
+                   cmapfc = flipud(colormap(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
+                   colormap(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmapfc);
+                end
+                
             else
                 if switchTo3DMode('get')     == true || ...
                    switchToIsoSurface('get') == true || ...
                    switchToMIPMode('get')    == true
 
-                % to do
                 else
                     set(uiCorWindowPtr('get'), 'BackgroundColor', 'black');
                     set(uiSagWindowPtr('get'), 'BackgroundColor', 'black');
                     set(uiTraWindowPtr('get'), 'BackgroundColor', 'black');
+                    
+                    if link2DMip('get') == true && isVsplash('get') == false
+                        set(uiMipWindowPtr('get'), 'BackgroundColor', 'black');
+                    end
+                    
+                    cmap1 = flipud(colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))));
+                    cmap2 = flipud(colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))));
+                    cmap3 = flipud(colormap(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))));
+                
+                    colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), cmap1);
+                    colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), cmap2);
+                    colormap(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), cmap3); 
+                
+                    if link2DMip('get') == true && isVsplash('get') == false
+                        cmapMip = flipud(colormap(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))));
+                        colormap(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), cmapMip); 
+                    end
 
-                    colormap(axes1Ptr('get'), getColorMap('one', colorMapOffset('get')));
-                    colormap(axes2Ptr('get'), getColorMap('one', colorMapOffset('get')));
-                    colormap(axes3Ptr('get'), getColorMap('one', colorMapOffset('get'))); 
-
-                    colormap(axes1fPtr('get'), getColorMap('one', fusionColorMapOffset('get')));
-                    colormap(axes2fPtr('get'), getColorMap('one', fusionColorMapOffset('get')));
-                    colormap(axes3fPtr('get'), getColorMap('one', fusionColorMapOffset('get')));                                                       
-
+                    if isFusion('get') == true 
+                        
+                        dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+                        for rr=1:dNbFusedSeries
+                            
+                            axes1f = axes1fPtr('get', [], rr);
+                            axes2f = axes2fPtr('get', [], rr);
+                            axes3f = axes3fPtr('get', [], rr);
+                            
+                            if ~isempty(axes1f) && ...
+                               ~isempty(axes2f) && ...
+                               ~isempty(axes3f) 
+                       
+                                cmap1f = flipud(colormap(axes1f));
+                                cmap2f = flipud(colormap(axes2f));
+                                cmap3f = flipud(colormap(axes3f));
+                                
+                                colormap(axes1f, cmap1f);
+                                colormap(axes2f, cmap2f);
+                                colormap(axes3f, cmap3f);  
+                            end
+                            
+                            if link2DMip('get') == true && isVsplash('get') == false
+                                
+                                axesMipf = axesMipfPtr('get', [], rr);                                
+                                if ~isempty(axesMipf)
+                                    cmapMipf = flipud(colormap(axesMipf));
+                                    colormap(axesMipf, cmapMipf);  
+                                end
+                            end
+                        end
+                    end
+                    
+                    if isPlotContours('get') == true && isVsplash('get') == false
+                        
+                        cmap1fc = flipud(colormap(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
+                        cmap2fc = flipud(colormap(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
+                        cmap3fc = flipud(colormap(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
+                    
+                        colormap(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmap1fc);
+                        colormap(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmap2fc);
+                        colormap(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmap3fc);   
+                        
+                        if link2DMip('get') == true && isVsplash('get') == false
+                            cmapMipfc = flipud(colormap(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
+                            colormap(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmapMipfc);                                                       
+                        end
+                    end
                 end
             end
+            
+            set(uiLogo.Children, 'Color', [0.8500 0.8500 0.8500]); 
 
+            set(fiMainWindowPtr('get'), 'Color', 'black');
+       
             set(uiSliderLevelPtr('get') , 'BackgroundColor',  'black');
             set(uiSliderWindowPtr('get'), 'BackgroundColor',  'black');
 
             set(uiFusionSliderLevelPtr('get') , 'BackgroundColor',  'black');
             set(uiFusionSliderWindowPtr('get'), 'BackgroundColor',  'black');                   
             set(uiAlphaSliderPtr('get')       , 'BackgroundColor',  'black');                   
-            set(uiColorbarPtr('get')         , 'Color',  'white');                   
-            set(uiFusionColorbarPtr('get')   , 'Color',  'white');                   
+            set(uiColorbarPtr('get')          , 'Color',  'white');                   
+            set(uiFusionColorbarPtr('get')    , 'Color',  'white');                   
 
             backgroundColor('set', 'black');
             if strcmp(getColorMap('one', colorMapOffset('get')), 'white')
@@ -450,32 +662,111 @@ end
             else    
                 overlayColor ('set', 'white' );
             end    
-         else   
+        else   
+             
             invertColor('set', true);
 
-            set(uiLogo.Children, 'Color', [0.1500 0.1500 0.1500]); 
-
-            set(fiMainWindowPtr('get'), 'Color', 'white');
-%            background3DOffset('set', 7); % white
-
             if size(dicomBuffer('get'), 3) == 1 
+                
                 set(uiOneWindowPtr('get'), 'BackgroundColor', 'white');
-                colormap(axePtr('get'), getColorMap('one', colorMapOffset('get')));
-                colormap(axefPtr('get'), getColorMap('one', fusionColorMapOffset('get')));                                                
+                
+                cmap = flipud(colormap(axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))));
+                colormap(axePtr('get' , [], get(uiSeriesPtr('get'), 'Value')), cmap);
+                
+                if isFusion('get') == true 
+                
+                    dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+                    for rr=1:dNbFusedSeries    
+                        axef = axefPtr('get', [], rr);
+                        if ~isempty(axef)
+                            cmapf = flipud(colormap(axef));
+                            colormap(axef, cmapf);                                                
+                        end
+                    end
+                end
+                
+                if isPlotContours('get') == true 
+                    cmapfc = flipud(colormap(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
+                    colormap(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmapfc);
+                end
+                
             else
 
                 set(uiCorWindowPtr('get'), 'BackgroundColor', 'white');
                 set(uiSagWindowPtr('get'), 'BackgroundColor', 'white');
                 set(uiTraWindowPtr('get'), 'BackgroundColor', 'white');
+                
+                if link2DMip('get') == true && isVsplash('get') == false
+                    set(uiMipWindowPtr('get'), 'BackgroundColor', 'white');
+                end         
+                
+                cmap1 = flipud(colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))));
+                cmap2 = flipud(colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))));
+                cmap3 = flipud(colormap(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))));
+                            
+                colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), cmap1);
+                colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), cmap2);
+                colormap(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), cmap3);        
+                
+                if link2DMip('get') == true && isVsplash('get') == false             
+                   cmapMip = flipud(colormap(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))));
+                   colormap(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')),cmapMip);        
+                end
+                
+                if isFusion('get') == true 
+                    
+                    dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+                    for rr=1:dNbFusedSeries
 
-                colormap(axes1Ptr('get'), getColorMap('one', colorMapOffset('get')));
-                colormap(axes2Ptr('get'), getColorMap('one', colorMapOffset('get')));
-                colormap(axes3Ptr('get'), getColorMap('one', colorMapOffset('get')));        
+                        axes1f = axes1fPtr('get', [], rr);
+                        axes2f = axes2fPtr('get', [], rr);
+                        axes3f = axes3fPtr('get', [], rr);
 
-               colormap(axes1fPtr('get'), getColorMap('one', fusionColorMapOffset('get')));
-               colormap(axes2fPtr('get'), getColorMap('one', fusionColorMapOffset('get')));
-               colormap(axes3fPtr('get'), getColorMap('one', fusionColorMapOffset('get')));                               
+                        if ~isempty(axes1f) && ...
+                           ~isempty(axes2f) && ...
+                           ~isempty(axes3f) 
+                       
+                            cmap1f = flipud(colormap(axes1f));
+                            cmap2f = flipud(colormap(axes2f));
+                            cmap3f = flipud(colormap(axes3f));
+                                
+                            colormap(axes1f, cmap1f);
+                            colormap(axes2f, cmap2f);
+                            colormap(axes3f, cmap3f);                               
+                        end
+                        
+                        if link2DMip('get') == true && isVsplash('get') == false
+                            
+                            axesMipf = axesMipfPtr('get', [], rr);
+                            if ~isempty(axesMipf)
+                                cmapMipf = flipud(colormap(axesMipf));
+                                colormap(axesMipf, cmapMipf);                               
+                            end
+                        end
+                    end
+                end
+                
+                if isPlotContours('get') == true && isVsplash('get') == false
+                    
+                    cmap1fc = flipud(colormap(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
+                    cmap2fc = flipud(colormap(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
+                    cmap3fc = flipud(colormap(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
+                        
+                    colormap(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmap1fc);
+                    colormap(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmap2fc);
+                    colormap(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmap3fc);    
+                    
+                    if link2DMip('get') == true && isVsplash('get') == false
+                        cmapMipfc = flipud(colormap(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
+                        colormap(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmapMipfc);                               
+                    end                    
+                end
+
             end
+            
+            set(uiLogo.Children, 'Color', [0.1500 0.1500 0.1500]); 
+
+            set(fiMainWindowPtr('get'), 'Color', 'white');
 
             set(uiSliderLevelPtr('get') , 'BackgroundColor',  'white');
             set(uiSliderWindowPtr('get'), 'BackgroundColor',  'white');  
@@ -483,11 +774,11 @@ end
             set(uiFusionSliderLevelPtr('get') , 'BackgroundColor',  'white');
             set(uiFusionSliderWindowPtr('get'), 'BackgroundColor',  'white');                   
             set(uiAlphaSliderPtr('get')       , 'BackgroundColor',  'white'); 
-            set(uiColorbarPtr('get')         , 'Color',  'black');                   
-            set(uiFusionColorbarPtr('get')   , 'Color',  'black');  
+            set(uiColorbarPtr('get')          , 'Color',  'black');                   
+            set(uiFusionColorbarPtr('get')    , 'Color',  'black');  
 
             backgroundColor('set', 'white');
-            if strcmp(getColorMap('one', colorMapOffset('get')), 'black')
+            if strcmpi(getColorMap('one', colorMapOffset('get')), 'black')
                 overlayColor ('set', 'white' );
             else
                 overlayColor ('set', 'black' ); 
@@ -556,14 +847,41 @@ end
             if size(dicomBuffer('get'), 3) == 1
                 pAxeText = axesText('get', 'axe');
                 pAxeText.Visible = 'off';
+                
+                if isFusion('get') == true
+                    pAxefText = axesText('get', 'axef');
+                    pAxefText.Visible = 'off';                    
+                end
             else
-                pAxes1Text = axesText('get', 'axes1');
-                pAxes2Text = axesText('get', 'axes2');
-                pAxes3Text = axesText('get', 'axes3');
+                pAxes1Text   = axesText('get', 'axes1'  );
+                pAxes2Text   = axesText('get', 'axes2'  );
+                pAxes3Text   = axesText('get', 'axes3'  );
+                pAxesMipText = axesText('get', 'axesMip');
 
-                pAxes1Text.Visible = 'off';
-                pAxes2Text.Visible = 'off';
-                pAxes3Text.Visible = 'off';
+                pAxes1Text.Visible   = 'off';
+                pAxes2Text.Visible   = 'off';
+                pAxes3Text.Visible   = 'off';
+                pAxesMipText.Visible = 'off';
+               
+                if isVsplash('get') == false
+                    pAxes1ViewText   = axesText('get', 'axes1View'  );
+                    pAxes2ViewText   = axesText('get', 'axes2View'  );
+                    pAxes3ViewText   = axesText('get', 'axes3View'  );
+                    pAxesMipViewText = axesText('get', 'axesMipView');
+
+                    pAxes1ViewText.Visible   = 'off';
+                    pAxes2ViewText.Visible   = 'off';
+                    for tt=1:numel(pAxes3ViewText)
+                        pAxes3ViewText{tt}.Visible   = 'off';
+                    end
+                    pAxesMipViewText.Visible = 'off';                    
+                end
+                
+                if isFusion('get') == true
+                    pAxes3fText = axesText('get', 'axes3f');
+                    pAxes3fText.Visible = 'off';                    
+                end
+                
             end
 
             if isVsplash('get') == true
@@ -588,14 +906,40 @@ end
             if size(dicomBuffer('get'), 3) == 1
                 pAxeText = axesText('get', 'axe');
                 pAxeText.Visible = 'on';
+                
+                if isFusion('get') == true
+                    pAxefText = axesText('get', 'axef');
+                    pAxefText.Visible = 'on';                    
+                end                                
             else
-                pAxes1Text = axesText('get', 'axes1');
-                pAxes2Text = axesText('get', 'axes2');
-                pAxes3Text = axesText('get', 'axes3');
+                pAxes1Text   = axesText('get', 'axes1'  );
+                pAxes2Text   = axesText('get', 'axes2'  );
+                pAxes3Text   = axesText('get', 'axes3'  );
+                pAxesMipText = axesText('get', 'axesMip');
 
-                pAxes1Text.Visible = 'on';
-                pAxes2Text.Visible = 'on';
-                pAxes3Text.Visible = 'on';
+                pAxes1Text.Visible   = 'on';
+                pAxes2Text.Visible   = 'on';
+                pAxes3Text.Visible   = 'on';
+                pAxesMipText.Visible = 'on';
+                
+                if isVsplash('get') == false
+                    pAxes1ViewText   = axesText('get', 'axes1View'  );
+                    pAxes2ViewText   = axesText('get', 'axes2View'  );
+                    pAxes3ViewText   = axesText('get', 'axes3View'  );
+                    pAxesMipViewText = axesText('get', 'axesMipView');
+
+                    pAxes1ViewText.Visible   = 'on';
+                    pAxes2ViewText.Visible   = 'on';
+                    for tt=1:numel(pAxes3ViewText)
+                        pAxes3ViewText{tt}.Visible   = 'on';
+                    end
+                    pAxesMipViewText.Visible = 'on';                    
+                end 
+                
+                if isFusion('get') == true
+                    pAxes3fText = axesText('get', 'axes3f');
+                    pAxes3fText.Visible = 'on';                    
+                end                
             end
 
             if isVsplash('get') == true
@@ -650,14 +994,31 @@ end
                 
         im = dicomBuffer('get');   
         im=im(:,:,end:-1:1);
-        dicomBuffer('set', im);
-
+        dicomBuffer('set', im);     
+        
         if isFusion('get')
-            imf = fusionBuffer('get');   
-            imf=imf(:,:,end:-1:1);
-            fusionBuffer('set', imf);                    
-        end                
+                             
+            dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+            for rr=1:dNbFusedSeries
+                                              
+                imf = fusionBuffer('get', [], rr);   
+                if ~isempty(imf)
 
+                    axes1f = axes1fPtr('get', [], rr);
+                    axes2f = axes2fPtr('get', [], rr);
+                    axes3f = axes3fPtr('get', [], rr);
+
+                    if ~isempty(axes1f) && ...
+                       ~isempty(axes2f) && ...
+                       ~isempty(axes3f)                       
+                        imf=imf(:,:,end:-1:1);
+                    end
+                    
+                    fusionBuffer('set', imf, rr);  
+                end
+            end
+        end 
+        
         refreshImages();
     end
 
@@ -690,18 +1051,52 @@ end
             im=im(:,end:-1:1);     
         else
             im=im(:,end:-1:1,:);     
+            if isVsplash('get') == false           
+                tAxes1ViewText = axesText('get', 'axes1View'); 
+                if strcmpi(tAxes1ViewText.String, 'Right')
+                    tAxes1ViewText.String  = 'Left';  
+                else
+                    tAxes1ViewText.String  = 'Right';  
+                end
+                
+                tAxes3ViewText = axesText('get', 'axes3View'); 
+                if strcmpi(tAxes3ViewText{2}.String, 'Right')
+                    tAxes3ViewText{2}.String  = 'Left';  
+                else
+                    tAxes3ViewText{2}.String  = 'Right';  
+                end                
+            end            
         end
         
         dicomBuffer('set', im);
 
         if isFusion('get')
-            imf = fusionBuffer('get');   
-            if size(fusionBuffer('get'), 3) == 1                              
-                imf=imf(:,end:-1:1);
-            else
-                imf=imf(:,end:-1:1,:);
+                             
+            dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+            for rr=1:dNbFusedSeries
+                                              
+                imf = fusionBuffer('get', [], rr);   
+                if ~isempty(imf)
+                    if size(imf, 3) == 1    
+                        axef = axefPtr('get', [], rr);
+                        if ~isempty(axef)
+                            imf=imf(:,end:-1:1);
+                        end
+                    else
+                        axes1f = axes1fPtr('get', [], rr);
+                        axes2f = axes2fPtr('get', [], rr);
+                        axes3f = axes3fPtr('get', [], rr);
+
+                        if ~isempty(axes1f) && ...
+                           ~isempty(axes2f) && ...
+                           ~isempty(axes3f)                       
+                            imf=imf(:,end:-1:1,:);
+                        end
+                    end
+                    
+                    fusionBuffer('set', imf, rr);  
+                end
             end
-            fusionBuffer('set', imf);                    
         end        
 
         refreshImages();
@@ -735,20 +1130,54 @@ end
             im=im(end:-1:1,:);
         else
             im=im(end:-1:1,:,:);
+            if isVsplash('get') == false           
+                tAxes2ViewText = axesText('get', 'axes2View'); 
+                if strcmpi(tAxes2ViewText.String, 'Anterior')
+                    tAxes2ViewText.String  = 'Posterior';  
+                else
+                    tAxes2ViewText.String  = 'Anterior';  
+                end
+                
+                tAxes3ViewText = axesText('get', 'axes3View'); 
+                if strcmpi(tAxes3ViewText{1}.String, 'Anterior')
+                    tAxes3ViewText{1}.String  = 'Posterior';  
+                else
+                    tAxes3ViewText{1}.String  = 'Anterior';  
+                end                
+            end             
         end
+        
         dicomBuffer('set', im);
-
+  
         if isFusion('get')
-            imf = fusionBuffer('get'); 
-            if size(fusionBuffer('get'), 3) == 1                              
-                imf=imf(end:-1:1,:);
-            else
-                imf=imf(end:-1:1,:,:);
-            end
-            
-            fusionBuffer('set', imf);                    
-        end   
+                             
+            dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+            for rr=1:dNbFusedSeries
+                                              
+                imf = fusionBuffer('get', [], rr);   
+                if ~isempty(imf)
+                    if size(imf, 3) == 1    
+                        axef = axefPtr('get', [], rr);
+                        if ~isempty(axef)
+                            imf=imf(end:-1:1,:);
+                        end
+                    else
+                        axes1f = axes1fPtr('get', [], rr);
+                        axes2f = axes2fPtr('get', [], rr);
+                        axes3f = axes3fPtr('get', [], rr);
 
+                        if ~isempty(axes1f) && ...
+                           ~isempty(axes2f) && ...
+                           ~isempty(axes3f)                       
+                            imf=imf(end:-1:1,:,:);
+                        end
+                    end
+                    
+                    fusionBuffer('set', imf, rr);  
+                end
+            end
+        end 
+        
         refreshImages();
     end  
 
@@ -816,11 +1245,7 @@ end
             [dMax, dMin] = computeWindowLevel(2500, 415);
             setFkeyWindowMinMax(dMax, dMin);
             pdToggle =2;
-        elseif pdToggle == 2
 
-            [dMax, dMin] = computeWindowLevel(350, 50);
-            setFkeyWindowMinMax(dMax, dMin);
-            pdToggle =3;
         else
             [dMax, dMin] = computeWindowLevel(1000, 350);
             setFkeyWindowMinMax(dMax, dMin);

@@ -30,26 +30,26 @@ function [dVolAlphaOffset, sVolMapSliderEnable] = ui3DPanelGetVolAlphaMapType(sT
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if strcmpi(sType, 'linear')
+    if strcmpi(sType, 'Linear')
         dVolAlphaOffset = 1;
         sVolMapSliderEnable = 'on';
-    elseif strcmpi(sType, 'custom')
+    elseif strcmpi(sType, 'Custom')
         dVolAlphaOffset = 2;
         sVolMapSliderEnable = 'off';
-    elseif strcmpi(sType, 'mr')
+    elseif strcmpi(sType, 'MR')
         dVolAlphaOffset = 3;
         sVolMapSliderEnable = 'off';
-    elseif strcmpi(sType, 'ct')
+    elseif strcmpi(sType, 'CT')
         dVolAlphaOffset = 4;
         sVolMapSliderEnable = 'off';
-    elseif strcmpi(sType, 'pt')
+    elseif strcmpi(sType, 'PET')
         dVolAlphaOffset = 5;
         sVolMapSliderEnable = 'off';      
     elseif strcmpi(sType, 'auto')  
-        if strcmpi(atMetaData{1}.Modality, 'mr')
+        if strcmpi(atMetaData{1}.Modality, 'MR')
             dVolAlphaOffset = 3;
             sVolMapSliderEnable = 'off';             
-        elseif strcmpi(atMetaData{1}.Modality, 'ct')
+        elseif strcmpi(atMetaData{1}.Modality, 'CT')
             dVolAlphaOffset = 4;
             sVolMapSliderEnable = 'off';            
         else

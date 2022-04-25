@@ -32,7 +32,7 @@ function setRotate3DCallback(~, ~)
     end
     
     set(fiMainWindowPtr('get'), 'Pointer', 'default');            
-    isMoveImageActivated('set', false);
+%    isMoveImageActivated('set', false);
     
     releaseRoiWait();
 
@@ -52,8 +52,12 @@ function setRotate3DCallback(~, ~)
    %         rotate3d on;
         else
 
-          set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
-          set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+            set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+            set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+            
+            if isMoveImageActivated('get') == true
+                set(fiMainWindowPtr('get'), 'Pointer', 'fleur');           
+            end          
         end
 
     else

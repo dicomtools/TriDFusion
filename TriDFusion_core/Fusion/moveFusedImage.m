@@ -1,5 +1,5 @@
-function moveFusedImage(bInitCoordinate, bRestoreXYData)
-%function  moveFusedImage(bInitCoordinate, bRestoreXYData)
+function moveFusedImage(bInitCoordinate)
+%function  moveFusedImage(bInitCoordinate)
 %Manually Move The Fused Image. 
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -28,25 +28,23 @@ function moveFusedImage(bInitCoordinate, bRestoreXYData)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
  
     persistent pInitImAxeFXData;       
-    persistent pInitImAxeFYData;  
+    persistent pInitImAxeFYData;      
     
     persistent pInitImCoronalFXData;       
     persistent pInitImCoronalFYData;  
-    
     persistent pInitImSagittalFXData;       
-    persistent pInitImSagittalFYData;  
-    
+    persistent pInitImSagittalFYData;      
     persistent pInitImAxialFXData;       
-    persistent pInitImAxialFYData;  
+    persistent pInitImAxialFYData;          
     
     persistent paInitClickedPtX;
-    persistent paInitClickedPtY;  
+    persistent paInitClickedPtY;    
     
     clickedAxe = gca;
           
-    if size(fusionBuffer('get'), 3) == 1 
-        
-        imAxeF = imAxeFPtr('get');
+    if size(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 3) == 1 
+                
+        imAxeF = imAxeFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
         
         if bInitCoordinate == true
             
@@ -56,7 +54,7 @@ function moveFusedImage(bInitCoordinate, bRestoreXYData)
             paInitClickedPtY = clickedPt(1,2);
                     
             pInitImAxeFXData =  get(imAxeF,'XData');       
-            pInitImAxeFYData =  get(imAxeF,'YData');                        
+            pInitImAxeFYData =  get(imAxeF,'YData');                           
 
         else
             clickedPt = get(clickedAxe,'CurrentPoint');
@@ -70,25 +68,12 @@ function moveFusedImage(bInitCoordinate, bRestoreXYData)
             imAxeF.XData = [pInitImAxeFXData(1)+aDiffClickedPtX pInitImAxeFXData(2)+aDiffClickedPtX];
             imAxeF.YData = [pInitImAxeFYData(1)+aDiffClickedPtY pInitImAxeFYData(2)+aDiffClickedPtY];
 
-            fusedImageMovementValues('set', true, clickedAxe, [-aDiffClickedPtX -aDiffClickedPtY]);            
+            fusedImageMovementValues('set', true, axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), [imAxeF.XData(1) imAxeF.YData(1)]);                       
         end
     else
-        imCoronalF  = imCoronalFPtr ('get'); 
-        imSagittalF = imSagittalFPtr('get'); 
-        imAxialF    = imAxialFPtr   ('get'); 
-        
-        if bRestoreXYData == true
-            set(imCoronalF,'XData', pInitImCoronalFXData);       
-            set(imCoronalF,'YData', pInitImCoronalFYData);  
-
-            set(imSagittalF,'XData', pInitImSagittalFXData);       
-            set(imSagittalF,'YData', pInitImSagittalFYData);  
-
-            set(imAxialF,'XData', pInitImAxialFXData);       
-            set(imAxialF,'YData', pInitImAxialFYData);     
-            
-            return;
-        end
+        imCoronalF  = imCoronalFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')); 
+        imSagittalF = imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')); 
+        imAxialF    = imAxialFPtr   ('get', [], get(uiFusedSeriesPtr('get'), 'Value'));         
           
         if bInitCoordinate == true
             
@@ -97,15 +82,15 @@ function moveFusedImage(bInitCoordinate, bRestoreXYData)
             paInitClickedPtX = clickedPt(1,1);
             paInitClickedPtY = clickedPt(1,2);
                     
-            pInitImCoronalFXData =  get(imCoronalF,'XData');       
-            pInitImCoronalFYData =  get(imCoronalF,'YData');  
+            pInitImCoronalFXData  =  get(imCoronalF,'XData');       
+            pInitImCoronalFYData  =  get(imCoronalF,'YData');  
 
             pInitImSagittalFXData =  get(imSagittalF,'XData');       
             pInitImSagittalFYData =  get(imSagittalF,'YData');  
 
-            pInitImAxialFXData =  get(imAxialF,'XData');       
-            pInitImAxialFYData =  get(imAxialF,'YData');                        
-
+            pInitImAxialFXData    =  get(imAxialF,'XData');       
+            pInitImAxialFYData    =  get(imAxialF,'YData');                                                
+            
         else        
             clickedPt = get(clickedAxe,'CurrentPoint');
             
@@ -116,7 +101,8 @@ function moveFusedImage(bInitCoordinate, bRestoreXYData)
             aDiffClickedPtY = aClickedPtY-paInitClickedPtY;
             
             switch clickedAxe
-                case axes1Ptr('get')
+                
+                case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     imCoronalF.XData = [pInitImCoronalFXData(1)+aDiffClickedPtX pInitImCoronalFXData(2)+aDiffClickedPtX];
                     imCoronalF.YData = [pInitImCoronalFYData(1)+aDiffClickedPtY pInitImCoronalFYData(2)+aDiffClickedPtY];
 
@@ -126,9 +112,12 @@ function moveFusedImage(bInitCoordinate, bRestoreXYData)
                     imAxialF.XData = [pInitImAxialFXData(1)+aDiffClickedPtX pInitImAxialFXData(2)+aDiffClickedPtX];
                 %    imAxialF.YData = [pInitImAxialFYData(1)+aDiffClickedPtY pInitImAxialFYData(2)+aDiffClickedPtY];
                 
-                    fusedImageMovementValues('set', true, clickedAxe, [-aDiffClickedPtX -aDiffClickedPtY]);                       
-                    
-                case axes2Ptr('get')
+%                    fusedImageMovementValues('set', true, axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [(pdCoronalMovementX+aDiffClickedPtX) (pdCoronalMovementY+aDiffClickedPtY)]);                       
+%                    fusedImageMovementValues('set', true, axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [imCoronalF.XData(1)  imCoronalF.YData(1)]);                       
+%                    fusedImageMovementValues('set', true, axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [imSagittalF.XData(1) imSagittalF.YData(1)]);                       
+%                    fusedImageMovementValues('set', true, axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [imAxialF.XData(1)    imAxialF.YData(1)]);                                       
+                                        
+                case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                  %   imCoronalF.XData = [pInitImCoronalFXData(1)+aDiffClickedPtX pInitImCoronalFXData(2)+aDiffClickedPtX];
                     imCoronalF.YData = [pInitImCoronalFYData(1)+aDiffClickedPtY pInitImCoronalFYData(2)+aDiffClickedPtY];
 
@@ -138,9 +127,13 @@ function moveFusedImage(bInitCoordinate, bRestoreXYData)
                 %    imAxialF.XData = [pInitImAxialFXData(1)+aDiffClickedPtX pInitImAxialFXData(2)+aDiffClickedPtX];
                     imAxialF.YData = [pInitImAxialFYData(1)+aDiffClickedPtX pInitImAxialFYData(2)+aDiffClickedPtX];
                     
-                    fusedImageMovementValues('set', true, clickedAxe, [-aDiffClickedPtX -aDiffClickedPtY]);                       
+%                    fusedImageMovementValues('set', true, clickedAxe, [(pdSagittalMovementX+aDiffClickedPtX) (pdSagittalMovementY+aDiffClickedPtY)]);                       
+%                    fusedImageMovementValues('set', true, clickedAxe, [imSagittalF.XData(1) imSagittalF.YData(1)]);                       
+%                    fusedImageMovementValues('set', true, axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [imCoronalF.XData(1)  imCoronalF.YData(1)]);                       
+%                    fusedImageMovementValues('set', true, axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [imSagittalF.XData(1) imSagittalF.YData(1)]);                       
+%                    fusedImageMovementValues('set', true, axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [imAxialF.XData(1)    imAxialF.YData(1)]);                       
                     
-                case axes3Ptr('get')
+                case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     
                     imCoronalF.XData = [pInitImCoronalFXData(1)+aDiffClickedPtX pInitImCoronalFXData(2)+aDiffClickedPtX];
                 %    imCoronalF.YData = [pInitImCoronalFYData(1)+aDiffClickedPtY pInitImCoronalFYData(2)+aDiffClickedPtY];
@@ -151,13 +144,17 @@ function moveFusedImage(bInitCoordinate, bRestoreXYData)
                     imAxialF.XData = [pInitImAxialFXData(1)+aDiffClickedPtX pInitImAxialFXData(2)+aDiffClickedPtX];
                     imAxialF.YData = [pInitImAxialFYData(1)+aDiffClickedPtY pInitImAxialFYData(2)+aDiffClickedPtY];
                     
-                    fusedImageMovementValues('set', true, clickedAxe, [-aDiffClickedPtX -aDiffClickedPtY]);                       
-
+%                    fusedImageMovementValues('set', true, clickedAxe, [(pdAxialMovementX+aDiffClickedPtX) (pdAxialMovementY+aDiffClickedPtY)]);                       
+%                    fusedImageMovementValues('set', true, clickedAxe, [imAxialF.XData(1) imAxialF.YData(1)]);                       
+   
                 otherwise
-                    fusedImageMovementValues('set', false);                       
+%                    fusedImageMovementValues('set', false);                       
                     return;                                                    
             end 
-                        
+            
+%            fusedImageMovementValues('set', true, axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [imCoronalF.XData  imCoronalF.YData ]);                       
+%            fusedImageMovementValues('set', true, axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [imSagittalF.XData imSagittalF.YData]);                       
+%            fusedImageMovementValues('set', true, axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [imAxialF.XData    imAxialF.YData   ]);                        
         end        
     end  
     

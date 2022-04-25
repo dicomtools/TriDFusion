@@ -29,8 +29,8 @@ function setMathCallback(~, ~)
 
     if numel(dicomBuffer('get')) < 1
         return;
-    end    
-    
+    end
+
     dlgMathematic = ...
         dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-810/2) ...
                             (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-570/2) ...
@@ -38,9 +38,19 @@ function setMathCallback(~, ~)
                             570 ...
                             ],...
                'Color', viewerBackgroundColor('get'),...
-               'Name' , 'Mathematic'...
+               'Name' , 'Mathematic'...               
                );
            
+        axes(dlgMathematic, ...
+             'Units'   , 'pixels', ...
+             'Position', get(dlgMathematic, 'Position'), ...
+             'Color'   , viewerBackgroundColor('get'),...
+             'XColor'  , viewerForegroundColor('get'),...
+             'YColor'  , viewerForegroundColor('get'),...
+             'ZColor'  , viewerForegroundColor('get'),...             
+             'Visible' , 'off'...             
+             ); 
+         
         uicontrol(dlgMathematic,...
                   'String','Reset',...
                   'Position',[15 525 100 25],...
@@ -48,7 +58,7 @@ function setMathCallback(~, ~)
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @resetMathematicCallback...
                   );
-              
+
      chkMathSeriesDescription = ...
           uicontrol(dlgMathematic,...
                   'style'   , 'checkbox',...
@@ -71,7 +81,7 @@ function setMathCallback(~, ~)
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'ButtonDownFcn', @updateMathDescriptionCallback...
                   );
-              
+
           uicontrol(dlgMathematic,...
                   'style'   , 'text',...
                   'FontWeight', 'bold',...
@@ -82,7 +92,7 @@ function setMathCallback(~, ~)
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get') ...
                   );
-              
+
     asText{1}  = '1- Select the serie(s)';
     asText{2}  = '2- Input the equation (case sensitive)';
     asText{3}  = '3- Execute';
@@ -129,7 +139,7 @@ function setMathCallback(~, ~)
                   'Callback', @lbMathWindowCallback...
                   );
     set(lbMathWindow, 'Max',2, 'Min',0);
-    
+
           uicontrol(dlgMathematic,...
                   'style'   , 'text',...
                   'FontWeight', 'bold',...
@@ -140,7 +150,7 @@ function setMathCallback(~, ~)
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get') ...
                   );
-              
+
     uiMathEquation = ...
          uicontrol(dlgMathematic,...
                   'enable'    , 'on',...
@@ -151,7 +161,7 @@ function setMathCallback(~, ~)
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'position'  , [15 65 295 20]...
                   );
-              
+
         uicontrol(dlgMathematic,...
                   'String','Execute',...
                   'Position',[210 30 100 25],...
@@ -159,15 +169,15 @@ function setMathCallback(~, ~)
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @executeMathCallback...
                   );
-              
+
     adLbSeries = zeros(size(seriesDescription('get')));
     dNextPosition = 1;
 
     function lbMathWindowCallback(~, ~)
-        
+
         aAlphabet = 'abcdefghijklmnopqrstuvwxyz';
         if numel(seriesDescription('get')) > numel(aAlphabet)
-            progressBar(1, sprintf('Error:lbMathWindowCallback() only support up to %d series!', numel(aAlphabet)));           
+            progressBar(1, sprintf('Error:lbMathWindowCallback() only support up to %d series!', numel(aAlphabet)));
             delete(dlgMathematic);
             return;
         end
@@ -269,159 +279,63 @@ function setMathCallback(~, ~)
 
     function resetMathematicCallback(~, ~)
 
-        tInitInput = inputTemplate('get');
-        dInitOffset = get(uiSeriesPtr('get'), 'Value');
-        if dInitOffset > numel(tInitInput)
-            return;
-        end
-        
+        dOffset = get(uiSeriesPtr('get'), 'Value');
+              
         try
-            
+
         set(dlgMathematic, 'Pointer', 'watch');
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-        drawnow; 
+        drawnow;
+
+        resetSeries(dOffset, true);
         
-        releaseRoiWait();
+        progressBar(1,'Ready');
+        delete(dlgMathematic);      
 
-        set(uiSeriesPtr('get'), 'Enable', 'off');
-
-        aInput = inputBuffer('get');
-
-        if ~strcmp(imageOrientation('get'), 'axial')
-            imageOrientation('set', 'axial');
-        end
-
-        asDescription = seriesDescription('get');
-        for jj=1:numel(aInput)
-
-            set(uiSeriesPtr('get'), 'Value', jj);
-
-            if     strcmp(imageOrientation('get'), 'axial')
-                aBuffer = permute(aInput{jj}, [1 2 3]);
-            elseif strcmp(imageOrientation('get'), 'coronal')
-                aBuffer = permute(aInput{jj}, [3 2 1]);
-            elseif strcmp(imageOrientation('get'), 'sagittal')
-                aBuffer = permute(aInput{jj}, [3 1 2]);
-            end
-
-            if isempty(tInitInput(jj).atDicomInfo{1}.SeriesDate)
-                sInitSeriesDate = '';
-            else
-                sSeriesDate = tInitInput(jj).atDicomInfo{1}.SeriesDate;
-                if isempty(tInitInput(jj).atDicomInfo{1}.SeriesTime)
-                    sSeriesTime = '000000';
-                else
-                    sSeriesTime = tInitInput(jj).atDicomInfo{1}.SeriesTime;
-                end
-
-                sInitSeriesDate = sprintf('%s%s', sSeriesDate, sSeriesTime);
-            end
-
-            if ~isempty(sInitSeriesDate)
-                if contains(sInitSeriesDate,'.')
-                    sInitSeriesDate = extractBefore(sInitSeriesDate,'.');
-                end
-
-                sInitSeriesDate = datetime(sInitSeriesDate,'InputFormat','yyyyMMddHHmmss');
-            end
-
-            sInitSeriesDescription = tInitInput(jj).atDicomInfo{1}.SeriesDescription;
-
-            asDescription{jj} = sprintf('%s %s', sInitSeriesDescription, sInitSeriesDate);
-
-            dicomBuffer('set',aBuffer);
-
-            dicomMetaData('set', tInitInput(jj).atDicomInfo);
-
-            setQuantification(jj);
-
-            tInitInput(jj).bEdgeDetection = false;
-            tInitInput(jj).bFlipLeftRight = false;
-            tInitInput(jj).bFlipAntPost   = false;
-            tInitInput(jj).bFlipHeadFeet  = false;
-            tInitInput(jj).bDoseKernel    = false;
-            tInitInput(jj).bMathApplied   = false;
-            tInitInput(jj).bFusedDoseKernel    = false;
-            tInitInput(jj).bFusedEdgeDetection = false;
-            
-            if isfield(tInitInput(jj), 'tRoi')
-                atRoi = roiTemplate('get');
-                for kk=1:numel(atRoi)
-                    atRoi{kk}.SliceNb = tInitInput(jj).tRoi{kk}.SliceNb;
-                    atRoi{kk}.Position = tInitInput(jj).tRoi{kk}.Position;
-                    atRoi{kk}.Object.Position = tInitInput(jj).tRoi{kk}.Position;
-                end
-                roiTemplate('set', atRoi);
-            end
-        end
-
-        seriesDescription('set', asDescription);
-
-        set(uiSeriesPtr('get'), 'Value', dInitOffset);
-        set(uiSeriesPtr('get'), 'Enable', 'on');
-
-        fusionBuffer('reset');
-        isFusion('set', false);
-        set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-        set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-
-        inputTemplate('set', tInitInput);
-         
-        set(dlgMathematic, 'Pointer', 'default');
-        delete(dlgMathematic);
-
-        clearDisplay();
-        initDisplay(3);
-
-        initWindowLevel('set', true);
-        quantificationTemplate('set', tInitInput(dInitOffset).tQuant);
-
-        dicomViewerCore();
-
-%              triangulateCallback();
-
-        refreshImages();
-        
         catch
-            progressBar(1, 'Error:resetRegistrationCallback()');           
+            progressBar(1, 'Error:resetMathematicCallback()');
         end
         
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
-        drawnow;         
+        drawnow;
+       
     end
 
     function executeMathCallback(~, ~)
-        
+
+        dInitOffset = get(uiSeriesPtr('get'), 'Value');
+            
         tInput = inputTemplate('get');
-        
+
         aInputBuffer  = inputBuffer('get');
-        iOffset = get(uiSeriesPtr('get'), 'Value');
-                    
+
         adLbOffset = get(lbMathWindow,  'Value');
-        asLbString = get(lbMathWindow,  'String');        
- 
+        asLbString = get(lbMathWindow,  'String');
+
         try
-            
+
         set(dlgMathematic, 'Pointer', 'watch');
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
-    
+
         for jj=1:numel(adLbOffset)
-            
+
             dCurOffset = adLbOffset(jj);
-              
+
             set(uiSeriesPtr('get'), 'Value', dCurOffset);
             aBuffer = dicomBuffer('get');
             if isempty(aBuffer)
                 aBuffer = aInputBuffer{dCurOffset};
                 dicomBuffer('set', aBuffer);
             end
+            aBufferInit = aBuffer;
 
             sLbString = asLbString{dCurOffset};
             cLetter = sLbString(1);
-            
+
             switch(cLetter)
-                case 'a'; a=double(aBuffer);                    
-                case 'b'; b=double(aBuffer);                   
+                case 'a'; a=double(aBuffer);
+                case 'b'; b=double(aBuffer);
                 case 'c'; c=double(aBuffer);
                 case 'd'; d=double(aBuffer);
                 case 'e'; e=double(aBuffer);
@@ -447,20 +361,18 @@ function setMathCallback(~, ~)
                 case 'y'; y=double(aBuffer);
                 case 'z'; z=double(aBuffer);
                 otherwise
-                    progressBar(1,'Error:executeMathCallback() Associated set serie cant be found!'); 
+                    progressBar(1,'Error:executeMathCallback() Associated set serie cant be found!');
                     break;
             end
 
-        end         
-        
-        set(uiSeriesPtr('get'), 'Value', iOffset);
+        end
 
         asEquation = strsplit(get(uiMathEquation, 'String'), ';');
         asEquation = strrep(asEquation,' ','');
         for jj=1: numel(asEquation)
-            
+
             sEquation = asEquation{jj};
-            
+
             acOperator = {'*', '/', '^'};
             for cc=1:numel(acOperator)
                 aPosition = strfind(sEquation, acOperator{cc});
@@ -468,11 +380,11 @@ function setMathCallback(~, ~)
                     sEquation = insertBefore(sEquation, aPosition(pp), '.');
                 end
             end
-            
+
             tMException = [];
             sInput = sprintf('try, %s; catch tMException; end', sEquation);
             eval(sInput);
-            
+
             if isempty(tMException)
                 aPosition = strfind(sEquation, '=');
                 for pp=1:numel(aPosition)
@@ -486,7 +398,7 @@ function setMathCallback(~, ~)
                         dCurOffset = adLbOffset(kk);
                         sLbString = asLbString{dCurOffset};
                         if strcmpi(cLetter, sLbString(1))
-                                                       
+
                             set(uiSeriesPtr('get'), 'Value', dCurOffset);
                             bOffsetExist = true;
                             break;
@@ -495,10 +407,10 @@ function setMathCallback(~, ~)
                     end
 
                     if bOffsetExist == true
-                                               
+
                         switch cLetter
-                            case 'a'; aBuffer = double(a);                            
-                            case 'b'; aBuffer = double(b);                            
+                            case 'a'; aBuffer = double(a);
+                            case 'b'; aBuffer = double(b);
                             case 'c'; aBuffer = double(c);
                             case 'd'; aBuffer = double(d);
                             case 'e'; aBuffer = double(e);
@@ -524,70 +436,87 @@ function setMathCallback(~, ~)
                             case 'y'; aBuffer = double(y);
                             case 'z'; aBuffer = double(z);
                         otherwise
-                            progressBar(1,'Error:executeMathCallback() Associated result serie cant be found!');    
+                            progressBar(1,'Error:executeMathCallback() Associated result serie cant be found!');
                             break;
                         end
 
-                        dicomBuffer('set', aBuffer);
+                        % Get constraint 
+
+                        [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dCurOffset);
+
+                        bInvertMask = invertConstraint('get');
+
+                        tRoiInput = roiTemplate('get', dCurOffset);
+
+                        aLogicalMask = roiConstraintToMask(aBufferInit, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);        
+
+                        aBuffer(aLogicalMask==0) = aBufferInit(aLogicalMask==0);                                                
                         
+                        dicomBuffer('set', aBuffer);
+
                         if get(chkMathSeriesDescription, 'Value') == true
-                            
+
                             atMetaData = dicomMetaData('get');
                             if isempty(atMetaData)
                                 atMetaData = tInput(dCurOffset).atDicomInfo;
                             end
 
                             for dd=1:numel(atMetaData)
-                                atMetaData{dd}.SeriesDescription  = sprintf('MATH %s', atMetaData{1}.SeriesDescription);                                                                                                
+                                atMetaData{dd}.SeriesDescription  = sprintf('MATH %s', atMetaData{1}.SeriesDescription);
                             end
                             asDescription = seriesDescription('get');
                             asDescription{dCurOffset} = sprintf('MATH %s', asDescription{dCurOffset});
 
                             seriesDescription('set', asDescription);
-                            dicomMetaData('set', atMetaData);                            
+                            dicomMetaData('set', atMetaData);
                         end
-                        
+
                         updateDescription('set', get(chkMathSeriesDescription, 'Value'));
-                        
+
                         tInput(dCurOffset).bMathApplied = true;
                         inputTemplate('set', tInput);
-                        
+
                         setQuantification(dCurOffset);
 
                         % quantificationTemplate('set', tInput(dCurOffset).tQuant);
-                        
+
                     end
                 end
             else
-                progressBar(1,'Error:executeMathCallback()');                       
+                progressBar(1,'Error:executeMathCallback()');
                 msgbox({tMException.identifier;tMException.message}, 'Error:executeMathCallback()');
                 break;
             end
-                                
-        end 
-        
+
+        end
+
         catch
-            progressBar(1,'Error:executeMathCallback()');                       
+            progressBar(1,'Error:executeMathCallback()');
         end
         
+        set(uiSeriesPtr('get'), 'Value', dInitOffset);
+        
+        setQuantification(dInitOffset)
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
         set(dlgMathematic, 'Pointer', 'default');
         drawnow;
-            
-        if isempty(tMException)        
-            
-            progressBar(1,'Ready');                       
+
+        if isempty(tMException)
+
+            progressBar(1,'Ready');
             delete(dlgMathematic);
-                        
-            clearDisplay();
-            initDisplay(3);
-
-            dicomViewerCore();
-
-            setViewerDefaultColor(true, dicomMetaData('get'));
             
+%            clearDisplay();
+%            initDisplay(3);
+
+%            dicomViewerCore();
+
+%            setViewerDefaultColor(true, dicomMetaData('get'));
+
             refreshImages();
         end
-        
+
     end
     function updateMathDescriptionCallback(hObject, ~)
 
@@ -608,7 +537,7 @@ function setMathCallback(~, ~)
     end
 
     function sNewString = insertBefore( sInputString, dPosition, sWhatToInsert)
-        
+
         sNewString = char( strcat( cellstr(sInputString(:,1:dPosition-1)), ...
                                    cellstr(sWhatToInsert), ...
                                    cellstr(sInputString(:, dPosition:end)) ) ...

@@ -40,6 +40,8 @@ function loadRawFile( sPathName, sFileName, dimX, dimY)
     
     try
         
+    outputDir('set', '');
+       
     mainDir('set', sPathName);
         
     rawFileName = sprintf('%s%s', sPathName, sFileName);
@@ -94,7 +96,13 @@ function loadRawFile( sPathName, sFileName, dimX, dimY)
         tInput(numel(tInput)).bMathApplied   = false;
         tInput(numel(tInput)).bFusedDoseKernel    = false;
         tInput(numel(tInput)).bFusedEdgeDetection = false;
-    
+        tInput(numel(tInput)).tMovement = [];
+        tInput(numel(tInput)).tMovement.bMovementApplied = false;
+        tInput(numel(tInput)).tMovement.aGeomtform = [];
+        tInput(numel(tInput)).tMovement.atSeq{1}.sAxe = [];
+        tInput(numel(tInput)).tMovement.atSeq{1}.aTranslation = [];
+        tInput(numel(tInput)).tMovement.atSeq{1}.dRotation = [];  
+        
         asSeries = get(uiSeriesPtr('get'), 'String');
         asSeries{numel(asSeries)+1} = asSeriesDescription{numel(asSeriesDescription)};        
     else
@@ -123,7 +131,7 @@ function loadRawFile( sPathName, sFileName, dimX, dimY)
     end    
     
     seriesDescription('set', asSeriesDescription);
-   
+            
     inputTemplate('set', tInput);
 
     aInputBuffer = inputBuffer('get');        

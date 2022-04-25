@@ -26,31 +26,45 @@ function clearDisplay()
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-    
+
+    arrayfun(@cla,findall(fiMainWindowPtr('get'),'type','axes'))
+  
     ptrFusionColorbar = uiFusionColorbarPtr('get');
     if ~isempty(ptrFusionColorbar) 
-        ptrFusionColorbar.Position = [0 0 0 0];                
+        if isvalid(ptrFusionColorbar)
+            delete(ptrFusionColorbar);
+        end
+%        ptrFusionColorbar.Position = [0 0 0 0];                
         clear ptrFusionColorbar;
         uiFusionColorbarPtr('set' , '');
     end
 
     uiFusionSliderLevel = uiFusionSliderLevelPtr('get');
     if ~isempty(uiFusionSliderLevel) 
-        uiFusionSliderLevel.Position = [0 0 0 0];
+        if isvalid(uiFusionSliderLevel)
+            delete(uiFusionSliderLevel);
+        end        
+%        uiFusionSliderLevel.Position = [0 0 0 0];
         clear uiFusionSliderLevel;               
         uiFusionSliderLevelPtr('set', '');
     end
 
     uiFusionSliderWindow = uiFusionSliderWindowPtr('get');
     if ~isempty(uiFusionSliderWindow) 
-        uiFusionSliderWindow.Position = [0 0 0 0];
+        if isvalid(uiFusionSliderWindow)
+            delete(uiFusionSliderWindow);
+        end            
+%        uiFusionSliderWindow.Position = [0 0 0 0];
         clear uiFusionSliderWindow;               
         uiFusionSliderWindowPtr('set', '');
     end
 
     uiAlphaSlider = uiAlphaSliderPtr('get');
     if ~isempty(uiAlphaSlider) 
-        uiAlphaSlider.Position = [0 0 0 0];
+        if isvalid(uiAlphaSlider)
+            delete(uiAlphaSlider);
+        end          
+%        uiAlphaSlider.Position = [0 0 0 0];
         clear uiAlphaSlider;               
         uiAlphaSliderPtr('set', '');
     end
@@ -152,120 +166,105 @@ function clearDisplay()
         clear uiSliderTra;           
         uiSliderTraPtr('set', '');
     end   
-
-    txt = axesText('get', 'axe');
-    if ~isempty(txt)
-        delete(txt);
-        clear txt;
-        axesText('set', 'axe', '');
-    end      
     
-    txt1 = axesText('get', 'axes1');
-    if ~isempty(txt1)
-        delete(txt1);
-        clear txt1;
-        axesText('set', 'axes1', '');
-    end    
+    uiSliderMip = uiSliderMipPtr('get');
+    if ~isempty(uiSliderMip)
+        delete(uiSliderMip);
+        clear uiSliderMip;           
+        uiSliderMipPtr('set', '');
+    end   
     
-    txt2 = axesText('get', 'axes2');
-    if ~isempty(txt2)
-        delete(txt2);
-        clear txt2;
-        axesText('set', 'axes2', '');
-    end    
+    axesText('reset', 'axe');
+    axesText('reset', 'axes1');
+    axesText('reset', 'axes2');
+    axesText('reset', 'axes3');
+    axesText('reset', 'axeMip');
     
-    txt3 = axesText('get', 'axes3');
-    if ~isempty(txt3)
-        delete(txt3);
-        clear txt3;
-        axesText('set', 'axes3', '');
-    end    
+    axesText('reset', 'axef');
+    axesText('reset', 'axes1f');
+    axesText('reset', 'axes2f');
+    axesText('reset', 'axes3f');
+    axesText('reset', 'axeMipf');
     
-    axef = axefPtr('get');
-    if ~isempty(axef)
-        delete(axef);
-        clear axef;
-        axefPtr('set', '');
-    end
-
-    axe = axePtr('get');
-    if ~isempty(axe)
-        axesText('set', 'axe', '');                
-        delete(axe);
-        clear axe;
-        axePtr('set', '');
-   end
-
+    axesText('reset', 'axeView');
+    axesText('reset', 'axes1View');
+    axesText('reset', 'axes2View');
+    axesText('reset', 'axes3View');
+    axesText('reset', 'axeMipView');
+         
+    imAxePtr  ('reset');    
+    imAxeFcPtr('reset');  
+    imAxeFPtr ('reset');  
+  
+    axefPtr ('reset');
+    axefcPtr('reset');
+    axePtr  ('reset');
+    
     uiOneWindow = uiOneWindowPtr('get');
     if ~isempty(uiOneWindow)
        delete(uiOneWindow);
        clear uiOneWindow;
        uiOneWindowPtr('set', '');
     end
-
-    axes1f = axes1fPtr('get');
-    if ~isempty(axes1f)
-        delete(axes1f);
-        clear axes1f;
-        axes1fPtr('set', '');
-    end
-
-    axes1 = axes1Ptr('get');
-    if ~isempty(axes1)
-        axesText('set', 'axes1', '');                
-        delete(axes1);
-        clear axes1;
-        axes1Ptr('set', '');
-    end
-
+    
+    imCoronalPtr  ('reset');                
+    imCoronalFcPtr('reset');                
+    imCoronalFPtr ('reset');                
+        
+    axes1fPtr ('reset');
+    axes1fcPtr('reset');
+    axes1Ptr  ('reset');
+        
     uiCorWindow = uiCorWindowPtr('get');
     if ~isempty(uiCorWindow)
         delete(uiCorWindow);
         clear uiCorWindow;
         uiCorWindowPtr('set', '');
     end
-
-    axes2f = axes2fPtr('get');
-    if ~isempty(axes2f)
-        delete(axes2f);
-        clear axes2f;
-        axes2fPtr('set', '');
-    end
-
-    axes2 = axes2Ptr('get');
-    if ~isempty(axes2)
-        axesText('set', 'axes2', '');                
-        delete(axes2);
-        clear axes2;
-        axes2Ptr('set', '');
-    end
-
+    
+    imSagittalPtr  ('reset');                
+    imSagittalFcPtr('reset');                
+    imSagittalFPtr ('reset');                
+        
+    axes2fPtr ('reset');
+    axes2fcPtr('reset');
+    axes2Ptr  ('reset');  
+    
     uiSagWindow = uiSagWindowPtr('get');
     if ~isempty(uiSagWindow)
         delete(uiSagWindow); 
         clear uiSagWindow;
         uiSagWindowPtr('set', '');
-    end          
-
-    axes3f = axes3fPtr('get');
-    if ~isempty(axes3f)
-        delete(axes3f);
-        clear axes3f;
-        axes3fPtr('set', '');
-    end
-
-    axes3 = axes3Ptr('get');
-    if ~isempty(axes3)
-        axesText('set', 'axes3', '');                
-        delete(axes3);
-        clear axes3;
-        axes3Ptr('set', '');
-    end       
-
+    end              
+    
+    imAxialPtr  ('reset'); 
+    imAxialFcPtr('reset'); 
+    imAxialFPtr ('reset'); 
+        
+    axes3fPtr ('reset');
+    axes3fcPtr('reset');
+    axes3Ptr  ('reset');            
+    
     uiTraWindow = uiTraWindowPtr('get');
     if ~isempty(uiTraWindow)
         delete(uiTraWindow); 
         clear uiTraWindow;
         uiTraWindowPtr('set', '');
-    end          
+    end
+    
+    imMipPtr  ('reset');    
+    imMipFcPtr('reset');    
+    imMipFPtr ('reset');    
+   
+    axesMipfPtr ('reset');
+    axesMipfcPtr('reset');
+    axesMipPtr  ('reset'); 
+    
+    uiMipWindow = uiMipWindowPtr('get');
+    if ~isempty(uiMipWindow)
+        delete(uiMipWindow); 
+        clear uiMipWindow;
+        uiMipWindowPtr('set', '');
+    end    
+
 end                  

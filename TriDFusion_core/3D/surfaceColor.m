@@ -28,8 +28,8 @@ function sColor = surfaceColor(sAction, lOffset)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
     persistent pasDefaultColor;
-    pasDefaultColor = {'yellow', 'magenta', 'cyan', 'red', 'green', ...
-                       'blue', 'white', 'black'};
+    pasDefaultColor = {'Yellow', 'Magenta', 'Cyan', 'Red', 'Green', ...
+                       'Blue', 'White', 'Black'};
 
     if strcmpi(sAction, 'all')
         sColor = pasDefaultColor;

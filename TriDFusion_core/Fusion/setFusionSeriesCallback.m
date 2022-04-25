@@ -28,11 +28,20 @@ function setFusionSeriesCallback(~, ~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
     if isFusion('get') == true
+        
         isFusion('set', false);
         
         initFusionWindowLevel('set', true);
 
-        fusionBuffer('reset');           
+        fusionBuffer('set', [], get(uiFusedSeriesPtr('get'), 'Value'));     
+        if link2DMip('get') == true
+            mipFusionBuffer('set', [], get(uiFusedSeriesPtr('get'), 'Value')); 
+        end
+        
+        if isPlotContours('get') == true % Deactivate contours
+            setPlotContoursCallback();
+        end
+       
         setFusionCallback();
     end
 

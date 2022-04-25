@@ -43,7 +43,7 @@ function triangulateImages()
         if clickedPtX > 0 && clickedPtY > 0
 
             switch gca
-                case axes1Ptr('get')  
+                case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  
                     if ( (clickedPtX <= iSagittalSize) &&...
                          (clickedPtY <= iAxialSize) )  
                         sliceNumber('set', 'sagittal', clickedPtX);
@@ -57,7 +57,7 @@ function triangulateImages()
                         uiresume(fiMainWindowPtr('get'));
                     end
 
-                case axes2Ptr('get')
+                case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     if ( (clickedPtX <= iCoronalSize) &&...
                          (clickedPtY <= iAxialSize) )  
                         sliceNumber('set', 'coronal', clickedPtX);
@@ -72,7 +72,7 @@ function triangulateImages()
                         uiresume(fiMainWindowPtr('get'));                                
                     end    
 
-                case axes3Ptr('get')
+                case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     if ( (clickedPtX <= iSagittalSize) && ...
                          (clickedPtY <= iCoronalSize) ) 
 

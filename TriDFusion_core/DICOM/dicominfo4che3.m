@@ -113,14 +113,22 @@ function info = dicominfo4che3(fileInput)
     if isempty(info.PixelSpacing) 
         info.PixelSpacing = zeros(2,1);
     end
-    
+         
     info.PatientWeight = char(dataset.getString(org.dcm4che.data.Tag.PatientWeight, 0));
     info.PatientSize   = char(dataset.getString(org.dcm4che.data.Tag.PatientSize, 0));
+    info.PatientSex    = char(dataset.getString(org.dcm4che.data.Tag.PatientSex, 0));
+    info.PatientAge    = char(dataset.getString(org.dcm4che.data.Tag.PatientAge, 0));
+    
+    % Manifacturer & protocol information
 
+    info.ManufacturerModelName = char(dataset.getString(org.dcm4che.data.Tag.ManufacturerModelName, 0));
+    info.ProtocolName          = char(dataset.getString(org.dcm4che.data.Tag.ProtocolName, 0)); 
+    
     % Dose information
-
+    
     datasetDose = dataset.getNestedDataset(org.dcm4che.data.Tag.RadiopharmaceuticalInformationSequence, 0);
     if ~isempty(datasetDose)
+        info.RadiopharmaceuticalInformationSequence.Item_1.Radiopharmaceutical              = char(datasetDose.getString(org.dcm4che.data.Tag.Radiopharmaceutical, 0));
         info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartTime     = char(datasetDose.getString(org.dcm4che.data.Tag.RadiopharmaceuticalStartTime, 0));
         info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStopTime      = char(datasetDose.getString(org.dcm4che.data.Tag.RadiopharmaceuticalStopTime, 0));
         info.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose            = char(datasetDose.getString(org.dcm4che.data.Tag.RadionuclideTotalDose, 0));
@@ -147,6 +155,7 @@ function info = dicominfo4che3(fileInput)
     end
     
     info.Units = char(dataset.getString(org.dcm4che.data.Tag.Units, 0));        
+    info.DecayCorrection = char(dataset.getString(org.dcm4che.data.Tag.DecayCorrection, 0));        
 
     % Image information
 
@@ -154,11 +163,11 @@ function info = dicominfo4che3(fileInput)
     info.BitsStored    = dataset.getInt(org.dcm4che.data.Tag.BitsStored, 0);
     info.HighBit       = dataset.getInt(org.dcm4che.data.Tag.HighBit, 0);
 
-    if info.HighBit == info.BitsStored -1
-        info.din.pixeldata  = uint16(dataset.getInts(org.dcm4che.data.Tag.PixelData));
-    else
+%    if info.HighBit == info.BitsStored -1 % 16 bits
+%        info.din.pixeldata  = uint16(dataset.getInts(org.dcm4che.data.Tag.PixelData));
+%    else
         info.din.pixeldata  = dataset.getInts(org.dcm4che.data.Tag.PixelData);
-    end
+%    end
 
     info.din.rows       = dataset.getInt(org.dcm4che.data.Tag.Rows, 0);
     info.din.cols       = dataset.getInt(org.dcm4che.data.Tag.Columns,0);                                                           

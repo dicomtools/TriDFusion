@@ -47,7 +47,7 @@ function sWindowName = getWindowName(dWindow, dLevel)
         sWindowName = 'Head and Neck';                
      elseif dWindow == 2000 &&...   
             dLevel  == -600
-        sWindowName = 'Enchanced Lung';               
+        sWindowName = 'Enhanced Lung';               
     elseif dWindow == 350 &&...   
            dLevel  == 50
         sWindowName = 'Mediastinum';                

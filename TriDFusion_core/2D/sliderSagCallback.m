@@ -38,6 +38,7 @@ function sliderSagCallback(~, ~)
         end
 
         sliceNumber('set', 'sagittal', iSliceNumber); 
+        
         refreshImages();
     end
 end    

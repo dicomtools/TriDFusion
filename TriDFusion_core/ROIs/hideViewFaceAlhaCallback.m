@@ -1,5 +1,5 @@
-function hideViewFaceAlhaCallback(hObject,~) 
-%function hideViewFaceAlhaCallback(hObject,~)  
+function hideViewFaceAlhaCallback(hObject,~)
+%function hideViewFaceAlhaCallback(hObject,~)
 %Hide\View ROI FaceAlpha.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -8,38 +8,38 @@ function hideViewFaceAlhaCallback(hObject,~)
 %Last specifications modified:
 %
 % Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
-% 
+%
 % This file is part of The Triple Dimention Fusion (TriDFusion).
-% 
+%
 % TriDFusion development has been led by:  Daniel Lafontaine
-% 
-% TriDFusion is distributed under the terms of the Lesser GNU Public License. 
-% 
+%
+% TriDFusion is distributed under the terms of the Lesser GNU Public License.
+%
 %     This version of TriDFusion is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 % TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 % without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 % See the GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     if hObject.UserData.FaceAlpha
         hObject.UserData.FaceAlpha = 0;
     else
         hObject.UserData.FaceAlpha = 0.2;
     end
-                   
-    atRoi = roiTemplate('get');
-    
+
+    atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
     for bb=1:numel(atRoi)
         if strcmpi(hObject.UserData.Tag, atRoi{bb}.Tag)
             atRoi{bb}.FaceAlpha = hObject.UserData.FaceAlpha;
-            roiTemplate('set', atRoi);
+            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoi);
             break;
         end
-    end 
-end   
+    end
+end

@@ -1,5 +1,5 @@
-function aObject = axes1fPtr(sAction, aValue)
-%function aObject = axes1fPtr(sAction, aValue)
+function aObject = axes1fPtr(sAction, aValue, iOffset)
+%function aObject = axes1fPtr(sAction, aValue, iOffset)
 %Get\Set Axe1 Fusion Pointer.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -28,12 +28,29 @@ function aObject = axes1fPtr(sAction, aValue)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.    persistent paObject; 
 
     persistent paObject; 
-
+    
+    aObject = '';
+        
     if strcmpi('set', sAction)
-       paObject = aValue;            
-    end      
-    aObject = paObject;
+        paObject{iOffset} = aValue; 
+    elseif strcmpi('reset', sAction)    
+        for aa=1:numel(paObject)
+            if ~isempty(paObject{aa})
+                if isvalid(paObject{aa})
+                    delete(paObject{aa});
+                end
+            end
+            clear paObject{aa};                           
+            paObject{aa} = '';
+        end
+    else
+        if ~isempty(paObject) && ...
+           numel(paObject) >= iOffset    
+            aObject = paObject{iOffset};
+        end
+    end 
+    
 end

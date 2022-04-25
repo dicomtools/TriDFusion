@@ -1,5 +1,5 @@
-function aObject = imCoronalFPtr(sAction, aValue)
-%function aObject = imCoronalFPtr(sAction, aValue)
+function aObject = imCoronalFPtr(sAction, aValue, iOffset)
+%function aObject = imCoronalFPtr(sAction, aValue, iOffset)
 %Get\Set Image Coronal Axe Fusion Pointer.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -31,9 +31,25 @@ function aObject = imCoronalFPtr(sAction, aValue)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     persistent paObject; 
-
+    
+    aObject = '';
+        
     if strcmpi('set', sAction)
-       paObject = aValue;            
-    end      
-    aObject = paObject;
+        paObject{iOffset} = aValue; 
+    elseif strcmpi('reset', sAction)    
+        for aa=1:numel(paObject)
+            if ~isempty(paObject{aa})
+                if isvalid(paObject{aa})
+                    delete(paObject{aa});
+                end
+            end
+            clear paObject{aa};                           
+            paObject{aa} = '';
+        end
+    else
+        if ~isempty(paObject) && ...
+           numel(paObject) >= iOffset    
+            aObject = paObject{iOffset};
+        end
+    end     
 end

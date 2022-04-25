@@ -59,35 +59,36 @@ function setQuantification(dSeriesOffset)
             atQuantDicomInfo = tInput(cc).atDicomInfo;
         end
 
-        switch lower(tInput(cc).atDicomInfo{1}.Modality)
-            case {'ct', 'mr'}
+        sModality = lower(tInput(cc).atDicomInfo{1}.Modality);
+        if strcmpi(sModality, 'ct') || strcmpi(sModality, 'mr')
 
             xPixel = 0;
             yPixel = 0;
-            zPixel = 0;
+%            zPixel = 0;
             for jj=1: numel(atQuantDicomInfo)-1
 
                 xPixel = xPixel + (atQuantDicomInfo{jj}.PixelSpacing(1)/10);
                 yPixel = yPixel + (atQuantDicomInfo{jj}.PixelSpacing(2)/10);
 
-                if atQuantDicomInfo{jj  }.SliceLocation - ...
-                   atQuantDicomInfo{jj+1}.SliceLocation > 0
-                    zPixel = atQuantDicomInfo{jj  }.SliceLocation - ...
-                             atQuantDicomInfo{jj+1}.SliceLocation + ...
-                             zPixel;
+%                if atQuantDicomInfo{jj  }.SliceLocation - ...
+%                   atQuantDicomInfo{jj+1}.SliceLocation > 0
+%                    zPixel = atQuantDicomInfo{jj  }.SliceLocation - ...
+%                             atQuantDicomInfo{jj+1}.SliceLocation + ...
+%                             zPixel;
 
-                elseif atQuantDicomInfo{jj+1}.SliceLocation - ...
-                       atQuantDicomInfo{jj  }.SliceLocation > 0
-                    zPixel = atQuantDicomInfo{jj+1}.SliceLocation - ...
-                             atQuantDicomInfo{jj  }.SliceLocation + ...
-                             zPixel;
-                end
+%                elseif atQuantDicomInfo{jj+1}.SliceLocation - ...
+%                       atQuantDicomInfo{jj  }.SliceLocation > 0
+%                    zPixel = atQuantDicomInfo{jj+1}.SliceLocation - ...
+%                             atQuantDicomInfo{jj  }.SliceLocation + ...
+%                             zPixel;
+%                end
 
             %    zPixel = zPixel + (tInput(cc).atDicomInfo{jj}.SliceThickness /10);
             end
             xPixel = xPixel / numel(atQuantDicomInfo);
             yPixel = yPixel / numel(atQuantDicomInfo);
-            zPixel = zPixel / (numel(atQuantDicomInfo)-1);
+            zPixel = computeSliceSpacing(atQuantDicomInfo);
+%            zPixel = zPixel / (numel(atQuantDicomInfo)-1);
 
             voxVolume = xPixel * yPixel * zPixel;
             nbVoxels = numel(aInput);
@@ -96,15 +97,16 @@ function setQuantification(dSeriesOffset)
             tInput(cc).tQuant.tHU.dMin = tInput(cc).tQuant.tCount.dMin;
             tInput(cc).tQuant.tHU.dMax = tInput(cc).tQuant.tCount.dMax;
             tInput(cc).tQuant.tHU.dTot = voxVolume * nbVoxels * volMean;
+            
+        elseif strcmpi(sModality, 'pt') || strcmpi(sModality, 'nm')
 
-            case {'pt', 'nm'}
 
-            dScale = computeSUV(atQuantDicomInfo{1});
+            dScale = computeSUV(atQuantDicomInfo{1}, viewerSUVtype('get'));
 
             if dScale ~= 0
                 xPixel = 0;
                 yPixel = 0;
-                zPixel = 0;
+%                zPixel = 0;
 
                 for jj=1: numel(atQuantDicomInfo)
                     xPixel = xPixel + (atQuantDicomInfo{jj}.PixelSpacing(1)/10);
@@ -125,7 +127,7 @@ function setQuantification(dSeriesOffset)
                 tInput(cc).tQuant.tSUV.dTot =  voxVolume * nbVoxels * volMean * dScale;
                 tInput(cc).tQuant.tSUV.dmCi =  (voxVolume * nbVoxels * volMean) / 3.7E7 / 10;
             end
-            otherwise
+        else
         end
     end
 
@@ -133,24 +135,35 @@ function setQuantification(dSeriesOffset)
 
         quantificationTemplate('set', tInput(dSeriesOffset).tQuant);
 %            inputTemplate('set', tInput);
-        cropValue('set', tInput(dSeriesOffset).tQuant.tCount.dMin);
-        imageSegEditValue('set', 'lower', tInput(dSeriesOffset).tQuant.tCount.dMin);
-        imageSegEditValue('set', 'upper', tInput(dSeriesOffset).tQuant.tCount.dMax);
+%        cropValue('set', tInput(dSeriesOffset).tQuant.tCount.dMin);
+        sModality = tInput(dSeriesOffset).atDicomInfo{1}.Modality;
+        if strcmpi(sModality, 'ct')
+%            imageSegEditValue('set', 'lower', 44 );
+%            imageSegEditValue('set', 'upper', 100);
+            imageSegEditValue('set', 'lower', tInput(dSeriesOffset).tQuant.tCount.dMin);
+            imageSegEditValue('set', 'upper', tInput(dSeriesOffset).tQuant.tCount.dMax);
+        else
+            imageSegEditValue('set', 'lower', tInput(dSeriesOffset).tQuant.tCount.dMin);
+            imageSegEditValue('set', 'upper', tInput(dSeriesOffset).tQuant.tCount.dMax);
+        end
     else
         inputTemplate('set', tInput);
         quantificationTemplate('set', tInput(1).tQuant);
         cropValue('set', tInput(1).tQuant.tCount.dMin);
 
-        if strcmpi(tInput(1).atDicomInfo{1}.Modality, 'ct')
-            imageSegEditValue('set', 'lower', 44 );
-            imageSegEditValue('set', 'upper', 100);
-
+        sModality = tInput(1).atDicomInfo{1}.Modality;
+        if strcmpi(sModality, 'ct')
+%            imageSegEditValue('set', 'lower', 44 );
+%            imageSegEditValue('set', 'upper', 100);
+            imageSegEditValue('set', 'lower', tInput(1).tQuant.tCount.dMin);
+            imageSegEditValue('set', 'upper', tInput(1).tQuant.tCount.dMax);
         else
             imageSegEditValue('set', 'lower', tInput(1).tQuant.tCount.dMin);
             imageSegEditValue('set', 'upper', tInput(1).tQuant.tCount.dMax);
         end
 
-        setKernelCtDoseMapUiValues();            
+        setKernelCtDoseMapUiValues();
+        setResampleToCTIsoMaskValues();
         setRoiPanelCtUiValues();
     end
 

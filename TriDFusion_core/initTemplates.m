@@ -136,6 +136,13 @@ function initTemplates()
                 tSetInputTemplate(dSeriesLoop).bMathApplied   = false;
                 tSetInputTemplate(dSeriesLoop).bFusedDoseKernel    = false;
                 tSetInputTemplate(dSeriesLoop).bFusedEdgeDetection = false;
+                tSetInputTemplate(dSeriesLoop).tMovement = [];
+                tSetInputTemplate(dSeriesLoop).tMovement.bMovementApplied = false;
+                tSetInputTemplate(dSeriesLoop).tMovement.aGeomtform = [];                
+                tSetInputTemplate(dSeriesLoop).tMovement.atSeq{1}.sAxe = [];
+                tSetInputTemplate(dSeriesLoop).tMovement.atSeq{1}.aTranslation = [];
+                tSetInputTemplate(dSeriesLoop).tMovement.atSeq{1}.dRotation = [];
+                
             end 
                     
             inputTemplate('set', tSetInputTemplate);
@@ -174,7 +181,7 @@ function initTemplates()
             setInputOrientation();
 
             setDisplayBuffer();
-
+            
             setQuantification();
             
         else

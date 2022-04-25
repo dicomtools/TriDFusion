@@ -29,60 +29,108 @@ function initRoiPanel()
 
     aBuffer = dicomBuffer('get');
     if isempty(aBuffer)
-         return;
-    else
-        roiPanelMinValue('set', min(double(aBuffer),[], 'all'));
-        roiPanelMaxValue('set', max(double(aBuffer),[], 'all'));
+        return;
     end
 
-        % Roi/Voi segmentation
+    % Delete Voi
 
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'text',...
                   'FontWeight', 'bold',...
-                  'string'  , 'ROI/VOI Segmentation',...
+                  'string'  , 'VOI Deletion',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [15 410 200 20]...
+                  'position', [15 565 200 20]...
                   );
 
-      uiRoiVoiRoiPanel = ...
-        uicontrol(uiRoiPanelPtr('get'), ...
+     uiDeleteVoiRoiPanel = ...
+         uicontrol(uiRoiPanelPtr('get'), ...
                   'Style'   , 'popup', ...
-                  'position'  , [95 380 160 20],...
+                  'Position', [15 535 245 25], ...
                   'String'  , ' ', ...
                   'Value'   , 1,...
+                  'Enable'  , 'Off', ...
+                  'Callback', @setVoiOffsetRoiPanelCallback, ...
+                  'BackgroundColor', viewerBackgroundColor ('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get') ...
+                  );
+    uiDeleteVoiRoiPanelObject('set', uiDeleteVoiRoiPanel);
+
+    uiPrevVoiRoiPanel = ...
+        uicontrol(uiRoiPanelPtr('get'),...
+                  'style'   , 'pushbutton',...
+                  'String'  ,'Previous',...
+                  'Position',[15 505 91 25],...
+                  'Enable'  , 'Off', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'Enable'  , 'off', ...
-                  'Callback', @segActionRoiPanelCallback...
+                  'Callback', @previousVoiRoiPanelCallback...
                   );
-     uiRoiVoiRoiPanelObject('set', uiRoiVoiRoiPanel);
+    uiPrevVoiRoiPanelObject('set', uiPrevVoiRoiPanel);
 
-     if size(aBuffer, 3) == 1
-         asSegOptions = {'Entire Image', 'Inside ROI\VOI', 'Outside ROI\VOI'};
-     else
-         asSegOptions = {'Entire Image', 'Inside ROI\VOI', 'Outside ROI\VOI', 'Inside all slices ROI\VOI', 'Outside all slices ROI\VOI'};
-     end
+    uiDelVoiRoiPanel = ...
+        uicontrol(uiRoiPanelPtr('get'),...
+                  'style'   , 'pushbutton',...
+                  'String'  ,'Delete',...
+                  'Position',[107 505 61 25],...
+                  'Enable'  , 'Off', ...
+                  'BackgroundColor', [0.2 0.039 0.027], ...
+                  'ForegroundColor', [0.94 0.94 0.94], ...
+                  'Callback', @deleteVoiRoiPanelCallback...
+                  );
+    uiDelVoiRoiPanelObject('set', uiDelVoiRoiPanel);
 
-     uiSegActRoiPanel = ...
+    uiNextVoiRoiPanel = ...
+        uicontrol(uiRoiPanelPtr('get'),...
+                  'style'   , 'pushbutton',...
+                  'String'  ,'Next',...
+                  'Position',[169 505 91 25],...
+                  'Enable'  , 'Off', ...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'Callback', @nextVoiRoiPanelCallback...
+                  );
+    uiNextVoiRoiPanelObject('set', uiNextVoiRoiPanel);
+
+    % Roi Face Alpha
+
+        uicontrol(uiRoiPanelPtr('get'),...
+                  'style'   , 'text',...
+                  'FontWeight', 'bold',...
+                  'string'  , 'Contour Face Alpha',...
+                  'horizontalalignment', 'left',...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'position', [15 455 200 20]...
+                  );
+
+    uiSliderRoisFaceAlphaRoiPanel = ...
         uicontrol(uiRoiPanelPtr('get'), ...
-                  'Style'   , 'popup', ...
-                  'position'  , [15 380 75 20],...
-                  'String'  , asSegOptions, ...
-                  'Value'   , 1,...
+                  'Style'   , 'Slider', ...
+                  'Position', [15 430 245 14], ...
+                  'Value'   , roiFaceAlphaValue('get'), ...
                   'Enable'  , 'on', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'Callback', @segActionRoiPanelCallback...
+                  'CallBack', @sliderRoisFaceAlphaRoiPanelCallback ...
                   );
-    uiSegActRoiPanelObject('set', uiSegActRoiPanel);
+%    addlistener(uiSliderRoisFaceAlphaRoiPanel, 'Value', 'PreSet', @sliderRoisFaceAlphaRoiPanelCallback);
+
+    % Contour segmentation
+
+        uicontrol(uiRoiPanelPtr('get'),...
+                  'style'   , 'text',...
+                  'FontWeight', 'bold',...
+                  'string'  , 'Contour Segmentation',...
+                  'horizontalalignment', 'left',...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'position', [15 380 200 20]...
+                  );
 
     tRoiPanelCT = roiPanelCtUiValues('get');
     if isempty(tRoiPanelCT) || size(aBuffer, 3) == 1
-
-        dUnitTypeValue = false;
 
         sUseCtEnable    = 'off';
         sChkUseCTEnable = 'off';
@@ -95,9 +143,7 @@ function initRoiPanel()
         sTxtUseCTEnable = 'Inactive';
 
         if roiPanelUseCt('get') == true
-
             sUseCtEnable = 'on';
-
         else
             sUseCtEnable = 'off';
         end
@@ -109,36 +155,17 @@ function initRoiPanel()
 
         dOffset = get(uiSeriesPtr('get'), 'Value');
         sUnitDisplay = getSerieUnitValue(dOffset);
-        if strcmpi(sUnitDisplay, 'SUV')
-            dUnitTypeValue = true;
-        else
-            dUnitTypeValue = false;
-        end
     end
 
-
-    chkUnitTypeRoiPanel = ...
+    btnUnitTypeRoiPanel = ...
         uicontrol(uiRoiPanelPtr('get'),...
-                  'style'   , 'checkbox',...
+                  'style'   , 'pushbutton',...
+                  'String'  ,'Toggle Unit',...
                   'enable'  , sUseCtEnable,...
-                  'value'   , dUnitTypeValue,...
-                  'position', [15 350 20 20],...
+                  'position', [15 350 91 25],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'Callback', @chkUnitTypeRoiPanelCallback...
-                  );
-    chkUnitTypeRoiPanelObject('set', chkUnitTypeRoiPanel);
-
-    txtUnitTypeRoiPanel = ...
-         uicontrol(uiRoiPanelPtr('get'),...
-                  'style'   , 'text',...
-                  'string'  , 'Unit in Percent',...
-                  'horizontalalignment', 'left',...
-                  'position', [35 347 200 20],...
-                  'Enable', 'On',...
-                  'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...
-                  'ButtonDownFcn', @chkUnitTypeRoiPanelCallback...
+                  'Callback', @btnUnitTypeRoiPanelCallback...
                   );
 
     chkUseCTRoiPanel = ...
@@ -152,7 +179,6 @@ function initRoiPanel()
                   'Callback', @chkUseCTRoiPanelCallback...
                   );
 
-    txtUseCTRoiPanel = ...
          uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'text',...
                   'string'  , 'Use CT Map',...
@@ -342,7 +368,7 @@ function initRoiPanel()
                   );
 
     if pixelEdgeRoiPanel('get') == true
-        sPixelEdgeDisplay = 'Pixel Edge';
+        sPixelEdgeDisplay = 'Pixel Edge (slower)';
     else
         sPixelEdgeDisplay = 'Pixel Center';
     end
@@ -353,7 +379,7 @@ function initRoiPanel()
                   'enable'  , 'Inactive',...
                   'string'  , sPixelEdgeDisplay,...
                   'horizontalalignment', 'left',...
-                  'position', [35 52 120 20],...
+                  'position', [35 52 150 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'ButtonDownFcn', @chkPixelEdgeRoiPanelCallback...
@@ -412,18 +438,202 @@ function initRoiPanel()
     minTresholdRoiPanelValue('set', true, 'Percent', minTresholdSliderRoiPanelValue('get'));
     maxTresholdRoiPanelValue('set', true, 'Percent', maxTresholdSliderRoiPanelValue('get'));
 
+    function setVoiOffsetRoiPanelCallback(hObject, ~)
 
-    function chkUnitTypeRoiPanelCallback(hObject, ~)
+        tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        dNbVOIs = numel(tVoiInput);
 
-        if strcmpi(get(hObject, 'Style'), 'text')
-            if get(chkUnitTypeRoiPanel, 'Value') == true
+        if ~isempty(tVoiInput)
 
-                set(chkUnitTypeRoiPanel, 'Value', false);
-            else
-                set(chkUnitTypeRoiPanel, 'Value', true);
+            dVoiOffset = get(hObject, 'Value');
+
+            if dVoiOffset <= 0
+                dVoiOffset = dNbVOIs;
             end
+
+            set(uiDeleteVoiRoiPanel, 'Value', dVoiOffset);
+
+            dRoiOffset = round(numel(tVoiInput{dVoiOffset}.RoisTag)/2);
+
+            triangulateRoi(tVoiInput{dVoiOffset}.RoisTag{dRoiOffset}, true);
         end
 
+    end
+
+    function previousVoiRoiPanelCallback(~, ~)
+
+        tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        dNbVOIs = numel(tVoiInput);
+
+        if ~isempty(tVoiInput)
+
+            dVoiOffset = get(uiDeleteVoiRoiPanel, 'Value')-1;
+
+            if dVoiOffset <= 0
+                dVoiOffset = dNbVOIs;
+            end
+
+            set(uiDeleteVoiRoiPanel, 'Value', dVoiOffset);
+
+            dRoiOffset = round(numel(tVoiInput{dVoiOffset}.RoisTag)/2);
+
+            triangulateRoi(tVoiInput{dVoiOffset}.RoisTag{dRoiOffset}, true);
+        end
+
+    end
+
+    function nextVoiRoiPanelCallback(~, ~)
+
+        tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        dNbVOIs = numel(tVoiInput);
+
+        if ~isempty(tVoiInput)
+
+            dVoiOffset = get(uiDeleteVoiRoiPanel, 'Value')+1;
+
+            if dVoiOffset > dNbVOIs
+                dVoiOffset = 1;
+            end
+
+            set(uiDeleteVoiRoiPanel, 'Value', dVoiOffset);
+
+            dRoiOffset = round(numel(tVoiInput{dVoiOffset}.RoisTag)/2);
+
+            triangulateRoi(tVoiInput{dVoiOffset}.RoisTag{dRoiOffset}, true);
+        end
+
+    end
+
+    function deleteVoiRoiPanelCallback(~, ~)
+
+        iOffset = get(uiSeriesPtr('get'), 'Value');
+        tDeleteInput = inputTemplate('get');
+
+        tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
+        if ~isempty(tVoiInput)
+
+            dVoiOffset = get(uiDeleteVoiRoiPanel, 'Value');
+            ptrObject = tVoiInput{dVoiOffset};
+
+            if isfield(tDeleteInput(iOffset), 'tVoi') && ~strcmpi(ptrObject.Label, 'TOTAL-MASK')
+                for vv=1:numel(ptrObject.RoisTag)
+                    for rr=1:numel(tDeleteInput(iOffset).tRoi)
+                        if strcmpi(ptrObject.RoisTag{vv}, tDeleteInput(iOffset).tRoi{rr}.Tag)
+
+                            tDeleteInput(iOffset).tRoi{rr} = [];
+                            break;
+                        end
+
+                    end
+
+                    tDeleteInput(iOffset).tRoi(cellfun(@isempty, tDeleteInput(iOffset).tRoi)) = [];
+                end
+
+                inputTemplate('set', tDeleteInput);
+
+                for vv=1:numel(ptrObject.RoisTag)
+                    for rr=1:numel(tRoiInput)
+                        if strcmpi(ptrObject.RoisTag{vv}, tRoiInput{rr}.Tag)
+
+                            if ~isempty(tRoiInput{rr}.MaxDistances)
+                                delete(tRoiInput{rr}.MaxDistances.MaxXY.Line);
+                                delete(tRoiInput{rr}.MaxDistances.MaxCY.Line);
+                                delete(tRoiInput{rr}.MaxDistances.MaxXY.Text);
+                                delete(tRoiInput{rr}.MaxDistances.MaxCY.Text);
+                            end
+
+                            delete(tRoiInput{rr}.Object);
+                            tRoiInput{rr} = [];
+                            break;
+                        end
+
+                    end
+
+                    tRoiInput(cellfun(@isempty, tRoiInput)) = [];
+                end
+
+                roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tRoiInput);
+
+                for vv=1:numel(tDeleteInput(iOffset).tVoi)
+                    if strcmpi(ptrObject.Tag, tDeleteInput(iOffset).tVoi{vv}.Tag)
+                        tDeleteInput(iOffset).tVoi{vv} = [];
+                        break;
+                    end
+                end
+
+                tDeleteInput(iOffset).tVoi(cellfun(@isempty, tDeleteInput(iOffset).tVoi)) = [];
+                inputTemplate('set', tDeleteInput);
+
+                for vv=1:numel(tVoiInput)
+                    if strcmpi(ptrObject.Tag, tVoiInput{vv}.Tag)
+                        tVoiInput{vv} = [];
+                        break;
+                    end
+                end
+
+                tVoiInput(cellfun(@isempty, tVoiInput)) = [];
+                voiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tVoiInput);
+
+                dNbVOIs = numel(tVoiInput);
+
+                if dVoiOffset > dNbVOIs || ...
+                    dNbVOIs == 0
+                    dVoiOffset = 1;
+                end
+
+                set(uiDeleteVoiRoiPanel, 'Value', dVoiOffset);
+
+                setVoiRoiSegPopup();
+
+                if dNbVOIs ~= 0
+
+                    dRoiOffset = round(numel(tVoiInput{dVoiOffset}.RoisTag)/2);
+
+                    triangulateRoi(tVoiInput{dVoiOffset}.RoisTag{dRoiOffset}, true);
+                end
+
+            end
+
+        end
+
+    end
+
+    function sliderRoisFaceAlphaRoiPanelCallback(~, ~)
+
+        try
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+
+        roiFaceAlphaValue('set', get(uiSliderRoisFaceAlphaRoiPanel, 'Value'));
+
+        tRefreshRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        if ~isempty(tRefreshRoi)
+
+            for bb=1:numel(tRefreshRoi)
+                if isvalid(tRefreshRoi{bb}.Object)
+                    if ~strcmpi(tRefreshRoi{bb}.Type, 'images.roi.line')
+                        tRefreshRoi{bb}.Object.FaceAlpha = roiFaceAlphaValue('get');
+                        tRefreshRoi{bb}.FaceAlpha = roiFaceAlphaValue('get');
+                    end
+               end
+            end
+
+            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tRefreshRoi);
+        end
+
+        catch
+            progressBar(1, 'Error:sliderRoisFaceAlphaRoiPanelCallback()');
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;
+    end
+
+    function btnUnitTypeRoiPanelCallback(~, ~)
+        
         dOffset = get(uiSeriesPtr('get'), 'Value');
 
         sUnitDisplay = getSerieUnitValue(dOffset);
@@ -431,12 +641,12 @@ function initRoiPanel()
         if strcmpi(sUnitDisplay, 'SUV') && ...
            get(chkUseCTRoiPanel, 'Value') == false
 
+            sSUVtype = viewerSUVtype('get');
 
-            if get(chkUnitTypeRoiPanel, 'Value') == true
-                set(txtUnitTypeRoiPanel , 'String', 'Unit in SUV');
-                set(txtInPercentRoiPanel, 'String', 'Treshold in SUV');
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in BQML')
+
+                set(txtInPercentRoiPanel, 'String', sprintf('Treshold in SUV/%s', sSUVtype));
             else
-                set(txtUnitTypeRoiPanel , 'String', 'Unit in BQML');
                 set(txtInPercentRoiPanel, 'String', 'Treshold in BQML');
             end
         end
@@ -444,22 +654,14 @@ function initRoiPanel()
         if strcmpi(sUnitDisplay, 'HU') || ...
            get(chkUseCTRoiPanel, 'Value') == true
 
-            if get(chkUnitTypeRoiPanel, 'Value') == true
-                set(txtUnitTypeRoiPanel , 'String', 'Unit in Window Level');
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in HU')
                 set(txtInPercentRoiPanel, 'String', 'Treshold in Window Level');
             else
-                set(txtUnitTypeRoiPanel , 'String', 'Unit in HU');
                 set(txtInPercentRoiPanel, 'String', 'Treshold in HU');
             end
         end
 
-        if get(chkUseCTRoiPanel, 'Value') == true
-            dMin = roiPanelCTMinValue('get');
-            dMax = roiPanelCTMaxValue('get');
-        else
-            dMin = roiPanelMinValue('get');
-            dMax = roiPanelMaxValue('get');
-        end
+        [dMin, dMax] = getTresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
 
         dMaxTresholdValue = get(uiSliderMaxTresholdRoiPanel, 'Value');
         dMinTresholdValue = get(uiSliderMinTresholdRoiPanel, 'Value');
@@ -469,13 +671,15 @@ function initRoiPanel()
         dMaxValue = (dMaxTresholdValue*dDiff)+dMin;
         dMinValue = (dMinTresholdValue*dDiff)+dMin;
 
-         if strcmpi(get(txtUnitTypeRoiPanel, 'String'), 'Unit in SUV')
+        sSUVtype = viewerSUVtype('get');
+
+        if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Treshold in SUV/%s', sSUVtype))
             tQuant = quantificationTemplate('get');
             dMinValue = dMinValue*tQuant.tSUV.dScale;
             dMaxValue = dMaxValue*tQuant.tSUV.dScale;
         end
 
-        if strcmpi(get(txtUnitTypeRoiPanel, 'String'), 'Unit in Window Level')
+        if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in Window Level')
             [dCTWindow, dCTLevel] = computeWindowMinMax(dMaxValue, dMinValue);
             dMaxValue = dCTWindow;
             dMinValue = dCTLevel;
@@ -483,7 +687,6 @@ function initRoiPanel()
 
         set(uiEditMinTresholdRoiPanel, 'String', num2str(dMinValue));
         set(uiEditMaxTresholdRoiPanel, 'String', num2str(dMaxValue));
-
 
     end
 
@@ -516,25 +719,12 @@ function initRoiPanel()
 
         if get(chkInPercentRoiPanel, 'Value') == true % Use percentage of max
             set(txtInPercentRoiPanel, 'String', 'Treshold in Percent');
-            set(txtUnitTypeRoiPanel , 'String', 'Unit in Percent');
 
             dOffset = get(uiSeriesPtr('get'), 'Value');
             sUnitDisplay = getSerieUnitValue(dOffset);
-
-            if get(chkUseCTRoiPanel, 'Value') == true % Use CT MAP
-                set(chkUnitTypeRoiPanel, 'Value', false);
-            end
-
-            if strcmpi(sUnitDisplay, 'SUV') && ...
-               get(chkUseCTRoiPanel, 'Value') == false
-                set(chkUnitTypeRoiPanel, 'Value', true);
-            end
-
         else
             if get(chkUseCTRoiPanel, 'Value') == true % Use CT MAP
-                set(chkUnitTypeRoiPanel, 'Value', false);
-
-                set(txtUnitTypeRoiPanel , 'String', 'Unit in HU');
+                
                 set(txtInPercentRoiPanel, 'String', 'Treshold in HU');
             else
 
@@ -544,25 +734,13 @@ function initRoiPanel()
 
                 if strcmpi(sUnitDisplay, 'SUV')
 
-                    if get(chkUnitTypeRoiPanel, 'Value') == true
-                        set(txtUnitTypeRoiPanel , 'String', 'Unit in SUV');
-                        set(txtInPercentRoiPanel, 'String', 'Treshold in SUV');
-                    else
-                        set(txtUnitTypeRoiPanel , 'String', 'Unit in BQML');
-                        set(txtInPercentRoiPanel, 'String', 'Treshold in BQML');
-                    end
+                    set(txtInPercentRoiPanel, 'String', 'Treshold in BQML');
 
                 elseif strcmpi(sUnitDisplay, 'HU')
 
-                    if get(chkUnitTypeRoiPanel, 'Value') == true
-                        set(txtUnitTypeRoiPanel , 'String', 'Unit in Window Level');
-                        set(txtInPercentRoiPanel, 'String', 'Treshold in Window Level');
-                    else
-                        set(txtUnitTypeRoiPanel , 'String', 'Unit in HU');
-                        set(txtInPercentRoiPanel, 'String', 'Treshold in HU');
-                    end
+                    set(txtInPercentRoiPanel, 'String', 'Treshold in HU');
+                   
                 else
-                    set(txtUnitTypeRoiPanel , 'String', sprintf('Unit in %s', sUnitDisplay)  );
                     set(txtInPercentRoiPanel, 'String', sprintf('Treshold in %s', sUnitDisplay) );
                 end
 
@@ -570,15 +748,9 @@ function initRoiPanel()
 
         end
 
-        if ~strcmpi(get(txtUnitTypeRoiPanel , 'String'), 'Unit in Percent')
+        if ~strcmpi(get(txtInPercentRoiPanel , 'String'), 'Treshold in Percent')
 
-            if get(chkUseCTRoiPanel, 'Value') == true
-                dMin = roiPanelCTMinValue('get');
-                dMax = roiPanelCTMaxValue('get');
-            else
-                dMin = roiPanelMinValue('get');
-                dMax = roiPanelMaxValue('get');
-            end
+            [dMin, dMax] = getTresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
 
             dMaxTresholdValue = get(uiSliderMaxTresholdRoiPanel, 'Value');
             dMinTresholdValue = get(uiSliderMinTresholdRoiPanel, 'Value');
@@ -588,13 +760,15 @@ function initRoiPanel()
             dMaxValue = (dMaxTresholdValue*dDiff)+dMin;
             dMinValue = (dMinTresholdValue*dDiff)+dMin;
 
-             if strcmpi(get(txtUnitTypeRoiPanel, 'String'), 'Unit in SUV')
+            sSUVtype = viewerSUVtype('get');
+
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Treshold in SUV/%s', sSUVtype))
                 tQuant = quantificationTemplate('get');
                 dMinValue = dMinValue*tQuant.tSUV.dScale;
                 dMaxValue = dMaxValue*tQuant.tSUV.dScale;
             end
 
-            if strcmpi(get(txtUnitTypeRoiPanel, 'String'), 'Unit in Window Level')
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in Window Level')
                 [dCTWindow, dCTLevel] = computeWindowMinMax(dMaxValue, dMinValue);
                 dMaxValue = dCTWindow;
                 dMinValue = dCTLevel;
@@ -638,7 +812,7 @@ function initRoiPanel()
         end
 
         if get(chkPixelEdgeRoiPanel, 'Value') == true
-            set(txtPixelEdgeRoiPanel, 'String', 'Pixel Edge');
+            set(txtPixelEdgeRoiPanel, 'String', 'Pixel Edge (slower)');
         else
             set(txtPixelEdgeRoiPanel, 'String', 'Pixel Center');
         end
@@ -664,46 +838,6 @@ function initRoiPanel()
         end
 
         multipleObjectsRoiPanel('set', get(chkMultipleObjectsRoiPanel, 'Value'));
-
-    end
-
-    function segActionRoiPanelCallback(hObject, ~)
-
-        setVoiRoiSegPopup();
-
-        aActionType = get(hObject, 'String');
-        dActionType = get(hObject, 'Value' );
-        sActionType = aActionType{dActionType};
-
-        if strcmpi(sActionType, 'Entire Image')
-            roiPanelMinValue('set', min(double(aBuffer),[], 'all'));
-            roiPanelMaxValue('set', max(double(aBuffer),[], 'all'));
-        else
-
-            [dComputedMin, dComputedMax] = computeRoiPanelMinMax();
-
-            if isempty(dComputedMin)||isempty(dComputedMax)
-
-                set(uiSegActRoiPanel, 'Value' , 1);
-                set(uiRoiVoiRoiPanel, 'Enable', 'off');
-
-                return;
-            else
-                roiPanelMinValue('set', dComputedMin);
-                roiPanelMaxValue('set', dComputedMax);
-            end
-
-        end
-%        delete(uiSliderMaxTresholdRoiListener);
-%        delete(uiSliderMinTresholdRoiListener);
-
-%        set(uiSliderMaxTresholdRoiPanel, 'Value', 1);
-%        set(uiSliderMinTresholdRoiPanel, 'Value', 0);
-
-
-
- %       uiSliderMaxTresholdRoiListener = addlistener(uiSliderMaxTresholdRoiPanel, 'Value', 'PreSet', @sliderMaxTresholdRoiPanelCallback);
- %       uiSliderMinTresholdRoiListener = addlistener(uiSliderMinTresholdRoiPanel, 'Value', 'PreSet', @sliderMinTresholdRoiPanelCallback);
 
     end
 
@@ -747,26 +881,22 @@ function initRoiPanel()
             maxTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), 'Percent', dMaxTresholdValue);
 
         else
-            if get(chkUseCTRoiPanel, 'Value') == true
-                dMin = roiPanelCTMinValue('get');
-                dMax = roiPanelCTMaxValue('get');
-            else
-                dMin = roiPanelMinValue('get');
-                dMax = roiPanelMaxValue('get');
-            end
+            [dMin, dMax] = getTresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
 
             dDiff = dMax - dMin;
 
             dMaxValue = (dMaxTresholdValue*dDiff)+dMin;
             dMinValue = (dMinTresholdValue*dDiff)+dMin;
 
-            if strcmpi(get(txtUnitTypeRoiPanel, 'String'), 'Unit in SUV')
+            sSUVtype = viewerSUVtype('get');
+
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Treshold in SUV/%s', sSUVtype))
                 tQuant = quantificationTemplate('get');
                 dMinValue = dMinValue*tQuant.tSUV.dScale;
                 dMaxValue = dMaxValue*tQuant.tSUV.dScale;
             end
 
-            if strcmpi(get(txtUnitTypeRoiPanel, 'String'), 'Unit in Window Level')
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in Window Level')
                 [dCTWindow, ~] = computeWindowMinMax(dMaxValue, dMinValue);
                 dMaxValue = dCTWindow;
             end
@@ -832,22 +962,18 @@ function initRoiPanel()
 
         else
 
-            if get(chkUseCTRoiPanel, 'Value') == true
-                dMin = roiPanelCTMinValue('get');
-                dMax = roiPanelCTMaxValue('get');
-            else
-                dMin = roiPanelMinValue('get');
-                dMax = roiPanelMaxValue('get');
-            end
+            [dMin, dMax] = getTresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
 
-            if strcmpi(get(txtUnitTypeRoiPanel, 'String'), 'Unit in SUV')
+            sSUVtype = viewerSUVtype('get');
+
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Treshold in SUV/%s', sSUVtype))
                 tQuant = quantificationTemplate('get');
 
                 dMin = dMin*tQuant.tSUV.dScale;
                 dMax = dMax*tQuant.tSUV.dScale;
             end
 
-            if strcmpi(get(txtUnitTypeRoiPanel, 'String'), 'Unit in Window Level')
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in Window Level')
                 [dCTWindow, dCTLevel] = computeWindowMinMax(dMax, dMin);
                 dMax = dCTWindow;
                 dMin = dCTLevel;
@@ -904,26 +1030,22 @@ function initRoiPanel()
             minTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), 'Percent', dMinTresholdValue);
 
         else
-            if get(chkUseCTRoiPanel, 'Value') == true
-                dMin = roiPanelCTMinValue('get');
-                dMax = roiPanelCTMaxValue('get');
-            else
-                dMin = roiPanelMinValue('get');
-                dMax = roiPanelMaxValue('get');
-            end
+            [dMin, dMax] = getTresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
 
             dDiff = dMax - dMin;
 
             dMaxValue = (dMaxTresholdValue*dDiff)+dMin;
             dMinValue = (dMinTresholdValue*dDiff)+dMin;
 
-            if strcmpi(get(txtUnitTypeRoiPanel, 'String'), 'Unit in SUV')
+            sSUVtype = viewerSUVtype('get');
+
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Treshold in SUV/%s', sSUVtype))
                 tQuant = quantificationTemplate('get');
                 dMinValue = dMinValue*tQuant.tSUV.dScale;
                 dMaxValue = dMaxValue*tQuant.tSUV.dScale;
             end
 
-            if strcmpi(get(txtUnitTypeRoiPanel, 'String'), 'Unit in Window Level')
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in Window Level')
                 [~, dCTLevel] = computeWindowMinMax(dMaxValue, dMinValue);
                 dMinValue = dCTLevel;
             end
@@ -966,7 +1088,7 @@ function initRoiPanel()
             if get(chkInPercentRoiPanel, 'Value') == true
                 dMinValue = minTresholdRoiPanelValue('get')*100;
             else
-                dMinValue = roiPanelMinValue('get');
+                [dMinValue, ~] = getTresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), false);
             end
         end
 
@@ -996,23 +1118,19 @@ function initRoiPanel()
             minTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), 'Percent', dMinValue/100);
 
         else
-            if get(chkUseCTRoiPanel, 'Value') == true
-                dMin = roiPanelCTMinValue('get');
-                dMax = roiPanelCTMaxValue('get');
-            else
-                dMin = roiPanelMinValue('get');
-                dMax = roiPanelMaxValue('get');
-            end
+            [dMin, dMax] = getTresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
 
             dOffset = get(uiSeriesPtr('get'), 'Value');
 
-            if strcmpi(get(txtUnitTypeRoiPanel, 'String'), 'Unit in SUV')
+            sSUVtype = viewerSUVtype('get');
+
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Treshold in SUV/%s', sSUVtype))
                 tQuant = quantificationTemplate('get');
                 dMin = dMin*tQuant.tSUV.dScale;
                 dMax = dMax*tQuant.tSUV.dScale;
             end
 
-            if strcmpi(get(txtUnitTypeRoiPanel, 'String'), 'Unit in Window Level')
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in Window Level')
                 [dCTWindow, dCTLevel] = computeWindowMinMax(dMax, dMin);
                 dMax = dCTWindow;
                 dMin = dCTLevel;
@@ -1102,13 +1220,7 @@ function initRoiPanel()
 
                 sUnitDisplay = getSerieUnitValue(dOffset);
 
-                if get(chkUseCTRoiPanel, 'Value') == true
-                    dMin = roiPanelCTMinValue('get');
-                    dMax = roiPanelCTMaxValue('get');
-                else
-                    dMin = roiPanelMinValue('get');
-                    dMax = roiPanelMaxValue('get');
-                end
+                [dMin, dMax] = getTresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
 
                 dDiff = dMax - dMin;
 
@@ -1119,12 +1231,14 @@ function initRoiPanel()
                 dMaxValue = (dMaxTresholdValue*dDiff)+dMin;
                 dMinValue = (dMinTresholdValue*dDiff)+dMin;
 
-                if strcmpi(get(txtUnitTypeRoiPanel, 'String'), 'Unit in SUV')
+                sSUVtype = viewerSUVtype('get');
+
+                if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Treshold in SUV/%s', sSUVtype))
                     tQuant = quantificationTemplate('get');
                     dMinValue = dMaxValue*tQuant.tSUV.dScale;
                 end
 
-                 if strcmpi(get(txtUnitTypeRoiPanel, 'String'), 'Unit in Window Level')
+                 if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in Window Level')
                     [~, dCTLevel] = computeWindowMinMax(dMaxValue, dMinValue);
                     dMinValue = dCTLevel;
                 end
@@ -1163,18 +1277,15 @@ function initRoiPanel()
 
         if get(chkInPercentRoiPanel, 'Value') == true
 
-            set(chkUnitTypeRoiPanel, 'Enable', 'off');
-            set(txtUnitTypeRoiPanel, 'Enable', 'on');
+            set(btnUnitTypeRoiPanel, 'Enable', 'off');
 
             set(txtInPercentRoiPanel, 'String', 'Treshold in Percent');
-            set(txtUnitTypeRoiPanel , 'String', 'Unit in Percent');
 
             dMaxPercentValue = maxTresholdSliderRoiPanelValue('get');
 
             set(uiEditMaxTresholdRoiPanel  , 'String', num2str(dMaxPercentValue*100));
 
             maxTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), 'Persent', dMaxPercentValue);
-
 
             dMinPercentValue = minTresholdSliderRoiPanelValue('get');
             if relativeToMaxRoiPanelValue('get') == false
@@ -1187,8 +1298,7 @@ function initRoiPanel()
 
 
         else
-            set(chkUnitTypeRoiPanel, 'Enable', 'on');
-            set(txtUnitTypeRoiPanel, 'Enable', 'Inactive');
+            set(btnUnitTypeRoiPanel, 'Enable', 'on');
 
             aBuffer = dicomBuffer('get');
 
@@ -1198,50 +1308,42 @@ function initRoiPanel()
 
             if strcmpi(sUnitDisplay, 'SUV')
                 if get(chkUseCTRoiPanel, 'Value') == true
-                    if get(chkUnitTypeRoiPanel, 'Value') == true
+                    if get(btnUnitTypeRoiPanel, 'Value') == true
                         set(txtInPercentRoiPanel, 'String', 'Treshold in Window Level');
-                        set(txtUnitTypeRoiPanel , 'String', 'Unit in Window Level');
                     else
                         set(txtInPercentRoiPanel, 'String', 'Treshold in HU');
-                        set(txtUnitTypeRoiPanel , 'String', 'Unit in HU');
                     end
                 else
-                    if get(chkUnitTypeRoiPanel, 'Value') == true
-                        set(txtInPercentRoiPanel, 'String', 'Treshold in SUV');
-                        set(txtUnitTypeRoiPanel , 'String', 'Unit in SUV');
+                    if get(btnUnitTypeRoiPanel, 'Value') == true
+
+                        sSUVtype = viewerSUVtype('get');
+
+                        set(txtInPercentRoiPanel, 'String', sprintf('Treshold in SUV/%s', sSUVtype));
                     else
                         set(txtInPercentRoiPanel, 'String', 'Treshold in BQML');
-                        set(txtUnitTypeRoiPanel , 'String', 'Unit in BQML');
                     end
                 end
             elseif strcmpi(sUnitDisplay, 'HU')
-                if get(chkUnitTypeRoiPanel, 'Value') == true
+                if get(btnUnitTypeRoiPanel, 'Value') == true
                     set(txtInPercentRoiPanel, 'String', 'Treshold in Window Level');
-                    set(txtUnitTypeRoiPanel , 'String', 'Unit in Window Level');
                 else
                     set(txtInPercentRoiPanel, 'String', 'Treshold in HU');
-                    set(txtUnitTypeRoiPanel , 'String', 'Unit in HU');
                 end
             else
                 set(txtInPercentRoiPanel, 'String', sprintf('Treshold in %s', sUnitDisplay));
-                set(txtUnitTypeRoiPanel , 'String', sprintf('Unit in %s', sUnitDisplay));
             end
 
             dMaxTresholdValue = maxTresholdSliderRoiPanelValue('get');
 
-            if get(chkUseCTRoiPanel, 'Value') == true
-                dMin = roiPanelCTMinValue('get');
-                dMax = roiPanelCTMaxValue('get');
-            else
-                dMin = roiPanelMinValue('get');
-                dMax = roiPanelMaxValue('get');
-            end
+            [dMin, dMax] = getTresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
 
             dDiff = dMax - dMin;
 
             dMaxValue = (dMaxTresholdValue*dDiff)+dMin;
 
-            if strcmpi(get(txtUnitTypeRoiPanel, 'String'), 'Unit in SUV')
+            sSUVtype = viewerSUVtype('get');
+
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Treshold in SUV/%s', sSUVtype))
                 tQuant = quantificationTemplate('get');
                 dMaxValue = dMaxValue*tQuant.tSUV.dScale;
             end
@@ -1250,7 +1352,7 @@ function initRoiPanel()
 
             dMinValue = (dMinTresholdValue*dDiff)+dMin;
 
-            if strcmpi(get(txtUnitTypeRoiPanel, 'String'), 'Unit in Window Level')
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in Window Level')
                 [dCTWindow, dCTLevel] = computeWindowMinMax(dMaxValue, dMinValue);
                 dMaxValue = dCTWindow;
                 dMinValue = dCTLevel;
@@ -1260,7 +1362,9 @@ function initRoiPanel()
 
             maxTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), sUnitDisplay, dMaxValue);
 
-            if strcmpi(get(txtUnitTypeRoiPanel, 'String'), 'Unit in SUV')
+            sSUVtype = viewerSUVtype('get');
+
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Treshold in SUV/%s', sSUVtype))
                 tQuant = quantificationTemplate('get');
                 dMinValue = dMinValue*tQuant.tSUV.dScale;
             end
@@ -1309,211 +1413,89 @@ function initRoiPanel()
 
         refreshImages();
 
-        uiSegActRoiPanelObj = uiSegActRoiPanelObject('get');
-
-        aActionType = get(uiSegActRoiPanelObj, 'String');
-        dActionType = get(uiSegActRoiPanelObj, 'Value' );
-        sActionType = aActionType{dActionType};
-
-        uiRoiVoiRoiPanelObj   = uiRoiVoiRoiPanelObject('get');
-        uiRoiVoiRoiPanelValue = get(uiRoiVoiRoiPanelObj, 'Value');
-
         bRelativeToMax = relativeToMaxRoiPanelValue('get');
 
         dSliderMin = minTresholdSliderRoiPanelValue('get');
         dSliderMax = maxTresholdSliderRoiPanelValue('get');
+       
+        % Get constraint 
 
+        [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value'));
+
+        bInvertMask = invertConstraint('get');
+
+        tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
+        aLogicalMask = roiConstraintToMask(aBuffer, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);        
+                
+        dImageMin = min(double(aBuffer),[], 'all');
+
+        aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
+        
         if bUseCtMap == true
-            dBufferMin = roiPanelCTMinValue('get');
-            dBufferMax = roiPanelCTMaxValue('get');
+            dTresholdMin = roiPanelCTMinValue('get');
+            dTresholdMax = roiPanelCTMaxValue('get');
         else
-            dBufferMin = roiPanelMinValue('get');
-            dBufferMax = roiPanelMaxValue('get');
+            dTresholdMin = min(double(aBuffer),[], 'all');
+            dTresholdMax = max(double(aBuffer),[], 'all');
         end
 
-        dBufferDiff = dBufferMax - dBufferMin;
+        dBufferDiff = dTresholdMax - dTresholdMin;
 
-        dMinTreshold = (dSliderMin * dBufferDiff)+dBufferMin;
-        dMaxTreshold = (dSliderMax * dBufferDiff)+dBufferMin;
-
+        dMinTreshold = (dSliderMin * dBufferDiff)+dTresholdMin;
+        dMaxTreshold = (dSliderMax * dBufferDiff)+dTresholdMin; 
+        
         if size(aBuffer, 3) == 1
 
             vBoundAxePtr = visBoundAxePtr('get');
             if ~isempty(vBoundAxePtr)
                 delete(vBoundAxePtr);
             end
-
-            dBufferMIn = min(double(aBuffer),[], 'all');
-
-            imAxe = imAxePtr ('get');
-            aAxe  = imAxe.CData;
-
-            if strcmpi(sActionType, 'Entire Image')
-
-                if bRelativeToMax == true
-                    aAxe(aAxe<=dMaxTreshold) = dBufferMIn;
-                else
-                    aAxe(aAxe<=dMinTreshold) = dBufferMIn;
-                    aAxe(aAxe>=dMaxTreshold) = dBufferMIn;
-                end
-
-                if bPixelEdge == true
-                    if bHoles == true
-                        [originalMaskAxe,~,~,~] = bwboundaries(bwimage(aAxe, dBufferMIn), 'holes', 8);
-                    else
-                        [originalMaskAxe,~,~,~] = bwboundaries(bwimage(aAxe, dBufferMIn), 'noholes', 8);
-                    end
-                end
-
-                if bPixelEdge == true
-                    aAxe = imresize(aAxe , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
-                end
-
-                if bHoles == true
-                    [maskAxe ,~,~,~] = bwboundaries(bwimage(aAxe, dBufferMIn), 'holes', 8);
-                else
-                    [maskAxe ,~,~,~] = bwboundaries(bwimage(aAxe, dBufferMIn), 'noholes', 8);
-                end
-
-                if bPixelEdge == true
-                    if ~isempty(maskAxe)
-                        for jj=1:numel(maskAxe)
-                            maskAxe{jj} = (maskAxe{jj} +1)/PIXEL_EDGE_RATIO;
-                        end
-                    end
-                end
-
-                if ~isempty(maskAxe)
-
-                    maskAxe = deleteSmallElements(originalMaskAxe, maskAxe, dSmalestRoiSize);
-                    if ~isempty(maskAxe)
-                        vBoundAxePtr = visboundaries(axePtr('get'), maskAxe);
-                        visBoundAxePtr('set', vBoundAxePtr);
-                    end
-                end
+                                               
+            if bRelativeToMax == true
+                aBuffer(aBuffer<=dMaxTreshold) = dImageMin;
             else
-                aobjList = '';
-
-                tRoiInput = roiTemplate('get');
-                tVoiInput = voiTemplate('get');
-
-                if ~isempty(tVoiInput)
-                    for aa=1:numel(tVoiInput)
-                        aobjList{numel(aobjList)+1} = tVoiInput{aa};
-                    end
-                end
-
-                if ~isempty(tRoiInput)
-                    for cc=1:numel(tRoiInput)
-                        if isvalid(tRoiInput{cc}.Object)
-                            aobjList{numel(aobjList)+1} = tRoiInput{cc};
-                        end
-                    end
-                end
-
-                aVoiBuffer = zeros(size(aBuffer));
-
-                if strcmpi(aobjList{uiRoiVoiRoiPanelValue}.ObjectType, 'voi')
-
-                    dNbRois = numel(aobjList{uiRoiVoiRoiPanelValue}.RoisTag);
-
-                    for bb=1:dNbRois
-
-                        for cc=1:numel(tRoiInput)
-                            if isvalid(tRoiInput{cc}.Object) && ...
-                                strcmpi(tRoiInput{cc}.Tag, aobjList{uiRoiVoiRoiPanelValue}.RoisTag{bb})
-
-                                objRoi = tRoiInput{cc}.Object;
-
-                                switch objRoi.Parent
-                                    case axePtr('get')
-                                        aSlice = aBuffer(:,:);
-                                        roiMask = createMask(objRoi, aSlice);
-
-                                        aSlice( roiMask) =1;
-                                        aSlice(~roiMask) =0;
-
-                                        aSliceMask =  aVoiBuffer(:,:);
-                                        aVoiBuffer(:,:) = aSlice|aSliceMask;
-                                end
-
-                                break;
-                             end
-                        end
-                    end
-                else
-                    objRoi   = aobjList{uiRoiVoiRoiPanelValue}.Object;
-
-                    switch objRoi.Parent
-                        case axePtr('get')
-                            aSlice = aBuffer(:,:);
-                            roiMask = createMask(objRoi, aSlice);
-
-                            aSlice( roiMask) =1;
-                            aSlice(~roiMask) =0;
-
-                            aVoiBuffer(:,:) = aSlice;
-                    end
-                end
-
-                if strcmpi(sActionType, 'Outside ROI\VOI') || ...
-                   strcmpi(sActionType, 'Outside all slices ROI\VOI')
-                    aVoiBuffer = ~aVoiBuffer;
-                end
-
-                aAxe = aBuffer;
-                aAxe(aVoiBuffer==0) = dBufferMIn;
-
-                if bRelativeToMax == true
-                    aAxe(aAxe<=dMaxTreshold) = dBufferMIn;
-                else
-                    aAxe(aAxe<=dMinTreshold) = dBufferMIn;
-                    aAxe(aAxe>=dMaxTreshold) = dBufferMIn;
-                end
-
-                if bPixelEdge == true
-                    if bHoles == true
-                        [originalMaskAxe,~,~,~] = bwboundaries(bwimage(aAxe, dBufferMIn), 'holes', 8);
-                    else
-                        [originalMaskAxe,~,~,~] = bwboundaries(bwimage(aAxe, dBufferMIn), 'noholes', 8);
-                    end
-                end
-
-                if bPixelEdge == true
-                    aAxe = imresize(aAxe , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
-                end
-
-                if bHoles == true
-                    [maskAxe ,~,~,~] = bwboundaries(bwimage(aAxe, dBufferMIn), 'holes', 8);
-                else
-                    [maskAxe ,~,~,~] = bwboundaries(bwimage(aAxe, dBufferMIn), 'noholes', 8);
-                end
-
-                if bPixelEdge == true
-                    if ~isempty(maskAxe)
-                        for jj=1:numel(maskAxe)
-                            maskAxe{jj} = (maskAxe{jj} +1)/PIXEL_EDGE_RATIO;
-                        end
-                    end
-                end
-
-                if ~isempty(maskAxe)
-
-                    maskAxe = deleteSmallElements(originalMaskAxe, maskAxe, dSmalestRoiSize);
-                    if ~isempty(maskAxe)
-                        vBoundAxePtr = visboundaries(axePtr('get'), maskAxe);
-                        visboundaries('set', vBoundAxePtr);
-                    end
-                end
-
+                aBuffer(aBuffer<=dMinTreshold) = dImageMin;
+                aBuffer(aBuffer>=dMaxTreshold) = dImageMin;
             end
+
+            if bHoles == true
+                [originalMaskAxe,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 'holes', 8);
+            else
+                [originalMaskAxe,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 'noholes', 8);
+            end
+
+            if bPixelEdge == true
+                aBuffer = imresize(aBuffer , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+            end
+
+            if bHoles == true
+                [maskAxe ,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 'holes', 8);
+            else
+                [maskAxe ,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 'noholes', 8);
+            end
+
+            if bPixelEdge == true
+                
+                if ~isempty(maskAxe)
+                    for jj=1:numel(maskAxe)
+                        maskAxe{jj} = (maskAxe{jj} +1)/PIXEL_EDGE_RATIO;
+                    end
+                end
+            end
+
+            if ~isempty(maskAxe)
+
+                maskAxe = deleteSmallElements(originalMaskAxe, maskAxe, dSmalestRoiSize);
+                if ~isempty(maskAxe)
+                    vBoundAxePtr = visboundaries(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), maskAxe);
+                    visBoundAxePtr('set', vBoundAxePtr);
+                end
+            end
+
         else % 3D Image
 
-            imCoronal  = imCoronalPtr ('get');
-            imSagittal = imSagittalPtr('get');
-            imAxial    = imAxialPtr   ('get');
-
-            if bUseCtMap == true
+            if bUseCtMap == true % Apply ct mask
 
                 atRefMetaData = dicomMetaData('get');
 
@@ -1534,7 +1516,7 @@ function initRoiPanel()
                     dicomMetaData('set', atCtMetaData);
                 end
 
-                if isempty(aCtBuffer)
+                if isempty(aCtBuffer) 
 
                     aInput = inputBuffer('get');
                     aCtBuffer = aInput{tRoiPanelCT{dCtOffset}.dSeriesNumber};
@@ -1564,26 +1546,20 @@ function initRoiPanel()
 
                 set(uiSeriesPtr('get'), 'Value', dSerieOffset);
 
-                [aBuffer, ~] = resampleImage(aCtBuffer, atCtMetaData, aBuffer, atRefMetaData, 'Linear', false);
-
-%                dResampMIn = min(double(aResamCt),[], 'all');
-%                dRefMIn    = min(double(aBuffer),[], 'all');
-
-                iCoronal  = sliceNumber('get', 'coronal' );
-                iSagittal = sliceNumber('get', 'sagittal');
-                iAxial    = sliceNumber('get', 'axial'   );
-
-                aCoronal =  permute(aBuffer(iCoronal,:,:), [3 2 1]);
-                aSagittal = permute(aBuffer(:,iSagittal,:), [3 1 2]);
-                aAxial    = aBuffer(:,:,iAxial);
-            else
-                aCoronal   = imCoronal.CData;
-                aSagittal  = imSagittal.CData;
-                aAxial     = imAxial.CData;
+                [aBuffer, ~] = resampleImage(aCtBuffer, atCtMetaData, aBuffer, atRefMetaData, 'Linear', true, false);
+                
+                aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
+                
             end
-
-            dBufferMIn = min(double(aBuffer),[], 'all');
-
+            
+            iCoronal  = sliceNumber('get', 'coronal' );
+            iSagittal = sliceNumber('get', 'sagittal');
+            iAxial    = sliceNumber('get', 'axial'   );
+                
+            aCoronal  = permute(aBuffer(iCoronal,:,:), [3 2 1]);
+            aSagittal = permute(aBuffer(:,iSagittal,:), [3 1 2]);
+            aAxial    = aBuffer(:,:,iAxial);
+                
             vBoundAxes1Ptr = visBoundAxes1Ptr('get');
             vBoundAxes2Ptr = visBoundAxes2Ptr('get');
             vBoundAxes3Ptr = visBoundAxes3Ptr('get');
@@ -1600,461 +1576,90 @@ function initRoiPanel()
                 delete(vBoundAxes3Ptr);
             end
 
-            if strcmpi(sActionType, 'Entire Image')
-
-                if bRelativeToMax == true
-                    aCoronal(aCoronal<=dMaxTreshold)   = dBufferMIn;
-                    aSagittal(aSagittal<=dMaxTreshold) = dBufferMIn;
-                    aAxial(aAxial<=dMaxTreshold)       = dBufferMIn;
-                else
-                    aCoronal(aCoronal<=dMinTreshold) = dBufferMIn;
-                    aCoronal(aCoronal>=dMaxTreshold) = dBufferMIn;
-
-                    aSagittal(aSagittal<=dMinTreshold) = dBufferMIn;
-                    aSagittal(aSagittal>=dMaxTreshold) = dBufferMIn;
-
-                    aAxial(aAxial<=dMinTreshold) = dBufferMIn;
-                    aAxial(aAxial>=dMaxTreshold) = dBufferMIn;
-                end
-
-                if bPixelEdge == true
-                    if bHoles == true
-                        [originalMaskCoronal ,~,~,~] = bwboundaries(bwimage(aCoronal , dBufferMIn), 'holes', 8);
-                        [originalMaskSagittal,~,~,~] = bwboundaries(bwimage(aSagittal, dBufferMIn), 'holes', 8);
-                        [originalMaskAxial   ,~,~,~] = bwboundaries(bwimage(aAxial   , dBufferMIn), 'holes', 8);
-                    else
-                        [originalMaskCoronal ,~,~,~] = bwboundaries(bwimage(aCoronal , dBufferMIn), 'noholes', 8);
-                        [originalMaskSagittal,~,~,~] = bwboundaries(bwimage(aSagittal, dBufferMIn), 'noholes', 8);
-                        [originalMaskAxial   ,~,~,~] = bwboundaries(bwimage(aAxial   , dBufferMIn), 'noholes', 8);
-                    end
-                end
-
-                if bPixelEdge == true
-                    aCoronal  = imresize(aCoronal , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
-                    aSagittal = imresize(aSagittal, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
-                    aAxial    = imresize(aAxial   , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
-                end
-
-                if bHoles == true
-                    [maskCoronal ,~,~,~] = bwboundaries(bwimage(aCoronal , dBufferMIn), 'holes', 8);
-                    [maskSagittal,~,~,~] = bwboundaries(bwimage(aSagittal, dBufferMIn), 'holes', 8);
-                    [maskAxial   ,~,~,~] = bwboundaries(bwimage(aAxial   , dBufferMIn), 'holes', 8);
-                else
-                    [maskCoronal ,~,~,~] = bwboundaries(bwimage(aCoronal , dBufferMIn), 'noholes', 8);
-                    [maskSagittal,~,~,~] = bwboundaries(bwimage(aSagittal, dBufferMIn), 'noholes', 8);
-                    [maskAxial   ,~,~,~] = bwboundaries(bwimage(aAxial   , dBufferMIn), 'noholes', 8);
-                end
-
-                if bPixelEdge == true
-                    if ~isempty(maskCoronal)
-                        for jj=1:numel(maskCoronal)
-                            maskCoronal{jj} = (maskCoronal{jj} +1)/PIXEL_EDGE_RATIO;
-                        end
-                    end
-
-                    if ~isempty(maskSagittal)
-                        for jj=1:numel(maskSagittal)
-                            maskSagittal{jj} = (maskSagittal{jj} +1)/PIXEL_EDGE_RATIO;
-                        end
-                    end
-
-                    if ~isempty(maskAxial)
-                        for jj=1:numel(maskAxial)
-                            maskAxial{jj} = (maskAxial{jj} +1)/PIXEL_EDGE_RATIO;
-                        end
-                    end
-                end
-
-                if ~isempty(maskCoronal)
-                    maskCoronal = deleteSmallElements(originalMaskCoronal, maskCoronal, dSmalestRoiSize);
-                    if ~isempty(maskCoronal)
-                        vBoundAxes1Ptr = visboundaries(axes1Ptr('get'), maskCoronal );
-                        visBoundAxes1Ptr('set', vBoundAxes1Ptr);
-                    end
-                end
-
-                if ~isempty(maskSagittal)
-                    maskSagittal = deleteSmallElements(originalMaskSagittal, maskSagittal, dSmalestRoiSize);
-                    if ~isempty(maskSagittal)
-                        vBoundAxes2Ptr = visboundaries(axes2Ptr('get'), maskSagittal);
-                        visBoundAxes2Ptr('set', vBoundAxes2Ptr);
-                    end
-                end
-
-                if ~isempty(maskAxial)
-                    maskAxial = deleteSmallElements(originalMaskAxial, maskAxial, dSmalestRoiSize);
-                    if ~isempty(maskAxial)
-                        vBoundAxes3Ptr = visboundaries(axes3Ptr('get'), maskAxial);
-                        visBoundAxes3Ptr('set', vBoundAxes3Ptr);
-                    end
-                end
+            if bRelativeToMax == true
+                aCoronal(aCoronal<=dMaxTreshold)   = dImageMin;
+                aSagittal(aSagittal<=dMaxTreshold) = dImageMin;
+                aAxial(aAxial<=dMaxTreshold)       = dImageMin;
             else
-
-                iCoronal  = sliceNumber('get', 'coronal' );
-                iSagittal = sliceNumber('get', 'sagittal');
-                iAxial    = sliceNumber('get', 'axial'   );
-
-                aobjList = '';
-
-                tRoiInput = roiTemplate('get');
-                tVoiInput = voiTemplate('get');
-
-                if ~isempty(tVoiInput)
-                    for aa=1:numel(tVoiInput)
-                        aobjList{numel(aobjList)+1} = tVoiInput{aa};
-                    end
-                end
-
-                if ~isempty(tRoiInput)
-                    for cc=1:numel(tRoiInput)
-                        if isvalid(tRoiInput{cc}.Object)
-                            aobjList{numel(aobjList)+1} = tRoiInput{cc};
-                        end
-                    end
-                end
-
-                if strcmpi(aobjList{uiRoiVoiRoiPanelValue}.ObjectType, 'voi')
-
-                    dNbRois = numel(aobjList{uiRoiVoiRoiPanelValue}.RoisTag);
-
-%                    if strcmpi(sActionType, 'Inside ROI\VOI') || ...
-%                       strcmpi(sActionType, 'Outside ROI\VOI')
-                        aVoiBuffer = zeros(size(aBuffer));
-%                        aVoiBuffer(aVoiBuffer==0) = cropValue('get');
-%                    else
-%                        aVoiBuffer = aBuffer;
-%                    end
-
-                    for bb=1:dNbRois
-
-                        for cc=1:numel(tRoiInput)
-                            if isvalid(tRoiInput{cc}.Object) && ...
-                                strcmpi(tRoiInput{cc}.Tag, aobjList{uiRoiVoiRoiPanelValue}.RoisTag{bb})
-
-                                objRoi   = tRoiInput{cc}.Object;
-                                dSliceNb = tRoiInput{cc}.SliceNb;
-
-                                switch objRoi.Parent
-
-                                    case axes1Ptr('get')
-                                        if strcmpi(sActionType, 'Inside ROI\VOI') || ...
-                                           strcmpi(sActionType, 'Outside ROI\VOI')
-
-                                            if dSliceNb == iCoronal
-                                                aSlice =  permute(aBuffer(dSliceNb,:,:), [3 2 1]);
-                                                roiMask = createMask(objRoi, aSlice);
-
-                                                aSlice( roiMask) =1;
-                                                aSlice(~roiMask) =0;
-
-                                                aSliceMask =  permute(aVoiBuffer(dSliceNb,:,:), [3 2 1]);
-                                                aSlice = aSlice|aSliceMask;
-                                                aVoiBuffer(dSliceNb,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
-
-                                            end
-                                        else
-                                            for ccc=1:size(aBuffer, 1)
-
-                                                aSlice = permute(aBuffer(ccc,:,:), [3 2 1]);
-                                                roiMask = createMask(objRoi, aSlice);
-
-                                                aSlice( roiMask) =1;
-                                                aSlice(~roiMask) =0;
-
-                                                aSliceMask =  permute(aVoiBuffer(dSliceNb,:,:), [3 2 1]);
-                                                aSlice = aSlice|aSliceMask;
-                                                aVoiBuffer(ccc,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
-                                            end
-                                        end
-
-                                    case axes2Ptr('get')
-
-                                        if strcmpi(sActionType, 'Inside ROI\VOI') || ...
-                                           strcmpi(sActionType, 'Outside ROI\VOI')
-
-                                            if dSliceNb == iSagittal
-                                                aSlice = permute(aBuffer(:,dSliceNb,:), [3 1 2]);
-                                                roiMask = createMask(objRoi, aSlice);
-
-                                                aSlice( roiMask) =1;
-                                                aSlice(~roiMask) =0;
-
-                                                aSliceMask =  permute(aVoiBuffer(:,dSliceNb,:), [3 1 2]);
-                                                aSlice = aSlice|aSliceMask;
-                                                aVoiBuffer(:,dSliceNb,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
-
-                                            end
-                                        else
-                                            for sss=1:size(aBuffer, 2)
-                                                aSlice = permute(aBuffer(:,sss,:), [3 1 2]);
-                                                roiMask = createMask(objRoi, aSlice);
-
-                                                aSlice( roiMask) =1;
-                                                aSlice(~roiMask) =0;
-
-                                                aSliceMask =  permute(aVoiBuffer(:,dSliceNb,:), [3 1 2]);
-                                                aSlice = aSlice|aSliceMask;
-                                                aVoiBuffer(:,sss,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
-
-                                            end
-                                        end
-
-                                    case axes3Ptr('get')
-
-                                        if strcmpi(sActionType, 'Inside ROI\VOI') || ...
-                                           strcmpi(sActionType, 'Outside ROI\VOI')
-
-                                            if dSliceNb == iAxial
-
-                                                aSlice = aBuffer(:,:,dSliceNb);
-                                                roiMask = createMask(objRoi, aSlice);
-
-                                                aSlice( roiMask) =1;
-                                                aSlice(~roiMask) =0;
-
-                                                aSliceMask =  aVoiBuffer(:,:,dSliceNb);
-                                                aVoiBuffer(:,:,dSliceNb) = aSlice|aSliceMask;
-                                            end
-                                        else
-                                            for aaa=1:size(aBuffer, 3)
-                                                aSlice = aBuffer(:,:,aaa);
-                                                roiMask = createMask(objRoi, aSlice);
-
-                                                aSlice( roiMask) =1;
-                                                aSlice(~roiMask) =0;
-
-                                                aSliceMask =  aVoiBuffer(:,:,dSliceNb);
-                                                aVoiBuffer(:,:,aaa) = aSlice|aSliceMask;
-                                            end
-                                        end
-                                end
-
-
-                                break;
-                             end
-                        end
-                    end
-
-                    if strcmpi(sActionType, 'Outside ROI\VOI') || ...
-                       strcmpi(sActionType, 'Outside all slices ROI\VOI')
-                        aVoiBuffer = ~aVoiBuffer;
-                    end
-
-                    aCoronal      = permute(aBuffer(iCoronal,:,:), [3 2 1]);
-                    aCoronalMask  = permute(aVoiBuffer(iCoronal,:,:), [3 2 1]);
-                    aCoronal(aCoronalMask==0) = dBufferMIn;
-
-                    aSagittal     = permute(aBuffer(:,iSagittal,:), [3 1 2]);
-                    aSagittalMask = permute(aVoiBuffer(:,iSagittal,:), [3 1 2]);
-                    aSagittal(aSagittalMask==0) = dBufferMIn;
-
-                    aAxial     = aBuffer(:,:,iAxial);
-                    aAxialMask = aVoiBuffer(:,:,iAxial);
-                    aAxial(aAxialMask==0) = dBufferMIn;
-                else
-                    objRoi   = aobjList{uiRoiVoiRoiPanel.Value}.Object;
-                    dSliceNb = aobjList{uiRoiVoiRoiPanel.Value}.SliceNb;
-
-%                    if strcmpi(sActionType, 'Inside ROI\VOI') || ...
-%                       strcmpi(sActionType, 'Outside ROI\VOI')
-%                        aVoiBuffer = zeros(size(aBuffer));
-%                    else
-%                        aVoiBuffer = aBuffer;
-%                    end
-                    aVoiBuffer = zeros(size(aBuffer));
-                    switch objRoi.Parent
-
-                        case axes1Ptr('get')
-
-                            if strcmpi(sActionType, 'Inside all slices ROI\VOI') || ...
-                               strcmpi(sActionType, 'Outside all slices ROI\VOI')
-                                for cc=1:size(aBuffer, 1)
-
-                                    aSlice = permute(aBuffer(cc,:,:), [3 2 1]);
-                                    roiMask = createMask(objRoi, aSlice);
-
-                                    aSlice( roiMask) =1;
-                                    aSlice(~roiMask) =0;
-
-                                    aVoiBuffer(cc,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
-                                end
-                            else
-                                if dSliceNb == iCoronal
-
-                                    aSlice = permute(aBuffer(dSliceNb,:,:), [3 2 1]);
-                                    roiMask = createMask(objRoi, aSlice);
-
-                                    aSlice( roiMask) =1;
-                                    aSlice(~roiMask) =0;
-
-                                    aVoiBuffer(dSliceNb,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
-                               end
-                            end
-
-                        case axes2Ptr('get')
-
-                            if strcmpi(sActionType, 'Inside all slices ROI\VOI') || ...
-                               strcmpi(sActionType, 'Outside all slices ROI\VOI')
-
-                                for ss=1:size(aBuffer, 2)
-                                    aSlice = permute(aBuffer(:,ss,:), [3 1 2]);
-                                    roiMask = createMask(objRoi, aSlice);
-
-                                    aSlice( roiMask) =1;
-                                    aSlice(~roiMask) =0;
-
-                                    aVoiBuffer(:,ss,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
-
-                                end
-                            else
-                                if dSliceNb == iSagittal
-
-                                    aSlice = permute(aBuffer(:,dSliceNb,:), [3 1 2]);
-                                    roiMask = createMask(objRoi, aSlice);
-
-                                    aSlice( roiMask) =1;
-                                    aSlice(~roiMask) =0;
-
-                                    aVoiBuffer(:,dSliceNb,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
-                                end
-
-                            end
-
-                        case axes3Ptr('get')
-
-                            if strcmpi(sActionType, 'Inside all slices ROI\VOI') || ...
-                               strcmpi(sActionType, 'Outside all slices ROI\VOI')
-
-                                for aa=1:size(aBuffer, 3)
-                                    aSlice = aBuffer(:,:,aa);
-                                    roiMask = createMask(objRoi, aSlice);
-
-                                    aSlice( roiMask) =1;
-                                    aSlice(~roiMask) =0;
-
-                                    aVoiBuffer(:,:,aa) = aSlice;
-                                end
-                            else
-                                if dSliceNb == iAxial
-                                    aSlice = aBuffer(:,:,dSliceNb);
-                                    roiMask = createMask(objRoi, aSlice);
-
-                                    aSlice( roiMask) =1;
-                                    aSlice(~roiMask) =0;
-
-                                    aVoiBuffer(:,:,dSliceNb) = aSlice;
-                                end
-                            end
-                    end
-
-                    if strcmpi(sActionType, 'Outside ROI\VOI') || ...
-                       strcmpi(sActionType, 'Outside all slices ROI\VOI')
-                        aVoiBuffer = ~aVoiBuffer;
-                    end
-
-                    aCoronal      = permute(aBuffer(iCoronal,:,:), [3 2 1]);
-                    aCoronalMask  = permute(aVoiBuffer(iCoronal,:,:), [3 2 1]);
-                    aCoronal(aCoronalMask==0) = dBufferMIn;
-
-                    aSagittal     = permute(aBuffer(:,iSagittal,:), [3 1 2]);
-                    aSagittalMask = permute(aVoiBuffer(:,iSagittal,:), [3 1 2]);
-                    aSagittal(aSagittalMask==0) = dBufferMIn;
-
-                    aAxial     = aBuffer(:,:,iAxial);
-                    aAxialMask = aVoiBuffer(:,:,iAxial);
-                    aAxial(aAxialMask==0) = dBufferMIn;
-
-                end
-
-                if bRelativeToMax == true
-                    aCoronal(aCoronal<=dMaxTreshold)   = dBufferMIn;
-                    aSagittal(aSagittal<=dMaxTreshold) = dBufferMIn;
-                    aAxial(aAxial<=dMaxTreshold)       = dBufferMIn;
-                else
-                    aCoronal(aCoronal<=dMinTreshold) = dBufferMIn;
-                    aCoronal(aCoronal>=dMaxTreshold) = dBufferMIn;
-
-                    aSagittal(aSagittal<=dMinTreshold) = dBufferMIn;
-                    aSagittal(aSagittal>=dMaxTreshold) = dBufferMIn;
-
-                    aAxial(aAxial<=dMinTreshold) = dBufferMIn;
-                    aAxial(aAxial>=dMaxTreshold) = dBufferMIn;
-                end
-
-                if bPixelEdge == true
-                    if bHoles == true
-                        [originalMaskCoronal ,~,~,~] = bwboundaries(bwimage(aCoronal , dBufferMIn), 'holes', 8);
-                        [originalMaskSagittal,~,~,~] = bwboundaries(bwimage(aSagittal, dBufferMIn), 'holes', 8);
-                        [originalMaskAxial   ,~,~,~] = bwboundaries(bwimage(aAxial   , dBufferMIn), 'holes', 8);
-                    else
-                        [originalMaskCoronal ,~,~,~] = bwboundaries(bwimage(aCoronal , dBufferMIn), 'noholes', 8);
-                        [originalMaskSagittal,~,~,~] = bwboundaries(bwimage(aSagittal, dBufferMIn), 'noholes', 8);
-                        [originalMaskAxial   ,~,~,~] = bwboundaries(bwimage(aAxial   , dBufferMIn), 'noholes', 8);
-                    end
-                end
-
-                if bPixelEdge == true
-                    aCoronal  = imresize(aCoronal , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
-                    aSagittal = imresize(aSagittal, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
-                    aAxial    = imresize(aAxial   , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
-                end
-
-                if bHoles == true
-                    [maskCoronal ,~,~,~] = bwboundaries(bwimage(aCoronal , dBufferMIn), 'holes', 8);
-                    [maskSagittal,~,~,~] = bwboundaries(bwimage(aSagittal, dBufferMIn), 'holes', 8);
-                    [maskAxial   ,~,~,~] = bwboundaries(bwimage(aAxial   , dBufferMIn), 'holes', 8);
-                else
-                    [maskCoronal ,~,~,~] = bwboundaries(bwimage(aCoronal , dBufferMIn), 'noholes', 8);
-                    [maskSagittal,~,~,~] = bwboundaries(bwimage(aSagittal, dBufferMIn), 'noholes', 8);
-                    [maskAxial   ,~,~,~] = bwboundaries(bwimage(aAxial   , dBufferMIn), 'noholes', 8);
-                end
-
-                if bPixelEdge == true
-
-                    if ~isempty(maskCoronal)
-                        for jj=1:numel(maskCoronal)
-                            maskCoronal{jj} = (maskCoronal{jj} +1)/PIXEL_EDGE_RATIO;
-                        end
-                    end
-
-                    if ~isempty(maskSagittal)
-                        for jj=1:numel(maskSagittal)
-                            maskSagittal{jj} = (maskSagittal{jj} +1)/PIXEL_EDGE_RATIO;
-                        end
-                    end
-
-                    if ~isempty(maskAxial)
-                        for jj=1:numel(maskAxial)
-                            maskAxial{jj} = (maskAxial{jj} +1)/PIXEL_EDGE_RATIO;
-                        end
-                    end
-                end
-
+                aCoronal(aCoronal<=dMinTreshold) = dImageMin;
+                aCoronal(aCoronal>=dMaxTreshold) = dImageMin;
+
+                aSagittal(aSagittal<=dMinTreshold) = dImageMin;
+                aSagittal(aSagittal>=dMaxTreshold) = dImageMin;
+
+                aAxial(aAxial<=dMinTreshold) = dImageMin;
+                aAxial(aAxial>=dMaxTreshold) = dImageMin;
+            end
+
+            if bHoles == true
+                [originalMaskCoronal ,~,~,~] = bwboundaries(bwimage(aCoronal , dImageMin), 'holes', 8);
+                [originalMaskSagittal,~,~,~] = bwboundaries(bwimage(aSagittal, dImageMin), 'holes', 8);
+                [originalMaskAxial   ,~,~,~] = bwboundaries(bwimage(aAxial   , dImageMin), 'holes', 8);
+            else
+                [originalMaskCoronal ,~,~,~] = bwboundaries(bwimage(aCoronal , dImageMin), 'noholes', 8);
+                [originalMaskSagittal,~,~,~] = bwboundaries(bwimage(aSagittal, dImageMin), 'noholes', 8);
+                [originalMaskAxial   ,~,~,~] = bwboundaries(bwimage(aAxial   , dImageMin), 'noholes', 8);
+            end
+
+            if bPixelEdge == true
+                aCoronal  = imresize(aCoronal , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+                aSagittal = imresize(aSagittal, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+                aAxial    = imresize(aAxial   , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+            end
+
+            if bHoles == true
+                [maskCoronal ,~,~,~] = bwboundaries(bwimage(aCoronal , dImageMin), 'holes', 8);
+                [maskSagittal,~,~,~] = bwboundaries(bwimage(aSagittal, dImageMin), 'holes', 8);
+                [maskAxial   ,~,~,~] = bwboundaries(bwimage(aAxial   , dImageMin), 'holes', 8);
+            else
+                [maskCoronal ,~,~,~] = bwboundaries(bwimage(aCoronal , dImageMin), 'noholes', 8);
+                [maskSagittal,~,~,~] = bwboundaries(bwimage(aSagittal, dImageMin), 'noholes', 8);
+                [maskAxial   ,~,~,~] = bwboundaries(bwimage(aAxial   , dImageMin), 'noholes', 8);
+            end
+
+            if bPixelEdge == true
                 if ~isempty(maskCoronal)
-                    maskCoronal = deleteSmallElements(originalMaskCoronal, maskCoronal , dSmalestRoiSize);
-                    if ~isempty(maskCoronal)
-                        vBoundAxes1Ptr = visboundaries(axes1Ptr('get'), maskCoronal );
-                        visBoundAxes1Ptr('set', vBoundAxes1Ptr);
+                    for jj=1:numel(maskCoronal)
+                        maskCoronal{jj} = (maskCoronal{jj} +1)/PIXEL_EDGE_RATIO;
                     end
                 end
 
                 if ~isempty(maskSagittal)
-                    maskSagittal   = deleteSmallElements(originalMaskSagittal, maskSagittal, dSmalestRoiSize);
-                    if ~isempty(maskSagittal)
-                        vBoundAxes2Ptr = visboundaries(axes2Ptr('get'), maskSagittal);
-                        visBoundAxes2Ptr('set', vBoundAxes2Ptr);
+                    for jj=1:numel(maskSagittal)
+                        maskSagittal{jj} = (maskSagittal{jj} +1)/PIXEL_EDGE_RATIO;
                     end
                 end
 
                 if ~isempty(maskAxial)
-                    maskAxial = deleteSmallElements(originalMaskAxial, maskAxial, dSmalestRoiSize);
-                    if ~isempty(maskAxial)
-                        vBoundAxes3Ptr = visboundaries(axes3Ptr('get'), maskAxial);
-                        visBoundAxes3Ptr('set', vBoundAxes3Ptr);
+                    for jj=1:numel(maskAxial)
+                        maskAxial{jj} = (maskAxial{jj} +1)/PIXEL_EDGE_RATIO;
                     end
                 end
             end
 
+            if ~isempty(maskCoronal)
+                maskCoronal = deleteSmallElements(originalMaskCoronal, maskCoronal, dSmalestRoiSize);
+                if ~isempty(maskCoronal)
+                    vBoundAxes1Ptr = visboundaries(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), maskCoronal );
+                    visBoundAxes1Ptr('set', vBoundAxes1Ptr);
+                end
+            end
+
+            if ~isempty(maskSagittal)
+                maskSagittal = deleteSmallElements(originalMaskSagittal, maskSagittal, dSmalestRoiSize);
+                if ~isempty(maskSagittal)
+                    vBoundAxes2Ptr = visboundaries(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), maskSagittal);
+                    visBoundAxes2Ptr('set', vBoundAxes2Ptr);
+                end
+            end
+
+            if ~isempty(maskAxial)
+                maskAxial = deleteSmallElements(originalMaskAxial, maskAxial, dSmalestRoiSize);
+                if ~isempty(maskAxial)
+                    vBoundAxes3Ptr = visboundaries(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), maskAxial);
+                    visBoundAxes3Ptr('set', vBoundAxes3Ptr);
+                end
+            end
         end
         catch
             progressBar(1, 'Error:previewRoiSegmentation()');
@@ -2082,6 +1687,25 @@ function initRoiPanel()
             cancelCreateVoiRoiPanel('set', false);
 
             createVoiRoi(bMultipleObjects, dSmalestRoiSize, bPixelEdge, bHoles, bUseCtMap, dCtOffset);
+
+            tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            dNbVOIs = numel(tVoiInput);
+
+            if ~isempty(tVoiInput)
+
+                dVoiOffset = get(uiDeleteVoiRoiPanel, 'Value');
+
+                if dVoiOffset <= 0
+                    dVoiOffset = dNbVOIs;
+                end
+
+                set(uiDeleteVoiRoiPanel, 'Value', dVoiOffset);
+
+                dRoiOffset = round(numel(tVoiInput{dVoiOffset}.RoisTag)/2);
+
+                triangulateRoi(tVoiInput{dVoiOffset}.RoisTag{dRoiOffset}, true);
+            end
+
         end
 
         cancelCreateVoiRoiPanel('set', false);
@@ -2116,37 +1740,41 @@ function initRoiPanel()
         drawnow;
 
         uiSeries = uiSeriesPtr('get');
-        uiSeriesValue = get(uiSeries, 'Value');
-%        refreshImages();
-
-        uiSegActRoiPanelObj = uiSegActRoiPanelObject('get');
-
-        aActionType = get(uiSegActRoiPanelObj, 'String');
-        dActionType = get(uiSegActRoiPanelObj, 'Value' );
-        sActionType = aActionType{dActionType};
-
-        uiRoiVoiRoiPanelObj   = uiRoiVoiRoiPanelObject('get');
-        uiRoiVoiRoiPanelValue = get(uiRoiVoiRoiPanelObj, 'Value');
+        dSeriesOffset = get(uiSeries, 'Value');
 
         bRelativeToMax = relativeToMaxRoiPanelValue('get');
         bInPercent     = inPercentRoiPanelValue('get');
 
         dSliderMin = minTresholdSliderRoiPanelValue('get');
         dSliderMax = maxTresholdSliderRoiPanelValue('get');
+        
+        % Roi constraint 
 
+        [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value'));
+
+        bInvertMask = invertConstraint('get');
+
+        tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
+        aLogicalMask = roiConstraintToMask(aBuffer, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);        
+                
+        dImageMin = min(double(aBuffer),[], 'all');
+
+        aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
+        
         if bUseCtMap == true
-            dBufferMin = roiPanelCTMinValue('get');
-            dBufferMax = roiPanelCTMaxValue('get');
+            dTresholdMin = roiPanelCTMinValue('get');
+            dTresholdMax = roiPanelCTMaxValue('get');
         else
-            dBufferMin = roiPanelMinValue('get');
-            dBufferMax = roiPanelMaxValue('get');
+            dTresholdMin = min(double(aBuffer),[], 'all');
+            dTresholdMax = max(double(aBuffer),[], 'all');
         end
 
-        dBufferDiff = dBufferMax - dBufferMin;
+        dBufferDiff = dTresholdMax - dTresholdMin;
 
-        dMinTreshold = (dSliderMin * dBufferDiff)+dBufferMin;
-        dMaxTreshold = (dSliderMax * dBufferDiff)+dBufferMin;
-
+        dMinTreshold = (dSliderMin * dBufferDiff)+dTresholdMin;
+        dMaxTreshold = (dSliderMax * dBufferDiff)+dTresholdMin;     
+                        
         if size(aBuffer, 3) == 1
 
             vBoundAxePtr = visBoundAxePtr('get');
@@ -2154,170 +1782,140 @@ function initRoiPanel()
                 delete(vBoundAxePtr);
             end
 
-            imAxe = imAxePtr ('get');
-            aAxe  = imAxe.CData;
+            if bRelativeToMax == true
+                aBuffer(aBuffer<=dMaxTreshold) = dImageMin;
+            else
+                aBuffer(aBuffer<=dMinTreshold) = dImageMin;
+                aBuffer(aBuffer>=dMaxTreshold) = dImageMin;
+            end
 
-            dBufferMIn = min(double(aBuffer),[], 'all');
+            if bHoles == true
+                [originalMaskAxe ,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 'holes', 8);
+            else
+                [originalMaskAxe ,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 'noholes', 8);
+            end
 
-            if strcmpi(sActionType, 'Entire Image')
+            if bPixelEdge == true
+                aBuffer = imresize(aBuffer , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+            end
 
-                if bRelativeToMax == true
-                    aAxe(aAxe<=dMaxTreshold) = dBufferMIn;
-                else
-                    aAxe(aAxe<=dMinTreshold) = dBufferMIn;
-                    aAxe(aAxe>=dMaxTreshold) = dBufferMIn;
-                end
+            if bHoles == true
+                [maskAxe ,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 'holes', 8);
+            else
+                [maskAxe ,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 'noholes', 8);
+            end
 
-                if bPixelEdge == true
-                    if bHoles == true
-                        [originalMaskAxe ,~,~,~] = bwboundaries(bwimage(aAxe, dBufferMIn), 'holes', 8);
-                    else
-                        [originalMaskAxe ,~,~,~] = bwboundaries(bwimage(aAxe, dBufferMIn), 'noholes', 8);
+            if bPixelEdge == true
+                if ~isempty(maskAxe)
+                    for jj=1:numel(maskAxe)
+                        maskAxe{jj} = (maskAxe{jj} +1)/PIXEL_EDGE_RATIO;
                     end
                 end
+            end
 
-                if bPixelEdge == true
-                    aAxe = imresize(aAxe , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
-                end
+            if ~isempty(maskAxe)
 
-                if bHoles == true
-                    [maskAxe ,~,~,~] = bwboundaries(bwimage(aAxe, dBufferMIn), 'holes', 8);
-                else
-                    [maskAxe ,~,~,~] = bwboundaries(bwimage(aAxe, dBufferMIn), 'noholes', 8);
-                end
-
-                if bPixelEdge == true
-                    if ~isempty(maskAxe)
-                        for jj=1:numel(maskAxe)
-                            maskAxe{jj} = (maskAxe{jj} +1)/PIXEL_EDGE_RATIO;
-                        end
-                    end
-                end
-
+                maskAxe = deleteSmallElements(originalMaskAxe, maskAxe, dSmalestRoiSize);
                 if ~isempty(maskAxe)
 
-                    maskAxe = deleteSmallElements(originalMaskAxe, maskAxe, dSmalestRoiSize);
-                    if ~isempty(maskAxe)
+                    asTag = [];
 
-%                vBoundAxePtr = visboundaries(axePtr('get'), maskAxe);
-
-%                visBoundAxePtr('set', vBoundAxePtr);
+                    if bMultipleObjects == false
+                        xmin=0.5;
+                        xmax=1;
+                        aColor=xmin+rand(1,3)*(xmax-xmin);
                     end
-                end
-            else
-                aobjList = '';
 
-                tRoiInput = roiTemplate('get');
-                tVoiInput = voiTemplate('get');
+                    for jj=1:numel(maskAxe)
 
-                if ~isempty(tVoiInput)
-                    for aa=1:numel(tVoiInput)
-                        aobjList{numel(aobjList)+1} = tVoiInput{aa};
-                    end
-                end
-
-                if ~isempty(tRoiInput)
-                    for cc=1:numel(tRoiInput)
-                        if isvalid(tRoiInput{cc}.Object)
-                            aobjList{numel(aobjList)+1} = tRoiInput{cc};
+                        if cancelCreateVoiRoiPanel('get') == true
+                            break;
                         end
-                    end
-                end
 
-                aVoiBuffer = zeros(size(aBuffer));
+                        if bMultipleObjects == true
+                            xmin=0.5;
+                            xmax=1;
+                            aColor=xmin+rand(1,3)*(xmax-xmin);
+                        end
 
-                if strcmpi(aobjList{uiRoiVoiRoiPanelValue}.ObjectType, 'voi')
+                        curentMask = maskAxe(jj);
 
-                    dNbRois = numel(aobjList{uiRoiVoiRoiPanelValue}.RoisTag);
+                        sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
 
-                    for bb=1:dNbRois
+                        aPosition = flip(curentMask{1}, 2);
 
-                        for cc=1:numel(tRoiInput)
-                            if isvalid(tRoiInput{cc}.Object) && ...
-                                strcmpi(tRoiInput{cc}.Tag, aobjList{uiRoiVoiRoiPanelValue}.RoisTag{bb})
+                        bAddRoi = true;
+                        pRoi = drawfreehand(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'Smoothing', 1, 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', roiFaceAlphaValue('get'));
+                        if dSmalestRoiSize > 0
+                            roiMask = pRoi.createMask();
+                            if numel(roiMask(roiMask==1)) < dSmalestRoiSize
+                                delete(pRoi);
+                                bAddRoi = false;
+                            end
+                        end
 
-                                objRoi   = tRoiInput{cc}.Object;
+                        if bAddRoi == true
 
-                                switch objRoi.Parent
-                                    case axePtr('get')
-                                        aSlice = aBuffer(:,:);
-                                        roiMask = createMask(objRoi, aSlice);
+                            if bMultipleObjects == true
 
-                                        aSlice( roiMask) =1;
-                                        aSlice(~roiMask) =0;
-
-                                        aSliceMask = aVoiBuffer(:,:);
-                                        aVoiBuffer(:,:) = aSlice|aSliceMask;
+                                if bInPercent == true
+                                    dMinValue = dSliderMin*100;
+                                    dMaxValue = dSliderMax*100;
+                                else
+                                    dMinValue = dMinTreshold;
+                                    dMaxValue = dMaxTreshold;
                                 end
 
-                                break;
-                             end
+                                if bRelativeToMax == true
+                                    sLabel = sprintf('RMAX-%d-ROI%d', dMaxValue, jj);
+                                else
+                                    sLabel = sprintf('MIN-MAX-%d-%d-ROI%d', dMinValue, dMaxValue, jj);
+                                end
+
+                                pRoi.Label = sLabel;
+                            end
+
+                            pRoi.Waypoints(:) = false;
+
+                            addRoi(pRoi, dSeriesOffset);
+
+                            roiDefaultMenu(pRoi);
+
+                            uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
+                            uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
+
+                            constraintMenu(pRoi);
+
+                            cropMenu(pRoi);
+                            
+                            voiMenu(pRoi);
+
+                            uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+
+                            asTag{numel(asTag)+1} = sTag;
                         end
                     end
-                else
-                    objRoi   = aobjList{uiRoiVoiRoiPanelValue}.Object;
 
-                    switch objRoi.Parent
-                        case axePtr('get')
-                            aSlice = aBuffer(:,:);
-                            roiMask = createMask(objRoi, aSlice);
+                    if ~isempty(asTag) && ...
+                       bMultipleObjects == false && ...
+                       cancelCreateVoiRoiPanel('get') == false
 
-                            aSlice( roiMask) =1;
-                            aSlice(~roiMask) =0;
-
-                            aVoiBuffer = aSlice;
-                    end
-                end
-
-                if strcmpi(sActionType, 'Outside ROI\VOI') || ...
-                   strcmpi(sActionType, 'Outside all slices ROI\VOI')
-                    aVoiBuffer = ~aVoiBuffer;
-                end
-
-                aAxe = aBuffer;
-                aAxe(aVoiBuffer==0) = dBufferMIn;
-
-                if bRelativeToMax == true
-                    aAxe(aAxe<=dMaxTreshold) = dBufferMIn;
-                else
-                    aAxe(aAxe<=dMinTreshold) = dBufferMIn;
-                    aAxe(aAxe>=dMaxTreshold) = dBufferMIn;
-                end
-
-                if bPixelEdge == true
-                    if bHoles == true
-                        [originalMaskAxe ,~,~,~] = bwboundaries(bwimage(aAxe, dBufferMIn), 'holes', 8);
-                    else
-                        [originalMaskAxe ,~,~,~] = bwboundaries(bwimage(aAxe, dBufferMIn), 'noholes', 8);
-                    end
-                end
-
-                if bPixelEdge == true
-                    aAxe = imresize(aAxe , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
-                end
-
-                if bHoles == true
-                    [maskAxe ,~,~,~] = bwboundaries(bwimage(aAxe, dBufferMIn), 'holes', 8);
-                else
-                    [maskAxe ,~,~,~] = bwboundaries(bwimage(aAxe, dBufferMIn), 'noholes', 8);
-                end
-
-                if bPixelEdge == true
-                    if ~isempty(maskAxe)
-                        for jj=1:numel(maskAxe)
-                            maskAxe{jj} = (maskAxe{jj} +1)/PIXEL_EDGE_RATIO;
+                        if bInPercent == true
+                            dMinValue = dSliderMin*100;
+                            dMaxValue = dSliderMax*100;
+                        else
+                            dMinValue = dMinTreshold;
+                            dMaxValue = dMaxTreshold;
                         end
-                    end
-                end
 
-                if ~isempty(maskAxe)
+                        if bRelativeToMax == true
+                            sLabel = sprintf('RMAX-%d', dMaxValue);
+                        else
+                            sLabel = sprintf('MIN-MAX-%d-%d-%d', dMinValue, dMaxValue);
+                        end
 
-                    maskAxe = deleteSmallElements(originalMaskAxe, maskAxe, dSmalestRoiSize);
-                    if ~isempty(maskAxe)
+                        createVoiFromRois(dSeriesOffset, asTag, sLabel);
 
-%todo                vBoundAxePtr = visboundaries(axePtr('get'), maskAxe);
-
-%todo                visboundaries('set', vBoundAxePtr);
                     end
                 end
             end
@@ -2339,6 +1937,8 @@ function initRoiPanel()
             if ~isempty(vBoundAxes3Ptr)
                 delete(vBoundAxes3Ptr);
             end
+            
+            % CT constraint 
 
             if bUseCtMap == true
 
@@ -2391,619 +1991,179 @@ function initRoiPanel()
 
                 set(uiSeriesPtr('get'), 'Value', dSerieOffset);
 
-                [aBuffer, ~] = resampleImage(aCtBuffer, atCtMetaData, aBuffer, atRefMetaData, 'Linear', false);
+                [aBuffer, ~] = resampleImage(aCtBuffer, atCtMetaData, aBuffer, atRefMetaData, 'Linear', true, false);
+                
+                aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint to CT
 
             end
 
-            dBufferMIn = min(double(aBuffer),[], 'all');
+            if bRelativeToMax == true
+                aBuffer(aBuffer<=dMaxTreshold) = dImageMin;
+            else
+                aBuffer(aBuffer<=dMinTreshold) = dImageMin;
+                aBuffer(aBuffer>=dMaxTreshold) = dImageMin;
+            end
 
-            if strcmpi(sActionType, 'Entire Image')
+            BW = bwimage(aBuffer, dImageMin);
 
-                if bRelativeToMax == true
-                    aBuffer(aBuffer<=dMaxTreshold) = dBufferMIn;
-                else
-                    aBuffer(aBuffer<=dMinTreshold) = dBufferMIn;
-                    aBuffer(aBuffer>=dMaxTreshold) = dBufferMIn;
-                end
-
-                BW = bwimage(aBuffer, dBufferMIn);
-
-                if bMultipleObjects == true
-                    CC = bwconncomp(BW, 6);
+            if bMultipleObjects == true
+                CC = bwconncomp(BW, 6);
 %                    S = regionprops(CC, 'Area');
 %                    L = labelmatrix(CC);
-                    dNbElements = numel(CC.PixelIdxList);
-                else
-                    dNbElements = 1;
-                end
-
-                for bb=1:dNbElements  % Nb VOI
-
-                    if cancelCreateVoiRoiPanel('get') == true
-                        break;
-                    end
-
-                    if bMultipleObjects == true
-                        BW = zeros(size(aBuffer));
-                        BW(CC.PixelIdxList{bb}) = 1;
-                    end
-
-                    asTag = [];
-
-                    progressBar( bb/dNbElements-0.0001, sprintf('Computing Volume %d/%d, please wait', bb, dNbElements) );
-
-                    xmin=0.5;
-                    xmax=1;
-                    aColor=xmin+rand(1,3)*(xmax-xmin);
-
-                    aBufferSize = size(BW, 3);
-
-                    for aa=1:aBufferSize % Find ROI
-
-                        if bMultipleObjects == false
-                            if mod(aa, 5)==1 || aa == aBufferSize
-                                progressBar( aa/aBufferSize-0.0001, sprintf('Computing slice %d/%d, please wait', aa, aBufferSize) );
-                            end
-                        end
-
-                        if cancelCreateVoiRoiPanel('get') == true
-                            break;
-                        end
-
-                        aAxial = BW(:,:,aa);
-                        if aAxial(aAxial==1)
-
-                            if bPixelEdge == true
-                                if bHoles == true
-                                    [originalMaskAxial,~,~,~] = bwboundaries(aAxial, 'holes', 8);
-                                else
-                                    [originalMaskAxial,~,~,~] = bwboundaries(aAxial, 'noholes', 8);
-                                end
-                            end
-
-                            if bPixelEdge == true
-                                aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
-                            end
-
-                            if bHoles == true
-                                [maskAxial,~,~,~] = bwboundaries(aAxial, 'holes', 8);
-                            else
-                                [maskAxial,~,~,~] = bwboundaries(aAxial, 'noholes', 8);
-                            end
-
-                            if ~isempty(maskAxial)
-
-                                if bPixelEdge == true
-                                    for ii=1:numel(maskAxial)
-                                        maskAxial{ii} = (maskAxial{ii} +1)/PIXEL_EDGE_RATIO;
-                                    end
-                                end
-
-                                maskAxial = deleteSmallElements(originalMaskAxial, maskAxial, dSmalestRoiSize);
-                            end
-
-                            if ~isempty(maskAxial)
-                                for jj=1:numel(maskAxial)
-
-                                    if cancelCreateVoiRoiPanel('get') == true
-                                        break;
-                                    end
-
-                                    curentMask = maskAxial(jj);
-
-                                    sliceNumber('set', 'axial', aa);
-
-                                    sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
-
-                                    aPosition = flip(curentMask{1}, 2);
-
-                                    bAddRoi = true;
-                                    pRoi = drawfreehand(axes3Ptr('get') , 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', 0);
-                                    if dSmalestRoiSize > 0
-                                        roiMask = pRoi.createMask();
-                                        if numel(roiMask(roiMask==1)) < dSmalestRoiSize
-                                            delete(pRoi);
-                                            bAddRoi = false;
-                                        end
-                                    end
-
-                                    if bAddRoi == true
-
-                                        pRoi.Waypoints(:) = false;
-
-                                        addRoi(pRoi, uiSeriesValue);
-
-                                        roiDefaultMenu(pRoi);
-
-                                        uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
-                                        uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
-
-                                        cropMenu(pRoi);
-
-                                        uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
-
-                                        asTag{numel(asTag)+1} = sTag;
-                                    end
-                                end
-                            end
-                        end
-                    end
-
-                    if ~isempty(asTag) && cancelCreateVoiRoiPanel('get') == false
-
-                        if bInPercent == true
-                            dMinValue = dSliderMin*100;
-                            dMaxValue = dSliderMax*100;
-                        else
-                            dMinValue = dMinTreshold;
-                            dMaxValue = dMaxTreshold;
-                        end
-
-                        if bRelativeToMax == true
-                            if bMultipleObjects == true
-                                sLabel = sprintf('RMAX-%d-VOI%d', dMaxValue, bb);
-                            else
-                                sLabel = sprintf('RMAX-%d', dMaxValue);
-                            end
-                        else
-                            if bMultipleObjects == true
-                                sLabel = sprintf('MIN-MAX-%d-%d-VOI%d', dMinValue, dMaxValue, bb);
-                            else
-                                sLabel = sprintf('MIN-MAX-%d-%d-%d', dMinValue, dMaxValue);
-                            end
-                        end
-
-                        createVoiFromRois(asTag, sLabel);
-
-                    end
-                end
-
-                setVoiRoiSegPopup();
-
-                refreshImages();
-
-                progressBar(1, 'Ready');
-
+                dNbElements = numel(CC.PixelIdxList);
             else
-%                currentAxe = [];
+                dNbElements = 1;
+            end
 
-                aobjList = '';
+            for bb=1:dNbElements  % Nb VOI
 
-                tRoiInput = roiTemplate('get');
-                tVoiInput = voiTemplate('get');
-
-                if ~isempty(tVoiInput)
-                    for aa=1:numel(tVoiInput)
-                        aobjList{numel(aobjList)+1} = tVoiInput{aa};
-                    end
+                if cancelCreateVoiRoiPanel('get') == true
+                    break;
                 end
-
-                if ~isempty(tRoiInput)
-                    for cc=1:numel(tRoiInput)
-                        if isvalid(tRoiInput{cc}.Object)
-                            aobjList{numel(aobjList)+1} = tRoiInput{cc};
-                        end
-                    end
-                end
-
-                if strcmpi(aobjList{uiRoiVoiRoiPanelValue}.ObjectType, 'voi')
-
-                    dNbRois = numel(aobjList{uiRoiVoiRoiPanelValue}.RoisTag);
-
-                    aVoiBuffer = zeros(size(aBuffer));
-
-                    for bb=1:dNbRois
-
-                        if cancelCreateVoiRoiPanel('get') == true
-                            break;
-                        end
-
-                        for cc=1:numel(tRoiInput)
-
-                            if cancelCreateVoiRoiPanel('get') == true
-                                break;
-                            end
-
-                            if isvalid(tRoiInput{cc}.Object) && ...
-                                strcmpi(tRoiInput{cc}.Tag, aobjList{uiRoiVoiRoiPanelValue}.RoisTag{bb})
-
-                                objRoi   = tRoiInput{cc}.Object;
-                                dSliceNb = tRoiInput{cc}.SliceNb;
-
-                                switch objRoi.Parent
-
-                                    case axes1Ptr('get')
-
-                                        if strcmpi(sActionType, 'Inside ROI\VOI') || ...
-                                           strcmpi(sActionType, 'Outside ROI\VOI')
-
-                                            aSlice =  permute(aBuffer(dSliceNb,:,:), [3 2 1]);
-                                            roiMask = createMask(objRoi, aSlice);
-
-                                            aSlice( roiMask) =1;
-                                            aSlice(~roiMask) =0;
-
-                                            aSliceMask =  permute(aVoiBuffer(dSliceNb,:,:), [3 2 1]);
-                                            aSlice = aSlice|aSliceMask;
-                                            aVoiBuffer(dSliceNb,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
-
-                                        else
-                                            for ccc=1:size(aBuffer, 1)
-
-                                                aSlice = permute(aBuffer(ccc,:,:), [3 2 1]);
-                                                roiMask = createMask(objRoi, aSlice);
-
-                                                aSlice( roiMask) =1;
-                                                aSlice(~roiMask) =0;
-
-                                                aSliceMask =  permute(aVoiBuffer(dSliceNb,:,:), [3 2 1]);
-                                                aSlice = aSlice|aSliceMask;
-                                                aVoiBuffer(ccc,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
-                                            end
-                                        end
-
-                                    case axes2Ptr('get')
-
-                                        if strcmpi(sActionType, 'Inside ROI\VOI') || ...
-                                           strcmpi(sActionType, 'Outside ROI\VOI')
-
-                                            aSlice = permute(aBuffer(:,dSliceNb,:), [3 1 2]);
-                                            roiMask = createMask(objRoi, aSlice);
-
-                                            aSlice( roiMask) =1;
-                                            aSlice(~roiMask) =0;
-
-                                            aSliceMask =  permute(aVoiBuffer(:,dSliceNb,:), [3 1 2]);
-                                            aSlice = aSlice|aSliceMask;
-                                            aVoiBuffer(:,dSliceNb,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
-
-                                        else
-                                            for sss=1:size(aBuffer, 2)
-                                                aSlice = permute(aBuffer(:,sss,:), [3 1 2]);
-                                                roiMask = createMask(objRoi, aSlice);
-
-                                                aSlice( roiMask) =1;
-                                                aSlice(~roiMask) =0;
-
-                                                aSliceMask =  permute(aVoiBuffer(:,dSliceNb,:), [3 1 2]);
-                                                aSlice = aSlice|aSliceMask;
-                                                aVoiBuffer(:,sss,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
-
-                                            end
-                                        end
-
-                                    case axes3Ptr('get')
-
-                                        if strcmpi(sActionType, 'Inside ROI\VOI') || ...
-                                           strcmpi(sActionType, 'Outside ROI\VOI')
-
-                                            aSlice = aBuffer(:,:,dSliceNb);
-                                            roiMask = createMask(objRoi, aSlice);
-
-                                            aSlice( roiMask) =1;
-                                            aSlice(~roiMask) =0;
-
-                                            aSliceMask =  aVoiBuffer(:,:,dSliceNb);
-                                            aVoiBuffer(:,:,dSliceNb) = aSlice|aSliceMask;
-
-                                        else
-                                            for aaa=1:size(aBuffer, 3)
-                                                aSlice = aBuffer(:,:,aaa);
-                                                roiMask = createMask(objRoi, aSlice);
-
-                                                aSlice( roiMask) =1;
-                                                aSlice(~roiMask) =0;
-
-                                                aSliceMask =  aVoiBuffer(:,:,dSliceNb);
-                                                aVoiBuffer(:,:,aaa) = aSlice|aSliceMask;
-                                            end
-                                        end
-                                end
-
-                                break;
-                             end
-                        end
-                    end
-                else
-
-                    objRoi   = aobjList{uiRoiVoiRoiPanelValue}.Object;
-                    dSliceNb = aobjList{uiRoiVoiRoiPanelValue}.SliceNb;
-
-                    aVoiBuffer = zeros(size(aBuffer));
-
-                    for cc=1:numel(tRoiInput)
-
-                        if cancelCreateVoiRoiPanel('get') == true
-                            break;
-                        end
-
-                        if isvalid(objRoi)
-
-                            switch objRoi.Parent
-
-                                case axes1Ptr('get')
-
-                                     if strcmpi(sActionType, 'Inside all slices ROI\VOI') || ...
-                                        strcmpi(sActionType, 'Outside all slices ROI\VOI')
-                                        for dd=1:size(aVoiBuffer, 1)
-                                             aSlice = permute(aBuffer(dd,:,:), [3 2 1]);
-                                             roiMask = createMask(objRoi, aSlice);
-
-                                             aSlice( roiMask) =1;
-                                             aSlice(~roiMask) =0;
-
-                                             aVoiBuffer(dd,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
-                                         end
-                                     else
-                                         aSlice = permute(aBuffer(dSliceNb,:,:), [3 2 1]);
-                                         roiMask = createMask(objRoi, aSlice);
-
-                                         aSlice( roiMask) =1;
-                                         aSlice(~roiMask) =0;
-
-                                        aVoiBuffer(dSliceNb,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
-                                     end
-
-                                case axes2Ptr('get')
-
-                                     if strcmpi(sActionType, 'Inside all slices ROI\VOI') || ...
-                                        strcmpi(sActionType, 'Outside all slices ROI\VOI')
-                                        for dd=1:size(aVoiBuffer, 2)
-
-                                            aSlice = permute(aBuffer(:,dd,:), [3 1 2]);
-                                            roiMask = createMask(objRoi, aSlice);
-
-                                            aSlice( roiMask) =1;
-                                            aSlice(~roiMask) =0;
-
-                                            aVoiBuffer(:,dd,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
-                                        end
-                                     else
-                                         aSlice = permute(aBuffer(:,dSliceNb,:), [3 1 2]);
-                                         roiMask = createMask(objRoi, aSlice);
-
-                                         aSlice( roiMask) =1;
-                                         aSlice(~roiMask) =0;
-
-                                         aVoiBuffer(:,dSliceNb,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
-                                     end
-
-                                case axes3Ptr('get')
-
-                                     if strcmpi(sActionType, 'Inside all slices ROI\VOI') || ...
-                                        strcmpi(sActionType, 'Outside all slices ROI\VOI')
-                                        for dd=1:size(aVoiBuffer, 3)
-                                            aSlice = aBuffer(:,:,dd);
-                                            roiMask = createMask(objRoi, aSlice);
-
-                                            aSlice( roiMask) =1;
-                                            aSlice(~roiMask) =0;
-
-                                            aVoiBuffer(:,:,dd) = aSlice;
-                                        end
-                                     else
-                                        aSlice = aBuffer(:,:,dSliceNb);
-                                        roiMask = createMask(objRoi, aSlice);
-
-                                        aSlice( roiMask) =1;
-                                        aSlice(~roiMask) =0;
-
-                                        aVoiBuffer(:,:,dSliceNb) = aSlice;
-                                     end
-                            end
-
-                            break;
-                         end
-                    end
-                end
-
-                if strcmpi(sActionType, 'Outside ROI\VOI') || ...
-                   strcmpi(sActionType, 'Outside all slices ROI\VOI')
-                    aVoiBuffer = ~aVoiBuffer;
-                end
-
-                aBuffer(aVoiBuffer==0) = dBufferMIn;
-
-                if bRelativeToMax == true
-                    aBuffer(aBuffer<=dMaxTreshold) = dBufferMIn;
-                else
-                    aBuffer(aBuffer<=dMinTreshold) = dBufferMIn;
-                    aBuffer(aBuffer>=dMaxTreshold) = dBufferMIn;
-                end
-
-%                BW = aVoiBuffer;
-%                BW(BW == cropValue('get'))=0;
-%                BW(BW ~= 0)=1;
-
-                BW = bwimage(aBuffer, dBufferMIn);
 
                 if bMultipleObjects == true
-                    CC = bwconncomp(BW, 6);
-%                        S = regionprops(CC, 'Area');
-%                        L = labelmatrix(CC);
-                    dNbElements = numel(CC.PixelIdxList);
-                else
-                    dNbElements = 1;
+                    BW = zeros(size(aBuffer));
+                    BW(CC.PixelIdxList{bb}) = 1;
                 end
 
-                for bb=1:dNbElements  % Nb VOI
+                asTag = [];
+
+                progressBar( bb/dNbElements-0.0001, sprintf('Computing Volume %d/%d, please wait', bb, dNbElements) );
+
+                xmin=0.5;
+                xmax=1;
+                aColor=xmin+rand(1,3)*(xmax-xmin);
+
+                aBufferSize = size(BW, 3);
+
+                for aa=1:aBufferSize % Find ROI
+
+                    if bMultipleObjects == false
+                        if mod(aa, 5)==1 || aa == aBufferSize
+                            progressBar( aa/aBufferSize-0.0001, sprintf('Computing slice %d/%d, please wait', aa, aBufferSize) );
+                        end
+                    end
 
                     if cancelCreateVoiRoiPanel('get') == true
                         break;
                     end
 
-                    if bMultipleObjects == true
-                        B = zeros(size(aBuffer));
-                        B(CC.PixelIdxList{bb}) = 1;
-                    else
-                        B = BW;
-                    end
+                    aAxial = BW(:,:,aa);
+                    if aAxial(aAxial==1)
 
-                    asTag = [];
-
-                    progressBar( bb/dNbElements-0.0001, sprintf('Computing Volume %d/%d, please wait', bb, dNbElements) );
-
-                    xmin=0.5;
-                    xmax=1;
-                    aColor=xmin+rand(1,3)*(xmax-xmin);
-
-%                        switch currentAxe
-%                            case axes1Ptr('get')
-%                                aBufferSize = size(B, 1);
-
-%                            case axes2Ptr('get')
-%                                aBufferSize = size(B, 2);
-
-%                            case axes3Ptr('get')
-%                                aBufferSize = size(B, 3);
-
-%                            otherwise
-%                                progressBar(1, 'Error: createVoiRoi() no axe found!');
-%                                break
-%                        end
-
-                    aBufferSize = size(B, 3);
-
-                    for aa=1:aBufferSize % Find ROI
-
-%                            progressBar( aa/aBufferSize, sprintf('Computing slice %d/%d, please wait', bb, aBufferSize) );
-
-                        if cancelCreateVoiRoiPanel('get') == true
-                            break;
+                        if bHoles == true
+                            [originalMaskAxial,~,~,~] = bwboundaries(aAxial, 'holes', 8);
+                        else
+                            [originalMaskAxial,~,~,~] = bwboundaries(aAxial, 'noholes', 8);
                         end
 
-%                            switch currentAxe
-%                                case axes1Ptr('get')
-%                                    aSlice = permute(B(aa,:,:), [3 2 1]);
+                        if bPixelEdge == true
+                            aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+                        end
 
-%                                case axes2Ptr('get')
-%                                    aSlice = permute(B(:,aa,:), [3 1 2]);
+                        if bHoles == true
+                            [maskAxial,~,~,~] = bwboundaries(aAxial, 'holes', 8);
+                        else
+                            [maskAxial,~,~,~] = bwboundaries(aAxial, 'noholes', 8);
+                        end
 
-%                                case axes3Ptr('get')
-%                                    aSlice = B(:,:,aa);
-%                            end
-
-                        aSlice = B(:,:,aa);
-
-                        if aSlice(aSlice~=0)
+                        if ~isempty(maskAxial)
 
                             if bPixelEdge == true
-                                if bHoles == true
-                                    [originalMaskSlice,~,~,~] = bwboundaries(aSlice, 'holes', 8);
-                                else
-                                    [originalMaskSlice,~,~,~] = bwboundaries(aSlice, 'noholes', 8);
+                                for ii=1:numel(maskAxial)
+                                    maskAxial{ii} = (maskAxial{ii} +1)/PIXEL_EDGE_RATIO;
                                 end
                             end
 
-                            if bPixelEdge == true
-                                aSlice = imresize(aSlice, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
-                            end
-
-                            if bHoles == true
-                                [maskSlice, ~,~,~] = bwboundaries(aSlice, 'holes', 8);
-                            else
-                                [maskSlice, ~,~,~] = bwboundaries(aSlice, 'noholes', 8);
-                            end
-
-                            if ~isempty(maskSlice)
-
-                                if bPixelEdge == true
-                                    for ii=1:numel(maskSlice)
-                                        maskSlice{ii} = (maskSlice{ii} +1)/PIXEL_EDGE_RATIO;
-                                    end
-                                end
-
-                                maskSlice = deleteSmallElements(originalMaskSlice, maskSlice, dSmalestRoiSize);
-                            end
-
-                            if bMultipleObjects == false
-                                if mod(aa, 5)==1 || aa == aBufferSize
-                                    progressBar( aa/aBufferSize-0.0001, sprintf('Computing slice %d/%d, please wait', aa, aBufferSize) );
-                                end
-                            end
-
-                            if ~isempty(maskSlice)
-                                for jj=1:numel(maskSlice)
-
-                                    if cancelCreateVoiRoiPanel('get') == true
-                                        break;
-                                    end
-
-                                    curentMask = maskSlice(jj);
-
-                                    sliceNumber('set', 'axial', aa);
-
-                                    sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
-
-                                    aPosition = flip(curentMask{1}, 2);
-
-                                    bAddRoi = true;
-                                    pRoi = drawfreehand(axes3Ptr('get') , 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', 0);
-                                    if dSmalestRoiSize > 0
-                                        roiMask = pRoi.createMask();
-                                        if numel(roiMask(roiMask==1)) < dSmalestRoiSize
-                                            delete(pRoi);
-                                            bAddRoi = false;
-                                        end
-                                    end
-
-                                    if bAddRoi == true
-
-                                        pRoi.Waypoints(:) = false;
-
-                                        addRoi(pRoi, uiSeriesValue);
-
-                                        roiDefaultMenu(pRoi);
-
-                                        uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
-                                        uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
-
-                                        cropMenu(pRoi);
-
-                                        uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
-
-                                        asTag{numel(asTag)+1} = sTag;
-                                    end
-                                end
-                            end
-                        end
-                    end
-
-                    if ~isempty(asTag) && cancelCreateVoiRoiPanel('get') == false
-
-                        if bInPercent == true
-                            dMinValue = dSliderMin*100;
-                            dMaxValue = dSliderMax*100;
-                        else
-                            dMinValue = dMinTreshold;
-                            dMaxValue = dMaxTreshold;
+                            maskAxial = deleteSmallElements(originalMaskAxial, maskAxial, dSmalestRoiSize);
                         end
 
-                        if bRelativeToMax == true
-                            if bMultipleObjects == true
-                                sLabel = sprintf('RMAX-%d-VOI%d', dMaxValue, bb);
-                            else
-                                sLabel = sprintf('RMAX-%d', dMaxValue);
-                            end
-                        else
-                            if bMultipleObjects == true
-                                sLabel = sprintf('MIN-MAX-%d-%d-VOI%d', dMinValue, dMaxValue, bb);
-                            else
-                                sLabel = sprintf('MIN-MAX-%d-%d-%d', dMinValue, dMaxValue);
+                        if ~isempty(maskAxial)
+                            for jj=1:numel(maskAxial)
+
+                                if cancelCreateVoiRoiPanel('get') == true
+                                    break;
+                                end
+
+                                curentMask = maskAxial(jj);
+
+                                sliceNumber('set', 'axial', aa);
+
+                                sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+
+                                aPosition = flip(curentMask{1}, 2);
+
+                                bAddRoi = true;
+                                pRoi = drawfreehand(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'Smoothing', 1, 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', roiFaceAlphaValue('get'));
+%                                if dSmalestRoiSize > 0
+%                                    roiMask = pRoi.createMask();
+%                                    if numel(roiMask(roiMask==1)) < dSmalestRoiSize
+%                                        delete(pRoi);
+%                                        bAddRoi = false;
+%                                    end
+%                                end
+
+%                                if bAddRoi == true
+
+                                    pRoi.Waypoints(:) = false;
+
+                                    addRoi(pRoi, dSeriesOffset);
+
+                                    roiDefaultMenu(pRoi);
+
+                                    uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
+                                    uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
+
+                                    constraintMenu(pRoi);
+
+                                    cropMenu(pRoi);
+                                    
+                                    voiMenu(pRoi);
+
+                                    uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+
+                                    asTag{numel(asTag)+1} = sTag;
+%                                end
                             end
                         end
-
-                        createVoiFromRois(asTag, sLabel);
-
                     end
                 end
 
-                setVoiRoiSegPopup();
+                if ~isempty(asTag) && cancelCreateVoiRoiPanel('get') == false
 
-                progressBar(1, 'Ready');
+                    if bInPercent == true
+                        dMinValue = dSliderMin*100;
+                        dMaxValue = dSliderMax*100;
+                    else
+                        dMinValue = dMinTreshold;
+                        dMaxValue = dMaxTreshold;
+                    end
 
-                refreshImages();
+                    if bRelativeToMax == true
+                        if bMultipleObjects == true
+                            sLabel = sprintf('RMAX-%d-VOI%d', dMaxValue, bb);
+                        else
+                            sLabel = sprintf('RMAX-%d', dMaxValue);
+                        end
+                    else
+                        if bMultipleObjects == true
+                            sLabel = sprintf('MIN-MAX-%d-%d-VOI%d', dMinValue, dMaxValue, bb);
+                        else
+                            sLabel = sprintf('MIN-MAX-%d-%d-%d', dMinValue, dMaxValue);
+                        end
+                    end
+
+                    createVoiFromRois(dSeriesOffset, asTag, sLabel);
+
+                end
             end
+
+            setVoiRoiSegPopup();
+
+            refreshImages();
+
+            progressBar(1, 'Ready');
+
         end
         catch
             progressBar(1, 'Error:createVoiRoi()');
@@ -3038,5 +2198,29 @@ function initRoiPanel()
             aNewMask(cellfun(@isempty, aNewMask)) = [];
         end
     end
+
+    function [dMin, dMax] = getTresholdMinMax(aBuffer, dOffset, dUseCT)
+        
+        if dUseCT == true
+            dMin = roiPanelCTMinValue('get');
+            dMax = roiPanelCTMaxValue('get');
+        else                            
+            [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dOffset);
+
+            bInvertMask = invertConstraint('get');
+
+            tRoiInput = roiTemplate('get', dOffset);
+
+            aLogicalMask = roiConstraintToMask(aBuffer, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);      
+
+            dImageMin = min(double(aBuffer),[], 'all');
+
+            aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
+
+            dMin = min(double(aBuffer),[], 'all');
+            dMax = max(double(aBuffer),[], 'all'); 
+        end
+    end
+
 
 end

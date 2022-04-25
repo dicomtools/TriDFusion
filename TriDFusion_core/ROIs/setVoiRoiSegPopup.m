@@ -8,180 +8,83 @@ function setVoiRoiSegPopup()
 %Last specifications modified:
 %
 % Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
-% 
+%
 % This file is part of The Triple Dimention Fusion (TriDFusion).
-% 
+%
 % TriDFusion development has been led by:  Daniel Lafontaine
-% 
-% TriDFusion is distributed under the terms of the Lesser GNU Public License. 
-% 
+%
+% TriDFusion is distributed under the terms of the Lesser GNU Public License.
+%
 %     This version of TriDFusion is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 % TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 % without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 % See the GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    asList = '';
-    
-    tRoiInput = roiTemplate('get');
-    tVoiInput = voiTemplate('get');
-        
-    uiSegActRoiPanel = uiSegActRoiPanelObject('get');
-    uiRoiVoiRoiPanel = uiRoiVoiRoiPanelObject('get');
-    
-    uiSegActKernelPanel = uiSegActKernelPanelObject('get');
-    uiRoiVoiKernelPanel = uiRoiVoiKernelPanelObject('get');       
+    tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
-    uiSegAction = voiRoiActObject('get');
-    uiRoiVoiSeg = voiRoiSegObject('get');  
+    uiDeleteVoiRoiPanel = uiDeleteVoiRoiPanelObject('get');
 
-    uiChkSubtractImageVoiRoi         = chkImageVoiRoiSubstractObject('get');            
-    uiEditImageVoiRoiUpperTreshold   = editImageVoiRoiUpperTresholdObject('get');
-    uiSliderImageVoiRoiUpperTreshold = sliderImageVoiRoiUpperTresholdObject('get');
-    uiTxtImageVoiRoiUpperTreshold    = txtImageVoiRoiUpperTresholdObject('get');
-    
-    if strcmpi(uiSegActRoiPanel.String{uiSegActRoiPanel.Value}, 'Entire Image') 
-        set(uiRoiVoiRoiPanel, 'Value' , 1);
-        set(uiRoiVoiRoiPanel, 'Enable', 'off');                        
-        set(uiRoiVoiRoiPanel, 'String', ' ');                         
-    else
-        
-        if ~isempty(tVoiInput) 
-            for aa=1:numel(tVoiInput)
-                asList{numel(asList)+1} = tVoiInput{aa}.Label;
-            end                        
-        end
+    uiPrevVoiRoiPanel = uiPrevVoiRoiPanelObject('get');
+    uiDelVoiRoiPanel  = uiDelVoiRoiPanelObject('get');
+    uiNextVoiRoiPanel = uiNextVoiRoiPanelObject('get');
 
-        if ~isempty(tRoiInput) 
+    asVOIsList = repmat({''},numel(tVoiInput),1);
+    dNbVOIs = numel(tVoiInput);
 
-            for cc=1:numel(tRoiInput)
-               if isvalid(tRoiInput{cc}.Object)
-                    asList{numel(asList)+1} = tRoiInput{cc}.Label;
+    if ~isempty(tVoiInput)
+
+        for aa=1:dNbVOIs
+            asVOIsList{aa} = tVoiInput{aa}.Label;
+            
+            for rr=1:numel(tVoiInput{aa}.RoisTag) % Enable VOI right click menu 
+                for rt=1:numel(tRoiInput)
+                    if strcmp(tRoiInput{rt}.Tag, tVoiInput{aa}.RoisTag{rr})
+                        voiDefaultMenu(tRoiInput{rt}.Object, tVoiInput{aa}.Tag);                      
+                        break;
+                    end
                 end
-            end                        
-        end 
+            end
+            
+        end
 
-        if numel(asList) ~= 0
-        %    set(uiTxtSubtractVoiRoi, 'Enable', 'inactive');                        
-        %    set(uiChkSubtractImageVoiRoi, 'Enable', 'on');     
+        if numel(asVOIsList) ~= 0
 
-            set(uiRoiVoiRoiPanel, 'Enable', 'on');
-            set(uiRoiVoiRoiPanel, 'String', asList);                      
+            dVoiOffset = get(uiDeleteVoiRoiPanel, 'Value');
+            if dVoiOffset > dNbVOIs
+                set(uiDeleteVoiRoiPanel, 'Value', 1);
+            end
+
+            set(uiDeleteVoiRoiPanel, 'Enable', 'on');
+            set(uiDeleteVoiRoiPanel, 'String', asVOIsList);
+
+            set(uiPrevVoiRoiPanel, 'Enable', 'on');
+            set(uiDelVoiRoiPanel , 'Enable', 'on');
+            set(uiNextVoiRoiPanel, 'Enable', 'on');
         else
-            set(uiSegActRoiPanel, 'Value' , 1);
-            set(uiRoiVoiRoiPanel, 'Enable', 'off');
-            set(uiRoiVoiRoiPanel, 'String', ' ');                                    
-        end                            
-    end
-    
-    if strcmpi(uiSegActKernelPanel.String{uiSegActKernelPanel.Value}, 'Entire Image') 
-        set(uiRoiVoiKernelPanel, 'Value' , 1);
-        set(uiRoiVoiKernelPanel, 'Enable', 'off');                        
-        set(uiRoiVoiKernelPanel, 'String', ' ');                         
+            set(uiDeleteVoiRoiPanel, 'Value' , 1);
+            set(uiDeleteVoiRoiPanel, 'Enable', 'off');
+            set(uiDeleteVoiRoiPanel, 'String', ' ');
+
+            set(uiPrevVoiRoiPanel, 'Enable', 'off');
+            set(uiDelVoiRoiPanel , 'Enable', 'off');
+            set(uiNextVoiRoiPanel, 'Enable', 'off');
+        end
     else
-        
-        if isempty(asList)
-            if ~isempty(tVoiInput) 
-                for aa=1:numel(tVoiInput)
-                    asList{numel(asList)+1} = tVoiInput{aa}.Label;
-                end                        
-            end
+        set(uiDeleteVoiRoiPanel, 'Value' , 1);
+        set(uiDeleteVoiRoiPanel, 'Enable', 'off');
+        set(uiDeleteVoiRoiPanel, 'String', ' ');
 
-            if ~isempty(tRoiInput) 
-
-                for cc=1:numel(tRoiInput)
-                   if isvalid(tRoiInput{cc}.Object)
-                        asList{numel(asList)+1} = tRoiInput{cc}.Label;
-                    end
-                end                        
-            end 
-        end
-        
-        if numel(asList) ~= 0
-        %    set(uiTxtSubtractVoiRoi, 'Enable', 'inactive');                        
-        %    set(uiChkSubtractImageVoiRoi, 'Enable', 'on');     
-
-            set(uiRoiVoiKernelPanel, 'Enable', 'on');
-            set(uiRoiVoiKernelPanel, 'String', asList);                      
-        else
-            set(uiSegActKernelPanel, 'Value' , 1);
-            set(uiRoiVoiKernelPanel, 'Enable', 'off');
-            set(uiRoiVoiKernelPanel, 'String', ' ');                                    
-        end                            
+        set(uiPrevVoiRoiPanel, 'Enable', 'off');
+        set(uiDelVoiRoiPanel , 'Enable', 'off');
+        set(uiNextVoiRoiPanel, 'Enable', 'off');
     end
-    
-    if strcmpi(uiSegAction.String{uiSegAction.Value}, 'Entire Image') 
 
-        set(uiRoiVoiSeg, 'Value' , 1);
-        set(uiRoiVoiSeg, 'Enable', 'off');                        
-        set(uiRoiVoiSeg, 'String', ' ');
-
-   %     set(uiTxtSubtractVoiRoi, 'Enable', 'off');                        
-   %     set(uiChkSubtractImageVoiRoi, 'Enable', 'off');     
-
-        if get(uiChkSubtractImageVoiRoi, 'Value') == false
-            set(uiEditImageVoiRoiUpperTreshold  , 'Enable', 'on');  
-            set(uiSliderImageVoiRoiUpperTreshold, 'Enable', 'on'); 
-            set(uiTxtImageVoiRoiUpperTreshold   , 'Enable', 'on');                                                 
-        end
-
-   %     set(uiProceedImageSeg, 'String', 'Segment');                                       
-
-    else
-
-        if isempty(asList)
-
-            if ~isempty(tVoiInput) 
-                for aa=1:numel(tVoiInput)
-                    asList{numel(asList)+1} = tVoiInput{aa}.Label;
-                end                        
-            end
-
-            if ~isempty(tRoiInput) 
-
-                for cc=1:numel(tRoiInput)
-                   if isvalid(tRoiInput{cc}.Object)
-                        asList{numel(asList)+1} = tRoiInput{cc}.Label;
-                    end
-                end                        
-            end 
-        end
-        
-        if numel(asList) ~= 0
-        %    set(uiTxtSubtractVoiRoi, 'Enable', 'inactive');                        
-        %    set(uiChkSubtractImageVoiRoi, 'Enable', 'on');     
-
-            set(uiRoiVoiSeg, 'Enable', 'on');
-            set(uiRoiVoiSeg, 'String', asList);
-
-            if get(uiChkSubtractImageVoiRoi, 'Value') == true
-                set(uiEditImageVoiRoiUpperTreshold  , 'Enable', 'off');  
-                set(uiSliderImageVoiRoiUpperTreshold, 'Enable', 'off'); 
-                set(uiTxtImageVoiRoiUpperTreshold   , 'Enable', 'off');  
-  %              set(uiProceedImageSeg, 'String', 'Subtract');                                                               
-            end
-        else
-            set(uiSegAction, 'Value' , 1);
-            set(uiRoiVoiSeg, 'Enable', 'off');
-            set(uiRoiVoiSeg, 'String', ' ');
-
-     %       set(uiTxtSubtractVoiRoi, 'Enable', 'off');                        
-     %       set(uiChkSubtractImageVoiRoi, 'Enable', 'off');   
-
-            if get(uiChkSubtractImageVoiRoi, 'Value') == false
-                set(uiEditImageVoiRoiUpperTreshold  , 'Enable', 'on');  
-                set(uiSliderImageVoiRoiUpperTreshold, 'Enable', 'on'); 
-                set(uiTxtImageVoiRoiUpperTreshold   , 'Enable', 'on'); 
-            end
-
-  %          set(uiProceedImageSeg, 'String', 'Segment');                                       
-
-        end
-    end
 end

@@ -44,12 +44,28 @@ function sliderFusionLevelCallback(~, ~)
            switchToIsoSurface('get') == false && ...
            switchToMIPMode('get')    == false
 
-            if size(dicomBuffer('get'), 3) == 1            
-                set(axefPtr('get'), 'CLim', [lMin lMax]);
+            if size(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 3) == 1            
+                set(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                if isPlotContours('get') == true
+                    set(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                end                  
             else
-                set(axes1fPtr('get'), 'CLim', [lMin lMax]);
-                set(axes2fPtr('get'), 'CLim', [lMin lMax]);
-                set(axes3fPtr('get'), 'CLim', [lMin lMax]);
+                set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                
+                if link2DMip('get') == true && isVsplash('get') == false                  
+                    set(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                end
+                
+                if isPlotContours('get') == true && isVsplash('get') == false
+                    set(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                    set(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                    set(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                    if link2DMip('get') == true && isVsplash('get') == false
+                        set(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                    end                    
+                end                 
             end
 
             if isVsplash('get') == false      

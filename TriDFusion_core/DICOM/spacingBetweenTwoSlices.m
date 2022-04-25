@@ -36,7 +36,6 @@ function dSpacing = spacingBetweenTwoSlices(tDicomInfo1, tDicomInfo2)
            [0 ; 0 ; 0 ; 0] [xyz1(1) ; xyz1(2) ; xyz1(3) ; 0 ]       ];
     pxyzFirst = M1*[1 ; 1 ; 0 ; 1];
 
-
     xyz2 = tDicomInfo2.ImagePositionPatient;
     pos2 = tDicomInfo2.ImageOrientationPatient;
     spa2 = tDicomInfo2.PixelSpacing;
@@ -44,6 +43,15 @@ function dSpacing = spacingBetweenTwoSlices(tDicomInfo1, tDicomInfo2)
            [pos2(4)*spa2(2) ; pos2(5)* spa2(2) ; pos2(6)*spa1(2) ; 0] ...
            [0 ; 0 ; 0 ; 0] [xyz2(1) ; xyz2(2) ; xyz2(3) ; 0 ]       ];
     pxyzLast = M2*[1 ; 1 ; 0 ; 1];
-
-    dSpacing = abs(pxyzLast(3) - pxyzFirst(3));
+    
+    sOrientation = getImageOrientation(tDicomInfo1.ImageOrientationPatient);
+            
+    if      strcmpi(sOrientation, 'Sagittal')
+        dSpacing = abs(pxyzLast(1) - pxyzFirst(1));
+    elseif  strcmpi(sOrientation, 'Coronal')
+        dSpacing = abs(pxyzLast(2) - pxyzFirst(2));
+    else    % Axial
+        dSpacing = abs(pxyzLast(3) - pxyzFirst(3));
+    end
+        
 end

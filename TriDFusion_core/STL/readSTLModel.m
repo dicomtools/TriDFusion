@@ -113,7 +113,13 @@ end
         tInput(numel(tInput)).bMathApplied   = false;
         tInput(numel(tInput)).bFusedDoseKernel    = false;
         tInput(numel(tInput)).bFusedEdgeDetection = false;
-    
+        tInput(numel(tInput)).tMovement = [];
+        tInput(numel(tInput)).tMovement.bMovementApplied = false;
+        tInput(numel(tInput)).tMovement.aGeomtform = [];
+        tInput(numel(tInput)).tMovement.atSeq{1}.sAxe = [];
+        tInput(numel(tInput)).tMovement.atSeq{1}.aTranslation = [];
+        tInput(numel(tInput)).tMovement.atSeq{1}.dRotation = [];  
+        
         asSeries = get(uiSeriesPtr('get'), 'String');
         asSeries{numel(asSeries)+1} = asSeriesDescription{numel(asSeriesDescription)};        
     else

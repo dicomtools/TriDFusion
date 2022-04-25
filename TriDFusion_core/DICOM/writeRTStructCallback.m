@@ -29,44 +29,54 @@ function writeRTStructCallback(~, ~)
 
     dOffset = get(uiSeriesPtr('get'), 'Value');
     
-    sCurrentDir  = viewerRootPath('get');
+    bSubDir = false;
+    
+    sOutDir = outputDir('get');
+    if isempty(sOutDir)
+        
+        bSubDir = true;
 
-    sMatFile = [sCurrentDir '/' 'lastWriteDicomDir.mat'];
-    % load last data directory
-    if exist(sMatFile, 'file')
-                                % lastDirMat mat file exists, load it
-       load('-mat', sMatFile);
-       if exist('exportDicomLastUsedDir', 'var')
-           sCurrentDir = exportDicomLastUsedDir;
-       end
-       if sCurrentDir == 0
-           sCurrentDir = pwd;
-       end
-    end
+        sCurrentDir  = viewerRootPath('get');
 
-    sOutDir = uigetdir(sCurrentDir);
-    if sOutDir == 0
-        return;
-    end
-    sOutDir = [sOutDir '/'];
+        sMatFile = [sCurrentDir '/' 'lastWriteDicomDir.mat'];
+        % load last data directory
+        if exist(sMatFile, 'file')
+                                    % lastDirMat mat file exists, load it
+           load('-mat', sMatFile);
+           if exist('exportDicomLastUsedDir', 'var')
+               sCurrentDir = exportDicomLastUsedDir;
+           end
+           if sCurrentDir == 0
+               sCurrentDir = pwd;
+           end
+        end   
+    
+        sOutDir = uigetdir(sCurrentDir);
+        if sOutDir == 0
+            return;
+        end
+        sOutDir = [sOutDir '/'];
 
-    try
-        exportDicomLastUsedDir = sOutDir;
-        save(sMatFile, 'exportDicomLastUsedDir');
-    catch
-        progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-%        h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
-%        if integrateToBrowser('get') == true
-%            sLogo = './TriDFusion/logo.png';
-%        else
-%            sLogo = './logo.png';
-%        end
+        try
+            exportDicomLastUsedDir = sOutDir;
+            save(sMatFile, 'exportDicomLastUsedDir');
+        catch
+            progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
+    %        h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
+    %        if integrateToBrowser('get') == true
+    %            sLogo = './TriDFusion/logo.png';
+    %        else
+    %            sLogo = './logo.png';
+    %        end
 
-%        javaFrame = get(h, 'JavaFrame');
-%        javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
+    %        javaFrame = get(h, 'JavaFrame');
+    %        javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
+        end        
     end
     
-
-    writeRtStruct(sOutDir, dOffset);
+    tInput = inputTemplate('get');    
+    aInputBuffer = inputBuffer('get');
+  
+    writeRtStruct(sOutDir, bSubDir, aInputBuffer{dOffset}, tInput(dOffset).atDicomInfo, dicomBuffer('get'), dicomMetaData('get'), dOffset);
 
 end

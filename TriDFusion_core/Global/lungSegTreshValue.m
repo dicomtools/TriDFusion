@@ -32,5 +32,6 @@ function dTreshValue = lungSegTreshValue(sAction, dValue)
     if strcmpi('set', sAction)
         pdTreshValue = dValue;            
     end
+    
     dTreshValue = pdTreshValue;
 end

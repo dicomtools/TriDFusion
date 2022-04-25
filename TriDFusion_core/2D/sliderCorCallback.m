@@ -31,7 +31,6 @@ function sliderCorCallback(~, ~)
        get(uiSliderCorPtr('get'), 'Value') <= 1 && ...
        strcmpi(windowButton('get'), 'up')  
 
-
         if get(uiSliderCorPtr('get'), 'Value') == 0
             iSliceNumber = 1;
         else
@@ -39,6 +38,7 @@ function sliderCorCallback(~, ~)
         end
 
         sliceNumber('set', 'coronal', iSliceNumber); 
+        
         refreshImages();
     end
 end

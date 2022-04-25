@@ -30,22 +30,29 @@ function aLine = axesLine(sAction, sAxes, aValue)
     persistent paLineAxes1; 
     persistent paLineAxes2; 
     persistent paLineAxes3; 
+    persistent paLineAxesMip; 
 
     if strcmpi('set', sAction)
-        if strcmpi('axes1', sAxes)
+        if     strcmpi('axes1', sAxes)
             paLineAxes1 = aValue;            
         elseif strcmpi('axes2', sAxes)
             paLineAxes2 = aValue;    
-        else
+        elseif strcmpi('axes3', sAxes)
             paLineAxes3 = aValue;    
+        elseif strcmpi('axesMip', sAxes)
+            paLineAxesMip = aValue;   
+        else
         end
     else
          if strcmpi('axes1', sAxes)
             aLine = paLineAxes1;            
         elseif strcmpi('axes2', sAxes)
             aLine = paLineAxes2;            
+        elseif strcmpi('axes3', sAxes)
+            aLine = paLineAxes3;      
+        elseif strcmpi('axesMip', sAxes)
+            aLine = paLineAxesMip;      
         else
-            aLine = paLineAxes3;            
         end                  
     end            
 end  

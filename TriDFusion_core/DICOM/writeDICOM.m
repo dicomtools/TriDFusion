@@ -1,4 +1,4 @@
-function writeDICOM(sOutDir, iSeriesOffset)            
+function writeDICOM(aBuffer, tMetaData, sWriteDir, iSeriesOffset)            
 %function writeDICOM(sOutDir, iSeriesOffset)
 %Write a DICOM Series.
 %See TriDFuison.doc (or pdf) for more information about options.
@@ -30,32 +30,22 @@ function writeDICOM(sOutDir, iSeriesOffset)
     tWriteTemplate = inputTemplate('get');
     if iSeriesOffset > numel(tWriteTemplate)  
         return;
-    end  
-    
-    sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                
-    sWriteDir = char(sOutDir) + "TriDFusion_DCM_" + char(sDate) + '/';              
-    if ~(exist(char(sWriteDir), 'dir'))
-        mkdir(char(sWriteDir));
-    end
+    end      
     
     try
                 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;  
-        
+  
+    sTmpDir = sprintf('%stemp_dicom_%s//', tempdir, datetime('now','Format','MMMM-d-y-hhmmss'));
+    if exist(char(sTmpDir), 'dir')
+        rmdir(char(sTmpDir), 's');
+    end
+    mkdir(char(sTmpDir));    
+    
     dicomdict('factory');  
 
-    aBuffer = dicomBuffer('get');
-    if isempty(aBuffer)
-        aInput  = inputBuffer('get');      
-        aBuffer = aInput{iSeriesOffset};
-    end
     aBufferSize = size(aBuffer);
-
-    tMetaData = dicomMetaData('get');
-    if isempty(tMetaData)
-        tMetaData = tWriteTemplate(iSeriesOffset).atDicomInfo;
-    end
 
     if numel(aBufferSize) > 2
         array4d = zeros(aBufferSize(1), aBufferSize(2),1, aBufferSize(3));
@@ -64,13 +54,13 @@ function writeDICOM(sOutDir, iSeriesOffset)
                 if isfield(tMetaData{slice}, 'RescaleIntercept') && ...
                    isfield(tMetaData{slice}, 'RescaleSlope')     
                     if tMetaData{slice}.RescaleSlope ~= 0
-                        aBuffer(:,:,slice) = (aBuffer(:,:,slice) / tMetaData{slice}.RescaleSlope) - tMetaData{slice}.RescaleIntercept;
+                        aBuffer(:,:,slice) = (aBuffer(:,:,slice) - tMetaData{slice}.RescaleIntercept) / tMetaData{slice}.RescaleSlope;
                     else
                         if isfield(tMetaData{slice}, 'RealWorldValueMappingSequence') % SUV Spect
                             if tMetaData{slice}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
                                 fSlope = tMetaData{slice}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
                                 fIntercept = tMetaData{slice}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
-                                aBuffer(:,:,slice) = (aBuffer(:,:,slice) / fSlope) - fIntercept;
+                                aBuffer(:,:,slice) = (aBuffer(:,:,slice) - fIntercept) / fSlope;
                             end                        
                         end                           
                     end
@@ -79,13 +69,13 @@ function writeDICOM(sOutDir, iSeriesOffset)
                 if isfield(tMetaData{1}, 'RescaleIntercept') && ...
                    isfield(tMetaData{1}, 'RescaleSlope')     
                     if tMetaData{1}.RescaleSlope ~= 0
-                        aBuffer(:,:,slice) = (aBuffer(:,:,slice) / tMetaData{1}.RescaleSlope) - tMetaData{1}.RescaleIntercept;
+                        aBuffer(:,:,slice) = (aBuffer(:,:,slice) - tMetaData{1}.RescaleIntercept) / tMetaData{1}.RescaleSlope;
                     else                        
                         if isfield(tMetaData{1}, 'RealWorldValueMappingSequence') % SUV Spect
                             if tMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
                                 fSlope =  tMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
                                 fIntercept = tMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
-                                aBuffer(:,:,slice) = (aBuffer(:,:,slice) / fSlope) - fIntercept;
+                                aBuffer(:,:,slice) = (aBuffer(:,:,slice) - fIntercept) / fSlope;
                             end                        
                         end                                                 
                     end
@@ -97,13 +87,13 @@ function writeDICOM(sOutDir, iSeriesOffset)
         if isfield(tMetaData{1}, 'RescaleIntercept') && ...
            isfield(tMetaData{1}, 'RescaleSlope') 
             if tMetaData{1}.RescaleSlope ~= 0
-                aBuffer = (aBuffer / tMetaData{1}.RescaleSlope) - tMetaData{1}.RescaleIntercept;
+                aBuffer = (aBuffer - tMetaData{1}.RescaleIntercept) / tMetaData{1}.RescaleSlope;
             else
                 if isfield(tMetaData{1}, 'RealWorldValueMappingSequence') % SUV Spect
                     if tMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
                         fSlope = tMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
                         fIntercept = tMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
-                        aBuffer = (aBuffer / fSlope) - fIntercept;
+                        aBuffer = (aBuffer - fIntercept) / fSlope;
                     end                        
                 end                
             end
@@ -116,7 +106,7 @@ function writeDICOM(sOutDir, iSeriesOffset)
         for ww=1: numel(tWriteTemplate(iSeriesOffset).asFilesList)
 
             tWriteMetaData{ww} = ...
-                dicominfo(char(tWriteTemplate(iSeriesOffset).asFilesList{ww}), 'UseVRHeuristic', false);
+                dicominfo(char(tWriteTemplate(iSeriesOffset).asFilesList{ww}));
             progressBar(ww / numel(tWriteTemplate(iSeriesOffset).asFilesList), sprintf('Processing header %d/%d, please wait', ww, numel(tWriteTemplate(iSeriesOffset).asFilesList)));
         end         
     else
@@ -152,7 +142,11 @@ function writeDICOM(sOutDir, iSeriesOffset)
             if strcmpi(tWriteMetaData{1}.PatientPosition, 'FFS')
                  array4d = array4d(:,:,:,end:-1:1);    
                  tWriteMetaData = flip(tWriteMetaData);
-            end                       
+            end         
+            
+            if strcmpi(tWriteMetaData{1}.PatientPosition, 'FFP')
+                 array4d = array4d(end:-1:1,:,:,:);    
+            end               
         end
     end  
 
@@ -170,7 +164,10 @@ function writeDICOM(sOutDir, iSeriesOffset)
 
         tWriteMetaData{ww}.SeriesDescription = tMetaData{ww}.SeriesDescription; 
         tWriteMetaData{ww}.SourceApplicationEntityTitle = 'TRIDFUSION';
-        tWriteMetaData{ww}.SeriesInstanceUID = dSeriesInstanceUID;
+        
+        if updateDicomWriteSeriesInstanceUID('get') == true
+            tWriteMetaData{ww}.SeriesInstanceUID = dSeriesInstanceUID;
+        end
 
         if isfield(tWriteMetaData{ww}, 'SliceLocation')
             tWriteMetaData{ww}.SliceLocation = tMetaData{ww}.SliceLocation;               
@@ -200,8 +197,51 @@ function writeDICOM(sOutDir, iSeriesOffset)
             tWriteMetaData{ww}.Units = tMetaData{ww}.Units;
         end  
         
+        % Fix patient dose
+        
+        if isfield(tWriteMetaData{ww}, 'PatientWeight')
+            tWriteMetaData{ww}.PatientWeight = tMetaData{ww}.PatientWeight;
+        end  
+        
+        if isfield(tWriteMetaData{ww}, 'PatientSize')
+            tWriteMetaData{ww}.PatientSize = tMetaData{ww}.PatientSize;
+        end  
+        
+        if isfield(tWriteMetaData{ww}, 'SeriesDate')
+            tWriteMetaData{ww}.SeriesDate = tMetaData{ww}.SeriesDate;
+        end  
+        
+        if isfield(tWriteMetaData{ww}, 'SeriesTime')
+            tWriteMetaData{ww}.SeriesTime = tMetaData{ww}.SeriesTime;
+        end    
+        
+        if isfield(tWriteMetaData{ww}, 'AcquisitionDate')
+            tWriteMetaData{ww}.AcquisitionDate = tMetaData{ww}.AcquisitionDate;
+        end  
+        
+        if isfield(tWriteMetaData{ww}, 'AcquisitionTime')
+            tWriteMetaData{ww}.AcquisitionTime = tMetaData{ww}.AcquisitionTime;
+        end   
+        
+        if isfield(tWriteMetaData{ww}, 'RadiopharmaceuticalInformationSequence')
+            if isfield(tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence, 'Item_1')
+                
+                if isfield(tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadionuclideTotalDose')
+                    tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose = tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose;
+                end
+                
+                if isfield(tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadiopharmaceuticalStartDateTime')
+                    tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime = tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;
+                end
+                
+                if isfield(tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadionuclideHalfLife')
+                    tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife = tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife;
+                end                
+            end
+        end                   
+        
         sWriteFile = sprintf('%s.%d', tWriteMetaData{ww}.SeriesInstanceUID, ww);                                             
-        sOutFile = sprintf('%s%s',sWriteDir, sWriteFile);
+        sOutFile = sprintf('%s%s',sTmpDir, sWriteFile);
 
         try      
             tWriteMetaData{ww}.BitsAllocated = 16;
@@ -241,7 +281,7 @@ function writeDICOM(sOutDir, iSeriesOffset)
                 
             if numel(tWriteMetaData) == 1    
                 
-                dicomwrite(uint16(array4d) , ...
+                dicomwrite(int16(array4d) , ...
                            sOutFile          , ...
                            tWriteMetaData{ww}, ...
                            'CreateMode'      , ...
@@ -249,8 +289,8 @@ function writeDICOM(sOutDir, iSeriesOffset)
                            'WritePrivate'    , true ...
                            ); 
             else       
-                
-                dicomwrite(uint16(array4d(:,:,:,ww)) , ...
+   %             array4d = dicomread(char(tWriteTemplate(iSeriesOffset).asFilesList{ww}));
+                dicomwrite(int16(array4d(:,:,:,ww)) , ...
                            sOutFile          , ...
                            tWriteMetaData{ww}, ...
                            'CreateMode'      , ...
@@ -262,7 +302,7 @@ function writeDICOM(sOutDir, iSeriesOffset)
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
             drawnow;             
             
-            progressBar(1, 'Error: Write dicom fail!');
+            progressBar(1, sprintf('Error: Write dicom %s fail!', char(sWriteDir)) );
             return;
         end
         
@@ -270,11 +310,20 @@ function writeDICOM(sOutDir, iSeriesOffset)
             progressBar(ww / dWriteEndLoop, sprintf('Writing dicom %d/%d, please wait', ww, dWriteEndLoop));
         end
     end                   
+  
+    f = java.io.File(char(sTmpDir)); % Copy from temp folder to output dir
+    dinfo = f.listFiles();                   
+    for K = 1 : 1 : numel(dinfo)
+        if ~(dinfo(K).isDirectory)
+            copyfile([char(sTmpDir) char(dinfo(K).getName())], char(sWriteDir) );
+        end
+    end 
+    rmdir(char(sTmpDir), 's');    
     
     progressBar(1, sprintf('Export %d files completed %s', ww, char(sWriteDir)));
     
     catch
-        progressBar(1, 'Error:writeDICOM()');                
+        progressBar(1, sprintf('Error:writeDICOM(), %s', char(sWriteDir)) );                
     end
     
     set(fiMainWindowPtr('get'), 'Pointer', 'default');

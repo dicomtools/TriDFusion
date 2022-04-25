@@ -32,20 +32,45 @@ function refreshColorMap()
        switchToMIPMode('get')    == false
 
         if size(dicomBuffer('get'), 3) == 1
-            colormap(axePtr('get'), getColorMap('one', colorMapOffset('get')));
+            colormap(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', colorMapOffset('get')));
             if isFusion('get')
-                colormap(axefPtr('get'), getColorMap('one', fusionColorMapOffset('get')));
+                colormap(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
             end
-       else
-            colormap(axes1Ptr('get'), getColorMap('one', colorMapOffset('get')));
-            colormap(axes2Ptr('get'), getColorMap('one', colorMapOffset('get')));
-            colormap(axes3Ptr('get'), getColorMap('one', colorMapOffset('get')));
-            if isFusion('get')
-                colormap(axes1fPtr('get'), getColorMap('one', fusionColorMapOffset('get')));
-                colormap(axes2fPtr('get'), getColorMap('one', fusionColorMapOffset('get')));
-                colormap(axes3fPtr('get'), getColorMap('one', fusionColorMapOffset('get')));                        
+        else
+            colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', colorMapOffset('get')));
+            colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', colorMapOffset('get')));
+            colormap(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', colorMapOffset('get')));
+            
+            if link2DMip('get') == true && isVsplash('get') == false
+                colormap(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', colorMapOffset('get')));              
+            end
+            
+            if isFusion('get')  == true
+                
+                ptrFusionColorbar = uiFusionColorbarPtr('get');
+                colormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')))
+
+                colormap(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
+                colormap(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
+                colormap(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
+                
+                if link2DMip('get') == true && isVsplash('get') == false               
+                    colormap(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));                        
+                end
+                
+                if isPlotContours('get') == true && isVsplash('get') == false
+                    colormap(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
+                    colormap(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
+                    colormap(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));  
+                    
+                    if link2DMip('get') == true && isVsplash('get') == false
+                        colormap(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));                        
+                    end                    
+                end                 
             end                    
         end
+        
+        refreshImages();
     end
 
 end

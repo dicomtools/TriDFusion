@@ -1,5 +1,5 @@
-function lungSegmentationPreview(dTreshold) 
-%function lungSegmentationPreview(dTreshold) 
+function lungSegmentationPreview(dTreshold, dRadius) 
+%function lungSegmentationPreview(dTreshold, dRadius) 
 %Create a Lung Segmentation preview to find the Treshold Value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,11 +27,13 @@ function lungSegmentationPreview(dTreshold)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    im = dicomBuffer('get');            
-    if isempty(im)
+    aBuffer = dicomBuffer('get');            
+    if isempty(aBuffer)
         return;
     end
 
+    aBufferInit = aBuffer;
+    
     if switchTo3DMode('get')     == true ||  ...
        switchToIsoSurface('get') == true || ...
        switchToMIPMode('get')    == true
@@ -43,18 +45,34 @@ function lungSegmentationPreview(dTreshold)
     
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
-        
+       
+    
+    % Get constraint 
+
+    [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value'));
+
+    bInvertMask = invertConstraint('get');
+
+    tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
+    aLogicalMask = roiConstraintToMask(aBufferInit, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);     
+    
+    dImageMin = min(double(aBuffer),[], 'all');
+
+    aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
+           
     progressBar(1 / 3, 'Computing axial preview');
 
     tSegmentMetaData = dicomMetaData('get');   
+    dNbMeta = numel(tSegmentMetaData);
 
   %  tSegmentMetaData.RescaleIntercept + (aInput{i}(:,:,ii) * tSegmentMetaData.RescaleSlope)
 
-    imSingle = im2single(im);
+    imSingle = im2single(aBuffer);
 
-    imCoronal  = imCoronalPtr ('get');
-    imSagittal = imSagittalPtr('get');
-    imAxial    = imAxialPtr   ('get');  
+    imCoronal  = imCoronalPtr ('get', [], get(uiSeriesPtr('get'), 'Value') );
+    imSagittal = imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value') );
+    imAxial    = imAxialPtr   ('get', [], get(uiSeriesPtr('get'), 'Value') );  
 
     iCoronal  = sliceNumber('get', 'coronal' );
     iSagittal = sliceNumber('get', 'sagittal');
@@ -62,10 +80,14 @@ function lungSegmentationPreview(dTreshold)
 
     % Axial 
 
-    b = im(:,:,iAxial);   
+    b = aBuffer(:,:,iAxial);   
 
     XY = imSingle(:,:,iAxial);
-    BW = XY > dTreshold * tSegmentMetaData{1}.RescaleIntercept; % treshold
+    if dNbMeta >= iAxial
+        BW = XY > dTreshold * tSegmentMetaData{iAxial}.RescaleIntercept; % treshold
+    else
+        BW = XY > dTreshold * tSegmentMetaData{1}.RescaleIntercept; % treshold
+    end
 
     BW = imcomplement(BW);
     BW = imclearborder(BW);
@@ -81,26 +103,34 @@ function lungSegmentationPreview(dTreshold)
 
     c = mask(:,:,iAxial);
     b(c == 0) = cropValue('get')-c(c == 0); % crop outside                
-    im(:,:,iAxial) = b;     
+    aBuffer(:,:,iAxial) = b;     
+    
+    aBuffer(aLogicalMask==0) = aBufferInit(aLogicalMask==0); % Set the constraint    
 
-    imAxial.CData = im(:,:,iAxial);
+    imAxial.CData = aBuffer(:,:,iAxial);
 
-     progressBar(2 / 3, 'Computing coronal preview');
+    progressBar(2 / 3, 'Computing coronal preview');
 
     % Coronal 
 
-    im = dicomBuffer('get');
-    imSingle = im2single(im);
+    aBuffer = dicomBuffer('get');    
+    aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
+    
+    imSingle = im2single(aBuffer);
 
-    b = permute(im(iCoronal,:,:), [3 2 1]);  
+    b = permute(aBuffer(iCoronal,:,:), [3 2 1]);  
 
     XY = permute(imSingle(iCoronal,:,:), [3 2 1]);
-    BW = XY > dTreshold * tSegmentMetaData{1}.RescaleIntercept; % treshold
-
+    if dNbMeta >= iAxial
+        BW = XY > dTreshold * tSegmentMetaData{iAxial}.RescaleIntercept; % treshold
+    else
+        BW = XY > dTreshold * tSegmentMetaData{1}.RescaleIntercept; % treshold
+    end
+    
     BW = imcomplement(BW);
     BW = imclearborder(BW);
     BW = imfill(BW, 'holes');
-    radius = 13;
+    radius = dRadius;
     decomposition = 0;
     se = strel('disk', radius, decomposition);
     BW = imerode(BW, se);
@@ -111,22 +141,30 @@ function lungSegmentationPreview(dTreshold)
 
     c = maskc(iCoronal,:,:);
     b(c == 0) = cropValue('get')-c(c == 0); % crop outside                
-    im(iCoronal,:,:) = permuteBuffer(b, 'coronal'); 
+    aBuffer(iCoronal,:,:) = permuteBuffer(b, 'coronal'); 
+    
+    aBuffer(aLogicalMask==0) = aBufferInit(aLogicalMask==0); % Set the constraint    
 
-    imCoronal.CData  = permute(im(iCoronal,:,:), [3 2 1]);
+    imCoronal.CData  = permute(aBuffer(iCoronal,:,:), [3 2 1]);
 
     progressBar(2 / 3, 'Computing sagittal preview');
 
     % Sagittal 
 
-    im = dicomBuffer('get');
-    imSingle = im2single(im);
+    aBuffer = dicomBuffer('get');
+    aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
 
-    b = permute(im(:,iSagittal,:), [3 1 2]);  
+    imSingle = im2single(aBuffer);
+
+    b = permute(aBuffer(:,iSagittal,:), [3 1 2]);  
 
     XY = permute(imSingle(:,iSagittal,:), [3 1 2]);
-    BW = XY > dTreshold * tSegmentMetaData{1}.RescaleIntercept; % treshold
-
+    if dNbMeta >= iAxial
+        BW = XY > dTreshold * tSegmentMetaData{iAxial}.RescaleIntercept; % treshold
+    else
+        BW = XY > dTreshold * tSegmentMetaData{1}.RescaleIntercept; % treshold
+    end
+    
     BW = imcomplement(BW);
     BW = imclearborder(BW);
     BW = imfill(BW, 'holes');
@@ -141,9 +179,11 @@ function lungSegmentationPreview(dTreshold)
 
     c = masks(:,iSagittal,:);
     b(c == 0) = cropValue('get')-c(c == 0); % crop outside                
-    im(:,iSagittal,:) = permuteBuffer(b, 'sagittal'); 
+    aBuffer(:,iSagittal,:) = permuteBuffer(b, 'sagittal'); 
+    
+    aBuffer(aLogicalMask==0) = aBufferInit(aLogicalMask==0); % Set the constraint    
 
-    imSagittal.CData = permute(im(:,iSagittal,:), [3 1 2]);
+    imSagittal.CData = permute(aBuffer(:,iSagittal,:), [3 1 2]);
 
     progressBar(1, 'Ready');
     

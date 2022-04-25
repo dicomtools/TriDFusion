@@ -60,32 +60,47 @@ function recordMultiGate(mRecord, sPath, sFileName, sExtention)
     set(uiSeriesPtr('get'), 'Enable', 'off');
 
     switch gca
-        case axes1Ptr('get')
+        case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
             iLastSlice = size(dicomBuffer('get'), 1);
             iCurrentSlice = sliceNumber('get', 'coronal');
-             aAxe = axes1Ptr('get');
+             aAxe = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
 
-        case axes2Ptr('get')
+        case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
             iLastSlice = size(dicomBuffer('get'), 2);
             iCurrentSlice = sliceNumber('get', 'sagittal');
-            aAxe = axes2Ptr('get');
+            aAxe = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
 
-        case axes3Ptr('get')
+        case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
             iLastSlice = size(dicomBuffer('get'), 3);
             iCurrentSlice = sliceNumber('get', 'axial');
-            aAxe = axes3Ptr('get');
+            aAxe = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+        case axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+            iLastSlice = size(dicomBuffer('get'), 1);
+            iCurrentSlice = sliceNumber('get', 'coronal');
+            aAxe = axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
 
         otherwise
             iLastSlice = size(dicomBuffer('get'), 3);
             iCurrentSlice = sliceNumber('get', 'axial');
-            aAxe = axes3Ptr('get');
+            aAxe = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
     end
 
     set(uiSliderSagPtr('get'), 'Visible', 'off');
     set(uiSliderCorPtr('get'), 'Visible', 'off');
     set(uiSliderTraPtr('get'), 'Visible', 'off');
+    set(uiSliderMipPtr('get'), 'Visible', 'off');
 
-    if aAxe == axes1Ptr('get')
+    if isVsplash('get') == false
+
+        if aAxe == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+            logoObj = logoObject('get');
+            if ~isempty(logoObj)
+                delete(logoObj);
+                logoObject('set', '');
+            end
+        end
+    else
         logoObj = logoObject('get');
         if ~isempty(logoObj)
             delete(logoObj);
@@ -93,7 +108,7 @@ function recordMultiGate(mRecord, sPath, sFileName, sExtention)
         end
     end
 
-    if aAxe == axes3Ptr('get')
+%    if aAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
         set(uiSliderWindowPtr('get'), 'Visible', 'off');
         set(uiSliderLevelPtr('get') , 'Visible', 'off');
         set(uiColorbarPtr('get')   , 'Visible', 'off');
@@ -103,33 +118,65 @@ function recordMultiGate(mRecord, sPath, sFileName, sExtention)
             set(uiAlphaSliderPtr('get')       , 'Visible', 'off');
             set(uiFusionColorbarPtr('get')   , 'Visible', 'off');
         end
-    end
+%    end
 
     if overlayActivate('get') == true
-        if     aAxe == axes1Ptr('get')
+        if     aAxe == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
             pAxes1Text = axesText('get', 'axes1');
             pAxes1Text.Visible = 'off';
-        elseif aAxe == axes2Ptr('get')
+
+            pAxes1View = axesText('get', 'axes1View');
+            pAxes1View.Visible = 'off';
+
+        elseif aAxe == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
             pAxes2Text = axesText('get', 'axes2');
             pAxes2Text.Visible = 'off';
-        else
+
+            pAxes2View = axesText('get', 'axes2View');
+            pAxes2View.Visible = 'off';
+
+        elseif aAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
             pAxes3Text = axesText('get', 'axes3');
             pAxes3Text.Visible = 'off';
+
+            pAxes3View = axesText('get', 'axes3View');
+            for tt=1:numel(pAxes3View)
+                pAxes3View{tt}.Visible = 'off';
+            end
+
+            if isFusion('get') == true
+                pAxes3fText = axesText('get', 'axes3f');
+                pAxes3fText.Visible = 'off';
+            end
+
+        else
+            if isVsplash('get') == false
+                pAxesMipText = axesText('get', 'axesMip');
+                pAxesMipText.Visible = 'off';
+
+                pAxesMipView = axesText('get', 'axesMipView');
+                pAxesMipView.Visible = 'off';
+            end
         end
     end
 
     if crossActivate('get') == true && ...
        isVsplash('get') == false
 
-        if     aAxe == axes1Ptr('get')
+        if     aAxe == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
             alAxes1Line = axesLine('get', 'axes1');
             for ii1=1:numel(alAxes1Line)
                 alAxes1Line{ii1}.Visible = 'off';
             end
-        elseif aAxe == axes2Ptr('get')
+        elseif aAxe == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
             alAxes2Line = axesLine('get', 'axes2');
             for ii2=1:numel(alAxes2Line)
                 alAxes2Line{ii2}.Visible = 'off';
+            end
+        elseif aAxe == axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+            alAxesMipLine = axesLine('get', 'axesMip');
+            for ii4=1:numel(alAxesMipLine)
+                alAxesMipLine{ii4}.Visible = 'off';
             end
         else
             alAxes3Line = axesLine('get', 'axes3');
@@ -139,7 +186,7 @@ function recordMultiGate(mRecord, sPath, sFileName, sExtention)
         end
     end
 
-    sLogo = sprintf('%s\n', 'TriDFusion (3DF)');  
+    sLogo = sprintf('%s\n', 'TriDFusion (3DF)');
     tLogo = text(aAxe, 0.02, 0.03, sLogo, 'Units','normalized');
     if strcmp(backgroundColor('get'), 'black')
         tLogo.Color = [0.8500 0.8500 0.8500];
@@ -230,6 +277,68 @@ function recordMultiGate(mRecord, sPath, sFileName, sExtention)
             break;
         end
 
+        % Get current Axes
+
+        axes1 = axes1Ptr('get', [], iSeriesOffset);
+        axes2 = axes2Ptr('get', [], iSeriesOffset);
+        axes3 = axes3Ptr('get', [], iSeriesOffset);
+        if isVsplash('get') == false
+            axesMip = axesMipPtr('get', [], iSeriesOffset);
+        end
+
+        % Get current CData
+
+        imCoronal  = imCoronalPtr ('get', [], iSeriesOffset);
+        imSagittal = imSagittalPtr('get', [], iSeriesOffset);
+        imAxial    = imAxialPtr   ('get', [], iSeriesOffset);
+        if isVsplash('get') == false
+            imMip = imMipPtr('get', [], iSeriesOffset);
+        end
+
+        % Set new serie offset
+
+        set(uiSeriesPtr('get'), 'Value', iOffset);
+
+        % Set new Axes
+
+        if isempty(axes1Ptr('get', [], iOffset))
+            axes1Ptr('set', axes1, iOffset);
+        end
+
+        if isempty(axes2Ptr('get', [], iOffset))
+            axes2Ptr('set', axes2, iOffset);
+        end
+
+        if isempty(axes3Ptr('get', [], iOffset))
+            axes3Ptr('set', axes3, iOffset);
+        end
+
+        if isVsplash('get') == false
+            if isempty(axesMipPtr('get', [], iOffset))
+                axesMipPtr('set', axesMip, iOffset);
+            end
+        end
+
+        % Set new CData
+
+        if isempty(imCoronalPtr('get', [], iOffset))
+            imCoronalPtr('set', imCoronal, iOffset);
+        end
+
+        if isempty(imSagittalPtr('get', [], iOffset))
+            imSagittalPtr('set', imSagittal, iOffset);
+        end
+
+        if isempty(imAxialPtr('get', [], iOffset))
+            imAxialPtr('set', imAxial, iOffset);
+        end
+
+        if isVsplash('get') == false
+            if isempty(imMipPtr('get', [], iOffset))
+                imMipPtr('set', imMip, iOffset);
+            end
+        end
+
         set(uiSeriesPtr('get'), 'Value', iOffset);
         atCoreMetaData = dicomMetaData('get');
         if isempty(atCoreMetaData)
@@ -239,30 +348,14 @@ function recordMultiGate(mRecord, sPath, sFileName, sExtention)
 
         aBuffer = dicomBuffer('get');
         if isempty(aBuffer)
-            if     strcmp(imageOrientation('get'), 'axial')
+            if     strcmpi(imageOrientation('get'), 'axial')
                 aBuffer = permute(aInput{iOffset}, [1 2 3]);
-            elseif strcmp(imageOrientation('get'), 'coronal')
+            elseif strcmpi(imageOrientation('get'), 'coronal')
                 aBuffer = permute(aInput{iOffset}, [3 2 1]);
-            elseif strcmp(imageOrientation('get'), 'sagittal')
+            elseif strcmpi(imageOrientation('get'), 'sagittal')
                 aBuffer = permute(aInput{iOffset}, [3 1 2]);
             end
-if 0
-            if numel(atCoreMetaData) ~= 1
 
-                if ~isempty(atCoreMetaData{1}.ImagePositionPatient)
-
-                    if atCoreMetaData{2}.ImagePositionPatient(3) - ...
-                       atCoreMetaData{1}.ImagePositionPatient(3) > 0
-                        aBuffer = aBuffer(:,:,end:-1:1);
-
-                    end
-                end
-            else
-                if strcmpi(atCoreMetaData{1}.PatientPosition, 'FFS')
-                        aBuffer = aBuffer(:,:,end:-1:1);
-                end
-            end
-end
             dicomBuffer('set', aBuffer);
         end
 
@@ -281,7 +374,7 @@ end
                     lMin = min(aBuffer, [], 'all');
                     lMax = max(aBuffer, [], 'all');
                 else
-                    [lMax, lMin] = computeWindowLevel(2000, 0);
+                    [lMax, lMin] = computeWindowLevel(500, 50);
                 end
             else
                 if strcmpi(gateLookupType('get'), 'Relative')
@@ -308,6 +401,7 @@ end
             end
             setWindowMinMax(lMax, lMin);
         end
+
 if 1
 
         if gateUseSeriesUID('get') == false
@@ -338,19 +432,28 @@ if 1
                 end
 
                if strcmp(imageOrientation('get'), 'axial')
-                    daspect(axes1Ptr('get'), [z x y]);
-                    daspect(axes2Ptr('get'), [z y x]);
-                    daspect(axes3Ptr('get'), [x y z]);
+                    daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+                    daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
+                    daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
+                    if link2DMip('get') == true && isVsplash('get') == false
+                        daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+                    end
 
                elseif strcmp(imageOrientation('get'), 'coronal')
-                    daspect(axes1Ptr('get'), [x y z]);
-                    daspect(axes2Ptr('get'), [y z x]);
-                    daspect(axes3Ptr('get'), [z x y]);
+                    daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
+                    daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [y z x]);
+                    daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+                    if link2DMip('get') == true && isVsplash('get') == false
+                        daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
+                    end
 
                 elseif strcmp(imageOrientation('get'), 'sagittal')
-                    daspect(axes1Ptr('get'), [y x z]);
-                    daspect(axes2Ptr('get'), [x z y]);
-                    daspect(axes3Ptr('get'), [z x y]);
+                    daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [y x z]);
+                    daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x z y]);
+                    daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+                    if link2DMip('get') == true && isVsplash('get') == false
+                        daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [y x z]);
+                    end
                end
 
             else
@@ -358,13 +461,19 @@ if 1
                 y =1;
                 z =1;
 
-                daspect(axes1Ptr('get'), [z x y]);
-                daspect(axes2Ptr('get'), [z y x]);
-                daspect(axes3Ptr('get'), [x y z]);
+                daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , [z x y]);
+                daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , [z y x]);
+                daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , [x y z]);
+                if link2DMip('get') == true && isVsplash('get') == false
+                    daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+                end
 
-                axis(axes1Ptr('get'), 'normal');
-                axis(axes2Ptr('get'), 'normal');
-                axis(axes3Ptr('get'), 'normal');
+                axis(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
+                axis(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
+                axis(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
+                if link2DMip('get') == true && isVsplash('get') == false
+                    axis(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
+                end
 
             end
 
@@ -383,7 +492,7 @@ end
 
         if overlayActivate('get') == true
 
-            if     aAxe == axes1Ptr('get')
+            if     aAxe == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                 if isVsplash('get') == true
                     [lFirst, lLast] = computeVsplashLayout(aBuffer, 'coronal', iCurrentSlice);
                     sSliceNb = sprintf('%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(iLastSlice));
@@ -391,14 +500,19 @@ end
                     sSliceNb = sprintf('%s/%s', num2str(iCurrentSlice), num2str(iLastSlice));
                 end
 
-            elseif aAxe == axes2Ptr('get')
+            elseif aAxe == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
 
-                if isVsplash('get') == true
+               if isVsplash('get') == true
                    [lFirst, lLast] = computeVsplashLayout(aBuffer, 'sagittal', iCurrentSlice);
                    sSliceNb = sprintf('%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(iLastSlice));
                else
                     sSliceNb = sprintf('%s/%s', num2str(iCurrentSlice), num2str(iLastSlice));
-                end
+               end
+            elseif aAxe == axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
+               if isVsplash('get') == false
+                    sSliceNb = sprintf('%s/%s', num2str(mipAngle('get')), num2str(32));
+               end
             else
 
                 if isVsplash('get') == true
@@ -439,8 +553,6 @@ end
         end
 
         refreshImages();
-
-
 
         I = getframe(aAxe);
         [indI,cm] = rgb2ind(I.cdata, 256);
@@ -489,7 +601,7 @@ end
         end
 
         try
-            tRefreshRoi = roiTemplate('get');
+            tRefreshRoi = roiTemplate('get', iOffset);
             if ~isempty(tRefreshRoi)
                 for bb=1:numel(tRefreshRoi)
                     if isvalid(tRefreshRoi{bb}.Object)
@@ -514,8 +626,9 @@ end
     set(uiSliderSagPtr('get'), 'Visible', 'on');
     set(uiSliderCorPtr('get'), 'Visible', 'on');
     set(uiSliderTraPtr('get'), 'Visible', 'on');
+    set(uiSliderMipPtr('get'), 'Visible', 'on');
 
-    if aAxe == axes3Ptr('get')
+%    if aAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
         set(uiSliderWindowPtr('get'), 'Visible', 'on');
         set(uiSliderLevelPtr('get') , 'Visible', 'on');
         set(uiColorbarPtr('get')   , 'Visible', 'on');
@@ -525,33 +638,67 @@ end
             set(uiAlphaSliderPtr('get')       , 'Visible', 'on');
             set(uiFusionColorbarPtr('get')   , 'Visible', 'on');
         end
-    end
+%    end
 
     if overlayActivate('get')
-        if     aAxe == axes1Ptr('get')
+        if     aAxe == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
             pAxes1Text = axesText('get', 'axes1');
             pAxes1Text.Visible = 'on';
-        elseif aAxe == axes2Ptr('get')
+
+            pAxes1View = axesText('get', 'axes1View');
+            pAxes1View.Visible = 'on';
+
+        elseif aAxe == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
             pAxes2Text = axesText('get', 'axes2');
             pAxes2Text.Visible = 'on';
-        else
+
+            pAxes2View = axesText('get', 'axes2View');
+            pAxes2View.Visible = 'on';
+
+        elseif aAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
             pAxes3Text = axesText('get', 'axes3');
             pAxes3Text.Visible = 'on';
+
+            pAxes3View = axesText('get', 'axes3View');
+            for tt=1:numel(pAxes3View)
+                pAxes3View{tt}.Visible = 'on';
+            end
+
+            if isFusion('get') == true
+                pAxes3fText = axesText('get', 'axes3f');
+                pAxes3fText.Visible = 'on';
+            end
+        else
+            if isVsplash('get') == false
+                pAxesMipText = axesText('get', 'axesMip');
+                pAxesMipText.Visible = 'on';
+
+                pAxesMipView = axesText('get', 'axesMipView');
+                pAxesMipView.Visible = 'on';
+            end
         end
     end
 
     if crossActivate('get') == true  && ...
        isVsplash('get') == false
 
-        if     aAxe == axes1Ptr('get')
+        if     aAxe == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
             alAxes1Line = axesLine('get', 'axes1');
             for ii1=1:numel(alAxes1Line)
                 alAxes1Line{ii1}.Visible = 'on';
             end
-        elseif aAxe == axes2Ptr('get')
+        elseif aAxe == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
             alAxes2Line = axesLine('get', 'axes2');
             for ii2=1:numel(alAxes2Line)
                 alAxes2Line{ii2}.Visible = 'on';
+            end
+        elseif aAxe == axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+            alAxesMipLine = axesLine('get', 'axesMip');
+            angle = mipAngle('get');
+            if (angle == 0 || angle == 90 || angle == 180 || angle == 270)
+                for ii4=1:numel(alAxesMipLine)
+                    alAxesMipLine{ii4}.Visible = 'on';
+                end
             end
         else
             alAxes3Line = axesLine('get', 'axes3');
@@ -564,8 +711,30 @@ end
     delete(tLogo);
     delete(tOverlay);
 
-    if aAxe == axes1Ptr('get')
-        uiLogo = displayLogo(uiCorWindowPtr('get'));
+    if isVsplash('get') == false
+
+        if aAxe == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+            uiLogo = displayLogo(uiCorWindowPtr('get'));
+            logoObject('set', uiLogo);
+        end
+    else
+
+        if strcmpi(vSplahView('get'), 'coronal')
+            uiLogo = displayLogo(uiCorWindowPtr('get'));
+
+        elseif strcmpi(vSplahView('get'), 'sagittal')
+            uiLogo = displayLogo(uiSagWindowPtr('get'));
+
+        elseif  strcmpi(vSplahView('get'), 'axial')
+            uiLogo = displayLogo(uiTraWindowPtr('get'));
+
+        elseif strcmpi(vSplahView('get'), 'all')
+            uiLogo = displayLogo(uiCorWindowPtr('get'));
+
+        else
+            uiLogo = displayLogo(uiCorWindowPtr('get'));
+        end
+
         logoObject('set', uiLogo);
     end
 

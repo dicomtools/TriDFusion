@@ -58,11 +58,20 @@ function dSpacing = computeSliceSpacing(atDicomInfo)
                [pos2(4)*spa2(2) ; pos2(5)* spa2(2) ; pos2(6)*spa1(2) ; 0] ...
                [0 ; 0 ; 0 ; 0] [xyz2(1) ; xyz2(2) ; xyz2(3) ; 0 ]       ];
         pxyzLast = M2*[1 ; 1 ; 0 ; 1];
-
-        sumPxyz = sumPxyz + (pxyzLast(3) - pxyzFirst(3));
+        
+        sOrientation = getImageOrientation(atDicomInfo{cc}.ImageOrientationPatient);
+        
+        if      strcmpi(sOrientation, 'Sagittal')
+            sumPxyz = sumPxyz + (pxyzLast(1) - pxyzFirst(1));
+        elseif  strcmpi(sOrientation, 'Coronal')
+            sumPxyz = sumPxyz + (pxyzLast(2) - pxyzFirst(2));
+        else    % Axial
+            sumPxyz = sumPxyz + (pxyzLast(3) - pxyzFirst(3));
+        end
 
     end
 
     dSpacing = abs(sumPxyz / (numel(atDicomInfo)-1));
+    
 
 end

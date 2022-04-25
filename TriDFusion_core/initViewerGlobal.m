@@ -27,37 +27,19 @@ function initViewerGlobal()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    axePtr ('set', '');
-    axefPtr('set', '');
+    isPlotContours('set', false);
 
-    axes1Ptr ('set', '');
-    axes1fPtr('set', '');
-    axes2Ptr ('set', '');
-    axes2fPtr('set', '');
-    axes3Ptr ('set', '');
-    axes3fPtr('set', '');
+    axesText('set', 'axe'    , '');
+    axesText('set', 'axes1'  , '');
+    axesText('set', 'axes2'  , '');
+    axesText('set', 'axes3'  , '');
+    axesText('set', 'axesMip', '');
 
-    axesText('set', 'axe', '');
-    axesText('set', 'axes1', '');
-    axesText('set', 'axes2', '');
-    axesText('set', 'axes3', '');
-
-    imAxePtr ('set', '');
-    imAxeFPtr('set', '');
-
-    imCoronalPtr ('set', '');
-    imSagittalPtr('set', '');
-    imAxialPtr   ('set', '');
-
-    imCoronalFPtr ('set', '');
-    imSagittalFPtr('set', '');
-    imAxialFPtr   ('set', '');
-    
     visBoundAxePtr  ('set', '');
     visBoundAxes1Ptr('set', '');
     visBoundAxes2Ptr('set', '');
     visBoundAxes3Ptr('set', '');
-                
+
     fiMainWindowPtr       ('set', '');
     uiTopWindowPtr        ('set', '');
     uiSegMainPanelPtr     ('set', '');
@@ -69,7 +51,7 @@ function initViewerGlobal()
     uiMain3DPanelPtr      ('set', '');
     ui3DPanelPtr          ('set', '');
     ui3DPanelSliderPtr    ('set', '');
-    
+
     btn3DPtr         ('set', '');
     btnIsoSurfacePtr ('set', '');
     btnMIPPtr        ('set', '');
@@ -90,6 +72,8 @@ function initViewerGlobal()
     uiSliderSagPtr('set', '');
     uiTraWindowPtr('set', '');
     uiSliderTraPtr('set', '');
+    uiMipWindowPtr('set', '');
+    uiSliderMipPtr('set', '');
 
     uiSeriesPtr('set', '');
     uiFusedSeriesPtr('set', '');
@@ -111,9 +95,13 @@ function initViewerGlobal()
     fusionBuffer ('reset');
     inputBuffer  ('set', '');
 
+    mipBuffer      ('reset');
+    mipFusionBuffer('reset');
+
     inputTemplate('set', '');
     inputContours('set', '');
 
+    outputDir   ('set', '');
     mainDir     ('set', '');
     roiTemplate ('reset');
     voiTemplate ('reset');
@@ -150,9 +138,6 @@ function initViewerGlobal()
     viewSegPanel   ('set', false);
     viewKernelPanel('set', false);
     viewRoiPanel('set', false);
-    
-    roiPanelMinValue('set', []);
-    roiPanelMaxValue('set', []);
 
     optionsPanelMenuObject   ('set', '');
     viewRoiObject            ('set', '');
@@ -182,7 +167,52 @@ function initViewerGlobal()
     viewerRootPath('set', './');
 
     copyRoiPtr('set', '');
-    
+
     kernelCtDoseMapUiValues('set', []);
+    resampleToCTIsoMaskUiValues ('set', []);
+
+    isRGBFusionNormalizeToLiver('set', false);
+
+    isRGBFusionRedEnable  ('set', true, []);
+    isRGBFusionGreenEnable('set', true, []);
+    isRGBFusionBlueEnable ('set', true, []);
+
+    imAxePtr  ('reset');
+    imAxeFcPtr('reset');
+    imAxeFPtr ('reset');
+
+    axePtr  ('reset');
+    axefcPtr('reset');
+    axefPtr ('reset');
+
+    imCoronalPtr ('reset');
+    imSagittalPtr('reset');
+    imAxialPtr   ('reset');
+    imMipPtr     ('reset');
+
+    axes1Ptr  ('reset');
+    axes2Ptr  ('reset');
+    axes3Ptr  ('reset');
+    axesMipPtr('reset');
+
+    imCoronalFPtr ('reset');
+    imSagittalFPtr('reset');
+    imAxialFPtr   ('reset');
+    imMipFPtr     ('reset');
+
+    axes1fPtr  ('reset');
+    axes2fPtr  ('reset');
+    axes3fPtr  ('reset');
+    axesMipfPtr('reset');
+
+    imCoronalFcPtr ('reset');
+    imSagittalFcPtr('reset');
+    imAxialFcPtr   ('reset');
+    imMipFcPtr     ('reset');
+
+    axes1fcPtr  ('reset');
+    axes2fcPtr  ('reset');
+    axes3fcPtr  ('reset');
+    axesMipfcPtr('reset');
 
 end

@@ -1,6 +1,6 @@
 function aObject = ui3DCreateIsoMaskPtr(sAction, aValue)
 %function aObject = ui3DCreateIsoMaskPtr(sAction, aValue)
-%Get\Set 3D Creat Mask from ISO Surface Pointer.
+%Get\Set 3D Create Mask from ISO Surface Pointer.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.

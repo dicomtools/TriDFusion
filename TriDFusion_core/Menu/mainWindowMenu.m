@@ -40,8 +40,10 @@ function mainWindowMenu()
     uimenu(mFile,'Label', 'Export DICOM...','Callback', @writeDICOMCallback, 'Separator','on');
     uimenu(mFile,'Label', 'Export DICOM All Series...','Callback', @writeDICOMAllSeriesCallback);
  %   uimenu(mFile,'Label', 'Export to Excel...','Callback', @exportAllSeriesResultCallback);
-    uimenu(mFile,'Label', 'Export ROIs to RT-Structure...','Callback', @writeRTStructCallback);
-    uimenu(mFile,'Label', 'Export ISO Model to STL...','Callback', @exportISOtoSTLCallback);
+    uimenu(mFile,'Label', 'Export Contours to DICOM-Mask...','Callback', @writeRoisToDicomMaskCallback);
+    uimenu(mFile,'Label', 'Export Contours to RT-Structure...','Callback', @writeRTStructCallback);
+    uimenu(mFile,'Label', 'Export 3D ISO Model to STL...','Callback', @exportISOtoSTLCallback);
+    uimenu(mFile,'Label', 'Export 3D Rendering to Slices...','Callback', @export3DToSlicesCallback);
     
     uimenu(mFile,'Label', 'Print Preview...','Callback', 'filemenufcn(gcbf,''FilePrintPreview'')', 'Separator','on');
     uimenu(mFile,'Label', 'Print...','Callback', 'printdlg(gcbf)');
@@ -101,22 +103,23 @@ function mainWindowMenu()
 
     mViewCam      = uimenu(mView, 'Label','Camera Toolbar'   , 'Callback', @setViewToolbar, 'Separator','on');
     mViewEdit     = uimenu(mView, 'Label','Plot Edit Toolbar', 'Callback', @setViewToolbar);
-    mViewPlayback = uimenu(mView, 'Label','Playback Toolbar' , 'Callback', @setViewToolbar);
-    viewPlaybackObject('set', mViewPlayback);
 
     mViewRoi = uimenu(mView, 'Label','ROI Toolbar' , 'Callback', @setViewToolbar);
     viewRoiObject('set', mViewRoi);
 
-    mViewSegPanel = uimenu(mView, 'Label','Segmentation Panel' , 'Callback', @setViewSegPanel, 'Separator', 'on');
+    mViewPlayback = uimenu(mView, 'Label','Playback Toolbar' , 'Callback', @setViewToolbar);
+    viewPlaybackObject('set', mViewPlayback);    
+    
+    mViewSegPanel = uimenu(mView, 'Label','Image Panel' , 'Callback', @setViewSegPanel, 'Separator', 'on');
     viewSegPanelMenuObject('set', mViewSegPanel);
 
     mViewKernelPanel = uimenu(mView, 'Label','Kernel Panel', 'Callback', @setViewKernelPanel);
     viewKernelPanelMenuObject('set', mViewKernelPanel);
 
-    mViewRoiPanel = uimenu(mView, 'Label','ROI Panel', 'Callback', @setViewRoiPanel);
+    mViewRoiPanel = uimenu(mView, 'Label','Contour Panel', 'Callback', @setViewRoiPanel);
     viewRoiPanelMenuObject('set', mViewRoiPanel);
     
-    m3DPanel = uimenu(mView, 'Label','3D Edit Panel', 'Callback', @setView3DPanel);
+    m3DPanel = uimenu(mView, 'Label','3D Panel', 'Callback', @setView3DPanel);
     view3DPanelMenuObject('set', m3DPanel);
 
     uimenu(mView, 'Label','Registration Report', 'Callback', @viewRegistrationReport, 'Separator','on');
@@ -190,7 +193,7 @@ function mainWindowMenu()
 %                    aInput = inputBuffer('get');
 
                 aInput  = dicomBuffer('get');
-                aFusion = fusionBuffer('get');
+                aFusion = fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
 
                 if strcmpi(get(hObject, 'Label'), 'Axial Plane') && ...
                   ~strcmpi(imageOrientation('get'), 'axial')
@@ -315,7 +318,7 @@ function mainWindowMenu()
 
                     dicomBuffer('set', aInput);
                     if isFusion('get') == true
-                        fusionBuffer('set', aFusion);
+                        fusionBuffer('set', aFusion, get(uiFusedSeriesPtr('get'), 'Value'));
                     end
 
                     clearDisplay();
@@ -535,9 +538,11 @@ function mainWindowMenu()
                 set(uiOneWindowPtr('get'), 'BorderWidth'   , 1);
             end
 
-            if ~isempty(axes1Ptr('get')) && ...
-               ~isempty(axes2Ptr('get')) && ...
-               ~isempty(axes3Ptr('get'))
+            if ~isempty(axes1Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
+               ~isempty(axes2Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
+               ~isempty(axes3Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
+               ~isempty(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
+               isVsplash('get') == false
 
                 set(uiCorWindowPtr('get'), 'HighlightColor', [0 1 1]);
                 set(uiCorWindowPtr('get'), 'BorderWidth'   , 1);
@@ -547,6 +552,9 @@ function mainWindowMenu()
 
                 set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 1]);
                 set(uiTraWindowPtr('get'), 'BorderWidth'   , 1);
+                
+                set(uiMipWindowPtr('get'), 'HighlightColor', [0 1 1]);
+                set(uiMipWindowPtr('get'), 'BorderWidth'   , 1);                
             end
         else
 
@@ -554,13 +562,16 @@ function mainWindowMenu()
                 set(uiOneWindowPtr('get'), 'BorderWidth', showBorder('get'));
             end
 
-            if ~isempty(axes1Ptr('get')) && ...
-               ~isempty(axes2Ptr('get')) && ...
-               ~isempty(axes3Ptr('get'))
+            if ~isempty(axes1Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
+               ~isempty(axes2Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
+               ~isempty(axes3Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
+               ~isempty(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
+               isVsplash('get') == false
 
                 set(uiCorWindowPtr('get'), 'BorderWidth', showBorder('get'));
                 set(uiSagWindowPtr('get'), 'BorderWidth', showBorder('get'));
                 set(uiTraWindowPtr('get'), 'BorderWidth', showBorder('get'));
+                set(uiMipWindowPtr('get'), 'BorderWidth', showBorder('get'));
             end
         end
 

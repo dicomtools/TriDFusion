@@ -70,7 +70,19 @@ function lOffset = getColorMapOffset(sLabel)
             lOffset = 20;    
         case 'angio'
             lOffset = 21;            
-              
+        case 'yellow'
+            lOffset = 22;    
+        case 'magenta'
+            lOffset = 23;                
+        case 'cyan'
+            lOffset = 24;                
+        case 'red'
+            lOffset = 25;          
+        case 'green'
+            lOffset = 26;    
+        case 'blue'
+            lOffset = 27;         
+             
         otherwise
             lOffset = 0;
     end

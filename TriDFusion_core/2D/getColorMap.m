@@ -1,5 +1,5 @@
-function aColorMap = getColorMap(sAction, lOffset)
-%function aColor = getColorMap(sAction, lOffset)
+function aColorMap = getColorMap(sAction, lOffset, aAxeColorMap)
+%function aColor = getColorMap(sAction, lOffset, aAxeColorMap)
 %Return the 2D ColorMap, from an offset.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -26,26 +26,38 @@ function aColorMap = getColorMap(sAction, lOffset)
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-
-    intensity = [0 20 40 120 220 1024];
-    color = ([0 0 0; 43 0 0; 103 37 20; 199 155 97; 216 213 201; 255 255 255]) ./ 255;
-    queryPoints = linspace(min(intensity),max(intensity),256);
-    aAngio = interp1(intensity, color, queryPoints);
-
-    pasColorMap = {'parula', 'jet'   , 'hsv'   , 'hot'   , 'cool', ...
-                   'spring', 'summer', 'autumn', 'winter', 'gray', ...
-                   'invert linear'   ,'bone'  , 'copper' , 'pink', ...
-                   'lines' , 'colorcube', 'prism', 'flag', 'pet' , ...
-                   'hot metal', 'angio', 'yellow', 'magenta', ...
-                   'cyan', 'red', 'green','blue', 'white', 'black'};                     
+       
+    pasColorMap = {'Parula', 'Jet'   , 'HSV'   , 'Hot'   , 'Cool', ...
+                   'Spring', 'Summer', 'Autumn', 'Winter', 'Gray', ...
+                   'Invert Linear'   ,'Bone'  , 'Copper' , 'Pink', ...
+                   'Lines' , 'Colorcube', 'Prism', 'Flag', 'PET' , ...
+                   'Hot Metal', 'Angio', 'Yellow', 'Magenta', ...
+                   'Cyan', 'Red', 'Green','Blue'};                     
 
     paColorMap = {parula(256), jet(256)   , hsv(256)   , hot(256)   , cool(256), ...
                   spring(256), summer(256), autumn(256), winter(256), gray(256), ...
                   flipud(gray(256)), bone(256)  , copper(256), pink(256)  , lines(256) , colorcube(256), ...
-                  prism(256) , flag(256), getPetColorMap(), getHotMetalColorMap(), aAngio};                  
+                  prism(256) , flag(256), getPetColorMap(), getHotMetalColorMap(), ...
+                  getAngioColorMap(), getYellowColorMap(), getMagentaColorMap(), getCyanColorMap(), getRedColorMap(), ...
+                  getGreenColorMap(), getBlueColorMap()};                
 
     if strcmpi(sAction, 'all')
         aColorMap = pasColorMap;
+    elseif strcmpi(sAction, 'name')
+        aColorMap = '';
+        for kk=1:numel(paColorMap)
+            
+            if invertColor('get')
+                aColorCurrentMap = flipud(paColorMap{kk});
+            else
+                aColorCurrentMap = paColorMap{kk};
+            end
+
+            if aColorCurrentMap == aAxeColorMap
+                aColorMap = pasColorMap{kk};
+                break;
+            end
+        end
     else
         if invertColor('get')
             aColorMap = flipud(paColorMap{lOffset});

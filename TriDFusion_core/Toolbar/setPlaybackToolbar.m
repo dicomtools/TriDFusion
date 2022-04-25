@@ -222,7 +222,7 @@ function setPlaybackToolbar(sVisible)
                                 end
                             end
 
-                            [file, path, indx] = uiputfile(filter, 'Save Images', sprintf('%s/%s_%s_%s_3D_TriDFusion' , sCurrentDir, cleanString(info{1}.PatientName), cleanString(info{1}.PatientID), cleanString(info{1}.SeriesDescription)) );
+                            [file, path, indx] = uiputfile(filter, 'Save Images', sprintf('%s/%s_%s_%s_3D_Playback_TriDFusion' , sCurrentDir, cleanString(info{1}.PatientName), cleanString(info{1}.PatientID), cleanString(info{1}.SeriesDescription)) );
 
                             if file ~= 0
 
@@ -334,8 +334,7 @@ function setPlaybackToolbar(sVisible)
                         else
                             set(uiSeriesPtr('get'), 'Enable', 'on');
                             mPlay.State = 'off';
-                            multiFramePlayback('set', false);
-
+                            multiFramePlayback('set', false);                       
                         end
                     end
 
@@ -402,7 +401,7 @@ function setPlaybackToolbar(sVisible)
                                 end
                             end
 
-                            [file, path, indx] = uiputfile(filter, 'Save Images', sprintf('%s/%s_%s_%s_2D_TriDFusion' , sCurrentDir, cleanString(info{1}.PatientName), cleanString(info{1}.PatientID), cleanString(info{1}.SeriesDescription)) );
+                            [file, path, indx] = uiputfile(filter, 'Save Images', sprintf('%s/%s_%s_%s_2D_Playback_TriDFusion' , sCurrentDir, cleanString(info{1}.PatientName), cleanString(info{1}.PatientID), cleanString(info{1}.SeriesDescription)) );
 
                             if file ~= 0
 
@@ -479,19 +478,25 @@ function setPlaybackToolbar(sVisible)
                         multiFrameZoom('set', 'in', dZFactor);
 
                         switch gca
-                            case axes1Ptr('get')
-                                zoom(axes1Ptr('get'), dZFactor);
-                                multiFrameZoom('set', 'axe', axes1Ptr('get'));
+                            case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                                zoom(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                                multiFrameZoom('set', 'axe', axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
 
-                            case axes2Ptr('get')
-                                zoom(axes2Ptr('get'), dZFactor);
-                                multiFrameZoom('set', 'axe', axes2Ptr('get'));
-                            case axes3Ptr('get')
-                                zoom(axes3Ptr('get'), dZFactor);
-                                multiFrameZoom('set', 'axe', axes3Ptr('get'));
+                            case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                                zoom(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                                multiFrameZoom('set', 'axe', axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                                
+                            case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                                zoom(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                                multiFrameZoom('set', 'axe', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                                
+                            case axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                                zoom(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                                multiFrameZoom('set', 'axe', axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                                
                             otherwise
-                                zoom(axes3Ptr('get'), dZFactor);
-                                multiFrameZoom('set', 'axe', axes3Ptr('get'));
+                                zoom(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                                multiFrameZoom('set', 'axe', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
                         end
 
                         set(mZoomIn, 'Enable', 'on');
@@ -518,19 +523,25 @@ function setPlaybackToolbar(sVisible)
                         end
 
                         switch gca
-                            case axes1Ptr('get')
-                                zoom(axes1Ptr('get'), dZFactor);
-                                multiFrameZoom('set', 'axe', axes1Ptr('get'));
+                            case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                                zoom(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                                multiFrameZoom('set', 'axe', axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
 
-                            case axes2Ptr('get')
-                                zoom(axes2Ptr('get'), dZFactor);
-                                multiFrameZoom('set', 'axe', axes2Ptr('get'));
-                            case axes3Ptr('get')
-                                zoom(axes3Ptr('get'), dZFactor);
-                                multiFrameZoom('set', 'axe', axes3Ptr('get'));
+                            case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                                zoom(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                                multiFrameZoom('set', 'axe', axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                                
+                            case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                                zoom(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                                multiFrameZoom('set', 'axe', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                                
+                            case axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                                zoom(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                                multiFrameZoom('set', 'axe', axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                                
                             otherwise
-                                zoom(axes3Ptr('get'), dZFactor);
-                                multiFrameZoom('set', 'axe', axes3Ptr('get'));
+                                zoom(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
+                                multiFrameZoom('set', 'axe', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
                         end
 
                         set(mZoomOut, 'Enable', 'on');

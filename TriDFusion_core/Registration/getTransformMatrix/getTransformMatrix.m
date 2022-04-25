@@ -13,7 +13,7 @@ function [M,Rot] = getTransformMatrix(info1, sliceThikness1, info2, sliceThiknes
 % Updated by Alper Yaman, Jan 2019
 
     [Mdti,Rdti] = TransformMatrix(info1, sliceThikness1);
-    [Mtf,Rtf] = TransformMatrix(info2, sliceThikness2);
+    [Mtf,Rtf]   = TransformMatrix(info2, sliceThikness2);
     % First we transform into patient coordinates by multiplying by Mdti, and
     % then we convert again into image coordinates of the second volume by
     % multiplying by inv(Mtf)

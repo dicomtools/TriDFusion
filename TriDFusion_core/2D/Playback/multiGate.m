@@ -8,22 +8,22 @@ function multiGate(mPlay)
 %Last specifications modified:
 %
 % Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
-% 
+%
 % This file is part of The Triple Dimention Fusion (TriDFusion).
-% 
+%
 % TriDFusion development has been led by:  Daniel Lafontaine
-% 
-% TriDFusion is distributed under the terms of the Lesser GNU Public License. 
-% 
+%
+% TriDFusion is distributed under the terms of the Lesser GNU Public License.
+%
 %     This version of TriDFusion is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 % TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 % without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 % See the GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -31,36 +31,40 @@ function multiGate(mPlay)
 
     aCurrentBuffer = dicomBuffer('get');
     if size(aCurrentBuffer, 3) == 1
-        progressBar(1, 'Error: Require a 3D Volume!');               
-        multiFramePlayback('set', false);  
+        progressBar(1, 'Error: Require a 3D Volume!');
+        multiFramePlayback('set', false);
         mPlay.State = 'off';
         return;
-    end   
+    end
 
     iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
     if iSeriesOffset > numel(tInput) || ...
        numel(tInput) < 2 % Need a least 2 series
-        progressBar(1, 'Error: Require at least two 3D Volume!');               
-        multiFramePlayback('set', false);  
-        mPlay.State = 'off';                
+        progressBar(1, 'Error: Require at least two 3D Volume!');
+        multiFramePlayback('set', false);
+        mPlay.State = 'off';
         return;
     end
 
     if ~isfield(tInput(iSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
        gateUseSeriesUID('get') == true
-        progressBar(1, 'Error: Require a 4D series!');       
-        multiFramePlayback('set', false);  
-        mPlay.State = 'off';                
+        progressBar(1, 'Error: Require a 4D series!');
+        multiFramePlayback('set', false);
+        mPlay.State = 'off';
         return;
     end
-        
+
     lMinBak = windowLevel('get', 'min');
     lMaxBak = windowLevel('get', 'max');
 
     set(uiSeriesPtr('get'), 'Enable', 'off');
 
     pAxes3Text  = axesText('get', 'axes3');
-    asAxes3Text = pAxes3Text.String;                                    
+    asAxes3Text = pAxes3Text.String;
+
+    pAxes3fText  = axesText('get', 'axes3f');
+    asAxes3fText = pAxes3fText.String;
+    pAxes3fText.String = '';
 
 %            tOverlay = text(axes3, 0.02, 0.97, '', 'Units','normalized');
 
@@ -68,8 +72,8 @@ function multiGate(mPlay)
 %                tOverlay.Color = [0.9500 0.9500 0.9500];
 %            else
 %                tOverlay.Color = [0.1500 0.1500 0.1500];
-%            end        
-    aInput  = inputBuffer('get');                     
+%            end
+    aInput  = inputBuffer('get');
     iOffset = iSeriesOffset;
 
     if gateUseSeriesUID('get') == false && ...
@@ -78,15 +82,15 @@ function multiGate(mPlay)
 
         for jj=1:numel(tInput)
             set(uiSeriesPtr('get'), 'Value', jj);
-            aBuffer = dicomBuffer('get');                                  
-            if isempty(aBuffer)  
+            aBuffer = dicomBuffer('get');
+            if isempty(aBuffer)
                 if     strcmp(imageOrientation('get'), 'axial')
                     aBuffer = permute(aInput{jj}, [1 2 3]);
-                elseif strcmp(imageOrientation('get'), 'coronal') 
-                    aBuffer = permute(aInput{jj}, [3 2 1]);    
+                elseif strcmp(imageOrientation('get'), 'coronal')
+                    aBuffer = permute(aInput{jj}, [3 2 1]);
                 elseif strcmp(imageOrientation('get'), 'sagittal')
                     aBuffer = permute(aInput{jj}, [3 1 2]);
-                end 
+                end
                 dicomBuffer('set', aBuffer);
             end
 
@@ -102,85 +106,147 @@ function multiGate(mPlay)
                 if lBufferMax > lAbsoluteMax
                     lAbsoluteMax = lBufferMax;
                 end
-            end                                    
-        end                            
-    end            
+            end
+        end
+    end
 %         aBackup = dicomBuffer('get');
 
 
-    while multiFramePlayback('get')                                  
+    while multiFramePlayback('get')
+
+        % Get current Axes
+
+        axes1 = axes1Ptr('get', [], iSeriesOffset);
+        axes2 = axes2Ptr('get', [], iSeriesOffset);
+        axes3 = axes3Ptr('get', [], iSeriesOffset);
+        if isVsplash('get') == false
+            axesMip = axesMipPtr('get', [], iSeriesOffset);
+        end
+
+        % Get current CData
+
+        imCoronal  = imCoronalPtr ('get', [], iSeriesOffset);
+        imSagittal = imSagittalPtr('get', [], iSeriesOffset);
+        imAxial    = imAxialPtr   ('get', [], iSeriesOffset);
+        if isVsplash('get') == false
+            imMip = imMipPtr('get', [], iSeriesOffset);
+        end
+
+        % Set new serie offset
 
         set(uiSeriesPtr('get'), 'Value', iOffset);
 
+        % Set new Axes
+
+        if isempty(axes1Ptr('get', [], iOffset))
+            axes1Ptr('set', axes1, iOffset);
+        end
+
+        if isempty(axes2Ptr('get', [], iOffset))
+            axes2Ptr('set', axes2, iOffset);
+        end
+
+        if isempty(axes3Ptr('get', [], iOffset))
+            axes3Ptr('set', axes3, iOffset);
+        end
+
+        if isVsplash('get') == false
+            if isempty(axesMipPtr('get', [], iOffset))
+                axesMipPtr('set', axesMip, iOffset);
+            end
+        end
+
+        % Set new CData
+
+        if isempty(imCoronalPtr('get', [], iOffset))
+            imCoronalPtr('set', imCoronal, iOffset);
+        end
+
+        if isempty(imSagittalPtr('get', [], iOffset))
+            imSagittalPtr('set', imSagittal, iOffset);
+        end
+
+        if isempty(imAxialPtr('get', [], iOffset))
+            imAxialPtr('set', imAxial, iOffset);
+        end
+
+        if isVsplash('get') == false
+            if isempty(imMipPtr('get', [], iOffset))
+                imMipPtr('set', imMip, iOffset);
+            end
+        end
+
         aBuffer = dicomBuffer('get');
-        if isempty(aBuffer)  
+        if isempty(aBuffer)
             if     strcmp(imageOrientation('get'), 'axial')
                 aBuffer = permute(aInput{iOffset}, [1 2 3]);
-            elseif strcmp(imageOrientation('get'), 'coronal') 
-                aBuffer = permute(aInput{iOffset}, [3 2 1]);    
+            elseif strcmp(imageOrientation('get'), 'coronal')
+                aBuffer = permute(aInput{iOffset}, [3 2 1]);
             elseif strcmp(imageOrientation('get'), 'sagittal')
                 aBuffer = permute(aInput{iOffset}, [3 1 2]);
-            end 
+            end
             dicomBuffer('set', aBuffer);
-        end  
+        end
 
         if size(aCurrentBuffer) ~= size(aBuffer)
-            progressBar(1, 'Error: Resample or Register the series!');     
+            progressBar(1, 'Error: Resample or Register the series!');
             mPlay.State = 'off';
             multiFramePlayback('set', false);
             break;
         end
 
-        atCoreMetaData = dicomMetaData('get'); 
+        atCoreMetaData = dicomMetaData('get');
         if isempty(atCoreMetaData)
             atCoreMetaData = tInput(iOffset).atDicomInfo;
             dicomMetaData('set', atCoreMetaData);
-        end    
+        end
 
         if gateUseSeriesUID('get') == false && ...
-           gateLookupTable('get') == true 
-             
+           gateLookupTable('get') == true
+
             if strcmpi(atCoreMetaData{1}.Modality, 'ct')
                 if min(aBuffer, [], 'all') >= 0
                     lMin = min(aBuffer, [], 'all');
-                    lMax = max(aBuffer, [], 'all');                 
+                    lMax = max(aBuffer, [], 'all');
                 else
-                    [lMax, lMin] = computeWindowLevel(2000, 0);
-                end         
-            else  
-                if strcmpi(gateLookupType('get'), 'Relative')                   
-                    
-                    sUnitDisplay = getSerieUnitValue(iOffset);                        
+                    [lMax, lMin] = computeWindowLevel(500, 50);
+                end
+            else
+                if strcmpi(gateLookupType('get'), 'Relative')
+
+                    sUnitDisplay = getSerieUnitValue(iOffset);
 
                     if strcmpi(sUnitDisplay, 'SUV')
-                        tQuant = quantificationTemplate('get');                                
-                        if tQuant.tSUV.dScale                
-                            lMin = suvWindowLevel('get', 'min')/tQuant.tSUV.dScale;  
-                            lMax = suvWindowLevel('get', 'max')/tQuant.tSUV.dScale;                        
+                        tQuant = quantificationTemplate('get');
+                        if tQuant.tSUV.dScale
+                            lMin = suvWindowLevel('get', 'min')/tQuant.tSUV.dScale;
+                            lMax = suvWindowLevel('get', 'max')/tQuant.tSUV.dScale;
                         else
                             lMin = min(aBuffer, [], 'all');
-                            lMax = max(aBuffer, [], 'all');                     
+                            lMax = max(aBuffer, [], 'all');
                         end
-                    else            
+                    else
                         lMin = min(aBuffer, [], 'all');
-                        lMax = max(aBuffer, [], 'all');                    
+                        lMax = max(aBuffer, [], 'all');
                     end
                 else
                     lMin = lAbsoluteMin;
                     lMax = lAbsoluteMax;
                 end
             end
-            setWindowMinMax(lMax, lMin); 
-        end  
-if 1           
-        if gateUseSeriesUID('get') == false 
+            setWindowMinMax(lMax, lMin);
+        end
+
+
+if 1
+        if gateUseSeriesUID('get') == false
 
             if aspectRatio('get') == true
 
                 if ~isempty(atCoreMetaData{1}.PixelSpacing)
                     x = atCoreMetaData{1}.PixelSpacing(1);
-                    y = atCoreMetaData{1}.PixelSpacing(2);                                                   
-                    z = computeSliceSpacing(atCoreMetaData);                   
+                    y = atCoreMetaData{1}.PixelSpacing(2);
+                    z = computeSliceSpacing(atCoreMetaData);
 
                     if x == 0
                         x = 1;
@@ -188,7 +254,7 @@ if 1
 
                     if y == 0
                         y = 1;
-                    end                    
+                    end
 
                     if z == 0
                         z = x;
@@ -197,23 +263,35 @@ if 1
 
                     x = computeAspectRatio('x', atCoreMetaData);
                     y = computeAspectRatio('y', atCoreMetaData);
-                    z = 1;                      
+                    z = 1;
                 end
 
-               if strcmp(imageOrientation('get'), 'axial') 
-                    daspect(axes1Ptr('get'), [z x y]); 
-                    daspect(axes2Ptr('get'), [z y x]); 
-                    daspect(axes3Ptr('get'), [x y z]); 
+               if strcmp(imageOrientation('get'), 'axial')
+                    daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , [z x y]);
+                    daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , [z y x]);
+                    daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , [x y z]);
 
-               elseif strcmp(imageOrientation('get'), 'coronal') 
-                    daspect(axes1Ptr('get'), [x y z]); 
-                    daspect(axes2Ptr('get'), [y z x]); 
-                    daspect(axes3Ptr('get'), [z x y]);       
+                    if link2DMip('get') == true && isVsplash('get') == false
+                        daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+                    end
 
-                elseif strcmp(imageOrientation('get'), 'sagittal')  
-                    daspect(axes1Ptr('get'), [y x z]); 
-                    daspect(axes2Ptr('get'), [x z y]); 
-                    daspect(axes3Ptr('get'), [z x y]);                                                                        
+               elseif strcmp(imageOrientation('get'), 'coronal')
+                    daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
+                    daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [y z x]);
+                    daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+
+                    if link2DMip('get') == true && isVsplash('get') == false
+                        daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
+                    end
+
+                elseif strcmp(imageOrientation('get'), 'sagittal')
+                    daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , [y x z]);
+                    daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , [x z y]);
+                    daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , [z x y]);
+
+                    if link2DMip('get') == true && isVsplash('get') == false
+                        daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [y x z]);
+                    end
                end
 
             else
@@ -221,95 +299,103 @@ if 1
                 y =1;
                 z =1;
 
-                daspect(axes1Ptr('get'), [z x y]); 
-                daspect(axes2Ptr('get'), [z y x]); 
-                daspect(axes3Ptr('get'), [x y z]);                    
+                daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+                daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
+                daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
 
-                axis(axes1Ptr('get'), 'normal');
-                axis(axes2Ptr('get'), 'normal');                    
-                axis(axes3Ptr('get'), 'normal');   
+                if link2DMip('get') == true && isVsplash('get') == false
+                    daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+                end
+
+                axis(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
+                axis(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
+                axis(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
+
+                if link2DMip('get') == true && isVsplash('get') == false
+                    axis(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
+                end
 
             end
 
             aspectRatioValue('set', 'x', x);
             aspectRatioValue('set', 'y', y);
-            aspectRatioValue('set', 'z', z);  
-        end    
-end                      
-        if isempty(aBuffer)     
+            aspectRatioValue('set', 'z', z);
+        end
+end
+        if isempty(aBuffer)
             if     strcmp(imageOrientation('get'), 'axial')
                 aBuffer = permute(aInput{iOffset}, [1 2 3]);
-            elseif strcmp(imageOrientation('get'), 'coronal') 
-                aBuffer = permute(aInput{iOffset}, [3 2 1]);    
+            elseif strcmp(imageOrientation('get'), 'coronal')
+                aBuffer = permute(aInput{iOffset}, [3 2 1]);
             elseif strcmp(imageOrientation('get'), 'sagittal')
                 aBuffer = permute(aInput{iOffset}, [3 1 2]);
-            end   
-                
-            dicomBuffer('set', aBuffer);                      
+            end
+
+            dicomBuffer('set', aBuffer);
         end
  %       if numel(tInput(iOffset).asFilesList) ~= 1
  %           if str2double(tInput(iOffset).atDicomInfo{2}.ImagePositionPatient(3)) - ...
- %              str2double(tInput(iOffset).atDicomInfo{1}.ImagePositionPatient(3)) > 0                    
+ %              str2double(tInput(iOffset).atDicomInfo{1}.ImagePositionPatient(3)) > 0
 
- %                aBuffer = aBuffer(:,:,end:-1:1);                   
+ %                aBuffer = aBuffer(:,:,end:-1:1);
  %           end
- %       end    
+ %       end
 
         if overlayActivate('get') == true
 
-%            pAxes3Text.Visible = 'off';                                    
+%            pAxes3Text.Visible = 'off';
 
             sSeriesDescription = atCoreMetaData{1}.SeriesDescription;
 
-            if isVsplash('get') == true          
+            if isVsplash('get') == true
                 [lFirst, lLast] = computeVsplashLayout(aBuffer, 'axial', size(aBuffer, 3)-sliceNumber('get', 'axial')+1);
                 sAxialSliceNumber = [num2str(lFirst) '-' num2str(lLast)];
             else
                 sAxialSliceNumber  = num2str(size(aBuffer, 3)-sliceNumber('get', 'axial')+1);
             end
 
-            if gateUseSeriesUID('get') == true                   
+            if gateUseSeriesUID('get') == true
                 sAxe3Text = sprintf('%s\nA:%s/%s', ...
-                    sSeriesDescription, ...  
+                    sSeriesDescription, ...
                     sAxialSliceNumber, ...
-                    num2str(size(aBuffer, 3)));                        
+                    num2str(size(aBuffer, 3)));
             else
                 sAxe3Text = sprintf('%s (Frame %d)\nA:%s/%s', ...
-                    sSeriesDescription, ...  
+                    sSeriesDescription, ...
                     iOffset, ...
                     sAxialSliceNumber, ...
-                    num2str(size(aBuffer, 3)));  
+                    num2str(size(aBuffer, 3)));
             end
 
-            if gca == axes3Ptr('get') && ...
+            if gca == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) && ...
                strcmp(windowButton('get'), 'down') && ...
                isVsplash('get') == false
 
-                clickedPt = get(axes3Ptr('get'),'CurrentPoint');
+                clickedPt = get(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')),'CurrentPoint');
                 clickedPtX = round(clickedPt(1,1));
 
-                if clickedPtX < 1 
-                    clickedPtX = 1;                       
+                if clickedPtX < 1
+                    clickedPtX = 1;
                 end
 
                 if clickedPtX > size(aBuffer, 2)
                     clickedPtX =  size(aBuffer, 2);
-                end  
+                end
 
                 clickedPtY = round(clickedPt(1,2));
-                if clickedPtY < 1 
-                    clickedPtY = 1;                       
+                if clickedPtY < 1
+                    clickedPtY = 1;
                 end
 
                 if clickedPtY > size(aBuffer, 1)
                     clickedPtY =  size(aBuffer, 1);
-                end 
+                end
 
                 sAxe3Text = sprintf('%s\n[X,Y] %s,%s', ...
-                    sAxe3Text, ...    
+                    sAxe3Text, ...
                     num2str(clickedPtX), ...
                     num2str(clickedPtY));
-            end                    
+            end
 
             set(pAxes3Text, 'String', sAxe3Text);
             set(pAxes3Text, 'Color' , overlayColor('get'));
@@ -317,33 +403,33 @@ end
 
         iOffset = iOffset+1;
 
-        if gateUseSeriesUID('get') == true                        
+        if gateUseSeriesUID('get') == true
 
             if iOffset > numel(tInput) || ... % End of list
                ~strcmpi(tInput(iOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
                         tInput(iOffset-1).atDicomInfo{1}.SeriesInstanceUID)
                 for bb=1:numel(tInput)
                     if strcmpi(tInput(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
-                        tInput(iOffset-1).atDicomInfo{1}.SeriesInstanceUID) 
+                        tInput(iOffset-1).atDicomInfo{1}.SeriesInstanceUID)
                         iOffset = bb;
                         break;
                     end
 
-                end                   
-            end  
+                end
+            end
         else
             if iOffset > numel(tInput)
                 iOffset = 1;
             end
         end
-            
-        refreshImages();      
+
+        refreshImages();
         pause(multiFrameSpeed('get'));
         try
-            tRefreshRoi = roiTemplate('get');
-            if ~isempty(tRefreshRoi) 
+            tRefreshRoi = roiTemplate('get', iOffset);
+            if ~isempty(tRefreshRoi)
                 for bb=1:numel(tRefreshRoi)
-                    if isvalid(tRefreshRoi{bb}.Object) 
+                    if isvalid(tRefreshRoi{bb}.Object)
                         tRefreshRoi{bb}.Object.Visible = 'off';
                     end
                 end
@@ -355,19 +441,23 @@ end
     if isvalid(pAxes3Text)
         set(pAxes3Text, 'String', asAxes3Text);
     end
+
+    if isvalid(pAxes3fText)
+        set(pAxes3fText, 'String', asAxes3fText);
+    end
 %           delete(tOverlay);
 
-%       dicomBuffer('set', aBackup);     
+%       dicomBuffer('set', aBackup);
 
     set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
 
     if gateUseSeriesUID('get') == false && ...
-       gateLookupTable('get') == true     
-        setWindowMinMax(lMaxBak, lMinBak);              
+       gateLookupTable('get') == true
+        setWindowMinMax(lMaxBak, lMinBak);
     end
 
     set(uiSeriesPtr('get'), 'Enable', 'on');
 
-    refreshImages();                                         
+    refreshImages();
 
 end

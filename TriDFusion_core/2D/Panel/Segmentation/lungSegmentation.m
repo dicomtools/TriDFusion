@@ -1,5 +1,5 @@
-function lungSegmentation(sPlane, dTreshold)    
-%function lungSegmentation(sPlane, dTreshold)  
+function lungSegmentation(dTreshold, dRadius)    
+%function lungSegmentation(dTreshold, dRadius)  
 %Extract the Lung of CT Images.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,9 +27,12 @@ function lungSegmentation(sPlane, dTreshold)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if isempty(dicomBuffer('get'))
+    aBuffer = dicomBuffer('get');            
+    if isempty(aBuffer)
         return;
     end
+
+    aBufferInit = aBuffer;
     
     if switchTo3DMode('get')     == true ||  ...
        switchToIsoSurface('get') == true || ...
@@ -44,153 +47,78 @@ function lungSegmentation(sPlane, dTreshold)
     drawnow;
     
     tSegmentMetaData = dicomMetaData('get');   
+    dNbMeta = numel(tSegmentMetaData);
+    
+    % Get constraint 
 
+    [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value'));
+
+    bInvertMask = invertConstraint('get');
+
+    tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
+    aLogicalMask = roiConstraintToMask(aBufferInit, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);     
+    
+    dImageMin = min(double(aBuffer),[], 'all');
+
+    aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
+    
     % Axial 
-    if strcmpi(sPlane, 'Axial') ||  strcmpi(sPlane, 'All') 
 
-        im = dicomBuffer('get');            
-        imSingle = im2single(im);
-        sizeOf = size(im);
-        mask = zeros(sizeOf);
-        
-        for iAxial=1:sizeOf(3)               
-
-            b = im(:,:,iAxial);   
-
-            XY = imSingle(:,:,iAxial);
-            BW = XY > dTreshold * tSegmentMetaData{1}.RescaleIntercept; % treshold
+    imSingle = im2single(aBuffer);
+    sizeOf = size(aBuffer);
+    mask = zeros(sizeOf);
 
 
-            BW = imcomplement(BW);
-            BW = imclearborder(BW);
-            BW = imfill(BW, 'holes');
-            radius = 13;
-            decomposition = 0;
-            se = strel('disk',radius,decomposition);
-            BW = imerode(BW, se);
-            maskedImageXY = XY;
-            maskedImageXY(~BW) = 0;        
+    for iAxial=1:sizeOf(3)               
 
-            mask(:,:,iAxial) = maskedImageXY;
+        b = aBuffer(:,:,iAxial);   
 
-            c = mask(:,:,iAxial);
-            b(c == 0) = cropValue('get')-c(c == 0); % crop outside                
-            im(:,:,iAxial) = b;     
+        XY = imSingle(:,:,iAxial);
 
-            if mod(iAxial,5)==1 || iAxial == sizeOf(3)         
-                progressBar(iAxial / sizeOf(3), sprintf('Computing lung segmentation axial plane %d/%d', iAxial, sizeOf(3)));
-            end
-
-        end
-
-        imPlane = im;
-        
-        clear mask;        
-    end
-
-    if strcmpi(sPlane, 'Coronal')  ||  strcmpi(sPlane, 'All') 
-
-        im = dicomBuffer('get');            
-        imSingle = im2single(im);
-        sizeOf = size(im);
-        maskc = zeros(sizeOf);
-
-        for iCoronal=1:sizeOf(1)               
-
-            b = permute(im(iCoronal,:,:), [3 2 1]);  
-
-            XY = permute(imSingle(iCoronal,:,:), [3 2 1]);
-            BW = XY > dTreshold * tSegmentMetaData{1}.RescaleIntercept; % treshold
-
-            BW = imcomplement(BW);
-            BW = imclearborder(BW);
-            BW = imfill(BW, 'holes');
-            radius = 13;
-            decomposition = 0;
-            se = strel('disk',radius,decomposition);
-            BW = imerode(BW, se);
-            maskedImageXY = XY;
-            maskedImageXY(~BW) = 0;        
-
-            maskc(iCoronal,:,:) = permuteBuffer(maskedImageXY, 'coronal');
-
-            c = maskc(iCoronal,:,:);
-            b(c == 0) = cropValue('get')-c(c == 0); % crop outside                
-            im(iCoronal,:,:) = permuteBuffer(b, 'coronal'); 
-
-            if mod(iCoronal,5)==1 || iCoronal == sizeOf(1)         
-                progressBar(iCoronal / sizeOf(1), sprintf('Computing lung segmentation coronal plane %d/%d', iCoronal, sizeOf(1)));
-            end
-
-        end
-                
-        if strcmpi(sPlane, 'All') 
-            for idx = find(imPlane == cropValue('get'))
-                imPlane(idx) = im(idx);
-            end
-        else                    
-            imPlane = imCoronalPlane;
-        end
-        
-        clear maskc;
-
-    end
-
-    if strcmpi(sPlane, 'Sagittal')  ||  strcmpi(sPlane, 'All') 
-
-        im = dicomBuffer('get');            
-        imSingle = im2single(im);
-        sizeOf = size(im);
-        masks = zeros(sizeOf);
-
-        for iSagittal=1:sizeOf(2)               
-
-            b = permute(im(:,iSagittal,:), [3 1 2]);  
-
-            XY = permute(imSingle(:,iSagittal,:), [3 1 2]);
-            BW = XY > dTreshold * tSegmentMetaData{1}.RescaleIntercept; % treshold
-
-            BW = imcomplement(BW);
-            BW = imclearborder(BW);
-            BW = imfill(BW, 'holes');
-            radius = 13;
-            decomposition = 0;
-            se = strel('disk',radius,decomposition);
-            BW = imerode(BW, se);
-            maskedImageXY = XY;
-            maskedImageXY(~BW) = 0;        
-
-            masks(:,iSagittal,:) = permuteBuffer(maskedImageXY, 'sagittal');
-
-            c = masks(:,iSagittal,:);
-            b(c == 0) = cropValue('get')-c(c == 0); % crop outside                
-            im(:,iSagittal,:) = permuteBuffer(b, 'sagittal');             
-
-            if mod(iSagittal,5)==1 || iSagittal == sizeOf(2)         
-                progressBar(iSagittal / sizeOf(2), sprintf('Computing lung segmentation sagittal plane %d/%d', iSagittal, sizeOf(2)));
-            end
-        end
-
-        if strcmpi(sPlane, 'All') 
-            for idx = find(imPlane == cropValue('get'))
-                imPlane(idx) = im(idx);
-            end  
+        if dNbMeta == sizeOf(3)
+            BW = XY > dTreshold * tSegmentMetaData{iAxial}.RescaleIntercept; % treshold
         else
-            imPlane = imSagittalPlane;
+            BW = XY > dTreshold * tSegmentMetaData{1}.RescaleIntercept; % treshold
         end
-        
-        clear masks;
 
-    end                        
+        BW = imcomplement(BW);
+        BW = imclearborder(BW);
+        BW = imfill(BW, 'holes');
+        radius = dRadius;
+        decomposition = 0;
+        se = strel('disk',radius,decomposition);
+        BW = imerode(BW, se);
+        maskedImageXY = XY;
+        maskedImageXY(~BW) = 0;        
 
-    progressBar(1, 'Ready');
+        mask(:,:,iAxial) = maskedImageXY;
 
-    dicomBuffer('set', imPlane);
+        c = mask(:,:,iAxial);
+        b(c == 0) = cropValue('get')-c(c == 0); % crop outside                
+        aBuffer(:,:,iAxial) = b;     
 
+        if mod(iAxial,5)==1 || iAxial == sizeOf(3)         
+            progressBar(iAxial / sizeOf(3), sprintf('Computing lung segmentation axial plane %d/%d', iAxial, sizeOf(3)));
+        end
+
+    end
+    
+    aBuffer(aLogicalMask==0) = aBufferInit(aLogicalMask==0); % Set the constraint    
+    
+    dicomBuffer('set', aBuffer);
+    
+    if link2DMip('get') == true 
+        aLungMip = computeMIP(aBuffer);
+        mipBuffer('set', aLungMip, get(uiSeriesPtr('get'), 'Value'));
+    end
+                            
     iOffset = get(uiSeriesPtr('get'), 'Value');
     setQuantification(iOffset);
 
     refreshImages();
+    
+    progressBar(1, 'Ready');
     
     catch
         progressBar(1, 'Error:lungSegmentation()');           

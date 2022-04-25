@@ -1,31 +1,33 @@
 function aImage = readDcm4che3(fileInput, din)
 %function aImage = readDcm4che3(fileInput, din)
 %Return the dicom buffer.
-%See TriDFuison.doc (or pdf) for more information about options.
+% An example of how to use the dcm4che toolkit from matlab for file
+% reading or other dicom functions.
 %
-%Author: Daniel Lafontaine, lafontad@mskcc.org
+% authors: dimitri.pianeta@gmail.com and Alberto Molano
+% version : september 2011
 %
-%Last specifications modified:
+% An example of how to use the dcm4che toolkit from matlab for file
+% reading or other dicom functions.
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Step 1 is to download the toolkit from www.dcm4che.org. Select the
+% dcm4che2 tookit 'bin' archive, and unzip it.
+%
+% Then add the java libraries to your path
+% version 3  RT 
+%
+% Example: 
+%  readDcm4che2_2('D:\CHU\stage10\dcm4che2
+%  matlab\dcm4che-2.0.22-bin\dcm4che-2.0.22\lib\','D:\CHU\stage10\pr
+%  ojet original et finale\00000001'')
 % 
-% This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
-% TriDFusion development has been led by:  Daniel Lafontaine
-% 
-% TriDFusion is distributed under the terms of the Lesser GNU Public License. 
-% 
-%     This version of TriDFusion is free software: you can redistribute it and/or modify
-%     it under the terms of the GNU General Public License as published by
-%     the Free Software Foundation, either version 3 of the License, or
-%     (at your option) any later version.
-% 
-% TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-% without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-% See the GNU General Public License for more details.
-% 
-% You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
+%pathDcm4che = 'D:\langage
+%informatique\dcm4che\dcm4che-2.0.25-bin\dcm4che-2.0.25\lib\';
+%testfile = 'C:\Users\Dimitri\Desktop\00000000';
+% fileInput : path package java dcm4che2 
+% pathDcm4che : path package dcm4che2
+% fileInput: noun and path file extension .dcm or no-extension dicom 
 
 %        try 
 %            din = org.dcm4che.io.DicomInputStream(...
@@ -49,12 +51,14 @@ if 0
 %        frames = din.nbOfFrames;
 
     try
-        aImg = reshape(pixeldata, cols, rows);
+        pixeldata2 = unir_numeros(pixeldata,rows,cols);
+
+        aImg = reshape(pixeldata2, cols, rows);
 
         aAlignImage = zeros(rows, cols);
-        for i =1 :rows-1
+        for ii =1 :rows-1
             for j=1 :cols-1
-                aAlignImage(i, j)= aImg(cols-j,i);
+                aAlignImage(ii, j)= aImg(cols-j,ii);
             end
         end
 
@@ -65,5 +69,17 @@ if 0
 else
     aImage = dicomread(char(fileInput));
 end
+
+    function pixeldata2 = unir_numeros(pixeldata, rows, cols)
+        pixeldata2 = zeros(rows*cols, 1);
+        fin = rows*cols*2;
+        cont = 0;
+        for jj = 1:2:fin
+            A = pixeldata(jj);
+            B = pixeldata(jj+1);
+            cont = cont + 1;
+            pixeldata2(cont,1) = A + B*65535;
+        end
+    end
 
 end

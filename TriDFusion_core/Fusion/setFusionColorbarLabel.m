@@ -27,6 +27,17 @@ function setFusionColorbarLabel()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    ptrFusionColorbar = uiFusionColorbarPtr('get');
+    
+    bIsGraphic = isgraphics(ptrFusionColorbar);
+    if isempty(bIsGraphic)
+       bIsGraphic = false;
+    end
+            
+    if ~bIsGraphic    
+        return;
+    end
+    
     tInput = inputTemplate('get');
     dFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
     if dFuseOffset > numel(tInput)
@@ -54,8 +65,8 @@ function setFusionColorbarLabel()
         end        
     end
         
-    ptrFusionColorbar = uiFusionColorbarPtr('get');
 
     ptrFusionColorbar.Label.String = sLabel;         
     uiFusionColorbarPtr('set', ptrFusionColorbar);
+
 end

@@ -33,18 +33,33 @@ function tRegistration = registrationTemplate(sAction, tValue)
     persistent ptRegistration; 
 
     if strcmpi('init', sAction)
-        ptRegistration.Interpolation = 'Linear';
+        ptRegistration.Interpolation = 'Bilinear';
 
         ptRegistration.Transformation = 'Rigid';   
+        
+        ptRegistration.Modality = 'Automatic';   
 
+        [tOptimizer, tMetric] = imregconfig('multimodal');
+        
+        % Multimodal
         ptRegistration.Metric.NumberOfSpatialSamples = 5000;
         ptRegistration.Metric.NumberOfHistogramBins  = 50;        
         ptRegistration.Metric.UseAllPixels = false;
-
+        
+        % Multimodal
         ptRegistration.Optimizer.GrowthFactor = 1.05;
         ptRegistration.Optimizer.Epsilon = 2.5e-06;
-        ptRegistration.Optimizer.InitialRadius = 1.5e-03;
-        ptRegistration.Optimizer.MaximumIterations = 100;              
+        ptRegistration.Optimizer.InitialRadius = 0.5e-03;
+        
+        % Monomodal
+        ptRegistration.Optimizer.GradientMagnitudeTolerance = 1.000000e-04;
+        ptRegistration.Optimizer.MinimumStepLength = 1.000000e-05;
+        ptRegistration.Optimizer.MaximumStepLength = 6.250000e-02;
+        ptRegistration.Optimizer.RelaxationFactor  = 5.000000e-01;        
+        
+        % Multimodal & Monomodal
+        ptRegistration.Optimizer.MaximumIterations = 100;    
+        
     elseif strcmpi('set', sAction)
        ptRegistration = tValue;            
     end

@@ -37,38 +37,44 @@ function tContours = readDicomContours(sFileName)
         
         for i = 1:length(ROIContourSequence) % Loop through contours
 
-            tContours(i).Number = i;
+            if isfield(rtssheader.ROIContourSequence.(ROIContourSequence{i}), 'ContourSequence')
+                tContours(i).Number = i;
 
-            tContours(i).ROIName = rtssheader.StructureSetROISequence.(ROIContourSequence{i}).ROIName;
+                tContours(i).ROIName = rtssheader.StructureSetROISequence.(ROIContourSequence{i}).ROIName;
 
-            ContourSequence = fieldnames(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence);
+                ContourSequence = fieldnames(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence);
 
-            % Loop through segments (slices)
-            aSegments = cell(1,length(ContourSequence));
-            for j = 1:length(ContourSequence)
-                if strcmpi(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourGeometricType, 'CLOSED_PLANAR')
-                    
-                    if ~isempty(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourData)
-                        % Read points
-                        aSegments{j} = reshape(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourData, ...
-                            3, rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).NumberOfContourPoints)';
+                % Loop through segments (slices)
+                aSegments = cell(1,length(ContourSequence));
+                for j = 1:length(ContourSequence)
+                    if strcmpi(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourGeometricType, 'CLOSED_PLANAR')
 
-                        tContours(i).Referenced.SOP(j).SOPClassUID    = rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourImageSequence.Item_1.ReferencedSOPClassUID;
-                        tContours(i).Referenced.SOP(j).SOPInstanceUID = rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourImageSequence.Item_1.ReferencedSOPInstanceUID;
+                        if ~isempty(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourData)
+                            % Read points
+                            aSegments{j} = reshape(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourData, ...
+                                3, rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).NumberOfContourPoints)';
+
+                            if isfield(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}), 'ContourImageSequence')
+                                tContours(i).Referenced.SOP(j).SOPClassUID    = rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourImageSequence.Item_1.ReferencedSOPClassUID;
+                                tContours(i).Referenced.SOP(j).SOPInstanceUID = rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourImageSequence.Item_1.ReferencedSOPInstanceUID;
+                            else
+                                tContours(i).Referenced.SOP(j).SOPClassUID    = rtssheader.SOPClassUID;
+                                tContours(i).Referenced.SOP(j).SOPInstanceUID = rtssheader.SOPInstanceUID;
+                            end
+                        end
+                    else
+                        progressBar(1, 'Error: RT structure Geometric Type not supported');                
                     end
-                else
-                    progressBar(1, 'Error: RT structure Geometric Type not supported');                
+
                 end
 
+                tContours(i).GeometricType = rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourGeometricType;
+                tContours(i).ContourData   = aSegments;    
+                tContours(i).Color = rtssheader.ROIContourSequence.(ROIContourSequence{i}).ROIDisplayColor;    
+
+                tContours(i).Referenced.StudyInstanceUID  = rtssheader.StudyInstanceUID;
+                tContours(i).Referenced.SeriesInstanceUID = rtssheader.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.RTReferencedSeriesSequence.Item_1.SeriesInstanceUID;
             end
-
-            tContours(i).GeometricType = rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourGeometricType;
-            tContours(i).ContourData   = aSegments;    
-            tContours(i).Color = rtssheader.ROIContourSequence.(ROIContourSequence{i}).ROIDisplayColor;    
-     
-            tContours(i).Referenced.StudyInstanceUID  = rtssheader.StudyInstanceUID;
-            tContours(i).Referenced.SeriesInstanceUID = rtssheader.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.RTReferencedSeriesSequence.Item_1.SeriesInstanceUID;
-
         end
         
     end

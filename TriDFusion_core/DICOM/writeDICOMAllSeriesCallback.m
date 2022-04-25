@@ -27,59 +27,111 @@ function writeDICOMAllSeriesCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    tWriteTemplate = inputTemplate('get');
+
     iOffset = get(uiSeriesPtr('get'), 'Value');
     if iOffset > numel(inputTemplate('get'))
         return;
     end
+    
+    bCreateSubDir = false;
+    sOutDir = outputDir('get');
+    if isempty(sOutDir)
+        
+        bCreateSubDir = true;
+        
+        sCurrentDir  = viewerRootPath('get');
 
-     sCurrentDir  = viewerRootPath('get');
+         sMatFile = [sCurrentDir '/' 'lastWriteDicomDir.mat'];
+         % load last data directory
+         if exist(sMatFile, 'file')
+                                    % lastDirMat mat file exists, load it
+            load('-mat', sMatFile);
+            if exist('exportDicomLastUsedDir', 'var')
+                sCurrentDir = exportDicomLastUsedDir;
+            end
+            if sCurrentDir == 0
+                sCurrentDir = pwd;
+            end
+         end
 
-     sMatFile = [sCurrentDir '/' 'lastWriteDicomDir.mat'];
-     % load last data directory
-     if exist(sMatFile, 'file')
-                                % lastDirMat mat file exists, load it
-        load('-mat', sMatFile);
-        if exist('exportDicomLastUsedDir', 'var')
-            sCurrentDir = exportDicomLastUsedDir;
+        sOutDir = uigetdir(sCurrentDir);
+        if sOutDir == 0
+            return;
         end
-        if sCurrentDir == 0
-            sCurrentDir = pwd;
+        sOutDir = [sOutDir '/'];
+
+        try
+            exportDicomLastUsedDir = sOutDir;
+            save(sMatFile, 'exportDicomLastUsedDir');
+        catch
+            progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
+    %        h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
+    %        if integrateToBrowser('get') == true
+    %            sLogo = './TriDFusion/logo.png';
+    %        else
+    %            sLogo = './logo.png';
+    %        end
+
+    %        javaFrame = get(h, 'JavaFrame');
+    %        javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
         end
-     end
-
-    sOutDir = uigetdir(sCurrentDir);
-    if sOutDir == 0
-        return;
+    
+        sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                
+        sOutDir = char(sOutDir) + "TriDFusion_ALL_DCM_" + char(sDate) + '/';              
+        if ~(exist(char(sOutDir), 'dir'))
+            mkdir(char(sOutDir));
+        end
     end
-    sOutDir = [sOutDir '/'];
-
-    try
-        exportDicomLastUsedDir = sOutDir;
-        save(sMatFile, 'exportDicomLastUsedDir');
-    catch
-        progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-%        h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
-%        if integrateToBrowser('get') == true
-%            sLogo = './TriDFusion/logo.png';
-%        else
-%            sLogo = './logo.png';
-%        end
-
-%        javaFrame = get(h, 'JavaFrame');
-%        javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
-    end
-
+   
     set(uiSeriesPtr('get'), 'Enable', 'off');
     
-    sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                
-    sWriteDir = char(sOutDir) + "TriDFusion_ALL_DCM_" + char(sDate) + '/';              
-    if ~(exist(char(sWriteDir), 'dir'))
-        mkdir(char(sWriteDir));
-    end
-    
     for jj=1: numel(inputTemplate('get'))
+        
         set(uiSeriesPtr('get'), 'Value', jj);
-        writeDICOM(sWriteDir, jj);
+        
+        aBuffer = dicomBuffer('get');
+        if isempty(aBuffer)
+            aInput  = inputBuffer('get');      
+            aBuffer = aInput{jj};
+            
+            if strcmp(imageOrientation('get'), 'coronal')
+                aBuffer = permute(aBuffer, [3 2 1]);
+            elseif strcmp(imageOrientation('get'), 'sagittal')
+                aBuffer = permute(aBuffer, [2 3 1]);
+            else
+                aBuffer = permute(aBuffer, [1 2 3]);
+            end
+
+            if tWriteTemplate(jj).bFlipLeftRight == true
+                aBuffer=aBuffer(:,end:-1:1,:);
+            end
+
+            if tWriteTemplate(jj).bFlipAntPost == true
+                aBuffer=aBuffer(end:-1:1,:,:);
+            end
+
+            if tWriteTemplate(jj).bFlipHeadFeet == true
+                aBuffer=aBuffer(:,:,end:-1:1);
+            end                           
+        end        
+        
+        atMetaData = dicomMetaData('get');
+        if isempty(atMetaData)
+            atMetaData = tWriteTemplate(jj).atDicomInfo;
+        end
+        
+        if bCreateSubDir == true
+            sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                
+            sWriteDir = char(sOutDir) + "TriDFusion_DCM_" + char(sDate) + '/';              
+            if ~(exist(char(sWriteDir), 'dir'))
+                mkdir(char(sWriteDir));
+            end
+        else
+            sWriteDir = sOutDir;
+        end
+    
+        writeDICOM(aBuffer, atMetaData, sWriteDir, jj);
     end
 
     set(uiSeriesPtr('get'), 'Value', iOffset);

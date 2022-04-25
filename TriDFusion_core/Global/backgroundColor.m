@@ -11,7 +11,7 @@ function sColor = backgroundColor(sAction, sValue)
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
-% TriDFusion development has been led by:  Daniel Lafontaine
+% TriDFusion development has been led by: Daniel Lafontaine
 % 
 % TriDFusion is distributed under the terms of the Lesser GNU Public License. 
 % 
@@ -32,5 +32,7 @@ function sColor = backgroundColor(sAction, sValue)
     if strcmp('set', sAction)
         psCrossColor = sValue;            
     end
-        sColor = psCrossColor;
+    
+    sColor = psCrossColor;
+    
 end 

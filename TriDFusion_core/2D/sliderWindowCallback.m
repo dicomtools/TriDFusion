@@ -42,11 +42,14 @@ function sliderWindowCallback(~, ~)
            switchToMIPMode('get')    == false
 
             if size(dicomBuffer('get'), 3) == 1            
-                set(axePtr('get'), 'CLim', [lMin lMax]);
+                set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
             else
-                set(axes1Ptr('get'), 'CLim', [lMin lMax]);
-                set(axes2Ptr('get'), 'CLim', [lMin lMax]);
-                set(axes3Ptr('get'), 'CLim', [lMin lMax]);
+                set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+                if link2DMip('get') == true && isVsplash('get') == false
+                    set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);                   
+                end
             end
 
             if isVsplash('get') == false                    

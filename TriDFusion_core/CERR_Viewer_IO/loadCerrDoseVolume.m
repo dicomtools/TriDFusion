@@ -30,20 +30,32 @@ function loadCerrDoseVolume(planC, structNamC)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    set(fiMainWindowPtr('get'), 'Pointer', 'watch');            
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+
     drawnow;
-    
+
+    if isFusion('get') == true % Deactivate fusion
+         setFusionCallback();
+    end
+
     set(uiSeriesPtr('get'), 'Value' , 1);
-    
+
     copyRoiPtr('set', '');
 
     isMoveImageActivated('set', false);
 
     releaseRoiWait();
-            
+    
+    outputDir('set', '');
+
     dicomMetaData('reset');
+
     dicomBuffer  ('reset');
     fusionBuffer ('reset');
+
+    mipBuffer      ('reset');
+    mipFusionBuffer('reset');
+
     inputBuffer  ('set', '');
 
     inputTemplate('set', '');
@@ -51,7 +63,7 @@ function loadCerrDoseVolume(planC, structNamC)
 
     roiTemplate ('reset');
     voiTemplate ('reset');
-    
+
     scanNum = 1;
     doseNum = 1;
 
@@ -116,6 +128,9 @@ function loadCerrDoseVolume(planC, structNamC)
             tTemplate{ii}.SpacingBetweenSlices = 0;
         end
 
+        if ~isfield(tTemplate{ii}, 'Units')
+            tTemplate{ii}.Units = '';
+        end
     end
 
     tNewInput(1).atDicomInfo = tTemplate;
@@ -140,23 +155,36 @@ function loadCerrDoseVolume(planC, structNamC)
         tNewInput(ii).bMathApplied   = false;
         tNewInput(ii).bFusedDoseKernel    = false;
         tNewInput(ii).bFusedEdgeDetection = false;
+        tNewInput(ii).tMovement = [];
+        tNewInput(ii).tMovement.bMovementApplied = false;
+        tNewInput(ii).tMovement.aGeomtform = [];
+        tNewInput(ii).tMovement.atSeq{1}.sAxe = [];
+        tNewInput(ii).tMovement.atSeq{1}.aTranslation = [];
+        tNewInput(ii).tMovement.atSeq{1}.dRotation = [];       
+    end
+
+    aBuffer{1}=scan3M;
+    aBuffer{2}=dose3M;
+
+    for mm=1:numel(aBuffer)
+        aMip = computeMIP(aBuffer{mm});
+        mipBuffer('set', aMip, mm);
+        tNewInput(mm).aMip = aMip;
     end
 
     inputTemplate('set', tNewInput);
     dicomBuffer  ('set', scan3M);
 
-    aBuffer{1}=scan3M;
-    aBuffer{2}=dose3M;
-
     inputBuffer  ('set', aBuffer);
     dicomMetaData('set', tTemplate);
 
+    if isFusion('get') == true
+        setFusionCallback();
+    end
     isFusion('set', false);
 
     initWindowLevel('set', true);
     initFusionWindowLevel ('set', true);
-    roiTemplate('set', '');
-    voiTemplate('set', '');
 
     deleteAlphaCurve('vol');
     deleteAlphaCurve('volfusion');
@@ -314,7 +342,11 @@ function loadCerrDoseVolume(planC, structNamC)
         mRecord.State = 'off';
   %      recordIconMenuObject('set', '');
     end
-   
+
+    isoMaskCtSerieOffset ('set', 1);
+    kernelCtSerieOffset  ('set', 1);
+    mipFusionBufferOffset('set', 1);
+
     multiFrame3DPlayback('set', false);
     multiFrame3DRecord  ('set', false);
     multiFrame3DIndex   ('set', 1);
@@ -332,6 +364,7 @@ function loadCerrDoseVolume(planC, structNamC)
     set(uiSeriesPtr('get'), 'Enable', 'off');
 
     set(btnFusionPtr    ('get'), 'Enable', 'off');
+    set(btnLinkMipPtr   ('get'), 'Enable', 'off');
     set(btnRegisterPtr  ('get'), 'Enable', 'off');
     set(btnMathPtr      ('get'), 'Enable', 'off');
     set(uiFusedSeriesPtr('get'), 'Value' , 1    );
@@ -406,13 +439,15 @@ function loadCerrDoseVolume(planC, structNamC)
 
         if  numel(sNewVolumes) > 1
             set(btnRegisterPtr('get'), 'Enable', 'on');
-            set(btnFusionPtr('get')  , 'Enable', 'on');
+            set(btnFusionPtr  ('get'), 'Enable', 'on');
+            set(btnLinkMipPtr ('get'), 'Enable', 'on');
 
             set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
             set(uiFusedSeriesPtr('get'), 'Enable', 'on');
             set(uiFusedSeriesPtr('get'), 'Value', 2);
         else
-            set(btnFusionPtr('get')  , 'Enable', 'on');
+            set(btnFusionPtr('get') , 'Enable', 'on');
+            set(btnLinkMipPtr('get'), 'Enable', 'on');
 
             set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
             set(uiFusedSeriesPtr('get'), 'Enable', 'on');
@@ -429,6 +464,11 @@ function loadCerrDoseVolume(planC, structNamC)
 
     clearDisplay();
     initDisplay(3);
+
+%    link2DMip('set', true);
+
+%    set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+%    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
 
     dicomViewerCore();
 
@@ -452,6 +492,7 @@ function loadCerrDoseVolume(planC, structNamC)
     set(uiCorWindowPtr('get'), 'Visible', 'off');
     set(uiSagWindowPtr('get'), 'Visible', 'off');
     set(uiTraWindowPtr('get'), 'Visible', 'off');
+    set(uiMipWindowPtr('get'), 'Visible', 'off');
 
     set(uiSliderLevelPtr ('get'), 'Visible', 'off');
     set(uiSliderWindowPtr('get'), 'Visible', 'off');
@@ -459,9 +500,10 @@ function loadCerrDoseVolume(planC, structNamC)
     set(uiSliderCorPtr('get'), 'Visible', 'off');
     set(uiSliderSagPtr('get'), 'Visible', 'off');
     set(uiSliderTraPtr('get'), 'Visible', 'off');
-    
+    set(uiSliderMipPtr('get'), 'Visible', 'off');
+
     drawnow;
-    
+
     for mm=1:numel(strMaskC)
         progressBar(0.7+(0.299999*mm/numel(strMaskC)), sprintf('Processing VOI %d/%d', mm, numel(strMaskC)));
 
@@ -472,18 +514,19 @@ function loadCerrDoseVolume(planC, structNamC)
                 break;
             end
         end
-        
+
         if get(uiSeriesPtr('get'), 'Value') ~= planC{4}(mm).associatedScan
             set(uiSeriesPtr('get'), 'Value', planC{4}(mm).associatedScan);
-            setSeriesCallback();            
+            setSeriesCallback();
         end
-        
-        maskToVoi(strMaskC{mm}, structNamC{mm}, aVoiColor, 'axial',  planC{4}(mm).associatedScan, true);
+
+        maskToVoi(strMaskC{mm}, structNamC{mm}, aVoiColor, 'axial',  planC{4}(mm).associatedScan, false);
     end
 
     set(uiCorWindowPtr('get'), 'Visible', 'on');
     set(uiSagWindowPtr('get'), 'Visible', 'on');
     set(uiTraWindowPtr('get'), 'Visible', 'on');
+    set(uiMipWindowPtr('get'), 'Visible', 'on');
 
     set(uiSliderLevelPtr ('get'), 'Visible', 'on');
     set(uiSliderWindowPtr('get'), 'Visible', 'on');
@@ -491,11 +534,27 @@ function loadCerrDoseVolume(planC, structNamC)
     set(uiSliderCorPtr('get'), 'Visible', 'on');
     set(uiSliderSagPtr('get'), 'Visible', 'on');
     set(uiSliderTraPtr('get'), 'Visible', 'on');
-    
-    set(fiMainWindowPtr('get'), 'Pointer', 'default');            
+    set(uiSliderMipPtr('get'), 'Visible', 'on');
+
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;
-    
+
     refreshImages();
+
+%    atMetaData = dicomMetaData('get');
+
+%    if strcmpi(atMetaData{1}.Modality, 'ct')
+%        link2DMip('set', false);
+
+%        set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+%        set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+%    end
+
+    if size(dicomBuffer('get'), 3) ~= 1
+        setPlaybackToolbar('on');
+    end
+
+    setRoiToolbar('on');
 
     progressBar(1, 'Ready');
 

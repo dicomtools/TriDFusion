@@ -27,7 +27,7 @@ function aAlphaMap = defaultMipFusionAlphaMap(im, sType)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    if strcmp(sType, 'mr')
+    if strcmpi(sType, 'MR')
 
        intensity = [0 20 40 120 220 1024];
        alpha = [0 0 0.15 0.3 0.38 0.5];
@@ -36,7 +36,7 @@ function aAlphaMap = defaultMipFusionAlphaMap(im, sType)
        alphamap = interp1(intensity,alpha,queryPoints)';
        aAlphaMap = alphamap;
 
-    elseif strcmp(sType, 'ct')     
+    elseif strcmpi(sType, 'CT')     
         
         dMin = min(im,[],'all');
         dMax = max(im,[],'all');
@@ -52,7 +52,7 @@ function aAlphaMap = defaultMipFusionAlphaMap(im, sType)
         queryPoints = linspace(min(intensity),max(intensity),256);
         alphamap = interp1(intensity,alpha,queryPoints)';
         aAlphaMap = alphamap;
-    elseif strcmpi(sType, 'pt')  
+    elseif strcmpi(sType, 'PET')  
         aAlphaMap = getPTAlphaMapValues();    
     else
         aAlphaMap = zeros(256,1);

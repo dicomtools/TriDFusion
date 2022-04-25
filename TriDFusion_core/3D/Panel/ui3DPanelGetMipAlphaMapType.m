@@ -30,26 +30,26 @@ function [dMipAlphaOffset, sMipMapSliderEnable] = ui3DPanelGetMipAlphaMapType(sT
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if strcmp(sType, 'linear')
+    if strcmpi(sType, 'Linear')
         dMipAlphaOffset = 1;
         sMipMapSliderEnable = 'on';
-    elseif strcmp(sType, 'custom')
+    elseif strcmpi(sType, 'Custom')
         dMipAlphaOffset = 2;
         sMipMapSliderEnable = 'off';
-    elseif strcmp(sType, 'mr')
+    elseif strcmpi(sType, 'MR')
         dMipAlphaOffset = 3;
         sMipMapSliderEnable = 'off';
-    elseif strcmp(sType, 'ct')
+    elseif strcmpi(sType, 'CT')
         dMipAlphaOffset = 4;
         sMipMapSliderEnable = 'off';
-    elseif strcmp(sType, 'pt')
+    elseif strcmpi(sType, 'PET')
         dMipAlphaOffset = 5;
         sMipMapSliderEnable = 'off';     
-    elseif strcmpi(sType, 'auto')  
-        if strcmpi(atMetaData{1}.Modality, 'mr')
+    elseif strcmpi(sType, 'Auto')  
+        if strcmpi(atMetaData{1}.Modality, 'MR')
             dMipAlphaOffset = 3;
             sMipMapSliderEnable = 'off';             
-        elseif strcmpi(atMetaData{1}.Modality, 'ct')
+        elseif strcmpi(atMetaData{1}.Modality, 'CT')
             dMipAlphaOffset = 4;
             sMipMapSliderEnable = 'off';            
         else

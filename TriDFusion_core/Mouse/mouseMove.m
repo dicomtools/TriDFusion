@@ -42,7 +42,7 @@ function mouseMove(~, ~)
             else
                 if isMoveImageActivated('get') == true
                     
-                    moveFusedImage(false, false);
+                    moveFusedImage(false);
                 else
                     if size(dicomBuffer('get'), 3) ~= 1
                         triangulateImages();  

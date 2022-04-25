@@ -29,9 +29,9 @@ function setMIPCallback(~, ~)
 
     if numel(dicomBuffer('get')) && ...
        size(dicomBuffer('get'), 3) ~= 1
-   
-        try   
-            
+
+        try
+
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
 %                releaseRoiAxeWait();
@@ -56,21 +56,21 @@ function setMIPCallback(~, ~)
         set(uiEditVsplahYPtr('get'), 'Enable', 'off');
 
         set(btnRegisterPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-        set(btnRegisterPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));        
+        set(btnRegisterPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
         set(btnRegisterPtr('get'), 'Enable', 'off');
-        
+
         set(btnMathPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-        set(btnMathPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));        
+        set(btnMathPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
         set(btnMathPtr('get'), 'Enable', 'off');
-        
+
    %     set(rotate3DMenu('get'), 'Checked', 'off');
         rotate3DTool('set', false);
         rotate3d('off');
-        
+
         set(dataCursorMenu('get'), 'Checked', 'off');
         dataCursorTool('set', false);
         datacursormode('off');
-        
+
         setRoiToolbar('off');
 
         if multiFramePlayback('get') == true
@@ -97,12 +97,12 @@ function setMIPCallback(~, ~)
         if ~isempty(mOptions)
             mOptions.Enable = 'off';
         end
-        
+
         uiSegMainPanel = uiSegMainPanelPtr('get');
         if ~isempty(uiSegMainPanel)
             set(uiSegMainPanel, 'Visible', 'off');
         end
-        
+
         viewSegPanel('set', false);
         objSegPanel = viewSegPanelMenuObject('get');
         if ~isempty(objSegPanel)
@@ -119,7 +119,7 @@ function setMIPCallback(~, ~)
         if ~isempty(objKernelPanel)
             objKernelPanel.Checked = 'off';
         end
-        
+
         uiRoiMainPanel = uiRoiMainPanelPtr('get');
         if ~isempty(uiRoiMainPanel)
             set(uiRoiMainPanel, 'Visible', 'off');
@@ -130,15 +130,15 @@ function setMIPCallback(~, ~)
         if ~isempty(objRoiPanel)
             objRoiPanel.Checked = 'off';
         end
-        
+
         if switchToMIPMode('get') == true
 
             switchToMIPMode('set', false);
 
             set(btnMIPPtr('get'), 'Enable', 'on');
             set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-            set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));     
-        
+            set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+
             if switchToIsoSurface('get') == false && ...
                switchTo3DMode('get')     == false
 
@@ -175,14 +175,15 @@ function setMIPCallback(~, ~)
                 set(uiSeriesPtr('get'), 'Enable', 'on');
 
 %                if numel(seriesDescription('get')) > 1
-                    set(btnFusionPtr('get')    , 'Enable', 'on');
-                    set(uiFusedSeriesPtr('get'), 'Enable', 'on');
+                     set(btnFusionPtr('get')    , 'Enable', 'on');
+                     set(btnLinkMipPtr('get')   , 'Enable', 'on');
+                     set(uiFusedSeriesPtr('get'), 'Enable', 'on');
 %                end
 
-                set(btnTriangulatePtr('get'), 'Enable', 'on'); 
+                set(btnTriangulatePtr('get'), 'Enable', 'on');
                 set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
                 set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-            
+
                 set(btnZoomPtr('get')    , 'Enable', 'on');
                 set(btnPanPtr('get')     , 'Enable', 'on');
                 if numel(inputTemplate('get')) >1
@@ -194,13 +195,13 @@ function setMIPCallback(~, ~)
                 set(uiEditVsplahXPtr('get'), 'Enable', 'on');
                 set(uiEditVsplahYPtr('get'), 'Enable', 'on');
 
-                set(btn3DPtr('get'), 'Enable', 'on');   
+                set(btn3DPtr('get'), 'Enable', 'on');
                 set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-                set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
-                
+                set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+
                 set(btnIsoSurfacePtr('get'), 'Enable', 'on');
                 set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-                set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
+                set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
  %               deleteAlphaCurve('vol');
 
@@ -340,20 +341,34 @@ function setMIPCallback(~, ~)
                 clearDisplay();
                 initDisplay(3);
 
+%                link2DMip('set', true);
+
+%                set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+%                set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get')); 
+                
                 dicomViewerCore();
+                
+                atMetaData = dicomMetaData('get');
 
                 if isFusion('get')
                     tFuseInput     = inputTemplate('get');
                     iFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
                     atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
 
-                    setViewerDefaultColor(true, dicomMetaData('get'), atFuseMetaData);
+                    setViewerDefaultColor(true, atMetaData, atFuseMetaData);
                 else
-                    setViewerDefaultColor(true, dicomMetaData('get'));
+                    setViewerDefaultColor(true, atMetaData);
                 end
 
                 refreshImages();
+                
+%                if strcmpi(atMetaData{1}.Modality, 'ct')
+%                    link2DMip('set', false);
 
+%                    set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+%                    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));         
+%                end 
+                
                 setRoiToolbar('on');
 
 %                        robotClick();
@@ -398,19 +413,20 @@ function setMIPCallback(~, ~)
         else
 
             switchToMIPMode('set', true);
-                       
+
             set(btnMIPPtr('get'), 'Enable', 'on');
             set(btnMIPPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnMIPPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-            
+
             set(uiSeriesPtr('get'), 'Enable', 'off');
 
 %            set(btnFusionPtr('get')    , 'Enable', 'off');
             set(uiFusedSeriesPtr('get'), 'Enable', 'off');
+            set(btnLinkMipPtr('get')   , 'Enable', 'off');
 
             set(btnTriangulatePtr('get'), 'Enable', 'off');
             set(btnTriangulatePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-            set(btnTriangulatePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));             
+            set(btnTriangulatePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
             if switchToIsoSurface('get') == false && ...
                 switchTo3DMode('get')    == false
@@ -420,6 +436,8 @@ function setMIPCallback(~, ~)
                 end
 
                 surface3DPriority('set', 'MaximumIntensityProjection', 1);
+                
+                isPlotContours('set', false);
 
                 clearDisplay();
                 initDisplay(1);
@@ -437,30 +455,38 @@ function setMIPCallback(~, ~)
                     tFuseInput     = inputTemplate('get');
                     iFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
                     atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
-                    
+
                     if (strcmpi(atMetaData{1}.Modality, 'nm') || ...
                         strcmpi(atMetaData{1}.Modality, 'pt')) && ...
                        (strcmpi(atFuseMetaData{1}.Modality, 'nm') || ...
                         strcmpi(atFuseMetaData{1}.Modality, 'pt'))
 
-           %             colorMapMipOffset('set', colorMapOffset('get')); %  % Set 3D Mip from 2D
+%                        colorMapMipOffset('set', colorMapOffset('get')); %  % Set 3D Mip from 2D                        
                         background3DOffset('set', 7); % White
                     else
-          %              colorMapMipOffset('set', 10); % Bone
+%                        colorMapMipOffset('set', colorMapOffset('get')); %  % Set 3D Mip from 2D                        
                         background3DOffset('set', 8); % Black
                     end
                 else
           %          colorMapMipOffset('set', 10); % Gray
                     if (strcmpi(atMetaData{1}.Modality, 'nm') || ...
                         strcmpi(atMetaData{1}.Modality, 'pt'))
+                    
+%                        colorMapMipOffset('set', 11); % Invert Linear
                         background3DOffset('set', 7); % White
                    else
                         background3DOffset('set', 8); % Black
+ %                       colorMapMipOffset('set', colorMapOffset('get')); %  % Set 3D Mip from 2D                        
                     end
                 end
-                colorMapMipOffset('set', colorMapOffset('get')); %  % Set 3D Mip from 2D
+                
+%                if (strcmpi(atMetaData{1}.Modality, 'nm') || ...
+%                    strcmpi(atMetaData{1}.Modality, 'pt')) 
+%                else        
+                    colorMapMipOffset('set', colorMapOffset('get')); %  % Set 3D Mip from 2D
+%                end
 
-                mipObj = initVolShow(dicomBuffer('get'), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atMetaData);
+                mipObj = initVolShow(squeeze(dicomBuffer('get')), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atMetaData);
                 set(mipObj, 'InteractionsEnabled', true);
 
                 mipObject('set', mipObj);
@@ -472,8 +498,8 @@ function setMIPCallback(~, ~)
                     tFuseInput     = inputTemplate('get');
                     iFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
                     atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
-                   
-                    
+
+
                     if (strcmpi(atFuseMetaData{1}.Modality, 'nm') || ...
                         strcmpi(atFuseMetaData{1}.Modality, 'pt')) && ...
                        (strcmpi(atMetaData{1}.Modality, 'nm') || ...
@@ -485,14 +511,15 @@ function setMIPCallback(~, ~)
 
                         background3DOffset('set', 8); % Black
                     end
+                    
                     colorMapMipFusionOffset('set', fusionColorMapOffset('get')); % Set 3D Mip from 2D
 
                     set(ui3DBackgroundPtr('get'), 'Value', background3DOffset('get'));
 
-                    mipFusionObj = initVolShow(fusionBuffer('get'), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);
+                    mipFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);
                     set(mipFusionObj, 'InteractionsEnabled', false);
 
-                    [aAlphaMap, ~] = getMipFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
+                    [aAlphaMap, ~] = getMipFusionAlphaMap('get', fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), atFuseMetaData);
                     mipFusionObj.Alphamap = aAlphaMap;
 
                     mipFusionObj.Colormap = get3DColorMap('one', colorMapMipFusionOffset('get'));
@@ -541,6 +568,7 @@ function setMIPCallback(~, ~)
 
      %           setPlaybackToolbar('on');
                 oneFrame3D();
+                flip3Dobject('right');                             
                 uiLogo = displayLogo(uiOneWindowPtr('get'));
                 logoObject('set', uiLogo);
 
@@ -572,7 +600,7 @@ function setMIPCallback(~, ~)
                         iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
                         atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
 
-                        [aFusionMap, sFusionType] = getMipFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
+                        [aFusionMap, sFusionType] = getMipFusionAlphaMap('get', fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), atFuseMetaData);
 
                         set(mipFusionObj, 'Alphamap', aFusionMap);
                         set(mipFusionObj, 'Colormap', get3DColorMap('get', colorMapMipFusionOffset('get') ));
@@ -621,7 +649,7 @@ function setMIPCallback(~, ~)
                     end
 %                    getMipAlphaMap('set', dicomBuffer('get'), 'auto');
 
-                    mipObj = initVolShow(dicomBuffer('get'), uiOneWindowPtr('get'), 'MaximumIntensityProjection', dicomMetaData('get'));
+                    mipObj = initVolShow(squeeze(dicomBuffer('get')), uiOneWindowPtr('get'), 'MaximumIntensityProjection', dicomMetaData('get'));
                     set(mipObj, 'InteractionsEnabled', false);
 
                     mipObject('set', mipObj);
@@ -634,10 +662,10 @@ function setMIPCallback(~, ~)
                         iFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
                         atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
 
-                        mipFusionObj = initVolShow(fusionBuffer('get'), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);
+                        mipFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);
                         set(mipFusionObj, 'InteractionsEnabled', false);
 
-                        [aAlphaMap, ~] = getMipFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
+                        [aAlphaMap, ~] = getMipFusionAlphaMap('get', fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), atFuseMetaData);
 
                         colorMapMipFusionOffset('set', fusionColorMapOffset('get')); % Set 3D Mip from 2D
                         mipFusionObj.Colormap = get3DColorMap('one', colorMapMipFusionOffset('get'));
@@ -680,7 +708,7 @@ function setMIPCallback(~, ~)
                             iFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
                             atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
 
-                            [aMap, sType] = getMipFusionAlphaMap('get', fusionBuffer('get'), atFuseMetaData);
+                            [aMap, sType] = getMipFusionAlphaMap('get', fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), atFuseMetaData);
 
                             [dMipAlphaOffset, sMipMapSliderEnable] = ui3DPanelGetMipAlphaMapType(sType, atFuseMetaData);
 
@@ -744,77 +772,77 @@ function setMIPCallback(~, ~)
             end
 
         end
-        
+
         if switchTo3DMode('get') == false && ...
            (switchToMIPMode('get') == true || ...
-            switchToIsoSurface('get') == true)   
-        
+            switchToIsoSurface('get') == true)
+
             set(ui3DVolColormapPtr('get')      , 'Enable', 'off');
             set(ui3DVolAlphamapTypePtr('get')  , 'Enable', 'off');
-            set(ui3DSliderVolLinAlphaPtr('get'), 'Enable', 'off');           
-        end       
-        
+            set(ui3DSliderVolLinAlphaPtr('get'), 'Enable', 'off');
+        end
+
         if switchToMIPMode('get') == false && ...
            (switchTo3DMode('get') == true || ...
-            switchToIsoSurface('get') == true)                   
-        
+            switchToIsoSurface('get') == true)
+
             set(ui3DMipColormapPtr('get')      , 'Enable', 'off');
             set(ui3DMipAlphamapTypePtr('get')  , 'Enable', 'off');
-            set(ui3DSliderMipLinAlphaPtr('get'), 'Enable', 'off');              
-            
+            set(ui3DSliderMipLinAlphaPtr('get'), 'Enable', 'off');
+
             mipObj = mipObject('get');
             set(mipObj, 'InteractionsEnabled', false);
             mipObject('set', mipObj);
-            
+
             if switchTo3DMode('get') == true && ...
                switchToIsoSurface('get') == true
-          
+
                 if surface3DPriority('get', 'VolumeRendering') < ...
                    surface3DPriority('get', 'Isosurface')
-               
+
                     volObj = volObject('get');
                     set(volObj, 'InteractionsEnabled', true);
-                    volObject('set', volObj);               
-                    
+                    volObject('set', volObj);
+
                     isoObj = isoObject('get');
                     set(isoObj, 'InteractionsEnabled', false);
-                    isoObject('set', isoObj);  
-                else    
+                    isoObject('set', isoObj);
+                else
                     volObj = volObject('get');
                     set(volObj, 'InteractionsEnabled', false);
-                    volObject('set', volObj);               
-                    
+                    volObject('set', volObj);
+
                     isoObj = isoObject('get');
                     set(isoObj, 'InteractionsEnabled', true);
-                    isoObject('set', isoObj);                      
+                    isoObject('set', isoObj);
                 end
             else
                 if switchTo3DMode('get') == true
                     volObj = volObject('get');
                     set(volObj, 'InteractionsEnabled', true);
-                    volObject('set', volObj);   
+                    volObject('set', volObj);
                 end
-                                        
+
                 if switchToIsoSurface('get') == true
                     isoObj = isoObject('get');
                     set(isoObj, 'InteractionsEnabled', true);
-                    isoObject('set', isoObj);                     
-                end          
+                    isoObject('set', isoObj);
+                end
             end
 
         else
             if switchToMIPMode('get') == true
                 set(ui3DMipColormapPtr('get')      , 'Enable', 'on');
                 set(ui3DMipAlphamapTypePtr('get')  , 'Enable', 'on');
-                set(ui3DSliderMipLinAlphaPtr('get'), 'Enable', 'on');               
+                set(ui3DSliderMipLinAlphaPtr('get'), 'Enable', 'on');
             end
         end
-        
+
         catch
-            progressBar(1, 'Error:setMIPCallback()');           
+            progressBar(1, 'Error:setMIPCallback()');
         end
-        
+
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
-        drawnow;        
-    end    
+        drawnow;
+    end
 end

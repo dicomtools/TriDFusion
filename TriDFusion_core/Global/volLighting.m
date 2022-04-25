@@ -32,8 +32,9 @@ function aObject = volLighting(sAction, aValue)
 
      persistent paObject; 
 
-     if strcmpi('set', sAction)
+    if strcmpi('set', sAction)
         paObject = aValue;            
-     end      
+    end      
+    
     aObject = paObject;
 end

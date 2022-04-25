@@ -64,7 +64,7 @@ function tDataSets = sortDicomFileList(tFileList, iNbFiles)
         if isfield(tFileList, 'Contours') 
             tDataSets(iLoop).Contours = tFileList.Contours;
         end
-        
+                
         progressBar(1, 'Ready');
 
     end

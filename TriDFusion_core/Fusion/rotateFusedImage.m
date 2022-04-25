@@ -1,6 +1,6 @@
 function rotateFusedImage(bInitCoordinate)
-%function  moveFusedImage(bInitCoordinate)
-%Manually Move The Fused Image. 
+%function  rotateFusedImage(bInitCoordinate)
+%Manually rotate The Fused Image. 
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -27,20 +27,36 @@ function rotateFusedImage(bInitCoordinate)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.     
     
-   persistent paInitClickedPtX;
+    persistent paInitClickedPtX;
+   
+    persistent pInitImAxeFCData;
+   
+    persistent pInitImSagittalFCData;
+    persistent pInitImCoronalFCData;
+    persistent pInitImAxialFCData;
+ 
+    persistent pdAxeRotation;
     
+    persistent pdCoronalRotation;
+    persistent pdSagittalRotation;
+    persistent pdAxialRotation;
+   
     clickedAxe = gca;
        
-    if size(fusionBuffer('get'), 3) == 1 
+    if size(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 3) == 1 
         
-        imAxeF = imAxeFPtr('get');
+        imAxeF = imAxeFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
         
         if bInitCoordinate == true
             
             clickedPt = get(clickedAxe, 'CurrentPoint');
             
             paInitClickedPtX = clickedPt(1,1);                                        
-
+                    
+            pInitImAxeFCData =  get(imAxeF,'CData');   
+            
+             [~, ~, dRotation] = fusedImageRotationValues('get', [], axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) );                  
+            pdAxeRotation = dRotation;           
         else
             clickedPt = get(clickedAxe,'CurrentPoint');
             
@@ -48,28 +64,41 @@ function rotateFusedImage(bInitCoordinate)
 
             aDiffClickedPtX = aClickedPtX-paInitClickedPtX;            
         
-            FF = fusionBuffer('get');
+%            FF = fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
             
-            imAxeF.CData = imrotate(FF(:,:), aDiffClickedPtX, 'nearest', 'crop');             
+            imAxeF.CData = imrotate(pInitImAxeFCData, aDiffClickedPtX, 'nearest', 'crop');             
             
-            fusedImageRotationValues('set', true, clickedAxe, aDiffClickedPtX);                       
+            fusedImageRotationValues('set', true, clickedAxe, pdAxeRotation+aDiffClickedPtX);                       
             
         end        
     else
-        imCoronalF  = imCoronalFPtr ('get'); 
-        imSagittalF = imSagittalFPtr('get'); 
-        imAxialF    = imAxialFPtr   ('get'); 
+        imCoronalF  = imCoronalFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')); 
+        imSagittalF = imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')); 
+        imAxialF    = imAxialFPtr   ('get', [], get(uiFusedSeriesPtr('get'), 'Value')); 
 
-        iCoronal  = sliceNumber('get', 'coronal' );
-        iSagittal = sliceNumber('get', 'sagittal');
-        iAxial    = sliceNumber('get', 'axial'   );
+%        iCoronal  = sliceNumber('get', 'coronal' );
+%        iSagittal = sliceNumber('get', 'sagittal');
+%        iAxial    = sliceNumber('get', 'axial'   );
         
         if bInitCoordinate == true
             
             clickedPt = get(clickedAxe,'CurrentPoint');
             
             paInitClickedPtX = clickedPt(1,1);                 
-                
+            
+            pInitImCoronalFCData  = get(imCoronalF,'CData');       
+            pInitImSagittalFCData = get(imSagittalF,'CData');       
+            pInitImAxialFCData    = get(imAxialF,'CData'); 
+            
+            [~, ~, dRotation] = fusedImageRotationValues('get', [], axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) );                  
+            pdCoronalRotation = dRotation;
+            
+            [~, ~, dRotation] = fusedImageRotationValues('get', [], axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) );                  
+            pdSagittalRotation = dRotation;
+            
+            [~, ~, dRotation] = fusedImageRotationValues('get', [], axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) );                  
+            pdAxialRotation = dRotation;
+            
         else      
             clickedPt = get(clickedAxe,'CurrentPoint');
             
@@ -77,23 +106,27 @@ function rotateFusedImage(bInitCoordinate)
 
             aDiffClickedPtX = aClickedPtX-paInitClickedPtX;            
         
-            FF = fusionBuffer('get');
+%            FF = fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
                     
             switch clickedAxe
-                case axes1Ptr('get')        
-                    imCoronalF.CData = imrotate(permute(FF(iCoronal,:,:), [3 2 1]), aDiffClickedPtX, 'nearest', 'crop');  
-   
-                case axes2Ptr('get')   
-                    imSagittalF.CData = imrotate(permute(FF(:,iSagittal,:), [3 1 2]), aDiffClickedPtX, 'nearest', 'crop');  
+                
+                case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))        
+                    imCoronalF.CData = imrotate(pInitImCoronalFCData, aDiffClickedPtX, 'nearest', 'crop');  
+                    fusedImageRotationValues('set', true, clickedAxe, pdCoronalRotation+aDiffClickedPtX);                       
                     
-                case axes3Ptr('get')        
-                    imAxialF.CData = imrotate(FF(:,:,iAxial), aDiffClickedPtX, 'nearest', 'crop');             
-                otherwise
-                    fusedImageRotationValues('set', false);                       
-                    return;
+                case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))   
+                    imSagittalF.CData = imrotate(pInitImSagittalFCData, aDiffClickedPtX, 'nearest', 'crop');  
+                    fusedImageRotationValues('set', true, clickedAxe, pdSagittalRotation+aDiffClickedPtX);                       
+                    
+                case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))                      
+                    imAxialF.CData = imrotate(pInitImAxialFCData, aDiffClickedPtX, 'nearest', 'crop');             
+                    fusedImageRotationValues('set', true, clickedAxe, pdAxialRotation+aDiffClickedPtX);                       
+                    
+               otherwise
+%                    fusedImageRotationValues('set', false);                       
+%                    return;
             end
             
-            fusedImageRotationValues('set', true, clickedAxe, aDiffClickedPtX);                       
                                     
         end
     end

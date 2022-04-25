@@ -91,25 +91,35 @@ function setDisplayBuffer()
                isfield(tInput(i).atDicomInfo{1}, 'RescaleSlope')
                       
                 if tInput(i).atDicomInfo{1}.RescaleSlope ~= 0
-                    aInput{i} = tInput(1).atDicomInfo{1}.RescaleIntercept + (aInput * tInput(1).atDicomInfo{1}.RescaleSlope);
+                    aInput{i} = tInput(1).atDicomInfo{1}.RescaleIntercept + (aInput{i} * tInput(1).atDicomInfo{1}.RescaleSlope);
                 else
                     if isfield(tInput(i).atDicomInfo{1}, 'RealWorldValueMappingSequence') % SUV Spect
                         if tInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
-                            fSlope = tInput(1).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
-                            fIntercept = tInput(1).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
+                            fSlope     = tInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
+                            fIntercept = tInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
                             aInput{i} = fIntercept + (double(aInput{i}) * fSlope);                            
                         end                        
                     end
                 end
             end  
-        end      
-
+        end
+                
     end                
 
     inputBuffer('set', aInput);
 
     dicomBuffer('set', aInput{1});                    
-
+    
+    for mm=1:numel(aInput)
+        if size(aInput{mm}, 3) ~= 1
+            aMip = computeMIP(aInput{mm});
+            mipBuffer('set', aMip, mm);
+            tInput(mm).aMip = aMip; 
+        end
+    end
+    
+    inputTemplate('set', tInput);
+ 
     progressBar(1, 'Ready'); 
 
 end

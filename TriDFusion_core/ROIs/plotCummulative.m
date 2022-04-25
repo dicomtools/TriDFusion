@@ -27,14 +27,19 @@ function ptrPlotCummulative = plotCummulative(pAxe, imCData, aColor)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
     
-    my_bins = min(double(imCData),[],'all'):max(double(imCData),[],'all');
+%    my_bins = min(double(imCData),[],'all'):max(double(imCData),[],'all');
+    
+
+    my_bins = min(double(imCData),[],'all'):max(double(imCData),[],'all');    
     bin = unique(my_bins);
     [N, ~] = histcounts(imCData,bin);
     ndist = N / sum(N);
     cdist = cumsum(ndist, 'reverse');
     hold on
-    ptrPlotCummulative = plot(pAxe, 0.5*(bin(1:end-1)+bin(2:end)), cdist);
+    lineSec = (bin(1:end-1)+bin(2:end));
+    ptrPlotCummulative = plot(pAxe, 0.5*lineSec, cdist);
     hold off
     ptrPlotCummulative.Color  = aColor;
-    
+    ptrPlotCummulative.LineWidth  = 1;
+   
 end

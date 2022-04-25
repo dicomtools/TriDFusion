@@ -6,12 +6,11 @@ function TriDFusion(varargin)
 %Note: option settings must fit on one line and can contain one semicolon at most.
 % -3d    : Display 2D View using 3D engine
 % -b     : Display 2D Border
-% -g     : Apply 3D Gauss Filter
 % -i     : TriDFusion is integrated with DIDOM Database Browser
 % -fusion: Activate the fusion. *Require 2 volumes 
 % -mip   : Activate the 3D mip. *The order of activation of the mip, vol and iso dictates the emphasis of each feature of the 3D resulting image
-% -iso   : Activate the 3D volume rendering. *The order of activation of the mip, vol and iso dictates the emphasis of each feature of the 3D resulting image
-% -vol   : Activate the 3D iso surface. *The order of activation of the mip, vol and iso dictates the emphasis of each feature of the 3D resulting image
+% -vol   : Activate the 3D volume rendering. *The order of activation of the mip, vol and iso dictates the emphasis of each feature of the 3D resulting image
+% -iso   : Activate the 3D iso surface. *The order of activation of the mip, vol and iso dictates the emphasis of each feature of the 3D resulting image
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
@@ -39,6 +38,8 @@ function TriDFusion(varargin)
 
     initViewerGlobal();
     
+    viewerSUVtype('set', 'BW'); % Body Weight
+    
     viewerAxesColor      ('set', [0.149 0.149 0.149]);
     viewerBackgroundColor('set', [0.16 0.18 0.20]);
     viewerForegroundColor('set', [0.94 0.94 0.94]);
@@ -49,11 +50,12 @@ function TriDFusion(varargin)
     viewerButtonPushedForegroundColor('set', [0.1 0.1 0.1]);
     
     arg3DEngine    = false;
-    argGaussFilter = false; 
     argBorder      = false;
     argInternal    = false;
     argFusion      = false;
     
+    dOutputDirOffset = 0;
+ 
     asRendererPriority = [];
     
     varargin = replace(varargin, '"', '');
@@ -64,14 +66,25 @@ function TriDFusion(varargin)
     for k = 1 : length(varargin)
    
         switch lower(varargin{k})
+            
+            case '-r' % 2D display using 3D engine
+                if k+1 <= length(varargin)
+                    if dOutputDirOffset == 0
+                        sOutputPath = varargin{k+1};
+                        if sOutputPath(end) ~= '/'
+                            sOutputPath = [sOutputPath '/'];   
+                            dOutputDirOffset = k+1;
+
+                            outputDir('set', sOutputPath);                                                         
+                        end               
+                    end
+                end
+                
             case '-3d' % 2D display using 3D engine
                 arg3DEngine = true;
 
             case '-b' % Show Border 2D
-                argBorder = true; 
-
-            case '-g' % Apply Gauss Filter
-                argGaussFilter = true;                
+                argBorder = true;               
 
             case '-i' % Viewer Integrate With DICOM DB Browser
                 argInternal = true;                               
@@ -89,18 +102,21 @@ function TriDFusion(varargin)
                 asRendererPriority{numel(asRendererPriority)+1} = 'mip';                                                
                 
             otherwise
-                asMainDirArg{argLoop} = varargin{k};
-                if asMainDirArg{argLoop}(end) ~= '/'
-                    asMainDirArg{argLoop} = [asMainDirArg{argLoop} '/'];                     
+                
+                if k ~= dOutputDirOffset % The output dir is set before
+                    asMainDirArg{argLoop} = varargin{k};
+                    if asMainDirArg{argLoop}(end) ~= '/'
+                        asMainDirArg{argLoop} = [asMainDirArg{argLoop} '/'];                     
+                    end
+                    argLoop = argLoop+1; 
+                    mainDir('set', asMainDirArg);                                 
                 end
-                argLoop = argLoop+1; 
-                mainDir('set', asMainDirArg);                                 
         end
     end            
     
-    is3DEngine   ('set', arg3DEngine    );
-    showBorder   ('set', argBorder      );
-    gaussFilter  ('set', argGaussFilter ); 
+    is3DEngine('set', arg3DEngine);
+    showBorder('set', argBorder  );
+    
     seriesDescription ('set', ' ');
     integrateToBrowser('set', argInternal);
 
@@ -137,6 +153,9 @@ function TriDFusion(varargin)
                'SizeChangedFcn',@resizeFigureCallback...
              );
     fiMainWindowPtr('set', fiMainWindow);
+    
+    set(fiMainWindow, 'doublebuffer', 'off'   );   
+    set(fiMainWindow, 'Renderer'    , 'opengl'); 
 
 %    warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');  
     
@@ -176,10 +195,7 @@ function TriDFusion(varargin)
     set(uiBar, 'ForegroundColor', viewerForegroundColor('get'));     
     set(uiBar, 'ShadowColor'    , viewerBackgroundColor('get'));
     set(uiBar, 'HighlightColor' , viewerBackgroundColor('get'));         
-    uiBarPtr('set', uiBar);
-    
-    set(fiMainWindowPtr('get'), 'doublebuffer', 'off'   );   
-    set(fiMainWindowPtr('get'), 'Renderer'    , 'opengl'); 
+    uiBarPtr('set', uiBar);    
         
     sRootPath = viewerRootPath('get');
     if isempty(sRootPath)

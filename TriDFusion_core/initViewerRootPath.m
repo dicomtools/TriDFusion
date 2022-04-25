@@ -28,27 +28,38 @@ function initViewerRootPath()
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
     viewerRootPath('set', '');
-             
-    sRootDir = pwd;
-    if sRootDir(end) ~= '\' || ...
-       sRootDir(end) ~= '/'     
-        sRootDir = [sRootDir '/'];
-    end   
-        
-    if isfile(sprintf('%sscreenDefault.png', sRootDir))
+    
+    if isdeployed 
+        % User is running an executable in standalone mode. 
+        [~, result] = system('set PATH');
+        sRootDir = char(regexpi(result, 'Path=(.*?);', 'tokens', 'once'));
+        if sRootDir(end) ~= '\' || ...
+           sRootDir(end) ~= '/'     
+            sRootDir = [sRootDir '/'];
+        end         
         viewerRootPath('set', sRootDir);
-    else
-        if integrateToBrowser('get') == true
-            if isfile(sprintf('%sTriDFusion/screenDefault.png', sRootDir))
-                viewerRootPath('set', sprintf('%sTriDFusion/', sRootDir) );
-            end
-        else    
-            sRootDir = fileparts(mfilename('fullpath'));
-            sRootDir = erase(sRootDir, 'TriDFusion_core');        
+    else               
+        sRootDir = pwd;
+        if sRootDir(end) ~= '\' || ...
+           sRootDir(end) ~= '/'     
+            sRootDir = [sRootDir '/'];
+        end   
 
-            if isfile(sprintf('%sscreenDefault.png', sRootDir))
-                viewerRootPath('set', sRootDir);
+        if isfile(sprintf('%sscreenDefault.png', sRootDir))
+            viewerRootPath('set', sRootDir);
+        else
+            if integrateToBrowser('get') == true
+                if isfile(sprintf('%sTriDFusion/screenDefault.png', sRootDir))
+                    viewerRootPath('set', sprintf('%sTriDFusion/', sRootDir) );
+                end
+            else    
+                sRootDir = fileparts(mfilename('fullpath'));
+                sRootDir = erase(sRootDir, 'TriDFusion_core');        
+
+                if isfile(sprintf('%sscreenDefault.png', sRootDir))
+                    viewerRootPath('set', sRootDir);
+                end
             end
-        end
-    end    
+        end    
+    end
 end

@@ -30,8 +30,8 @@ function [aAlphaMap, sAlphaType] = getMipAlphaMap(sAction, im, sTypeOrtMetaData,
     persistent paAlphaMap;
     persistent pasAlphaType;
 
-    if strcmp('set', sAction)
-        if strcmp(sTypeOrtMetaData, 'linear')
+    if strcmpi('set', sAction)
+        if strcmpi(sTypeOrtMetaData, 'Linear')
             if exist('aValue', 'var')
                 paAlphaMap   = aValue;
             else
@@ -39,7 +39,7 @@ function [aAlphaMap, sAlphaType] = getMipAlphaMap(sAction, im, sTypeOrtMetaData,
             end
             pasAlphaType = sTypeOrtMetaData;
             
-        elseif strcmp(sTypeOrtMetaData, 'custom')            
+        elseif strcmpi(sTypeOrtMetaData, 'Custom')            
             mipICObj = mipICObject('get');
             if isempty(mipICObj)
                 paAlphaMap = linspace(0, 1, 256)';
@@ -48,42 +48,42 @@ function [aAlphaMap, sAlphaType] = getMipAlphaMap(sAction, im, sTypeOrtMetaData,
             end
             pasAlphaType = sTypeOrtMetaData;
             
-        elseif strcmp(sTypeOrtMetaData, 'mr')
-           paAlphaMap   = defaultMipAlphaMap(im, 'mr');
+        elseif strcmpi(sTypeOrtMetaData, 'MR')
+           paAlphaMap   = defaultMipAlphaMap(im, 'MR');
            pasAlphaType = sTypeOrtMetaData;
 
-        elseif strcmp(sTypeOrtMetaData, 'ct')     
-            paAlphaMap   = defaultMipAlphaMap(im, 'ct');
+        elseif strcmpi(sTypeOrtMetaData, 'CT')     
+            paAlphaMap   = defaultMipAlphaMap(im, 'CT');
             pasAlphaType = sTypeOrtMetaData;
             
-        elseif strcmp(sTypeOrtMetaData, 'pt')     
-            paAlphaMap   = defaultMipAlphaMap(im, 'pt');
+        elseif strcmpi(sTypeOrtMetaData, 'PET')     
+            paAlphaMap   = defaultMipAlphaMap(im, 'PET');
             pasAlphaType = sTypeOrtMetaData;  
             
-        elseif strcmp(sTypeOrtMetaData, 'auto')               
+        elseif strcmpi(sTypeOrtMetaData, 'Auto')               
             paAlphaMap   = '';
-            pasAlphaType = 'auto';       
+            pasAlphaType = 'Auto';       
         end 
     else
-        if strcmp(pasAlphaType, 'custom')
+        if strcmpi(pasAlphaType, 'Custom')
 
             mipICObj = mipICObject('get');
             if ~isempty(mipICObj)
                 paAlphaMap = computeAlphaMap(mipICObj);
             end
-        elseif strcmp(pasAlphaType, 'linear')
+        elseif strcmpi(pasAlphaType, 'Linear')
             paAlphaMap = linspace(0, mipLinearAlphaValue('get'), 256)';                        
             
-        elseif strcmpi(pasAlphaType, 'auto')
-            if strcmpi(sTypeOrtMetaData{1}.Modality, 'ct')
-                paAlphaMap   = defaultMipAlphaMap(im, 'ct');
-                pasAlphaType = 'auto';
-            elseif strcmpi(sTypeOrtMetaData{1}.Modality, 'mr')
-                paAlphaMap   = defaultMipAlphaMap(im, 'mr');
-                pasAlphaType = 'auto';    
+        elseif strcmpi(pasAlphaType, 'Auto')
+            if strcmpi(sTypeOrtMetaData{1}.Modality, 'CT')
+                paAlphaMap   = defaultMipAlphaMap(im, 'CT');
+                pasAlphaType = 'Auto';
+            elseif strcmpi(sTypeOrtMetaData{1}.Modality, 'MR')
+                paAlphaMap   = defaultMipAlphaMap(im, 'MR');
+                pasAlphaType = 'Auto';    
             else
-                paAlphaMap   = defaultMipAlphaMap(im, 'pt');
-                pasAlphaType = 'auto';                  
+                paAlphaMap   = defaultMipAlphaMap(im, 'PET');
+                pasAlphaType = 'Auto';                  
             end            
         end
     end

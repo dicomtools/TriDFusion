@@ -43,8 +43,23 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
          volObj = volObject('get');
          isoObj = isoObject('get');
          mipObj = mipObject('get');
+         
+         try % Clear object
+             if ~isvalid(volObj)
+                 volObj = [];
+             end
 
-         im = im(:,:,end:-1:1);
+             if ~isvalid(isoObj)
+                 isoObj = [];
+             end
+
+             if ~isvalid(mipObj)
+                 mipObj = [];
+             end
+         catch
+         end
+         
+         im = squeeze(im(:,:,end:-1:1));
 
 
 %             im(:,(399:400),:) = 0;
@@ -76,6 +91,7 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
                  else  
                      aCamera = {'CameraPosition', [1 0 0], ...
                                 'CameraUpVector', [0 0 1]};
+                                   
                      aInputArguments = [aInputArguments(:)', aCamera(:)'];                               
                  end      
 
@@ -92,6 +108,7 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
                  else    
                      aCamera = {'CameraPosition', [1 0 0], ...
                                 'CameraUpVector', [0 0 1]};
+                            
                      aInputArguments = [aInputArguments(:)', aCamera(:)'];  
                  end
 
@@ -107,7 +124,8 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
                  else
                      aCamera = {'CameraPosition', [1 0 0], ...
                                 'CameraUpVector', [0 0 1]};
-                     aInputArguments = [aInputArguments(:)', aCamera(:)'];  
+                            
+                    aInputArguments = [aInputArguments(:)', aCamera(:)'];  
                  end
          end                    
 
@@ -163,7 +181,7 @@ end
             aScaleFactors = get(mipObj, 'ScaleFactors');
         end
 
-        aInputArguments = [aInputArguments(:)', {'ScaleFactors'}, {aScaleFactors}];
+        aInputArguments = [aInputArguments(:)', {'ScaleFactors'}, {[1 1 1]}];
 
         if init3DPanel('get') == true
             view3DPanel('set', true);
@@ -208,6 +226,7 @@ end
 %                    volshow(im, 'Parent', uiOneWindowPtr('get'), 'Renderer', sRenderer)
 
                 pObject = volshow(im, aInputArguments{:});
+                set(pObject, 'ScaleFactors', aScaleFactors);
                 if isempty(isoObj)&&isempty(mipObj)&&multiFrame3DZoom('get')==0
                     multiFrame3DZoom('set', 3*dScaleMax);  % Normalize to 1
                 end
@@ -237,6 +256,7 @@ end
                 aInputArguments = [aInputArguments(:)', {'Isovalue'}, {aIsovalue}, {'IsosurfaceColor'}, {aIsosurfaceColor}];
 
                 pObject = volshow(im, aInputArguments{:});
+                set(pObject, 'ScaleFactors', aScaleFactors);
                 if isempty(volObj)&&isempty(mipObj)&&multiFrame3DZoom('get')==0
                     multiFrame3DZoom('set', 3*dScaleMax);  % Normalize to 1
                 end                        
@@ -256,6 +276,7 @@ end
                aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
 
                pObject = volshow(im, aInputArguments{:});
+               set(pObject, 'ScaleFactors', aScaleFactors);
                if isempty(volObj)&&isempty(isoObj)&&multiFrame3DZoom('get')==0
                     multiFrame3DZoom('set', 3*dScaleMax);  % Normalize to 1
                end                         

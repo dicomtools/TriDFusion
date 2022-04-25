@@ -44,58 +44,51 @@ function cropOutsideCallback(hObject,~)
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
     
-    axe = axePtr('get');
-    if ~isempty(axe)
-       imAxe = imAxePtr('get');
-       if gca == axe                        
-            b = imAxe.CData;
-            c = createMask(hObject.UserData, b);
-            b(c == 0) = cropValue('get')-c(c == 0); % crop outside
-            imAxe.CData = b;                
-            im = b;                           
+    if size(im, 3) == 1
+        axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+        if ~isempty(axe)
+           if gca == axe                        
+                im = cropOutside(hObject.UserData, ...
+                                 im, ...
+                                 [], ...
+                                 'Axe' ...
+                                 );                             
+            end
         end
+    else
+        if ~isempty(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
+           ~isempty(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
+           ~isempty(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')))       
+
+            if gca == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                                
+                im = cropOutside(hObject.UserData, ...
+                                 im, ...
+                                 sliceNumber('get', 'coronal'), ...
+                                 'Axes1' ...
+                                 );             
+            end
+
+            if gca == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))        
+
+                im = cropOutside(hObject.UserData, ...
+                                 im, ...
+                                 sliceNumber('get', 'sagittal'), ...
+                                 'Axes2' ...
+                                 );             
+            end
+
+            if gca == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))     
+                
+                im = cropOutside(hObject.UserData, ...
+                                 im, ...
+                                 sliceNumber('get', 'axial'), ...
+                                 'Axes3' ...
+                                 );                                           
+            end
+        end     
     end
-
-    if ~isempty(axes1Ptr('get')) && ...
-       ~isempty(axes2Ptr('get')) && ...
-       ~isempty(axes3Ptr('get'))
-
-        imCoronal  = imCoronalPtr ('get');
-        imSagittal = imSagittalPtr('get');
-        imAxial    = imAxialPtr   ('get');
-
-        if gca == axes1Ptr('get')
-            iCoronal  = sliceNumber('get', 'coronal');
-
-            b = imCoronal.CData;
-            c = createMask(hObject.UserData, b);
-            b(c == 0) = cropValue('get')-c(c == 0); % crop outside
-            imCoronal.CData = b;                
-            im(iCoronal,:,:) = permuteBuffer(b, 'coronal');               
-        end
-
-        if gca == axes2Ptr('get')        
-            iSagittal = sliceNumber('get', 'sagittal');
-
-            b = imSagittal.CData;
-            c = createMask(hObject.UserData,b);
-            b(c == 0) = cropValue('get')-c(c == 0); % crop outside
-            imSagittal.CData = b;          
-
-            im(:,iSagittal,:) = permuteBuffer(b, 'sagittal');  
-        end
-
-        if gca == axes3Ptr('get')      
-            iAxial = sliceNumber('get', 'axial');
-
-            b = imAxial.CData;       
-            c = createMask(hObject.UserData,b);
-            b(c == 0) = cropValue('get')-c(c == 0); % crop outside                
-            imAxial.CData = b;                
-            im(:,:,iAxial) = b;                
-        end
-    end     
-
+    
     dicomBuffer('set', im); 
 
     iOffset = get(uiSeriesPtr('get'), 'Value');

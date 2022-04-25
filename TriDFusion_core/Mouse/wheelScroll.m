@@ -27,7 +27,7 @@ function wheelScroll(~, evnt)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    windowButton('set', 'down');  
+    windowButton('set', 'scrool');  
 
     if size(dicomBuffer('get'), 3) ~= 1 && ...
        switchTo3DMode('get')      == false && ...
@@ -44,7 +44,7 @@ function wheelScroll(~, evnt)
 
         else
             switch gca
-                case axes1Ptr('get')
+                case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     if evnt.VerticalScrollCount > 0
                         if sliceNumber('get', 'coronal') > 1
                             sliceNumber('set', 'coronal', ...
@@ -59,7 +59,7 @@ function wheelScroll(~, evnt)
 
                     set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get'), 1));
 
-                case axes2Ptr('get')
+                case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     if evnt.VerticalScrollCount > 0
                          if sliceNumber('get', 'sagittal') > 1
                              sliceNumber('set', 'sagittal', ...
@@ -74,7 +74,7 @@ function wheelScroll(~, evnt)
 
                     set(uiSliderSagPtr('get'), 'Value', sliceNumber('get', 'sagittal') / size(dicomBuffer('get'), 2));
 
-                case axes3Ptr('get')
+                case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
 
                     if evnt.VerticalScrollCount > 0
 
@@ -90,14 +90,42 @@ function wheelScroll(~, evnt)
                     end
 
                     set(uiSliderTraPtr('get'), 'Value', 1 - (sliceNumber('get', 'axial') / size(dicomBuffer('get'), 3)));
+                    
+                case axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                                        
+                    iMipAngleValue = mipAngle('get');
+                    
+                    if evnt.VerticalScrollCount > 0
+                        iMipAngleValue = iMipAngleValue-1;
+                    else
+                        iMipAngleValue = iMipAngleValue+1;
+                    end
 
-
+                    if iMipAngleValue <= 0
+                        iMipAngleValue = 32;
+                    end
+                    
+                    if iMipAngleValue > 32
+                        iMipAngleValue = 1;
+                    end    
+                    
+                    mipAngle('set', iMipAngleValue);                    
+                    
+                    if iMipAngleValue == 1
+                        dMipSliderValue = 0;
+                    else
+                        dMipSliderValue = mipAngle('get')/32;
+                    end
+                    
+                    set(uiSliderMipPtr('get'), 'Value', dMipSliderValue);
+                    
                 otherwise
 
             end
         end
-
-        refreshImages();
+        
+        refreshImages();       
+        
     else
         updateObjet3DPosition();              
     end

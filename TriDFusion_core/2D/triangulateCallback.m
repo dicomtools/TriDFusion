@@ -32,7 +32,7 @@ function triangulateCallback(~, ~)
     end
     
     set(fiMainWindowPtr('get'), 'Pointer', 'default');            
-    isMoveImageActivated('set', false);
+%    isMoveImageActivated('set', false);
             
     if switchTo3DMode('get')     == false && ...
        switchToIsoSurface('get') == false && ...  
@@ -65,7 +65,10 @@ function triangulateCallback(~, ~)
 %              set(btnDataCursor, 'BackgroundColor', 'default');
         dataCursorTool('set', false);              
         datacursormode('off');       
-
+        
+        if isMoveImageActivated('get') == true
+            set(fiMainWindowPtr('get'), 'Pointer', 'fleur');           
+        end   
     end
 
 end

@@ -33,26 +33,30 @@ function initRoi()
         return;
     end
 
-    atRoi = roiTemplate('get');    
+    atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
     if isempty(atRoi)
         return;
     end
-                  
+
+    atDicomInfo = dicomMetaData('get');
+
+    imRoi  = dicomBuffer('get');
+
     endLoop = numel(atRoi);
     for bb=1:numel(atRoi)
-        
-        if mod(bb,5)==1 || bb == endLoop         
+
+        if mod(bb,5)==1 || bb == endLoop
             progressBar(bb/numel(tInitInput(iOffset).tRoi), sprintf('Processing ROI %d/%d', bb, endLoop));
         end
-        
+
         if     strcmpi(atRoi{bb}.Axe, 'axes1')
-            axRoi = axes1Ptr('get');
+            axRoi = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
         elseif strcmpi(atRoi{bb}.Axe, 'axes2')
-            axRoi = axes2Ptr('get');
+            axRoi = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
         elseif strcmpi(atRoi{bb}.Axe, 'axes3')
-            axRoi = axes3Ptr('get');
+            axRoi = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
         elseif strcmpi(atRoi{bb}.Axe, 'axe')
-            axRoi = axePtr('get');
+            axRoi = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
         else
             break;
         end
@@ -71,8 +75,8 @@ function initRoi()
                                   'LabelVisible', atRoi{bb}.LabelVisible, ...
                                   'Tag'         , atRoi{bb}.Tag);
 
-                uimenu(roiPtr.UIContextMenu, 'Label', 'Copy Object' , 'UserData', roiPtr, 'Callback', @copyRoiCallback, 'Separator', 'on');
-                uimenu(roiPtr.UIContextMenu, 'Label', 'Paste Object', 'UserData', roiPtr, 'Callback', @pasteRoiCallback);
+                uimenu(roiPtr.UIContextMenu, 'Label', 'Copy Contour' , 'UserData', roiPtr, 'Callback', @copyRoiCallback, 'Separator', 'on');
+                uimenu(roiPtr.UIContextMenu, 'Label', 'Paste Contour', 'UserData', roiPtr, 'Callback', @pasteRoiCallback);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Snap To Circles'   , 'UserData',roiPtr, 'Callback',@snapLinesToCirclesCallback, 'Separator', 'on');
                 uimenu(roiPtr.UIContextMenu,'Label', 'Snap To Rectangles', 'UserData',roiPtr, 'Callback',@snapLinesToRectanglesCallback);
@@ -81,6 +85,8 @@ function initRoi()
                 uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Label', 'UserData',roiPtr, 'Callback',@hideViewLabelCallback);
                 uimenu(roiPtr.UIContextMenu,'Label', 'Edit Color'     , 'UserData',roiPtr, 'Callback',@editColorCallback);
 
+                constraintMenu(roiPtr);
+
                 cropMenu(roiPtr);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
@@ -88,24 +94,42 @@ function initRoi()
 
             case lower('images.roi.freehand')
 
-                roiPtr = drawfreehand(axRoi, ...
-                                      'Position'      , atRoi{bb}.Position, ...
-                                      'Waypoints'     , atRoi{bb}.Waypoints, ...
-                                      'Color'         , atRoi{bb}.Color, ...
-                                      'FaceAlpha'     , atRoi{bb}.FaceAlpha, ...
-                                      'LineWidth'     , atRoi{bb}.LineWidth, ...
-                                      'Label'         , atRoi{bb}.Label, ...
-                                      'LabelVisible'  , atRoi{bb}.LabelVisible, ...
-                                      'FaceSelectable', atRoi{bb}.FaceSelectable, ...
-                                      'Tag'           , atRoi{bb}.Tag);
-                roiPtr.Waypoints(:) = atRoi{bb}.Waypoints(:);
-
+                if isempty(atRoi{bb}.Waypoints)
+                    roiPtr = drawfreehand(axRoi, ...
+                                          'Position'      , atRoi{bb}.Position, ...
+                                          'Smoothing'     , atRoi{bb}.Smoothing, ...
+                                          'Color'         , atRoi{bb}.Color, ...
+                                          'FaceAlpha'     , atRoi{bb}.FaceAlpha, ...
+                                          'LineWidth'     , atRoi{bb}.LineWidth, ...
+                                          'Label'         , atRoi{bb}.Label, ...
+                                          'LabelVisible'  , atRoi{bb}.LabelVisible, ...
+                                          'FaceSelectable', atRoi{bb}.FaceSelectable, ...
+                                          'Tag'           , atRoi{bb}.Tag);  
+                    roiPtr.Waypoints(:) = false;                    
+                else
+                    roiPtr = drawfreehand(axRoi, ...
+                                          'Position'      , atRoi{bb}.Position, ...
+                                          'Smoothing'     , atRoi{bb}.Smoothing, ...
+                                          'Waypoints'     , atRoi{bb}.Waypoints, ...
+                                          'Color'         , atRoi{bb}.Color, ...
+                                          'FaceAlpha'     , atRoi{bb}.FaceAlpha, ...
+                                          'LineWidth'     , atRoi{bb}.LineWidth, ...
+                                          'Label'         , atRoi{bb}.Label, ...
+                                          'LabelVisible'  , atRoi{bb}.LabelVisible, ...
+                                          'FaceSelectable', atRoi{bb}.FaceSelectable, ...
+                                          'Tag'           , atRoi{bb}.Tag);
+                end
+                
                 roiDefaultMenu(roiPtr);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
                 uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', roiPtr, 'Callback', @clearWaypointsCallback);
 
+                constraintMenu(roiPtr);
+
                 cropMenu(roiPtr);
+                
+                voiMenu(roiPtr);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
@@ -131,7 +155,11 @@ function initRoi()
                 uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
                 uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', roiPtr, 'Callback', @clearWaypointsCallback);
 
+                constraintMenu(roiPtr);
+
                 cropMenu(roiPtr);
+                
+                voiMenu(roiPtr);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
@@ -154,7 +182,11 @@ function initRoi()
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
 
+                constraintMenu(roiPtr);
+
                 cropMenu(roiPtr);
+                
+                voiMenu(roiPtr);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
@@ -173,7 +205,11 @@ function initRoi()
 
                 roiDefaultMenu(roiPtr);
 
+                constraintMenu(roiPtr);
+
                 cropMenu(roiPtr);
+                
+                voiMenu(roiPtr);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
@@ -195,13 +231,19 @@ function initRoi()
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
 
+                constraintMenu(roiPtr);
+
                 cropMenu(roiPtr);
+                
+                voiMenu(roiPtr);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
             case lower('images.roi.rectangle')
                 roiPtr = drawrectangle(axRoi, ...
                                       'Position'      , atRoi{bb}.Position, ...
+                                      'Rotatable'     , atRoi{bb}.Rotatable, ...
+                                      'RotationAngle' , atRoi{bb}.RotationAngle, ...
                                       'Color'         , atRoi{bb}.Color, ...
                                       'FaceAlpha'     , atRoi{bb}.FaceAlpha, ...
                                       'LineWidth'     , atRoi{bb}.LineWidth, ...
@@ -214,7 +256,11 @@ function initRoi()
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
 
+                constraintMenu(roiPtr);
+
                 cropMenu(roiPtr);
+                
+                voiMenu(roiPtr);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
@@ -224,9 +270,14 @@ function initRoi()
         addlistener(roiPtr, 'ROIMoved'   , @movedRoiEvents  );
 
         atRoi{bb}.Object = roiPtr;
+
+        tMaxDistances = computeRoiFarthestPoint(imRoi, atDicomInfo, atRoi{bb}, false, false);
+        atRoi{bb}.MaxDistances = tMaxDistances;
     end
 
-    roiTemplate('set', atRoi);
+    roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoi);
+
+    setVoiRoiSegPopup();
 
     progressBar(1, 'Ready');
 

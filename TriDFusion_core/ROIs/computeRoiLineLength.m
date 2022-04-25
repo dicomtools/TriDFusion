@@ -33,11 +33,11 @@ function dLength = computeRoiLineLength(roiObject)
         sAxe = 'Axe';    
     else
         switch gca
-            case axes1Ptr('get')   
+            case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))   
                 sAxe = 'Axes1';
-            case axes2Ptr('get')                   
+            case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))                   
                 sAxe = 'Axes2';
-            case axes3Ptr('get')                   
+            case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))                   
                 sAxe = 'Axes3';
         end
     end

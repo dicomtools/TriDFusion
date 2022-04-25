@@ -1,5 +1,5 @@
-function [imRegistered, atRegisteredMetaData, Rregistered, Rmoving, Rfixed] = registerImage(imMoving, atMovingMetaData, imFixed, atFixedMetaData, sType, tOptimizer, tMetric, bUpdateDescription)
-%function [imRegistered, atRegisteredMetaData, Rregistered, Rmoving, Rfixed] = registerImage(imMoving, atMovingMetaData, imFixed, atFixedMetaData, sType, tOptimizer, tMetric, bUpdateDescription)
+function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = registerImage(imToRegister, atImToRegisterMetaData, imReference, atReferenceMetaData, aLogicalMask, sType, sModality, tOptimizer, tMetric, bRefOutputView, bUpdateDescription, registratedGeomtform)
+%function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed] = registerImage(imToRegister, atImToRegisterMetaData, dImToRegisterOffset,imReference, atReferenceMetaData, dReferenceOffset, sType, sModality, tOptimizer, tMetric,  bRefOutputView, bUpdateDescription, registratedGeomtform)
 %Register any modalities.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -36,154 +36,206 @@ function [imRegistered, atRegisteredMetaData, Rregistered, Rmoving, Rfixed] = re
     % 'similarity'	Nonreflective similarity transformation consisting of translation, rotation, and scale.
     % 'affine' Affine transformation consisting of translation, rotation, scale, and shear.        
     
+    if strcmpi(sType, 'Deformable')
+        bDemons = true;
+    else
+        bDemons = false;
+    end
     
-    fixedSliceThickness = computeSliceSpacing(atFixedMetaData);
+    if bRefOutputView == false && bDemons == false  
+        [imReference, atReferenceMetaData] = ...
+            resampleImage(imReference, atReferenceMetaData, imToRegister, atImToRegisterMetaData, 'nearest', false);
+    end
+    
+    fixedSliceThickness = computeSliceSpacing(atReferenceMetaData);
     
     if fixedSliceThickness == 0           
         fixedSliceThickness = 1;
     end
     
-    if atFixedMetaData{1}.PixelSpacing(1) == 0 && ...
-       atFixedMetaData{1}.PixelSpacing(2) == 0 
-        for jj=1:numel(atFixedMetaData)
-            atFixedMetaData{1}.PixelSpacing(1) =1;
-            atFixedMetaData{1}.PixelSpacing(2) =1;
+    if atReferenceMetaData{1}.PixelSpacing(1) == 0 && ...
+       atReferenceMetaData{1}.PixelSpacing(2) == 0 
+        for jj=1:numel(atReferenceMetaData)
+            atReferenceMetaData{1}.PixelSpacing(1) =1;
+            atReferenceMetaData{1}.PixelSpacing(2) =1;
         end       
     end
         
-    if size(imFixed, 3) == 1
-       Rfixed  = imref2d(size(imFixed),atFixedMetaData{1}.PixelSpacing(2),atFixedMetaData{1}.PixelSpacing(1));  
+    if size(imReference, 3) == 1
+       Rfixed  = imref2d(size(imReference),atReferenceMetaData{1}.PixelSpacing(2),atReferenceMetaData{1}.PixelSpacing(1));  
     else
-       Rfixed  = imref3d(size(imFixed),atFixedMetaData{1}.PixelSpacing(2),atFixedMetaData{1}.PixelSpacing(1), fixedSliceThickness);  
+       Rfixed  = imref3d(size(imReference),atReferenceMetaData{1}.PixelSpacing(2),atReferenceMetaData{1}.PixelSpacing(1), fixedSliceThickness);  
     end
 
-    movingSliceThickness = computeSliceSpacing(atMovingMetaData);        
+    movingSliceThickness = computeSliceSpacing(atImToRegisterMetaData);        
     
     if movingSliceThickness == 0           
         movingSliceThickness = 1;
     end
     
-    if atMovingMetaData{1}.PixelSpacing(1) == 0 && ...
-       atMovingMetaData{1}.PixelSpacing(2) == 0 
-        for jj=1:numel(atMovingMetaData)
-            atMovingMetaData{1}.PixelSpacing(1) =1;
-            atMovingMetaData{1}.PixelSpacing(2) =1;
+    if atImToRegisterMetaData{1}.PixelSpacing(1) == 0 && ...
+       atImToRegisterMetaData{1}.PixelSpacing(2) == 0 
+        for jj=1:numel(atImToRegisterMetaData)
+            atImToRegisterMetaData{1}.PixelSpacing(1) =1;
+            atImToRegisterMetaData{1}.PixelSpacing(2) =1;
         end       
+    end      
+        
+    if size(imToRegister, 3) == 1
+       Rmoving = imref2d(size(imToRegister), atImToRegisterMetaData{1}.PixelSpacing(2), atImToRegisterMetaData{1}.PixelSpacing(1));                 
+    else         
+       Rmoving = imref3d(size(imToRegister), atImToRegisterMetaData{1}.PixelSpacing(2), atImToRegisterMetaData{1}.PixelSpacing(1), movingSliceThickness);
+    end
+       
+    bMonomodal = false;
+    if strcmpi(sModality, 'Automatic') % Must be the same modality, same camera & same intensity,
+        if  strcmpi(atReferenceMetaData{1}.Modality, atImToRegisterMetaData{1}.Modality) && ... % Same modality
+            strcmpi(atReferenceMetaData{1}.ManufacturerModelName, atImToRegisterMetaData{1}.ManufacturerModelName) && ... % Same camera
+            strcmpi(atReferenceMetaData{1}.ProtocolName, atImToRegisterMetaData{1}.ProtocolName) % Same protocol 
+                bMonomodal = true;
+        end        
+    else
+        if strcmpi(sModality, 'Monomodal') 
+            bMonomodal = true;
+        end        
     end
       
+    if bMonomodal == true
+      
+        [optimizer, metric] = imregconfig('monomodal');
         
-    if size(imMoving, 3) == 1
-       Rmoving = imref2d(size(imMoving),atMovingMetaData{1}.PixelSpacing(2),atMovingMetaData{1}.PixelSpacing(1));                 
-    else         
-       Rmoving = imref3d(size(imMoving),atMovingMetaData{1}.PixelSpacing(2),atMovingMetaData{1}.PixelSpacing(1),movingSliceThickness);
-    end
-
-    [optimizer, metric] = imregconfig('multimodal');
-
-    metric.NumberOfSpatialSamples = tMetric.NumberOfSpatialSamples;
-    metric.NumberOfHistogramBins = tMetric.NumberOfHistogramBins;
-    metric.UseAllPixels = tMetric.UseAllPixels;
-
-    optimizer.InitialRadius = tOptimizer.InitialRadius;
-    optimizer.Epsilon = tOptimizer.Epsilon;
-    optimizer.GrowthFactor = tOptimizer.GrowthFactor;
-    optimizer.MaximumIterations = tOptimizer.MaximumIterations;
-
-    if double(min(imMoving,[],'all')) == 0
-        [imRegistered, Rregistered] = imregister(imMoving, Rmoving, imFixed, Rfixed, sType, optimizer, metric);  
-    else    
-        [~, Rregistered] = imregister(imMoving, Rmoving, imFixed, Rfixed, sType, optimizer, metric);  
+        optimizer.GradientMagnitudeTolerance = tOptimizer.GradientMagnitudeTolerance;
+        optimizer.MinimumStepLength = tOptimizer.MinimumStepLength;
+        optimizer.MaximumStepLength = tOptimizer.MaximumStepLength;
+        optimizer.RelaxationFactor  = tOptimizer.RelaxationFactor;
+    else
     
-        geomtform = imregtform(imMoving, Rmoving, imFixed, Rregistered, sType, optimizer, metric);
-        imRegistered = imwarp(imMoving, Rmoving, geomtform, 'bicubic', 'OutputView', Rregistered, 'FillValues', double(min(imMoving,[],'all')) );
+        [optimizer, metric] = imregconfig('multimodal');
+
+        metric.NumberOfSpatialSamples = tMetric.NumberOfSpatialSamples;
+        metric.NumberOfHistogramBins  = tMetric.NumberOfHistogramBins;
+        metric.UseAllPixels           = tMetric.UseAllPixels;
+
+        optimizer.InitialRadius = tOptimizer.InitialRadius;
+        optimizer.Epsilon       = tOptimizer.Epsilon;
+        optimizer.GrowthFactor  = tOptimizer.GrowthFactor;
     end
-
-    dimsReg = size(imRegistered);
-
-    atRegisteredMetaData = atMovingMetaData;
-
-    if atFixedMetaData{1}.SpacingBetweenSlices
-        fSpacing = atFixedMetaData{1}.SpacingBetweenSlices;
+    
+    optimizer.MaximumIterations = tOptimizer.MaximumIterations;
+    
+    dMovingMin = double(min(imToRegister,[],'all'));
+   
+    if bRefOutputView == true
+        Routput = Rfixed;
     else
-        fSpacing = fixedSliceThickness;
+        Routput = Rmoving;
     end
-
-    if size(imRegistered, 3) ~= 1
-        if dimsReg(3) < numel(atRegisteredMetaData) && ...
-           numel(atRegisteredMetaData) ~= 1   
-            atRegisteredMetaData = atRegisteredMetaData(1:dimsReg(3));
-
-        elseif dimsReg(3) > numel(atRegisteredMetaData) && ...
-               numel(atRegisteredMetaData) ~= 1   
-
-            for cc=1:dimsReg(3)- numel(atRegisteredMetaData)
-                atRegisteredMetaData{end+1} = atRegisteredMetaData{end}; %Add missing slice
-            end
+       
+    
+    if exist('registratedGeomtform', 'var')        
+                
+        if bDemons == true        
+            imRegistered = imwarp(imToRegister, registratedGeomtform, 'bicubic', 'FillValues', dMovingMin);
+        else        
+            imRegistered = imwarp(imToRegister, Rmoving, registratedGeomtform, 'bicubic', 'OutputView', Routput, 'FillValues', dMovingMin);  
         end
-    end
+        geomtform = registratedGeomtform;
+    else
+        if bDemons == true
+%            imToRegister = gpuArray(imToRegister);
+%            imReference  = gpuArray(imReference);
+           
+            [geomtform, imRegistered] = registerDemons(imToRegister, imReference, optimizer.MaximumIterations, bRefOutputView);
+        else
+            if ~isempty(aLogicalMask) % Use a logical mask 
 
-    if numel(atRegisteredMetaData) == numel(atFixedMetaData)
+                imToRegisterMasked = imToRegister;                        
+                [aLogicalMask, ~] = ...
+                    resampleImage(double(aLogicalMask), atReferenceMetaData, imToRegister, atImToRegisterMetaData, 'nearest', false);                
+                aLogicalMask = logical(imbinarize(aLogicalMask));
+                imToRegisterMasked(aLogicalMask==0) = min(imToRegister, [], 'all'); 
 
-        for jj=1:numel(atRegisteredMetaData)
-            atRegisteredMetaData{jj}.PixelSpacing(1) = atFixedMetaData{jj}.PixelSpacing(1);
-            atRegisteredMetaData{jj}.PixelSpacing(2) = atFixedMetaData{jj}.PixelSpacing(2);
-            atRegisteredMetaData{jj}.SliceThickness  = atFixedMetaData{jj}.SliceThickness;
-            if atFixedMetaData{jj}.SpacingBetweenSlices
-                atRegisteredMetaData{jj}.SpacingBetweenSlices  = atFixedMetaData{jj}.SpacingBetweenSlices;
-            else
-                atRegisteredMetaData{jj}.SpacingBetweenSlices = atRegisteredMetaData{jj}.SliceThickness;
+                imReferenceMasked = imReference;          
+                imReferenceMasked(aLogicalMask==0) = min(imReference, [], 'all');  
+
+                geomtform = imregtform(imToRegisterMasked, Rmoving, imReferenceMasked, Rfixed, sType, optimizer, metric);
+            else    
+                geomtform = imregtform(imToRegister, Rmoving, imReference, Rfixed, sType, optimizer, metric);
             end
-
-            if bUpdateDescription == true 
-                atRegisteredMetaData{jj}.SeriesDescription  = sprintf('MOV-COREG %s', atRegisteredMetaData{jj}.SeriesDescription);
-            end
-        end
-
-        for cc=1:numel(atRegisteredMetaData)
-            atRegisteredMetaData{cc}.InstanceNumber  = atFixedMetaData{cc}.InstanceNumber;               
-            atRegisteredMetaData{cc}.PatientPosition = atFixedMetaData{cc}.PatientPosition;               
-            atRegisteredMetaData{cc}.ImagePositionPatient    = atFixedMetaData{cc}.ImagePositionPatient;               
-            atRegisteredMetaData{cc}.ImageOrientationPatient = atFixedMetaData{cc}.ImageOrientationPatient;                              
-            atRegisteredMetaData{cc}.SliceLocation  = atFixedMetaData{cc}.SliceLocation;               
-            atRegisteredMetaData{cc}.NumberOfSlices = atFixedMetaData{cc}.NumberOfSlices;               
+            
+            imRegistered = imwarp(imToRegister, Rmoving, geomtform, 'OutputView', Routput, 'FillValues', dMovingMin); 
         end              
-    else
-        for jj=1:numel(atRegisteredMetaData)
-            atRegisteredMetaData{jj}.PatientPosition = atFixedMetaData{1}.PatientPosition;               
-            atRegisteredMetaData{jj}.PixelSpacing(1) = atFixedMetaData{1}.PixelSpacing(1);
-            atRegisteredMetaData{jj}.PixelSpacing(2) = atFixedMetaData{1}.PixelSpacing(2);
-            atRegisteredMetaData{jj}.SliceThickness  = atFixedMetaData{1}.SliceThickness;
-            if atFixedMetaData{1}.SpacingBetweenSlices
-                atRegisteredMetaData{jj}.SpacingBetweenSlices  = atFixedMetaData{1}.SpacingBetweenSlices;
-            else
-                atRegisteredMetaData{jj}.SpacingBetweenSlices = atRegisteredMetaData{jj}.SliceThickness;
-            end
-
-            atRegisteredMetaData{jj}.InstanceNumber  = jj;               
-            atRegisteredMetaData{jj}.NumberOfSlices  = numel(atRegisteredMetaData); 
-            if bUpdateDescription == true 
-                atRegisteredMetaData{jj}.SeriesDescription  = sprintf('MOV-COREG %s', atRegisteredMetaData{jj}.SeriesDescription);
-            end
-        end 
-
-        for cc=1:numel(atRegisteredMetaData)
-            atRegisteredMetaData{cc}.PatientPosition = atFixedMetaData{1}.PatientPosition;               
-            atRegisteredMetaData{cc}.ImagePositionPatient    = atFixedMetaData{1}.ImagePositionPatient;               
-            atRegisteredMetaData{cc}.ImageOrientationPatient = atFixedMetaData{1}.ImageOrientationPatient;                            
-        end    
-
-        newSliceThickness = fSpacing;
-        for cc=1:numel(atRegisteredMetaData)-1
-            atRegisteredMetaData{cc+1}.ImagePositionPatient(3) = atRegisteredMetaData{cc}.ImagePositionPatient(3) + newSliceThickness;               
-            atRegisteredMetaData{cc+1}.SliceLocation = atRegisteredMetaData{cc}.SliceLocation + newSliceThickness;               
-        end 
     end
+               
+    if bRefOutputView == true
+        
+%        newSliceThickness = fixedSliceThickness;        
+     
+        dimsRef = size(imReference);        
+%        dimsDcm = size(imToRegister);
+        
+        %Add missing slice
+     
+        if dimsRef(3) < numel(atImToRegisterMetaData) && ...
+           numel(atImToRegisterMetaData) ~= 1   
+            atImToRegisterMetaData = atImToRegisterMetaData(1:dimsRef(3));
 
+        elseif dimsRef(3) > numel(atImToRegisterMetaData) && ...
+               numel(atImToRegisterMetaData) ~= 1   
+
+            for cc=1:dimsRef(3)- numel(atImToRegisterMetaData)
+                atImToRegisterMetaData{end+1} = atImToRegisterMetaData{end};
+            end
+        end
+
+        for jj=1:numel(atImToRegisterMetaData)
+            
+            if numel(atReferenceMetaData) == numel(atImToRegisterMetaData)
+                atImToRegisterMetaData{jj}.PatientPosition = atReferenceMetaData{jj}.PatientPosition;  
+                atImToRegisterMetaData{jj}.InstanceNumber  = atReferenceMetaData{jj}.InstanceNumber;               
+                atImToRegisterMetaData{jj}.NumberOfSlices  = atReferenceMetaData{jj}.NumberOfSlices;
+            else
+                atImToRegisterMetaData{jj}.PatientPosition = atReferenceMetaData{1}.PatientPosition;  
+                atImToRegisterMetaData{jj}.InstanceNumber  = jj;               
+                atImToRegisterMetaData{jj}.NumberOfSlices  = numel(atReferenceMetaData);                
+            end
+            
+            atImToRegisterMetaData{jj}.PixelSpacing(1) = atReferenceMetaData{jj}.PixelSpacing(1);
+            atImToRegisterMetaData{jj}.PixelSpacing(2) = atReferenceMetaData{jj}.PixelSpacing(2);
+            if atImToRegisterMetaData{jj}.SliceThickness ~= 0
+                atImToRegisterMetaData{jj}.SliceThickness  = atReferenceMetaData{jj}.SliceThickness;
+            end
+            if atReferenceMetaData{jj}.SpacingBetweenSlices == 0
+                atImToRegisterMetaData{jj}.SpacingBetweenSlices = fixedSliceThickness;        
+            else
+                atImToRegisterMetaData{jj}.SpacingBetweenSlices = atReferenceMetaData{jj}.SpacingBetweenSlices;        
+            end
+        end
+
+        for cc=1:numel(atImToRegisterMetaData)-1
+            if atImToRegisterMetaData{1}.ImagePositionPatient(3) < atImToRegisterMetaData{2}.ImagePositionPatient(3)
+                atImToRegisterMetaData{cc+1}.ImagePositionPatient(3) = atImToRegisterMetaData{cc}.ImagePositionPatient(3) + fixedSliceThickness;               
+                atImToRegisterMetaData{cc+1}.SliceLocation = atImToRegisterMetaData{cc}.SliceLocation + fixedSliceThickness; 
+            else
+                atImToRegisterMetaData{cc+1}.ImagePositionPatient(3) = atImToRegisterMetaData{cc}.ImagePositionPatient(3) - fixedSliceThickness;               
+                atImToRegisterMetaData{cc+1}.SliceLocation = atImToRegisterMetaData{cc}.SliceLocation - fixedSliceThickness;             
+            end
+        end      
+    end
+    
+    atRegisteredMetaData = atImToRegisterMetaData;
+  
+    if bUpdateDescription == true 
+        for jj=1:numel(atRegisteredMetaData)
+            atRegisteredMetaData{jj}.SeriesDescription  = sprintf('MOV-COREG %s', atRegisteredMetaData{jj}.SeriesDescription);
+        end
+    end
+    
     iOffset = get(uiSeriesPtr('get'), 'Value');
     if iOffset <= numel(inputTemplate('get')) && bUpdateDescription == true 
         asDescription = seriesDescription('get');
         asDescription{iOffset} = sprintf('MOV-COREG %s', asDescription{iOffset});
         seriesDescription('set', asDescription);
     end  
-      
+         
 end

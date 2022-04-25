@@ -32,7 +32,7 @@ function setZoomCallback(~, ~)
     end     
     
     set(fiMainWindowPtr('get'), 'Pointer', 'default');            
-    isMoveImageActivated('set', false);
+%    isMoveImageActivated('set', false);
     
     releaseRoiWait();
 
@@ -53,8 +53,12 @@ function setZoomCallback(~, ~)
         else
             set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+            
+            if isMoveImageActivated('get') == true
+                set(fiMainWindowPtr('get'), 'Pointer', 'fleur');           
+            end
         end
-
+        
     else    
         set(zoomMenu('get'), 'Checked', 'on');
 

@@ -93,17 +93,23 @@ function setSourceCallback(~, ~)
         end
 
         if(numel(mainDir('get')))
+
+            if isFusion('get') == true % Deactivate fusion
+                 setFusionCallback();
+            end
             
             set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-            drawnow; 
-        
+            drawnow;
+
             copyRoiPtr('set', '');
-            
+
             isMoveImageActivated('set', false);
-    
+
             releaseRoiWait();
 
             isFusion('set', false);
+            
+            outputDir('set', '');
 
             inputTemplate('set', '');
             inputBuffer('set', '');
@@ -112,6 +118,9 @@ function setSourceCallback(~, ~)
             dicomMetaData('reset');
             dicomBuffer  ('reset');
             fusionBuffer ('reset');
+
+            mipBuffer      ('reset');
+            mipFusionBuffer('reset');
 
             initWindowLevel('set', true);
             initFusionWindowLevel ('set', true);
@@ -280,7 +289,11 @@ function setSourceCallback(~, ~)
                 mRecord.State = 'off';
           %      recordIconMenuObject('set', '');
             end
-
+            
+            isoMaskCtSerieOffset ('set', 1);    
+            kernelCtSerieOffset  ('set', 1);
+            mipFusionBufferOffset('set', 1);
+    
             multiFrame3DPlayback('set', false);
             multiFrame3DRecord  ('set', false);
             multiFrame3DIndex   ('set', 1);
@@ -292,7 +305,9 @@ function setSourceCallback(~, ~)
             multiFrameZoom    ('set', 'in' , 1);
             multiFrameZoom    ('set', 'out', 1);
             multiFrameZoom    ('set', 'axe', []);
-    
+            
+            isPlotContours('set', false);
+
             clearDisplay();
             initDisplay(3);
 
@@ -301,6 +316,7 @@ function setSourceCallback(~, ~)
             set(uiSeriesPtr('get'), 'Enable', 'off');
 
             set(btnFusionPtr    ('get'), 'Enable', 'off');
+            set(btnLinkMipPtr   ('get'), 'Enable', 'off');
             set(btnRegisterPtr  ('get'), 'Enable', 'off');
             set(btnMathPtr      ('get'), 'Enable', 'off');
             set(uiFusedSeriesPtr('get'), 'Value' , 1    );
@@ -313,7 +329,7 @@ function setSourceCallback(~, ~)
             set(btnVsplashPtr('get')   , 'Enable', 'off');
             set(uiEditVsplahXPtr('get'), 'Enable', 'off');
             set(uiEditVsplahYPtr('get'), 'Enable', 'off');
-
+    
             asMainDir = mainDir('get');
 
             registrationReport('set', '');
@@ -436,6 +452,12 @@ function setSourceCallback(~, ~)
                     tNewInput(ii).bMathApplied   = false;
                     tNewInput(ii).bFusedDoseKernel    = false;
                     tNewInput(ii).bFusedEdgeDetection = false;
+                    tNewInput(ii).tMovement = [];
+                    tNewInput(ii).tMovement.bMovementApplied = false;
+                    tNewInput(ii).tMovement.aGeomtform = [];
+                    tNewInput(ii).tMovement.atSeq{1}.sAxe = [];
+                    tNewInput(ii).tMovement.atSeq{1}.aTranslation = [];
+                    tNewInput(ii).tMovement.atSeq{1}.dRotation = [];                   
                 end
 
                 inputTemplate('set', tNewInput);
@@ -474,13 +496,15 @@ function setSourceCallback(~, ~)
 
                     if  numel(sNewVolumes) > 1
                         set(btnRegisterPtr('get'), 'Enable', 'on');
-                        set(btnFusionPtr('get')  , 'Enable', 'on');
+                        set(btnFusionPtr  ('get'), 'Enable', 'on');
+                        set(btnLinkMipPtr ('get'), 'Enable', 'on');
 
                         set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
                         set(uiFusedSeriesPtr('get'), 'Enable', 'on');
                         set(uiFusedSeriesPtr('get'), 'Value', 2);
-                    else                        
-                        set(btnFusionPtr('get')  , 'Enable', 'on');
+                    else
+                        set(btnFusionPtr ('get'), 'Enable', 'on');
+                        set(btnLinkMipPtr('get'), 'Enable', 'on');
 
                         set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
                         set(uiFusedSeriesPtr('get'), 'Enable', 'on');
@@ -492,7 +516,7 @@ function setSourceCallback(~, ~)
                 setInputOrientation();
 
                 setDisplayBuffer();
-                
+
                 if numel(dicomBuffer('get'))
                     set(btnMathPtr('get'), 'Enable', 'on');
                 end
@@ -503,17 +527,39 @@ function setSourceCallback(~, ~)
                     set(uiEditVsplahXPtr('get'), 'Enable', 'on');
                     set(uiEditVsplahYPtr('get'), 'Enable', 'on');
                 end
-                    
+
                 setQuantification();
 
                 clearDisplay();
                 initDisplay(3);
-                
+
+%                link2DMip('set', true);
+
+%                set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+%                set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get')); 
+                    
                 dicomViewerCore();
-                
+
                 setContours();
 
                 setViewerDefaultColor(true, dicomMetaData('get'));
+                
+                refreshImages();
+               
+%                atMetaData = dicomMetaData('get');
+
+%                if strcmpi(atMetaData{1}.Modality, 'ct')
+%                    link2DMip('set', false);
+
+%                    set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+%                    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));       
+%                end    
+        
+                if size(dicomBuffer('get'), 3) ~= 1
+                    setPlaybackToolbar('on');
+                end
+
+                setRoiToolbar('on');                
 
             else
                 progressBar(1 , 'Error: TriDFusion: no volumes detected!');
@@ -526,12 +572,12 @@ function setSourceCallback(~, ~)
 %                javaFrame = get(h, 'JavaFrame');
 %                javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
                 set(fiMainWindowPtr('get'), 'Pointer', 'default');
-                drawnow; 
+                drawnow;
                 return;
             end
-            
+
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
-            drawnow;             
+            drawnow;
         end
     end
 end

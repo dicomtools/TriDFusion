@@ -29,7 +29,8 @@ function releaseRoiWait()
 
     windowButton('set', 'up');
     axeClicked('set', true);
-
+    
     uiresume(fiMainWindowPtr('get'));
     robotReleaseKey();
+    
 end
