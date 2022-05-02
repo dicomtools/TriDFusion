@@ -596,7 +596,7 @@ function initKernelPanel()
 
             set(uiSeriesPtr('get'), 'Value', dSerieOffset);
 
-           [aResamCt, ~] = resampleImage(aCtBuffer, atCtMetaData, aRefBuffer, atRefMetaData, 'Linear', true, false);
+           [aResamCt, ~] = resampleImage(aCtBuffer, atCtMetaData, aRefBuffer, atRefMetaData, 'Linear', false);
            
              % Get constraint 
 
@@ -1206,7 +1206,7 @@ function initKernelPanel()
                 aCtBuffer(aCtBuffer==dCtMIn)=0;
                 aCtBuffer(aCtBuffer~=0)=1;
 
-                [aResamCt, ~] = resampleImage(aCtBuffer, atCtMetaData, aRefBuffer, atRefMetaData, 'Linear', true, false);
+                [aResamCt, ~] = resampleImage(aCtBuffer, atCtMetaData, aRefBuffer, atRefMetaData, 'Linear', false);
 
                 dResampMIn = min(double(aResamCt),[], 'all');
 

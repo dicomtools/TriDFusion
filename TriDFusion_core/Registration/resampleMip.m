@@ -1,5 +1,5 @@
-function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, bRefOutputView)
-%function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, bRefOutputView)
+function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode)
+%function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode)
 %Resample any modalities.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -30,7 +30,7 @@ function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaD
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    dimsRef = size(refImage);        
+%    dimsRef = size(refImage);        
     dimsDcm = size(dcmImage);
        
     dcmSliceThickness = computeSliceSpacing(atDcmMetaData);
@@ -49,17 +49,9 @@ function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaD
     
     TF = affine3d(f);
        
-    Rdcm  = imref3d(size(dcmImage), atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
+    Rdcm  = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
 %    Rref  = imref3d(size(refImage), atRefMetaData{1}.PixelSpacing(2), atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
-    
-    if bRefOutputView == true
-        if dimsDcm(3) ~= dimsRef(3)
-            [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
-        else
-            [resampImage, ~] = imwarp(dcmImage, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef));  
-        end
-    else
-        [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
-    end
+
+    [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));      
 
 end

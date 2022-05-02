@@ -376,6 +376,7 @@ end
 
                 end
                 
+                set(imAxeF, 'Visible', 'off'); 
                 set(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); % Patch
                 
                 imAxeFPtr('set', imAxeF, get(uiFusedSeriesPtr('get'), 'Value'));          
@@ -696,7 +697,8 @@ end
 
                 end
                 
-                set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); % Patch
+                set(imCoronalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
+                set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
  
                 % Set Sagittal
                                                 
@@ -760,7 +762,8 @@ end
                     rightClickMenu('add', imSagittalF);
                 end                
                 
-                set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); % Patch
+                set(imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
+                set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
                 
                 % Set Axial
                                                 
@@ -827,7 +830,8 @@ end
 
                 end
                 
-                set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); % Patch
+                set(imAxialFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
+                set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
                     
                 % Set Mip
                 
@@ -872,6 +876,7 @@ end
                     end                                             
 
                     imMipFPtr('set', imMipF, get(uiFusedSeriesPtr('get'), 'Value'));
+                    set(imMipFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
                 end                      
                 
                 set(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); % Patch

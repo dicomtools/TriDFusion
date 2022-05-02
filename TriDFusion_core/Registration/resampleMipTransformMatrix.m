@@ -49,19 +49,19 @@ function [resampImage, atDcmMetaData] = resampleMipTransformMatrix(dcmImage, atD
     
     TF = affine3d(f);
     
-    Rdcm  = imref3d(size(dcmImage), atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
+    Rdcm  = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
     
     [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')) );  
     
-    if numel(resampImage) ~=  numel(refImage) % Temp patch
+    if numel(resampImage) ~=  numel(refImage) % SPECT and CT DX
 
-        if dimsDcm(3) ~= dimsRef(3)
-            resampImage = imresize3(resampImage,[dimsRef(1) dimsRef(2) dimsRef(3)]);                
-        else
-            sameAsInput  = affineOutputView(size(refImage),TF,'BoundsStyle','SameAsInput');
-            [resampImage, ~] = imwarp(dcmImage, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', sameAsInput );  
-        end
+        [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
+
+        dimsRsp = size(resampImage);         
+        xMoveOffset = (dimsRsp(3)-dimsRef(3))/2;
+        yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
+
+        resampImage = imtranslate(resampImage,[-yMoveOffset, 0, -xMoveOffset], 'nearest', 'OutputView', 'same', 'FillValues', min(resampImage, [], 'all') );    
     end
         
-
 end

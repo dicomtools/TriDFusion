@@ -877,7 +877,7 @@ function setRegistrationCallback(~, ~)
                         progressBar(dNextSeries/dNbElements-0.000001, sprintf('Processing resampling %d/%d, please wait', dNextSeries-1, dNbElements-1));
 
                %         try
-                        [aResampledBuffer, atResampledMetaData] = resampleImage(aBuffer, atMetaData, refImage, atRefMetaData, sInterpolation, true, updateDescription('get'));
+                        [aResampledBuffer, atResampledMetaData] = resampleImage(aBuffer, atMetaData, refImage, atRefMetaData, sInterpolation, updateDescription('get'));
                         
                         atRoi = roiTemplate('get', kk);
                         
@@ -888,7 +888,7 @@ function setRegistrationCallback(~, ~)
                         if size(aInput{kk}, 3) ~= 1
                             if isVsplash('get') == false
 
-                                aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, sInterpolation, true);
+                                aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, sInterpolation);
 
                                 mipBuffer('set', aResampledMip, kk);
                             end

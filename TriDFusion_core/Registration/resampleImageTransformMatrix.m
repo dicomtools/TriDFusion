@@ -39,60 +39,61 @@ function [resampImage, atDcmMetaData] = resampleImageTransformMatrix(dcmImage, a
     [M, ~] = getTransformMatrix(atDcmMetaData{1}, dcmSliceThickness, atRefMetaData{1}, refSliceThickness);
     TF = affine3d(M);
 
-%    if dimsDcm(3) == dimsRef(3)
-        Rdcm = imref3d(size(dcmImage), atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
-        Rref = imref3d(size(refImage), atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), refSliceThickness);
+    Rdcm = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
+%    Rref = imref3d(size(refImage), atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), refSliceThickness);
+    [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
+
+    if numel(resampImage) ~=  numel(refImage) % SPECT and CT DX
+
         [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
-        
-        if numel(resampImage) ~=  numel(refImage) % Temp patch
 
-            if dimsDcm(3) ~= dimsRef(3)
-                resampImage = imresize3(resampImage,[dimsRef(1) dimsRef(2) dimsRef(3)]);                
-            else
-                sameAsInput  = affineOutputView(size(refImage),TF,'BoundsStyle','SameAsInput');
-                [resampImage, ~] = imwarp(dcmImage, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', sameAsInput );  
-            end
-                     
-        end
-%    end
+        dimsRsp = size(resampImage);         
+        xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
+        yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
 
-    if numel(atRefMetaData) < numel(atDcmMetaData) && ...
-       numel(atDcmMetaData) ~= 1   
-        atDcmMetaData = atDcmMetaData(1:numel(atRefMetaData));
+        resampImage = imtranslate(resampImage,[-xMoveOffset, -yMoveOffset, 0], 'nearest', 'OutputView', 'same', 'FillValues', min(resampImage, [], 'all') );    
 
-    elseif numel(atRefMetaData) > numel(atDcmMetaData) && ...
-           numel(atDcmMetaData) ~= 1   
+    end
 
-        for cc=1:numel(atRefMetaData)- numel(atDcmMetaData)
-            atDcmMetaData{end+1} = atDcmMetaData{end}; %Add missing slice
+    aResampledImageSize = size(resampImage);
+
+    if numel(atDcmMetaData) ~= 1
+        if aResampledImageSize(3) < numel(atDcmMetaData)
+            atDcmMetaData = atDcmMetaData(1:numel(atRefMetaData)); % Remove some slices
+        else
+            for cc=1:aResampledImageSize(3) - numel(atDcmMetaData)
+                atDcmMetaData{end+1} = atDcmMetaData{end}; %Add missing slice
+            end            
         end
     end
     
-    aResampledImageSize = size(resampImage);
-
     for jj=1:numel(atDcmMetaData)
-        if numel(atRefMetaData)==numel(atDcmMetaData)
-            atDcmMetaData{jj}.PatientPosition = atDcmMetaData{jj}.PatientPosition;  
-            atDcmMetaData{jj}.InstanceNumber  = atRefMetaData{jj}.InstanceNumber;               
-            atDcmMetaData{jj}.NumberOfSlices  = atRefMetaData{jj}.NumberOfSlices;
-        else
-            atDcmMetaData{jj}.PatientPosition = atRefMetaData{1}.PatientPosition;  
-            atDcmMetaData{jj}.InstanceNumber  = jj;               
-            atDcmMetaData{jj}.NumberOfSlices  = numel(atRefMetaData);                
-        end
-
-        atDcmMetaData{jj}.PixelSpacing(1) = atRefMetaData{jj}.PixelSpacing(1);
-        atDcmMetaData{jj}.PixelSpacing(2) = atRefMetaData{jj}.PixelSpacing(2);
-        atDcmMetaData{jj}.SliceThickness  = atRefMetaData{jj}.SliceThickness;
-        atDcmMetaData{jj}.SpacingBetweenSlices  = refSliceThickness;
         
+        atDcmMetaData{jj}.InstanceNumber  = jj;               
+        atDcmMetaData{jj}.NumberOfSlices  = aResampledImageSize(3);                
+        
+        atDcmMetaData{jj}.PixelSpacing(1) = atRefMetaData{1}.PixelSpacing(1);
+        atDcmMetaData{jj}.PixelSpacing(2) = atRefMetaData{1}.PixelSpacing(2);
+        atDcmMetaData{jj}.SliceThickness  = atRefMetaData{1}.SliceThickness;
+        atDcmMetaData{jj}.SpacingBetweenSlices  = refSliceThickness;
+
         atDcmMetaData{jj}.Rows    = aResampledImageSize(1);
-        atDcmMetaData{jj}.Columns = aResampledImageSize(2);      
+        atDcmMetaData{jj}.Columns = aResampledImageSize(2);
+        
+        
+        atDcmMetaData{jj}.ImagePositionPatient(1) = atRefMetaData{1}.ImagePositionPatient(1);
+        atDcmMetaData{jj}.ImagePositionPatient(2) = atRefMetaData{1}.ImagePositionPatient(2);
+         
     end
-       
-    for cc=1:numel(atDcmMetaData)        
-        atDcmMetaData{cc}.ImagePositionPatient = atRefMetaData{cc}.ImagePositionPatient;               
-        atDcmMetaData{cc}.SliceLocation = atDcmMetaData{cc}.SliceLocation - refSliceThickness;                                      
-    end       
+              
+    for cc=1:numel(atDcmMetaData)-1
+        if atDcmMetaData{1}.ImagePositionPatient(3) < atDcmMetaData{2}.ImagePositionPatient(3)
+            atDcmMetaData{cc+1}.ImagePositionPatient(3) = atDcmMetaData{cc}.ImagePositionPatient(3) + refSliceThickness;               
+            atDcmMetaData{cc+1}.SliceLocation = atDcmMetaData{cc}.SliceLocation + refSliceThickness; 
+        else
+            atDcmMetaData{cc+1}.ImagePositionPatient(3) = atDcmMetaData{cc}.ImagePositionPatient(3) - refSliceThickness;               
+            atDcmMetaData{cc+1}.SliceLocation = atDcmMetaData{cc}.SliceLocation - refSliceThickness;             
+        end
+    end    
     
 end

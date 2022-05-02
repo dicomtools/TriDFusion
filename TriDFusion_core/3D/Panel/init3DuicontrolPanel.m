@@ -2114,7 +2114,7 @@ end
                 refImage = aInputBuffer{dCTSeriesNumber};
                 atRefMetaData = tInput(dCTSeriesNumber).atDicomInfo;           
            
-                [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'bilinear', true,  true);   
+                [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear',  true);   
                 
                 progressBar(0.6, sprintf('Resampling ROIs, please wait'));
 
@@ -2132,7 +2132,7 @@ end
                 refMip = mipBuffer('get', [], dCTSeriesNumber);
 
                 aMip = mipBuffer('get', [], dSeriesOffset);
-                aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'bilinear', true);
+                aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear');
 
                 mipBuffer('set', aResampledMip, dSeriesOffset);
 

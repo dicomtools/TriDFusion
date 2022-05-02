@@ -1619,7 +1619,7 @@ function initRoiPanel()
 
                 set(uiSeriesPtr('get'), 'Value', dSerieOffset);
 
-                [aBuffer, ~] = resampleImage(aCtBuffer, atCtMetaData, aBuffer, atRefMetaData, 'Linear', true, false);
+                [aBuffer, ~] = resampleImage(aCtBuffer, atCtMetaData, aBuffer, atRefMetaData, 'Linear', false);
                 
                 aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
                 
@@ -2064,7 +2064,7 @@ function initRoiPanel()
 
                 set(uiSeriesPtr('get'), 'Value', dSerieOffset);
 
-                [aBuffer, ~] = resampleImage(aCtBuffer, atCtMetaData, aBuffer, atRefMetaData, 'Linear', true, false);
+                [aBuffer, ~] = resampleImage(aCtBuffer, atCtMetaData, aBuffer, atRefMetaData, 'Linear', false);
                 
                 aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint to CT
 
