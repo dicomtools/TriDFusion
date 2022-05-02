@@ -84,12 +84,20 @@ function initTemplates()
                     else
 
                         for dFramesLoop=1:numel(atFrameInfo)
+ 
+                            if dFramesLoop == 1
+                                
+                                dFrameOffset = dFramesLoop-1;
+                                dNbOfSlices  = atFrameInfo{dFramesLoop}.NbSlices;
+                                
+                                dFrom = 1+ (dFrameOffset * dNbOfSlices);
+                                dTo   = dNbOfSlices * dFramesLoop;                                
+                            else
+                                dNbOfSlices  = atFrameInfo{dFramesLoop}.NbSlices;
 
-                            dFrameOffset = dFramesLoop-1;
-                            dNbOfSlices  = atFrameInfo{dFramesLoop}.NbSlices;
-
-                            dFrom = 1+ (dFrameOffset * dNbOfSlices);
-                            dTo   = dNbOfSlices * dFramesLoop;
+                                dFrom = 1+dLastTo;
+                                dTo   = dNbOfSlices + dLastTo;                                    
+                            end
 
                             asFilesList{dNbEntry}  = tDatasets.FileNames(dFrom:dTo);
                             atDicomInfo{dNbEntry}  = tDatasets.DicomInfos(dFrom:dTo);
@@ -101,6 +109,7 @@ function initTemplates()
                             end
 
                             dNbEntry = dNbEntry+1;
+                            dLastTo  = dTo;
                         end
 
                     end

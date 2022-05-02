@@ -356,6 +356,7 @@ function setSourceCallback(~, ~)
 
                         if strcmpi(tNewDatasets.DicomInfos{1}.SeriesType{1}, 'GATED'  ) || ...
                            strcmpi(tNewDatasets.DicomInfos{1}.SeriesType{1}, 'DYNAMIC')
+                       
                             dNewNbFrames    = numel(tNewDatasets.DicomInfos) / tNewDatasets.DicomInfos{1}.NumberOfSlices;
                             dNewNbOfSlices = tNewDatasets.DicomInfos{1}.NumberOfSlices;
 
@@ -382,11 +383,18 @@ function setSourceCallback(~, ~)
 
                             for dNewFramesLoop=1:numel(atNewFrameInfo)
 
-                                dNewFrameOffset = dNewFramesLoop-1;
-                                dNewNbOfSlices  = atNewFrameInfo{dNewFramesLoop}.NbSlices;
+                                if dNewFramesLoop == 1
+                                    dNewFrameOffset = dNewFramesLoop-1;
+                                    dNewNbOfSlices  = atNewFrameInfo{dNewFramesLoop}.NbSlices;
 
-                                dNewFrom = 1+ (dNewFrameOffset * dNewNbOfSlices);
-                                dNewTo   = dNewNbOfSlices * dNewFramesLoop;
+                                    dNewFrom = 1+ (dNewFrameOffset * dNewNbOfSlices);
+                                    dNewTo   = dNewNbOfSlices * dNewFramesLoop;
+                                else
+                                    dNewNbOfSlices  = atNewFrameInfo{dNewFramesLoop}.NbSlices;
+                                    
+                                    dNewFrom = 1+dLastTo;
+                                    dNewTo   = dNewNbOfSlices + dLastTo;                                    
+                                end
 
                                 asNewFilesList{dNewNbEntry}  = tNewDatasets.FileNames(dNewFrom:dNewTo);
                                 atNewDicomInfo{dNewNbEntry}  = tNewDatasets.DicomInfos(dNewFrom:dNewTo);
@@ -397,11 +405,13 @@ function setSourceCallback(~, ~)
                                     atNewDicomInfo{dNewNbEntry}{dNewSeriesLoop}.din.frame = dNewFramesLoop;
                                 end
 
-                                dNewNbEntry = dNewNbEntry+1;
-                            end
+                                dNewNbEntry = dNewNbEntry+1;                                
+                                dLastTo   = dNewTo;
+                           end
 
                         end
                     else
+                                                
                         asNewFilesList{dNewNbEntry}  = tNewDatasets.FileNames;
                         atNewDicomInfo{dNewNbEntry}  = tNewDatasets.DicomInfos;
                         aNewDicomBuffer{dNewNbEntry} = tNewDatasets.DicomBuffers;

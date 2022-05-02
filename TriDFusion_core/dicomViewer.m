@@ -115,7 +115,7 @@ function resize = dicomViewer()
     peakSUVMaxIsoMask     ('set', 4);  % In SUV
     peakPercentIsoMask    ('set', 65); % In percent
     voiIsoMaskMax         ('set', 42); % In percent
-    smalestIsoMask        ('set', 3 ); % In pixels
+    smalestIsoMask        ('set', 0.3); % In ml
     pixelEdgeIsoMask      ('set', false);
     resampleToCTIsoMask   ('set', false);
     isoMaskCtSerieOffset  ('set', 1);
@@ -200,7 +200,7 @@ function resize = dicomViewer()
     roiPanelCtSerieOffset('set', 1);
     roiPanelUseCt('set', false);
     roiPanelUnitTypeWindow('set', false);
-    smalestRegionRoiPanelValue('set', 5);
+    smalestRegionRoiPanelValue('set', 3);
     multipleObjectsRoiPanel('set', false);
     pixelEdgeRoiPanel('set', true);
     holesRoiPanel('set', false);

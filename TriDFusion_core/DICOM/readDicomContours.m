@@ -51,21 +51,21 @@ function tContours = readDicomContours(sFileName)
 
                         if ~isempty(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourData)
                             % Read points
-                            aSegments{j} = reshape(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourData, ...
-                                3, rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).NumberOfContourPoints)';
-
+                            dContourDataSize = numel(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourData);
+                            aSegments{j} = reshape(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourData, 3, dContourDataSize/3)';
+                                
                             if isfield(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}), 'ContourImageSequence')
                                 tContours(i).Referenced.SOP(j).SOPClassUID    = rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourImageSequence.Item_1.ReferencedSOPClassUID;
                                 tContours(i).Referenced.SOP(j).SOPInstanceUID = rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourImageSequence.Item_1.ReferencedSOPInstanceUID;
                             else
                                 tContours(i).Referenced.SOP(j).SOPClassUID    = rtssheader.SOPClassUID;
                                 tContours(i).Referenced.SOP(j).SOPInstanceUID = rtssheader.SOPInstanceUID;
-                            end
+                            end                            
+                            
                         end
                     else
                         progressBar(1, 'Error: RT structure Geometric Type not supported');                
                     end
-
                 end
 
                 tContours(i).GeometricType = rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourGeometricType;
@@ -73,7 +73,10 @@ function tContours = readDicomContours(sFileName)
                 tContours(i).Color = rtssheader.ROIContourSequence.(ROIContourSequence{i}).ROIDisplayColor;    
 
                 tContours(i).Referenced.StudyInstanceUID  = rtssheader.StudyInstanceUID;
-                tContours(i).Referenced.SeriesInstanceUID = rtssheader.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.RTReferencedSeriesSequence.Item_1.SeriesInstanceUID;
+                tContours(i).Referenced.SeriesInstanceUID = rtssheader.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.RTReferencedSeriesSequence.Item_1.SeriesInstanceUID;                
+                
+                tContours(i).Referenced.FrameOfReferenceUID = rtssheader.ReferencedFrameOfReferenceSequence.Item_1.FrameOfReferenceUID;                
+                
             end
         end
         

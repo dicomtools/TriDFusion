@@ -43,7 +43,7 @@ function setDisplayBuffer()
                  for ii=1: numel(tInput(i).asFilesList)
 
                      if ~isempty(tInput(i).aDicomBuffer{ii})
-                        aInput{i}(:,:,ii) = tInput(i).aDicomBuffer{ii};
+                       aInput{i}(:,:,ii) = tInput(i).aDicomBuffer{ii};
 
                         if tInput(i).atDicomInfo{ii}.RescaleSlope ~= 0
                             aInput{i}(:,:,ii) = tInput(i).atDicomInfo{ii}.RescaleIntercept + (aInput{i}(:,:,ii) * tInput(i).atDicomInfo{ii}.RescaleSlope);

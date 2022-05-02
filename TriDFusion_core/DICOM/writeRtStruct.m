@@ -234,7 +234,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                 
                             a3DOffset(:,1)=tRoiInput{tt}.Position(:,1)-1;
                             a3DOffset(:,2)=tRoiInput{tt}.Position(:,2)-1;
-                            a3DOffset(:,3)=tRoiInput{tt}.SliceNb;
+                            a3DOffset(:,3)=tRoiInput{tt}.SliceNb-1;
 
                             sliceThikness = computeSliceSpacing(atDicomMeta);       
                             [xfm,~] = TransformMatrix(atDicomMeta{1}, sliceThikness);
@@ -242,25 +242,26 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 
                             aX = out.Location(:,1);
                             aY = out.Location(:,2);
+                            aZ = out.Location(:,3);
 
-                            aZ = zeros(dNBoundaries, 1);
-                            aZ(:) = atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation;
+ %                           aZ = zeros(dNBoundaries, 1);
+ %                           aZ(:) = atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation;
 
                             dXOffset=1;
                             dYOffset=1;
                             dZOffset=1;
                             aXYZ = zeros(dNBoundaries*3, 1);
-                            for xx=1:3:size(aXYZ,1)
+                            for xx=1:3:numel(aXYZ)
                                 aXYZ(xx)=aX(dXOffset);
                                 dXOffset = dXOffset+1;
                             end
 
-                            for yy=2:3:size(aXYZ,1)
+                            for yy=2:3:numel(aXYZ)
                                 aXYZ(yy)=aY(dYOffset);
                                 dYOffset = dYOffset+1;
                             end
 
-                            for zz=3:3:size(aXYZ,1)
+                            for zz=3:3:numel(aXYZ)
                                 aXYZ(zz)=aZ(dZOffset);
                                 dZOffset = dZOffset+1;
                             end

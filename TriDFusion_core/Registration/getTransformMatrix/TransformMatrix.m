@@ -16,7 +16,7 @@ function [M,R] = TransformMatrix(info, sliceThikness)
          r(3) c(3) s(3) 0; ...
          0 0 0 1];
     %if info.MRAcquisitionType=='3D' % 3D turboflash
-    %    S = [ps(2) 0 0 0; 0 ps(1) 0 0; 0 0 sliceThikness 0 ; 0 0 0 1];
+%        S = [ps(2) 0 0 0; 0 ps(1) 0 0; 0 0 sliceThikness 0 ; 0 0 0 1];
     %else % 2D epi dti
 
         S = [ps(2) 0 0 0; ...
@@ -29,5 +29,5 @@ function [M,R] = TransformMatrix(info, sliceThikness)
            0 0 1 0; ...
            0 0 0 1];
     M = Tipp * R * S * T0;
-
+    
 end

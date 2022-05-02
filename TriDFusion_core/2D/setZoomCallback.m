@@ -89,6 +89,6 @@ function setZoomCallback(~, ~)
         'Callback',@setZoomCallback);
         hZoom = zoom(fiMainWindowPtr('get'));
         hZoom.UIContextMenu = hCMZ;
-        zoom('on');           
+        zoom(fiMainWindowPtr('get'));           
     end           
 end  

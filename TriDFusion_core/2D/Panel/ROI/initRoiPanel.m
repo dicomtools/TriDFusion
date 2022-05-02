@@ -37,13 +37,13 @@ function initRoiPanel()
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'text',...
                   'FontWeight', 'bold',...
-                  'string'  , 'VOI Deletion',...
+                  'string'  , 'Contour Deletion',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [15 565 200 20]...
-                  );
-
+                  );                
+              
      uiDeleteVoiRoiPanel = ...
          uicontrol(uiRoiPanelPtr('get'), ...
                   'Style'   , 'popup', ...
@@ -56,12 +56,24 @@ function initRoiPanel()
                   'ForegroundColor', viewerForegroundColor('get') ...
                   );
     uiDeleteVoiRoiPanelObject('set', uiDeleteVoiRoiPanel);
-
+    
+    uiAddVoiRoiPanel = ...
+        uicontrol(uiRoiPanelPtr('get'),...
+                  'style'   , 'pushbutton',...
+                  'String'  ,'Add',...
+                  'Position',[15 505 32 25],...
+                  'Enable'  , 'Off', ...
+                  'BackgroundColor', [0.5300 0.6300 0.4000], ...
+                  'ForegroundColor', [0.1 0.1 0.1], ...
+                  'Callback', @addVoiRoiPanelCallback...
+                  ); 
+    uiAddVoiRoiPanelObject('set', uiAddVoiRoiPanel);
+              
     uiPrevVoiRoiPanel = ...
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'pushbutton',...
                   'String'  ,'Previous',...
-                  'Position',[15 505 91 25],...
+                  'Position',[48 505 75 25],...
                   'Enable'  , 'Off', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
@@ -73,7 +85,7 @@ function initRoiPanel()
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'pushbutton',...
                   'String'  ,'Delete',...
-                  'Position',[107 505 61 25],...
+                  'Position',[124 505 60 25],...
                   'Enable'  , 'Off', ...
                   'BackgroundColor', [0.2 0.039 0.027], ...
                   'ForegroundColor', [0.94 0.94 0.94], ...
@@ -85,14 +97,14 @@ function initRoiPanel()
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'pushbutton',...
                   'String'  ,'Next',...
-                  'Position',[169 505 91 25],...
+                  'Position',[185 505 75 25],...
                   'Enable'  , 'Off', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @nextVoiRoiPanelCallback...
                   );
-    uiNextVoiRoiPanelObject('set', uiNextVoiRoiPanel);
-
+    uiNextVoiRoiPanelObject('set', uiNextVoiRoiPanel);    
+    
     % Roi Face Alpha
 
         uicontrol(uiRoiPanelPtr('get'),...
@@ -218,7 +230,7 @@ function initRoiPanel()
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'text',...
                   'enable'  , 'Inactive',...
-                  'string'  , 'Smalest ROI (nb pixels)',...
+                  'string'  , 'Smalest Contour (nb pixel)',...
                   'horizontalalignment', 'left',...
                   'position', [15 262 165 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -453,11 +465,36 @@ function initRoiPanel()
 
             set(uiDeleteVoiRoiPanel, 'Value', dVoiOffset);
 
-            dRoiOffset = round(numel(tVoiInput{dVoiOffset}.RoisTag)/2);
+            sRoiTag = getLargestArea(tVoiInput{dVoiOffset}.RoisTag);
+            
+%            dRoiOffset = round(numel(tVoiInput{dVoiOffset}.RoisTag)/2);
 
-            triangulateRoi(tVoiInput{dVoiOffset}.RoisTag{dRoiOffset}, true);
+            triangulateRoi(sRoiTag, true);
         end
 
+    end
+
+    
+    function addVoiRoiPanelCallback(~, ~)
+        
+        aBuffer = dicomBuffer('get');
+        
+        dVoiOffset = get(uiDeleteVoiRoiPanel, 'Value');
+        
+        tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+                
+        if size(aBuffer, 3) == 1
+            pAxe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+        else
+            pAxe = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+        end
+        
+%        roiSetAxeBorder(true, pAxe );
+    
+%        a = drawpolygon(pAxe, 'Color', 'cyan', 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', num2str(randi([-(2^52/2),(2^52/2)],1)), 'FaceSelectable', 1, 'FaceAlpha', 0);
+
+%        tVoiInput{dVoiOffset}.RoisTag
+   
     end
 
     function previousVoiRoiPanelCallback(~, ~)
@@ -466,7 +503,12 @@ function initRoiPanel()
         dNbVOIs = numel(tVoiInput);
 
         if ~isempty(tVoiInput)
-
+                        
+            try
+                
+            set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+            drawnow;
+            
             dVoiOffset = get(uiDeleteVoiRoiPanel, 'Value')-1;
 
             if dVoiOffset <= 0
@@ -475,9 +517,16 @@ function initRoiPanel()
 
             set(uiDeleteVoiRoiPanel, 'Value', dVoiOffset);
 
-            dRoiOffset = round(numel(tVoiInput{dVoiOffset}.RoisTag)/2);
+            sRoiTag = getLargestArea(tVoiInput{dVoiOffset}.RoisTag);
+%            dRoiOffset = round(numel(tVoiInput{dVoiOffset}.RoisTag)/2);
 
-            triangulateRoi(tVoiInput{dVoiOffset}.RoisTag{dRoiOffset}, true);
+            triangulateRoi(sRoiTag, true);
+            
+            catch
+            end
+            
+            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            drawnow;             
         end
 
     end
@@ -488,6 +537,11 @@ function initRoiPanel()
         dNbVOIs = numel(tVoiInput);
 
         if ~isempty(tVoiInput)
+            
+            try
+                
+            set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+            drawnow;
 
             dVoiOffset = get(uiDeleteVoiRoiPanel, 'Value')+1;
 
@@ -497,9 +551,17 @@ function initRoiPanel()
 
             set(uiDeleteVoiRoiPanel, 'Value', dVoiOffset);
 
-            dRoiOffset = round(numel(tVoiInput{dVoiOffset}.RoisTag)/2);
+            sRoiTag = getLargestArea(tVoiInput{dVoiOffset}.RoisTag);
 
-            triangulateRoi(tVoiInput{dVoiOffset}.RoisTag{dRoiOffset}, true);
+%            dRoiOffset = round(numel(tVoiInput{dVoiOffset}.RoisTag)/2);
+
+            triangulateRoi(sRoiTag, true);
+            
+            catch
+            end
+            
+            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            drawnow;            
         end
 
     end
@@ -513,6 +575,11 @@ function initRoiPanel()
         tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
         if ~isempty(tVoiInput)
+            
+            try
+                
+            set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+            drawnow;
 
             dVoiOffset = get(uiDeleteVoiRoiPanel, 'Value');
             ptrObject = tVoiInput{dVoiOffset};
@@ -588,14 +655,20 @@ function initRoiPanel()
                 setVoiRoiSegPopup();
 
                 if dNbVOIs ~= 0
+                    sRoiTag = getLargestArea(tVoiInput{dVoiOffset}.RoisTag);
 
-                    dRoiOffset = round(numel(tVoiInput{dVoiOffset}.RoisTag)/2);
+%                    dRoiOffset = round(numel(tVoiInput{dVoiOffset}.RoisTag)/2);
 
-                    triangulateRoi(tVoiInput{dVoiOffset}.RoisTag{dRoiOffset}, true);
+                    triangulateRoi(sRoiTag, true);
                 end
 
             end
-
+            
+            catch
+            end
+            
+            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            drawnow;
         end
 
     end
@@ -1411,8 +1484,8 @@ function initRoiPanel()
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
 
-        refreshImages();
-
+        refreshImages();        
+            
         bRelativeToMax = relativeToMaxRoiPanelValue('get');
 
         dSliderMin = minTresholdSliderRoiPanelValue('get');
@@ -1740,8 +1813,8 @@ function initRoiPanel()
         drawnow;
 
         uiSeries = uiSeriesPtr('get');
-        dSeriesOffset = get(uiSeries, 'Value');
-
+        dSeriesOffset = get(uiSeries, 'Value');        
+        
         bRelativeToMax = relativeToMaxRoiPanelValue('get');
         bInPercent     = inPercentRoiPanelValue('get');
 
@@ -2222,5 +2295,51 @@ function initRoiPanel()
         end
     end
 
+    function sRoiTag = getLargestArea(asRoisTag)
+        
+        tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
+        imRoi = dicomBuffer('get');
+
+        dLargestMaskNbPixels = 0;
+
+        for at=1:numel(asRoisTag)
+
+            for rt=1:numel(tRoiInput)
+                if strcmp(tRoiInput{rt}.Tag, asRoisTag{at})
+                
+                    if size(imRoi, 3) == 1 
+                        if strcmpi(tRoiInput{rt}.Axe, 'Axe')
+                            imRoi=imRoi(:,:);
+                            imCData = imRoi; 
+                       end
+                    else
+                        if strcmpi(tRoiInput{rt}.Axe, 'Axes1')
+                            imCData = permute(imRoi(tRoiInput{rt}.SliceNb,:,:), [3 2 1]);
+                       end
+
+                        if strcmpi(tRoiInput{rt}.Axe, 'Axes2')                    
+                            imCData = permute(imRoi(:,tRoiInput{rt}.SliceNb,:), [3 1 2]) ;
+                        end
+
+                        if strcmpi(tRoiInput{rt}.Axe, 'Axes3')
+                            imCData  = imRoi(:,:,tRoiInput{rt}.SliceNb);  
+                        end
+                    end                
+                
+                    mask = roiTemplateToMask(tRoiInput{rt}, imCData);      
+
+                    dNbPixelsMasked = numel(imCData(mask));
+
+                    if dNbPixelsMasked >= dLargestMaskNbPixels 
+                        dLargestMaskNbPixels = dNbPixelsMasked;
+                        sRoiTag = asRoisTag{at};
+                    end
+
+                    break;
+                end            
+            end                
+        end
+    end
 
 end

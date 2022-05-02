@@ -33,7 +33,7 @@ function info = dicominfo4che3(fileInput)
             
         dataset = din.readDataset(-1, -1);                  
     catch 
-       info = ''; 
+       info = dicominfo(char(fileInput)); 
        return;
     end  
 

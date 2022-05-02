@@ -202,14 +202,20 @@ function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = regi
             
             atImToRegisterMetaData{jj}.PixelSpacing(1) = atReferenceMetaData{jj}.PixelSpacing(1);
             atImToRegisterMetaData{jj}.PixelSpacing(2) = atReferenceMetaData{jj}.PixelSpacing(2);
+            
             if atImToRegisterMetaData{jj}.SliceThickness ~= 0
                 atImToRegisterMetaData{jj}.SliceThickness  = atReferenceMetaData{jj}.SliceThickness;
             end
+            
             if atReferenceMetaData{jj}.SpacingBetweenSlices == 0
                 atImToRegisterMetaData{jj}.SpacingBetweenSlices = fixedSliceThickness;        
             else
                 atImToRegisterMetaData{jj}.SpacingBetweenSlices = atReferenceMetaData{jj}.SpacingBetweenSlices;        
             end
+            
+            atImToRegisterMetaData{jj}.Rows    = dimsRef(1);
+            atImToRegisterMetaData{jj}.Columns = dimsRef(2);
+            
         end
 
         for cc=1:numel(atImToRegisterMetaData)-1

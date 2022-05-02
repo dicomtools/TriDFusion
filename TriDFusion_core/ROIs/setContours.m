@@ -59,99 +59,104 @@ function setContours(tContours)
             for dd=1:numel(atContours{cc})
                 
                 if ~isempty(atContours{cc}(dd).Referenced)
-                    if strcmpi(atInput(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Find matching series
-                               atContours{cc}(dd).Referenced.SeriesInstanceUID)
+                    
+                    if strcmpi(atInput(bb).atDicomInfo{1}.FrameOfReferenceUID, ... % Find matching series
+                               atContours{cc}(dd).Referenced.FrameOfReferenceUID)
+                           
+                        if strcmpi(atInput(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Find matching series
+                                   atContours{cc}(dd).Referenced.SeriesInstanceUID)
 
-     %                   hold on;                        
+         %                   hold on;                        
 
-                        bNbContours = bNbContours+1;
+                            bNbContours = bNbContours+1;
 
-               %         if dSeriesValue ~= bb
+                   %         if dSeriesValue ~= bb
 
-               %             set(uiSeriesPtr('get'), 'Value', bb);
-               %             setSeriesCallback();
-               %         end
+                   %             set(uiSeriesPtr('get'), 'Value', bb);
+                   %             setSeriesCallback();
+                   %         end
 
-                        set(uiCorWindowPtr('get'), 'Visible', 'off');
-                        set(uiSagWindowPtr('get'), 'Visible', 'off');
-                        set(uiTraWindowPtr('get'), 'Visible', 'off');
-                        set(uiMipWindowPtr('get'), 'Visible', 'off');
+                            set(uiCorWindowPtr('get'), 'Visible', 'off');
+                            set(uiSagWindowPtr('get'), 'Visible', 'off');
+                            set(uiTraWindowPtr('get'), 'Visible', 'off');
+                            set(uiMipWindowPtr('get'), 'Visible', 'off');
 
-                        set(uiSliderLevelPtr ('get'), 'Visible', 'off');
-                        set(uiSliderWindowPtr('get'), 'Visible', 'off');
+                            set(uiSliderLevelPtr ('get'), 'Visible', 'off');
+                            set(uiSliderWindowPtr('get'), 'Visible', 'off');
 
-                        set(uiSliderCorPtr('get'), 'Visible', 'off');
-                        set(uiSliderSagPtr('get'), 'Visible', 'off');   
-                        set(uiSliderTraPtr('get'), 'Visible', 'off'); 
-                        set(uiSliderMipPtr('get'), 'Visible', 'off'); 
+                            set(uiSliderCorPtr('get'), 'Visible', 'off');
+                            set(uiSliderSagPtr('get'), 'Visible', 'off');   
+                            set(uiSliderTraPtr('get'), 'Visible', 'off'); 
+                            set(uiSliderMipPtr('get'), 'Visible', 'off'); 
 
-                        segments = atContours{cc}(dd).ContourData;   
-                        if ~cellfun(@isempty,segments)
+                            segments = atContours{cc}(dd).ContourData;   
+                            if ~cellfun(@isempty,segments)
 
-                %            xfm = getAffineXfm(atInput(bb).atDicomInfo);
+                    %            xfm = getAffineXfm(atInput(bb).atDicomInfo);
 
-                            sliceThikness = computeSliceSpacing(atInput(bb).atDicomInfo);       
-                            [xfm,~] = TransformMatrix(atInput(bb).atDicomInfo{1}, sliceThikness);
+                                sliceThikness = computeSliceSpacing(atInput(bb).atDicomInfo);       
+                                [xfm,~] = TransformMatrix(atInput(bb).atDicomInfo{1}, sliceThikness);
 
 
-                            asTag = [];
+                                asTag = [];
 
-                            set(uiSeriesPtr('get'), 'Value', bb);
+                                set(uiSeriesPtr('get'), 'Value', bb);
 
-                            drawnow;
+                                drawnow;
 
-                            progressBar( bNbContours/numel(atContours{cc})-0.0001, sprintf('Volume %d: Processing contour %d/%d', bb, bNbContours, numel(atContours{cc}) ));  
+                                progressBar( bNbContours/numel(atContours{cc})-0.0001, sprintf('Volume %d: Processing contour %d/%d', bb, bNbContours, numel(atContours{cc}) ));  
 
-                            for j=1:numel(segments)
+                                for j=1:numel(segments)
 
-                                out = pctransform(pointCloud(segments{j}),invert(affine3d(xfm')));
+                                    out = pctransform(pointCloud(segments{j}),invert(affine3d(xfm')));
 
-                                points{j} = [abs(out.Location(:,1)) abs(out.Location(:,2))] ;
-                                z = round(abs(out.Location(:,3)));   % Axial                    
+                                    points{j} = [abs(out.Location(:,1)) abs(out.Location(:,2))] ;
+                                    z = round(abs(out.Location(:,3)));   % Axial                    
 
-                                ROI.Position = [points{j}(:,1)+1, points{j}(:,2)+1];
+                                    ROI.Position = [points{j}(:,1)+1, points{j}(:,2)+1];
 
-                                bFlip = getImagePosition(bb);
-                                if bFlip == true
-                                    aImageSize = size(dicomBuffer('get'));
-                                    dSliceNb =  aImageSize(3)-z(1);
-                    %                sliceNumber('set', 'axial', dSliceNb);
-                                    
-                                else
-                                    dSliceNb =  z(1)+1;
-                    %                sliceNumber('set', 'axial', dSliceNb);
+                                    bFlip = getImagePosition(bb);
+                                    if bFlip == true
+                                        aImageSize = size(dicomBuffer('get'));
+                                        dSliceNb =  aImageSize(3)-z(1);
+                        %                sliceNumber('set', 'axial', dSliceNb);
+
+                                    else
+                                        dSliceNb =  z(1)+1;
+                        %                sliceNumber('set', 'axial', dSliceNb);
+                                    end
+
+                                    sTag   = num2str(randi([-(2^52/2),(2^52/2)],1));
+    %                                axRoi  = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                                    aColor = [atContours{cc}(dd).Color(1)/255 atContours{cc}(dd).Color(2)/255 atContours{cc}(dd).Color(3)/255];
+                                    sLabel = atContours{cc}(dd).ROIName;
+
+    %                                pRoi = drawfreehand(axRoi, 'Smoothing', 1, 'Position', ROI.Position, 'Color', aColor, 'LineWidth', 1, 'Label', sLabel, 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'off', 'FaceSelectable', 0, 'FaceAlpha', 0);  
+    %                                pRoi.Waypoints(:) = false;
+                                    addContourToTemplate(bb, 'Axes3', dSliceNb, 'images.roi.freehand', ROI.Position, sLabel, 'off', aColor, 1, 0, 1, 1, sTag);
+
+    %                                addRoi(pRoi, bb);                  
+
+    %                                roiDefaultMenu(pRoi);
+
+    %                                uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback); 
+    %                                uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', pRoi, 'Callback', @clearWaypointsCallback); 
+
+    %                                constraintMenu(pRoi);
+
+    %                                cropMenu(pRoi);
+
+    %                                uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on'); 
+
+             %                       set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
+
+                                    asTag{numel(asTag)+1} = sTag;                        
                                 end
 
-                                sTag   = num2str(randi([-(2^52/2),(2^52/2)],1));
-%                                axRoi  = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                                aColor = [atContours{cc}(dd).Color(1)/255 atContours{cc}(dd).Color(2)/255 atContours{cc}(dd).Color(3)/255];
-                                sLabel = atContours{cc}(dd).ROIName;
-
-%                                pRoi = drawfreehand(axRoi, 'Smoothing', 1, 'Position', ROI.Position, 'Color', aColor, 'LineWidth', 1, 'Label', sLabel, 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'off', 'FaceSelectable', 0, 'FaceAlpha', 0);  
-%                                pRoi.Waypoints(:) = false;
-                                addContourToTemplate(bb, 'Axes3', dSliceNb, 'images.roi.freehand', ROI.Position, sLabel, 'off', aColor, 1, 0, 1, 1, sTag);
-
-%                                addRoi(pRoi, bb);                  
-
-%                                roiDefaultMenu(pRoi);
-
-%                                uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback); 
-%                                uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', pRoi, 'Callback', @clearWaypointsCallback); 
-
-%                                constraintMenu(pRoi);
-
-%                                cropMenu(pRoi);
-
-%                                uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on'); 
-
-         %                       set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
-
-                                asTag{numel(asTag)+1} = sTag;                        
+                                if ~isempty(asTag)
+                                    createVoiFromRois(bb, asTag, sLabel);                        
+                                end            
                             end
-
-                            if ~isempty(asTag)
-                                createVoiFromRois(bb, asTag, sLabel);                        
-                            end            
                         end
                     end
                 end

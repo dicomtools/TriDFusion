@@ -42,22 +42,33 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
 
             dSliceSpacing = spacingBetweenTwoSlices(atDicomInfo{jj},atDicomInfo{jj+1});
 
-            if (dSliceSpacing - dFirstSpacing) > (2*dFirstSpacing) 
+            if (dSliceSpacing - dFirstSpacing) > (2*dFirstSpacing) % Inconsistent spacing  
                 tGate{dNbGate}.GateNumber = dNbGate;
-                tGate{dNbGate}.NbSlices = dNbSlices;       
+                tGate{dNbGate}.NbSlices   = dNbSlices;       
                 tGate{dNbGate}.SeriesInstanceUID = atDicomInfo{jj}.SeriesInstanceUID;       
 
                 dNbGate = dNbGate+1;
                 dNbSlices = 0;
-            end
+            else
+                if ~strcmp(atDicomInfo{jj}.FrameOfReferenceUID, atDicomInfo{jj+1}.FrameOfReferenceUID) % Different series
 
+                    tGate{dNbGate}.GateNumber = dNbGate;
+                    tGate{dNbGate}.NbSlices   = dNbSlices;       
+                    tGate{dNbGate}.SeriesInstanceUID = atDicomInfo{jj}.SeriesInstanceUID;       
+
+                    dNbGate = dNbGate+1;
+                    dNbSlices = 0;                
+                end            
+            end
+            
             dNbSlices = dNbSlices+1;
 
         end
 
         if dNbGate ~= 1 % last frame
+            
             tGate{dNbGate}.GateNumber = dNbGate;
-            tGate{dNbGate}.NbSlices = dNbSlices;       
+            tGate{dNbGate}.NbSlices   = dNbSlices;       
             tGate{dNbGate}.SeriesInstanceUID = atDicomInfo{jj}.SeriesInstanceUID; 
         end
 

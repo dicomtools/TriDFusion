@@ -39,12 +39,22 @@ function [resampImage, atDcmMetaData] = resampleImageTransformMatrix(dcmImage, a
     [M, ~] = getTransformMatrix(atDcmMetaData{1}, dcmSliceThickness, atRefMetaData{1}, refSliceThickness);
     TF = affine3d(M);
 
-    if dimsDcm(3) ~= dimsRef(3)
+%    if dimsDcm(3) == dimsRef(3)
         Rdcm = imref3d(size(dcmImage), atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
+        Rref = imref3d(size(refImage), atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), refSliceThickness);
         [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
-    else
-        [resampImage, ~] = imwarp(dcmImage, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef) );  
-    end
+        
+        if numel(resampImage) ~=  numel(refImage) % Temp patch
+
+            if dimsDcm(3) ~= dimsRef(3)
+                resampImage = imresize3(resampImage,[dimsRef(1) dimsRef(2) dimsRef(3)]);                
+            else
+                sameAsInput  = affineOutputView(size(refImage),TF,'BoundsStyle','SameAsInput');
+                [resampImage, ~] = imwarp(dcmImage, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', sameAsInput );  
+            end
+                     
+        end
+%    end
 
     if numel(atRefMetaData) < numel(atDcmMetaData) && ...
        numel(atDcmMetaData) ~= 1   
@@ -57,6 +67,8 @@ function [resampImage, atDcmMetaData] = resampleImageTransformMatrix(dcmImage, a
             atDcmMetaData{end+1} = atDcmMetaData{end}; %Add missing slice
         end
     end
+    
+    aResampledImageSize = size(resampImage);
 
     for jj=1:numel(atDcmMetaData)
         if numel(atRefMetaData)==numel(atDcmMetaData)
@@ -73,7 +85,9 @@ function [resampImage, atDcmMetaData] = resampleImageTransformMatrix(dcmImage, a
         atDcmMetaData{jj}.PixelSpacing(2) = atRefMetaData{jj}.PixelSpacing(2);
         atDcmMetaData{jj}.SliceThickness  = atRefMetaData{jj}.SliceThickness;
         atDcmMetaData{jj}.SpacingBetweenSlices  = refSliceThickness;
-      
+        
+        atDcmMetaData{jj}.Rows    = aResampledImageSize(1);
+        atDcmMetaData{jj}.Columns = aResampledImageSize(2);      
     end
        
     for cc=1:numel(atDcmMetaData)        

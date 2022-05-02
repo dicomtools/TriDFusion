@@ -123,7 +123,7 @@ function figRoiDialogCallback(hObject, ~)
         uimenu(mRoiOptions,'Label', 'Invert Constraint', 'Checked', sInvConstChecked, 'Callback', @figRoiInverConstraintCallback);
 
     mRoiReset = uimenu(figRoiWindow,'Label','Clear');
-                uimenu(mRoiReset,'Label', 'Series Contours'   , 'Checked', 'off', 'Callback', @clearAllRoisCallback);
+                uimenu(mRoiReset,'Label', 'Series Contours'   , 'Checked', 'off', 'Callback', @clearAllContoursCallback);
                 uimenu(mRoiReset,'Label', 'Series Constraints', 'Checked', 'off', 'Callback', @clearAllMasksCallback);
 
 %    if integrateToBrowser('get') == true
@@ -2227,7 +2227,7 @@ end
         roiConstraintList('reset', get(uiSeriesPtr('get'), 'Value'));
     end
 
-    function clearAllRoisCallback(~, ~)
+    function clearAllContoursCallback(~, ~)
 
         tDeleteInput = inputTemplate('get');
         iOffset = get(uiSeriesPtr('get'), 'Value');
@@ -2292,15 +2292,15 @@ end
 
             setVoiRoiListbox(bSUVUnit, bSegmented);
             
-            clearDisplay();
+%            clearDisplay();
 
-            if size(dicomBuffer('get'), 3) == 1
-                initDisplay(1);
-            else
-                initDisplay(3);
-            end
+%            if size(dicomBuffer('get'), 3) == 1
+%                initDisplay(1);
+%            else
+%                initDisplay(3);
+%            end
 
-            dicomViewerCore();           
+%            dicomViewerCore();           
             
         end
 

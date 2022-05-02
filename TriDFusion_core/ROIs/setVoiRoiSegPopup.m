@@ -32,8 +32,9 @@ function setVoiRoiSegPopup()
 
     uiDeleteVoiRoiPanel = uiDeleteVoiRoiPanelObject('get');
 
+    uiAddVoiRoiPanel  = uiAddVoiRoiPanelObject ('get');
     uiPrevVoiRoiPanel = uiPrevVoiRoiPanelObject('get');
-    uiDelVoiRoiPanel  = uiDelVoiRoiPanelObject('get');
+    uiDelVoiRoiPanel  = uiDelVoiRoiPanelObject ('get');
     uiNextVoiRoiPanel = uiNextVoiRoiPanelObject('get');
 
     asVOIsList = repmat({''},numel(tVoiInput),1);
@@ -65,6 +66,7 @@ function setVoiRoiSegPopup()
             set(uiDeleteVoiRoiPanel, 'Enable', 'on');
             set(uiDeleteVoiRoiPanel, 'String', asVOIsList);
 
+            set(uiAddVoiRoiPanel , 'Enable', 'on');
             set(uiPrevVoiRoiPanel, 'Enable', 'on');
             set(uiDelVoiRoiPanel , 'Enable', 'on');
             set(uiNextVoiRoiPanel, 'Enable', 'on');
@@ -73,6 +75,7 @@ function setVoiRoiSegPopup()
             set(uiDeleteVoiRoiPanel, 'Enable', 'off');
             set(uiDeleteVoiRoiPanel, 'String', ' ');
 
+            set(uiAddVoiRoiPanel , 'Enable', 'off');
             set(uiPrevVoiRoiPanel, 'Enable', 'off');
             set(uiDelVoiRoiPanel , 'Enable', 'off');
             set(uiNextVoiRoiPanel, 'Enable', 'off');
@@ -82,6 +85,7 @@ function setVoiRoiSegPopup()
         set(uiDeleteVoiRoiPanel, 'Enable', 'off');
         set(uiDeleteVoiRoiPanel, 'String', ' ');
 
+        set(uiAddVoiRoiPanel , 'Enable', 'off');
         set(uiPrevVoiRoiPanel, 'Enable', 'off');
         set(uiDelVoiRoiPanel , 'Enable', 'off');
         set(uiNextVoiRoiPanel, 'Enable', 'off');

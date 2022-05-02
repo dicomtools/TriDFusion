@@ -162,6 +162,9 @@ function writeDICOM(aBuffer, tMetaData, sWriteDir, iSeriesOffset)
         tWriteMetaData{ww}.ImagePositionPatient = tMetaData{ww}.ImagePositionPatient;               
         tWriteMetaData{ww}.ImageOrientationPatient = tMetaData{ww}.ImageOrientationPatient;        
 
+        tWriteMetaData{ww}.Rows = tMetaData{ww}.Rows;               
+        tWriteMetaData{ww}.Columns = tMetaData{ww}.Columns;           
+        
         tWriteMetaData{ww}.SeriesDescription = tMetaData{ww}.SeriesDescription; 
         tWriteMetaData{ww}.SourceApplicationEntityTitle = 'TRIDFUSION';
         

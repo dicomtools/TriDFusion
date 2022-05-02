@@ -33,131 +33,131 @@ function triangulateRoi(sRoiTag, bCenterRoi)
 
     if size(im, 3) ~= 1 % 3D
         for rr=1:numel(tRoiInput)
-            if strcmpi(tRoiInput{rr}.Tag, sRoiTag)
-                if isvalid(tRoiInput{rr}.Object)
+            if strcmp(tRoiInput{rr}.Tag, sRoiTag)
 
-                    if ~isempty(tRoiInput{rr}.MaxDistances)
+                if ~isempty(tRoiInput{rr}.MaxDistances)
 
-                        p1x = tRoiInput{rr}.MaxDistances.MaxXY.Line.XData(1);
-                        p2x = tRoiInput{rr}.MaxDistances.MaxXY.Line.XData(2);
-                        p1y = tRoiInput{rr}.MaxDistances.MaxXY.Line.YData(1);
-                        p2y = tRoiInput{rr}.MaxDistances.MaxXY.Line.YData(2);
+                    p1x = tRoiInput{rr}.MaxDistances.MaxXY.Line.XData(1);
+                    p2x = tRoiInput{rr}.MaxDistances.MaxXY.Line.XData(2);
+                    p1y = tRoiInput{rr}.MaxDistances.MaxXY.Line.YData(1);
+                    p2y = tRoiInput{rr}.MaxDistances.MaxXY.Line.YData(2);
 
-                        midX = round(mean([p1x, p2x]));
-                        midY = round(mean([p1y, p2y]));
+                    midX = round(mean([p1x, p2x]));
+                    midY = round(mean([p1y, p2y]));
+                else 
+                    midX = round(tRoiInput{rr}.Position(1,1));
+                    midY = round(tRoiInput{rr}.Position(1,2));                        
+                end
 
-                        iCoronalSize  = size(im,1);
-                        iSagittalSize = size(im,2);
-                        iAxialSize    = size(im,3);
+                iCoronalSize  = size(im,1);
+                iSagittalSize = size(im,2);
+                iAxialSize    = size(im,3);
 
-                        dSliceNb = tRoiInput{rr}.SliceNb;
+                dSliceNb = tRoiInput{rr}.SliceNb;
 
-                        switch lower(tRoiInput{rr}.Axe)
-                            case 'axes1'
-                                if ( (midX <= iSagittalSize) &&...
-                                     (midY <= iAxialSize) )
+                switch lower(tRoiInput{rr}.Axe)
+                    case 'axes1'
+                        if ( (midX <= iSagittalSize) &&...
+                             (midY <= iAxialSize) )
 
-                                    set(uiSliderSagPtr('get'), 'Value', midX / iSagittalSize);
-                                    set(uiSliderTraPtr('get'), 'Value', 1 - (midY / iAxialSize));
-                                    set(uiSliderCorPtr('get'), 'Value', dSliceNb / iCoronalSize);
+                            set(uiSliderSagPtr('get'), 'Value', midX / iSagittalSize);
+                            set(uiSliderTraPtr('get'), 'Value', 1 - (midY / iAxialSize));
+                            set(uiSliderCorPtr('get'), 'Value', dSliceNb / iCoronalSize);
 
-                                    sliceNumber('set', 'sagittal', midX);
-                                    sliceNumber('set', 'axial'   , midY);
-                                    sliceNumber('set', 'coronal' , dSliceNb);
+                            sliceNumber('set', 'sagittal', midX);
+                            sliceNumber('set', 'axial'   , midY);
+                            sliceNumber('set', 'coronal' , dSliceNb);
 
-                                    refreshImages();
+                            refreshImages();
 
-                                    if bCenterRoi == true
-                                        xx = tRoiInput{rr}.Object.Parent.XLim;
-                                        yy = tRoiInput{rr}.Object.Parent.YLim;
+                            if bCenterRoi == true
+                                xx = tRoiInput{rr}.Object.Parent.XLim;
+                                yy = tRoiInput{rr}.Object.Parent.YLim;
 
-                                        xOffset = diff(xx)/2;
-                                        yOffset = diff(yy)/2;
+                                xOffset = diff(xx)/2;
+                                yOffset = diff(yy)/2;
 
-                                        if xOffset < midX
-                                            Xlimit = [midX-xOffset midX+xOffset];
-                                            tRoiInput{rr}.Object.Parent.XLim = Xlimit;
-                                        end
-
-                                  %      if yOffset < midY
-                                  %          Ylimit = [midY-yOffset midY+yOffset];
-                                  %          tRoiInput{rr}.Object.Parent.YLim = Ylimit;
-                                  %      end
-                                    end
+                                if xOffset < midX
+                                    Xlimit = [midX-xOffset midX+xOffset];
+                                    tRoiInput{rr}.Object.Parent.XLim = Xlimit;
                                 end
 
-                            case 'axes2'
-                                if ( (midX <= iCoronalSize) &&...
-                                     (midY <= iAxialSize) )
+                          %      if yOffset < midY
+                          %          Ylimit = [midY-yOffset midY+yOffset];
+                          %          tRoiInput{rr}.Object.Parent.YLim = Ylimit;
+                          %      end
+                            end
+                        end
 
-                                    set(uiSliderCorPtr('get'), 'Value', midX / iCoronalSize);
-                                    set(uiSliderTraPtr('get'), 'Value', 1 - (midY / iAxialSize));
-                                    set(uiSliderSagPtr('get'), 'Value', dSliceNb / iSagittalSize);
+                    case 'axes2'
+                        if ( (midX <= iCoronalSize) &&...
+                             (midY <= iAxialSize) )
 
-                                    sliceNumber('set', 'coronal' , midX);
-                                    sliceNumber('set', 'axial'   , midY);
-                                    sliceNumber('set', 'sagittal', dSliceNb);
+                            set(uiSliderCorPtr('get'), 'Value', midX / iCoronalSize);
+                            set(uiSliderTraPtr('get'), 'Value', 1 - (midY / iAxialSize));
+                            set(uiSliderSagPtr('get'), 'Value', dSliceNb / iSagittalSize);
 
-                                    refreshImages();
+                            sliceNumber('set', 'coronal' , midX);
+                            sliceNumber('set', 'axial'   , midY);
+                            sliceNumber('set', 'sagittal', dSliceNb);
 
-                                    if bCenterRoi == true
+                            refreshImages();
 
-                                        xx = tRoiInput{rr}.Object.Parent.XLim;
-                                        yy = tRoiInput{rr}.Object.Parent.YLim;
+                            if bCenterRoi == true
 
-                                        xOffset = diff(xx)/2;
-                                        yOffset = diff(yy)/2;
+                                xx = tRoiInput{rr}.Object.Parent.XLim;
+                                yy = tRoiInput{rr}.Object.Parent.YLim;
 
-                                        if xOffset < midX
-                                            Xlimit = [midX-xOffset midX+xOffset];
-                                            tRoiInput{rr}.Object.Parent.XLim = Xlimit;
-                                        end
+                                xOffset = diff(xx)/2;
+                                yOffset = diff(yy)/2;
 
-                                  %      if yOffset < midY
-                                  %          Ylimit = [midY-yOffset midY+yOffset];
-                                  %          tRoiInput{rr}.Object.Parent.YLim = Ylimit;
-                                  %      end
-                                    end
+                                if xOffset < midX
+                                    Xlimit = [midX-xOffset midX+xOffset];
+                                    tRoiInput{rr}.Object.Parent.XLim = Xlimit;
                                 end
 
-                            case 'axes3'
-                                if ( (midX <= iSagittalSize) && ...
-                                     (midY <= iCoronalSize) )
+                          %      if yOffset < midY
+                          %          Ylimit = [midY-yOffset midY+yOffset];
+                          %          tRoiInput{rr}.Object.Parent.YLim = Ylimit;
+                          %      end
+                            end
+                        end
 
-                                    set(uiSliderSagPtr('get'), 'Value', midX / iSagittalSize);
-                                    set(uiSliderCorPtr('get'), 'Value', midY / iCoronalSize);
-                                    set(uiSliderTraPtr('get'), 'Value', 1 - (dSliceNb / iAxialSize));
+                    case 'axes3'
+                        if ( (midX <= iSagittalSize) && ...
+                             (midY <= iCoronalSize) )
 
-                                    sliceNumber('set', 'sagittal', midX);
-                                    sliceNumber('set', 'coronal' , midY);
-                                    sliceNumber('set', 'axial'   , dSliceNb);
+                            set(uiSliderSagPtr('get'), 'Value', midX / iSagittalSize);
+                            set(uiSliderCorPtr('get'), 'Value', midY / iCoronalSize);
+                            set(uiSliderTraPtr('get'), 'Value', 1 - (dSliceNb / iAxialSize));
 
-                                    refreshImages();
+                            sliceNumber('set', 'sagittal', midX);
+                            sliceNumber('set', 'coronal' , midY);
+                            sliceNumber('set', 'axial'   , dSliceNb);
 
-                                    if bCenterRoi == true
+                            refreshImages();
 
-                                        xx = tRoiInput{rr}.Object.Parent.XLim;
-                                        yy = tRoiInput{rr}.Object.Parent.YLim;
+                            if bCenterRoi == true
 
-                                        xOffset = diff(xx)/2;
-                                        yOffset = diff(yy)/2;
+                                xx = tRoiInput{rr}.Object.Parent.XLim;
+                                yy = tRoiInput{rr}.Object.Parent.YLim;
 
-                                        if xOffset < midX
-                                            Xlimit = [midX-xOffset midX+xOffset];
-                                            tRoiInput{rr}.Object.Parent.XLim = Xlimit;
-                                        end
+                                xOffset = diff(xx)/2;
+                                yOffset = diff(yy)/2;
 
-                                 %       if yOffset < midY
-                                 %           Ylimit = [midY-yOffset midY+yOffset];
-                                 %           tRoiInput{rr}.Object.Parent.YLim = Ylimit;
-                                 %       end
-                                    end
-
+                                if xOffset < midX
+                                    Xlimit = [midX-xOffset midX+xOffset];
+                                    tRoiInput{rr}.Object.Parent.XLim = Xlimit;
                                 end
-                            otherwise
+
+                         %       if yOffset < midY
+                         %           Ylimit = [midY-yOffset midY+yOffset];
+                         %           tRoiInput{rr}.Object.Parent.YLim = Ylimit;
+                         %       end
+                            end
 
                         end
-                    end
+                    otherwise
 
                 end
                 break;

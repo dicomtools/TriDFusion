@@ -50,11 +50,18 @@ function [resampImage, atDcmMetaData] = resampleMipTransformMatrix(dcmImage, atD
     TF = affine3d(f);
     
     Rdcm  = imref3d(size(dcmImage), atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
-   
-    if dimsDcm(3) ~= dimsRef(3)
-        [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')) );  
-    else
-        [resampImage, ~] = imwarp(dcmImage, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef) );  
+    
+    [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')) );  
+    
+    if numel(resampImage) ~=  numel(refImage) % Temp patch
+
+        if dimsDcm(3) ~= dimsRef(3)
+            resampImage = imresize3(resampImage,[dimsRef(1) dimsRef(2) dimsRef(3)]);                
+        else
+            sameAsInput  = affineOutputView(size(refImage),TF,'BoundsStyle','SameAsInput');
+            [resampImage, ~] = imwarp(dcmImage, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', sameAsInput );  
+        end
     end
+        
 
 end

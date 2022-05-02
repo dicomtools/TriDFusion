@@ -314,7 +314,7 @@ end
                 axis(axeF, 'tight');
                 axefPtr('set', axeF, get(uiFusedSeriesPtr('get'), 'Value'));
 
-                linkaxes([axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                                
+%                linkaxes([axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                                
                 uistack(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
               
                 [x1,y1,~] = size(A);
@@ -427,7 +427,7 @@ end
                 axis(axes1f, 'tight');
                 axes1fPtr('set', axes1f, get(uiFusedSeriesPtr('get'), 'Value'));
                 
-                linkaxes([axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                
+%                linkaxes([axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                
                 uistack(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
 
                 if ~isempty(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')))
@@ -452,7 +452,7 @@ end
                 axis(axes2f, 'tight');
                 axes2fPtr('set', axes2f, get(uiFusedSeriesPtr('get'), 'Value'));
 
-                linkaxes([axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                
+%                linkaxes([axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                
                 uistack(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
                 
                 if ~isempty(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')))
@@ -475,10 +475,16 @@ end
                         'Visible' , 'off'...
                         );
                 axis(axes3f, 'tight');
+                
+%                axes3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')  );
+%                set(axes3f, 'XLim', axes3.XLim);
+%                set(axes3f, 'YLim', axes3.YLim); 
+                
                 axes3fPtr('set', axes3f, get(uiFusedSeriesPtr('get'), 'Value'));
                 
-                linkaxes([axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))], 'xy');                
+%                linkaxes([axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))], 'xy');                
                 uistack(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
+                
                 
                 if link2DMip('get') == true && isVsplash('get') == false         
                     if ~isempty(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')))
@@ -503,7 +509,7 @@ end
                     axis(axesMipf, 'tight');
                     axesMipfPtr('set', axesMipf, get(uiFusedSeriesPtr('get'), 'Value'));
 
-                    linkaxes([axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                
+%                    linkaxes([axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                
                     uistack(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');                    
                 end                                                             
                 
@@ -578,7 +584,17 @@ end
                                                          A, ...
                                                          tMetaData, ...
                                                          'bilinear' ...
-                                                         );                                                 
+                                                         ); 
+%                    [B, tFuseMetaData] = ...
+%                        resampleImage(B, ...
+%                                      tFuseMetaData, ...
+%                                      A, ...
+%                                      tMetaData, ...
+%                                      'bilinear', ...
+%                                      false, ...
+%                                      false ...
+%                                      );                                                     
+                                                     
                     end                             
 %                else
                     
@@ -1703,7 +1719,56 @@ end
                     alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-get(uiAlphaSliderPtr('get'), 'Value') );                                
                 end 
             end
-                       
+            
+            % Set fused axes on same field of view
+
+            if size(fusionBuffer('get', [], iFuseOffset), 3) == 1
+
+                axe  = axePtr ('get', [], get(uiSeriesPtr('get'), 'Value')  );
+                axef = axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+
+                set(axef, 'XLim', axe.XLim);
+                set(axef, 'YLim', axe.YLim); 
+
+                linkaxes([axe axef], 'xy');                     
+            else
+if 1                
+                axes1  = axes1Ptr ('get', [], get(uiSeriesPtr('get'), 'Value')  );
+                axes1f = axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+
+                set(axes1f, 'XLim', axes1.XLim);
+                set(axes1f, 'YLim', axes1.YLim); 
+
+                linkaxes([axes1 axes1f], 'xy'); 
+
+                axes2  = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')  );
+                axes2f = axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+
+                set(axes2f, 'XLim', axes2.XLim);
+                set(axes2f, 'YLim', axes2.YLim); 
+
+                linkaxes([axes2 axes2f], 'xy'); 
+
+                axes3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')  );
+                axes3f = axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+
+                set(axes3f, 'XLim', axes3.XLim);
+                set(axes3f, 'YLim', axes3.YLim); 
+
+                linkaxes([axes3 axes3f], 'xy'); 
+                
+                if link2DMip('get') == true && isVsplash('get') == false         
+                    
+                    axesMip  = axesMipPtr ('get', [], get(uiSeriesPtr('get'), 'Value'));
+                    axesMipf = axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                    
+                    set(axesMipf, 'XLim', axesMip.XLim);
+                    set(axesMipf, 'YLim', axesMip.YLim); 
+
+                    linkaxes([axesMip axesMipf], 'xy');               
+                end                
+end                
+            end
         else
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
             isMoveImageActivated('set', false);

@@ -49,17 +49,19 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
     end
 
     Rdcm = imref3d(size(dcmImage), atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
-%    Rref = imref3d(size(refImage), atRefMetaData{1}.PixelSpacing(2), atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
+    Rref = imref3d(size(refImage), atRefMetaData{1}.PixelSpacing(2), atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
     
     [M, ~] = getTransformMatrix(atDcmMetaData{1}, dcmSliceThickness, atRefMetaData{1}, refSliceThickness);
     TF = affine3d(M);
-    
+        
     if bRefOutputView == true
         if dimsDcm(3) ~= dimsRef(3)
             [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
         else
             [resampImage, ~] = imwarp(dcmImage, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef));  
         end
+%        resampImage = imresize3(resampImage,[dimsRef(1) dimsRef(2) dimsRef(3)]);
+
     else
         [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
     end
@@ -76,6 +78,8 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
         end
     end
 
+    aResampledImageSize = size(resampImage);
+    
     for jj=1:numel(atDcmMetaData)
         
         if numel(atRefMetaData)==numel(atDcmMetaData)
@@ -93,6 +97,9 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
         atDcmMetaData{jj}.SliceThickness  = atRefMetaData{jj}.SliceThickness;
         atDcmMetaData{jj}.SpacingBetweenSlices  = refSliceThickness;
 
+        atDcmMetaData{jj}.Rows    = aResampledImageSize(1);
+        atDcmMetaData{jj}.Columns = aResampledImageSize(2);
+        
         if bUpdateDescription == true 
             atDcmMetaData{jj}.SeriesDescription  = sprintf('RSP %s', atDcmMetaData{1}.SeriesDescription);
         end           
@@ -121,5 +128,27 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
         asDescription{iOffset} = sprintf('RSP %s', asDescription{iOffset});
         seriesDescription('set', asDescription);
     end   
+    
+    
+         function A = getAffineXfm(headers)
+        % Constants
+        if length(headers) == 1 % Some NM series
+            N =  headers{1}.NumberOfSlices;
+        else
+            N = length(headers);
+        end
+        dr = headers{1}.PixelSpacing(1);
+        dc = headers{1}.PixelSpacing(2);
+        F(:,1) = headers{1}.ImageOrientationPatient(1:3);
+        F(:,2) = headers{1}.ImageOrientationPatient(4:6);
+        T1 = headers{1}.ImagePositionPatient;
+        TN = headers{end}.ImagePositionPatient;
+        k = (T1 - TN) ./ (1 - N);
+        % Build affine transformation
+        A = [[F(1,1)*dr F(1,2)*dc k(1) T1(1)]; ...
+            [F(2,1)*dr F(2,2)*dc k(2) T1(2)]; ...
+            [F(3,1)*dr F(3,2)*dc k(3) T1(3)]; ...
+            [0         0         0    1    ]];
+    end     
 end  
 

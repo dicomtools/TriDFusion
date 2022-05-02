@@ -435,7 +435,7 @@ end
      txtAddVoiIsoMask = ...
        uicontrol(ui3DPanelPtr('get'),...
                   'style'   , 'text',...
-                  'string'  , 'Add VOIs to ISO Mask',...
+                  'string'  , 'Add Contours from ISO Mask',...
                   'horizontalalignment', 'left',...
                   'position', [45 732 200 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -561,7 +561,7 @@ end
 
        uicontrol(ui3DPanelPtr('get'),...
                   'style'   , 'text',...
-                  'string'  , 'Smalest Mask (nb pixels)',...
+                  'string'  , 'Smalest Contour (ml)',...
                   'horizontalalignment', 'left',...
                   'position', [45 635 200 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -2414,7 +2414,28 @@ end
 
             uiSeries = uiSeriesPtr('get');
             dSeriesOffset = get(uiSeries, 'Value');
+            
+            atMetaData = dicomMetaData('get');
+                  
+            dPixelSizeX = atMetaData{1}.PixelSpacing(1);
+            if dPixelSizeX == 0 
+                dPixelSizeX = 1;
+            end
+            
+            dPixelSizeY = atMetaData{1}.PixelSpacing(2);
+            if dPixelSizeY == 0 
+                dPixelSizeY = 1;
+            end                    
+            
+            dPixelSizeZ = computeSliceSpacing(atMetaData);
+            if dPixelSizeZ == 0  
+                dPixelSizeZ = 1;
+            end            
 
+            dVoxelSize = dPixelSizeX * dPixelSizeY * dPixelSizeZ;
+            
+            dSmalestValueNbVoxels = round(dSmalestValue/(dVoxelSize/1000)); % In ml
+            
 %            SMALEST_ROI_SIZE = 0;
             PIXEL_EDGE_RATIO = 3;
 
@@ -2428,11 +2449,12 @@ end
 
             BW = zeros(size(imMask)); % Init BW buffer
 
+                        
             for bb=1:dNbElements  % Nb VOI
 
                 progressBar( bb/dNbElements-0.0001, sprintf('Computing Volume %d/%d, please wait', bb, dNbElements) );
 
-                if numel(CC.PixelIdxList{bb}) >= dSmalestValue
+                if numel(CC.PixelIdxList{bb}) >= dSmalestValueNbVoxels
 
                     BW(BW ~=0) = 0; % Reset BW buffer
 
