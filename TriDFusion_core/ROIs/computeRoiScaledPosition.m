@@ -27,8 +27,8 @@ function [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(refImage,
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-%    dimsRef = size(refImage);        
-%    dimsDcm = size(dcmImage);
+    dimsRef = size(refImage);        
+    dimsDcm = size(dcmImage);
 
     if ~exist('Rsmp', 'var')
         Rsmp = [];
@@ -79,12 +79,18 @@ function [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(refImage,
             atRefMetaData{1}.PixelSpacing(2) =1;
         end       
     end
-        
+    
+    Rdcm = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
+    Rref = imref3d(dimsRef, atRefMetaData{1}.PixelSpacing(2), atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
+      
     [M, ~] = getTransformMatrix(atDcmMetaData{1}, dcmSliceThickness, atRefMetaData{1}, refSliceThickness);
     TF = affine3d(M);         
         
     a3DOffset = zeros(size(tRoi.Position, 1),3);
-
+    
+    xMoveOffset = (dimsDcm(1)-dimsRef(1))/2;
+    yMoveOffset = (dimsDcm(2)-dimsRef(2))/2;   
+    
     switch lower(tRoi.Axe)
 
         case lower('axe')
@@ -176,10 +182,15 @@ function [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(refImage,
                 aNewPosition(4) = tRoi.Position(4)*yScale;
                 aNewPosition(5) = out.Location(3);
             else
-
-                aNewPosition(:,1) = out.Location(:,1);
-                aNewPosition(:,2) = out.Location(:,2);
-                aNewPosition(:,3) = out.Location(:,3);                    
+                if numel(refImage) > numel(dcmImage)
+                    aNewPosition(:,1) = out.Location(:,1);
+                    aNewPosition(:,2) = out.Location(:,2);
+                    aNewPosition(:,3) = out.Location(:,3);                    
+                else
+                    aNewPosition(:,1) = out.Location(:,1);
+                    aNewPosition(:,2) = out.Location(:,2);
+                    aNewPosition(:,3) = out.Location(:,3);                      
+                end
             end
     end
 

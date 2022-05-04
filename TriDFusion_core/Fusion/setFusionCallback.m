@@ -572,13 +572,13 @@ end
                     aRefMip = mipBuffer('get', [], iSeriesOffset);
                     aMip    = mipBuffer('get', [], iFuseOffset);
                     
-                    if numel(aMip) ~= numel(aRefMip)  % Resample mip  
+%                    if numel(aMip) ~= numel(aRefMip)  % Resample mip  
                         aResampledMip = resampleMipTransformMatrix(aMip, tFuseMetaData, aRefMip, tMetaData, 'bilinear');   
-                    else
-                        aResampledMip = aMip;
-                    end
+%                    else
+%                        aResampledMip = aMip;
+%                    end
                     
-                    if numel(A) ~= numel(B) % Resample image                 
+    %                if numel(A) ~= numel(B) % Resample image                 
                         [B, tFuseMetaData] = ...
                             resampleImageTransformMatrix(B, ...
                                                          tFuseMetaData, ...
@@ -596,7 +596,7 @@ end
 %                                      false ...
 %                                      );                                                     
                                                      
-                    end                             
+     %               end                             
 %                else
                     
 %                    aRefMip = mipBuffer('get', [], iSeriesOffset);

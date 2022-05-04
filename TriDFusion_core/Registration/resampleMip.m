@@ -30,7 +30,7 @@ function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaD
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-%    dimsRef = size(refImage);        
+    dimsRef = size(refImage);        
     dimsDcm = size(dcmImage);
        
     dcmSliceThickness = computeSliceSpacing(atDcmMetaData);
@@ -52,6 +52,6 @@ function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaD
     Rdcm  = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
 %    Rref  = imref3d(size(refImage), atRefMetaData{1}.PixelSpacing(2), atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
 
-    [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));      
+    [resampImage, ~] = imwarp(dcmImage, TF, 'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef));      
 
 end
