@@ -561,6 +561,19 @@ function initRoiPanel()
             end
         end
         
+        % Add ROI to Total Mask
+        
+        for pp=1:numel(atVoiInput) 
+            if strcmpi(atVoiInput{pp}.Label, 'TOTAL-MASK')
+                if pp ~= dVoiOffset
+                    atVoiInput{pp}.RoisTag{end+1} = sRoiTag;
+                    tInput(dSeriesOffset).tVoi{pp}.RoisTag{end+1} = sRoiTag;
+                    
+                end
+                break;
+            end
+        end
+    
         roiTemplate('set', dSeriesOffset, atRoi);
         voiTemplate('set', dSeriesOffset, atVoiInput);
         
