@@ -1693,38 +1693,6 @@ end
             set( uiFusionSliderLevelPtr('get') , 'Visible', 'on' );
             set( uiAlphaSliderPtr('get')       , 'Visible', 'on' );
             
-            if size(dicomBuffer('get'), 3) == 1
-                set( imAxeFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , 'Visible', 'on' );
-
-                alpha( axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
-                alpha( axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 1-get(uiAlphaSliderPtr('get'), 'Value') );                    
-            else
-
-                set( imCoronalFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
-                set( imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
-                set( imAxialFPtr   ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
-                
-                if link2DMip('get') == true && isVsplash('get') == false      
-                    set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
-                end
-
-                alpha( axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
-                alpha( axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
-                alpha( axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
-                
-                if link2DMip('get') == true && isVsplash('get') == false      
-                    alpha( axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );                                
-                end 
-
-                alpha( axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
-                alpha( axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
-                alpha( axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
-                
-                if link2DMip('get') == true && isVsplash('get') == false      
-                    alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-get(uiAlphaSliderPtr('get'), 'Value') );                                
-                end 
-            end
-            
             % Set fused axes on same field of view
 
             if size(fusionBuffer('get', [], iFuseOffset), 3) == 1
@@ -1737,7 +1705,7 @@ end
 
                 linkaxes([axe axef], 'xy');                     
             else
-if 1                
+                
                 axes1  = axes1Ptr ('get', [], get(uiSeriesPtr('get'), 'Value')  );
                 axes1f = axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
 
@@ -1771,9 +1739,41 @@ if 1
                     set(axesMipf, 'YLim', axesMip.YLim); 
 
                     linkaxes([axesMip axesMipf], 'xy');               
-                end                
-end                
+                end                                
             end
+                        
+            if size(dicomBuffer('get'), 3) == 1
+                set( imAxeFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , 'Visible', 'on' );
+
+                alpha( axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
+                alpha( axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 1-get(uiAlphaSliderPtr('get'), 'Value') );                    
+            else
+
+                set( imCoronalFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
+                set( imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
+                set( imAxialFPtr   ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
+                
+                if link2DMip('get') == true && isVsplash('get') == false      
+                    set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
+                end
+
+                alpha( axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
+                alpha( axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
+                alpha( axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
+                
+                if link2DMip('get') == true && isVsplash('get') == false      
+                    alpha( axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );                                
+                end 
+
+                alpha( axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+                alpha( axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+                alpha( axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+                
+                if link2DMip('get') == true && isVsplash('get') == false      
+                    alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-get(uiAlphaSliderPtr('get'), 'Value') );                                
+                end 
+            end
+            
         else
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
             isMoveImageActivated('set', false);

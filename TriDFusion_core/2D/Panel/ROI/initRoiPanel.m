@@ -37,7 +37,7 @@ function initRoiPanel()
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'text',...
                   'FontWeight', 'bold',...
-                  'string'  , 'Contour Deletion',...
+                  'string'  , 'Contour Tool',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
@@ -477,22 +477,102 @@ function initRoiPanel()
     
     function addVoiRoiPanelCallback(~, ~)
         
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+                
         aBuffer = dicomBuffer('get');
         
         dVoiOffset = get(uiDeleteVoiRoiPanel, 'Value');
-        
-        tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+                
+        atVoiInput = voiTemplate('get', dSeriesOffset);
                 
         if size(aBuffer, 3) == 1
-            pAxe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+            pAxe = axePtr('get', [], dSeriesOffset);
         else
-            pAxe = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+            pAxe = axes3Ptr('get', [], dSeriesOffset);
         end
         
-%        roiSetAxeBorder(true, pAxe );
-    
-%        a = drawpolygon(pAxe, 'Color', 'cyan', 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', num2str(randi([-(2^52/2),(2^52/2)],1)), 'FaceSelectable', 1, 'FaceAlpha', 0);
+        % Set axe & viewer for ROI
 
+        setCrossVisibility(false);
+     
+        roiSetAxeBorder(true, pAxe);
+
+        mainToolBarEnable('off');
+        mouseFcn('reset');
+        
+        sRoiTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+                
+        pRoi = drawpolygon(pAxe, 'Color', atVoiInput{dVoiOffset}.Color, 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', sRoiTag, 'FaceSelectable', 1, 'FaceAlpha', roiFaceAlphaValue('get'));
+        
+        % Add ROI right click menu
+
+        addRoi(pRoi, dSeriesOffset);
+
+        roiDefaultMenu(pRoi);
+
+        uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
+        uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
+
+        constraintMenu(pRoi);
+
+        cropMenu(pRoi);
+
+        voiMenu(pRoi);
+
+        uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+        
+        % Restore axe & viewer
+                        
+        windowButton('set', 'up');
+        mouseFcn('set');
+        mainToolBarEnable('on');
+        
+        roiSetAxeBorder(false, pAxe);
+       
+        setCrossVisibility(true);
+
+        % Add ROI to VOI
+        
+        tInput = inputTemplate('get');
+              
+        atVoiInput{dVoiOffset}.RoisTag{end+1} = sRoiTag;
+        
+        tInput(dSeriesOffset).tVoi{dVoiOffset}.RoisTag{end+1} = sRoiTag;
+                
+        dRoiNb  = numel(tInput(dSeriesOffset).tVoi{dVoiOffset}.RoisTag);
+        dNbTags = numel(tInput(dSeriesOffset).tVoi{dVoiOffset}.RoisTag);
+        
+        atRoi = roiTemplate('get', dSeriesOffset);
+        
+        for cc=1:numel(atRoi)
+            if strcmp(atRoi{cc}.Tag, sRoiTag)
+
+                atRoi{cc}.ObjectType  = 'voi-roi';
+                tInput(dSeriesOffset).tRoi{cc}.ObjectType = atRoi{cc}.ObjectType;
+                
+                sLabel = sprintf('%s (roi %d/%d)', tInput(dSeriesOffset).tVoi{dVoiOffset}.Label, dRoiNb, dNbTags);
+
+                atRoi{cc}.Label = sLabel;
+                atRoi{cc}.Object.Label = sLabel;   
+                
+                voiDefaultMenu(atRoi{cc}.Object, atVoiInput{dVoiOffset}.Tag);
+                break;
+
+            end
+        end
+        
+        roiTemplate('set', dSeriesOffset, atRoi);
+        voiTemplate('set', dSeriesOffset, atVoiInput);
+        
+        inputTemplate('set', tInput);         
+        
+        
+%        catch
+%        end
+            
+%        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+%        drawnow;                
+        
 %        tVoiInput{dVoiOffset}.RoisTag
    
     end

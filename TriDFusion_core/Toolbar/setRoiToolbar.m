@@ -241,7 +241,7 @@ function setRoiToolbar(sVisible)
 
                     addRoi(a, get(uiSeriesPtr('get'), 'Value'));
 
-                    setVoiRoiSegPopup();
+%                    setVoiRoiSegPopup();
 
                     uimenu(a.UIContextMenu, 'Label', 'Copy Contour' , 'UserData', a, 'Callback', @copyRoiCallback, 'Separator', 'on');
                     uimenu(a.UIContextMenu, 'Label', 'Paste Contour', 'UserData', a, 'Callback', @pasteRoiCallback);
@@ -380,7 +380,7 @@ function setRoiToolbar(sVisible)
 
                     addRoi(a, get(uiSeriesPtr('get'), 'Value'));
 
-                    setVoiRoiSegPopup();
+%                    setVoiRoiSegPopup();
 
                     roiDefaultMenu(a);
 
@@ -442,7 +442,7 @@ function setRoiToolbar(sVisible)
             windowButton('set', 'up');
             mouseFcn('set');
             mainToolBarEnable('on');
-            setCrossVisibility(1);
+            setCrossVisibility(true);
 
             return;
         end
@@ -510,7 +510,7 @@ function setRoiToolbar(sVisible)
 
                     addRoi(a, get(uiSeriesPtr('get'), 'Value'));
 
-                    setVoiRoiSegPopup();
+%                    setVoiRoiSegPopup();
 
                     roiDefaultMenu(a);
 
@@ -665,7 +665,7 @@ function setRoiToolbar(sVisible)
 
                     addRoi(a, get(uiSeriesPtr('get'), 'Value'));
 
-                    setVoiRoiSegPopup();
+%                    setVoiRoiSegPopup();
 
                     roiDefaultMenu(a);
 
@@ -786,7 +786,7 @@ function setRoiToolbar(sVisible)
 
                     addRoi(a, get(uiSeriesPtr('get'), 'Value'));
 
-                    setVoiRoiSegPopup();
+%                    setVoiRoiSegPopup();
 
                     roiDefaultMenu(a);
 
@@ -870,9 +870,11 @@ function setRoiToolbar(sVisible)
                     end
                 end
             end
+            
             if ~isvalid(t6)
                 return;
             end
+            
             if strcmpi(get(t6, 'State'), 'off')
                 return;
             end
@@ -908,7 +910,7 @@ function setRoiToolbar(sVisible)
 
                     addRoi(a, get(uiSeriesPtr('get'), 'Value'));
 
-                    setVoiRoiSegPopup();
+%                    setVoiRoiSegPopup();
 
                     uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
 

@@ -50,7 +50,7 @@ function deleteRoiEvents(hObject, ~)
         bFoundRoi = false;
         for vv=1:numel(tDeleteInput(iOffset).tVoi)
             for tt=1:numel(tDeleteInput(iOffset).tVoi{vv}.RoisTag)
-                if strcmpi(tDeleteInput(iOffset).tVoi{vv}.RoisTag{tt}, hObject.Tag)
+                if strcmp(tDeleteInput(iOffset).tVoi{vv}.RoisTag{tt}, hObject.Tag)
 
                     tDeleteInput(iOffset).tVoi{vv}.RoisTag{tt} = [];
                     tDeleteInput(iOffset).tVoi{vv}.RoisTag(cellfun(@isempty, tDeleteInput(iOffset).tVoi{vv}.RoisTag)) = [];
@@ -77,7 +77,7 @@ function deleteRoiEvents(hObject, ~)
 
     if isfield(tDeleteInput(iOffset), 'tRoi')
         for rr=1:numel(tDeleteInput(iOffset).tRoi)
-            if strcmpi(hObject.Tag, tDeleteInput(iOffset).tRoi{rr}.Tag)
+            if strcmp(hObject.Tag, tDeleteInput(iOffset).tRoi{rr}.Tag)
 
                 tDeleteInput(iOffset).tRoi{rr} = [];
                 tDeleteInput(iOffset).tRoi(cellfun(@isempty, tDeleteInput(iOffset).tRoi)) = [];
@@ -91,7 +91,7 @@ function deleteRoiEvents(hObject, ~)
     for vv=1:numel(tVoiInput)
         bFoundRoi = false;
         for tt=1:numel(tVoiInput{vv}.RoisTag)
-            if strcmpi(tVoiInput{vv}.RoisTag{tt}, hObject.Tag)
+            if strcmp(tVoiInput{vv}.RoisTag{tt}, hObject.Tag)
 
                 tVoiInput{vv}.RoisTag{tt} = [];
                 tVoiInput{vv}.RoisTag(cellfun(@isempty, tVoiInput{vv}.RoisTag)) = [];
@@ -116,7 +116,7 @@ function deleteRoiEvents(hObject, ~)
     end
 
     for rr=1:numel(tRoiInput)
-        if strcmpi(hObject.Tag, tRoiInput{rr}.Tag)
+        if strcmp(hObject.Tag, tRoiInput{rr}.Tag)
 
             if ~isempty(tRoiInput{rr}.MaxDistances)
                 delete(tRoiInput{rr}.MaxDistances.MaxXY.Line);

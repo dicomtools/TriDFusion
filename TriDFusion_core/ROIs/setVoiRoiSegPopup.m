@@ -27,7 +27,7 @@ function setVoiRoiSegPopup()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+%    tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
     tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
     uiDeleteVoiRoiPanel = uiDeleteVoiRoiPanelObject('get');
@@ -45,14 +45,14 @@ function setVoiRoiSegPopup()
         for aa=1:dNbVOIs
             asVOIsList{aa} = tVoiInput{aa}.Label;
             
-            for rr=1:numel(tVoiInput{aa}.RoisTag) % Enable VOI right click menu 
-                for rt=1:numel(tRoiInput)
-                    if strcmp(tRoiInput{rt}.Tag, tVoiInput{aa}.RoisTag{rr})
-                        voiDefaultMenu(tRoiInput{rt}.Object, tVoiInput{aa}.Tag);                      
-                        break;
-                    end
-                end
-            end
+%            for rr=1:numel(tVoiInput{aa}.RoisTag) % Enable VOI right click menu 
+%                for rt=1:numel(tRoiInput)
+%                    if strcmp(tRoiInput{rt}.Tag, tVoiInput{aa}.RoisTag{rr})
+%                        voiDefaultMenu(tRoiInput{rt}.Object, tVoiInput{aa}.Tag);                      
+%                        break;
+%                    end
+%                end
+%            end
             
         end
 

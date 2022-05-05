@@ -33,20 +33,29 @@ function mainToolBarEnable(sEnable)
     set(btnMIPPtr('get')         , 'Enable', sEnable);            
     set(btnPanPtr('get')         , 'Enable', sEnable);
     set(btnZoomPtr('get')        , 'Enable', sEnable);
+ 
+    set(btnFusionPtr('get')    , 'Enable', sEnable);
+    set(uiFusedSeriesPtr('get'), 'Enable', sEnable);
+    
     
     if numel(inputTemplate('get')) > 1
         set(btnRegisterPtr('get'), 'Enable', sEnable); 
     end
     
     if numel(dicomBuffer('get'))
-        set(btnMathPtr('get'), 'Enable', 'on');
+        set(btnMathPtr('get'), 'Enable', sEnable);
     end
 
-    if size(dicomBuffer('get'), 3) ~= 1 && ...
-       numel(dicomBuffer('get'))
-        set(btnVsplashPtr('get')   , 'Enable', 'on');
-        set(uiEditVsplahXPtr('get'), 'Enable', 'on');
-        set(uiEditVsplahYPtr('get'), 'Enable', 'on');
+    if size(dicomBuffer('get'), 3) ~= 1 
+        
+        set(btnLinkMipPtr('get'), 'Enable', sEnable);
+
+        if numel(dicomBuffer('get'))
+            set(btnVsplashPtr('get')   , 'Enable', sEnable);
+            set(uiEditVsplahXPtr('get'), 'Enable', sEnable);
+            set(uiEditVsplahYPtr('get'), 'Enable', sEnable);
+            
+        end
     end    
 %        set(uiSliderWindowPtr('get') , 'Enable', sEnable);
 %        set(uiSliderLevel  , 'Enable', sEnable);           

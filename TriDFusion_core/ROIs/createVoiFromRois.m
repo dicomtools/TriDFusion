@@ -63,7 +63,7 @@ function createVoiFromRois(iSeriesOffset, adTag, sVoiName)
     for bb=1:dNbTags
         for cc=1:numel(atRoi) % Set VOI tag, type and color
 %            if isvalid(atRoi{cc}.Object)
-                if strcmpi(atRoi{cc}.Tag, adTag{bb})
+                if strcmp(atRoi{cc}.Tag, adTag{bb})
                     sVoiTag = num2str(randi([-(2^52/2),(2^52/2)],1));
                     tInput(iSeriesOffset).tVoi{dVoiOffset}.Tag = sVoiTag;
                     tInput(iSeriesOffset).tVoi{dVoiOffset}.ObjectType = 'voi';
@@ -86,7 +86,7 @@ function createVoiFromRois(iSeriesOffset, adTag, sVoiName)
 
         for cc=1:numel(atRoi)
 %            if isvalid(atRoi{cc}.Object)
-                if strcmpi(atRoi{cc}.Tag, adTag{bb})
+                if strcmp(atRoi{cc}.Tag, adTag{bb})
 
                     atRoi{cc}.ObjectType  = 'voi-roi';
                     tInput(iSeriesOffset).tRoi{cc}.ObjectType = atRoi{cc}.ObjectType;

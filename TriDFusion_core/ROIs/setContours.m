@@ -50,7 +50,7 @@ function setContours(tContours)
     try
             
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-%    drawnow; 
+    drawnow; 
     
     for bb=1:numel(atInput)
         
