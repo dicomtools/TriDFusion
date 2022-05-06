@@ -33,8 +33,12 @@ function info = dicominfo4che3(fileInput)
             
         dataset = din.readDataset(-1, -1);                  
     catch 
-       info = dicominfo(char(fileInput)); 
-       return;
+        try 
+        info = dicominfo(char(fileInput)); 
+        catch
+            info = [];
+        end
+        return;
     end  
 
 
