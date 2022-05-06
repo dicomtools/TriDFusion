@@ -235,6 +235,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                             a3DOffset(:,1)=tRoiInput{tt}.Position(:,1)-1;
                             a3DOffset(:,2)=tRoiInput{tt}.Position(:,2)-1;
                             a3DOffset(:,3)=tRoiInput{tt}.SliceNb-1;
+%                            a3DOffset(:,3)=atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation;
 
                             sliceThikness = computeSliceSpacing(atDicomMeta);       
                             [xfm,~] = TransformMatrix(atDicomMeta{1}, sliceThikness);
@@ -242,7 +243,9 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 
                             aX = out.Location(:,1);
                             aY = out.Location(:,2);
-                            aZ = out.Location(:,3);
+%                            aZ = out.Location(:,3);
+                            aZ = zeros(dNBoundaries, 1);
+                            aZ(:) = atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation;
 
  %                           aZ = zeros(dNBoundaries, 1);
  %                           aZ(:) = atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation;
