@@ -148,13 +148,15 @@ end
     end    
     
     seriesDescription('set', asSeriesDescription);
-   
+ 
+        
     inputTemplate('set', tInput);
 
     aInputBuffer = inputBuffer('get');        
     aInputBuffer{numel(aInputBuffer)+1} = aVolume;    
     inputBuffer('set', aInputBuffer);
-        
+    
+    
     set(uiSeriesPtr('get'), 'String', asSeries);
     set(uiFusedSeriesPtr('get'), 'String', asSeries);
     
@@ -163,12 +165,17 @@ end
     set(uiSeriesPtr('get'), 'Value', numel(tInput));
     dicomMetaData('set', tInput(numel(tInput)).atDicomInfo);
     dicomBuffer('set', aVolume);
+    
+    aMip = computeMIP(aVolume);
+    mipBuffer('set', aMip, numel(tInput)) ;
+    tInput(numel(tInput)).aMip = aMip;       
+    
     setQuantification(numel(tInput));
-
+    
     tQuant = quantificationTemplate('get');
     tInput(numel(tInput)).tQuant = tQuant;
     inputTemplate('set', tInput);  
-
+   
     clearDisplay();                       
     initDisplay(3); 
 

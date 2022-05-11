@@ -146,6 +146,11 @@ function loadRawFile( sPathName, sFileName, dimX, dimY)
     set(uiSeriesPtr('get'), 'Value', numel(tInput));
     dicomMetaData('set', tInput(numel(tInput)).atDicomInfo);
     dicomBuffer('set', aBuffer);
+    
+    aMip = computeMIP(aBuffer);
+    mipBuffer('set', aMip, numel(tInput)) ;
+    tInput(numel(tInput)).aMip = aMip;   
+    
     setQuantification(numel(tInput));
 
     tQuant = quantificationTemplate('get');

@@ -477,6 +477,8 @@ function initRoiPanel()
     
     function addVoiRoiPanelCallback(~, ~)
         
+        triangulateCallback()
+        
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
                 
         aBuffer = dicomBuffer('get');

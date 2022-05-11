@@ -329,10 +329,10 @@ function importSTLCallback(~, ~)
 
      function okImportSTLCallback(~, ~)
          
-         try  
+%         try  
  
-         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-         drawnow;
+%         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+%         drawnow;
 
         if isFusion('get') == true % Deactivate fusion
              setFusionCallback();
@@ -363,12 +363,12 @@ function importSTLCallback(~, ~)
 
         readSTLModel(path, file, xBufSize, yBufSize, zBufSize, dPixelValue, bFillHoles);
          
-        catch
-            progressBar(1, 'Error:okImportSTLCallback()');           
-        end
+%        catch
+%            progressBar(1, 'Error:okImportSTLCallback()');           
+%        end
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');
-        drawnow; 
+%        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+%        drawnow; 
     
      end
 
