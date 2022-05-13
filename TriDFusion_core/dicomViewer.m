@@ -116,8 +116,9 @@ function resize = dicomViewer()
     peakPercentIsoMask    ('set', 65); % In percent
     voiIsoMaskMax         ('set', 42); % In percent
     smalestIsoMask        ('set', 0.3); % In ml
-    pixelEdgeIsoMask      ('set', false);
-    resampleToCTIsoMask   ('set', false);
+    pixelEdgeIsoMask      ('set', true);
+    resampleToCTIsoMask   ('set', true);
+    resampledContoursIsoMask('set', false);
     isoMaskCtSerieOffset  ('set', 1);
 
     volLighting           ('set', true);

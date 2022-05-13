@@ -63,9 +63,11 @@ function atRoi = resampleROIs(dcmImage, atDcmMetaData, refImage, atRefMetaData, 
                          tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
                          atRoi{jj}.MaxDistances = tMaxDistances;
                          
-                         if isvalid(atRoi{jj}.Object) && bUpdateObject == true
-                             atRoi{jj}.Object.Position = atRoi{jj}.Position;
-                             atRoi{jj}.Object.Radius   = atRoi{jj}.Radius;
+                         if ~isstruct(atRoi{jj}.Object)
+                             if isvalid(atRoi{jj}.Object) && bUpdateObject == true
+                                 atRoi{jj}.Object.Position = atRoi{jj}.Position;
+                                 atRoi{jj}.Object.Radius   = atRoi{jj}.Radius;
+                             end
                          end
                 end
 
@@ -99,9 +101,11 @@ function atRoi = resampleROIs(dcmImage, atDcmMetaData, refImage, atRefMetaData, 
                          tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
                          atRoi{jj}.MaxDistances = tMaxDistances;
                          
-                         if isvalid(atRoi{jj}.Object) && bUpdateObject == true                
-                            atRoi{jj}.Object.Position = atRoi{jj}.Position;
-                            atRoi{jj}.Object.SemiAxes = atRoi{jj}.SemiAxes;
+                         if ~isstruct(atRoi{jj}.Object)
+                             if isvalid(atRoi{jj}.Object) && bUpdateObject == true                
+                                atRoi{jj}.Object.Position = atRoi{jj}.Position;
+                                atRoi{jj}.Object.SemiAxes = atRoi{jj}.SemiAxes;
+                             end
                          end
                 end
 
@@ -116,10 +120,12 @@ function atRoi = resampleROIs(dcmImage, atDcmMetaData, refImage, atRefMetaData, 
                  tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
                  atRoi{jj}.MaxDistances = tMaxDistances;
                  
-                 if isvalid(atRoi{jj}.Object) && bUpdateObject == true                                 
-                    atRoi{jj}.Object.Position = atRoi{jj}.Position;
+                 if ~isstruct(atRoi{jj}.Object)
+                     if isvalid(atRoi{jj}.Object) && bUpdateObject == true                                 
+                        atRoi{jj}.Object.Position = atRoi{jj}.Position;
+                     end
                  end
-
+                 
             otherwise
                  atRoi{jj}.Position(:,1) = aNewPosition(:, 1);
                  atRoi{jj}.Position(:,2) = aNewPosition(:, 2);
@@ -128,9 +134,11 @@ function atRoi = resampleROIs(dcmImage, atDcmMetaData, refImage, atRefMetaData, 
                  tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
                  atRoi{jj}.MaxDistances = tMaxDistances;
                 
-                 if isvalid(atRoi{jj}.Object) && bUpdateObject == true                                  
-                    atRoi{jj}.Object.Position = atRoi{jj}.Position;
-                 end                
+                 if ~isstruct(atRoi{jj}.Object)
+                     if isvalid(atRoi{jj}.Object) && bUpdateObject == true                                  
+                        atRoi{jj}.Object.Position = atRoi{jj}.Position;
+                     end                
+                 end
         end        
                 
     end
