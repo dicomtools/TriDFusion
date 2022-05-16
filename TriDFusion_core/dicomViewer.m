@@ -188,7 +188,7 @@ function resize = dicomViewer()
     getRGBColormapImage('set', 'rgb-plus.png');
         
     suvMenuUnitOption('set', true);
-    segMenuOption    ('set', true);
+    segMenuOption    ('set', false);
     isFigRoiInColor  ('set', true);
 
     registrationTemplate('init');
