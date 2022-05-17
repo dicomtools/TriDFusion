@@ -116,9 +116,9 @@ function resize = dicomViewer()
     peakPercentIsoMask    ('set', 65); % In percent
     voiIsoMaskMax         ('set', 42); % In percent
     smalestIsoMask        ('set', 0.3); % In ml
-    pixelEdgeIsoMask      ('set', true);
+    pixelEdgeIsoMask      ('set', false);
     resampleToCTIsoMask   ('set', true);
-    resampledContoursIsoMask('set', false);
+    resampledContoursIsoMask('set', true);
     isoMaskCtSerieOffset  ('set', 1);
 
     volLighting           ('set', true);
@@ -188,7 +188,7 @@ function resize = dicomViewer()
     getRGBColormapImage('set', 'rgb-plus.png');
         
     suvMenuUnitOption('set', true);
-    segMenuOption    ('set', false);
+    segMenuOption    ('set', true);
     isFigRoiInColor  ('set', true);
 
     registrationTemplate('init');

@@ -148,6 +148,7 @@ function mainWindowMenu()
 
 
     mHelp = uimenu(fiMainWindowPtr('get'),'Label','Help');
+    uimenu(mHelp,'Label', 'Shortcuts', 'Callback', @shortcutsViewerCallback);
     uimenu(mHelp,'Label', 'User Manual', 'Callback', @helpViewerCallback);
     uimenu(mHelp,'Label', 'About', 'Callback', @aboutViewerCallback, 'Separator','on');
 
