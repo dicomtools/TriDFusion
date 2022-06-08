@@ -1,4 +1,8 @@
-# TriDFusion (3DF) is a DICOM Multi-Fusion Viewer for Research
+
+<div align="center">
+  <h1>TriDFusion (3DF) Medical Imaging Viewer</h1>
+  <p><strong>The TriDFusion (3DF)</strong> is a a DICOM Multi-Fusion Viewer for research provided by <a href="https://daniellafontaine.com/">Daniel Lafontaine</a>.</p>
+</div>
 
 ## Features:
 
