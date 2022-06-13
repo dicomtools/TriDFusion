@@ -432,6 +432,33 @@ end
             return;
         end
         
+
+        dNbFusedSeries = 0;
+        
+        if size(dicomBuffer('get'), 3) == 1
+            dNbSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+            for rr=1:dNbSeries
+                imAxeF = imAxeFPtr('get', [], rr);
+                if ~isempty(imAxeF)               
+                    dNbFusedSeries = dNbFusedSeries+1; % Multiple fusion
+                end
+            end
+        else
+            dNbSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+            for rr=1:dNbSeries
+                    
+                imCoronalF  = imCoronalFPtr ('get', [], rr);
+                imSagittalF = imSagittalFPtr('get', [], rr);
+                imAxialF    = imAxialFPtr   ('get', [], rr);
+
+                if ~isempty(imCoronalF) && ...
+                   ~isempty(imSagittalF) && ...
+                   ~isempty(imAxialF)
+                    dNbFusedSeries = dNbFusedSeries+1;  % Multiple fusion
+                end
+            end
+        end             
+        
         if isFusion('get')== true
                                 
             if keyPressFusionStatus('get') ~= 0 && ...
@@ -453,13 +480,25 @@ end
 
                 if size(dicomBuffer('get'), 3) == 1
                     alpha( axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
+                    if dNbFusedSeries == 1
+                        alpha( axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
+                    end                    
                 else
                     alpha( axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
                     alpha( axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
                     alpha( axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
                     if link2DMip('get') == true  && isVsplash('get') == false                                        
                         alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
-                    end                      
+                    end  
+                    
+                    if dNbFusedSeries == 1
+                        alpha( axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
+                        alpha( axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
+                        alpha( axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
+                        if link2DMip('get') == true  && isVsplash('get') == false                                        
+                            alpha( axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
+                        end                        
+                    end
                 end
 
                 iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
@@ -485,7 +524,8 @@ end
                         alpha( axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
                         if link2DMip('get') == true  && isVsplash('get') == false                                        
                             alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
-                        end                      
+                        end 
+                                                
                     end
 
                     setViewerDefaultColor(true, dicomMetaData('get'));                           
@@ -504,6 +544,15 @@ end
                         if link2DMip('get') == true && isVsplash('get') == false                       
                             alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
                         end
+                        
+                        if dNbFusedSeries == 1
+                            alpha( axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
+                            alpha( axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
+                            alpha( axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
+                            if link2DMip('get') == true  && isVsplash('get') == false                                        
+                                alpha( axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
+                            end                        
+                        end                        
                    end   
 
                     colorMapOffset('set', pdColorOffset);

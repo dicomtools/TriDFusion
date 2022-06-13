@@ -62,11 +62,27 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
 %        end
 %        resampImage = imresize3(resampImage,[dimsRef(1) dimsRef(2) dimsRef(3)]);
 
-%    else
-        [resampImage, RB1] = imwarp(dcmImage, TF, 'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef));  
-%        [resampImage, RB2] = imwarp(dcmImage, Rdcm, TF, 'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
-%    end
+%    followOutput = affineOutputView(dimsDcm, TF, 'BoundsStyle', 'FollowOutput');
+%    [resampImage, Rrsmp] = imwarp(dcmImage, TF, 'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView',followOutput);
 
+
+%    else
+%       [resampImage, Rreg] = imwarp(dcmImage, TF, 'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef));  
+        [resampImage, Rreg] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
+
+        if dimsRef(3)==dimsDcm(3)
+            aResampledImageSize = size(resampImage);
+            resampImage=imresize3(resampImage, [aResampledImageSize(1) aResampledImageSize(2) dimsRef(3)]);
+        end
+        
+%        dimsRsp = size(resampImage);         
+%        xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
+%        yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
+
+%        resampImage = imtranslate(resampImage,[-xMoveOffset, -yMoveOffset, 0], 'nearest', 'OutputView', 'same', 'FillValues', min(resampImage, [], 'all') );         
+        
+%        [resampImage, Rrsmp] = imwarp(dcmImage, Rdcm, TF, 'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
+%    end
 
     aResampledImageSize = size(resampImage);
 
@@ -81,23 +97,29 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
     end
     
     computedSliceThikness = (dimsRef(3) * refSliceThickness) / aResampledImageSize(3); 
-    
+%    computedSliceThikness = Rrsmp.PixelExtentInWorldZ; 
+  
+
+
     for jj=1:numel(atDcmMetaData)
         
         atDcmMetaData{jj}.InstanceNumber  = jj;               
         atDcmMetaData{jj}.NumberOfSlices  = aResampledImageSize(3);                
         
-        atDcmMetaData{jj}.PixelSpacing(1) = atRefMetaData{1}.PixelSpacing(1);
-        atDcmMetaData{jj}.PixelSpacing(2) = atRefMetaData{1}.PixelSpacing(2);
+%        atDcmMetaData{jj}.PixelSpacing(1) = atRefMetaData{1}.PixelSpacing(1);
+%        atDcmMetaData{jj}.PixelSpacing(2) = atRefMetaData{1}.PixelSpacing(2);
+        atDcmMetaData{jj}.PixelSpacing(1) = dimsDcm(1)/aResampledImageSize(1)*atDcmMetaData{jj}.PixelSpacing(1);
+        atDcmMetaData{jj}.PixelSpacing(2) = dimsDcm(2)/aResampledImageSize(2)*atDcmMetaData{jj}.PixelSpacing(2);
         atDcmMetaData{jj}.SliceThickness  = atRefMetaData{1}.SliceThickness;
         atDcmMetaData{jj}.SpacingBetweenSlices  = computedSliceThikness;
 
         atDcmMetaData{jj}.Rows    = aResampledImageSize(1);
         atDcmMetaData{jj}.Columns = aResampledImageSize(2);
+        atDcmMetaData{jj}.NumberOfSlices = numel(atDcmMetaData);
         
-        atDcmMetaData{jj}.ImagePositionPatient(1) = atRefMetaData{1}.ImagePositionPatient(1);               
-        atDcmMetaData{jj}.ImagePositionPatient(2) = atRefMetaData{1}.ImagePositionPatient(2);               
-        atDcmMetaData{jj}.ImagePositionPatient(3) = atRefMetaData{1}.ImagePositionPatient(3);               
+        atDcmMetaData{jj}.ImagePositionPatient(1) = -(atDcmMetaData{jj}.PixelSpacing(1)*aResampledImageSize(1)/2);               
+        atDcmMetaData{jj}.ImagePositionPatient(2) = -(atDcmMetaData{jj}.PixelSpacing(2)*aResampledImageSize(2)/2);               
+%        atDcmMetaData{jj}.ImagePositionPatient(3) = atRefMetaData{1}.ImagePositionPatient(3);               
         
         if bUpdateDescription == true 
             atDcmMetaData{jj}.SeriesDescription  = sprintf('RSP %s', atDcmMetaData{1}.SeriesDescription);

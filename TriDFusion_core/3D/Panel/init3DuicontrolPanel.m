@@ -2685,7 +2685,7 @@ end
                                 for jj=1:numel(maskAxial)
 
                                     curentMask = maskAxial(jj);
-
+                                    
 %                                    sliceNumber('set', 'axial', aa);
 
                                     sTag = num2str(randi([-(2^52/2),(2^52/2)],1));

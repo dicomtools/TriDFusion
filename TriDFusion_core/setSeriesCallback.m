@@ -236,8 +236,9 @@ function setSeriesCallback(~,~)
 
 %        quantificationTemplate('set', tInput(iOffset).tQuant);
         setQuantification(iOffset);
-
-%        cropValue('set', tInput(iOffset).tQuant.tCount.dMin);
+        
+        tQuant = quantificationTemplate('get');
+        cropValue('set', tQuant.tCount.dMin);
 
         imageSegTreshValue('set', 'lower', 0);
         imageSegTreshValue('set', 'upper', 1);

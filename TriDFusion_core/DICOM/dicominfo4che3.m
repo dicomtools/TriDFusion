@@ -161,6 +161,8 @@ function info = dicominfo4che3(fileInput)
     info.Units = char(dataset.getString(org.dcm4che.data.Tag.Units, 0));        
     info.DecayCorrection = char(dataset.getString(org.dcm4che.data.Tag.DecayCorrection, 0));        
 
+    info.MRAcquisitionType = char(dataset.getString(org.dcm4che.data.Tag.MRAcquisitionType, 0));
+    
     % Image information
 
     info.BitsAllocated = dataset.getInt(org.dcm4che.data.Tag.BitsAllocated, 0);

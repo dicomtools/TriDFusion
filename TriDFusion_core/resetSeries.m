@@ -30,7 +30,21 @@ function resetSeries(dOffset, bInitDisplay)
     tInitInput = inputTemplate('get');
     
     dInitOffset = get(uiSeriesPtr('get'), 'Value');
-
+    
+    if link2DMip('get') == false
+        sLinkMipEnable = 'on';
+        sLinkMipBackgroundColor = viewerButtonPushedBackgroundColor('get');
+        sLinkMipForegroundColor = viewerButtonPushedForegroundColor('get');
+        
+        btnLinkMip = btnLinkMipPtr('get');
+        
+        set(btnLinkMip, 'Enable', sLinkMipEnable);
+        set(btnLinkMip, 'BackgroundColor', sLinkMipBackgroundColor);
+        set(btnLinkMip, 'ForegroundColor', sLinkMipForegroundColor);
+        
+        link2DMip('set', true);
+    end
+    
     if isFusion('get') == true
         setFusionCallback(); % Deactivate fusion
     end
