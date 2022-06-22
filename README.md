@@ -4,7 +4,7 @@
   <p><strong>The TriDFusion (3DF)</strong> is a a DICOM Multi-Fusion Viewer for research provided by <a href="https://daniellafontaine.com/">Daniel Lafontaine</a>.</p>
 </div>
 
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/IAmS4n/CTLabeling/pulls)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/dicomtools/TriDFusion)
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/dicomtools/TriDFusion/blob/main/LICENSE)
 
 ![TriDFusion](images/TriDFusionMontage.png)
