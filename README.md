@@ -21,7 +21,7 @@
 | Ultrasonography (US)                       |                                            |
 
 ## Main features
-- Multimodality Image Viewer
+- Multi-modality Image Viewer
 - Total Tumor Burden Determination
 - 3D Visualization
 - 3D Printing
