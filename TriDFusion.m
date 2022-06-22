@@ -12,6 +12,13 @@ function TriDFusion(varargin)
 % -vol   : Activate the 3D volume rendering. *The order of activation of the mip, vol and iso dictates the emphasis of each feature of the 3D resulting image
 % -iso   : Activate the 3D iso surface. *The order of activation of the mip, vol and iso dictates the emphasis of each feature of the 3D resulting image
 %
+%Example:
+%TriDFusion(); Open the graphical user interface
+%TriDFusion('path_to_dicom_folder'); Open the graphical user interface with a dicom image
+%TriDFusion('path_to_dicom_folder','path_to_dicom_folder');  Open the graphical user interface with 2 dicom image
+%TriDFusion('path_to_dicom_folder','path_to_dicom_folder', '-fusion'); Open the graphical user interface with 2 dicom image and fused them
+%TriDFusion('path_to_dicom_folder', '-mip'); Open the graphical user interface with a dicom image and create a 2D mip.
+%
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
