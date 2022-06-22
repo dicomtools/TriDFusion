@@ -8,16 +8,17 @@
 
 ## File format compatibility:
 
-* Dose Kernel Monte Carlo Voxel base dosimetry 
-* Threshold base contours segmentation
-* Threshold base image editing, lung segmentation 
-* Fix issues related to the image orientation, voxel size or field-of-view
-* Image resampling & registration
-* 2D & 3D Image Fusion
-* 2D & 3D view of 2D, 3D and 4D images
-* 3D Printer, isosurface base model export to .stl file format
-* 3D isosurface base model 3D mask DICOM image
-* 3D Multi-Fusion of Volume Rendering, ISO surface and MIP
+| Medical Imaging Modalities                 | Import / Export File Formats               |
+| ------------------------------------------ | ------------------------------------------ |
+| Positron Emission Tomography PET-CT (PT)   | DICOM using custom/vendor dictionaries     |
+| Gamma Camera, Nuclear Medicine (NM)        | Raw data from nuclear imaging devices      |
+| Computed Tomography (CT)                   | DICOM-RT structure (contours)              |
+| Digital Radiography (CR, DX)               | CERR planC, dose volumes and constraints   |
+| Digital Angiography (XA)                   | Comma separated values (.csv)              |
+| Magnetic Resonance (MR)                    | Standard triangle language (.stl)          |
+| Secondary Pictures and Scanned Images (SC) | Bitmap (.bmp)                              |
+| Mammography (MG)                           |                                            |
+| Ultrasonography (US)                       |                                            |
 
 ## MATLAB version
 
