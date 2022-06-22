@@ -6,7 +6,7 @@
 
 ![TriDFusion](images/TriDFusionMontage.png)
 
-## Features:
+## File format compatibility:
 
 * Dose Kernel Monte Carlo Voxel base dosimetry 
 * Threshold base contours segmentation
