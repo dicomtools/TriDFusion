@@ -20,6 +20,23 @@
 | Mammography (MG)                           |                                            |
 | Ultrasonography (US)                       |                                            |
 
+## Main features
+- Multimodality Image Viewer
+- Total Tumor Burden Determination
+- 3D Visualization
+- 3D Printing
+- Image Multi-Fusion
+- Image Convolution
+- Image Registration
+- Image Resampling
+- Image Re-Orientation
+- Image Arithmetic and Post Filtering
+- Image Editing
+- Image Mask
+- Image Constraint
+- Lung Segmentation
+- Edge Detection
+
 ## MATLAB version
 
 * MATLAB 2020a
