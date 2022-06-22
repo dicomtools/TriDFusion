@@ -4,6 +4,8 @@
   <p><strong>The TriDFusion (3DF)</strong> is a a DICOM Multi-Fusion Viewer for research provided by <a href="https://daniellafontaine.com/">Daniel Lafontaine</a>.</p>
 </div>
 
+![TriDFusion (3DF)](logo.png)
+
 ## Features:
 
 * Dose Kernel Monte Carlo Voxel base dosimetry 
