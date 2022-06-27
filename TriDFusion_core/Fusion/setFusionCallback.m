@@ -693,24 +693,26 @@ end
 %                     strcmpi(tFuseMetaData{1}.Modality, 'ct') ) ) && ...
 %                   numel(tMetaData) ~= 1 && ...
 %                   numel(tFuseMetaData) ~= 1
-               
-                    aRefMip = mipBuffer('get', [], iSeriesOffset);
-                    aMip    = mipBuffer('get', [], iFuseOffset);
-                    
-%                    if numel(aMip) ~= numel(aRefMip)  % Resample mip  
-                        aResampledMip = resampleMipTransformMatrix(aMip, tFuseMetaData, aRefMip, tMetaData, 'bilinear', false);   
-%                    else
-%                        aResampledMip = aMip;
-%                    end
-                    dimsRef = size(aRefMip);         
-                    dimsRsp = size(aResampledMip);         
-                    xMoveOffset = (dimsRsp(3)-dimsRef(3))/2;
-                    yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
+                    if isVsplash('get') == false
+                        aRefMip = mipBuffer('get', [], iSeriesOffset);
+                        aMip    = mipBuffer('get', [], iFuseOffset);
 
-                    if xMoveOffset ~= 0 || yMoveOffset ~= 0 
-                        aResampledMip = imtranslate(aResampledMip,[-yMoveOffset, 0, -xMoveOffset], 'nearest', 'OutputView', 'same', 'FillValues', min(aResampledMip, [], 'all') );    
-                    end                  
+    %                    if numel(aMip) ~= numel(aRefMip)  % Resample mip  
+                            aResampledMip = resampleMipTransformMatrix(aMip, tFuseMetaData, aRefMip, tMetaData, 'bilinear', false);   
+    %                    else
+    %                        aResampledMip = aMip;
+    %                    end
+                        dimsRef = size(aRefMip);         
+                        dimsRsp = size(aResampledMip);         
+                        xMoveOffset = (dimsRsp(3)-dimsRef(3))/2;
+                        yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
+
+                        if xMoveOffset ~= 0 || yMoveOffset ~= 0 
+                            aResampledMip = imtranslate(aResampledMip,[-yMoveOffset, 0, -xMoveOffset], 'nearest', 'OutputView', 'same', 'FillValues', min(aResampledMip, [], 'all') );    
+                        end                  
+                    end
     %                if numel(A) ~= numel(B) % Resample image                 
+                    if isVsplash('get') == false
                         [B, tFuseMetaData] = ...
                             resampleImageTransformMatrix(B, ...
                                                          tFuseMetaData, ...
@@ -719,13 +721,41 @@ end
                                                          'bilinear', ...
                                                          false ...
                                                          ); 
-                    dimsRef = size(A);         
-                    dimsRsp = size(B);         
-                    xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
-                    yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
+                                  
+                        dimsRef = size(A);         
+                        dimsRsp = size(B);         
+                        xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
+                        yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
 
-                    if xMoveOffset ~= 0 || yMoveOffset ~= 0 
-                        B = imtranslate(B,[-xMoveOffset, -yMoveOffset, 0], 'nearest', 'OutputView', 'same', 'FillValues', min(B, [], 'all') ); 
+                        if xMoveOffset ~= 0 || yMoveOffset ~= 0 
+                            B = imtranslate(B,[-xMoveOffset, -yMoveOffset, 0], 'nearest', 'OutputView', 'same', 'FillValues', min(B, [], 'all') ); 
+                        end
+                    else
+                        [aResampled, tFuseMetaData] = ...
+                            resampleImageTransformMatrix(B, ...
+                                                         tFuseMetaData, ...
+                                                         A, ...
+                                                         tMetaData, ...
+                                                         'bilinear', ...
+                                                         true ...
+                                                         );  
+                                                     
+                       if numel(aResampled(aResampled==min(aResampled, [], 'all'))) == numel(aResampled)                            
+                                [aResampled, ~] = ...
+                                    resampleImageTransformMatrix(B, ...
+                                                                 tFuseMetaData, ...
+                                                                 A, ...
+                                                                 tMetaData, ...
+                                                                 'bilinear', ...
+                                                                 false ...
+                                                                 );         
+                        end
+                        
+                        if numel(A)~=numel(aResampled)                             
+                            B = imresize3(aResampled, size(A));
+                        else
+                            B = aResampled;
+                        end                                                    
                     end
             
 %                    [B, tFuseMetaData] = ...
@@ -1385,7 +1415,7 @@ end
                                      );            
                     elseif strcmpi(vSplahView('get'), 'sagittal')
                         ptrFusionColorbar = ...
-                            colorbar(axes2fPtr('get'), ...
+                            colorbar(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                      'AxisLocation' , 'in', ...
                                      'Tag'          , 'Fusion Colorbar', ...
                                      'EdgeColor'    , overlayColor('get'), ...
