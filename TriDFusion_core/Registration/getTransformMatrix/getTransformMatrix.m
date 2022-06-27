@@ -17,13 +17,13 @@ function [M,Rot] = getTransformMatrix(info1, sliceThikness1, info2, sliceThiknes
     % First we transform into patient coordinates by multiplying by Mdti, and
     % then we convert again into image coordinates of the second volume by
     % multiplying by inv(Mtf)
-%    M =  inv(Mtf) * Mdti;
-%    Rot = inv(Rtf) * Rdti;
-%    M = M';
+    M =  inv(Mtf) * Mdti;
+    Rot = inv(Rtf) * Rdti;
+    M = M';
     
 %    M   = Mdti' /Mtf';
-    M   = Mdti' /Mtf';
-    Rot = Rdti' /Rtf';
+%    M   = Mdti' /Mtf';
+%    Rot = Rdti' /Rtf';
        
 %    M = Mdti ./Mtf;
 %    M(M==inf)=0;

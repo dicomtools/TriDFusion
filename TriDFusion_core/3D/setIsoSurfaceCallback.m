@@ -404,9 +404,12 @@ function setIsoSurfaceCallback(~, ~)
                 end
             end
         else
-
             switchToIsoSurface('set', true);
-
+            
+            if isFusion('get') == true
+                init3DfusionBuffer();  
+            end
+            
             set(btnIsoSurfacePtr('get'), 'Enable', 'on');
             set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));

@@ -1,5 +1,5 @@
-function [resampImage, atDcmMetaData] = resampleImageTransformMatrix(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode)
-%function [resampImage, atDcmMetaData] = resampleImageTransformMatrix(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode)
+function [resampImage, atDcmMetaData, xMoveOffset, yMoveOffset] = resampleImageTransformMatrix(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, bSameOutput)
+%function [resampImage, atDcmMetaData] = resampleImageTransformMatrix(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, bSameOutput)
 %Resample any modalities using a transfer matrix.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -45,20 +45,21 @@ function [resampImage, atDcmMetaData] = resampleImageTransformMatrix(dcmImage, a
 %    [resampImage, ~] = imwarp(dcmImage, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef));  
 
 %test    if numel(resampImage) ~=  numel(refImage) % SPECT and CT DX
-
-        [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
+%sMode='Nearest'
+        if bSameOutput == true
+            [resampImage, ~] = imwarp(dcmImage, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef));  
+        else
+            [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
+                   
+        end
 %        if dimsRef(3)==dimsDcm(3)
 %            aResampledImageSize = size(resampImage);
 %            resampImage=imresize3(resampImage, [aResampledImageSize(1) aResampledImageSize(2) dimsRef(3)]);
 %        end
         
-        dimsRsp = size(resampImage);         
-        xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
-        yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
 
-        if xMoveOffset ~= 0 || yMoveOffset ~= 0 
-            resampImage = imtranslate(resampImage,[-xMoveOffset, -yMoveOffset, 0], 'nearest', 'OutputView', 'same', 'FillValues', min(resampImage, [], 'all') );    
-        end
+        
+
 
  %test   end
 

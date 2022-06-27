@@ -411,6 +411,9 @@ function setMIPCallback(~, ~)
                 end
             end
         else
+            if isFusion('get') == true
+                init3DfusionBuffer();  
+            end
 
             switchToMIPMode('set', true);
 
@@ -516,6 +519,10 @@ function setMIPCallback(~, ~)
 
                     set(ui3DBackgroundPtr('get'), 'Value', background3DOffset('get'));
 
+                    
+                    
+                                       
+                    
                     mipFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);
                     set(mipFusionObj, 'InteractionsEnabled', false);
 

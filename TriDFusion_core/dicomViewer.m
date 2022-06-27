@@ -61,7 +61,21 @@ function resize = dicomViewer()
     kernelSegTreshValue('set', 'upper', 1);
     
     kernelInterpolation('set', 'Linear');
-
+    
+    kernelMicrosphereInSpecimen('set', false);
+    
+    resizePixelSizeDoseInformationDialog('set', true);
+    
+    resizeVoxelDoseInformationDialog('set', 'x', 0.1); % mm
+    resizeVoxelDoseInformationDialog('set', 'y', 0.1); % mm
+    resizeVoxelDoseInformationDialog('set', 'z', 0.1); % mm
+    
+    isSameSpacingDoseInformationDialog('set', true);
+    
+    treatmentTypeDoseInformationDialog('set', 1); % TheraSphere    
+    
+    microspereVolumeDoseInformationDialog('set', 0.00001); % In ml
+    
     imageSegTreshValue('set', 'lower', 0);
     imageSegTreshValue('set', 'upper', 1);
     lungSegTreshValue ('set', 0.2       );
@@ -219,7 +233,8 @@ function resize = dicomViewer()
 
     updateDicomWriteSeriesInstanceUID('set', true);
     modifiedImagesContourMatrix('set', false);
-
+    
+   
     mipAngle('set', 1);
 
     rng('shuffle');

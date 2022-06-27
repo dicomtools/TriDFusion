@@ -87,22 +87,30 @@ function [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(refImage,
  
     % Set origin to the edge of first pixel
     
-    atDcmMetaData{1}.ImagePositionPatient(1) = atDcmMetaData{1}.ImagePositionPatient(1)-(atDcmMetaData{1}.PixelSpacing(1));
-    atDcmMetaData{1}.ImagePositionPatient(2) = atDcmMetaData{1}.ImagePositionPatient(2)-(atDcmMetaData{1}.PixelSpacing(2));
+%    atDcmMetaData{1}.ImagePositionPatient(1) = atDcmMetaData{1}.ImagePositionPatient(1)-(atDcmMetaData{1}.PixelSpacing(1));
+%    atDcmMetaData{1}.ImagePositionPatient(2) = atDcmMetaData{1}.ImagePositionPatient(2)-(atDcmMetaData{1}.PixelSpacing(2));
   
-    atRefMetaData{1}.ImagePositionPatient(1) = atRefMetaData{1}.ImagePositionPatient(1)- (atRefMetaData{1}.PixelSpacing(1));
-    atRefMetaData{1}.ImagePositionPatient(2) = atRefMetaData{1}.ImagePositionPatient(2)- (atRefMetaData{1}.PixelSpacing(2));     
+%    atRefMetaData{1}.ImagePositionPatient(1) = atRefMetaData{1}.ImagePositionPatient(1)-(atRefMetaData{1}.PixelSpacing(1));
+%    atRefMetaData{1}.ImagePositionPatient(2) = atRefMetaData{1}.ImagePositionPatient(2)-(atRefMetaData{1}.PixelSpacing(2));     
 
-    % Set origin to the edge of first pixel
-
+    % Set origin to the edge of first pixel. ImagePositionPatient is the
+    % coordinates of top left middle of first pixel.  
+    
     atDcmMetaData{1}.ImagePositionPatient(1) = -(atDcmMetaData{1}.PixelSpacing(1)/2);
     atDcmMetaData{1}.ImagePositionPatient(2) = -(atDcmMetaData{1}.PixelSpacing(2)/2);
   
     atRefMetaData{1}.ImagePositionPatient(1) = -(atRefMetaData{1}.PixelSpacing(1)/2);
     atRefMetaData{1}.ImagePositionPatient(2) = -(atRefMetaData{1}.PixelSpacing(2)/2);    
 
-    
+%    atDcmMetaData{1}.ImagePositionPatient(1) = 0;
+%    atDcmMetaData{1}.ImagePositionPatient(2) = 0;
+  
+%    atRefMetaData{1}.ImagePositionPatient(1) = 0;
+%    atRefMetaData{1}.ImagePositionPatient(2) = 0;  
+
     [M, ~] = getTransformMatrix(atDcmMetaData{1}, dcmSliceThickness, atRefMetaData{1}, refSliceThickness);
+%    M(4,1)=0
+%    M(4,2)=0
     
     xScale = M(2,2);
     yScale = M(1,1);  
@@ -110,9 +118,7 @@ function [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(refImage,
     TF = affine3d(M); 
         
     a3DOffset = zeros(size(tRoi.Position, 1),3);
-    
-    
-    
+        
     switch lower(tRoi.Axe)
 
         case lower('axe')
@@ -143,11 +149,45 @@ function [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(refImage,
     out = pctransform(pointCloud(a3DOffset), TF);
     
     
-    [x,y,z] = transformPointsForward(TF, a3DOffset(:,1), a3DOffset(:,2), a3DOffset(:,3)); % Same
+%    [x,y,z] = transformPointsForward(TF, a3DOffset(:,1), a3DOffset(:,2), a3DOffset(:,3)); 
+
+%    [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', 'Linear');      
+%    dimsRsp = size(resampImage);         
+
     
-    xMoveOffset = (dimsDcm(1)-dimsRef(1))/2;
-    yMoveOffset = (dimsDcm(2)-dimsRef(2))/2;
+    if    (round(Rdcm.ImageExtentInWorldX) > round(Rref.ImageExtentInWorldX)) && ...
+          (round(Rdcm.ImageExtentInWorldX) > round(Rref.ImageExtentInWorldX))     
+      
+        xMoveOffset = abs((Rref.ImageExtentInWorldX-Rdcm.ImageExtentInWorldX)/2);
+        xMoveOffset = xMoveOffset + (Rdcm.PixelExtentInWorldX/2);
+    
+        yMoveOffset = abs((Rref.ImageExtentInWorldY-Rdcm.ImageExtentInWorldY)/2);
+        yMoveOffset = yMoveOffset + (Rdcm.PixelExtentInWorldY/2);
+  
         
+    elseif(round(Rdcm.ImageExtentInWorldX) < round(Rref.ImageExtentInWorldX)) && ...
+          (round(Rdcm.ImageExtentInWorldX) < round(Rref.ImageExtentInWorldX))
+        xMoveOffset = (Rdcm.ImageExtentInWorldX-Rref.ImageExtentInWorldX)/2;
+        xMoveOffset = xMoveOffset*xScale;
+        xMoveOffset = xMoveOffset + (Rdcm.PixelExtentInWorldX/2)-1;
+
+        yMoveOffset = (Rdcm.ImageExtentInWorldY-Rref.ImageExtentInWorldY)/2;
+        yMoveOffset = yMoveOffset*yScale;
+        yMoveOffset = yMoveOffset + (Rdcm.PixelExtentInWorldY/2)-1;        
+    else
+        xMoveOffset = 0;
+        yMoveOffset = 0;        
+    end
+        
+%        xMoveOffset = 0;
+%        yMoveOffset = 0;
+
+%    xMoveOffset = ((round(Rdcm.ImageExtentInWorldX)-round(Rref.ImageExtentInWorldX)/2))/(Rdcm.PixelExtentInWorldX/xScale)-(Rdcm.XWorldLimits(1)/5.6);
+%    yMoveOffset = ((round(Rdcm.ImageExtentInWorldY)-round(Rref.ImageExtentInWorldY)/2))/(Rdcm.PixelExtentInWorldY/yScale)-(Rdcm.YWorldLimits(1)/5.6);
+    
+    
+%    zMoveOffset = ((Rdcm.ImageExtentInWorldZ-Rref.ImageExtentInWorldZ)/2);
+         
     switch lower(tRoi.Axe)
 
         case lower('axe')
@@ -214,8 +254,8 @@ function [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(refImage,
                     aNewPosition(5) = out.Location(3);                    
 %                end
             else
-                    aNewPosition(:,1) =x;
-                    aNewPosition(:,2) = y;
+                    aNewPosition(:,1) = out.Location(:,1)-xMoveOffset;
+                    aNewPosition(:,2) = out.Location(:,2)-yMoveOffset;
                     aNewPosition(:,3) = out.Location(:,3);                    
 
             end

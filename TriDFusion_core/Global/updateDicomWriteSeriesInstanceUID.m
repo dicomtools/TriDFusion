@@ -1,5 +1,5 @@
 function bUpdate = updateDicomWriteSeriesInstanceUID(sAction, bValue)
-%function sColor = updateDicomWriteSeriesInstanceUID(sAction, bValue)
+%function bUpdate = updateDicomWriteSeriesInstanceUID(sAction, bValue)
 %Get/Set View ROIs Farthest Distances.
 %See TriDFuison.doc (or pdf) for more information about options.
 %

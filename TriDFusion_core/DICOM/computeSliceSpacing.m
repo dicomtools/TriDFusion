@@ -73,5 +73,8 @@ function dSpacing = computeSliceSpacing(atDicomInfo)
 
     dSpacing = abs(sumPxyz / (numel(atDicomInfo)-1));
     
+    if dSpacing == 0
+        dSpacing = abs(atDicomInfo{1}.SpacingBetweenSlices);
+    end
 
 end

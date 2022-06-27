@@ -424,9 +424,12 @@ function set3DCallback(~, ~)
                 end
             end
         else
-
             switchTo3DMode('set', true);
 
+            if isFusion('get') == true
+                init3DfusionBuffer();  
+            end
+            
             set(btn3DPtr('get'), 'Enable', 'on');
             set(btn3DPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btn3DPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));

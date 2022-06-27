@@ -82,10 +82,10 @@ function triangulateRoi(sRoiTag, bCenterRoi)
                                     tRoiInput{rr}.Object.Parent.XLim = Xlimit;
                                 end
 
-                          %      if yOffset < midY
-                          %          Ylimit = [midY-yOffset midY+yOffset];
-                          %          tRoiInput{rr}.Object.Parent.YLim = Ylimit;
-                          %      end
+                                if yOffset < midY
+                                    Ylimit = [midY-yOffset midY+yOffset];
+                                    tRoiInput{rr}.Object.Parent.YLim = Ylimit;
+                                end
                             end
                         end
 
@@ -116,10 +116,10 @@ function triangulateRoi(sRoiTag, bCenterRoi)
                                     tRoiInput{rr}.Object.Parent.XLim = Xlimit;
                                 end
 
-                          %      if yOffset < midY
-                          %          Ylimit = [midY-yOffset midY+yOffset];
-                          %          tRoiInput{rr}.Object.Parent.YLim = Ylimit;
-                          %      end
+                                if yOffset < midY
+                                    Ylimit = [midY-yOffset midY+yOffset];
+                                    tRoiInput{rr}.Object.Parent.YLim = Ylimit;
+                                end
                             end
                         end
 
@@ -150,10 +150,10 @@ function triangulateRoi(sRoiTag, bCenterRoi)
                                     tRoiInput{rr}.Object.Parent.XLim = Xlimit;
                                 end
 
-                         %       if yOffset < midY
-                         %           Ylimit = [midY-yOffset midY+yOffset];
-                         %           tRoiInput{rr}.Object.Parent.YLim = Ylimit;
-                         %       end
+                                if yOffset < midY
+                                    Ylimit = [midY-yOffset midY+yOffset];
+                                    tRoiInput{rr}.Object.Parent.YLim = Ylimit;
+                                end
                             end
 
                         end

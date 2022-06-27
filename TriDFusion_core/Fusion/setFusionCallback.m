@@ -27,7 +27,7 @@ function setFusionCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    try
+%    try
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
@@ -316,7 +316,67 @@ end
 
 %                linkaxes([axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                                
                 uistack(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
-              
+                
+                axAxefText = ...
+                    axes(uiOneWindowPtr('get'), ...
+                         'Units'   ,'normalized', ...
+                         'Ydir'    ,'reverse', ...
+                         'xlimmode','manual',...
+                         'ylimmode','manual',...
+                         'zlimmode','manual',...
+                         'climmode','manual',...
+                         'alimmode','manual',...
+                         'Position', [0 0 0.95 1], ...
+                         'Visible' , 'off',...
+                         'HandleVisibility', 'off' ...
+                         );
+
+                if isfield(tFuseMetaData{1}, 'SeriesDescription')
+                    sFusedSeriesDescription = tFuseMetaData{1}.SeriesDescription;
+                    sFusedSeriesDescription = strrep(sFusedSeriesDescription,'_',' ');
+                    sFusedSeriesDescription = strrep(sFusedSeriesDescription,'^',' ');
+                    sFusedSeriesDescription = strtrim(sFusedSeriesDescription);
+                else
+                    sFusedSeriesDescription = '';
+                end
+
+                if isfield(tFuseMetaData{1}, 'SeriesDate')
+
+                    if isempty(tFuseMetaData{1}.SeriesDate)
+                        sFusedSeriesDate = '';
+                    else
+                        sFusedSeriesDate = tFuseMetaData{1}.SeriesDate;
+                        if isempty(tFuseMetaData{1}.SeriesTime)
+                            sFusedSeriesTime = '000000';
+                        else
+                            sFusedSeriesTime = tFuseMetaData{1}.SeriesTime;
+                        end
+                        sFusedSeriesDate = sprintf('%s%s', sFusedSeriesDate, sFusedSeriesTime);
+                    end
+
+                    if ~isempty(sFusedSeriesDate)
+                        if contains(sFusedSeriesDate,'.')
+                            sFusedSeriesDate = extractBefore(sFusedSeriesDate,'.');
+                        end
+                        sFusedSeriesDate = datetime(sFusedSeriesDate, 'InputFormat', 'yyyyMMddHHmmss');
+                    end
+                else
+                    sFusedSeriesDate = '';
+                end
+
+                asColorMap = getColorMap('all');
+                sColormap = asColorMap{fusionColorMapOffset('get')};
+
+                sAxefText = sprintf('\n%s\n%s\nColormap: %s', ...
+                                sFusedSeriesDescription, ...
+                                sFusedSeriesDate, ...
+                                sColormap ...
+                                );
+
+                tAxefText  = text(axAxefText, 1, 0, sAxefText, 'Color', overlayColor('get'), 'HorizontalAlignment', 'right', 'VerticalAlignment', 'top');
+
+                axesText('set', 'axef', tAxefText);
+        
                 [x1,y1,~] = size(A);
                 [x2,y2,~] = size(B);
 
@@ -482,11 +542,76 @@ end
 %                set(axes3f, 'YLim', axes3.YLim); 
                 
                 axes3fPtr('set', axes3f, get(uiFusedSeriesPtr('get'), 'Value'));
-                
+             
 %                linkaxes([axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))], 'xy');                
                 uistack(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
                 
+                % Set fusion display text
                 
+                axAxes3fText = ...
+                    axes(uiTraWindowPtr('get'), ...
+                         'Units'   ,'normalized', ...
+                         'Ydir'    ,'reverse', ...
+                         'xlimmode','manual',...
+                         'ylimmode','manual',...
+                         'zlimmode','manual',...
+                         'climmode','manual',...
+                         'alimmode','manual',...
+                         'Position', [0 0 0.90 1], ...
+                         'Visible' , 'off',...
+                         'HandleVisibility', 'off' ...
+                         );
+                     
+                if isfield(tFuseMetaData{1}, 'SeriesDescription')
+                    sFusedSeriesDescription = tFuseMetaData{1}.SeriesDescription;
+                    sFusedSeriesDescription = strrep(sFusedSeriesDescription,'_',' ');
+                    sFusedSeriesDescription = strrep(sFusedSeriesDescription,'^',' ');
+                    sFusedSeriesDescription = strtrim(sFusedSeriesDescription);
+                else
+                    sFusedSeriesDescription = '';
+                end
+
+                if isfield(tFuseMetaData{1}, 'SeriesDate')
+
+                    if isempty(tFuseMetaData{1}.SeriesDate)
+                        sFusedSeriesDate = '';
+                    else
+                        sFusedSeriesDate = tFuseMetaData{1}.SeriesDate;
+                        if isempty(tFuseMetaData{1}.SeriesTime)
+                            sFusedSeriesTime = '000000';
+                        else
+                            sFusedSeriesTime = tFuseMetaData{1}.SeriesTime;
+                        end
+                        sFusedSeriesDate = sprintf('%s%s', sFusedSeriesDate, sFusedSeriesTime);
+                    end
+
+                    if ~isempty(sFusedSeriesDate)
+                        if contains(sFusedSeriesDate,'.')
+                            sFusedSeriesDate = extractBefore(sFusedSeriesDate,'.');
+                        end
+                        sFusedSeriesDate = datetime(sFusedSeriesDate, 'InputFormat', 'yyyyMMddHHmmss');
+                    end
+                else
+                    sFusedSeriesDate = '';
+                end
+            
+                asColorMap = getColorMap('all');
+                sColormap = asColorMap{fusionColorMapOffset('get')};
+
+                sAxe3fText = sprintf('\n%s\n%s\nColormap: %s', ...
+                                sFusedSeriesDescription, ...
+                                sFusedSeriesDate, ...
+                                sColormap ...
+                                );
+                        
+                tAxes3fText  = text(axAxes3fText, 1, 0, sAxe3fText, 'Color', overlayColor('get'), 'HorizontalAlignment', 'right', 'VerticalAlignment', 'top');
+                
+                axesText('set', 'axes3f', tAxes3fText);
+
+                if overlayActivate('get') == false
+                    set(tAxes3fText, 'Visible', 'off');
+                end
+        
                 if link2DMip('get') == true && isVsplash('get') == false         
                     if ~isempty(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')))
                         if isvalid(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')))
@@ -539,7 +664,7 @@ end
                     B = permute(B, [1 2 3]);
                 end
 
-if 0
+if 1
                 if iSeriesOffset ~= iFuseOffset
 
                     if tFuseInput(iSeriesOffset).bFlipLeftRight == true
@@ -573,19 +698,36 @@ end
                     aMip    = mipBuffer('get', [], iFuseOffset);
                     
 %                    if numel(aMip) ~= numel(aRefMip)  % Resample mip  
-                        aResampledMip = resampleMipTransformMatrix(aMip, tFuseMetaData, aRefMip, tMetaData, 'bilinear');   
+                        aResampledMip = resampleMipTransformMatrix(aMip, tFuseMetaData, aRefMip, tMetaData, 'bilinear', false);   
 %                    else
 %                        aResampledMip = aMip;
 %                    end
-                    
+                    dimsRef = size(aRefMip);         
+                    dimsRsp = size(aResampledMip);         
+                    xMoveOffset = (dimsRsp(3)-dimsRef(3))/2;
+                    yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
+
+                    if xMoveOffset ~= 0 || yMoveOffset ~= 0 
+                        aResampledMip = imtranslate(aResampledMip,[-yMoveOffset, 0, -xMoveOffset], 'nearest', 'OutputView', 'same', 'FillValues', min(aResampledMip, [], 'all') );    
+                    end                  
     %                if numel(A) ~= numel(B) % Resample image                 
                         [B, tFuseMetaData] = ...
                             resampleImageTransformMatrix(B, ...
                                                          tFuseMetaData, ...
                                                          A, ...
                                                          tMetaData, ...
-                                                         'bilinear' ...
+                                                         'bilinear', ...
+                                                         false ...
                                                          ); 
+                    dimsRef = size(A);         
+                    dimsRsp = size(B);         
+                    xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
+                    yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
+
+                    if xMoveOffset ~= 0 || yMoveOffset ~= 0 
+                        B = imtranslate(B,[-xMoveOffset, -yMoveOffset, 0], 'nearest', 'OutputView', 'same', 'FillValues', min(B, [], 'all') ); 
+                    end
+            
 %                    [B, tFuseMetaData] = ...
 %                        resampleImage(B, ...
 %                                      tFuseMetaData, ...
@@ -765,6 +907,12 @@ end
                 set(imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
                 set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
                 
+                % Apply image translation. The translation xMoveOffset and
+                % yMoveOffset is set by resampleImageTransformMatrix
+                
+%                imSagittalF.XData = [imSagittalF.XData(1)-xMoveOffset imSagittalF.XData(2)-xMoveOffset];
+%                imSagittalF.YData = [imSagittalF.YData(1)-yMoveOffset imSagittalF.YData(2)-yMoveOffset];
+                                          
                 % Set Axial
                                                 
                 if isVsplash('get') == true && ...
@@ -832,7 +980,13 @@ end
                 
                 set(imAxialFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
                 set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
-                    
+                                
+                % Apply image translation. The translation xMoveOffset and
+                % yMoveOffset is set by resampleImageTransformMatrix
+                
+%                imAxialF.XData = [imAxialF.XData(1)-xMoveOffset imAxialF.XData(2)-xMoveOffset];
+%                imAxialF.YData = [imAxialF.YData(1)-yMoveOffset imAxialF.YData(2)-yMoveOffset];
+                
                 % Set Mip
                 
                 if link2DMip('get') == true && ...
@@ -1728,8 +1882,8 @@ end
                 set(axes3f, 'XLim', axes3.XLim);
                 set(axes3f, 'YLim', axes3.YLim); 
 
-                linkaxes([axes3 axes3f], 'xy'); 
-                
+                linkaxes([axes3 axes3f], 'xy');                 
+                               
                 if link2DMip('get') == true && isVsplash('get') == false         
                     
                     axesMip  = axesMipPtr ('get', [], get(uiSeriesPtr('get'), 'Value'));
@@ -1802,6 +1956,8 @@ end
             
             if size(dicomBuffer('get'), 3) == 1
                 
+                axesText('reset', 'axef');
+                
                 imAxeFcPtr('reset');                                
                 imAxeFPtr ('reset');                                
                 axefPtr   ('reset');
@@ -1812,6 +1968,8 @@ end
                     alpha( axe, 1);                
                 end
             else
+                axesText('reset', 'axes3f');
+
                 imCoronalFcPtr ('reset');                
                 imSagittalFcPtr('reset');                
                 imAxialFcPtr   ('reset');
@@ -1882,9 +2040,9 @@ end
             
     end
     
-    catch
-        progressBar(1, 'Error:setFusionCallback()');
-    end
+%    catch
+%        progressBar(1, 'Error:setFusionCallback()');
+%    end
     
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;
