@@ -686,12 +686,13 @@ end
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [25 837 150 20]...
                   );
-
+    
+    asColor = [surfaceColor('all') 'Custom'];
     uiIsoSurfaceColor = ...
        uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'popup', ...
                   'Position', [180 840 140 20], ...
-                  'String'  , surfaceColor('all'), ...
+                  'String'  , asColor, ...
                   'Value'   , isoColorOffset('get'),...
                   'Enable'  , 'on', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -1798,60 +1799,63 @@ end
            switchToMIPMode('get')    == false
             return;
         end
+        
+        asColor = surfaceColor('get', get(hObject, 'Value'));
+        if numel(asColor) ~= 1
 
-        background3DOffset('set', get(hObject, 'Value'));
+            background3DOffset('set', get(hObject, 'Value'));
 
-        volObj = volObject('get');
-        if ~isempty(volObj)
-            set(volObj, 'BackgroundColor', surfaceColor('get', get(hObject, 'Value')));
+            volObj = volObject('get');
+            if ~isempty(volObj)
+                set(volObj, 'BackgroundColor', asColor);
 
-            if displayVolColorMap('get') == true
+                if displayVolColorMap('get') == true
 
-                volColorObj = volColorObject('get');
-                if ~isempty(volColorObj)
-                    delete(volColorObj);
-                    volColorObject('set', '');
+                    volColorObj = volColorObject('get');
+                    if ~isempty(volColorObj)
+                        delete(volColorObj);
+                        volColorObject('set', '');
+                    end
+
+                    uivolColorbar = volColorbar(uiOneWindowPtr('get'), get3DColorMap('get', get(uiColorVol, 'Value')));
+                    volColorObject('set', uivolColorbar);
                 end
-
-                uivolColorbar = volColorbar(uiOneWindowPtr('get'), get3DColorMap('get', get(uiColorVol, 'Value')));
-                volColorObject('set', uivolColorbar);
             end
-        end
 
-        isoObj = isoObject('get');
-        if ~isempty(isoObj)
-            set(isoObj, 'BackgroundColor', surfaceColor('get', get(hObject, 'Value')));
-        end
+            isoObj = isoObject('get');
+            if ~isempty(isoObj)
+                set(isoObj, 'BackgroundColor', asColor);
+            end
 
-        mipObj = mipObject('get');
-        if ~isempty(mipObj)
-            set(mipObj, 'BackgroundColor', surfaceColor('get', get(hObject, 'Value')));
+            mipObj = mipObject('get');
+            if ~isempty(mipObj)
+                set(mipObj, 'BackgroundColor', asColor);
 
-            if displayMIPColorMap('get') == true
+                if displayMIPColorMap('get') == true
 
-                mipColorObj = mipColorObject('get');
-                if ~isempty(mipColorObj)
-                    delete(mipColorObj);
-                    mipColorObject('set', '');
+                    mipColorObj = mipColorObject('get');
+                    if ~isempty(mipColorObj)
+                        delete(mipColorObj);
+                        mipColorObject('set', '');
+                    end
+
+                    uimipColorbar = mipColorbar(uiOneWindowPtr('get'), get3DColorMap('one', get(uiColorMip, 'Value')) );
+                    mipColorObject('set', uimipColorbar);
+
                 end
-
-                uimipColorbar = mipColorbar(uiOneWindowPtr('get'), get3DColorMap('one', get(uiColorMip, 'Value')) );
-                mipColorObject('set', uimipColorbar);
-
             end
+
+            logoObj = logoObject('get');
+            if ~isempty(logoObj)
+                delete(logoObj);
+                logoObject('set', '');
+            end
+
+            uiLogo = displayLogo(uiOneWindowPtr('get'));
+            logoObject('set', uiLogo);
+
+            initGate3DObject('set', true);
         end
-
-        logoObj = logoObject('get');
-        if ~isempty(logoObj)
-            delete(logoObj);
-            logoObject('set', '');
-        end
-
-        uiLogo = displayLogo(uiOneWindowPtr('get'));
-        logoObject('set', uiLogo);
-
-        initGate3DObject('set', true);
-
     end
 
     function resampleToCTOffsetCallback(hObject, ~)
@@ -2766,6 +2770,8 @@ end
            switchToMIPMode('get')    == false
             return;
         end
+        
+       asColor = surfaceColor('get', get(hObject, 'Value'), true);
 
         if get(ui3DVolume, 'Value') == 2 % Fusion
 
@@ -2774,7 +2780,9 @@ end
             if switchToIsoSurface('get') == true && isFusion('get') == true
                 isoFusionObj = isoFusionObject('get');
                 if ~isempty(isoFusionObj)
-                    set(isoFusionObj, 'IsosurfaceColor', surfaceColor('get', get(hObject, 'Value')));
+                    if numel(asColor) ~= 1
+                        set(isoFusionObj, 'IsosurfaceColor', asColor);
+                    end
                 end
             end
         else
@@ -2784,7 +2792,9 @@ end
            if switchToIsoSurface('get') == true
                 isoObj = isoObject('get');
                 if ~isempty(isoObj)
-                    set(isoObj, 'IsosurfaceColor', surfaceColor('get', get(hObject, 'Value')));
+                    if numel(asColor) ~= 1
+                        set(isoObj, 'IsosurfaceColor', asColor);
+                    end
                 end
             end
         end

@@ -484,14 +484,37 @@ function figRoiMultiplePlot(sType, atVoiRoiTag, bSUVUnit, bDoseKernel, bSegmente
         aDisplayBuffer = dicomBuffer('get');
 
         aInput   = inputBuffer('get');
-        if     strcmp(imageOrientation('get'), 'axial')
+        if     strcmpi(imageOrientation('get'), 'axial')
             aInputBuffer = permute(aInput{iOffset}, [1 2 3]);
-        elseif strcmp(imageOrientation('get'), 'coronal')
+        elseif strcmpi(imageOrientation('get'), 'coronal')
             aInputBuffer = permute(aInput{iOffset}, [3 2 1]);
-        elseif strcmp(imageOrientation('get'), 'sagittal')
+        elseif strcmpi(imageOrientation('get'), 'sagittal')
             aInputBuffer = permute(aInput{iOffset}, [3 1 2]);
         end
         
+        if size(aInputBuffer, 3) ==1
+
+            if tInput(iOffset).bFlipLeftRight == true
+                aInputBuffer=aInputBuffer(:,end:-1:1);
+            end
+
+            if tInput(iOffset).bFlipAntPost == true
+                aInputBuffer=aInputBuffer(end:-1:1,:);
+            end            
+        else
+            if tInput(iOffset).bFlipLeftRight == true
+                aInputBuffer=aInputBuffer(:,end:-1:1,:);
+            end
+
+            if tInput(iOffset).bFlipAntPost == true
+                aInputBuffer=aInputBuffer(end:-1:1,:,:);
+            end
+
+            if tInput(iOffset).bFlipHeadFeet == true
+                aInputBuffer=aInputBuffer(:,:,end:-1:1);
+            end 
+        end 
+            
         atInputMetaData = tInput(iOffset).atDicomInfo;
 
         try

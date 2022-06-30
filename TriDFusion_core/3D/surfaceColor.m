@@ -1,4 +1,4 @@
-function sColor = surfaceColor(sAction, lOffset)              
+function sColor = surfaceColor(sAction, lOffset, bSetCustom)              
 %function sColor = surfaceColor(sAction, lOffset)   
 %Get/Set 3D Surface Color.
 %See TriDFuison.doc (or pdf) for more information about options.
@@ -27,6 +27,7 @@ function sColor = surfaceColor(sAction, lOffset)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
+    persistent pasCustomColor;
     persistent pasDefaultColor;
     pasDefaultColor = {'Yellow', 'Magenta', 'Cyan', 'Red', 'Green', ...
                        'Blue', 'White', 'Black'};
@@ -34,6 +35,19 @@ function sColor = surfaceColor(sAction, lOffset)
     if strcmpi(sAction, 'all')
         sColor = pasDefaultColor;
     else
-        sColor = pasDefaultColor{lOffset};
+        if lOffset > numel(pasDefaultColor)
+            if exist('bSetCustom', 'var')                
+                if bSetCustom == true
+                    sColor = uisetcolor;                
+                    pasCustomColor = sColor;
+                else
+                    sColor = pasCustomColor;
+                end
+            else
+                sColor = pasCustomColor;
+            end
+        else
+            sColor = pasDefaultColor{lOffset};
+        end
     end               
 end  

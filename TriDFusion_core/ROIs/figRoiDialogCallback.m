@@ -267,7 +267,7 @@ function figRoiDialogCallback(hObject, ~)
                'Position', [1350 uiVoiRoiWindow.Position(4)-20 100 20],...
                'BackgroundColor', viewerBackgroundColor('get'), ...
                'ForegroundColor', viewerForegroundColor('get'), ...
-               'String'  , 'Volume cm'...
+               'String'  , 'Volume cm3'...
                );
 
      uicontrol(uiVoiRoiWindow,...
@@ -562,7 +562,7 @@ end
             if ~isempty(tVoiInput) && ...
                ~isempty(aVoiRoiTag)
                 for aa=1:numel(tVoiInput)
-                    if strcmpi(tVoiInput{aa}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+                    if strcmp(tVoiInput{aa}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
 
                         if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                             bSUVUnit = true;
@@ -590,7 +590,7 @@ end
 
                 for cc=1:numel(tRoiInput)
                     if isvalid(tRoiInput{cc}.Object)
-                        if strcmpi(tRoiInput{cc}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+                        if strcmp(tRoiInput{cc}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
 
                             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                                 bSUVUnit = true;
@@ -1421,20 +1421,43 @@ end
         end
 
         aInput = inputBuffer('get');
-        if     strcmp(imageOrientation('get'), 'axial')
+        if     strcmpi(imageOrientation('get'), 'axial')
             aInputBuffer = permute(aInput{iOffset}, [1 2 3]);
-        elseif strcmp(imageOrientation('get'), 'coronal')
+        elseif strcmpi(imageOrientation('get'), 'coronal')
             aInputBuffer = permute(aInput{iOffset}, [3 2 1]);
-        elseif strcmp(imageOrientation('get'), 'sagittal')
+        elseif strcmpi(imageOrientation('get'), 'sagittal')
             aInputBuffer = permute(aInput{iOffset}, [3 1 2]);
         end
+        
+        if size(aInputBuffer, 3) ==1
+            
+            if tInput(iOffset).bFlipLeftRight == true
+                aInputBuffer=aInputBuffer(:,end:-1:1);
+            end
+
+            if tInput(iOffset).bFlipAntPost == true
+                aInputBuffer=aInputBuffer(end:-1:1,:);
+            end            
+        else
+            if tInput(iOffset).bFlipLeftRight == true
+                aInputBuffer=aInputBuffer(:,end:-1:1,:);
+            end
+
+            if tInput(iOffset).bFlipAntPost == true
+                aInputBuffer=aInputBuffer(end:-1:1,:,:);
+            end
+
+            if tInput(iOffset).bFlipHeadFeet == true
+                aInputBuffer=aInputBuffer(:,:,end:-1:1);
+            end 
+        end   
         
         atInputMetaData = tInput(iOffset).atDicomInfo;
 
         aDisplayBuffer = dicomBuffer('get');
         
-        bDoseKernel      = tInput(dOffset).bDoseKernel;
-        bMovementApplied = tInput(dOffset).tMovement.bMovementApplied;
+        bDoseKernel      = tInput(iOffset).bDoseKernel;
+        bMovementApplied = tInput(iOffset).tMovement.bMovementApplied;
 
         dNbVois = numel(tVoiInput);
         if ~isempty(tVoiInput)
@@ -1731,6 +1754,29 @@ end
             aInputBuffer = permute(aInput{iOffset}, [3 2 1]);
         elseif strcmp(imageOrientation('get'), 'sagittal')
             aInputBuffer = permute(aInput{iOffset}, [3 1 2]);
+        end
+  
+        if size(aDisplayBuffer, 3) ==1
+            
+            if aInput(iOffset).bFlipLeftRight == true
+                aInputBuffer=aInputBuffer(:,end:-1:1);
+            end
+
+            if aInput(iOffset).bFlipAntPost == true
+                aInputBuffer=aInputBuffer(end:-1:1,:);
+            end            
+        else
+            if aInput(iOffset).bFlipLeftRight == true
+                aInputBuffer=aInputBuffer(:,end:-1:1,:);
+            end
+
+            if aInput(iOffset).bFlipAntPost == true
+                aInputBuffer=aInputBuffer(end:-1:1,:,:);
+            end
+
+            if aInput(iOffset).bFlipHeadFeet == true
+                aInputBuffer=aInputBuffer(:,:,end:-1:1);
+            end 
         end
         
         atInputMetaData = tInput(iOffset).atDicomInfo;
