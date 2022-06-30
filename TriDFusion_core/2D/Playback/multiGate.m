@@ -63,8 +63,10 @@ function multiGate(mPlay)
     asAxes3Text = pAxes3Text.String;
 
     pAxes3fText  = axesText('get', 'axes3f');
-    asAxes3fText = pAxes3fText.String;
-    pAxes3fText.String = '';
+    if ~isempty(pAxes3fText)
+        asAxes3fText = pAxes3fText.String;
+        pAxes3fText.String = '';
+    end
 
 %            tOverlay = text(axes3, 0.02, 0.97, '', 'Units','normalized');
 
@@ -438,11 +440,11 @@ end
         end
     end
 
-    if isvalid(pAxes3Text)
+    if ~isempty(pAxes3Text)
         set(pAxes3Text, 'String', asAxes3Text);
     end
 
-    if isvalid(pAxes3fText)
+    if ~isempty(pAxes3fText)
         set(pAxes3fText, 'String', asAxes3fText);
     end
 %           delete(tOverlay);
