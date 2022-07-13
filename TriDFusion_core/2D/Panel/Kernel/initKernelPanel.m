@@ -344,7 +344,7 @@ function initKernelPanel()
                   'Callback', @uiKernelInterpolationCallback...
                   );    
 
-if 0
+if 1
     chkMicrosphereInSpecimen = ...
         uicontrol(uiKernelPanelPtr('get'),...
                   'style'   , 'checkbox',...
@@ -1129,27 +1129,32 @@ end
 
             dicomMetaData('set', atCoreMetaData);  
             
-            sigmaX = atCoreMetaData{1}.PixelSpacing(1)/10;
-            sigmaY = atCoreMetaData{1}.PixelSpacing(2)/10;
-            sigmaZ = computeSliceSpacing(atCoreMetaData)/10;
+            xPixel = atCoreMetaData{1}.PixelSpacing(1)/10;
+            yPixel = atCoreMetaData{1}.PixelSpacing(2)/10;
+            zPixel = computeSliceSpacing(atCoreMetaData)/10;
+            
+%            sigmaX = atCoreMetaData{1}.PixelSpacing(1)/10;
+%            sigmaY = atCoreMetaData{1}.PixelSpacing(2)/10;
+%            sigmaZ = computeSliceSpacing(atCoreMetaData)/10;
                         
-            if strcmpi(imageOrientation('get'), 'coronal')
-                xPixel = sigmaX;
-                yPixel = sigmaZ;
-                zPixel = sigmaY;
-            end
+%            if strcmpi(imageOrientation('get'), 'coronal')
+%                xPixel = sigmaX;
+%                yPixel = sigmaZ;
+%                zPixel = sigmaY;
+%            end
             
-            if strcmpi(imageOrientation('get'), 'sagittal')
-                xPixel = sigmaY;
-                yPixel = sigmaZ;
-                zPixel = sigmaX;
-            end
             
-            if strcmpi(imageOrientation('get'), 'axial')
-                xPixel = sigmaX;
-                yPixel = sigmaY;
-                zPixel = sigmaZ;
-            end
+%            if strcmpi(imageOrientation('get'), 'sagittal')
+%                xPixel = sigmaY;
+%                yPixel = sigmaZ;
+%                zPixel = sigmaX;
+%            end
+            
+%            if strcmpi(imageOrientation('get'), 'axial')
+%                xPixel = sigmaX;
+%                yPixel = sigmaY;
+%                zPixel = sigmaZ;
+%            end
 
             injDateTime = atCoreMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;
             acqTime     = atCoreMetaData{1}.SeriesTime;
