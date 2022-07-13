@@ -85,20 +85,17 @@ function aImage = computeMicrospereActivity(aImage, atMetaData, sTreatmentType, 
     
     bSUVUnit = true;    
     bSegmented = false;
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Temp multiplicator to test the mecanic....         
+           
     if strcmpi(sTreatmentType, 'TheraSphere')
-        dMultiplicator = 1;
+        dSphereMultiplicator = 2500; % BQ per sphere
     elseif strcmpi(sTreatmentType, 'SIRsphere')
-        dMultiplicator = 1;
+        dSphereMultiplicator = 50;
     else
         sErrorMessage = sprintf('Error: %s is not supported', sTreatmentType);
         errordlg(sErrorMessage);
         progressBar(1 , sErrorMessage);                   
         return;
     end
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
        
     dNbVois = numel(atVoi);
     for vv=1:dNbVois
@@ -108,25 +105,10 @@ function aImage = computeMicrospereActivity(aImage, atMetaData, sTreatmentType, 
         end
         
         [tVoiComputed, ~, aVoiMask] = computeVoi(aInputBuffer, atInputMetaData, aImage, atMetaData, atVoi{vv}, atRoi, dSUVScale, bSUVUnit, bSegmented, bDoseKernel, bMovementApplied);
-
+        
         dNbSphere = round(tVoiComputed.volume \ dMicrosphereVolume)+1;
-                        
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        switch dNbSphere % Temp equaton to test the mecanic....
-            case 1
-
-                aImage(aVoiMask) = aImage(aVoiMask)*2*dMultiplicator; 
-            case 2
-                
-                aImage(aVoiMask) = aImage(aVoiMask)*4*dMultiplicator; 
-                
-            otherwise
-                sErrorMessage = sprintf('Warning: Contour %s, %d microspheres detected, skipping this contour!', atVoi{vv}.Label, dNbSphere);
-                
-                msgbox(sErrorMessage, 'Warning');
-                progressBar(1 , sErrorMessage);                
-        end
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                  
+        aImage(aVoiMask) = dNbSphere * dSphereMultiplicator \ numel(aVoiMask(aVoiMask~=0));  
                  
     end
     
