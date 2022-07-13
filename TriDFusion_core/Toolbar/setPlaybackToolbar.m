@@ -280,6 +280,7 @@ function setPlaybackToolbar(sVisible)
 
                 case 'Zoom In'
                     set(mZoomIn, 'State', 'off');
+                    multiFrame3DZoom('set', multiFrame3DZoom('get')/1.2);
 
                     if multiFrame3DZoom('get') > 1.2
                         multiFrame3DZoom('set', multiFrame3DZoom('get')/1.2);
