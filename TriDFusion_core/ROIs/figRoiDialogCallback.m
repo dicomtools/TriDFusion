@@ -1758,23 +1758,23 @@ end
   
         if size(aDisplayBuffer, 3) ==1
             
-            if aInput(iOffset).bFlipLeftRight == true
+            if tInput(iOffset).bFlipLeftRight == true
                 aInputBuffer=aInputBuffer(:,end:-1:1);
             end
 
-            if aInput(iOffset).bFlipAntPost == true
+            if tInput(iOffset).bFlipAntPost == true
                 aInputBuffer=aInputBuffer(end:-1:1,:);
             end            
         else
-            if aInput(iOffset).bFlipLeftRight == true
+            if tInput(iOffset).bFlipLeftRight == true
                 aInputBuffer=aInputBuffer(:,end:-1:1,:);
             end
 
-            if aInput(iOffset).bFlipAntPost == true
+            if tInput(iOffset).bFlipAntPost == true
                 aInputBuffer=aInputBuffer(end:-1:1,:,:);
             end
 
-            if aInput(iOffset).bFlipHeadFeet == true
+            if tInput(iOffset).bFlipHeadFeet == true
                 aInputBuffer=aInputBuffer(:,:,end:-1:1);
             end 
         end
