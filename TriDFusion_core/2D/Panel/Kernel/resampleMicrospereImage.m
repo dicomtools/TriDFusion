@@ -32,10 +32,8 @@ function [aImage, atMetaData] = resampleMicrospereImage(aImage, atMetaData, dSiz
 
     dimsDcm = size(aImage);
     
-    dcmSliceThickness = computeSliceSpacing(atMetaData);
-    
-%    Rdcm = imref3d(dimsDcm, atMetaData{1}.PixelSpacing(2), atMetaData{1}.PixelSpacing(1), dcmSliceThickness);
-    
+    dcmSliceThickness = atMetaData{1}.SpacingBetweenSlices;
+        
     if ~any(atMetaData{1}.ImageOrientationPatient, 'all')
         aImageOrientationPatient = zeros(6,1);
         
@@ -67,33 +65,36 @@ function [aImage, atMetaData] = resampleMicrospereImage(aImage, atMetaData, dSiz
     end
     
     refSliceThickness = dSizeZ;
-    
-    dimsRef = zeros(1,3);
-
-    dimsRef(1,1) = round(dimsDcm(1,1) * atMetaData{1}.PixelSpacing(1)/atRefMetaData{1}.PixelSpacing(1));
-    dimsRef(1,2) = round(dimsDcm(1,2) * atMetaData{1}.PixelSpacing(2)/atRefMetaData{1}.PixelSpacing(2));
-    dimsRef(1,3) = dimsDcm(1,3);
-    
+        
     [M, ~] = getTransformMatrix(atMetaData{1}, dcmSliceThickness, atRefMetaData{1}, refSliceThickness);
-    M(3,3) = 1;
     TF = affine3d(M);    
     
-%    [aImage, ~] = imwarp(aImage, Rdcm, TF,'Interp', 'Linear', 'FillValues', double(min(aImage,[],'all')));  
-    [aImage, ~] = imwarp(aImage, TF, 'Interp', 'Linear', 'FillValues', double(min(aImage,[],'all')), 'OutputView', imref3d(dimsRef));  
+    Rdcm = imref3d(dimsDcm, atMetaData{1}.PixelSpacing(2), atMetaData{1}.PixelSpacing(1), dcmSliceThickness);
+    
+    [aImage, ~] = imwarp(aImage, Rdcm, TF,'Interp', 'Linear', 'FillValues', double(min(aImage,[],'all')));  
+%    [aImage, ~] = imwarp(aImage, TF, 'Interp', 'Linear', 'FillValues', double(min(aImage,[],'all')), 'OutputView', imref3d(dimsRef));  
 
     aResampledImageSize = size(aImage);
-   
-    computedSliceThikness = (dSizeZ * refSliceThickness) / aResampledImageSize(3); 
-  
+    
+    if numel(atMetaData) ~= 1
+        if aResampledImageSize(3) < numel(atMetaData)
+            atMetaData = atMetaData(1:aResampledImageSize(3)); % Remove some slices
+        else
+            for cc=1:aResampledImageSize(3) - numel(atMetaData)
+                atMetaData{end+1} = atMetaData{end}; %Add missing slice
+            end            
+        end                
+    end
+      
     for jj=1:numel(atMetaData)
         
         atMetaData{jj}.InstanceNumber  = jj;               
         atMetaData{jj}.NumberOfSlices  = aResampledImageSize(3);                
         
-        atMetaData{jj}.PixelSpacing(1) = dimsDcm(1)/aResampledImageSize(1)*atMetaData{jj}.PixelSpacing(1);
-        atMetaData{jj}.PixelSpacing(2) = dimsDcm(2)/aResampledImageSize(2)*atMetaData{jj}.PixelSpacing(2);
-        atMetaData{jj}.SliceThickness  = computedSliceThikness;
-        atMetaData{jj}.SpacingBetweenSlices  = computedSliceThikness;
+        atMetaData{jj}.PixelSpacing(1) = dSizeX;
+        atMetaData{jj}.PixelSpacing(2) = dSizeY;
+        atMetaData{jj}.SliceThickness  = dSizeZ;
+        atMetaData{jj}.SpacingBetweenSlices  = dSizeZ;
 
         atMetaData{jj}.Rows    = aResampledImageSize(1);
         atMetaData{jj}.Columns = aResampledImageSize(2);
@@ -102,11 +103,11 @@ function [aImage, atMetaData] = resampleMicrospereImage(aImage, atMetaData, dSiz
               
     for cc=1:numel(atMetaData)-1
         if atMetaData{1}.ImagePositionPatient(3) < atMetaData{2}.ImagePositionPatient(3)
-            atMetaData{cc+1}.ImagePositionPatient(3) = atMetaData{cc}.ImagePositionPatient(3) + computedSliceThikness;               
-            atMetaData{cc+1}.SliceLocation = atMetaData{cc}.SliceLocation + computedSliceThikness; 
+            atMetaData{cc+1}.ImagePositionPatient(3) = atMetaData{cc}.ImagePositionPatient(3) + dSizeZ;               
+            atMetaData{cc+1}.SliceLocation = atMetaData{cc}.SliceLocation + dSizeZ; 
         else
-            atMetaData{cc+1}.ImagePositionPatient(3) = atMetaData{cc}.ImagePositionPatient(3) - computedSliceThikness;               
-            atMetaData{cc+1}.SliceLocation = atMetaData{cc}.SliceLocation - computedSliceThikness;             
+            atMetaData{cc+1}.ImagePositionPatient(3) = atMetaData{cc}.ImagePositionPatient(3) - dSizeZ;               
+            atMetaData{cc+1}.SliceLocation = atMetaData{cc}.SliceLocation - dSizeZ;             
         end
     end    
 end

@@ -63,7 +63,7 @@ function [tKernel, sMatFile] = xlsxToMat(sFileName)
                 aFieldData2 = cell2mat(aFieldData2);
                 aFieldData2(find(isnan(aFieldData2)))=[]; % Remove NAN
                 dFieldOffset = dFieldOffset+1;
-
+                                
                 tKernel.(sHeteroName).(sIsotopeName) = struct(sFieldName1, aFieldData1, sFieldName2, aFieldData2);              
 
             end

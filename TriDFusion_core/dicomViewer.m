@@ -74,7 +74,7 @@ function resize = dicomViewer()
     
     treatmentTypeDoseInformationDialog('set', 1); % TheraSphere    
     
-    microspereVolumeDoseInformationDialog('set', 2E-8); % In cm3
+    microspereVolumeDoseInformationDialog('set', 1.4E-8); % In cm3
     
     imageSegTreshValue('set', 'lower', 0);
     imageSegTreshValue('set', 'upper', 1);

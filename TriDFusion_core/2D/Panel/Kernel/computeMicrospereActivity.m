@@ -106,9 +106,16 @@ function aImage = computeMicrospereActivity(aImage, atMetaData, sTreatmentType, 
         
         [tVoiComputed, ~, aVoiMask] = computeVoi(aInputBuffer, atInputMetaData, aImage, atMetaData, atVoi{vv}, atRoi, dSUVScale, bSUVUnit, bSegmented, bDoseKernel, bMovementApplied);
         
-        dNbSphere = round(tVoiComputed.volume \ dMicrosphereVolume)+1;
+%        dRatio = tVoiComputed.volume / dMicrosphereVolume;
+%        if dRatio > 0.2 && dRatio < 1.2
+%            dNbSphere = 1;
+%        else
+%            dNbSphere = 2;
+%        end
+        
+        dNbSphere = round(tVoiComputed.volume / dMicrosphereVolume);
                   
-        aImage(aVoiMask) = dNbSphere * dSphereMultiplicator \ numel(aVoiMask(aVoiMask~=0));  
+        aImage(aVoiMask) = dNbSphere * dSphereMultiplicator / numel(aVoiMask(aVoiMask~=0));  
                  
     end
     
