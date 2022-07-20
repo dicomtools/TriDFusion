@@ -188,14 +188,9 @@ function tInformation = radiopharmaceuticalInformationDialog()
         sResizePixelSpacingY = num2str(resizeVoxelDoseInformationDialog('get', 'y'));
         sResizePixelSpacingZ = num2str(resizeVoxelDoseInformationDialog('get', 'z'));            
     else
-        if isSameSpacingDoseInformationDialog('get') == false
-            sXResizePixelSpacingEditEnable  = 'on';            
-            sYZResizePixelSpacingEditEnable = 'on';         
-        else
-            sXResizePixelSpacingEditEnable  = 'on';            
-            sYZResizePixelSpacingEditEnable = 'off';                        
-        end
-
+        sXResizePixelSpacingEditEnable  = 'on';            
+        sYZResizePixelSpacingEditEnable = 'on';         
+ 
         sResizePixelSpacingX = num2str(resizeVoxelDoseInformationDialog('get', 'x'));
         sResizePixelSpacingY = num2str(resizeVoxelDoseInformationDialog('get', 'x'));
         sResizePixelSpacingZ = num2str(resizeVoxelDoseInformationDialog('get', 'x'));             
@@ -240,8 +235,7 @@ function tInformation = radiopharmaceuticalInformationDialog()
                 'string'    , sResizePixelSpacingX,...
                 'BackgroundColor', viewerBackgroundColor('get'), ...
                 'ForegroundColor', viewerForegroundColor('get'), ...                 
-                'position'  , [200 415 160 20], ...
-                'Callback', @edtResizePixelSpacingDoseInformationCallback...
+                'position'  , [200 415 160 20] ...
                 );             
 
 
@@ -476,22 +470,6 @@ function tInformation = radiopharmaceuticalInformationDialog()
 
             set(edtPixelSpacingY, 'String', num2str(atMetaData{1}.PixelSpacing(2)) );
             set(edtPixelSpacingZ, 'String', num2str(computeSliceSpacing(atMetaData)) );     
-
-            if get(chkResizePixelSize, 'Value') == 1
-                set(edtResizePixelSpacingX, 'enable', 'on');                
-                set(edtResizePixelSpacingY, 'enable', 'on');
-                set(edtResizePixelSpacingZ, 'enable', 'on');                 
-            else
-                set(edtResizePixelSpacingX, 'enable', 'off');                
-                set(edtResizePixelSpacingY, 'enable', 'off');
-                set(edtResizePixelSpacingZ, 'enable', 'off');                     
-            end
-
-            if get(chkResizePixelSize, 'Value') == true
-
-                set(edtResizePixelSpacingY, 'String', num2str(resizeVoxelDoseInformationDialog('get', 'y')) );
-                set(edtResizePixelSpacingZ, 'String', num2str(resizeVoxelDoseInformationDialog('get', 'Z')) );                 
-            end
         else                  
 
             set(edtPixelSpacingY, 'enable', 'off');
@@ -499,15 +477,6 @@ function tInformation = radiopharmaceuticalInformationDialog()
 
             set(edtPixelSpacingY, 'String', get(edtPixelSpacingX, 'String'));
             set(edtPixelSpacingZ, 'String', get(edtPixelSpacingX, 'String')); 
-
-            set(edtResizePixelSpacingY, 'enable', 'off');
-            set(edtResizePixelSpacingZ, 'enable', 'off');   
-
-            if get(chkResizePixelSize, 'Value') == true
-
-                set(edtResizePixelSpacingY, 'String', get(edtResizePixelSpacingX, 'String'));
-                set(edtResizePixelSpacingZ, 'String', get(edtResizePixelSpacingX, 'String'));                 
-            end
         end       
 
     end % isSameSpacingDoseInformationCallback()
@@ -522,16 +491,6 @@ function tInformation = radiopharmaceuticalInformationDialog()
         end
 
     end % edtPixelSpacingDoseInformationCallback()
-
-    function edtResizePixelSpacingDoseInformationCallback(hObject, ~)
-
-        if get(chkIsSamePixelSpacing, 'Value') == true
-
-            sXPixelValue = get(hObject, 'String');
-            set(edtResizePixelSpacingY, 'String', sXPixelValue);
-            set(edtResizePixelSpacingZ, 'String', sXPixelValue);
-        end            
-    end % edtResizePixelSpacingDoseInformationCallback()
 
     function resizePixelSizeDoseInformationCallback(hObject, ~)      
 
@@ -550,19 +509,13 @@ function tInformation = radiopharmaceuticalInformationDialog()
         end       
 
         if get(chkResizePixelSize, 'Value') == false
-             set(edtResizePixelSpacingX, 'enable', 'off');                
-             set(edtResizePixelSpacingY, 'enable', 'off');
-             set(edtResizePixelSpacingZ, 'enable', 'off');                 
+            set(edtResizePixelSpacingX, 'enable', 'off');                
+            set(edtResizePixelSpacingY, 'enable', 'off');
+            set(edtResizePixelSpacingZ, 'enable', 'off');                 
         else
-            if get(chkIsSamePixelSpacing, 'Value') == false
-                set(edtResizePixelSpacingX, 'enable', 'on');                
-                set(edtResizePixelSpacingY, 'enable', 'on');
-                set(edtResizePixelSpacingZ, 'enable', 'on');    
-            else
-                set(edtResizePixelSpacingX, 'enable', 'on');                
-                set(edtResizePixelSpacingY, 'enable', 'off');
-                set(edtResizePixelSpacingZ, 'enable', 'off')                    
-            end
+            set(edtResizePixelSpacingX, 'enable', 'on');                
+            set(edtResizePixelSpacingY, 'enable', 'on');
+            set(edtResizePixelSpacingZ, 'enable', 'on');    
         end
 
     end % resizePixelSizeDoseInformationCallback()                       
@@ -620,15 +573,9 @@ function tInformation = radiopharmaceuticalInformationDialog()
             dPixelSpacingZ = str2double(get(edtPixelSpacingZ, 'String'));                      
         end
 
-        if get(chkIsSamePixelSpacing, 'Value') == true
-            dResizePixelSpacingX = str2double(get(edtResizePixelSpacingX, 'String'));
-            dResizePixelSpacingY = dResizePixelSpacingX;
-            dResizePixelSpacingZ = dResizePixelSpacingX;                    
-        else
-            dResizePixelSpacingX = str2double(get(edtResizePixelSpacingX, 'String'));
-            dResizePixelSpacingY = str2double(get(edtResizePixelSpacingY, 'String'));
-            dResizePixelSpacingZ = str2double(get(edtResizePixelSpacingZ, 'String'));                      
-        end        
+        dResizePixelSpacingX = str2double(get(edtResizePixelSpacingX, 'String'));
+        dResizePixelSpacingY = str2double(get(edtResizePixelSpacingY, 'String'));
+        dResizePixelSpacingZ = str2double(get(edtResizePixelSpacingZ, 'String'));                          
         
 %            aspectRatioValue('set', 'x', dPixelSpacingX);
 %            aspectRatioValue('set', 'y', dPixelSpacingY);

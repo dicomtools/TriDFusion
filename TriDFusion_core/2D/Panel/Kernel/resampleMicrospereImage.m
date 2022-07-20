@@ -1,5 +1,5 @@
-function [aImage, atMetaData] = resampleMicrospereImage(aImage, atMetaData, dSizeX, dSizeY, dSizeZ)
-%function [aImage, atMetaData] = resampleMicrospereImage(aImage, atMetaData, dSizeX, dSizeY, dSizeZ)
+function [aResampledImage, atResampledMetaData] = resampleMicrospereImage(aImage, atMetaData, dSizeX, dSizeY, dSizeZ)
+%function [aResampledImage, atMetaData] = resampleMicrospereImage(aImage, atMetaData, dSizeX, dSizeY, dSizeZ)
 %resample a microshere image.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -30,7 +30,11 @@ function [aImage, atMetaData] = resampleMicrospereImage(aImage, atMetaData, dSiz
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    imageOrientation('set', 'axial');
+    
     dimsDcm = size(aImage);
+    
+    % Set new dicom information 
     
     dcmSliceThickness = atMetaData{1}.SpacingBetweenSlices;
         
@@ -65,49 +69,73 @@ function [aImage, atMetaData] = resampleMicrospereImage(aImage, atMetaData, dSiz
     end
     
     refSliceThickness = dSizeZ;
+    
+    progressBar(0.5, 'Resampling image, please wait.');
+    
+    % Resample Image
         
     [M, ~] = getTransformMatrix(atMetaData{1}, dcmSliceThickness, atRefMetaData{1}, refSliceThickness);
     TF = affine3d(M);    
     
     Rdcm = imref3d(dimsDcm, atMetaData{1}.PixelSpacing(2), atMetaData{1}.PixelSpacing(1), dcmSliceThickness);
     
-    [aImage, ~] = imwarp(aImage, Rdcm, TF,'Interp', 'Linear', 'FillValues', double(min(aImage,[],'all')));  
+    [aResampledImage, ~] = imwarp(aImage, Rdcm, TF,'Interp', 'Nearest', 'FillValues', double(min(aImage,[],'all')));  
 %    [aImage, ~] = imwarp(aImage, TF, 'Interp', 'Linear', 'FillValues', double(min(aImage,[],'all')), 'OutputView', imref3d(dimsRef));  
 
-    aResampledImageSize = size(aImage);
+    % Set dicom header
+
+    aResampledImageSize = size(aResampledImage);
     
-    if numel(atMetaData) ~= 1
-        if aResampledImageSize(3) < numel(atMetaData)
-            atMetaData = atMetaData(1:aResampledImageSize(3)); % Remove some slices
+    atResampledMetaData = atMetaData;
+    
+    if numel(atResampledMetaData) ~= 1
+        if aResampledImageSize(3) < numel(atResampledMetaData)
+            atResampledMetaData = atResampledMetaData(1:aResampledImageSize(3)); % Remove some slices
         else
-            for cc=1:aResampledImageSize(3) - numel(atMetaData)
-                atMetaData{end+1} = atMetaData{end}; %Add missing slice
+            for cc=1:aResampledImageSize(3) - numel(atResampledMetaData)
+                atResampledMetaData{end+1} = atResampledMetaData{end}; %Add missing slice
             end            
         end                
     end
       
-    for jj=1:numel(atMetaData)
+    for jj=1:numel(atResampledMetaData)
         
-        atMetaData{jj}.InstanceNumber  = jj;               
-        atMetaData{jj}.NumberOfSlices  = aResampledImageSize(3);                
+        atResampledMetaData{jj}.InstanceNumber  = jj;               
+        atResampledMetaData{jj}.NumberOfSlices  = aResampledImageSize(3);                
         
-        atMetaData{jj}.PixelSpacing(1) = dSizeX;
-        atMetaData{jj}.PixelSpacing(2) = dSizeY;
-        atMetaData{jj}.SliceThickness  = dSizeZ;
-        atMetaData{jj}.SpacingBetweenSlices  = dSizeZ;
+        atResampledMetaData{jj}.PixelSpacing(1) = dSizeX;
+        atResampledMetaData{jj}.PixelSpacing(2) = dSizeY;
+        atResampledMetaData{jj}.SliceThickness  = dSizeZ;
+        atResampledMetaData{jj}.SpacingBetweenSlices  = dSizeZ;
 
-        atMetaData{jj}.Rows    = aResampledImageSize(1);
-        atMetaData{jj}.Columns = aResampledImageSize(2);
-        atMetaData{jj}.NumberOfSlices = numel(atMetaData);                  
+        atResampledMetaData{jj}.Rows    = aResampledImageSize(1);
+        atResampledMetaData{jj}.Columns = aResampledImageSize(2);
+        atResampledMetaData{jj}.NumberOfSlices = numel(atResampledMetaData);                  
     end
               
-    for cc=1:numel(atMetaData)-1
-        if atMetaData{1}.ImagePositionPatient(3) < atMetaData{2}.ImagePositionPatient(3)
-            atMetaData{cc+1}.ImagePositionPatient(3) = atMetaData{cc}.ImagePositionPatient(3) + dSizeZ;               
-            atMetaData{cc+1}.SliceLocation = atMetaData{cc}.SliceLocation + dSizeZ; 
+    for cc=1:numel(atResampledMetaData)-1
+        if atResampledMetaData{1}.ImagePositionPatient(3) < atResampledMetaData{2}.ImagePositionPatient(3)
+            atResampledMetaData{cc+1}.ImagePositionPatient(3) = atResampledMetaData{cc}.ImagePositionPatient(3) + dSizeZ;               
+            atResampledMetaData{cc+1}.SliceLocation = atResampledMetaData{cc}.SliceLocation + dSizeZ; 
         else
-            atMetaData{cc+1}.ImagePositionPatient(3) = atMetaData{cc}.ImagePositionPatient(3) - dSizeZ;               
-            atMetaData{cc+1}.SliceLocation = atMetaData{cc}.SliceLocation - dSizeZ;             
+            atResampledMetaData{cc+1}.ImagePositionPatient(3) = atResampledMetaData{cc}.ImagePositionPatient(3) - dSizeZ;               
+            atResampledMetaData{cc+1}.SliceLocation = atResampledMetaData{cc}.SliceLocation - dSizeZ;             
         end
-    end    
+    end   
+    
+    % Resample ROIs
+
+    uiSeries = uiSeriesPtr('get');
+    dSeriesOffset = get(uiSeries, 'Value');
+
+    atRoi = roiTemplate('get', dSeriesOffset);
+
+    if ~isempty(atRoi)
+        atResampledRoi = resampleROIs(aImage, atMetaData, aResampledImage, atResampledMetaData, atRoi, false);
+
+        roiTemplate('set', dSeriesOffset, atResampledRoi);
+    end
+    
+    progressBar(1, 'Ready');
+                
 end

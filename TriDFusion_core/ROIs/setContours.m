@@ -107,11 +107,16 @@ function setContours(tContours)
                                 progressBar( bNbContours/numel(atContours{cc})-0.0001, sprintf('Volume %d: Processing contour %d/%d', bb, bNbContours, numel(atContours{cc}) ));  
 
                                 for j=1:numel(segments)
+                                    
+                                    a3DOffset = segments{j};
+                                    [outX, outY, outZ] = transformPointsForward(invert(affine3d(xfm')), a3DOffset(:,1), a3DOffset(:,2), a3DOffset(:,3)); 
+                                    points{j} = [abs(outX(:)) abs(outY(:))] ;
+                                    z = round(abs(outZ(:)));   % Axial  
 
-                                    out = pctransform(pointCloud(segments{j}),invert(affine3d(xfm')));
+%                                    out = pctransform(pointCloud(segments{j}),invert(affine3d(xfm')));
 
-                                    points{j} = [abs(out.Location(:,1)) abs(out.Location(:,2))] ;
-                                    z = round(abs(out.Location(:,3)));   % Axial                    
+%                                    points{j} = [abs(out.Location(:,1)) abs(out.Location(:,2))] ;
+%                                    z = round(abs(out.Location(:,3)));   % Axial                    
 
                                     ROI.Position = [points{j}(:,1)+1, points{j}(:,2)+1];
 

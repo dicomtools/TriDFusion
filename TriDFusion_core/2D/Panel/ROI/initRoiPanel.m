@@ -1869,9 +1869,9 @@ function initRoiPanel()
 
                 set(uiDeleteVoiRoiPanel, 'Value', dVoiOffset);
 
-                dRoiOffset = round(numel(tVoiInput{dVoiOffset}.RoisTag)/2);
+%                dRoiOffset = round(numel(tVoiInput{dVoiOffset}.RoisTag)/2);
 
-                triangulateRoi(tVoiInput{dVoiOffset}.RoisTag{dRoiOffset}, true);
+%                triangulateRoi(tVoiInput{dVoiOffset}.RoisTag{dRoiOffset}, true);
             end
 
         end

@@ -59,7 +59,11 @@ function mainWindowMenu()
     mAxial    = uimenu(mView, 'Label','Axial Plane'   , 'Callback', @setOrientationCallback);
     mSagittal = uimenu(mView, 'Label','Sagittal Plane', 'Callback', @setOrientationCallback);
     mCoronal  = uimenu(mView, 'Label','Coronal plane' , 'Callback', @setOrientationCallback);
-
+    
+    axialOrientationMenuPtr   ('set', mAxial   );
+    sagittalOrientationMenuPtr('set', mSagittal);
+    coronalOrientationMenuPtr ('set', mCoronal );
+       
     mVsplashAxial    = uimenu(mView, 'Label','V-Splash Axial'   , 'Callback', @setVsplashViewCallback, 'Separator','on');
     mVsplashSagittal = uimenu(mView, 'Label','V-Splash Sagittal', 'Callback', @setVsplashViewCallback);
     mVslashCoronal   = uimenu(mView, 'Label','V-Splash Coronal' , 'Callback', @setVsplashViewCallback);
@@ -199,11 +203,7 @@ function mainWindowMenu()
                 if strcmpi(get(hObject, 'Label'), 'Axial Plane') && ...
                   ~strcmpi(imageOrientation('get'), 'axial')
 
-                    set(mAxial   , 'Checked', 'on' );
-                    set(mCoronal , 'Checked', 'off');
-                    set(mSagittal, 'Checked', 'off');
-
-                    refreshImages();
+                    triangulateCallback();
 
                     viewSegPanel('set', false);
                     objSegPanel = viewSegPanelMenuObject('get');
@@ -242,10 +242,6 @@ function mainWindowMenu()
                 elseif strcmpi(get(hObject, 'Label'), 'Coronal Plane') && ...
                       ~strcmpi(imageOrientation('get'), 'coronal')
 
-                    set(mAxial   , 'Checked', 'off');
-                    set(mCoronal , 'Checked', 'on' );
-                    set(mSagittal, 'Checked', 'off');
-
                     triangulateCallback();
 
                     viewSegPanel('set', false);
@@ -278,10 +274,6 @@ function mainWindowMenu()
 
                elseif strcmpi(get(hObject, 'Label'), 'Sagittal Plane') && ...
                       ~strcmp(imageOrientation('get'), 'sagittal')
-
-                    set(mAxial   , 'Checked', 'off');
-                    set(mCoronal , 'Checked', 'off');
-                    set(mSagittal, 'Checked', 'on' );
 
                     triangulateCallback();
 

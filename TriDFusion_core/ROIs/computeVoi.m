@@ -59,8 +59,12 @@ function [tVoiComputed, atRoiComputed, voiMask] = computeVoi(imInput, atInputMet
     for bb=1: numel(ptrVoiInput.RoisTag)
         for cc=1:numel(tRoiInput)
             if strcmpi(ptrVoiInput.RoisTag{bb}, tRoiInput{cc}.Tag)                
-                                
-                [atRoiComputed{bb}, roiMask] = computeRoi(imInput, atInputMetaData, imRoiCompute, atRoiMetaData, tRoiInput{cc}, dSUVScale, bSUVUnit, bSegmented, bDoseKernel, bMovementApplied);                  
+                     
+                try
+                    [atRoiComputed{bb}, roiMask] = computeRoi(imInput, atInputMetaData, imRoiCompute, atRoiMetaData, tRoiInput{cc}, dSUVScale, bSUVUnit, bSegmented, bDoseKernel, bMovementApplied);                                      
+                catch
+                    break;
+                end
                 
                 tVoiMask{bb}.SliceNb = atRoiComputed{bb}.SliceNb;
                 tVoiMask{bb}.Axe     = atRoiComputed{bb}.Axe;

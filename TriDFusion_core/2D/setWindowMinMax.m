@@ -1,5 +1,5 @@
-function setWindowMinMax(lMax, lMin)
-%function setWindowMinMax(lMax, lMin)
+function setWindowMinMax(lMax, lMin, bRefreshImages)
+%function setWindowMinMax(lMax, lMin, bRefreshImages)
 %Set 2D Window Min Max Value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -53,7 +53,11 @@ function setWindowMinMax(lMax, lMin)
                 set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);            
             end
         end
-
-        refreshImages();
+        
+        if exist('bRefreshImages', 'var')
+            if bRefreshImages == true
+                refreshImages();
+            end
+        end
     end
 end 

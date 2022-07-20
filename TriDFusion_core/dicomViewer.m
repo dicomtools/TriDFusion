@@ -53,15 +53,12 @@ function resize = dicomViewer()
     windowLevel('set', 'min', 0);
 
     kernelCtSerieOffset('set', 1);
-
     kernelUseCtDoseMap('set', false);
     kernelUnitTypeWindow('set', false);
-
     kernelSegTreshValue('set', 'lower', 0);
-    kernelSegTreshValue('set', 'upper', 1);
-    
-    kernelInterpolation('set', 'Linear');
-    
+    kernelSegTreshValue('set', 'upper', 1);    
+    kernelInterpolation('set', 'Linear');    
+    kernelCutoff('set', 1000);
     kernelMicrosphereInSpecimen('set', false);
     
     resizePixelSizeDoseInformationDialog('set', true);
@@ -74,7 +71,7 @@ function resize = dicomViewer()
     
     treatmentTypeDoseInformationDialog('set', 1); % TheraSphere    
     
-    microspereVolumeDoseInformationDialog('set', 1.4E-8); % In cm3
+    microspereVolumeDoseInformationDialog('set', 5E-8); % In cm3
     
     imageSegTreshValue('set', 'lower', 0);
     imageSegTreshValue('set', 'upper', 1);
@@ -216,7 +213,7 @@ function resize = dicomViewer()
     roiPanelUseCt('set', false);
     roiPanelUnitTypeWindow('set', false);
     smalestRegionRoiPanelValue('set', 3);
-    multipleObjectsRoiPanel('set', false);
+    multipleObjectsRoiPanel('set', true);
     pixelEdgeRoiPanel('set', true);
     holesRoiPanel('set', false);
 

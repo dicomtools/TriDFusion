@@ -1,6 +1,6 @@
-function aObject = ui3DSliderIsoSurfacePtr(sAction, aValue)
-%function aObject = ui3DSliderIsoSurfacePtr(sAction, aValue)
-%Get\Set 3D ISO Surface Slider ui Pointer.
+function dCutoff = kernelCutoff(sAction, dValue)
+%function  dCutoff = edgeSegMethod(sAction, dValue)
+%Get\Set Kernel Cutoff Value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.
@@ -10,7 +10,7 @@ function aObject = ui3DSliderIsoSurfacePtr(sAction, aValue)
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2022, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -30,12 +30,11 @@ function aObject = ui3DSliderIsoSurfacePtr(sAction, aValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent paObject; 
+    persistent pdCutoff; 
 
     if strcmpi('set', sAction)
-       paObject = aValue;            
-    end     
+       pdCutoff = dValue;            
+    end      
     
-    aObject = paObject;
-    
+    dCutoff = pdCutoff;
 end

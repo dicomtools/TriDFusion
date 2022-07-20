@@ -1,6 +1,6 @@
-function aObject = ui3DSliderIsoSurfacePtr(sAction, aValue)
-%function aObject = ui3DSliderIsoSurfacePtr(sAction, aValue)
-%Get\Set 3D ISO Surface Slider ui Pointer.
+function aObject = coronalOrientationMenuPtr(sAction, aValue)
+%function aObject = coronalOrientationMenuPtr(sAction, aValue)
+%Get\Set axial menu pointer.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.
@@ -10,7 +10,7 @@ function aObject = ui3DSliderIsoSurfacePtr(sAction, aValue)
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2022, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -34,7 +34,7 @@ function aObject = ui3DSliderIsoSurfacePtr(sAction, aValue)
 
     if strcmpi('set', sAction)
        paObject = aValue;            
-    end     
+    end      
     
     aObject = paObject;
     

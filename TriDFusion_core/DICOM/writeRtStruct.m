@@ -239,10 +239,16 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 
                             sliceThikness = computeSliceSpacing(atDicomMeta);       
                             [xfm,~] = TransformMatrix(atDicomMeta{1}, sliceThikness);
-                            out = pctransform(pointCloud(a3DOffset), affine3d(xfm'));
+%                            out = pctransform(pointCloud(a3DOffset), affine3d(xfm'));
 
-                            aX = out.Location(:,1);
-                            aY = out.Location(:,2);
+%                            aX = out.Location(:,1);
+%                            aY = out.Location(:,2);
+                            
+                            [outX, outY, ~] = transformPointsForward(affine3d(xfm'), a3DOffset(:,1), a3DOffset(:,2), a3DOffset(:,3)); 
+                            
+                            aX = outX(:);
+                            aY = outY(:);
+                            
 %                            aZ = out.Location(:,3);
                             aZ = zeros(dNBoundaries, 1);
                             aZ(:) = atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation;
@@ -260,7 +266,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                             end
 
                             for yy=2:3:numel(aXYZ)
-                                aXYZ(yy)=aY(dYOffset);
+                                aXYZ(yy) = aY(dYOffset);
                                 dYOffset = dYOffset+1;
                             end
 

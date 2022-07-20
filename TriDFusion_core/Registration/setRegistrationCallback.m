@@ -151,7 +151,8 @@ function setRegistrationCallback(~, ~)
                   'String'  , {'Nearest', 'Bilinear', 'Cubic', 'Bicubic'}, ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'Value'   , dInterpolation ...
+                  'Value'   , dInterpolation, ...
+                  'Callback', @interpolationCallback...
                   );
 
         uicontrol(dlgRegister,...
@@ -746,6 +747,19 @@ function setRegistrationCallback(~, ~)
 
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;
+        
+    end
+
+    function interpolationCallback(~, ~)
+                
+        asInterpolation       = get(uiInterpolation, 'String');
+        dInterpolationOffeset = get(uiInterpolation, 'Value');
+        
+        sInterpolation = asInterpolation{dInterpolationOffeset};
+       
+        tRegistration.Interpolation = sInterpolation;
+        
+        registrationTemplate('set', tRegistration);
         
     end
 

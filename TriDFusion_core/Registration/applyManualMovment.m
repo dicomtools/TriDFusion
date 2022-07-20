@@ -60,13 +60,18 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
             a3DOffset = zeros(1,3);
             a3DOffset(1)=aOffset(1);
             a3DOffset(2)=aOffset(2);
+            
+            [outX, outY, ~] = transformPointsForward(TF, a3DOffset(1), a3DOffset(2), a3DOffset(3)); 
 
-            pcOut = pctransform(pointCloud(a3DOffset), TF);
+%            pcOut = pctransform(pointCloud(a3DOffset), TF);
                         
             aScaledOffset = zeros(1, 2);
-            aScaledOffset(1) = pcOut.Location(1); % X
-            aScaledOffset(2) = pcOut.Location(2); % Y
-            
+%            aScaledOffset(1) = pcOut.Location(1); % X
+%            aScaledOffset(2) = pcOut.Location(2); % Y
+
+            aScaledOffset(1) = outX; % X
+            aScaledOffset(2) = outY; % Y
+
             aMovedDicomBuffer = translateImageMovement(aMovedDicomBuffer, aScaledOffset);
 
             bMovementApplied = true;
@@ -103,13 +108,18 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
 
             TF = affine3d(f);
 
-            pcOut = pctransform(pointCloud(aOffset), TF);
+           [outX, outY, outZ] = transformPointsForward(TF, aOffset(:,1), aOffset(:,2), aOffset(:,3)); 
+
+%            pcOut = pctransform(pointCloud(aOffset), TF);
                         
             aScaledOffset = zeros(1,3);
-            aScaledOffset(1) = pcOut.Location(1); % X
-            aScaledOffset(2) = pcOut.Location(2); % Y
-            aScaledOffset(3) = pcOut.Location(3); % Z          
-            
+%            aScaledOffset(1) = pcOut.Location(1); % X
+%            aScaledOffset(2) = pcOut.Location(2); % Y
+%            aScaledOffset(3) = pcOut.Location(3); % Z          
+            aScaledOffset(1) = outX; % X
+            aScaledOffset(2) = outY; % Y
+            aScaledOffset(3) = outZ; % Z     
+
             aMovedDicomBuffer = translateImageMovement(aMovedDicomBuffer, aScaledOffset);
             
             bMovementApplied = true;

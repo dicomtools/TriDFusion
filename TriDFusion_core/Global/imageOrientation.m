@@ -33,7 +33,41 @@ function sOrientation = imageOrientation(sAction, sValue)
     persistent psOrientation;
 
     if strcmp(sAction, 'set')
-        psOrientation = sValue;        
+        
+        psOrientation = sValue;      
+        
+        mAxial    = axialOrientationMenuPtr   ('get');
+        mSagittal = sagittalOrientationMenuPtr('get');
+        mCoronal  = coronalOrientationMenuPtr ('get');
+    
+        if ~isempty(mAxial) && ...
+           ~isempty(mSagittal) && ...
+           ~isempty(mCoronal)
+       
+            if isvalid(mAxial) && ...
+               isvalid(mSagittal) && ...
+               isvalid(mCoronal)
+
+                if strcmpi(sValue, 'axial')
+
+                    set(mAxial   , 'Checked', 'on' );
+                    set(mCoronal , 'Checked', 'off');
+                    set(mSagittal, 'Checked', 'off');
+
+                elseif strcmpi(sValue, 'coronal')
+
+                    set(mAxial   , 'Checked', 'off');
+                    set(mCoronal , 'Checked', 'on' );
+                    set(mSagittal, 'Checked', 'off');            
+
+                elseif strcmpi(sValue, 'sagittal')
+
+                    set(mAxial   , 'Checked', 'off');
+                    set(mCoronal , 'Checked', 'off');
+                    set(mSagittal, 'Checked', 'on' );            
+                end
+            end
+        end
     end
 
     sOrientation = psOrientation;

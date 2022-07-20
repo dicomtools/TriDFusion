@@ -77,15 +77,15 @@ function triangulateRoi(sRoiTag, bCenterRoi)
                                 xOffset = diff(xx)/2;
                                 yOffset = diff(yy)/2;
 
-                                if xOffset < midX
+                     %           if xOffset < midX
                                     Xlimit = [midX-xOffset midX+xOffset];
                                     tRoiInput{rr}.Object.Parent.XLim = Xlimit;
-                                end
+                     %           end
 
-                                if yOffset < midY
+                     %           if yOffset < midY
                                     Ylimit = [midY-yOffset midY+yOffset];
                                     tRoiInput{rr}.Object.Parent.YLim = Ylimit;
-                                end
+                     %           end
                             end
                         end
 
@@ -111,15 +111,15 @@ function triangulateRoi(sRoiTag, bCenterRoi)
                                 xOffset = diff(xx)/2;
                                 yOffset = diff(yy)/2;
 
-                                if xOffset < midX
+                    %            if xOffset < midX
                                     Xlimit = [midX-xOffset midX+xOffset];
                                     tRoiInput{rr}.Object.Parent.XLim = Xlimit;
-                                end
+                    %            end
 
-                                if yOffset < midY
+                    %            if yOffset < midY
                                     Ylimit = [midY-yOffset midY+yOffset];
                                     tRoiInput{rr}.Object.Parent.YLim = Ylimit;
-                                end
+                    %            end
                             end
                         end
 
@@ -145,15 +145,19 @@ function triangulateRoi(sRoiTag, bCenterRoi)
                                 xOffset = diff(xx)/2;
                                 yOffset = diff(yy)/2;
 
-                                if xOffset < midX
+                      %          if xOffset < midX
                                     Xlimit = [midX-xOffset midX+xOffset];
                                     tRoiInput{rr}.Object.Parent.XLim = Xlimit;
-                                end
+                      %          else
+                      %              tRoiInput{rr}.Object.Parent.XLim = midX;
+                      %          end
 
-                                if yOffset < midY
+                      %          if yOffset < midY
                                     Ylimit = [midY-yOffset midY+yOffset];
                                     tRoiInput{rr}.Object.Parent.YLim = Ylimit;
-                                end
+                      %          else                                   
+                      %              tRoiInput{rr}.Object.Parent.YLim = midY;
+                      %          end
                             end
 
                         end

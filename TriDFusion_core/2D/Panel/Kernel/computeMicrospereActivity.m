@@ -38,6 +38,10 @@ function aImage = computeMicrospereActivity(aImage, atMetaData, sTreatmentType, 
     atRoi = roiTemplate('get', dSeriesOffset);
     atVoi = voiTemplate('get', dSeriesOffset);
     
+    if isempty(atVoi)
+        return;
+    end
+       
     paInputBuffer = inputBuffer('get');
     if     strcmpi(imageOrientation('get'), 'axial')
         aInputBuffer = permute(paInputBuffer{dSeriesOffset}, [1 2 3]);
@@ -105,18 +109,13 @@ function aImage = computeMicrospereActivity(aImage, atMetaData, sTreatmentType, 
         end
         
         [tVoiComputed, ~, aVoiMask] = computeVoi(aInputBuffer, atInputMetaData, aImage, atMetaData, atVoi{vv}, atRoi, dSUVScale, bSUVUnit, bSegmented, bDoseKernel, bMovementApplied);
-        
-%        dRatio = tVoiComputed.volume / dMicrosphereVolume;
-%        if dRatio > 0.2 && dRatio < 1.2
-%            dNbSphere = 1;
-%        else
-%            dNbSphere = 2;
-%        end
-        
+               
         dNbSphere = round(tVoiComputed.volume / dMicrosphereVolume);
                   
-        aImage(aVoiMask) = dNbSphere * dSphereMultiplicator / numel(aVoiMask(aVoiMask~=0));  
+        aImage(aVoiMask) = dNbSphere * dSphereMultiplicator / tVoiComputed.cells;  
                  
     end
+    
+    progressBar(1, 'Ready');
     
 end
