@@ -2303,11 +2303,12 @@ end
 
             tQuant = quantificationTemplate('get');
             tInput(numel(tInput)).tQuant = tQuant;
-            inputTemplate('set', tInput);
 
             aMaskedMip = computeMIP(imMask);
             mipBuffer('set', aMaskedMip, numel(tInput));
             tInput(numel(tInput)).aMip = aMaskedMip;
+            
+            inputTemplate('set', tInput);
 
             set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
 
