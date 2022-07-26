@@ -53,7 +53,7 @@ function initKernelPanel()
                   'Callback', @resetKernelCallback...
                   );
 
-    % 3D Dose Kernel
+% 3D Dose Kernel
 
     tDoseKernel = getDoseKernelTemplate();
 
@@ -958,6 +958,8 @@ function initKernelPanel()
 %            javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
         end
 
+% ASK: Dose Kernel set-up
+
         function setDoseKernel()
 
             tInput = inputTemplate('get');
@@ -1173,11 +1175,19 @@ function initKernelPanel()
                 end
             end
 
-            dicomMetaData('set', atCoreMetaData);  
+            dicomMetaData('set', atCoreMetaData);
             
-            xPixel = atCoreMetaData{1}.PixelSpacing(1)/10;
-            yPixel = atCoreMetaData{1}.PixelSpacing(2)/10;
-            zPixel = computeSliceSpacing(atCoreMetaData)/10;
+            
+            % ASK: converting from mm to cm ??
+            
+            
+            xPixelInMm = atCoreMetaData{1}.PixelSpacing(1);
+            yPixelInMm = atCoreMetaData{1}.PixelSpacing(2);
+            zPixelInMm = computeSliceSpacing(atCoreMetaData);
+ 
+            xPixelInCm = atCoreMetaData{1}.PixelSpacing(1)/10;
+            yPixelInCm = atCoreMetaData{1}.PixelSpacing(2)/10;
+            zPixelInCm = computeSliceSpacing(atCoreMetaData)/10;            
             
 %            sigmaX = atCoreMetaData{1}.PixelSpacing(1)/10;
 %            sigmaY = atCoreMetaData{1}.PixelSpacing(2)/10;
@@ -1201,6 +1211,8 @@ function initKernelPanel()
 %                yPixel = sigmaY;
 %                zPixel = sigmaZ;
 %            end
+
+% ASK: Decay correction
 
             injDateTime = atCoreMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;
             acqTime     = atCoreMetaData{1}.SeriesTime;
@@ -1226,7 +1238,8 @@ function initKernelPanel()
             switch lower(asIsotope{dIsotope})
                 
                 case 'y90'
-                    
+
+% ASK: Kernel normalization               
                     betaYield = 1; %Beta yield Y-90
 %                    nbOfParticuleSimulated = 3.1867E5; % To double check
                     nbOfParticuleSimulated = 4E7; % To double check (number of particule simulated)
@@ -1267,36 +1280,56 @@ function initKernelPanel()
                      return;
 
              end
+% ASK: equations 
+USE_LBM_METHOD = true;
 
-            aActivity = aActivity*xPixel*yPixel*zPixel/1000;  % 1) From PET image – Activity A in kBq for each voxel at time of scan: Ascan= Bq/mL * Vvox(mL)
-            A0 = aActivity*2^(TscanMinusTinjection/halfLife); % 2) Activity at injection of microspheres: A0=A*2[(Tscan-Tinjection)/T1/2]
-            Acum  = A0 *halfLife *1/log(2);                   % 3) Calculate the total number of disintegrations in the voxel Acum = A0(Bq) *1.442695* T1/2(s)
-            Nb = Acum*betaYield;                              % 4) Calculate total number of beta-particles (e.g. beta) using the yield Yb Nb = Acum * Yb
-            aActivity = Nb/nbOfParticuleSimulated;            % 5) Nb,scaled = Nb/(4*107  )
-
+            if USE_LBM_METHOD == true
+                % LDM method:
+    %            mean(aActivity(62:66,62:66,23:26), 'All')% activity in center at scan time
+    %            A0 = aActivity*2^(TscanMinusTinjection/halfLife); % 2) Activity at injection of microspheres: A0=A*2[(Tscan-Tinjection)/T1/2]
+    %            xPixelInCm*yPixelInCm*zPixelInCm    % voxel volume in mL ~0.09mL
+%                LDM_Dose = 49.7*aActivity/10^6;
+                aActivity=49.7*aActivity/10^6;
+                %check dose in center of sphere
+    %            mean(LDM_Dose(62:66,62:66,23:26), 'All')
+            
+            else
+                % Kernel convolution method
+                aActivity = aActivity*xPixelInCm*yPixelInCm*zPixelInCm;  % 1) From PET image – Activity A in Bq for each voxel at time of scan: Ascan= Bq/mL * Vvox(mL)
+                A0 = aActivity*2^(TscanMinusTinjection/halfLife); % 2) Activity at injection of microspheres: A0=A*2[(Tscan-Tinjection)/T1/2]
+                Acum  = A0 *halfLife *1/log(2);                   % 3) Calculate the total number of disintegrations in the voxel Acum = A0(Bq) *1.442695* T1/2(s)
+                Nb = Acum*betaYield;                              % 4) Calculate total number of beta-particles (e.g. beta) using the yield Yb Nb = Acum * Yb
+                aActivity = Nb/nbOfParticuleSimulated;            % 5) Nb,scaled = Nb/(4*107  )
+            end
+            
             aDose = aDoseR2./aDistance.^2;                    % 6) Cumulative Dose to point at distance r (mm), D(r) = Nb,scaled * DPKr2(r) / r2  ???
 
  %           aActivity = NbScaled;
 
             % Set Meshgrid
             dKernelCutoff = str2double(get(uiEditKernelCutoff, 'String'));
-
-            dMax = max(aDose, [], 'all')/dKernelCutoff; % Dose kernel truncated to 1000th of the peak
-            aVector = find(aDose<dMax);
+% ASK: Kernel cut-off level
+            dMax = max(aDose, [], 'all')/dKernelCutoff; % Dose kernel truncated to the cutoff of the max dose
+            aVector = find(aDose<=dMax);
 
             dFirst = aVector(1);
 
             dDistance = aDistance(dFirst);
+            
+%            dDistance = aDistance(end); % mm
+%            dDistance = 100; % mm
 
-            fromToX = ceil(dDistance/xPixel);
+ %ASK: size of kernel in voxels
+
+            fromToX = ceil(dDistance/xPixelInMm);
             fromX = -abs(fromToX);
             toX   =  abs(fromToX);
 
-            fromToY = ceil(dDistance/yPixel);
+            fromToY = ceil(dDistance/yPixelInMm);
             fromY = -abs(fromToY);
             toY   =  abs(fromToY);
 
-            fromToZ = ceil(dDistance/zPixel);
+            fromToZ = ceil(dDistance/zPixelInMm);
             fromZ = -abs(fromToZ);
             toZ   =  abs(fromToZ);
             
@@ -1307,22 +1340,32 @@ function initKernelPanel()
             
             % Interpolate Meshgrid
 
-            distanceMatrix = sqrt((X*xPixel).^2+(Y*yPixel).^2+(Z*zPixel).^2);
+            distanceMatrix = sqrt((X*xPixelInMm).^2+(Y*yPixelInMm).^2+(Z*zPixelInMm).^2);
+            
 %            vqKernel = interp1(aDistance, aDose, distanceMatrix, 'pchip', 'extrap'); %interpolation method: 'linear', 'nearest', 'next', 'previous', 'pchip', 'cubic', 'v5cubic', 'makima', or 'spline'.
 
             asKernelInterpolation = get(uiKernelInterpolation, 'String');
             dInterpolationValue   = get(uiKernelInterpolation, 'Value');
             
             progressBar(0.85, sprintf('Processing %s interpolatiion, please wait.', asKernelInterpolation{dInterpolationValue} ));
-            
+            % Kernel in 3D in mm: 
             vqKernel = interp1(aDistance, aDose, distanceMatrix, asKernelInterpolation{dInterpolationValue}, 'extrap'); %interpolation method: 'linear', 'nearest', 'next', 'previous', 'pchip', 'cubic', 'v5cubic', 'makima', or 'spline'.
  %           vqKernel = interp1(aDistance, aDose, distanceMatrix, asKernelInterpolation{dInterpolationValue}); %interpolation method: 'linear', 'nearest', 'next', 'previous', 'pchip', 'cubic', 'v5cubic', 'makima', or 'spline'.
        %     vqKernel = vqKernel/sum(vqKernel, 'all')*49.67;
 
-            % Kernel Convolution
-            
+% ASK: Kernel Convolution
+            % here; vqKernel has to be in voxels, not mm
+            if USE_LBM_METHOD == true
+ 
+                dKernelSum = sum(vqKernel, 'all');
+                vqKernel =  vqKernel/dKernelSum;
+            end
+             
             aActivity = convn(aActivity, vqKernel, 'same');
-
+                       
+            % check mean dose in center of sphere
+%            mean(aActivity(62:66,62:66,23:26), 'All')
+            
             % Apply CT constraint 
 
             bUseCtMap = get(chkUseCTdoseMapKernel, 'Value'); % CT Guided
