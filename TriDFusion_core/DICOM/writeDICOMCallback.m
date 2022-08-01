@@ -81,6 +81,24 @@ function writeDICOMCallback(~, ~)
         end        
     end
     
+    atMetaData = dicomMetaData('get');
+    if isempty(atMetaData)
+        atMetaData = tWriteTemplate(iOffset).atDicomInfo;
+    end    
+    
+    % Set series label
+    
+    sSeriesDescription = getViewerSeriesDescriptionDialog(sprintf('%s', atMetaData{1}.SeriesDescription));
+    if isempty(sSeriesDescription)
+        return;
+    end
+    
+    for sd=1:numel(atMetaData)
+        atMetaData{sd}.SeriesDescription = sSeriesDescription;
+    end
+    
+    % Set series buffer
+    
     aBuffer = dicomBuffer('get');
     if isempty(aBuffer)
         aInput  = inputBuffer('get');      
@@ -107,11 +125,8 @@ function writeDICOMCallback(~, ~)
         end
     end
     
-    atMetaData = dicomMetaData('get');
-    if isempty(atMetaData)
-        atMetaData = tWriteTemplate(iOffset).atDicomInfo;
-    end    
-
+    % Write DICOM
+        
     writeDICOM(aBuffer, atMetaData, sWriteDir, iOffset);
 
 end

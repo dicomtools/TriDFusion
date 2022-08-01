@@ -74,7 +74,7 @@ function TriDFusion(varargin)
    
         switch lower(varargin{k})
             
-            case '-r' % 2D display using 3D engine
+            case '-r' % Output directory
                 if k+1 <= length(varargin)
                     if dOutputDirOffset == 0
                         sOutputPath = varargin{k+1};

@@ -38,7 +38,25 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
-
+    
+    dicomdict('factory');    
+    
+    if ~isempty(tInput(dOffset).asFilesList)
+        sInputFile = tInput(dOffset).asFilesList{1};
+        tMetaData = dicominfo(string(sInputFile));
+    else % CERR
+        tMetaData = tInput(dOffset).atDicomMeta{1};
+    end
+        
+    % Set series label
+    
+    sSeriesDescription = getViewerSeriesDescriptionDialog(sprintf('RT-%s', tMetaData.SeriesDescription));
+    if isempty(sSeriesDescription)
+        return;
+    end
+    
+    % Resample contours (if needed)
+    
     tRoiInput = roiTemplate('get', dOffset);
     tVoiInput = voiTemplate('get', dOffset);
     
@@ -62,16 +80,11 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
         end        
     end
                 
-    if ~isempty(tInput(dOffset).asFilesList)
-        sInputFile = tInput(dOffset).asFilesList{1};
-        tMetaData = dicominfo(string(sInputFile));
-    else % CERR
-        tMetaData = tInput(dOffset).atDicomMeta{1};
-    end
-
-    sRootPath  = viewerRootPath('get');
+    % Set metadata information
+    
+    sRootPath = viewerRootPath('get');
     info = dicominfo(sprintf('%s/imdata/rtstruct.dcm', sRootPath));
-
+        
     info.Filename = [];
     info.FileModDate = datetime;
     info.ManufacturerModelName = 'TriDFusion1.0';
@@ -102,8 +115,8 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 
     info.StudyInstanceUID  = tMetaData.StudyInstanceUID;
     info.SeriesInstanceUID = dicomuid;
-
-    info.SeriesDescription = sprintf('RT-%s', tMetaData.SeriesDescription);
+    
+    info.SeriesDescription = sSeriesDescription;
     info.StudyDescription  = tMetaData.StudyDescription;
 
     if isfield(tMetaData, 'StudyID')
@@ -327,6 +340,6 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;
-
+    
 end
 

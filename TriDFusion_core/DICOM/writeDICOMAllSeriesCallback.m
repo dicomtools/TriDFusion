@@ -90,6 +90,30 @@ function writeDICOMAllSeriesCallback(~, ~)
         
         set(uiSeriesPtr('get'), 'Value', jj);
         
+        % Set series label
+        
+        atMetaData = dicomMetaData('get');
+        if isempty(atMetaData)
+            atMetaData = tWriteTemplate(jj).atDicomInfo;
+        end
+        
+        if jj == 1
+            bDontDisplayDialog = false;
+        end
+        
+        if bDontDisplayDialog == false
+            [sSeriesDescription, bDontDisplayDialog] = getViewerSeriesDescriptionDialog(sprintf('%s', atMetaData{1}.SeriesDescription), bDontDisplayDialog);
+            if isempty(sSeriesDescription)
+                return;
+            end
+
+            for sd=1:numel(atMetaData)
+                atMetaData{sd}.SeriesDescription = sSeriesDescription;
+            end
+        end
+        
+        % Set series buffer
+   
         aBuffer = dicomBuffer('get');
         if isempty(aBuffer)
             aInput  = inputBuffer('get');      
@@ -114,12 +138,7 @@ function writeDICOMAllSeriesCallback(~, ~)
             if tWriteTemplate(jj).bFlipHeadFeet == true
                 aBuffer=aBuffer(:,:,end:-1:1);
             end                           
-        end        
-        
-        atMetaData = dicomMetaData('get');
-        if isempty(atMetaData)
-            atMetaData = tWriteTemplate(jj).atDicomInfo;
-        end
+        end                
         
         if bCreateSubDir == true
             sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                

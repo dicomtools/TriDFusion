@@ -29,7 +29,7 @@ function setIsoSurfaceCallback(~, ~)
 
     if numel(dicomBuffer('get')) && ...
        size(dicomBuffer('get'), 3) ~= 1
-        try
+%        try
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
 %             releaseRoiAxeWait();
@@ -388,7 +388,8 @@ function setIsoSurfaceCallback(~, ~)
                 set(uiEditAddVoiIsoMaskPtr     ('get'), 'Enable', 'off');
                 set(chkMultiplePeaksIsoMaskPtr ('get'), 'Enable', 'off'); 
                 set(txtMultiplePeaksIsoMaskPtr ('get'), 'Enable', 'on' );                     
-                set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'off');  
+                set(uiValueFormulaIsoMaskPtr   ('get'), 'Enable', 'off');  
+                set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'off');                                  
                 set(uiEditSmalestIsoMaskPtr    ('get'), 'Enable', 'off');                 
                 set(txtResampleToCTIsoMaskPtr  ('get'), 'Enable', 'On' );
                 set(chkResampleToCTIsoMaskPtr  ('get'), 'Enable', 'off');
@@ -466,6 +467,8 @@ function setIsoSurfaceCallback(~, ~)
                     end  
                     
                     if percentOfPeakIsoMask('get') == true
+                        
+                        set(uiEditAddVoiIsoMaskPtr('get')    , 'Enable', 'on');                        
                         set(uiEditAddVoiIsoMaskPtr('get')    , 'String', num2str(voiIsoMaskMax('get')));      
                         set(txtPercentOfPeakIsoMaskPtr('get'), 'String', 'Percent of Peak'); 
                         
@@ -478,13 +481,26 @@ function setIsoSurfaceCallback(~, ~)
                             set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'off');             
                         end
                         
+                        set(uiValueFormulaIsoMaskPtr('get'), 'Enable', 'off');  
+                       
                     else
                         set(uiEditAddVoiIsoMaskPtr('get')    , 'String', num2str(peakSUVMaxIsoMask('get')));      
                         set(txtPercentOfPeakIsoMaskPtr('get'), 'String', 'Min SUV Value');     
                         
-                        set(chkMultiplePeaksIsoMaskPtr('get'), 'Enable', 'off'); 
-                        set(txtMultiplePeaksIsoMaskPtr('get'), 'Enable', 'on'); 
-                        set(uiEditPeakPercentIsoMaskPtr        ('get'), 'Enable', 'off');                                     
+                        set(chkMultiplePeaksIsoMaskPtr ('get'), 'Enable', 'off'); 
+                        set(txtMultiplePeaksIsoMaskPtr ('get'), 'Enable', 'on'); 
+                        set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'off');                                     
+                        
+                        set(uiValueFormulaIsoMaskPtr('get'), 'Enable', 'on'); 
+                        
+                        asFormula = get(uiValueFormulaIsoMaskPtr('get'), 'String');
+                        dFormula  = get(uiValueFormulaIsoMaskPtr('get'), 'Value');
+
+                        if ~strcmpi(asFormula{dFormula}, 'Fixed')
+                            set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'off');
+                        else
+                            set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'on');
+                        end                         
                     end                 
 
                     set(uiEditSmalestIsoMaskPtr('get'), 'Enable', 'on');
@@ -585,6 +601,8 @@ function setIsoSurfaceCallback(~, ~)
                             end 
 
                             if percentOfPeakIsoMask('get') == true
+                                
+                                set(uiEditAddVoiIsoMaskPtr('get')    , 'Enable', 'on');
                                 set(uiEditAddVoiIsoMaskPtr('get')    , 'String', num2str(voiIsoMaskMax('get')));      
                                 set(txtPercentOfPeakIsoMaskPtr('get'), 'String', 'Percent of Peak'); 
 
@@ -596,14 +614,26 @@ function setIsoSurfaceCallback(~, ~)
                                 else
                                     set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'off');             
                                 end
-
+                                
+                                set(uiValueFormulaIsoMaskPtr('get'), 'Enable', 'off');  
                             else
                                 set(uiEditAddVoiIsoMaskPtr('get')    , 'String', num2str(peakSUVMaxIsoMask('get')));      
                                 set(txtPercentOfPeakIsoMaskPtr('get'), 'String', 'Min SUV Value');     
 
-                                set(chkMultiplePeaksIsoMaskPtr('get'), 'Enable', 'off'); 
-                                set(txtMultiplePeaksIsoMaskPtr('get'), 'Enable', 'on'); 
-                                set(uiEditPeakPercentIsoMaskPtr        ('get'), 'Enable', 'off');                                     
+                                set(chkMultiplePeaksIsoMaskPtr ('get'), 'Enable', 'off'); 
+                                set(txtMultiplePeaksIsoMaskPtr ('get'), 'Enable', 'on'); 
+                                set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'off');                                     
+                                
+                                set(uiValueFormulaIsoMaskPtr('get'), 'Enable', 'on'); 
+                                
+                                asFormula = get(uiValueFormulaIsoMaskPtr('get'), 'String');
+                                dFormula  = get(uiValueFormulaIsoMaskPtr('get'), 'Value');
+
+                                if ~strcmpi(asFormula{dFormula}, 'Fixed')
+                                    set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'off');
+                                else
+                                    set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'on');
+                                end                                  
                             end                 
 
                             set(uiEditSmalestIsoMaskPtr('get'), 'Enable', 'on');
@@ -636,7 +666,7 @@ function setIsoSurfaceCallback(~, ~)
                             end                            
                         else
                             set(txtResampleToCTIsoMaskPtr('get'), 'Enable', 'on');
-                            et(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
+                            set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
                         end
                 
                     end
@@ -685,6 +715,8 @@ function setIsoSurfaceCallback(~, ~)
                         end  
 
                         if percentOfPeakIsoMask('get') == true
+                            
+                            set(uiEditAddVoiIsoMaskPtr('get')    , 'Enable', 'on');                            
                             set(uiEditAddVoiIsoMaskPtr('get')    , 'String', num2str(voiIsoMaskMax('get')));      
                             set(txtPercentOfPeakIsoMaskPtr('get'), 'String', 'Percent of Peak'); 
 
@@ -696,6 +728,8 @@ function setIsoSurfaceCallback(~, ~)
                             else
                                 set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'off');             
                             end
+                            
+                            set(uiValueFormulaIsoMaskPtr('get'), 'Enable', 'off');  
 
                         else
                             set(uiEditAddVoiIsoMaskPtr('get')    , 'String', num2str(peakSUVMaxIsoMask('get')));      
@@ -704,6 +738,17 @@ function setIsoSurfaceCallback(~, ~)
                             set(chkMultiplePeaksIsoMaskPtr('get'), 'Enable', 'off'); 
                             set(txtMultiplePeaksIsoMaskPtr('get'), 'Enable', 'on'); 
                             set(uiEditPeakPercentIsoMaskPtr        ('get'), 'Enable', 'off');                                     
+                            
+                            set(uiValueFormulaIsoMaskPtr('get'), 'Enable', 'on'); 
+                            
+                            asFormula = get(uiValueFormulaIsoMaskPtr('get'), 'String');
+                            dFormula  = get(uiValueFormulaIsoMaskPtr('get'), 'Value');
+
+                            if ~strcmpi(asFormula{dFormula}, 'Fixed')
+                                set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'off');
+                            else
+                                set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'on');
+                            end                            
                         end                 
 
                         set(uiEditSmalestIsoMaskPtr('get'), 'Enable', 'on');
@@ -828,9 +873,9 @@ end
                 end
             end
         end
-        catch
-            progressBar(1, 'Error:setIsoSurfaceCallback()');
-        end
+%        catch
+%            progressBar(1, 'Error:setIsoSurfaceCallback()');
+%        end
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;
     end

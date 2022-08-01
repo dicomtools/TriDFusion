@@ -117,7 +117,7 @@ function resize = dicomViewer()
     mipFusionBufferOffset('set', 1);
 
     isoColorOffset        ('set', 4  ); % red
-    isoSurfaceValue       ('set', 0.1);
+    isoSurfaceValue       ('set', 0.1); 
     isoColorFusionOffset  ('set', 4  ); % red
     isoSurfaceFusionValue ('set', 1  );
     addVoiIsoMask         ('set', true);
@@ -127,6 +127,7 @@ function resize = dicomViewer()
     peakPercentIsoMask    ('set', 65); % In percent
     voiIsoMaskMax         ('set', 42); % In percent
     smalestIsoMask        ('set', 0.3); % In ml
+    valueFormulaIsoMask   ('set', 1); %Fixed suv value
     pixelEdgeIsoMask      ('set', false);
     resampleToCTIsoMask   ('set', true);
     resampledContoursIsoMask('set', true);

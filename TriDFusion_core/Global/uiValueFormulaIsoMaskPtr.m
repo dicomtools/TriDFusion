@@ -1,6 +1,6 @@
-function dMaskValue = smalestIsoMask(sAction, dValue)
-%function dMaskValue = smalestIsoMask(sAction, dValue)
-%Get\Set nb pixels smalest ISO surface mask value.
+function aObject = uiValueFormulaIsoMaskPtr(sAction, aValue)
+%function aObject = uiValueFormulaIsoMaskPtr(sAction, aValue)
+%Get\Set MIN SUV Value Formula ISO Surface Mask Pointer.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.
@@ -30,11 +30,11 @@ function dMaskValue = smalestIsoMask(sAction, dValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-     persistent pdMaskValue; 
+    persistent paObject; 
 
     if strcmpi('set', sAction)
-        pdMaskValue = dValue;            
-    end      
+       paObject = aValue;            
+    end     
     
-    dMaskValue = pdMaskValue;
+    aObject = paObject;
 end

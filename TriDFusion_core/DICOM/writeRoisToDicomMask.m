@@ -37,8 +37,19 @@ function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDico
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
 
-    dicomdict('factory');
+    dicomdict('factory');    
+        
+    % Set series label
     
+    sSeriesDescription = getViewerSeriesDescriptionDialog(sprintf('MASK-%s', atDicomMeta{1}.SeriesDescription));
+    if isempty(sSeriesDescription)
+        return;
+    end
+    
+    for sd=1:numel(atDicomMeta)
+        atDicomMeta{sd}.SeriesDescription = sSeriesDescription;
+    end
+        
     tRoiInput = roiTemplate('get', dOffset);
     tVoiInput = voiTemplate('get', dOffset);
     

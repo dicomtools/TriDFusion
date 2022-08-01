@@ -34,6 +34,7 @@ function aColor = viewerBackgroundColor(sAction, aValue)
 
     if strcmpi('set', sAction)
        paColor = aValue;            
-    end      
+    end  
+    
     aColor = paColor;
 end
