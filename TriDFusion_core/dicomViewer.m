@@ -58,7 +58,7 @@ function resize = dicomViewer()
     kernelSegTreshValue('set', 'lower', 0);
     kernelSegTreshValue('set', 'upper', 1);    
     kernelInterpolation('set', 'Linear');    
-    kernelCutoff('set', 2.4930e+09);
+    kernelCutoff('set', 99.9305); % mm
     kernelMicrosphereInSpecimen('set', false);
     
     resizePixelSizeDoseInformationDialog('set', true);

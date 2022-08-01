@@ -346,18 +346,37 @@ function initKernelPanel()
          uicontrol(uiKernelPanelPtr('get'),...
                   'Enable'  , 'On', ...
                   'style'   , 'text',...
-                  'string'  , 'Kernel cutoff',...
+                  'string'  , 'Cutoff distance (mm)',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [15 202 125 20]...
+                  'position', [15 202 200 20]...
                   );
               
+    uiPlotDistance = ...
+        uicontrol(uiKernelPanelPtr('get'),...
+                  'Enable'  , sEnable, ...
+                  'String', 'Plot',...
+                  'Position',[160 205 33 20],...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'Callback', @plotKernelDistanceCallback...
+                  ); 
+              
+          
+    dTissue   = get(uiKernelTissue , 'Value' );
+    asTissue  = get(uiKernelTissue , 'String');
+
+    dIsotope  = get(uiKernelIsotope, 'Value' );
+    asIsotope = get(uiKernelIsotope, 'String');
+        
+    dCutoffValue = getKernelDefaultCutoffValue(asTissue{dTissue}, asIsotope{dIsotope});
+    
     uiEditKernelCutoff = ...
         uicontrol(uiKernelPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
                   'Position', [195 205 65 20], ...
-                  'String'  , num2str(kernelCutoff('get')), ...
+                  'String'  , num2str(dCutoffValue), ...
                   'Enable'  , sEnable, ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
@@ -886,6 +905,7 @@ function initKernelPanel()
            set(uiKernelIsotope, 'String', tDoseKernel.Isotope{get(uiKernelModel, 'Value')}{get(uiKernelTissue, 'Value')});
         end
     end
+
     function uiKernelTissueCallback(~, ~)
         if ~isempty(tDoseKernel)
             set(uiKernelIsotope, 'Value', 1);
@@ -894,7 +914,36 @@ function initKernelPanel()
     end
 
     function uiKernelIsotopeCallback(~, ~)
+        
+        dTissue   = get(uiKernelTissue , 'Value' );
+        asTissue  = get(uiKernelTissue , 'String');
+
+        dIsotope  = get(uiKernelIsotope, 'Value' );
+        asIsotope = get(uiKernelIsotope, 'String');        
+        
+        dCutOffValue = getKernelDefaultCutoffValue(asTissue{dTissue}, asIsotope{dIsotope});
+        
+        set(uiEditKernelCutoff, 'String', num2str(dCutOffValue));
+        
     end
+
+    function dCutOffValue = getKernelDefaultCutoffValue(sTissueDependent, sIsotope)
+        
+        switch lower(sIsotope)
+
+            case 'y90'
+                dCutOffValue = 99.9305;
+                
+            case 'y9010e7'     
+                dCutOffValue = 10;
+                
+            otherwise
+                dCutOffValue = kernelCutoff('get');
+        end        
+        
+        kernelCutoff('set', dCutOffValue);
+    end
+
 
     function uiKernelInterpolationCallback(~, ~)
        
@@ -904,17 +953,143 @@ function initKernelPanel()
         kernelInterpolation('set', asKernelInterpolation{dInterpolationValue});           
     end
 
+    function plotKernelDistanceCallback(~, ~)
+       
+        % Get custom distance
+        
+        dDistance = str2double(get(uiEditKernelCutoff, 'String'));
+
+        % Get kernel details
+        
+        dModel    = get(uiKernelModel   , 'Value');
+
+        dTissue   = get(uiKernelTissue , 'Value' );
+        asTissue  = get(uiKernelTissue , 'String');
+
+        dIsotope  = get(uiKernelIsotope, 'Value' );
+        asIsotope = get(uiKernelIsotope, 'String');
+
+        tKernel = tDoseKernel.Kernel{dModel}.(asTissue{dTissue}).(asIsotope{dIsotope});
+
+        asField = fieldnames(tKernel);
+
+        if numel(asField) == 2
+            aDistance = tKernel.(asField{1});
+            aDoseR2   = tKernel.(asField{2});                   
+        else
+            return;
+        end         
+        
+        % Build plot figure
+        
+        dScreenSize  = get(groot, 'Screensize');
+
+        ySize = dScreenSize(4);
+
+        PLOT_FIGURE_Y = ySize*0.75;
+        PLOT_FIGURE_X = PLOT_FIGURE_Y;
+
+        sPlotKernelFigureName = sprintf('Distance Plot: Tissue Dependent %s, Isotope %s', asTissue{dTissue}, asIsotope{dIsotope});
+        
+        figPlotKernelDistance = ...
+            figure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-PLOT_FIGURE_X/2) ...
+                   (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-PLOT_FIGURE_Y/2) ...
+                   PLOT_FIGURE_X ...
+                   PLOT_FIGURE_Y],...
+                   'Name', sPlotKernelFigureName,...
+                   'NumberTitle','off',...
+                   'MenuBar', 'none',...
+                   'Resize', 'on', ...
+                   'Color', viewerBackgroundColor('get'), ...
+                   'Toolbar','none'...
+                   );        
+               
+        aFigurePosition = get(figPlotKernelDistance, 'Position');
+              
+        axePlotKernelDistance = ...
+            axes(figPlotKernelDistance, ...
+                 'Units'   , 'pixels', ...
+                 'Position', [60 60 aFigurePosition(3)-90 aFigurePosition(4)-90], ...
+                 'Color'   , viewerAxesColor('get'),...
+                 'XColor'  , viewerForegroundColor('get'),...
+                 'YColor'  , viewerForegroundColor('get'),...
+                 'ZColor'  , viewerForegroundColor('get'),...
+                 'Visible' , 'on'...
+                 );    
+                         
+        pDistancePlot = plot(axePlotKernelDistance, aDistance, log10(aDoseR2./aDistance.^2));
+        set(pDistancePlot, 'Color', 'cyan');
+%        set(axePlotKernelDistance,'XDir','Reverse');
+%        set(axePlotKernelDistance,'YDir','Reverse');
+ 
+        axePlotKernelDistance.XLabel.String = 'Distance (mm)';
+        axePlotKernelDistance.YLabel.String = 'Log10 of kernel';     
+        
+        axePlotKernelDistance.XColor = viewerForegroundColor('get');
+        axePlotKernelDistance.YColor = viewerForegroundColor('get');
+        axePlotKernelDistance.ZColor = viewerForegroundColor('get');        
+        
+        axePlotKernelDistance.Title.Color = viewerForegroundColor('get');
+        axePlotKernelDistance.Color = viewerAxesColor('get');
+        
+        cDataCursor = datacursormode(figPlotKernelDistance);
+        cDataCursor.UpdateFcn = @displayCursorCoordinates;
+        set(cDataCursor, 'Enable', 'on');  
+        
+        dTip = createDatatip(cDataCursor, pDistancePlot);
+
+        [~, dIndex] = min(abs(pDistancePlot.XData-dDistance));
+        
+%        dIndex = find(pDistancePlot.XData == dDistance);
+        
+        xPosition = pDistancePlot.XData(dIndex);
+        yPosition = pDistancePlot.YData(dIndex);
+        
+        dTip.Position = [xPosition yPosition];
+        
+        function txt = displayCursorCoordinates(~,info)
+            x = info.Position(1);
+            y = info.Position(2);
+            txt = ['(' num2str(x) ', ' num2str(y) ')'];
+            
+            set(uiEditKernelCutoff, 'String', num2str(x));
+            
+            kernelCutoff('set', x);
+        end
+
+    end
+
     function editKernelCutoffCallback(~, ~)
                 
-        dKernelCutoff = str2double(get(uiEditKernelCutoff, 'string'));
+        dDistance = str2double(get(uiEditKernelCutoff, 'string'));
         
-        if dKernelCutoff <= 0
-            dKernelCutoff = 1;
-            set(uiEditKernelCutoff, 'String', '1');
-        end
+        % Get kernel details
+        
+        dModel    = get(uiKernelModel   , 'Value');
+
+        dTissue   = get(uiKernelTissue , 'Value' );
+        asTissue  = get(uiKernelTissue , 'String');
+
+        dIsotope  = get(uiKernelIsotope, 'Value' );
+        asIsotope = get(uiKernelIsotope, 'String');
+
+        tKernel = tDoseKernel.Kernel{dModel}.(asTissue{dTissue}).(asIsotope{dIsotope});
+
+        asField = fieldnames(tKernel);
+
+        if numel(asField) == 2
+            aDistance = tKernel.(asField{1});
+%            aDoseR2   = tKernel.(asField{2});                   
+        else
+            return;
+        end  
+        
+        [~, dIndex] = min(abs(aDistance-dDistance));
+        dKernelCutoff = aDistance(dIndex);
                
         kernelCutoff('set', dKernelCutoff);
         
+        set(uiEditKernelCutoff, 'string', num2str(dKernelCutoff));   
     end
 
     function chkMicrosphereInSpecimenCallback(hObject, ~)
@@ -993,6 +1168,7 @@ function initKernelPanel()
             set(uiKernelInterpolation, 'Enable', 'off');
             set(uiDoseKernelPanel    , 'Enable', 'off');
             set(uiEditKernelCutoff   , 'Enable', 'off');
+            set(uiPlotDistance       , 'Enable', 'off');            
             
             vBoundAxes1Ptr = visBoundAxes1Ptr('get');
             vBoundAxes2Ptr = visBoundAxes2Ptr('get');
@@ -1032,6 +1208,22 @@ function initKernelPanel()
             if numel(asField) == 2
                 aDistance = tKernel.(asField{1});
                 aDoseR2   = tKernel.(asField{2});
+            else
+                % Activate uipanel 
+
+                set(uiKernelTissue       , 'Enable', 'on');
+                set(uiKernelIsotope      , 'Enable', 'on');
+                set(uiKernelModel        , 'Enable', 'on');
+                set(uiKernelInterpolation, 'Enable', 'on');
+                set(uiDoseKernelPanel    , 'Enable', 'on');
+                set(uiEditKernelCutoff   , 'Enable', 'on');
+                set(uiPlotDistance       , 'Enable', 'on');            
+
+                progressBar(0, 'Error:setDoseKernel() invalid kernel!');
+
+                set(fiMainWindowPtr('get'), 'Pointer', 'default');
+                drawnow;                  
+                return;
             end
 
             aActivity = double(dicomBuffer('get'));
@@ -1074,6 +1266,7 @@ function initKernelPanel()
                     set(uiKernelInterpolation, 'Enable', 'on');
                     set(uiDoseKernelPanel    , 'Enable', 'on');
                     set(uiEditKernelCutoff   , 'Enable', 'on');
+                    set(uiPlotDistance       , 'Enable', 'on');            
             
                     progressBar(0, 'Ready');
                     
@@ -1145,6 +1338,7 @@ function initKernelPanel()
                     set(uiKernelInterpolation, 'Enable', 'on');
                     set(uiDoseKernelPanel    , 'Enable', 'on');
                     set(uiEditKernelCutoff   , 'Enable', 'on');
+                    set(uiPlotDistance       , 'Enable', 'on');            
                     
                     set(fiMainWindowPtr('get'), 'Pointer', 'default');
                     drawnow;
@@ -1238,19 +1432,23 @@ function initKernelPanel()
             switch lower(asIsotope{dIsotope})
                 
                 case 'y90'
-
-% ASK: Kernel normalization               
+                    
                     betaYield = 1; %Beta yield Y-90
-%                    nbOfParticuleSimulated = 3.1867E5; % To double check
-                    nbOfParticuleSimulated = 4E7; % To double check (number of particule simulated)
 
-% Need validation                case 'i124'
-% Need validation                   betaYield = 0.92; %Beta yield I124
-% Need validation                   nbOfParticuleSimulated = 2E7;
+                    switch lower(asTissue{dTissue})
+                        
+                        case 'water'
+                            nbOfParticuleSimulated = 4E7;
+                            
+                         case 'liver'
+                            nbOfParticuleSimulated = 4E8;                           
+                            
+                        otherwise
+                            nbOfParticuleSimulated = 4E7;
+                    end
 
                 case 'y9010e7'
                     betaYield = 1; %Beta yield Y-90
-%                    nbOfParticuleSimulated = 3.1867E5; % To double check
                     nbOfParticuleSimulated = 10E7; 
                     
                 otherwise
@@ -1263,6 +1461,7 @@ function initKernelPanel()
                     set(uiKernelInterpolation, 'Enable', 'on');
                     set(uiDoseKernelPanel    , 'Enable', 'on');
                     set(uiEditKernelCutoff   , 'Enable', 'on');
+                    set(uiPlotDistance       , 'Enable', 'on');            
                     
                     set(fiMainWindowPtr('get'), 'Pointer', 'default');
                     drawnow;
@@ -1307,14 +1506,16 @@ USE_LBM_METHOD = true;
  %           aActivity = NbScaled;
 
             % Set Meshgrid
-            dKernelCutoff = str2double(get(uiEditKernelCutoff, 'String'));
+            dDistance = str2double(get(uiEditKernelCutoff, 'String'));
+
+%            dKernelCutoff = str2double(get(uiEditKernelCutoff, 'String'));
 % ASK: Kernel cut-off level
-            dMax = max(aDose, [], 'all')/dKernelCutoff; % Dose kernel truncated to the cutoff of the max dose
-            aVector = find(aDose<=dMax);
+%            dMax = max(aDose, [], 'all')/dKernelCutoff; % Dose kernel truncated to the cutoff of the max dose
+%            aVector = find(aDose<=dMax);
 
-            dFirst = aVector(1);
+%            dFirst = aVector(1);
 
-            dDistance = aDistance(dFirst);
+%            dDistance = aDistance(dFirst);
             
 %            dDistance = aDistance(end); % mm
 %            dDistance = 100; % mm
@@ -1484,6 +1685,7 @@ USE_LBM_METHOD = true;
             set(uiKernelInterpolation, 'Enable', 'on');
             set(uiDoseKernelPanel    , 'Enable', 'on');            
             set(uiEditKernelCutoff   , 'Enable', 'on');
+            set(uiPlotDistance       , 'Enable', 'on');            
            
             dMin = min(aActivity, [], 'all');
             dMax = max(aActivity, [], 'all');
