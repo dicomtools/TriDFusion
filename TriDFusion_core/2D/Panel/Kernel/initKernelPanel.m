@@ -6,6 +6,7 @@ function initKernelPanel()
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %        Brad Beattie, beattieb@mskcc.org
 %        C. Ross Schmidtlein, schmidtr@mskcc.org
+%        Assen Kirov, kirova@mskcc.org
 %
 %Last specifications modified:
 %
