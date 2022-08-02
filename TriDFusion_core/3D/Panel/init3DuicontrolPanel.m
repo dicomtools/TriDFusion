@@ -2251,7 +2251,7 @@ end
                         
                         progressBar(0.3, sprintf('Resampling series, please wait'));
 
-                        [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear',  true);   
+                        [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', true, true);   
 
                         progressBar(0.6, sprintf('Resampling ROIs, please wait'));
 
@@ -2269,7 +2269,7 @@ end
                         refMip = mipBuffer('get', [], dCTSeriesNumber);
 
                         aMip = mipBuffer('get', [], dSeriesOffset);
-                        aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear');
+                        aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear', true);
 
                         mipBuffer('set', aResampledMip, dSeriesOffset);
 
@@ -2531,7 +2531,7 @@ end
                             
                             progressBar(0.3, sprintf('Resampling series, please wait'));
                         
-                            [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear',  true);   
+                            [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', true, true);   
 
                             progressBar(0.6, sprintf('Resampling ROIs, please wait'));
 
@@ -2549,7 +2549,7 @@ end
                             refMip = mipBuffer('get', [], dCTSeriesNumber);
 
                             aMip = mipBuffer('get', [], dSeriesOffset);
-                            aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear');
+                            aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear', true);
 
                             mipBuffer('set', aResampledMip, dSeriesOffset);
 

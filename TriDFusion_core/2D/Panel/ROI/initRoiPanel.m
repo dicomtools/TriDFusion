@@ -1597,8 +1597,6 @@ function initRoiPanel()
         aLogicalMask = roiConstraintToMask(aBuffer, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);        
                 
         dImageMin = min(double(aBuffer),[], 'all');
-
-        aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
         
         if bUseCtMap == true
             dTresholdMin = roiPanelCTMinValue('get');
@@ -1614,6 +1612,8 @@ function initRoiPanel()
         dMaxTreshold = (dSliderMax * dBufferDiff)+dTresholdMin; 
         
         if size(aBuffer, 3) == 1
+            
+            aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
 
             vBoundAxePtr = visBoundAxePtr('get');
             if ~isempty(vBoundAxePtr)
@@ -1714,12 +1714,24 @@ function initRoiPanel()
 
                 set(uiSeriesPtr('get'), 'Value', dSerieOffset);
 
-                [aBuffer, ~] = resampleImage(aCtBuffer, atCtMetaData, aBuffer, atRefMetaData, 'Linear', false);
+                [aBuffer, ~] = resampleImage(aCtBuffer, atCtMetaData, aBuffer, atRefMetaData, 'Nearest', 2, false);
                 
-                aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
-                
+                dImageMin = min(double(aBuffer),[], 'all');               
             end
             
+            aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint                            
+           
+            if bRelativeToMax == true                
+                aBuffer(aBuffer<=dMaxTreshold) = dImageMin;
+                aBuffer(aBuffer<=dMaxTreshold) = dImageMin;
+            else
+                aBuffer(aBuffer<=dMinTreshold) = dImageMin;
+                aBuffer(aBuffer>=dMaxTreshold) = dImageMin;
+            end            
+            
+            aBuffer(aBuffer==dImageMin)=0;
+            aBuffer(aBuffer~=0)=1;
+        
             iCoronal  = sliceNumber('get', 'coronal' );
             iSagittal = sliceNumber('get', 'sagittal');
             iAxial    = sliceNumber('get', 'axial'   );
@@ -1742,23 +1754,8 @@ function initRoiPanel()
 
             if ~isempty(vBoundAxes3Ptr)
                 delete(vBoundAxes3Ptr);
-            end
-
-            if bRelativeToMax == true
-                aCoronal(aCoronal<=dMaxTreshold)   = dImageMin;
-                aSagittal(aSagittal<=dMaxTreshold) = dImageMin;
-                aAxial(aAxial<=dMaxTreshold)       = dImageMin;
-            else
-                aCoronal(aCoronal<=dMinTreshold) = dImageMin;
-                aCoronal(aCoronal>=dMaxTreshold) = dImageMin;
-
-                aSagittal(aSagittal<=dMinTreshold) = dImageMin;
-                aSagittal(aSagittal>=dMaxTreshold) = dImageMin;
-
-                aAxial(aAxial<=dMinTreshold) = dImageMin;
-                aAxial(aAxial>=dMaxTreshold) = dImageMin;
-            end
-
+            end            
+            
             if bHoles == true
                 [originalMaskCoronal ,~,~,~] = bwboundaries(bwimage(aCoronal , dImageMin), 'holes', 8);
                 [originalMaskSagittal,~,~,~] = bwboundaries(bwimage(aSagittal, dImageMin), 'holes', 8);
@@ -2159,7 +2156,7 @@ function initRoiPanel()
 
                 set(uiSeriesPtr('get'), 'Value', dSerieOffset);
 
-                [aBuffer, ~] = resampleImage(aCtBuffer, atCtMetaData, aBuffer, atRefMetaData, 'Linear', false);
+                [aBuffer, ~] = resampleImage(aCtBuffer, atCtMetaData, aBuffer, atRefMetaData, 'Nearest', 2, false);
                 
                 aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint to CT
 

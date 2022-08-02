@@ -44,7 +44,7 @@ function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = regi
     
     if bRefOutputView == false && bDemons == false  
         [imReference, atReferenceMetaData] = ...
-            resampleImage(imReference, atReferenceMetaData, imToRegister, atImToRegisterMetaData, 'Nearest', false);
+            resampleImage(imReference, atReferenceMetaData, imToRegister, atImToRegisterMetaData, 'Nearest', true, false);
     end
     
     fixedSliceThickness = computeSliceSpacing(atReferenceMetaData);
@@ -151,7 +151,7 @@ function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = regi
 
                 imToRegisterMasked = imToRegister;                        
                 [aLogicalMask, ~] = ...
-                    resampleImage(double(aLogicalMask), atReferenceMetaData, imToRegister, atImToRegisterMetaData, 'Nearest', false);                
+                    resampleImage(double(aLogicalMask), atReferenceMetaData, imToRegister, atImToRegisterMetaData, 'Nearest', true, false);                
                 aLogicalMask = logical(imbinarize(aLogicalMask));
                 imToRegisterMasked(aLogicalMask==0) = min(imToRegister, [], 'all'); 
 

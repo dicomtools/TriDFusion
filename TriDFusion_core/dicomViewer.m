@@ -207,7 +207,7 @@ function resize = dicomViewer()
     registrationReport('set', '');
 
     updateDescription('set', true);
-    resampleRegistration('set', true);
+    referenceOutputView('set', true);
     associateRegistrationModality('set', true);
 
     roiPanelCtSerieOffset('set', 1);

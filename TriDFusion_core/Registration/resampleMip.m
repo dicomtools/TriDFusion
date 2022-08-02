@@ -1,5 +1,5 @@
-function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode)
-%function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode)
+function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, dRefOutputView)
+%function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, dRefOutputView)
 %Resample any modalities.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -52,11 +52,21 @@ function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaD
     Rdcm  = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
 %    Rref  = imref3d(size(refImage), atRefMetaData{1}.PixelSpacing(2), atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
 
-%    [resampImage, ~] = imwarp(dcmImage, TF, 'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef));      
-    [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
+    if dRefOutputView == 2
+        [resampImage, ~] = imwarp(dcmImage, TF, 'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef));      
+    else
+        [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
+    end
     
-    if dimsRef(3)==dimsDcm(3)
-        aResampledImageSize = size(resampImage);
-        resampImage=imresize3(resampImage, [aResampledImageSize(1) aResampledImageSize(2) dimsRef(3)]);
+    dimsRsp = size(resampImage);
+
+    if dRefOutputView == true
+        if dimsRsp(1)~=dimsRef(1) || ...
+           dimsRsp(2)~=dimsRef(2) || ...     
+           dimsRsp(3)~=dimsRef(3)
+
+            resampImage=imresize3(resampImage, [dimsRef(1) dimsRef(2) dimsRef(3)],'Method', 'nearest');
+%            dimsRsp = size(resampImage);
+        end
     end
 end

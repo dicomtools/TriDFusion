@@ -658,9 +658,9 @@ function initKernelPanel()
 
             set(uiSeriesPtr('get'), 'Value', dSerieOffset);
 
-           [aResamCt, ~] = resampleImage(aCtBuffer, atCtMetaData, aRefBuffer, atRefMetaData, 'Linear', false);
+            [aResamCt, ~] = resampleImage(aCtBuffer, atCtMetaData, aRefBuffer, atRefMetaData, 'Nearest', 2, false);
            
-             % Get constraint 
+            % Get constraint 
 
             [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value'));
 
@@ -674,7 +674,6 @@ function initKernelPanel()
 
             aResamCt(aLogicalMask==0) = dImageMin; % Apply constraint
        
-
             dCtMIn = min(double(aResamCt),[], 'all');
 
             dUpperValue = str2double( get(uiEditKernelUpperTreshold, 'String') );
@@ -1487,7 +1486,7 @@ USE_LBM_METHOD = true;
                         dNormFactor = 49.7;
                 end
 
-                aActivity=dNormFactor*aActivity/10^6;
+                aActivity = dNormFactor*aActivity/10^6;
             
             else  % Kernel convolution method
                
@@ -1547,6 +1546,7 @@ USE_LBM_METHOD = true;
             
             progressBar(0.85, sprintf('Processing %s interpolatiion, please wait.', asKernelInterpolation{dInterpolationValue} ));
             % Kernel in 3D in mm: 
+   %         vqKernel = interp1(aDistance, aDose, distanceMatrix, asKernelInterpolation{dInterpolationValue}, 'extrap'); %interpolation method: 'linear', 'nearest', 'next', 'previous', 'pchip', 'cubic', 'v5cubic', 'makima', or 'spline'.
             vqKernel = interp1(aDistance, aDose, distanceMatrix, asKernelInterpolation{dInterpolationValue}, 'extrap'); %interpolation method: 'linear', 'nearest', 'next', 'previous', 'pchip', 'cubic', 'v5cubic', 'makima', or 'spline'.
  %           vqKernel = interp1(aDistance, aDose, distanceMatrix, asKernelInterpolation{dInterpolationValue}); %interpolation method: 'linear', 'nearest', 'next', 'previous', 'pchip', 'cubic', 'v5cubic', 'makima', or 'spline'.
        %     vqKernel = vqKernel/sum(vqKernel, 'all')*49.67;
@@ -1637,7 +1637,7 @@ USE_LBM_METHOD = true;
                 aCtBuffer(aCtBuffer==dCtMIn)=0;
                 aCtBuffer(aCtBuffer~=0)=1;
 
-                [aResamCt, ~] = resampleImage(aCtBuffer, atCtMetaData, aRefBuffer, atRefMetaData, 'Linear', false);
+                [aResamCt, ~] = resampleImage(aCtBuffer, atCtMetaData, aRefBuffer, atRefMetaData, 'Nearest', 2, false);
 
                 dResampMIn = min(double(aResamCt),[], 'all');
 
