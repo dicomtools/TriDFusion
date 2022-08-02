@@ -55,15 +55,50 @@ function resetSeries(dOffset, bInitDisplay)
 
     aInput = inputBuffer('get');
 
-    if ~strcmp(imageOrientation('get'), 'axial')
+    bReOrientedImage = false;
+    if ~strcmpi(imageOrientation('get'), 'axial')
+        
+        bReOrientedImage = true;
+
+        % clear all contour
+        
+        atRoi = roiTemplate('get', dOffset);
+
+        roiConstraintList('reset', dOffset); % Delete all masks
+
+        if isfield(tInitInput(dOffset), 'tRoi')
+            for rr=1:numel(atRoi)
+                if ~isempty(atRoi{rr}.MaxDistances)
+                    delete(atRoi{rr}.MaxDistances.MaxXY.Line);
+                    delete(atRoi{rr}.MaxDistances.MaxCY.Line);
+                    delete(atRoi{rr}.MaxDistances.MaxXY.Text);
+                    delete(atRoi{rr}.MaxDistances.MaxCY.Text);
+                end
+                delete(atRoi{rr}.Object);
+            end
+
+            tInitInput(dOffset).tRoi = [];
+        end
+
+        if isfield(tInitInput(dOffset), 'tVoi')
+            tInitInput(dOffset).tVoi = [];
+        end
+
+        voiRoiTag('set', '');
+
+        roiTemplate('reset', dOffset);
+        voiTemplate('reset', dOffset);        
+        
+        % Set axial 
+     
         imageOrientation('set', 'axial');
     end
 
-    if     strcmp(imageOrientation('get'), 'axial')
+    if     strcmpi(imageOrientation('get'), 'axial')
         aBuffer = permute(aInput{dOffset}, [1 2 3]);
-    elseif strcmp(imageOrientation('get'), 'coronal')
+    elseif strcmpi(imageOrientation('get'), 'coronal')
         aBuffer = permute(aInput{dOffset}, [3 2 1]);
-    elseif strcmp(imageOrientation('get'), 'sagittal')
+    elseif strcmpi(imageOrientation('get'), 'sagittal')
         aBuffer = permute(aInput{dOffset}, [3 1 2]);
     end
     
@@ -160,7 +195,8 @@ function resetSeries(dOffset, bInitDisplay)
 
     if bInitDisplay == true
         
-        if bImageIsResampled == true 
+        if bImageIsResampled == true || ...
+           bReOrientedImage  == true      
 
             initWindowLevel('set', true);
 

@@ -1435,18 +1435,8 @@ function initKernelPanel()
                 case 'y90'
                     
                     betaYield = 1; %Beta yield Y-90
-
-                    switch lower(asTissue{dTissue})
-                        
-                        case 'water'
-                            nbOfParticuleSimulated = 4E7;
-                            
-                         case 'liver'
-                            nbOfParticuleSimulated = 4E8;                           
-                            
-                        otherwise
-                            nbOfParticuleSimulated = 4E7;
-                    end
+                    nbOfParticuleSimulated = 4E7;
+                    
 
                 case 'y9010e7'
                     betaYield = 1; %Beta yield Y-90
@@ -1483,18 +1473,24 @@ function initKernelPanel()
 % ASK: equations 
 USE_LBM_METHOD = true;
 
-            if USE_LBM_METHOD == true
-                % LDM method:
-    %            mean(aActivity(62:66,62:66,23:26), 'All')% activity in center at scan time
-    %            A0 = aActivity*2^(TscanMinusTinjection/halfLife); % 2) Activity at injection of microspheres: A0=A*2[(Tscan-Tinjection)/T1/2]
-    %            xPixelInCm*yPixelInCm*zPixelInCm    % voxel volume in mL ~0.09mL
-%                LDM_Dose = 49.7*aActivity/10^6;
-                aActivity=49.7*aActivity/10^6;
-                %check dose in center of sphere
-    %            mean(LDM_Dose(62:66,62:66,23:26), 'All')
+            if USE_LBM_METHOD == true % LDM method
+                
+                switch lower(asTissue{dTissue})
+                        
+                    case 'water'
+                        dNormFactor = 49.7;
+                            
+                    case 'liver'
+                        dNormFactor = 47.8;
+                            
+                    otherwise
+                        dNormFactor = 49.7;
+                end
+
+                aActivity=dNormFactor*aActivity/10^6;
             
-            else
-                % Kernel convolution method
+            else  % Kernel convolution method
+               
                 aActivity = aActivity*xPixelInCm*yPixelInCm*zPixelInCm;  % 1) From PET image – Activity A in Bq for each voxel at time of scan: Ascan= Bq/mL * Vvox(mL)
                 A0 = aActivity*2^(TscanMinusTinjection/halfLife); % 2) Activity at injection of microspheres: A0=A*2[(Tscan-Tinjection)/T1/2]
                 Acum  = A0 *halfLife *1/log(2);                   % 3) Calculate the total number of disintegrations in the voxel Acum = A0(Bq) *1.442695* T1/2(s)
@@ -1507,7 +1503,7 @@ USE_LBM_METHOD = true;
  %           aActivity = NbScaled;
 
             % Set Meshgrid
-            dDistance = str2double(get(uiEditKernelCutoff, 'String'));
+            dKernelDistance = str2double(get(uiEditKernelCutoff, 'String'));
 
 %            dKernelCutoff = str2double(get(uiEditKernelCutoff, 'String'));
 % ASK: Kernel cut-off level
@@ -1523,15 +1519,15 @@ USE_LBM_METHOD = true;
 
  %ASK: size of kernel in voxels
 
-            fromToX = ceil(dDistance/xPixelInMm);
+            fromToX = ceil(dKernelDistance/xPixelInMm);
             fromX = -abs(fromToX);
             toX   =  abs(fromToX);
 
-            fromToY = ceil(dDistance/yPixelInMm);
+            fromToY = ceil(dKernelDistance/yPixelInMm);
             fromY = -abs(fromToY);
             toY   =  abs(fromToY);
 
-            fromToZ = ceil(dDistance/zPixelInMm);
+            fromToZ = ceil(dKernelDistance/zPixelInMm);
             fromZ = -abs(fromToZ);
             toZ   =  abs(fromToZ);
             
