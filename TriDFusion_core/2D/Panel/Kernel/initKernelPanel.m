@@ -1315,8 +1315,9 @@ function initKernelPanel()
                 
                 progressBar(0.6, 'Processing microsphere, please wait.');
                   
+                aActivity(aActivity~=0)=0;
                 aActivity = computeMicrospereActivity(aActivity, atCoreMetaData, sRadiopharmaceutical, dMicrosphereVolume);
-                
+                                
                 progressBar(0.7, 'Resampling image, please wait.');
 
                 if bResizePixelSize == true
@@ -1556,6 +1557,9 @@ USE_LBM_METHOD = true;
             if USE_LBM_METHOD == true
  
                 dKernelSum = sum(vqKernel, 'all');
+                if dKernelSum == 0
+                    dKernelSum = 1;
+                end
                 vqKernel =  vqKernel/dKernelSum;
             end
              

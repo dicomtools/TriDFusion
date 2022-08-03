@@ -76,7 +76,7 @@ function aImage = computeMicrospereActivity(aImage, atMetaData, sTreatmentType, 
             
     atInputMetaData = atInputTemplate(dSeriesOffset).atDicomInfo;
     
-    bDoseKernel      = atInputTemplate(dSeriesOffset).bDoseKernel;
+%    bDoseKernel      = atInputTemplate(dSeriesOffset).bDoseKernel;
     bMovementApplied = atInputTemplate(dSeriesOffset).tMovement.bMovementApplied;
     
     tRoiQuant = quantificationTemplate('get');
@@ -108,7 +108,7 @@ function aImage = computeMicrospereActivity(aImage, atMetaData, sTreatmentType, 
             progressBar(vv/dNbVois-0.0001, sprintf('Processing microsphere %d/%d', vv, dNbVois ) );
         end
         
-        [tVoiComputed, ~, aVoiMask] = computeVoi(aInputBuffer, atInputMetaData, aImage, atMetaData, atVoi{vv}, atRoi, dSUVScale, bSUVUnit, bSegmented, bDoseKernel, bMovementApplied);
+        [tVoiComputed, ~, aVoiMask] = computeVoi(aInputBuffer, atInputMetaData, aImage, atMetaData, atVoi{vv}, atRoi, dSUVScale, bSUVUnit, bSegmented, true, bMovementApplied);
                
         dNbSphere = round(tVoiComputed.volume / dMicrosphereVolume);
                   

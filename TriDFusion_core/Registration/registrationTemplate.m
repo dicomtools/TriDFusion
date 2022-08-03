@@ -33,7 +33,7 @@ function tRegistration = registrationTemplate(sAction, tValue)
     persistent ptRegistration; 
 
     if strcmpi('init', sAction)
-        ptRegistration.Interpolation = 'Bilinear';
+        ptRegistration.Interpolation = 'Linear';
 
         ptRegistration.Transformation = 'Rigid';   
         

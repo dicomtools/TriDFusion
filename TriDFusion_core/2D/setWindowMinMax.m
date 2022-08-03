@@ -1,5 +1,5 @@
-function setWindowMinMax(lMax, lMin, bRefreshImages)
-%function setWindowMinMax(lMax, lMin, bRefreshImages)
+function setWindowMinMax(dMax, dMin, bRefreshImages)
+%function setWindowMinMax(dMax, dMin, bRefreshImages)
 %Set 2D Window Min Max Value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,13 +27,14 @@ function setWindowMinMax(lMax, lMin, bRefreshImages)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    lMin = double(lMin);
-    lMax = double(lMax);
+    if dMax == 0 && dMin ==0
+        dMax = 1;
+    end
+        
+    windowLevel('set', 'max', dMax);
+    windowLevel('set', 'min' ,dMin);
 
-    windowLevel('set', 'max', lMax);
-    windowLevel('set', 'min' ,lMin);
-
-    getInitWindowMinMax('set', lMax, lMin);
+    getInitWindowMinMax('set', dMax, dMin);
 
     set(uiSliderWindowPtr('get'), 'value', 0.5);
     set(uiSliderLevelPtr('get') , 'value', 0.5);
@@ -43,14 +44,14 @@ function setWindowMinMax(lMax, lMin, bRefreshImages)
        switchToMIPMode('get')    == false
 
         if size(dicomBuffer('get'), 3) == 1            
-            set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+            set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);
         else
-            set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-            set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-            set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+            set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);
+            set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);
+            set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);
             
             if link2DMip('get') == true && isVsplash('get') == false
-                set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);            
+                set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);            
             end
         end
         

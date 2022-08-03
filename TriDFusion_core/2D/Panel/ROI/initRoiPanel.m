@@ -1596,25 +1596,25 @@ function initRoiPanel()
 
         aLogicalMask = roiConstraintToMask(aBuffer, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);        
                 
-        dImageMin = min(double(aBuffer),[], 'all');
-        
-        if bUseCtMap == true
-            dTresholdMin = roiPanelCTMinValue('get');
-            dTresholdMax = roiPanelCTMaxValue('get');
-        else
-            dTresholdMin = min(double(aBuffer),[], 'all');
-            dTresholdMax = max(double(aBuffer),[], 'all');
-        end
-
-        dBufferDiff = dTresholdMax - dTresholdMin;
-
-        dMinTreshold = (dSliderMin * dBufferDiff)+dTresholdMin;
-        dMaxTreshold = (dSliderMax * dBufferDiff)+dTresholdMin; 
+        dImageMin = min(double(aBuffer),[], 'all');        
         
         if size(aBuffer, 3) == 1
             
             aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
+            
+            if bUseCtMap == true
+                dTresholdMin = roiPanelCTMinValue('get');
+                dTresholdMax = roiPanelCTMaxValue('get');
+            else
+                dTresholdMin = min(double(aBuffer),[], 'all');
+                dTresholdMax = max(double(aBuffer),[], 'all');
+            end
 
+            dBufferDiff = dTresholdMax - dTresholdMin;
+
+            dMinTreshold = (dSliderMin * dBufferDiff)+dTresholdMin;
+            dMaxTreshold = (dSliderMax * dBufferDiff)+dTresholdMin; 
+        
             vBoundAxePtr = visBoundAxePtr('get');
             if ~isempty(vBoundAxePtr)
                 delete(vBoundAxePtr);
@@ -1720,17 +1720,19 @@ function initRoiPanel()
             end
             
             aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint                            
-           
-            if bRelativeToMax == true                
-                aBuffer(aBuffer<=dMaxTreshold) = dImageMin;
-                aBuffer(aBuffer<=dMaxTreshold) = dImageMin;
-            else
-                aBuffer(aBuffer<=dMinTreshold) = dImageMin;
-                aBuffer(aBuffer>=dMaxTreshold) = dImageMin;
-            end            
             
-            aBuffer(aBuffer==dImageMin)=0;
-            aBuffer(aBuffer~=0)=1;
+            if bUseCtMap == true
+                dTresholdMin = roiPanelCTMinValue('get');
+                dTresholdMax = roiPanelCTMaxValue('get');
+            else
+                dTresholdMin = min(double(aBuffer),[], 'all');
+                dTresholdMax = max(double(aBuffer),[], 'all');
+            end
+
+            dBufferDiff = dTresholdMax - dTresholdMin;
+
+            dMinTreshold = (dSliderMin * dBufferDiff)+dTresholdMin;
+            dMaxTreshold = (dSliderMax * dBufferDiff)+dTresholdMin; 
         
             iCoronal  = sliceNumber('get', 'coronal' );
             iSagittal = sliceNumber('get', 'sagittal');
@@ -1739,7 +1741,22 @@ function initRoiPanel()
             aCoronal  = permute(aBuffer(iCoronal,:,:), [3 2 1]);
             aSagittal = permute(aBuffer(:,iSagittal,:), [3 1 2]);
             aAxial    = aBuffer(:,:,iAxial);
+            
+            if bRelativeToMax == true
+                aCoronal (aCoronal  <= dMaxTreshold) = dImageMin;
+                aSagittal(aSagittal <= dMaxTreshold) = dImageMin;
+                aAxial   (aAxial    <= dMaxTreshold) = dImageMin;
+            else
+                aCoronal (aCoronal <= dMinTreshold)  = dImageMin;
+                aCoronal (aCoronal >= dMaxTreshold)  = dImageMin;
                 
+                aSagittal(aSagittal <= dMinTreshold) = dImageMin;
+                aSagittal(aSagittal >= dMaxTreshold) = dImageMin;
+                
+                aAxial   (aAxial <= dMinTreshold)    = dImageMin;
+                aAxial   (aAxial >= dMaxTreshold)    = dImageMin;                
+            end 
+            
             vBoundAxes1Ptr = visBoundAxes1Ptr('get');
             vBoundAxes2Ptr = visBoundAxes2Ptr('get');
             vBoundAxes3Ptr = visBoundAxes3Ptr('get');
@@ -1826,6 +1843,7 @@ function initRoiPanel()
                 end
             end
         end
+        
         catch
             progressBar(1, 'Error:previewRoiSegmentation()');
         end
@@ -2011,13 +2029,13 @@ function initRoiPanel()
 
                         bAddRoi = true;
                         pRoi = drawfreehand(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'Smoothing', 1, 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', roiFaceAlphaValue('get'));
-                        if dSmalestRoiSize > 0
-                            roiMask = pRoi.createMask();
-                            if numel(roiMask(roiMask==1)) < dSmalestRoiSize
-                                delete(pRoi);
-                                bAddRoi = false;
-                            end
-                        end
+%                        if dSmalestRoiSize > 0
+%                            roiMask = pRoi.createMask();
+%                            if numel(roiMask(roiMask==1)) < dSmalestRoiSize
+%                                delete(pRoi);
+%                                bAddRoi = false;
+%                            end
+%                        end
 
                         if bAddRoi == true
 
