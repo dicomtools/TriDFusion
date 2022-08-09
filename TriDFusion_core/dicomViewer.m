@@ -61,7 +61,7 @@ function resize = dicomViewer()
     kernelCutoff('set', 99.9305); % mm
     kernelMicrosphereInSpecimen('set', false);
     
-    resizePixelSizeDoseInformationDialog('set', true);
+    resizePixelSizeDoseInformationDialog('set', false);
     
     resizeVoxelDoseInformationDialog('set', 'x', 0.1); % mm
     resizeVoxelDoseInformationDialog('set', 'y', 0.1); % mm
@@ -72,6 +72,7 @@ function resize = dicomViewer()
     treatmentTypeDoseInformationDialog('set', 1); % TheraSphere    
     
     microspereVolumeDoseInformationDialog('set', 5E-8); % In cm3
+    specimenVolumeDoseInformationDialog('set', 0); % In ml
     
     imageSegTreshValue('set', 'lower', 0);
     imageSegTreshValue('set', 'upper', 1);

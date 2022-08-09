@@ -1,4 +1,4 @@
-function loadRawFile( sPathName, sFileName, dimX, dimY)
+function loadRawFile( sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ, sUnit, sMachine)
 %function loadRawFile(rawFileName))
 %Load .raw file to TriDFusion.
 %See TriDFuison.doc (or pdf) for more information about options.
@@ -31,9 +31,9 @@ function loadRawFile( sPathName, sFileName, dimX, dimY)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     tInput = inputTemplate('get');    
-    atDcmMetaData = dicomMetaData('get');   
+%    atDcmMetaData = dicomMetaData('get');   
 
-    iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+%    iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 %    if iSeriesOffset > numel(inputTemplate('get'))  
 %        return;
 %    end 
@@ -50,14 +50,37 @@ function loadRawFile( sPathName, sFileName, dimX, dimY)
     drawnow;
         
     progressBar(0.5, 'Scaning .raw file');
+
+    switch lower(sMachine)
+        case 'big-endian'
+            sMachineFmt = 'ieee-be'; 
+            
+        case 'little-endian'
+            sMachineFmt = 'ieee-le'; 
+            
+        case 'big-endian 64'
+            sMachineFmt = 'ieee-be.l64'; 
+            
+        case 'little-endian 64'
+            sMachineFmt = 'ieee-le.l64'; 
+            
+        otherwise
+            sMachineFmt = 'ieee-be'; 
+    end
     
-    fid = fopen(rawFileName, 'r', 'ieee-be');
+    fid = fopen(rawFileName, 'r', sMachineFmt);
+     
     if fid == -1
       error('Cannot open file: %s', rawFileName);
     end
     
-    aBuffer = fread(fid,[dimX dimY], 'uint16');
+%    aBuffer = fread(fid,[dimX dimY], 'uint16');
+
+    aBuffer = fread(fid,  dimX*dimY*dimZ, sUnit);
     fclose(fid);
+    aBuffer = reshape(aBuffer, [dimX dimY dimZ]);
+
+%    fclose(fid);
     
     if ~isempty(tInput)
         
@@ -71,12 +94,12 @@ function loadRawFile( sPathName, sFileName, dimX, dimY)
         
         tInput(numel(tInput)).atDicomInfo{1}.Modality = 'ot';
         tInput(numel(tInput)).atDicomInfo{1}.SeriesDescription = asSeriesDescription{1}; 
-        tInput(numel(tInput)).atDicomInfo{1}.Units = '';
+        tInput(numel(tInput)).atDicomInfo{1}.Units = sUnit;
         tInput(numel(tInput)).atDicomInfo{1}.ReconstructionDiameter = [];
         
-        tInput(numel(tInput)).atDicomInfo{1}.PixelSpacing(1) = 1;
-        tInput(numel(tInput)).atDicomInfo{1}.PixelSpacing(2) = 1;        
-        tInput(numel(tInput)).atDicomInfo{1}.SpacingBetweenSlices = 1;
+        tInput(numel(tInput)).atDicomInfo{1}.PixelSpacing(1) = voxelX;
+        tInput(numel(tInput)).atDicomInfo{1}.PixelSpacing(2) = voxelY;        
+        tInput(numel(tInput)).atDicomInfo{1}.SpacingBetweenSlices = voxelZ;
         
 %        for jj=1:numel(tInput(numel(tInput)).atDicomInfo)
 %            tInput(numel(tInput)).atDicomInfo{jj}.SeriesDescription = asSeriesDescription{numel(asSeriesDescription)};
@@ -111,12 +134,12 @@ function loadRawFile( sPathName, sFileName, dimX, dimY)
 
         tInput(1).atDicomInfo{1}.Modality = 'ot';
         tInput(1).atDicomInfo{1}.SeriesDescription = asSeriesDescription{1}; 
-        tInput(1).atDicomInfo{1}.Units = '';
+        tInput(1).atDicomInfo{1}.Units = sUnit;
         tInput(1).atDicomInfo{1}.ReconstructionDiameter = [];
         
-        tInput(1).atDicomInfo{1}.PixelSpacing(1) = 1;
-        tInput(1).atDicomInfo{1}.PixelSpacing(2) = 1;        
-        tInput(1).atDicomInfo{1}.SpacingBetweenSlices = 1;
+        tInput(1).atDicomInfo{1}.PixelSpacing(1) = voxelX;
+        tInput(1).atDicomInfo{1}.PixelSpacing(2) = voxelY;        
+        tInput(1).atDicomInfo{1}.SpacingBetweenSlices = voxelZ;
         
         tInput(1).bEdgeDetection = false;
         tInput(1).bFlipLeftRight = false;
@@ -178,6 +201,6 @@ function loadRawFile( sPathName, sFileName, dimX, dimY)
     drawnow;
     
 
-    progressBar(1, 'Ready');
+%    progressBar(1, 'Ready');
 
 end

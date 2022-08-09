@@ -305,7 +305,7 @@ function [tVoiComputed, atRoiComputed, voiMask] = computeVoi(imInput, atInputMet
                     % Initialization SUVpeak
                     ROIonlyPET = padarray(voiCDataMasked,[1 1 1],NaN);
 
-                    % SUVmax
+                    % SUVmax 
                     [~,indMax] = max(ROIonlyPET(:));         
                     % SUVpeak (using 26 neighbors around SUVmax)
                     [indMaxX,indMaxY,indMaxZ] = ind2sub(size(ROIonlyPET),indMax);

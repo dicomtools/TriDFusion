@@ -32,6 +32,14 @@ function aLogicalMask = roiTemplateToMask(tRoi, aSlice)
 
     switch sType
         
+        case lower('images.roi.line')
+                       
+            xValues = int32(aPosition(:,1));
+            yValues = int32(aPosition(:,2));
+            
+            rectMask(xValues, yValues)= 1;
+            aLogicalMask = logical(rectMask);
+            
         case lower('images.roi.rectangle')
 
             rectMask = zeros(size(aSlice, 1), size(aSlice, 2)); % generate grid of ones

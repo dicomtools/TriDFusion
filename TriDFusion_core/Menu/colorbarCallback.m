@@ -89,7 +89,7 @@ function colorbarCallback(hObject, ~)
         end                
         
         sModality = tInput(dFuseOffset).atDicomInfo{1}.Modality;       
-        if ~strcmpi(sModality, 'CT')
+%        if ~strcmpi(sModality, 'CT')
 
             mPlot = uimenu(d,'Label','Plot Contours');
       %      set(mPlot, 'tag', get(hObject, 'Tag'));
@@ -161,7 +161,7 @@ function colorbarCallback(hObject, ~)
                 set(mLineWidth, 'Enable', 'off');           
                 set(mTextList , 'Enable', 'off');            
             end
-        end    
+     %   end    
     end
 
     if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')

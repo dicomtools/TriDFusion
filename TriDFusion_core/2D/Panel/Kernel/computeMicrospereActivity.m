@@ -104,16 +104,18 @@ function aImage = computeMicrospereActivity(aImage, atMetaData, sTreatmentType, 
     dNbVois = numel(atVoi);
     for vv=1:dNbVois
         
-        if mod(vv, 5)==1 || vv == dNbVois
-            progressBar(vv/dNbVois-0.0001, sprintf('Processing microsphere %d/%d', vv, dNbVois ) );
-        end
-        
-        [tVoiComputed, ~, aVoiMask] = computeVoi(aInputBuffer, atInputMetaData, aImage, atMetaData, atVoi{vv}, atRoi, dSUVScale, bSUVUnit, bSegmented, true, bMovementApplied);
-               
-        dNbSphere = round(tVoiComputed.volume / dMicrosphereVolume);
-                  
-        aImage(aVoiMask) = dNbSphere * dSphereMultiplicator / tVoiComputed.cells;  
-                 
+        if ~strcmpi(atVoi{vv}.Label, 'TOTAL-MASK')
+
+            if mod(vv, 5)==1 || vv == dNbVois
+                progressBar(vv/dNbVois-0.0001, sprintf('Processing microsphere %d/%d', vv, dNbVois ) );
+            end
+
+            [tVoiComputed, ~, aVoiMask] = computeVoi(aInputBuffer, atInputMetaData, aImage, atMetaData, atVoi{vv}, atRoi, dSUVScale, bSUVUnit, bSegmented, true, bMovementApplied);
+
+            dNbSphere = round(tVoiComputed.volume / dMicrosphereVolume);
+
+            aImage(aVoiMask) = dNbSphere * dSphereMultiplicator / tVoiComputed.cells;  
+        end         
     end
     
     progressBar(1, 'Ready');

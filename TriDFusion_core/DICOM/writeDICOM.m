@@ -107,7 +107,8 @@ function writeDICOM(aBuffer, tMetaData, sWriteDir, iSeriesOffset)
 
             tWriteMetaData{ww} = ...
                 dicominfo(char(tWriteTemplate(iSeriesOffset).asFilesList{ww}));
-            progressBar(ww / numel(tWriteTemplate(iSeriesOffset).asFilesList), sprintf('Processing header %d/%d, please wait', ww, numel(tWriteTemplate(iSeriesOffset).asFilesList)));
+            progressBar(ww / numel(tWriteTemplate(iSeriesOffset).asFilesList), ...
+                sprintf('Processing header %d/%d, please wait', ww, numel(tWriteTemplate(iSeriesOffset).asFilesList)));
         end         
     else
         for ww=1: numel(tWriteTemplate(iSeriesOffset).atDicomInfo)
@@ -171,7 +172,19 @@ function writeDICOM(aBuffer, tMetaData, sWriteDir, iSeriesOffset)
         if updateDicomWriteSeriesInstanceUID('get') == true
             tWriteMetaData{ww}.SeriesInstanceUID = dSeriesInstanceUID;
         end
-
+        
+        if isfield(tWriteMetaData{ww}, 'Modality')
+            tWriteMetaData{ww}.Modality = tMetaData{ww}.Modality;               
+        end
+        
+        if isfield(tWriteMetaData{ww}, 'SOPClassUID')
+            tWriteMetaData{ww}.SOPClassUID = tMetaData{ww}.SOPClassUID;               
+        end  
+        
+        if isfield(tWriteMetaData{ww}, 'MediaStorageSOPClassUID')
+            tWriteMetaData{ww}.SOPClassUID = tMetaData{ww}.MediaStorageSOPClassUID;               
+        end          
+               
         if isfield(tWriteMetaData{ww}, 'SliceLocation')
             tWriteMetaData{ww}.SliceLocation = tMetaData{ww}.SliceLocation;               
         end
@@ -281,7 +294,8 @@ function writeDICOM(aBuffer, tMetaData, sWriteDir, iSeriesOffset)
                     tWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeMeaning =  'Counts';                    
                 end
             end
-                
+            
+            
             if numel(tWriteMetaData) == 1    
                 
                 dicomwrite(int16(array4d) , ...

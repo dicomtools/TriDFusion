@@ -68,6 +68,10 @@ function dicomViewerCore()
         lMin = windowLevel('get', 'min');
         lMax = windowLevel('get', 'max');
     end
+    
+    if lMin == lMax
+        lMax = lMin+1;
+    end
 
     tInput = inputTemplate('get');
 

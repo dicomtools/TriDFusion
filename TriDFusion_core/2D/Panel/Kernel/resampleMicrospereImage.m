@@ -79,12 +79,13 @@ function [aResampledImage, atResampledMetaData] = resampleMicrospereImage(aImage
     
     Rdcm = imref3d(dimsDcm, atMetaData{1}.PixelSpacing(2), atMetaData{1}.PixelSpacing(1), dcmSliceThickness);
     
-    [aResampledImage, ~] = imwarp(aImage, Rdcm, TF,'Interp', 'Nearest', 'FillValues', double(min(aImage,[],'all')));  
+    [aResampledImage, ~] = imwarp(aImage, Rdcm, TF,'Interp', 'Linear', 'FillValues', double(min(aImage,[],'all')));  
 %    [aImage, ~] = imwarp(aImage, TF, 'Interp', 'Linear', 'FillValues', double(min(aImage,[],'all')), 'OutputView', imref3d(dimsRef));  
 
     % Set dicom header
 
     aResampledImageSize = size(aResampledImage);
+    aResampledImage = imresize3(aImage, aResampledImageSize);
     
     atResampledMetaData = atMetaData;
     

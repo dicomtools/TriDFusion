@@ -992,7 +992,7 @@ function initKernelPanel()
         sPlotKernelFigureName = sprintf('Distance Plot: Tissue Dependent %s, Isotope %s', asTissue{dTissue}, asIsotope{dIsotope});
         
         figPlotKernelDistance = ...
-            figure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-PLOT_FIGURE_X/2) ...
+            dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-PLOT_FIGURE_X/2) ...
                    (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-PLOT_FIGURE_Y/2) ...
                    PLOT_FIGURE_X ...
                    PLOT_FIGURE_Y],...
@@ -1303,7 +1303,12 @@ function initKernelPanel()
 
                         atCoreMetaData{jj}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife = sRadionuclideHalfLife;
 
-                        atCoreMetaData{jj}.RadiopharmaceuticalInformationSequence.Item_1.Radiopharmaceutical = sRadiopharmaceutical;                
+                        atCoreMetaData{jj}.RadiopharmaceuticalInformationSequence.Item_1.Radiopharmaceutical = sRadiopharmaceutical;        
+                        atCoreMetaData{jj}.Modality = 'pt';
+                        
+                        if ~strcmpi(atCoreMetaData{jj}.SOPClassUID, atCoreMetaData{jj}.MediaStorageSOPClassUID)   
+                            atCoreMetaData{jj}.SOPClassUID = atCoreMetaData{jj}.MediaStorageSOPClassUID;  
+                        end
                     end                                        
                 end
   
@@ -1312,10 +1317,12 @@ function initKernelPanel()
                 dResizeY           = tMicrosphereInfo.dResizePixelSpacingY;            
                 dResizeZ           = tMicrosphereInfo.dResizePixelSpacingZ;            
                 dMicrosphereVolume = tMicrosphereInfo.dMicrosphereVolume;   
+                dSpecimenVolume    = tMicrosphereInfo.dSpecimenVolume;   
                 
                 progressBar(0.6, 'Processing microsphere, please wait.');
-                  
+                                  
                 aActivity(aActivity~=0)=0;
+                
                 aActivity = computeMicrospereActivity(aActivity, atCoreMetaData, sRadiopharmaceutical, dMicrosphereVolume);
                                 
                 progressBar(0.7, 'Resampling image, please wait.');
@@ -1328,6 +1335,10 @@ function initKernelPanel()
                     
                 end
 
+                % Calibrate the activity 
+                
+                aActivity = aActivity/dSpecimenVolume;
+                
             else
                 if isempty(atCoreMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime)
                     
@@ -1533,8 +1544,12 @@ USE_LBM_METHOD = true;
             
             progressBar(0.75, 'Creating meshgrid, please wait.');
 
-            [X,Y,Z] = meshgrid(fromX:toX,fromY:toY,fromZ:toZ);
-
+            try 
+                [X,Y,Z] = meshgrid(fromX:toX,fromY:toY,fromZ:toZ);
+            catch
+                % Try a meshgrid 10x smaler 
+                 [X,Y,Z] = meshgrid(fromX/10:toX/10,fromY/10:toY/10,fromZ/10:toZ/10);               
+            end
             
             % Interpolate Meshgrid
 
@@ -1562,6 +1577,8 @@ USE_LBM_METHOD = true;
                 end
                 vqKernel =  vqKernel/dKernelSum;
             end
+            
+            progressBar(0.95, sprintf('Processing convolution, please wait.'));
              
             aActivity = convn(aActivity, vqKernel, 'same');
                        

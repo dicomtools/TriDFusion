@@ -94,13 +94,13 @@ function resetSeries(dOffset, bInitDisplay)
         imageOrientation('set', 'axial');
     end
 
-    if     strcmpi(imageOrientation('get'), 'axial')
+%    if     strcmpi(imageOrientation('get'), 'axial')
         aBuffer = permute(aInput{dOffset}, [1 2 3]);
-    elseif strcmpi(imageOrientation('get'), 'coronal')
-        aBuffer = permute(aInput{dOffset}, [3 2 1]);
-    elseif strcmpi(imageOrientation('get'), 'sagittal')
-        aBuffer = permute(aInput{dOffset}, [3 1 2]);
-    end
+%    elseif strcmpi(imageOrientation('get'), 'coronal')
+%        aBuffer = permute(aInput{dOffset}, [3 2 1]);
+%    elseif strcmpi(imageOrientation('get'), 'sagittal')
+%        aBuffer = permute(aInput{dOffset}, [3 1 2]);
+%    end
     
     % Reset Series Description
     

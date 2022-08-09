@@ -603,8 +603,14 @@ end
                             else
                                 bSegmented = false;
                             end
+                            
+                            if isempty(aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Sub)
+                                dSubstraction = 0;
+                            else
+                                dSubstraction = aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Sub;
+                            end
 
-                            figRoiHistogram(tRoiInput{cc}, bSUVUnit, tInput(dOffset).bDoseKernel, bSegmented, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Sub);
+                            figRoiHistogram(tRoiInput{cc}, bSUVUnit, tInput(dOffset).bDoseKernel, bSegmented, dSubstraction);
                             return;
                        end
                     end
@@ -2234,7 +2240,7 @@ end
 
             for cc=1:numel(tVoiInput)
                 if isvalid(tRoiInput{cc}.Object)
-                    if strcmpi(tVoiInput{cc}.Tag, aVoiRoiTag{hObject.Value}.Tag)
+                    if strcmp(tVoiInput{cc}.Tag, aVoiRoiTag{hObject.Value}.Tag)
 
                         dRoiOffset = round(numel(tVoiInput{cc}.RoisTag)/2);
 
@@ -2258,9 +2264,11 @@ end
 
             for cc=1:numel(tRoiInput)
                 if isvalid(tRoiInput{cc}.Object)
-                    if strcmpi(tRoiInput{cc}.Tag, aVoiRoiTag{hObject.Value}.Tag)
-                         triangulateRoi(tRoiInput{cc}.Tag, true)
-                         break;
+                    if strcmp(tRoiInput{cc}.Tag, aVoiRoiTag{hObject.Value}.Tag)
+                        if ~strcmpi(tRoiInput{cc}.Type, 'images.roi.line')
+                            triangulateRoi(tRoiInput{cc}.Tag, true)
+                        end
+                        break;
                     end
                 end
             end

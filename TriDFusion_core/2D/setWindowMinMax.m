@@ -27,8 +27,8 @@ function setWindowMinMax(dMax, dMin, bRefreshImages)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    if dMax == 0 && dMin ==0
-        dMax = 1;
+    if dMax == dMin
+        dMax = dMin+1;
     end
         
     windowLevel('set', 'max', dMax);
