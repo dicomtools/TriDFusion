@@ -76,7 +76,26 @@ function loadRawFile( sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vo
     
 %    aBuffer = fread(fid,[dimX dimY], 'uint16');
 
-    aBuffer = fread(fid,  dimX*dimY*dimZ, sUnit);
+    switch(lower(sUnit))
+        case 'uint8'
+            aBuffer = uint8(fread(fid,dimX*dimY*dimZ,'uint8'));
+        case 'int8'
+            aBuffer = int8(fread(fid,dimX*dimY*dimZ,'int8'));
+        case 'uint16'
+            aBuffer = uint16(fread(fid,dimX*dimY*dimZ,'uint16'));
+        case 'int16'
+            aBuffer = int16(fread(fid,dimX*dimY*dimZ,'int16'));
+        case 'uint32'
+            aBuffer = uint32(fread(fid,dimX*dimY*dimZ,'uint32'));
+        case 'int32'
+            aBuffer = int32(fread(fid,dimX*dimY*dimZ,'int32'));
+        case 'single'
+            aBuffer = single(fread(fid,dimX*dimY*dimZ,'single'));
+        case 'double'
+            aBuffer = double(fread(fid,dimX*dimY*dimZ,'double'));
+    end
+
+%    aBuffer = fread(fid,  dimX*dimY*dimZ, sUnit);
     fclose(fid);
     aBuffer = reshape(aBuffer, [dimX dimY dimZ]);
 

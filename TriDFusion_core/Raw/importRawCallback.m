@@ -202,7 +202,7 @@ function importRawCallback(~, ~)
                   'position', [20 87 200 20]...
                   );
               
-        asType={'uint8', 'int8', 'uint16', 'int16', 'uint32', 'int32', 'single', 'double'};
+        asType={'8 bit, unsigned (uchar)', '8 bit, signed (char)', '16 bit, unsigned (uchort)', '16 bit, signed (short)', '32 bit, unsigned (uint)', '32 bit, signed (int)', '32 bit, floating point (float)', '64 bit, floating point (double)'};
                  
         popUnitType = ...
             uicontrol(dlgRawSize,...
@@ -285,8 +285,29 @@ function importRawCallback(~, ~)
         
         asMachinefmt       = get(popMachinefmt, 'String');
         dMachinefmtOffset  = get(popMachinefmt, 'Value');        
+             
+        switch(asType{dTypeOffset})
+            case '8 bit, unsigned (uchar)'
+                sUnitType = 'uint8';
+            case '8 bit, signed (char)'
+                sUnitType = 'int8';
+            case '16 bit, unsigned (uchort)'
+                sUnitType = 'uint16';
+            case '16 bit, signed (short)'
+                sUnitType = 'int16';
+            case '32 bit, unsigned (uint)'
+                sUnitType = 'uint32';
+            case '32 bit, signed (int)'
+                sUnitType = 'int32';
+            case '32 bit, floating point (float)'
+                sUnitType = 'single';
+            case '64 bit, floating point (double)'    
+                sUnitType = 'double';
+            otherwise
+                sUnitType = 'uint16';
+        end                
         
-        loadRawFile( sPathName, sFileName, xImageSize, yImageSize, zImageSize, xVoxelSize, yVoxelSize, zVoxelSize, asType{dTypeOffset}, asMachinefmt{dMachinefmtOffset});
+        loadRawFile( sPathName, sFileName, xImageSize, yImageSize, zImageSize, xVoxelSize, yVoxelSize, zVoxelSize, sUnitType, asMachinefmt{dMachinefmtOffset});
         delete(dlgRawSize);
      end
 end
