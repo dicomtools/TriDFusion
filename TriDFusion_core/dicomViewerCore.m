@@ -1323,10 +1323,6 @@ function dicomViewerCore()
 
         axesText('set', 'axes3', tAxes3Text);
 
-        if overlayActivate('get') == false
-            set(tAxes3fText, 'Visible', 'off');
-        end
-
         axesText('set', 'axesMip', ''); % Set 2D MIP
 
         cla(axesMipPtr ('get', [], get(uiSeriesPtr('get'), 'Value')),'reset');
