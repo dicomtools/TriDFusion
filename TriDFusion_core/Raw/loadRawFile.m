@@ -1,4 +1,4 @@
-function loadRawFile( sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ, sUnit, sMachine)
+function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ, dImageOffset, sUnit, sMachine)
 %function loadRawFile(rawFileName))
 %Load .raw file to TriDFusion.
 %See TriDFuison.doc (or pdf) for more information about options.
@@ -68,13 +68,15 @@ function loadRawFile( sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vo
             sMachineFmt = 'ieee-be'; 
     end
     
-    fid = fopen(rawFileName, 'r', sMachineFmt);
+    fid = fopen(rawFileName, 'rb', sMachineFmt);
      
     if fid == -1
       error('Cannot open file: %s', rawFileName);
     end
     
 %    aBuffer = fread(fid,[dimX dimY], 'uint16');
+
+    fseek(fid, dImageOffset,'bof');
 
     switch(lower(sUnit))
         case 'uint8'
