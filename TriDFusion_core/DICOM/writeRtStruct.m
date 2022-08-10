@@ -34,7 +34,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
         return;
     end
 
-    try
+%    try
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
@@ -50,7 +50,13 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
         
     % Set series label
     
-    sSeriesDescription = getViewerSeriesDescriptionDialog(sprintf('RT-%s', tMetaData.SeriesDescription));
+    if isfield(tMetaData, 'SeriesDescription')
+        sSeriesDescription = tMetaData.SeriesDescription;
+    else
+        sSeriesDescription = '';
+    end
+        
+    sSeriesDescription = getViewerSeriesDescriptionDialog(sprintf('RT-%s', sSeriesDescription));
     if isempty(sSeriesDescription)
         return;
     end
@@ -88,12 +94,30 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
     info.Filename = [];
     info.FileModDate = datetime;
     info.ManufacturerModelName = 'TriDFusion1.0';
-
-    info.StudyDate = tMetaData.StudyDate;
-    info.StudyTime = tMetaData.StudyTime;
-
-    info.PatientName = tMetaData.PatientName;
-    info.PatientID = tMetaData.PatientID;
+    
+    if isfield(tMetaData, 'StudyDate')
+        info.StudyDate = tMetaData.StudyDate;
+    else
+        info.StudyDate = '';
+    end
+    
+    if isfield(tMetaData, 'StudyTime')
+        info.StudyTime = tMetaData.StudyTime;
+    else
+        info.StudyTime = '';
+    end
+    
+    if isfield(tMetaData, 'PatientName')
+        info.PatientName = tMetaData.PatientName;
+    else
+        info.PatientName = '';
+    end
+    
+    if isfield(tMetaData, 'PatientID')
+        info.PatientID = tMetaData.PatientID;
+    else
+        info.PatientID = '';
+    end
 
     if isfield(tMetaData, 'PatientBirthDate')
         info.PatientBirthDate = tMetaData.PatientBirthDate;
@@ -112,13 +136,17 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
     else
         info.ReferringPhysicianName = '';
     end
-
+        
     info.StudyInstanceUID  = tMetaData.StudyInstanceUID;
     info.SeriesInstanceUID = dicomuid;
-    
+        
     info.SeriesDescription = sSeriesDescription;
-    info.StudyDescription  = tMetaData.StudyDescription;
-
+    if isfield(tMetaData, 'StudyDescription')
+        info.StudyDescription = tMetaData.StudyDescription;
+    else
+        info.StudyDescription = '';
+    end
+    
     if isfield(tMetaData, 'StudyID')
         info.StudyID = tMetaData.StudyID;
     else
@@ -138,7 +166,13 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 
     % set ReferencedFrameOfReferenceSequence %
 
-    info.ReferencedFrameOfReferenceSequence.Item_1.FrameOfReferenceUID = tMetaData.FrameOfReferenceUID;
+    if isfield(tMetaData, 'FrameOfReferenceUID')
+        sFrameOfReferenceUID = tMetaData.FrameOfReferenceUID;
+    else
+       sFrameOfReferenceUID = '';
+    end 
+    
+    info.ReferencedFrameOfReferenceSequence.Item_1.FrameOfReferenceUID = sFrameOfReferenceUID;
     info.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.ReferencedSOPClassUID = '1.2.840.10008.3.1.2.3.1';
     info.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.ReferencedSOPInstanceUID = tMetaData.StudyInstanceUID;
     info.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.RTReferencedSeriesSequence.Item_1.SeriesInstanceUID = tMetaData.SeriesInstanceUID;
@@ -156,7 +190,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
     for cc=1:nbContours
         sVOIitemName = sprintf('Item_%d', cc);
         info.StructureSetROISequence.(sVOIitemName).ROINumber = cc;
-        info.StructureSetROISequence.(sVOIitemName).ReferencedFrameOfReferenceUID = tMetaData.FrameOfReferenceUID;
+        info.StructureSetROISequence.(sVOIitemName).ReferencedFrameOfReferenceUID = sFrameOfReferenceUID;
         info.StructureSetROISequence.(sVOIitemName).ROIName = tVoiInput{cc}.Label;
         info.StructureSetROISequence.(sVOIitemName).ROIDescription = '';
         info.StructureSetROISequence.(sVOIitemName).ROIGenerationAlgorithm = 'MANUAL';
@@ -214,17 +248,17 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                                  dZOffset=1;
                                  aXYZ = zeros(dNBoundaries*3, 1);
                                  for xx=1:3:size(aXYZ,1)
-                                    aXYZ(xx)=aX(dXOffset);
+                                    aXYZ(xx) = aX(dXOffset);
                                     dXOffset = dXOffset+1;
                                  end
     
                                  for yy=2:3:size(aXYZ,1)
-                                    aXYZ(yy)=aY(dYOffset);
+                                    aXYZ(yy) = aY(dYOffset);
                                     dYOffset = dYOffset+1;
                                  end
     
                                  for zz=3:3:size(aXYZ,1)
-                                    aXYZ(zz)=aZ(dZOffset);
+                                    aXYZ(zz) = aZ(dZOffset);
                                     dZOffset = dZOffset+1;
                                  end  
 
@@ -264,7 +298,11 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                             
 %                            aZ = out.Location(:,3);
                             aZ = zeros(dNBoundaries, 1);
-                            aZ(:) = atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation;
+                            if atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation == 0
+                                aZ(:) = a3DOffset(:,3);
+                            else
+                                aZ(:) = atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation;
+                            end
 
  %                           aZ = zeros(dNBoundaries, 1);
  %                           aZ(:) = atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation;
@@ -288,7 +326,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                                 dZOffset = dZOffset+1;
                             end
 
-                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPClassUID = tRoiInput{tt}.SOPClassUID;
+                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPClassUID    = tRoiInput{tt}.SOPClassUID;
                              info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPInstanceUID = tRoiInput{tt}.SOPInstanceUID;
                              info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourGeometricType = 'CLOSED_PLANAR';
     
@@ -312,7 +350,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
         info.RTROIObservationsSequence.(sVOIitemName).RTROIInterpretedType = 'ORGAN';
 
         info.RTROIObservationsSequence.(sVOIitemName).ROIInterpreter.FamilyName = '';
-        info.RTROIObservationsSequence.(sVOIitemName).ROIInterpreter.GivenName = '';
+        info.RTROIObservationsSequence.(sVOIitemName).ROIInterpreter.GivenName  = '';
         info.RTROIObservationsSequence.(sVOIitemName).ROIInterpreter.MiddleName = '';
         info.RTROIObservationsSequence.(sVOIitemName).ROIInterpreter.NamePrefix = '';
         info.RTROIObservationsSequence.(sVOIitemName).ROIInterpreter.NameSuffix = '';
@@ -334,9 +372,9 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 
     progressBar( 1, sprintf('Export %s completed %s', sOutFile) );
 
-    catch
-        progressBar(1, sprintf('Error:writeRtStruct(), %s', sOutDir) );
-    end
+%    catch
+%        progressBar(1, sprintf('Error:writeRtStruct(), %s', sOutDir) );
+%    end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;
