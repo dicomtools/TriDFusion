@@ -604,6 +604,10 @@ end
                                 sColormap ...
                                 );
                         
+                tAxes3fText = axesText('get', 'axes3f');            
+                if ~isempty(tAxes3fText)
+                    delete(tAxes3fText)
+                end
                 tAxes3fText  = text(axAxes3fText, 1, 0, sAxe3fText, 'Color', overlayColor('get'), 'HorizontalAlignment', 'right', 'VerticalAlignment', 'top');
                 
                 axesText('set', 'axes3f', tAxes3fText);
