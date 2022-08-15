@@ -47,16 +47,22 @@ function cropOutsideAllSlicesCallback(hObject,~)
     dBufferSize = size(im);   
 
     if dBufferSize(3) == 1
-        
         axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
         if ~isempty(axe)
-            if gca == axe        
+            if gca == axe  
                 
-                im = cropOutside(hObject.UserData, ...
-                                im, ...
-                                [], ...
-                                'Axe' ...
-                                );                          
+                aMask = createMask(hObject.UserData, im(:,:));
+                
+                b = im(:,:);
+                c = aMask;
+                b(c == 0) = cropValue('get')-c(c == 0); % crop inside
+                im = b;  
+            
+%                im = cropOutside(aMask, ...
+%                                 im, ...
+%                                 [], ...
+%                                 'Axe' ...
+%                                 );                            
             end
         end
     else
@@ -65,45 +71,69 @@ function cropOutsideAllSlicesCallback(hObject,~)
            ~isempty(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')))
 
             if gca == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))         
+                
+                aMask = createMask(hObject.UserData, permute(im(1,:,:), [3 2 1]));
 
                 for iCoronal=1:dBufferSize(1)
                     
-                    im = cropOutside(hObject.UserData, ...
-                                    im, ...
-                                    iCoronal, ...
-                                    'Axes1' ...
-                                    );     
+                    b = permute(im(iCoronal,:,:), [3 2 1]);
+                    c = aMask;
+                    b(c == 0) = cropValue('get')-c(c == 0); % crop inside 
 
-                    progressBar(iCoronal / dBufferSize(1), 'Mask outside in progress');
+                    im(iCoronal,:,:) = permute(reshape(b, [1 size(b)]), [1 3 2]);  
+            
+%                    im = cropOutside(aMask, ...
+%                                     im, ...
+%                                     iCoronal, ...
+%                                     'Axes1' ...
+%                                     );                                
+
+%                    progressBar(iCoronal / dBufferSize(1), 'Mask inside in progress');
+
                 end
             end
 
             if gca == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))        
+                
+                aMask = createMask(hObject.UserData, permute(im(:,1,:), [3 1 2]));
 
                 for iSagittal=1:dBufferSize(2)
                     
-                    im = cropOutside(hObject.UserData, ...
-                                    im, ...
-                                    iSagittal, ...
-                                    'Axes2' ...
-                                    );  
+                    b = permute(im(:,iSagittal,:), [3 1 2]);
+                    c = aMask;
+                    b(c == 0) = cropValue('get')-c(c == 0); % crop inside 
+                    im(:,iSagittal,:) =  permute(reshape(b, [1 size(b)]), [3 1 2]);  
+            
+%                    im = cropOutside(aMask, ...
+%                                     im, ...
+%                                     iSagittal, ...
+%                                     'Axes2' ...
+%                                     );  
 
-                    progressBar(iSagittal / dBufferSize(2), 'Mask outside in progress');
+%                   progressBar(iSagittal / dBufferSize(2), 'Mask inside in progress');
                 end
             end
 
             if gca == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))      
+                
+                aMask = createMask(hObject.UserData, im(:,:,1));
 
                 for iAxial=1:dBufferSize(3)
                     
-                    im = cropOutside(hObject.UserData, ...
-                                    im, ...
-                                    iAxial, ...
-                                    'Axes3' ...
-                                    );    
+                    b = im(:,:,iAxial);       
+                    c = aMask;
+                    b(c == 0) = cropValue('get')-c(c == 0); % crop inside             
+                    im(:,:,iAxial) = b; 
+            
+%                    im = cropOutside(aMask, ...
+%                                     im, ...
+%                                     iAxial, ...
+%                                     'Axes3' ...
+%                                     );     
 
-                    progressBar(iAxial / dBufferSize(3), 'Mask outside in progress');
+     %               progressBar(iAxial / dBufferSize(3), 'Mask inside in progress');
                 end
+                               
             end
         end
     end

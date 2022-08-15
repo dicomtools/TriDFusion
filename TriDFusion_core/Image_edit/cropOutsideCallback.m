@@ -47,46 +47,82 @@ function cropOutsideCallback(hObject,~)
     if size(im, 3) == 1
         axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
         if ~isempty(axe)
-           if gca == axe                        
-                im = cropOutside(hObject.UserData, ...
-                                 im, ...
-                                 [], ...
-                                 'Axe' ...
-                                 );                             
+            if gca == axe
+                
+                aMask = createMask(hObject.UserData, im(:,:));
+                
+                b = im(:,:);
+                c = aMask;
+                b(c == 0) = cropValue('get')-c(c == 0); % crop inside
+                im = b;  
+                
+%                im = cropOutside(hObject.UserData, ...
+%                                 im, ...
+%                                 [], ...
+%                                 'Axe' ...
+%                                 ); 
             end
         end
     else
         if ~isempty(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
            ~isempty(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
-           ~isempty(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')))       
+           ~isempty(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')))
 
             if gca == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                                
-                im = cropOutside(hObject.UserData, ...
-                                 im, ...
-                                 sliceNumber('get', 'coronal'), ...
-                                 'Axes1' ...
-                                 );             
-            end
-
-            if gca == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))        
-
-                im = cropOutside(hObject.UserData, ...
-                                 im, ...
-                                 sliceNumber('get', 'sagittal'), ...
-                                 'Axes2' ...
-                                 );             
-            end
-
-            if gca == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))     
                 
-                im = cropOutside(hObject.UserData, ...
-                                 im, ...
-                                 sliceNumber('get', 'axial'), ...
-                                 'Axes3' ...
-                                 );                                           
+                iCoronal = sliceNumber('get', 'coronal');
+                
+                aMask = createMask(hObject.UserData, permute(im(iCoronal,:,:), [3 2 1]));
+                
+                b = permute(im(iCoronal,:,:), [3 2 1]);
+                c = aMask;
+                b(c == 0) = cropValue('get')-c(c == 0); % crop inside 
+
+                im(iCoronal,:,:) = permute(reshape(b, [1 size(b)]), [1 3 2]);  
+                    
+%                im = cropOutside(aMask, ...
+%                                 im, ...
+%                                 iCoronal, ...
+%                                 'Axes1' ...
+%                                 );   
             end
-        end     
+
+            if gca == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                
+                iSagittal = sliceNumber('get', 'sagittal');
+                
+                aMask = createMask(hObject.UserData, permute(im(:,iSagittal,:), [3 1 2]));
+                
+                b = permute(im(:,iSagittal,:), [3 1 2]);
+                c = aMask;
+                b(c == 0) = cropValue('get')-c(c == 0); % crop inside 
+                im(:,iSagittal,:) =  permute(reshape(b, [1 size(b)]), [3 1 2]);  
+                    
+%                im = cropOutside(aMask, ...
+%                                 im, ...
+%                                 iSagittal, ...
+%                                 'Axes2' ...
+%                                 );   
+            end
+
+            if gca == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                
+                 iAxial = sliceNumber('get', 'axial');
+                 
+                 aMask = createMask(hObject.UserData, im(:,:,iAxial));
+                 
+                 b = im(:,:,iAxial);       
+                 c = aMask;
+                 b(c == 0) = cropValue('get')-c(c == 0); % crop inside             
+                 im(:,:,iAxial) = b; 
+                    
+%                 im = cropOutside(aMask, ...
+%                                  im, ...
+%                                  iAxial, ...
+%                                  'Axes3' ...
+%                                  );  
+            end
+        end
     end
     
     dicomBuffer('set', im); 

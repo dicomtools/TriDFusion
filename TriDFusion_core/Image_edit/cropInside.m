@@ -1,5 +1,5 @@
-function imBuffer = cropInside(pObject, imBuffer, dSliceNumber, sAxe)
-%function cropInside(pObject, imBuffer, dSliceNumber, sAxe)
+function imBuffer = cropInside(aMask, imBuffer, dSliceNumber, sAxe)
+%function cropInside(aMask, imBuffer, dSliceNumber, sAxe)
 %Crop inside a buffer.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -30,7 +30,8 @@ function imBuffer = cropInside(pObject, imBuffer, dSliceNumber, sAxe)
     if size(imBuffer, 3) == 1
         if strcmpi(sAxe, 'Axe')
             b = imBuffer(:,:);
-            c = createMask(pObject, b);
+%            c = createMask(pObject, b);
+            c = aMask;
             c = ~c;    
             b(c == 0) = cropValue('get')-c(c == 0); % crop inside
             imBuffer = b;                           
@@ -40,7 +41,8 @@ function imBuffer = cropInside(pObject, imBuffer, dSliceNumber, sAxe)
         if strcmpi(sAxe, 'Axes1')
                 
             b = permute(imBuffer(dSliceNumber,:,:), [3 2 1]);
-            c = createMask(pObject, b);
+%            c = createMask(pObject, b);
+            c = aMask;
             c = ~c;    
             b(c == 0) = cropValue('get')-c(c == 0); % crop inside 
             
@@ -50,7 +52,8 @@ function imBuffer = cropInside(pObject, imBuffer, dSliceNumber, sAxe)
         if strcmpi(sAxe, 'Axes2')
 
             b = permute(imBuffer(:,dSliceNumber,:), [3 1 2]);
-            c = createMask(pObject,b);
+%            c = createMask(pObject,b);
+            c = aMask;
             c = ~c;      
             b(c == 0) = cropValue('get')-c(c == 0); % crop inside 
             imBuffer(:,dSliceNumber,:) =  permute(reshape(b, [1 size(b)]), [3 1 2]);  
@@ -59,7 +62,8 @@ function imBuffer = cropInside(pObject, imBuffer, dSliceNumber, sAxe)
         if strcmpi(sAxe, 'Axes3')
 
             b = imBuffer(:,:,dSliceNumber);       
-            c = createMask(pObject,b);
+%            c = createMask(pObject,b);
+            c = aMask;
             c = ~c;           
             b(c == 0) = cropValue('get')-c(c == 0); % crop inside             
             imBuffer(:,:,dSliceNumber) = b;                

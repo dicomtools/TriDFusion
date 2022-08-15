@@ -94,8 +94,23 @@ function maskContourFromMenuCallback(hObject, ~)
                 if strcmp(tRoiInput{aa}.Tag, sMaskTag) % Tag is a ROI
 
                     if strcmpi(sMaskType, 'Inside This Contour')
-
-                        imBuffer = cropInside(tRoiInput{aa}.Object, ...
+                        
+                       if     strcmpi(tRoiInput{aa}.Axe, 'Axe')
+                            aMask = createMask(tRoiInput{aa}.Object, imBuffer(:,:));
+                            
+                       elseif strcmpi(tRoiInput{aa}.Axe, 'Axes1')
+                            aMask = createMask(tRoiInput{aa}.Object, permute(imBuffer(1,:,:), [3 2 1]));
+                            
+                        elseif strcmpi(tRoiInput{aa}.Axe, 'Axes2')
+                            aMask = createMask(tRoiInput{aa}.Object, permute(imBuffer(:,1,:), [3 1 2]));
+                            
+                        elseif strcmpi(tRoiInput{aa}.Axe, 'Axes3')
+                            aMask = createMask(tRoiInput{aa}.Object, imBuffer(:,:,1));
+                        else
+                            break;
+                        end
+                        
+                        imBuffer = cropInside(aMask, ...
                                               imBuffer, ...
                                               tRoiInput{aa}.SliceNb, ...
                                               tRoiInput{aa}.Axe ...
@@ -103,8 +118,23 @@ function maskContourFromMenuCallback(hObject, ~)
                     end
 
                     if strcmpi(sMaskType, 'Outside This Contour')
-
-                        imBuffer = cropOutside(tRoiInput{aa}.Object, ...
+                        
+                       if     strcmpi(tRoiInput{aa}.Axe, 'Axe')
+                            aMask = createMask(tRoiInput{aa}.Object, imBuffer(:,:));
+                            
+                       elseif strcmpi(tRoiInput{aa}.Axe, 'Axes1')
+                            aMask = createMask(tRoiInput{aa}.Object, permute(imBuffer(1,:,:), [3 2 1]));
+                            
+                        elseif strcmpi(tRoiInput{aa}.Axe, 'Axes2')
+                            aMask = createMask(tRoiInput{aa}.Object, permute(imBuffer(:,1,:), [3 1 2]));
+                            
+                        elseif strcmpi(tRoiInput{aa}.Axe, 'Axes3')
+                            aMask = createMask(tRoiInput{aa}.Object, imBuffer(:,:,1));
+                        else
+                            break;
+                       end
+                        
+                        imBuffer = cropOutside(aMask, ...
                                                imBuffer, ...
                                                tRoiInput{aa}.SliceNb, ...
                                                tRoiInput{aa}.Axe ...
@@ -116,24 +146,28 @@ function maskContourFromMenuCallback(hObject, ~)
                         dBufferSize = size(imBuffer);   
 
                         if     strcmpi(tRoiInput{aa}.Axe, 'Axes1')
-                            dLastSliceNb = dBufferSize(1);
+                            dLastSliceNb = dBufferSize(1);                            
+                            aMask = createMask(tRoiInput{aa}.Object, permute(imBuffer(1,:,:), [3 2 1]));
+                            
                         elseif strcmpi(tRoiInput{aa}.Axe, 'Axes2')
-                            dLastSliceNb = dBufferSize(2);
+                            dLastSliceNb = dBufferSize(2);                            
+                            aMask = createMask(tRoiInput{aa}.Object, permute(imBuffer(:,1,:), [3 1 2]));
+                            
                         elseif strcmpi(tRoiInput{aa}.Axe, 'Axes3')
                             dLastSliceNb = dBufferSize(3);
+                            aMask = createMask(tRoiInput{aa}.Object, imBuffer(:,:,1));
                         else
                             break;
                         end
 
                         for dSliceNb=1:dLastSliceNb
-                            imBuffer = cropInside(tRoiInput{aa}.Object, ...
-                                                   imBuffer, ...
-                                                   dSliceNb, ...
-                                                   tRoiInput{aa}.Axe ...
-                                                   );   
+                            imBuffer = cropInside(aMask, ...
+                                                  imBuffer, ...
+                                                  dSliceNb, ...
+                                                  tRoiInput{aa}.Axe ...
+                                                  );   
 
-                            progressBar(dSliceNb / dLastSliceNb, 'Mask inside in progress');
-
+%                            progressBar(dSliceNb / dLastSliceNb, 'Mask inside in progress');
                         end                                
                     end
 
@@ -143,22 +177,27 @@ function maskContourFromMenuCallback(hObject, ~)
 
                         if     strcmpi(tRoiInput{aa}.Axe, 'Axes1')
                             dLastSliceNb = dBufferSize(1);
+                            aMask = createMask(tRoiInput{aa}.Object, permute(imBuffer(1,:,:), [3 2 1]));
+                            
                         elseif strcmpi(tRoiInput{aa}.Axe, 'Axes2')
                             dLastSliceNb = dBufferSize(2);
+                            aMask = createMask(tRoiInput{aa}.Object, permute(imBuffer(:,1,:), [3 1 2]));
+                            
                         elseif strcmpi(tRoiInput{aa}.Axe, 'Axes3')
                             dLastSliceNb = dBufferSize(3);
+                            aMask = createMask(tRoiInput{aa}.Object, imBuffer(:,:,1));
                         else
                             break;
                         end
 
                         for dSliceNb=1:dLastSliceNb
-                            imBuffer = cropOutside(tRoiInput{aa}.Object, ...
+                            imBuffer = cropOutside(aMask, ...
                                                    imBuffer, ...
                                                    dSliceNb, ...
                                                    tRoiInput{aa}.Axe ...
                                                    ); 
 
-                            progressBar(dSliceNb / dLastSliceNb, 'Mask outside in progress');
+%                            progressBar(dSliceNb / dLastSliceNb, 'Mask outside in progress');
 
                         end
                     end                            
