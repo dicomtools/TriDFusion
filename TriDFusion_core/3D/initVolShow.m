@@ -195,6 +195,7 @@ end
          end  
 
         switch sRenderer
+            
             case 'VolumeRendering'
          %       intensity = [0 20 40 120 220 1024];
          %       alpha = [0 0 0.15 0.3 0.38 0.5];

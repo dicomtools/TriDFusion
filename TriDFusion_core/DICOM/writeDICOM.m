@@ -155,15 +155,15 @@ function writeDICOM(aBuffer, tMetaData, sWriteDir, iSeriesOffset)
     
     dWriteEndLoop = numel(tWriteMetaData);
     for ww=1:dWriteEndLoop
-        tWriteMetaData{ww}.InstanceNumber = tMetaData{ww}.InstanceNumber;                              
+        tWriteMetaData{ww}.InstanceNumber  = tMetaData{ww}.InstanceNumber;                              
         tWriteMetaData{ww}.PatientPosition = tMetaData{ww}.PatientPosition;                                                                  
 
-        tWriteMetaData{ww}.PixelSpacing = tMetaData{ww}.PixelSpacing;                              
-        tWriteMetaData{ww}.SliceThickness = tMetaData{ww}.SliceThickness;                 
-        tWriteMetaData{ww}.ImagePositionPatient = tMetaData{ww}.ImagePositionPatient;               
+        tWriteMetaData{ww}.PixelSpacing            = tMetaData{ww}.PixelSpacing;                              
+        tWriteMetaData{ww}.SliceThickness          = tMetaData{ww}.SliceThickness;                 
+        tWriteMetaData{ww}.ImagePositionPatient    = tMetaData{ww}.ImagePositionPatient;               
         tWriteMetaData{ww}.ImageOrientationPatient = tMetaData{ww}.ImageOrientationPatient;        
 
-        tWriteMetaData{ww}.Rows = tMetaData{ww}.Rows;               
+        tWriteMetaData{ww}.Rows    = tMetaData{ww}.Rows;               
         tWriteMetaData{ww}.Columns = tMetaData{ww}.Columns;           
         
         tWriteMetaData{ww}.SeriesDescription = tMetaData{ww}.SeriesDescription; 
@@ -174,84 +174,221 @@ function writeDICOM(aBuffer, tMetaData, sWriteDir, iSeriesOffset)
         end
         
         if isfield(tWriteMetaData{ww}, 'Modality')
-            tWriteMetaData{ww}.Modality = tMetaData{ww}.Modality;               
+            tWriteMetaData{ww}.Modality = tMetaData{ww}.Modality;  
+        else
+            if isfield(tMetaData{ww}, 'Modality')
+                if ~isempty(tMetaData{ww}.Modality)
+                    tWriteMetaData{ww}.Modality = ...
+                        tMetaData{ww}.Modality;
+                end
+            end            
         end
         
         if isfield(tWriteMetaData{ww}, 'SOPClassUID')
-            tWriteMetaData{ww}.SOPClassUID = tMetaData{ww}.SOPClassUID;               
+            tWriteMetaData{ww}.SOPClassUID = tMetaData{ww}.SOPClassUID; 
+        else
+            if isfield(tMetaData{ww}, 'SOPClassUID')
+                if ~isempty(tMetaData{ww}.SOPClassUID)
+                    tWriteMetaData{ww}.SOPClassUID = ...
+                        tMetaData{ww}.SOPClassUID;
+                end
+            end             
         end  
         
         if isfield(tWriteMetaData{ww}, 'MediaStorageSOPClassUID')
-            tWriteMetaData{ww}.SOPClassUID = tMetaData{ww}.MediaStorageSOPClassUID;               
+            tWriteMetaData{ww}.SOPClassUID = tMetaData{ww}.MediaStorageSOPClassUID;         
+        else
+            if isfield(tMetaData{ww}, 'MediaStorageSOPClassUID')
+                if ~isempty(tMetaData{ww}.MediaStorageSOPClassUID)
+                    tWriteMetaData{ww}.MediaStorageSOPClassUID = ...
+                        tMetaData{ww}.MediaStorageSOPClassUID;
+                end
+            end               
         end          
                
         if isfield(tWriteMetaData{ww}, 'SliceLocation')
-            tWriteMetaData{ww}.SliceLocation = tMetaData{ww}.SliceLocation;               
+            tWriteMetaData{ww}.SliceLocation = tMetaData{ww}.SliceLocation;     
+        else
+            if isfield(tMetaData{ww}, 'SliceLocation')
+                if ~isempty(tMetaData{ww}.SliceLocation)
+                    tWriteMetaData{ww}.SliceLocation = ...
+                        tMetaData{ww}.SliceLocation;
+                end
+            end             
         end
 
         if isfield(tWriteMetaData{ww}, 'SpacingBetweenSlices')
-            tWriteMetaData{ww}.SpacingBetweenSlices = tMetaData{ww}.SpacingBetweenSlices;
+            tWriteMetaData{ww}.SpacingBetweenSlices = ...
+                tMetaData{ww}.SpacingBetweenSlices;
+        else
+            if isfield(tMetaData{ww}, 'SpacingBetweenSlices')
+                if ~isempty(tMetaData{ww}.SpacingBetweenSlices)
+                    tWriteMetaData{ww}.SpacingBetweenSlices = ...
+                        tMetaData{ww}.SpacingBetweenSlices;
+                end
+            end             
         end
 
         if isfield(tWriteMetaData{ww}, 'NumberOfSlices')
             tWriteMetaData{ww}.NumberOfSlices = tMetaData{ww}.NumberOfSlices;
+        else
+            if isfield(tMetaData{ww}, 'NumberOfSlices')
+                if ~isempty(tMetaData{ww}.NumberOfSlices)
+                    tWriteMetaData{ww}.NumberOfSlices = ...
+                        tMetaData{ww}.NumberOfSlices;
+                end
+            end             
         end
 
         if isfield(tWriteMetaData{ww}, 'InstanceNumber')
             tWriteMetaData{ww}.InstanceNumber = tMetaData{ww}.InstanceNumber;
+        else
+            if isfield(tMetaData{ww}, 'InstanceNumber')
+                if ~isempty(tMetaData{ww}.InstanceNumber)
+                    tWriteMetaData{ww}.InstanceNumber = ...
+                        tMetaData{ww}.InstanceNumber;
+                end
+            end              
         end
 
         if isfield(tWriteMetaData{ww}, 'RescaleIntercept')
             tWriteMetaData{ww}.RescaleIntercept = tMetaData{ww}.RescaleIntercept;
+        else
+            if isfield(tMetaData{ww}, 'RescaleIntercept')
+                if ~isempty(tMetaData{ww}.RescaleIntercept)
+                    tWriteMetaData{ww}.RescaleIntercept = ...
+                        tMetaData{ww}.RescaleIntercept;
+                end
+            end               
         end
         
         if isfield(tWriteMetaData{ww}, 'RescaleSlope')
             tWriteMetaData{ww}.RescaleSlope = tMetaData{ww}.RescaleSlope;
+        else
+            if isfield(tMetaData{ww}, 'RescaleSlope')
+                if ~isempty(tMetaData{ww}.RescaleSlope)
+                    tWriteMetaData{ww}.RescaleSlope = ...
+                        tMetaData{ww}.RescaleSlope;
+                end
+            end             
         end        
         
         if isfield(tWriteMetaData{ww}, 'Units')
             tWriteMetaData{ww}.Units = tMetaData{ww}.Units;
+        else
+            if isfield(tMetaData{ww}, 'Units')
+                if ~isempty(tMetaData{ww}.Units)
+                    tWriteMetaData{ww}.Units = tMetaData{ww}.Units;
+                end
+            end              
         end  
         
         % Fix patient dose
         
         if isfield(tWriteMetaData{ww}, 'PatientWeight')
             tWriteMetaData{ww}.PatientWeight = tMetaData{ww}.PatientWeight;
+        else
+            if isfield(tMetaData{ww}, 'PatientWeight')
+                if ~isempty(tMetaData{ww}.PatientWeight)
+                    tWriteMetaData{ww}.PatientWeight = ...
+                        tMetaData{ww}.PatientWeight;
+                end
+            end
         end  
         
         if isfield(tWriteMetaData{ww}, 'PatientSize')
             tWriteMetaData{ww}.PatientSize = tMetaData{ww}.PatientSize;
+        else
+            if isfield(tMetaData{ww}, 'PatientSize')
+                if ~isempty(tMetaData{ww}.PatientSize)
+                    tWriteMetaData{ww}.PatientSize = ...
+                        tMetaData{ww}.PatientSize;
+                end
+            end            
         end  
         
         if isfield(tWriteMetaData{ww}, 'SeriesDate')
             tWriteMetaData{ww}.SeriesDate = tMetaData{ww}.SeriesDate;
+        else
+            if isfield(tMetaData{ww}, 'SeriesDate')
+                if ~isempty(tMetaData{ww}.SeriesDate)
+                    tWriteMetaData{ww}.SeriesDate = ...
+                        tMetaData{ww}.SeriesDate;
+                end
+            end             
         end  
         
         if isfield(tWriteMetaData{ww}, 'SeriesTime')
             tWriteMetaData{ww}.SeriesTime = tMetaData{ww}.SeriesTime;
+        else
+            if isfield(tMetaData{ww}, 'SeriesTime')
+                if ~isempty(tMetaData{ww}.SeriesTime)
+                    tWriteMetaData{ww}.SeriesTime = ...
+                        tMetaData{ww}.SeriesTime;
+                end
+            end             
         end    
         
         if isfield(tWriteMetaData{ww}, 'AcquisitionDate')
             tWriteMetaData{ww}.AcquisitionDate = tMetaData{ww}.AcquisitionDate;
+        else
+            if isfield(tMetaData{ww}, 'AcquisitionDate')
+                if ~isempty(tMetaData{ww}.AcquisitionDate)
+                    tWriteMetaData{ww}.AcquisitionDate = ...
+                        tMetaData{ww}.AcquisitionDate;
+                end
+            end             
         end  
         
         if isfield(tWriteMetaData{ww}, 'AcquisitionTime')
-            tWriteMetaData{ww}.AcquisitionTime = tMetaData{ww}.AcquisitionTime;
+            tWriteMetaData{ww}.AcquisitionTime = ...
+                tMetaData{ww}.AcquisitionTime;
+        else
+            if isfield(tMetaData{ww}, 'AcquisitionTime')
+                if ~isempty(tMetaData{ww}.AcquisitionTime)
+                    tWriteMetaData{ww}.AcquisitionTime = ...
+                        tMetaData{ww}.AcquisitionTime;
+                end
+            end              
         end   
         
         if isfield(tWriteMetaData{ww}, 'RadiopharmaceuticalInformationSequence')
             if isfield(tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence, 'Item_1')
                 
                 if isfield(tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadionuclideTotalDose')
-                    tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose = tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose;
+                    tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose = ...
+                        tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose;
+                else
+                    if isfield(tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadionuclideTotalDose')
+                        if ~isempty(tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose)
+                            tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose = ...
+                                tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose;
+                        end
+                    end                      
                 end
                 
                 if isfield(tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadiopharmaceuticalStartDateTime')
-                    tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime = tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;
+                    tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime = ...
+                        tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;
+                else
+                    if isfield(tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadiopharmaceuticalStartDateTime')
+                        if ~isempty(tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime)
+                            tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime = ...
+                                tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;
+                        end
+                    end    
                 end
                 
                 if isfield(tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadionuclideHalfLife')
-                    tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife = tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife;
+                    tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife = ...
+                        tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife;
+                else
+                    if isfield(tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadionuclideHalfLife')
+                        if ~isempty(tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife)
+                            tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife = ...
+                                tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife;
+                        end
+                    end                     
                 end                
             end
         end                   

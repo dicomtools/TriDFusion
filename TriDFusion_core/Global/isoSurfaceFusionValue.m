@@ -32,5 +32,6 @@ function dIsoValue = isoSurfaceFusionValue(sAction, dValue)
     if strcmpi('set', sAction)
         pdIsoValue = dValue;            
     end
+    
     dIsoValue = pdIsoValue;
 end

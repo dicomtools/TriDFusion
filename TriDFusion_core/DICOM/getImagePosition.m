@@ -31,6 +31,10 @@ function bFlip = getImagePosition(dInputOffset)
 
     tInputTemplate = inputTemplate('get');
 
+    if isempty(tInputTemplate(dInputOffset).asFilesList)
+        return;
+    end
+    
     if  numel(tInputTemplate(dInputOffset).asFilesList) ~= 1 
 
         tDicomInfo1 = tInputTemplate(dInputOffset).atDicomInfo{1}; 

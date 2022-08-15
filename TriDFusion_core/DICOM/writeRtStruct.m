@@ -45,7 +45,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
         sInputFile = tInput(dOffset).asFilesList{1};
         tMetaData = dicominfo(string(sInputFile));
     else % CERR
-        tMetaData = tInput(dOffset).atDicomMeta{1};
+        tMetaData = tInput(dOffset).atDicomInfo{1};
     end
         
     % Set series label
@@ -298,10 +298,14 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                             
 %                            aZ = out.Location(:,3);
                             aZ = zeros(dNBoundaries, 1);
-                            if atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation == 0
-                                aZ(:) = a3DOffset(:,3);
+                            if numel(atDicomMeta) == 1
+                                aZ(:) = a3DOffset(:,3);                                
                             else
-                                aZ(:) = atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation;
+                                if atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation == 0
+                                    aZ(:) = a3DOffset(:,3);
+                                else
+                                    aZ(:) = atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation;
+                                end
                             end
 
  %                           aZ = zeros(dNBoundaries, 1);
@@ -354,7 +358,6 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
         info.RTROIObservationsSequence.(sVOIitemName).ROIInterpreter.MiddleName = '';
         info.RTROIObservationsSequence.(sVOIitemName).ROIInterpreter.NamePrefix = '';
         info.RTROIObservationsSequence.(sVOIitemName).ROIInterpreter.NameSuffix = '';
-
     end
     
     if bSubDir == true

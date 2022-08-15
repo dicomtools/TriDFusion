@@ -743,7 +743,10 @@ end
                   'CallBack', @sliderIsoCallback ...
                   );
     ui3DSliderIsoSurfacePtr('set', uiSliderIsoSurface);
+    
+    bypassUiSliderIsoSurfaceListener('set', false);    
     uiSliderIsoSurfaceListener = addlistener(uiSliderIsoSurface,'Value','PreSet',@sliderIsoCallback);
+    
 
     uiEditIsoSurface = ...
         uicontrol(ui3DPanelPtr('get'), ...
@@ -1376,7 +1379,7 @@ end
             % ISO
             set(uiIsoSurfaceColor , 'Value', isoColorFusionOffset('get') );
             set(uiSliderIsoSurface, 'Value', isoSurfaceFusionValue('get'));
-            set(uiEditIsoSurface  , 'String', num2str(isoSurfaceFusionValue('get')));
+            set(uiEditIsoSurface  , 'String', num2str(isoSurfaceFusionValue('get')*100));
 
         else
             if switchToIsoSurface('get') == true
@@ -1482,7 +1485,7 @@ end
 
             set(uiIsoSurfaceColor , 'Value' , isoColorOffset('get') );
             set(uiSliderIsoSurface, 'Value' , isoSurfaceValue('get'));
-            set(uiEditIsoSurface  , 'String', num2str(isoSurfaceValue('get')));
+            set(uiEditIsoSurface  , 'String', num2str(isoSurfaceValue('get')*100));
 
         end
 
@@ -3299,6 +3302,10 @@ end
            switchToMIPMode('get')    == false
             return;
         end
+        
+        if bypassUiSliderIsoSurfaceListener('get') == true
+            return;
+        end
 
         if get(ui3DVolume, 'Value') == 2 % Fusion
 
@@ -3323,7 +3330,7 @@ end
         end
 
         set(uiEditIsoSurface, 'String', num2str(get(uiSliderIsoSurface, 'Value')*100));
-
+        
         initGate3DObject('set', true);
 
     end
@@ -3335,8 +3342,8 @@ end
            switchToMIPMode('get')    == false
             return;
         end
-        
-        delete(uiSliderIsoSurfaceListener);
+                
+        bypassUiSliderIsoSurfaceListener('set', true);
 
         dValue = abs(str2double(get(uiEditIsoSurface, 'String')));
 
@@ -3370,7 +3377,7 @@ end
         set(uiEditIsoSurface  , 'String', num2str(dValue));
         set(uiSliderIsoSurface, 'Value', dValue/100 );
         
-        uiSliderIsoSurfaceListener = addlistener(uiSliderIsoSurface,'Value','PreSet',@sliderIsoCallback);
+        bypassUiSliderIsoSurfaceListener('set', false);
 
         initGate3DObject('set', true);
 

@@ -93,7 +93,15 @@ function setSourceCallback(~, ~)
         end
 
         if(numel(mainDir('get')))
+            
+            % Restore ISOsurface default value. Those value will be use in
+            % setIsoSurfaceCallback(~, ~). 
 
+            isoColorOffset        ('set', defaultIsoColorOffset('get') ); 
+            isoSurfaceValue       ('set', defaultIsoSurfaceValue('get')); 
+            isoColorFusionOffset  ('set', defaultIsoColorFusionOffset('get')); 
+            isoSurfaceFusionValue ('set', defaultIsoSurfaceFusionValue('get'));
+        
             if isFusion('get') == true % Deactivate fusion
                  setFusionCallback();
             end

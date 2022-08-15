@@ -30,7 +30,7 @@ function setMIPCallback(~, ~)
     if numel(dicomBuffer('get')) && ...
        size(dicomBuffer('get'), 3) ~= 1
 
-        try
+%        try
 
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
@@ -359,7 +359,7 @@ function setMIPCallback(~, ~)
                 else
                     setViewerDefaultColor(true, atMetaData);
                 end
-
+                
                 refreshImages();
                 
 %                if strcmpi(atMetaData{1}.Modality, 'ct')
@@ -455,10 +455,10 @@ function setMIPCallback(~, ~)
 
                 if isFusion('get') == true
 
+if 1                    
                     tFuseInput     = inputTemplate('get');
                     iFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
                     atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
-
                     if (strcmpi(atMetaData{1}.Modality, 'nm') || ...
                         strcmpi(atMetaData{1}.Modality, 'pt')) && ...
                        (strcmpi(atFuseMetaData{1}.Modality, 'nm') || ...
@@ -481,8 +481,8 @@ function setMIPCallback(~, ~)
                         background3DOffset('set', 8); % Black
  %                       colorMapMipOffset('set', colorMapOffset('get')); %  % Set 3D Mip from 2D                        
                     end
-                end
-                
+end
+                end            
 %                if (strcmpi(atMetaData{1}.Modality, 'nm') || ...
 %                    strcmpi(atMetaData{1}.Modality, 'pt')) 
 %                else        
@@ -501,7 +501,7 @@ function setMIPCallback(~, ~)
                     tFuseInput     = inputTemplate('get');
                     iFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
                     atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
-
+if 1
 
                     if (strcmpi(atFuseMetaData{1}.Modality, 'nm') || ...
                         strcmpi(atFuseMetaData{1}.Modality, 'pt')) && ...
@@ -518,11 +518,9 @@ function setMIPCallback(~, ~)
                     colorMapMipFusionOffset('set', fusionColorMapOffset('get')); % Set 3D Mip from 2D
 
                     set(ui3DBackgroundPtr('get'), 'Value', background3DOffset('get'));
-
+end
                     
-                    
-                                       
-                    
+                 
                     mipFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);
                     set(mipFusionObj, 'InteractionsEnabled', false);
 
@@ -845,9 +843,9 @@ function setMIPCallback(~, ~)
             end
         end
 
-        catch
-            progressBar(1, 'Error:setMIPCallback()');
-        end
+%        catch
+%            progressBar(1, 'Error:setMIPCallback()');
+%        end
 
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;

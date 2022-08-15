@@ -29,7 +29,8 @@ function setIsoSurfaceCallback(~, ~)
 
     if numel(dicomBuffer('get')) && ...
        size(dicomBuffer('get'), 3) ~= 1
-%        try
+   
+ %       try
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
 %             releaseRoiAxeWait();
@@ -345,9 +346,8 @@ function setIsoSurfaceCallback(~, ~)
 
 %                set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
 %                set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get')); 
-                
                 dicomViewerCore();
-                
+                                
                 atMetaData = dicomMetaData('get');
 
                 if isFusion('get')
@@ -359,7 +359,7 @@ function setIsoSurfaceCallback(~, ~)
                 else
                     setViewerDefaultColor(true, atMetaData);
                 end
-
+                
                 refreshImages();
                 
 %                if strcmpi(atMetaData{1}.Modality, 'ct')
@@ -423,14 +423,61 @@ function setIsoSurfaceCallback(~, ~)
             set(btnTriangulatePtr('get'), 'Enable', 'off');
             set(btnTriangulatePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnTriangulatePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+            
+            atMetaData = dicomMetaData('get');
 
+            if isfield(atMetaData{1}, 'Modality')
+
+                if strcmpi(atMetaData{1}.Modality, 'ct')
+                    % isoSurfaceFusionValue default value is preset
+                    % for CT
+                    if isoSurfaceValue('get') == defaultIsoSurfaceValue('get') 
+                        isoSurfaceValue('set', defaultIsoSurfaceFusionValue('get'));
+                    end
+
+                    % isoColorFusionOffset default color is preset
+                    % for CT                        
+                    if isoColorOffset('get') == defaultIsoColorOffset('get') 
+                        isoColorOffset('set', defaultIsoColorFusionOffset('get'));
+                    end                       
+                end
+            end
+   
+            if isFusion('get') == true
+                
+                atInputTemplate = inputTemplate('get');
+
+                dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
+                atFusionMetaData = dicomMetaData('get', [], dFusionSeriesOffset);
+                if isempty(atFusionMetaData)
+                    atFusionMetaData = atInputTemplate(dFusionSeriesOffset).atDicomInfo;
+                end
+
+                if isfield(atFusionMetaData{1}, 'Modality')
+
+                    if ~strcmpi(atFusionMetaData{1}.Modality, 'ct')
+                        % isoSurfaceFusionValue default value is preset
+                        % for CT, for other modality we use the defaultIsoSurfaceValue
+                        if isoSurfaceFusionValue('get') == defaultIsoSurfaceFusionValue('get') 
+                            isoSurfaceFusionValue('set', defaultIsoSurfaceValue('get'));
+                        end
+
+                        % isoColorFusionOffset default color is preset
+                        % for CT, for other modality we use the defaultIsoColorOffset                        
+                        if isoColorFusionOffset('get') == defaultIsoColorFusionOffset('get') 
+                            isoColorFusionOffset('set', defaultIsoColorOffset('get'));
+                        end                       
+                    end
+                end
+            end
+            
             if switchTo3DMode('get')  == false && ...
                switchToMIPMode('get') == false
 
                 if isFusion('get') == false
                     set(btnFusionPtr('get')    , 'Enable', 'off');
                 end
-
+                
                 surface3DPriority('set', 'Isosurface', 1);
                 
                 isPlotContours('set', false);
@@ -438,7 +485,7 @@ function setIsoSurfaceCallback(~, ~)
                 clearDisplay();
                 initDisplay(1);
 
-                setViewerDefaultColor(false, dicomMetaData('get'));
+                setViewerDefaultColor(false, atMetaData);
 
                 isoObj = initVolShow(squeeze(dicomBuffer('get')), uiOneWindowPtr('get'), 'Isosurface');
                 set(isoObj, 'InteractionsEnabled', true);
@@ -536,7 +583,8 @@ function setIsoSurfaceCallback(~, ~)
                     set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
                 end
                 
-                if isFusion('get')
+                if isFusion('get') == true
+                                    
                     isoFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'Isosurface');
                     set(isoFusionObj, 'InteractionsEnabled', false);
 
@@ -569,16 +617,41 @@ function setIsoSurfaceCallback(~, ~)
                 uiLogo = displayLogo(uiOneWindowPtr('get'));
                 logoObject('set', uiLogo);
             else
+                % Set 3D UI Panel, we change the iso value for a 'ct'
 
+                bypassUiSliderIsoSurfaceListener('set', true);
+
+                set(ui3DIsoSurfaceColorPtr('get') , 'Value' , isoColorOffset('get') );
+                set(ui3DSliderIsoSurfacePtr('get'), 'Value' , isoSurfaceValue('get'));            
+                set(ui3DEditIsoSurfacePtr('get')  , 'String', num2str(isoSurfaceValue('get')*100));
+
+                bypassUiSliderIsoSurfaceListener('set', false);
+                
+                if switchToMIPMode('get') == true && ...
+                   isFusion('get') == true
+                    
+                    if background3DOffset('get') == 8 % Black
+                        invertColor     ('set', true   );    
+                        backgroundColor ('set', 'white' );              
+                        set(fiMainWindowPtr('get'), 'Color', 'white');  
+
+                        set(uiOneWindowPtr('get'), 'BackgroundColor', backgroundColor('get'));
+
+                        background3DOffset('set', 7);
+
+                        set(ui3DBackgroundPtr('get'), 'Value', background3DOffset('get'));
+                    end
+                end
+                
                 isoObj = isoObject('get');
                 if ~isempty(isoObj)
 
                     set(isoObj, 'Isovalue', isoSurfaceValue('get') );
                     set(isoObj, 'IsosurfaceColor', surfaceColor('get', isoColorOffset('get')) );
-
+                                
                     isoObject('set', isoObj);
                     if get(ui3DVolumePtr('get'), 'Value') == 1 % Not Fusion
-                        
+                                                                   
                         set(ui3DCreateIsoMaskPtr       ('get'), 'Enable', 'on');
                         set(txtAddVoiIsoMaskPtr        ('get'), 'Enable', 'Inactive');
                         set(chkAddVoiIsoMaskPtr        ('get'), 'Enable', 'on');
@@ -667,8 +740,7 @@ function setIsoSurfaceCallback(~, ~)
                         else
                             set(txtResampleToCTIsoMaskPtr('get'), 'Enable', 'on');
                             set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
-                        end
-                
+                        end                     
                     end
 
                     isoFusionObj = isoFusionObject('get');
@@ -873,9 +945,11 @@ end
                 end
             end
         end
+        
 %        catch
 %            progressBar(1, 'Error:setIsoSurfaceCallback()');
 %        end
+        
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;
     end

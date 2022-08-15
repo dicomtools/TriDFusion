@@ -35,12 +35,22 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
        isempty(dicomBuffer('get'))
         return;
     else   
-        if switchToIsoSurface('get') == true || ...
-           switchTo3DMode('get') == true || ...
-           switchToMIPMode('get') == true 
-            invertColor     ('set', true   );    
-            backgroundColor ('set', 'white' );              
-            set(fiMainWindowPtr('get'), 'Color', 'white');
+         if switchToIsoSurface('get') == true || ...
+            switchTo3DMode('get')     == true || ...
+            switchToMIPMode('get')    == true 
+                
+             if switchToIsoSurface('get') == true  && ...
+                switchTo3DMode('get')     == false && ...
+                switchToMIPMode('get')    == false 
+
+                invertColor     ('set', true   );    
+                backgroundColor ('set', 'white' );              
+                set(fiMainWindowPtr('get'), 'Color', 'white');  
+
+                set(uiOneWindowPtr('get'), 'BackgroundColor', backgroundColor('get'));
+                
+                background3DOffset('set', 7);
+            end
         else   
             
             dNbFusedAxes    = 0;

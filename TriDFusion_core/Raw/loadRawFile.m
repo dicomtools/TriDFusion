@@ -108,30 +108,48 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
 %        tInput(numel(tInput)+1) = tInput(iSeriesOffset);
 %        tInput(numel(tInput)).atDicomInfo = atDcmMetaData;        
 
+
         asSeriesDescription = seriesDescription('get');
         asSeriesDescription{numel(asSeriesDescription)+1}=sprintf('RAW-%s', sFileName);
         
         tInput(numel(tInput)+1).atDicomInfo = [];        
         
         tInput(numel(tInput)).atDicomInfo{1}.Modality = 'ot';
-        tInput(numel(tInput)).atDicomInfo{1}.SeriesDescription = asSeriesDescription{1}; 
         tInput(numel(tInput)).atDicomInfo{1}.Units = sUnit;
         tInput(numel(tInput)).atDicomInfo{1}.ReconstructionDiameter = [];
         
-        tInput(numel(tInput)).atDicomInfo{1}.PixelSpacing(1) = voxelX;
-        tInput(numel(tInput)).atDicomInfo{1}.PixelSpacing(2) = voxelY;        
+        tInput(numel(tInput)).atDicomInfo{1}.PixelSpacing(1)      = voxelX;
+        tInput(numel(tInput)).atDicomInfo{1}.PixelSpacing(2)      = voxelY;        
         tInput(numel(tInput)).atDicomInfo{1}.SpacingBetweenSlices = voxelZ;
         
-%        for jj=1:numel(tInput(numel(tInput)).atDicomInfo)
-%            tInput(numel(tInput)).atDicomInfo{jj}.SeriesDescription = asSeriesDescription{numel(asSeriesDescription)};
-%            tInput(numel(tInput)).atDicomInfo{jj}.Modality = 'ot';            
-%       %     tInput(numel(tInput)).atDicomInfo{jj}.PixelSpacing(1) = 1;
-%       %     tInput(numel(tInput)).atDicomInfo{jj}.PixelSpacing(2) = 1;
-%       %     tInput(numel(tInput)).atDicomInfo{jj}.ImagePositionPatient(1)=0;
- %      %     tInput(numel(tInput)).atDicomInfo{jj}.ImagePositionPatient(2)=0;
- %      %     tInput(numel(tInput)).atDicomInfo{jj}.ImagePositionPatient(3)=jj;
- %       end
- %       
+        % Patient information
+       
+        tInput(numel(tInput)).atDicomInfo{1}.PatientName       = asSeriesDescription{1}; 
+        tInput(numel(tInput)).atDicomInfo{1}.PatientID         = asSeriesDescription{1};
+        tInput(numel(tInput)).atDicomInfo{1}.SeriesDescription = asSeriesDescription{1}; 
+        
+        tInput(numel(tInput)).atDicomInfo{1}.InstanceNumber          = 1; 
+        tInput(numel(tInput)).atDicomInfo{1}.PatientPosition         = [];
+        tInput(numel(tInput)).atDicomInfo{1}.ImagePositionPatient    = zeros(3,1); 
+        tInput(numel(tInput)).atDicomInfo{1}.ImageOrientationPatient = zeros(6,1); 
+        
+        % Series SOP
+       
+        tInput(numel(tInput)).atDicomInfo{1}.SOPClassUID = ''; 
+        tInput(numel(tInput)).atDicomInfo{1}.MediaStorageSOPClassUID = ''; 
+        tInput(numel(tInput)).atDicomInfo{1}.SOPInstanceUID = ''; 
+        tInput(numel(tInput)).atDicomInfo{1}.FrameOfReferenceUID = ''; 
+        
+        % Series UID
+        
+        tInput(numel(tInput)).atDicomInfo{1}.StudyID           = '';
+        tInput(numel(tInput)).atDicomInfo{1}.SeriesInstanceUID = '';
+        tInput(numel(tInput)).atDicomInfo{1}.StudyInstanceUID  = '';
+        
+        % Series default
+        
+        tInput(numel(tInput)).asFilesList = [];
+       
         tInput(numel(tInput)).bEdgeDetection = false;
         tInput(numel(tInput)).bFlipLeftRight = false;
         tInput(numel(tInput)).bFlipAntPost   = false;
@@ -148,7 +166,8 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
         tInput(numel(tInput)).tMovement.atSeq{1}.dRotation = [];  
         
         asSeries = get(uiSeriesPtr('get'), 'String');
-        asSeries{numel(asSeries)+1} = asSeriesDescription{numel(asSeriesDescription)};        
+        asSeries{numel(asSeries)+1} = asSeriesDescription{numel(asSeriesDescription)};   
+        
     else
         
         asSeriesDescription{1}=sprintf('RAW-%s', sFileName);
@@ -158,9 +177,36 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
         tInput(1).atDicomInfo{1}.Units = sUnit;
         tInput(1).atDicomInfo{1}.ReconstructionDiameter = [];
         
-        tInput(1).atDicomInfo{1}.PixelSpacing(1) = voxelX;
-        tInput(1).atDicomInfo{1}.PixelSpacing(2) = voxelY;        
+        tInput(1).atDicomInfo{1}.PixelSpacing(1)      = voxelX;
+        tInput(1).atDicomInfo{1}.PixelSpacing(2)      = voxelY;        
         tInput(1).atDicomInfo{1}.SpacingBetweenSlices = voxelZ;
+        
+        % Patient information
+       
+        tInput(1).atDicomInfo{1}.PatientName       = asSeriesDescription{1}; 
+        tInput(1).atDicomInfo{1}.PatientID         = asSeriesDescription{1};
+        tInput(1).atDicomInfo{1}.SeriesDescription = asSeriesDescription{1}; 
+        
+        tInput(1).atDicomInfo{1}.InstanceNumber          = 1; 
+        tInput(1).atDicomInfo{1}.PatientPosition         = [];
+        tInput(1).atDicomInfo{1}.ImagePositionPatient    = zeros(3,1); 
+        tInput(1).atDicomInfo{1}.ImageOrientationPatient = zeros(6,1); 
+        
+        % Series SOP
+       
+        tInput(1).atDicomInfo{1}.SOPClassUID = ''; 
+        tInput(1).atDicomInfo{1}.MediaStorageSOPClassUID = ''; 
+        tInput(1).atDicomInfo{1}.SOPInstanceUID = ''; 
+        tInput(1).atDicomInfo{1}.FrameOfReferenceUID = ''; 
+        
+        % Series UID
+        
+        tInput(1).atDicomInfo{1}.StudyID           = '';
+        tInput(1).atDicomInfo{1}.SeriesInstanceUID = '';
+        tInput(1).atDicomInfo{1}.StudyInstanceUID  = '';
+        
+        % Series default
+        tInput(1).asFilesList = [];
         
         tInput(1).bEdgeDetection = false;
         tInput(1).bFlipLeftRight = false;
@@ -170,6 +216,12 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
         tInput(1).bMathApplied   = false;
         tInput(1).bFusedDoseKernel    = false;
         tInput(1).bFusedEdgeDetection = false;
+        tInput(1).tMovement = [];
+        tInput(1).tMovement.bMovementApplied = false;
+        tInput(1).tMovement.aGeomtform = [];
+        tInput(1).tMovement.atSeq{1}.sAxe = [];
+        tInput(1).tMovement.atSeq{1}.aTranslation = [];
+        tInput(1).tMovement.atSeq{1}.dRotation = [];  
         
         asSeries{1} = asSeriesDescription{1};              
     end    

@@ -119,8 +119,8 @@ function resize = dicomViewer()
 
     isoColorOffset        ('set', 4  ); % red
     isoSurfaceValue       ('set', 0.1); 
-    isoColorFusionOffset  ('set', 4  ); % red
-    isoSurfaceFusionValue ('set', 1  );
+    isoColorFusionOffset  ('set', 7  ); % white
+    isoSurfaceFusionValue ('set', 0.67);    
     addVoiIsoMask         ('set', true);
     percentOfPeakIsoMask  ('set', true); % In percent or SUV  
     multiplePeaksIsoMask  ('set', true);
@@ -232,12 +232,20 @@ function resize = dicomViewer()
 
     updateDicomWriteSeriesInstanceUID('set', true);
     modifiedImagesContourMatrix('set', false);
-    
-   
+       
     mipAngle('set', 1);
 
     rng('shuffle');
-
+    
+    % Set ISOsurface default value. Those value will be use in
+    % setIsoSurfaceCallback(~, ~). The default value are restored in
+    % setSeriesCallback() and setSourceCallback().
+    
+    defaultIsoColorOffset        ('set', isoColorOffset('get') ); 
+    defaultIsoSurfaceValue       ('set', isoSurfaceValue('get')); 
+    defaultIsoColorFusionOffset  ('set', isoColorFusionOffset('get')); 
+    defaultIsoSurfaceFusionValue ('set', isoSurfaceFusionValue('get'));
+    
     clearDisplay();
 
     uiTopWindow = ...

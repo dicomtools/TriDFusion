@@ -372,7 +372,7 @@ function set3DCallback(~, ~)
                 else
                     setViewerDefaultColor(true, atMetaData);
                 end
-
+                
                 refreshImages();
                 
 %                if strcmpi(atMetaData{1}.Modality, 'ct')

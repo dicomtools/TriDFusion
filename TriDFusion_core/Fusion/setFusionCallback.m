@@ -47,12 +47,12 @@ function setFusionCallback(~, ~)
             set(btnFusionPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnFusionPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
 
-            tFuseInput  = inputTemplate('get');
-            iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
-            atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
+            atInputTemplate  = inputTemplate('get');
+            dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
+            atFusionMetaData = atInputTemplate(dFusionSeriesOffset).atDicomInfo;
 
             if ~isempty(volFusionObj) && switchTo3DMode('get') == true
-                [aFusionMap, sFusionType] = getVolFusionAlphaMap('get', fusionBuffer('get', [], iFuseOffset), atFuseMetaData);
+                [aFusionMap, sFusionType] = getVolFusionAlphaMap('get', fusionBuffer('get', [], dFusionSeriesOffset), atFusionMetaData);
 
                 set(volFusionObj, 'Alphamap', aFusionMap);
                 set(volFusionObj, 'Colormap', get3DColorMap('get', colorMapVolFusionOffset('get') ));
@@ -76,7 +76,7 @@ function setFusionCallback(~, ~)
 
             if ~isempty(mipFusionObj) && switchToMIPMode('get') == true
 
-                [aFusionMap, sFusionType] = getMipFusionAlphaMap('get', fusionBuffer('get', [], iFuseOffset), atFuseMetaData);
+                [aFusionMap, sFusionType] = getMipFusionAlphaMap('get', fusionBuffer('get', [], dFusionSeriesOffset), atFusionMetaData);
 
                 set(mipFusionObj, 'Alphamap', aFusionMap);
                 set(mipFusionObj, 'Colormap', get3DColorMap('get', colorMapMipFusionOffset('get') ));
@@ -135,8 +135,8 @@ function setFusionCallback(~, ~)
        end
     else
 
-        tFuseInput = inputTemplate('get');
-        if numel(tFuseInput) == 0
+        atInputTemplate = inputTemplate('get');
+        if numel(atInputTemplate) == 0
             isFusion('set', false);
             set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
@@ -144,8 +144,8 @@ function setFusionCallback(~, ~)
             return
         end
 
-        iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-        if iSeriesOffset > numel(tFuseInput)
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+        if dSeriesOffset > numel(atInputTemplate)
             isFusion('set', false);
             set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
@@ -153,8 +153,8 @@ function setFusionCallback(~, ~)
             return;
         end
 
-        iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
-        if iFuseOffset > numel(tFuseInput)
+        dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
+        if dFusionSeriesOffset > numel(atInputTemplate)
             isFusion('set', false);
             set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
@@ -162,18 +162,16 @@ function setFusionCallback(~, ~)
             return;
         end
 
-        set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
-        tMetaData  = dicomMetaData('get');
-        if isempty(tMetaData)
-            tMetaData = tFuseInput(iSeriesOffset).atDicomInfo;
+        set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
+        atMetaData = dicomMetaData('get');
+        if isempty(atMetaData)
+            atMetaData = atInputTemplate(dSeriesOffset).atDicomInfo;
         end
 
-        set(uiSeriesPtr('get'), 'Value', iFuseOffset);
-        tFuseMetaData = dicomMetaData('get');
-        if isempty(tFuseMetaData)
-            tFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
+        atFusionMetaData = dicomMetaData('get', [], dFusionSeriesOffset);
+        if isempty(atFusionMetaData)
+            atFusionMetaData = atInputTemplate(dFusionSeriesOffset).atDicomInfo;
         end
-        set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
 
         if isFusion('get') == false
             
@@ -239,15 +237,15 @@ function setFusionCallback(~, ~)
                 
             aInput = inputBuffer('get');
 
-            set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
+            set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
             A = dicomBuffer('get');
 
-            set(uiSeriesPtr('get'), 'Value', iFuseOffset);
+            set(uiSeriesPtr('get'), 'Value', dFusionSeriesOffset);
             B = dicomBuffer('get');
             if isempty(B)
-                B = aInput{iFuseOffset};
+                B = aInput{dFusionSeriesOffset};
             end
-            set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
+            set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
 
             
             if numel(size(A))~=numel(size(B)) %Fuse 2D with 3D
@@ -268,8 +266,8 @@ else
                     end
                     B = imresize(aTemp, [x1 y1]);
 
-                    refSliceThickness = computeSliceSpacing(tMetaData);
-                    tFuseMetaData{1}.SpacingBetweenSlices = refSliceThickness;
+                    refSliceThickness = computeSliceSpacing(atMetaData);
+                    atFusionMetaData{1}.SpacingBetweenSlices = refSliceThickness;
 
 
 
@@ -331,8 +329,8 @@ end
                          'HandleVisibility', 'off' ...
                          );
 
-                if isfield(tFuseMetaData{1}, 'SeriesDescription')
-                    sFusedSeriesDescription = tFuseMetaData{1}.SeriesDescription;
+                if isfield(atFusionMetaData{1}, 'SeriesDescription')
+                    sFusedSeriesDescription = atFusionMetaData{1}.SeriesDescription;
                     sFusedSeriesDescription = strrep(sFusedSeriesDescription,'_',' ');
                     sFusedSeriesDescription = strrep(sFusedSeriesDescription,'^',' ');
                     sFusedSeriesDescription = strtrim(sFusedSeriesDescription);
@@ -340,16 +338,16 @@ end
                     sFusedSeriesDescription = '';
                 end
 
-                if isfield(tFuseMetaData{1}, 'SeriesDate')
+                if isfield(atFusionMetaData{1}, 'SeriesDate')
 
-                    if isempty(tFuseMetaData{1}.SeriesDate)
+                    if isempty(atFusionMetaData{1}.SeriesDate)
                         sFusedSeriesDate = '';
                     else
-                        sFusedSeriesDate = tFuseMetaData{1}.SeriesDate;
-                        if isempty(tFuseMetaData{1}.SeriesTime)
+                        sFusedSeriesDate = atFusionMetaData{1}.SeriesDate;
+                        if isempty(atFusionMetaData{1}.SeriesTime)
                             sFusedSeriesTime = '000000';
                         else
-                            sFusedSeriesTime = tFuseMetaData{1}.SeriesTime;
+                            sFusedSeriesTime = atFusionMetaData{1}.SeriesTime;
                         end
                         sFusedSeriesDate = sprintf('%s%s', sFusedSeriesDate, sFusedSeriesTime);
                     end
@@ -382,25 +380,25 @@ end
 
                 B = imresize(B, [x1 y1]);
 if 0
-                if iSeriesOffset ~= iFuseOffset
-                    if tFuseInput(iSeriesOffset).bFlipLeftRight == true
+                if dSeriesOffset ~= dFusionSeriesOffset
+                    if atInputTemplate(dSeriesOffset).bFlipLeftRight == true
                         B=B(:,end:-1:1);
                     end
 
-                    if tFuseInput(iSeriesOffset).bFlipAntPost == true
+                    if atInputTemplate(dSeriesOffset).bFlipAntPost == true
                         B=B(end:-1:1,:);
                     end
                 end
 end
- %               tFuseInput(iFuseOffset).bEdgeDetection = false;
+ %               atInputTemplate(dFusionSeriesOffset).bEdgeDetection = false;
 
- %               inputTemplate('set', tFuseInput);
+ %               inputTemplate('set', atInputTemplate);
 
              %   B = resampleImage(A, B);
 
-                fusionBuffer('set', B, iFuseOffset);
+                fusionBuffer('set', B, dFusionSeriesOffset);
                 
-                imf = squeeze(fusionBuffer('get', [], iFuseOffset));    
+                imf = squeeze(fusionBuffer('get', [], dFusionSeriesOffset));    
                 
                 if is3DEngine('get') == true
                     if gaussFilter('get') == true
@@ -444,8 +442,8 @@ end
                       
                 if aspectRatio('get') == true
 
-                    xf = computeAspectRatio('x', tFuseMetaData);
-                    yf = computeAspectRatio('y', tFuseMetaData);
+                    xf = computeAspectRatio('x', atFusionMetaData);
+                    yf = computeAspectRatio('y', atFusionMetaData);
 
                     daspect(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf 1]);
 
@@ -562,8 +560,8 @@ end
                          'HandleVisibility', 'off' ...
                          );
                      
-                if isfield(tFuseMetaData{1}, 'SeriesDescription')
-                    sFusedSeriesDescription = tFuseMetaData{1}.SeriesDescription;
+                if isfield(atFusionMetaData{1}, 'SeriesDescription')
+                    sFusedSeriesDescription = atFusionMetaData{1}.SeriesDescription;
                     sFusedSeriesDescription = strrep(sFusedSeriesDescription,'_',' ');
                     sFusedSeriesDescription = strrep(sFusedSeriesDescription,'^',' ');
                     sFusedSeriesDescription = strtrim(sFusedSeriesDescription);
@@ -571,16 +569,16 @@ end
                     sFusedSeriesDescription = '';
                 end
 
-                if isfield(tFuseMetaData{1}, 'SeriesDate')
+                if isfield(atFusionMetaData{1}, 'SeriesDate')
 
-                    if isempty(tFuseMetaData{1}.SeriesDate)
+                    if isempty(atFusionMetaData{1}.SeriesDate)
                         sFusedSeriesDate = '';
                     else
-                        sFusedSeriesDate = tFuseMetaData{1}.SeriesDate;
-                        if isempty(tFuseMetaData{1}.SeriesTime)
+                        sFusedSeriesDate = atFusionMetaData{1}.SeriesDate;
+                        if isempty(atFusionMetaData{1}.SeriesTime)
                             sFusedSeriesTime = '000000';
                         else
-                            sFusedSeriesTime = tFuseMetaData{1}.SeriesTime;
+                            sFusedSeriesTime = atFusionMetaData{1}.SeriesTime;
                         end
                         sFusedSeriesDate = sprintf('%s%s', sFusedSeriesDate, sFusedSeriesTime);
                     end
@@ -658,7 +656,7 @@ end
                     set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Position', [0 0 0.9000 1]);
                 end
         
-                set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
+                set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
 
                 if strcmp(imageOrientation('get'), 'coronal')
                     B = permute(B, [3 2 1]);
@@ -669,44 +667,44 @@ end
                 end
 
 if 1
-                if iSeriesOffset ~= iFuseOffset
+                if dSeriesOffset ~= dFusionSeriesOffset
 
-                    if tFuseInput(iSeriesOffset).bFlipLeftRight == true
+                    if atInputTemplate(dSeriesOffset).bFlipLeftRight == true
                         B=B(:,end:-1:1,:);
                     end
 
-                    if tFuseInput(iSeriesOffset).bFlipAntPost == true
+                    if atInputTemplate(dSeriesOffset).bFlipAntPost == true
                         B=B(end:-1:1,:,:);
                     end
 
-                    if tFuseInput(iSeriesOffset).bFlipHeadFeet == true
+                    if atInputTemplate(dSeriesOffset).bFlipHeadFeet == true
                         B=B(:,:,end:-1:1);
                     end
                 end
 end
-%                tFuseInput(iFuseOffset).bEdgeDetection = false;
-%                inputTemplate('set', tFuseInput);
+%                atInputTemplate(dFusionSeriesOffset).bEdgeDetection = false;
+%                inputTemplate('set', atInputTemplate);
 
 %                [x1,y1,z1] = size(A);
 %                [x2,y2,z2] = size(B);                
                  
     %                 msgbox('Warning: Reslice is not yet supported, the fusion may be wrong!');
-%                if ( ( tMetaData{1}.ReconstructionDiameter ~= 700 && ...
-%                       strcmpi(tMetaData{1}.Modality, 'ct') ) || ...
-%                   ( tFuseMetaData{1}.ReconstructionDiameter ~= 700 && ...
-%                     strcmpi(tFuseMetaData{1}.Modality, 'ct') ) ) && ...
-%                   numel(tMetaData) ~= 1 && ...
-%                   numel(tFuseMetaData) ~= 1
+%                if ( ( atMetaData{1}.ReconstructionDiameter ~= 700 && ...
+%                       strcmpi(atMetaData{1}.Modality, 'ct') ) || ...
+%                   ( atFusionMetaData{1}.ReconstructionDiameter ~= 700 && ...
+%                     strcmpi(atFusionMetaData{1}.Modality, 'ct') ) ) && ...
+%                   numel(atMetaData) ~= 1 && ...
+%                   numel(atFusionMetaData) ~= 1
 
                     tRegistration  = registrationTemplate('get');
                     sInterpolation = tRegistration.Interpolation;
                     
                     if isVsplash('get') == false
-                        aRefMip = mipBuffer('get', [], iSeriesOffset);
-                        aMip    = mipBuffer('get', [], iFuseOffset);
+                        aRefMip = mipBuffer('get', [], dSeriesOffset);
+                        aMip    = mipBuffer('get', [], dFusionSeriesOffset);
 
     %                    if numel(aMip) ~= numel(aRefMip)  % Resample mip  
-                            aResampledMip = resampleMipTransformMatrix(aMip, tFuseMetaData, aRefMip, tMetaData, sInterpolation, false);   
+                            aResampledMip = resampleMipTransformMatrix(aMip, atFusionMetaData, aRefMip, atMetaData, sInterpolation, false);   
     %                    else
     %                        aResampledMip = aMip;
     %                    end
@@ -718,17 +716,15 @@ end
                         if xMoveOffset ~= 0 || yMoveOffset ~= 0 
                             aResampledMip = imtranslate(aResampledMip,[-yMoveOffset, 0, -xMoveOffset], 'nearest', 'OutputView', 'same', 'FillValues', min(aResampledMip, [], 'all') );    
                         end                  
-                    end
-                    
-
+                    end                    
                     
     %                if numel(A) ~= numel(B) % Resample image                 
                     if isVsplash('get') == false
-                        [B, tFuseMetaData] = ...
+                        [B, atFusionMetaData] = ...
                             resampleImageTransformMatrix(B, ...
-                                                         tFuseMetaData, ...
+                                                         atFusionMetaData, ...
                                                          A, ...
-                                                         tMetaData, ...
+                                                         atMetaData, ...
                                                          sInterpolation, ...
                                                          false ...
                                                          ); 
@@ -742,11 +738,11 @@ end
                             B = imtranslate(B,[-xMoveOffset, -yMoveOffset, 0], 'nearest', 'OutputView', 'same', 'FillValues', min(B, [], 'all') ); 
                         end
                     else
-                        [aResampled, tFuseMetaData] = ...
+                        [aResampled, atFusionMetaData] = ...
                             resampleImageTransformMatrix(B, ...
-                                                         tFuseMetaData, ...
+                                                         atFusionMetaData, ...
                                                          A, ...
-                                                         tMetaData, ...
+                                                         atMetaData, ...
                                                          sInterpolation, ...
                                                          true ...
                                                          );  
@@ -754,9 +750,9 @@ end
                        if numel(aResampled(aResampled==min(aResampled, [], 'all'))) == numel(aResampled)                            
                                 [aResampled, ~] = ...
                                     resampleImageTransformMatrix(B, ...
-                                                                 tFuseMetaData, ...
+                                                                 atFusionMetaData, ...
                                                                  A, ...
-                                                                 tMetaData, ...
+                                                                 atMetaData, ...
                                                                  'bilinear', ...
                                                                  false ...
                                                                  );         
@@ -769,11 +765,11 @@ end
                         end                                                    
                     end
             
-%                    [B, tFuseMetaData] = ...
+%                    [B, atFusionMetaData] = ...
 %                        resampleImage(B, ...
-%                                      tFuseMetaData, ...
+%                                      atFusionMetaData, ...
 %                                      A, ...
-%                                      tMetaData, ...
+%                                      atMetaData, ...
 %                                      'bilinear', ...
 %                                      false, ...
 %                                      false ...
@@ -782,26 +778,26 @@ end
      %               end                             
 %                else
                     
-%                    aRefMip = mipBuffer('get', [], iSeriesOffset);
-%                    aMip = mipBuffer('get', [], iFuseOffset);
+%                    aRefMip = mipBuffer('get', [], dSeriesOffset);
+%                    aMip = mipBuffer('get', [], dFusionSeriesOffset);
 
-%                    aResampledMip = resampleMip(aMip, tFuseMetaData, aRefMip, tMetaData, 'bilinear');  
+%                    aResampledMip = resampleMip(aMip, atFusionMetaData, aRefMip, atMetaData, 'bilinear');  
                     
-%                    [B, tFuseMetaData] = ...
+%                    [B, atFusionMetaData] = ...
 %                        resampleImage(B, ...
-%                                      tFuseMetaData, ...
+%                                      atFusionMetaData, ...
 %                                      A, ...
-%                                      tMetaData, ...
+%                                      atMetaData, ...
 %                                      'bilinear', ...
 %                                      false, ...
 %                                      );
                                                                                                     
 %                end
 
-                fusionBuffer('set', B, iFuseOffset);     
+                fusionBuffer('set', B, dFusionSeriesOffset);     
                 if link2DMip('get') == true && isVsplash('get') == false      
-                    mipFusionBufferOffset('set', iFuseOffset);
-                    mipFusionBuffer('set', aResampledMip, iFuseOffset);               
+                    mipFusionBufferOffset('set', dFusionSeriesOffset);
+                    mipFusionBuffer('set', aResampledMip, dFusionSeriesOffset);               
                 end
                 
                 % Init CData
@@ -811,7 +807,7 @@ end
                 iAxial    = sliceNumber('get', 'axial'   );        
                 iMipAngle = mipAngle('get');
 
-                imf = squeeze(fusionBuffer('get', [], iFuseOffset));    
+                imf = squeeze(fusionBuffer('get', [], dFusionSeriesOffset));    
                 
                 % Set Coronal
 
@@ -1034,7 +1030,7 @@ end
                    isVsplash('get') == false         
 
 
-                    imComputedMipF = mipFusionBuffer('get', [], iFuseOffset);                                  
+                    imComputedMipF = mipFusionBuffer('get', [], dFusionSeriesOffset);                                  
 
                     if is3DEngine('get') == true
                         if gaussFilter('get') == true
@@ -1080,10 +1076,10 @@ end
 
                 if aspectRatio('get') == true
 
-                    if ~isempty(tFuseMetaData{1}.PixelSpacing)
-                        xf = tFuseMetaData{1}.PixelSpacing(1);
-                        yf = tFuseMetaData{1}.PixelSpacing(2);
-                        zf = computeSliceSpacing(tFuseMetaData);
+                    if ~isempty(atFusionMetaData{1}.PixelSpacing)
+                        xf = atFusionMetaData{1}.PixelSpacing(1);
+                        yf = atFusionMetaData{1}.PixelSpacing(2);
+                        zf = computeSliceSpacing(atFusionMetaData);
 
                         if xf == 0
                             xf = 1;
@@ -1098,8 +1094,8 @@ end
                         end
                     else
 
-                        xf = computeAspectRatio('x', tFuseMetaData) ;
-                        yf = computeAspectRatio('y', tFuseMetaData) ;
+                        xf = computeAspectRatio('x', atFusionMetaData) ;
+                        yf = computeAspectRatio('y', atFusionMetaData) ;
                         zf = 1;
                     end
 
@@ -1162,16 +1158,16 @@ end
             set(btnFusionPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
         else
                                                 
-            if numel(tFuseInput) == 1
-                if tFuseInput(iFuseOffset).bEdgeDetection == false
-                    tFuseInput(iFuseOffset).bFusedEdgeDetection = false;
+            if numel(atInputTemplate) == 1
+                if atInputTemplate(dFusionSeriesOffset).bEdgeDetection == false
+                    atInputTemplate(dFusionSeriesOffset).bFusedEdgeDetection = false;
                 end
             else
-                tFuseInput(iFuseOffset).bEdgeDetection = false;
+                atInputTemplate(dFusionSeriesOffset).bEdgeDetection = false;
             end
 
-%           tFuseInput(iFuseOffset).bEdgeDetection = false;
-           inputTemplate('set', tFuseInput);
+%           atInputTemplate(dFusionSeriesOffset).bEdgeDetection = false;
+           inputTemplate('set', atInputTemplate);
 
            isFusion('set', false);
 
@@ -1190,7 +1186,7 @@ end
         if initFusionWindowLevel('get') == true
             initFusionWindowLevel('set', false);
 
-            if strcmpi(tFuseMetaData{1}.Modality, 'ct')
+            if strcmpi(atFusionMetaData{1}.Modality, 'ct')
                 if min(B, [], 'all') >= 0
                     dMax = max(B, [], 'all');
                     dMin = min(B, [], 'all');
@@ -1198,11 +1194,11 @@ end
                     [dMax, dMin] = computeWindowLevel(500, 50);
                 end
             else
-                sUnitDisplay = getSerieUnitValue(iFuseOffset);
+                sUnitDisplay = getSerieUnitValue(dFusionSeriesOffset);
                 if strcmpi(sUnitDisplay, 'SUV')
-                    if tFuseInput(iFuseOffset).tQuant.tSUV.dScale
-                        dMin = suvWindowLevel('get', 'min')/tFuseInput(iFuseOffset).tQuant.tSUV.dScale;
-                        dMax = suvWindowLevel('get', 'max')/tFuseInput(iFuseOffset).tQuant.tSUV.dScale;
+                    if atInputTemplate(dFusionSeriesOffset).tQuant.tSUV.dScale
+                        dMin = suvWindowLevel('get', 'min')/atInputTemplate(dFusionSeriesOffset).tQuant.tSUV.dScale;
+                        dMax = suvWindowLevel('get', 'max')/atInputTemplate(dFusionSeriesOffset).tQuant.tSUV.dScale;
                     else
                         dMin = min(B, [], 'all');
                         dMax = max(B, [], 'all');
@@ -1227,7 +1223,7 @@ end
        %     sliderAlphaValue('set', 0.5);
             set(uiAlphaSliderPtr('get') , 'Value', sliderAlphaValue('get'));
 
-            if size(fusionBuffer('get', [], iFuseOffset), 3) == 1
+            if size(fusionBuffer('get', [], dFusionSeriesOffset), 3) == 1
                 set(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);
             else
                 set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);
@@ -1482,7 +1478,7 @@ end
         aFigurePosition = ptrFusionColorbar.Parent.Position;
         if size(dicomBuffer('get'), 3) == 1
             set(ptrFusionColorbar, ...
-                'Position', [aFigurePosition(3)-49 ...
+                'Position', [aFigurePosition(3)-48 ...
                              27 ...
                              40 ...
                              ((aFigurePosition(4))/2)-41  ...
@@ -1494,7 +1490,7 @@ end
                 if viewSegPanel('get')
 
                     set(ptrFusionColorbar, ...
-                        'Position', [aFigurePosition(3)-(uiSegMainPanel.Position(3)/2)-49 ...
+                        'Position', [aFigurePosition(3)-(uiSegMainPanel.Position(3)/2)-48 ...
                                      29 ...
                                      40 ...
                                      ((aFigurePosition(4))/2)-35  ...
@@ -1503,7 +1499,7 @@ end
                 elseif viewKernelPanel('get') == true
 
                     set(ptrFusionColorbar, ...
-                        'Position', [aFigurePosition(3)-(uiKernelMainPanel.Position(3)/2)-49 ...
+                        'Position', [aFigurePosition(3)-(uiKernelMainPanel.Position(3)/2)-48 ...
                                      29 ...
                                      40 ...
                                      ((aFigurePosition(4))/2)-35  ...
@@ -1512,7 +1508,7 @@ end
                 elseif viewRoiPanel('get') == true
 
                     set(ptrFusionColorbar, ...
-                        'Position', [aFigurePosition(3)-(uiRoiMainPanel.Position(3)/2)-49 ...
+                        'Position', [aFigurePosition(3)-(uiRoiMainPanel.Position(3)/2)-48 ...
                                      29 ...
                                      40 ...
                                      ((aFigurePosition(4))/2)-35  ...
@@ -1520,7 +1516,7 @@ end
                         );
                 else
                     set(ptrFusionColorbar, ...
-                        'Position', [aFigurePosition(3)-49 ...
+                        'Position', [aFigurePosition(3)-48 ...
                                      29 ...
                                      40 ...
                                      ((aFigurePosition(4))/2)-35  ...
@@ -1529,7 +1525,7 @@ end
                 end
             else
                 set(ptrFusionColorbar, ...
-                    'Position', [aFigurePosition(3)-49 ...
+                    'Position', [aFigurePosition(3)-48 ...
                                  29 ...
                                  40 ...
                                  ((aFigurePosition(4))/2)-35  ...
@@ -1695,7 +1691,7 @@ end
             if size(dicomBuffer('get'), 3) == 1
 
                 set(ptrColorbar, ...
-                    'Position', [aFigurePosition(3)-49 ...
+                    'Position', [aFigurePosition(3)-48 ...
                                  (aFigurePosition(4)/2)-9 ...
                                  40 ...
                                  (aFigurePosition(4)/2)+5  ...
@@ -1708,7 +1704,7 @@ end
                     if viewSegPanel('get')
 
                         set(ptrColorbar, ...
-                            'Position', [aFigurePosition(3)-(uiSegMainPanel.Position(3)/2)-49 ...
+                            'Position', [aFigurePosition(3)-(uiSegMainPanel.Position(3)/2)-48 ...
                                          (aFigurePosition(4)/2) ...
                                          40 ...
                                          (aFigurePosition(4)/2)-4  ...
@@ -1717,7 +1713,7 @@ end
                     elseif viewKernelPanel('get') == true
 
                         set(ptrColorbar, ...
-                            'Position', [aFigurePosition(3)-(uiKernelMainPanel.Position(3)/2)-49 ...
+                            'Position', [aFigurePosition(3)-(uiKernelMainPanel.Position(3)/2)-48 ...
                                          (aFigurePosition(4)/2) ...
                                          40 ...
                                          (aFigurePosition(4)/2)-4  ...
@@ -1726,7 +1722,7 @@ end
                     elseif viewRoiPanel('get') == true
 
                         set(ptrColorbar, ...
-                            'Position', [aFigurePosition(3)-(uiRoiMainPanel.Position(3)/2)-49 ...
+                            'Position', [aFigurePosition(3)-(uiRoiMainPanel.Position(3)/2)-48 ...
                                          (aFigurePosition(4)/2) ...
                                          40 ...
                                          (aFigurePosition(4)/2)-4  ...
@@ -1734,7 +1730,7 @@ end
                             );
                     else
                         set(ptrColorbar, ...
-                            'Position', [aFigurePosition(3)-49 ...
+                            'Position', [aFigurePosition(3)-48 ...
                                          (aFigurePosition(4)/2) ...
                                          40 ...
                                          (aFigurePosition(4)/2)-4  ...
@@ -1743,7 +1739,7 @@ end
                     end
                 else
                     set(ptrColorbar, ...
-                        'Position', [aFigurePosition(3)-49 ...
+                        'Position', [aFigurePosition(3)-48 ...
                                      (aFigurePosition(4)/2) ...
                                      40 ...
                                      (aFigurePosition(4)/2)-4  ...
@@ -1826,7 +1822,7 @@ end
             if size(dicomBuffer('get'), 3) == 1
 
                 set(ptrColorbar, ...
-                    'Position', [aFigurePosition(3)-49 ...
+                    'Position', [aFigurePosition(3)-48 ...
                                  7 ...
                                  40 ...
                                  aFigurePosition(4)-11  ...
@@ -1838,7 +1834,7 @@ end
                     if viewSegPanel('get')
 
                         set(ptrColorbar, ...
-                            'Position', [aFigurePosition(3)-(uiSegMainPanel.Position(3)/2)-49 ...
+                            'Position', [aFigurePosition(3)-(uiSegMainPanel.Position(3)/2)-48 ...
                                          7 ...
                                          40 ...
                                          aFigurePosition(4)-11  ...
@@ -1846,7 +1842,7 @@ end
                             );
                     elseif viewKernelPanel('get') == true
                         set(ptrColorbar, ...
-                            'Position', [aFigurePosition(3)-(uiKernelMainPanel.Position(3)/2)-49 ...
+                            'Position', [aFigurePosition(3)-(uiKernelMainPanel.Position(3)/2)-48 ...
                                          7 ...
                                          40 ...
                                          aFigurePosition(4)-11  ...
@@ -1854,7 +1850,7 @@ end
                             );
                     elseif viewRoiPanel('get') == true
                         set(ptrColorbar, ...
-                            'Position', [aFigurePosition(3)-(uiRoiMainPanel.Position(3)/2)-49 ...
+                            'Position', [aFigurePosition(3)-(uiRoiMainPanel.Position(3)/2)-48 ...
                                          7 ...
                                          40 ...
                                          aFigurePosition(4)-11  ...
@@ -1862,7 +1858,7 @@ end
                             );
                     else
                         set(ptrColorbar, ...
-                            'Position', [aFigurePosition(3)-49 ...
+                            'Position', [aFigurePosition(3)-48 ...
                                          7 ...
                                          40 ...
                                          aFigurePosition(4)-11  ...
@@ -1871,7 +1867,7 @@ end
                     end
                 else
                     set(ptrColorbar, ...
-                        'Position', [aFigurePosition(3)-49 ...
+                        'Position', [aFigurePosition(3)-48 ...
                                      7 ...
                                      40 ...
                                      aFigurePosition(4)-11  ...
@@ -1890,7 +1886,7 @@ end
             
             % Set fused axes on same field of view
 
-            if size(fusionBuffer('get', [], iFuseOffset), 3) == 1
+            if size(fusionBuffer('get', [], dFusionSeriesOffset), 3) == 1
 
                 axe  = axePtr ('get', [], get(uiSeriesPtr('get'), 'Value')  );
                 axef = axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
@@ -2075,7 +2071,7 @@ end
             set(uiLogo, 'Position', [5 15 70 30]);
         end
 
-        setViewerDefaultColor(true, tMetaData, tFuseMetaData);
+        setViewerDefaultColor(true, atMetaData, atFusionMetaData);
 
         refreshImages(); 
             

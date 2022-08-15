@@ -32,5 +32,6 @@ function dOffset = isoColorFusionOffset(sAction, dValue)
     if strcmpi('set', sAction)
         pdOffset = dValue;            
     end
+    
     dOffset = pdOffset;
 end
