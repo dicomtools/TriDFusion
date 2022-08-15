@@ -30,7 +30,7 @@ function setMIPCallback(~, ~)
     if numel(dicomBuffer('get')) && ...
        size(dicomBuffer('get'), 3) ~= 1
 
-%        try
+        try
 
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
@@ -843,9 +843,9 @@ end
             end
         end
 
-%        catch
-%            progressBar(1, 'Error:setMIPCallback()');
-%        end
+        catch
+            progressBar(1, 'Error:setMIPCallback()');
+        end
 
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;

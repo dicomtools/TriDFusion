@@ -30,7 +30,7 @@ function setIsoSurfaceCallback(~, ~)
     if numel(dicomBuffer('get')) && ...
        size(dicomBuffer('get'), 3) ~= 1
    
- %       try
+        try
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
 %             releaseRoiAxeWait();
@@ -946,9 +946,9 @@ end
             end
         end
         
-%        catch
-%            progressBar(1, 'Error:setIsoSurfaceCallback()');
-%        end
+        catch
+            progressBar(1, 'Error:setIsoSurfaceCallback()');
+        end
         
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;
