@@ -33,63 +33,23 @@ function aImage = computeMicrospereActivity(aImage, atMetaData, sTreatmentType, 
     uiSeries = uiSeriesPtr('get');
     dSeriesOffset = get(uiSeries, 'Value');
     
-    atInputTemplate = inputTemplate('get');
-
     atRoi = roiTemplate('get', dSeriesOffset);
     atVoi = voiTemplate('get', dSeriesOffset);
     
     if isempty(atVoi)
         return;
-    end
-       
-    paInputBuffer = inputBuffer('get');
-    if     strcmpi(imageOrientation('get'), 'axial')
-        aInputBuffer = permute(paInputBuffer{dSeriesOffset}, [1 2 3]);
-    elseif strcmpi(imageOrientation('get'), 'coronal')
-        aInputBuffer = permute(paInputBuffer{dSeriesOffset}, [3 2 1]);
-    elseif strcmpi(imageOrientation('get'), 'sagittal')
-        aInputBuffer = permute(paInputBuffer{dSeriesOffset}, [3 1 2]);
-    end
+    end                   
     
-    if size(aInputBuffer, 3) ==1
-
-        if atInputTemplate(dSeriesOffset).bFlipLeftRight == true
-            aInputBuffer=aInputBuffer(:,end:-1:1);
-        end
-
-        if atInputTemplate(dSeriesOffset).bFlipAntPost == true
-            aInputBuffer=aInputBuffer(end:-1:1,:);
-        end            
+    xPixel = atMetaData{1}.PixelSpacing(1)/10;
+    yPixel = atMetaData{1}.PixelSpacing(2)/10; 
+    if size(aImage, 3) == 1 
+        zPixel = 1;
     else
-        if atInputTemplate(dSeriesOffset).bFlipLeftRight == true
-            aInputBuffer=aInputBuffer(:,end:-1:1,:);
-        end
-
-        if atInputTemplate(dSeriesOffset).bFlipAntPost == true
-            aInputBuffer=aInputBuffer(end:-1:1,:,:);
-        end
-
-        if atInputTemplate(dSeriesOffset).bFlipHeadFeet == true
-            aInputBuffer=aInputBuffer(:,:,end:-1:1);
-        end 
-    end 
-            
-    atInputMetaData = atInputTemplate(dSeriesOffset).atDicomInfo;
-    
-%    bDoseKernel      = atInputTemplate(dSeriesOffset).bDoseKernel;
-    bMovementApplied = atInputTemplate(dSeriesOffset).tMovement.bMovementApplied;
-    
-    tRoiQuant = quantificationTemplate('get');
-
-    if isfield(tRoiQuant, 'tSUV')
-        dSUVScale = tRoiQuant.tSUV.dScale;
-    else
-        dSUVScale = 0;
+        zPixel = computeSliceSpacing(atMetaData)/10; 
     end
+
+    dVoxVolume = xPixel * yPixel * zPixel;      
     
-    bSUVUnit = true;    
-    bSegmented = false;
-           
     if strcmpi(sTreatmentType, 'TheraSphere')
         dSphereMultiplicator = 2500; % BQ per sphere
     elseif strcmpi(sTreatmentType, 'SIRsphere')
@@ -102,20 +62,47 @@ function aImage = computeMicrospereActivity(aImage, atMetaData, sTreatmentType, 
     end
        
     dNbVois = numel(atVoi);
+    
     for vv=1:dNbVois
         
-        if ~strcmpi(atVoi{vv}.Label, 'TOTAL-MASK')
+        dNbRois = numel(atVoi{vv}.RoisTag);
 
-            if mod(vv, 5)==1 || vv == dNbVois
-                progressBar(vv/dNbVois-0.0001, sprintf('Processing microsphere %d/%d', vv, dNbVois ) );
-            end
+        if mod(vv, 5)==1 || vv == dNbVois
+            progressBar(vv/dNbVois-0.0001, sprintf('Processing microsphere %d/%d', vv, dNbVois ) );
+        end
 
-            [tVoiComputed, ~, aVoiMask] = computeVoi(aInputBuffer, atInputMetaData, aImage, atMetaData, atVoi{vv}, atRoi, dSUVScale, bSUVUnit, bSegmented, true, bMovementApplied);
+        voiMask = zeros(size(aImage));
 
-            dNbSphere = round(tVoiComputed.volume / dMicrosphereVolume);
+        for rr=1:dNbRois
+          
+            aTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {[atVoi{vv}.RoisTag{rr}]} );
 
-            aImage(aVoiMask) = dNbSphere * dSphereMultiplicator / tVoiComputed.cells;  
-        end         
+            tRoi = atRoi{find(aTagOffset, 1)};
+
+            switch lower(tRoi.Axe)     
+                
+                case 'axe'
+                    voiMask = roiTemplateToMask(tRoi, dicomBuffer('get')) | voiMask;
+
+                case 'axes1'
+                    voiMask(tRoi.SliceNb,:,:) = roiTemplateToMask(tRoi, dicomBuffer('get')) | permute(voiMask(tRoi.SliceNb,:,:), [3 2 1]);
+
+                case 'axes2'
+                    voiMask(:,tRoi.SliceNb,:) = roiTemplateToMask(tRoi, dicomBuffer('get')) | permute(voiMask(:,tRoi.SliceNb,:), [3 1 2]);
+
+               case 'axes3'
+                    voiMask(:,:,tRoi.SliceNb) = roiTemplateToMask(tRoi, dicomBuffer('get')) | voiMask(:,:,tRoi.SliceNb);
+            end 
+
+        end
+  
+        dNbCells = numel( aImage(voiMask~=0) );                     
+
+        dContourVolume = dNbCells*dVoxVolume;
+
+        dNbSphere = round(dContourVolume / dMicrosphereVolume);
+
+        aImage(voiMask~=0) = dNbSphere * dSphereMultiplicator / dNbCells;  
     end
     
     progressBar(1, 'Ready');

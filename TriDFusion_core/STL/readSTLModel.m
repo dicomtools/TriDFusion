@@ -1,5 +1,5 @@
-function readSTLModel(sPath, sFile, xBufSize, yBufSize, zBufSize, dPixelValue, bFillHoles)
-%function readSTLModel(sPath, sFile, xBufSize, yBufSize, zBufSize, dPixelValue, bFillHoles)
+function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ, dPixelValue, bFillHoles)
+%function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ, dPixelValue, bFillHoles)
 %Read .stl Model.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,10 +27,12 @@ function readSTLModel(sPath, sFile, xBufSize, yBufSize, zBufSize, dPixelValue, b
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    tInput = inputTemplate('get');
-    atDcmMetaData = dicomMetaData('get');   
+    % Deactivate main tool bar 
+    set(uiSeriesPtr('get'), 'Enable', 'off');                
+    mainToolBarEnable('off');
+    
+    atInput = inputTemplate('get');
 
-    iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 %    if iSeriesOffset > numel(inputTemplate('get'))  
 %        return;
 %    end 
@@ -39,143 +41,226 @@ function readSTLModel(sPath, sFile, xBufSize, yBufSize, zBufSize, dPixelValue, b
                 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow; 
-        
-    progressBar(0.999999, 'Processing import stl, please wait');
-
-    FV = stlread(sprintf('%s%s', sPath, sFile));            
-
-%        aVolume = polygon2voxel(FV, [xBufSize yBufSize zBufSize], 'auto');
-    aVolume = polygon2voxel(FV, [xBufSize yBufSize zBufSize], 'auto');
-    if bFillHoles == true
-        aVolume = imfill(aVolume, 'holes');
-    end
-    aVolume = aVolume(:,:,end:-1:1);
-    aVolume = double(aVolume);
-    aVolume(aVolume~=0) = dPixelValue;
-
-if 0        
-        x = aspectRatioValue('get', 'x');
-        y = aspectRatioValue('get', 'y');
-        z = aspectRatioValue('get', 'z');                                                                    
-
-        if  strcmp(imageOrientation('get'), 'axial')   
-
-            aScaleFactors = [x y z];    
-        elseif strcmp(imageOrientation('get'), 'coronal' )                           
-
-            aScaleFactors = [y z x];   
-        elseif strcmp(imageOrientation('get'), 'sagittal') 
-
-            aScaleFactors = [x z y];
-        end
-
-        dcmSliceThickness = computeSliceSpacing(atDcmMetaData);
-
-        dimsRef = size(aVolume);        
-        dimsDcm = size(aVolume); 
-        dimsRef(1) =  dimsRef(1)*aScaleFactors(1);
-        dimsRef(2) =  dimsRef(2)*aScaleFactors(2);
-        dimsRef(3) =  dimsRef(3)*aScaleFactors(3);
-
-        f = diag([dimsRef(:) ./ dimsDcm(:);1]);
-
-        TF = affine3d(f);
-
-        Rdcm  = imref3d(size(aVolume),atDcmMetaData{1}.PixelSpacing(2),atDcmMetaData{1}.PixelSpacing(1),dcmSliceThickness);
-
-        sMode = 'linear';
-        [resampImage, ~] = imwarp(aVolume, Rdcm, TF, 'Interp', sMode, 'FillValues', cropValue('get'));          
-        aVolume = resampImage;
-end        
     
-    if ~isempty(tInput)
-        tInput(numel(tInput)+1) = tInput(iSeriesOffset);
-        tInput(numel(tInput)).atDicomInfo = atDcmMetaData;        
+    releaseRoiWait();
+
+    set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+    set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+
+    set(zoomMenu('get'), 'Checked', 'off');
+    set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+    set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+    zoomTool('set', false);
+    zoom('off');           
+
+    set(panMenu('get'), 'Checked', 'off');
+    set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+    set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
+    panTool('set', false);
+    pan('off');     
+
+    set(rotate3DMenu('get'), 'Checked', 'off');         
+    rotate3DTool('set', false);
+    rotate3d off;
+
+    set(dataCursorMenu('get'), 'Checked', 'off');
+    dataCursorTool('set', false);              
+    datacursormode('off');  
+        
+    progressBar(0.5, 'Reading stl, please wait.');
+
+    FV = stlread(sprintf('%s%s', sPath, sFileName));            
+    
+    progressBar(0.999999, 'Converting polygon to voxel, please wait.');
+
+%        aBuffer = polygon2voxel(FV, [dimX dimY dimZ], 'auto');
+    aBuffer = polygon2voxel(FV, [dimX dimY dimZ], 'auto');
+    if bFillHoles == true
+        aBuffer = imfill(aBuffer, 'holes');
+    end
+    
+    aBuffer = aBuffer(:,:,end:-1:1);
+    aBuffer = double(aBuffer);
+    aBuffer(aBuffer~=0) = dPixelValue;       
+    
+    if ~isempty(atInput)
+        
+%        atInput(numel(atInput)+1) = atInput(iSeriesOffset);
+%        atInput(numel(atInput)).atDicomInfo = atDcmMetaData;        
+
 
         asSeriesDescription = seriesDescription('get');
-        asSeriesDescription{numel(asSeriesDescription)+1}=sprintf('STL-%s', sFile);
-
-        for jj=1:numel(tInput(numel(tInput)).atDicomInfo)
-            tInput(numel(tInput)).atDicomInfo{jj}.SeriesDescription = asSeriesDescription{numel(asSeriesDescription)};
-            tInput(numel(tInput)).atDicomInfo{jj}.Modality = 'ot';            
-       %     tInput(numel(tInput)).atDicomInfo{jj}.PixelSpacing(1) = 1;
-       %     tInput(numel(tInput)).atDicomInfo{jj}.PixelSpacing(2) = 1;
-       %     tInput(numel(tInput)).atDicomInfo{jj}.ImagePositionPatient(1)=0;
-       %     tInput(numel(tInput)).atDicomInfo{jj}.ImagePositionPatient(2)=0;
-       %     tInput(numel(tInput)).atDicomInfo{jj}.ImagePositionPatient(3)=jj;
-        end
+        asSeriesDescription{numel(asSeriesDescription)+1}=sprintf('STL-%s', sFileName);
         
-        tInput(numel(tInput)).bEdgeDetection = false;
-        tInput(numel(tInput)).bFlipLeftRight = false;
-        tInput(numel(tInput)).bFlipAntPost   = false;
-        tInput(numel(tInput)).bFlipHeadFeet  = false;
-        tInput(numel(tInput)).bDoseKernel    = false;
-        tInput(numel(tInput)).bMathApplied   = false;
-        tInput(numel(tInput)).bFusedDoseKernel    = false;
-        tInput(numel(tInput)).bFusedEdgeDetection = false;
-        tInput(numel(tInput)).tMovement = [];
-        tInput(numel(tInput)).tMovement.bMovementApplied = false;
-        tInput(numel(tInput)).tMovement.aGeomtform = [];
-        tInput(numel(tInput)).tMovement.atSeq{1}.sAxe = [];
-        tInput(numel(tInput)).tMovement.atSeq{1}.aTranslation = [];
-        tInput(numel(tInput)).tMovement.atSeq{1}.dRotation = [];  
+        atInput(numel(atInput)+1).atDicomInfo = [];        
+        
+        atInput(numel(atInput)).atDicomInfo{1}.Modality = 'ot';
+        atInput(numel(atInput)).atDicomInfo{1}.Units = '';
+        atInput(numel(atInput)).atDicomInfo{1}.ReconstructionDiameter = [];
+        
+        atInput(numel(atInput)).atDicomInfo{1}.PixelSpacing(1)      = voxelX;
+        atInput(numel(atInput)).atDicomInfo{1}.PixelSpacing(2)      = voxelY;        
+        atInput(numel(atInput)).atDicomInfo{1}.SpacingBetweenSlices = voxelZ;
+        
+        % Patient information
+       
+        atInput(numel(atInput)).atDicomInfo{1}.PatientName      = asSeriesDescription{1}; 
+        atInput(numel(atInput)).atDicomInfo{1}.PatientID        = asSeriesDescription{1};
+        
+        atInput(numel(atInput)).atDicomInfo{1}.PatientWeight    = [];
+        atInput(numel(atInput)).atDicomInfo{1}.PatientSize      = [];
+        atInput(numel(atInput)).atDicomInfo{1}.PatientSex       = '';
+        atInput(numel(atInput)).atDicomInfo{1}.PatientAge       = '';
+        atInput(numel(atInput)).atDicomInfo{1}.PatientBirthDate = '';   
+        
+        atInput(numel(atInput)).atDicomInfo{1}.SeriesDescription = asSeriesDescription{1}; 
+        
+        atInput(numel(atInput)).atDicomInfo{1}.InstanceNumber          = 1; 
+        atInput(numel(atInput)).atDicomInfo{1}.PatientPosition         = [];
+        atInput(numel(atInput)).atDicomInfo{1}.ImagePositionPatient    = zeros(3,1); 
+        atInput(numel(atInput)).atDicomInfo{1}.ImageOrientationPatient = zeros(6,1); 
+        
+        % Series SOP
+       
+        atInput(numel(atInput)).atDicomInfo{1}.SOPClassUID = ''; 
+        atInput(numel(atInput)).atDicomInfo{1}.MediaStorageSOPClassUID = ''; 
+        atInput(numel(atInput)).atDicomInfo{1}.SOPInstanceUID = ''; 
+        atInput(numel(atInput)).atDicomInfo{1}.FrameOfReferenceUID = ''; 
+        
+        % Series UID
+        
+        atInput(numel(atInput)).atDicomInfo{1}.StudyID           = '';
+        atInput(numel(atInput)).atDicomInfo{1}.SeriesInstanceUID = '';
+        atInput(numel(atInput)).atDicomInfo{1}.StudyInstanceUID  = '';
+        
+        % Date Time
+   
+        atInput(numel(atInput)).atDicomInfo{1}.SeriesTime = '';
+        atInput(numel(atInput)).atDicomInfo{1}.SeriesDate = '';
+
+        atInput(numel(atInput)).atDicomInfo{1}.AcquisitionTime = '';
+        atInput(numel(atInput)).atDicomInfo{1}.AcquisitionDate = '';   
+        
+        % Series default
+        
+        atInput(numel(atInput)).asFilesList = [];
+       
+        atInput(numel(atInput)).bEdgeDetection = false;
+        atInput(numel(atInput)).bFlipLeftRight = false;
+        atInput(numel(atInput)).bFlipAntPost   = false;
+        atInput(numel(atInput)).bFlipHeadFeet  = false;
+        atInput(numel(atInput)).bDoseKernel    = false;
+        atInput(numel(atInput)).bMathApplied   = false;
+        atInput(numel(atInput)).bFusedDoseKernel    = false;
+        atInput(numel(atInput)).bFusedEdgeDetection = false;
+        atInput(numel(atInput)).tMovement = [];
+        atInput(numel(atInput)).tMovement.bMovementApplied = false;
+        atInput(numel(atInput)).tMovement.aGeomtform = [];
+        atInput(numel(atInput)).tMovement.atSeq{1}.sAxe = [];
+        atInput(numel(atInput)).tMovement.atSeq{1}.aTranslation = [];
+        atInput(numel(atInput)).tMovement.atSeq{1}.dRotation = [];  
         
         asSeries = get(uiSeriesPtr('get'), 'String');
-        asSeries{numel(asSeries)+1} = asSeriesDescription{numel(asSeriesDescription)};        
+        asSeries{numel(asSeries)+1} = asSeriesDescription{numel(asSeriesDescription)};   
+        
     else
         
-        asSeriesDescription{1}=sprintf('STL-%s', sFile);
+        asSeriesDescription{1}=sprintf('STL-%s', sFileName);
+
+        atInput(1).atDicomInfo{1}.Modality = 'ot';
+        atInput(1).atDicomInfo{1}.SeriesDescription = asSeriesDescription{1}; 
+        atInput(1).atDicomInfo{1}.Units = '';
+        atInput(1).atDicomInfo{1}.ReconstructionDiameter = [];
         
-        tInput(1).atDicomInfo{1}.PixelSpacing(1) = 1;
-        tInput(1).atDicomInfo{1}.PixelSpacing(2) = 1;
-        tInput(1).atDicomInfo{1}.SpacingBetweenSlices = 1;
+        atInput(1).atDicomInfo{1}.PixelSpacing(1)      = voxelX;
+        atInput(1).atDicomInfo{1}.PixelSpacing(2)      = voxelY;        
+        atInput(1).atDicomInfo{1}.SpacingBetweenSlices = voxelZ;
+        
+        % Patient information
        
-        tInput(1).atDicomInfo{1}.Modality = 'ot';
-        tInput(1).atDicomInfo{1}.SeriesDescription = asSeriesDescription{1}; 
-        tInput(1).atDicomInfo{1}.Units = '';
-        tInput(1).atDicomInfo{1}.ReconstructionDiameter = [];
+        atInput(1).atDicomInfo{1}.PatientName      = asSeriesDescription{1}; 
+        atInput(1).atDicomInfo{1}.PatientID        = asSeriesDescription{1};
         
-        tInput(1).bEdgeDetection = false;
-        tInput(1).bFlipLeftRight = false;
-        tInput(1).bFlipAntPost   = false;
-        tInput(1).bFlipHeadFeet  = false;
-        tInput(1).bDoseKernel    = false;
-        tInput(1).bMathApplied   = false;
-        tInput(1).bFusedDoseKernel    = false;
-        tInput(1).bFusedEdgeDetection = false;
+        atInput(1).atDicomInfo{1}.PatientWeight    = '';
+        atInput(1).atDicomInfo{1}.PatientSize      = '';
+        atInput(1).atDicomInfo{1}.PatientSex       = '';
+        atInput(1).atDicomInfo{1}.PatientAge       = '';
+        atInput(1).atDicomInfo{1}.PatientBirthDate = '';   
+        
+        atInput(1).atDicomInfo{1}.SeriesDescription = asSeriesDescription{1}; 
+        
+        atInput(1).atDicomInfo{1}.InstanceNumber          = 1; 
+        atInput(1).atDicomInfo{1}.PatientPosition         = [];
+        atInput(1).atDicomInfo{1}.ImagePositionPatient    = zeros(3,1); 
+        atInput(1).atDicomInfo{1}.ImageOrientationPatient = zeros(6,1); 
+        
+        % Series SOP
+       
+        atInput(1).atDicomInfo{1}.SOPClassUID = ''; 
+        atInput(1).atDicomInfo{1}.MediaStorageSOPClassUID = ''; 
+        atInput(1).atDicomInfo{1}.SOPInstanceUID = ''; 
+        atInput(1).atDicomInfo{1}.FrameOfReferenceUID = ''; 
+        
+        % Series UID
+        
+        atInput(1).atDicomInfo{1}.StudyID           = '';
+        atInput(1).atDicomInfo{1}.SeriesInstanceUID = '';
+        atInput(1).atDicomInfo{1}.StudyInstanceUID  = '';
+        
+        % Date Time
+   
+        atInput(1).atDicomInfo{1}.SeriesTime = '';
+        atInput(1).atDicomInfo{1}.SeriesDate = '';
+
+        atInput(1).atDicomInfo{1}.AcquisitionTime = '';
+        atInput(1).atDicomInfo{1}.AcquisitionDate = '';   
+        
+        % Series default
+        atInput(1).asFilesList = [];
+        
+        atInput(1).bEdgeDetection = false;
+        atInput(1).bFlipLeftRight = false;
+        atInput(1).bFlipAntPost   = false;
+        atInput(1).bFlipHeadFeet  = false;
+        atInput(1).bDoseKernel    = false;
+        atInput(1).bMathApplied   = false;
+        atInput(1).bFusedDoseKernel    = false;
+        atInput(1).bFusedEdgeDetection = false;
+        atInput(1).tMovement = [];
+        atInput(1).tMovement.bMovementApplied = false;
+        atInput(1).tMovement.aGeomtform = [];
+        atInput(1).tMovement.atSeq{1}.sAxe = [];
+        atInput(1).tMovement.atSeq{1}.aTranslation = [];
+        atInput(1).tMovement.atSeq{1}.dRotation = [];  
         
         asSeries{1} = asSeriesDescription{1};              
-    end    
-    
+    end   
+            
     seriesDescription('set', asSeriesDescription);
- 
-        
-    inputTemplate('set', tInput);
+            
+    inputTemplate('set', atInput);
 
     aInputBuffer = inputBuffer('get');        
-    aInputBuffer{numel(aInputBuffer)+1} = aVolume;    
+    aInputBuffer{numel(aInputBuffer)+1} = aBuffer;    
     inputBuffer('set', aInputBuffer);
-    
-    
+        
     set(uiSeriesPtr('get'), 'String', asSeries);
     set(uiFusedSeriesPtr('get'), 'String', asSeries);
     
-    set(uiSeriesPtr('get'), 'Enable', 'on');
+    set(uiSeriesPtr('get'), 'Value', numel(atInput));
+    dicomMetaData('set', atInput(numel(atInput)).atDicomInfo);
+    dicomBuffer('set', aBuffer);
+    
+    aMip = computeMIP(aBuffer);
+    mipBuffer('set', aMip, numel(atInput)) ;
+    atInput(numel(atInput)).aMip = aMip;   
+    
+    setQuantification(numel(atInput));
 
-    set(uiSeriesPtr('get'), 'Value', numel(tInput));
-    dicomMetaData('set', tInput(numel(tInput)).atDicomInfo);
-    dicomBuffer('set', aVolume);
-    
-    aMip = computeMIP(aVolume);
-    mipBuffer('set', aMip, numel(tInput)) ;
-    tInput(numel(tInput)).aMip = aMip;       
-    
-    setQuantification(numel(tInput));
-    
     tQuant = quantificationTemplate('get');
-    tInput(numel(tInput)).tQuant = tQuant;
-    inputTemplate('set', tInput);  
-   
+    atInput(numel(atInput)).tQuant = tQuant;
+    inputTemplate('set', atInput);  
+
     clearDisplay();                       
     initDisplay(3); 
 
@@ -183,16 +268,28 @@ end
 
     dicomViewerCore();  
     
-    setViewerDefaultColor(1, tInput(numel(tInput)).atDicomInfo);
-
-    refreshImages();     
-
-    progressBar(1, sprintf('Import %s completed', sFile));
+    setViewerDefaultColor(1, atInput(numel(atInput)).atDicomInfo);
+       
+    refreshImages();
+    
+    % Activate playback
+   
+    if size(dicomBuffer('get'), 3) ~= 1
+        setPlaybackToolbar('on');
+    end
+    
+    setRoiToolbar('on');
+    
+    progressBar(1, sprintf('Import %s completed.', sFileName));
     
     catch
         progressBar(1, 'Error:readSTLModel()');                        
     end
-
+    
+    % Reactivate main tool bar 
+    set(uiSeriesPtr('get'), 'Enable', 'on');        
+    mainToolBarEnable('on');
+    
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow; 
 end

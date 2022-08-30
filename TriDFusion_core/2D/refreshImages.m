@@ -188,24 +188,24 @@ function refreshImages()
 %             if isShading('get') == true
 %                 shading(axe, 'interp');
 %             end
-        tRefreshRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-        if ~isempty(tRefreshRoi)
-            for bb=1:numel(tRefreshRoi)
-                if isvalid(tRefreshRoi{bb}.Object)
-                    tRefreshRoi{bb}.Object.Visible = 'on';
+        atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        if ~isempty(atRoiInput)
+            for bb=1:numel(atRoiInput)
+                if isvalid(atRoiInput{bb}.Object)
+                    atRoiInput{bb}.Object.Visible = 'on';
                     if viewFarthestDistances('get') == true
-                        if ~isempty(tRefreshRoi{bb}.MaxDistances)
-                            tRefreshRoi{bb}.MaxDistances.MaxXY.Line.Visible = 'on';
-                            tRefreshRoi{bb}.MaxDistances.MaxCY.Line.Visible = 'on';
-                            tRefreshRoi{bb}.MaxDistances.MaxXY.Text.Visible = 'on';
-                            tRefreshRoi{bb}.MaxDistances.MaxCY.Text.Visible = 'on';
+                        if ~isempty(atRoiInput{bb}.MaxDistances)
+                            atRoiInput{bb}.MaxDistances.MaxXY.Line.Visible = 'on';
+                            atRoiInput{bb}.MaxDistances.MaxCY.Line.Visible = 'on';
+                            atRoiInput{bb}.MaxDistances.MaxXY.Text.Visible = 'on';
+                            atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'on';
                         end
                     else
-                        if ~isempty(tRefreshRoi{bb}.MaxDistances)
-                            tRefreshRoi{bb}.MaxDistances.MaxXY.Line.Visible = 'off';
-                            tRefreshRoi{bb}.MaxDistances.MaxCY.Line.Visible = 'off';
-                            tRefreshRoi{bb}.MaxDistances.MaxXY.Text.Visible = 'off';
-                            tRefreshRoi{bb}.MaxDistances.MaxCY.Text.Visible = 'off';
+                        if ~isempty(atRoiInput{bb}.MaxDistances)
+                            atRoiInput{bb}.MaxDistances.MaxXY.Line.Visible = 'off';
+                            atRoiInput{bb}.MaxDistances.MaxCY.Line.Visible = 'off';
+                            atRoiInput{bb}.MaxDistances.MaxXY.Text.Visible = 'off';
+                            atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'off';
                         end
                     end
                end
@@ -803,69 +803,114 @@ function refreshImages()
                 end
             end
 if 0
-            tRefreshRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-            for bb=1:numel(tRefreshRoi)
+            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            for bb=1:numel(atRoiInput)
 
-                if isvalid(tRefreshRoi{bb}.Object)
+                if isvalid(atRoiInput{bb}.Object)
 
-                    tRefreshRoi{bb}.Object.Visible = 'off';
+                    atRoiInput{bb}.Object.Visible = 'off';
 
-                    if ~isempty(tRefreshRoi{bb}.MaxDistances)
-                        tRefreshRoi{bb}.MaxDistances.MaxXY.Line.Visible = 'off';
-                        tRefreshRoi{bb}.MaxDistances.MaxCY.Line.Visible = 'off';
-                        tRefreshRoi{bb}.MaxDistances.MaxXY.Text.Visible = 'off';
-                        tRefreshRoi{bb}.MaxDistances.MaxCY.Text.Visible = 'off';
+                    if ~isempty(atRoiInput{bb}.MaxDistances)
+                        atRoiInput{bb}.MaxDistances.MaxXY.Line.Visible = 'off';
+                        atRoiInput{bb}.MaxDistances.MaxCY.Line.Visible = 'off';
+                        atRoiInput{bb}.MaxDistances.MaxXY.Text.Visible = 'off';
+                        atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'off';
                     end
                 end
             end
 end            
         end
+        
+        atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
 if 1 % Need to improve speed
-        tRefreshRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-        if ~isempty(tRefreshRoi) && isVsplash('get') == false
+%tic
+        if ~isempty(atRoiInput) && isVsplash('get') == false
 
     %        H = findobj('Type', 'images.roi.freehand');
     %        set(H,'visible','off');
 
-            for bb=1:numel(tRefreshRoi)
-               if isvalid(tRefreshRoi{bb}.Object)
-                   if (strcmpi(tRefreshRoi{bb}.Axe, 'Axes1') && ...
-                        iCoronal == tRefreshRoi{bb}.SliceNb) || ...
-                       (strcmpi(tRefreshRoi{bb}.Axe, 'Axes2')&& ...
-                        iSagittal == tRefreshRoi{bb}.SliceNb)|| ...
-                       (strcmpi(tRefreshRoi{bb}.Axe, 'Axes3') && ...
-                        iAxial == tRefreshRoi{bb}.SliceNb)
+            for bb=1:numel(atRoiInput)
+               if isvalid(atRoiInput{bb}.Object)
+                   if (strcmpi(atRoiInput{bb}.Axe, 'Axes1') && ...
+                        iCoronal == atRoiInput{bb}.SliceNb) || ...
+                       (strcmpi(atRoiInput{bb}.Axe, 'Axes2')&& ...
+                        iSagittal == atRoiInput{bb}.SliceNb)|| ...
+                       (strcmpi(atRoiInput{bb}.Axe, 'Axes3') && ...
+                        iAxial == atRoiInput{bb}.SliceNb)
 
-                        tRefreshRoi{bb}.Object.Visible = 'on';
+                        atRoiInput{bb}.Object.Visible = 'on';
                         if viewFarthestDistances('get') == true
-                            if ~isempty(tRefreshRoi{bb}.MaxDistances)
-                                tRefreshRoi{bb}.MaxDistances.MaxXY.Line.Visible = 'on';
-                                tRefreshRoi{bb}.MaxDistances.MaxCY.Line.Visible = 'on';
-                                tRefreshRoi{bb}.MaxDistances.MaxXY.Text.Visible = 'on';
-                                tRefreshRoi{bb}.MaxDistances.MaxCY.Text.Visible = 'on';
+                            if ~isempty(atRoiInput{bb}.MaxDistances)
+                                atRoiInput{bb}.MaxDistances.MaxXY.Line.Visible = 'on';
+                                atRoiInput{bb}.MaxDistances.MaxCY.Line.Visible = 'on';
+                                atRoiInput{bb}.MaxDistances.MaxXY.Text.Visible = 'on';
+                                atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'on';
                             end
                         else
-                            if ~isempty(tRefreshRoi{bb}.MaxDistances)
-                                tRefreshRoi{bb}.MaxDistances.MaxXY.Line.Visible = 'off';
-                                tRefreshRoi{bb}.MaxDistances.MaxCY.Line.Visible = 'off';
-                                tRefreshRoi{bb}.MaxDistances.MaxXY.Text.Visible = 'off';
-                                tRefreshRoi{bb}.MaxDistances.MaxCY.Text.Visible = 'off';
+                            if ~isempty(atRoiInput{bb}.MaxDistances)
+                                atRoiInput{bb}.MaxDistances.MaxXY.Line.Visible = 'off';
+                                atRoiInput{bb}.MaxDistances.MaxCY.Line.Visible = 'off';
+                                atRoiInput{bb}.MaxDistances.MaxXY.Text.Visible = 'off';
+                                atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'off';
                             end
                         end
 
                     else
-                        tRefreshRoi{bb}.Object.Visible = 'off';
+                        atRoiInput{bb}.Object.Visible = 'off';
 
-                        if ~isempty(tRefreshRoi{bb}.MaxDistances)
-                            tRefreshRoi{bb}.MaxDistances.MaxXY.Line.Visible = 'off';
-                            tRefreshRoi{bb}.MaxDistances.MaxCY.Line.Visible = 'off';
-                            tRefreshRoi{bb}.MaxDistances.MaxXY.Text.Visible = 'off';
-                            tRefreshRoi{bb}.MaxDistances.MaxCY.Text.Visible = 'off';
+                        if ~isempty(atRoiInput{bb}.MaxDistances)
+                            atRoiInput{bb}.MaxDistances.MaxXY.Line.Visible = 'off';
+                            atRoiInput{bb}.MaxDistances.MaxCY.Line.Visible = 'off';
+                            atRoiInput{bb}.MaxDistances.MaxXY.Text.Visible = 'off';
+                            atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'off';
                         end
                     end
                end
             end
         end
+%toc        
+else
+    if ~isempty(atRoiInput)
+tic        
+        % Deactivate all valid ROIs
+        
+        aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Object.Visible, atRoiInput, 'uni', false ), {'on'} );
+        if aTagOffset(aTagOffset) 
+            for rr=1:numel(aTagOffset)
+                atRoiInput{rr}.Object.Visible = 'off';    
+                if ~isempty(atRoiInput{rr}.MaxDistances)
+                    atRoiInput{rr}.MaxDistances.MaxXY.Line.Visible = 'off';
+                    atRoiInput{rr}.MaxDistances.MaxCY.Line.Visible = 'off';
+                    atRoiInput{rr}.MaxDistances.MaxXY.Text.Visible = 'off';
+                    atRoiInput{rr}.MaxDistances.MaxCY.Text.Visible = 'off'; 
+                end
+            end
+        end
+        
+        for bb=1:numel(atRoiInput)
+           if isvalid(atRoiInput{bb}.Object)
+               if (strcmpi(atRoiInput{bb}.Axe, 'Axes1') && ...
+                    iCoronal == atRoiInput{bb}.SliceNb) || ...
+                   (strcmpi(atRoiInput{bb}.Axe, 'Axes2')&& ...
+                    iSagittal == atRoiInput{bb}.SliceNb)|| ...
+                   (strcmpi(atRoiInput{bb}.Axe, 'Axes3') && ...
+                    iAxial == atRoiInput{bb}.SliceNb)
+
+                    atRoiInput{bb}.Object.Visible = 'on';
+                    if viewFarthestDistances('get') == true
+                        if ~isempty(atRoiInput{bb}.MaxDistances)
+                            atRoiInput{bb}.MaxDistances.MaxXY.Line.Visible = 'on';
+                            atRoiInput{bb}.MaxDistances.MaxCY.Line.Visible = 'on';
+                            atRoiInput{bb}.MaxDistances.MaxXY.Text.Visible = 'on';
+                            atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'on';
+                        end
+                    end
+               end
+           end
+        end
+    end
+toc    
 end
         if crossActivate('get') == true && ...
            isVsplash('get') == false
@@ -1229,7 +1274,7 @@ end
                 tAxes2ViewText.Color  = overlayColor('get');
             end
 
-            tOverlayQuant = quantificationTemplate('get');
+            tQuantification = quantificationTemplate('get');
             atMetaData = dicomMetaData('get');
 
             bDisplayAxe3 = true;
@@ -1263,10 +1308,24 @@ end
                             sUnit = getSerieUnitValue(dOffset);
 
                             if strcmpi(sUnit, 'SUV')
-                                sDecayCorrection = lower(atMetaData{1}.DecayCorrection);
+                                
+                                switch lower(atMetaData{1}.DecayCorrection)
+                                    case 'start'
+                                        sDecayCorrection = '(SUV is decay-corrected to scan start time)';
+                                        
+                                    case 'admin'
+                                        sDecayCorrection = '(SUV is decay-corrected to administration time)';
+
+                                    case 'none'
+                                        sDecayCorrection = '(No decay correction)';
+                                        
+                                    otherwise
+                                    sDecayCorrection = '';
+                                end
+                                
                                 sSUVtype = viewerSUVtype('get');
-                                suvValue = double(im(iCoronal,iSagittal,iAxial)) * tOverlayQuant.tSUV.dScale;
-                                sAxe3Text = sprintf('\n\n\n\n\n\n\n\n\n%s\n%s\n%s\n%s\n%s\n(SUV is decay-corrected to scan %s time)\nMin SUV/%s: %s -- %s Bq/cc\nMax SUV/%s: %s -- %s Bq/cc\nTotal SUV/%s: %s -- %s mCi\nCurrent SUV/%s: %s -- %s Bq/cc\nLookup Table SUV/%s: %s - %s\nA: %s/%s', ...
+                                suvValue = double(im(iCoronal,iSagittal,iAxial)) * tQuantification.tSUV.dScale;
+                                sAxe3Text = sprintf('\n\n\n\n\n\n\n\n\n%s\n%s\n%s\n%s\n%s\n%s\nMin SUV/%s: %s -- %s Bq/cc\nMax SUV/%s: %s -- %s Bq/cc\nTotal activity: %s MBq -- %s mCi\nCurrent SUV/%s: %s -- %s Bq/cc\nLookup Table SUV/%s: %s - %s\nA: %s/%s', ...
                                     sPatientName, ...
                                     sPatientID, ...
                                     sSeriesDescription, ...
@@ -1274,20 +1333,19 @@ end
                                     sSeriesDate,...
                                     sDecayCorrection, ...
                                     sSUVtype, ...
-                                    num2str(tOverlayQuant.tSUV.dMin), ...
-                                    num2str(tOverlayQuant.tCount.dMin), ...
+                                    num2str(tQuantification.tSUV.dMin), ...
+                                    num2str(tQuantification.tCount.dMin), ...
                                     sSUVtype, ...
-                                    num2str(tOverlayQuant.tSUV.dMax), ...
-                                    num2str(tOverlayQuant.tCount.dMax), ...
-                                    sSUVtype, ...
-                                    num2str(tOverlayQuant.tSUV.dTot), ...
-                                    num2str(tOverlayQuant.tSUV.dmCi), ...
+                                    num2str(tQuantification.tSUV.dMax), ...
+                                    num2str(tQuantification.tCount.dMax), ...
+                                    num2str(tQuantification.tSUV.dTot/10000000), ...
+                                    num2str(tQuantification.tSUV.dmCi), ...
                                     sSUVtype, ...
                                     num2str(suvValue), ...
                                     num2str(double(im(iCoronal,iSagittal,iAxial))), ...
                                     sSUVtype, ...
-                                    num2str(lMin*tOverlayQuant.tSUV.dScale), ...
-                                    num2str(lMax*tOverlayQuant.tSUV.dScale), ...
+                                    num2str(lMin*tQuantification.tSUV.dScale), ...
+                                    num2str(lMax*tQuantification.tSUV.dScale), ...
                                     sAxialSliceNumber, ...
                                     num2str(size(dicomBuffer('get'), 3)));
                             else
@@ -1297,9 +1355,9 @@ end
                                     sSeriesDescription, ...
                                     sRadiopharmaceutical, ...
                                     sSeriesDate,...
-                                    num2str(tOverlayQuant.tCount.dMin), ...
-                                    num2str(tOverlayQuant.tCount.dMax), ...
-                                    num2str(tOverlayQuant.tCount.dSum), ...
+                                    num2str(tQuantification.tCount.dMin), ...
+                                    num2str(tQuantification.tCount.dMax), ...
+                                    num2str(tQuantification.tCount.dSum), ...
                                     num2str(double(im(iCoronal,iSagittal,iAxial))), ...
                                     num2str(lMin), ...
                                     num2str(lMax), ...
@@ -1316,8 +1374,8 @@ end
                                 sPatientID, ...
                                 sSeriesDescription, ...
                                 sSeriesDate,...
-                                num2str(tOverlayQuant.tHU.dMin), ...
-                                num2str(tOverlayQuant.tHU.dMax), ...
+                                num2str(tQuantification.tHU.dMin), ...
+                                num2str(tQuantification.tHU.dMax), ...
                                 num2str(double(im(iCoronal,iSagittal,iAxial))), ...
                                 sWindowName,...
                                 num2str(round(dWindow)), ...
@@ -1331,9 +1389,9 @@ end
                                 sPatientID, ...
                                 sSeriesDescription, ...
                                 sSeriesDate,...
-                                num2str(tOverlayQuant.tCount.dMin), ...
-                                num2str(tOverlayQuant.tCount.dMax), ...
-                                num2str(tOverlayQuant.tCount.dSum), ...
+                                num2str(tQuantification.tCount.dMin), ...
+                                num2str(tQuantification.tCount.dMax), ...
+                                num2str(tQuantification.tCount.dSum), ...
                                 num2str(double(im(iCoronal,iSagittal,iAxial))), ...
                                 num2str(lMin), ...
                                 num2str(lMax), ...

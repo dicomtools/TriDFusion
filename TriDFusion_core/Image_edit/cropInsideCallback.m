@@ -113,7 +113,8 @@ function cropInsideCallback(hObject,~)
                  iAxial = sliceNumber('get', 'axial');
                  
                  aMask = createMask(hObject.UserData, im(:,:,iAxial));
-                 
+               %  mask = roiTemplateToMask(ptrRoi, imCData);      
+               
                  b = im(:,:,iAxial);       
                  c = aMask;
                  c = ~c;           

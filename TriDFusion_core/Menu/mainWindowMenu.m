@@ -30,12 +30,12 @@ function mainWindowMenu()
     mFile = uimenu(fiMainWindowPtr('get'),'Label','File');
     uimenu(mFile,'Label', 'Open...', 'Callback',@setSourceCallback);
     uimenu(mFile,'Label', 'Import .raw file...','Callback', @importRawCallback);
-    uimenu(mFile,'Label', 'Import Dose Kernel...','Callback', @importDoseKernelCallback);
-    uimenu(mFile,'Label', 'Import STL Model...','Callback', @importSTLCallback);
+    uimenu(mFile,'Label', 'Import .stl file...','Callback', @importSTLCallback);
     uimenu(mFile,'Label', 'Import RT-Structure...','Callback', @importContoursCallback);    
     uimenu(mFile,'Label', 'Import CERR planC...','Callback', @importCerrPlanCCallback, 'Separator','on');
     uimenu(mFile,'Label', 'Import CERR Dose Volume...','Callback', @importCerrDoseVolumeCallback);
     uimenu(mFile,'Label', 'Import CERR Dose Constraint...','Callback', @importCerrDoseConstraintCallback);
+    uimenu(mFile,'Label', 'Import Dose Kernel...','Callback', @importDoseKernelCallback);
 
     uimenu(mFile,'Label', 'Export DICOM...','Callback', @writeDICOMCallback, 'Separator','on');
     uimenu(mFile,'Label', 'Export DICOM All Series...','Callback', @writeDICOMAllSeriesCallback);

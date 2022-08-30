@@ -27,19 +27,52 @@ function predefinedLabelCallback(hObject,~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-%    hObject.Checked = 'on';
     hObject.UserData.Label = hObject.Text;
 
-    atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    sLabel = hObject.Text;
 
-    for bb=1:numel(atRoi)
-        if strcmpi(hObject.UserData.Tag, atRoi{bb}.Tag)
-            atRoi{bb}.Label = hObject.UserData.Label;
-            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoi);
-            break;
+    dSerieOffset = get(uiSeriesPtr('get'), 'Value');
+    atInput = inputTemplate('get');
+
+    atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
+
+    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );            
+
+    if aTagOffset(aTagOffset==1) % tag is a roi
+
+        if ~isempty(atRoiInput) 
+
+            dTagOffset = find(aTagOffset, 1);
+
+            if ~isempty(dTagOffset)
+
+                hObject.UserData.Label = sLabel;
+
+                atRoiInput{dTagOffset}.Color = sLabel;
+                if isvalid(atRoiInput{dTagOffset}.Object)
+                    atRoiInput{dTagOffset}.Object.Label = sLabel;
+                end
+
+                roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+            end
+
+            % Set roi label input template tRoi
+
+            if isfield(atInput(dSerieOffset), 'tRoi')
+
+                atInputRoi = atInput(dSerieOffset).tRoi;
+                aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {hObject.UserData.Tag} );      
+
+                dTagOffset = find(aTagOffset, 1);
+
+                if ~isempty(dTagOffset)
+                    atInput(dSerieOffset).tRoi{dTagOffset}.Label = sLabel;
+                    inputTemplate('set', atInput);                
+                end
+            end                        
         end
-    end
 
-    setVoiRoiSegPopup();
-
+%            setVoiRoiSegPopup(); Not need for ROI
+    end 
+    
 end

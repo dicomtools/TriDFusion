@@ -1,5 +1,5 @@
-function figRoiMultiplePlot(sType, atVoiRoiTag, bSUVUnit, bDoseKernel, bSegmented)
-%function figRoiMultiplePlot(sType, atVoiRoiTag, bSUVUnit, bDoseKernel, bSegmented)
+function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied)
+%function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied)
 %Display a figure of multiple plot.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -43,14 +43,14 @@ function figRoiMultiplePlot(sType, atVoiRoiTag, bSUVUnit, bDoseKernel, bSegmente
 
     ySize = dScreenSize(4);
 
-    HIST_PANEL_y = ySize*0.75;
-    HIST_PANEL_X = HIST_PANEL_y;
+    FIG_MPLOT_Y = ySize*0.75;
+    FIG_MPLOT_X = FIG_MPLOT_Y;
 
     figRoiMultiplePlot = ...
-        figure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-HIST_PANEL_X/2) ...
-               (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-HIST_PANEL_y/2) ...
-               HIST_PANEL_X ...
-               HIST_PANEL_y],...
+        figure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_MPLOT_X/2) ...
+               (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_MPLOT_Y/2) ...
+               FIG_MPLOT_X ...
+               FIG_MPLOT_Y],...
                'Name', ' ',...
                'NumberTitle','off',...
                'MenuBar', 'none',...
@@ -221,12 +221,19 @@ function figRoiMultiplePlot(sType, atVoiRoiTag, bSUVUnit, bDoseKernel, bSegmente
     function setMultiplePlotFigureName()
 
         sTitle = sType;
-
-%        if bSegmented == true
-%            sSegmented = ' - Segmented Values';
-%        else
-%            sSegmented = '';
-%        end
+                
+        if bModifiedMatrix == true           
+            sModified = ' - Cells Value: Display Image';
+        else
+            sModified = ' - Cells Value: Unmodified Image';
+        end   
+        
+        if bSegmented == true 
+            sSegmented = ' - Masked Cells Subtracted';
+        else
+            sSegmented = '';
+        end
+        
 
         if bDoseKernel == true
             sUnits = 'Unit: Dose';
@@ -263,7 +270,7 @@ function figRoiMultiplePlot(sType, atVoiRoiTag, bSUVUnit, bDoseKernel, bSegmente
             end
         end
 
-        set(figRoiMultiplePlot, 'Name', [sTitle ' - ' atRoiVoiMetaData{1}.SeriesDescription ' - ' sUnits]);
+        set(figRoiMultiplePlot, 'Name', [sTitle ' - ' atRoiVoiMetaData{1}.SeriesDescription ' - ' sUnits sModified sSegmented]);
 
     end
 
@@ -299,23 +306,17 @@ function figRoiMultiplePlot(sType, atVoiRoiTag, bSUVUnit, bDoseKernel, bSegmente
                 if strcmp(atVoiRoiTag{aa}.Tag, tVoiInput{bb}.Tag)
 
                     try
-                    [imCData, logicalMask] = computeHistogram(dicomBuffer('get'), atRoiVoiMetaData, tVoiInput{bb}, tRoiInput, dSUVScale, bSUVUnit);
-                    if bSegmented == true
-                        imCDataMasked = imCData(logicalMask);
-                        imCDataMasked = imCDataMasked(imCDataMasked>cropValue('get'));
-                    else
-                        imCDataMasked = imCData(logicalMask);
-                    end
+                    imCData = computeHistogram(aInputBuffer, atInputMetaData, dicomBuffer('get'), atRoiVoiMetaData, tVoiInput{bb}, tRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
 
-                    set(axeMultiplePlot, 'XLim', [min(double(imCDataMasked),[],'all') max(double(imCDataMasked),[],'all')]);
+                    set(axeMultiplePlot, 'XLim', [min(double(imCData),[],'all') max(double(imCData),[],'all')]);
                     set(axeMultiplePlot, 'YLim', [0 1]);
 
-                    ptrPlot = plotCummulative(axeMultiplePlot, imCDataMasked, tVoiInput{bb}.Color);
+                    ptrPlot = plotCummulative(axeMultiplePlot, imCData, tVoiInput{bb}.Color);
 
                     if dOffset==1
-                        imCumCDataMasked = imCDataMasked;
+                        imCumCDataMasked = imCData;
                     else
-                        imCumCDataMasked = [imCumCDataMasked;  imCDataMasked];
+                        imCumCDataMasked = [imCumCDataMasked;  imCData];
                     end
 
                     set(axeMultiplePlot, 'XLim', [min(double(imCumCDataMasked),[],'all') max(double(imCumCDataMasked),[],'all')]);
@@ -359,23 +360,17 @@ function figRoiMultiplePlot(sType, atVoiRoiTag, bSUVUnit, bDoseKernel, bSegmente
                 for bb=1:numel(tRoiInput)
                     if strcmp(atVoiRoiTag{aa}.Tag, tRoiInput{bb}.Tag)
                         try
-                        [imCData, logicalMask] = computeHistogram(dicomBuffer('get'), atRoiVoiMetaData, tRoiInput{bb}, tRoiInput, dSUVScale, bSUVUnit);
-                        if bSegmented == true
-                            imCDataMasked = imCData(logicalMask);
-                            imCDataMasked = imCDataMasked(imCDataMasked>cropValue('get'));
-                        else
-                            imCDataMasked = imCData(logicalMask);
-                        end
+                        imCData = computeHistogram(aInputBuffer, atInputMetaData, dicomBuffer('get'), atRoiVoiMetaData, tRoiInput{bb}, tRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
 
-                        set(axeMultiplePlot, 'XLim', [min(double(imCDataMasked),[],'all') max(double(imCDataMasked),[],'all')]);
+                        set(axeMultiplePlot, 'XLim', [min(double(imCData),[],'all') max(double(imCData),[],'all')]);
                         set(axeMultiplePlot, 'YLim', [0 1]);
 
-                        ptrPlot = plotCummulative(axeMultiplePlot, imCDataMasked, tRoiInput{bb}.Color);
+                        ptrPlot = plotCummulative(axeMultiplePlot, imCData, tRoiInput{bb}.Color);
 
                         if dOffset==1
-                            imCumCDataMasked = imCDataMasked;
+                            imCumCDataMasked = imCData;
                         else
-                            imCumCDataMasked = [imCumCDataMasked;  imCDataMasked];
+                            imCumCDataMasked = [imCumCDataMasked;  imCData];
                         end
 
                         set(axeMultiplePlot, 'XLim', [min(double(imCumCDataMasked),[],'all') max(double(imCumCDataMasked),[],'all')]);
@@ -685,8 +680,7 @@ function figRoiMultiplePlot(sType, atVoiRoiTag, bSUVUnit, bDoseKernel, bSegmente
             asCell{dLineOffset,12} = 'Max CY cm';
             asCell{dLineOffset,13} = 'Area cm2';
             asCell{dLineOffset,14} = 'Volume cm3';
-            asCell{dLineOffset,15} = 'Subtraction';
-            for tt=16:21
+            for tt=15:21
                 asCell{dLineOffset,tt}  = (' ');
             end
             
@@ -774,11 +768,8 @@ function figRoiMultiplePlot(sType, atVoiRoiTag, bSUVUnit, bDoseKernel, bSegmente
                                             end
                                             asCell{dLineOffset,13} = [atRoiComputed{bb}.area];
                                             asCell{dLineOffset,14} = (' ');
-                                            if isfield(atRoiComputed{bb} ,'subtraction')
-                                                asCell{dLineOffset,15} = [atRoiComputed{bb}.subtraction];
-                                            else
-                                                asCell{dLineOffset,15} = (' ');
-                                            end
+                                            asCell{dLineOffset,15} = (' ');
+                                            
                                             for tt=16:21
                                                 asCell{dLineOffset,tt}  = (' ');
                                             end
@@ -839,11 +830,8 @@ function figRoiMultiplePlot(sType, atVoiRoiTag, bSUVUnit, bDoseKernel, bSegmente
                                 end
                                 asCell{dLineOffset, 13} = tRoiComputed.area;
                                 asCell{dLineOffset, 14} = (' ');
-                                if isfield(tRoiComputed ,'subtraction')
-                                    asCell{dLineOffset, 15} = tRoiComputed.subtraction;
-                                else
-                                    asCell{dLineOffset,15} = (' ');
-                                end
+                                asCell{dLineOffset,15} = (' ');
+                                
                                 for tt=16:21
                                     asCell{dLineOffset,tt}  = (' ');
                                 end

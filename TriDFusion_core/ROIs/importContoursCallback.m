@@ -75,6 +75,11 @@ function importContoursCallback(~, ~)
         progressBar(0.3 , sprintf('Importing Contours, please wait'));
         
         try
+            
+        % Deactivate main tool bar 
+        set(uiSeriesPtr('get'), 'Enable', 'off');                        
+        mainToolBarEnable('off');  
+                
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');            
         drawnow;
             
@@ -114,6 +119,7 @@ function importContoursCallback(~, ~)
             set(uiSeriesPtr('get'), 'Value', dSeriesValue);
 
             setSeriesCallback();
+            set(uiSeriesPtr('get'), 'Enable', 'off');                        
         
             progressBar( 1, 'Ready');                
             
@@ -149,7 +155,11 @@ function importContoursCallback(~, ~)
         catch
             progressBar(1, 'Error:importContoursCallback()');                          
         end
-
+        
+        % Reactivate main tool bar 
+        set(uiSeriesPtr('get'), 'Enable', 'on');                        
+        mainToolBarEnable('on');  
+                
         set(fiMainWindowPtr('get'), 'Pointer', 'default');            
         drawnow;
     end

@@ -30,10 +30,40 @@ function loadCerrDoseVolume(planC, structNamC)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    % Deactivate main tool bar 
+    set(uiSeriesPtr('get'), 'Enable', 'off');        
+    mainToolBarEnable('off');
+    
+    try
+        
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-
     drawnow;
+    
+    releaseRoiWait();
 
+    set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+    set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+
+    set(zoomMenu('get'), 'Checked', 'off');
+    set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+    set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+    zoomTool('set', false);
+    zoom('off');           
+
+    set(panMenu('get'), 'Checked', 'off');
+    set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+    set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
+    panTool('set', false);
+    pan('off');     
+
+    set(rotate3DMenu('get'), 'Checked', 'off');         
+    rotate3DTool('set', false);
+    rotate3d off;
+
+    set(dataCursorMenu('get'), 'Checked', 'off');
+    dataCursorTool('set', false);              
+    datacursormode('off');  
+    
     if isFusion('get') == true % Deactivate fusion
          setFusionCallback();
     end
@@ -43,8 +73,6 @@ function loadCerrDoseVolume(planC, structNamC)
     copyRoiPtr('set', '');
 
     isMoveImageActivated('set', false);
-
-    releaseRoiWait();
     
     outputDir('set', '');
 
@@ -87,7 +115,7 @@ function loadCerrDoseVolume(planC, structNamC)
     progressBar(0.7, 'Initializing Viewer');
 
     for ii=1:numel(planC{1,3}(1).scanInfo)
-        tTemplate{ii} = planC{1,3}(1).scanInfo(ii).DICOMHeaders;
+        atTemplate{ii} = planC{1,3}(1).scanInfo(ii).DICOMHeaders;
         sPatientName = sprintf('%s^%s^%s^%s^%s', ...
                            planC{1,3}(1).scanInfo(ii).DICOMHeaders.PatientName.FamilyName, ...
                            planC{1,3}(1).scanInfo(ii).DICOMHeaders.PatientName.GivenName, ...
@@ -95,72 +123,153 @@ function loadCerrDoseVolume(planC, structNamC)
                            planC{1,3}(1).scanInfo(ii).DICOMHeaders.PatientName.NamePrefix, ...
                            planC{1,3}(1).scanInfo(ii).DICOMHeaders.PatientName.NameSuffix );
 
-        tTemplate{ii}.PatientName      = sPatientName;
-        tTemplate{ii}.AcquisitionTime  = planC{1,3}(1).scanInfo(ii).acquisitionTime;
-        tTemplate{ii}.NumberOfSlices = numel(planC{1,3}(1).scanInfo);
-        if isempty(tTemplate{ii}.AcquisitionTime)
-            tTemplate{ii}.AcquisitionTime = '000000';
+        atTemplate{ii}.PatientName      = sPatientName;
+        atTemplate{ii}.NumberOfSlices = numel(planC{1,3}(1).scanInfo);
+        
+        if ~isfield(atTemplate{ii}, 'AcquisitionDate')                
+            atTemplate{ii}.AcquisitionDate = '';
+        end
+        
+        if ~isfield(atTemplate{ii}, 'AcquisitionTime')                
+            atTemplate{ii}.AcquisitionTime = '';
+        end
+        
+        if ~isfield(atTemplate{ii}, 'SeriesDate')    
+            atTemplate{ii}.SeriesDate = '';
+        end
+        
+        if ~isfield(atTemplate{ii}, 'SeriesTime')    
+            atTemplate{ii}.SeriesTime = '';
+        end
+        
+        if isfield( planC{1,3}(1).scanInfo(ii), 'frameAcquisitionDuration')
+            atTemplate{ii}.ActualFrameDuration = planC{1,3}(1).scanInfo(ii).frameAcquisitionDuration;
+        else
+            atTemplate{ii}.ActualFrameDuration = '';
         end
 
-        tTemplate{ii}.SeriesTime          = planC{1,3}(1).scanInfo(ii).seriesTime;
-        if isempty(tTemplate{ii}.SeriesTime)
-            tTemplate{ii}.SeriesTime = '000000';
+        if isfield( planC{1,3}(1).scanInfo(ii), 'patientWeight')
+            atTemplate{ii}.PatientWeight       = planC{1,3}(1).scanInfo(ii).patientWeight;
+        else
+            atTemplate{ii}.PatientWeight       = [];
         end
 
-        tTemplate{ii}.ActualFrameDuration = planC{1,3}(1).scanInfo(ii).frameAcquisitionDuration;
-        tTemplate{ii}.PatientWeight       = planC{1,3}(1).scanInfo(ii).patientWeight;
-        tTemplate{ii}.PatientSize         = planC{1,3}(1).scanInfo(ii).patientSize;
-
-        if ~isfield(tTemplate{ii}, 'SeriesType')
-            tTemplate{ii}.SeriesType{1} = '';
-            tTemplate{ii}.SeriesType{2} = '';
+        if isfield( planC{1,3}(1).scanInfo(ii), 'patientSize')
+            atTemplate{ii}.PatientSize         = planC{1,3}(1).scanInfo(ii).patientSize;
+        else
+            atTemplate{ii}.PatientSize         = [];
         end
 
-        if ~isfield(tTemplate{ii}, 'AccessionNumber')
-            tTemplate{ii}.AccessionNumber = '';
+        if isfield( planC{1,3}(1).scanInfo(ii), 'patientSex')
+            atTemplate{ii}.PatientSex          = planC{1,3}(1).scanInfo(ii).patientSex;
+        else
+            atTemplate{ii}.PatientSex          = '';
         end
 
-        if ~isfield(tTemplate{ii}, 'ReconstructionDiameter')
-            tTemplate{ii}.ReconstructionDiameter = 0;
+        if isfield( planC{1,3}(1).scanInfo(ii), 'patientAge')
+            atTemplate{ii}.PatientAge          = planC{1,3}(1).scanInfo(ii).patientAge;
+        else
+            atTemplate{ii}.PatientAge          = '';
         end
 
-        if ~isfield(tTemplate{ii}, 'SpacingBetweenSlices')
-            tTemplate{ii}.SpacingBetweenSlices = 0;
+        if isfield( planC{1,3}(1).scanInfo(ii), 'patientBirthDate')                
+            atTemplate{ii}.PatientBirthDate    = planC{1,3}(1).scanInfo(ii).patientBirthDate;         
+        else
+            atTemplate{ii}.PatientBirthDate    = '';         
         end
 
-        if ~isfield(tTemplate{ii}, 'Units')
-            tTemplate{ii}.Units = '';
+        if ~isfield(atTemplate{ii}, 'SeriesType')
+            atTemplate{ii}.SeriesType{1} = '';
+            atTemplate{ii}.SeriesType{2} = '';
         end
+
+        if ~isfield(atTemplate{ii}, 'AccessionNumber')
+            atTemplate{ii}.AccessionNumber = '';
+        end
+
+        if ~isfield(atTemplate{ii}, 'ReconstructionDiameter')
+            atTemplate{ii}.ReconstructionDiameter = 0;
+        end
+
+        if ~isfield(atTemplate{ii}, 'SpacingBetweenSlices')
+            atTemplate{ii}.SpacingBetweenSlices = 0;
+        end
+
+        if ~isfield(atTemplate{ii}, 'Units')
+            atTemplate{ii}.Units = '';
+        end
+         
+        if isfield(planC{1,3}(1).scanInfo(ii).DICOMHeaders, 'RadiopharmaceuticalInformationSequence')
+
+            atTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartTime  = planC{1,3}(1).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartTime;
+            atTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStopTime   = planC{1,3}(1).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStopTime;
+            atTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose         = num2str(planC{1,3}(1).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose);
+            atTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife          = num2str(planC{1,3}(1).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife);
+            atTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclidePositronFraction  = planC{1,3}(1).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadionuclidePositronFraction;
+
+            jDate = atTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;
+            sFormatedDate = sprintf('%s%02s%02s%02s%02s%02s.00', num2str(1900+jDate.getYear()), num2str(jDate.getMonth()+1), num2str(jDate.getDate()), num2str(jDate.getHours()),num2str(jDate.getMinutes()), num2str(jDate.getSeconds()));
+
+            atTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime = sFormatedDate;
+
+            jDate = atTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStopDateTime;
+            sFormatedDate = sprintf('%s%02s%02s%02s%02s%02s.00', num2str(1900+jDate.getYear()), num2str(jDate.getMonth()+1), num2str(jDate.getDate()), num2str(jDate.getHours()),num2str(jDate.getMinutes()), num2str(jDate.getSeconds()));
+
+            atTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStopDateTime  = sFormatedDate;
+
+            % RadiopharmaceuticalCodeSequence
+
+            atTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalCodeSequence.Item_1.CodeValue = ...
+                char(planC{1,3}(1).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodeValue);
+
+            atTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalCodeSequence.Item_1.CodingSchemeDesignator = ...
+                char(planC{1,3}(1).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodingSchemeDesignator);
+
+            atTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalCodeSequence.Item_1.CodeMeaning = ...
+                char(planC{1,3}(1).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodeMeaning);
+
+            % RadionuclideCodeSequence
+
+            atTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodeValue = ...
+                char(planC{1,3}(1).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodeValue);
+
+            atTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodingSchemeDesignator = ...
+                char(planC{1,3}(1).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodingSchemeDesignator);
+
+            atTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodeMeaning = ...
+                char(planC{1,3}(1).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodeMeaning);                 
+        end      
+        
     end
 
-    tNewInput(1).atDicomInfo = tTemplate;
-    tNewInput(2).atDicomInfo = tTemplate;
-    for ii=1:numel(tNewInput(2).atDicomInfo)
-        tNewInput(2).atDicomInfo{ii}.Modality = 'PT';
-        tNewInput(2).atDicomInfo{ii}.SeriesDescription = sprintf('Dose: %s', tNewInput(1).atDicomInfo{ii}.SeriesDescription);
-        tNewInput(2).atDicomInfo{ii}.Units = 'DOSE';
+    atNewInput(1).atDicomInfo = atTemplate;
+    atNewInput(2).atDicomInfo = atTemplate;
+    for ii=1:numel(atNewInput(2).atDicomInfo)
+        atNewInput(2).atDicomInfo{ii}.Modality = 'PT';
+        atNewInput(2).atDicomInfo{ii}.SeriesDescription = sprintf('Dose: %s', atNewInput(1).atDicomInfo{ii}.SeriesDescription);
+        atNewInput(2).atDicomInfo{ii}.Units = 'DOSE';
     end
 
-    tNewInput(1).aDicomBuffer = scan3M;
-    tNewInput(2).aDicomBuffer = dose3M;
+    atNewInput(1).aDicomBuffer = scan3M;
+    atNewInput(2).aDicomBuffer = dose3M;
 
-    for ii=1:numel(tNewInput)
-        tNewInput(ii).asFilesList = '';
+    for ii=1:numel(atNewInput)
+        atNewInput(ii).asFilesList = '';
 
-        tNewInput(ii).bEdgeDetection = false;
-        tNewInput(ii).bFlipLeftRight = false;
-        tNewInput(ii).bFlipAntPost   = false;
-        tNewInput(ii).bFlipHeadFeet  = false;
-        tNewInput(ii).bDoseKernel    = false;
-        tNewInput(ii).bMathApplied   = false;
-        tNewInput(ii).bFusedDoseKernel    = false;
-        tNewInput(ii).bFusedEdgeDetection = false;
-        tNewInput(ii).tMovement = [];
-        tNewInput(ii).tMovement.bMovementApplied = false;
-        tNewInput(ii).tMovement.aGeomtform = [];
-        tNewInput(ii).tMovement.atSeq{1}.sAxe = [];
-        tNewInput(ii).tMovement.atSeq{1}.aTranslation = [];
-        tNewInput(ii).tMovement.atSeq{1}.dRotation = [];       
+        atNewInput(ii).bEdgeDetection = false;
+        atNewInput(ii).bFlipLeftRight = false;
+        atNewInput(ii).bFlipAntPost   = false;
+        atNewInput(ii).bFlipHeadFeet  = false;
+        atNewInput(ii).bDoseKernel    = false;
+        atNewInput(ii).bMathApplied   = false;
+        atNewInput(ii).bFusedDoseKernel    = false;
+        atNewInput(ii).bFusedEdgeDetection = false;
+        atNewInput(ii).tMovement = [];
+        atNewInput(ii).tMovement.bMovementApplied = false;
+        atNewInput(ii).tMovement.aGeomtform = [];
+        atNewInput(ii).tMovement.atSeq{1}.sAxe = [];
+        atNewInput(ii).tMovement.atSeq{1}.aTranslation = [];
+        atNewInput(ii).tMovement.atSeq{1}.dRotation = [];       
     end
 
     aBuffer{1}=scan3M;
@@ -169,14 +278,14 @@ function loadCerrDoseVolume(planC, structNamC)
     for mm=1:numel(aBuffer)
         aMip = computeMIP(aBuffer{mm});
         mipBuffer('set', aMip, mm);
-        tNewInput(mm).aMip = aMip;
+        atNewInput(mm).aMip = aMip;
     end
 
-    inputTemplate('set', tNewInput);
+    inputTemplate('set', atNewInput);
     dicomBuffer  ('set', scan3M);
 
     inputBuffer  ('set', aBuffer);
-    dicomMetaData('set', tTemplate);
+    dicomMetaData('set', atTemplate);
 
     if isFusion('get') == true
         setFusionCallback();
@@ -361,22 +470,13 @@ function loadCerrDoseVolume(planC, structNamC)
 
     set(uiSeriesPtr('get'), 'Value' , 1);
     set(uiSeriesPtr('get'), 'String', ' ');
-    set(uiSeriesPtr('get'), 'Enable', 'off');
 
-    set(btnFusionPtr    ('get'), 'Enable', 'off');
-    set(btnLinkMipPtr   ('get'), 'Enable', 'off');
-    set(btnRegisterPtr  ('get'), 'Enable', 'off');
-    set(btnMathPtr      ('get'), 'Enable', 'off');
     set(uiFusedSeriesPtr('get'), 'Value' , 1    );
     set(uiFusedSeriesPtr('get'), 'String', ' '  );
-    set(uiFusedSeriesPtr('get'), 'Enable', 'off');
 
     isVsplash('set', false);
     set(btnVsplashPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnVsplashPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnVsplashPtr('get')   , 'Enable', 'off');
-    set(uiEditVsplahXPtr('get'), 'Enable', 'off');
-    set(uiEditVsplahYPtr('get'), 'Enable', 'off');
 
     registrationReport('set', '');
 
@@ -407,14 +507,14 @@ function loadCerrDoseVolume(planC, structNamC)
 
         for ii = 1 : numel(inputTemplate('get'))
 
-            if isempty(tNewInput(ii).atDicomInfo{1}.SeriesDate)
+            if isempty(atNewInput(ii).atDicomInfo{1}.SeriesDate)
                 sNewVolSeriesDate = '';
             else
-                sSeriesDate = tNewInput(ii).atDicomInfo{1}.SeriesDate;
-                if isempty(tNewInput(ii).atDicomInfo{1}.SeriesTime)
+                sSeriesDate = atNewInput(ii).atDicomInfo{1}.SeriesDate;
+                if isempty(atNewInput(ii).atDicomInfo{1}.SeriesTime)
                     sSeriesTime = '000000';
                 else
-                    sSeriesTime = tNewInput(ii).atDicomInfo{1}.SeriesTime;
+                    sSeriesTime = atNewInput(ii).atDicomInfo{1}.SeriesTime;
                 end
 
                 sNewVolSeriesDate = sprintf('%s%s', sSeriesDate, sSeriesTime);
@@ -427,7 +527,7 @@ function loadCerrDoseVolume(planC, structNamC)
                 sNewVolSeriesDate = datetime(sNewVolSeriesDate,'InputFormat','yyyyMMddHHmmss');
             end
 
-            sNewVolSeriesDescription = tNewInput(ii).atDicomInfo{1}.SeriesDescription;
+            sNewVolSeriesDescription = atNewInput(ii).atDicomInfo{1}.SeriesDescription;
 
             sNewVolumes{ii} = sprintf('%s %s', sNewVolSeriesDescription, sNewVolSeriesDate);
         end
@@ -435,29 +535,14 @@ function loadCerrDoseVolume(planC, structNamC)
         seriesDescription('set', sNewVolumes);
 
         set(uiSeriesPtr('get'), 'String', sNewVolumes);
-        set(uiSeriesPtr('get'), 'Enable', 'on');
 
         if  numel(sNewVolumes) > 1
-            set(btnRegisterPtr('get'), 'Enable', 'on');
-            set(btnFusionPtr  ('get'), 'Enable', 'on');
-            set(btnLinkMipPtr ('get'), 'Enable', 'on');
-
             set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
-            set(uiFusedSeriesPtr('get'), 'Enable', 'on');
             set(uiFusedSeriesPtr('get'), 'Value', 2);
         else
-            set(btnFusionPtr('get') , 'Enable', 'on');
-            set(btnLinkMipPtr('get'), 'Enable', 'on');
-
             set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
-            set(uiFusedSeriesPtr('get'), 'Enable', 'on');
             set(uiFusedSeriesPtr('get'), 'Value', 1);
         end
-        set(btnMathPtr('get'), 'Enable', 'on');
-
-        set(btnVsplashPtr('get')   , 'Enable', 'on');
-        set(uiEditVsplahXPtr('get'), 'Enable', 'on');
-        set(uiEditVsplahYPtr('get'), 'Enable', 'on');
     end
 
     setQuantification();
@@ -502,10 +587,8 @@ function loadCerrDoseVolume(planC, structNamC)
     set(uiSliderTraPtr('get'), 'Visible', 'off');
     set(uiSliderMipPtr('get'), 'Visible', 'off');
 
-    drawnow;
-
     for mm=1:numel(strMaskC)
-        progressBar(0.7+(0.299999*mm/numel(strMaskC)), sprintf('Processing VOI %d/%d', mm, numel(strMaskC)));
+        progressBar(0.7+(0.299999*mm/numel(strMaskC)), sprintf('Processing Contour %d/%d', mm, numel(strMaskC)));
 
         aVoiColor = [];
         for pp=1:numel(planC{4})
@@ -518,6 +601,7 @@ function loadCerrDoseVolume(planC, structNamC)
         if get(uiSeriesPtr('get'), 'Value') ~= planC{4}(mm).associatedScan
             set(uiSeriesPtr('get'), 'Value', planC{4}(mm).associatedScan);
             setSeriesCallback();
+            mainToolBarEnable('off');            
         end
 
         maskToVoi(strMaskC{mm}, structNamC{mm}, aVoiColor, 'axial',  planC{4}(mm).associatedScan, false);
@@ -536,8 +620,6 @@ function loadCerrDoseVolume(planC, structNamC)
     set(uiSliderTraPtr('get'), 'Visible', 'on');
     set(uiSliderMipPtr('get'), 'Visible', 'on');
 
-    set(fiMainWindowPtr('get'), 'Pointer', 'default');
-    drawnow;
 
     refreshImages();
 
@@ -550,12 +632,24 @@ function loadCerrDoseVolume(planC, structNamC)
 %        set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 %    end
 
+    % Activate playback
+
     if size(dicomBuffer('get'), 3) ~= 1
         setPlaybackToolbar('on');
     end
-
+    
     setRoiToolbar('on');
-
-    progressBar(1, 'Ready');
-
+   
+    progressBar(1, 'Import of dose volume completed.');
+    
+    catch
+        progressBar(1, 'Error:loadCerrDoseVolume()');                        
+    end
+    
+    % Reactivate main tool bar 
+    set(uiSeriesPtr('get'), 'Enable', 'on');        
+    mainToolBarEnable('on');
+    
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    drawnow;
 end

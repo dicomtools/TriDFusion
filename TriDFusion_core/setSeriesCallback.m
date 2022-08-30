@@ -32,6 +32,10 @@ function setSeriesCallback(~,~)
 
     if iOffset <= numel(tInput)
         
+        % Deactivate main tool bar 
+        
+        mainToolBarEnable('off');
+        
         % Restore ISOsurface default value. Those value will be use in
         % setIsoSurfaceCallback(~, ~). 
 
@@ -39,6 +43,7 @@ function setSeriesCallback(~,~)
         isoSurfaceValue       ('set', defaultIsoSurfaceValue('get')); 
         isoColorFusionOffset  ('set', defaultIsoColorFusionOffset('get')); 
         isoSurfaceFusionValue ('set', defaultIsoSurfaceFusionValue('get'));
+        
     
         if isFusion('get') == true % Deactivate fusion
             
@@ -144,21 +149,26 @@ function setSeriesCallback(~,~)
         copyRoiPtr('set', '');
 
         releaseRoiWait();
-
+            
         set(zoomMenu('get'), 'Checked', 'off');
         set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
         zoomTool('set', false);
-        zoom('off');
+        zoom('off');           
 
         set(panMenu('get'), 'Checked', 'off');
         set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-        set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
         panTool('set', false);
-        pan('off');
+        pan('off');     
 
+        set(rotate3DMenu('get'), 'Checked', 'off');         
         rotate3DTool('set', false);
-        rotate3d('off');
+        rotate3d off;
+
+        set(dataCursorMenu('get'), 'Checked', 'off');
+        dataCursorTool('set', false);              
+        datacursormode('off');  
         
         
 %        isFusion('set', false);
@@ -201,24 +211,18 @@ function setSeriesCallback(~,~)
         multiFrameZoom    ('set', 'out', 1);
         multiFrameZoom    ('set', 'axe', []);
 
-        rotate3d('off');
-
         switchTo3DMode('set', false);
-        set(btn3DPtr('get'), 'Enable', 'on');
         set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
         switchToMIPMode('set', false);
-        set(btnIsoSurfacePtr('get'), 'Enable', 'on');
         set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
         switchToIsoSurface('set', false);
-        set(btnMIPPtr('get'), 'Enable', 'on');
         set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
-        set(btnTriangulatePtr('get'), 'Enable', 'on');
         set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
         set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
 
@@ -349,6 +353,10 @@ function setSeriesCallback(~,~)
         setViewerDefaultColor(true, dicomMetaData('get'));
         
         refreshImages();
+        
+        % Reactivate main tool bar 
+        
+        mainToolBarEnable('on');
         
 %        atMetaData = dicomMetaData('get');
         

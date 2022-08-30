@@ -32,7 +32,38 @@ function setVsplashCallback(~, ~)
     if isempty(im)
         return;
     end
+    
+    % Deactivate main tool bar 
+    set(uiSeriesPtr('get'), 'Enable', 'off');                        
+    mainToolBarEnable('off');   
+    
+    try
+        
+    releaseRoiWait();
 
+    set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+    set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+
+    set(zoomMenu('get'), 'Checked', 'off');
+    set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+    set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+    zoomTool('set', false);
+    zoom('off');           
+
+    set(panMenu('get'), 'Checked', 'off');
+    set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+    set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
+    panTool('set', false);
+    pan('off');     
+
+    set(rotate3DMenu('get'), 'Checked', 'off');         
+    rotate3DTool('set', false);
+    rotate3d off;
+
+    set(dataCursorMenu('get'), 'Checked', 'off');
+    dataCursorTool('set', false);              
+    datacursormode('off'); 
+    
     iCoronalSize  = size(im,1);
     iSagittalSize = size(im,2);
     iAxialSize    = size(im,3);
@@ -115,6 +146,14 @@ function setVsplashCallback(~, ~)
     sliceNumber('set', 'axial', iAxial);
 
     refreshImages();
+    
+    catch
+        progressBar(1, 'Error:setVsplashCallback()');                        
+    end
+    
+    % Reactivate main tool bar 
+    set(uiSeriesPtr('get'), 'Enable', 'on');                        
+    mainToolBarEnable('on');   
     
 %    if isVsplash('get') == false
         

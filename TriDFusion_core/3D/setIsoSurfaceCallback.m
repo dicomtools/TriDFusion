@@ -31,44 +31,40 @@ function setIsoSurfaceCallback(~, ~)
        size(dicomBuffer('get'), 3) ~= 1
    
         try
+            
+        sFusionBtnEnable = get(btnFusionPtr('get'), 'Enable');
+        
+        % Deactivate main tool bar 
+        set(uiSeriesPtr('get'), 'Enable', 'off');                        
+        mainToolBarEnable('off');
+            
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
 %             releaseRoiAxeWait();
         releaseRoiWait();
 
+        set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+        set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+            
         set(zoomMenu('get'), 'Checked', 'off');
         set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnZoomPtr('get'), 'Enable', 'off');
         zoomTool('set', false);
-        zoom('off');
+        zoom('off');           
 
         set(panMenu('get'), 'Checked', 'off');
         set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-        set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnPanPtr('get'), 'Enable', 'off');
+        set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
         panTool('set', false);
-        pan('off');
+        pan('off');     
 
-        set(btnVsplashPtr('get')   , 'Enable', 'off');
-        set(uiEditVsplahXPtr('get'), 'Enable', 'off');
-        set(uiEditVsplahYPtr('get'), 'Enable', 'off');
-
-        set(btnRegisterPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-        set(btnRegisterPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnRegisterPtr('get'), 'Enable', 'off');
-
-        set(btnMathPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-        set(btnMathPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnMathPtr('get'), 'Enable', 'off');
-
-   %     set(rotate3DMenu('get'), 'Checked', 'off');
+        set(rotate3DMenu('get'), 'Checked', 'off');         
         rotate3DTool('set', false);
-        rotate3d('off');
+        rotate3d off;
 
         set(dataCursorMenu('get'), 'Checked', 'off');
-        dataCursorTool('set', false);
-        datacursormode('off');
+        dataCursorTool('set', false);              
+        datacursormode('off');  
 
         setRoiToolbar('off');
 
@@ -135,14 +131,13 @@ function setIsoSurfaceCallback(~, ~)
         if switchToIsoSurface('get') == true
 
             switchToIsoSurface('set', false);
-
-            set(btnIsoSurfacePtr('get'), 'Enable', 'on');
+            
             set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-
+                
             if switchTo3DMode('get')  == false && ...
                switchToMIPMode('get') == false
-
+                
                 view3DPanel('set', false);
                 init3DPanel('set', true);
 
@@ -167,37 +162,6 @@ function setIsoSurfaceCallback(~, ~)
                 multiFrame3DRecord('set', false);
                 multiFrame3DIndex('set', 1);
        %         setPlaybackToolbar('off');
-
-                set(uiSeriesPtr('get'), 'Enable', 'on');
-
-%                if numel(seriesDescription('get')) > 1
-                     set(btnFusionPtr('get')    , 'Enable', 'on');
-                     set(btnLinkMipPtr('get')   , 'Enable', 'on');
-                     set(uiFusedSeriesPtr('get'), 'Enable', 'on');
-%                end
-
-                set(btnTriangulatePtr('get'), 'Enable', 'on');
-                set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
-                set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-
-                set(btnZoomPtr('get')    , 'Enable', 'on');
-                set(btnPanPtr('get')     , 'Enable', 'on');
-                if numel(inputTemplate('get')) >1
-                    set(btnRegisterPtr('get'), 'Enable', 'on');
-                end
-                set(btnMathPtr('get'), 'Enable', 'on');
-
-                set(btnVsplashPtr('get')   , 'Enable', 'on');
-                set(uiEditVsplahXPtr('get'), 'Enable', 'on');
-                set(uiEditVsplahYPtr('get'), 'Enable', 'on');
-
-                set(btn3DPtr('get'), 'Enable', 'on');
-                set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-                set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-
-                set(btnMIPPtr('get'), 'Enable', 'on');
-                set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-                set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
                 mOptions = optionsPanelMenuObject('get');
                 if ~isempty(mOptions)
@@ -362,6 +326,8 @@ function setIsoSurfaceCallback(~, ~)
                 
                 refreshImages();
                 
+                triangulateCallback();
+                
 %                if strcmpi(atMetaData{1}.Modality, 'ct')
 %                    link2DMip('set', false);
 
@@ -370,7 +336,11 @@ function setIsoSurfaceCallback(~, ~)
 %                end 
                 
                 setRoiToolbar('on');
-
+                
+                % Reactivate main tool bar 
+                set(uiSeriesPtr('get'), 'Enable', 'on');                        
+                mainToolBarEnable('on');
+                
 %                       robotClick();
 
             else
@@ -403,80 +373,61 @@ function setIsoSurfaceCallback(~, ~)
                     isoFusionObj.Isovalue = 1;
                     isoFusionObject('set', isoFusionObj);
                 end
+            
+                set(btn3DPtr('get')        , 'Enable', 'on');                
+                set(btnMIPPtr('get')       , 'Enable', 'on');
+                set(btnIsoSurfacePtr('get'), 'Enable', 'on');
+
+                set(btnFusionPtr('get'), 'Enable', sFusionBtnEnable);                  
             end
         else
+                
             switchToIsoSurface('set', true);
             
             if isFusion('get') == true
                 init3DfusionBuffer();  
             end
-            
-            set(btnIsoSurfacePtr('get'), 'Enable', 'on');
-            set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
-            set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-
-            set(uiSeriesPtr('get'), 'Enable', 'off');
-
-            set(btnLinkMipPtr('get')   , 'Enable', 'off');
-            set(uiFusedSeriesPtr('get'), 'Enable', 'off');
-
-            set(btnTriangulatePtr('get'), 'Enable', 'off');
-            set(btnTriangulatePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-            set(btnTriangulatePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-            
+                        
             atMetaData = dicomMetaData('get');
+            
+            sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
 
-            if isfield(atMetaData{1}, 'Modality')
+            if strcmpi(sSeriesUnit, 'HU') % CT
 
-                if strcmpi(atMetaData{1}.Modality, 'ct')
+                % isoSurfaceFusionValue default value is preset
+                % for CT
+                if isoSurfaceValue('get') == defaultIsoSurfaceValue('get') 
+                    isoSurfaceValue('set', ctHUToScalarValue(dicomBuffer('get'), 150)/100);
+                end
+
+                % isoColorFusionOffset default color is preset
+                % for CT                        
+                if isoColorOffset('get') == defaultIsoColorOffset('get') 
+                    isoColorOffset('set', 7); % White
+                end                       
+            end
+   
+            if isFusion('get') == true % CT
+                                
+                sFusionUnit = getSerieUnitValue(get(uiFusedSeriesPtr('get'), 'Value'));
+       
+                if strcmpi(sFusionUnit, 'HU')
                     % isoSurfaceFusionValue default value is preset
-                    % for CT
-                    if isoSurfaceValue('get') == defaultIsoSurfaceValue('get') 
-                        isoSurfaceValue('set', defaultIsoSurfaceFusionValue('get'));
+                    % for CT, for other modality we use the defaultIsoSurfaceValue
+                    if isoSurfaceFusionValue('get') == defaultIsoSurfaceFusionValue('get') 
+                        isoSurfaceFusionValue('set', ctHUToScalarValue(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 150)/100);
                     end
 
                     % isoColorFusionOffset default color is preset
-                    % for CT                        
-                    if isoColorOffset('get') == defaultIsoColorOffset('get') 
-                        isoColorOffset('set', defaultIsoColorFusionOffset('get'));
+                    % for CT, for other modality we use the defaultIsoColorOffset                        
+                    if isoColorFusionOffset('get') == defaultIsoColorFusionOffset('get') 
+                        isoColorFusionOffset('set', 7); % White
                     end                       
-                end
-            end
-   
-            if isFusion('get') == true
-                
-                atInputTemplate = inputTemplate('get');
-
-                dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
-                atFusionMetaData = dicomMetaData('get', [], dFusionSeriesOffset);
-                if isempty(atFusionMetaData)
-                    atFusionMetaData = atInputTemplate(dFusionSeriesOffset).atDicomInfo;
-                end
-
-                if isfield(atFusionMetaData{1}, 'Modality')
-
-                    if ~strcmpi(atFusionMetaData{1}.Modality, 'ct')
-                        % isoSurfaceFusionValue default value is preset
-                        % for CT, for other modality we use the defaultIsoSurfaceValue
-                        if isoSurfaceFusionValue('get') == defaultIsoSurfaceFusionValue('get') 
-                            isoSurfaceFusionValue('set', defaultIsoSurfaceValue('get'));
-                        end
-
-                        % isoColorFusionOffset default color is preset
-                        % for CT, for other modality we use the defaultIsoColorOffset                        
-                        if isoColorFusionOffset('get') == defaultIsoColorFusionOffset('get') 
-                            isoColorFusionOffset('set', defaultIsoColorOffset('get'));
-                        end                       
-                    end
                 end
             end
             
             if switchTo3DMode('get')  == false && ...
                switchToMIPMode('get') == false
-
-                if isFusion('get') == false
-                    set(btnFusionPtr('get')    , 'Enable', 'off');
-                end
                 
                 surface3DPriority('set', 'Isosurface', 1);
                 
@@ -492,9 +443,9 @@ function setIsoSurfaceCallback(~, ~)
 
                 isoObject('set', isoObj);
 
-                set(ui3DCreateIsoMaskPtr       ('get'), 'Enable', 'on');
-                set(txtAddVoiIsoMaskPtr        ('get'), 'Enable', 'Inactive');
-                set(chkAddVoiIsoMaskPtr        ('get'), 'Enable', 'on');
+                set(ui3DCreateIsoMaskPtr('get'), 'Enable', 'on');
+                set(txtAddVoiIsoMaskPtr ('get'), 'Enable', 'Inactive');
+                set(chkAddVoiIsoMaskPtr ('get'), 'Enable', 'on');
                 
                 if addVoiIsoMask('get') == true                    
                                 
@@ -544,9 +495,58 @@ function setIsoSurfaceCallback(~, ~)
                         dFormula  = get(uiValueFormulaIsoMaskPtr('get'), 'Value');
 
                         if ~strcmpi(asFormula{dFormula}, 'Fixed')
+                            
                             set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'off');
+                            
+                            % Validate formula
+                            
+                            if strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD)') % Need a quantified PT or NM
+
+                                sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
+
+                                if ~strcmpi(sSeriesUnit, 'SUV') 
+                                    set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
+                                    valueFormulaIsoMask('set', 1);
+                                end         
+                            end  
+
+                            if strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map') % ISO Only
+                                
+                                tResampleToCT = resampleToCTIsoMaskUiValues('get');
+                                if isempty(tResampleToCT)       
+                                    set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
+                                    valueFormulaIsoMask('set', 1);                                
+                                else
+                                    dCTOffset = isoMaskCtSerieOffset('get');
+                                    dCTSeriesNumber = tResampleToCT{dCTOffset}.dSeriesNumber; 
+
+                                    sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
+                                    sCTUnit     = getSerieUnitValue(dCTSeriesNumber);
+
+                                    if ~(strcmpi(sSeriesUnit, 'SUV') && strcmpi(sCTUnit, 'HU')) % Need a quantified PT or NM and a CT                                    
+                                        set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
+                                        valueFormulaIsoMask('set', 1);
+                                    end                                
+                                end
+                            end 
+                            
+                            if strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map')
+                                
+                                if isFusion('get') == false % Need a fuse CT
+                                    set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
+                                    valueFormulaIsoMask('set', 1);                                    
+                                else    
+                                    sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get')     , 'Value'));
+                                    sFusionUnit = getSerieUnitValue(get(uiFusedSeriesPtr('get'), 'Value'));
+
+                                    if ~(strcmpi(sSeriesUnit, 'SUV') && strcmpi(sFusionUnit, 'HU')) % Need a quantified PT or NM and a CT                                    
+                                        set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
+                                        valueFormulaIsoMask('set', 1);
+                                    end 
+                                end
+                            end                            
                         else
-                            set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'on');
+                            set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'on');                           
                         end                         
                     end                 
 
@@ -584,7 +584,9 @@ function setIsoSurfaceCallback(~, ~)
                 end
                 
                 if isFusion('get') == true
-                                    
+                    
+                    set(btnFusionPtr('get'), 'Enable', 'on');
+
                     isoFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'Isosurface');
                     set(isoFusionObj, 'InteractionsEnabled', false);
 
@@ -592,6 +594,8 @@ function setIsoSurfaceCallback(~, ~)
                     isoFusionObj.Isovalue         = isoSurfaceFusionValue('get');
 
                     isoFusionObject('set', isoFusionObj);
+                else
+                    set(btnFusionPtr('get'), 'Enable', 'off');                    
                 end
 
                 if displayVoi('get') == true
@@ -703,7 +707,51 @@ function setIsoSurfaceCallback(~, ~)
                                 dFormula  = get(uiValueFormulaIsoMaskPtr('get'), 'Value');
 
                                 if ~strcmpi(asFormula{dFormula}, 'Fixed')
+                                    
                                     set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'off');
+                                    
+                                    % Validate formula
+
+                                    if strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD)') % Need a quantified PT or NM
+
+                                        sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
+
+                                        if ~strcmpi(sSeriesUnit, 'SUV') 
+                                            set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
+                                            valueFormulaIsoMask('set', 1);
+                                        end         
+                                    end  
+
+                                    if strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map') % ISO & MIP and ro VOL 
+                                        
+                                        tResampleToCT = resampleToCTIsoMaskUiValues('get');
+                                        if isempty(tResampleToCT)       
+                                            set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
+                                            valueFormulaIsoMask('set', 1);                                
+                                        else
+                                            dCTOffset = isoMaskCtSerieOffset('get');
+                                            dCTSeriesNumber = tResampleToCT{dCTOffset}.dSeriesNumber; 
+
+                                            sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
+                                            sCTUnit     = getSerieUnitValue(dCTSeriesNumber);
+
+                                            if ~(strcmpi(sSeriesUnit, 'SUV') && strcmpi(sCTUnit, 'HU')) % Need a quantified PT or NM and a CT                                    
+                                                set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
+                                                valueFormulaIsoMask('set', 1);
+                                            end                                
+                                        end                                       
+                                    end 
+                                    
+                                    if strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map')
+                                         
+                                        sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get')     , 'Value'));
+                                        sFusionUnit = getSerieUnitValue(get(uiFusedSeriesPtr('get'), 'Value'));
+
+                                        if ~(strcmpi(sSeriesUnit, 'SUV') && strcmpi(sFusionUnit, 'HU')) % Need a quantified PT or NM and a CT                                    
+                                            set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
+                                            valueFormulaIsoMask('set', 1);
+                                        end 
+                                    end                                     
                                 else
                                     set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'on');
                                 end                                  
@@ -817,7 +865,51 @@ function setIsoSurfaceCallback(~, ~)
                             dFormula  = get(uiValueFormulaIsoMaskPtr('get'), 'Value');
 
                             if ~strcmpi(asFormula{dFormula}, 'Fixed')
+                                
                                 set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'off');
+                                
+                                % Validate formula
+
+                                if strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD)') % Need a quantified PT or NM
+
+                                    sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
+
+                                    if ~strcmpi(sSeriesUnit, 'SUV') 
+                                        set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
+                                        valueFormulaIsoMask('set', 1);
+                                    end         
+                                end  
+
+                                if strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map')
+
+                                    tResampleToCT = resampleToCTIsoMaskUiValues('get');
+                                    if isempty(tResampleToCT)       
+                                        set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
+                                        valueFormulaIsoMask('set', 1);                                
+                                    else
+                                        dCTOffset = isoMaskCtSerieOffset('get');
+                                        dCTSeriesNumber = tResampleToCT{dCTOffset}.dSeriesNumber; 
+
+                                        sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
+                                        sCTUnit     = getSerieUnitValue(dCTSeriesNumber);
+
+                                        if ~(strcmpi(sSeriesUnit, 'SUV') && strcmpi(sCTUnit, 'HU')) % Need a quantified PT or NM and a CT                                    
+                                            set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
+                                            valueFormulaIsoMask('set', 1);
+                                        end                                
+                                    end                                   
+                                end   
+                                
+                                if strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map')
+       
+                                    sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get')     , 'Value'));
+                                    sFusionUnit = getSerieUnitValue(get(uiFusedSeriesPtr('get'), 'Value'));
+
+                                    if ~(strcmpi(sSeriesUnit, 'SUV') && strcmpi(sFusionUnit, 'HU')) % Need a quantified PT or NM and a CT                                    
+                                        set(uiValueFormulaIsoMaskPtr('get'), 'Value', 1);
+                                        valueFormulaIsoMask('set', 1);
+                                    end 
+                                end                                    
                             else
                                 set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'on');
                             end                            
@@ -879,9 +971,19 @@ if 0
                     end
 end
                 end
+                
+                set(btnFusionPtr('get'), 'Enable', sFusionBtnEnable);                                        
 
             end
-
+            
+            % Reactivate toolbar specific items 
+            
+            set(btnIsoSurfacePtr('get'), 'Enable', 'on');
+            set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+            set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+            
+            set(btnMIPPtr('get'), 'Enable', 'on');            
+            set(btn3DPtr('get') , 'Enable', 'on');
         end
 
         if switchToMIPMode('get') == false && ...

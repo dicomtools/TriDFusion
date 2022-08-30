@@ -37,8 +37,8 @@ function setMoveImageCallback(~, ~)
     persistent pInitImAxialFXData;       
     persistent pInitImAxialFYData;   
             
-    tInput = inputTemplate('get');
-    aInput = inputBuffer('get');
+    atTemplate   = inputTemplate('get');
+    aInputBuffer = inputBuffer('get');
 
     iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
     iFusionOffset = get(uiFusedSeriesPtr('get'), 'Value');
@@ -50,30 +50,30 @@ function setMoveImageCallback(~, ~)
     set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
 
     if isempty(aDicomBuffer)
-        aDicomBuffer = aInput{iFusionOffset};
+        aDicomBuffer = aInputBuffer{iFusionOffset};
     end
 
     if size(aDicomBuffer, 3) == 1
         if iSeriesOffset ~= iFusionOffset
-            if tInput(iSeriesOffset).bFlipLeftRight == true
+            if atTemplate(iSeriesOffset).bFlipLeftRight == true
                 aDicomBuffer=aDicomBuffer(:,end:-1:1);
             end
 
-            if tInput(iSeriesOffset).bFlipAntPost == true
+            if atTemplate(iSeriesOffset).bFlipAntPost == true
                 aDicomBuffer=aDicomBuffer(end:-1:1,:);
             end
         end                
     else
         if iSeriesOffset ~= iFusionOffset                
-            if tInput(iSeriesOffset).bFlipLeftRight == true
+            if atTemplate(iSeriesOffset).bFlipLeftRight == true
                 aDicomBuffer=aDicomBuffer(:,end:-1:1,:);
             end
 
-            if tInput(iSeriesOffset).bFlipAntPost == true
+            if atTemplate(iSeriesOffset).bFlipAntPost == true
                 aDicomBuffer=aDicomBuffer(end:-1:1,:,:);
             end
 
-            if tInput(iSeriesOffset).bFlipHeadFeet == true
+            if atTemplate(iSeriesOffset).bFlipHeadFeet == true
                 aDicomBuffer=aDicomBuffer(:,:,end:-1:1);
             end
         end
@@ -252,20 +252,20 @@ function setMoveImageCallback(~, ~)
                 
                 adAssociatedSeries = [];
             
-                sStudyInstanceUID    = tInput(iFusionOffset).atDicomInfo{1}.StudyInstanceUID;
-                sSeriesInstanceUID   = tInput(iFusionOffset).atDicomInfo{1}.SeriesInstanceUID;
-                sFrameOfReferenceUID = tInput(iFusionOffset).atDicomInfo{1}.FrameOfReferenceUID;
+                sStudyInstanceUID    = atTemplate(iFusionOffset).atDicomInfo{1}.StudyInstanceUID;
+                sSeriesInstanceUID   = atTemplate(iFusionOffset).atDicomInfo{1}.SeriesInstanceUID;
+                sFrameOfReferenceUID = atTemplate(iFusionOffset).atDicomInfo{1}.FrameOfReferenceUID;
                         
-                for mm=1:numel(tInput) % Find associated series
+                for mm=1:numel(atTemplate) % Find associated series
 
                     sCurrentStudyInstanceUID = ...
-                        tInput(mm).atDicomInfo{1}.StudyInstanceUID;
+                        atTemplate(mm).atDicomInfo{1}.StudyInstanceUID;
 
                     sCurrentSeriesInstanceUID = ...
-                        tInput(mm).atDicomInfo{1}.SeriesInstanceUID;
+                        atTemplate(mm).atDicomInfo{1}.SeriesInstanceUID;
 
                     sCurrentFrameOfReferenceUID = ...                               
-                        tInput(mm).atDicomInfo{1}.FrameOfReferenceUID;
+                        atTemplate(mm).atDicomInfo{1}.FrameOfReferenceUID;
 
 
                     if strcmpi(sStudyInstanceUID   , sCurrentStudyInstanceUID) && ... % Will need to switch and move the sub modality
@@ -292,30 +292,30 @@ function setMoveImageCallback(~, ~)
                         set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
 
                         if isempty(aDicomBuffer)
-                            aDicomBuffer = aInput{iAssociatedOffset};
+                            aDicomBuffer = aInputBuffer{iAssociatedOffset};
                         end
 
                         if size(aDicomBuffer, 3) == 1
                             if iSeriesOffset ~= iAssociatedOffset
-                                if tInput(iSeriesOffset).bFlipLeftRight == true
+                                if atTemplate(iSeriesOffset).bFlipLeftRight == true
                                     aDicomBuffer=aDicomBuffer(:,end:-1:1);
                                 end
 
-                                if tInput(iSeriesOffset).bFlipAntPost == true
+                                if atTemplate(iSeriesOffset).bFlipAntPost == true
                                     aDicomBuffer=aDicomBuffer(end:-1:1,:);
                                 end
                             end                
                         else
                             if iSeriesOffset ~= iAssociatedOffset                
-                                if tInput(iSeriesOffset).bFlipLeftRight == true
+                                if atTemplate(iSeriesOffset).bFlipLeftRight == true
                                     aDicomBuffer=aDicomBuffer(:,end:-1:1,:);
                                 end
 
-                                if tInput(iSeriesOffset).bFlipAntPost == true
+                                if atTemplate(iSeriesOffset).bFlipAntPost == true
                                     aDicomBuffer=aDicomBuffer(end:-1:1,:,:);
                                 end
 
-                                if tInput(iSeriesOffset).bFlipHeadFeet == true
+                                if atTemplate(iSeriesOffset).bFlipHeadFeet == true
                                     aDicomBuffer=aDicomBuffer(:,:,end:-1:1);
                                 end
                             end

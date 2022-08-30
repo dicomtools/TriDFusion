@@ -27,7 +27,7 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tInput = inputTemplate('get');
+    atInput = inputTemplate('get');
     
     dFusedSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
     
@@ -76,14 +76,14 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
 
             bMovementApplied = true;
             
-            tInput(dFusedSeriesOffset).tMovement.bMovementApplied = true;
-            if isempty(tInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe)
-                tInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe = 'Axe';
-                tInput(dFusedSeriesOffset).tMovement.atSeq{1}.aTranslation = TF;                       
+            atInput(dFusedSeriesOffset).tMovement.bMovementApplied = true;
+            if isempty(atInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe)
+                atInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe = 'Axe';
+                atInput(dFusedSeriesOffset).tMovement.atSeq{1}.aTranslation = TF;                       
             else
-                dNewMovementOffset = numel(tInput(dFusedSeriesOffset).tMovement.atSeq)+1;
-                tInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.sAxe = 'Axe';
-                tInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.aTranslation = TF;              
+                dNewMovementOffset = numel(atInput(dFusedSeriesOffset).tMovement.atSeq)+1;
+                atInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.sAxe = 'Axe';
+                atInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.aTranslation = TF;              
             end              
         end
     else
@@ -124,19 +124,19 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
             
             bMovementApplied = true;
             
-            tInput(dFusedSeriesOffset).tMovement.bMovementApplied = true;
-            if isempty(tInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe)
-                tInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe = 'Axes';
-                tInput(dFusedSeriesOffset).tMovement.atSeq{1}.aTranslation = TF;                       
+            atInput(dFusedSeriesOffset).tMovement.bMovementApplied = true;
+            if isempty(atInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe)
+                atInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe = 'Axes';
+                atInput(dFusedSeriesOffset).tMovement.atSeq{1}.aTranslation = TF;                       
             else
-                dNewMovementOffset = numel(tInput(dFusedSeriesOffset).tMovement.atSeq)+1;
-                tInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.sAxe = 'Axes';
-                tInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.aTranslation = TF;              
+                dNewMovementOffset = numel(atInput(dFusedSeriesOffset).tMovement.atSeq)+1;
+                atInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.sAxe = 'Axes';
+                atInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.aTranslation = TF;              
             end             
         end         
     end
     
-    inputTemplate('set', tInput);
+    inputTemplate('set', atInput);
     
     progressBar(1, 'Ready');
 

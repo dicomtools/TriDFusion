@@ -28,27 +28,28 @@ function setVoiRoiSegPopup()
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
 %    tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-    tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
-    uiDeleteVoiRoiPanel = uiDeleteVoiRoiPanelObject('get');
+    uiDeleteVoiRoiPanel     = uiDeleteVoiRoiPanelObject('get');
+    uiLesionTypeVoiRoiPanel = uiLesionTypeVoiRoiPanelObject('get');
 
     uiAddVoiRoiPanel  = uiAddVoiRoiPanelObject ('get');
     uiPrevVoiRoiPanel = uiPrevVoiRoiPanelObject('get');
     uiDelVoiRoiPanel  = uiDelVoiRoiPanelObject ('get');
     uiNextVoiRoiPanel = uiNextVoiRoiPanelObject('get');
 
-    asVOIsList = repmat({''},numel(tVoiInput),1);
-    dNbVOIs = numel(tVoiInput);
+    asVOIsList = repmat({''},numel(atVoiInput),1);
+    dNbVOIs = numel(atVoiInput);
 
-    if ~isempty(tVoiInput)
+    if ~isempty(atVoiInput)
 
         for aa=1:dNbVOIs
-            asVOIsList{aa} = tVoiInput{aa}.Label;
+            asVOIsList{aa} = atVoiInput{aa}.Label;
             
-%            for rr=1:numel(tVoiInput{aa}.RoisTag) % Enable VOI right click menu 
+%            for rr=1:numel(atVoiInput{aa}.RoisTag) % Enable VOI right click menu 
 %                for rt=1:numel(tRoiInput)
-%                    if strcmp(tRoiInput{rt}.Tag, tVoiInput{aa}.RoisTag{rr})
-%                        voiDefaultMenu(tRoiInput{rt}.Object, tVoiInput{aa}.Tag);                      
+%                    if strcmp(tRoiInput{rt}.Tag, atVoiInput{aa}.RoisTag{rr})
+%                        voiDefaultMenu(tRoiInput{rt}.Object, atVoiInput{aa}.Tag);                      
 %                        break;
 %                    end
 %                end
@@ -62,9 +63,16 @@ function setVoiRoiSegPopup()
             if dVoiOffset > dNbVOIs
                 set(uiDeleteVoiRoiPanel, 'Value', 1);
             end
-
+         
             set(uiDeleteVoiRoiPanel, 'Enable', 'on');
             set(uiDeleteVoiRoiPanel, 'String', asVOIsList);
+            
+            sLesionType = atVoiInput{get(uiDeleteVoiRoiPanel, 'Value')}.LesionType;
+            
+            [bLesionOffset, asLesionList] = getLesionType(sLesionType);
+            set(uiLesionTypeVoiRoiPanel, 'Enable', 'on');
+            set(uiLesionTypeVoiRoiPanel, 'String', asLesionList);
+            set(uiLesionTypeVoiRoiPanel, 'Value' , bLesionOffset);
 
             set(uiAddVoiRoiPanel , 'Enable', 'on');
             set(uiPrevVoiRoiPanel, 'Enable', 'on');
@@ -74,6 +82,10 @@ function setVoiRoiSegPopup()
             set(uiDeleteVoiRoiPanel, 'Value' , 1);
             set(uiDeleteVoiRoiPanel, 'Enable', 'off');
             set(uiDeleteVoiRoiPanel, 'String', ' ');
+            
+            set(uiLesionTypeVoiRoiPanel, 'Value' , 1);
+            set(uiLesionTypeVoiRoiPanel, 'Enable', 'off');
+            set(uiLesionTypeVoiRoiPanel, 'String', ' ');
 
             set(uiAddVoiRoiPanel , 'Enable', 'off');
             set(uiPrevVoiRoiPanel, 'Enable', 'off');
@@ -84,7 +96,11 @@ function setVoiRoiSegPopup()
         set(uiDeleteVoiRoiPanel, 'Value' , 1);
         set(uiDeleteVoiRoiPanel, 'Enable', 'off');
         set(uiDeleteVoiRoiPanel, 'String', ' ');
-
+        
+        set(uiLesionTypeVoiRoiPanel, 'Value' , 1);
+        set(uiLesionTypeVoiRoiPanel, 'Enable', 'off');
+        set(uiLesionTypeVoiRoiPanel, 'String', ' ');
+            
         set(uiAddVoiRoiPanel , 'Enable', 'off');
         set(uiPrevVoiRoiPanel, 'Enable', 'off');
         set(uiDelVoiRoiPanel , 'Enable', 'off');

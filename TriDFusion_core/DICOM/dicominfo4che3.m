@@ -119,10 +119,11 @@ function info = dicominfo4che3(fileInput)
         info.PixelSpacing = zeros(2,1);
     end
          
-    info.PatientWeight = char(dataset.getString(org.dcm4che.data.Tag.PatientWeight, 0));
-    info.PatientSize   = char(dataset.getString(org.dcm4che.data.Tag.PatientSize, 0));
-    info.PatientSex    = char(dataset.getString(org.dcm4che.data.Tag.PatientSex, 0));
-    info.PatientAge    = char(dataset.getString(org.dcm4che.data.Tag.PatientAge, 0));
+    info.PatientWeight    = dataset.getFloat(org.dcm4che.data.Tag.PatientWeight, 0);
+    info.PatientSize      = dataset.getFloat(org.dcm4che.data.Tag.PatientSize, 0);
+    info.PatientSex       = char(dataset.getString(org.dcm4che.data.Tag.PatientSex, 0));
+    info.PatientAge       = char(dataset.getString(org.dcm4che.data.Tag.PatientAge, 0));
+    info.PatientBirthDate = char(dataset.getString(org.dcm4che.data.Tag.PatientBirthDate, 0));
     
     % Manifacturer & protocol information
 
@@ -133,6 +134,7 @@ function info = dicominfo4che3(fileInput)
     
     datasetDose = dataset.getNestedDataset(org.dcm4che.data.Tag.RadiopharmaceuticalInformationSequence, 0);
     if ~isempty(datasetDose)
+        % RadiopharmaceuticalInformationSequence
         info.RadiopharmaceuticalInformationSequence.Item_1.Radiopharmaceutical              = char(datasetDose.getString(org.dcm4che.data.Tag.Radiopharmaceutical, 0));
         info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartTime     = char(datasetDose.getString(org.dcm4che.data.Tag.RadiopharmaceuticalStartTime, 0));
         info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStopTime      = char(datasetDose.getString(org.dcm4che.data.Tag.RadiopharmaceuticalStopTime, 0));
@@ -141,6 +143,44 @@ function info = dicominfo4che3(fileInput)
         info.RadiopharmaceuticalInformationSequence.Item_1.RadionuclidePositronFraction     = char(datasetDose.getString(org.dcm4che.data.Tag.RadionuclidePositronFraction, 0));
         info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime = char(datasetDose.getString(org.dcm4che.data.Tag.RadiopharmaceuticalStartDateTime, 0));
         info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStopDateTime  = char(datasetDose.getString(org.dcm4che.data.Tag.RadiopharmaceuticalStopDateTime, 0));
+        
+        % RadiopharmaceuticalCodeSequence
+        
+        datasetRadiopharmaceutical = datasetDose.getNestedDataset(org.dcm4che.data.Tag.RadiopharmaceuticalCodeSequence, 0);        
+        if ~isempty(datasetRadiopharmaceutical)
+            
+            info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalCodeSequence.Item_1.CodeValue = ...
+                char(datasetRadiopharmaceutical.getString(org.dcm4che.data.Tag.CodeValue, 0));
+
+            info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalCodeSequence.Item_1.CodingSchemeDesignator = ...
+                char(datasetRadiopharmaceutical.getString(org.dcm4che.data.Tag.CodingSchemeDesignator, 0));
+
+            info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalCodeSequence.Item_1.CodeMeaning = ...
+                char(datasetRadiopharmaceutical.getString(org.dcm4che.data.Tag.CodeMeaning, 0));
+        else
+            info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalCodeSequence.Item_1.CodeValue = '';
+            info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalCodeSequence.Item_1.CodingSchemeDesignator = '';
+            info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalCodeSequence.Item_1.CodeMeaning = '';
+        end
+        
+        % RadionuclideCodeSequence
+        
+        datasetRadionuclide = datasetDose.getNestedDataset(org.dcm4che.data.Tag.RadionuclideCodeSequence, 0);
+        if ~isempty(datasetRadionuclide)
+        
+            info.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodeValue = ...
+                char(datasetRadionuclide.getString(org.dcm4che.data.Tag.CodeValue, 0));
+
+            info.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodingSchemeDesignator ...
+                = char(datasetRadionuclide.getString(org.dcm4che.data.Tag.CodingSchemeDesignator, 0));
+
+            info.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodeMeaning ...
+                = char(datasetRadionuclide.getString(org.dcm4che.data.Tag.CodeMeaning, 0));        
+        else
+            info.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodeValue = '';
+            info.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodingSchemeDesignator = '';
+            info.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodeMeaning = '';
+        end
     end
     
     % Real World Value (SUV SPECT)

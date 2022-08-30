@@ -32,5 +32,6 @@ function lOffset = colorMapVolFusionOffset(sAction, lValue)
     if strcmp('set', sAction)
         plColorMapOffset = lValue;            
     end
+    
     lOffset = plColorMapOffset;
 end

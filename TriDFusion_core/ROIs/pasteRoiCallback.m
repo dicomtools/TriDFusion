@@ -220,7 +220,7 @@ function pasteRoiCallback(~, ~)
             return;
     end
 
-    addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'));
+    addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
 
 %    setVoiRoiSegPopup();
 

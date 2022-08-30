@@ -239,7 +239,7 @@ function setRoiToolbar(sVisible)
                     dLength = computeRoiLineLength(a);
                     a.Label = [num2str(dLength) ' mm'];
 
-                    addRoi(a, get(uiSeriesPtr('get'), 'Value'));
+                    addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
 
 %                    setVoiRoiSegPopup();
 
@@ -378,7 +378,7 @@ function setRoiToolbar(sVisible)
                         return;
                     end
 
-                    addRoi(a, get(uiSeriesPtr('get'), 'Value'));
+                    addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
 
 %                    setVoiRoiSegPopup();
 
@@ -508,7 +508,7 @@ function setRoiToolbar(sVisible)
 %test addlistener(he,'MovingROI', @(varargin)editorROIMoving(he, hf));
 %test addlistener(he,'ROIMoved', @(varargin)editFreehand(hf, he));
 
-                    addRoi(a, get(uiSeriesPtr('get'), 'Value'));
+                    addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
 
 %                    setVoiRoiSegPopup();
 
@@ -663,7 +663,7 @@ function setRoiToolbar(sVisible)
                         return;
                     end
 
-                    addRoi(a, get(uiSeriesPtr('get'), 'Value'));
+                    addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
 
 %                    setVoiRoiSegPopup();
 
@@ -784,7 +784,7 @@ function setRoiToolbar(sVisible)
                         return;
                     end
 
-                    addRoi(a, get(uiSeriesPtr('get'), 'Value'));
+                    addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
 
 %                    setVoiRoiSegPopup();
 
@@ -908,7 +908,7 @@ function setRoiToolbar(sVisible)
                         return;
                     end
 
-                    addRoi(a, get(uiSeriesPtr('get'), 'Value'));
+                    addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
 
 %                    setVoiRoiSegPopup();
 

@@ -1,6 +1,6 @@
-function aBuffer = dicomBuffer(sAction, aValue, dSeriesOffset)
-%function aBuffer = dicomBuffer(sAction, aValue, dSeriesOffset)
-%Get\Set DICOM Buffer.
+function uiObject = uiLesionTypeVoiRoiPanelObject(sAction, aValue)
+%function  uiObject = uiLesionTypeVoiRoiPanelObject(sAction, aValue)
+%Get\Set Lesion Type List Roi Panel Object.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.
@@ -10,7 +10,7 @@ function aBuffer = dicomBuffer(sAction, aValue, dSeriesOffset)
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2022, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -30,32 +30,11 @@ function aBuffer = dicomBuffer(sAction, aValue, dSeriesOffset)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent paBuffer; 
-
-    uiSeries = uiSeriesPtr('get');
-    
-    if ~isempty(uiSeries)
-        if exist('dSeriesOffset', 'var')
-            iOffset = dSeriesOffset;
-        else
-            iOffset = get(uiSeries, 'Value');
-        end
-    else
-        iOffset = 1;
-    end
+    persistent paObject; 
 
     if strcmpi('set', sAction)
-        paBuffer{iOffset} = aValue; 
-    elseif strcmpi('reset', sAction)    
-        for aa=1:numel(paBuffer)
-            paBuffer{aa} = '';
-        end
-    end
-
-    if numel(paBuffer) < iOffset
-        aBuffer = '';
-    else
-        aBuffer = paBuffer{iOffset};
-    end
-
+        paObject = aValue;            
+    end      
+    
+    uiObject = paObject;
 end

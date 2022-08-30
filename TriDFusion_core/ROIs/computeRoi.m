@@ -1,5 +1,5 @@
-function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRoiMetaData, ptrRoi, dSUVScale, bSUVUnit, bSegmented, bDoseKernel, bMovementApplied)  
-%function tRoiComputed = computeRoi(imInput, atInputMetaData, imRoi, atRoiMetaData, ptrRoi, dSUVScale, bSUVUnit, bSegmented, bDoseKernel, bMovementApplied)  
+function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRoiMetaData, ptrRoi, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied)  
+%function tRoiComputed = computeRoi(imInput, atInputMetaData, imRoi, atRoiMetaData, ptrRoi, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied)  
 %Compute ROI values from ROI object.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -30,26 +30,22 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    bUseRoiTemplate = false;
-        
-    if bSegmented == false && ...
-       bDoseKernel == false && ... % Can't use input buffer for a kernel
-       bMovementApplied == false   % Can't use input buffer if movement have been applied
+%    bUseRoiTemplate = false;
+
+    
+    if bModifiedMatrix  == false && ... 
+       bMovementApplied == false        % Can't use input buffer if movement have been applied
+               
         if numel(imInput) ~= numel(imRoi)
             pTemp{1} = ptrRoi;
             ptrRoiTemp = resampleROIs(imRoi, atRoiMetaData, imInput, atInputMetaData, pTemp, false);
             ptrRoi = ptrRoiTemp{1};
-            
-            imRoi  = imInput;
-           
-            atRoiMetaData = atInputMetaData;
-    
-            bUseRoiTemplate = true;
-        end        
+        end
+        
+        imRoi  = imInput;
+
+        atRoiMetaData = atInputMetaData;    
     end
-    
-    dImInputSize = numel(imInput);
-    dImRoiSize   = numel(imRoi);
     
     tRoiComputed.MaxDistances = ptrRoi.MaxDistances;
    
@@ -59,63 +55,45 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
         tSliceMeta = atRoiMetaData{1};
     end
     
-    if size(imRoi, 3) == 1 
-        if strcmpi(ptrRoi.Axe, 'Axe')
-            imRoi=imRoi(:,:);
-            imCData = imRoi; 
-            imCInput = imInput;
-       end
-    else
-        if strcmpi(ptrRoi.Axe, 'Axes1')
-            imCData = permute(imRoi(ptrRoi.SliceNb,:,:), [3 2 1]);
-            if dImInputSize == dImRoiSize
-                imCInput = permute(imInput(ptrRoi.SliceNb,:,:), [3 2 1]);
-            else
-                imCInput = 0;
-            end
-       end
-
-        if strcmpi(ptrRoi.Axe, 'Axes2')                    
-            imCData = permute(imRoi(:,ptrRoi.SliceNb,:), [3 1 2]) ;
-            if dImInputSize == dImRoiSize
-                imCInput = permute(imInput(:,ptrRoi.SliceNb,:), [3 1 2]);
-            else
-                imCInput = 0;
-            end
-        end
-
-        if strcmpi(ptrRoi.Axe, 'Axes3')
-            imCData  = imRoi(:,:,ptrRoi.SliceNb);  
-            if dImInputSize == dImRoiSize
-                imCInput = imInput(:,:,ptrRoi.SliceNb);  
-            else
-                imCInput = 0;
-            end
-        end
-    end
-    
-%    if bUseRoiTemplate == true
-        mask = roiTemplateToMask(ptrRoi, imCData);      
-%    else
-%        mask = createMask(ptrRoi.Object, imCData);         
-%    end
-
-    if bSegmented == true && ...
-       bDoseKernel == false && ... % Can't use input buffer for a kernel
-       bMovementApplied == false   % Can't use input buffer if movement have been applied  
-   
-        dInputMin = min(imInput, [], 'all');
-        imCDataMasked = imCData(mask);
-        imCDataMasked = imCDataMasked(imCDataMasked>dInputMin);
-    else    
-        imCDataMasked = imCData(mask);
-    end
-    
-    if numel(double(imCDataMasked)) == 0
-        % smaler than 1 pixel
-    end
+    switch lower(ptrRoi.Axe)    
         
-    tRoiComputed.cells = numel(double(imCDataMasked));
+        case 'axe'
+            imCData = imRoi(:,:); 
+            
+        case 'axes1'
+            imCData = permute(imRoi(ptrRoi.SliceNb,:,:), [3 2 1]);
+            
+        case 'axes2'
+            imCData = permute(imRoi(:,ptrRoi.SliceNb,:), [3 1 2]) ;
+            
+        case 'axes3'
+            imCData  = imRoi(:,:,ptrRoi.SliceNb);  
+            
+        otherwise   
+            tRoiComputed = []; 
+            mask = [];
+            return;
+     end
+    
+     if strcmpi(ptrRoi.Type, 'images.roi.line')
+        mask = createMask(ptrRoi.Object, imCData);         
+     else
+        mask = roiTemplateToMask(ptrRoi, imCData);      
+     end
+
+    imCData = imCData(mask);
+    
+    if bSegmented  == true && ...      
+       bModifiedMatrix == true % Can't use original buffer   
+   
+        imCData = imCData(imCData>cropValue('get'));                            
+    end
+    
+%    if numel(imCData) == 0
+%        % smaler than 1 pixel
+%    end
+        
+    tRoiComputed.cells = numel(imCData);
     
     if isfield(tSliceMeta, 'RealWorldValueMappingSequence') % SUV SPECT
         if isfield(tSliceMeta.RealWorldValueMappingSequence.Item_1, 'MeasurementUnitsCodeSequence')
@@ -145,90 +123,21 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
             zPixel = zPixel/10;
         end
 
-%        if strcmpi(ptrRoi.Axe, 'Axe')
-%             xPixel = xAxial;
-%             yPixel = yAxial;
-%             zPixel = zAxial;                 
-%        end    
-
-%        if strcmpi(ptrRoi.Axe, 'Axes1') % Coronal    
-
-%            if strcmpi(imageOrientation('get'), 'coronal')
-%                xPixel = xAxial;
-%                yPixel = yAxial;
-%                zPixel = zAxial;                                    
-%            end
-            
-%            if strcmpi(imageOrientation('get'), 'sagittal')
-%                xPixel = yAxial;
-%                yPixel = xAxial;
-%                zPixel = zAxial;                                    
-%            end
-            
-%            if strcmpi(imageOrientation('get'), 'axial')
-%                xPixel = yAxial;
-%                yPixel = zAxial;
-%                zPixel = xAxial;                                    
-%           end
-%       end
-
-%       if strcmpi(ptrRoi.Axe, 'Axes2') % Sagittal   
-           
-%            if strcmpi(imageOrientation('get'), 'coronal')
-%                xPixel = yAxial;
-%                yPixel = xAxial;
-%                zPixel = zAxial;                                    
-%            end
-           
-%            if strcmpi(imageOrientation('get'), 'sagittal')
-%                xPixel = zAxial;
-%                yPixel = yAxial;
-%                zPixel = xAxial;                                    
-%            end
-            
-%            if strcmpi(imageOrientation('get'), 'axial')
-%                xPixel = yAxial;
-%                yPixel = zAxial;
-%                zPixel = xAxial;                                    
-%            end                
-%        end
-
-%        if strcmpi(ptrRoi.Axe, 'Axes3') % Axial  
-
-%            if strcmpi(imageOrientation('get'), 'coronal')
-%                xPixel = xAxial;
-%                yPixel = zAxial;
-%                zPixel = yAxial;                                    
-%            end
-            
-%            if strcmpi(imageOrientation('get'), 'sagittal')
-%                xPixel = yAxial;
-%                yPixel = zAxial;
-%                zPixel = xAxial;                                    
-%            end
-            
-%            if strcmpi(imageOrientation('get'), 'axial')
-%                xPixel = xAxial;
-%                yPixel = yAxial;
-%                zPixel = zAxial;                                    
-%            end
-%        end
-
         voxVolume = xPixel * yPixel * zPixel;
         nbVoxels = tRoiComputed.cells;
 
-        tRoiComputed.min    = min(double(imCDataMasked),[],'all')  * dSUVScale;
-        tRoiComputed.max    = max(double(imCDataMasked),[],'all')  * dSUVScale;
-        tRoiComputed.mean   = mean(double(imCDataMasked), 'all')   * dSUVScale;
-        tRoiComputed.median = median(double(imCDataMasked), 'all') * dSUVScale;
+        tRoiComputed.min    = min(imCData,[],'all')  * dSUVScale;
+        tRoiComputed.max    = max(imCData,[],'all')  * dSUVScale;
+        tRoiComputed.mean   = mean(imCData, 'all')   * dSUVScale;
+        tRoiComputed.median = median(imCData, 'all') * dSUVScale;
 
-        volMean = mean(double(imCDataMasked), 'all'); % To verify              
+        volMean = mean(double(imCData), 'all'); % To verify              
         tRoiComputed.sum    = voxVolume * nbVoxels * volMean * dSUVScale;
-        tRoiComputed.std    = std(double(imCDataMasked),[],'all') * dSUVScale;           
+        tRoiComputed.std    = std(imCData,[],'all') * dSUVScale;           
 
         if ~isempty(tRoiComputed.max)
             % Initialization 
-            ROIonlyPET = padarray(imCDataMasked * dSUVScale,[1 1 1],NaN);
+            ROIonlyPET = padarray(imCData * dSUVScale,[1 1 1],NaN);
 
             % SUVmax
             [~,indMax] = max(ROIonlyPET(:));         
@@ -250,24 +159,18 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
             tRoiComputed.peak = [];
         end
 
-    %    tRoiComputed.area   = bwarea(mask) * xPixel * yPixel;
-
-        tRoiComputed.area = numel(imCDataMasked) * xPixel * yPixel;
-
-        if numel(imCInput) == numel(imCData)
-            tRoiComputed.subtraction = max(imCInput(mask)-imCData(mask),[],'all') * dSUVScale;
-        end
+        tRoiComputed.area = numel(imCData) * xPixel * yPixel;
 
     else
-        tRoiComputed.min    = min(double(imCDataMasked),[],'all');
-        tRoiComputed.max    = max(double(imCDataMasked),[],'all');
-        tRoiComputed.mean   = mean(double(imCDataMasked), 'all');
-        tRoiComputed.median = median(double(imCDataMasked), 'all');
-        tRoiComputed.std    = std(double(imCDataMasked),[],'all');
+        tRoiComputed.min    = min(imCData,[],'all');
+        tRoiComputed.max    = max(imCData,[],'all');
+        tRoiComputed.mean   = mean(imCData, 'all');
+        tRoiComputed.median = median(imCData, 'all');
+        tRoiComputed.std    = std(imCData,[],'all');
 
         if ~isempty(tRoiComputed.max)
             % Initialization SUVpeak
-            ROIonlyPET = padarray(imCDataMasked,[1 1 1],NaN);
+            ROIonlyPET = padarray(imCData,[1 1 1],NaN);
 
             % SUVmax
             [~,indMax] = max(ROIonlyPET(:));         
@@ -304,88 +207,13 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
             end
         end            
 
-%        if strcmpi(ptrRoi.Axe, 'Axe')
-%             xPixel = xAxial;
-%             yPixel = yAxial;
-%             zPixel = zAxial;                 
-%        end    
-
-%        if strcmpi(ptrRoi.Axe, 'Axes1') % Coronal    
-
-%            if strcmpi(imageOrientation('get'), 'coronal')
-%                xPixel = xAxial;
-%                yPixel = yAxial;
-%                zPixel = zAxial;                                    
-%            end
-            
-%            if strcmpi(imageOrientation('get'), 'sagittal')
-%                xPixel = yAxial;
-%                yPixel = xAxial;
-%                zPixel = zAxial;                                    
-%            end
-            
-%            if strcmpi(imageOrientation('get'), 'axial')
-%                xPixel = yAxial;
-%                yPixel = zAxial;
-%                zPixel = xAxial;                                    
-%           end
-%       end
-
-%       if strcmpi(ptrRoi.Axe, 'Axes2') % Sagittal   
-           
-%            if strcmpi(imageOrientation('get'), 'coronal')
-%                xPixel = yAxial;
-%                yPixel = xAxial;
-%                zPixel = zAxial;                                    
-%            end
-           
-%            if strcmpi(imageOrientation('get'), 'sagittal')
-%                xPixel = zAxial;
-%                yPixel = yAxial;
-%                zPixel = xAxial;                                    
-%            end
-            
-%            if strcmpi(imageOrientation('get'), 'axial')
-%                xPixel = yAxial;
-%                yPixel = zAxial;
-%                zPixel = xAxial;                                    
-%            end                
-%        end
-
-%        if strcmpi(ptrRoi.Axe, 'Axes3') % Axial  
-
-%            if strcmpi(imageOrientation('get'), 'coronal')
-%                xPixel = xAxial;
-%                yPixel = zAxial;
-%                zPixel = yAxial;                                    
-%            end
-            
-%            if strcmpi(imageOrientation('get'), 'sagittal')
-%                xPixel = yAxial;
-%                yPixel = zAxial;
-%                zPixel = xAxial;                                    
-%            end
-            
-%            if strcmpi(imageOrientation('get'), 'axial')
-%                xPixel = xAxial;
-%                yPixel = yAxial;
-%                zPixel = zAxial;                                    
-%            end
-%        end
-
         voxVolume = xPixel * yPixel * zPixel;
         nbVoxels  = tRoiComputed.cells;
         volMean   = tRoiComputed.mean;                    
         tRoiComputed.sum = voxVolume * nbVoxels * volMean;
 
-%         tRoiComputed.area = bwarea(mask) * (xPixel/10) * (yPixel/10);
-        tRoiComputed.area = numel(imCDataMasked) * xPixel * yPixel;
+        tRoiComputed.area = numel(imCData) * xPixel * yPixel;
 
-        if numel(imCInput) == numel(imCData) 
-            if bSegmented == true
-                tRoiComputed.subtraction = max(imCInput(mask)-imCData(mask), [], 'all');
-            end
-        end
     end   
     
     tRoiComputed.SliceNb = ptrRoi.SliceNb;

@@ -63,21 +63,21 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
     
     % Resample contours (if needed)
     
-    tRoiInput = roiTemplate('get', dOffset);
-    tVoiInput = voiTemplate('get', dOffset);
+    atRoiInput = roiTemplate('get', dOffset);
+    atVoiInput = voiTemplate('get', dOffset);
     
-    for pp=1:numel(tVoiInput) % Patch, don't export total-mask
-        if strcmpi(tVoiInput{pp}.Label, 'TOTAL-MASK')
-            tVoiInput{pp} = [];
-            tVoiInput(cellfun(@isempty, tVoiInput)) = [];       
-        end
-    end
+%    for pp=1:numel(atVoiInput) % Patch, don't export total-mask
+%        if strcmpi(atVoiInput{pp}.Label, 'TOTAL-MASK')
+%            atVoiInput{pp} = [];
+%            atVoiInput(cellfun(@isempty, atVoiInput)) = [];       
+%        end
+%    end
     
     bUseRoiTemplate = false;
     if modifiedImagesContourMatrix('get') == false
         if numel(aInputBuffer) ~= numel(aDicomBuffer)  
             
-            tRoiInput = resampleROIs(aDicomBuffer, atDicomMeta, aInputBuffer, atInputMeta, tRoiInput, false); 
+            atRoiInput = resampleROIs(aDicomBuffer, atDicomMeta, aInputBuffer, atInputMeta, atRoiInput, false); 
             
             atDicomMeta  = atInputMeta;          
             aDicomBuffer = aInputBuffer;
@@ -186,12 +186,12 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 
     % set StructureSetROISequence *
 
-    nbContours = numel(tVoiInput);
+    nbContours = numel(atVoiInput);
     for cc=1:nbContours
         sVOIitemName = sprintf('Item_%d', cc);
         info.StructureSetROISequence.(sVOIitemName).ROINumber = cc;
         info.StructureSetROISequence.(sVOIitemName).ReferencedFrameOfReferenceUID = sFrameOfReferenceUID;
-        info.StructureSetROISequence.(sVOIitemName).ROIName = tVoiInput{cc}.Label;
+        info.StructureSetROISequence.(sVOIitemName).ROIName = atVoiInput{cc}.Label;
         info.StructureSetROISequence.(sVOIitemName).ROIDescription = '';
         info.StructureSetROISequence.(sVOIitemName).ROIGenerationAlgorithm = 'MANUAL';
     end
@@ -202,30 +202,30 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
         
         sVOIitemName = sprintf('Item_%d', cc);
             
-        info.ROIContourSequence.(sVOIitemName).ROIDisplayColor = tVoiInput{cc}.Color * 255;
+        info.ROIContourSequence.(sVOIitemName).ROIDisplayColor = atVoiInput{cc}.Color * 255;
         info.ROIContourSequence.(sVOIitemName).ReferencedROINumber = cc;
 
         if mod(cc,5)==1 || cc == 1 || cc == nbContours
             progressBar( cc / nbContours - 0.000001, sprintf('Processing contour %d/%d, please wait', cc, nbContours) );
         end
 
-        nbRois = numel(tVoiInput{cc}.RoisTag);
+        nbRois = numel(atVoiInput{cc}.RoisTag);
         for rr=1:nbRois
 
             sROIitemName = sprintf('Item_%d', rr);
-            for tt=1:numel(tRoiInput)
-                if strcmpi(tVoiInput{cc}.RoisTag{rr}, tRoiInput{tt}.Tag)
+            for tt=1:numel(atRoiInput)
+                if strcmpi(atVoiInput{cc}.RoisTag{rr}, atRoiInput{tt}.Tag)
 
-                    if strcmpi(tRoiInput{tt}.Axe, 'Axes3') % Only axial plane is supported
+                    if strcmpi(atRoiInput{tt}.Axe, 'Axes3') % Only axial plane is supported
 
-                         if strcmpi(tRoiInput{tt}.Type, 'images.roi.rectangle') || ...
-                            strcmpi(tRoiInput{tt}.Type, 'images.roi.circle')    || ...
-                            strcmpi(tRoiInput{tt}.Type, 'images.roi.ellipse')
+                         if strcmpi(atRoiInput{tt}.Type, 'images.roi.rectangle') || ...
+                            strcmpi(atRoiInput{tt}.Type, 'images.roi.circle')    || ...
+                            strcmpi(atRoiInput{tt}.Type, 'images.roi.ellipse')
 
                              if bUseRoiTemplate == true
-                                 bw = roiTemplateToMask(tRoiInput{tt}, aDicomBuffer(:,:,tRoiInput{tt}.SliceNb));      
+                                 bw = roiTemplateToMask(atRoiInput{tt}, aDicomBuffer(:,:,atRoiInput{tt}.SliceNb));      
                              else
-                                 bw = createMask(tRoiInput{tt}.Object);         
+                                 bw = createMask(atRoiInput{tt}.Object);         
                              end
         
                              aBw  = imresize(bw , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
@@ -235,13 +235,13 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                                  aBoundaries = aBoundaries{:};
                                  aBoundaries = aBoundaries/PIXEL_EDGE_RATIO;
 
-                                 aX = (aBoundaries(:,2)-(size(aDicomBuffer,1)/2)) * atDicomMeta{tRoiInput{tt}.SliceNb}.PixelSpacing(1);
-                                 aY = (aBoundaries(:,1)-(size(aDicomBuffer,2)/2)) * atDicomMeta{tRoiInput{tt}.SliceNb}.PixelSpacing(2);
+                                 aX = (aBoundaries(:,2)-(size(aDicomBuffer,1)/2)) * atDicomMeta{atRoiInput{tt}.SliceNb}.PixelSpacing(1);
+                                 aY = (aBoundaries(:,1)-(size(aDicomBuffer,2)/2)) * atDicomMeta{atRoiInput{tt}.SliceNb}.PixelSpacing(2);
 
                                  dNBoundaries = size(aBoundaries,1);
 
                                  aZ = zeros(dNBoundaries, 1);
-                                 aZ(:) = atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation;
+                                 aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
     
                                  dXOffset=1;
                                  dYOffset=1;
@@ -262,27 +262,27 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                                     dZOffset = dZOffset+1;
                                  end  
 
-                                 info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPClassUID = tRoiInput{tt}.SOPClassUID;
-                                 info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPInstanceUID = tRoiInput{tt}.SOPInstanceUID;
+                                 info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPClassUID = atRoiInput{tt}.SOPClassUID;
+                                 info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPInstanceUID = atRoiInput{tt}.SOPInstanceUID;
                                  info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourGeometricType = 'CLOSED_PLANAR';
         
                                  info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).NumberOfContourPoints = dNBoundaries; % To revisit
                                  info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourData = aXYZ; % TO DO [NumberOfContourPoints * xyz]                                 
                              end
                          else
-                            aBoundaries = zeros(size(tRoiInput{tt}.Position, 1),2);
+                            aBoundaries = zeros(size(atRoiInput{tt}.Position, 1),2);
 
-                            aBoundaries(:,1)=tRoiInput{tt}.Position(:,2);
-                            aBoundaries(:,2)=tRoiInput{tt}.Position(:,1);
+                            aBoundaries(:,1)=atRoiInput{tt}.Position(:,2);
+                            aBoundaries(:,2)=atRoiInput{tt}.Position(:,1);
 
                             dNBoundaries = size(aBoundaries,1);
 
-                            a3DOffset = zeros(size(tRoiInput{tt}.Position, 1),3);
+                            a3DOffset = zeros(size(atRoiInput{tt}.Position, 1),3);
                 
-                            a3DOffset(:,1)=tRoiInput{tt}.Position(:,1)-1;
-                            a3DOffset(:,2)=tRoiInput{tt}.Position(:,2)-1;
-                            a3DOffset(:,3)=tRoiInput{tt}.SliceNb-1;
-%                            a3DOffset(:,3)=atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation;
+                            a3DOffset(:,1)=atRoiInput{tt}.Position(:,1)-1;
+                            a3DOffset(:,2)=atRoiInput{tt}.Position(:,2)-1;
+                            a3DOffset(:,3)=atRoiInput{tt}.SliceNb-1;
+%                            a3DOffset(:,3)=atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
 
                             sliceThikness = computeSliceSpacing(atDicomMeta);       
                             [xfm,~] = TransformMatrix(atDicomMeta{1}, sliceThikness);
@@ -301,15 +301,15 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                             if numel(atDicomMeta) == 1
                                 aZ(:) = a3DOffset(:,3);                                
                             else
-                                if atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation == 0
+                                if atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation == 0
                                     aZ(:) = a3DOffset(:,3);
                                 else
-                                    aZ(:) = atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation;
+                                    aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
                                 end
                             end
 
  %                           aZ = zeros(dNBoundaries, 1);
- %                           aZ(:) = atDicomMeta{tRoiInput{tt}.SliceNb}.SliceLocation;
+ %                           aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
 
                             dXOffset=1;
                             dYOffset=1;
@@ -330,8 +330,8 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                                 dZOffset = dZOffset+1;
                             end
 
-                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPClassUID    = tRoiInput{tt}.SOPClassUID;
-                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPInstanceUID = tRoiInput{tt}.SOPInstanceUID;
+                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPClassUID    = atRoiInput{tt}.SOPClassUID;
+                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPInstanceUID = atRoiInput{tt}.SOPInstanceUID;
                              info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourGeometricType = 'CLOSED_PLANAR';
     
                              info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).NumberOfContourPoints = dNBoundaries; % To revisit
@@ -350,7 +350,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
         sVOIitemName = sprintf('Item_%d', cc);
         info.RTROIObservationsSequence.(sVOIitemName).ObservationNumber    = cc;
         info.RTROIObservationsSequence.(sVOIitemName).ReferencedROINumber  = cc;
-        info.RTROIObservationsSequence.(sVOIitemName).ROIObservationLabel  = tVoiInput{cc}.Label;
+        info.RTROIObservationsSequence.(sVOIitemName).ROIObservationLabel  = atVoiInput{cc}.Label;
         info.RTROIObservationsSequence.(sVOIitemName).RTROIInterpretedType = 'ORGAN';
 
         info.RTROIObservationsSequence.(sVOIitemName).ROIInterpreter.FamilyName = '';

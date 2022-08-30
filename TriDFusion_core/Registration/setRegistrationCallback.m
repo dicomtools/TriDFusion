@@ -27,6 +27,9 @@ function setRegistrationCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    FIG_REGISTRATION_X = 850;
+    FIG_REGISTRATION_Y = 745;
+    
     if numel(seriesDescription('get')) < 2
         return;
     end
@@ -34,10 +37,10 @@ function setRegistrationCallback(~, ~)
     tRegistration = registrationTemplate('get');
 
     dlgRegister = ...
-        dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-850/2) ...
-                            (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-745/2) ...
-                            850 ...
-                            745 ...
+        dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_REGISTRATION_X/2) ...
+                            (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_REGISTRATION_Y/2) ...
+                            FIG_REGISTRATION_X ...
+                            FIG_REGISTRATION_Y ...
                             ],...
                'Color', viewerBackgroundColor('get'),...
                'Name' , 'Image Resampling & Registration'...
@@ -45,7 +48,7 @@ function setRegistrationCallback(~, ~)
 
      axes(dlgRegister, ...
          'Units'   , 'pixels', ...
-         'Position', get(dlgRegister, 'Position'), ...
+         'Position', [0 0 FIG_REGISTRATION_X FIG_REGISTRATION_Y], ...
          'Color'   , viewerBackgroundColor('get'),...
          'XColor'  , viewerForegroundColor('get'),...
          'YColor'  , viewerForegroundColor('get'),...
@@ -726,6 +729,10 @@ function setRegistrationCallback(~, ~)
 
         try
             
+        % Deactivate main tool bar 
+        set(uiSeriesPtr('get'), 'Enable', 'off');                
+        mainToolBarEnable('off');
+        
         set(dlgRegister, 'Pointer', 'watch');
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
@@ -736,16 +743,20 @@ function setRegistrationCallback(~, ~)
             end
         end
 
-        resetSeries(dInitOffset, true);
-        
-        progressBar(1,'Ready');
+        resetSeries(dInitOffset, true);       
         
         delete(dlgRegister);       
+        
+        progressBar(1,'Ready');        
 
         catch
             progressBar(1, 'Error:resetRegistrationCallback()');
         end
-
+        
+        % Reactivate main tool bar 
+        set(uiSeriesPtr('get'), 'Enable', 'on');                
+        mainToolBarEnable('on');
+        
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;
         

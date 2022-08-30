@@ -34,7 +34,11 @@ function setVsplashLayoutCallback(hObject, ~)
     end
 
     if isVsplash('get') == true
-
+        
+        % Deactivate main tool bar 
+        set(uiSeriesPtr('get'), 'Enable', 'off');                        
+        mainToolBarEnable('off');  
+    
         multiFramePlayback('set', false);
 
         mPlay = playIconMenuObject('get');
@@ -45,7 +49,11 @@ function setVsplashLayoutCallback(hObject, ~)
         clearDisplay();                    
         initDisplay(3);  
 
-        dicomViewerCore();                 
+        dicomViewerCore(); 
+        
+        % Reactivate main tool bar 
+        set(uiSeriesPtr('get'), 'Enable', 'on');                        
+        mainToolBarEnable('on');          
     end
 
 end

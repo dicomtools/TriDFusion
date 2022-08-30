@@ -42,12 +42,12 @@ function voiObj = initVoiIsoSurface(uiWindow)
     tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
     tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
     
-    for pp=1:numel(tVoiInput) % Patch, don't export total-mask
-        if strcmpi(tVoiInput{pp}.Label, 'TOTAL-MASK')
-            tVoiInput{pp} = [];
-            tVoiInput(cellfun(@isempty, tVoiInput)) = [];       
-        end
-    end   
+%    for pp=1:numel(tVoiInput) % Patch, don't export total-mask
+%        if strcmpi(tVoiInput{pp}.Label, 'TOTAL-MASK')
+%            tVoiInput{pp} = [];
+%            tVoiInput(cellfun(@isempty, tVoiInput)) = [];       
+%        end
+%    end   
         
     if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
         aInputArguments = {'Parent', uiWindow, 'Renderer', 'VolumeRendering', 'BackgroundColor', surfaceColor('one', background3DOffset('get'))};

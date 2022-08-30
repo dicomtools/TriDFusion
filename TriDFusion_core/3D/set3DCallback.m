@@ -31,7 +31,12 @@ function set3DCallback(~, ~)
        size(dicomBuffer('get'), 3) ~= 1
 
         try
-
+        sFusionBtnEnable = get(btnFusionPtr('get'), 'Enable');
+            
+        % Deactivate main tool bar 
+        set(uiSeriesPtr('get'), 'Enable', 'off');                        
+        mainToolBarEnable('off');
+            
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
 
@@ -49,39 +54,28 @@ function set3DCallback(~, ~)
 %                releaseRoiAxeWait();
         releaseRoiWait();
 
+        set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+        set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+            
         set(zoomMenu('get'), 'Checked', 'off');
         set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnZoomPtr('get'), 'Enable', 'off');
         zoomTool('set', false);
-        zoom('off');
+        zoom('off');           
 
         set(panMenu('get'), 'Checked', 'off');
         set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-        set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnPanPtr('get'), 'Enable', 'off');
+        set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
         panTool('set', false);
-        pan('off');
+        pan('off');     
 
-        set(btnVsplashPtr('get')   , 'Enable', 'off');
-        set(uiEditVsplahXPtr('get'), 'Enable', 'off');
-        set(uiEditVsplahYPtr('get'), 'Enable', 'off');
-
-        set(btnRegisterPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-        set(btnRegisterPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnRegisterPtr('get'), 'Enable', 'off');
-
-        set(btnMathPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-        set(btnMathPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-        set(btnMathPtr('get'), 'Enable', 'off');
-
-   %     set(rotate3DMenu('get'), 'Checked', 'off');
+        set(rotate3DMenu('get'), 'Checked', 'off');         
         rotate3DTool('set', false);
-        rotate3d('off');
+        rotate3d off;
 
         set(dataCursorMenu('get'), 'Checked', 'off');
-        dataCursorTool('set', false);
-        datacursormode('off');
+        dataCursorTool('set', false);              
+        datacursormode('off');  
 
         setRoiToolbar('off');
 
@@ -148,14 +142,13 @@ function set3DCallback(~, ~)
         if switchTo3DMode('get') == true
             
             switchTo3DMode('set', false);
-
-            set(btn3DPtr('get'), 'Enable', 'on');
+            
             set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-            set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-
+            set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));   
+                
             if switchToIsoSurface('get') == false && ...
                switchToMIPMode('get')    == false
-
+                
                 view3DPanel('set', false);
                 init3DPanel('set', true);
 
@@ -180,36 +173,6 @@ function set3DCallback(~, ~)
                 multiFrame3DRecord  ('set', false);
                 multiFrame3DIndex   ('set', 1);
 %                     setPlaybackToolbar('off');
-
-                set(uiSeriesPtr('get'), 'Enable', 'on');
-
-%                if numel(seriesDescription('get')) > 1
-                    set(btnFusionPtr ('get')   , 'Enable', 'on');
-                    set(btnLinkMipPtr('get')   , 'Enable', 'on');
-                    set(uiFusedSeriesPtr('get'), 'Enable', 'on');
-%                end
-
-                set(btnZoomPtr('get')    , 'Enable', 'on');
-                set(btnPanPtr('get')     , 'Enable', 'on');
-                if numel(inputTemplate('get')) >1
-                    set(btnRegisterPtr('get'), 'Enable', 'on');
-                end
-                set(btnMathPtr('get'), 'Enable', 'on');
-
-                set(btnVsplashPtr('get')   , 'Enable', 'on');
-                set(uiEditVsplahXPtr('get'), 'Enable', 'on');
-                set(uiEditVsplahYPtr('get'), 'Enable', 'on');
-
-                set(btnTriangulatePtr('get'), 'Enable', 'on');
-                set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
-                set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-
-                set(btnIsoSurfacePtr('get'), 'Enable', 'on');
-                set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-                set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-
-                set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-                set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
                 mOptions = optionsPanelMenuObject('get');
                 if ~isempty(mOptions)
@@ -373,6 +336,8 @@ function set3DCallback(~, ~)
                     setViewerDefaultColor(true, atMetaData);
                 end
                 
+                triangulateCallback();
+                
                 refreshImages();
                 
 %                if strcmpi(atMetaData{1}.Modality, 'ct')
@@ -383,7 +348,11 @@ function set3DCallback(~, ~)
 %                end 
     
                 setRoiToolbar('on');
-
+                
+                % Reactivate main tool bar 
+                set(uiSeriesPtr('get'), 'Enable', 'on');                        
+                mainToolBarEnable('on');  
+                
 %                        robotClick();
             else
                 volObj = volObject('get');
@@ -422,31 +391,24 @@ function set3DCallback(~, ~)
                         end
                     end
                 end
+                
+                set(btn3DPtr('get')        , 'Enable', 'on');                
+                set(btnMIPPtr('get')       , 'Enable', 'on');
+                set(btnIsoSurfacePtr('get'), 'Enable', 'on');
+
+                set(btnFusionPtr('get'), 'Enable', sFusionBtnEnable);   
+            
             end
-        else
+        else                
             switchTo3DMode('set', true);
 
             if isFusion('get') == true
                 init3DfusionBuffer();  
             end
             
-            set(btn3DPtr('get'), 'Enable', 'on');
-            set(btn3DPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
-            set(btn3DPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-
-            set(uiSeriesPtr('get'), 'Enable', 'off');
-
-%            set(btnFusionPtr('get')    , 'Enable', 'off');
-            set(uiFusedSeriesPtr('get'), 'Enable', 'off');
-            set(btnLinkMipPtr('get')   , 'Enable', 'off');
-
-            set(btnTriangulatePtr('get'), 'Enable', 'off');
-            set(btnTriangulatePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-            set(btnTriangulatePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-
             if switchToIsoSurface('get') == false && ...
                switchToMIPMode('get')    == false
-
+                           
                 if isFusion('get') == false
                     set(btnFusionPtr('get')    , 'Enable', 'off');
                 end
@@ -468,6 +430,8 @@ function set3DCallback(~, ~)
                 volObject('set', volObj);
 
                 if isFusion('get')
+                    
+                    set(btnFusionPtr('get'), 'Enable', 'on');
 
 %                    getVolFusionAlphaMap('set', fusionBuffer('get'), 'auto');
 
@@ -500,6 +464,8 @@ function set3DCallback(~, ~)
                         end
                     end
                 else
+                    set(btnFusionPtr('get'), 'Enable', 'off');
+                    
                     ic = volICObject('get');
                     if ~isempty(ic)
                         ic.surfObj = volObj;
@@ -745,8 +711,19 @@ function set3DCallback(~, ~)
                         volColorObject('set', uivolColorbar);
                     end
                 end
+                
+                set(btnFusionPtr('get'), 'Enable', sFusionBtnEnable);                                        
             end
+            
+            % Reactivate toolbar specific items 
+            
+            set(btn3DPtr('get'), 'Enable', 'on');
+            set(btn3DPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+            set(btn3DPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
 
+            set(btnMIPPtr('get'), 'Enable', 'on');
+            set(btnIsoSurfacePtr('get'), 'Enable', 'on');
+                 
         end
 
         if switchToMIPMode('get') == false && ...

@@ -27,19 +27,52 @@ function hideViewLabelCallback(hObject,~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if strcmpi(hObject.UserData.LabelVisible, 'on')
-        hObject.UserData.LabelVisible = 'off';
-    else
-        hObject.UserData.LabelVisible = 'on';
-    end
+    dSerieOffset = get(uiSeriesPtr('get'), 'Value');
+    atInput = inputTemplate('get');
 
-    atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
+    
+    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );            
 
-    for bb=1:numel(atRoi)
-        if strcmpi(hObject.UserData.Tag, atRoi{bb}.Tag)
-            atRoi{bb}.LabelVisible = hObject.UserData.LabelVisible;
-            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoi);
-            break;
+    if aTagOffset(aTagOffset==1) % tag is a roi
+
+        if ~isempty(atRoiInput) 
+
+            sLabelVisible = 'off';
+
+            dTagOffset = find(aTagOffset, 1);
+
+            if ~isempty(dTagOffset)
+
+                if strcmpi(hObject.UserData.LabelVisible, 'off')
+                    sLabelVisible = 'on';
+                end
+                
+                hObject.UserData.LabelVisible = sLabelVisible;
+
+                atRoiInput{dTagOffset}.LabelVisible = sLabelVisible;
+                if isvalid(atRoiInput{dTagOffset}.Object)
+                    atRoiInput{dTagOffset}.Object.LabelVisible = sLabelVisible;
+                end
+
+                roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+            end
+
+            % Set roi label input template tRoi
+
+            if isfield(atInput(dSerieOffset), 'tRoi')
+
+                atInputRoi = atInput(dSerieOffset).tRoi;
+                aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {hObject.UserData.Tag} );      
+
+                dTagOffset = find(aTagOffset, 1);
+
+                if ~isempty(dTagOffset)
+                    atInput(dSerieOffset).tRoi{dTagOffset}.LabelVisible = sLabelVisible;
+                    inputTemplate('set', atInput);                
+                end
+            end                        
         end
     end
+    
 end

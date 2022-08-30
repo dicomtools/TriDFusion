@@ -1,5 +1,5 @@
-function addRoi(ptrRoi, iOffset)
-%function addRoi(ptrRoi, iOffset)
+function addRoi(ptrRoi, dOffset, sLesionType)
+%function addRoi(ptrRoi, dOffset, sLesionType)
 %Add ROI to input template.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -30,18 +30,18 @@ function addRoi(ptrRoi, iOffset)
     tAddInput = inputTemplate('get');
 
     iCurrentOffset = get(uiSeriesPtr('get'), 'Value');
-    if iOffset > numel(tAddInput)
+    if dOffset > numel(tAddInput)
         return;
     end
 
-    if iCurrentOffset == iOffset
+    if iCurrentOffset == dOffset
         atDicomInfo = dicomMetaData('get');
         imRoi = dicomBuffer('get');
     else
-        atDicomInfo = tAddInput(iOffset).atDicomInfo;
+        atDicomInfo = tAddInput(dOffset).atDicomInfo;
 
         aInput = inputBuffer('get');
-        imRoi  = aInput{iOffset};
+        imRoi  = aInput{dOffset};
     end
 
     atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
@@ -102,6 +102,7 @@ function addRoi(ptrRoi, iOffset)
     tRoi.LineWidth           = ptrRoi.LineWidth;
     tRoi.Tag                 = ptrRoi.Tag;
     tRoi.ObjectType          = 'roi';
+    tRoi.LesionType          = sLesionType;
 
     switch lower(tRoi.Type)
         case lower('images.roi.line')
@@ -143,10 +144,10 @@ function addRoi(ptrRoi, iOffset)
     tMaxDistances = computeRoiFarthestPoint(imRoi, atDicomInfo, tRoi, false, false);
     tRoi.MaxDistances = tMaxDistances;
 
-    if isfield( tAddInput(iOffset), 'tRoi' )
-        tAddInput(iOffset).tRoi{numel(tAddInput(iOffset).tRoi)+1} = tRoi;
+    if isfield( tAddInput(dOffset), 'tRoi' )
+        tAddInput(dOffset).tRoi{numel(tAddInput(dOffset).tRoi)+1} = tRoi;
     else
-        tAddInput(iOffset).tRoi{1} = tRoi;
+        tAddInput(dOffset).tRoi{1} = tRoi;
     end
 
     if isempty(atRoiInput)

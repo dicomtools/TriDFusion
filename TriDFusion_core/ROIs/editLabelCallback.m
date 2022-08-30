@@ -35,22 +35,17 @@ function editLabelCallback(hObject, ~)
                (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-EDIT_DIALOG_Y/2) ...
                EDIT_DIALOG_X ...
                EDIT_DIALOG_Y],...
+               'Color', viewerBackgroundColor('get'), ...
                'Name', 'Edit Label'...
                );
 
-%    if integrateToBrowser('get') == true
-%        sLogo = './TriDFusion/logo.png';
-%    else
-%        sLogo = './logo.png';
-%    end
-
-%    javaFrame = get(editLabelWindow, 'JavaFrame');
-%    javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
 
     uicontrol(editLabelWindow,...
               'style'   , 'text',...
               'string'  , 'Label Name:',...
               'horizontalalignment', 'left',...
+              'BackgroundColor', viewerBackgroundColor('get'), ...
+              'ForegroundColor', viewerForegroundColor('get'), ...   
               'position', [20 52 80 25]...
               );
 
@@ -61,44 +56,89 @@ function editLabelCallback(hObject, ~)
               'Background', 'white',...
               'string'    , hObject.UserData.Label,...
               'position'  , [100 55 150 25], ...
+              'BackgroundColor', viewerBackgroundColor('get'), ...
+              'ForegroundColor', viewerForegroundColor('get'), ...              
               'Callback', @acceptEditLabelCallback...
               );
 
     % Cancel or Proceed
 
-   uicontrol(editLabelWindow,...
+    editLabelCancelWindow = ...
+    uicontrol(editLabelWindow,...
              'String','Cancel',...
              'Position',[200 7 100 25],...
+             'BackgroundColor', viewerBackgroundColor('get'), ...
+             'ForegroundColor', viewerForegroundColor('get'), ...                
              'Callback', @cancelEditLabelCallback...
              );
 
-   uicontrol(editLabelWindow,...
+    editLabelOkWindow = ...
+    uicontrol(editLabelWindow,...
              'String','Ok',...
              'Position',[95 7 100 25],...
+             'BackgroundColor', viewerBackgroundColor('get'), ...
+             'ForegroundColor', viewerForegroundColor('get'), ...                
              'Callback', @acceptEditLabelCallback...
              );
 
-   function cancelEditLabelCallback(~, ~)
+    function cancelEditLabelCallback(~, ~)
+        
         delete(editLabelWindow);
-   end
+    end
 
-   function acceptEditLabelCallback(~, ~)
+    function acceptEditLabelCallback(~, ~)
+        
+        set(editLabelCancelWindow, 'Enable', 'off');
+        set(editLabelOkWindow    , 'Enable', 'off');
 
-        hObject.UserData.Label = get(edtLabelName, 'String');
+        sLabel = get(edtLabelName, 'String');
 
-        atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        dSerieOffset = get(uiSeriesPtr('get'), 'Value');
+        atInput = inputTemplate('get');
 
-        for bb=1:numel(atRoi)
-            if strcmpi(hObject.UserData.Tag, atRoi{bb}.Tag)
-                atRoi{bb}.Label = hObject.UserData.Label;
-                roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoi);
-                break;
+        atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
+
+        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );            
+
+        if aTagOffset(aTagOffset==1) % tag is a roi
+
+            if ~isempty(atRoiInput) 
+
+                dTagOffset = find(aTagOffset, 1);
+
+                if ~isempty(dTagOffset)
+
+                    hObject.UserData.Label = sLabel;
+
+                    atRoiInput{dTagOffset}.Color = sLabel;
+                    if isvalid(atRoiInput{dTagOffset}.Object)
+                        atRoiInput{dTagOffset}.Object.Label = sLabel;
+                    end
+
+                    roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+                end
+
+                % Set roi label input template tRoi
+
+                if isfield(atInput(dSerieOffset), 'tRoi')
+
+                    atInputRoi = atInput(dSerieOffset).tRoi;
+                    aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {hObject.UserData.Tag} );      
+
+                    dTagOffset = find(aTagOffset, 1);
+
+                    if ~isempty(dTagOffset)
+                        atInput(dSerieOffset).tRoi{dTagOffset}.Label = sLabel;
+                        inputTemplate('set', atInput);                
+                    end
+                end                        
             end
-        end
-
+            
+%            setVoiRoiSegPopup(); Not need for ROI
+        end        
+       
         delete(editLabelWindow);
+                
    end
-
-   setVoiRoiSegPopup();
 
 end

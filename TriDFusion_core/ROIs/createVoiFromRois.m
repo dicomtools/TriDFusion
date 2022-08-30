@@ -1,5 +1,5 @@
-function createVoiFromRois(iSeriesOffset, adTag, sVoiName)
-%function createVoiFromRois(iSeriesOffset, adTag, sVoiName)
+function createVoiFromRois(iSeriesOffset, adTag, sVoiName, sLesionType)
+%function createVoiFromRois(iSeriesOffset, adTag, sVoiName, sLesionType)
 %Create VOI From Array Of ROIs tag.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -49,7 +49,7 @@ function createVoiFromRois(iSeriesOffset, adTag, sVoiName)
         dVoiOffset = 1;
     end
 
-    if exist('sVoiName', 'var')
+    if ~isempty(sVoiName)
         tInput(iSeriesOffset).tVoi{dVoiOffset}.Label = sVoiName;
     else
         tInput(iSeriesOffset).tVoi{dVoiOffset}.Label = sprintf('VOI %d', dVoiOffset);
@@ -65,9 +65,10 @@ function createVoiFromRois(iSeriesOffset, adTag, sVoiName)
 %            if isvalid(atRoi{cc}.Object)
                 if strcmp(atRoi{cc}.Tag, adTag{bb})
                     sVoiTag = num2str(randi([-(2^52/2),(2^52/2)],1));
-                    tInput(iSeriesOffset).tVoi{dVoiOffset}.Tag = sVoiTag;
+                    tInput(iSeriesOffset).tVoi{dVoiOffset}.Tag        = sVoiTag;
                     tInput(iSeriesOffset).tVoi{dVoiOffset}.ObjectType = 'voi';
-                    tInput(iSeriesOffset).tVoi{dVoiOffset}.Color = atRoi{cc}.Color;
+                    tInput(iSeriesOffset).tVoi{dVoiOffset}.Color      = atRoi{cc}.Color;
+                    tInput(iSeriesOffset).tVoi{dVoiOffset}.LesionType = sLesionType;
 
                     tInput(iSeriesOffset).tVoi{dVoiOffset}.RoisTag = num2cell(zeros(1,numel(adTag)));
                     break;

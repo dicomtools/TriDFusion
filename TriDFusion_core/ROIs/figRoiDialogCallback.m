@@ -31,16 +31,16 @@ function figRoiDialogCallback(hObject, ~)
 
     ySize = dScreenSize(4);
 
-    ROI_PANEL_X = 1550;
-    ROI_PANEL_Y =  ySize*0.75;
+    FIG_ROI_X = 1500;
+    FIG_ROI_Y =  ySize*0.75;
 
-    tInput = inputTemplate('get');
+    atInput = inputTemplate('get');
 
     dOffset = get(uiSeriesPtr('get'), 'Value');
-    if dOffset > numel(tInput)
+    if dOffset > numel(atInput)
         return;
     end
-
+            
     releaseRoiWait();
 
     if strcmpi(get(hObject, 'Tag'), 'toolbar')
@@ -52,10 +52,10 @@ function figRoiDialogCallback(hObject, ~)
     profileMenuOption('set', false);
 
     figRoiWindow = ...
-        figure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-ROI_PANEL_X/2) ...
-               (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-ROI_PANEL_Y/2) ...
-               ROI_PANEL_X ...
-               ROI_PANEL_Y],...
+        figure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_ROI_X/2) ...
+               (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_ROI_Y/2) ...
+               FIG_ROI_X ...
+               FIG_ROI_Y],...
                'Name', 'ROIs/VOIs result',...
                'NumberTitle','off',...
                'MenuBar', 'none',...
@@ -78,21 +78,39 @@ function figRoiDialogCallback(hObject, ~)
     mRoiOptions = uimenu(figRoiWindow,'Label','Options', 'Callback', @figRoiRefreshOption);
 
     if suvMenuUnitOption('get') == true && ...
-       tInput(dOffset).bDoseKernel == false
+       atInput(dOffset).bDoseKernel == false    
         sSuvChecked = 'on';
     else
+        if suvMenuUnitOption('get') == true
+            suvMenuUnitOption('set', false);
+        end
         sSuvChecked = 'off';
     end
-
-    if segMenuOption('get') == true && ...
-        tInput(dOffset).bDoseKernel == false
-
-        sSegChecked = 'on';
+           
+    if modifiedMatrixValueMenuOption('get') == true 
+       sModifiedMatrixChecked = 'on';
     else
+        if atInput(dOffset).tMovement.bMovementApplied == true
+            sModifiedMatrixChecked = 'on';        
+            modifiedMatrixValueMenuOption('set', true);
+        else
+            sModifiedMatrixChecked = 'off';        
+            modifiedMatrixValueMenuOption('set', false);
+        end
+    end
+    
+    if segMenuOption('get') == true 
+        if modifiedMatrixValueMenuOption('get') == false 
+            segMenuOption('set', 'off');
+            sSegChecked = 'off';
+        else
+            sSegChecked = 'on';
+        end
+    else        
         sSegChecked = 'off';
     end
-
-    if tInput(dOffset).bDoseKernel == true
+    
+    if atInput(dOffset).bDoseKernel == true
         sSuvEnable = 'off';
     else
         sSuvEnable = 'on';
@@ -112,9 +130,12 @@ function figRoiDialogCallback(hObject, ~)
 
     mSUVUnit          = ...
         uimenu(mRoiOptions,'Label', 'SUV Unit', 'Checked', sSuvChecked , 'Enable', sSuvEnable, 'Callback', @SUVUnitCallback);
-
+    
+    mModifiedMatrix   = ...
+        uimenu(mRoiOptions,'Label', 'Display Image Cells Value' , 'Checked', sModifiedMatrixChecked, 'Callback', @modifiedMatrixCallback);
+    
     mSegmented        = ...
-        uimenu(mRoiOptions,'Label', 'Modified Image Values' , 'Checked', sSegChecked, 'Callback', @segmentedCallback);
+        uimenu(mRoiOptions,'Label', 'Subtract Masked Cells' , 'Checked', sSegChecked, 'Callback', @segmentedCallback);
 
     mColorBackground  = ...
         uimenu(mRoiOptions,'Label', 'Display in Color' , 'Checked', sFigRoiInColorChecked, 'Callback', @figRoiColorCallback);
@@ -147,7 +168,7 @@ function figRoiDialogCallback(hObject, ~)
                 'Units'   , 'pixels',...
                 'BorderWidth', 0,...
                 'HighlightColor', [0 1 1],...
-                'position', [0 0 ROI_PANEL_X ROI_PANEL_Y]...
+                'position', [0 0 FIG_ROI_X FIG_ROI_Y]...
                );
 
     if isFigRoiInColor('get') == true
@@ -190,7 +211,7 @@ function figRoiDialogCallback(hObject, ~)
                'Position', [250 uiVoiRoiWindow.Position(4)-20 100 20],...
                'BackgroundColor', viewerBackgroundColor('get'), ...
                'ForegroundColor', viewerForegroundColor('get'), ...
-               'String'  , 'NB Pixels'...
+               'String'  , 'Cells'...
                );
 
      uicontrol(uiVoiRoiWindow,...
@@ -264,17 +285,10 @@ function figRoiDialogCallback(hObject, ~)
                );
 
      uicontrol(uiVoiRoiWindow,...
-               'Position', [1350 uiVoiRoiWindow.Position(4)-20 100 20],...
+               'Position', [1350 uiVoiRoiWindow.Position(4)-20 150 20],...
                'BackgroundColor', viewerBackgroundColor('get'), ...
                'ForegroundColor', viewerForegroundColor('get'), ...
                'String'  , 'Volume cm3'...
-               );
-
-     uicontrol(uiVoiRoiWindow,...
-               'Position', [1450 uiVoiRoiWindow.Position(4)-20 100 20],...
-               'BackgroundColor', viewerBackgroundColor('get'), ...
-               'ForegroundColor', viewerForegroundColor('get'), ...
-               'String'  , 'Subtraction'...
                );
 
     tRoiMetaData = dicomMetaData('get');
@@ -285,32 +299,42 @@ function figRoiDialogCallback(hObject, ~)
         bSUVUnit = false;
     end
 
-    if strcmpi(mSegmented.Checked, 'on') && ...
-       tInput(dOffset).bDoseKernel == false
+    if strcmpi(mSegmented.Checked, 'on') 
         bSegmented = true;
     else
         bSegmented = false;
     end
 
-    setVoiRoiListbox(bSUVUnit, bSegmented);
+    if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+        bModifiedMatrix = true;
+    else
+        bModifiedMatrix = false;
+    end
+                
+    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
 
     setRoiFigureName();
 
     function figRoiRefreshOption(~, ~)
 
-        if suvMenuUnitOption('get') == true && ...
-           tInput(dOffset).bDoseKernel == false
+        if suvMenuUnitOption('get') == true 
             sSuvChecked = 'on';
         else
             sSuvChecked = 'off';
         end
-
+        
+        if modifiedMatrixValueMenuOption('get') == true 
+            sModifiedMatrixChecked = 'on';
+        else
+            sModifiedMatrixChecked = 'off';
+        end
+        
         if segMenuOption('get') == true 
             sSegChecked = 'on';
         else
             sSegChecked = 'off';
         end
-
+      
         if isFigRoiInColor('get') == true
             sFigRoiInColorChecked = 'on';
         else
@@ -324,6 +348,7 @@ function figRoiDialogCallback(hObject, ~)
         end
 
         set(mSUVUnit         , 'Checked', sSuvChecked);
+        set(mModifiedMatrix  , 'Checked', sModifiedMatrixChecked);
         set(mSegmented       , 'Checked', sSegChecked);
         set(mColorBackground , 'Checked', sFigRoiInColorChecked);
         set(mInvertConstraint, 'Checked', sInvConstChecked);
@@ -337,7 +362,7 @@ function figRoiDialogCallback(hObject, ~)
             bDispayMenu = false;
             
             aVoiRoiTag = voiRoiTag('get', get(uiSeriesPtr('get'), 'Value'));
-            tRoiInput  = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
+            atRoiInput  = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
 
             adOffset = get(lbVoiRoiWindow, 'Value');
             asRoiWindow = cellstr(get(lbVoiRoiWindow, 'String'));
@@ -375,11 +400,11 @@ end
                 uimenu(c,'Label', 'Edit Color', 'Callback',@figRoiEditColorCallback);
                 uimenu(c,'Label', 'Hide/View Face Alpha', 'Callback', @figRoiHideViewFaceAlhaCallback);
 
-                tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+                atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
             
                 bIsVoiTag= false;
-                for gg=1:numel(tVoiInput)                    
-                    if strcmp(tVoiInput{gg}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag) % Tag is a VOI
+                for gg=1:numel(atVoiInput)                    
+                    if strcmp(atVoiInput{gg}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag) % Tag is a VOI
                                                                        
                         bIsVoiTag = true;
                         break;
@@ -461,11 +486,11 @@ end
                 uimenu(c,'Label', 'Bar Histogram'  , 'Separator', 'on' , 'Callback',@figRoiHistogramCallback);
                 uimenu(c,'Label', 'Cummulative DVH', 'Separator', 'off', 'Callback',@figRoiHistogramCallback);
 
-                if ~isempty(tRoiInput)
-                    for dd=1:numel(tRoiInput)
-                        if isvalid(tRoiInput{dd}.Object)
-                            if strcmpi(tRoiInput{dd}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
-                                if strcmpi(tRoiInput{dd}.Type, 'images.roi.line')
+                if ~isempty(atRoiInput)
+                    for dd=1:numel(atRoiInput)
+                        if isvalid(atRoiInput{dd}.Object)
+                            if strcmpi(atRoiInput{dd}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+                                if strcmpi(atRoiInput{dd}.Type, 'images.roi.line')
                                     uimenu(c,'Label', 'Profile', 'Separator', 'off', 'Callback',@figRoiHistogramCallback);
                                 end
                             end
@@ -473,7 +498,7 @@ end
                     end
                 end
 
- %       switch lower(tInitInput(iOffset).tRoi{bb}.Type)
+ %       switch lower(tInitInput(dOffset).tRoi{bb}.Type)
  %           case lower('images.roi.line')
 
                 return;
@@ -536,14 +561,54 @@ end
         end
                 
         function figRoiHistogramCallback(hObject, ~)
-
+            
+            atInput = inputTemplate('get');
+            dOffset = get(uiSeriesPtr('get'), 'Value');
+            if dOffset > numel(atInput)
+                return;
+            end
+        
             aVoiRoiTag = voiRoiTag('get');
 
-            tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-            tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            
+            aInput = inputBuffer('get');
+            if     strcmpi(imageOrientation('get'), 'axial')
+                aInputBuffer = permute(aInput{dOffset}, [1 2 3]);
+            elseif strcmpi(imageOrientation('get'), 'coronal')
+                aInputBuffer = permute(aInput{dOffset}, [3 2 1]);
+            elseif strcmpi(imageOrientation('get'), 'sagittal')
+                aInputBuffer = permute(aInput{dOffset}, [3 1 2]);
+            end
 
+            if size(aInputBuffer, 3) ==1
+
+                if atInput(dOffset).bFlipLeftRight == true
+                    aInputBuffer=aInputBuffer(:,end:-1:1);
+                end
+
+                if atInput(dOffset).bFlipAntPost == true
+                    aInputBuffer=aInputBuffer(end:-1:1,:);
+                end            
+            else
+                if atInput(dOffset).bFlipLeftRight == true
+                    aInputBuffer=aInputBuffer(:,end:-1:1,:);
+                end
+
+                if atInput(dOffset).bFlipAntPost == true
+                    aInputBuffer=aInputBuffer(end:-1:1,:,:);
+                end
+
+                if atInput(dOffset).bFlipHeadFeet == true
+                    aInputBuffer=aInputBuffer(:,:,end:-1:1);
+                end 
+            end   
+
+            atInputMetaData = atInput(dOffset).atDicomInfo;
+        
             if     strcmpi(get(hObject, 'Label'), 'Bar Histogram')
-
+                
                 histogramMenuOption('set', true);
                 cummulativeMenuOption('set', false);
                 profileMenuOption('set', false);
@@ -559,10 +624,10 @@ end
                 profileMenuOption('set', true);
             end
 
-            if ~isempty(tVoiInput) && ...
+            if ~isempty(atVoiInput) && ...
                ~isempty(aVoiRoiTag)
-                for aa=1:numel(tVoiInput)
-                    if strcmp(tVoiInput{aa}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+                for aa=1:numel(atVoiInput)
+                    if strcmp(atVoiInput{aa}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
 
                         if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                             bSUVUnit = true;
@@ -576,8 +641,17 @@ end
                             bSegmented = false;
                         end
 
-
-                        figRoiHistogram(tVoiInput{aa}, bSUVUnit, tInput(dOffset).bDoseKernel, bSegmented, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Sub);
+                        if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+                            bModifiedMatrix = true;
+                        else
+                            bModifiedMatrix = false;
+                        end
+                        
+                        bDoseKernel      = atInput(dOffset).bDoseKernel;
+                        bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;
+        
+                        figRoiHistogram(aInputBuffer, atInputMetaData, atVoiInput{aa}, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied)
+ 
                         return;
                     end
 
@@ -585,12 +659,12 @@ end
 
             end
 
-            if ~isempty(tRoiInput) && ...
+            if ~isempty(atRoiInput) && ...
                ~isempty(aVoiRoiTag)
 
-                for cc=1:numel(tRoiInput)
-                    if isvalid(tRoiInput{cc}.Object)
-                        if strcmp(tRoiInput{cc}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+                for cc=1:numel(atRoiInput)
+                    if isvalid(atRoiInput{cc}.Object)
+                        if strcmp(atRoiInput{cc}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
 
                             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                                 bSUVUnit = true;
@@ -604,13 +678,16 @@ end
                                 bSegmented = false;
                             end
                             
-                            if isempty(aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Sub)
-                                dSubstraction = 0;
+                            if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+                                bModifiedMatrix = true;
                             else
-                                dSubstraction = aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Sub;
+                                bModifiedMatrix = false;
                             end
-
-                            figRoiHistogram(tRoiInput{cc}, bSUVUnit, tInput(dOffset).bDoseKernel, bSegmented, dSubstraction);
+                            
+                            bDoseKernel      = atInput(dOffset).bDoseKernel;
+                            bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;
+                        
+                            figRoiHistogram(aInputBuffer, atInputMetaData, atRoiInput{cc}, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
                             return;
                        end
                     end
@@ -629,7 +706,7 @@ end
                 asTag{hh}=aVoiRoiTag{hh}.Tag;
             end
 
-            createVoiFromRois(dSeriesOffset, asTag(get(lbVoiRoiWindow, 'Value')));
+            createVoiFromRois(dSeriesOffset, asTag(get(lbVoiRoiWindow, 'Value')), [], 'Unspecified');
 
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                 bSUVUnit = true;
@@ -642,17 +719,63 @@ end
             else
                 bSegmented = false;
             end
-
-            setVoiRoiListbox(bSUVUnit, bSegmented);
+            
+            if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+                bModifiedMatrix = true;
+            else
+                bModifiedMatrix = false;
+            end
+    
+            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
 
             setVoiRoiSegPopup();
 
         end
 
         function figRoiMultiplePlotCallback(hObject, ~)
-
+            
+            atInput = inputTemplate('get');
+            dOffset = get(uiSeriesPtr('get'), 'Value');
+            if dOffset > numel(atInput)
+                return;
+            end
+        
             aVoiRoiTag = voiRoiTag('get');
+            
+            aInput = inputBuffer('get');
+            if     strcmpi(imageOrientation('get'), 'axial')
+                aInputBuffer = permute(aInput{dOffset}, [1 2 3]);
+            elseif strcmpi(imageOrientation('get'), 'coronal')
+                aInputBuffer = permute(aInput{dOffset}, [3 2 1]);
+            elseif strcmpi(imageOrientation('get'), 'sagittal')
+                aInputBuffer = permute(aInput{dOffset}, [3 1 2]);
+            end
 
+            if size(aInputBuffer, 3) ==1
+
+                if atInput(dOffset).bFlipLeftRight == true
+                    aInputBuffer=aInputBuffer(:,end:-1:1);
+                end
+
+                if atInput(dOffset).bFlipAntPost == true
+                    aInputBuffer=aInputBuffer(end:-1:1,:);
+                end            
+            else
+                if atInput(dOffset).bFlipLeftRight == true
+                    aInputBuffer=aInputBuffer(:,end:-1:1,:);
+                end
+
+                if atInput(dOffset).bFlipAntPost == true
+                    aInputBuffer=aInputBuffer(end:-1:1,:,:);
+                end
+
+                if atInput(dOffset).bFlipHeadFeet == true
+                    aInputBuffer=aInputBuffer(:,:,end:-1:1);
+                end 
+            end   
+
+            atInputMetaData = atInput(dOffset).atDicomInfo;
+            
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                 bSUVUnit = true;
             else
@@ -664,61 +787,169 @@ end
             else
                 bSegmented = false;
             end
-
+            
+            if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+                bModifiedMatrix = true;
+            else
+                bModifiedMatrix = false;
+            end
+            
+            bDoseKernel      = atInput(dOffset).bDoseKernel;
+            bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;  
+            
             sType = get(hObject, 'Label');
             atVoiRoiTag = aVoiRoiTag(get(lbVoiRoiWindow, 'Value'));
-
+            
             figRoiMultiplePlot(sType, ...
+                               aInputBuffer, ...
+                               atInputMetaData, ...
                                atVoiRoiTag, ...
                                bSUVUnit, ...
-                               tInput(dOffset).bDoseKernel, ...
-                               bSegmented ...
+                               bModifiedMatrix, ...
+                               bSegmented, ...
+                               bDoseKernel, ...
+                               bMovementApplied ...
                                );
 
         end
 
         function figRoiDeleteObjectCallback(~, ~)
-
+            
+            dSerieOffset = get(uiSeriesPtr('get'), 'Value');
+            
+            atInput = inputTemplate('get');
+        
             aVoiRoiTag = voiRoiTag('get');
 
-            tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-            tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                        
+    
+            if ~isempty(aVoiRoiTag)
+                
+                % Search for a voi tag, if we don't find one, then the tag is            
+                % roi
 
-            if ~isempty(tVoiInput) && ...
-               ~isempty(aVoiRoiTag)
-                for aa=1:numel(tVoiInput)
-                    if strcmpi(tVoiInput{aa}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+                aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
 
-                        figRoiDeleteObject(tVoiInput{aa}, 'voi');
+                if aTagOffset(aTagOffset==1) % tag is a voi
 
-                        if strcmpi(get(mSUVUnit, 'Checked'), 'on')
-                            bSUVUnit = true;
-                        else
-                            bSUVUnit = false;
-                        end
+                    if ~isempty(atVoiInput) 
 
-                        if strcmpi(get(mSegmented, 'Checked'), 'on')
-                            bSegmented = true;
-                        else
-                            bSegmented = false;
-                        end
+                        dTagOffset = find(aTagOffset, 1);
 
-                        setVoiRoiListbox(bSUVUnit, bSegmented);
-                        return;
-                    end
+                        if ~isempty(dTagOffset)
 
-                end
+                            % Clear roi from roi input template
 
-            end
+                            aRoisTagOffset = zeros(1, numel(atVoiInput{dTagOffset}.RoisTag));
+                            if ~isempty(atRoiInput)
 
-            if ~isempty(tRoiInput) && ...
-               ~isempty(aVoiRoiTag)
+                                for ro=1:numel(atVoiInput{dTagOffset}.RoisTag)
+                                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[atVoiInput{dTagOffset}.RoisTag{ro}]} );
+                                    aRoisTagOffset(ro) = find(aTagOffset, 1);    
+                                end
 
-                for cc=1:numel(tRoiInput)
-                    if isvalid(tRoiInput{cc}.Object)
-                        if strcmpi(tRoiInput{cc}.Tag, aVoiRoiTag{lbVoiRoiWindow.Value}.Tag)
+                                if numel(atVoiInput{dTagOffset}.RoisTag)
+                                    
+                                    for ro=1:numel(atVoiInput{dTagOffset}.RoisTag)
 
-                            figRoiDeleteObject(tRoiInput{cc}, 'roi');
+                                        % Clear it constraint
+
+                                        [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value') );
+
+                                        if ~isempty(asConstraintTagList)
+                                            
+                                            dConstraintOffset = find(contains(asConstraintTagList, atVoiInput{dTagOffset}.RoisTag(ro)));
+                                            if ~isempty(dConstraintOffset) % tag exist
+                                                 roiConstraintList('set', dSerieOffset,  asConstraintTagList{dConstraintOffset}, asConstraintTypeList{dConstraintOffset});
+                                            end
+                                        end
+                                        
+                                        % Delete ROI object
+
+                                        if isvalid(atRoiInput{aRoisTagOffset(ro)}.Object)
+                                            delete(atRoiInput{aRoisTagOffset(ro)}.Object);
+                                        end
+
+                                        % Delete farthest distance object
+
+                                        if ~isempty(atRoiInput{aRoisTagOffset(ro)}.MaxDistances)
+
+                                            if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Line)
+                                                delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Line);
+                                            end
+
+                                            if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Line)
+                                                delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Line);
+                                            end
+
+                                            if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Text)
+                                                delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Text);
+                                            end
+
+                                            if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Text)
+                                                delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Text);
+                                            end
+                                        end
+
+                                        atRoiInput{aRoisTagOffset(ro)} = [];
+                                    end
+
+                                    atRoiInput(cellfun(@isempty, atRoiInput)) = [];
+
+                                    roiTemplate('set', dSerieOffset, atRoiInput);  
+                                end
+                            end
+
+                            % Clear roi from input template tRoi
+
+                            if isfield(atInput(dSerieOffset), 'tRoi')
+
+                                atInputRoi = atInput(dSerieOffset).tRoi;
+                                for ro=1:numel(atVoiInput{dTagOffset}.RoisTag)
+                                    aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {[atVoiInput{dTagOffset}.RoisTag{ro}]} );
+                                    aRoisTagOffset(ro) = find(aTagOffset, 1);    
+                                end
+                                
+                                if numel(atVoiInput{dTagOffset}.RoisTag)
+                                    for ro=1:numel(atVoiInput{dTagOffset}.RoisTag)
+                                        atInput(dSerieOffset).tRoi{aRoisTagOffset(ro)} = [];
+                                    end                
+
+                                    atInput(dSerieOffset).tRoi(cellfun(@isempty, atInput(dSerieOffset).tRoi)) = [];
+
+                                    inputTemplate('set', atInput);          
+                                end
+                            end
+
+                            % Clear voi from voi input template
+
+                            atVoiInput{dTagOffset} = [];            
+                            atVoiInput(cellfun(@isempty, atVoiInput)) = [];
+
+                            voiTemplate('set', dSerieOffset, atVoiInput);
+
+                            % Clear voi from input template tVoi
+
+                            if isfield(atInput(dSerieOffset), 'tVoi')
+
+                                atInputVoi = atInput(dSerieOffset).tVoi;
+                                aTagOffset = strcmp( cellfun( @(atInputVoi) atInputVoi.Tag, atInputVoi, 'uni', false ),  {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
+
+                                dTagOffset = find(aTagOffset, 1);  
+
+                                if ~isempty(dTagOffset)
+
+                                    atInput(dSerieOffset).tVoi{dTagOffset} = [];
+                                    atInput(dSerieOffset).tVoi(cellfun(@isempty, atInput(dSerieOffset).tVoi)) = [];
+
+                                    inputTemplate('set', atInput);                
+                                end
+                            end
+
+                            % Refresh contour figure
+
+                            setVoiRoiSegPopup();
 
                             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                                 bSUVUnit = true;
@@ -732,165 +963,165 @@ end
                                 bSegmented = false;
                             end
 
-                            setVoiRoiListbox(bSUVUnit, bSegmented);
+                            if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+                                bModifiedMatrix = true;
+                            else
+                                bModifiedMatrix = false;
+                            end
 
-                            return;
+                            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                        end 
+                    end     
+
+                else % Tag is a ROI
+
+                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );            
+
+                    if aTagOffset(aTagOffset==1) % tag is a roi
+
+                        if ~isempty(atRoiInput) 
+
+                            dTagOffset = find(aTagOffset, 1);
+
+                            if ~isempty(dTagOffset)
+
+                                % Clear it constraint
+
+                                [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dSerieOffset);
+                                
+                                if ~isempty(asConstraintTagList)
+
+                                    dConstraintOffset = find(contains(asConstraintTagList, {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag}));
+                                    if ~isempty(dConstraintOffset) % tag exist
+                                         roiConstraintList('set', dSerieOffset,  asConstraintTagList{dConstraintOffset}, asConstraintTypeList{dConstraintOffset});
+                                    end
+                                end        
+                                
+                                % Delete ROI object 
+
+                                if isvalid(atRoiInput{dTagOffset}.Object)
+                                    delete(atRoiInput{dTagOffset}.Object)
+                                end
+
+                                % Delete farthest distance object
+
+                                if ~isempty(atRoiInput{dTagOffset}.MaxDistances)
+                                    if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Line)
+                                        delete(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Line);
+                                    end
+
+                                    if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Line)
+                                        delete(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Line);
+                                    end
+
+                                    if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Text)
+                                        delete(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Text);
+                                    end
+
+                                    if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Text)
+                                        delete(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Text);
+                                    end
+                                end                        
+
+                                atRoiInput{dTagOffset} = [];
+
+                                atRoiInput(cellfun(@isempty, atRoiInput)) = [];
+
+                                roiTemplate('set', dSerieOffset, atRoiInput);  
+
+                                % Clear roi from input template tRoi
+
+                                if isfield(atInput(dSerieOffset), 'tRoi')
+
+                                    atInputRoi = atInput(dSerieOffset).tRoi;
+                                    aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
+
+                                    dTagOffset = find(aTagOffset, 1);  
+
+                                    if ~isempty(dTagOffset)
+                                        atInput(dSerieOffset).tRoi{dTagOffset} = [];
+
+                                        atInput(dSerieOffset).tRoi(cellfun(@isempty, atInput(dSerieOffset).tRoi)) = [];
+
+                                        inputTemplate('set', atInput);  
+                                    end
+                                end
+
+                                % Clear roi from voi input template (if exist)
+
+                                if ~isempty(atVoiInput)                        
+
+                                    for vo=1:numel(atVoiInput)     
+
+                                        dTagOffset = find(contains(atVoiInput{vo}.RoisTag,{aVoiRoiTag{lbVoiRoiWindow.Value}.Tag}));
+
+                                        if ~isempty(dTagOffset) % tag exist
+                                            atVoiInput{vo}.RoisTag{dTagOffset} = [];
+                                            atVoiInput{vo}.RoisTag(cellfun(@isempty, atVoiInput{vo}.RoisTag)) = [];     
+
+                                            if isempty(atVoiInput{vo}.RoisTag)
+                                                atVoiInput{vo} = [];
+                                           end
+
+                                        end
+                                    end
+
+                                   atVoiInput(cellfun(@isempty, atVoiInput)) = [];
+                                   
+                                   voiTemplate('set', dSerieOffset, atVoiInput);                                        
+                                end
+
+                                % Clear roi from input tVoi template (if exist)
+
+                                if isfield(atInput(dSerieOffset), 'tVoi')
+
+                                    for vo=1:numel(atInput(dSerieOffset).tVoi)     
+
+                                        dTagOffset = find(contains(atInput(dSerieOffset).tVoi{vo}.RoisTag,{aVoiRoiTag{lbVoiRoiWindow.Value}.Tag}));
+
+                                        if ~isempty(dTagOffset) % tag exist
+                                            atInput(dSerieOffset).tVoi{vo}.RoisTag{dTagOffset} = [];
+                                            atInput(dSerieOffset).tVoi{vo}.RoisTag(cellfun(@isempty, atInput(dSerieOffset).tVoi{vo}.RoisTag)) = [];     
+
+                                            if isempty(atInput(dSerieOffset).tVoi{vo}.RoisTag)
+                                                atInput(dSerieOffset).tVoi{vo} = [];
+                                           end
+
+                                        end
+                                    end
+
+                                   atInput(dSerieOffset).tVoi(cellfun(@isempty, atInput(dSerieOffset).tVoi)) = [];
+                                   
+                                   inputTemplate('set', atInput);                
+                                end
+
+                                % Refresh contour figure and contour popup
+
+                                setVoiRoiSegPopup();
+
+                                if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+                                    bSUVUnit = true;
+                                else
+                                    bSUVUnit = false;
+                                end
+
+                                if strcmpi(get(mSegmented, 'Checked'), 'on')
+                                    bSegmented = true;
+                                else
+                                    bSegmented = false;
+                                end
+
+                                if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+                                    bModifiedMatrix = true;
+                                else
+                                    bModifiedMatrix = false;
+                                end
+
+                                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                            end
                         end
                     end
                 end
-            end
-
-            function figRoiDeleteObject(ptrObject, sType)
-
-                iOffset = get(uiSeriesPtr('get'), 'Value');
-                tDeleteInput = inputTemplate('get');
-
-                tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-                tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-
-                if strcmpi(sType, 'voi')
-                    if isfield(tDeleteInput(iOffset), 'tVoi')
-                        for vv=1:numel(ptrObject.RoisTag)
-                            for rr=1:numel(tDeleteInput(iOffset).tRoi)
-                                if strcmpi(ptrObject.RoisTag{vv}, tDeleteInput(iOffset).tRoi{rr}.Tag)
-
-                                    tDeleteInput(iOffset).tRoi{rr} = [];
-                                    break;
-                                end
-
-                            end
-
-                            tDeleteInput(iOffset).tRoi(cellfun(@isempty, tDeleteInput(iOffset).tRoi)) = [];
-                        end
-
-                        inputTemplate('set', tDeleteInput);
-
-                        for vv=1:numel(ptrObject.RoisTag)
-                            for rr=1:numel(tRoiInput)
-                                if strcmpi(ptrObject.RoisTag{vv}, tRoiInput{rr}.Tag)
-
-                                    if ~isempty(tRoiInput{rr}.MaxDistances)
-                                        delete(tRoiInput{rr}.MaxDistances.MaxXY.Line);
-                                        delete(tRoiInput{rr}.MaxDistances.MaxCY.Line);
-                                        delete(tRoiInput{rr}.MaxDistances.MaxXY.Text);
-                                        delete(tRoiInput{rr}.MaxDistances.MaxCY.Text);
-                                    end
-
-                                    delete(tRoiInput{rr}.Object);
-                                    tRoiInput{rr} = [];
-                                    break;
-                                end
-
-                            end
-
-                            tRoiInput(cellfun(@isempty, tRoiInput)) = [];
-                        end
-
-                        roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tRoiInput);
-
-                        for vv=1:numel(tDeleteInput(iOffset).tVoi)
-                            if strcmpi(ptrObject.Tag, tDeleteInput(iOffset).tVoi{vv}.Tag)
-                                tDeleteInput(iOffset).tVoi{vv} = [];
-                                break;
-                            end
-                        end
-
-                        tDeleteInput(iOffset).tVoi(cellfun(@isempty, tDeleteInput(iOffset).tVoi)) = [];
-                        inputTemplate('set', tDeleteInput);
-
-                        for vv=1:numel(tVoiInput)
-                            if strcmpi(ptrObject.Tag, tVoiInput{vv}.Tag)
-                                tVoiInput{vv} = [];
-                                break;
-                            end
-                        end
-
-                        tVoiInput(cellfun(@isempty, tVoiInput)) = [];
-                        voiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tVoiInput);
-
-                    end
-                else
-                    if isfield(tDeleteInput(iOffset), 'tVoi')
-                        for vv=1:numel(tDeleteInput(iOffset).tVoi)
-                            for tt=1: numel(tDeleteInput(iOffset).tVoi{vv}.RoisTag)
-                                if strcmpi(tDeleteInput(iOffset).tVoi{vv}.RoisTag{tt}, ptrObject.Tag)
-
-                                    tDeleteInput(iOffset).tVoi{vv}.RoisTag{tt} = [];
-                                    tDeleteInput(iOffset).tVoi{vv}.RoisTag(cellfun(@isempty, tDeleteInput(iOffset).tVoi{vv}.RoisTag)) = [];
-
-                                    tDeleteInput(iOffset).tVoi{vv}.tMask{tt} = [];
-                                    tDeleteInput(iOffset).tVoi{vv}.tMask(cellfun(@isempty, tDeleteInput(iOffset).tVoi{vv}.tMask)) = [];
-
-                                    if isempty(tDeleteInput(iOffset).tVoi{vv}.RoisTag)
-                                        tDeleteInput(iOffset).tVoi{vv} = [];
-                                        tDeleteInput(iOffset).tVoi(cellfun(@isempty, tDeleteInput(iOffset).tVoi)) = [];
-                                    end
-
-                                    inputTemplate('set', tDeleteInput);
-                                    break;
-                                end
-                            end
-                        end
-                    end
-
-                    if isfield(tDeleteInput(iOffset), 'tRoi')
-                        for rr=1:numel(tDeleteInput(iOffset).tRoi)
-                            if strcmpi(ptrObject.Tag, tDeleteInput(iOffset).tRoi{rr}.Tag)
-
-                                tDeleteInput(iOffset).tRoi{rr} = [];
-                                tDeleteInput(iOffset).tRoi(cellfun(@isempty, tDeleteInput(iOffset).tRoi)) = [];
-
-                                inputTemplate('set', tDeleteInput);
-                                break;
-                            end
-                        end
-                    end
-
-                    for vv=1:numel(tVoiInput)
-                        for tt=1:numel(tVoiInput{vv}.RoisTag)
-                            if strcmpi(tVoiInput{vv}.RoisTag{tt}, ptrObject.Tag)
-
-                                tVoiInput{vv}.RoisTag{tt} = [];
-                                tVoiInput{vv}.RoisTag(cellfun(@isempty, tVoiInput{vv}.RoisTag)) = [];
-
-                                tVoiInput{vv}.tMask{tt} = [];
-                                tVoiInput{vv}.tMask(cellfun(@isempty, tVoiInput{vv}.tMask)) = [];
-
-                                if isempty(tVoiInput{vv}.RoisTag)
-                                    tVoiInput{vv} = [];
-                                    tVoiInput(cellfun(@isempty, tVoiInput)) = [];
-                                end
-
-                                voiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tVoiInput);
-                                break;
-                            end
-                        end
-
-                    end
-
-                    for rr=1:numel(tRoiInput)
-
-                        if strcmpi(ptrObject.Tag, tRoiInput{rr}.Tag)
-                            if ~isempty(tRoiInput{rr}.MaxDistances)
-                                delete(tRoiInput{rr}.MaxDistances.MaxXY.Line);
-                                delete(tRoiInput{rr}.MaxDistances.MaxCY.Line);
-                                delete(tRoiInput{rr}.MaxDistances.MaxXY.Text);
-                                delete(tRoiInput{rr}.MaxDistances.MaxCY.Text);
-                            end
-
-                            delete(tRoiInput{rr}.Object);
-                            tRoiInput{rr} = [];
-                            tRoiInput(cellfun(@isempty, tRoiInput)) = [];
-
-                            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tRoiInput);
-                            break;
-                        end
-                    end
-
-                end
-
-                setVoiRoiSegPopup();
-
             end
         end
 
@@ -898,44 +1129,29 @@ end
 
             aVoiRoiTag = voiRoiTag('get');
 
-            tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-            tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            
+            if ~isempty(aVoiRoiTag)
+                
+                % Search for a voi tag, if we don't find one, then the tag is            
+                % roi
 
-            if ~isempty(tVoiInput) && ...
-               ~isempty(aVoiRoiTag)
-                for aa=1:numel(tVoiInput)
-                    if strcmpi(tVoiInput{aa}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+                aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
 
-                        figRoiSetLabel(tVoiInput{aa}, hObject.Text)
+                if aTagOffset(aTagOffset==1) % tag is a voi
 
-                        if strcmpi(get(mSUVUnit, 'Checked'), 'on')
-                            bSUVUnit = true;
-                        else
-                            bSUVUnit = false;
-                        end
+                    if ~isempty(atVoiInput) 
 
-                        if strcmpi(get(mSegmented, 'Checked'), 'on')
-                            bSegmented = true;
-                        else
-                            bSegmented = false;
-                        end
+                        dTagOffset = find(aTagOffset, 1);
 
-                        setVoiRoiListbox(bSUVUnit, bSegmented);
-                        return;
-                    end
+                        if ~isempty(dTagOffset)
 
-                end
+                            figRoiSetLabel(atVoiInput{dTagOffset}, get(hObject, 'Text'))
 
-            end
+                            % Refresh contour figure and contour popup
 
-            if ~isempty(tRoiInput) && ...
-               ~isempty(aVoiRoiTag)
-
-                for cc=1:numel(tRoiInput)
-                    if isvalid(tRoiInput{cc}.Object)
-                        if strcmpi(tRoiInput{cc}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
-
-                            figRoiSetLabel(tRoiInput{cc}, hObject.Text);
+                            setVoiRoiSegPopup();
 
                             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                                 bSUVUnit = true;
@@ -949,49 +1165,109 @@ end
                                 bSegmented = false;
                             end
 
-                            setVoiRoiListbox(bSUVUnit, bSegmented);
+                            if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+                                bModifiedMatrix = true;
+                            else
+                                bModifiedMatrix = false;
+                            end
 
-                            return;
+                            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                        end
+
+                    end
+
+                else % Tag is a ROI
+
+                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );            
+
+                    if aTagOffset(aTagOffset==1) % tag is a roi
+
+                        if ~isempty(atRoiInput) 
+
+                            dTagOffset = find(aTagOffset, 1);
+
+                            if ~isempty(dTagOffset)
+
+                                if isvalid(atRoiInput{dTagOffset}.Object)
+
+                                    figRoiSetLabel(atRoiInput{dTagOffset}, get(hObject, 'Text'));
+
+                                    % Refresh contour figure and contour popup
+
+                                    setVoiRoiSegPopup();
+
+                                    if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+                                        bSUVUnit = true;
+                                    else
+                                        bSUVUnit = false;
+                                    end
+
+                                    if strcmpi(get(mSegmented, 'Checked'), 'on')
+                                        bSegmented = true;
+                                    else
+                                        bSegmented = false;
+                                    end
+
+                                    if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+                                        bModifiedMatrix = true;
+                                    else
+                                        bModifiedMatrix = false;
+                                    end
+
+                                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+
+                                end
+                            end
                         end
                     end
-                end
+                end  
             end
-
-            setVoiRoiSegPopup();
-
         end
 
         function figRoiEditLabelCallback(~, ~)
 
             aVoiRoiTag = voiRoiTag('get');
 
-            tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-            tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+                      
+            if ~isempty(aVoiRoiTag)
+                
+                % Search for a voi tag, if we don't find one, then the tag is            
+                % roi
+            
+                aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
 
-            if ~isempty(tVoiInput) && ...
-               ~isempty(aVoiRoiTag)
-                for aa=1:numel(tVoiInput)
-                    if strcmpi(tVoiInput{aa}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+                if aTagOffset(aTagOffset==1) % tag is a voi
 
-                        figRoiEditLabelDialog(tVoiInput{aa});
+                    if ~isempty(atVoiInput) 
 
-                        return;
+                        dTagOffset = find(aTagOffset, 1);
+
+                        if ~isempty(dTagOffset)
+
+                            figRoiEditLabelDialog(atVoiInput{dTagOffset});
+                        end
                     end
 
-                end
+                else % Tag is a ROI
 
-            end
+                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );            
 
-            if ~isempty(tRoiInput) && ...
-               ~isempty(aVoiRoiTag)
+                    if aTagOffset(aTagOffset==1) % tag is a roi
 
-                for cc=1:numel(tRoiInput)
-                    if isvalid(tRoiInput{cc}.Object)
-                        if strcmpi(tRoiInput{cc}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+                        if ~isempty(atRoiInput)
 
-                            figRoiEditLabelDialog(tRoiInput{cc});
+                            dTagOffset = find(aTagOffset, 1);
 
-                            return;
+                            if ~isempty(dTagOffset)
+
+                                if isvalid(atRoiInput{dTagOffset}.Object)
+
+                                    figRoiEditLabelDialog(atRoiInput{dTagOffset});
+                                end
+
+                            end
                         end
                     end
                 end
@@ -1002,8 +1278,8 @@ end
                 EDIT_DIALOG_X = 310;
                 EDIT_DIALOG_Y = 100;
 
-                figRoiPosX = figRoiWindow.Position(1);
-                figRoiPosY = figRoiWindow.Position(2);
+                figRoiPosX  = figRoiWindow.Position(1);
+                figRoiPosY  = figRoiWindow.Position(2);
                 figRoiSizeX = figRoiWindow.Position(3);
                 figRoiSizeY = figRoiWindow.Position(4);
 
@@ -1012,18 +1288,9 @@ end
                            (figRoiPosY+(figRoiSizeY/2)-EDIT_DIALOG_Y/2) ...
                            EDIT_DIALOG_X ...
                            EDIT_DIALOG_Y],...
-                          'Color', viewerBackgroundColor('get'), ...
+                           'Color', viewerBackgroundColor('get'), ...
                            'Name', 'Edit Label'...
                            );
-
-%                if integrateToBrowser('get') == true
-%                    sLogo = './TriDFusion/logo.png';
-%                else
-%                    sLogo = './logo.png';
-%                end
-
-%                javaFrame = get(figRoiEditLabelWindow, 'JavaFrame');
-%                javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
 
                 uicontrol(figRoiEditLabelWindow,...
                           'style'   , 'text',...
@@ -1048,6 +1315,7 @@ end
 
                 % Cancel or Proceed
 
+                figRoiEditLabelCancelWindow = ...
                 uicontrol(figRoiEditLabelWindow,...
                           'String','Cancel',...
                           'Position',[200 7 100 25],...
@@ -1056,6 +1324,7 @@ end
                           'Callback', @cancelFigRoiEditLabelCallback...
                           );
 
+                figRoiEditLabelOkWindow = ...
                 uicontrol(figRoiEditLabelWindow,...
                           'String','Ok',...
                           'Position',[95 7 100 25],...
@@ -1065,14 +1334,20 @@ end
                           );
 
                 function cancelFigRoiEditLabelCallback(~, ~)
+                    
                     delete(figRoiEditLabelWindow);
                 end
 
                 function acceptFigRoiEditLabelCallback(~, ~)
 
+                    set(figRoiEditLabelCancelWindow, 'Enable', 'off');
+                    set(figRoiEditLabelOkWindow    , 'Enable', 'off');
+                    
                     figRoiSetLabel(ptrObject, get(edtFigRoiLabelName, 'String'))
-
-                    delete(figRoiEditLabelWindow);
+                    
+                    if strcmpi(ptrObject.ObjectType, 'voi') % Object is a voi
+                        setVoiRoiSegPopup();
+                    end
 
                     if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                         bSUVUnit = true;
@@ -1081,69 +1356,154 @@ end
                     end
 
                     if strcmpi(get(mSegmented, 'Checked'), 'on') && ...
-                       tInput(dOffset).bDoseKernel == false
+                       atInput(dOffset).bDoseKernel == false
                         bSegmented = true;
                     else
                         bSegmented = false;
                     end
+                    
+                    if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+                        bModifiedMatrix = true;
+                    else
+                        bModifiedMatrix = false;
+                    end
+                            
+                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                    
+                    delete(figRoiEditLabelWindow);
 
-                    setVoiRoiListbox(bSUVUnit, bSegmented);
                 end
             end
-
-            setVoiRoiSegPopup();
 
         end
 
         function figRoiSetLabel(ptrObject, sLabel)
+            
+            dSerieOffset = get(uiSeriesPtr('get'), 'Value');
+            atInput = inputTemplate('get');
+            
+            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
-            tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-            tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            if strcmpi(ptrObject.ObjectType, 'voi') % Object is a voi
+                
+                aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {ptrObject.Tag} );
 
-            if strcmpi(ptrObject.ObjectType, 'voi')
+                if ~isempty(atVoiInput) && ~isempty(atRoiInput)
 
-                % Set voi Label
-                for ff=1:numel(tVoiInput)
-                    if strcmpi(tVoiInput{ff}.Tag, ptrObject.Tag)
+                    dTagOffset = find(aTagOffset, 1);
 
-                        tVoiInput{ff}.Label = sLabel;
-                        voiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tVoiInput);
-                        break
-                    end
-                end
+                    if ~isempty(dTagOffset)
 
-                % Set rois label
-                dRoiNb = 0;
-                for bb=1:numel(ptrObject.RoisTag)
+                        % Set voi template voi label 
 
-                    for vv=1:numel(tRoiInput)
-                        if isvalid(tRoiInput{vv}.Object)
-                            if strcmpi(tRoiInput{vv}.Tag, ptrObject.RoisTag{bb})
+                        atVoiInput{dTagOffset}.Label = sLabel;
 
-                                dRoiNb = dRoiNb+1;
-                                sRoiLabel =  sprintf('%s (roi %d/%d)', sLabel, dRoiNb, numel(ptrObject.RoisTag));
-                                tRoiInput{vv}.Label = sRoiLabel;
-                                tRoiInput{vv}.Object.Label = sRoiLabel;
+                        voiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atVoiInput);
 
-                                roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tRoiInput);
-                                break;
+                        % Set roi template voi\roi label 
+
+                        aRoisTagOffset = zeros(1, numel(ptrObject.RoisTag));
+
+                        if ~isempty(atRoiInput)
+
+                            for ro=1:numel(ptrObject.RoisTag)
+                                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[ptrObject.RoisTag{ro}]} );
+                                aRoisTagOffset(ro) = find(aTagOffset, 1);    
                             end
+
+                            if numel(ptrObject.RoisTag)
+                                for ro=1:numel(ptrObject.RoisTag)
+                                    sRoiLabel =  sprintf('%s (roi %d/%d)', sLabel, ro, numel(ptrObject.RoisTag));
+                                    atRoiInput{aRoisTagOffset(ro)}.Label = sRoiLabel;
+
+                                    if isvalid(atRoiInput{aRoisTagOffset(ro)}.Object)
+                                        atRoiInput{aRoisTagOffset(ro)}.Object.Label = sRoiLabel;
+                                    end
+
+                                end
+
+                                roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);                                    
+                            end
+
                         end
+                        
+                        % Set voi label input template tVoi
+
+                        if isfield(atInput(dSerieOffset), 'tVoi')
+
+                            atInputVoi = atInput(dSerieOffset).tVoi;
+                            aTagOffset = strcmp( cellfun( @(atInputVoi) atInputVoi.Tag, atInputVoi, 'uni', false ),  {ptrObject.Tag} );
+
+                            dTagOffset = find(aTagOffset, 1);  
+                            
+                            if ~isempty(dTagOffset)    
+                                
+                                atInput(dSerieOffset).tVoi{dTagOffset}.Label = sLabel;
+
+                                inputTemplate('set', atInput);                
+                            end
+                        end 
+                        
+                        % Set roi label input template tRoi
+
+                        if isfield(atInput(dSerieOffset), 'tRoi')
+
+                            atInputRoi = atInput(dSerieOffset).tRoi;
+                            for ro=1:numel(ptrObject.RoisTag)
+                                aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {[ptrObject.RoisTag{ro}]} );
+                                aRoisTagOffset(ro) = find(aTagOffset, 1);    
+                            end
+                            
+                            if numel(ptrObject.RoisTag)
+
+                                for ro=1:numel(ptrObject.RoisTag)
+                                   sRoiLabel =  sprintf('%s (roi %d/%d)', sLabel, ro, numel(ptrObject.RoisTag));
+                                   atInput(dSerieOffset).tRoi{aRoisTagOffset(ro)}.Label = sRoiLabel;
+                                end                
+
+                                inputTemplate('set', atInput);                
+                            end
+                        end                 
+                        
                     end
                 end
-            else
-                for vv=1:numel(tRoiInput)
-                    if isvalid(tRoiInput{vv}.Object)
-                        if strcmpi(tRoiInput{vv}.Tag, ptrObject.Tag)
+                
+            else % Tag is a ROI
+                
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {ptrObject.Tag} );            
+                
+                if aTagOffset(aTagOffset==1) % tag is a roi
+                    
+                    if ~isempty(atRoiInput) 
 
-                            tRoiInput{vv}.Label = sLabel;
-                            tRoiInput{vv}.Object.Label = sLabel;
+                        dTagOffset = find(aTagOffset, 1);
+                        
+                        if ~isempty(dTagOffset)
+                            atRoiInput{dTagOffset}.Label = sLabel;
+                            if isvalid(atRoiInput{dTagOffset}.Object)
+                                atRoiInput{dTagOffset}.Object.Label = sLabel;
+                            end
 
-                            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tRoiInput);
-                            break;
+                            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
                         end
+                        
+                        % Set roi label input template tRoi
+
+                        if isfield(atInput(dSerieOffset), 'tRoi')
+                            
+                            atInputRoi = atInput(dSerieOffset).tRoi;
+                            aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {ptrObject.Tag} );            
+                            dTagOffset = find(aTagOffset, 1);
+
+                            if ~isempty(dTagOffset)
+                                atInput(dSerieOffset).tRoi{dTagOffset}.Label = sLabel;
+                                inputTemplate('set', atInput);                
+                            end
+                        end                        
                     end
                 end
+
             end
         end
 
@@ -1151,203 +1511,399 @@ end
 
             aVoiRoiTag = voiRoiTag('get');
 
-            tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-            tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            
+            if ~isempty(aVoiRoiTag)
+                
+                aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
 
-            if ~isempty(tVoiInput) && ...
-               ~isempty(aVoiRoiTag)
-                for aa=1:numel(tVoiInput)
-                    if strcmpi(tVoiInput{aa}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+                if aTagOffset(aTagOffset==1) % tag is a voi
 
-                        sColor = uisetcolor([tVoiInput{aa}.Color], 'Select a color');
+                    if ~isempty(atVoiInput)
 
-                        figRoiSetColor(tVoiInput{aa}, sColor)
-                        return;
-                    end
+                        dTagOffset = find(aTagOffset, 1);
 
-                end
+                        if ~isempty(dTagOffset)
 
-            end
+                            sColor = uisetcolor([atVoiInput{dTagOffset}.Color], 'Select a color');
 
-            if ~isempty(tRoiInput) && ...
-               ~isempty(aVoiRoiTag)
+                            figRoiSetColor(atVoiInput{dTagOffset}, sColor)
 
-                for cc=1:numel(tRoiInput)
-                    if isvalid(tRoiInput{cc}.Object)
-                        if strcmpi(tRoiInput{cc}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+                            % Refresh contour figure and contour popup
 
-                            sColor = uisetcolor([tRoiInput{cc}.Color], 'Select a color');
+                            if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+                                bSUVUnit = true;
+                            else
+                                bSUVUnit = false;
+                            end
 
-                            figRoiSetColor(tRoiInput{cc}, sColor);
-                            return;
+                            if strcmpi(get(mSegmented, 'Checked'), 'on')
+                                bSegmented = true;
+                            else
+                                bSegmented = false;
+                            end
+
+                            if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+                                bModifiedMatrix = true;
+                            else
+                                bModifiedMatrix = false;
+                            end
+
+                            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
                         end
-                    end
-                end
-            end
 
-            function figRoiSetColor(ptrObject, sColor)
-
-                tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-                tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-
-                if strcmpi(ptrObject.ObjectType, 'voi')
-
-                    % Set voi color
-
-                    for ff=1:numel(tVoiInput)
-                        if strcmpi(tVoiInput{ff}.Tag, ptrObject.Tag)
-
-                            tVoiInput{ff}.Color = sColor;
-                            voiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tVoiInput);
-                            break;
-                        end
                     end
 
-                    % Set rois color
+                else % Tag is a ROI
 
-                    for bb=1:numel(ptrObject.RoisTag)
+                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );            
 
-                        for vv=1:numel(tRoiInput)
-                            if isvalid(tRoiInput{vv}.Object)
-                                if strcmpi(tRoiInput{vv}.Tag, ptrObject.RoisTag{bb})
+                    if aTagOffset(aTagOffset==1) % tag is a roi
 
-                                    tRoiInput{vv}.Color = sColor;
-                                    tRoiInput{vv}.Object.Color = sColor;
+                        if ~isempty(atRoiInput)
 
-                                    roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tRoiInput);
-                                    break;
+                            dTagOffset = find(aTagOffset, 1);
+
+                            if ~isempty(dTagOffset)
+
+                                if isvalid(atRoiInput{dTagOffset}.Object)
+
+                                    sColor = uisetcolor([atRoiInput{dTagOffset}.Color], 'Select a color');
+
+                                    figRoiSetColor(atRoiInput{dTagOffset}, sColor); 
+
+                                    % Refresh contour figure and contour popup
+
+                                    if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+                                        bSUVUnit = true;
+                                    else
+                                        bSUVUnit = false;
+                                    end
+
+                                    if strcmpi(get(mSegmented, 'Checked'), 'on')
+                                        bSegmented = true;
+                                    else
+                                        bSegmented = false;
+                                    end
+
+                                    if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+                                        bModifiedMatrix = true;
+                                    else
+                                        bModifiedMatrix = false;
+                                    end
+
+                                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+
                                 end
                             end
                         end
-
                     end
-                else
-                    for vv=1:numel(tRoiInput)
-                        if isvalid(tRoiInput{vv}.Object)
-                            if strcmpi(tRoiInput{vv}.Tag, ptrObject.Tag)
+                end
+            end                          
 
-                                tRoiInput{vv}.Color = sColor;
-                                tRoiInput{vv}.Object.Color = sColor;
+            function figRoiSetColor(ptrObject, sColor)
 
-                                roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tRoiInput);
-                                break;
+                dSerieOffset = get(uiSeriesPtr('get'), 'Value');
+                atInput = inputTemplate('get');
+
+                atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+                atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
+                if strcmpi(ptrObject.ObjectType, 'voi') % Object is a voi
+
+                    aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {ptrObject.Tag} );
+
+                    if ~isempty(atVoiInput) && ~isempty(atRoiInput)
+
+                        dTagOffset = find(aTagOffset, 1);
+
+                        if ~isempty(dTagOffset)
+
+                            % Set voi template voi color 
+
+                            atVoiInput{dTagOffset}.Color = sColor;
+
+                            voiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atVoiInput);
+
+                            % Set roi template voi\roi color 
+
+                            aRoisTagOffset = zeros(1, numel(ptrObject.RoisTag));
+
+                            if ~isempty(atRoiInput)
+
+                                for ro=1:numel(ptrObject.RoisTag)
+                                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[ptrObject.RoisTag{ro}]} );
+                                    aRoisTagOffset(ro) = find(aTagOffset, 1);    
+                                end
+
+                                if numel(ptrObject.RoisTag)
+                                    
+                                    for ro=1:numel(ptrObject.RoisTag)
+
+                                        atRoiInput{aRoisTagOffset(ro)}.Color = sColor;
+
+                                        if isvalid(atRoiInput{aRoisTagOffset(ro)}.Object)
+                                            atRoiInput{aRoisTagOffset(ro)}.Object.Color = sColor;
+                                        end
+
+                                    end
+                                    
+                                    roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);                                    
+                                end
                             end
+
+                            % Set voi color input template tVoi
+
+                            if isfield(atInput(dSerieOffset), 'tVoi')
+
+                                atInputVoi = atInput(dSerieOffset).tVoi;
+                                aTagOffset = strcmp( cellfun( @(atInputVoi) atInputVoi.Tag, atInputVoi, 'uni', false ),  {ptrObject.Tag} );
+
+                                dTagOffset = find(aTagOffset, 1);  
+
+                                if ~isempty(dTagOffset)    
+
+                                    atInput(dSerieOffset).tVoi{dTagOffset}.Color = sColor;
+
+                                    inputTemplate('set', atInput);                
+                                end
+                            end 
+
+                            % Set roi color input template tRoi
+
+                            if isfield(atInput(dSerieOffset), 'tRoi')
+
+                                atInputRoi = atInput(dSerieOffset).tRoi;
+                                for ro=1:numel(ptrObject.RoisTag)
+                                    aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {[ptrObject.RoisTag{ro}]} );
+                                    aRoisTagOffset(ro) = find(aTagOffset, 1);    
+                                end
+                                
+                                if numel(ptrObject.RoisTag)
+                                    for ro=1:numel(ptrObject.RoisTag)
+                                       atInput(dSerieOffset).tRoi{aRoisTagOffset(ro)}.Color = sColor;
+                                    end                
+
+                                    inputTemplate('set', atInput);                
+                                end
+                            end                 
+
                         end
                     end
 
+                else % Tag is a ROI
+
+                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {ptrObject.Tag} );            
+
+                    if aTagOffset(aTagOffset==1) % tag is a roi
+
+                        if ~isempty(atRoiInput) 
+
+                            dTagOffset = find(aTagOffset, 1);
+
+                            if ~isempty(dTagOffset)
+                                atRoiInput{dTagOffset}.Color = sColor;
+                                if isvalid(atRoiInput{dTagOffset}.Object)
+                                    atRoiInput{dTagOffset}.Object.Color = sColor;
+                                end
+
+                                roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+                            end
+
+                            % Set roi color input template tRoi
+
+                            if isfield(atInput(dSerieOffset), 'tRoi')
+
+                                atInputRoi = atInput(dSerieOffset).tRoi;
+                                aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {ptrObject.Tag} );      
+
+                                dTagOffset = find(aTagOffset, 1);
+
+                                if ~isempty(dTagOffset)
+                                    atInput(dSerieOffset).tRoi{dTagOffset}.Color = sColor;
+                                    inputTemplate('set', atInput);                
+                                end
+                            end                        
+                        end
+                    end
                 end
-
-                if strcmpi(get(mSUVUnit, 'Checked'), 'on')
-                    bSUVUnit = true;
-                else
-                    bSUVUnit = false;
-                end
-
-                if strcmpi(get(mSegmented, 'Checked'), 'on')
-                    bSegmented = true;
-                else
-                    bSegmented = false;
-                end
-
-                setVoiRoiListbox(bSUVUnit, bSegmented);
-
             end
         end
-
+        
         function figRoiHideViewFaceAlhaCallback(~, ~)
-
+            
             aVoiRoiTag = voiRoiTag('get');
 
-            tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-            tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+                      
+            if ~isempty(aVoiRoiTag)
+                
+                % Search for a voi tag, if we don't find one, then the tag is            
+                % roi
+            
+                aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
 
-            if ~isempty(tVoiInput) && ...
-               ~isempty(aVoiRoiTag)
-                for aa=1:numel(tVoiInput)
-                    if strcmpi(tVoiInput{aa}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+                if aTagOffset(aTagOffset==1) % tag is a voi
 
-                        figRoiSetRoiFaceAlpha(tVoiInput{aa})
-                        return;
+                    if ~isempty(atVoiInput) 
+
+                        dTagOffset = find(aTagOffset, 1);
+
+                        if ~isempty(dTagOffset)
+
+                            figRoiSetRoiFaceAlpha(atVoiInput{dTagOffset});
+                        end
                     end
 
-                end
+                else % Tag is a ROI
 
-            end
+                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );            
 
-            if ~isempty(tRoiInput) && ...
-               ~isempty(aVoiRoiTag)
+                    if aTagOffset(aTagOffset==1) % tag is a roi
 
-                for cc=1:numel(tRoiInput)
-                    if isvalid(tRoiInput{cc}.Object)
-                        if strcmpi(tRoiInput{cc}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+                        if ~isempty(atRoiInput)
 
-                            figRoiSetRoiFaceAlpha(tRoiInput{cc});
-                            return;
+                            dTagOffset = find(aTagOffset, 1);
+
+                            if ~isempty(dTagOffset)
+
+                                if isvalid(atRoiInput{dTagOffset}.Object)
+
+                                    figRoiSetRoiFaceAlpha(atRoiInput{dTagOffset});
+                                end
+
+                            end
                         end
                     end
                 end
             end
 
             function figRoiSetRoiFaceAlpha(ptrObject)
+                
+                dSerieOffset = get(uiSeriesPtr('get'), 'Value');
+                atInput = inputTemplate('get');
+                
+                atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+                atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+                
+                if strcmpi(ptrObject.ObjectType, 'voi') % Object is a voi
 
-                tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-                tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+                    aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {ptrObject.Tag} );
 
-                if strcmpi(ptrObject.ObjectType, 'voi')
+                    if ~isempty(atVoiInput) && ~isempty(atRoiInput)
 
-                    % Set rois alpha
-                    bSetAlpha = true;
-                    dAlpha = 0;
-                    for bb=1:numel(ptrObject.RoisTag)
+                        dTagOffset = find(aTagOffset, 1);
 
-                        for vv=1:numel(tRoiInput)
-                            if strcmpi(tRoiInput{vv}.Tag, ptrObject.RoisTag{bb})
-                                if ~strcmpi(tRoiInput{vv}.Object.Type, 'images.roi.line')
-                                    if bSetAlpha == true
-                                        bSetAlpha = false;
-                                        if tRoiInput{vv}.FaceAlpha == 0
-                                            dAlpha = 0.2;
-                                        else
-                                            dAlpha = 0;
+                        if ~isempty(dTagOffset)
+                            
+                            dFaceAlpha = 0;
+
+                            % Set roi template voi\roi face alpha 
+
+                            aRoisTagOffset = zeros(1, numel(ptrObject.RoisTag));
+
+                            if ~isempty(atRoiInput)
+
+                                for ro=1:numel(ptrObject.RoisTag)
+                                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[ptrObject.RoisTag{ro}]} );
+                                    aRoisTagOffset(ro) = find(aTagOffset, 1);    
+                                end
+
+                                if numel(ptrObject.RoisTag)
+                                    
+                                    if atRoiInput{aRoisTagOffset(1)}.FaceAlpha == 0
+                                        dFaceAlpha = roiFaceAlphaValue('get');
+                                    end
+                                    
+                                    for ro=1:numel(ptrObject.RoisTag)
+                                        
+                                        if ~strcmpi(atRoiInput{aRoisTagOffset(ro)}.Type, 'images.roi.line')
+
+                                            atRoiInput{aRoisTagOffset(ro)}.FaceAlpha = dFaceAlpha;
+
+                                            if isvalid(atRoiInput{aRoisTagOffset(ro)}.Object)
+                                                atRoiInput{aRoisTagOffset(ro)}.Object.FaceAlpha = dFaceAlpha;
+                                            end
                                         end
-                                    end
 
-                                    tRoiInput{vv}.FaceAlpha = dAlpha;
-                                    tRoiInput{vv}.Object.FaceAlpha = dAlpha;
+                                    end
+                                    
+                                    roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);                                    
                                 end
                             end
 
+                            % Set roi label input template tRoi
+
+                            if isfield(atInput(dSerieOffset), 'tRoi')
+
+                                atInputRoi = atInput(dSerieOffset).tRoi;
+                                for ro=1:numel(ptrObject.RoisTag)
+                                    aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {[ptrObject.RoisTag{ro}]} );
+                                    aRoisTagOffset(ro) = find(aTagOffset, 1);    
+                                end
+                                
+                                if numel(ptrObject.RoisTag)
+                                    for ro=1:numel(ptrObject.RoisTag)
+                                        if ~strcmpi(atInput(dSerieOffset).tRoi{aRoisTagOffset(ro)}.Type, 'images.roi.line')                                    
+                                            atInput(dSerieOffset).tRoi{aRoisTagOffset(ro)}.FaceAlpha = dFaceAlpha;
+                                        end
+                                    end                
+
+                                    inputTemplate('set', atInput);                
+                                end
+                            end                 
+
                         end
-
-                        roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tRoiInput);
-
                     end
-                else
 
-                    bSetAlpha = true;
-                    dAlpha = 0;
-                    for vv=1:numel(tRoiInput)
-                        if strcmpi(tRoiInput{vv}.Tag, ptrObject.Tag)
-                            if ~strcmpi(tRoiInput{vv}.Object.Type, 'images.roi.line')
-                                if bSetAlpha == true
-                                    bSetAlpha = false;
-                                    if tRoiInput{vv}.FaceAlpha == 0
-                                        dAlpha = 0.2;
-                                    else
-                                        dAlpha = 0;
+                else % Tag is a ROI
+                    
+                    if ~strcmpi(ptrObject.Type, 'images.roi.line')
+
+                        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {ptrObject.Tag} );            
+
+                        if aTagOffset(aTagOffset==1) % tag is a roi
+
+                            if ~isempty(atRoiInput) 
+
+                                dFaceAlpha = 0;
+
+                                dTagOffset = find(aTagOffset, 1);
+
+                                if ~isempty(dTagOffset)
+
+                                    if atRoiInput{dTagOffset}.FaceAlpha == 0
+                                        dFaceAlpha = roiFaceAlphaValue('get');
                                     end
+
+                                    atRoiInput{dTagOffset}.FaceAlpha = dFaceAlpha;
+                                    if isvalid(atRoiInput{dTagOffset}.Object)
+                                        atRoiInput{dTagOffset}.Object.FaceAlpha = dFaceAlpha;
+                                    end
+
+                                    roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
                                 end
 
-                                tRoiInput{vv}.FaceAlpha = dAlpha;
-                                tRoiInput{vv}.Object.FaceAlpha = dAlpha;
-                                break;
+                                % Set roi label input template tRoi
+
+                                if isfield(atInput(dSerieOffset), 'tRoi')
+
+                                    atInputRoi = atInput(dSerieOffset).tRoi;
+                                    aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {ptrObject.Tag} );      
+
+                                    dTagOffset = find(aTagOffset, 1);
+
+                                    if ~isempty(dTagOffset)
+                                        atInput(dSerieOffset).tRoi{dTagOffset}.FaceAlpha = dFaceAlpha;
+                                        inputTemplate('set', atInput);                
+                                    end
+                                end                        
                             end
                         end
                     end
-
-                    roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tRoiInput);
-
-                end
+                end               
             end
         end
     end
@@ -1357,8 +1913,20 @@ end
         if ~isvalid(lbVoiRoiWindow)
             return;
         end
+        
+        if strcmpi(get(mSegmented, 'Checked'), 'on')
+            sSegmented = ' - Masked Cells Subtracted';
+        else
+            sSegmented = '';
+        end
 
-        if tInput(dOffset).bDoseKernel == true
+        if strcmpi(get(mModifiedMatrix, 'Checked'), 'on')            
+            sModified = ' - Cells Value: Display Image';
+        else
+            sModified = ' - Cells Value: Unmodified Image';
+        end       
+        
+        if atInput(dOffset).bDoseKernel == true
             sUnits =  'Unit: Dose';
         else
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
@@ -1392,11 +1960,11 @@ end
             end
         end
 
-        figRoiWindow.Name = ['ROI/VOI Result - ' tRoiMetaData{1}.SeriesDescription ' - ' sUnits];
+        figRoiWindow.Name = ['TriDFusion (3DF) ROI/VOI Result - ' tRoiMetaData{1}.SeriesDescription ' - ' sUnits sModified sSegmented];
 
     end
 
-    function setVoiRoiListbox(bSUVUnit, bSegmented)
+    function setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented)
 
         sLbWindow = '';
         aVoiRoiTag = [];
@@ -1405,9 +1973,9 @@ end
 
         atVoiMetaData = dicomMetaData('get');
 
-        tInput = inputTemplate('get');
-        iOffset = get(uiSeriesPtr('get'), 'Value');
-        if iOffset > numel(tInput)
+        atInput = inputTemplate('get');
+        dOffset = get(uiSeriesPtr('get'), 'Value');
+        if dOffset > numel(atInput)
             return;
         end
 
@@ -1416,8 +1984,8 @@ end
         set(figRoiWindow, 'Pointer', 'watch');
         drawnow;
 
-        tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-        tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
         tQuant = quantificationTemplate('get');
 
         if isfield(tQuant, 'tSUV')
@@ -1428,48 +1996,48 @@ end
 
         aInput = inputBuffer('get');
         if     strcmpi(imageOrientation('get'), 'axial')
-            aInputBuffer = permute(aInput{iOffset}, [1 2 3]);
+            aInputBuffer = permute(aInput{dOffset}, [1 2 3]);
         elseif strcmpi(imageOrientation('get'), 'coronal')
-            aInputBuffer = permute(aInput{iOffset}, [3 2 1]);
+            aInputBuffer = permute(aInput{dOffset}, [3 2 1]);
         elseif strcmpi(imageOrientation('get'), 'sagittal')
-            aInputBuffer = permute(aInput{iOffset}, [3 1 2]);
+            aInputBuffer = permute(aInput{dOffset}, [3 1 2]);
         end
         
         if size(aInputBuffer, 3) ==1
             
-            if tInput(iOffset).bFlipLeftRight == true
+            if atInput(dOffset).bFlipLeftRight == true
                 aInputBuffer=aInputBuffer(:,end:-1:1);
             end
 
-            if tInput(iOffset).bFlipAntPost == true
+            if atInput(dOffset).bFlipAntPost == true
                 aInputBuffer=aInputBuffer(end:-1:1,:);
             end            
         else
-            if tInput(iOffset).bFlipLeftRight == true
+            if atInput(dOffset).bFlipLeftRight == true
                 aInputBuffer=aInputBuffer(:,end:-1:1,:);
             end
 
-            if tInput(iOffset).bFlipAntPost == true
+            if atInput(dOffset).bFlipAntPost == true
                 aInputBuffer=aInputBuffer(end:-1:1,:,:);
             end
 
-            if tInput(iOffset).bFlipHeadFeet == true
+            if atInput(dOffset).bFlipHeadFeet == true
                 aInputBuffer=aInputBuffer(:,:,end:-1:1);
             end 
         end   
         
-        atInputMetaData = tInput(iOffset).atDicomInfo;
+        atInputMetaData = atInput(dOffset).atDicomInfo;
 
         aDisplayBuffer = dicomBuffer('get');
         
-        bDoseKernel      = tInput(iOffset).bDoseKernel;
-        bMovementApplied = tInput(iOffset).tMovement.bMovementApplied;
+        bDoseKernel      = atInput(dOffset).bDoseKernel;
+        bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;
 
-        dNbVois = numel(tVoiInput);
-        if ~isempty(tVoiInput)
+        dNbVois = numel(atVoiInput);
+        if ~isempty(atVoiInput)
             for aa=1:dNbVois
 
-                if ~isempty(tVoiInput{aa}.RoisTag)
+                if ~isempty(atVoiInput{aa}.RoisTag)
 
                     if dNbVois > 10
                         if mod(aa, 5)==1 || aa == dNbVois
@@ -1477,10 +2045,10 @@ end
                         end
                     end
 
-                    [tVoiComputed, atRoiComputed] = computeVoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atVoiMetaData, tVoiInput{aa}, tRoiInput, dSUVScale, bSUVUnit, bSegmented, bDoseKernel, bMovementApplied);
+                    [tVoiComputed, atRoiComputed] = computeVoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atVoiMetaData, atVoiInput{aa}, atRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
                    
                     if ~isempty(tVoiComputed)
-                        sVoiName = tVoiInput{aa}.Label;
+                        sVoiName = atVoiInput{aa}.Label;
 
                         sLine = sprintf('%-18s %-11s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s', ...
                             maxLength(sVoiName, 17), ...
@@ -1501,7 +2069,7 @@ end
                         if isFigRoiInColor('get') == true
                             sLine = strrep(sLine, ' ', '&nbsp;');
 
-                            aColor = tVoiInput{aa}.Color;
+                            aColor = atVoiInput{aa}.Color;
                             sColor = reshape(dec2hex([int32(aColor(1)*255) int32(aColor(2)*255) int32(aColor(3)*255)], 2)',1, 6);
                             sLine  = sprintf('<HTML><FONT color="%s" face="%s">%s', sColor, sFontName, sLine);
                         end
@@ -1512,20 +2080,10 @@ end
 
                             dResizeArray = numel(aVoiRoiTag)+1;
 
-                            aVoiRoiTag{dResizeArray}.Tag = tVoiInput{aa}.Tag;
-                            if isfield(tVoiComputed, 'subtraction')
-                                aVoiRoiTag{dResizeArray}.Sub = tVoiComputed.subtraction;
-                            else
-                                aVoiRoiTag{dResizeArray}.Sub = 0;
-                            end
+                            aVoiRoiTag{dResizeArray}.Tag = atVoiInput{aa}.Tag;
 
                         else
-                             aVoiRoiTag{1}.Tag = tVoiInput{aa}.Tag;
-                             if isfield(tVoiComputed, 'subtraction')
-                                aVoiRoiTag{1}.Sub = tVoiComputed.subtraction;
-                             else
-                                aVoiRoiTag{1}.Sub =0;
-                             end
+                             aVoiRoiTag{1}.Tag = atVoiInput{aa}.Tag;
                         end
 
                         dNbTags =numel(atRoiComputed);
@@ -1563,7 +2121,7 @@ end
                                     sMaxCY = ' ';
                                 end
 
-                                sLine = sprintf('%-18s %-11s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s', ...
+                                sLine = sprintf('%-18s %-11s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s', ...
                                     ' ', ...
                                     sSliceNb, ...
                                     num2str(atRoiComputed{bb}.cells), ...
@@ -1577,8 +2135,7 @@ end
                                     sMaxXY, ...
                                     sMaxCY, ...
                                     num2str(atRoiComputed{bb}.area), ...
-                                    ' ', ...
-                                    sSubtraction);
+                                    ' ');
 
                                  if isFigRoiInColor('get') == true
                                      sLine = strrep(sLine, ' ', '&nbsp;');
@@ -1593,11 +2150,7 @@ end
                                  dResizeArray = numel(aVoiRoiTag)+1;
 
                                  aVoiRoiTag{dResizeArray}.Tag = atRoiComputed{bb}.Tag;
-                                 if isfield(atRoiComputed{bb}, 'subtraction')
-                                    aVoiRoiTag{dResizeArray}.Sub = atRoiComputed{bb}.subtraction;
-                                 else
-                                    aVoiRoiTag{dResizeArray}.Sub = 0;
-                                 end
+
                             end  
                         end
                     end
@@ -1605,8 +2158,8 @@ end
             end
         end
 
-        if ~isempty(tRoiInput)
-            dNbTags = numel(tRoiInput);
+        if ~isempty(atRoiInput)
+            dNbTags = numel(atRoiInput);
             for bb=1:dNbTags
 
                if dNbTags > 100
@@ -1615,27 +2168,21 @@ end
                    end
                end
 
-               if isvalid(tRoiInput{bb}.Object)
-                    if strcmpi(tRoiInput{bb}.ObjectType, 'roi')
+               if isvalid(atRoiInput{bb}.Object)
+                    if strcmpi(atRoiInput{bb}.ObjectType, 'roi')
 
-                        tRoiComputed = computeRoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atVoiMetaData, tRoiInput{bb}, dSUVScale, bSUVUnit, bSegmented, bDoseKernel, bMovementApplied);
+                        tRoiComputed = computeRoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atVoiMetaData, atRoiInput{bb}, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
 
-                        sRoiName = tRoiInput{bb}.Label;
+                        sRoiName = atRoiInput{bb}.Label;
 
-                        if strcmpi(tRoiInput{bb}.Axe, 'Axe')
-                            sSliceNb = num2str(tRoiInput{bb}.SliceNb);
-                        elseif strcmpi(tRoiInput{bb}.Axe, 'Axes1')
-                            sSliceNb = ['C:' num2str(tRoiInput{bb}.SliceNb)];
-                        elseif strcmpi(tRoiInput{bb}.Axe, 'Axes2')
-                            sSliceNb = ['S:' num2str(tRoiInput{bb}.SliceNb)];
-                        elseif strcmpi(tRoiInput{bb}.Axe, 'Axes3')
-                            sSliceNb = ['A:' num2str(size(aDisplayBuffer, 3)-tRoiInput{bb}.SliceNb+1)];
-                        end
-
-                        if isfield(tRoiComputed ,'subtraction')
-                            sSubtraction = num2str(tRoiComputed.subtraction);
-                        else
-                            sSubtraction = 'N/A';
+                        if strcmpi(atRoiInput{bb}.Axe, 'Axe')
+                            sSliceNb = num2str(atRoiInput{bb}.SliceNb);
+                        elseif strcmpi(atRoiInput{bb}.Axe, 'Axes1')
+                            sSliceNb = ['C:' num2str(atRoiInput{bb}.SliceNb)];
+                        elseif strcmpi(atRoiInput{bb}.Axe, 'Axes2')
+                            sSliceNb = ['S:' num2str(atRoiInput{bb}.SliceNb)];
+                        elseif strcmpi(atRoiInput{bb}.Axe, 'Axes3')
+                            sSliceNb = ['A:' num2str(size(aDisplayBuffer, 3)-atRoiInput{bb}.SliceNb+1)];
                         end
 
                         if ~isempty(tRoiComputed.MaxDistances)
@@ -1646,7 +2193,7 @@ end
                             sMaxCY = ' ';
                         end
 
-                        sLine = sprintf('%-18s %-11s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s', ...
+                        sLine = sprintf('%-18s %-11s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s', ...
                             maxLength(sRoiName, 17), ...
                             sSliceNb, ...
                             num2str(tRoiComputed.cells), ...
@@ -1660,13 +2207,12 @@ end
                             sMaxXY, ...
                             sMaxCY, ...
                             num2str(tRoiComputed.area), ...
-                            ' ', ...
-                            sSubtraction);
+                            ' ');
 
                         if isFigRoiInColor('get') == true
                             sLine = strrep(sLine, ' ', '&nbsp;');
 
-                            aColor = tRoiInput{bb}.Color;
+                            aColor = atRoiInput{bb}.Color;
                             sColor = reshape(dec2hex([int32(aColor(1)*255) int32(aColor(2)*255) int32(aColor(3)*255)], 2)',1, 6);
                             sLine = sprintf('<HTML><FONT color="%s" face="%s">%s', sColor, sFontName, sLine);
                         end
@@ -1675,19 +2221,9 @@ end
 
                         if exist('aVoiRoiTag', 'var')
                             dResizeArray = numel(aVoiRoiTag)+1;
-                            aVoiRoiTag{dResizeArray}.Tag = tRoiInput{bb}.Tag;
-                            if isfield(tRoiComputed ,'subtraction')
-                                aVoiRoiTag{dResizeArray}.Sub = tRoiComputed.subtraction;
-                            else
-                                aVoiRoiTag{dResizeArray}.Sub = 0;
-                            end
+                            aVoiRoiTag{dResizeArray}.Tag = atRoiInput{bb}.Tag;
                         else
-                            aVoiRoiTag{1}.Tag = tRoiInput{bb}.Tag;
-                            if isfield(tRoiComputed ,'subtraction')
-                                aVoiRoiTag{1}.Sub = tRoiComputed.subtraction;
-                            else
-                                aVoiRoiTag{1}.Sub = 0;
-                            end
+                            aVoiRoiTag{1}.Tag = atRoiInput{bb}.Tag;
                         end
                     end
                end
@@ -1732,9 +2268,9 @@ end
 
     function exportCurrentSeriesResultCallback(~, ~)
 
-        tInput = inputTemplate('get');
-        iOffset = get(uiSeriesPtr('get'), 'Value');
-        if iOffset > numel(tInput)
+        atInput = inputTemplate('get');
+        dOffset = get(uiSeriesPtr('get'), 'Value');
+        if dOffset > numel(atInput)
             return;
         end
 
@@ -1748,47 +2284,47 @@ end
 
         atMetaData = dicomMetaData('get');
 
-        tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-        tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
         aDisplayBuffer = dicomBuffer('get');
 
         aInput   = inputBuffer('get');
         if     strcmp(imageOrientation('get'), 'axial')
-            aInputBuffer = permute(aInput{iOffset}, [1 2 3]);
+            aInputBuffer = permute(aInput{dOffset}, [1 2 3]);
         elseif strcmp(imageOrientation('get'), 'coronal')
-            aInputBuffer = permute(aInput{iOffset}, [3 2 1]);
+            aInputBuffer = permute(aInput{dOffset}, [3 2 1]);
         elseif strcmp(imageOrientation('get'), 'sagittal')
-            aInputBuffer = permute(aInput{iOffset}, [3 1 2]);
+            aInputBuffer = permute(aInput{dOffset}, [3 1 2]);
         end
   
         if size(aDisplayBuffer, 3) ==1
             
-            if tInput(iOffset).bFlipLeftRight == true
+            if atInput(dOffset).bFlipLeftRight == true
                 aInputBuffer=aInputBuffer(:,end:-1:1);
             end
 
-            if tInput(iOffset).bFlipAntPost == true
+            if atInput(dOffset).bFlipAntPost == true
                 aInputBuffer=aInputBuffer(end:-1:1,:);
             end            
         else
-            if tInput(iOffset).bFlipLeftRight == true
+            if atInput(dOffset).bFlipLeftRight == true
                 aInputBuffer=aInputBuffer(:,end:-1:1,:);
             end
 
-            if tInput(iOffset).bFlipAntPost == true
+            if atInput(dOffset).bFlipAntPost == true
                 aInputBuffer=aInputBuffer(end:-1:1,:,:);
             end
 
-            if tInput(iOffset).bFlipHeadFeet == true
+            if atInput(dOffset).bFlipHeadFeet == true
                 aInputBuffer=aInputBuffer(:,:,end:-1:1);
             end 
         end
         
-        atInputMetaData = tInput(iOffset).atDicomInfo;
+        atInputMetaData = atInput(dOffset).atDicomInfo;
 
-        if ~isempty(tRoiInput) || ...
-           ~isempty(tVoiInput)
+        if ~isempty(atRoiInput) || ...
+           ~isempty(atVoiInput)
 
             filter = {'*.csv'};
      %       info = dicomMetaData('get');
@@ -1852,19 +2388,31 @@ end
                     bSUVUnit = false;
                 end
 
+                if strcmpi(get(mSegmented, 'Checked'), 'on')
+                    bSegmented = true;
+                else
+                    bSegmented = false;
+                end
+
+                if strcmpi(get(mModifiedMatrix, 'Checked'), 'on')
+                    bModifiedMatrix = true;
+                else
+                    bModifiedMatrix = false;
+                end
+            
                 % Count number of elements
 
                 dNumberOfLines = 1;
-                if ~isempty(tVoiInput) % Scan VOI
-                    for aa=1:numel(tVoiInput)
-                        if ~isempty(tVoiInput{aa}.RoisTag) % Found a VOI
+                if ~isempty(atVoiInput) % Scan VOI
+                    for aa=1:numel(atVoiInput)
+                        if ~isempty(atVoiInput{aa}.RoisTag) % Found a VOI
 
                             dNumberOfLines = dNumberOfLines+1;
 
-                            for cc=1:numel(tVoiInput{aa}.RoisTag)
-                                for bb=1:numel(tRoiInput)
-                                   if isvalid(tRoiInput{bb}.Object)
-                                        if strcmpi(tVoiInput{aa}.RoisTag{cc}, tRoiInput{bb}.Tag) % Found a VOI/ROI
+                            for cc=1:numel(atVoiInput{aa}.RoisTag)
+                                for bb=1:numel(atRoiInput)
+                                   if isvalid(atRoiInput{bb}.Object)
+                                        if strcmpi(atVoiInput{aa}.RoisTag{cc}, atRoiInput{bb}.Tag) % Found a VOI/ROI
 
                                             dNumberOfLines = dNumberOfLines+1;
 
@@ -1876,17 +2424,17 @@ end
                     end
                 end
 
-                for bb=1:numel(tRoiInput) % Scan ROI
-                    if isvalid(tRoiInput{bb}.Object)
-                        if strcmpi(tRoiInput{bb}.ObjectType, 'roi') % Found a ROI
+                for bb=1:numel(atRoiInput) % Scan ROI
+                    if isvalid(atRoiInput{bb}.Object)
+                        if strcmpi(atRoiInput{bb}.ObjectType, 'roi') % Found a ROI
 
                             dNumberOfLines = dNumberOfLines+1;
                         end
                     end
                 end
 
-                bDoseKernel      = tInput(dOffset).bDoseKernel;
-                bMovementApplied = tInput(dOffset).tMovement.bMovementApplied;
+                bDoseKernel      = atInput(dOffset).bDoseKernel;
+                bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;
                 
                 if bDoseKernel == true
                     sUnits = 'Dose';
@@ -1949,7 +2497,7 @@ end
 
                 asCell{dLineOffset,1}  = 'Name';
                 asCell{dLineOffset,2}  = 'Image number';
-                asCell{dLineOffset,3}  = 'NB Pixels';
+                asCell{dLineOffset,3}  = 'Cells';
                 asCell{dLineOffset,4}  = 'Total';
                 asCell{dLineOffset,5}  = 'Mean';
                 asCell{dLineOffset,6}  = 'Min';
@@ -1961,17 +2509,16 @@ end
                 asCell{dLineOffset,12} = 'Max SAD cm';
                 asCell{dLineOffset,13} = 'Area cm2';
                 asCell{dLineOffset,14} = 'Volume cm3';
-                asCell{dLineOffset,15} = 'Subtraction';
-                for tt=16:21
+                for tt=15:21
                     asCell{dLineOffset,tt}  = (' ');
                 end
 
                 dLineOffset = dLineOffset+1;
 
-                dNbVois = numel(tVoiInput);
-                if ~isempty(tVoiInput) % Scan VOIs
+                dNbVois = numel(atVoiInput);
+                if ~isempty(atVoiInput) % Scan VOIs
                     for aa=1:dNbVois
-                        if ~isempty(tVoiInput{aa}.RoisTag) % Found a valid VOI
+                        if ~isempty(atVoiInput{aa}.RoisTag) % Found a valid VOI
 
                             if dNbVois > 10
                                 if mod(aa, 5)==1 || aa == dNbVois
@@ -1979,11 +2526,11 @@ end
                                 end
                             end
 
-                            [tVoiComputed, atRoiComputed] = computeVoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atMetaData, tVoiInput{aa}, tRoiInput, dSUVScale, bSUVUnit, bSegmented, bDoseKernel, bMovementApplied);
+                            [tVoiComputed, atRoiComputed] = computeVoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atMetaData, atVoiInput{aa}, atRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
                             
                             if ~isempty(tVoiComputed)
 
-                                sVoiName = tVoiInput{aa}.Label;
+                                sVoiName = atVoiInput{aa}.Label;
 
                                 asCell{dLineOffset,1}  = (sVoiName);
                                 asCell{dLineOffset,2}  = (' ');
@@ -2045,11 +2592,8 @@ end
                                         end
                                         asCell{dLineOffset,13} = [atRoiComputed{bb}.area];
                                         asCell{dLineOffset,14} = (' ');
-                                        if isfield(atRoiComputed{bb} ,'subtraction')
-                                            asCell{dLineOffset,15} = [atRoiComputed{bb}.subtraction];
-                                        else
-                                            asCell{dLineOffset,15} = (' ');
-                                        end
+                                        asCell{dLineOffset,15} = (' ');
+                                        
                                         for tt=16:21
                                             asCell{dLineOffset,tt}  = (' ');
                                         end
@@ -2062,10 +2606,10 @@ end
                     end
                 end
 
-                dNbRois = numel(tRoiInput);
+                dNbRois = numel(atRoiInput);
                 for bb=1:dNbRois % Scan ROIs
-                    if isvalid(tRoiInput{bb}.Object)
-                        if strcmpi(tRoiInput{bb}.ObjectType, 'roi')
+                    if isvalid(atRoiInput{bb}.Object)
+                        if strcmpi(atRoiInput{bb}.ObjectType, 'roi')
 
                             if dNbRois > 100
                                 if mod(bb, 10)==1 || bb == dNbRois
@@ -2073,18 +2617,18 @@ end
                                 end
                             end
 
-                            tRoiComputed = computeRoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atMetaData, tRoiInput{bb}, dSUVScale, bSUVUnit, bSegmented, bDoseKernel, bMovementApplied);
+                            tRoiComputed = computeRoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atMetaData, atRoiInput{bb}, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
 
-                            sRoiName = tRoiInput{bb}.Label;
+                            sRoiName = atRoiInput{bb}.Label;
 
-                            if strcmpi(tRoiInput{bb}.Axe, 'Axe')
-                                sSliceNb = num2str(tRoiInput{bb}.SliceNb);
-                            elseif strcmpi(tRoiInput{bb}.Axe, 'Axes1')
-                                sSliceNb = ['C:' num2str(tRoiInput{bb}.SliceNb)];
-                            elseif strcmpi(tRoiInput{bb}.Axe, 'Axes2')
-                                sSliceNb = ['S:' num2str(tRoiInput{bb}.SliceNb)];
-                            elseif strcmpi(tRoiInput{bb}.Axe, 'Axes3')
-                                sSliceNb = ['A:' num2str(size(dicomBuffer('get'), 3)-tRoiInput{bb}.SliceNb+1)];
+                            if strcmpi(atRoiInput{bb}.Axe, 'Axe')
+                                sSliceNb = num2str(atRoiInput{bb}.SliceNb);
+                            elseif strcmpi(atRoiInput{bb}.Axe, 'Axes1')
+                                sSliceNb = ['C:' num2str(atRoiInput{bb}.SliceNb)];
+                            elseif strcmpi(atRoiInput{bb}.Axe, 'Axes2')
+                                sSliceNb = ['S:' num2str(atRoiInput{bb}.SliceNb)];
+                            elseif strcmpi(atRoiInput{bb}.Axe, 'Axes3')
+                                sSliceNb = ['A:' num2str(size(dicomBuffer('get'), 3)-atRoiInput{bb}.SliceNb+1)];
                             end
 
                             asCell{dLineOffset, 1}  = (sRoiName);
@@ -2106,11 +2650,8 @@ end
                             end
                             asCell{dLineOffset, 13} = tRoiComputed.area;
                             asCell{dLineOffset, 14} = (' ');
-                            if isfield(tRoiComputed ,'subtraction')
-                                asCell{dLineOffset, 15} = tRoiComputed.subtraction;
-                            else
-                                asCell{dLineOffset,15} = (' ');
-                            end
+                            asCell{dLineOffset,15} = (' ');
+                            
                             for tt=16:21
                                 asCell{dLineOffset,tt}  = (' ');
                             end
@@ -2187,16 +2728,67 @@ end
         else
             bSegmented = false;
         end
-
+        
+        if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+            bModifiedMatrix = true;
+        else
+            bModifiedMatrix = false;
+        end
+                
         if strcmpi(hObject.Checked, 'on')
             hObject.Checked = 'off';
-            setVoiRoiListbox(false, bSegmented);
             suvMenuUnitOption('set', false);
+            
+            setVoiRoiListbox(false, bModifiedMatrix, bSegmented);           
         else
             hObject.Checked = 'on';
-            setVoiRoiListbox(true, bSegmented);
             suvMenuUnitOption('set', true);
+            
+            setVoiRoiListbox(true, bModifiedMatrix, bSegmented);
         end
+
+        setRoiFigureName();
+    end
+
+    function modifiedMatrixCallback(hObject, ~)
+        
+        atInput = inputTemplate('get');
+        dOffset = get(uiSeriesPtr('get'), 'Value');
+        
+        if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+            bSUVUnit = true;
+        else
+            bSUVUnit = false;
+        end
+        
+        if strcmpi(get(mSegmented, 'Checked'), 'on')
+            bSegmented = true;
+        else
+            bSegmented = false;
+        end
+        
+        if strcmpi(hObject.Checked, 'on')
+            
+            if atInput(dOffset).tMovement.bMovementApplied == true
+                modifiedMatrixValueMenuOption('set', true);                         
+                hObject.Checked = 'on';
+                
+                setVoiRoiListbox(bSUVUnit, true, bSegmented);           
+            else
+                modifiedMatrixValueMenuOption('set', false);                         
+                hObject.Checked = 'off';      
+                
+                segMenuOption('set', false);
+                set(mSegmented, 'Checked', 'off');                
+                
+                setVoiRoiListbox(bSUVUnit, false, false);           
+            end
+        else
+            modifiedMatrixValueMenuOption('set', true);                               
+            hObject.Checked = 'on';
+            
+            setVoiRoiListbox(bSUVUnit, true, bSegmented);
+       end
 
         setRoiFigureName();
     end
@@ -2208,15 +2800,28 @@ end
         else
             bSUVUnit = false;
         end
-
+        
+        if strcmpi(get(mModifiedMatrix, 'Checked'), 'on')
+            bModifiedMatrix = true;
+        else
+            bModifiedMatrix = false;
+        end
+        
         if strcmpi(hObject.Checked, 'on')
             hObject.Checked = 'off';
-            setVoiRoiListbox(bSUVUnit, false);
             segMenuOption('set', false);
+            
+            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, false);
         else
-            hObject.Checked = 'on';
-            setVoiRoiListbox(bSUVUnit, true);
-            segMenuOption('set', true);
+            if bModifiedMatrix == true
+                hObject.Checked = 'on';
+                segMenuOption('set', true);
+                
+                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, true);
+            else
+                hObject.Checked = 'off';
+                segMenuOption('set', false);                
+            end
        end
 
         setRoiFigureName();
@@ -2225,12 +2830,12 @@ end
     function lbMainWindowCallback(hObject, ~)
 
         aVoiRoiTag = voiRoiTag('get');
-        tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-        tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
         bTagIsVoi = false;
 
-        if ~isempty(tVoiInput)  && ...
+        if ~isempty(atVoiInput)  && ...
            ~isempty(aVoiRoiTag) && ...
            numel(hObject.Value) == 1
 
@@ -2238,13 +2843,13 @@ end
                 return
             end
 
-            for cc=1:numel(tVoiInput)
-                if isvalid(tRoiInput{cc}.Object)
-                    if strcmp(tVoiInput{cc}.Tag, aVoiRoiTag{hObject.Value}.Tag)
+            for cc=1:numel(atVoiInput)
+                if isvalid(atRoiInput{cc}.Object)
+                    if strcmp(atVoiInput{cc}.Tag, aVoiRoiTag{hObject.Value}.Tag)
 
-                        dRoiOffset = round(numel(tVoiInput{cc}.RoisTag)/2);
+                        dRoiOffset = round(numel(atVoiInput{cc}.RoisTag)/2);
 
-                        triangulateRoi(tVoiInput{cc}.RoisTag{dRoiOffset}, true);
+                        triangulateRoi(atVoiInput{cc}.RoisTag{dRoiOffset}, true);
                         bTagIsVoi = true;
 
                         break;
@@ -2253,7 +2858,7 @@ end
             end
         end
 
-        if ~isempty(tRoiInput)  && ...
+        if ~isempty(atRoiInput)  && ...
            ~isempty(aVoiRoiTag) && ...
            bTagIsVoi == false && ...
            numel(hObject.Value) == 1
@@ -2262,11 +2867,11 @@ end
                 return
             end
 
-            for cc=1:numel(tRoiInput)
-                if isvalid(tRoiInput{cc}.Object)
-                    if strcmp(tRoiInput{cc}.Tag, aVoiRoiTag{hObject.Value}.Tag)
-                        if ~strcmpi(tRoiInput{cc}.Type, 'images.roi.line')
-                            triangulateRoi(tRoiInput{cc}.Tag, true)
+            for cc=1:numel(atRoiInput)
+                if isvalid(atRoiInput{cc}.Object)
+                    if strcmp(atRoiInput{cc}.Tag, aVoiRoiTag{hObject.Value}.Tag)
+                        if ~strcmpi(atRoiInput{cc}.Type, 'images.roi.line')
+                            triangulateRoi(atRoiInput{cc}.Tag, true)
                         end
                         break;
                     end
@@ -2284,16 +2889,16 @@ end
     function clearAllContoursCallback(~, ~)
 
         tDeleteInput = inputTemplate('get');
-        iOffset = get(uiSeriesPtr('get'), 'Value');
-        if iOffset > numel(tDeleteInput)
+        dOffset = get(uiSeriesPtr('get'), 'Value');
+        if dOffset > numel(tDeleteInput)
             return;
         end
 
-        if ~isfield(tDeleteInput(iOffset), 'tRoi')
+        if ~isfield(tDeleteInput(dOffset), 'tRoi')
             return;
         end
 
-        if isempty(tDeleteInput(iOffset).tRoi)
+        if isempty(tDeleteInput(dOffset).tRoi)
             return;
         end
 
@@ -2303,9 +2908,9 @@ end
 
         if strcmpi(sAnswer, 'Delete')
 
-            roiConstraintList('reset', iOffset); % Delete all masks
+            roiConstraintList('reset', dOffset); % Delete all masks
 
-            if isfield(tDeleteInput(iOffset), 'tRoi')
+            if isfield(tDeleteInput(dOffset), 'tRoi')
                 for rr=1:numel(atRoi)
                     if ~isempty(atRoi{rr}.MaxDistances)
                         delete(atRoi{rr}.MaxDistances.MaxXY.Line);
@@ -2316,17 +2921,17 @@ end
                     delete(atRoi{rr}.Object);
                 end
 
-                tDeleteInput(iOffset).tRoi = [];
+                tDeleteInput(dOffset).tRoi = [];
             end
 
-            if isfield(tDeleteInput(iOffset), 'tVoi')
-                tDeleteInput(iOffset).tVoi = [];
+            if isfield(tDeleteInput(dOffset), 'tVoi')
+                tDeleteInput(dOffset).tVoi = [];
             end
 
             voiRoiTag('set', '');
 
-            roiTemplate('reset', iOffset);
-            voiTemplate('reset', iOffset);
+            roiTemplate('reset', dOffset);
+            voiTemplate('reset', dOffset);
 
             inputTemplate('set', tDeleteInput);
 
@@ -2343,8 +2948,14 @@ end
             else
                 bSegmented = false;
             end
-
-            setVoiRoiListbox(bSUVUnit, bSegmented);
+            
+            if strcmpi(get(mModifiedMatrix, 'Checked'), 'on')
+                bModifiedMatrix = true;
+            else
+                bModifiedMatrix = false;
+            end
+        
+            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
             
 %            clearDisplay();
 
@@ -2402,8 +3013,14 @@ end
         else
             bSegmented = false;
         end
-
-        setVoiRoiListbox(bSUVUnit, bSegmented);
+        
+        if strcmpi(get(mModifiedMatrix, 'Checked'), 'on')
+            bModifiedMatrix = true;
+        else
+            bModifiedMatrix = false;
+        end
+            
+        setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
 
     end
 
@@ -2426,16 +3043,16 @@ end
 
         aVoiRoiTag = voiRoiTag('get');
 
-        tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-        tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
         bObjectIsVoi = false; 
-        if ~isempty(tVoiInput) && ...
+        if ~isempty(atVoiInput) && ...
            ~isempty(aVoiRoiTag)
-            for aa=1:numel(tVoiInput)
-                if strcmpi(tVoiInput{aa}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+            for aa=1:numel(atVoiInput)
+                if strcmpi(atVoiInput{aa}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
                     % Object is a VOI
-                    tObject = tVoiInput{aa};
+                    tObject = atVoiInput{aa};
                     bObjectIsVoi = true;
                     break;
                 end
@@ -2445,13 +3062,13 @@ end
         end
 
         if bObjectIsVoi == false
-            if ~isempty(tRoiInput)
+            if ~isempty(atRoiInput)
 
-                for cc=1:numel(tRoiInput)
-                    if isvalid(tRoiInput{cc}.Object)
-                        if strcmpi(tRoiInput{cc}.Tag, aVoiRoiTag{lbVoiRoiWindow.Value}.Tag)
+                for cc=1:numel(atRoiInput)
+                    if isvalid(atRoiInput{cc}.Object)
+                        if strcmpi(atRoiInput{cc}.Tag, aVoiRoiTag{lbVoiRoiWindow.Value}.Tag)
                             % Object is a ROI
-                            tObject = tRoiInput{cc};
+                            tObject = atRoiInput{cc};
                             break;
                         end
                     end
@@ -2472,13 +3089,19 @@ end
                 end
 
                 if strcmpi(get(mSegmented, 'Checked'), 'on') && ...
-                   tInput(dOffset).bDoseKernel == false
+                   atInput(dOffset).bDoseKernel == false
                     bSegmented = true;
                 else
                     bSegmented = false;
                 end
-
-                setVoiRoiListbox(bSUVUnit, bSegmented);
+                
+                if strcmpi(get(mModifiedMatrix, 'Checked'), 'on')
+                    bModifiedMatrix = true;
+                else
+                    bModifiedMatrix = false;
+                end
+        
+                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
             end
 
         end
@@ -2504,15 +3127,15 @@ end
 
         aVoiRoiTag = voiRoiTag('get');
 
-        tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-        tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
-        if ~isempty(tVoiInput) && ...
+        if ~isempty(atVoiInput) && ...
            ~isempty(aVoiRoiTag)
-            for aa=1:numel(tVoiInput)
-                if strcmpi(tVoiInput{aa}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+            for aa=1:numel(atVoiInput)
+                if strcmpi(atVoiInput{aa}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
                     % Object is a VOI
-                    tObject = tVoiInput{aa};
+                    tObject = atVoiInput{aa};
                     break;
                 end
 
@@ -2520,14 +3143,14 @@ end
 
         end
 
-        if ~isempty(tRoiInput) && ...
+        if ~isempty(atRoiInput) && ...
            ~isempty(aVoiRoiTag)
 
-            for cc=1:numel(tRoiInput)
-                if isvalid(tRoiInput{cc}.Object)
-                    if strcmpi(tRoiInput{cc}.Tag, aVoiRoiTag{lbVoiRoiWindow.Value}.Tag)
+            for cc=1:numel(atRoiInput)
+                if isvalid(atRoiInput{cc}.Object)
+                    if strcmpi(atRoiInput{cc}.Tag, aVoiRoiTag{lbVoiRoiWindow.Value}.Tag)
                         % Object is a ROI
-                        tObject = tRoiInput{cc};
+                        tObject = atRoiInput{cc};
                         break;
                     end
                 end
@@ -2545,13 +3168,19 @@ end
                 end
 
                 if strcmpi(get(mSegmented, 'Checked'), 'on') && ...
-                   tInput(dOffset).bDoseKernel == false
+                   atInput(dOffset).bDoseKernel == false
                     bSegmented = true;
                 else
                     bSegmented = false;
                 end
-
-                setVoiRoiListbox(bSUVUnit, bSegmented);
+                
+                if strcmpi(get(mModifiedMatrix, 'Checked'), 'on')
+                    bModifiedMatrix = true;
+                else
+                    bModifiedMatrix = false;
+                end
+                
+                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
             end
         end
 

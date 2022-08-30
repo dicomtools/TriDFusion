@@ -1,5 +1,5 @@
-function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtraction)
-%function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtraction)
+function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied)
+%function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied)
 %Figure ROI Histogram Main Function.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -43,7 +43,6 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
     ptrPlotCummulative = '';
     ptrPlotProfile = '';
 
-    dLastSliderValue = '';
     dInitialBinsValue = 256;
     dInitialBarWidth  = 1;
 
@@ -51,14 +50,14 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
 
     ySize = dScreenSize(4);
 
-    HIST_PANEL_y = ySize*0.75;
-    HIST_PANEL_X = HIST_PANEL_y*0.85;
+    FIG_HIST_Y = ySize*0.75;
+    FIG_HIST_X = FIG_HIST_Y*0.85;
 
     figRoiHistogramWindow = ...
-        figure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-HIST_PANEL_X/2) ...
-               (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-HIST_PANEL_y/2) ...
-               HIST_PANEL_X ...
-               HIST_PANEL_y],...
+        figure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_HIST_X/2) ...
+               (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_HIST_Y/2) ...
+               FIG_HIST_X ...
+               FIG_HIST_Y],...
                'Name', ' ',...
                'NumberTitle','off',...
                'MenuBar', 'none',...
@@ -124,7 +123,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
     axeHistogram = ...
         axes(figRoiHistogramWindow, ...
              'Units'   , 'pixels', ...
-             'Position', [60 60 HIST_PANEL_X-130 HIST_PANEL_y-90], ...
+             'Position', [60 60 FIG_HIST_X-130 FIG_HIST_Y-90], ...
              'Color'   , paAxeBackgroundColor,...
              'XColor'  , viewerForegroundColor('get'),...
              'YColor'  , viewerForegroundColor('get'),...
@@ -135,7 +134,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
     sliBins = ...
         uicontrol(figRoiHistogramWindow, ...
                   'Style'   , 'Slider', ...
-                  'Position', [HIST_PANEL_X-60 110 20 HIST_PANEL_y-140], ...
+                  'Position', [FIG_HIST_X-60 110 20 FIG_HIST_Y-140], ...
                   'Value'   , 0.5, ...
                   'Enable'  , 'on', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -153,7 +152,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Visible' , 'off',...
-                  'position', [HIST_PANEL_X-60 80 60 20]...
+                  'position', [FIG_HIST_X-60 80 60 20]...
                   );
 
      edtBinsValue = ...
@@ -161,7 +160,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                   'style'     , 'edit',...
                   'Background', 'white',...
                   'string'    , 256,...
-                  'position'  , [HIST_PANEL_X-60 60 50 20], ...
+                  'position'  , [FIG_HIST_X-60 60 50 20], ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Visible' , 'off',...
@@ -173,17 +172,11 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
     set(figRoiWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
 
-    [imCData, logicalMask] = computeHistogram(dicomBuffer('get'), atRoiVoiMetaData, ptrObject, tRoiInput, dSUVScale, bSUVUnit);
-    if bSegmented == true
-        imCDataMasked = imCData(logicalMask);
-        imCDataMasked = imCDataMasked(imCDataMasked>cropValue('get'));
-    else
-        imCDataMasked = imCData(logicalMask);
-    end
+    imCData = computeHistogram(aInputBuffer, atInputMetaData, dicomBuffer('get'), atRoiVoiMetaData, ptrObject, tRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
 
     if histogramMenuOption('get') == true
 
-        ptrHist = histogram(axeHistogram, imCDataMasked, dInitialBinsValue, 'EdgeColor', 'none', 'FaceColor', ptrObject.Color);
+        ptrHist = histogram(axeHistogram, imCData, dInitialBinsValue, 'EdgeColor', 'none', 'FaceColor', ptrObject.Color);
 
         axeHistogram.XColor = viewerForegroundColor('get');
         axeHistogram.YColor = viewerForegroundColor('get');
@@ -218,13 +211,13 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
         set(sliBins, 'Value', 0);
 
 
-      %      aXSum = cumsum(imCDataMasked, 'reverse');
-      %      aYSum = 1:1:numel(imCDataMasked);
+      %      aXSum = cumsum(imCData, 'reverse');
+      %      aYSum = 1:1:numel(imCData);
 
         try
-            ptrPlotCummulative = plotCummulative(axeHistogram, imCDataMasked, ptrObject.Color);
+            ptrPlotCummulative = plotCummulative(axeHistogram, imCData, ptrObject.Color);
 
-  %          set(axeHistogram, 'XLim', [min(double(imCDataMasked),[],'all') max(double(imCDataMasked),[],'all')]);
+  %          set(axeHistogram, 'XLim', [min(double(imCData),[],'all') max(double(imCData),[],'all')]);
   %          set(axeHistogram, 'YLim', [0 1]);
         catch
             ptrPlotCummulative = '';
@@ -266,10 +259,47 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
 
         dLastSliderValue = 0;
         set(sliBins, 'Value', 0);
+  
+        imCData = dicomBuffer('get');
+        if bModifiedMatrix  == false && ... 
+           bMovementApplied == false        % Can't use input buffer if movement have been applied
 
+            if numel(aInputBuffer) ~= numel(imCData)
+                pTemp{1} = ptrObject;
+                ptrRoiTemp = resampleROIs(imCData, atRoiVoiMetaData, aInputBuffer, atInputMetaData, pTemp, false);
+                ptrObject = ptrRoiTemp{1};
+            end        
+
+            imCData = aInputBuffer;
+        end  
+        
+%        if bSegmented  == true && ...      
+%           bModifiedMatrix == true    % Can't use original matrix
+
+%            imCData = imCData(imCData>cropValue('get'));                            
+%        end 
+    
         xValues = ptrObject.Position(:,1);
-        yValues = ptrObject.Position(:,2);
+        yValues = ptrObject.Position(:,2);                    
+        
+        switch lower(ptrObject.Axe)    
 
+            case 'axe'
+                imCData = imCData(:,:); 
+
+            case 'axes1'
+                imCData = permute(imCData(ptrObject.SliceNb,:,:), [3 2 1]);
+
+            case 'axes2'
+                imCData = permute(imCData(:,ptrObject.SliceNb,:), [3 1 2]) ;
+
+            case 'axes3'
+                imCData  = imCData(:,:,ptrObject.SliceNb);  
+
+            otherwise   
+                return;
+        end 
+        
         aProfile = improfile(imCData, xValues, yValues);
         ptrPlotProfile = plot(axeHistogram, aProfile);
         set(ptrPlotProfile, 'Color', ptrObject.Color);
@@ -333,11 +363,16 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
             sTitle = ['Cummulative DVH' sType];
         else
             sTitle = [sType ' Profile'];
-       end
-
-        if bSegmented == true && ...
-           dSubtraction ~= 0
-            sSegmented = ' - Segmented Values';
+        end
+       
+        if bModifiedMatrix == true           
+            sModified = ' - Cells Value: Display Image';
+        else
+            sModified = ' - Cells Value: Unmodified Image';
+        end   
+        
+        if bSegmented == true 
+            sSegmented = ' - Masked Cells Subtracted';
         else
             sSegmented = '';
         end
@@ -377,7 +412,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
             end
         end
 
-        figRoiHistogramWindow.Name = [sTitle ' - ' atRoiVoiMetaData{1}.SeriesDescription ' - ' sUnits sSegmented];
+        figRoiHistogramWindow.Name = [sTitle ' - ' atRoiVoiMetaData{1}.SeriesDescription ' - ' sUnits sModified sSegmented];
 
     end
 
@@ -436,16 +471,16 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
             dLastSliderValue = 0;
             set(sliBins, 'Value', 0);
 
-       %     [counts, bins] = histcounts(imCDataMasked);
+       %     [counts, bins] = histcounts(imCData);
         %    cdf = cumsum(counts);
 
 
-      %      aXSum = cumsum(imCDataMasked, 'reverse');
-      %      aYSum = 1:1:numel(imCDataMasked);
+      %      aXSum = cumsum(imCData, 'reverse');
+      %      aYSum = 1:1:numel(imCData);
             try
-                ptrPlotCummulative = plotCummulative(axeHistogram, imCDataMasked, ptrObject.Color);
+                ptrPlotCummulative = plotCummulative(axeHistogram, imCData, ptrObject.Color);
 
-      %          set(axeHistogram, 'XLim', [min(double(imCDataMasked),[],'all') max(double(imCDataMasked),[],'all')]);
+      %          set(axeHistogram, 'XLim', [min(double(imCData),[],'all') max(double(imCData),[],'all')]);
       %          set(axeHistogram, 'YLim', [0 1]);
             catch
                 ptrPlotCummulative = '';
@@ -509,7 +544,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
             dLastSliderValue = 0.5;
             set(sliBins, 'Value', 0.5);
 
-            ptrHist = histogram(axeHistogram, imCDataMasked, dInitialBinsValue, 'EdgeColor', 'none', 'FaceColor', ptrObject.Color);
+            ptrHist = histogram(axeHistogram, imCData, dInitialBinsValue, 'EdgeColor', 'none', 'FaceColor', ptrObject.Color);
 
             axeHistogram.XColor = viewerForegroundColor('get');
             axeHistogram.YColor = viewerForegroundColor('get');
@@ -882,8 +917,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                 asCell{dLineOffset,12} = 'Max CY cm';
                 asCell{dLineOffset,13} = 'Area cm2';
                 asCell{dLineOffset,14} = 'Volume cm3';
-                asCell{dLineOffset,15} = 'Subtraction';
-                for tt=16:21
+                for tt=15:21
                     asCell{dLineOffset,tt}  = (' ');
                 end
 
@@ -905,7 +939,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                                     end
                                 end
 
-                                [tVoiComputed, atRoiComputed] = computeVoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atMetaData, tVoiInput{aa}, tRoiInput, dSUVScale, bSUVUnit, bSegmented, bDoseKernel, bMovementApplied);
+                                [tVoiComputed, atRoiComputed] = computeVoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atMetaData, tVoiInput{aa}, tRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
                                 
                                 if ~isempty(tVoiComputed)
 
@@ -971,11 +1005,8 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                                             end
                                             asCell{dLineOffset,13} = [atRoiComputed{bb}.area];
                                             asCell{dLineOffset,14} = (' ');
-                                            if isfield(atRoiComputed{bb} ,'subtraction')
-                                                asCell{dLineOffset,15} = [atRoiComputed{bb}.subtraction];
-                                            else
-                                                asCell{dLineOffset,15} = (' ');
-                                            end
+                                            asCell{dLineOffset,15} = (' ');
+                                            
                                             for tt=16:21
                                                 asCell{dLineOffset,tt}  = (' ');
                                             end
@@ -1006,7 +1037,7 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                             
                             if isvalid(tRoiInput{bb}.Object)
 
-                                tRoiComputed = computeRoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atMetaData, tRoiInput{bb}, dSUVScale, bSUVUnit, bSegmented, bDoseKernel, bMovementApplied);
+                                tRoiComputed = computeRoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atMetaData, tRoiInput{bb}, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
 
                                 sRoiName = tRoiInput{bb}.Label;
 
@@ -1039,11 +1070,8 @@ function figRoiHistogram(ptrObject, bSUVUnit, bDoseKernel, bSegmented, dSubtract
                                 end
                                 asCell{dLineOffset, 13} = tRoiComputed.area;
                                 asCell{dLineOffset, 14} = (' ');
-                                if isfield(tRoiComputed ,'subtraction')
-                                    asCell{dLineOffset, 15} = tRoiComputed.subtraction;
-                                else
-                                    asCell{dLineOffset,15} = (' ');
-                                end
+                                asCell{dLineOffset,15} = (' ');
+                        
                                 for tt=16:21
                                     asCell{dLineOffset,tt}  = (' ');
                                 end

@@ -27,15 +27,18 @@ function setMathCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    FIG_MATH_X = 810;
+    FIG_MATH_Y = 570;
+    
     if numel(dicomBuffer('get')) < 1
         return;
     end
 
     dlgMathematic = ...
-        dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-810/2) ...
-                            (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-570/2) ...
-                            810 ...
-                            570 ...
+        dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_MATH_X/2) ...
+                            (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_MATH_Y/2) ...
+                            FIG_MATH_X ...
+                            FIG_MATH_Y ...
                             ],...
                'Color', viewerBackgroundColor('get'),...
                'Name' , 'Mathematic'...               
@@ -43,7 +46,7 @@ function setMathCallback(~, ~)
            
         axes(dlgMathematic, ...
              'Units'   , 'pixels', ...
-             'Position', get(dlgMathematic, 'Position'), ...
+             'Position', [0 0 FIG_MATH_X FIG_MATH_Y], ...
              'Color'   , viewerBackgroundColor('get'),...
              'XColor'  , viewerForegroundColor('get'),...
              'YColor'  , viewerForegroundColor('get'),...
@@ -278,23 +281,30 @@ function setMathCallback(~, ~)
     end
 
     function resetMathematicCallback(~, ~)
-
-        dOffset = get(uiSeriesPtr('get'), 'Value');
               
         try
-
+            
+        % Deactivate main tool bar 
+        set(uiSeriesPtr('get'), 'Enable', 'off');                
+        mainToolBarEnable('off');
+        
         set(dlgMathematic, 'Pointer', 'watch');
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
 
-        resetSeries(dOffset, true);
+        resetSeries(get(uiSeriesPtr('get'), 'Value'), true);
+        
+        delete(dlgMathematic);              
         
         progressBar(1,'Ready');
-        delete(dlgMathematic);      
 
         catch
             progressBar(1, 'Error:resetMathematicCallback()');
         end
+        
+        % Reactivate main tool bar 
+        set(uiSeriesPtr('get'), 'Enable', 'on');                
+        mainToolBarEnable('on');
         
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;

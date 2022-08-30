@@ -34,50 +34,63 @@ function movedRoiEvents(hObject, ~)
     end
 
     atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    
+    aTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {hObject.Tag} );
+    dTagOffset = find(aTagOffset, 1);       
 
-    for bb=1:numel(atRoi)
-        if strcmpi(hObject.Tag, atRoi{bb}.Tag)
+   if ~isempty(dTagOffset)
+           
+        atRoi{dTagOffset}.Position = hObject.Position;
+        tInput(iOffset).tRoi{dTagOffset}.Position = hObject.Position;
 
-            atRoi{bb}.Position = hObject.Position;
-            tInput(iOffset).tRoi{bb}.Position = hObject.Position;
+        switch lower(hObject.Type)
+            
+            case lower('images.roi.circle')
+                atRoi{dTagOffset}.Radius = hObject.Radius;
+                tInput(iOffset).tRoi{dTagOffset}.Radius = hObject.Radius;
 
-            switch lower(hObject.Type)
-                case lower('images.roi.circle')
-                    atRoi{bb}.Radius = hObject.Radius;
-                    tInput(iOffset).tRoi{bb}.Radius = hObject.Radius;
+             case lower('images.roi.ellipse')
+                atRoi{dTagOffset}.SemiAxes      = hObject.SemiAxes;
+                atRoi{dTagOffset}.RotationAngle = hObject.RotationAngle;
+                tInput(iOffset).tRoi{dTagOffset}.SemiAxes = hObject.SemiAxes;
+                tInput(iOffset).tRoi{dTagOffset}.RotationAngle = hObject.RotationAngle;
 
-                 case lower('images.roi.ellipse')
-                    atRoi{bb}.SemiAxes      = hObject.SemiAxes;
-                    atRoi{bb}.RotationAngle = hObject.RotationAngle;
-                    tInput(iOffset).tRoi{bb}.SemiAxes = hObject.SemiAxes;
-                    tInput(iOffset).tRoi{bb}.RotationAngle = hObject.RotationAngle;
-
-                 case lower('images.roi.line')
-                    dLength = computeRoiLineLength(hObject);
-                    atRoi{bb}.Label = [num2str(dLength) ' mm'];
-                    atRoi{bb}.Object.Label = [num2str(dLength) ' mm'];
-                    tInput(iOffset).tRoi{bb}.Label =  [num2str(dLength) ' mm'];
-            end
-
-            if ~isempty(atRoi{bb}.MaxDistances)
-                delete(atRoi{bb}.MaxDistances.MaxXY.Line);
-                delete(atRoi{bb}.MaxDistances.MaxCY.Line);
-                delete(atRoi{bb}.MaxDistances.MaxXY.Text);
-                delete(atRoi{bb}.MaxDistances.MaxCY.Text);
-            end
-
-            tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get'), dicomMetaData('get'), atRoi{bb}, false, false);
-            atRoi{bb}.MaxDistances = tMaxDistances;
-
-            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoi);
-            inputTemplate('set', tInput);
-
-            if viewFarthestDistances('get') == true
-                refreshImages();
-            end
-
-            break;
+             case lower('images.roi.line')
+                dLength = computeRoiLineLength(hObject);
+                atRoi{dTagOffset}.Label = [num2str(dLength) ' mm'];
+                atRoi{dTagOffset}.Object.Label = [num2str(dLength) ' mm'];
+                tInput(iOffset).tRoi{dTagOffset}.Label =  [num2str(dLength) ' mm'];
         end
+
+        if ~isempty(atRoi{dTagOffset}.MaxDistances)
+            
+            if isvalid(atRoi{dTagOffset}.MaxDistances.MaxXY.Line)
+                delete(atRoi{dTagOffset}.MaxDistances.MaxXY.Line);
+            end
+            
+            if isvalid(atRoi{dTagOffset}.MaxDistances.MaxCY.Line)
+                delete(atRoi{dTagOffset}.MaxDistances.MaxCY.Line);
+            end
+            
+            if isvalid(atRoi{dTagOffset}.MaxDistances.MaxXY.Text)
+                delete(atRoi{dTagOffset}.MaxDistances.MaxXY.Text);
+            end
+            
+            if isvalid(atRoi{dTagOffset}.MaxDistances.MaxCY.Text)
+                delete(atRoi{dTagOffset}.MaxDistances.MaxCY.Text);
+            end
+        end
+
+        tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get'), dicomMetaData('get'), atRoi{dTagOffset}, false, false);
+        atRoi{dTagOffset}.MaxDistances = tMaxDistances;
+
+        roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoi);
+        inputTemplate('set', tInput);
+
+        if viewFarthestDistances('get') == true
+            refreshImages();
+        end
+
     end
 
 end

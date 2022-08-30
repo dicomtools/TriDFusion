@@ -186,7 +186,7 @@ function copyRoiVoiToSerie(dSeriesToOffset, tRoiVoiObject, bMirror)
 
         if ~isempty(asTag)
             sLabel = tRoiVoiObject.Label;
-            createVoiFromRois(dSeriesToOffset, asTag, sLabel);
+            createVoiFromRois(dSeriesToOffset, asTag, sLabel, 'Unspecified');
         end
 
     else

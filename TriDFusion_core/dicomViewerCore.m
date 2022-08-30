@@ -439,9 +439,9 @@ function dicomViewerCore()
 
     else
 
-        set(btn3DPtr('get')        , 'Enable', 'on');
-        set(btnIsoSurfacePtr('get'), 'Enable', 'on');
-        set(btnMIPPtr('get')       , 'Enable', 'on');
+%        set(btn3DPtr('get')        , 'Enable', 'on');
+%        set(btnIsoSurfacePtr('get'), 'Enable', 'on');
+%        set(btnMIPPtr('get')       , 'Enable', 'on');
 
         im  = im(:,:,:);
 

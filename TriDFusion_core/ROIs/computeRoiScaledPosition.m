@@ -207,8 +207,8 @@ function [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(refImage,
 
                 aNewPosition(1) = outX(:);
                 aNewPosition(2) = outY(:);
-                aNewPosition(3) = tRoi.Position(3)*xScale;
-                aNewPosition(4) = tRoi.Position(4)*yScale;
+                aNewPosition(3) = tRoi.Position(3)/xScale;
+                aNewPosition(4) = tRoi.Position(4)/yScale;
                 aNewPosition(5) = 1;
             else
                 aNewPosition(:,1) = outX(:);
@@ -222,7 +222,7 @@ function [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(refImage,
 
                 aNewPosition(1) = outX(:);
                 aNewPosition(2) = outZ(:);
-                aNewPosition(3) = tRoi.Position(3)*yScale;
+                aNewPosition(3) = tRoi.Position(3)/yScale;
                 aNewPosition(4) = tRoi.Position(4);
                 aNewPosition(5) = outY(:);
             else
@@ -237,7 +237,7 @@ function [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(refImage,
 
                 aNewPosition(1) = outY(:);
                 aNewPosition(2) = outZ(:);
-                aNewPosition(3) = tRoi.Position(3)*xScale;
+                aNewPosition(3) = tRoi.Position(3)/xScale;
                 aNewPosition(4) = tRoi.Position(4);
                 aNewPosition(5) = outX(:);
             else
@@ -260,8 +260,8 @@ function [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(refImage,
 %                else
                     aNewPosition(1) = outX(:);
                     aNewPosition(2) = outY(:);
-                    aNewPosition(3) = tRoi.Position(3)*xScale;
-                    aNewPosition(4) = tRoi.Position(4)*yScale;
+                    aNewPosition(3) = tRoi.Position(3)/xScale;
+                    aNewPosition(4) = tRoi.Position(4)/yScale;
                     aNewPosition(5) = outZ(:);                    
 %                end
             else

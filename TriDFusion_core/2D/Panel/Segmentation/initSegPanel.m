@@ -946,21 +946,28 @@ function initSegPanel()
 
     function resetSegmentationCallback(~, ~)
 
-        dOffset = get(uiSeriesPtr('get'), 'Value');
               
         try
-
+            
+        % Deactivate main tool bar 
+        set(uiSeriesPtr('get'), 'Enable', 'off');                
+        mainToolBarEnable('off');
+        
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
 
-        resetSeries(dOffset, true);
+        resetSeries(get(uiSeriesPtr('get'), 'Value'), true);        
         
         progressBar(1, 'Ready');
 
         catch
             progressBar(1, 'Error:resetSegmentationCallback()');
         end
-
+        
+        % Reactivate main tool bar 
+        set(uiSeriesPtr('get'), 'Enable', 'on');                
+        mainToolBarEnable('on');
+        
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;
     end

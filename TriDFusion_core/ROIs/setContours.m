@@ -138,7 +138,7 @@ function setContours(tContours)
 
     %                                pRoi = drawfreehand(axRoi, 'Smoothing', 1, 'Position', ROI.Position, 'Color', aColor, 'LineWidth', 1, 'Label', sLabel, 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'off', 'FaceSelectable', 0, 'FaceAlpha', 0);  
     %                                pRoi.Waypoints(:) = false;
-                                    addContourToTemplate(bb, 'Axes3', dSliceNb, 'images.roi.freehand', ROI.Position, sLabel, 'off', aColor, 1, roiFaceAlphaValue('get'), 0, 1, sTag);
+                                    addContourToTemplate(bb, 'Axes3', dSliceNb, 'images.roi.freehand', ROI.Position, sLabel, 'off', aColor, 1, roiFaceAlphaValue('get'), 0, 1, sTag, 'Unspecified');
 
     %                                addRoi(pRoi, bb);                  
 
@@ -159,7 +159,7 @@ function setContours(tContours)
                                 end
 
                                 if ~isempty(asTag)
-                                    createVoiFromRois(bb, asTag, sLabel);                        
+                                    createVoiFromRois(bb, asTag, sLabel, 'Unspecified');                        
                                 end            
                             end
                         end

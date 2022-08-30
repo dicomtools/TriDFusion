@@ -27,36 +27,64 @@ function mainToolBarEnable(sEnable)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    set(btn3DPtr('get')          , 'Enable', sEnable);
-    set(btnIsoSurfacePtr('get')  , 'Enable', sEnable);
-    set(btnTriangulatePtr('get') , 'Enable', sEnable);        
-    set(btnMIPPtr('get')         , 'Enable', sEnable);            
-    set(btnPanPtr('get')         , 'Enable', sEnable);
-    set(btnZoomPtr('get')        , 'Enable', sEnable);
- 
-    set(btnFusionPtr('get')    , 'Enable', sEnable);
-    set(uiFusedSeriesPtr('get'), 'Enable', sEnable);
-    
-    
-    if numel(inputTemplate('get')) > 1
-        set(btnRegisterPtr('get'), 'Enable', sEnable); 
-    end
-    
-    if numel(dicomBuffer('get'))
-        set(btnMathPtr('get'), 'Enable', sEnable);
-    end
+    if ~isempty(dicomBuffer('get'))
+               
+        set(btnTriangulatePtr('get') , 'Enable', sEnable);        
+        set(btnPanPtr('get')         , 'Enable', sEnable);
+        set(btnZoomPtr('get')        , 'Enable', sEnable);
 
-    if size(dicomBuffer('get'), 3) ~= 1 
-        
-        set(btnLinkMipPtr('get'), 'Enable', sEnable);
+        set(btnFusionPtr('get')      , 'Enable', sEnable);
+        set(uiFusedSeriesPtr('get')  , 'Enable', sEnable);
 
-        if numel(dicomBuffer('get'))
-            set(btnVsplashPtr('get')   , 'Enable', sEnable);
-            set(uiEditVsplahXPtr('get'), 'Enable', sEnable);
-            set(uiEditVsplahYPtr('get'), 'Enable', sEnable);
-            
+        if numel(inputTemplate('get')) > 1
+            set(btnRegisterPtr('get'), 'Enable', sEnable); 
         end
+
+        set(btnMathPtr('get'), 'Enable', sEnable);
+        
+        if size(dicomBuffer('get'), 3) ~= 1 
+
+            set(btn3DPtr('get')          , 'Enable', sEnable);
+            set(btnIsoSurfacePtr('get')  , 'Enable', sEnable);
+            set(btnMIPPtr('get')         , 'Enable', sEnable); 
+
+            set(btnLinkMipPtr('get')     , 'Enable', sEnable);
+
+            set(btnVsplashPtr('get')     , 'Enable', sEnable);
+            set(uiEditVsplahXPtr('get')  , 'Enable', sEnable);
+            set(uiEditVsplahYPtr('get')  , 'Enable', sEnable);
+
+        else
+            set(btn3DPtr('get')        , 'Enable', 'off');
+            set(btnIsoSurfacePtr('get'), 'Enable', 'off');
+            set(btnMIPPtr('get')       , 'Enable', 'off'); 
+
+            set(btnVsplashPtr('get')   , 'Enable', 'off');
+            set(uiEditVsplahXPtr('get'), 'Enable', 'off');
+            set(uiEditVsplahYPtr('get'), 'Enable', 'off');
+            
+            set(btnLinkMipPtr('get')   , 'Enable', 'off');            
+        end
+    else
+        set(btn3DPtr('get')          , 'Enable', 'off');
+        set(btnIsoSurfacePtr('get')  , 'Enable', 'off');
+        set(btnMIPPtr('get')         , 'Enable', 'off'); 
+
+        set(btnVsplashPtr('get')     , 'Enable', 'off');
+        set(uiEditVsplahXPtr('get')  , 'Enable', 'off');
+        set(uiEditVsplahYPtr('get')  , 'Enable', 'off');
+            
+        set(btnTriangulatePtr('get') , 'Enable', 'off');        
+        set(btnPanPtr('get')         , 'Enable', 'off');
+        set(btnZoomPtr('get')        , 'Enable', 'off');
+        
+        set(btnRegisterPtr('get')    , 'Enable', 'off'); 
+        set(btnMathPtr('get')        , 'Enable', 'off');
+        
+        set(btnFusionPtr('get')      , 'Enable', 'off');
+        set(uiFusedSeriesPtr('get')  , 'Enable', 'off');
+     
+        set(btnLinkMipPtr('get')     , 'Enable', 'off');
     end    
-%        set(uiSliderWindowPtr('get') , 'Enable', sEnable);
-%        set(uiSliderLevel  , 'Enable', sEnable);           
+        
 end

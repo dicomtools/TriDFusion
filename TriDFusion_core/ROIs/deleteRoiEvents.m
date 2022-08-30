@@ -27,114 +27,140 @@ function deleteRoiEvents(hObject, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tDeleteInput = inputTemplate('get');
-    iOffset = get(uiSeriesPtr('get'), 'Value');
-    if iOffset > numel(tDeleteInput)
-        return;
+    sRoiTag = hObject.Tag;
+
+    dSerieOffset = get(uiSeriesPtr('get'), 'Value');
+
+    atInput = inputTemplate('get');
+
+    atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));  
+            
+    % Clear it constraint
+
+    [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dSerieOffset);
+
+    if ~isempty(asConstraintTagList)
+        dConstraintOffset = find(contains(asConstraintTagList, {sRoiTag}));
+        if ~isempty(dConstraintOffset) % tag exist
+             roiConstraintList('set', dSerieOffset,  asConstraintTagList{dConstraintOffset}, asConstraintTypeList{dConstraintOffset});
+        end    
     end
+    
+    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {sRoiTag} );            
 
+    if aTagOffset(aTagOffset==1) % tag is a roi
 
-     % Clear it mask
+        if ~isempty(atRoiInput) 
 
-    [asMaskTagList, asMaskTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value') );
-    for rr=1:numel(asMaskTagList)
-        if strcmpi(asMaskTagList{rr}, hObject.Tag) % Setting a mask with the same type erase it.
-            roiConstraintList('set', get(uiSeriesPtr('get'), 'Value'),  asMaskTagList{rr}, asMaskTypeList{rr});
-        end
-    end
+            dTagOffset = find(aTagOffset, 1);
 
-    tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-    tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            if ~isempty(dTagOffset)
 
-    if isfield(tDeleteInput(iOffset), 'tVoi')
-        bFoundRoi = false;
-        for vv=1:numel(tDeleteInput(iOffset).tVoi)
-            for tt=1:numel(tDeleteInput(iOffset).tVoi{vv}.RoisTag)
-                if strcmp(tDeleteInput(iOffset).tVoi{vv}.RoisTag{tt}, hObject.Tag)
+                % Delete ROI object 
 
-                    tDeleteInput(iOffset).tVoi{vv}.RoisTag{tt} = [];
-                    tDeleteInput(iOffset).tVoi{vv}.RoisTag(cellfun(@isempty, tDeleteInput(iOffset).tVoi{vv}.RoisTag)) = [];
+                if isvalid(atRoiInput{dTagOffset}.Object)
+                    delete(atRoiInput{dTagOffset}.Object)
+                end
 
-                    tDeleteInput(iOffset).tVoi{vv}.tMask{tt} = [];
-                    tDeleteInput(iOffset).tVoi{vv}.tMask(cellfun(@isempty, tDeleteInput(iOffset).tVoi{vv}.tMask)) = [];
+                % Delete farthest distance object
 
-                    if isempty(tDeleteInput(iOffset).tVoi{vv}.RoisTag)
-                        tDeleteInput(iOffset).tVoi{vv} = [];
-                        tDeleteInput(iOffset).tVoi(cellfun(@isempty, tDeleteInput(iOffset).tVoi)) = [];
+                if ~isempty(atRoiInput{dTagOffset}.MaxDistances)
+                    if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Line)
+                        delete(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Line);
                     end
 
-                    inputTemplate('set', tDeleteInput);
-                    bFoundRoi = true;
-                    break;
-                end
-            end
+                    if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Line)
+                        delete(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Line);
+                    end
 
-            if bFoundRoi == true
-                break;
-            end
-        end
-    end
+                    if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Text)
+                        delete(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Text);
+                    end
 
-    if isfield(tDeleteInput(iOffset), 'tRoi')
-        for rr=1:numel(tDeleteInput(iOffset).tRoi)
-            if strcmp(hObject.Tag, tDeleteInput(iOffset).tRoi{rr}.Tag)
+                    if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Text)
+                        delete(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Text);
+                    end
+                end                        
 
-                tDeleteInput(iOffset).tRoi{rr} = [];
-                tDeleteInput(iOffset).tRoi(cellfun(@isempty, tDeleteInput(iOffset).tRoi)) = [];
+                atRoiInput{dTagOffset} = [];
 
-                inputTemplate('set', tDeleteInput);
-                break;
-            end
-        end
-    end
+                atRoiInput(cellfun(@isempty, atRoiInput)) = [];
 
-    for vv=1:numel(tVoiInput)
-        bFoundRoi = false;
-        for tt=1:numel(tVoiInput{vv}.RoisTag)
-            if strcmp(tVoiInput{vv}.RoisTag{tt}, hObject.Tag)
+                roiTemplate('set', dSerieOffset, atRoiInput);  
 
-                tVoiInput{vv}.RoisTag{tt} = [];
-                tVoiInput{vv}.RoisTag(cellfun(@isempty, tVoiInput{vv}.RoisTag)) = [];
+                % Clear roi from input template tRoi
 
-                tVoiInput{vv}.tMask{tt} = [];
-                tVoiInput{vv}.tMask(cellfun(@isempty, tVoiInput{vv}.tMask)) = [];
+                if isfield(atInput(dSerieOffset), 'tRoi')
 
-                if isempty(tVoiInput{vv}.RoisTag)
-                    tVoiInput{vv} = [];
-                    tVoiInput(cellfun(@isempty, tVoiInput)) = [];
+                    atInputRoi = atInput(dSerieOffset).tRoi;
+                    aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {sRoiTag} );
+
+                    dTagOffset = find(aTagOffset, 1);  
+
+                    if ~isempty(dTagOffset)
+                        atInput(dSerieOffset).tRoi{dTagOffset} = [];
+
+                        atInput(dSerieOffset).tRoi(cellfun(@isempty, atInput(dSerieOffset).tRoi)) = [];
+
+                        inputTemplate('set', atInput);  
+                    end
                 end
 
-                voiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tVoiInput);
-                bFoundRoi = true;
-                break;
+                % Clear roi from voi input template (if exist)
+
+                if ~isempty(atVoiInput)                        
+
+                    for vo=1:numel(atVoiInput)     
+
+                        dTagOffset = find(contains(atVoiInput{vo}.RoisTag,{sRoiTag}));
+
+                        if ~isempty(dTagOffset) % tag exist
+                            atVoiInput{vo}.RoisTag{dTagOffset} = [];
+                            atVoiInput{vo}.RoisTag(cellfun(@isempty, atVoiInput{vo}.RoisTag)) = [];     
+
+                            if isempty(atVoiInput{vo}.RoisTag)
+                                atVoiInput{vo} = [];
+                           end
+
+                        end
+                    end
+
+                   atVoiInput(cellfun(@isempty, atVoiInput)) = [];
+
+                   voiTemplate('set', dSerieOffset, atVoiInput);                                        
+                end
+
+                % Clear roi from input tVoi template (if exist)
+
+                if isfield(atInput(dSerieOffset), 'tVoi')
+
+                    for vo=1:numel(atInput(dSerieOffset).tVoi)     
+
+                        dTagOffset = find(contains(atInput(dSerieOffset).tVoi{vo}.RoisTag,{sRoiTag}));
+
+                        if ~isempty(dTagOffset) % tag exist
+                            atInput(dSerieOffset).tVoi{vo}.RoisTag{dTagOffset} = [];
+                            atInput(dSerieOffset).tVoi{vo}.RoisTag(cellfun(@isempty, atInput(dSerieOffset).tVoi{vo}.RoisTag)) = [];     
+
+                            if isempty(atInput(dSerieOffset).tVoi{vo}.RoisTag)
+                                atInput(dSerieOffset).tVoi{vo} = [];
+                           end
+
+                        end
+                    end
+
+                   atInput(dSerieOffset).tVoi(cellfun(@isempty, atInput(dSerieOffset).tVoi)) = [];
+
+                   inputTemplate('set', atInput);                
+                end
+
+                % Refresh contour popup
+
+                setVoiRoiSegPopup();
+
             end
         end
-
-        if bFoundRoi == true
-            break
-        end
     end
-
-    for rr=1:numel(tRoiInput)
-        if strcmp(hObject.Tag, tRoiInput{rr}.Tag)
-
-            if ~isempty(tRoiInput{rr}.MaxDistances)
-                delete(tRoiInput{rr}.MaxDistances.MaxXY.Line);
-                delete(tRoiInput{rr}.MaxDistances.MaxCY.Line);
-                delete(tRoiInput{rr}.MaxDistances.MaxXY.Text);
-                delete(tRoiInput{rr}.MaxDistances.MaxCY.Text);
-            end
-
-            tRoiInput{rr} = [];
-            tRoiInput(cellfun(@isempty, tRoiInput)) = [];
-
-            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tRoiInput);
-            break;
-        end
-    end
-
-    delete(hObject);
-
-    setVoiRoiSegPopup();
 
 end

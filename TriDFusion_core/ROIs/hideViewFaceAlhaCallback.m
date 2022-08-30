@@ -1,5 +1,5 @@
-function hideViewFaceAlhaCallback(hObject,~)
-%function hideViewFaceAlhaCallback(hObject,~)
+function hideViewFaceAlhaCallback(hObject, ~)
+%function hideViewFaceAlhaCallback(hObject.UserData,~)
 %Hide\View ROI FaceAlpha.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,19 +27,55 @@ function hideViewFaceAlhaCallback(hObject,~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if hObject.UserData.FaceAlpha
-        hObject.UserData.FaceAlpha = 0;
-    else
-        hObject.UserData.FaceAlpha = 0.2;
-    end
+    dSerieOffset = get(uiSeriesPtr('get'), 'Value');
+    atInput = inputTemplate('get');
 
-    atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
+    
+    if ~strcmpi(hObject.UserData.Type, 'images.roi.line')
 
-    for bb=1:numel(atRoi)
-        if strcmpi(hObject.UserData.Tag, atRoi{bb}.Tag)
-            atRoi{bb}.FaceAlpha = hObject.UserData.FaceAlpha;
-            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoi);
-            break;
+        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );            
+
+        if aTagOffset(aTagOffset==1) % tag is a roi
+
+            if ~isempty(atRoiInput) 
+
+                dFaceAlpha = 0;
+
+                dTagOffset = find(aTagOffset, 1);
+
+                if ~isempty(dTagOffset)
+
+                    if hObject.UserData.FaceAlpha == 0
+                        dFaceAlpha = roiFaceAlphaValue('get');
+                    end
+                    
+                    hObject.UserData.FaceAlpha = dFaceAlpha;
+
+                    atRoiInput{dTagOffset}.FaceAlpha = dFaceAlpha;
+                    if isvalid(atRoiInput{dTagOffset}.Object)
+                        atRoiInput{dTagOffset}.Object.FaceAlpha = dFaceAlpha;
+                    end
+
+                    roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+                end
+
+                % Set roi label input template tRoi
+
+                if isfield(atInput(dSerieOffset), 'tRoi')
+
+                    atInputRoi = atInput(dSerieOffset).tRoi;
+                    aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {hObject.UserData.Tag} );      
+
+                    dTagOffset = find(aTagOffset, 1);
+
+                    if ~isempty(dTagOffset)
+                        atInput(dSerieOffset).tRoi{dTagOffset}.FaceAlpha = dFaceAlpha;
+                        inputTemplate('set', atInput);                
+                    end
+                end                        
+            end
         end
-    end
+    end    
+    
 end

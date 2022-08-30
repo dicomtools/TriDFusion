@@ -1,5 +1,5 @@
-function addContourToTemplate(dSeriesOffset, sAxe, dSliceNb, sType, aPosition, sLabel, sLabelVisible, aColor, dLineWidth, dFaceAlpha, dFaceSelectable, dSmoothing, sTag)
-%function addContourToTemplate(dSeriesOffset, sAxe, dSliceNb, sType, aPosition, sLabel, sLabelVisible, aColor, dLineWidth, dFaceAlpha, dFaceSelectable, dSmoothing, sTag)
+function addContourToTemplate(dSeriesOffset, sAxe, dSliceNb, sType, aPosition, sLabel, sLabelVisible, aColor, dLineWidth, dFaceAlpha, dFaceSelectable, dSmoothing, sTag, sLesionType)
+%function addContourToTemplate(dSeriesOffset, sAxe, dSliceNb, sType, aPosition, sLabel, sLabelVisible, aColor, dLineWidth, dFaceAlpha, dFaceSelectable, dSmoothing, sTag, sLesionType)
 %Add contour to input template.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -79,6 +79,7 @@ function addContourToTemplate(dSeriesOffset, sAxe, dSliceNb, sType, aPosition, s
     tRoi.Waypoints           = [];    
     tRoi.Tag                 = sTag;    
     tRoi.ObjectType          = 'roi';
+    tRoi.LesionType          = sLesionType;
 
     tMaxDistances     = computeRoiFarthestPoint(imRoi, atDicomInfo, tRoi, false, false);
     tRoi.MaxDistances = tMaxDistances;

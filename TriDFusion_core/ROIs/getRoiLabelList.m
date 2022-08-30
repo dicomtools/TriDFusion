@@ -27,23 +27,23 @@ function aList = getRoiLabelList()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-        aList{1}='Heart';
-        aList{numel(aList)+1}='Water';
-        aList{numel(aList)+1}='Bone';
-        aList{numel(aList)+1}='Liver';
-        aList{numel(aList)+1}='Lung';
-        aList{numel(aList)+1}='Left Lung';
-        aList{numel(aList)+1}='Right Lung';
-        aList{numel(aList)+1}='Left Kidney';
-        aList{numel(aList)+1}='Right Kidney';
-        aList{numel(aList)+1}='Urinary Bladder Content';
-        aList{numel(aList)+1}='Remainder Tissues';
-        aList{numel(aList)+1}='Soft Tissue';
-        aList{numel(aList)+1}='Calibration Source';
-        aList{numel(aList)+1}='Tumor';
-        aList{numel(aList)+1}='Tumor 1';
-        aList{numel(aList)+1}='Tumor 2';
-        aList{numel(aList)+1}='Tumor 3';
-        aList{numel(aList)+1}='Tumor 4';
-        aList{numel(aList)+1}='Tumor 5';            
+    aList{1}='Heart';
+    aList{numel(aList)+1}='Water';
+    aList{numel(aList)+1}='Bone';
+    aList{numel(aList)+1}='Liver';
+    aList{numel(aList)+1}='Lung';
+    aList{numel(aList)+1}='Left Lung';
+    aList{numel(aList)+1}='Right Lung';
+    aList{numel(aList)+1}='Left Kidney';
+    aList{numel(aList)+1}='Right Kidney';
+    aList{numel(aList)+1}='Urinary Bladder Content';
+    aList{numel(aList)+1}='Remainder Tissues';
+    aList{numel(aList)+1}='Soft Tissue';
+    aList{numel(aList)+1}='Calibration Source';
+    aList{numel(aList)+1}='Tumor';
+    aList{numel(aList)+1}='Tumor 1';
+    aList{numel(aList)+1}='Tumor 2';
+    aList{numel(aList)+1}='Tumor 3';
+    aList{numel(aList)+1}='Tumor 4';
+    aList{numel(aList)+1}='Tumor 5';            
 end

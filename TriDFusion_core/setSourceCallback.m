@@ -47,6 +47,11 @@ function setSourceCallback(~, ~)
     sMainDir{1} = uigetdir(sCurrentDir);
 
     if sMainDir{1} ~= 0
+        
+         % Deactivate main tool bar 
+        set(uiSeriesPtr('get'), 'Enable', 'off');                        
+        mainToolBarEnable('off');       
+        
         sMainDir{1} = [sMainDir{1} '/'];
 
         try
@@ -321,22 +326,13 @@ function setSourceCallback(~, ~)
 
             set(uiSeriesPtr('get'), 'Value' , 1);
             set(uiSeriesPtr('get'), 'String', ' ');
-            set(uiSeriesPtr('get'), 'Enable', 'off');
 
-            set(btnFusionPtr    ('get'), 'Enable', 'off');
-            set(btnLinkMipPtr   ('get'), 'Enable', 'off');
-            set(btnRegisterPtr  ('get'), 'Enable', 'off');
-            set(btnMathPtr      ('get'), 'Enable', 'off');
             set(uiFusedSeriesPtr('get'), 'Value' , 1    );
             set(uiFusedSeriesPtr('get'), 'String', ' '  );
-            set(uiFusedSeriesPtr('get'), 'Enable', 'off');
 
             isVsplash('set', false);
             set(btnVsplashPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnVsplashPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-            set(btnVsplashPtr('get')   , 'Enable', 'off');
-            set(uiEditVsplahXPtr('get'), 'Enable', 'off');
-            set(uiEditVsplahYPtr('get'), 'Enable', 'off');
     
             asMainDir = mainDir('get');
 
@@ -458,42 +454,42 @@ function setSourceCallback(~, ~)
                imageOrientation('set', 'axial');
 
                for ii=1: numel(asNewFilesList)
-                    tNewInput(ii).asFilesList  = asNewFilesList{ii};
-                    tNewInput(ii).atDicomInfo  = atNewDicomInfo{ii};
-                    tNewInput(ii).aDicomBuffer = aNewDicomBuffer{ii};
+                    atNewInput(ii).asFilesList  = asNewFilesList{ii};
+                    atNewInput(ii).atDicomInfo  = atNewDicomInfo{ii};
+                    atNewInput(ii).aDicomBuffer = aNewDicomBuffer{ii};
 
-                    tNewInput(ii).bEdgeDetection = false;
-                    tNewInput(ii).bFlipLeftRight = false;
-                    tNewInput(ii).bFlipAntPost   = false;
-                    tNewInput(ii).bFlipHeadFeet  = false;
-                    tNewInput(ii).bDoseKernel    = false;
-                    tNewInput(ii).bMathApplied   = false;
-                    tNewInput(ii).bFusedDoseKernel    = false;
-                    tNewInput(ii).bFusedEdgeDetection = false;
-                    tNewInput(ii).tMovement = [];
-                    tNewInput(ii).tMovement.bMovementApplied = false;
-                    tNewInput(ii).tMovement.aGeomtform = [];
-                    tNewInput(ii).tMovement.atSeq{1}.sAxe = [];
-                    tNewInput(ii).tMovement.atSeq{1}.aTranslation = [];
-                    tNewInput(ii).tMovement.atSeq{1}.dRotation = [];                   
+                    atNewInput(ii).bEdgeDetection = false;
+                    atNewInput(ii).bFlipLeftRight = false;
+                    atNewInput(ii).bFlipAntPost   = false;
+                    atNewInput(ii).bFlipHeadFeet  = false;
+                    atNewInput(ii).bDoseKernel    = false;
+                    atNewInput(ii).bMathApplied   = false;
+                    atNewInput(ii).bFusedDoseKernel    = false;
+                    atNewInput(ii).bFusedEdgeDetection = false;
+                    atNewInput(ii).tMovement = [];
+                    atNewInput(ii).tMovement.bMovementApplied = false;
+                    atNewInput(ii).tMovement.aGeomtform = [];
+                    atNewInput(ii).tMovement.atSeq{1}.sAxe = [];
+                    atNewInput(ii).tMovement.atSeq{1}.aTranslation = [];
+                    atNewInput(ii).tMovement.atSeq{1}.dRotation = [];                   
                 end
 
-                inputTemplate('set', tNewInput);
+                inputTemplate('set', atNewInput);
 
                 if numel(inputTemplate('get')) ~= 0
 
                     for ii = 1 : numel(inputTemplate('get'))
 
-                        if isempty(tNewInput(ii).atDicomInfo{1}.SeriesDate)
+                        if isempty(atNewInput(ii).atDicomInfo{1}.SeriesDate)
                             sSeriesDate = '00010101';
                         else
-                            sSeriesDate = tNewInput(ii).atDicomInfo{1}.SeriesDate;
+                            sSeriesDate = atNewInput(ii).atDicomInfo{1}.SeriesDate;
                         end
 
-                        if isempty(tNewInput(ii).atDicomInfo{1}.SeriesTime)
+                        if isempty(atNewInput(ii).atDicomInfo{1}.SeriesTime)
                             sSeriesTime = '000000';
                         else
-                            sSeriesTime = tNewInput(ii).atDicomInfo{1}.SeriesTime;
+                            sSeriesTime = atNewInput(ii).atDicomInfo{1}.SeriesTime;
                         end
 
                         sNewVolSeriesDate = sprintf('%s%s', sSeriesDate, sSeriesTime);
@@ -502,7 +498,7 @@ function setSourceCallback(~, ~)
                             sNewVolSeriesDate = extractBefore(sNewVolSeriesDate,'.');
                         end
                         sNewVolSeriesDate = datetime(sNewVolSeriesDate,'InputFormat','yyyyMMddHHmmss');
-                        sNewVolSeriesDescription = tNewInput(ii).atDicomInfo{1}.SeriesDescription;
+                        sNewVolSeriesDescription = atNewInput(ii).atDicomInfo{1}.SeriesDescription;
 
                         sNewVolumes{ii} = sprintf('%s %s', sNewVolSeriesDescription, sNewVolSeriesDate);
                     end
@@ -510,22 +506,12 @@ function setSourceCallback(~, ~)
                     seriesDescription('set', sNewVolumes);
 
                     set(uiSeriesPtr('get'), 'String', sNewVolumes);
-                    set(uiSeriesPtr('get'), 'Enable', 'on');
 
                     if  numel(sNewVolumes) > 1
-                        set(btnRegisterPtr('get'), 'Enable', 'on');
-                        set(btnFusionPtr  ('get'), 'Enable', 'on');
-                        set(btnLinkMipPtr ('get'), 'Enable', 'on');
-
                         set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
-                        set(uiFusedSeriesPtr('get'), 'Enable', 'on');
                         set(uiFusedSeriesPtr('get'), 'Value', 2);
                     else
-                        set(btnFusionPtr ('get'), 'Enable', 'on');
-                        set(btnLinkMipPtr('get'), 'Enable', 'on');
-
                         set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
-                        set(uiFusedSeriesPtr('get'), 'Enable', 'on');
                         set(uiFusedSeriesPtr('get'), 'Value', 1);
                    end
 
@@ -534,17 +520,6 @@ function setSourceCallback(~, ~)
                 setInputOrientation();
 
                 setDisplayBuffer();
-
-                if numel(dicomBuffer('get'))
-                    set(btnMathPtr('get'), 'Enable', 'on');
-                end
-
-                if size(dicomBuffer('get'), 3) ~= 1 && ...
-                   numel(dicomBuffer('get'))
-                    set(btnVsplashPtr('get')   , 'Enable', 'on');
-                    set(uiEditVsplahXPtr('get'), 'Enable', 'on');
-                    set(uiEditVsplahYPtr('get'), 'Enable', 'on');
-                end
 
                 setQuantification();
 
@@ -572,13 +547,17 @@ function setSourceCallback(~, ~)
 %                    set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
 %                    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));       
 %                end    
+
         
                 if size(dicomBuffer('get'), 3) ~= 1
                     setPlaybackToolbar('on');
                 end
 
-                setRoiToolbar('on');                
-
+                setRoiToolbar('on'); 
+                
+                % Reactivate main tool bar 
+                set(uiSeriesPtr('get'), 'Enable', 'on');                        
+                mainToolBarEnable('on');    
             else
                 progressBar(1 , 'Error: TriDFusion: no volumes detected!');
                 h = msgbox('Error: TriDFusion: no volumes detected!', 'Error');

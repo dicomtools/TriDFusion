@@ -30,7 +30,6 @@ function maskToVoi(aMask, sLabel, aColor, sPlane, dSeriesOffset, bPixelEdge)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-
     aMaskSize = size(aMask);
 
     if numel(aMaskSize) ~= 3 % Must be 3D array
@@ -99,7 +98,7 @@ function maskToVoi(aMask, sLabel, aColor, sPlane, dSeriesOffset, bPixelEdge)
                     pRoi = drawfreehand(axRoi, 'Smoothing', 1, 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'off', 'FaceSelectable', 0, 'FaceAlpha', roiFaceAlphaValue('get'));  
                     pRoi.Waypoints(:) = false;
 
-                    addRoi(pRoi, dSeriesOffset);                  
+                    addRoi(pRoi, dSeriesOffset, 'Unspecified');                  
 
                     roiDefaultMenu(pRoi);
 
@@ -124,7 +123,7 @@ function maskToVoi(aMask, sLabel, aColor, sPlane, dSeriesOffset, bPixelEdge)
     end
     
     if ~isempty(asTag)
-        createVoiFromRois(dSeriesOffset, asTag, sLabel);
+        createVoiFromRois(dSeriesOffset, asTag, sLabel, 'Unspecified');
         setVoiRoiSegPopup();
     end
     

@@ -27,8 +27,16 @@ function setFusionCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-%    try
-
+    try
+        
+    if switchTo3DMode('get')     == false && ...
+       switchToIsoSurface('get') == false && ...
+       switchToMIPMode('get')    == false        
+        % Deactivate main tool bar 
+        set(uiSeriesPtr('get'), 'Enable', 'off');                        
+        mainToolBarEnable('off');
+    end
+    
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
 
@@ -134,7 +142,7 @@ function setFusionCallback(~, ~)
             end
        end
     else
-
+        
         atInputTemplate = inputTemplate('get');
         if numel(atInputTemplate) == 0
             isFusion('set', false);
@@ -2073,13 +2081,22 @@ end
 
         setViewerDefaultColor(true, atMetaData, atFusionMetaData);
 
-        refreshImages(); 
-            
+        refreshImages();            
     end
     
-%    catch
-%        progressBar(1, 'Error:setFusionCallback()');
-%    end
+    catch   
+        
+        progressBar(1, 'Error:setFusionCallback()');
+    end
+    
+    if switchTo3DMode('get')     == false && ...
+       switchToIsoSurface('get') == false && ...
+       switchToMIPMode('get')    == false
+   
+        % Reactivate main tool bar 
+        set(uiSeriesPtr('get'), 'Enable', 'on');                        
+        mainToolBarEnable('on');     
+    end
     
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;
