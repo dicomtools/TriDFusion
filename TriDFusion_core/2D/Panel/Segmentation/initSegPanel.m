@@ -875,6 +875,8 @@ function initSegPanel()
         setQuantification(iOffset);
 
         refreshImages();
+        
+        modifiedMatrixValueMenuOption('set', true);
 
         catch
             progressBar(1, 'Error:proceedImageSegCallback()');

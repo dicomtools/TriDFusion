@@ -1818,6 +1818,8 @@ USE_LBM_METHOD = true;
         dicomBuffer('set', imgaussfilt3(aBuffer,[xPixel,yPixel,zPixel]));
 
         refreshImages();
+        
+        modifiedMatrixValueMenuOption('set', true);
 
         catch
             progressBar(1, 'Error:setDoseKernel()');

@@ -27,7 +27,7 @@ function [bLesionOffset, asLesionList] = getLesionType(sLesionType)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    asLesionList = {'Unspecified', 'Bone', 'Soft Tissue'};  
+    asLesionList = {'Unspecified', 'Bone', 'Soft Tissue', 'Lung', 'Liver', 'Parotid', 'Blood Pool'};  
     
     bLesionOffset = 1;
     

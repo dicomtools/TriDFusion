@@ -39,7 +39,7 @@ function generateContourReportCallback(~, ~)
         return;
     end
     
-    FIG_REPORT_X = 1024;
+    FIG_REPORT_X = 1224;
     FIG_REPORT_Y = 660;
 
     figContourReport = ...
@@ -237,6 +237,33 @@ function generateContourReportCallback(~, ~)
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+125 FIG_REPORT_Y-560 100 420]...
                   );  
               
+         % Contour Max
+              
+          uicontrol(figContourReport,...
+                  'style'     , 'text',...
+                  'FontWeight', 'bold',...
+                  'FontSize'  , 10,...
+                  'FontName'  , 'MS Sans Serif', ...
+                  'string'    , 'Max',...
+                  'horizontalalignment', 'left',...
+                  'BackgroundColor', 'White', ...
+                  'ForegroundColor', 'Black', ...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+225 FIG_REPORT_Y-130 100 20]...
+                  ); 
+              
+        uiReportLesionMax = ...       
+        uicontrol(figContourReport,...
+                  'style'     , 'text',...
+                  'FontWeight', 'Normal',...
+                  'FontSize'  , 10,...
+                  'FontName'  , 'MS Sans Serif', ...
+                  'string'    , getReportLesionMeanInformation('init'),...
+                  'horizontalalignment', 'left',...
+                  'BackgroundColor', 'White', ...
+                  'ForegroundColor', 'Black', ...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+225 FIG_REPORT_Y-560 100 420]...
+                  ); 
+              
           % Contour Volume
               
           uicontrol(figContourReport,...
@@ -248,7 +275,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+225 FIG_REPORT_Y-130 100 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+325 FIG_REPORT_Y-130 100 20]...
                   ); 
               
         uiReportLesionVolume = ...       
@@ -261,7 +288,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+225 FIG_REPORT_Y-560 100 420]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+325 FIG_REPORT_Y-560 100 420]...
                   );               
          
     mReportFile = uimenu(figContourReport,'Label','File');
@@ -342,7 +369,11 @@ function generateContourReportCallback(~, ~)
             if isvalid(uiReportLesionMean) % Make sure the figure is still open        
                 set(uiReportLesionMean, 'String', getReportLesionMeanInformation('get', tReport));
             end        
-
+            
+            if isvalid(uiReportLesionMax) % Make sure the figure is still open        
+                set(uiReportLesionMax, 'String', getReportLesionMaxInformation('get', tReport));
+            end    
+            
             if isvalid(uiReportLesionVolume) % Make sure the figure is still open        
                 set(uiReportLesionVolume, 'String', getReportLesionVolumeInformation('get', tReport));
             end        
@@ -878,7 +909,36 @@ function generateContourReportCallback(~, ~)
                             sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.SoftTissue.Count));
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
-                        end                           
+                        end     
+                        
+                    case 'lung'
+                        if ~isempty(tReport.Lung.Count)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Lung.Count));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end  
+                        
+                    case 'liver'
+                        if ~isempty(tReport.Liver.Count)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Liver.Count));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end  
+                        
+                    case 'parotid'
+                        if ~isempty(tReport.Parotid.Count)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Parotid.Count));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end 
+                        
+                    case 'blood pool'
+                        if ~isempty(tReport.BloodPool.Count)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.BloodPool.Count));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end 
+                        
                     otherwise    
                         sReport = sprintf('%s\n\n%s', sReport, '-');
                 end
@@ -926,7 +986,113 @@ function generateContourReportCallback(~, ~)
                             sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.SoftTissue.Mean));
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
-                        end                           
+                        end 
+                        
+                    case 'lung'
+                        if ~isempty(tReport.Lung.Mean)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Lung.Mean));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end  
+                        
+                    case 'liver'
+                        if ~isempty(tReport.Liver.Mean)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Liver.Mean));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end  
+                        
+                    case 'parotid'
+                        if ~isempty(tReport.Parotid.Mean)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Parotid.Mean));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end 
+                        
+                    case 'blood pool'
+                        if ~isempty(tReport.BloodPool.Mean)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.BloodPool.Mean));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end 
+                        
+                    otherwise                        
+                        sReport = sprintf('%s\n\n%s', sReport, '-');
+                end
+            end             
+        end      
+    end
+
+    function sReport = getReportLesionMaxInformation(sAction, tReport)
+                
+        [~, asLesionList] = getLesionType('');
+        
+        if strcmpi(sAction, 'init')
+            sReport = sprintf('%s', '-');      
+            for ll=1:numel(asLesionList)
+                sReport = sprintf('%s\n\n%s', sReport, '-');
+            end       
+        else
+            
+            if ~isempty(tReport.All.Max)
+                sReport = sprintf('%-12s', num2str(tReport.All.Max));      
+            else
+                sReport = sprintf('%s', '-');      
+            end
+                
+            for ll=1:numel(asLesionList)      
+                
+                switch lower(asLesionList{ll})
+                    
+                    case 'unspecified'
+                        if ~isempty(tReport.Unspecified.Max)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Unspecified.Max));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end      
+                        
+                    case 'bone'
+                        if ~isempty(tReport.Bone.Max)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Bone.Max));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end          
+                        
+                    case 'soft tissue'
+                        if ~isempty(tReport.SoftTissue.Max)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.SoftTissue.Max));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end    
+                        
+                    case 'lung'
+                        if ~isempty(tReport.Lung.Max)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Lung.Max));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end  
+                        
+                    case 'liver'
+                        if ~isempty(tReport.Liver.Max)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Liver.Max));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end  
+                        
+                    case 'parotid'
+                        if ~isempty(tReport.Parotid.Max)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Parotid.Max));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end 
+                        
+                    case 'blood pool'
+                        if ~isempty(tReport.BloodPool.Max)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.BloodPool.Max));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end 
+                        
                     otherwise    
                         sReport = sprintf('%s\n\n%s', sReport, '-');
                 end
@@ -974,7 +1140,36 @@ function generateContourReportCallback(~, ~)
                             sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.SoftTissue.Volume));
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
-                        end                           
+                        end   
+                        
+                    case 'lung'
+                        if ~isempty(tReport.Lung.Volume)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Lung.Volume));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end  
+                        
+                    case 'liver'
+                        if ~isempty(tReport.Liver.Volume)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Liver.Volume));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end  
+                        
+                    case 'parotid'
+                        if ~isempty(tReport.Parotid.Volume)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Parotid.Volume));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end 
+                        
+                    case 'blood pool'
+                        if ~isempty(tReport.BloodPool.Volume)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.BloodPool.Volume));
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end 
+                        
                     otherwise    
                         sReport = sprintf('%s\n\n%s', sReport, '-');
                 end
@@ -1058,21 +1253,30 @@ function generateContourReportCallback(~, ~)
         
         % Count Lesion Type number of contour
        
-        dUnspecifiedCount = 0;
-        dBoneCount = 0;
-        dSoftTissueCount = 0;
-        dUnknowCount = 0;
+        dUnspecifiedCount  = 0;
+        dBoneCount         = 0;
+        dSoftTissueCount   = 0;
+        dUnknowCount       = 0;
+        dLungCount         = 0;
+        dLiverCount        = 0;
+        dParotidCount      = 0;
+        dBloodPoolCount    = 0;
         
         dNbUnspecifiedRois = 0;
-        dNbBoneRois = 0;
-        dNbSoftTissueRois = 0;
-        dNbUnknowRois = 0;
+        dNbBoneRois        = 0;
+        dNbSoftTissueRois  = 0;
+        dNbUnknowRois      = 0;
+        dNbLungRois        = 0;
+        dNbLiverRois       = 0;
+        dNbParotidRois     = 0;
+        dNbBloodPoolRois   = 0;
         
         for vv=1:numel(atVoiInput)
             
             dNbRois = numel(atVoiInput{vv}.RoisTag);
             
             switch lower(atVoiInput{vv}.LesionType)
+                
                 case 'unspecified'
                     dUnspecifiedCount = dUnspecifiedCount+1;
                     dNbUnspecifiedRois = dNbUnspecifiedRois+dNbRois;
@@ -1084,6 +1288,22 @@ function generateContourReportCallback(~, ~)
                 case 'soft tissue'
                     dSoftTissueCount  = dSoftTissueCount+1;                    
                     dNbSoftTissueRois = dNbSoftTissueRois+dNbRois;
+                    
+                case 'lung'
+                    dLungCount  = dLungCount+1;                    
+                    dNbLungRois = dNbLungRois+dNbRois;
+                    
+                case 'liver'
+                    dLiverCount  = dLiverCount+1;                    
+                    dNbLiverRois = dNbLiverRois+dNbRois;
+                    
+                case 'parotid'
+                    dParotidCount  = dParotidCount+1;                    
+                    dNbParotidRois = dNbParotidRois+dNbRois;
+                    
+                case 'blood pool'
+                    dBloodPoolCount  = dBloodPoolCount+1;                    
+                    dNbBloodPoolRois = dNbBloodPoolRois+dNbRois;
                     
                 otherwise
                     dUnknowCount  = dUnknowCount+1;
@@ -1110,23 +1330,55 @@ function generateContourReportCallback(~, ~)
         else
             tReport.SoftTissue.Count = dSoftTissueCount;
         end
+                
+        if dLungCount == 0
+            tReport.Lung.Count = [];
+        else
+            tReport.Lung.Count = dLungCount;
+        end
         
+        if dLiverCount == 0
+            tReport.Liver.Count = [];
+        else
+            tReport.Liver.Count = dLiverCount;
+        end
+        
+        if dParotidCount == 0
+            tReport.Parotid.Count = [];
+        else
+            tReport.Parotid.Count = dParotidCount;
+        end        
+        
+        if dBloodPoolCount == 0
+            tReport.BloodPool.Count = [];
+        else
+            tReport.BloodPool.Count = dBloodPoolCount;
+        end        
+                
         if dUnspecifiedCount+dBoneCount+dSoftTissueCount+dUnknowCount == 0
             tReport.All.Count = [];
         else
-            tReport.All.Count = dUnspecifiedCount+dBoneCount+dSoftTissueCount+dUnknowCount;
+            tReport.All.Count = dUnspecifiedCount+dBoneCount+dSoftTissueCount+dLungCount+dLiverCount+dParotidCount+dBloodPoolCount+dUnknowCount;
         end
         
         % Clasify ROIs by lession type      
 
         tReport.Unspecified.RoisTag = cell(1, dNbUnspecifiedRois);
         tReport.Bone.RoisTag        = cell(1, dNbBoneRois);
-        tReport.SoftTissue.RoisTag  = cell(1, dNbSoftTissueRois);
-        tReport.All.RoisTag         = cell(1, dNbUnspecifiedRois+dNbBoneRois+dNbSoftTissueRois+dNbUnknowRois);        
+        tReport.SoftTissue.RoisTag  = cell(1, dNbSoftTissueRois);      
+        tReport.Lung.RoisTag        = cell(1, dNbLungRois);
+        tReport.Liver.RoisTag       = cell(1, dNbLiverRois);
+        tReport.Parotid.RoisTag     = cell(1, dNbParotidRois);
+        tReport.BloodPool.RoisTag   = cell(1, dNbBloodPoolRois); 
+        tReport.All.RoisTag         = cell(1, dUnspecifiedCount+dBoneCount+dSoftTissueCount+dLungCount+dLiverCount+dParotidCount+dBloodPoolCount+dUnknowCount);        
         
         dUnspecifiedRoisOffset = 1;
         dBoneRoisOffset = 1;
-        dSoftTissueRoisOffset = 1;
+        dSoftTissueRoisOffset = 1;    
+        dLungRoisOffset = 1;
+        dLiverRoisOffset = 1;
+        dParotidRoisOffset = 1;
+        dBloodPoolRoisOffset = 1;        
         dAllRoisOffset = 1;
         
         for vv=1:numel(atVoiInput)
@@ -1167,7 +1419,39 @@ function generateContourReportCallback(~, ~)
                     
                     tReport.SoftTissue.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
                     
-                    dSoftTissueRoisOffset = dSoftTissueRoisOffset+dNbRois;                  
+                    dSoftTissueRoisOffset = dSoftTissueRoisOffset+dNbRois;    
+                    
+                case 'lung'
+                    dFrom = dLungRoisOffset;
+                    dTo   = dLungRoisOffset+dNbRois-1;
+                    
+                    tReport.Lung.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
+                    
+                    dLungRoisOffset = dLungRoisOffset+dNbRois;
+                    
+                case 'liver'
+                    dFrom = dLiverRoisOffset;
+                    dTo   = dLiverRoisOffset+dNbRois-1;
+                    
+                    tReport.Liver.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
+                    
+                    dLiverRoisOffset = dLiverRoisOffset+dNbRois;
+                    
+                case 'parotid'
+                    dFrom = dParotidRoisOffset;
+                    dTo   = dParotidRoisOffset+dNbRois-1;
+                    
+                    tReport.Parotid.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
+                    
+                    dParotidRoisOffset = dParotidRoisOffset+dNbRois;
+                    
+                case 'blood pool'
+                    dFrom = dBloodPoolRoisOffset;
+                    dTo   = dBloodPoolRoisOffset+dNbRois-1;
+                    
+                    tReport.BloodPool.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
+                    
+                    dBloodPoolRoisOffset = dBloodPoolRoisOffset+dNbRois;                   
             end
         end    
         
@@ -1176,7 +1460,7 @@ function generateContourReportCallback(~, ~)
         
         % Compute Unspecified lesion
         
-        progressBar( 1/4, 'Computing unspecified lesion, please wait');
+        progressBar( 1/8, 'Computing unspecified lesion, please wait');
         
         if numel(tReport.Unspecified.RoisTag) ~= 0
             
@@ -1248,13 +1532,17 @@ function generateContourReportCallback(~, ~)
             tReport.Unspecified.Volume = dNbCells*dVoxVolume;
             
             if strcmpi(sUnitDisplay, 'SUV')
+                
                 if bSUVUnit == true
                     tReport.Unspecified.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.Unspecified.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;             
                 else
                     tReport.Unspecified.Mean = mean(voiData, 'all');
+                    tReport.Unspecified.Max  = max (voiData, [], 'all');
                 end
             else
                 tReport.Unspecified.Mean = mean(voiData, 'all');             
+                tReport.Unspecified.Max  = max (voiData, [], 'all');             
             end
          
             clear voiMask;
@@ -1263,11 +1551,12 @@ function generateContourReportCallback(~, ~)
             tReport.Unspecified.Cells  = [];
             tReport.Unspecified.Volume = [];
             tReport.Unspecified.Mean   = [];            
+            tReport.Unspecified.Max    = [];            
         end
         
         % Compute bone lesion
         
-        progressBar( 2/4, 'Computing bone lesion, please wait') ;
+        progressBar( 2/8, 'Computing bone lesion, please wait') ;
          
         if numel(tReport.Bone.RoisTag) ~= 0
             
@@ -1339,13 +1628,17 @@ function generateContourReportCallback(~, ~)
             tReport.Bone.Volume = dNbCells*dVoxVolume;
             
             if strcmpi(sUnitDisplay, 'SUV')
+                
                 if bSUVUnit == true
                     tReport.Bone.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.Bone.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;             
                 else
                     tReport.Bone.Mean = mean(voiData, 'all');
+                    tReport.Bone.Max  = max (voiData, [], 'all');
                 end
             else
                 tReport.Bone.Mean = mean(voiData, 'all');             
+                tReport.Bone.Max  = max (voiData, [], 'all');             
             end
          
             clear voiMask;
@@ -1353,12 +1646,13 @@ function generateContourReportCallback(~, ~)
         else
             tReport.Bone.Cells  = [];
             tReport.Bone.Volume = [];
-            tReport.Bone.Mean  = [];
+            tReport.Bone.Mean   = [];
+            tReport.Bone.Max    = [];
         end
         
         % Compute SoftTissue lesion
         
-        progressBar( 3/4, 'Computing soft tissue lesion, please wait' );
+        progressBar( 3/8, 'Computing soft tissue lesion, please wait' );
        
         if numel(tReport.SoftTissue.RoisTag) ~= 0  
         
@@ -1430,13 +1724,17 @@ function generateContourReportCallback(~, ~)
             tReport.SoftTissue.Volume = dNbCells*dVoxVolume;
             
             if strcmpi(sUnitDisplay, 'SUV')
+                
                 if bSUVUnit == true
                     tReport.SoftTissue.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.SoftTissue.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;             
                 else
                     tReport.SoftTissue.Mean = mean(voiData, 'all');
+                    tReport.SoftTissue.Max  = max (voiData, [], 'all');
                 end
             else
                 tReport.SoftTissue.Mean = mean(voiData, 'all');             
+                tReport.SoftTissue.Max  = max (voiData, [], 'all');             
             end
          
             clear voiMask;
@@ -1445,6 +1743,391 @@ function generateContourReportCallback(~, ~)
             tReport.SoftTissue.Cells  = [];
             tReport.SoftTissue.Volume = [];
             tReport.SoftTissue.Mean   = [];            
+            tReport.SoftTissue.Max    = [];            
+        end
+        
+        % Compute Lung lesion
+        
+        progressBar( 4/8, 'Computing lung lesion, please wait' );
+       
+        if numel(tReport.Lung.RoisTag) ~= 0  
+        
+            voiMask = cell(1, numel(tReport.Lung.RoisTag));
+            voiData = cell(1, numel(tReport.Lung.RoisTag));
+            
+            dNbCells = 0;
+            
+            for uu=1:numel(tReport.Lung.RoisTag)
+
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.Lung.RoisTag{uu}]} );                
+                
+                tRoi = atRoiInput{find(aTagOffset, 1)};
+                
+                if bModifiedMatrix  == false && ... 
+                   bMovementApplied == false        % Can't use input buffer if movement have been applied
+
+                    if numel(aImage) ~= numel(dicomBuffer('get'))
+                        pTemp{1} = tRoi;
+                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                        tRoi = ptrRoiTemp{1};
+                    end   
+                end
+                
+                switch lower(tRoi.Axe)                    
+                    case 'axe'
+                        voiData{uu} = aImage(:,:);
+                        voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
+                        
+                    case 'axes1'
+                        aSlice = permute(aImage(tRoi.SliceNb,:,:), [3 2 1]);
+                        voiData{uu} = aSlice;
+                        voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+                        
+                    case 'axes2'
+                        aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
+                        voiData{uu} = aSlice;                        
+                        voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+                         
+                   case 'axes3'
+                        aSlice = aImage(:,:,tRoi.SliceNb);
+                        voiData{uu} = aSlice;                        
+                        voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+                end              
+                
+                if bSegmented  == true && ...      
+                   bModifiedMatrix == true % Can't use original buffer   
+
+                    voiDataTemp = voiData{uu}(voiMask{uu}); 
+                    voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
+                    dNbCells = dNbCells+numel(voiDataTemp);
+                else
+                    dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
+                end
+            end
+            
+            voiMask = cell2mat(voiMask);
+            voiData = cell2mat(voiData);
+            
+            voiData(voiMask~=1) = [];
+            
+            if bSegmented  == true && ...      
+               bModifiedMatrix == true % Can't use original buffer   
+
+                voiData = voiData(voiData>cropValue('get'));                            
+            end
+            
+            tReport.Lung.Cells  = dNbCells;
+            tReport.Lung.Volume = dNbCells*dVoxVolume;
+            
+            if strcmpi(sUnitDisplay, 'SUV')
+                
+                if bSUVUnit == true
+                    tReport.Lung.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.Lung.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;             
+                else
+                    tReport.Lung.Mean = mean(voiData, 'all');
+                    tReport.Lung.Max  = max (voiData, [], 'all');
+                end
+            else
+                tReport.Lung.Mean = mean(voiData, 'all');             
+                tReport.Lung.Max  = max (voiData, [], 'all');             
+            end
+         
+            clear voiMask;
+            clear voiData;     
+        else
+            tReport.Lung.Cells  = [];
+            tReport.Lung.Volume = [];
+            tReport.Lung.Mean   = [];            
+            tReport.Lung.Max    = [];            
+        end
+        
+        % Compute Liver lesion
+        
+        progressBar( 5/8, 'Computing liver lesion, please wait' );
+       
+        if numel(tReport.Liver.RoisTag) ~= 0  
+        
+            voiMask = cell(1, numel(tReport.Liver.RoisTag));
+            voiData = cell(1, numel(tReport.Liver.RoisTag));
+            
+            dNbCells = 0;
+            
+            for uu=1:numel(tReport.Liver.RoisTag)
+
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.Liver.RoisTag{uu}]} );                
+                
+                tRoi = atRoiInput{find(aTagOffset, 1)};
+                
+                if bModifiedMatrix  == false && ... 
+                   bMovementApplied == false        % Can't use input buffer if movement have been applied
+
+                    if numel(aImage) ~= numel(dicomBuffer('get'))
+                        pTemp{1} = tRoi;
+                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                        tRoi = ptrRoiTemp{1};
+                    end   
+                end
+                
+                switch lower(tRoi.Axe)                    
+                    case 'axe'
+                        voiData{uu} = aImage(:,:);
+                        voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
+                        
+                    case 'axes1'
+                        aSlice = permute(aImage(tRoi.SliceNb,:,:), [3 2 1]);
+                        voiData{uu} = aSlice;
+                        voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+                        
+                    case 'axes2'
+                        aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
+                        voiData{uu} = aSlice;                        
+                        voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+                         
+                   case 'axes3'
+                        aSlice = aImage(:,:,tRoi.SliceNb);
+                        voiData{uu} = aSlice;                        
+                        voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+                end              
+                
+                if bSegmented  == true && ...      
+                   bModifiedMatrix == true % Can't use original buffer   
+
+                    voiDataTemp = voiData{uu}(voiMask{uu}); 
+                    voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
+                    dNbCells = dNbCells+numel(voiDataTemp);
+                else
+                    dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
+                end
+            end
+            
+            voiMask = cell2mat(voiMask);
+            voiData = cell2mat(voiData);
+            
+            voiData(voiMask~=1) = [];
+            
+            if bSegmented  == true && ...      
+               bModifiedMatrix == true % Can't use original buffer   
+
+                voiData = voiData(voiData>cropValue('get'));                            
+            end
+            
+            tReport.Liver.Cells  = dNbCells;
+            tReport.Liver.Volume = dNbCells*dVoxVolume;
+            
+            if strcmpi(sUnitDisplay, 'SUV')
+                
+                if bSUVUnit == true
+                    tReport.Liver.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.Liver.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;             
+                else
+                    tReport.Liver.Mean = mean(voiData, 'all');
+                    tReport.Liver.Max  = max (voiData, [], 'all');
+                end
+            else
+                tReport.Liver.Mean = mean(voiData, 'all');             
+                tReport.Liver.Max  = max (voiData, [], 'all');             
+            end
+         
+            clear voiMask;
+            clear voiData;     
+        else
+            tReport.Liver.Cells  = [];
+            tReport.Liver.Volume = [];
+            tReport.Liver.Mean   = [];            
+            tReport.Liver.Max    = [];            
+        end
+        
+        % Compute Parotid lesion
+        
+        progressBar( 6/8, 'Computing parotid lesion, please wait' );
+       
+        if numel(tReport.Parotid.RoisTag) ~= 0  
+        
+            voiMask = cell(1, numel(tReport.Parotid.RoisTag));
+            voiData = cell(1, numel(tReport.Parotid.RoisTag));
+            
+            dNbCells = 0;
+            
+            for uu=1:numel(tReport.Parotid.RoisTag)
+
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.Parotid.RoisTag{uu}]} );                
+                
+                tRoi = atRoiInput{find(aTagOffset, 1)};
+                
+                if bModifiedMatrix  == false && ... 
+                   bMovementApplied == false        % Can't use input buffer if movement have been applied
+
+                    if numel(aImage) ~= numel(dicomBuffer('get'))
+                        pTemp{1} = tRoi;
+                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                        tRoi = ptrRoiTemp{1};
+                    end   
+                end
+                
+                switch lower(tRoi.Axe)                    
+                    case 'axe'
+                        voiData{uu} = aImage(:,:);
+                        voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
+                        
+                    case 'axes1'
+                        aSlice = permute(aImage(tRoi.SliceNb,:,:), [3 2 1]);
+                        voiData{uu} = aSlice;
+                        voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+                        
+                    case 'axes2'
+                        aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
+                        voiData{uu} = aSlice;                        
+                        voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+                         
+                   case 'axes3'
+                        aSlice = aImage(:,:,tRoi.SliceNb);
+                        voiData{uu} = aSlice;                        
+                        voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+                end              
+                
+                if bSegmented  == true && ...      
+                   bModifiedMatrix == true % Can't use original buffer   
+
+                    voiDataTemp = voiData{uu}(voiMask{uu}); 
+                    voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
+                    dNbCells = dNbCells+numel(voiDataTemp);
+                else
+                    dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
+                end
+            end
+            
+            voiMask = cell2mat(voiMask);
+            voiData = cell2mat(voiData);
+            
+            voiData(voiMask~=1) = [];
+            
+            if bSegmented  == true && ...      
+               bModifiedMatrix == true % Can't use original buffer   
+
+                voiData = voiData(voiData>cropValue('get'));                            
+            end
+            
+            tReport.Parotid.Cells  = dNbCells;
+            tReport.Parotid.Volume = dNbCells*dVoxVolume;
+            
+            if strcmpi(sUnitDisplay, 'SUV')
+                
+                if bSUVUnit == true
+                    tReport.Parotid.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.Parotid.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;             
+                else
+                    tReport.Parotid.Mean = mean(voiData, 'all');
+                    tReport.Parotid.Max  = max (voiData, [], 'all');
+                end
+            else
+                tReport.Parotid.Mean = mean(voiData, 'all');             
+                tReport.Parotid.Max  = max (voiData, [], 'all');             
+            end
+         
+            clear voiMask;
+            clear voiData;     
+        else
+            tReport.Parotid.Cells  = [];
+            tReport.Parotid.Volume = [];
+            tReport.Parotid.Mean   = [];            
+            tReport.Parotid.Max    = [];            
+        end
+        
+        % Compute BloodPool lesion
+        
+        progressBar( 7/8, 'Computing blood pool lesion, please wait' );
+       
+        if numel(tReport.BloodPool.RoisTag) ~= 0  
+        
+            voiMask = cell(1, numel(tReport.BloodPool.RoisTag));
+            voiData = cell(1, numel(tReport.BloodPool.RoisTag));
+            
+            dNbCells = 0;
+            
+            for uu=1:numel(tReport.BloodPool.RoisTag)
+
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.BloodPool.RoisTag{uu}]} );                
+                
+                tRoi = atRoiInput{find(aTagOffset, 1)};
+                
+                if bModifiedMatrix  == false && ... 
+                   bMovementApplied == false        % Can't use input buffer if movement have been applied
+
+                    if numel(aImage) ~= numel(dicomBuffer('get'))
+                        pTemp{1} = tRoi;
+                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                        tRoi = ptrRoiTemp{1};
+                    end   
+                end
+                
+                switch lower(tRoi.Axe)                    
+                    case 'axe'
+                        voiData{uu} = aImage(:,:);
+                        voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
+                        
+                    case 'axes1'
+                        aSlice = permute(aImage(tRoi.SliceNb,:,:), [3 2 1]);
+                        voiData{uu} = aSlice;
+                        voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+                        
+                    case 'axes2'
+                        aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
+                        voiData{uu} = aSlice;                        
+                        voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+                         
+                   case 'axes3'
+                        aSlice = aImage(:,:,tRoi.SliceNb);
+                        voiData{uu} = aSlice;                        
+                        voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+                end              
+                
+                if bSegmented  == true && ...      
+                   bModifiedMatrix == true % Can't use original buffer   
+
+                    voiDataTemp = voiData{uu}(voiMask{uu}); 
+                    voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
+                    dNbCells = dNbCells+numel(voiDataTemp);
+                else
+                    dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
+                end
+            end
+            
+            voiMask = cell2mat(voiMask);
+            voiData = cell2mat(voiData);
+            
+            voiData(voiMask~=1) = [];
+            
+            if bSegmented  == true && ...      
+               bModifiedMatrix == true % Can't use original buffer   
+
+                voiData = voiData(voiData>cropValue('get'));                            
+            end
+            
+            tReport.BloodPool.Cells  = dNbCells;
+            tReport.BloodPool.Volume = dNbCells*dVoxVolume;
+            
+            if strcmpi(sUnitDisplay, 'SUV')
+                
+                if bSUVUnit == true
+                    tReport.BloodPool.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.BloodPool.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;             
+                else
+                    tReport.BloodPool.Mean = mean(voiData, 'all');
+                    tReport.BloodPool.Max  = max (voiData, [], 'all');
+                end
+            else
+                tReport.BloodPool.Mean = mean(voiData, 'all');             
+                tReport.BloodPool.Max  = max (voiData, [], 'all');             
+            end
+         
+            clear voiMask;
+            clear voiData;     
+        else
+            tReport.BloodPool.Cells  = [];
+            tReport.BloodPool.Volume = [];
+            tReport.BloodPool.Mean   = [];            
+            tReport.BloodPool.Max    = [];            
         end
         
         % Compute All lesion
@@ -1474,7 +2157,8 @@ function generateContourReportCallback(~, ~)
                     end   
                 end
                 
-                switch lower(tRoi.Axe)                    
+                switch lower(tRoi.Axe)       
+                    
                     case 'axe'
                         voiData{uu} = aImage(:,:);
                         voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
@@ -1521,13 +2205,17 @@ function generateContourReportCallback(~, ~)
             tReport.All.Volume = dNbCells*dVoxVolume;
 
             if strcmpi(sUnitDisplay, 'SUV')
+                
                 if bSUVUnit == true
                     tReport.All.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.All.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;             
                 else
                     tReport.All.Mean = mean(voiData, 'all');
+                    tReport.All.Max  = max (voiData, [], 'all');
                 end
             else
                 tReport.All.Mean = mean(voiData, 'all');             
+                tReport.All.Max  = max (voiData, [], 'all');             
             end
          
             clear voiMask;
@@ -1536,6 +2224,7 @@ function generateContourReportCallback(~, ~)
             tReport.All.Cells  = [];
             tReport.All.Volume = [];
             tReport.All.Mean   = [];               
+            tReport.All.Max    = [];               
         end
         
         clear aImage;

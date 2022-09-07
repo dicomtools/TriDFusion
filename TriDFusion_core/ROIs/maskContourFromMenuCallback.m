@@ -35,182 +35,157 @@ function maskContourFromMenuCallback(hObject, ~)
     sMaskType = get(hObject, 'Label');
     sMaskTag  = get(hObject, 'UserData'); 
 
-    tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-    tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    atVoi = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
-    if ~isempty(tVoiInput) || ...
-       ~isempty(tRoiInput)
+    if ~isempty(atRoi)
 
-        bIsVoiTag= false;
+        aTagOffset = strcmp( cellfun( @(atVoi) atVoi.Tag, atVoi, 'uni', false ), {sMaskTag} );
 
-        for aa=1:numel(tVoiInput)
+        if aTagOffset(aTagOffset==1) % tag is a voi
 
-            if strcmp(tVoiInput{aa}.Tag, sMaskTag) % Tag is a VOI
+            dNbRoiTag = numel(atVoi{aTagOffset}.RoisTag);
 
-                bIsVoiTag = true;
+            for tt=1:dNbRoiTag % Scan all tag
+                
+                aRoiTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {[atVoi{aTagOffset}.RoisTag{tt}]} );
+                dRoiTagOffset = find(aRoiTagOffset, 1);           
+           
+                if ~isempty(dRoiTagOffset)
+                    
+                    switch lower(atRoi{dRoiTagOffset}.Axe)
+                        
+                        case 'axe'
+                        aMask = createMask(atRoi{dRoiTagOffset}.Object, imBuffer(:,:));
 
-                dNbRoiTag = numel(tVoiInput{aa}.RoisTag);
+                        case 'axes1'
+                        aMask = createMask(atRoi{dRoiTagOffset}.Object, permute(imBuffer(atRoi{dRoiTagOffset}.SliceNb,:,:), [3 2 1]));
 
-                for tt=1:dNbRoiTag % Scan all tag
+                        case 'axes2'
+                        aMask = createMask(atRoi{dRoiTagOffset}.Object, permute(imBuffer(:,atRoi{dRoiTagOffset}.SliceNb,:), [3 1 2]));
 
-                    for uu=1:numel(tRoiInput)
-
-                        if strcmp(tVoiInput{aa}.RoisTag{tt}, tRoiInput{uu}.Tag) % VOI\ROI tag found
-
-                            if strcmpi(sMaskType, 'Inside This Contour')
-
-                               imBuffer = cropInside(tRoiInput{uu}.Object, ...
-                                                      imBuffer, ...
-                                                      tRoiInput{uu}.SliceNb, ...
-                                                      tRoiInput{uu}.Axe ...
-                                                      );    
-
-                               progressBar(tt / dNbRoiTag, 'Mask inside in progress');
-
-                            end
-
-                            if strcmpi(sMaskType, 'Outside This Contour')
-
-                                imBuffer = cropOutside(tRoiInput{uu}.Object, ...
-                                                       imBuffer, ...
-                                                       tRoiInput{uu}.SliceNb, ...
-                                                       tRoiInput{uu}.Axe ...
-                                                       );    
-
-                               progressBar(tt / dNbRoiTag, 'Mask outside in progress');
-                            end                                    
-
-                            break;
-                        end
+                        case 'axes3'
+                        aMask = createMask(atRoi{dRoiTagOffset}.Object, imBuffer(:,:,atRoi{dRoiTagOffset}.SliceNb));
+                        
                     end
-                end
-
-                break;
-            end
-        end
-
-        if bIsVoiTag == false % Tag is a ROI
-            for aa=1:numel(tRoiInput)
-                if strcmp(tRoiInput{aa}.Tag, sMaskTag) % Tag is a ROI
-
+                       
                     if strcmpi(sMaskType, 'Inside This Contour')
+
                         
-                       if     strcmpi(tRoiInput{aa}.Axe, 'Axe')
-                            aMask = createMask(tRoiInput{aa}.Object, imBuffer(:,:));
-                            
-                       elseif strcmpi(tRoiInput{aa}.Axe, 'Axes1')
-                            aMask = createMask(tRoiInput{aa}.Object, permute(imBuffer(1,:,:), [3 2 1]));
-                            
-                        elseif strcmpi(tRoiInput{aa}.Axe, 'Axes2')
-                            aMask = createMask(tRoiInput{aa}.Object, permute(imBuffer(:,1,:), [3 1 2]));
-                            
-                        elseif strcmpi(tRoiInput{aa}.Axe, 'Axes3')
-                            aMask = createMask(tRoiInput{aa}.Object, imBuffer(:,:,1));
-                        else
-                            break;
-                        end
-                        
-                        imBuffer = cropInside(aMask, ...
+                       imBuffer = cropInside(aMask, ...
                                               imBuffer, ...
-                                              tRoiInput{aa}.SliceNb, ...
-                                              tRoiInput{aa}.Axe ...
+                                              atRoi{dRoiTagOffset}.SliceNb, ...
+                                              atRoi{dRoiTagOffset}.Axe ...
                                               );    
                     end
 
                     if strcmpi(sMaskType, 'Outside This Contour')
-                        
-                       if     strcmpi(tRoiInput{aa}.Axe, 'Axe')
-                            aMask = createMask(tRoiInput{aa}.Object, imBuffer(:,:));
-                            
-                       elseif strcmpi(tRoiInput{aa}.Axe, 'Axes1')
-                            aMask = createMask(tRoiInput{aa}.Object, permute(imBuffer(1,:,:), [3 2 1]));
-                            
-                        elseif strcmpi(tRoiInput{aa}.Axe, 'Axes2')
-                            aMask = createMask(tRoiInput{aa}.Object, permute(imBuffer(:,1,:), [3 1 2]));
-                            
-                        elseif strcmpi(tRoiInput{aa}.Axe, 'Axes3')
-                            aMask = createMask(tRoiInput{aa}.Object, imBuffer(:,:,1));
-                        else
-                            break;
-                       end
-                        
+
                         imBuffer = cropOutside(aMask, ...
                                                imBuffer, ...
-                                               tRoiInput{aa}.SliceNb, ...
-                                               tRoiInput{aa}.Axe ...
+                                               atRoi{dRoiTagOffset}.SliceNb, ...
+                                               atRoi{dRoiTagOffset}.Axe ...
                                                );    
-                    end
-
-                    if strcmpi(sMaskType, 'Inside Every Slice')
-
-                        dBufferSize = size(imBuffer);   
-
-                        if     strcmpi(tRoiInput{aa}.Axe, 'Axes1')
-                            dLastSliceNb = dBufferSize(1);                            
-                            aMask = createMask(tRoiInput{aa}.Object, permute(imBuffer(1,:,:), [3 2 1]));
-                            
-                        elseif strcmpi(tRoiInput{aa}.Axe, 'Axes2')
-                            dLastSliceNb = dBufferSize(2);                            
-                            aMask = createMask(tRoiInput{aa}.Object, permute(imBuffer(:,1,:), [3 1 2]));
-                            
-                        elseif strcmpi(tRoiInput{aa}.Axe, 'Axes3')
-                            dLastSliceNb = dBufferSize(3);
-                            aMask = createMask(tRoiInput{aa}.Object, imBuffer(:,:,1));
-                        else
-                            break;
-                        end
-
-                        for dSliceNb=1:dLastSliceNb
-                            imBuffer = cropInside(aMask, ...
-                                                  imBuffer, ...
-                                                  dSliceNb, ...
-                                                  tRoiInput{aa}.Axe ...
-                                                  );   
-
-%                            progressBar(dSliceNb / dLastSliceNb, 'Mask inside in progress');
-                        end                                
-                    end
-
-                    if strcmpi(sMaskType, 'Outside Every Slice')
-
-                        dBufferSize = size(imBuffer);   
-
-                        if     strcmpi(tRoiInput{aa}.Axe, 'Axes1')
-                            dLastSliceNb = dBufferSize(1);
-                            aMask = createMask(tRoiInput{aa}.Object, permute(imBuffer(1,:,:), [3 2 1]));
-                            
-                        elseif strcmpi(tRoiInput{aa}.Axe, 'Axes2')
-                            dLastSliceNb = dBufferSize(2);
-                            aMask = createMask(tRoiInput{aa}.Object, permute(imBuffer(:,1,:), [3 1 2]));
-                            
-                        elseif strcmpi(tRoiInput{aa}.Axe, 'Axes3')
-                            dLastSliceNb = dBufferSize(3);
-                            aMask = createMask(tRoiInput{aa}.Object, imBuffer(:,:,1));
-                        else
-                            break;
-                        end
-
-                        for dSliceNb=1:dLastSliceNb
-                            imBuffer = cropOutside(aMask, ...
-                                                   imBuffer, ...
-                                                   dSliceNb, ...
-                                                   tRoiInput{aa}.Axe ...
-                                                   ); 
-
-%                            progressBar(dSliceNb / dLastSliceNb, 'Mask outside in progress');
-
-                        end
-                    end                            
-
-                break;
+                    end                                                        
                 end
+            end
+            
+        else % tag is a roi
+
+            aRoiTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {sMaskTag} );
+            dRoiTagOffset = find(aRoiTagOffset, 1);  
+                
+            if ~isempty(dRoiTagOffset)
+                
+                switch lower(atRoi{dRoiTagOffset}.Axe)
+                   
+                    case 'axe'
+                    aMask = createMask(atRoi{dRoiTagOffset}.Object, imBuffer(:,:));
+
+                    case 'axes1'
+                    aMask = createMask(atRoi{dRoiTagOffset}.Object, permute(imBuffer(atRoi{dRoiTagOffset}.SliceNb,:,:), [3 2 1]));
+
+                    case 'axes2'
+                    aMask = createMask(atRoi{dRoiTagOffset}.Object, permute(imBuffer(:,atRoi{dRoiTagOffset}.SliceNb,:), [3 1 2]));
+
+                    case 'axes3'
+                    aMask = createMask(atRoi{dRoiTagOffset}.Object, imBuffer(:,:,atRoi{dRoiTagOffset}.SliceNb));
+                end
+
+                if strcmpi(sMaskType, 'Inside This Contour')
+                
+                    imBuffer = cropInside(aMask, ...
+                                          imBuffer, ...
+                                          atRoi{dRoiTagOffset}.SliceNb, ...
+                                          atRoi{dRoiTagOffset}.Axe ...
+                                          );    
+                end
+
+                if strcmpi(sMaskType, 'Outside This Contour')
+
+                    imBuffer = cropOutside(aMask, ...
+                                           imBuffer, ...
+                                           atRoi{dRoiTagOffset}.SliceNb, ...
+                                           atRoi{dRoiTagOffset}.Axe ...
+                                           );    
+                end
+
+                if strcmpi(sMaskType, 'Inside Every Slice')
+
+                    dBufferSize = size(imBuffer);   
+                    
+                    switch lower(atRoi{dRoiTagOffset}.Axe)
+
+                        case 'axes1'
+                        dLastSliceNb = dBufferSize(1);                            
+
+                        case 'axes2'
+                        dLastSliceNb = dBufferSize(2);                            
+
+                        case 'axes3'
+                        dLastSliceNb = dBufferSize(3);
+                    end
+
+                    for dSliceNb=1:dLastSliceNb
+                        
+                        imBuffer = cropInside(aMask, ...
+                                              imBuffer, ...
+                                              dSliceNb, ...
+                                              atRoi{dRoiTagOffset}.Axe ...
+                                              );   
+                    end                                
+                end
+
+                if strcmpi(sMaskType, 'Outside Every Slice')
+
+                    dBufferSize = size(imBuffer);   
+                    
+                    switch lower(atRoi{dRoiTagOffset}.Axe)
+
+                        case 'axes1'
+                        dLastSliceNb = dBufferSize(1);
+
+                        case 'axes2'
+                        dLastSliceNb = dBufferSize(2);
+
+                        case 'axes3'
+                        dLastSliceNb = dBufferSize(3);
+                    end
+
+                    for dSliceNb=1:dLastSliceNb
+                        imBuffer = cropOutside(aMask, ...
+                                               imBuffer, ...
+                                               dSliceNb, ...
+                                               atRoi{dRoiTagOffset}.Axe ...
+                                               ); 
+                    end
+                end                            
             end
         end
 
         dicomBuffer('set', imBuffer); 
 
-        iOffset = get(uiSeriesPtr('get'), 'Value');
-        setQuantification(iOffset);
+        setQuantification(get(uiSeriesPtr('get'), 'Value'));
 
         refreshImages();
 

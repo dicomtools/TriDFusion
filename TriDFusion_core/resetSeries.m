@@ -221,4 +221,6 @@ function resetSeries(dOffset, bInitDisplay)
         refreshImages();
     end
     
+    modifiedMatrixValueMenuOption('set', false);
+    
 end

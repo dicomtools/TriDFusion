@@ -202,7 +202,7 @@ function resize = dicomViewer()
         
     suvMenuUnitOption('set', true);
     segMenuOption    ('set', false);
-    modifiedMatrixValueMenuOption('set', true);
+    modifiedMatrixValueMenuOption('set', false);
     isFigRoiInColor  ('set', true);
 
     registrationTemplate('init');
