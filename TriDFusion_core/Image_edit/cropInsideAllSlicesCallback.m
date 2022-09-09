@@ -143,6 +143,8 @@ function cropInsideAllSlicesCallback(hObject,~)
     end
 
     progressBar(1, 'Ready');
+    
+%    modifiedMatrixValueMenuOption('set', true);
 
     dicomBuffer('set', im); 
 

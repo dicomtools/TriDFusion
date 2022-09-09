@@ -130,6 +130,8 @@ function cropInsideCallback(hObject,~)
         end
     end
     
+    modifiedMatrixValueMenuOption('set', true);
+   
     dicomBuffer('set', im);
 
     iOffset = get(uiSeriesPtr('get'), 'Value');

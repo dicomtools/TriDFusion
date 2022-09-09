@@ -32,47 +32,48 @@ function hideViewLabelCallback(hObject,~)
 
     atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
     
-    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );            
-
+    if isempty(atRoiInput) 
+        aTagOffset = 0;
+    else
+        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );            
+    end
+    
     if aTagOffset(aTagOffset==1) % tag is a roi
 
-        if ~isempty(atRoiInput) 
+        sLabelVisible = 'off';
 
-            sLabelVisible = 'off';
+        dTagOffset = find(aTagOffset, 1);
+
+        if ~isempty(dTagOffset)
+
+            if strcmpi(hObject.UserData.LabelVisible, 'off')
+                sLabelVisible = 'on';
+            end
+
+            hObject.UserData.LabelVisible = sLabelVisible;
+
+            atRoiInput{dTagOffset}.LabelVisible = sLabelVisible;
+            if isvalid(atRoiInput{dTagOffset}.Object)
+                atRoiInput{dTagOffset}.Object.LabelVisible = sLabelVisible;
+            end
+
+            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+        end
+
+        % Set roi label input template tRoi
+
+        if isfield(atInput(dSerieOffset), 'tRoi')
+
+            atInputRoi = atInput(dSerieOffset).tRoi;
+            aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {hObject.UserData.Tag} );      
 
             dTagOffset = find(aTagOffset, 1);
 
             if ~isempty(dTagOffset)
-
-                if strcmpi(hObject.UserData.LabelVisible, 'off')
-                    sLabelVisible = 'on';
-                end
-                
-                hObject.UserData.LabelVisible = sLabelVisible;
-
-                atRoiInput{dTagOffset}.LabelVisible = sLabelVisible;
-                if isvalid(atRoiInput{dTagOffset}.Object)
-                    atRoiInput{dTagOffset}.Object.LabelVisible = sLabelVisible;
-                end
-
-                roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+                atInput(dSerieOffset).tRoi{dTagOffset}.LabelVisible = sLabelVisible;
+                inputTemplate('set', atInput);                
             end
-
-            % Set roi label input template tRoi
-
-            if isfield(atInput(dSerieOffset), 'tRoi')
-
-                atInputRoi = atInput(dSerieOffset).tRoi;
-                aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {hObject.UserData.Tag} );      
-
-                dTagOffset = find(aTagOffset, 1);
-
-                if ~isempty(dTagOffset)
-                    atInput(dSerieOffset).tRoi{dTagOffset}.LabelVisible = sLabelVisible;
-                    inputTemplate('set', atInput);                
-                end
-            end                        
-        end
+        end                               
     end
     
 end

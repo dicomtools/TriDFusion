@@ -138,7 +138,9 @@ function cropOutsideAllSlicesCallback(hObject,~)
         end
     end
 
-    progressBar(1, 'Ready');
+%    progressBar(1, 'Ready');
+    
+    modifiedMatrixValueMenuOption('set', true);
 
     dicomBuffer('set', im); 
 

@@ -30,6 +30,9 @@ function triangulateRoi(sRoiTag, bCenterRoi)
     im = dicomBuffer('get');
     
     atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    if isempty(atRoiInput)
+        return;
+    end
 
     if size(im, 3) ~= 1 % 3D
         

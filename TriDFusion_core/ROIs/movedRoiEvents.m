@@ -35,10 +35,14 @@ function movedRoiEvents(hObject, ~)
 
     atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
     
+    if isempty(atRoi)
+        return;
+    end
+    
     aTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {hObject.Tag} );
-    dTagOffset = find(aTagOffset, 1);       
+    dTagOffset = find(aTagOffset, 1);          
 
-   if ~isempty(dTagOffset)
+    if ~isempty(dTagOffset)
            
         atRoi{dTagOffset}.Position = hObject.Position;
         tInput(iOffset).tRoi{dTagOffset}.Position = hObject.Position;

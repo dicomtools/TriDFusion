@@ -489,6 +489,17 @@ function setRoiToolbar(sVisible)
 
           %      while strcmpi(get(t2, 'State'), 'on')
 
+%                    switch gca
+%                        case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+%                            pAxe = axerPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+%                        case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+%                            pAxe = axes1rPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+%                        case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+%                            pAxe = axes2rPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+%                        case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+%                            pAxe = axes3rPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+%                    end
+          
                     a = drawcircle(gca, 'Color', 'cyan', 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', num2str(randi([-(2^52/2),(2^52/2)],1)), 'FaceSelectable', 1, 'FaceAlpha', 0);
                     if ~isvalid(t2)
                         return;

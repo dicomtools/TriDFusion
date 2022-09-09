@@ -39,9 +39,13 @@ function maskContourFromMenuCallback(hObject, ~)
     atVoi = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
     if ~isempty(atRoi)
-
-        aTagOffset = strcmp( cellfun( @(atVoi) atVoi.Tag, atVoi, 'uni', false ), {sMaskTag} );
-
+        
+        if isempty(atVoi)
+            aTagOffset = 0;
+        else
+            aTagOffset = strcmp( cellfun( @(atVoi) atVoi.Tag, atVoi, 'uni', false ), {sMaskTag} );
+        end
+        
         if aTagOffset(aTagOffset==1) % tag is a voi
 
             dNbRoiTag = numel(atVoi{aTagOffset}.RoisTag);
@@ -182,6 +186,8 @@ function maskContourFromMenuCallback(hObject, ~)
                 end                            
             end
         end
+        
+        modifiedMatrixValueMenuOption('set', true);
 
         dicomBuffer('set', imBuffer); 
 
@@ -189,7 +195,7 @@ function maskContourFromMenuCallback(hObject, ~)
 
         refreshImages();
 
-        progressBar(1, 'Ready');
+%        progressBar(1, 'Ready');
 
     end               
 end

@@ -403,11 +403,10 @@ end
                 atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
             
                 bIsVoiTag= false;
-                for gg=1:numel(atVoiInput)                    
-                    if strcmp(atVoiInput{gg}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag) % Tag is a VOI
-                                                                       
+                if ~isempty(atVoiInput)
+                    aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag} );
+                    if aTagOffset(aTagOffset==1) % tag is a voi
                         bIsVoiTag = true;
-                        break;
                     end
                 end
                 
@@ -829,325 +828,274 @@ end
                 % Search for a voi tag, if we don't find one, then the tag is            
                 % roi
 
-                aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
+                if isempty(atVoiInput)
+                    aTagOffset = 0;
+                else
+                    aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
+                end
 
                 if aTagOffset(aTagOffset==1) % tag is a voi
 
-                    if ~isempty(atVoiInput) 
+                    dTagOffset = find(aTagOffset, 1);
+
+                    if ~isempty(dTagOffset)
+
+                        % Clear roi from roi input template
+
+                        aRoisTagOffset = zeros(1, numel(atVoiInput{dTagOffset}.RoisTag));
+                        if ~isempty(atRoiInput)
+
+                            for ro=1:numel(atVoiInput{dTagOffset}.RoisTag)
+                                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[atVoiInput{dTagOffset}.RoisTag{ro}]} );
+                                aRoisTagOffset(ro) = find(aTagOffset, 1);    
+                            end
+
+                            if numel(atVoiInput{dTagOffset}.RoisTag)
+
+                                for ro=1:numel(atVoiInput{dTagOffset}.RoisTag)
+
+                                    % Clear it constraint
+
+                                    [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value') );
+
+                                    if ~isempty(asConstraintTagList)
+
+                                        dConstraintOffset = find(contains(asConstraintTagList, atVoiInput{dTagOffset}.RoisTag(ro)));
+                                        if ~isempty(dConstraintOffset) % tag exist
+                                             roiConstraintList('set', dSerieOffset,  asConstraintTagList{dConstraintOffset}, asConstraintTypeList{dConstraintOffset});
+                                        end
+                                    end
+
+                                    % Delete ROI object
+
+                                    if isvalid(atRoiInput{aRoisTagOffset(ro)}.Object)
+                                        delete(atRoiInput{aRoisTagOffset(ro)}.Object);
+                                    end
+
+                                    % Delete farthest distance object
+
+                                    if ~isempty(atRoiInput{aRoisTagOffset(ro)}.MaxDistances)
+
+                                        if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Line)
+                                            delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Line);
+                                        end
+
+                                        if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Line)
+                                            delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Line);
+                                        end
+
+                                        if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Text)
+                                            delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Text);
+                                        end
+
+                                        if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Text)
+                                            delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Text);
+                                        end
+                                    end
+
+                                    atRoiInput{aRoisTagOffset(ro)} = [];
+                                end
+
+                                atRoiInput(cellfun(@isempty, atRoiInput)) = [];
+
+                                roiTemplate('set', dSerieOffset, atRoiInput);  
+                            end
+                        end
+
+                        % Clear roi from input template tRoi
+
+                        if isfield(atInput(dSerieOffset), 'tRoi')
+
+                            atInputRoi = atInput(dSerieOffset).tRoi;
+                            for ro=1:numel(atVoiInput{dTagOffset}.RoisTag)
+                                aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {[atVoiInput{dTagOffset}.RoisTag{ro}]} );
+                                aRoisTagOffset(ro) = find(aTagOffset, 1);    
+                            end
+
+                            if numel(atVoiInput{dTagOffset}.RoisTag)
+                                for ro=1:numel(atVoiInput{dTagOffset}.RoisTag)
+                                    atInput(dSerieOffset).tRoi{aRoisTagOffset(ro)} = [];
+                                end                
+
+                                atInput(dSerieOffset).tRoi(cellfun(@isempty, atInput(dSerieOffset).tRoi)) = [];
+
+                                inputTemplate('set', atInput);          
+                            end
+                        end
+
+                        % Clear voi from voi input template
+
+                        atVoiInput{dTagOffset} = [];            
+                        atVoiInput(cellfun(@isempty, atVoiInput)) = [];
+
+                        voiTemplate('set', dSerieOffset, atVoiInput);
+
+                        % Clear voi from input template tVoi
+
+                        if isfield(atInput(dSerieOffset), 'tVoi')
+
+                            atInputVoi = atInput(dSerieOffset).tVoi;
+                            aTagOffset = strcmp( cellfun( @(atInputVoi) atInputVoi.Tag, atInputVoi, 'uni', false ),  {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
+
+                            dTagOffset = find(aTagOffset, 1);  
+
+                            if ~isempty(dTagOffset)
+
+                                atInput(dSerieOffset).tVoi{dTagOffset} = [];
+                                atInput(dSerieOffset).tVoi(cellfun(@isempty, atInput(dSerieOffset).tVoi)) = [];
+
+                                inputTemplate('set', atInput);                
+                            end
+                        end
+
+                        % Refresh contour figure
+
+                        setVoiRoiSegPopup();
+
+                        if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+                            bSUVUnit = true;
+                        else
+                            bSUVUnit = false;
+                        end
+
+                        if strcmpi(get(mSegmented, 'Checked'), 'on')
+                            bSegmented = true;
+                        else
+                            bSegmented = false;
+                        end
+
+                        if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+                            bModifiedMatrix = true;
+                        else
+                            bModifiedMatrix = false;
+                        end
+
+                        setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                    end 
+
+                else % Tag is a ROI
+                    
+                    if isempty(atRoiInput) 
+                        aTagOffset = 0;
+                    else
+                        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );            
+                    end
+                    
+                    if aTagOffset(aTagOffset==1) % tag is a roi
 
                         dTagOffset = find(aTagOffset, 1);
 
                         if ~isempty(dTagOffset)
 
-                            % Clear roi from roi input template
+                            % Clear it constraint
 
-                            aRoisTagOffset = zeros(1, numel(atVoiInput{dTagOffset}.RoisTag));
-                            if ~isempty(atRoiInput)
+                            [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dSerieOffset);
 
-                                for ro=1:numel(atVoiInput{dTagOffset}.RoisTag)
-                                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[atVoiInput{dTagOffset}.RoisTag{ro}]} );
-                                    aRoisTagOffset(ro) = find(aTagOffset, 1);    
+                            if ~isempty(asConstraintTagList)
+
+                                dConstraintOffset = find(contains(asConstraintTagList, {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag}));
+                                if ~isempty(dConstraintOffset) % tag exist
+                                     roiConstraintList('set', dSerieOffset,  asConstraintTagList{dConstraintOffset}, asConstraintTypeList{dConstraintOffset});
                                 end
+                            end        
 
-                                if numel(atVoiInput{dTagOffset}.RoisTag)
-                                    
-                                    for ro=1:numel(atVoiInput{dTagOffset}.RoisTag)
+                            % Delete ROI object 
 
-                                        % Clear it constraint
-
-                                        [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value') );
-
-                                        if ~isempty(asConstraintTagList)
-                                            
-                                            dConstraintOffset = find(contains(asConstraintTagList, atVoiInput{dTagOffset}.RoisTag(ro)));
-                                            if ~isempty(dConstraintOffset) % tag exist
-                                                 roiConstraintList('set', dSerieOffset,  asConstraintTagList{dConstraintOffset}, asConstraintTypeList{dConstraintOffset});
-                                            end
-                                        end
-                                        
-                                        % Delete ROI object
-
-                                        if isvalid(atRoiInput{aRoisTagOffset(ro)}.Object)
-                                            delete(atRoiInput{aRoisTagOffset(ro)}.Object);
-                                        end
-
-                                        % Delete farthest distance object
-
-                                        if ~isempty(atRoiInput{aRoisTagOffset(ro)}.MaxDistances)
-
-                                            if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Line)
-                                                delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Line);
-                                            end
-
-                                            if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Line)
-                                                delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Line);
-                                            end
-
-                                            if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Text)
-                                                delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Text);
-                                            end
-
-                                            if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Text)
-                                                delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Text);
-                                            end
-                                        end
-
-                                        atRoiInput{aRoisTagOffset(ro)} = [];
-                                    end
-
-                                    atRoiInput(cellfun(@isempty, atRoiInput)) = [];
-
-                                    roiTemplate('set', dSerieOffset, atRoiInput);  
-                                end
+                            if isvalid(atRoiInput{dTagOffset}.Object)
+                                delete(atRoiInput{dTagOffset}.Object)
                             end
+
+                            % Delete farthest distance object
+
+                            if ~isempty(atRoiInput{dTagOffset}.MaxDistances)
+                                if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Line)
+                                    delete(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Line);
+                                end
+
+                                if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Line)
+                                    delete(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Line);
+                                end
+
+                                if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Text)
+                                    delete(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Text);
+                                end
+
+                                if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Text)
+                                    delete(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Text);
+                                end
+                            end                        
+
+                            atRoiInput{dTagOffset} = [];
+
+                            atRoiInput(cellfun(@isempty, atRoiInput)) = [];
+
+                            roiTemplate('set', dSerieOffset, atRoiInput);  
 
                             % Clear roi from input template tRoi
 
                             if isfield(atInput(dSerieOffset), 'tRoi')
 
                                 atInputRoi = atInput(dSerieOffset).tRoi;
-                                for ro=1:numel(atVoiInput{dTagOffset}.RoisTag)
-                                    aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {[atVoiInput{dTagOffset}.RoisTag{ro}]} );
-                                    aRoisTagOffset(ro) = find(aTagOffset, 1);    
-                                end
-                                
-                                if numel(atVoiInput{dTagOffset}.RoisTag)
-                                    for ro=1:numel(atVoiInput{dTagOffset}.RoisTag)
-                                        atInput(dSerieOffset).tRoi{aRoisTagOffset(ro)} = [];
-                                    end                
-
-                                    atInput(dSerieOffset).tRoi(cellfun(@isempty, atInput(dSerieOffset).tRoi)) = [];
-
-                                    inputTemplate('set', atInput);          
-                                end
-                            end
-
-                            % Clear voi from voi input template
-
-                            atVoiInput{dTagOffset} = [];            
-                            atVoiInput(cellfun(@isempty, atVoiInput)) = [];
-
-                            voiTemplate('set', dSerieOffset, atVoiInput);
-
-                            % Clear voi from input template tVoi
-
-                            if isfield(atInput(dSerieOffset), 'tVoi')
-
-                                atInputVoi = atInput(dSerieOffset).tVoi;
-                                aTagOffset = strcmp( cellfun( @(atInputVoi) atInputVoi.Tag, atInputVoi, 'uni', false ),  {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
+                                aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
 
                                 dTagOffset = find(aTagOffset, 1);  
 
                                 if ~isempty(dTagOffset)
+                                    atInput(dSerieOffset).tRoi{dTagOffset} = [];
 
-                                    atInput(dSerieOffset).tVoi{dTagOffset} = [];
-                                    atInput(dSerieOffset).tVoi(cellfun(@isempty, atInput(dSerieOffset).tVoi)) = [];
+                                    atInput(dSerieOffset).tRoi(cellfun(@isempty, atInput(dSerieOffset).tRoi)) = [];
 
-                                    inputTemplate('set', atInput);                
+                                    inputTemplate('set', atInput);  
                                 end
                             end
 
-                            % Refresh contour figure
+                            % Clear roi from voi input template (if exist)
 
-                            setVoiRoiSegPopup();
+                            if ~isempty(atVoiInput)                        
 
-                            if strcmpi(get(mSUVUnit, 'Checked'), 'on')
-                                bSUVUnit = true;
-                            else
-                                bSUVUnit = false;
+                                for vo=1:numel(atVoiInput)     
+
+                                    dTagOffset = find(contains(atVoiInput{vo}.RoisTag,{aVoiRoiTag{lbVoiRoiWindow.Value}.Tag}));
+
+                                    if ~isempty(dTagOffset) % tag exist
+                                        atVoiInput{vo}.RoisTag{dTagOffset} = [];
+                                        atVoiInput{vo}.RoisTag(cellfun(@isempty, atVoiInput{vo}.RoisTag)) = [];     
+
+                                        if isempty(atVoiInput{vo}.RoisTag)
+                                            atVoiInput{vo} = [];
+                                       end
+
+                                    end
+                                end
+
+                               atVoiInput(cellfun(@isempty, atVoiInput)) = [];
+
+                               voiTemplate('set', dSerieOffset, atVoiInput);                                        
                             end
 
-                            if strcmpi(get(mSegmented, 'Checked'), 'on')
-                                bSegmented = true;
-                            else
-                                bSegmented = false;
+                            % Clear roi from input tVoi template (if exist)
+
+                            if isfield(atInput(dSerieOffset), 'tVoi')
+
+                                for vo=1:numel(atInput(dSerieOffset).tVoi)     
+
+                                    dTagOffset = find(contains(atInput(dSerieOffset).tVoi{vo}.RoisTag,{aVoiRoiTag{lbVoiRoiWindow.Value}.Tag}));
+
+                                    if ~isempty(dTagOffset) % tag exist
+                                        atInput(dSerieOffset).tVoi{vo}.RoisTag{dTagOffset} = [];
+                                        atInput(dSerieOffset).tVoi{vo}.RoisTag(cellfun(@isempty, atInput(dSerieOffset).tVoi{vo}.RoisTag)) = [];     
+
+                                        if isempty(atInput(dSerieOffset).tVoi{vo}.RoisTag)
+                                            atInput(dSerieOffset).tVoi{vo} = [];
+                                       end
+
+                                    end
+                                end
+
+                               atInput(dSerieOffset).tVoi(cellfun(@isempty, atInput(dSerieOffset).tVoi)) = [];
+
+                               inputTemplate('set', atInput);                
                             end
-
-                            if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
-                                bModifiedMatrix = true;
-                            else
-                                bModifiedMatrix = false;
-                            end
-
-                            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
-                        end 
-                    end     
-
-                else % Tag is a ROI
-
-                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );            
-
-                    if aTagOffset(aTagOffset==1) % tag is a roi
-
-                        if ~isempty(atRoiInput) 
-
-                            dTagOffset = find(aTagOffset, 1);
-
-                            if ~isempty(dTagOffset)
-
-                                % Clear it constraint
-
-                                [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dSerieOffset);
-                                
-                                if ~isempty(asConstraintTagList)
-
-                                    dConstraintOffset = find(contains(asConstraintTagList, {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag}));
-                                    if ~isempty(dConstraintOffset) % tag exist
-                                         roiConstraintList('set', dSerieOffset,  asConstraintTagList{dConstraintOffset}, asConstraintTypeList{dConstraintOffset});
-                                    end
-                                end        
-                                
-                                % Delete ROI object 
-
-                                if isvalid(atRoiInput{dTagOffset}.Object)
-                                    delete(atRoiInput{dTagOffset}.Object)
-                                end
-
-                                % Delete farthest distance object
-
-                                if ~isempty(atRoiInput{dTagOffset}.MaxDistances)
-                                    if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Line)
-                                        delete(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Line);
-                                    end
-
-                                    if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Line)
-                                        delete(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Line);
-                                    end
-
-                                    if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Text)
-                                        delete(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Text);
-                                    end
-
-                                    if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Text)
-                                        delete(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Text);
-                                    end
-                                end                        
-
-                                atRoiInput{dTagOffset} = [];
-
-                                atRoiInput(cellfun(@isempty, atRoiInput)) = [];
-
-                                roiTemplate('set', dSerieOffset, atRoiInput);  
-
-                                % Clear roi from input template tRoi
-
-                                if isfield(atInput(dSerieOffset), 'tRoi')
-
-                                    atInputRoi = atInput(dSerieOffset).tRoi;
-                                    aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
-
-                                    dTagOffset = find(aTagOffset, 1);  
-
-                                    if ~isempty(dTagOffset)
-                                        atInput(dSerieOffset).tRoi{dTagOffset} = [];
-
-                                        atInput(dSerieOffset).tRoi(cellfun(@isempty, atInput(dSerieOffset).tRoi)) = [];
-
-                                        inputTemplate('set', atInput);  
-                                    end
-                                end
-
-                                % Clear roi from voi input template (if exist)
-
-                                if ~isempty(atVoiInput)                        
-
-                                    for vo=1:numel(atVoiInput)     
-
-                                        dTagOffset = find(contains(atVoiInput{vo}.RoisTag,{aVoiRoiTag{lbVoiRoiWindow.Value}.Tag}));
-
-                                        if ~isempty(dTagOffset) % tag exist
-                                            atVoiInput{vo}.RoisTag{dTagOffset} = [];
-                                            atVoiInput{vo}.RoisTag(cellfun(@isempty, atVoiInput{vo}.RoisTag)) = [];     
-
-                                            if isempty(atVoiInput{vo}.RoisTag)
-                                                atVoiInput{vo} = [];
-                                           end
-
-                                        end
-                                    end
-
-                                   atVoiInput(cellfun(@isempty, atVoiInput)) = [];
-                                   
-                                   voiTemplate('set', dSerieOffset, atVoiInput);                                        
-                                end
-
-                                % Clear roi from input tVoi template (if exist)
-
-                                if isfield(atInput(dSerieOffset), 'tVoi')
-
-                                    for vo=1:numel(atInput(dSerieOffset).tVoi)     
-
-                                        dTagOffset = find(contains(atInput(dSerieOffset).tVoi{vo}.RoisTag,{aVoiRoiTag{lbVoiRoiWindow.Value}.Tag}));
-
-                                        if ~isempty(dTagOffset) % tag exist
-                                            atInput(dSerieOffset).tVoi{vo}.RoisTag{dTagOffset} = [];
-                                            atInput(dSerieOffset).tVoi{vo}.RoisTag(cellfun(@isempty, atInput(dSerieOffset).tVoi{vo}.RoisTag)) = [];     
-
-                                            if isempty(atInput(dSerieOffset).tVoi{vo}.RoisTag)
-                                                atInput(dSerieOffset).tVoi{vo} = [];
-                                           end
-
-                                        end
-                                    end
-
-                                   atInput(dSerieOffset).tVoi(cellfun(@isempty, atInput(dSerieOffset).tVoi)) = [];
-                                   
-                                   inputTemplate('set', atInput);                
-                                end
-
-                                % Refresh contour figure and contour popup
-
-                                setVoiRoiSegPopup();
-
-                                if strcmpi(get(mSUVUnit, 'Checked'), 'on')
-                                    bSUVUnit = true;
-                                else
-                                    bSUVUnit = false;
-                                end
-
-                                if strcmpi(get(mSegmented, 'Checked'), 'on')
-                                    bSegmented = true;
-                                else
-                                    bSegmented = false;
-                                end
-
-                                if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
-                                    bModifiedMatrix = true;
-                                else
-                                    bModifiedMatrix = false;
-                                end
-
-                                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
-                            end
-                        end
-                    end
-                end
-            end
-        end
-
-        function figRoiPredefinedLabelCallback(hObject, ~)
-
-            aVoiRoiTag = voiRoiTag('get');
-
-            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-            atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-            
-            if ~isempty(aVoiRoiTag)
-                
-                % Search for a voi tag, if we don't find one, then the tag is            
-                % roi
-
-                aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
-
-                if aTagOffset(aTagOffset==1) % tag is a voi
-
-                    if ~isempty(atVoiInput) 
-
-                        dTagOffset = find(aTagOffset, 1);
-
-                        if ~isempty(dTagOffset)
-
-                            figRoiSetLabel(atVoiInput{dTagOffset}, get(hObject, 'Text'))
 
                             % Refresh contour figure and contour popup
 
@@ -1173,52 +1121,106 @@ end
 
                             setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
                         end
+                    end
+                end
+            end
+        end
 
+        function figRoiPredefinedLabelCallback(hObject, ~)
+
+            aVoiRoiTag = voiRoiTag('get');
+
+            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            
+            if ~isempty(aVoiRoiTag)
+                
+                % Search for a voi tag, if we don't find one, then the tag is            
+                % roi
+                
+                if isempty(atVoiInput)
+                    aTagOffset = 0;
+                else
+                    aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
+                end
+
+                if aTagOffset(aTagOffset==1) % tag is a voi
+
+                    dTagOffset = find(aTagOffset, 1);
+
+                    if ~isempty(dTagOffset)
+
+                        figRoiSetLabel(atVoiInput{dTagOffset}, get(hObject, 'Text'))
+
+                        % Refresh contour figure and contour popup
+
+                        setVoiRoiSegPopup();
+
+                        if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+                            bSUVUnit = true;
+                        else
+                            bSUVUnit = false;
+                        end
+
+                        if strcmpi(get(mSegmented, 'Checked'), 'on')
+                            bSegmented = true;
+                        else
+                            bSegmented = false;
+                        end
+
+                        if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+                            bModifiedMatrix = true;
+                        else
+                            bModifiedMatrix = false;
+                        end
+
+                        setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
                     end
 
                 else % Tag is a ROI
-
-                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );            
+                    
+                    if isempty(atRoiInput)
+                        aTagOffset = 0;
+                    else
+                        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );            
+                    end
 
                     if aTagOffset(aTagOffset==1) % tag is a roi
 
-                        if ~isempty(atRoiInput) 
+                        dTagOffset = find(aTagOffset, 1);
 
-                            dTagOffset = find(aTagOffset, 1);
+                        if ~isempty(dTagOffset)
 
-                            if ~isempty(dTagOffset)
+                            if isvalid(atRoiInput{dTagOffset}.Object)
 
-                                if isvalid(atRoiInput{dTagOffset}.Object)
+                                figRoiSetLabel(atRoiInput{dTagOffset}, get(hObject, 'Text'));
 
-                                    figRoiSetLabel(atRoiInput{dTagOffset}, get(hObject, 'Text'));
+                                % Refresh contour figure and contour popup
 
-                                    % Refresh contour figure and contour popup
+                                setVoiRoiSegPopup();
 
-                                    setVoiRoiSegPopup();
-
-                                    if strcmpi(get(mSUVUnit, 'Checked'), 'on')
-                                        bSUVUnit = true;
-                                    else
-                                        bSUVUnit = false;
-                                    end
-
-                                    if strcmpi(get(mSegmented, 'Checked'), 'on')
-                                        bSegmented = true;
-                                    else
-                                        bSegmented = false;
-                                    end
-
-                                    if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
-                                        bModifiedMatrix = true;
-                                    else
-                                        bModifiedMatrix = false;
-                                    end
-
-                                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
-
+                                if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+                                    bSUVUnit = true;
+                                else
+                                    bSUVUnit = false;
                                 end
+
+                                if strcmpi(get(mSegmented, 'Checked'), 'on')
+                                    bSegmented = true;
+                                else
+                                    bSegmented = false;
+                                end
+
+                                if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+                                    bModifiedMatrix = true;
+                                else
+                                    bModifiedMatrix = false;
+                                end
+
+                                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+
                             end
-                        end
+                        end                       
                     end
                 end  
             end
@@ -1236,7 +1238,11 @@ end
                 % Search for a voi tag, if we don't find one, then the tag is            
                 % roi
             
-                aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
+                if isempty(atVoiInput) 
+                    aTagOffset = 0;
+                else        
+                    aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
+                end
 
                 if aTagOffset(aTagOffset==1) % tag is a voi
 
@@ -1251,22 +1257,22 @@ end
                     end
 
                 else % Tag is a ROI
-
-                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );            
+                    
+                    if isempty(atRoiInput) 
+                        aTagOffset = 0;
+                    else
+                        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );            
+                    end
 
                     if aTagOffset(aTagOffset==1) % tag is a roi
 
-                        if ~isempty(atRoiInput)
+                        dTagOffset = find(aTagOffset, 1);
 
-                            dTagOffset = find(aTagOffset, 1);
+                        if ~isempty(dTagOffset)
 
-                            if ~isempty(dTagOffset)
+                            if isvalid(atRoiInput{dTagOffset}.Object)
 
-                                if isvalid(atRoiInput{dTagOffset}.Object)
-
-                                    figRoiEditLabelDialog(atRoiInput{dTagOffset});
-                                end
-
+                                figRoiEditLabelDialog(atRoiInput{dTagOffset});
                             end
                         end
                     end
@@ -1516,86 +1522,87 @@ end
             
             if ~isempty(aVoiRoiTag)
                 
-                aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
+                if isempty(atVoiInput)
+                    aTagOffset = 0;
+                else
+                    aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
+                end
 
                 if aTagOffset(aTagOffset==1) % tag is a voi
 
-                    if ~isempty(atVoiInput)
+                    dTagOffset = find(aTagOffset, 1);
+
+                    if ~isempty(dTagOffset)
+
+                        sColor = uisetcolor([atVoiInput{dTagOffset}.Color], 'Select a color');
+
+                        figRoiSetColor(atVoiInput{dTagOffset}, sColor)
+
+                        % Refresh contour figure and contour popup
+
+                        if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+                            bSUVUnit = true;
+                        else
+                            bSUVUnit = false;
+                        end
+
+                        if strcmpi(get(mSegmented, 'Checked'), 'on')
+                            bSegmented = true;
+                        else
+                            bSegmented = false;
+                        end
+
+                        if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+                            bModifiedMatrix = true;
+                        else
+                            bModifiedMatrix = false;
+                        end
+
+                        setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                    end
+
+                else % Tag is a ROI
+                    
+                    if isempty(atRoiInput)
+                        aTagOffset = 0;
+                    else
+                        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );            
+                    end
+
+                    if aTagOffset(aTagOffset==1) % tag is a roi
 
                         dTagOffset = find(aTagOffset, 1);
 
                         if ~isempty(dTagOffset)
 
-                            sColor = uisetcolor([atVoiInput{dTagOffset}.Color], 'Select a color');
+                            if isvalid(atRoiInput{dTagOffset}.Object)
 
-                            figRoiSetColor(atVoiInput{dTagOffset}, sColor)
+                                sColor = uisetcolor([atRoiInput{dTagOffset}.Color], 'Select a color');
 
-                            % Refresh contour figure and contour popup
+                                figRoiSetColor(atRoiInput{dTagOffset}, sColor); 
 
-                            if strcmpi(get(mSUVUnit, 'Checked'), 'on')
-                                bSUVUnit = true;
-                            else
-                                bSUVUnit = false;
-                            end
+                                % Refresh contour figure and contour popup
 
-                            if strcmpi(get(mSegmented, 'Checked'), 'on')
-                                bSegmented = true;
-                            else
-                                bSegmented = false;
-                            end
-
-                            if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
-                                bModifiedMatrix = true;
-                            else
-                                bModifiedMatrix = false;
-                            end
-
-                            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
-                        end
-
-                    end
-
-                else % Tag is a ROI
-
-                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );            
-
-                    if aTagOffset(aTagOffset==1) % tag is a roi
-
-                        if ~isempty(atRoiInput)
-
-                            dTagOffset = find(aTagOffset, 1);
-
-                            if ~isempty(dTagOffset)
-
-                                if isvalid(atRoiInput{dTagOffset}.Object)
-
-                                    sColor = uisetcolor([atRoiInput{dTagOffset}.Color], 'Select a color');
-
-                                    figRoiSetColor(atRoiInput{dTagOffset}, sColor); 
-
-                                    % Refresh contour figure and contour popup
-
-                                    if strcmpi(get(mSUVUnit, 'Checked'), 'on')
-                                        bSUVUnit = true;
-                                    else
-                                        bSUVUnit = false;
-                                    end
-
-                                    if strcmpi(get(mSegmented, 'Checked'), 'on')
-                                        bSegmented = true;
-                                    else
-                                        bSegmented = false;
-                                    end
-
-                                    if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
-                                        bModifiedMatrix = true;
-                                    else
-                                        bModifiedMatrix = false;
-                                    end
-
-                                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
-
+                                if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+                                    bSUVUnit = true;
+                                else
+                                    bSUVUnit = false;
                                 end
+
+                                if strcmpi(get(mSegmented, 'Checked'), 'on')
+                                    bSegmented = true;
+                                else
+                                    bSegmented = false;
+                                end
+
+                                if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+                                    bModifiedMatrix = true;
+                                else
+                                    bModifiedMatrix = false;
+                                end
+
+                                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+
                             end
                         end
                     end
@@ -1742,39 +1749,40 @@ end
                 
                 % Search for a voi tag, if we don't find one, then the tag is            
                 % roi
-            
-                aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
+                
+                if isempty(atVoiInput) 
+                    aTagOffset = 0;
+                else           
+                    aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );
+                end
 
                 if aTagOffset(aTagOffset==1) % tag is a voi
 
-                    if ~isempty(atVoiInput) 
+                    dTagOffset = find(aTagOffset, 1);
+
+                    if ~isempty(dTagOffset)
+                        figRoiSetRoiFaceAlpha(atVoiInput{dTagOffset});
+                    end
+
+                else % Tag is a ROI
+                    
+                    if isempty(atRoiInput)
+                        aTagOffset = 0;
+                    else
+                        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );            
+                    end
+
+                    if aTagOffset(aTagOffset==1) % tag is a roi
 
                         dTagOffset = find(aTagOffset, 1);
 
                         if ~isempty(dTagOffset)
 
-                            figRoiSetRoiFaceAlpha(atVoiInput{dTagOffset});
-                        end
-                    end
+                            if isvalid(atRoiInput{dTagOffset}.Object)
 
-                else % Tag is a ROI
-
-                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {aVoiRoiTag{lbVoiRoiWindow.Value}.Tag} );            
-
-                    if aTagOffset(aTagOffset==1) % tag is a roi
-
-                        if ~isempty(atRoiInput)
-
-                            dTagOffset = find(aTagOffset, 1);
-
-                            if ~isempty(dTagOffset)
-
-                                if isvalid(atRoiInput{dTagOffset}.Object)
-
-                                    figRoiSetRoiFaceAlpha(atRoiInput{dTagOffset});
-                                end
-
+                                figRoiSetRoiFaceAlpha(atRoiInput{dTagOffset});
                             end
+
                         end
                     end
                 end
@@ -1790,10 +1798,9 @@ end
                 
                 if strcmpi(ptrObject.ObjectType, 'voi') % Object is a voi
 
-                    aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {ptrObject.Tag} );
-
                     if ~isempty(atVoiInput) && ~isempty(atRoiInput)
-
+                        
+                        aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {ptrObject.Tag} );
                         dTagOffset = find(aTagOffset, 1);
 
                         if ~isempty(dTagOffset)
@@ -1861,46 +1868,47 @@ end
                 else % Tag is a ROI
                     
                     if ~strcmpi(ptrObject.Type, 'images.roi.line')
-
-                        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {ptrObject.Tag} );            
+                        
+                        if isempty(atRoiInput) 
+                            aTagOffset =0;
+                        else
+                            aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {ptrObject.Tag} );            
+                        end
 
                         if aTagOffset(aTagOffset==1) % tag is a roi
 
-                            if ~isempty(atRoiInput) 
+                            dFaceAlpha = 0;
 
-                                dFaceAlpha = 0;
+                            dTagOffset = find(aTagOffset, 1);
+
+                            if ~isempty(dTagOffset)
+
+                                if atRoiInput{dTagOffset}.FaceAlpha == 0
+                                    dFaceAlpha = roiFaceAlphaValue('get');
+                                end
+
+                                atRoiInput{dTagOffset}.FaceAlpha = dFaceAlpha;
+                                if isvalid(atRoiInput{dTagOffset}.Object)
+                                    atRoiInput{dTagOffset}.Object.FaceAlpha = dFaceAlpha;
+                                end
+
+                                roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+                            end
+
+                            % Set roi label input template tRoi
+
+                            if isfield(atInput(dSerieOffset), 'tRoi')
+
+                                atInputRoi = atInput(dSerieOffset).tRoi;
+                                aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {ptrObject.Tag} );      
 
                                 dTagOffset = find(aTagOffset, 1);
 
                                 if ~isempty(dTagOffset)
-
-                                    if atRoiInput{dTagOffset}.FaceAlpha == 0
-                                        dFaceAlpha = roiFaceAlphaValue('get');
-                                    end
-
-                                    atRoiInput{dTagOffset}.FaceAlpha = dFaceAlpha;
-                                    if isvalid(atRoiInput{dTagOffset}.Object)
-                                        atRoiInput{dTagOffset}.Object.FaceAlpha = dFaceAlpha;
-                                    end
-
-                                    roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+                                    atInput(dSerieOffset).tRoi{dTagOffset}.FaceAlpha = dFaceAlpha;
+                                    inputTemplate('set', atInput);                
                                 end
-
-                                % Set roi label input template tRoi
-
-                                if isfield(atInput(dSerieOffset), 'tRoi')
-
-                                    atInputRoi = atInput(dSerieOffset).tRoi;
-                                    aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {ptrObject.Tag} );      
-
-                                    dTagOffset = find(aTagOffset, 1);
-
-                                    if ~isempty(dTagOffset)
-                                        atInput(dSerieOffset).tRoi{dTagOffset}.FaceAlpha = dFaceAlpha;
-                                        inputTemplate('set', atInput);                
-                                    end
-                                end                        
-                            end
+                            end                        
                         end
                     end
                 end               
@@ -1971,7 +1979,7 @@ end
 
         sFontName = get(lbVoiRoiWindow, 'FontName');
 
-        atVoiMetaData = dicomMetaData('get');
+        atMetaData = dicomMetaData('get');
 
         atInput = inputTemplate('get');
         dOffset = get(uiSeriesPtr('get'), 'Value');
@@ -2045,7 +2053,7 @@ end
                         end
                     end
 
-                    [tVoiComputed, atRoiComputed] = computeVoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atVoiMetaData, atVoiInput{aa}, atRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
+                    [tVoiComputed, atRoiComputed] = computeVoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atMetaData, atVoiInput{aa}, atRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
                    
                     if ~isempty(tVoiComputed)
                         sVoiName = atVoiInput{aa}.Label;
@@ -2171,7 +2179,7 @@ end
                if isvalid(atRoiInput{bb}.Object)
                     if strcmpi(atRoiInput{bb}.ObjectType, 'roi')
 
-                        tRoiComputed = computeRoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atVoiMetaData, atRoiInput{bb}, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
+                        tRoiComputed = computeRoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atMetaData, atRoiInput{bb}, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
 
                         sRoiName = atRoiInput{bb}.Label;
 

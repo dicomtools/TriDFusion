@@ -620,23 +620,25 @@ function initRoiPanel()
         
         atRoi = roiTemplate('get', dSerieOffset);
         
-        aTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {sRoiTag} );
-        dTagOffset = find(aTagOffset, 1);       
-                
-       if ~isempty(dTagOffset)
-                    
-            atRoi{dTagOffset}.ObjectType  = 'voi-roi';
-            atInput(dSerieOffset).tRoi{dTagOffset}.ObjectType = atRoi{dTagOffset}.ObjectType;
+        if ~isempty(atRoi)
+            aTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {sRoiTag} );
+            dTagOffset = find(aTagOffset, 1);       
 
-            sLabel = sprintf('%s (roi %d/%d)', atInput(dSerieOffset).tVoi{dVoiOffset}.Label, dRoiNb, dNbTags);
+            if ~isempty(dTagOffset)
 
-            atRoi{dTagOffset}.Label = sLabel;
-            atRoi{dTagOffset}.Object.Label = sLabel;   
+                atRoi{dTagOffset}.ObjectType  = 'voi-roi';
+                atInput(dSerieOffset).tRoi{dTagOffset}.ObjectType = atRoi{dTagOffset}.ObjectType;
 
-            voiDefaultMenu(atRoi{dTagOffset}.Object, atVoiInput{dVoiOffset}.Tag);
-  
+                sLabel = sprintf('%s (roi %d/%d)', atInput(dSerieOffset).tVoi{dVoiOffset}.Label, dRoiNb, dNbTags);
+
+                atRoi{dTagOffset}.Label = sLabel;
+                atRoi{dTagOffset}.Object.Label = sLabel;   
+
+                voiDefaultMenu(atRoi{dTagOffset}.Object, atVoiInput{dVoiOffset}.Tag);
+
+            end
         end
-            
+        
         roiTemplate('set', dSerieOffset, atRoi);
         voiTemplate('set', dSerieOffset, atVoiInput);
         
@@ -823,15 +825,17 @@ function initRoiPanel()
             if isfield(atInput(dSerieOffset), 'tVoi')
 
                 atInputVoi = atInput(dSerieOffset).tVoi;
-                aTagOffset = strcmp( cellfun( @(atInputVoi) atInputVoi.Tag, atInputVoi, 'uni', false ), {[ptrObject.Tag]} );
-                
-                dTagOffset = find(aTagOffset, 1);  
-                
-                if ~isempty(dTagOffset)
-                    atInput(dSerieOffset).tVoi{dTagOffset} = [];
-                    atInput(dSerieOffset).tVoi(cellfun(@isempty, atInput(dSerieOffset).tVoi)) = [];
+                if ~isempty(atInputVoi)
+                    aTagOffset = strcmp( cellfun( @(atInputVoi) atInputVoi.Tag, atInputVoi, 'uni', false ), {[ptrObject.Tag]} );
 
-                    inputTemplate('set', atInput);                
+                    dTagOffset = find(aTagOffset, 1);  
+
+                    if ~isempty(dTagOffset)
+                        atInput(dSerieOffset).tVoi{dTagOffset} = [];
+                        atInput(dSerieOffset).tVoi(cellfun(@isempty, atInput(dSerieOffset).tVoi)) = [];
+
+                        inputTemplate('set', atInput);                
+                    end
                 end
             end
             
@@ -840,15 +844,17 @@ function initRoiPanel()
             if isfield(atInput(dSerieOffset), 'tRoi')
                 
                 atInputRoi = atInput(dSerieOffset).tRoi;
-                for rr=1:numel(ptrObject.RoisTag)
-                    aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {[ptrObject.RoisTag{rr}]} );
-                    aRoisTagOffset(rr) = find(aTagOffset, 1);    
+                if ~isempty(atInputRoi)
+                    for rr=1:numel(ptrObject.RoisTag)
+                        aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {[ptrObject.RoisTag{rr}]} );
+                        aRoisTagOffset(rr) = find(aTagOffset, 1);    
+                    end
                 end
                 
                 for rr=1:numel(ptrObject.RoisTag)
                     atInput(dSerieOffset).tRoi{aRoisTagOffset(rr)} = [];
                 end                
-                
+
                 atInput(dSerieOffset).tRoi(cellfun(@isempty, atInput(dSerieOffset).tRoi)) = [];
                 
                 inputTemplate('set', atInput);                

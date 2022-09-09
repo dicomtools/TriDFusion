@@ -34,40 +34,41 @@ function editColorCallback(hObject,~)
 
     atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
     
-    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );            
-
+    if isempty(atRoiInput) 
+        aTagOffset = 0;
+    else
+        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );            
+    end
+    
     if aTagOffset(aTagOffset==1) % tag is a roi
 
-        if ~isempty(atRoiInput) 
+        dTagOffset = find(aTagOffset, 1);
+
+        if ~isempty(dTagOffset)
+
+            hObject.UserData.Color = sColor;
+
+            atRoiInput{dTagOffset}.Color = sColor;
+            if isvalid(atRoiInput{dTagOffset}.Object)
+                atRoiInput{dTagOffset}.Object.Color = sColor;
+            end
+
+            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+        end
+
+        % Set roi label input template tRoi
+
+        if isfield(atInput(dSerieOffset), 'tRoi')
+
+            atInputRoi = atInput(dSerieOffset).tRoi;
+            aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {hObject.UserData.Tag} );      
 
             dTagOffset = find(aTagOffset, 1);
 
             if ~isempty(dTagOffset)
-                
-                hObject.UserData.Color = sColor;
-
-                atRoiInput{dTagOffset}.Color = sColor;
-                if isvalid(atRoiInput{dTagOffset}.Object)
-                    atRoiInput{dTagOffset}.Object.Color = sColor;
-                end
-
-                roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+                atInput(dSerieOffset).tRoi{dTagOffset}.Color = sColor;
+                inputTemplate('set', atInput);                
             end
-
-            % Set roi label input template tRoi
-
-            if isfield(atInput(dSerieOffset), 'tRoi')
-
-                atInputRoi = atInput(dSerieOffset).tRoi;
-                aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {hObject.UserData.Tag} );      
-
-                dTagOffset = find(aTagOffset, 1);
-
-                if ~isempty(dTagOffset)
-                    atInput(dSerieOffset).tRoi{dTagOffset}.Color = sColor;
-                    inputTemplate('set', atInput);                
-                end
-            end                        
-        end
+        end                        
     end    
 end
