@@ -62,9 +62,15 @@ function addRoiToTemplate(iOffset, sAxe, dSliceNb, sType, aPosition, sLabel, sLa
             case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                 dSliceNb = sliceNumber('get', 'coronal' );
                 sAxe = 'Axes1';
+            case axes1rPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                dSliceNb = sliceNumber('get', 'coronal' );
+                sAxe = 'Axes1';                
             case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                 dSliceNb = sliceNumber('get', 'sagittal');
                 sAxe = 'Axes2';
+            case axes2rPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                dSliceNb = sliceNumber('get', 'sagittal');
+                sAxe = 'Axes2';                
             otherwise
                 dSliceNb = sliceNumber('get', 'axial'   );
                 sAxe = 'Axes3';
@@ -120,19 +126,24 @@ function addRoiToTemplate(iOffset, sAxe, dSliceNb, sType, aPosition, sLabel, sLa
             tRoi.FaceAlpha      = ptrRoi.FaceAlpha;
             tRoi.Radius         = ptrRoi.Radius;
             tRoi.FaceSelectable = ptrRoi.FaceSelectable;
-
+            tRoi.FaceSelectable = ptrRoi.FaceSelectable;
+            tRoi.Vertices       = ptrRoi.Vertices;
+            
         case lower('images.roi.ellipse')
             tRoi.FaceAlpha      = ptrRoi.FaceAlpha;
             tRoi.SemiAxes       = ptrRoi.SemiAxes;
             tRoi.RotationAngle  = ptrRoi.RotationAngle;
             tRoi.FaceSelectable = ptrRoi.FaceSelectable;
-
+            tRoi.FaceSelectable = ptrRoi.FaceSelectable;
+            tRoi.Vertices       = ptrRoi.Vertices;
+            
         case lower('images.roi.rectangle')
             tRoi.FaceAlpha      = ptrRoi.FaceAlpha;
             tRoi.FaceSelectable = ptrRoi.FaceSelectable;
             tRoi.Rotatable      = ptrRoi.Rotatable;
             tRoi.RotationAngle  = ptrRoi.RotationAngle;
-
+            tRoi.FaceSelectable = ptrRoi.FaceSelectable;
+            tRoi.Vertices       = ptrRoi.Vertices;
     end
 
     tRoi.Object = ptrRoi;

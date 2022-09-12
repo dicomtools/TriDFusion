@@ -1515,10 +1515,10 @@ function generateContourReportCallback(~, ~)
                 else
                     dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
                 end
-            end
+            end            
             
-            voiMask = cell2mat(voiMask);
-            voiData = cell2mat(voiData);
+            voiMask = cat(1, voiMask{:});
+            voiData = cat(1, voiData{:});
             
             voiData(voiMask~=1) = [];            
             
@@ -1613,8 +1613,8 @@ function generateContourReportCallback(~, ~)
                 end              
             end
             
-            voiMask = cell2mat(voiMask);
-            voiData = cell2mat(voiData);
+            voiMask = cat(1, voiMask{:});
+            voiData = cat(1, voiData{:});
             
             voiData(voiMask~=1) = [];
             
@@ -1709,8 +1709,8 @@ function generateContourReportCallback(~, ~)
                 end
             end
             
-            voiMask = cell2mat(voiMask);
-            voiData = cell2mat(voiData);
+            voiMask = cat(1, voiMask{:});
+            voiData = cat(1, voiData{:});
             
             voiData(voiMask~=1) = [];
             
@@ -1805,8 +1805,8 @@ function generateContourReportCallback(~, ~)
                 end
             end
             
-            voiMask = cell2mat(voiMask);
-            voiData = cell2mat(voiData);
+            voiMask = cat(1, voiMask{:});
+            voiData = cat(1, voiData{:});
             
             voiData(voiMask~=1) = [];
             
@@ -1901,8 +1901,8 @@ function generateContourReportCallback(~, ~)
                 end
             end
             
-            voiMask = cell2mat(voiMask);
-            voiData = cell2mat(voiData);
+            voiMask = cat(1, voiMask{:});
+            voiData = cat(1, voiData{:});
             
             voiData(voiMask~=1) = [];
             
@@ -1997,8 +1997,8 @@ function generateContourReportCallback(~, ~)
                 end
             end
             
-            voiMask = cell2mat(voiMask);
-            voiData = cell2mat(voiData);
+            voiMask = cat(1, voiMask{:});
+            voiData = cat(1, voiData{:});
             
             voiData(voiMask~=1) = [];
             
@@ -2093,8 +2093,8 @@ function generateContourReportCallback(~, ~)
                 end
             end
             
-            voiMask = cell2mat(voiMask);
-            voiData = cell2mat(voiData);
+            voiMask = cat(1, voiMask{:});
+            voiData = cat(1, voiData{:});
             
             voiData(voiMask~=1) = [];
             
@@ -2190,8 +2190,8 @@ function generateContourReportCallback(~, ~)
                 end                              
             end  
             
-            voiMask = cell2mat(voiMask);
-            voiData = cell2mat(voiData);
+            voiMask = cat(1, voiMask{:});
+            voiData = cat(1, voiData{:});
             
             voiData(voiMask~=1) = [];
             

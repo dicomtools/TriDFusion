@@ -108,8 +108,8 @@ function [tVoiComputed, atRoiComputed] = computeVoi(imInput, atInputMetaData, im
     
     dVoxVolume = xPixel * yPixel * zPixel; 
     
-    imCData  = cell2mat(imCData);
-    imCMask  = cell2mat(imCMask);
+    imCMask = cat(1, imCMask{:});
+    imCData = cat(1, imCData{:});
     
     imCData = imCData(imCMask);                  
          

@@ -51,19 +51,30 @@ function movedRoiEvents(hObject, ~)
             
             case lower('images.roi.circle')
                 atRoi{dTagOffset}.Radius = hObject.Radius;
-                tInput(iOffset).tRoi{dTagOffset}.Radius = hObject.Radius;
-
+                atRoi{dTagOffset}.Vertices = hObject.Vertices;
+                 
+                tInput(iOffset).tRoi{dTagOffset}.Radius = hObject.Radius;                
+                tInput(iOffset).tRoi{dTagOffset}.Vertices = hObject.Vertices;
+                
              case lower('images.roi.ellipse')
                 atRoi{dTagOffset}.SemiAxes      = hObject.SemiAxes;
                 atRoi{dTagOffset}.RotationAngle = hObject.RotationAngle;
+                atRoi{dTagOffset}.Vertices      = hObject.Vertices;
+                
                 tInput(iOffset).tRoi{dTagOffset}.SemiAxes = hObject.SemiAxes;
                 tInput(iOffset).tRoi{dTagOffset}.RotationAngle = hObject.RotationAngle;
-
+                tInput(iOffset).tRoi{dTagOffset}.Vertices = hObject.Vertices;
+                
+             case lower('images.roi.rectangle')
+                atRoi{dTagOffset}.Vertices = hObject.Vertices;
+                tInput(iOffset).tRoi{dTagOffset}.Vertices = hObject.Vertices;
+                
              case lower('images.roi.line')
                 dLength = computeRoiLineLength(hObject);
-                atRoi{dTagOffset}.Label = [num2str(dLength) ' mm'];
-                atRoi{dTagOffset}.Object.Label = [num2str(dLength) ' mm'];
-                tInput(iOffset).tRoi{dTagOffset}.Label =  [num2str(dLength) ' mm'];
+                
+                atRoi{dTagOffset}.Label                = [num2str(dLength) ' mm'];
+                atRoi{dTagOffset}.Object.Label         = [num2str(dLength) ' mm'];
+                tInput(iOffset).tRoi{dTagOffset}.Label = [num2str(dLength) ' mm'];
         end
 
         if ~isempty(atRoi{dTagOffset}.MaxDistances)

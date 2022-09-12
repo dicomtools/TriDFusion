@@ -42,62 +42,67 @@ function aLogicalMask = roiTemplateToMask(tRoi, aSlice)
             
         case lower('images.roi.rectangle')
 
-            rectMask = zeros(size(aSlice, 1), size(aSlice, 2)); % generate grid of ones
+%            rectMask = zeros(size(aSlice, 1), size(aSlice, 2)); % generate grid of ones
 
-            top    = int32(aPosition(2));
-            bottom = int32(aPosition(2)+aPosition(4));
-            left   = int32(aPosition(1));
-            right  = int32(aPosition(1)+aPosition(3));
+%            top    = int32(aPosition(2));
+%            bottom = int32(aPosition(2)+aPosition(4));
+%            left   = int32(aPosition(1));
+%            right  = int32(aPosition(1)+aPosition(3));
 
-            if bottom > size(aSlice, 1)
-                bottom = size(aSlice, 1);
-            end
+%            if bottom > size(aSlice, 1)
+%                bottom = size(aSlice, 1);
+%            end
             
-            if right > size(aSlice, 2)
-                right = size(aSlice, 2);
-            end
+%            if right > size(aSlice, 2)
+%                right = size(aSlice, 2);
+%            end
             
-            rectMask(top:bottom,left:right) = 1; % rectMask( Y values, X values)
+%            rectMask(top:bottom,left:right) = 1; % rectMask( Y values, X values)
             
-            aLogicalMask = logical(rectMask);
+%            aLogicalMask = logical(rectMask);
+            xy = tRoi.Vertices;
+            aLogicalMask = poly2mask(xy(:, 1), xy(:, 2), size(aSlice,1), size(aSlice,2));
 
         case lower('images.roi.ellipse')
             
-            dRotationAngle = tRoi.RotationAngle;
-            aSemiAxes      = tRoi.SemiAxes;
+%            dRotationAngle = tRoi.RotationAngle+270;
+%            aSemiAxes      = tRoi.SemiAxes;
             
-            phi  = dRotationAngle;
+%            phi  = dRotationAngle;
 
-            xCenter = aPosition(1);
-            yCenter = aPosition(2);
-            xRadius = aSemiAxes(1);
-            yRadius = aSemiAxes(2);
-            theta = 0 : 0.01 : 2*pi;
-            X_cen = [xCenter;yCenter];
-            X = [xRadius * cos(theta);
-                 yRadius * sin(theta)];
-            R = [cos(phi) -sin(phi);
-                 sin(phi) cos(phi)];
-            Xr = R*X + X_cen;
-            x = Xr(1,:);
-            y = Xr(2,:);
-
-            aLogicalMask = poly2mask(x(:),y(:), size(aSlice,1), size(aSlice,2));
+%            xCenter = aPosition(1);
+%            yCenter = aPosition(2);
+%            xRadius = aSemiAxes(1);
+%            yRadius = aSemiAxes(2);
+%            theta = 0 : 0.01 : 2*pi;
+%            X_cen = [xCenter;yCenter];
+%            X = [xRadius * cos(theta);
+%                 yRadius * sin(theta)];
+%            R = [cos(phi) -sin(phi);
+%                 sin(phi) cos(phi)];
+%            Xr = R*X + X_cen;
+%            x = Xr(1,:);
+%            y = Xr(2,:);
+            
+            xy = tRoi.Vertices;
+            aLogicalMask = poly2mask(xy(:, 1), xy(:, 2), size(aSlice,1), size(aSlice,2));
+%            aLogicalMask = poly2mask(x(:),y(:), size(aSlice,1), size(aSlice,2));
 
         case lower('images.roi.circle')
             
-            dRadius = tRoi.Radius;
+%            dRadius = tRoi.Radius;
 
-            xCenter = aPosition(1);
-            yCenter = aPosition(2);
+%            xCenter = aPosition(1);
+%            yCenter = aPosition(2);
 
-            theta = 0 : 0.01 : 2*pi;
-            radius = dRadius;
-            x = radius * cos(theta) + xCenter;
-            y = radius * sin(theta) + yCenter;
+%            theta = 0 : 0.01 : 2*pi;
+%            radius = dRadius;
+%            x = radius * cos(theta) + xCenter;
+%            y = radius * sin(theta) + yCenter;
 
-            aLogicalMask = poly2mask(x(:),y(:), size(aSlice,1), size(aSlice,2));
-
+     %       aLogicalMask = poly2mask(x(:),y(:), size(aSlice,1), size(aSlice,2));
+            xy = tRoi.Vertices;
+            aLogicalMask = poly2mask(xy(:, 1), xy(:, 2), size(aSlice,1), size(aSlice,2));
         otherwise
 
             aLogicalMask = poly2mask(aPosition(:,1),aPosition(:,2), size(aSlice,1), size(aSlice,2));

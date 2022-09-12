@@ -203,6 +203,8 @@ function initRoi()
                                     'FaceSelectable', atRoi{bb}.FaceSelectable, ...
                                     'Tag'           , atRoi{bb}.Tag);
 
+                atRoi{bb}.Vertices = roiPtr.Vertices;
+                
                 roiDefaultMenu(roiPtr);
 
                 constraintMenu(roiPtr);
@@ -226,6 +228,8 @@ function initRoi()
                                      'LabelVisible'  , atRoi{bb}.LabelVisible, ...
                                      'FaceSelectable', atRoi{bb}.FaceSelectable, ...
                                      'Tag'           , atRoi{bb}.Tag);
+                                 
+                atRoi{bb}.Vertices = roiPtr.Vertices;
 
                 roiDefaultMenu(roiPtr);
 
@@ -251,7 +255,9 @@ function initRoi()
                                       'LabelVisible'  , atRoi{bb}.LabelVisible, ...
                                       'FaceSelectable', atRoi{bb}.FaceSelectable, ...
                                       'Tag'           , atRoi{bb}.Tag);
-
+                                  
+                atRoi{bb}.Vertices = roiPtr.Vertices;
+                
                 roiDefaultMenu(roiPtr);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);

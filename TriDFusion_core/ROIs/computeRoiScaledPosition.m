@@ -128,6 +128,7 @@ function [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(refImage,
       
     xScale = M(2,2);
     yScale = M(1,1);  
+    zScale = M(3,3);  
             
     a3DOffset = zeros(size(tRoi.Position, 1),3);
         
