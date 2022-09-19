@@ -1,6 +1,6 @@
-function bView = viewFarthestDistances(sAction, bValue)
-%function sColor = viewFarthestDistances(sAction, bValue)
-%Get/Set View ROIs Farthest Distances.
+function dDiameter = sphereDefaultDiameter(sAction, dValue)
+%function dDiameter = viewFarthestDistances(sAction, dValue)
+%Get/Set roi sphere default diameter.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -27,11 +27,11 @@ function bView = viewFarthestDistances(sAction, bValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    persistent pbView; 
+    persistent pdDiameter; 
 
     if strcmpi('set', sAction)
-        pbView = bValue;            
+        pdDiameter = dValue;            
     end
     
-    bView = pbView;
+    dDiameter = pdDiameter;
 end

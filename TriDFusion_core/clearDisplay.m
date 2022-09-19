@@ -214,7 +214,7 @@ function clearDisplay()
         
     axes1fPtr ('reset');
     axes1fcPtr('reset');
-    axes1rPtr ('reset');
+%    axes1rPtr ('reset');
     axes1Ptr  ('reset');
         
     uiCorWindow = uiCorWindowPtr('get');
@@ -230,7 +230,7 @@ function clearDisplay()
         
     axes2fPtr ('reset');
     axes2fcPtr('reset');
-    axes2rPtr ('reset');  
+%    axes2rPtr ('reset');  
     axes2Ptr  ('reset');  
     
     uiSagWindow = uiSagWindowPtr('get');
@@ -246,7 +246,7 @@ function clearDisplay()
         
     axes3fPtr ('reset');
     axes3fcPtr('reset');
-    axes3rPtr ('reset');            
+%    axes3rPtr ('reset');            
     axes3Ptr  ('reset');            
     
     uiTraWindow = uiTraWindowPtr('get');

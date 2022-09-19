@@ -63,16 +63,16 @@ function maskContourFromMenuCallback(hObject, ~)
                         aMask = createMask(atRoi{dRoiTagOffset}.Object, imBuffer(:,:));
 
                         case 'axes1'
-                        aMask = createMask(atRoi{dRoiTagOffset}.Object, permute(imBuffer(atRoi{dRoiTagOffset}.SliceNb,:,:), [3 2 1]));
-                 %       aMask = roiTemplateToMask(atRoi{dRoiTagOffset}, permute(imBuffer(atRoi{dRoiTagOffset}.SliceNb,:,:), [3 2 1]));
+                 %       aMask = createMask(atRoi{dRoiTagOffset}.Object, permute(imBuffer(atRoi{dRoiTagOffset}.SliceNb,:,:), [3 2 1]));
+                        aMask = roiTemplateToMask(atRoi{dRoiTagOffset}, permute(imBuffer(atRoi{dRoiTagOffset}.SliceNb,:,:), [3 2 1]));
                         
                         case 'axes2'
-                        aMask = createMask(atRoi{dRoiTagOffset}.Object, permute(imBuffer(:,atRoi{dRoiTagOffset}.SliceNb,:), [3 1 2]));
-                  %      aMask = roiTemplateToMask(atRoi{dRoiTagOffset}, permute(imBuffer(:,atRoi{dRoiTagOffset}.SliceNb,:), [3 1 2]));
+                 %       aMask = createMask(atRoi{dRoiTagOffset}.Object, permute(imBuffer(:,atRoi{dRoiTagOffset}.SliceNb,:), [3 1 2]));
+                        aMask = roiTemplateToMask(atRoi{dRoiTagOffset}, permute(imBuffer(:,atRoi{dRoiTagOffset}.SliceNb,:), [3 1 2]));
 
                         case 'axes3'
-                        aMask = createMask(atRoi{dRoiTagOffset}.Object, imBuffer(:,:,atRoi{dRoiTagOffset}.SliceNb));
-                   %     aMask = roiTemplateToMask(atRoi{dRoiTagOffset}, imBuffer(:,:,atRoi{dRoiTagOffset}.SliceNb));
+                  %      aMask = createMask(atRoi{dRoiTagOffset}.Object, imBuffer(:,:,atRoi{dRoiTagOffset}.SliceNb));
+                        aMask = roiTemplateToMask(atRoi{dRoiTagOffset}, imBuffer(:,:,atRoi{dRoiTagOffset}.SliceNb));
                         
                     end
                        

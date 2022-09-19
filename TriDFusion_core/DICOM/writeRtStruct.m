@@ -34,8 +34,8 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
         return;
     end
 
-%    try
-
+    try
+        
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
     
@@ -85,7 +85,12 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
             bUseRoiTemplate = true;
         end        
     end
-                
+    
+    bFlip = getImagePosition(dOffset);
+    if bFlip == true
+        dZsize = size(aDicomBuffer, 3);
+    end
+    
     % Set metadata information
     
     sRootPath = viewerRootPath('get');
@@ -222,27 +227,56 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                             strcmpi(atRoiInput{tt}.Type, 'images.roi.circle')    || ...
                             strcmpi(atRoiInput{tt}.Type, 'images.roi.ellipse')
 
-                             if bUseRoiTemplate == true
-                                 bw = roiTemplateToMask(atRoiInput{tt}, aDicomBuffer(:,:,atRoiInput{tt}.SliceNb));      
-                             else
-                                 bw = createMask(atRoiInput{tt}.Object);         
-                             end
+%                             if bUseRoiTemplate == true
+%                                 bw = roiTemplateToMask(atRoiInput{tt}, aDicomBuffer(:,:,atRoiInput{tt}.SliceNb));      
+%                             else
+%                                 bw = createMask(atRoiInput{tt}.Object);         
+%                             end
         
-                             aBw  = imresize(bw , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+%                             aBw  = imresize(bw , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
     
-                             aBoundaries = bwboundaries(aBw);
-                             if ~isempty(aBoundaries)
-                                 aBoundaries = aBoundaries{:};
-                                 aBoundaries = aBoundaries/PIXEL_EDGE_RATIO;
+%                             aBoundaries = bwboundaries(aBw);
+%                             if ~isempty(aBoundaries)
+%                                aBoundaries = aBoundaries{:};
+%                                aBoundaries = aBoundaries/PIXEL_EDGE_RATIO;
 
-                                 aX = (aBoundaries(:,2)-(size(aDicomBuffer,1)/2)) * atDicomMeta{atRoiInput{tt}.SliceNb}.PixelSpacing(1);
-                                 aY = (aBoundaries(:,1)-(size(aDicomBuffer,2)/2)) * atDicomMeta{atRoiInput{tt}.SliceNb}.PixelSpacing(2);
+                                xy = atRoiInput{tt}.Vertices-1;
 
-                                 dNBoundaries = size(aBoundaries,1);
+                                dNBoundaries = size(xy,1);                          
 
+                                azOffset = zeros(dNBoundaries, 1);
+                                azOffset(:)=atRoiInput{tt}.SliceNb;
+    %                            a3DOffset(:,3)=atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
+
+                                if bFlip == true
+                                    azOffset(:) = dZsize-azOffset(:);
+                                end
+
+                                sliceThikness = computeSliceSpacing(atDicomMeta);       
+                                [xfm,~] = TransformMatrix(atDicomMeta{1}, sliceThikness);
+    %                            out = pctransform(pointCloud(a3DOffset), affine3d(xfm'));
+
+    %                            aX = out.Location(:,1);
+    %                            aY = out.Location(:,2);
+
+                                [aX, aY, outZ] = transformPointsForward(affine3d(xfm'), xy(:,1), xy(:,2), azOffset(:)); 
+                            
+%                                 aX = (aBoundaries(:,2)-(size(aDicomBuffer,1)/2)) * atDicomMeta{atRoiInput{tt}.SliceNb}.PixelSpacing(1);
+%                                 aY = (aBoundaries(:,1)-(size(aDicomBuffer,2)/2)) * atDicomMeta{atRoiInput{tt}.SliceNb}.PixelSpacing(2);
+
+                                 
                                  aZ = zeros(dNBoundaries, 1);
-                                 aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
-    
+                                 if numel(atDicomMeta) == 1
+    %                                aZ(:) = a3DOffset(:,3);                                
+                                    aZ = outZ(:);                                
+                                 else
+                                    if atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation == 0
+                                        aZ(:) = outZ(:);
+                                    else
+                                        aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
+                                    end
+                                 end
+                            
                                  dXOffset=1;
                                  dYOffset=1;
                                  dZOffset=1;
@@ -268,7 +302,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
         
                                  info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).NumberOfContourPoints = dNBoundaries; % To revisit
                                  info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourData = aXYZ; % TO DO [NumberOfContourPoints * xyz]                                 
-                             end
+%                             end
                          else
                             aBoundaries = zeros(size(atRoiInput{tt}.Position, 1),2);
 
@@ -284,6 +318,10 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                             a3DOffset(:,3)=atRoiInput{tt}.SliceNb-1;
 %                            a3DOffset(:,3)=atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
 
+                            if bFlip == true
+                                a3DOffset(:,3) = dZsize-a3DOffset(:,3);
+                            end
+                                
                             sliceThikness = computeSliceSpacing(atDicomMeta);       
                             [xfm,~] = TransformMatrix(atDicomMeta{1}, sliceThikness);
 %                            out = pctransform(pointCloud(a3DOffset), affine3d(xfm'));
@@ -291,7 +329,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 %                            aX = out.Location(:,1);
 %                            aY = out.Location(:,2);
                             
-                            [outX, outY, ~] = transformPointsForward(affine3d(xfm'), a3DOffset(:,1), a3DOffset(:,2), a3DOffset(:,3)); 
+                            [outX, outY, outZ] = transformPointsForward(affine3d(xfm'), a3DOffset(:,1), a3DOffset(:,2), a3DOffset(:,3)); 
                             
                             aX = outX(:);
                             aY = outY(:);
@@ -299,14 +337,16 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 %                            aZ = out.Location(:,3);
                             aZ = zeros(dNBoundaries, 1);
                             if numel(atDicomMeta) == 1
-                                aZ(:) = a3DOffset(:,3);                                
+%                                aZ(:) = a3DOffset(:,3);                                
+                                aZ = outZ(:);                                
                             else
                                 if atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation == 0
-                                    aZ(:) = a3DOffset(:,3);
+                                    aZ(:) = outZ(:);
                                 else
                                     aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
                                 end
                             end
+                            
 
  %                           aZ = zeros(dNBoundaries, 1);
  %                           aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
@@ -329,13 +369,13 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                                 aXYZ(zz)=aZ(dZOffset);
                                 dZOffset = dZOffset+1;
                             end
-
-                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPClassUID    = atRoiInput{tt}.SOPClassUID;
-                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPInstanceUID = atRoiInput{tt}.SOPInstanceUID;
-                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourGeometricType = 'CLOSED_PLANAR';
+                            
+                            info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPClassUID    = atRoiInput{tt}.SOPClassUID;
+                            info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPInstanceUID = atRoiInput{tt}.SOPInstanceUID;
+                            info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourGeometricType = 'CLOSED_PLANAR';
     
-                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).NumberOfContourPoints = dNBoundaries; % To revisit
-                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourData = aXYZ; % TO DO [NumberOfContourPoints * xyz]                            
+                            info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).NumberOfContourPoints = dNBoundaries; % To revisit
+                            info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourData = aXYZ; % TO DO [NumberOfContourPoints * xyz]                            
                          end
                     end
                     break;
@@ -375,9 +415,9 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 
     progressBar( 1, sprintf('Export %s completed %s', sOutFile) );
 
-%    catch
-%        progressBar(1, sprintf('Error:writeRtStruct(), %s', sOutDir) );
-%    end
+    catch
+        progressBar(1, sprintf('Error:writeRtStruct(), %s', sOutDir) );
+    end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;

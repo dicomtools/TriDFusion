@@ -69,7 +69,7 @@ function cropInsideCallback(hObject,~)
            ~isempty(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
            ~isempty(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')))
 
-            if gca == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+            if gca == axes1Ptr ('get', [], get(uiSeriesPtr('get'), 'Value')) 
                 
                 iCoronal = sliceNumber('get', 'coronal');
                 
@@ -89,7 +89,7 @@ function cropInsideCallback(hObject,~)
 %                                );   
             end
 
-            if gca == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+            if gca == axes2Ptr ('get', [], get(uiSeriesPtr('get'), 'Value')) 
                 
                 iSagittal = sliceNumber('get', 'sagittal');
                 
@@ -108,8 +108,7 @@ function cropInsideCallback(hObject,~)
 %                                );   
             end
 
-            if gca == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                
+            if gca == axes3Ptr ('get', [], get(uiSeriesPtr('get'), 'Value')) 
                  iAxial = sliceNumber('get', 'axial');
                  
                  aMask = createMask(hObject.UserData, im(:,:,iAxial));

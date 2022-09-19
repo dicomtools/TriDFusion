@@ -87,7 +87,8 @@ function aLogicalMask = roiTemplateToMask(tRoi, aSlice)
             xy = tRoi.Vertices;
             aLogicalMask = poly2mask(xy(:, 1), xy(:, 2), size(aSlice,1), size(aSlice,2));
 %            aLogicalMask = poly2mask(x(:),y(:), size(aSlice,1), size(aSlice,2));
-
+     
+                       
         case lower('images.roi.circle')
             
 %            dRadius = tRoi.Radius;
@@ -100,13 +101,15 @@ function aLogicalMask = roiTemplateToMask(tRoi, aSlice)
 %            x = radius * cos(theta) + xCenter;
 %            y = radius * sin(theta) + yCenter;
 
-     %       aLogicalMask = poly2mask(x(:),y(:), size(aSlice,1), size(aSlice,2));
+%            aLogicalMask = poly2mask(x(:),y(:), size(aSlice,1), size(aSlice,2));            
+
             xy = tRoi.Vertices;
             aLogicalMask = poly2mask(xy(:, 1), xy(:, 2), size(aSlice,1), size(aSlice,2));
+                                                
         otherwise
 
             aLogicalMask = poly2mask(aPosition(:,1),aPosition(:,2), size(aSlice,1), size(aSlice,2));
+   
     end
-
 end
 

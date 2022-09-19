@@ -63,19 +63,11 @@ function addRoi(ptrRoi, dOffset, sLesionType)
             case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))                   
                 dSliceNb = sliceNumber('get', 'coronal' );
                 sAxe = 'Axes1';
-                
-            case axes1rPtr('get', [], get(uiSeriesPtr('get'), 'Value'))  
-                dSliceNb = sliceNumber('get', 'coronal' );
-                sAxe = 'Axes1'; 
-                
+                                
             case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                 dSliceNb = sliceNumber('get', 'sagittal');
                 sAxe = 'Axes2';
-                
-            case axes2rPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                dSliceNb = sliceNumber('get', 'sagittal');
-                sAxe = 'Axes2';
-                
+                              
             otherwise
                 dSliceNb = sliceNumber('get', 'axial');
                 sAxe = 'Axes3';
