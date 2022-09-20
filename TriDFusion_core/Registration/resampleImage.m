@@ -52,6 +52,11 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
 %    Rref = imref3d(size(refImage), atRefMetaData{1}.PixelSpacing(2), atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
     
     [M, ~] = getTransformMatrix(atDcmMetaData{1}, dcmSliceThickness, atRefMetaData{1}, refSliceThickness);
+    
+    if dRefOutputView == false % Keep source z
+        M(3,3) = 1;
+    end
+    
     TF = affine3d(M);
         
 %    if dRefOutputView == true
@@ -105,8 +110,12 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
             end            
         end                
     end
-    
-    computedSliceThikness = (dimsRef(3) * refSliceThickness) / dimsRsp(3); 
+
+    if dRefOutputView == false % Keep source z
+        computedSliceThikness = dcmSliceThickness;
+    else
+        computedSliceThikness = (dimsRef(3) * refSliceThickness) / dimsRsp(3); 
+    end
 %    computedSliceThikness = Rrsmp.PixelExtentInWorldZ; 
   
 

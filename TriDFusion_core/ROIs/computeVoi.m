@@ -68,16 +68,14 @@ function [tVoiComputed, atRoiComputed] = computeVoi(imInput, atInputMetaData, im
                                         
             case 'axes1'
                 
-                imCData{uu}  = permute(imCDataVoi(tRoi.SliceNb,:,:), [3 2 1]);
+                imCData{uu}  = permute(imCDataVoi(atRoiComputed{uu}.SliceNb,:,:), [3 2 1]);
                 
             case 'axes2'
                 
-                imCData{uu} = permute(imCDataVoi(:,tRoi.SliceNb,:), [3 1 2]);
-  
+                imCData{uu} = permute(imCDataVoi(:,atRoiComputed{uu}.SliceNb,:), [3 1 2]);  
                 
             case 'axes3'
-                
-                imCData{uu} = imCDataVoi(:,:,tRoi.SliceNb);                   
+                imCData{uu} = imCDataVoi(:,:,atRoiComputed{uu}.SliceNb);                   
         end 
 
         if bSegmented      == true && ...

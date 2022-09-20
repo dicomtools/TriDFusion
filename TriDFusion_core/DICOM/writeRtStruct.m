@@ -227,6 +227,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                             strcmpi(atRoiInput{tt}.Type, 'images.roi.circle')    || ...
                             strcmpi(atRoiInput{tt}.Type, 'images.roi.ellipse')
 
+
 %                             if bUseRoiTemplate == true
 %                                 bw = roiTemplateToMask(atRoiInput{tt}, aDicomBuffer(:,:,atRoiInput{tt}.SliceNb));      
 %                             else
@@ -369,7 +370,10 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                                 aXYZ(zz)=aZ(dZOffset);
                                 dZOffset = dZOffset+1;
                             end
-                            
+                            if numel(aXYZ)*64/8 > 65534
+                                dNBoundaries = 1;
+                                aXYZ = zeros(dNBoundaries*3, 1);
+                            end
                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPClassUID    = atRoiInput{tt}.SOPClassUID;
                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPInstanceUID = atRoiInput{tt}.SOPInstanceUID;
                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourGeometricType = 'CLOSED_PLANAR';

@@ -44,9 +44,9 @@ function cropInsideAllSlicesCallback(hObject,~)
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
     
-    dBufferSize = size(im);   
+    adBufferSize = size(im);   
 
-    if dBufferSize(3) == 1
+    if adBufferSize(3) == 1
         axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
         if ~isempty(axe)
             if gca == axe  
@@ -75,7 +75,7 @@ function cropInsideAllSlicesCallback(hObject,~)
                 
                 aMask = createMask(hObject.UserData, permute(im(1,:,:), [3 2 1]));
 
-                for iCoronal=1:dBufferSize(1)
+                for iCoronal=1:adBufferSize(1)
                     
                     b = permute(im(iCoronal,:,:), [3 2 1]);
                     c = aMask;
@@ -90,7 +90,7 @@ function cropInsideAllSlicesCallback(hObject,~)
 %                                    'Axes1' ...
 %                                    );                                
 
-%                    progressBar(iCoronal / dBufferSize(1), 'Mask inside in progress');
+%                    progressBar(iCoronal / adBufferSize(1), 'Mask inside in progress');
 
                 end
             end
@@ -99,7 +99,7 @@ function cropInsideAllSlicesCallback(hObject,~)
                 
                 aMask = createMask(hObject.UserData, permute(im(:,1,:), [3 1 2]));
 
-                for iSagittal=1:dBufferSize(2)
+                for iSagittal=1:adBufferSize(2)
                     
                     b = permute(im(:,iSagittal,:), [3 1 2]);
                     c = aMask;
@@ -113,7 +113,7 @@ function cropInsideAllSlicesCallback(hObject,~)
 %                                    'Axes2' ...
 %                                    );  
 
-%                   progressBar(iSagittal / dBufferSize(2), 'Mask inside in progress');
+%                   progressBar(iSagittal / adBufferSize(2), 'Mask inside in progress');
                 end
             end
 
@@ -121,7 +121,7 @@ function cropInsideAllSlicesCallback(hObject,~)
                 
                 aMask = createMask(hObject.UserData, im(:,:,1));
 
-                for iAxial=1:dBufferSize(3)
+                for iAxial=1:adBufferSize(3)
                     
                     b = im(:,:,iAxial);       
                     c = aMask;
@@ -135,7 +135,7 @@ function cropInsideAllSlicesCallback(hObject,~)
 %                                    'Axes3' ...
 %                                    );     
 
-     %               progressBar(iAxial / dBufferSize(3), 'Mask inside in progress');
+     %               progressBar(iAxial / adBufferSize(3), 'Mask inside in progress');
                 end
                                
             end

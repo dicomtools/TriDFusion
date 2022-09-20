@@ -151,7 +151,7 @@ function resetSeries(dOffset, bInitDisplay)
     if ~isempty(atRoi)       
         if bImageIsResampled == true
             atResampledRoi = resampleROIs(aCurrentBuffer, aCurrentMeteData, aBuffer, tInitInput(dOffset).atDicomInfo, atRoi, true);
-            roiTemplate('set', dOffset, atResampledRoi);                
+            roiTemplate('set', dOffset, atResampledRoi);     
         end
     end                
     

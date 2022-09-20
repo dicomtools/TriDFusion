@@ -365,8 +365,8 @@ function setIsoSurfaceCallback(~, ~)
                 set(chkResampleToCTIsoMaskPtr  ('get'), 'Enable', 'off');
                 set(uiResampleToCTIsoMaskPtr   ('get'), 'Enable', 'off');
                 set(uiEditSmalestIsoMaskPtr    ('get'), 'Enable', 'off');
-                set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'off');
-                set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
+%                set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'off');
+%                set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
 
                 isoFusionObj = isoFusionObject('get');
                 if ~isempty(isoFusionObj)
@@ -570,14 +570,14 @@ function setIsoSurfaceCallback(~, ~)
                     set(chkResampleToCTIsoMaskPtr('get'), 'Enable', 'on');
                     set(uiResampleToCTIsoMaskPtr ('get'), 'Enable', 'on');
                     
-                    if resampleToCTIsoMask('get') == true && ...
-                       addVoiIsoMask('get') == true
-                        set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'on');                
-                        set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'Inactive');
-                    else
-                        set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'off');                
-                        set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
-                    end
+%                    if resampleToCTIsoMask('get') == true && ...
+%                       addVoiIsoMask('get') == true
+%                        set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'on');                
+%                        set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'Inactive');
+%                    else
+%                        set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'off');                
+%                        set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
+%                    end
                 else
                     set(txtResampleToCTIsoMaskPtr('get'), 'Enable', 'on');
                     set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
@@ -777,14 +777,14 @@ function setIsoSurfaceCallback(~, ~)
                             set(chkResampleToCTIsoMaskPtr('get'), 'Enable', 'on');
                             set(uiResampleToCTIsoMaskPtr ('get'), 'Enable', 'on');
                             
-                            if resampleToCTIsoMask('get') == true && ...
-                               addVoiIsoMask('get') == true
-                                set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'on');                
-                                set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'Inactive');
-                            else
-                                set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'off');                
-                                set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
-                            end                            
+%                            if resampleToCTIsoMask('get') == true && ...
+%                               addVoiIsoMask('get') == true
+%                                set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'on');                
+%                                set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'Inactive');
+%                           else
+%                                set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'off');                
+%                                set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
+%                            end                            
                         else
                             set(txtResampleToCTIsoMaskPtr('get'), 'Enable', 'on');
                             set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
@@ -935,14 +935,14 @@ function setIsoSurfaceCallback(~, ~)
                         set(chkResampleToCTIsoMaskPtr('get'), 'Enable', 'on');
                         set(uiResampleToCTIsoMaskPtr ('get'), 'Enable', 'on');
                         
-                        if resampleToCTIsoMask('get') == true && ...
-                           addVoiIsoMask('get') == true
-                            set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'on');                
-                            set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'Inactive');
-                        else
-                            set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'off');                
-                            set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
-                        end                             
+%                        if resampleToCTIsoMask('get') == true && ...
+%                           addVoiIsoMask('get') == true
+%                            set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'on');                
+%                            set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'Inactive');
+%                        else
+%                            set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'off');                
+%                            set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
+%                        end                             
                     else
                         set(txtResampleToCTIsoMaskPtr('get'), 'Enable', 'on');                        
                         set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');

@@ -1555,7 +1555,9 @@ end
 
                 tAxesMipText = axesText('get', 'axesMip');
                 tAxesMipText.String = sAxeMipText;
-                tAxesMipText.Color  = overlayColor('get');
+                if link2DMip('get') == true
+                    tAxesMipText.Color  = overlayColor('get');
+                end
 
                 if      iMipAngle < 5
                     sMipAngleView = 'Left';
@@ -1571,7 +1573,9 @@ end
 
                 tAxesMipViewText = axesText('get', 'axesMipView');
                 tAxesMipViewText.String = sMipAngleView;
-                tAxesMipViewText.Color  = overlayColor('get');
+                if link2DMip('get') == true
+                    tAxesMipViewText.Color  = overlayColor('get');
+                end
 
             end
 

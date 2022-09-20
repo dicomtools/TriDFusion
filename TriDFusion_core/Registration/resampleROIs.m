@@ -30,10 +30,18 @@ function atRoi = resampleROIs(dcmImage, atDcmMetaData, refImage, atRefMetaData, 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    aRefImageSize = size(refImage);
+
     for jj=1:numel(atRoi)
                 
         [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(refImage, atRefMetaData, dcmImage, atDcmMetaData, atRoi{jj});
-                
+        
+        if aRefImageSize(3) ~= 1       
+            if round(aNewPosition(1,3)) > aRefImageSize(3)
+                aNewPosition(:,3) = aRefImageSize(3);
+            end
+        end
+        
         switch lower( atRoi{jj}.Type)
 
             case lower('images.roi.circle')
