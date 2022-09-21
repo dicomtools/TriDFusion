@@ -127,7 +127,7 @@ function resize = dicomViewer()
     peakSUVMaxIsoMask     ('set', 4);  % In SUV
     peakPercentIsoMask    ('set', 65); % In percent
     voiIsoMaskMax         ('set', 42); % In percent
-    smalestIsoMask        ('set', 3); % In ml
+    smalestIsoMask        ('set', 0.3); % In ml
     valueFormulaIsoMask   ('set', 1); %Fixed suv value
     pixelEdgeIsoMask      ('set', true);
     resampleToCTIsoMask   ('set', true);

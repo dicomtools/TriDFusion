@@ -27,10 +27,10 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.cIf not, see <http://www.gnu.org/licenses/>.
 
-    PIXEL_EDGE_RATIO = 3;
+%    PIXEL_EDGE_RATIO = 3;
 
-    tInput = inputTemplate('get');
-    if dOffset > numel(tInput)
+    atInput = inputTemplate('get');
+    if dOffset > numel(atInput)
         return;
     end
 
@@ -41,11 +41,11 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
     
     dicomdict('factory');    
     
-    if ~isempty(tInput(dOffset).asFilesList)
-        sInputFile = tInput(dOffset).asFilesList{1};
+    if ~isempty(atInput(dOffset).asFilesList)
+        sInputFile = atInput(dOffset).asFilesList{1};
         tMetaData = dicominfo(string(sInputFile));
     else % CERR
-        tMetaData = tInput(dOffset).atDicomInfo{1};
+        tMetaData = atInput(dOffset).atDicomInfo{1};
     end
         
     % Set series label
@@ -73,7 +73,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 %        end
 %    end
     
-    bUseRoiTemplate = false;
+%    bUseRoiTemplate = false;
     if modifiedImagesContourMatrix('get') == false
         if numel(aInputBuffer) ~= numel(aDicomBuffer)  
             
@@ -82,7 +82,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
             atDicomMeta  = atInputMeta;          
             aDicomBuffer = aInputBuffer;
             
-            bUseRoiTemplate = true;
+%            bUseRoiTemplate = true;
         end        
     end
     

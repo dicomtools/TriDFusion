@@ -639,8 +639,17 @@ end
         asCTSeries = ' ';
         isoMaskCtSerieOffset('set', 1);
     else
+        atDicomMeta = dicomMetaData('get');
+        atInput = inputTemplate('get');
+        
         asCTSeries = num2cell(zeros(1,numel(tResampleToCT)));
+
         for cc=1:numel(tResampleToCT)
+            
+            if strcmpi(atDicomMeta{1}.StudyInstanceUID, atInput(tResampleToCT{cc}.dSeriesNumber).atDicomInfo{1}.StudyInstanceUID)
+                isoMaskCtSerieOffset('set', cc);
+            end
+            
             asCTSeries{cc} = tResampleToCT{cc}.sSeriesDescription;
         end
     end
@@ -2377,13 +2386,13 @@ end
 
             bInvertMask = invertConstraint('get');
 
-            tRoiInput = roiTemplate('get', dSeriesOffset);
+            atRoiInput = roiTemplate('get', dSeriesOffset);
 
-            aLogicalMask = roiConstraintToMask(im, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);        
+            aLogicalMask = roiConstraintToMask(im, atRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);        
 
-            dImageMin = min(double(im),[], 'all');
+%            dImageMin = min(double(im),[], 'all');
 
-            im(aLogicalMask==0) = dImageMin; % Apply constraint            
+%            im(aLogicalMask==0) = dImageMin; % Apply constraint            
             
             % Get ISO value
             
@@ -2393,6 +2402,7 @@ end
 
             aVolume = polygon2voxel(fv, size(im), 'none');
             BW = imfill(aVolume, 4, 'holes');
+            BW(aLogicalMask==0) = 0;
        %     BW = volumeFill(aVolume);
 
             imMask = im;

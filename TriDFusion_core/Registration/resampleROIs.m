@@ -1,5 +1,5 @@
-function atRoi = resampleROIs(dcmImage, atDcmMetaData, refImage, atRefMetaData, atRoi, bUpdateObject)
-%function aROIsPosition = resampleROIs(dcmImage, atDcmMetaData, refImage, atRefMetaData, atRoi, bUpdateObject)
+function [atRoi, transM] = resampleROIs(dcmImage, atDcmMetaData, refImage, atRefMetaData, atRoi, bUpdateObject)
+%function  [atRoi, transM] = resampleROIs(dcmImage, atDcmMetaData, refImage, atRefMetaData, atRoi, bUpdateObject)
 %Resample any ROIs.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -30,11 +30,13 @@ function atRoi = resampleROIs(dcmImage, atDcmMetaData, refImage, atRefMetaData, 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    transM = [];
+
     aRefImageSize = size(refImage);
 
     for jj=1:numel(atRoi)
                 
-        [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(refImage, atRefMetaData, dcmImage, atDcmMetaData, atRoi{jj});
+        [aNewPosition, aRadius, aSemiAxes, transM] = computeRoiScaledPosition(refImage, atRefMetaData, dcmImage, atDcmMetaData, atRoi{jj});
         
         if aRefImageSize(3) ~= 1       
             if round(aNewPosition(1,3)) > aRefImageSize(3)
@@ -124,6 +126,10 @@ function atRoi = resampleROIs(dcmImage, atDcmMetaData, refImage, atRefMetaData, 
                  atRoi{jj}.Position(3) = aNewPosition(3);
                  atRoi{jj}.Position(4) = aNewPosition(4);
                  atRoi{jj}.SliceNb     = round(aNewPosition(5));
+                 
+                 xs = [aNewPosition(1) aNewPosition(1)+aNewPosition(3) aNewPosition(1)+aNewPosition(3) aNewPosition(1)];
+                 ys = [aNewPosition(2) aNewPosition(2) aNewPosition(2)+aNewPosition(4) aNewPosition(2)+aNewPosition(4)];
+                 atRoi{jj}.Vertices    = [xs' ys'];
                  
                  tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
                  atRoi{jj}.MaxDistances = tMaxDistances;

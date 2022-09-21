@@ -32,14 +32,23 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
 
 %    bUseRoiTemplate = false;
 
-    
+     xScale = 1;
+     yScale = 1;  
+     zScale = 1;
+            
     if bModifiedMatrix  == false && ... 
        bMovementApplied == false        % Can't use input buffer if movement have been applied
                
         if numel(imInput) ~= numel(imRoi)
             pTemp{1} = ptrRoi;
-            ptrRoiTemp = resampleROIs(imRoi, atRoiMetaData, imInput, atInputMetaData, pTemp, false);
+            [ptrRoiTemp, transM] = resampleROIs(imRoi, atRoiMetaData, imInput, atInputMetaData, pTemp, false);
             ptrRoi = ptrRoiTemp{1};
+            
+            if ~strcmpi(ptrRoi.Axe, 'axe')
+                xScale = transM(2,2);
+                yScale = transM(1,1);  
+                zScale = transM(3,3);             
+            end
         end
         
         imRoi  = imInput;
@@ -109,21 +118,43 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
         sUnits = tSliceMeta.Units;
     end
     
+    if isempty(tSliceMeta.PixelSpacing)
+        xPixel = 1;
+        yPixel = 1;
+        zPixel = 1;
+    else
+        xPixel = tSliceMeta.PixelSpacing(1)/10;
+        yPixel = tSliceMeta.PixelSpacing(2)/10;
+        if size(imRoi, 3) == 1 
+            zPixel = 1;
+        else
+            zPixel = computeSliceSpacing(atRoiMetaData)/10; 
+        end
+    end            
+
+    switch lower(ptrRoi.Axe)    
+
+        case 'axe'
+            voxVolume = xPixel * yPixel * zPixel;
+
+        case 'axes1'
+            voxVolume = xPixel * yPixel * zPixel * yScale;
+
+        case 'axes2'
+            voxVolume = xPixel * yPixel * zPixel * xScale;
+
+        case 'axes3'
+            voxVolume = xPixel * yPixel * zPixel * zScale;
+
+        otherwise   
+            voxVolume = [];
+    end
+        
     if (strcmpi(tSliceMeta.Modality, 'pt') || ...
         strcmpi(tSliceMeta.Modality, 'nm'))&& ...
         strcmpi(sUnits, 'BQML' ) && ...     
         bSUVUnit == true 
 
-        xPixel = tSliceMeta.PixelSpacing(1)/10;
-        yPixel = tSliceMeta.PixelSpacing(2)/10; 
-        if size(imRoi, 3) == 1 
-            zPixel = 1;
-        else
-            zPixel = computeSliceSpacing(atRoiMetaData); 
-            zPixel = zPixel/10;
-        end
-
-        voxVolume = xPixel * yPixel * zPixel;
         nbVoxels = tRoiComputed.cells;
 
         tRoiComputed.min    = min(imCData,[],'all')  * dSUVScale;
@@ -158,8 +189,24 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
         else
             tRoiComputed.peak = [];
         end
+        
+        switch lower(ptrRoi.Axe)    
 
-        tRoiComputed.area = numel(imCData) * xPixel * yPixel;
+            case 'axe'
+                tRoiComputed.area = nbVoxels * xPixel * yPixel;
+
+            case 'axes1'
+                tRoiComputed.area = nbVoxels * xPixel * zPixel;
+
+            case 'axes2'
+                tRoiComputed.area = nbVoxels * yPixel * zPixel;
+
+            case 'axes3'
+                tRoiComputed.area = nbVoxels * xPixel * yPixel;
+
+            otherwise   
+                tRoiComputed.area = []; 
+        end
 
     else
         tRoiComputed.min    = min(imCData,[],'all');
@@ -192,28 +239,27 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
             tRoiComputed.peak = [];   
         end
 
-        if isempty(tSliceMeta.PixelSpacing)
-            xPixel = 0;
-            yPixel = 0;
-            zPixel = 0;
-        else
-            xPixel = tSliceMeta.PixelSpacing(1)/10;
-            yPixel = tSliceMeta.PixelSpacing(2)/10;
-            if size(imRoi, 3) == 1 
-                zPixel = 1;
-            else
-                zPixel = computeSliceSpacing(atRoiMetaData); 
-                zPixel = zPixel/10;
-            end
-        end            
-
-        voxVolume = xPixel * yPixel * zPixel;
         nbVoxels  = tRoiComputed.cells;
         volMean   = tRoiComputed.mean;                    
         tRoiComputed.sum = voxVolume * nbVoxels * volMean;
 
-        tRoiComputed.area = numel(imCData) * xPixel * yPixel;
+        switch lower(ptrRoi.Axe)    
 
+            case 'axe'
+                tRoiComputed.area = nbVoxels * xPixel * yPixel;
+
+            case 'axes1'
+                tRoiComputed.area = nbVoxels * xPixel * zPixel;
+
+            case 'axes2'
+                tRoiComputed.area = nbVoxels * yPixel * zPixel;
+
+            case 'axes3'
+                tRoiComputed.area = nbVoxels * xPixel * yPixel;
+
+            otherwise   
+                tRoiComputed.area = []; 
+        end
     end   
     
     tRoiComputed.SliceNb = ptrRoi.SliceNb;
