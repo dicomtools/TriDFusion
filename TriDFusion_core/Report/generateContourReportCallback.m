@@ -39,7 +39,7 @@ function generateContourReportCallback(~, ~)
         return;
     end
     
-    FIG_REPORT_X = 1224;
+    FIG_REPORT_X = 1245;
     FIG_REPORT_Y = 660;
 
     figContourReport = ...

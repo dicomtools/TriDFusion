@@ -39,13 +39,13 @@ function voiObj = initVoiIsoSurface(uiWindow)
     isoObj = isoObject('get');
     mipObj = mipObject('get');
 
-    tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-    tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
     
-%    for pp=1:numel(tVoiInput) % Patch, don't export total-mask
-%        if strcmpi(tVoiInput{pp}.Label, 'TOTAL-MASK')
-%            tVoiInput{pp} = [];
-%            tVoiInput(cellfun(@isempty, tVoiInput)) = [];       
+%    for pp=1:numel(atVoiInput) % Patch, don't export total-mask
+%        if strcmpi(atVoiInput{pp}.Label, 'TOTAL-MASK')
+%            atVoiInput{pp} = [];
+%            atVoiInput(cellfun(@isempty, atVoiInput)) = [];       
 %        end
 %    end   
         
@@ -72,31 +72,31 @@ function voiObj = initVoiIsoSurface(uiWindow)
         aInputArguments = [aInputArguments(:)', aCamera(:)'];
     end
 
-    if ~isempty(tVoiInput)
+    if ~isempty(atVoiInput)
 
         aVoiEnableList = voi3DEnableList('get');
         if isempty(aVoiEnableList)
-            for aa=1:numel(tVoiInput)
+            for aa=1:numel(atVoiInput)
                 aVoiEnableList{aa} = true;
             end
         end
 
         aVoiTransparencyList = voi3DTransparencyList('get');
         if isempty(aVoiTransparencyList)
-            for aa=1:numel(tVoiInput)
+            for aa=1:numel(atVoiInput)
                 aVoiTransparencyList{aa} = slider3DVoiTransparencyValue('get');
             end
         end
 
         aColormap = zeros(256,3);
 
-        for aa=1:numel(tVoiInput)
+        for aa=1:numel(atVoiInput)
 
-            progressBar(aa/numel(tVoiInput)-0.0001, sprintf('Processing VOI %d/%d', aa, numel(tVoiInput) ) );
+            progressBar(aa/numel(atVoiInput)-0.0001, sprintf('Processing VOI %d/%d', aa, numel(atVoiInput) ) );
 
             aBuffer = zeros(size(dicomBuffer('get')));
 
-            aIsosurfaceColor = tVoiInput{aa}.Color;
+            aIsosurfaceColor = atVoiInput{aa}.Color;
 
             aColormap(:,1) = aIsosurfaceColor(1);
             aColormap(:,2) = aIsosurfaceColor(2);
@@ -107,7 +107,7 @@ function voiObj = initVoiIsoSurface(uiWindow)
 
             aInputArguments = [aInputArguments(:)', {'Isovalue'}, {aIsovalue}, {'IsosurfaceColor'}, {aIsosurfaceColor}, {'Colormap'}, {aColormap}, {'Alphamap'}, {aAlphamap}];
 
-            dNbTags = numel(tVoiInput{aa}.RoisTag);
+            dNbTags = numel(atVoiInput{aa}.RoisTag);
             for yy=1:dNbTags
 
                 if dNbTags > 100
@@ -115,35 +115,42 @@ function voiObj = initVoiIsoSurface(uiWindow)
                         progressBar( yy/dNbTags, sprintf('Computing ROI %d/%d, please wait', yy, dNbTags) );
                     end
                 end
-
-                for rr=1:numel(tRoiInput)
-                    if strcmpi(tVoiInput{aa}.RoisTag{yy}, tRoiInput{rr}.Tag)
-                                                                        
-                        sAxe = tRoiInput{rr}.Axe;
-                        dSliceNb = tRoiInput{rr}.SliceNb;
-
-                        if     strcmpi(sAxe, 'Axes1')
-                            im = permute(aBuffer(dSliceNb,:,:), [3 2 1]);
-                        elseif strcmpi(sAxe, 'Axes2')
-                            im = permute(aBuffer(:,dSliceNb,:), [3 1 2]);
-                        else
-                            im = aBuffer(:,:,dSliceNb);
-                        end
-
-                        break;
-                    end
-                end
                 
-                bw = roiTemplateToMask(tRoiInput{rr}, im);
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), atVoiInput{aa}.RoisTag{yy} );
+                dRoiTagOffset = find(aTagOffset, 1); 
+                
+                if ~isempty(dRoiTagOffset)
+                    
+                    sAxe = atRoiInput{dRoiTagOffset}.Axe;
+                    dSliceNb = atRoiInput{dRoiTagOffset}.SliceNb;
 
-                if strcmpi(sAxe, 'Axes1')
-                    aBuffer(dSliceNb, :, :) = aBuffer(dSliceNb, :, :)|permuteBuffer(bw, 'coronal');
-                elseif strcmpi(sAxe, 'Axes2')
-                    aBuffer(:, dSliceNb, :) = aBuffer(:, dSliceNb, :)|permuteBuffer(bw, 'sagittal');
-                else
-                    aBuffer(:, :, dSliceNb) = aBuffer(:, :, dSliceNb)|bw;
+                    switch lower(sAxe)
+                        
+                        case 'axes1'
+                        im = permute(aBuffer(dSliceNb,:,:), [3 2 1]);
+                        
+                        case 'axes2'
+                        im = permute(aBuffer(:,dSliceNb,:), [3 1 2]);
+                        
+                        otherwise
+                        im = aBuffer(:,:,dSliceNb);
+                    end                                    
+                                
+                    bw = roiTemplateToMask(atRoiInput{dRoiTagOffset}, im);
+                    
+                    switch lower(sAxe)
+                        
+                        case 'axes1'
+                        aBuffer(dSliceNb, :, :) = aBuffer(dSliceNb, :, :)|permuteBuffer(bw, 'coronal');
+                        
+                        case 'axes2'
+                        aBuffer(:, dSliceNb, :) = aBuffer(:, dSliceNb, :)|permuteBuffer(bw, 'sagittal');
+                        
+                        otherwise
+                        aBuffer(:, :, dSliceNb) = aBuffer(:, :, dSliceNb)|bw;
+                   end 
+                   
                 end
-
             end
 
             aBuffer = aBuffer(:,:,end:-1:1);

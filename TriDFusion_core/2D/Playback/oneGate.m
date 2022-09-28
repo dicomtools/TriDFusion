@@ -176,13 +176,6 @@ function oneGate(sDirection)
         end
     end
 
-%    if isfield(tInput(iOffset), 'tRoi')
-%        atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-%        if isempty(atRoi)
-%            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), tInput(iOffset).tRoi);
-%        end
-%    end
-
     aBuffer = dicomBuffer('get');
     if isempty(aBuffer)
         if     strcmp(imageOrientation('get'), 'axial')

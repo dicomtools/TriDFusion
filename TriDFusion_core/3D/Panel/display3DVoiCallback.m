@@ -1,4 +1,4 @@
-function display3DVoiCallback(~, ~)
+ function display3DVoiCallback(~, ~)
 %function display3DVoiCallback()
 %Display 3D VOI
 %See TriDFuison.doc (or pdf) for more information about options.

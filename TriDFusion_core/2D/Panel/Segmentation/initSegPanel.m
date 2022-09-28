@@ -227,8 +227,12 @@ function initSegPanel()
 
     tQuant = quantificationTemplate('get');
 
-    dUpperValue = imageSegEditValue('get', 'upper');
-    dLowerValue = imageSegEditValue('get', 'lower');
+%    dUpperValue = imageSegEditValue('get', 'upper');
+%    dLowerValue = imageSegEditValue('get', 'lower');
+
+    dUpperValue = max(dicomBuffer('get'), [], 'all');
+    dLowerValue = min(dicomBuffer('get'), [], 'all');
+
     if strcmpi(sUnitDisplay, 'SUV') ||  strcmpi(sUnitDisplay, 'Window Level')
          if strcmpi(sUnitDisplay, 'Window Level')
 

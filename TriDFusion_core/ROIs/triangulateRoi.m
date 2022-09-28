@@ -1,5 +1,5 @@
-function triangulateRoi(sRoiTag, bCenterRoi)
-%function triangulateRoi(sRoiTag, bCenterRoi)
+function triangulateRoi(sRoiTag)
+%function triangulateRoi(sRoiTag)
 %Set the slices number of the 2D triangulation, based on a ROI.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -36,10 +36,22 @@ function triangulateRoi(sRoiTag, bCenterRoi)
 
     if size(im, 3) ~= 1 % 3D
         
-       aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[sRoiTag]} );                
+       aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), sRoiTag );                
        tRoi = atRoiInput{find(aTagOffset, 1)};
        
        if ~isempty(tRoi)
+           
+            origInfo = getappdata(tRoi.Object.Parent, 'matlab_graphics_resetplotview');
+            if isempty(origInfo)
+                bIsZoomed = false;
+            elseif isequal(get(tRoi.Object.Parent,'XLim'), origInfo.XLim) && ...
+                isequal(get(tRoi.Object.Parent,'YLim'), origInfo.YLim) && ...
+                isequal(get(tRoi.Object.Parent,'ZLim'), origInfo.ZLim)
+                bIsZoomed = false;
+            else
+                bIsZoomed = true;
+            end
+            
            if ~isempty(tRoi.MaxDistances)
 
                 p1x = tRoi.MaxDistances.MaxXY.Line.XData(1);
@@ -58,9 +70,10 @@ function triangulateRoi(sRoiTag, bCenterRoi)
             iSagittalSize = size(im,2);
             iAxialSize    = size(im,3);
 
-            dSliceNb = tRoi.SliceNb;
+            dSliceNb = tRoi.SliceNb;            
 
             switch lower(tRoi.Axe)
+                
                 case 'axes1'
 
                     if ( (midX <= iSagittalSize) &&...
@@ -76,22 +89,19 @@ function triangulateRoi(sRoiTag, bCenterRoi)
 
                         refreshImages();
 
-                        if bCenterRoi == true
+                        if bIsZoomed == true
+                            
                             xx = tRoi.Object.Parent.XLim;
                             yy = tRoi.Object.Parent.YLim;
 
                             xOffset = diff(xx)/2;
                             yOffset = diff(yy)/2;
+            
+                            Xlimit = [midX-xOffset midX+xOffset];
+                            tRoi.Object.Parent.XLim = Xlimit;
 
-                 %           if xOffset < midX
-                                Xlimit = [midX-xOffset midX+xOffset];
-                                tRoi.Object.Parent.XLim = Xlimit;
-                 %           end
-
-                 %           if yOffset < midY
-                                Ylimit = [midY-yOffset midY+yOffset];
-                                tRoi.Object.Parent.YLim = Ylimit;
-                 %           end
+                            Ylimit = [midY-yOffset midY+yOffset];
+                            tRoi.Object.Parent.YLim = Ylimit;
                         end
                     end
 
@@ -110,7 +120,7 @@ function triangulateRoi(sRoiTag, bCenterRoi)
 
                         refreshImages();
 
-                        if bCenterRoi == true
+                        if bIsZoomed == true
 
                             xx = tRoi.Object.Parent.XLim;
                             yy = tRoi.Object.Parent.YLim;
@@ -118,15 +128,14 @@ function triangulateRoi(sRoiTag, bCenterRoi)
                             xOffset = diff(xx)/2;
                             yOffset = diff(yy)/2;
 
-                %            if xOffset < midX
-                                Xlimit = [midX-xOffset midX+xOffset];
-                                tRoi.Object.Parent.XLim = Xlimit;
-                %            end
+                            Xlimit = [midX-xOffset midX+xOffset];
+                            tRoi.Object.Parent.XLim = Xlimit;
 
-                %            if yOffset < midY
-                                Ylimit = [midY-yOffset midY+yOffset];
-                                tRoi.Object.Parent.YLim = Ylimit;
-                %            end
+
+
+                            Ylimit = [midY-yOffset midY+yOffset];
+                            tRoi.Object.Parent.YLim = Ylimit;
+
                         end
                     end
 
@@ -145,7 +154,7 @@ function triangulateRoi(sRoiTag, bCenterRoi)
 
                         refreshImages();
 
-                        if bCenterRoi == true
+                        if bIsZoomed == true
 
                             xx = tRoi.Object.Parent.XLim;
                             yy = tRoi.Object.Parent.YLim;
@@ -153,19 +162,12 @@ function triangulateRoi(sRoiTag, bCenterRoi)
                             xOffset = diff(xx)/2;
                             yOffset = diff(yy)/2;
 
-                  %          if xOffset < midX
-                                Xlimit = [midX-xOffset midX+xOffset];
-                                tRoi.Object.Parent.XLim = Xlimit;
-                  %          else
-                  %              tRoi.Object.Parent.XLim = midX;
-                  %          end
+                            Xlimit = [midX-xOffset midX+xOffset];
+                            tRoi.Object.Parent.XLim = Xlimit;
 
-                  %          if yOffset < midY
-                                Ylimit = [midY-yOffset midY+yOffset];
-                                tRoi.Object.Parent.YLim = Ylimit;
-                  %          else                                   
-                  %              tRoi.Object.Parent.YLim = midY;
-                  %          end
+                            Ylimit = [midY-yOffset midY+yOffset];
+                            tRoi.Object.Parent.YLim = Ylimit;
+
                         end
 
                     end

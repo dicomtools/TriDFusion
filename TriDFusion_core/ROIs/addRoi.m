@@ -106,6 +106,9 @@ function addRoi(ptrRoi, dOffset, sLesionType)
     tRoi.Tag                 = ptrRoi.Tag;
     tRoi.ObjectType          = 'roi';
     tRoi.LesionType          = sLesionType;
+    tRoi.StripeColor         = ptrRoi.StripeColor;
+    tRoi.InteractionsAllowed = ptrRoi.InteractionsAllowed;    
+    tRoi.UserData            = ptrRoi.UserData;
 
     switch lower(tRoi.Type)
         case lower('images.roi.line')
@@ -131,18 +134,20 @@ function addRoi(ptrRoi, dOffset, sLesionType)
             tRoi.Vertices       = ptrRoi.Vertices;
 
         case lower('images.roi.ellipse')
-            tRoi.FaceAlpha      = ptrRoi.FaceAlpha;
-            tRoi.SemiAxes       = ptrRoi.SemiAxes;
-            tRoi.RotationAngle  = ptrRoi.RotationAngle;
-            tRoi.FaceSelectable = ptrRoi.FaceSelectable;
-            tRoi.Vertices       = ptrRoi.Vertices;
-            
+            tRoi.FaceAlpha        = ptrRoi.FaceAlpha;
+            tRoi.SemiAxes         = ptrRoi.SemiAxes;
+            tRoi.RotationAngle    = ptrRoi.RotationAngle;
+            tRoi.FaceSelectable   = ptrRoi.FaceSelectable;
+            tRoi.Vertices         = ptrRoi.Vertices;
+            tRoi.FixedAspectRatio = ptrRoi.FixedAspectRatio;
+           
         case lower('images.roi.rectangle')
-            tRoi.FaceAlpha      = ptrRoi.FaceAlpha;
-            tRoi.FaceSelectable = ptrRoi.FaceSelectable;
-            tRoi.Rotatable      = ptrRoi.Rotatable;
-            tRoi.RotationAngle  = ptrRoi.RotationAngle;
-            tRoi.Vertices       = ptrRoi.Vertices;
+            tRoi.FaceAlpha        = ptrRoi.FaceAlpha;
+            tRoi.FaceSelectable   = ptrRoi.FaceSelectable;
+            tRoi.Rotatable        = ptrRoi.Rotatable;
+            tRoi.RotationAngle    = ptrRoi.RotationAngle;
+            tRoi.Vertices         = ptrRoi.Vertices;
+            tRoi.FixedAspectRatio = ptrRoi.FixedAspectRatio;
     end
 
     tRoi.Object = ptrRoi;
@@ -150,19 +155,11 @@ function addRoi(ptrRoi, dOffset, sLesionType)
     tMaxDistances = computeRoiFarthestPoint(imRoi, atDicomInfo, tRoi, false, false);
     tRoi.MaxDistances = tMaxDistances;
 
-    if isfield( tAddInput(dOffset), 'tRoi' )
-        tAddInput(dOffset).tRoi{numel(tAddInput(dOffset).tRoi)+1} = tRoi;
-    else
-        tAddInput(dOffset).tRoi{1} = tRoi;
-    end
-
     if isempty(atRoiInput)
         atRoiInput{1} = tRoi;
     else
         atRoiInput{numel(atRoiInput)+1} = tRoi;
     end
-
-    inputTemplate('set', tAddInput);
 
     roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
 

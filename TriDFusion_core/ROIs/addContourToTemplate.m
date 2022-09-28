@@ -80,23 +80,18 @@ function addContourToTemplate(dSeriesOffset, sAxe, dSliceNb, sType, aPosition, s
     tRoi.Tag                 = sTag;    
     tRoi.ObjectType          = 'roi';
     tRoi.LesionType          = sLesionType;
-
+    tRoi.StripeColor         = 'none';
+    tRoi.InteractionsAllowed = 'all';    
+    tRoi.UserData            = [];
+    
     tMaxDistances     = computeRoiFarthestPoint(imRoi, atDicomInfo, tRoi, false, false);
     tRoi.MaxDistances = tMaxDistances;
-
-    if isfield(tAddInput(dSeriesOffset), 'tRoi' )
-        tAddInput(dSeriesOffset).tRoi{numel(tAddInput(dSeriesOffset).tRoi)+1} = tRoi;
-    else
-        tAddInput(dSeriesOffset).tRoi{1} = tRoi;
-    end
 
     if isempty(atRoiInput)
         atRoiInput{1} = tRoi;
     else
         atRoiInput{numel(atRoiInput)+1} = tRoi;
     end
-
-    inputTemplate('set', tAddInput);
 
     roiTemplate('set', dSeriesOffset, atRoiInput);
 

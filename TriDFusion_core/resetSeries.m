@@ -66,23 +66,16 @@ function resetSeries(dOffset, bInitDisplay)
 
         roiConstraintList('reset', dOffset); % Delete all masks
 
-        if isfield(tInitInput(dOffset), 'tRoi')
-            for rr=1:numel(atRoi)
-                if ~isempty(atRoi{rr}.MaxDistances)
-                    delete(atRoi{rr}.MaxDistances.MaxXY.Line);
-                    delete(atRoi{rr}.MaxDistances.MaxCY.Line);
-                    delete(atRoi{rr}.MaxDistances.MaxXY.Text);
-                    delete(atRoi{rr}.MaxDistances.MaxCY.Text);
-                end
-                delete(atRoi{rr}.Object);
+        for rr=1:numel(atRoi)
+            if ~isempty(atRoi{rr}.MaxDistances)
+                delete(atRoi{rr}.MaxDistances.MaxXY.Line);
+                delete(atRoi{rr}.MaxDistances.MaxCY.Line);
+                delete(atRoi{rr}.MaxDistances.MaxXY.Text);
+                delete(atRoi{rr}.MaxDistances.MaxCY.Text);
             end
-
-            tInitInput(dOffset).tRoi = [];
+            delete(atRoi{rr}.Object);
         end
 
-        if isfield(tInitInput(dOffset), 'tVoi')
-            tInitInput(dOffset).tVoi = [];
-        end
 
         voiRoiTag('set', '');
 

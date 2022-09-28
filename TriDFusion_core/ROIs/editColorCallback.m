@@ -30,7 +30,6 @@ function editColorCallback(hObject,~)
     sColor = uisetcolor([hObject.UserData.Color],'Select a color');
     
     dSerieOffset = get(uiSeriesPtr('get'), 'Value');
-    atInput = inputTemplate('get');
 
     atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
     
@@ -55,20 +54,6 @@ function editColorCallback(hObject,~)
 
             roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
         end
-
-        % Set roi label input template tRoi
-
-        if isfield(atInput(dSerieOffset), 'tRoi')
-
-            atInputRoi = atInput(dSerieOffset).tRoi;
-            aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {hObject.UserData.Tag} );      
-
-            dTagOffset = find(aTagOffset, 1);
-
-            if ~isempty(dTagOffset)
-                atInput(dSerieOffset).tRoi{dTagOffset}.Color = sColor;
-                inputTemplate('set', atInput);                
-            end
-        end                        
+                      
     end    
 end

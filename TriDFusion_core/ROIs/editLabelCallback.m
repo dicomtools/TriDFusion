@@ -94,7 +94,6 @@ function editLabelCallback(hObject, ~)
         sLabel = get(edtLabelName, 'String');
 
         dSerieOffset = get(uiSeriesPtr('get'), 'Value');
-        atInput = inputTemplate('get');
 
         atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));     
         
@@ -118,22 +117,7 @@ function editLabelCallback(hObject, ~)
                 end
 
                 roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
-            end
-
-            % Set roi label input template tRoi
-
-            if isfield(atInput(dSerieOffset), 'tRoi')
-
-                atInputRoi = atInput(dSerieOffset).tRoi;
-                aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {hObject.UserData.Tag} );      
-
-                dTagOffset = find(aTagOffset, 1);
-
-                if ~isempty(dTagOffset)
-                    atInput(dSerieOffset).tRoi{dTagOffset}.Label = sLabel;
-                    inputTemplate('set', atInput);                
-                end
-            end                        
+            end                      
             
 %            setVoiRoiSegPopup(); Not need for ROI
         end        

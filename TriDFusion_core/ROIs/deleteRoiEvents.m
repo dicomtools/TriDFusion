@@ -31,8 +31,6 @@ function deleteRoiEvents(hObject, ~)
 
     dSerieOffset = get(uiSeriesPtr('get'), 'Value');
 
-    atInput = inputTemplate('get');
-
     atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
     atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));  
             
@@ -91,23 +89,6 @@ function deleteRoiEvents(hObject, ~)
 
             roiTemplate('set', dSerieOffset, atRoiInput);  
 
-            % Clear roi from input template tRoi
-
-            if isfield(atInput(dSerieOffset), 'tRoi')
-
-                atInputRoi = atInput(dSerieOffset).tRoi;
-                aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {sRoiTag} );
-
-                dTagOffset = find(aTagOffset, 1);  
-
-                if ~isempty(dTagOffset)
-                    atInput(dSerieOffset).tRoi{dTagOffset} = [];
-
-                    atInput(dSerieOffset).tRoi(cellfun(@isempty, atInput(dSerieOffset).tRoi)) = [];
-
-                    inputTemplate('set', atInput);  
-                end
-            end
 
             % Clear roi from voi input template (if exist)
 
@@ -131,30 +112,6 @@ function deleteRoiEvents(hObject, ~)
                atVoiInput(cellfun(@isempty, atVoiInput)) = [];
 
                voiTemplate('set', dSerieOffset, atVoiInput);                                        
-            end
-
-            % Clear roi from input tVoi template (if exist)
-
-            if isfield(atInput(dSerieOffset), 'tVoi')
-
-                for vo=1:numel(atInput(dSerieOffset).tVoi)     
-
-                    dTagOffset = find(contains(atInput(dSerieOffset).tVoi{vo}.RoisTag,{sRoiTag}));
-
-                    if ~isempty(dTagOffset) % tag exist
-                        atInput(dSerieOffset).tVoi{vo}.RoisTag{dTagOffset} = [];
-                        atInput(dSerieOffset).tVoi{vo}.RoisTag(cellfun(@isempty, atInput(dSerieOffset).tVoi{vo}.RoisTag)) = [];     
-
-                        if isempty(atInput(dSerieOffset).tVoi{vo}.RoisTag)
-                            atInput(dSerieOffset).tVoi{vo} = [];
-                       end
-
-                    end
-                end
-
-               atInput(dSerieOffset).tVoi(cellfun(@isempty, atInput(dSerieOffset).tVoi)) = [];
-
-               inputTemplate('set', atInput);                
             end
 
             % Refresh contour popup

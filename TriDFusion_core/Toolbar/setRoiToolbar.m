@@ -98,11 +98,11 @@ function setRoiToolbar(sVisible)
         t3 = uitoggletool(tbRoi,'CData',img,'TooltipString','Draw Rectangle');
         t3.ClickedCallback = @drawrectangleCallback;
         
-%        [img,~] = imread(sprintf('%s//sphere.png', sIconsPath));
-%        img = double(img)/255;
+        [img,~] = imread(sprintf('%s//sphere.png', sIconsPath));
+        img = double(img)/255;
 
-%        t11 = uitoggletool(tbRoi,'CData',img,'TooltipString','Draw Sphere');
-%        t11.ClickedCallback = @drawsphereCallback;
+        t11 = uitoggletool(tbRoi,'CData',img,'TooltipString','Draw Sphere');
+        t11.ClickedCallback = @drawsphereCallback;
         
         [img,~] = imread(sprintf('%s//farthest.png', sIconsPath));
         img = double(img)/255;
@@ -155,7 +155,7 @@ function setRoiToolbar(sVisible)
         set(t6 , 'State', 'off');
       %  set(t7, 'State', 'off');
         set(t8 , 'State', 'off');
-%        set(t11, 'State', 'off');
+        set(t11, 'State', 'off');
 
         set(tMenu, 'State', 'on');
 
@@ -1105,6 +1105,8 @@ function setRoiToolbar(sVisible)
                 dSemiAxesY = yPixel/2;                
             end
             
+            sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+            
             a = images.roi.Ellipse(gca, ...
                                    'Center'          , [clickedPtX clickedPtY], ...
                                    'SemiAxes'        , [dSemiAxesX dSemiAxesY], ...
@@ -1116,11 +1118,14 @@ function setRoiToolbar(sVisible)
                                    'lineWidth'       , 1, ...
                                    'Label'           , roiLabelName(), ...
                                    'LabelVisible'    , 'off', ...
-                                   'Tag'             , num2str(randi([-(2^52/2),(2^52/2)],1)), ...
+                                   'Tag'             , sTag, ...
                                    'FaceSelectable'  , 1, ...
                                    'FaceAlpha'       , 0, ...
+                                   'UserData'        , 'Sphere', ...
                                    'Visible'         , 'on' ...
                                    );
+                               
+             asTag{1} = sTag;
                         
             if ~isvalid(t11)
                 return;
@@ -1195,8 +1200,8 @@ function setRoiToolbar(sVisible)
 
                     dSliceNb = sliceNumber('get', 'sagittal');
 
-                    xPixelOffset = clickedPtX;
-                    yPixelOffset = dSliceNb;
+                    xPixelOffset = dSliceNb;
+                    yPixelOffset = clickedPtX;
                     zPixelOffset = clickedPtY;
                     
                     dPixelRatio = xPixel/yPixel;
@@ -1271,7 +1276,9 @@ function setRoiToolbar(sVisible)
                     dSemiAxesY = maxDistance/2*dPixelRatio;
                     
                     sliceNumber('set', sPlane, zz);                
-
+                    
+                    sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+                    
                     a = images.roi.Ellipse(gca, ...
                                            'Center'             , [clickedPtX clickedPtY], ...
                                            'SemiAxes'           , [dSemiAxesX dSemiAxesY], ...
@@ -1284,16 +1291,21 @@ function setRoiToolbar(sVisible)
                                            'lineWidth'          , 1, ...
                                            'Label'              , roiLabelName(), ...
                                            'LabelVisible'       , 'off', ...
-                                           'Tag'                , num2str(randi([-(2^52/2),(2^52/2)],1)), ...
+                                           'Tag'                , sTag, ...
                                            'FaceSelectable'     , 1, ...
                                            'FaceAlpha'          , 0, ...
                                            'Visible'            , 'off' ...
                                            );
 
                     addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
-
+                    
+                    asTag{numel(asTag)+1} = sTag;
                 end
             end
+            
+            createVoiFromRois(get(uiSeriesPtr('get'), 'Value'), asTag, sprintf('Sphere %d mm', dSphereDiameter), [0 1 1], 'Unspecified');
+            
+            setVoiRoiSegPopup();
 
             sliceNumber('set', sPlane, dSliceNb);
         end
@@ -1330,7 +1342,7 @@ function setRoiToolbar(sVisible)
         set(t6 , 'State', 'off');
       %  set(t7, 'State', 'off');
         set(t8 , 'State', 'off');
-%        set(t11, 'State', 'off');
+        set(t11, 'State', 'off');
 
     end
 

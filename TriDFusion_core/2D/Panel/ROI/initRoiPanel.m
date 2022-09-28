@@ -479,9 +479,7 @@ function initRoiPanel()
     function setLesionTypeRoiPanelCallback(hObject, ~)
         
         dSerieOffset = get(uiSeriesPtr('get'), 'Value');
-                
-        atInput = inputTemplate('get');
-        
+                        
         atRoiInput = roiTemplate('get', dSerieOffset);
         atVoiInput = voiTemplate('get', dSerieOffset);
 
@@ -492,20 +490,9 @@ function initRoiPanel()
             bLesionOffset = get(hObject, 'Value');
             asLesionType  = get(hObject, 'String');
             sLesionType = asLesionType{bLesionOffset};
-            
-            atInput(dSerieOffset).tVoi{dVoiOffset}.LesionType = sLesionType;
-                        
+                                    
             atVoiInput{dVoiOffset}.LesionType = sLesionType; 
-            
-            for rr=1:numel(atVoiInput{dVoiOffset}.RoisTag) % Set input template
-                for tt=1:numel(atInput(dSerieOffset).tRoi)
-                    if strcmp(atVoiInput{dVoiOffset}.RoisTag{rr}, atInput(dSerieOffset).tRoi{tt}.Tag)
-                        atInput(dSerieOffset).tRoi{tt}.LesionType = sLesionType;
-                        break;
-                    end                   
-                end
-            end
-            
+                        
             for rr=1:numel(atVoiInput{dVoiOffset}.RoisTag) % Set ROIs template
                 for tt=1:numel(atRoiInput)
                     if strcmp(atVoiInput{dVoiOffset}.RoisTag{rr}, atRoiInput{tt}.Tag)
@@ -515,9 +502,7 @@ function initRoiPanel()
                 end
             end
         end
-        
-        inputTemplate('set', atInput);
-        
+                
         roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
         voiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atVoiInput);
 
@@ -546,7 +531,7 @@ function initRoiPanel()
             
 %            dRodSerieOffset = round(numel(atVoiInput{dVoiOffset}.RoisTag)/2);
 
-            triangulateRoi(sRoiTag, true);
+            triangulateRoi(sRoiTag);
         end
 
     end
@@ -612,14 +597,11 @@ function initRoiPanel()
 
         % Add ROI to VOI
         
-        atInput = inputTemplate('get');
               
         atVoiInput{dVoiOffset}.RoisTag{end+1} = sRoiTag;
-        
-        atInput(dSerieOffset).tVoi{dVoiOffset}.RoisTag{end+1} = sRoiTag;
-                
-        dRoiNb  = numel(atInput(dSerieOffset).tVoi{dVoiOffset}.RoisTag);
-        dNbTags = numel(atInput(dSerieOffset).tVoi{dVoiOffset}.RoisTag);
+                        
+        dRoiNb  = numel(atVoiInput{dVoiOffset}.RoisTag);
+        dNbTags = numel(atVoiInput{dVoiOffset}.RoisTag);
         
         atRoi = roiTemplate('get', dSerieOffset);
         
@@ -630,9 +612,8 @@ function initRoiPanel()
             if ~isempty(dTagOffset)
 
                 atRoi{dTagOffset}.ObjectType  = 'voi-roi';
-                atInput(dSerieOffset).tRoi{dTagOffset}.ObjectType = atRoi{dTagOffset}.ObjectType;
 
-                sLabel = sprintf('%s (roi %d/%d)', atInput(dSerieOffset).tVoi{dVoiOffset}.Label, dRoiNb, dNbTags);
+                sLabel = sprintf('%s (roi %d/%d)', atVoiInput{dVoiOffset}.Label, dRoiNb, dNbTags);
 
                 atRoi{dTagOffset}.Label = sLabel;
                 atRoi{dTagOffset}.Object.Label = sLabel;   
@@ -644,9 +625,7 @@ function initRoiPanel()
         
         roiTemplate('set', dSerieOffset, atRoi);
         voiTemplate('set', dSerieOffset, atVoiInput);
-        
-        inputTemplate('set', atInput);         
-        
+                
         
 %        catch
 %        end
@@ -685,7 +664,7 @@ function initRoiPanel()
             sRoiTag = getLargestArea(atVoiInput{dVoiOffset}.RoisTag);
 %            dRodSerieOffset = round(numel(atVoiInput{dVoiOffset}.RoisTag)/2);
 
-            triangulateRoi(sRoiTag, true);
+            triangulateRoi(sRoiTag);
             
             catch
             end
@@ -722,7 +701,7 @@ function initRoiPanel()
             
             sRoiTag = getLargestArea(atVoiInput{dVoiOffset}.RoisTag);
 
-            triangulateRoi(sRoiTag, true);
+            triangulateRoi(sRoiTag);
             
             catch
             end
@@ -736,8 +715,7 @@ function initRoiPanel()
     function deleteVoiRoiPanelCallback(~, ~)
 
         dSerieOffset = get(uiSeriesPtr('get'), 'Value');
-        atInput = inputTemplate('get');
-
+        
         atRoiInput = roiTemplate('get', dSerieOffset);
         atVoiInput = voiTemplate('get', dSerieOffset);
 
@@ -823,45 +801,6 @@ function initRoiPanel()
                 roiTemplate('set', dSerieOffset, atRoiInput);            
             end
             
-            % Clear input template tVoi
-            
-            if isfield(atInput(dSerieOffset), 'tVoi')
-
-                atInputVoi = atInput(dSerieOffset).tVoi;
-                if ~isempty(atInputVoi)
-                    aTagOffset = strcmp( cellfun( @(atInputVoi) atInputVoi.Tag, atInputVoi, 'uni', false ), {[ptrObject.Tag]} );
-
-                    dTagOffset = find(aTagOffset, 1);  
-
-                    if ~isempty(dTagOffset)
-                        atInput(dSerieOffset).tVoi{dTagOffset} = [];
-                        atInput(dSerieOffset).tVoi(cellfun(@isempty, atInput(dSerieOffset).tVoi)) = [];
-
-                        inputTemplate('set', atInput);                
-                    end
-                end
-            end
-            
-            % Clear input template tRoi
-            
-            if isfield(atInput(dSerieOffset), 'tRoi')
-                
-                atInputRoi = atInput(dSerieOffset).tRoi;
-                if ~isempty(atInputRoi)
-                    for rr=1:numel(ptrObject.RoisTag)
-                        aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {[ptrObject.RoisTag{rr}]} );
-                        aRoisTagOffset(rr) = find(aTagOffset, 1);    
-                    end
-                end
-                
-                for rr=1:numel(ptrObject.RoisTag)
-                    atInput(dSerieOffset).tRoi{aRoisTagOffset(rr)} = [];
-                end                
-
-                atInput(dSerieOffset).tRoi(cellfun(@isempty, atInput(dSerieOffset).tRoi)) = [];
-                
-                inputTemplate('set', atInput);                
-            end
                        
             dNbVOIs = numel(atVoiInput);
 
@@ -891,7 +830,7 @@ function initRoiPanel()
             if dNbVOIs ~= 0
                 sRoiTag = getLargestArea(atVoiInput{dVoiOffset}.RoisTag);
 
-                triangulateRoi(sRoiTag, true);
+                triangulateRoi(sRoiTag);
             end
                 
             catch
@@ -2251,7 +2190,7 @@ function initRoiPanel()
                             sLabel = sprintf('MIN-MAX-%d-%d-%d', dMinValue, dMaxValue);
                         end
 
-                        createVoiFromRois(dSerieOffset, asTag, sLabel, 'Unspecified');
+                        createVoiFromRois(dSerieOffset, asTag, sLabel, aColor, 'Unspecified');
 
                     end
                 end
@@ -2506,7 +2445,7 @@ function initRoiPanel()
                         end
                     end
 
-                    createVoiFromRois(dSerieOffset, asTag, sLabel, 'Unspecified');
+                    createVoiFromRois(dSerieOffset, asTag, sLabel, aColor, 'Unspecified');
 
                 end
             end
@@ -2584,40 +2523,36 @@ function initRoiPanel()
         dLargestMaskNbPixels = 0;
 
         for at=1:numel(asRoisTag)
-
-            for rt=1:numel(atRoiInput)
-                if strcmp(atRoiInput{rt}.Tag, asRoisTag{at})
+            
+            aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), asRoisTag{at} );
+            dRoiTagOffset = find(aTagOffset, 1); 
+            
+            if ~isempty(dRoiTagOffset)
                 
-                    if size(imRoi, 3) == 1 
-                        if strcmpi(atRoiInput{rt}.Axe, 'Axe')
-                            imRoi=imRoi(:,:);
-                            imCData = imRoi; 
-                       end
-                    else
-                        if strcmpi(atRoiInput{rt}.Axe, 'Axes1')
-                            imCData = permute(imRoi(atRoiInput{rt}.SliceNb,:,:), [3 2 1]);
-                       end
-
-                        if strcmpi(atRoiInput{rt}.Axe, 'Axes2')                    
-                            imCData = permute(imRoi(:,atRoiInput{rt}.SliceNb,:), [3 1 2]) ;
-                        end
-
-                        if strcmpi(atRoiInput{rt}.Axe, 'Axes3')
-                            imCData  = imRoi(:,:,atRoiInput{rt}.SliceNb);  
-                        end
-                    end                
+                switch lower(atRoiInput{dRoiTagOffset}.Axe)
+                    
+                    case 'axe'
+                    imCData = imRoi(:,:); 
+                                           
+                    case 'axes1'
+                    imCData = permute(imRoi(atRoiInput{dRoiTagOffset}.SliceNb,:,:), [3 2 1]);
+                       
+                    case 'axes2'
+                    imCData = permute(imRoi(:,atRoiInput{dRoiTagOffset}.SliceNb,:), [3 1 2]) ;
+                        
+                    case 'axes3'
+                    imCData  = imRoi(:,:,atRoiInput{dRoiTagOffset}.SliceNb);  
+                       
+                end                
                 
-                    mask = roiTemplateToMask(atRoiInput{rt}, imCData);      
+                mask = roiTemplateToMask(atRoiInput{dRoiTagOffset}, imCData);      
 
-                    dNbPixelsMasked = numel(imCData(mask));
+                dMaskNbPixels = numel(imCData(mask));
 
-                    if dNbPixelsMasked >= dLargestMaskNbPixels 
-                        dLargestMaskNbPixels = dNbPixelsMasked;
-                        sRoiTag = asRoisTag{at};
-                    end
-
-                    break;
-                end            
+                if dMaskNbPixels > dLargestMaskNbPixels 
+                    dLargestMaskNbPixels = dMaskNbPixels;
+                    sRoiTag = asRoisTag{at};
+                end                                               
             end                
         end
     end

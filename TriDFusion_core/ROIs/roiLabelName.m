@@ -27,16 +27,8 @@ function sLabelName = roiLabelName()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tRoiInput = inputTemplate('get');        
-    iOffset = get(uiSeriesPtr('get'), 'Value');
-    if iOffset > numel(tRoiInput)  
-        sLabelName = 'null';
-        return;
-    end  
-
-    if isfield( tRoiInput(iOffset), 'tRoi' )            
-        sLabelName = sprintf('ROI %d', numel(tRoiInput(iOffset).tRoi)+1);
-    else                        
-        sLabelName = 'ROI 1';
-    end
+    atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    
+    sLabelName = sprintf('ROI %d', numel(atRoiInput)+1);
+ 
 end

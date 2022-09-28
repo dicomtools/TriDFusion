@@ -68,7 +68,7 @@ function dicomViewerCore()
         lMin = windowLevel('get', 'min');
         lMax = windowLevel('get', 'max');
     end
-    
+
     if lMin == lMax
         lMax = lMin+1;
     end
@@ -328,7 +328,7 @@ function dicomViewerCore()
         rightClickMenu('add', imAxe);
 
         imAxePtr ('set', imAxe , get(uiSeriesPtr('get'), 'Value'));
-        
+
         set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'Visible', 'off');
 
 %               set(axe, 'CLim', [aCLim(1) aCLim(2)]);
@@ -408,7 +408,7 @@ function dicomViewerCore()
         if overlayActivate('get') == false
             set(tAxeText, 'Visible', 'off');
         end
-        
+
         axesText('set', 'axe', tAxeText);
 
         if aspectRatio('get') == true
@@ -1102,7 +1102,7 @@ function dicomViewerCore()
             dVsplashLayoutY = vSplashLayout('get', 'y');
 
             if gaussFilter('get') == true
-                
+
                imAxial  = imagesc(imgaussfilt(im (:,:,iAxial)),  ...
                                   'Parent', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
                                   );
@@ -1333,7 +1333,7 @@ function dicomViewerCore()
         axesText('set', 'axesMip', ''); % Set 2D MIP
 
         cla(axesMipPtr ('get', [], get(uiSeriesPtr('get'), 'Value')),'reset');
-        
+
         set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) , ...
             'Units'   , 'normalized', ...
             'Position', [0 0 1 1], ...
@@ -1492,7 +1492,7 @@ function dicomViewerCore()
             axesText('set', 'axesMipView', tAxesMipView);
 
         end
-        
+
         if isVsplash('get') == true
             aAxeXLim = get(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim');
             aAxeYLim = get(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim');
@@ -1509,7 +1509,7 @@ function dicomViewerCore()
             set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim', [aAxeXLim(1) aAxeXLim(2)*dVsplashLayoutX]);
             set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim', [aAxeYLim(1) aAxeYLim(2)*dVsplashLayoutY]);
         end
-        
+
         if aspectRatio('get') == true
 
             atCoreMetaData = dicomMetaData('get');
@@ -1686,7 +1686,7 @@ function dicomViewerCore()
            % lMin = min(im, [], 'all');
            % lMax = max(im, [], 'all');
          end
-         
+
          set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
 
 
@@ -1730,7 +1730,6 @@ function dicomViewerCore()
     if isVsplash('get') == false
 
         initRoi();
-        initVoi();
 
         tRefreshRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
         if ~isempty(tRefreshRoi)
@@ -1784,11 +1783,11 @@ function dicomViewerCore()
                 alpha(axesMip, 1 );
             end
         end
-    end    
-    
+    end
+
     set(uiSliderWindowPtr('get'), 'Visible', 'on');
     set(uiSliderLevelPtr('get') , 'Visible', 'on');
-    
+
     if size(im, 3) == 1
         set(uiOneWindowPtr('get'), 'Visible', 'on');
     else
@@ -1845,12 +1844,12 @@ function dicomViewerCore()
             set(uiSliderTraPtr('get'), 'Visible', 'on');
         end
     end
-    
+
     if isFusion('get') == true
         isFusion('set', false);
         setFusionCallback();
     end
-    
+
     if bInitSegPanel == true
        setViewSegPanel();
     end
@@ -1862,7 +1861,7 @@ function dicomViewerCore()
     if bInitRoiPanel == true
        setViewRoiPanel();
     end
-    
+
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
 
 end

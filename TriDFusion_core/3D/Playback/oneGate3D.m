@@ -47,58 +47,60 @@ function oneGate3D(sDirection)
         progressBar(1, 'Error: Require a 3D Volume!');
         return;
     end
+    
+    atVoi = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
-    tInput = inputTemplate('get');
+    atInput = inputTemplate('get');
 
-    iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-    if iSeriesOffset > numel(tInput) || ...
-        numel(tInput) < 2 % Need a least 2 series
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+    if dSeriesOffset > numel(atInput) || ...
+        numel(atInput) < 2 % Need a least 2 series
         return;
     end
 
-    if ~isfield(tInput(iSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
+    if ~isfield(atInput(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
        gateUseSeriesUID('get') == true
         return
     end
 
-    aInput  = inputBuffer('get');
+    aInputBuffer  = inputBuffer('get');
 
     if strcmpi(sDirection, 'Foward')
-        iOffset = iSeriesOffset+1;
+        dOffset = dSeriesOffset+1;
         if gateUseSeriesUID('get') == true
-            if iOffset > numel(tInput) || ... % End of list
-               ~strcmpi(tInput(iSeriesOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
-                        tInput(iOffset).atDicomInfo{1}.SeriesInstanceUID)
-                for bb=1:numel(tInput)
-                    if strcmpi(tInput(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
-                               tInput(iSeriesOffset).atDicomInfo{1}.SeriesInstanceUID)
-                        iOffset = bb;
+            if dOffset > numel(atInput) || ... % End of list
+               ~strcmpi(atInput(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
+                        atInput(dOffset).atDicomInfo{1}.SeriesInstanceUID)
+                for bb=1:numel(atInput)
+                    if strcmpi(atInput(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
+                               atInput(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID)
+                        dOffset = bb;
                         break;
                     end
                 end
             end
         else
-            if iOffset > numel(tInput)
-                iOffset =1;
+            if dOffset > numel(atInput)
+                dOffset =1;
             end
         end
     else
-        iOffset = iSeriesOffset-1;
+        dOffset = dSeriesOffset-1;
 
         if gateUseSeriesUID('get') == true
-            if iOffset == 0 || ... % The list start at 1
-               ~strcmpi(tInput(iSeriesOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
-                        tInput(iOffset).atDicomInfo{1}.SeriesInstanceUID)
+            if dOffset == 0 || ... % The list start at 1
+               ~strcmpi(atInput(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
+                        atInput(dOffset).atDicomInfo{1}.SeriesInstanceUID)
 
                 bOffsetFound = false;
-                for bb=1:numel(tInput)
-                    if strcmpi(tInput(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
-                               tInput(iSeriesOffset).atDicomInfo{1}.SeriesInstanceUID)
-                        for cc=bb:numel(tInput) % Found the first frame
-                            if cc >= numel(tInput) || ... % End of list
-                               ~strcmpi(tInput(iSeriesOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the last frame
-                                        tInput(cc).atDicomInfo{1}.SeriesInstanceUID)
-                                iOffset = cc;
+                for bb=1:numel(atInput)
+                    if strcmpi(atInput(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
+                               atInput(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID)
+                        for cc=bb:numel(atInput) % Found the first frame
+                            if cc >= numel(atInput) || ... % End of list
+                               ~strcmpi(atInput(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the last frame
+                                        atInput(cc).atDicomInfo{1}.SeriesInstanceUID)
+                                dOffset = cc;
                                 bOffsetFound = true;
                                 break;
                             end
@@ -112,34 +114,34 @@ function oneGate3D(sDirection)
                 end
             end
         else
-            if iOffset == 0
-                iOffset = numel(tInput);
+            if dOffset == 0
+                dOffset = numel(atInput);
             end
         end
     end
     
-    if isempty( axePtr('get', [], iOffset) )
-        axe = axePtr('get', [], iSeriesOffset);
-        axePtr('set', axe, iOffset);
+    if isempty( axePtr('get', [], dOffset) )
+        axe = axePtr('get', [], dSeriesOffset);
+        axePtr('set', axe, dOffset);
     end
        
-    set(uiSeriesPtr('get'), 'Value', iOffset);
+    set(uiSeriesPtr('get'), 'Value', dOffset);
 
     aBuffer = squeeze(dicomBuffer('get'));
 
     if isempty(aBuffer)
         if     strcmp(imageOrientation('get'), 'axial')
-            aBuffer = permute(aInput{iOffset}, [1 2 3]);
+            aBuffer = permute(aInputBuffer{dOffset}, [1 2 3]);
         elseif strcmp(imageOrientation('get'), 'coronal')
-            aBuffer = permute(aInput{iOffset}, [3 2 1]);
+            aBuffer = permute(aInputBuffer{dOffset}, [3 2 1]);
         elseif strcmp(imageOrientation('get'), 'sagittal')
-            aBuffer = permute(aInput{iOffset}, [3 1 2]);
+            aBuffer = permute(aInputBuffer{dOffset}, [3 1 2]);
         end
 
         dicomBuffer('set', aBuffer);
     end
 
-    dicomMetaData('set', tInput(iOffset).atDicomInfo);
+    dicomMetaData('set', atInput(dOffset).atDicomInfo);
 
     if switchTo3DMode('get') == true
 
@@ -238,7 +240,7 @@ function oneGate3D(sDirection)
             dPriority = surface3DPriority('get', 'MaximumIntensityProjection');
             if dPriority == dPriorityLoop
 
-                mipObj = initVolShow(aBuffer, uiOneWindowPtr('get'), 'MaximumIntensityProjection', tInput(iSeriesOffset).atDicomInfo);
+                mipObj = initVolShow(aBuffer, uiOneWindowPtr('get'), 'MaximumIntensityProjection', atInput(dSeriesOffset).atDicomInfo);
                 if isFusion('get') == true
                     mipFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);
                 end
@@ -248,7 +250,7 @@ function oneGate3D(sDirection)
         if switchToIsoSurface('get') == true
             dPriority = surface3DPriority('get', 'Isosurface');
             if dPriority == dPriorityLoop
-                isoObj = initVolShow(aBuffer, uiOneWindowPtr('get'), 'Isosurface', tInput(iSeriesOffset).atDicomInfo);
+                isoObj = initVolShow(aBuffer, uiOneWindowPtr('get'), 'Isosurface', atInput(dSeriesOffset).atDicomInfo);
                 if isFusion('get') == true
                     isoFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'Isosurface', atFuseMetaData);
                 end
@@ -258,7 +260,7 @@ function oneGate3D(sDirection)
         if switchTo3DMode('get') == true
             dPriority = surface3DPriority('get', 'VolumeRendering');
             if dPriority == dPriorityLoop
-                volObj = initVolShow(aBuffer, uiOneWindowPtr('get'), 'VolumeRendering', tInput(iSeriesOffset).atDicomInfo);
+                volObj = initVolShow(aBuffer, uiOneWindowPtr('get'), 'VolumeRendering', atInput(dSeriesOffset).atDicomInfo);
                 if isFusion('get') == true
                     volFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'VolumeRendering', atFuseMetaData);
                 end
@@ -368,8 +370,8 @@ function oneGate3D(sDirection)
         end
     end
 
-    if isfield(tInput(iOffset), 'tVoi')
-%        voiTemplate('set', tInput(iOffset).tVoi);
+    if ~isempty(atVoi)
+        
         voiObj = initVoiIsoSurface(uiOneWindowPtr('get'));
 
         if ~isempty(voiObj)

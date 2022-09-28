@@ -2813,7 +2813,7 @@ end
 
                     dRoiOffset = round(numel(atVoiInput{1}.RoisTag)/2);
 
-                    triangulateRoi(atVoiInput{1}.RoisTag{dRoiOffset}, true);
+                    triangulateRoi(atVoiInput{1}.RoisTag{dRoiOffset});
                 end
 
                 % Activate ROI Panel
@@ -2827,7 +2827,7 @@ end
             end
                        
             catch
-                progressBar(1, 'Error:createIsoMaskCallback()');
+                progressBar(1, 'Error: createIsoMaskCallback()');
             end
             
             % Reactivate main tool bar 
@@ -3139,23 +3139,12 @@ end
 
                         sLabel = sprintf('RMAX-%d-VOI%d', dPercentMaxOrMaxSUVValue, bb);
 
-                        createVoiFromRois(dSeriesOffset, asTag, sLabel, sLesionType);
+                        createVoiFromRois(dSeriesOffset, asTag, sLabel, aColor, sLesionType);
 
                     end
                 end
             end
             
-%            clear(BW);
-
-%            if ~isempty(asAllTag)
-
-%                sLabel = sprintf('TOTAL-MASK');
-
-%                createVoiFromRois(dSeriesOffset, asAllTag, sLabel, 'Unspecified');
-%            end
-
-%            setVoiRoiSegPopup();
-%            setSeriesCallback();
 
             progressBar(1, 'Ready');
 

@@ -313,26 +313,6 @@ function [aNewPosition, aRadius, aSemiAxes, transM] = computeRoiScaledPosition(r
             end
     end    
     
-    function [outX, outY, outZ] = applyTransMatrix(transM, xV, yV, zV)
-
-        pointsM = [reshape(xV,[],1), reshape(yV,[],1) reshape(zV,[],1)]';    
-
-        %Rotation.
-        pointsM = transM(1:3,1:3) * pointsM;
-
-        %Translation XY
-        outX = pointsM(1,:) + transM(1,4);
-        outY = pointsM(2,:) + transM(2,4);
-        
-        %Translation Z
-        transM = transM'; % Patch for spect
-        
-        pointsM = [reshape(xV,[],1), reshape(yV,[],1) reshape(zV,[],1)]';         
-        pointsM = transM(1:3,1:3) * pointsM;
-        
-        outZ = pointsM(3,:) + transM(3,4);
-        
-    end
 end
 
 

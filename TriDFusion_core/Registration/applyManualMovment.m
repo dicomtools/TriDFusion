@@ -29,11 +29,19 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
 
     atInput = inputTemplate('get');
     
-    dFusedSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
-    
+    dSeriesOffset = get(uiSeriesPtr('get')     , 'Value');
+    dFusionOffset = get(uiFusedSeriesPtr('get'), 'Value');
+   
     aMovedDicomBuffer  = aDicomBuffer;
     aMovedFusionBuffer = aFusionBuffer;
-        
+   
+    atRefMetaData = dicomMetaData('get', [], dSeriesOffset);
+    atDcmMetaData = dicomMetaData('get', [], dFusionOffset);
+    if isempty(atDcmMetaData)
+        atDcmMetaData = atInput(dFusionOffset).atDicomInfo;
+    end
+    
+    
     bMovementApplied = false;
     
     progressBar(0.999, 'Processing Translation, please wait');
@@ -76,14 +84,14 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
 
             bMovementApplied = true;
             
-            atInput(dFusedSeriesOffset).tMovement.bMovementApplied = true;
-            if isempty(atInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe)
-                atInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe = 'Axe';
-                atInput(dFusedSeriesOffset).tMovement.atSeq{1}.aTranslation = TF;                       
+            atInput(dFusionOffset).tMovement.bMovementApplied = true;
+            if isempty(atInput(dFusionOffset).tMovement.atSeq{1}.sAxe)
+                atInput(dFusionOffset).tMovement.atSeq{1}.sAxe = 'Axe';
+                atInput(dFusionOffset).tMovement.atSeq{1}.aTranslation = TF;                       
             else
-                dNewMovementOffset = numel(atInput(dFusedSeriesOffset).tMovement.atSeq)+1;
-                atInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.sAxe = 'Axe';
-                atInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.aTranslation = TF;              
+                dNewMovementOffset = numel(atInput(dFusionOffset).tMovement.atSeq)+1;
+                atInput(dFusionOffset).tMovement.atSeq{dNewMovementOffset}.sAxe = 'Axe';
+                atInput(dFusionOffset).tMovement.atSeq{dNewMovementOffset}.aTranslation = TF;              
             end              
         end
     else
@@ -95,20 +103,54 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
             if bMoveFusion == true
                 aMovedFusionBuffer = translateImageMovement(aMovedFusionBuffer, aOffset);
             end
-
-            yScale = size(aDicomBuffer,1)/size(aFusionBuffer,1);
-            xScale = size(aDicomBuffer,2)/size(aFusionBuffer,2);
-            zScale = size(aDicomBuffer,3)/size(aFusionBuffer,3);
             
-            f = [ yScale 0      0      0
-                  0      xScale 0      0
-                  0      0      zScale 0
-                  0      0      0      1];
+            dcmSliceThickness = computeSliceSpacing(atDcmMetaData);
+            refSliceThickness = computeSliceSpacing(atRefMetaData);
+        
+            if dcmSliceThickness == 0  
+                dcmSliceThickness = 1;
+            end
+
+            if atDcmMetaData{1}.PixelSpacing(1) == 0 && ...
+               atDcmMetaData{1}.PixelSpacing(2) == 0 
+                for jj=1:numel(atDcmMetaData)
+                    atDcmMetaData{1}.PixelSpacing(1) =1;
+                    atDcmMetaData{1}.PixelSpacing(2) =1;
+                end       
+            end
+
+            if refSliceThickness == 0  
+                refSliceThickness = 1;
+            end
+
+            if atRefMetaData{1}.PixelSpacing(1) == 0 && ...
+               atRefMetaData{1}.PixelSpacing(2) == 0 
+                for jj=1:numel(atRefMetaData)
+                    atRefMetaData{1}.PixelSpacing(1) =1;
+                    atRefMetaData{1}.PixelSpacing(2) =1;
+                end       
+            end
+
+            [Mdti,~] = TransformMatrix(atDcmMetaData{1}, dcmSliceThickness);
+            [Mtf,~]  = TransformMatrix(atRefMetaData{1}, refSliceThickness);
+            
+            transM = inv(Mdti) * Mtf;
+            [outX, outY, outZ]  = applyTransMatrix(transM, aOffset(:,1), aOffset(:,2), aOffset(:,3)); 
+                        
+            
+%            yScale = size(aDicomBuffer,1)/size(aFusionBuffer,1);
+%            xScale = size(aDicomBuffer,2)/size(aFusionBuffer,2);
+%            zScale = size(aDicomBuffer,3)/size(aFusionBuffer,3);
+            
+%            f = [ yScale 0      0      0
+%                  0      xScale 0      0
+%                  0      0      zScale 0
+%                  0      0      0      1];
 
 
-            TF = affine3d(f);
+%            TF = affine3d(f);
 
-           [outX, outY, outZ] = transformPointsForward(TF, aOffset(:,1), aOffset(:,2), aOffset(:,3)); 
+%           [outX, outY, outZ] = transformPointsForward(TF, aOffset(:,1), aOffset(:,2), aOffset(:,3)); 
 
 %            pcOut = pctransform(pointCloud(aOffset), TF);
                         
@@ -124,14 +166,14 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
             
             bMovementApplied = true;
             
-            atInput(dFusedSeriesOffset).tMovement.bMovementApplied = true;
-            if isempty(atInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe)
-                atInput(dFusedSeriesOffset).tMovement.atSeq{1}.sAxe = 'Axes';
-                atInput(dFusedSeriesOffset).tMovement.atSeq{1}.aTranslation = TF;                       
+            atInput(dFusionOffset).tMovement.bMovementApplied = true;
+            if isempty(atInput(dFusionOffset).tMovement.atSeq{1}.sAxe)
+                atInput(dFusionOffset).tMovement.atSeq{1}.sAxe = 'Axes';
+                atInput(dFusionOffset).tMovement.atSeq{1}.aTranslation = transM;                       
             else
-                dNewMovementOffset = numel(atInput(dFusedSeriesOffset).tMovement.atSeq)+1;
-                atInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.sAxe = 'Axes';
-                atInput(dFusedSeriesOffset).tMovement.atSeq{dNewMovementOffset}.aTranslation = TF;              
+                dNewMovementOffset = numel(atInput(dFusionOffset).tMovement.atSeq)+1;
+                atInput(dFusionOffset).tMovement.atSeq{dNewMovementOffset}.sAxe = 'Axes';
+                atInput(dFusionOffset).tMovement.atSeq{dNewMovementOffset}.aTranslation = transM;              
             end             
         end         
     end

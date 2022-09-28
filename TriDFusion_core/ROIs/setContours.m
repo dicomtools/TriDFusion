@@ -159,7 +159,7 @@ function setContours(tContours)
                                 end
 
                                 if ~isempty(asTag)
-                                    createVoiFromRois(bb, asTag, sLabel, 'Unspecified');                        
+                                    createVoiFromRois(bb, asTag, sLabel, aColor, 'Unspecified');                        
                                 end            
                             end
                         end

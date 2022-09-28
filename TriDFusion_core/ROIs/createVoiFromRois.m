@@ -1,5 +1,5 @@
-function createVoiFromRois(iSeriesOffset, adTag, sVoiName, sLesionType)
-%function createVoiFromRois(iSeriesOffset, adTag, sVoiName, sLesionType)
+function createVoiFromRois(dSeriesOffset, asTag, sVoiName, sColor, sLesionType)
+%function createVoiFromRois(dSeriesOffset, asTag, sVoiName, sColor, sLesionType)
 %Create VOI From Array Of ROIs tag.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,91 +27,50 @@ function createVoiFromRois(iSeriesOffset, adTag, sVoiName, sLesionType)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tInput = inputTemplate('get');
-
-    if iSeriesOffset > numel(tInput)
-        return;
-    end
-
-    atRoi = roiTemplate('get', iSeriesOffset);
+    atRoi = roiTemplate('get', dSeriesOffset);
     if isempty(atRoi)
         return;
     end
-
-    if isfield(tInput(iSeriesOffset), 'tVoi')
-        if isempty(tInput(iSeriesOffset).tVoi)
-            dVoiOffset = 1;
-        else
-            dVoiOffset = numel(tInput(iSeriesOffset).tVoi)+1;
-        end
-
-    else
-        dVoiOffset = 1;
-    end
+    
+    atVoi = voiTemplate('get', dSeriesOffset);
+    dVoiOffset = numel(atVoi)+1;
 
     if ~isempty(sVoiName)
-        tInput(iSeriesOffset).tVoi{dVoiOffset}.Label = sVoiName;
+        atVoi{dVoiOffset}.Label = sVoiName;
     else
-        tInput(iSeriesOffset).tVoi{dVoiOffset}.Label = sprintf('VOI %d', dVoiOffset);
+        atVoi{dVoiOffset}.Label = sprintf('VOI %d', dVoiOffset);
     end
 
     dRoiNb = 0;
-    dNbTags = numel(adTag);
-    
-    sVoiTag = [];
-
-    for bb=1:dNbTags
-        for cc=1:numel(atRoi) % Set VOI tag, type and color
-%            if isvalid(atRoi{cc}.Object)
-                if strcmp(atRoi{cc}.Tag, adTag{bb})
-                    sVoiTag = num2str(randi([-(2^52/2),(2^52/2)],1));
-                    tInput(iSeriesOffset).tVoi{dVoiOffset}.Tag        = sVoiTag;
-                    tInput(iSeriesOffset).tVoi{dVoiOffset}.ObjectType = 'voi';
-                    tInput(iSeriesOffset).tVoi{dVoiOffset}.Color      = atRoi{cc}.Color;
-                    tInput(iSeriesOffset).tVoi{dVoiOffset}.LesionType = sLesionType;
-
-                    tInput(iSeriesOffset).tVoi{dVoiOffset}.RoisTag = num2cell(zeros(1,numel(adTag)));
-                    break;
-                end
-%           end
-        end
-    end
+    dNbTags = numel(asTag);
+     
+    sVoiTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+    atVoi{dVoiOffset}.Tag        = sVoiTag;
+    atVoi{dVoiOffset}.ObjectType = 'voi';
+    atVoi{dVoiOffset}.Color      = sColor;
+    atVoi{dVoiOffset}.LesionType = sLesionType;
+    atVoi{dVoiOffset}.RoisTag    = cell(1, dNbTags);
 
     for bb=1:dNbTags
 
-        if dNbTags > 100
-            if mod(bb, 10)==1 || bb == dNbTags
-                progressBar( bb/dNbTags, sprintf('Computing ROI %d/%d, please wait', bb, dNbTags) );
-            end
-        end
+        aTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), asTag(bb) );
+        dRoiTagOffset = find(aTagOffset, 1);  
+        
+        if ~isempty(dRoiTagOffset)
 
-        for cc=1:numel(atRoi)
-%            if isvalid(atRoi{cc}.Object)
-                if strcmp(atRoi{cc}.Tag, adTag{bb})
+            atRoi{dRoiTagOffset}.ObjectType  = 'voi-roi';
+            atVoi{dVoiOffset}.RoisTag{bb} = atRoi{dRoiTagOffset}.Tag;
 
-                    atRoi{cc}.ObjectType  = 'voi-roi';
-                    tInput(iSeriesOffset).tRoi{cc}.ObjectType = atRoi{cc}.ObjectType;
-                    tInput(iSeriesOffset).tVoi{dVoiOffset}.RoisTag{bb} = atRoi{cc}.Tag;
+            dRoiNb = dRoiNb+1;
+            sLabel = sprintf('%s (roi %d/%d)', atVoi{dVoiOffset}.Label, dRoiNb, dNbTags);
 
-                    dRoiNb = dRoiNb+1;
-                    sLabel = sprintf('%s (roi %d/%d)', tInput(iSeriesOffset).tVoi{dVoiOffset}.Label, dRoiNb, dNbTags);
-
-                    atRoi{cc}.Label = sLabel;
-                    atRoi{cc}.Object.Label = sLabel;
-                    voiDefaultMenu(atRoi{cc}.Object, sVoiTag);
-                    break;
-                end
-%            end
+            atRoi{dRoiTagOffset}.Label = sLabel;
+            atRoi{dRoiTagOffset}.Object.Label = sLabel;
+            voiDefaultMenu(atRoi{dRoiTagOffset}.Object, sVoiTag);
         end
     end
 
-    roiTemplate('set', iSeriesOffset, atRoi);
-    voiTemplate('set', iSeriesOffset, tInput(iSeriesOffset).tVoi);
-
-    inputTemplate('set', tInput);
-
-    if dNbTags > 100
-        progressBar( 1, 'Ready' );
-    end
+    roiTemplate('set', dSeriesOffset, atRoi);
+    voiTemplate('set', dSeriesOffset, atVoi);
 
 end

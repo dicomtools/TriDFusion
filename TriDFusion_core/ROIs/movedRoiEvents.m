@@ -27,12 +27,6 @@ function movedRoiEvents(hObject, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tInput = inputTemplate('get');
-    iOffset = get(uiSeriesPtr('get'), 'Value');
-    if iOffset > numel(tInput)
-        return;
-    end
-
     atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
     
     if isempty(atRoi)
@@ -45,36 +39,108 @@ function movedRoiEvents(hObject, ~)
     if ~isempty(dTagOffset)
            
         atRoi{dTagOffset}.Position = hObject.Position;
-        tInput(iOffset).tRoi{dTagOffset}.Position = hObject.Position;
 
         switch lower(hObject.Type)
             
             case lower('images.roi.circle')
-                atRoi{dTagOffset}.Radius = hObject.Radius;
+                
+                atRoi{dTagOffset}.Radius   = hObject.Radius;
                 atRoi{dTagOffset}.Vertices = hObject.Vertices;
-                 
-                tInput(iOffset).tRoi{dTagOffset}.Radius = hObject.Radius;                
-                tInput(iOffset).tRoi{dTagOffset}.Vertices = hObject.Vertices;
                 
              case lower('images.roi.ellipse')
+                
+                if strcmpi(hObject.UserData, 'Sphere')
+                    
+                    atVoi = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+                                          
+                    aSemiAxesRatio = atRoi{dTagOffset}.SemiAxes ./ hObject.SemiAxes;
+                    
+                    for vv=1:numel(atVoi)
+                        
+                        pRoisTag = atVoi{vv}.RoisTag;
+                        aTagOffset = strcmp( cellfun( @(pRoisTag) pRoisTag, pRoisTag, 'uni', false ), {hObject.Tag} );
+                        
+                        if find(aTagOffset, 1) % Move all sphere objects
+                            
+                            sVoiLable = []; 
+                            
+                            for rr=1:numel(pRoisTag)
+                                
+                                if strcmp(pRoisTag{rr}, hObject.Tag)
+                                    
+                                    if aSemiAxesRatio(1) ~= 1 && ...
+                                       aSemiAxesRatio(2) ~= 1    
+                                    
+                                    atRoi{dTagOffset}.SemiAxes      = hObject.SemiAxes;
+                                    atRoi{dTagOffset}.RotationAngle = hObject.RotationAngle;
+                                    atRoi{dTagOffset}.Vertices      = hObject.Vertices;
+                
+                                    tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get'), dicomMetaData('get'), atRoi{dTagOffset}, false, false);
+
+                                    sVoiLable = sprintf('Sphere %s mm', num2str(tMaxDistances.MaxXY.Length));
+                                    atVoi{vv}.Label = sVoiLable;
+                                    
+                                    voiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atVoi);
+                                    
+                                    setVoiRoiSegPopup();
+                                    
+                                    atRoi{dTagOffset}.Object.Label = sprintf('%s (roi %d/%d)', sVoiLable, rr, numel(pRoisTag));
+                                    atRoi{dTagOffset}.Label = sprintf('%s (roi %d/%d)', sVoiLable, rr, numel(pRoisTag));
+
+                                    end
+                                    
+                                    continue;
+                                end
+                                
+                                aTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), pRoisTag(rr) );
+                                dVoiRoiTagOffset = find(aTagOffset, 1);      
+                                
+                                if ~isempty(dVoiRoiTagOffset)
+      
+                                    atRoi{dVoiRoiTagOffset}.Object.Center = hObject.Center;
+                                    atRoi{dVoiRoiTagOffset}.Position      = hObject.Center;
+                                    
+                                    if aSemiAxesRatio(1) ~= 1 && ...
+                                       aSemiAxesRatio(2) ~= 1  
+                                   
+                                     if ~isempty(sVoiLable)
+                                        atRoi{dVoiRoiTagOffset}.Object.Label = sprintf('%s (roi %d/%d)', sVoiLable, rr, numel(pRoisTag));
+                                        atRoi{dVoiRoiTagOffset}.Label = sprintf('%s (roi %d/%d)', sVoiLable, rr, numel(pRoisTag));
+                                     end
+
+                                    atRoi{dVoiRoiTagOffset}.Object.SemiAxes      = atRoi{dVoiRoiTagOffset}.Object.SemiAxes ./ aSemiAxesRatio;
+                                    atRoi{dVoiRoiTagOffset}.Object.RotationAngle = hObject.RotationAngle;
+
+                                    atRoi{dVoiRoiTagOffset}.SemiAxes      = atRoi{dVoiRoiTagOffset}.Object.SemiAxes;
+                                    atRoi{dVoiRoiTagOffset}.RotationAngle = atRoi{dVoiRoiTagOffset}.Object.RotationAngle;
+
+                                    tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get'), dicomMetaData('get'), atRoi{dVoiRoiTagOffset}, false, false);
+                                    atRoi{dVoiRoiTagOffset}.MaxDistances = tMaxDistances;    
+                                    end
+                                    
+                                    atRoi{dVoiRoiTagOffset}.Vertices = atRoi{dVoiRoiTagOffset}.Object.Vertices;     
+                                    
+                                end   
+                                                            
+                            end
+                        end
+                        
+                        break
+                    end                    
+                end
+                
                 atRoi{dTagOffset}.SemiAxes      = hObject.SemiAxes;
                 atRoi{dTagOffset}.RotationAngle = hObject.RotationAngle;
                 atRoi{dTagOffset}.Vertices      = hObject.Vertices;
-                
-                tInput(iOffset).tRoi{dTagOffset}.SemiAxes = hObject.SemiAxes;
-                tInput(iOffset).tRoi{dTagOffset}.RotationAngle = hObject.RotationAngle;
-                tInput(iOffset).tRoi{dTagOffset}.Vertices = hObject.Vertices;
-                
+                               
              case lower('images.roi.rectangle')
                 atRoi{dTagOffset}.Vertices = hObject.Vertices;
-                tInput(iOffset).tRoi{dTagOffset}.Vertices = hObject.Vertices;
                 
              case lower('images.roi.line')
                 dLength = computeRoiLineLength(hObject);
                 
-                atRoi{dTagOffset}.Label                = [num2str(dLength) ' mm'];
-                atRoi{dTagOffset}.Object.Label         = [num2str(dLength) ' mm'];
-                tInput(iOffset).tRoi{dTagOffset}.Label = [num2str(dLength) ' mm'];
+                atRoi{dTagOffset}.Label          = [num2str(dLength) ' mm'];
+                atRoi{dTagOffset}.Object.Label   = [num2str(dLength) ' mm'];
         end
 
         if ~isempty(atRoi{dTagOffset}.MaxDistances)
@@ -100,7 +166,6 @@ function movedRoiEvents(hObject, ~)
         atRoi{dTagOffset}.MaxDistances = tMaxDistances;
 
         roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoi);
-        inputTemplate('set', tInput);
 
         if viewFarthestDistances('get') == true
             refreshImages();

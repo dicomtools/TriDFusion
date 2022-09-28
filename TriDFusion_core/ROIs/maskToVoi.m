@@ -133,7 +133,7 @@ function maskToVoi(aMask, sLabel, aColor, sPlane, dSeriesOffset, bPixelEdge)
     end
     
     if ~isempty(asTag)
-        createVoiFromRois(dSeriesOffset, asTag, sLabel, 'Unspecified');
+        createVoiFromRois(dSeriesOffset, asTag, sLabel, aColor, 'Unspecified');
         setVoiRoiSegPopup();
     end
     

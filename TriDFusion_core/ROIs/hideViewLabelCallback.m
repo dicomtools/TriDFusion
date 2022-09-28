@@ -27,9 +27,6 @@ function hideViewLabelCallback(hObject,~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    dSerieOffset = get(uiSeriesPtr('get'), 'Value');
-    atInput = inputTemplate('get');
-
     atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
     
     if isempty(atRoiInput) 
@@ -58,22 +55,7 @@ function hideViewLabelCallback(hObject,~)
             end
 
             roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
-        end
-
-        % Set roi label input template tRoi
-
-        if isfield(atInput(dSerieOffset), 'tRoi')
-
-            atInputRoi = atInput(dSerieOffset).tRoi;
-            aTagOffset = strcmp( cellfun( @(atInputRoi) atInputRoi.Tag, atInputRoi, 'uni', false ), {hObject.UserData.Tag} );      
-
-            dTagOffset = find(aTagOffset, 1);
-
-            if ~isempty(dTagOffset)
-                atInput(dSerieOffset).tRoi{dTagOffset}.LabelVisible = sLabelVisible;
-                inputTemplate('set', atInput);                
-            end
-        end                               
+        end                             
     end
     
 end
