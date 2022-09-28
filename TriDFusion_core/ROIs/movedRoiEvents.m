@@ -100,8 +100,8 @@ function movedRoiEvents(hObject, ~)
                                     atRoi{dVoiRoiTagOffset}.Object.Center = hObject.Center;
                                     atRoi{dVoiRoiTagOffset}.Position      = hObject.Center;
                                     
-                                    if aSemiAxesRatio(1) ~= 1 && ...
-                                       aSemiAxesRatio(2) ~= 1  
+%                                    if aSemiAxesRatio(1) ~= 1 && ...
+%                                       aSemiAxesRatio(2) ~= 1  
                                    
                                      if ~isempty(sVoiLable)
                                         atRoi{dVoiRoiTagOffset}.Object.Label = sprintf('%s (roi %d/%d)', sVoiLable, rr, numel(pRoisTag));
@@ -116,7 +116,7 @@ function movedRoiEvents(hObject, ~)
 
                                     tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get'), dicomMetaData('get'), atRoi{dVoiRoiTagOffset}, false, false);
                                     atRoi{dVoiRoiTagOffset}.MaxDistances = tMaxDistances;    
-                                    end
+%                                    end
                                     
                                     atRoi{dVoiRoiTagOffset}.Vertices = atRoi{dVoiRoiTagOffset}.Object.Vertices;     
                                     
