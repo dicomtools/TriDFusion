@@ -72,24 +72,31 @@ function constraintMenu(ptrRoi)
         
         ptrConstraintRoi = get(hObject, 'UserData'); 
         sConstraintTag   = get(ptrConstraintRoi, 'Tag');
-        
-        set(mConstraintInsideObject , 'Checked', 'off');                    
-        
-        if size(dicomBuffer('get'), 3) ~= 1 % 2D Image       
+                
+        if size(dicomBuffer('get'), 3) == 1 % 2D Image       
             set(mConstraintInsideEverySlice , 'Checked', 'off');                    
         end
         
         [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value') );
         
-        for tt=1:numel(asConstraintTagList)
-            if strcmp(asConstraintTagList{tt}, sConstraintTag)
-                if     strcmpi(asConstraintTypeList{tt}, 'Inside This Contour')
+        if isempty(asConstraintTagList)
+            set(mConstraintInsideObject , 'Checked', 'off');                    
+        else
+            aTagOffset = strcmp( cellfun( @(asConstraintTagList) asConstraintTagList, asConstraintTagList, 'uni', false ), sConstraintTag);
+            dVoiTagOffset = find(aTagOffset, 1);   
+
+            if ~isempty(dVoiTagOffset) % tag is active
+                if     strcmpi(asConstraintTypeList{dVoiTagOffset}, 'Inside This Contour')
                     set(mConstraintInsideObject, 'Checked', 'on');                                     
-                elseif strcmpi(asConstraintTypeList{tt}, 'Inside Every Slice')
+                elseif strcmpi(asConstraintTypeList{dVoiTagOffset}, 'Inside Every Slice')
                     set(mConstraintInsideEverySlice, 'Checked', 'on');                                      
+                else
+                    set(mConstraintInsideObject , 'Checked', 'off');                    
                 end
+            else
+                set(mConstraintInsideObject , 'Checked', 'off');                    
             end
-        end 
+        end
     end
 
     function setRoiConstraintCallback(hObject, ~)
@@ -99,7 +106,31 @@ function constraintMenu(ptrRoi)
         
         sConstraintTag = get(ptrConstraintRoi, 'Tag');
 
+        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
         roiConstraintList('set', get(uiSeriesPtr('get'), 'Value'), sConstraintTag, sConstraintType);
+
+        aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), sConstraintTag);
+        dRoiVoiTagOffset = find(aTagOffset, 1);   
+
+        if ~isempty(dRoiVoiTagOffset) % tag is a voi
+
+            [asConstraintTagList, ~] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value') );
+
+            bIsVoiActive = false;
+
+            aTagOffset = strcmp( cellfun( @(asConstraintTagList) asConstraintTagList, asConstraintTagList, 'uni', false ), sConstraintTag);
+            dVoiTagOffset = find(aTagOffset, 1);   
+
+            if ~isempty(dVoiTagOffset) % tag is active
+                bIsVoiActive = true;
+            end        
+
+            for tt=1:numel(atVoiInput{dRoiVoiTagOffset}.RoisTag)
+                sConstraintTag = atVoiInput{dRoiVoiTagOffset}.RoisTag{tt};
+                roiConstraintList('set', get(uiSeriesPtr('get'), 'Value'), sConstraintTag, sConstraintType, bIsVoiActive);
+            end
+        end 
         
     end   
 

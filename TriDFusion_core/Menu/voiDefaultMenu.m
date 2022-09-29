@@ -104,9 +104,10 @@ function voiDefaultMenu(ptrRoi, sTag)
     
     function setMenuConstraintCheckedCallback(hObject, ~)
         
-        if isfield(ptrRoi, 'ContextMenu')
+        if isprop(ptrRoi, 'ContextMenu')
                
             for mcc=1:numel(hObject.Children)
+                
                 if strcmpi(hObject.Children(mcc).Label, 'Invert Constraint')
 
                     if invertConstraint('get') == true
@@ -114,31 +115,30 @@ function voiDefaultMenu(ptrRoi, sTag)
                     else
                         set(hObject.Children(mcc), 'Checked', 'off');
                     end                
+                else
+                    sConstraintTag = get(hObject, 'UserData'); 
 
-                    break;
-                end
-            end        
+                    [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value') );
+                    if isempty(asConstraintTagList)
+                        set(hObject.Children(mcc), 'Checked', 'off');                    
+                    else
+                        aTagOffset = strcmp( cellfun( @(asConstraintTagList) asConstraintTagList, asConstraintTagList, 'uni', false ), sConstraintTag);
+                        dVoiTagOffset = find(aTagOffset, 1);  
 
-            sConstraintTag = get(hObject, 'UserData'); 
-
-            [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value') );
-
-            for tt=1:numel(asConstraintTagList)
-                if strcmp(asConstraintTagList{tt}, sConstraintTag)
-
-                    if strcmpi(asConstraintTypeList{tt}, 'Inside This Contour')
-
-                        for mcc=1:numel(hObject.Children)
-                            if strcmpi(hObject.Children(mcc).Label, 'Inside This Contour')
-
-                                set(hObject.Children(mcc), 'Checked', 'on');                                                
-
-                                break;
+                        if ~isempty(dVoiTagOffset) % tag is active
+                            if     strcmpi(asConstraintTypeList{dVoiTagOffset}, 'Inside This Contour')
+                                set(hObject.Children(mcc), 'Checked', 'on');                                     
+                            elseif strcmpi(asConstraintTypeList{dVoiTagOffset}, 'Inside Every Slice')
+                                set(hObject.Children(mcc), 'Checked', 'on');                                      
+                            else
+                                set(hObject.Children(mcc), 'Checked', 'off');                    
                             end
-                        end                                                          
+                        else
+                            set(hObject.Children(mcc), 'Checked', 'off');                    
+                        end
                     end
                 end
-            end 
+            end        
         end
     end           
        

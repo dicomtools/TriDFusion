@@ -66,6 +66,7 @@ function createVoiFromRois(dSeriesOffset, asTag, sVoiName, sColor, sLesionType)
 
             atRoi{dRoiTagOffset}.Label = sLabel;
             atRoi{dRoiTagOffset}.Object.Label = sLabel;
+            
             voiDefaultMenu(atRoi{dRoiTagOffset}.Object, sVoiTag);
         end
     end
