@@ -32,33 +32,35 @@ function constraintContourFromMenuCallback(hObject, ~)
 
 %    aVoiRoiTag = voiRoiTag('get');
 
-%    tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
     atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
     roiConstraintList('set', get(uiSeriesPtr('get'), 'Value'), sConstraintTag, sConstraintType);
     
-    aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), sConstraintTag);
-    dRoiVoiTagOffset = find(aTagOffset, 1);   
-   
-    if ~isempty(dRoiVoiTagOffset) % tag is a voi
+    if ~isempty(atVoiInput)
         
-        [asConstraintTagList, ~] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value') );
-        
-        bIsVoiActive = false;
-        
-        if ~isempty(asConstraintTagList)
-            aTagOffset = strcmp( cellfun( @(asConstraintTagList) asConstraintTagList, asConstraintTagList, 'uni', false ), sConstraintTag);
-            dVoiTagOffset = find(aTagOffset, 1);   
+        aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), sConstraintTag);
+        dRoiVoiTagOffset = find(aTagOffset, 1);   
+    
+        if ~isempty(dRoiVoiTagOffset) % tag is a voi
 
-            if ~isempty(dVoiTagOffset) % tag is active
-                bIsVoiActive = true;
-            end        
-        end
-        
-        for tt=1:numel(atVoiInput{dRoiVoiTagOffset}.RoisTag)
-            sConstraintTag = atVoiInput{dRoiVoiTagOffset}.RoisTag{tt};
-            roiConstraintList('set', get(uiSeriesPtr('get'), 'Value'), sConstraintTag, sConstraintType, bIsVoiActive);
-        end
-    end   
-      
+            [asConstraintTagList, ~] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value') );
+
+            bIsVoiActive = false;
+
+            if ~isempty(asConstraintTagList)
+                aTagOffset = strcmp( cellfun( @(asConstraintTagList) asConstraintTagList, asConstraintTagList, 'uni', false ), sConstraintTag);
+                dVoiTagOffset = find(aTagOffset, 1);   
+
+                if ~isempty(dVoiTagOffset) % tag is active
+                    bIsVoiActive = true;
+                end        
+            end
+
+            for tt=1:numel(atVoiInput{dRoiVoiTagOffset}.RoisTag)
+                sConstraintTag = atVoiInput{dRoiVoiTagOffset}.RoisTag{tt};
+                roiConstraintList('set', get(uiSeriesPtr('get'), 'Value'), sConstraintTag, sConstraintType, bIsVoiActive);
+            end            
+        end         
+    end
+    
 end

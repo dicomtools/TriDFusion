@@ -29,6 +29,7 @@ function uiSeries = uiSeriesPtr(sAction, dValue)
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+
     persistent pdPtr;        
 
     if strcmpi('set', sAction)

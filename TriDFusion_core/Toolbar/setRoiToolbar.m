@@ -1097,6 +1097,14 @@ function setRoiToolbar(sVisible)
             
             dSphereDiameter = sphereDefaultDiameter('get'); % in mm
             
+            if xPixel == 0
+                xPixel = 1;
+            end
+            
+            if yPixel == 0
+                yPixel = 1;
+            end
+            
             if dSphereDiameter > 0
                 dSemiAxesX = dSphereDiameter/xPixel/2; % In pixel
                 dSemiAxesY = dSphereDiameter/yPixel/2; % In pixel
