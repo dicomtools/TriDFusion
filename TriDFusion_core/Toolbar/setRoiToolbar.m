@@ -1197,7 +1197,7 @@ function setRoiToolbar(sVisible)
                     
                     dPixelRatio = xPixel/yPixel;
                     
-                    dBufferSize = size(aDicomBuffer, 1);
+                    dBufferSize = size(aDicomBuffer, 1);                    
                     
 
                 % Sagittal axe
@@ -1232,9 +1232,10 @@ function setRoiToolbar(sVisible)
                     dBufferSize = size(aDicomBuffer, 3);
                     
             end                  
-
+            
+            
             aSphereMask = getSphereMask(aDicomBuffer, xPixelOffset, yPixelOffset, zPixelOffset, dRadius);
-                                     
+            
             for zz=1:dBufferSize    
 
                 if zz==dSliceNb

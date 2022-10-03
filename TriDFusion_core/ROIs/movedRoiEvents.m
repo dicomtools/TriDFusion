@@ -123,9 +123,10 @@ function movedRoiEvents(hObject, ~)
                                 end   
                                                             
                             end
-                        end
-                        
-                        break
+                            
+                            break;
+                            
+                        end                        
                     end                    
                 end
                 

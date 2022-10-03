@@ -246,7 +246,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                                 dNBoundaries = size(xy,1);                          
 
                                 azOffset = zeros(dNBoundaries, 1);
-                                azOffset(:)=atRoiInput{tt}.SliceNb;
+                                azOffset(:)=atRoiInput{tt}.SliceNb-1;
     %                            a3DOffset(:,3)=atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
 
                                 if bFlip == true

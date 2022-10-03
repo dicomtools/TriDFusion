@@ -90,6 +90,8 @@ function pasteRoiCallback(~, ~)
 
             uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
+            addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+
 
         case lower('images.roi.freehand')
             
@@ -129,6 +131,8 @@ function pasteRoiCallback(~, ~)
             voiMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
+            
+            addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
 
 
         case lower('images.roi.polygon')
@@ -168,6 +172,8 @@ function pasteRoiCallback(~, ~)
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
 
+            addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+            
 
         case lower('images.roi.circle')
 
@@ -197,8 +203,10 @@ function pasteRoiCallback(~, ~)
             voiMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
+            
+            addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
 
-
+            
         case lower('images.roi.ellipse')
 
             pRoi = images.roi.Ellipse(ptrRoi.Parent, ...
@@ -231,7 +239,108 @@ function pasteRoiCallback(~, ~)
             voiMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
+            
+            addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+            
+            if strcmpi(pRoi.UserData, 'Sphere')
 
+                atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+                atVoi = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+                
+                aRoiTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {ptrRoi.Tag} );
+                dFirstRoiOffset = find(aRoiTagOffset, 1); 
+                
+                if ~isempty(dFirstRoiOffset)
+                    
+                    for vv=1:numel(atVoi)
+
+                        pRoisTag   = atVoi{vv}.RoisTag;
+                        aTagOffset = strcmp( cellfun( @(pRoisTag) pRoisTag, pRoisTag, 'uni', false ), {ptrRoi.Tag} );
+
+                        if find(aTagOffset, 1) % Found sphere
+
+                            asTag{1} = sTag;
+                            
+                            switch lower(atRoi{dFirstRoiOffset}.Axe)
+
+                                case 'axes1'
+                                    sPlane = 'coronal';
+                                    dLastSlice = size(dicomBuffer('get'), 1);
+
+                                case 'axes2'
+                                    dLastSlice = size(dicomBuffer('get'), 2);
+                                    sPlane = 'sagittal';
+
+                                case 'axes3'
+                                    sPlane = 'axial';
+                                    dLastSlice = size(dicomBuffer('get'), 3);
+                            end
+                            
+                            dInitalRoiOffset = sliceNumber('get', sPlane);
+                            
+                            for rr=1:numel(pRoisTag)
+
+                                if strcmp(pRoisTag{rr}, ptrRoi.Tag)
+                                    continue;
+                                end
+
+                                aTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), pRoisTag(rr) );
+                                dVoiRoiTagOffset = find(aTagOffset, 1);      
+
+                                if ~isempty(dVoiRoiTagOffset)
+
+                                    dSliceOffset =   atRoi{dFirstRoiOffset}.SliceNb - atRoi{dVoiRoiTagOffset}.SliceNb;
+                                    
+                                    dSliceNumber = dInitalRoiOffset-dSliceOffset;
+                                    
+                                    if dSliceNumber > dLastSlice || ...
+                                       dSliceNumber < 1 
+                                        continue;
+                                    end
+                                    
+                                    sliceNumber('set', sPlane, dSliceNumber);                
+
+                                    sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+
+                                    a = images.roi.Ellipse(gca, ...
+                                                           'Center'             , pRoi.Center, ...
+                                                           'SemiAxes'           , atRoi{dVoiRoiTagOffset}.SemiAxes, ...
+                                                           'RotationAngle'      , atRoi{dVoiRoiTagOffset}.RotationAngle, ...
+                                                           'Deletable'          , 0, ...
+                                                           'FixedAspectRatio'   , atRoi{dVoiRoiTagOffset}.FixedAspectRatio, ...
+                                                           'InteractionsAllowed', atRoi{dVoiRoiTagOffset}.InteractionsAllowed, ...
+                                                           'StripeColor'        , atRoi{dVoiRoiTagOffset}.StripeColor, ...
+                                                           'Color'              , atRoi{dVoiRoiTagOffset}.Color, ...
+                                                           'LineWidth'          , atRoi{dVoiRoiTagOffset}.LineWidth, ...
+                                                           'Label'              , roiLabelName(), ...
+                                                           'LabelVisible'       , 'off', ...
+                                                           'Tag'                , sTag, ...
+                                                           'FaceSelectable'     , atRoi{dVoiRoiTagOffset}.FaceSelectable, ...
+                                                           'FaceAlpha'          , atRoi{dVoiRoiTagOffset}.FaceAlpha, ...
+                                                           'UserData'           , atRoi{dVoiRoiTagOffset}.UserData, ...
+                                                           'Visible'            , 'off' ...
+                                                           );
+
+                                    addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+
+                                    asTag{numel(asTag)+1} = sTag;    
+
+                                end   
+
+                            end
+                        end
+                        
+                        createVoiFromRois(get(uiSeriesPtr('get'), 'Value'), asTag, sprintf('Sphere %s mm', num2str(atRoi{dFirstRoiOffset}.MaxDistances.MaxXY.Length)), ptrRoi.Color, 'Unspecified');
+
+                        setVoiRoiSegPopup();
+
+                        sliceNumber('set', sPlane, dInitalRoiOffset);
+                        
+                        break;
+                    end   
+                end
+            end
+                
 
         case lower('images.roi.rectangle')
                         
@@ -271,12 +380,13 @@ function pasteRoiCallback(~, ~)
             voiMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
+            
+            addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
 
         otherwise
             return;
     end
     
-    addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
 
 %    setVoiRoiSegPopup();
 
