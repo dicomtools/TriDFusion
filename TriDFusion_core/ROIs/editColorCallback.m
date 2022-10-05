@@ -29,31 +29,25 @@ function editColorCallback(hObject,~)
 
     sColor = uisetcolor([hObject.UserData.Color],'Select a color');
     
-    dSerieOffset = get(uiSeriesPtr('get'), 'Value');
-
     atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
     
     if isempty(atRoiInput) 
-        aTagOffset = 0;
+        return;        
     else
-        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );            
-    end
-    
-    if aTagOffset(aTagOffset==1) % tag is a roi
-
+        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );       
         dTagOffset = find(aTagOffset, 1);
+    end
 
-        if ~isempty(dTagOffset)
+    if ~isempty(dTagOffset)
 
-            hObject.UserData.Color = sColor;
+        hObject.UserData.Color = sColor;
 
-            atRoiInput{dTagOffset}.Color = sColor;
-            if isvalid(atRoiInput{dTagOffset}.Object)
-                atRoiInput{dTagOffset}.Object.Color = sColor;
-            end
-
-            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+        atRoiInput{dTagOffset}.Color = sColor;
+        if isvalid(atRoiInput{dTagOffset}.Object)
+            atRoiInput{dTagOffset}.Object.Color = sColor;
         end
+
+        roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+    end
                       
-    end    
 end

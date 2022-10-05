@@ -29,19 +29,14 @@ function hideViewLabelCallback(hObject,~)
 
     atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
     
-    if isempty(atRoiInput) 
-        aTagOffset = 0;
-    else
+    if ~isempty(atRoiInput) 
+        
         aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );            
-    end
-    
-    if aTagOffset(aTagOffset==1) % tag is a roi
-
-        sLabelVisible = 'off';
-
         dTagOffset = find(aTagOffset, 1);
 
         if ~isempty(dTagOffset)
+            
+            sLabelVisible = 'off';
 
             if strcmpi(hObject.UserData.LabelVisible, 'off')
                 sLabelVisible = 'on';

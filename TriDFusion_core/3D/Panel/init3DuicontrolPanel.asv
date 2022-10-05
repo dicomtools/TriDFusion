@@ -2430,7 +2430,6 @@ end
 
                         case 'axes2'
                             aSlice = permute(im(:,atRoiInput{dTagOffset}.SliceNb,:), [3 1 2]);
-                            
                         case 'axes3'
                             aSlice = im(:,:,atRoiInput{dTagOffset}.SliceNb);       
                     end
@@ -2440,48 +2439,12 @@ end
                     fv = isosurface(im, dIsoValue, aSurfaceColor{dColorOffset}); % Make patch w. faces "out"
                     aVolume = polygon2voxel(fv, size(im), 'none');
                     
-                    switch lower(atRoiInput{dTagOffset}.Axe)
-                        
-                        case 'axes1'   
-                            
-                            for kk=1:size(aVolume, 1)
-                                
-                                aSlice = permute(aVolume(kk,:,:), [3 2 1]); % 10% of treshold Liver 
-                                aSlice(aLogicalMask==0)=0;
-                                aVolume(kk,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);  
-                                
-                                aSlice = permute(BW(kk,:,:), [3 2 1]);  % Outside Liver 
-                                aSlice(aLogicalMask==1)=0;
-                                BW(kk,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);                                                                                            
-                            end
-
-                        case 'axes2'
-                            
-                            for kk=1:size(aVolume, 2)
-                                aSlice = permute(aVolume(:,kk,:), [3 1 2]); % 10% of treshold Liver 
-                                aSlice(aLogicalMask==0)=0;
-                                aVolume(:,kk,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);  
-                                
-                                aSlice = permute(BW(:,kk,:), [3 1 2]);  % Outside Liver 
-                                aSlice(aLogicalMask==1)=0;
-                                BW(:,kk,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]); 
-                            end
-                            
-                        case 'axes3'
-                            
-                            for kk=1:size(aVolume, 3)
-                                aSlice = aVolume(:,:,kk); % 10% of treshold Liver 
-                                aSlice(aLogicalMask==0)=0;
-                                aVolume(:,:,kk) = aSlice;  
-                                
-                                aSlice = BW(:,:,kk);  % Outside Liver 
-                                aSlice(aLogicalMask==1)=0;
-                                BW(:,:,kk) = aSlice;                                 
-                            end
-                    end                    
                     
-                    BW = BW|aVolume;
-                end                
+                    
+                    
+                end
+                
+
         
              end
      

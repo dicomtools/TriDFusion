@@ -1325,9 +1325,10 @@ function initKernelPanel()
                 
                 aActivity = computeMicrospereActivity(aActivity, atCoreMetaData, sRadiopharmaceutical, dMicrosphereVolume);
                                 
-                progressBar(0.7, 'Resampling image, please wait.');
 
                 if bResizePixelSize == true
+                    
+                    progressBar(0.7, 'Resampling image, please wait.');
                     
                     % Resample image
                     
@@ -1337,7 +1338,9 @@ function initKernelPanel()
 
                 % Calibrate the activity 
                 
-                aActivity = aActivity/dSpecimenVolume;
+                if dSpecimenVolume ~= 0                    
+                    aActivity = aActivity/dSpecimenVolume;
+                end
                 
             else
                 if isempty(atCoreMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime)
@@ -1453,6 +1456,9 @@ function initKernelPanel()
                     betaYield = 1; %Beta yield Y-90
                     nbOfParticuleSimulated = 10E7; 
                     
+                 case 'y9010e8'
+                    betaYield = 1; %Beta yield Y-90
+                    nbOfParticuleSimulated = 10E8;                    
                 otherwise
                     
                     % Activate uipanel 
@@ -1491,7 +1497,7 @@ USE_LBM_METHOD = true;
                     case 'water'
                         dNormFactor = 49.7;
                             
-                    case 'liver'
+                    case 'softtissue' % Liver
                         dNormFactor = 47.8;
                             
                     otherwise

@@ -43,26 +43,34 @@ function [asConstraintTagList, asConstraintTypeList] = roiConstraintList(sAction
                     bTagExist = false;
 
                     dNbConstraint = numel(ptConstraint{dSeriesOffset}.asConstraintTag);
-                    for pp=1:dNbConstraint % Search for existing Constraint
-                        if strcmp(ptConstraint{dSeriesOffset}.asConstraintTag{pp}, sConstraintTag)
+                    
+                    asConstraintTagList = ptConstraint{dSeriesOffset}.asConstraintTag;
+                    
+                    aTagOffset = strcmp( cellfun( @(asConstraintTagList) asConstraintTagList, asConstraintTagList, 'uni', false ), sConstraintTag);
+                    dTagOffset = find(aTagOffset, 1);   
+
+                    if ~isempty(dTagOffset)
+                                        
+%                    for pp=1:dNbConstraint % Search for existing Constraint
+%                        if strcmp(ptConstraint{dSeriesOffset}.asConstraintTag{pp}, sConstraintTag)
 
                             % If the same is set, clear the Constraint
                             if bIsActive == false % Deactivate the tag
 
-                                ptConstraint{dSeriesOffset}.asConstraintTag{pp}  = [];
-                                ptConstraint{dSeriesOffset}.asConstraintType{pp} = [];     
+                                ptConstraint{dSeriesOffset}.asConstraintTag{dTagOffset}  = [];
+                                ptConstraint{dSeriesOffset}.asConstraintType{dTagOffset} = [];     
 
                                 ptConstraint{dSeriesOffset}.asConstraintTag (cellfun(@isempty,  ptConstraint{dSeriesOffset}.asConstraintTag )) = [];                           
                                 ptConstraint{dSeriesOffset}.asConstraintType(cellfun(@isempty,  ptConstraint{dSeriesOffset}.asConstraintType)) = [];   
                             else                            
-                                if ~strcmpi(ptConstraint{dSeriesOffset}.asConstraintType{pp}, sConstraintType) % If constraint is not the same type                                 
-                                    ptConstraint{dSeriesOffset}.asConstraintType{pp} = sConstraintType;                        
+                                if ~strcmpi(ptConstraint{dSeriesOffset}.asConstraintType{dTagOffset}, sConstraintType) % If constraint is not the same type                                 
+                                    ptConstraint{dSeriesOffset}.asConstraintType{dTagOffset} = sConstraintType;                        
                                 end
                             end
 
                             bTagExist = true;
-                            break;
-                        end
+%                            break;
+%                        end
                     end
                     
                     if bTagExist == false % New tag
@@ -80,26 +88,33 @@ function [asConstraintTagList, asConstraintTypeList] = roiConstraintList(sAction
                     bTagExist = false;
 
                     dNbConstraint = numel(ptConstraint{dSeriesOffset}.asConstraintTag);
+                    
+                    asConstraintTagList = ptConstraint{dSeriesOffset}.asConstraintTag;
+                    
+                    aTagOffset = strcmp( cellfun( @(asConstraintTagList) asConstraintTagList, asConstraintTagList, 'uni', false ), sConstraintTag);
+                    dTagOffset = find(aTagOffset, 1);   
 
-                    for pp=1:dNbConstraint % Search for existing Constraint
-                        if strcmp(ptConstraint{dSeriesOffset}.asConstraintTag{pp}, sConstraintTag)
+                    if ~isempty(dTagOffset)
+                    
+%                    for pp=1:dNbConstraint % Search for existing Constraint
+%                        if strcmp(ptConstraint{dSeriesOffset}.asConstraintTag{pp}, sConstraintTag)
 
                             % If the same is set, clear the Constraint
-                            if strcmpi(ptConstraint{dSeriesOffset}.asConstraintType{pp}, sConstraintType)  
+                            if strcmpi(ptConstraint{dSeriesOffset}.asConstraintType{dTagOffset}, sConstraintType)  
 
-                                ptConstraint{dSeriesOffset}.asConstraintTag{pp}  = [];
-                                ptConstraint{dSeriesOffset}.asConstraintType{pp} = [];     
+                                ptConstraint{dSeriesOffset}.asConstraintTag{dTagOffset}  = [];
+                                ptConstraint{dSeriesOffset}.asConstraintType{dTagOffset} = [];     
 
                                 ptConstraint{dSeriesOffset}.asConstraintTag (cellfun(@isempty,  ptConstraint{dSeriesOffset}.asConstraintTag )) = [];                           
                                 ptConstraint{dSeriesOffset}.asConstraintType(cellfun(@isempty,  ptConstraint{dSeriesOffset}.asConstraintType)) = [];   
                             else                            
-                                ptConstraint{dSeriesOffset}.asConstraintTag{pp}  = sConstraintTag;
-                                ptConstraint{dSeriesOffset}.asConstraintType{pp} = sConstraintType;                        
+                                ptConstraint{dSeriesOffset}.asConstraintTag{dTagOffset}  = sConstraintTag;
+                                ptConstraint{dSeriesOffset}.asConstraintType{dTagOffset} = sConstraintType;                        
                             end
 
                             bTagExist = true;
-                            break;
-                        end
+%                            break;
+%                        end
                     end
 
                     if bTagExist == false

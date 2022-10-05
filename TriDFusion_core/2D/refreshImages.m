@@ -871,6 +871,7 @@ if 1 % Need to improve speed
         end
 %toc        
 else
+    
     if ~isempty(atRoiInput)
 tic        
         % Deactivate all valid ROIs

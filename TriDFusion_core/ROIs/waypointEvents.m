@@ -26,14 +26,20 @@ function waypointEvents(hObject, ~)
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+    
+    atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
+    
+    if ~isempty(atRoiInput) 
+        
+        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );            
+        dTagOffset = find(aTagOffset, 1);
 
-    atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        if ~isempty(dTagOffset)
+            
+            atRoiInput{dTagOffset}.Waypoints = hObject.Waypoints;
 
-    for bb=1:numel(atRoi)
-        if strcmpi(hObject.Tag, atRoi{bb}.Tag)
-            atRoi{bb}.Waypoints = hObject.Waypoints;
-            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoi);
-            break;
-        end
-    end
+            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+        end                             
+    end    
+    
 end

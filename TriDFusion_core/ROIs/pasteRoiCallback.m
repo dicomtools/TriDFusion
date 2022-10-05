@@ -117,6 +117,7 @@ function pasteRoiCallback(~, ~)
                                        'UserData'           , ptrRoi.UserData, ...
                                        'Visible'            , 'on' ...
                                        );
+                                   
             pRoi.Waypoints(:) = ptrRoi.Waypoints(:);
 
             roiDefaultMenu(pRoi);
@@ -159,7 +160,7 @@ function pasteRoiCallback(~, ~)
                                       'UserData'           , ptrRoi.UserData, ...
                                       'Visible'            , 'on' ...
                                       );
-
+                                  
             roiDefaultMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);

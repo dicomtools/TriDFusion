@@ -31,19 +31,14 @@ function hideViewFaceAlhaCallback(hObject, ~)
     
     if ~strcmpi(hObject.UserData.Type, 'images.roi.line')
         
-        if isempty(atRoiInput) 
-            aTagOffset = 0;
-        else
+        if ~isempty(atRoiInput) 
+
             aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );            
-        end
-        
-        if aTagOffset(aTagOffset==1) % tag is a roi
-
-            dFaceAlpha = 0;
-
-            dTagOffset = find(aTagOffset, 1);
+            dTagOffset = find(aTagOffset, 1);     
 
             if ~isempty(dTagOffset)
+                
+                dFaceAlpha = 0;
 
                 if hObject.UserData.FaceAlpha == 0
                     dFaceAlpha = roiFaceAlphaValue('get');
@@ -57,8 +52,7 @@ function hideViewFaceAlhaCallback(hObject, ~)
                 end
 
                 roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
-            end
-                      
+            end                     
         end
     end    
     

@@ -33,29 +33,24 @@ function predefinedLabelCallback(hObject,~)
 
     atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
     
-    if isempty(atRoiInput) 
-        aTagOffset = 0;
-    else
+    if ~isempty(atRoiInput) 
+
         aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );            
-    end
-
-    if aTagOffset(aTagOffset==1) % tag is a roi
-
         dTagOffset = find(aTagOffset, 1);
-
+        
         if ~isempty(dTagOffset)
 
             hObject.UserData.Label = sLabel;
 
-            atRoiInput{dTagOffset}.Color = sLabel;
+            atRoiInput{dTagOffset}.Label = sLabel;
             if isvalid(atRoiInput{dTagOffset}.Object)
                 atRoiInput{dTagOffset}.Object.Label = sLabel;
             end
 
             roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
-        end                      
+        end         
+    end
 
 %            setVoiRoiSegPopup(); Not need for ROI
-    end 
     
 end

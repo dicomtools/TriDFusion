@@ -96,7 +96,6 @@ function initRoi()
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
-
             case lower('images.roi.freehand')
                 
                 roiPtr = images.roi.Freehand(axRoi, ...
@@ -115,7 +114,7 @@ function initRoi()
                                              'Visible'            , 'off' ...
                                              );  
                                          
-                if isempty(atRoi{bb}.Waypoints)
+                if isempty(atRoi{bb}.Waypoints(atRoi{bb}.Waypoints==1))
                     roiPtr.Waypoints(:) = false;                    
                 end
                                 
@@ -152,7 +151,9 @@ function initRoi()
                                                      'UserData'           , atRoi{bb}.UserData, ...   
                                                      'Visible'            , 'off' ...
                                                      );
-                roiPtr.Waypoints(:) = atRoi{bb}.Waypoints(:);
+                if atRoi{bb}.Waypoints(atRoi{bb}.Waypoints==1)
+                    roiPtr.Waypoints(:) = false;                    
+                end
 
                 roiDefaultMenu(roiPtr);
 
@@ -185,8 +186,7 @@ function initRoi()
                                             'InteractionsAllowed', atRoi{bb}.InteractionsAllowed, ...                                                 
                                             'UserData'           , atRoi{bb}.UserData, ...   
                                             'Visible'            , 'off' ...
-                                            );
-
+                                            );                                                        
                 roiDefaultMenu(roiPtr);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
