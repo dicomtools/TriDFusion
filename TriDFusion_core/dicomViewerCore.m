@@ -62,7 +62,7 @@ function dicomViewerCore()
 
     if initWindowLevel('get') == true
 
-        [lMin, lMax] = setWindowLevel(im, atMetaData);
+        [lMin, lMax] = setWindowLevel(gather(im), atMetaData);
 
     else
         lMin = windowLevel('get', 'min');

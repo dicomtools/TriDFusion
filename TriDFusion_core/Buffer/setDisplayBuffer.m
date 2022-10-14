@@ -103,16 +103,22 @@ function setDisplayBuffer()
                 end
             end  
         end
-                
+    
     end                
-
+    
+ %   if canUseGPU()    
+%        for mm=1:numel(aInput)
+%            aInput{mm} = uint16(aInput{mm});
+%        end
+ %   end
+    
     inputBuffer('set', aInput);
 
     dicomBuffer('set', aInput{1});                    
     
     for mm=1:numel(aInput)
         if size(aInput{mm}, 3) ~= 1
-            aMip = computeMIP(aInput{mm});
+            aMip = computeMIP(gather(aInput{mm}));
             mipBuffer('set', aMip, mm);
             tInput(mm).aMip = aMip; 
         end

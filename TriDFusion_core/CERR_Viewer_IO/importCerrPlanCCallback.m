@@ -78,7 +78,7 @@ function importCerrPlanCCallback(~, ~)
             planC = quality_assure_planC(cerrFileName,planC);        
             planC = updatePlanFields(planC);
         catch
-            progressBar(1, 'Error: loadCerrDoseConstraint() Cant Load CERR PlanC!');
+            progressBar(1, 'Error: importCerrPlanCCallback() Cant Load CERR PlanC!');
            return;
         end
         

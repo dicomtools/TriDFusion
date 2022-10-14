@@ -31,6 +31,13 @@ function imComputed = computeMIP(im)
  %   im=int16(im);
  
 if 1 
+    
+    if canUseGPU()
+        aImage = gpuArray(uint16(im));
+    else
+        aImage = uint16(im);
+    end
+
     aSize = size(im);
     imComputed = zeros(32, aSize(2), aSize(3));
 
@@ -45,14 +52,16 @@ if 1
         
 
 %        aRotatedImage = imrotate3(im, rr, [0 0 1], 'linear','crop', 'FillValues', min(im, [], 'all'));
-        aRotatedImage=imrotate(im, rr, 'bilinear','crop');
+        aRotatedImage=gather(imrotate(aImage, rr, 'bilinear','crop'));
        
         imComputed(cc,:,:) = squeeze(max(aRotatedImage, [], 1));
         
         cc = cc+1;
         
     end    
-    
+
+    clear aImage;
+
     progressBar(1, 'Ready');               
 else
     aSize = size(im);

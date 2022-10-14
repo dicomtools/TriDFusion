@@ -569,6 +569,25 @@ end
                   'Enable', 'On' ...
                   );
 
+%    uiValueFormulaIsoMask = ...
+%        uicontrol(ui3DPanelPtr('get'), ...
+%                  'Style'   , 'popup', ...
+%                  'Position', [180 650 140 20], ...
+%                  'string'  , {'Fixed', ...
+%                               '(4.30/SUVmean)x(SUVmean + SD)', ...
+%                               '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map', ...
+%                               '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map', ...      
+%                               'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map', ...
+%                               'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map' ...                                  
+%                               },...
+%                  'Value'   , valueFormulaIsoMask('get'), ...
+%                  'Enable'  , 'on', ...
+%                  'BackgroundColor', viewerBackgroundColor('get'), ...
+%                  'ForegroundColor', viewerForegroundColor('get'), ...
+%                  'CallBack', @minSuvFromFormulaIsoMaskValue ...
+%                  );
+%    uiValueFormulaIsoMaskPtr('set', uiValueFormulaIsoMask);    
+
     uiValueFormulaIsoMask = ...
         uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'popup', ...
@@ -576,9 +595,7 @@ end
                   'string'  , {'Fixed', ...
                                '(4.30/SUVmean)x(SUVmean + SD)', ...
                                '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map', ...
-                               '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map', ...      
-                               'Liver 10% scalar offset, (4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map', ...
-                               'Liver 10% scalar offset, (4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map' ...                                  
+                               'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map', ...
                                },...
                   'Value'   , valueFormulaIsoMask('get'), ...
                   'Enable'  , 'on', ...
@@ -586,8 +603,8 @@ end
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @minSuvFromFormulaIsoMaskValue ...
                   );
-    uiValueFormulaIsoMaskPtr('set', uiValueFormulaIsoMask);    
-
+    uiValueFormulaIsoMaskPtr('set', uiValueFormulaIsoMask);  
+    
        uicontrol(ui3DPanelPtr('get'),...
                   'style'   , 'Text',...
                   'string'  , 'Smallest Contour (ml)',...
@@ -2205,7 +2222,7 @@ end
         end
         
         if strcmpi(sFormula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map') || ... % Use CT HU treshold value
-           strcmpi(sFormula, 'Liver 10% scalar offset, (4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map')
+           strcmpi(sFormula, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map')
             
             tResampleToCT = resampleToCTIsoMaskUiValues('get');
             
@@ -2236,7 +2253,7 @@ end
         end
         
         if strcmpi(sFormula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map') || ... % Use CT ISO contour
-           strcmpi(sFormula, 'Liver 10% scalar offset, (4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map')     
+           strcmpi(sFormula, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map')     
             
             btnFusion = btnFusionPtr('get');
             if strcmpi(get(btnFusion, 'Enable'), 'off')  % Need a fuse CT  
@@ -2301,7 +2318,7 @@ end
     end
 
     function createIsoMaskCallback(~, ~)
-
+        
         isoObj = isoObject('get');
         if ~isempty(isoObj)
 
@@ -2346,7 +2363,7 @@ end
                         
                         progressBar(0.3, sprintf('Resampling series, please wait'));
 
-                        [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', false, true);   
+                        [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', true, true);   
 
                         progressBar(0.6, sprintf('Resampling ROIs, please wait'));
 
@@ -2364,7 +2381,7 @@ end
                         refMip = mipBuffer('get', [], dCTSeriesNumber);
 
                         aMip = mipBuffer('get', [], dSeriesOffset);
-                        aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear', false);
+                        aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear', true);
 
                         mipBuffer('set', aResampledMip, dSeriesOffset);
 
@@ -2405,148 +2422,183 @@ end
             fv = isosurface(im, dIsoValue, aSurfaceColor{dColorOffset}); % Make patch w. faces "out"
 
             aVolume = polygon2voxel(fv, size(im), 'none');
-            BW = imfill(aVolume, 4, 'holes');
+            
+            BW = imfill(aVolume, 4, 'holes');            
+
+%            dScale = dMax*isoObj.Isovalue;
+            
+%            BW = im;
+%            BW(BW<dScale) = dMin;            
+%            BW(BW~=dMin) = 1;
+%            BW(BW==dMin) = 0;
+%            BW = imfill(BW, 4, 'holes');            
+            
+        
             BW(aLogicalMask==0) = 0;
+            
        %     BW = volumeFill(aVolume);
        
-             asFormula = get(uiValueFormulaIsoMask, 'String');
-             dFormula  = get(uiValueFormulaIsoMask, 'Value');
-                    
-             if strcmpi(asFormula{dFormula}, 'Liver 10% scalar offset, (4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map') || ...
-                strcmpi(asFormula{dFormula}, 'Liver 10% scalar offset, (4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map')
-               
-                dOffset = dScale*(isoObj.Isovalue + .1);
-                dIsoValue = dMin+dOffset;
-                
-                aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Label, atRoiInput, 'uni', false ), {'Liver'} );            
-                dTagOffset = find(aTagOffset, 1);
-                
-                if ~isempty(dTagOffset)
-                    
-                    switch lower(atRoiInput{dTagOffset}.Axe)
-                        
-                        case 'axes1'                            
-                            aSlice = permute(im(atRoiInput{dTagOffset}.SliceNb,:,:), [3 2 1]);
+            asFormula = get(uiValueFormulaIsoMask, 'String');
+            dFormula  = get(uiValueFormulaIsoMask, 'Value');
+            
+            BWLIVER = [];
+            imMaskLiver = [];
+ 
+            if strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map') || ...
+               strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map')
+                               
+                if ~isempty(atRoiInput)
+                    aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Label, atRoiInput, 'uni', false ), {'Liver'} );            
+                    dTagOffset = find(aTagOffset, 1);
 
-                        case 'axes2'
-                            aSlice = permute(im(:,atRoiInput{dTagOffset}.SliceNb,:), [3 1 2]);
-                            
-                        case 'axes3'
-                            aSlice = im(:,:,atRoiInput{dTagOffset}.SliceNb);       
-                    end
-                    
-                    aLogicalMask = roiTemplateToMask(atRoiInput{dTagOffset}, aSlice);
-                    
-                    fv = isosurface(im, dIsoValue, aSurfaceColor{dColorOffset}); % Make patch w. faces "out"
-                    aVolume = polygon2voxel(fv, size(im), 'none');
-                    
-                    switch lower(atRoiInput{dTagOffset}.Axe)
-                        
-                        case 'axes1'   
-                            
-                            for kk=1:size(aVolume, 1)
-                                
-                                aSlice = permute(aVolume(kk,:,:), [3 2 1]); % 10% of treshold Liver 
-                                aSlice(aLogicalMask==0)=0;
-                                aVolume(kk,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);  
-                                
-                                aSlice = permute(BW(kk,:,:), [3 2 1]);  % Outside Liver 
-                                aSlice(aLogicalMask==1)=0;
-                                BW(kk,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);                                                                                            
-                            end
+                    if ~isempty(dTagOffset)
 
-                        case 'axes2'
-                            
-                            for kk=1:size(aVolume, 2)
-                                aSlice = permute(aVolume(:,kk,:), [3 1 2]); % 10% of treshold Liver 
-                                aSlice(aLogicalMask==0)=0;
-                                aVolume(:,kk,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);  
-                                
-                                aSlice = permute(BW(:,kk,:), [3 1 2]);  % Outside Liver 
-                                aSlice(aLogicalMask==1)=0;
-                                BW(:,kk,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]); 
-                            end
-                            
-                        case 'axes3'
-                            
-                            for kk=1:size(aVolume, 3)
-                                aSlice = aVolume(:,:,kk); % 10% of treshold Liver 
-                                aSlice(aLogicalMask==0)=0;
-                                aVolume(:,:,kk) = aSlice;  
-                                
-                                aSlice = BW(:,:,kk);  % Outside Liver 
-                                aSlice(aLogicalMask==1)=0;
-                                BW(:,:,kk) = aSlice;                                 
-                            end
-                    end                    
-                    
-                    BW = BW|aVolume;
-                end                
-        
+                        switch lower(atRoiInput{dTagOffset}.Axe)
+
+                            case 'axes1'                            
+                                aSlice = permute(im(atRoiInput{dTagOffset}.SliceNb,:,:), [3 2 1]);
+
+                            case 'axes2'
+                                aSlice = permute(im(:,atRoiInput{dTagOffset}.SliceNb,:), [3 1 2]);
+
+                            case 'axes3'
+                                aSlice = im(:,:,atRoiInput{dTagOffset}.SliceNb);       
+                        end
+
+
+    %                    fv = isosurface(im, dIsoValue, aSurfaceColor{dColorOffset}); % Make patch w. faces "out"
+    %                    aVolume = polygon2voxel(fv, size(im), 'none');
+
+                        aVolume = im;
+
+                        aLogicalMask2 = roiTemplateToMask(atRoiInput{dTagOffset}, aSlice);
+
+                        switch lower(atRoiInput{dTagOffset}.Axe)
+
+                            case 'axes1'   
+
+                                for kk=1:size(im, 1)
+
+                                    aSlice = permute(aVolume(kk,:,:), [3 2 1]); % 10% of treshold Liver 
+                                    aSlice(aLogicalMask2==0)=0;
+                                    aVolume(kk,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);  
+
+                                    aSlice = permute(BW(kk,:,:), [3 2 1]);  % Outside Liver 
+                                    aSlice(aLogicalMask2==1)=0;
+                                    BW(kk,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);                                                                                            
+                                end
+
+                            case 'axes2'
+
+                                for kk=1:size(aVolume, 2)
+                                    aSlice = permute(aVolume(:,kk,:), [3 1 2]); % 10% of treshold Liver 
+                                    aSlice(aLogicalMask2==0)=0;
+                                    aVolume(:,kk,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);  
+
+                                    aSlice = permute(BW(:,kk,:), [3 1 2]);  % Outside Liver 
+                                    aSlice(aLogicalMask2==1)=0;
+                                    BW(:,kk,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]); 
+                                end
+
+                            case 'axes3'
+
+                                for kk=1:size(aVolume, 3)
+                                    aSlice = aVolume(:,:,kk); % 10% of treshold Liver 
+                                    aSlice(aLogicalMask2==0)=0;
+                                    aVolume(:,:,kk) = aSlice;  
+
+                                    aSlice = BW(:,:,kk);  % Outside Liver 
+                                    aSlice(aLogicalMask2==1)=0;
+                                    BW(:,:,kk) = aSlice;                                 
+                                end
+                        end                    
+
+                        dMin = min(aVolume, [], 'all');
+                        dMax = max(aVolume, [], 'all');
+                        dScale = abs(dMin)+abs(dMax);
+
+                        dOffset = dScale*.20;
+                        dIsoValue = dMin+dOffset;
+
+                        fv = isosurface(aVolume, dIsoValue, aSurfaceColor{dColorOffset}); % Make patch w. faces "out"
+                        aVolume = polygon2voxel(fv, size(im), 'none');
+                        aVolume = imfill(aVolume, 4, 'holes');
+                        aVolume(aLogicalMask==0) = 0;
+
+%                        BW = BW|aVolume;
+                        BWLIVER = aVolume;
+                        imMaskLiver = im;
+                        imMaskLiver(BWLIVER == 0) = dMin;
+
+                    end                
+                end
              end
-     
+            
             imMask = im;
             imMask(BW == 0) = dMin;
-                                   
-            atInput = inputTemplate('get');
-                                    
-            atInput(numel(atInput)+1) = atInput(dSeriesOffset);
             
-            atInput(numel(atInput)).bEdgeDetection = false;
-            atInput(numel(atInput)).bDoseKernel    = false;    
-            atInput(numel(atInput)).bFlipLeftRight = false;
-            atInput(numel(atInput)).bFlipAntPost   = false;
-            atInput(numel(atInput)).bFlipHeadFeet  = false;
-            atInput(numel(atInput)).bMathApplied   = false;
-            atInput(numel(atInput)).bFusedDoseKernel    = false;
-            atInput(numel(atInput)).bFusedEdgeDetection = false;
-            atInput(numel(atInput)).tMovement = [];
-            atInput(numel(atInput)).tMovement.bMovementApplied = false;
-            atInput(numel(atInput)).tMovement.aGeomtform = [];                
-            atInput(numel(atInput)).tMovement.atSeq{1}.sAxe = [];
-            atInput(numel(atInput)).tMovement.atSeq{1}.aTranslation = [];
-            atInput(numel(atInput)).tMovement.atSeq{1}.dRotation = [];            
-                                  
-            atInput(numel(atInput)).atDicomInfo = atDcmMetaData;
+            if get(chkAddVoiIsoMask, 'Value') == false % test
+                                   
+                atInput = inputTemplate('get');
 
-            asSeriesDescription = seriesDescription('get');
-            asSeriesDescription{numel(asSeriesDescription)+1}=sprintf('MASK %s', asSeriesDescription{dSeriesOffset});
-            seriesDescription('set', asSeriesDescription);
+                atInput(numel(atInput)+1) = atInput(dSeriesOffset);
 
-            dSeriesInstanceUID = dicomuid;
+                atInput(numel(atInput)).bEdgeDetection = false;
+                atInput(numel(atInput)).bDoseKernel    = false;    
+                atInput(numel(atInput)).bFlipLeftRight = false;
+                atInput(numel(atInput)).bFlipAntPost   = false;
+                atInput(numel(atInput)).bFlipHeadFeet  = false;
+                atInput(numel(atInput)).bMathApplied   = false;
+                atInput(numel(atInput)).bFusedDoseKernel    = false;
+                atInput(numel(atInput)).bFusedEdgeDetection = false;
+                atInput(numel(atInput)).tMovement = [];
+                atInput(numel(atInput)).tMovement.bMovementApplied = false;
+                atInput(numel(atInput)).tMovement.aGeomtform = [];                
+                atInput(numel(atInput)).tMovement.atSeq{1}.sAxe = [];
+                atInput(numel(atInput)).tMovement.atSeq{1}.aTranslation = [];
+                atInput(numel(atInput)).tMovement.atSeq{1}.dRotation = [];            
 
-            for hh=1:numel(atInput(numel(atInput)).atDicomInfo)
-                atInput(numel(atInput)).atDicomInfo{hh}.SeriesDescription = asSeriesDescription{numel(asSeriesDescription)};
-                atInput(numel(atInput)).atDicomInfo{hh}.SeriesInstanceUID = dSeriesInstanceUID;
+                atInput(numel(atInput)).atDicomInfo = atDcmMetaData;
+
+                asSeriesDescription = seriesDescription('get');
+                asSeriesDescription{numel(asSeriesDescription)+1}=sprintf('MASK %s', asSeriesDescription{dSeriesOffset});
+                seriesDescription('set', asSeriesDescription);
+
+                dSeriesInstanceUID = dicomuid;
+
+                for hh=1:numel(atInput(numel(atInput)).atDicomInfo)
+                    atInput(numel(atInput)).atDicomInfo{hh}.SeriesDescription = asSeriesDescription{numel(asSeriesDescription)};
+                    atInput(numel(atInput)).atDicomInfo{hh}.SeriesInstanceUID = dSeriesInstanceUID;
+                end
+
+                atInput(numel(atInput)).aDicomBuffer = imMask;
+
+                inputTemplate('set', atInput);
+
+                aInputBuffer = inputBuffer('get');
+                aInputBuffer{numel(aInputBuffer)+1} = imMask;
+                inputBuffer('set', aInputBuffer);
+
+                asSeries = get(uiSeriesPtr('get'), 'String');
+                asSeries{numel(asSeries)+1} = asSeriesDescription{numel(asSeriesDescription)};
+                set(uiSeriesPtr('get'), 'String', asSeries);
+                set(uiFusedSeriesPtr('get'), 'String', asSeries);
+
+                set(uiSeriesPtr('get'), 'Value', numel(atInput));
+                dicomMetaData('set', atInput(numel(atInput)).atDicomInfo);
+                dicomBuffer('set', imMask);
+                setQuantification(numel(atInput));
+
+                tQuant = quantificationTemplate('get');
+                atInput(numel(atInput)).tQuant = tQuant;
+
+                aMaskedMip = computeMIP(imMask);
+                mipBuffer('set', aMaskedMip, numel(atInput));
+                atInput(numel(atInput)).aMip = aMaskedMip;
+
+                inputTemplate('set', atInput);
             end
             
-            atInput(numel(atInput)).aDicomBuffer = imMask;
-                
-            inputTemplate('set', atInput);
-
-            aInputBuffer = inputBuffer('get');
-            aInputBuffer{numel(aInputBuffer)+1} = imMask;
-            inputBuffer('set', aInputBuffer);
-
-            asSeries = get(uiSeriesPtr('get'), 'String');
-            asSeries{numel(asSeries)+1} = asSeriesDescription{numel(asSeriesDescription)};
-            set(uiSeriesPtr('get'), 'String', asSeries);
-            set(uiFusedSeriesPtr('get'), 'String', asSeries);
-
-            set(uiSeriesPtr('get'), 'Value', numel(atInput));
-            dicomMetaData('set', atInput(numel(atInput)).atDicomInfo);
-            dicomBuffer('set', imMask);
-            setQuantification(numel(atInput));
-
-            tQuant = quantificationTemplate('get');
-            atInput(numel(atInput)).tQuant = tQuant;
-
-            aMaskedMip = computeMIP(imMask);
-            mipBuffer('set', aMaskedMip, numel(atInput));
-            atInput(numel(atInput)).aMip = aMaskedMip;
-            
-            inputTemplate('set', atInput);
-
             set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
 
             progressBar(1, sprintf('Mask completed'));
@@ -2554,11 +2606,12 @@ end
             set(uiSeriesPtr('get'), 'Enable', 'on');
             set(btnIsoSurfacePtr('get'), 'Enable', 'on');
             set(btn3DPtr('get'), 'Enable', 'on');
-            set(btnMIPPtr('get'), 'Enable', 'on');
+            set(btnMIPPtr('get'), 'Enable', 'on');            
 
+            BWCT = [];            
+                
             if get(chkAddVoiIsoMask, 'Value') == true
                 
-                BWCT = [];
                
                 % Set Pixel Edge
                 if get(chkPixelEdgeIsoMask, 'Value') == true
@@ -2613,7 +2666,7 @@ end
                         set(uiEditAddVoiIsoMask, 'String', num2str(dPercentMaxOrMaxSUVValue));
                         
                     elseif strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map') || ...
-                           strcmpi(asFormula{dFormula}, 'Liver 10% scalar offset, (4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map')
+                           strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map')
                         
                         bUseFormula = true;   
                         
@@ -2627,8 +2680,11 @@ end
                         dCTSeriesNumber = tResampleToCT{dCTOffset}.dSeriesNumber;
                         
                         BWCT = dicomBuffer('get', [], dCTSeriesNumber); 
-                        if isempty(BWCT)                                       
+                                                
+                        if isempty(BWCT)        
+                            
                             BWCT = aInputBuffer{dCTSeriesNumber};
+                                                        
                             if     strcmpi(imageOrientation('get'), 'axial')
                                 BWCT = permute(BWCT, [1 2 3]);
                             elseif strcmpi(imageOrientation('get'), 'coronal')
@@ -2649,7 +2705,7 @@ end
                                 BWCT=BWCT(:,:,end:-1:1);
                             end   
                         end
-                        
+                                        
                         atFuseMetaData = dicomMetaData('get', [], dCTSeriesNumber);
                         if isempty(atFuseMetaData)
                             atFuseMetaData = atInput(dCTSeriesNumber).atDicomInfo;
@@ -2665,16 +2721,17 @@ end
                             end
                         end
                         
-                        progressBar(0.6, sprintf('Computing ct bone map, please wait'));
-                                               
+                         
+                        progressBar(0.6, sprintf('Computing ct bone map, please wait'));                        
+                
                         BWCT(BWCT < 100) = 0;                                    
-                        BWCT = imfill(BWCT, 4, 'holes');
-                        
+                        BWCT = imfill(BWCT, 4, 'holes');                       
+                
                         BWCT(BWCT~=0) = 1;
                         BWCT(BWCT~=1) = 0;
                             
                     elseif strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map') || ...
-                           strcmpi(asFormula{dFormula}, 'Liver 10% scalar offset, (4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map')
+                           strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map')
 
                         
                         bUseFormula = true;       
@@ -2684,14 +2741,15 @@ end
                         valueFormulaIsoMask('set', dFormula);
                         
                         dFusedSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
-                         
+
                         BWCT = fusionBuffer('get', [], dFusedSeriesOffset); 
-                                                            
+                                                                                    
                         if resampleToCTIsoMask('get') == true && resampledContoursIsoMask('get') == true
                        
                             if numel(BWCT) ~= numel(im) 
-                                                                                               
-                                BWCT = dicomBuffer('get', [], dFusedSeriesOffset); 
+                                
+                               BWCT = dicomBuffer('get', [], dFusedSeriesOffset); 
+                                                                
                                 if isempty(BWCT)    
                                     BWCT = aInputBuffer{dFusedSeriesOffset};
                                     if     strcmpi(imageOrientation('get'), 'axial')
@@ -2734,6 +2792,7 @@ end
                             fv = isosurface(BWCT, dIsoValue, aSurfaceColor{dColorFusionOffset}); % Make patch w. faces "out"
 
                             BWCT = imfill(polygon2voxel(fv, size(BWCT), 'none'), 4, 'holes');
+                                                     
                             BWCT(BWCT~=0) = 1;
                             BWCT(BWCT~=1) = 0;
                        %     BW = volumeFill(aVolume);
@@ -2812,8 +2871,16 @@ end
         
                 % Create VOIs
 
-                maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxOrMaxSUVValue, bMultiplePeaks, dMultiplePeaksPercentValue, bUseFormula, sMinSUVformula, BWCT, dSmalestVoiValue);
-
+                
+                if strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map') || ...
+                   strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map')
+               
+                   maskAddVoiToSeries(imMask, BW, bPixelEdge, true, 42, true, 65, false, sMinSUVformula, BWCT, dSmalestVoiValue);                    
+                   maskAddVoiToSeries(imMaskLiver, BWLIVER, bPixelEdge, true, 42, false, dMultiplePeaksPercentValue, false, sMinSUVformula, BWCT, dSmalestVoiValue);
+                else
+                    maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxOrMaxSUVValue, bMultiplePeaks, dMultiplePeaksPercentValue, bUseFormula, sMinSUVformula, BWCT, dSmalestVoiValue);                    
+                end
+            
                 % Resample to CT
 
                 if resampledContoursIsoMask('get') == false
@@ -2835,7 +2902,7 @@ end
                             
                             progressBar(0.3, sprintf('Resampling series, please wait'));
                         
-                            [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', false, true);   
+                            [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', true, true);   
 
                             progressBar(0.6, sprintf('Resampling ROIs, please wait'));
 
@@ -2853,7 +2920,7 @@ end
                             refMip = mipBuffer('get', [], dCTSeriesNumber);
 
                             aMip = mipBuffer('get', [], dSeriesOffset);
-                            aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear', false);
+                            aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear', true);
 
                             mipBuffer('set', aResampledMip, dSeriesOffset);
 
@@ -2863,7 +2930,7 @@ end
                     end
                 end
             
-                setSeriesCallback();                               
+%                setSeriesCallback();                               
                 
                 if resampleToCTIsoMask('get') == true && ...
                    ~isempty(tResampleToCT) 
@@ -2904,7 +2971,7 @@ end
                 if viewRoiPanel('get') == false
                     setViewRoiPanel();
                 end
-                           
+                
             else
 
             end
@@ -2913,7 +2980,14 @@ end
                 progressBar(1, 'Error: createIsoMaskCallback()');
             end
             
-            % Reactivate main tool bar 
+            clear BW;            
+            clear BWCT;       
+            clear imMask;
+            clear aVolume;
+            clear BWLIVER;
+            clear imMaskLiver;
+                 
+           % Reactivate main tool bar 
             set(uiSeriesPtr('get'), 'Enable', 'on');                        
             mainToolBarEnable('on');     
                 
@@ -2968,278 +3042,310 @@ end
             PIXEL_EDGE_RATIO = 3;
 
             dMinValue = min(imMask, [], 'all');
-            dMaxValue = max(imMask, [], 'all');
+%            dMaxValue = max(imMask, [], 'all');
 
-            CC = bwconncomp(BW, 6);
+            CC = bwconncomp(gather(BW), 6);
             dNbElements = numel(CC.PixelIdxList);
 
-            asAllTag = [];
+%            asAllTag = [];
 
-            BW = zeros(size(imMask)); % Init BW buffer
-                        
+            if canUseGPU()
+                BW2       = gpuArray(zeros(size(imMask))); % Init BW2 buffer                                       
+                BWCT2     = gpuArray(BWCT);
+                BWANDBWCT = gpuArray(zeros(size(BWCT)));
+            else
+                BW2       = zeros(size(imMask)); % Init BW2 buffer                                       
+                BWCT2     = BWCT;
+                BWANDBWCT = zeros(size(BWCT));                
+            end
+            
             for bb=1:dNbElements  % Nb VOI
 
                 progressBar( bb/dNbElements-0.0001, sprintf('Computing Volume %d/%d, please wait', bb, dNbElements) );
 
-                if numel(CC.PixelIdxList{bb}) >= dSmalestValueNbVoxels
+%                if numel(CC.PixelIdxList{bb}) 
 
-                    BW(BW ~=0) = 0; % Reset BW buffer
+                BW2(BW2~=0) = 0; % Reset BW2 buffer
 
-                    BW(CC.PixelIdxList{bb}) = imMask(CC.PixelIdxList{bb});
+                BW2(CC.PixelIdxList{bb}) = imMask(CC.PixelIdxList{bb});
 
-                    if bPercentOfPeak == true % Percent of peak or SUV Value
+                if bPercentOfPeak == true % Percent of peak or SUV Value
+                    
+                    if  strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map') || ...
+                        strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map')  || ...
+                        strcmpi(sMinSUVformula, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map')     || ...
+                        trcmpi(sMinSUVformula, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map')
                         
-                        sLesionType = 'Unspecified';
+                        BWANDBWCT = BW2&BWCT2;
 
-                        if bMultiplePeaks == true % Multiple peaks
-if 0
-                            MASK_PEAKS = zeros(size(imMask)); % Init PEAK buffer
+                        dBWnbPixel        = numel(BW2(BW2~=0));
+                        dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
 
-                            BW_PEAKS = imregionalmax(BW, 6); % Search for peaks
-                            CC_PEAKS = bwconncomp(BW_PEAKS, 6);
-
-                            dNbMaxPeaks = numel(CC_PEAKS.PixelIdxList);
-
-                            BW(BW ~=0) = 0; % Reset BW buffer
-
-                            for mm=1:dNbMaxPeaks  % Nb Peaks
-
-                                MASK_PEAKS(MASK_PEAKS ~=0) = 0;
-
-                                dCurrentPeakValue = max(imMask(CC_PEAKS.PixelIdxList{mm}), [], 'all');
-                                dMaxMaskValue     = max(imMask(CC.PixelIdxList{bb}), [], 'all');
-
-                                if dCurrentPeakValue >= dMaxMaskValue * (dMultiplePeaksPercentValue /100) % Inside the Ratio
-
-                                    dMinPeakValue = dCurrentPeakValue * (dPercentMaxOrMaxSUVValue /100);
-
-                                    MASK_PEAKS(CC.PixelIdxList{bb}) = imMask(CC.PixelIdxList{bb});
-                                    MASK_PEAKS(MASK_PEAKS <= dMinPeakValue) = dMinValue;
-
-                                    BW(MASK_PEAKS ~= dMinValue) = dMaxValue;
-                                end
-
-                            end
-
-                            BW(BW ~= dMaxValue) = 0;
-                            BW(BW == dMaxValue) = 1;
-else
-    
-
-                            dMaxMaskValue = max(imMask(CC.PixelIdxList{bb}), [], 'all') * (dPercentMaxOrMaxSUVValue) /100;
-                            dMaxMaskValue = dMaxMaskValue * (dMultiplePeaksPercentValue) /100;
-                            
-                            BW(BW <= dMaxMaskValue) = dMinValue;
-
-                            BW(BW ~= dMinValue) = 1;
-                            BW(BW == dMinValue) = 0;
-end
-
-                        else % Single peak
-
-                            dMaxMaskValue = max(imMask(CC.PixelIdxList{bb}), [], 'all') * dPercentMaxOrMaxSUVValue /100;
-
-                            BW(BW <= dMaxMaskValue) = dMinValue;
-
-                            BW(BW ~= dMinValue) = 1;
-                            BW(BW == dMinValue) = 0;
-                        end
-                    else
-                        tQuant = quantificationTemplate('get');
-                        if isfield(tQuant, 'tSUV')
-                            dSUVScale = tQuant.tSUV.dScale;
+                        if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
+                            sLesionType = 'Bone';
                         else
-                            dSUVScale = 0;
+                            sLesionType = 'Soft Tissue';
                         end
+                        
+                    else
+                        sLesionType = 'Unspecified';
+                    end
+                        
+                    if bMultiplePeaks == true % Multiple peaks
 
-                        if bUseFormula == false
+                        dMaxMaskValue = max(imMask(CC.PixelIdxList{bb}), [], 'all') * (dPercentMaxOrMaxSUVValue) /100;
+                        dMaxMaskValue = dMaxMaskValue * (dMultiplePeaksPercentValue) /100;
+
+                        BW2(BW2 <= dMaxMaskValue) = dMinValue;
+
+                        BW2(BW2 ~= dMinValue) = 1;
+                        BW2(BW2 == dMinValue) = 0;
+
+                    else % Single peak
+
+                        dMaxMaskValue = max(imMask(CC.PixelIdxList{bb}), [], 'all') * dPercentMaxOrMaxSUVValue /100;
+
+                        BW2(BW2 <= dMaxMaskValue) = dMinValue;
+
+                        BW2(BW2 ~= dMinValue) = 1;
+                        BW2(BW2 == dMinValue) = 0;
+                    end
+                else
+                    tQuant = quantificationTemplate('get');
+                    
+                    if isfield(tQuant, 'tSUV')
+                        dSUVScale = tQuant.tSUV.dScale;
+                    else
+                        dSUVScale = 0;
+                    end
+
+                    if bUseFormula == false
+
+                        if strcmpi(sMinSUVformula, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map') || ...
+                           strcmpi(sMinSUVformula, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map')   
+                            sLesionType = 'Liver';
+                        else
+                            sLesionType = 'Unspecified';
+                        end
                             
+                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2 ~= dMinValue) = 1;
+                        BW2(BW2 == dMinValue) = 0;
+                    else
+                        if strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD)')      
+
                             sLesionType = 'Unspecified';
 
-                            BW(BW*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
-                            BW(BW ~= dMinValue) = 1;
-                            BW(BW == dMinValue) = 0;
-                        else
-                            if strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD)')      
-                                
-                                sLesionType = 'Unspecified';
-                            
-                                dMean = mean(BW(BW~=dMinValue), 'all') * dSUVScale;
-                                dSTD = std(BW(BW~=dMinValue), [],'all') * dSUVScale;
+                            dMean = mean(BW2(BW2~=dMinValue), 'all') * dSUVScale;
+                            dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
+
+                            dPercentMaxOrMaxSUVValue = (4.30/dMean)*(dMean + dSTD);                                
+                            BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                            BW2(BW2 ~= dMinValue) = 1;
+                            BW2(BW2 == dMinValue) = 0;                                
+
+                        elseif strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map') 
+
+                            BWANDBWCT = BW2&BWCT2;
+
+                            dBWnbPixel        = numel(BW2(BW2~=0));
+                            dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
+
+                            if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
+                                sLesionType = 'Bone';
+
+                                dPercentMaxOrMaxSUVValue = 3;                                
+                                BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                            else
+                                sLesionType = 'Soft Tissue';
+
+                                dMean = mean(BW2(BW2~=dMinValue), 'all') * dSUVScale;
+                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
 
                                 dPercentMaxOrMaxSUVValue = (4.30/dMean)*(dMean + dSTD);                                
-                                BW(BW*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
-                                BW(BW ~= dMinValue) = 1;
-                                BW(BW == dMinValue) = 0;                                
-                                
-                            elseif strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map') || ...
-                                   strcmpi(sMinSUVformula, 'Liver 10% scalar offset, (4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map')
-                               
-                                BWANDBWCT = BW&BWCT;
-                                
-                                dBWnbPixel        = numel(BW(BW~=0));
-                                dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
-                                
-                                if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
-                                    sLesionType = 'Bone';
-                                    
-                                    dPercentMaxOrMaxSUVValue = 3;                                
-                                    BW(BW*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
-                                else
-                                    sLesionType = 'Soft Tissue';
-                                    
-                                    dMean = mean(BW(BW~=dMinValue), 'all') * dSUVScale;
-                                    dSTD = std(BW(BW~=dMinValue), [],'all') * dSUVScale;
+                                BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                            end
 
-                                    dPercentMaxOrMaxSUVValue = (4.30/dMean)*(dMean + dSTD);                                
-                                    BW(BW*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
-                                end
-                                
-                                BW(BW ~= dMinValue) = 1;
-                                BW(BW == dMinValue) = 0;    
-                                
-%                                clear(BWANDBWCT);
-                                
-                            elseif strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map') || ...
-                                   strcmpi(sMinSUVformula, 'Liver 10% scalar offset, (4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map')
-                                
-                                BWANDBWCT = BW&BWCT;
-                                
-                                dBWnbPixel        = numel(BW(BW~=0));
-                                dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
-                                
-                                if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
-                                    sLesionType = 'Bone';
-                                    
-                                    dPercentMaxOrMaxSUVValue = 3;                                
-                                    BW(BW*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
-                                else
-                                    sLesionType = 'Soft Tissue';
-                                    
-                                    dMean = mean(BW(BW~=dMinValue), 'all') * dSUVScale;
-                                    dSTD = std(BW(BW~=dMinValue), [],'all') * dSUVScale;
+                            BW2(BW2 ~= dMinValue) = 1;
+                            BW2(BW2 == dMinValue) = 0;    
 
-                                    dPercentMaxOrMaxSUVValue = (4.30/dMean)*(dMean + dSTD);                                
-                                    BW(BW*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
-                                end
-                                
-                                BW(BW ~= dMinValue) = 1;
-                                BW(BW == dMinValue) = 0;     
-                                
 %                                clear(BWANDBWCT);
-                                
+
+                        elseif strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map') 
+
+                            BWANDBWCT = BW2&BWCT2;
+
+                            dBWnbPixel        = numel(BW2(BW2~=0));
+                            dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
+
+                            if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
+                                sLesionType = 'Bone';
+
+                                dPercentMaxOrMaxSUVValue = 3;                                
+                                BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
                             else
-                                return;
+                                sLesionType = 'Soft Tissue';
+
+                                dMean = mean(BW2(BW2~=dMinValue), 'all') * dSUVScale;
+                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
+
+                                dPercentMaxOrMaxSUVValue = (4.30/dMean)*(dMean + dSTD);                                
+                                BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
                             end
+
+                            BW2(BW2 ~= dMinValue) = 1;
+                            BW2(BW2 == dMinValue) = 0;     
+                            
+                        elseif strcmpi(sMinSUVformula, 'Liver SUV 10, Soft Tissue SUV 4, Bone SUV 3, CT Bone Map')
+                            
+                            BWANDBWCT = BW2&BWCT2;
+
+                            dBWnbPixel        = numel(BW2(BW2~=0));
+                            dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
+
+                            if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
+                                sLesionType = 'Bone';
+
+                                dPercentMaxOrMaxSUVValue = 3;                                
+                                BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                            else
+                                sLesionType = 'Soft Tissue';
+
+                                dPercentMaxOrMaxSUVValue = 4;                                
+                                BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                            end
+
+                            BW2(BW2 ~= dMinValue) = 1;
+                            BW2(BW2 == dMinValue) = 0; 
+                            
+                        elseif strcmpi(sMinSUVformula, 'Liver SUV 10, Soft Tissue SUV 4, Bone SUV 3, CT ISO Map')
+                            
+                            BWANDBWCT = BW2&BWCT2;
+
+                            dBWnbPixel        = numel(BW2(BW2~=0));
+                            dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
+
+                            if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
+                                sLesionType = 'Bone';
+
+                                dPercentMaxOrMaxSUVValue = 3;                                
+                                BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                            else
+                                sLesionType = 'Soft Tissue';
+
+                                dPercentMaxOrMaxSUVValue = 4;                                
+                                BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                            end
+
+                            BW2(BW2 ~= dMinValue) = 1;
+                            BW2(BW2 == dMinValue) = 0; 
+%                                clear(BWANDBWCT);
+
+                        else
+                            return;
                         end
-                    end
-
-                    asTag = []; % Reset ROIs tag
-
-                    xmin=0.5;
-                    xmax=1;
-                    aColor=xmin+rand(1,3)*(xmax-xmin);
-
-                    dNbSlices = size(BW, 3);
-
-                    [~,~,adSlices]=ind2sub(size(BW), CC.PixelIdxList{bb});
-
-                    dFirstSlice = adSlices(1);
-                    dLastSlice  = adSlices(end);
-                                                
-                    for aa=dFirstSlice:dLastSlice % Find ROI
-
-                        aAxial = BW(:,:,aa);
-                        if aAxial(aAxial==1)
-
-                            if mod(aa, 5)==1 || aa == dNbSlices
-                                progressBar( aa/dNbSlices-0.0001, sprintf('Computing slice %d/%d, please wait', aa, dNbSlices) );
-                            end
-
-                           if bPixelEdge == true
-                                aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
-                            end
-
-                            [maskAxial,~,~,~] = bwboundaries(aAxial, 'noholes', 4);
-
-                            if ~isempty(maskAxial)
-
-                                if bPixelEdge == true
-                                    for ii=1:numel(maskAxial)
-                                        maskAxial{ii} = (maskAxial{ii} +1)/PIXEL_EDGE_RATIO;
-                                        maskAxial{ii} = reducepoly(maskAxial{ii});
-                                    end
-                                end
-
-                            end
-
-                            if ~isempty(maskAxial)
-                                for jj=1:numel(maskAxial)
-
-                                    curentMask = maskAxial(jj);
-                                    
-%                                    sliceNumber('set', 'axial', aa);
-
-                                    sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
-
-                                    aPosition = flip(curentMask{1}, 2);
-
-%                                    bAddRoi = true;
-%                                    pRoi = drawfreehand(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'Smoothing', 1, 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', roiFaceAlphaValue('get'));
-                                    addContourToTemplate(dSeriesOffset, 'Axes3', aa, 'images.roi.freehand', aPosition, '', 'off', aColor, 1, roiFaceAlphaValue('get'), 0, 1, sTag, sLesionType);
-                           %         if SMALEST_ROI_SIZE > 0
-                           %             roiMask = pRoi.createMask();
-                           %             if numel(roiMask(roiMask==1)) < SMALEST_ROI_SIZE
-                           %                 delete(pRoi);
-                           %                 bAddRoi = false;
-                           %             end
-                           %         else
-                           %             MASK_FLAG(BW ~= dMinValue) = 0; % Set flag to 0 for that region
-                           %         end
-
-%                                    if bAddRoi == true
-
-%                                        pRoi.Waypoints(:) = false;
-
-%                                        addRoi(pRoi, dSeriesOffset);
-
-%                                        roiDefaultMenu(pRoi);
-
-%                                        uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
-%                                        uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
-
-%                                        cropMenu(pRoi);
-
-%                                        uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
-
-                                        asTag{numel(asTag)+1} = sTag;
-%                                        asAllTag{numel(asAllTag)+1} = sTag;
-%                                    end
-                                end
-                            end
-                        end
-                    end
-
-                    if ~isempty(asTag)
-
-                        sLabel = sprintf('RMAX-%d-VOI%d', dPercentMaxOrMaxSUVValue, bb);
-
-                        createVoiFromRois(dSeriesOffset, asTag, sLabel, aColor, sLesionType);
-
                     end
                 end
+
+                asTag = []; % Reset ROIs tag
+
+                xmin=0.5;
+                xmax=1;
+                aColor=xmin+rand(1,3)*(xmax-xmin);
+
+%                    dNbSlices = size(BW2, 3);
+
+                aPixelsList = gather(find(BW2));
+                if numel(aPixelsList) < dSmalestValueNbVoxels
+                    continue;
+                end
+
+                [~,~,adSlices]=ind2sub(size(BW2), aPixelsList);
+                adSlices = unique(adSlices);                
+                
+                dNbComputedSlices = numel(adSlices);
+
+                for aa=1:dNbComputedSlices % Find ROI
+
+                    dCurrentSlice = adSlices(aa);
+
+                    aAxial = gather(BW2(:,:,dCurrentSlice));
+
+                    if bPixelEdge == true
+                        aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+                    end
+                    
+                    maskAxial = bwboundaries(aAxial, 'noholes', 8);                    
+                     
+                    dSlicesNbElements = numel(maskAxial);
+                    for jj=1:dSlicesNbElements
+
+                        if bPixelEdge == true
+                            maskAxial{jj} = (maskAxial{jj} +1)/PIXEL_EDGE_RATIO;
+                            maskAxial{jj} = reducepoly(maskAxial{jj});
+                        end   
+
+                        curentMask = maskAxial(jj);
+
+%                                    sliceNumber('set', 'axial', aa);
+
+                        sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+
+                        aPosition = flip(curentMask{1}, 2);
+%                                    aPosition(:,1) = aPosition(:,1) - 0.5;
+%                                    aPosition(:,2) = aPosition(:,2) + 0.5;
+
+%                                    bAddRoi = true;
+                        sliceNumber('set', 'axial', dCurrentSlice);
+                        
+                        roiPtr = images.roi.Freehand(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'Smoothing', 1, 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', roiFaceAlphaValue('get'), 'Visible', 'off');
+                        roiPtr.Waypoints(:) = false;                    
+     
+                        addRoi(roiPtr, get(uiSeriesPtr('get'), 'Value'), sLesionType);
+
+                        roiDefaultMenu(roiPtr);
+
+                        uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',roiPtr, 'Callback', @hideViewFaceAlhaCallback);
+                        uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData',roiPtr, 'Callback', @clearWaypointsCallback);
+
+                        constraintMenu(roiPtr);
+
+                        cropMenu(roiPtr);
+
+                        voiMenu(roiPtr);
+
+                        uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                                           
+%                        addContourToTemplate(dSeriesOffset, 'Axes3', dCurrentSlice, 'images.roi.freehand', aPosition, '', 'off', aColor, 1, roiFaceAlphaValue('get'), 0, 1, sTag, sLesionType);
+
+                        asTag{numel(asTag)+1} = sTag;
+                    end              
+                end
+                
+                if ~isempty(asTag)
+
+                    sLabel = sprintf('RMAX-%d-VOI%d', dPercentMaxOrMaxSUVValue, bb);
+
+                    createVoiFromRois(dSeriesOffset, asTag, sLabel, aColor, sLesionType);
+                end           
             end
-            
+    
+            setVoiRoiSegPopup();
 
             progressBar(1, 'Ready');
 
             catch
                 progressBar(1, 'Error:maskAddVoiToSeries()');
             end
-
+            
+            clear BW2;
+            clear BWCT2; 
+            clear BWANDBWCT; 
+            
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
             drawnow;
         end
+
     end
 
     function isoSurfaceColorCallback(hObject, ~)
