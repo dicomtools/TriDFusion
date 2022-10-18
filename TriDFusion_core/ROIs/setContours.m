@@ -47,7 +47,7 @@ function setContours(tContours)
         return;
     end
     
-    try
+%    try
             
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow; 
@@ -123,7 +123,11 @@ function setContours(tContours)
                                     bFlip = getImagePosition(bb);
                                     if bFlip == true
                                         aImageSize = size(dicomBuffer('get'));
-                                        dSliceNb =  aImageSize(3)-z(1);
+                                        try
+                                            dSliceNb =  aImageSize(3)-z(1);
+                                        catch
+                                            dSliceNb =  z(1)+1;
+                                        end
                         %                sliceNumber('set', 'axial', dSliceNb);
 
                                     else
@@ -200,9 +204,9 @@ function setContours(tContours)
         end
     end
     
-    catch
-        progressBar(1, 'Error:setContours()');          
-    end  
+%    catch
+%        progressBar(1, 'Error:setContours()');          
+%    end  
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow; 

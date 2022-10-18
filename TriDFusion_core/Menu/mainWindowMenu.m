@@ -185,143 +185,166 @@ function mainWindowMenu()
     function setOrientationCallback(hObject, ~)
 
         bRefresh = false;
+        
         if switchTo3DMode('get')     == false && ...
            switchToIsoSurface('get') == false && ...
            switchToMIPMode('get')    == false && ...
-           ~isempty(dicomBuffer('get'))
+           isVsplash('get') == false
+       
+            try
 
+            set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+            drawnow;
+            
+            if strcmpi(get(hObject, 'Label'), 'Axial Plane') && ...
+               strcmpi(imageOrientation('get'), 'axial')
+                return;
+            end
+            
+            if strcmpi(get(hObject, 'Label'), 'Coronal Plane') && ...
+               strcmpi(imageOrientation('get'), 'coronal')
+                return;
+            end
+            
+            if strcmpi(get(hObject, 'Label'), 'Sagittal Plane') && ...                
+               strcmpi(imageOrientation('get'), 'sagittal')
+                return;
+            end
+                      
             releaseRoiWait();
 
-%                iOffset = get(uiSeriesPtr('get'), 'Value');
-%                if iOffset <= numel(tInput)
+            if isFusion('get') == true
+                setFusionCallback(); % Deactivate fusion
+            end
 
-%                    aInput = inputBuffer('get');
+            if isPlotContours('get') == true
+               setPlotContoursCallback(); % Deactivate plot contours
+            end
+            
+            atInputTemplate = inputTemplate('get');
+            aInputBuffer  = inputBuffer('get');
 
-                aInput  = dicomBuffer('get');
-                aFusion = fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+            dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+            
+            sSeriesInstanceUID = atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID;                        
+                   
+            for kk=1:numel(atInputTemplate) % Scan all series
+                
+                if strcmpi(sSeriesInstanceUID, atInputTemplate(kk).atDicomInfo{1}.SeriesInstanceUID) % Same series
+                                
+%                    aDicomBuffer = dicomBuffer('get', [], kk);
+%                    if isempty(aDicomBuffer)
+                        aDicomBuffer = aInputBuffer{kk};
+%                    end
+                    
+                    if strcmpi(get(hObject, 'Label'), 'Axial Plane')
+                        
+                        imageOrientation('set', 'axial');
 
-                if strcmpi(get(hObject, 'Label'), 'Axial Plane') && ...
-                  ~strcmpi(imageOrientation('get'), 'axial')
-
-                    triangulateCallback();
-
-                    viewSegPanel('set', false);
-                    objSegPanel = viewSegPanelMenuObject('get');
-                    if ~isempty(objSegPanel)
-                        objSegPanel.Checked = 'off';
-                    end
-
-                    viewKernelPanel('set', false);
-                    objKernelPanel = viewKernelPanelMenuObject('get');
-                    if ~isempty(objKernelPanel)
-                        objKernelPanel.Checked = 'off';
-                    end
-
-                    if strcmp(imageOrientation('get'), 'coronal')
-                        aInput = permute(aInput, [3 2 1]);
-                        if isFusion('get') == true
-                            aFusion = permute(aFusion, [3 2 1]);
-                        end
-                    elseif strcmp(imageOrientation('get'), 'sagittal')
-                        aInput = permute(aInput, [2 3 1]);
-                        if isFusion('get') == true
-                            aFusion = permute(aFusion, [2 3 1]);
-                        end
-                    else
-                        aInput = permute(aInput, [1 2 3]);
-                        if isFusion('get') == true
-                            aFusion = permute(aFusion, [1 2 3]);
+                        viewSegPanel('set', false);
+                        objSegPanel = viewSegPanelMenuObject('get');
+                        if ~isempty(objSegPanel)
+                            objSegPanel.Checked = 'off';
                         end
 
-                    end
-
-                    imageOrientation('set', 'axial');
-
-                    bRefresh = true;
-
-                elseif strcmpi(get(hObject, 'Label'), 'Coronal Plane') && ...
-                      ~strcmpi(imageOrientation('get'), 'coronal')
-
-                    triangulateCallback();
-
-                    viewSegPanel('set', false);
-                    objSegPanel = viewSegPanelMenuObject('get');
-                    if ~isempty(objSegPanel)
-                        objSegPanel.Checked = 'off';
-                    end
-
-                    viewKernelPanel('set', false);
-                    objKernelPanel = viewKernelPanelMenuObject('get');
-                    if ~isempty(objKernelPanel)
-                        objKernelPanel.Checked = 'off';
-                    end
-
-                    if strcmp(imageOrientation('get'), 'sagittal')
-                        aInput = permute(aInput, [1 3 2]);
-                        if isFusion('get') == true
-                            aFusion = permute(aFusion, [1 3 2]);
+                        viewKernelPanel('set', false);
+                        objKernelPanel = viewKernelPanelMenuObject('get');
+                        if ~isempty(objKernelPanel)
+                            objKernelPanel.Checked = 'off';
                         end
-                   else
-                        aInput = permute(aInput, [3 2 1]);
-                        if isFusion('get') == true
-                            aFusion = permute(aFusion, [3 2 1]);
+                
+                        if strcmpi(imageOrientation('get'), 'coronal')
+                            aDicomBuffer = permute(aDicomBuffer, [3 2 1]);
+                        elseif strcmpi(imageOrientation('get'), 'sagittal')
+                            aDicomBuffer = permute(aDicomBuffer, [2 3 1]);
+                        else
+                            aDicomBuffer = permute(aDicomBuffer, [1 2 3]);
                         end
-                    end
 
-                    imageOrientation('set', 'coronal');
+                        dicomBuffer('set', aDicomBuffer, kk);
+                        
+                        aReorientedMip = computeMIP(aDicomBuffer);
+                        mipBuffer('set', aReorientedMip, kk);
+                        
+                        bRefresh = true;
 
-                    bRefresh = true;
+                    elseif strcmpi(get(hObject, 'Label'), 'Coronal Plane')
+                       
+                        imageOrientation('set', 'coronal');
 
-               elseif strcmpi(get(hObject, 'Label'), 'Sagittal Plane') && ...
-                      ~strcmp(imageOrientation('get'), 'sagittal')
-
-                    triangulateCallback();
-
-                    viewSegPanel('set', false);
-                    objSegPanel = viewSegPanelMenuObject('get');
-                    if ~isempty(objSegPanel)
-                        objSegPanel.Checked = 'off';
-                    end
-
-                    viewKernelPanel('set', false);
-                    objKernelPanel = viewKernelPanelMenuObject('get');
-                    if ~isempty(objKernelPanel)
-                        objKernelPanel.Checked = 'off';
-                    end
-
-                    if strcmp(imageOrientation('get'), 'coronal')
-                        aInput = permute(aInput, [1 3 2]);
-                        if isFusion('get') == true
-                            aFusion = permute(aFusion, [1 3 2]);
+                        viewSegPanel('set', false);
+                        objSegPanel = viewSegPanelMenuObject('get');
+                        if ~isempty(objSegPanel)
+                            objSegPanel.Checked = 'off';
                         end
-                   else
-                        aInput = permute(aInput, [3 1 2]);
-                         if isFusion('get') == true
-                            aFusion = permute(aFusion, [3 1 2]);
-                         end
+
+                        viewKernelPanel('set', false);
+                        objKernelPanel = viewKernelPanelMenuObject('get');
+                        if ~isempty(objKernelPanel)
+                            objKernelPanel.Checked = 'off';
+                        end
+
+                        if strcmpi(imageOrientation('get'), 'sagittal')
+                            aDicomBuffer = permute(aDicomBuffer, [1 3 2]);
+                        else
+                            aDicomBuffer = permute(aDicomBuffer, [3 2 1]);
+                        end
+                        
+                        dicomBuffer('set', aDicomBuffer, kk);
+                        
+                        aReorientedMip = computeMIP(aDicomBuffer);
+                        mipBuffer('set', aReorientedMip, kk);
+                        
+                        bRefresh = true;
+
+                   elseif strcmpi(get(hObject, 'Label'), 'Sagittal Plane')
+
+                        imageOrientation('set', 'sagittal');
+
+                        viewSegPanel('set', false);
+                        objSegPanel = viewSegPanelMenuObject('get');
+                        if ~isempty(objSegPanel)
+                            objSegPanel.Checked = 'off';
+                        end
+
+                        viewKernelPanel('set', false);
+                        objKernelPanel = viewKernelPanelMenuObject('get');
+                        if ~isempty(objKernelPanel)
+                            objKernelPanel.Checked = 'off';
+                        end
+
+                        if strcmpi(imageOrientation('get'), 'coronal')
+                            aDicomBuffer = permute(aDicomBuffer, [1 3 2]);
+                        else
+                            aDicomBuffer = permute(aDicomBuffer, [3 1 2]);
+                        end
+                        
+                        dicomBuffer('set', aDicomBuffer, kk);
+                        
+                        aReorientedMip = computeMIP(aDicomBuffer);
+                        mipBuffer('set', aReorientedMip, kk);
+                
+                        bRefresh = true;
                     end
-
-                    imageOrientation('set', 'sagittal');
-
-                    bRefresh = true;
-
                 end
+            end
+            
+            if  bRefresh == true
 
-                if  bRefresh == true
+                clearDisplay();
+                initDisplay(3);
+                dicomViewerCore();
 
-                    dicomBuffer('set', aInput);
-                    if isFusion('get') == true
-                        fusionBuffer('set', aFusion, get(uiFusedSeriesPtr('get'), 'Value'));
-                    end
-
-                    clearDisplay();
-                    initDisplay(3);
-                    dicomViewerCore();
-
-                    refreshImages();
-                end
-
-          %  end
+                refreshImages();
+            end
+            
+            catch
+                progressBar(1, 'Error:setOrientationCallback()');
+            end            
+            
+            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            drawnow;
+            
         end
     end
 

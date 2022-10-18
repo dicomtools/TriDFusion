@@ -2362,8 +2362,12 @@ end
                     if numel(im) ~= numel(refImage)
                         
                         progressBar(0.3, sprintf('Resampling series, please wait'));
-
-                        [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', true, true);   
+                        
+                        if size(im, 3) ~= size(refImage, 3)
+                            [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', false, true);   
+                        else
+                            [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', true, true);   
+                        end
 
                         progressBar(0.6, sprintf('Resampling ROIs, please wait'));
 
@@ -2717,7 +2721,8 @@ end
                             if numel(BWCT) ~= numel(im) 
                                progressBar(0.6, sprintf('Resampling ct, please wait'));
                                
-                               [BWCT, ~] = resampleImage(BWCT, atFuseMetaData, im, atMetaData, 'Nearest', true, false);   
+                                [BWCT, ~] = resampleImage(BWCT, atFuseMetaData, im, atMetaData, 'Nearest', true, false);   
+                                
                             end
                         end
                         
@@ -2901,8 +2906,12 @@ end
                         if numel(im) ~= numel(refImage)
                             
                             progressBar(0.3, sprintf('Resampling series, please wait'));
-                        
-                            [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', true, true);   
+                            
+                            if size(im, 3) ~= size(refImage, 3)
+                                [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', false, true);   
+                            else
+                                [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', true, true);   
+                            end
 
                             progressBar(0.6, sprintf('Resampling ROIs, please wait'));
 

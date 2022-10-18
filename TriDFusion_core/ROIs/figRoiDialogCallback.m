@@ -1953,7 +1953,7 @@ end
                    end
                end
 
-               if isvalid(atRoiInput{bb}.Object)
+%               if isvalid(atRoiInput{bb}.Object)
                     if strcmpi(atRoiInput{bb}.ObjectType, 'roi')
 
                         tRoiComputed = computeRoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atMetaData, atRoiInput{bb}, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
@@ -2011,7 +2011,7 @@ end
                             aVoiRoiTag{1}.Tag = atRoiInput{bb}.Tag;
                         end
                     end
-               end
+%               end
             end
         end
 
@@ -2629,7 +2629,7 @@ end
             end
 
             for cc=1:numel(atVoiInput)
-                if isvalid(atRoiInput{cc}.Object)
+%                if isvalid(atRoiInput{cc}.Object)
                     if strcmp(atVoiInput{cc}.Tag, aVoiRoiTag{hObject.Value}.Tag)
 
                         dRoiOffset = round(numel(atVoiInput{cc}.RoisTag)/2);
@@ -2639,7 +2639,7 @@ end
 
                         break;
                     end
-                end
+%                end
             end
         end
 
@@ -2653,14 +2653,14 @@ end
             end
 
             for cc=1:numel(atRoiInput)
-                if isvalid(atRoiInput{cc}.Object)
+%                if isvalid(atRoiInput{cc}.Object)
                     if strcmp(atRoiInput{cc}.Tag, aVoiRoiTag{hObject.Value}.Tag)
                         if ~strcmpi(atRoiInput{cc}.Type, 'images.roi.line')
                             triangulateRoi(atRoiInput{cc}.Tag)
                         end
                         break;
                     end
-                end
+%                end
             end
 
         end

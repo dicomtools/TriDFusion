@@ -157,7 +157,13 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
     else
         info.StudyID = '';
     end
-
+    
+    if isfield(tMetaData, 'AccessionNumber')
+        info.AccessionNumber = tMetaData.AccessionNumber;
+    else
+        info.AccessionNumber = '';
+    end
+    
     info.SeriesNumber = 1;
     info.StructureSetLabel = 'TriDFusion1.0';
 
@@ -246,7 +252,11 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                                 dNBoundaries = size(xy,1);                          
 
                                 azOffset = zeros(dNBoundaries, 1);
-                                azOffset(:)=atRoiInput{tt}.SliceNb-1;
+                                if numel(atDicomMeta) ~= 1
+                                    azOffset(:)=atRoiInput{tt}.SliceNb-1;
+                                else
+                                    azOffset(:)=atRoiInput{tt}.SliceNb;
+                                end
     %                            a3DOffset(:,3)=atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
 
                                 if bFlip == true
@@ -277,24 +287,27 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                                         aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
                                     end
                                  end
-                            
-                                 dXOffset=1;
-                                 dYOffset=1;
-                                 dZOffset=1;
+                                 
                                  aXYZ = zeros(dNBoundaries*3, 1);
+                          
+                                 dXOffset=1;
                                  for xx=1:3:size(aXYZ,1)
                                     aXYZ(xx) = aX(dXOffset);
                                     dXOffset = dXOffset+1;
                                  end
     
+                                 dYOffset=1;
                                  for yy=2:3:size(aXYZ,1)
                                     aXYZ(yy) = aY(dYOffset);
                                     dYOffset = dYOffset+1;
                                  end
     
+                                 dZOffset=1;
                                  for zz=3:3:size(aXYZ,1)
                                     aXYZ(zz) = aZ(dZOffset);
-                                    dZOffset = dZOffset+1;
+%                                    if bFlip == false % patch for spect, to revisit
+                                        dZOffset = dZOffset+1;
+%                                    end
                                  end  
 
                                  info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPClassUID = atRoiInput{tt}.SOPClassUID;
@@ -316,7 +329,11 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                 
                             a3DOffset(:,1)=atRoiInput{tt}.Position(:,1)-1;
                             a3DOffset(:,2)=atRoiInput{tt}.Position(:,2)-1;
-                            a3DOffset(:,3)=atRoiInput{tt}.SliceNb-1;
+                            if numel(atDicomMeta) ~= 1
+                                a3DOffset(:,3)=atRoiInput{tt}.SliceNb-1;
+                            else
+                                a3DOffset(:,3)=atRoiInput{tt}.SliceNb;
+                            end
 %                            a3DOffset(:,3)=atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
 
                             if bFlip == true
@@ -351,29 +368,32 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 
  %                           aZ = zeros(dNBoundaries, 1);
  %                           aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
+ 
+                            aXYZ = zeros(dNBoundaries*3, 1);
 
                             dXOffset=1;
-                            dYOffset=1;
-                            dZOffset=1;
-                            aXYZ = zeros(dNBoundaries*3, 1);
                             for xx=1:3:numel(aXYZ)
                                 aXYZ(xx)=aX(dXOffset);
                                 dXOffset = dXOffset+1;
                             end
 
+                            dYOffset=1;
                             for yy=2:3:numel(aXYZ)
                                 aXYZ(yy) = aY(dYOffset);
                                 dYOffset = dYOffset+1;
                             end
-
+                            
+                            dZOffset=1;
                             for zz=3:3:numel(aXYZ)
                                 aXYZ(zz)=aZ(dZOffset);
-                                dZOffset = dZOffset+1;
+                                dZOffset = dZOffset+1;                               
                             end
+                            
                             if numel(aXYZ)*64/8 > 65534
                                 dNBoundaries = 1;
                                 aXYZ = zeros(dNBoundaries*3, 1);
                             end
+                            
                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPClassUID    = atRoiInput{tt}.SOPClassUID;
                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPInstanceUID = atRoiInput{tt}.SOPInstanceUID;
                             info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourGeometricType = 'CLOSED_PLANAR';

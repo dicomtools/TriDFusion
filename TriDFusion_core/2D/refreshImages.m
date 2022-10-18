@@ -831,7 +831,7 @@ if 1 % Need to improve speed
     %        set(H,'visible','off');
 
             for bb=1:numel(atRoiInput)
-               if isvalid(atRoiInput{bb}.Object)
+%               if isvalid(atRoiInput{bb}.Object)
                    if (strcmpi(atRoiInput{bb}.Axe, 'Axes1') && ...
                         iCoronal == atRoiInput{bb}.SliceNb) || ...
                        (strcmpi(atRoiInput{bb}.Axe, 'Axes2')&& ...
@@ -866,7 +866,7 @@ if 1 % Need to improve speed
                             atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'off';
                         end
                     end
-               end
+%               end
             end
         end
 %toc        
