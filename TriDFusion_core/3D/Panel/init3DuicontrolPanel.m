@@ -2381,12 +2381,16 @@ end
 
                         dicomMetaData('set', atResampledMetaData);
                         dicomBuffer('set', aResampledBuffer);
-
-                        refMip = mipBuffer('get', [], dCTSeriesNumber);
-
-                        aMip = mipBuffer('get', [], dSeriesOffset);
-                        aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear', true);
-
+                        
+                        refMip = mipBuffer('get', [], dCTSeriesNumber);                        
+                          aMip = mipBuffer('get', [], dSeriesOffset);
+                      
+                        if size(im, 3) ~= size(refImage, 3)
+                            aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear', false);
+                        else
+                            aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear', true);
+                        end
+                        
                         mipBuffer('set', aResampledMip, dSeriesOffset);
 
                         setQuantification(dSeriesOffset);                               
@@ -2725,8 +2729,7 @@ end
                                 
                             end
                         end
-                        
-                         
+                                                 
                         progressBar(0.6, sprintf('Computing ct bone map, please wait'));                        
                 
                         BWCT(BWCT < 100) = 0;                                    
@@ -2927,9 +2930,13 @@ end
                             dicomBuffer('set', aResampledBuffer);
 
                             refMip = mipBuffer('get', [], dCTSeriesNumber);
-
                             aMip = mipBuffer('get', [], dSeriesOffset);
-                            aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear', true);
+                            
+                            if size(im, 3) ~= size(refImage, 3)
+                                aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear', false);
+                            else
+                                aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear', true);
+                            end
 
                             mipBuffer('set', aResampledMip, dSeriesOffset);
 
