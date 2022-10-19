@@ -1,7 +1,7 @@
 
 <div align="center">
   <h1>TriDFusion (3DF) Medical Imaging Viewer</h1>
-  <p><strong>The TriDFusion (3DF)</strong> is a a DICOM Multi-Fusion Viewer for research provided by <a href="https://daniellafontaine.com/">Daniel Lafontaine</a>.</p>
+  <p><strong>The TriDFusion (3DF)</strong> is a DICOM Multi-Fusion Viewer for research provided by <a href="https://daniellafontaine.com/">Daniel Lafontaine</a>.</p>
 </div>
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/dicomtools/TriDFusion)
