@@ -1,7 +1,7 @@
 
 <div align="center">
   <h1>TriDFusion (3DF) Image Viewer</h1>
-  <p><strong>The TriDFusion (3DF) Image Viewer</strong> is a DICOM Multi-Fusion Viewer for research provided by <a href="https://daniellafontaine.com/">Daniel Lafontaine</a></p><p><strong>The software is published by <a href="https://ejnmmiphys.springeropen.com/articles/10.1186/s40658-022-00501-y">EJNMMI Physics</a></p>
+  <p><strong>The TriDFusion (3DF) Image Viewer</strong> is a DICOM Multi-Fusion Viewer for research provided by <a href="https://daniellafontaine.com/">Daniel Lafontaine</a></p><p>The software is published by <a href="https://ejnmmiphys.springeropen.com/articles/10.1186/s40658-022-00501-y">EJNMMI Physics</a></p>
 <div align="center">
   
   
