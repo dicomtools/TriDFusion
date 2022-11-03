@@ -27,39 +27,39 @@ function init3DfusionBuffer()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    atInput  = inputTemplate('get');
+    atInputTemplate  = inputTemplate('get');
     
-    iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-    iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+    dFuseOffset   = get(uiFusedSeriesPtr('get'), 'Value');
        
     % Set buffer % Meta data
 
     aInput = inputBuffer('get');
 
-    set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
-    A = dicomBuffer('get');
-     if isempty(A)
-        A = aInput{iFuseOffset};
-     end
+%    set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
+    A = dicomBuffer('get', [], dSeriesOffset);
+    if isempty(A)
+        A = aInput{dSeriesOffset};
+    end
     
     atMetaData  = dicomMetaData('get');
     if isempty(atMetaData)
-        atMetaData = atInput(iSeriesOffset).atDicomInfo;
+        atMetaData = atInputTemplate(dSeriesOffset).atDicomInfo;
     end
         
-    set(uiSeriesPtr('get'), 'Value', iFuseOffset);
+%    set(uiSeriesPtr('get'), 'Value', dFuseOffset);
     
-    B = dicomBuffer('get');
+    B = dicomBuffer('get', [], dFuseOffset);
     if isempty(B)
-        B = aInput{iFuseOffset};
+        B = aInput{dFuseOffset};
     end
     
     atFuseMetaData = dicomMetaData('get');
     if isempty(atFuseMetaData)
-        atFuseMetaData = atInput(iFuseOffset).atDicomInfo;
+        atFuseMetaData = atInputTemplate(dFuseOffset).atDicomInfo;
     end
         
-    set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
+%    set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
                                                                                                   
     if strcmpi(imageOrientation('get'), 'coronal')
         B = permute(B, [3 2 1]);
@@ -69,15 +69,15 @@ function init3DfusionBuffer()
         B = permute(B, [1 2 3]);
     end
 
-    if atInput(iSeriesOffset).bFlipLeftRight == true
+    if atInputTemplate(dSeriesOffset).bFlipLeftRight == true
         B=B(:,end:-1:1,:);
     end
 
-    if atInput(iSeriesOffset).bFlipAntPost == true
+    if atInputTemplate(dSeriesOffset).bFlipAntPost == true
         B=B(end:-1:1,:,:);
     end
 
-    if atInput(iSeriesOffset).bFlipHeadFeet == true
+    if atInputTemplate(dSeriesOffset).bFlipHeadFeet == true
         B=B(:,:,end:-1:1);
     end                                 
                                 
@@ -105,6 +105,6 @@ function init3DfusionBuffer()
         aResampled = imresize3(aResampled, size(A));
     end
     
-    fusionBuffer('set', squeeze(aResampled), iFuseOffset);     
+    fusionBuffer('set', squeeze(aResampled), dFuseOffset);     
 
 end  

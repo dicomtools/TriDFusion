@@ -27,7 +27,9 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if size(dicomBuffer('get'), 3) == 1
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
         progressBar(1, 'Error: Require a 3D Volume!');
         multiFrame3DRecord('set', false);
         mRecord.State = 'off';
@@ -49,11 +51,14 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
     volObjBak  = volObject('get');
     isoObjBak  = isoObject('get');
     mipObjBak  = mipObject('get');
+    
+    aInputBuffer  = inputBuffer('get');
 
+    atInputTemplate = inputTemplate('get');
+    
     if isFusion('get') == true
-        tFuseInput     = inputTemplate('get');
-        iFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
-        atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
+        dFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
+        atFuseMetaData = atInputTemplate(dFuseOffset).atDicomInfo;
     end
 
     volGateFusionObj = volGateFusionObject('get');
@@ -66,21 +71,15 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
 
     voiObjBak = voiObject('get');
 
-%       aBackup = dicomBuffer('get');
-    aInputBuffer  = inputBuffer('get');
-
-    atInput = inputTemplate('get');
-
-    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-    if dSeriesOffset > numel(atInput) || ...
-       numel(atInput) < 2 % Need a least 2 series
+    if dSeriesOffset > numel(atInputTemplate) || ...
+       numel(atInputTemplate) < 2 % Need a least 2 series
         progressBar(1, 'Error: Require at least two 3D Volume!');
         multiFrame3DRecord('set', false);
         mRecord.State = 'off';
         return;
     end
 
-    if ~isfield(atInput(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
+    if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
        gateUseSeriesUID('get') == true
         progressBar(1, 'Error: Require a dynamic 3D Volume!');
         multiFrame3DRecord('set', false);
@@ -91,16 +90,16 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
     if gateUseSeriesUID('get') == true
         dOffset = dSeriesOffset;
 
-        for idx=1: numel(atInput)
+        for idx=1: numel(atInputTemplate)
 
             dOffset = dOffset+1;
 
-            if dOffset > numel(atInput) || ... % End of list
-               ~strcmpi(atInput(dOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
-                        atInput(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
-                for bb=1:numel(atInput)
-                    if strcmpi(atInput(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
-                        atInput(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
+            if dOffset > numel(atInputTemplate) || ... % End of list
+               ~strcmpi(atInputTemplate(dOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
+                        atInputTemplate(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
+                for bb=1:numel(atInputTemplate)
+                    if strcmpi(atInputTemplate(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
+                        atInputTemplate(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
                         dOffset = bb;
                         break;
                     end
@@ -108,12 +107,12 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
                 end
             end
             if dOffset == dSeriesOffset
-                iNbSeries = idx;
+                dNbSeries = idx;
                 break
             end
         end
     else
-        iNbSeries = numel(atInput);
+        dNbSeries = numel(atInputTemplate);
     end
 
     set(btn3DPtr('get')        , 'Enable', 'off');
@@ -131,7 +130,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
     ui3DGateWindow = ui3DGateWindowObject('get');
 
     if isempty(ui3DGateWindow)
-        for tt=1:iNbSeries
+        for tt=1:dNbSeries
             if view3DPanel('get') == false
                 ui3DWindow{tt} = uipanel(fiMainWindowPtr('get'),...
                                       'Units'   , 'pixels',...
@@ -171,7 +170,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
         end
     end
 
-    for tt=1:iNbSeries
+    for tt=1:dNbSeries
         ui3DLogo{tt} = displayLogo(ui3DWindow{tt});
     end
     ui3DLogoObject('set', ui3DLogo);
@@ -188,7 +187,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
     end
     mipColorObject('set', '');
 
-    for tt=1:iNbSeries
+    for tt=1:dNbSeries
         if displayVolColorMap('get') == true && ...
            switchTo3DMode('get') == true
             if isFusion('get') == true && ...
@@ -208,7 +207,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
         volColorObject('set', '');
     end
 
-    for tt=1:iNbSeries
+    for tt=1:dNbSeries
         if displayMIPColorMap('get') == true && ...
            switchToMIPMode('get') == true
             if isFusion('get') == true && ...
@@ -227,41 +226,42 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
         mipColorObject('set', '');
     end
 
-    dNbSurface = 0;
-    if switchToMIPMode('get') == true
-        dNbSurface = dNbSurface+1;
-    end
+%    dNbSurface = 0;
+%    if switchToMIPMode('get') == true
+%        dNbSurface = dNbSurface+1;
+%    end
 
-    if switchToIsoSurface('get') == true
-        dNbSurface = dNbSurface+1;
-    end
+%    if switchToIsoSurface('get') == true
+%        dNbSurface = dNbSurface+1;
+%    end
 
-    if switchTo3DMode('get') == true
-        dNbSurface = dNbSurface+1;
-    end
+%    if switchTo3DMode('get') == true
+%        dNbSurface = dNbSurface+1;
+%    end
 
     dOffset = dSeriesOffset;
-    for tt=1:iNbSeries
+    for tt=1:dNbSeries
 
         set(uiSeriesPtr('get'), 'Value', dOffset);
-        atCoreMetaData = dicomMetaData('get');
-        if isempty(atCoreMetaData)
-            atCoreMetaData = atInput(dOffset).atDicomInfo;
-            dicomMetaData('set', atCoreMetaData);
+        
+        atMetaData = dicomMetaData('get', [], dOffset);
+        if isempty(atMetaData)
+            atMetaData = atInputTemplate(dOffset).atDicomInfo;
+            dicomMetaData('set', atMetaData, dOffset);
         end
 
-        aBuffer = squeeze(dicomBuffer('get'));
+        aBuffer = squeeze(dicomBuffer('get', [], dOffset));
         if isempty(aBuffer)
-            if     strcmp(imageOrientation('get'), 'axial')
-                aBuffer = permute(aInputBuffer{dOffset}, [1 2 3]);
-            elseif strcmp(imageOrientation('get'), 'coronal')
-                aBuffer = permute(aInputBuffer{dOffset}, [3 2 1]);
-            elseif strcmp(imageOrientation('get'), 'sagittal')
-                aBuffer = permute(aInputBuffer{dOffset}, [3 1 2]);
-            end
+            aBuffer = aInputBuffer{dOffset};
+%            if     strcmp(imageOrientation('get'), 'axial')
+%                aBuffer = permute(aInputBuffer{dOffset}, [1 2 3]);
+%            elseif strcmp(imageOrientation('get'), 'coronal')
+%                aBuffer = permute(aInputBuffer{dOffset}, [3 2 1]);
+%            elseif strcmp(imageOrientation('get'), 'sagittal')
+%                aBuffer = permute(aInputBuffer{dOffset}, [3 1 2]);
+%            end
 
-            dicomBuffer('set', aBuffer);
-
+            dicomBuffer('set', aBuffer, dOffset);
         end
 
         for dPriorityLoop=1:3
@@ -271,10 +271,10 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
                 dPriority = surface3DPriority('get', 'MaximumIntensityProjection');
 
                 if isempty(mipGateObj)&&(dPriority == dPriorityLoop)
-                    mipObj{tt} = initVolShow(aBuffer, ui3DWindow{tt}, 'MaximumIntensityProjection', atCoreMetaData);
+                    mipObj{tt} = initVolShow(aBuffer, ui3DWindow{tt}, 'MaximumIntensityProjection', atMetaData);
                     if isFusion('get') == true
                         if isempty(mipGateFusionObj)
-                            mipFusionObj{tt} = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), ui3DWindow{tt}, 'MaximumIntensityProjection', atFuseMetaData);
+                            mipFusionObj{tt} = initVolShow(squeeze(fusionBuffer('get', [], dFuseOffset)), ui3DWindow{tt}, 'MaximumIntensityProjection', atFuseMetaData);
                         end
                     end
                 end
@@ -286,10 +286,10 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
                 dPriority = surface3DPriority('get', 'Isosurface');
 
                 if isempty(isoGateObj) &&(dPriority == dPriorityLoop)
-                    isoObj{tt} = initVolShow(aBuffer, ui3DWindow{tt}, 'Isosurface', atCoreMetaData);
+                    isoObj{tt} = initVolShow(aBuffer, ui3DWindow{tt}, 'Isosurface', atMetaData);
                     if isFusion('get') == true
                         if isempty(isoGateFusionObj)
-                            isoFusionObj{tt} = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), ui3DWindow{tt}, 'Isosurface', atFuseMetaData);
+                            isoFusionObj{tt} = initVolShow(squeeze(fusionBuffer('get', [], dFuseOffset)), ui3DWindow{tt}, 'Isosurface', atFuseMetaData);
                         end
                     end
                 end
@@ -300,10 +300,10 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
                 dPriority = surface3DPriority('get', 'VolumeRendering');
 
                 if isempty(volGateObj) &&(dPriority == dPriorityLoop)
-                    volObj{tt} = initVolShow(aBuffer, ui3DWindow{tt}, 'VolumeRendering', atCoreMetaData);
+                    volObj{tt} = initVolShow(aBuffer, ui3DWindow{tt}, 'VolumeRendering', atMetaData);
                     if isFusion('get') == true
                         if isempty(volGateFusionObj)
-                            volFusionObj{tt} = initVolShow(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ui3DWindow{tt}, 'VolumeRendering', atFuseMetaData);
+                            volFusionObj{tt} = initVolShow(fusionBuffer('get', [], dFuseOffset), ui3DWindow{tt}, 'VolumeRendering', atFuseMetaData);
                         end
                     end
                 end
@@ -325,12 +325,12 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
 
         if gateUseSeriesUID('get') == true
 
-            if dOffset > numel(atInput) || ... % End of list
-               ~strcmpi(atInput(dOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
-                        atInput(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
-                for bb=1:numel(atInput)
-                    if strcmpi(atInput(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
-                        atInput(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
+            if dOffset > numel(atInputTemplate) || ... % End of list
+               ~strcmpi(atInputTemplate(dOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
+                        atInputTemplate(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
+                for bb=1:numel(atInputTemplate)
+                    if strcmpi(atInputTemplate(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
+                        atInputTemplate(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
                         dOffset = bb;
                         break;
                     end
@@ -338,12 +338,12 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
                 end
             end
         else
-            if dOffset > numel(atInput)
+            if dOffset > numel(atInputTemplate)
                 dOffset = 1;
             end
         end
 
-        progressBar(tt / iNbSeries, 'Initializing surface', 'red');
+        progressBar(tt / dNbSeries, 'Initializing surface', 'red');
 
     end
 
@@ -579,7 +579,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
 
     progressBar(1, 'Ready');
 
-    for tt=1:iNbSeries
+    for tt=1:dNbSeries
         
        if ~multiFrame3DRecord('get')
             break;
@@ -592,10 +592,10 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
               
        set(uiSeriesPtr('get'), 'Value', tt);
        
-       atCoreMetaData = dicomMetaData('get');
-       if isempty(atCoreMetaData)
-           atCoreMetaData = atInput(dOffset).atDicomInfo;
-           dicomMetaData('set',atCoreMetaData);
+       atMetaData = dicomMetaData('get');
+       if isempty(atMetaData)
+           atMetaData = atInputTemplate(dOffset).atDicomInfo;
+           dicomMetaData('set',atMetaData);
        end
 
         set(ui3DWindow{tt}, 'Visible', 'on');
@@ -608,7 +608,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
                 imwrite(indI, cm, [sPath sFileName], 'gif', 'Loopcount', inf, 'DelayTime', multiFrame3DSpeed('get'));
             elseif strcmpi('*.jpg', sExtention)
 
-                sDirName = sprintf('%s_%s_%s_JPG_3D', atCoreMetaData{1}.PatientName, atCoreMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
+                sDirName = sprintf('%s_%s_%s_JPG_3D', atMetaData{1}.PatientName, atMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
                 sImgDirName = [sPath sDirName '//' ];
 
                 if~(exist(char(sImgDirName), 'dir'))
@@ -620,7 +620,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
                 imwrite(indI, cm, [sImgDirName newName], 'jpg');
 
             elseif strcmpi('*.bmp', sExtention)
-                sDirName = sprintf('%s_%s_%s_BMP_3D', atCoreMetaData{1}.PatientName, atCoreMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
+                sDirName = sprintf('%s_%s_%s_BMP_3D', atMetaData{1}.PatientName, atMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
                 sImgDirName = [sPath sDirName '//' ];
 
                 if~(exist(char(sImgDirName), 'dir'))
@@ -647,7 +647,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
 
         set(ui3DWindow{tt}, 'Visible', 'off');
 
-        progressBar(tt / iNbSeries, 'Recording', 'red');
+        progressBar(tt / dNbSeries, 'Recording', 'red');
 
     end
 
@@ -820,6 +820,6 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
         progressBar(1, sprintf('Write %s completed', sFileName));
     elseif strcmpi('*.jpg', sExtention) || ...
            strcmpi('*.bmp', sExtention)
-        progressBar(1, sprintf('Write %d files to %s completed', iNbSeries, sImgDirName));
+        progressBar(1, sprintf('Write %d files to %s completed', dNbSeries, sImgDirName));
     end
 end

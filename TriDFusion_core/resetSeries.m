@@ -27,7 +27,7 @@ function resetSeries(dOffset, bInitDisplay)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tInitInput = inputTemplate('get');
+    atInitInput = inputTemplate('get');
     
     dInitOffset = get(uiSeriesPtr('get'), 'Value');
     
@@ -55,10 +55,10 @@ function resetSeries(dOffset, bInitDisplay)
 
     aInput = inputBuffer('get');
 
-    bReOrientedImage = false;
-    if ~strcmpi(imageOrientation('get'), 'axial')
+  %  bReOrientedImage = false;
+  %  if ~strcmpi(imageOrientation('get'), 'axial')
         
-        bReOrientedImage = true;
+%        bReOrientedImage = true;
 
         % clear all contour
         
@@ -85,10 +85,10 @@ function resetSeries(dOffset, bInitDisplay)
         % Set axial 
      
         imageOrientation('set', 'axial');
-    end
+%    end
 
 %    if     strcmpi(imageOrientation('get'), 'axial')
-        aBuffer = permute(aInput{dOffset}, [1 2 3]);
+        aBuffer = aInput{dOffset};
 %    elseif strcmpi(imageOrientation('get'), 'coronal')
 %        aBuffer = permute(aInput{dOffset}, [3 2 1]);
 %    elseif strcmpi(imageOrientation('get'), 'sagittal')
@@ -99,14 +99,14 @@ function resetSeries(dOffset, bInitDisplay)
     
     asDescription = seriesDescription('get');
     
-    if isempty(tInitInput(dOffset).atDicomInfo{1}.SeriesDate)
+    if isempty(atInitInput(dOffset).atDicomInfo{1}.SeriesDate)
         sInitSeriesDate = '';
     else
-        sSeriesDate = tInitInput(dOffset).atDicomInfo{1}.SeriesDate;
-        if isempty(tInitInput(dOffset).atDicomInfo{1}.SeriesTime)
+        sSeriesDate = atInitInput(dOffset).atDicomInfo{1}.SeriesDate;
+        if isempty(atInitInput(dOffset).atDicomInfo{1}.SeriesTime)
             sSeriesTime = '000000';
         else
-            sSeriesTime = tInitInput(dOffset).atDicomInfo{1}.SeriesTime;
+            sSeriesTime = atInitInput(dOffset).atDicomInfo{1}.SeriesTime;
         end
 
         sInitSeriesDate = sprintf('%s%s', sSeriesDate, sSeriesTime);
@@ -120,7 +120,7 @@ function resetSeries(dOffset, bInitDisplay)
         sInitSeriesDate = datetime(sInitSeriesDate,'InputFormat','yyyyMMddHHmmss');
     end
 
-    sInitSeriesDescription = tInitInput(dOffset).atDicomInfo{1}.SeriesDescription;
+    sInitSeriesDescription = atInitInput(dOffset).atDicomInfo{1}.SeriesDescription;
 
     asDescription{dOffset} = sprintf('%s %s', sInitSeriesDescription, sInitSeriesDate);
     
@@ -143,44 +143,49 @@ function resetSeries(dOffset, bInitDisplay)
     atRoi = roiTemplate('get', dOffset);            
     if ~isempty(atRoi)       
         if bImageIsResampled == true
-            atResampledRoi = resampleROIs(aCurrentBuffer, aCurrentMeteData, aBuffer, tInitInput(dOffset).atDicomInfo, atRoi, true);
+            atResampledRoi = resampleROIs(aCurrentBuffer, aCurrentMeteData, aBuffer, atInitInput(dOffset).atDicomInfo, atRoi, true);
             roiTemplate('set', dOffset, atResampledRoi);     
         end
     end                
     
     % Reset Template
 
-    tInitInput(dOffset).bEdgeDetection = false;
-    tInitInput(dOffset).bFlipLeftRight = false;
-    tInitInput(dOffset).bFlipAntPost   = false;
-    tInitInput(dOffset).bFlipHeadFeet  = false;
-    tInitInput(dOffset).bDoseKernel    = false;
-    tInitInput(dOffset).bMathApplied   = false;
-    tInitInput(dOffset).bFusedDoseKernel    = false;
-    tInitInput(dOffset).bFusedEdgeDetection = false;
-    tInitInput(dOffset).tMovement = [];
-    tInitInput(dOffset).tMovement.bMovementApplied = false;
-    tInitInput(dOffset).tMovement.aGeomtform = [];
-    tInitInput(dOffset).tMovement.atSeq{1}.sAxe = [];
-    tInitInput(dOffset).tMovement.atSeq{1}.aTranslation = [];
-    tInitInput(dOffset).tMovement.atSeq{1}.dRotation = []; 
+    atInitInput(dOffset).sOrientationView    = 'Axial';
+    
+    atInitInput(dOffset).bEdgeDetection      = false;
+    atInitInput(dOffset).bFlipLeftRight      = false;
+    atInitInput(dOffset).bFlipAntPost        = false;
+    atInitInput(dOffset).bFlipHeadFeet       = false;
+    atInitInput(dOffset).bDoseKernel         = false;
+    atInitInput(dOffset).bMathApplied        = false;
+    atInitInput(dOffset).bFusedDoseKernel    = false;
+    atInitInput(dOffset).bFusedEdgeDetection = false;
+    
+    atInitInput(dOffset).tMovement = [];
+    
+    atInitInput(dOffset).tMovement.bMovementApplied = false;
+    atInitInput(dOffset).tMovement.aGeomtform       = [];
+    
+    atInitInput(dOffset).tMovement.atSeq{1}.sAxe         = [];
+    atInitInput(dOffset).tMovement.atSeq{1}.aTranslation = [];
+    atInitInput(dOffset).tMovement.atSeq{1}.dRotation    = []; 
         
     dFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
-    if dFuseOffset <= numel(tInitInput)
-        tInitInput(dFuseOffset).bEdgeDetection = false;
+    if dFuseOffset <= numel(atInitInput)
+        atInitInput(dFuseOffset).bEdgeDetection = false;
     end
 
-    inputTemplate('set', tInitInput);
+    inputTemplate('set', atInitInput);
     
     % Reset Display Buffer
    
     dicomBuffer('set', aBuffer);
 
     if size(aBuffer, 3) ~= 1
-        mipBuffer('set', tInitInput(dOffset).aMip, dOffset);
+        mipBuffer('set', atInitInput(dOffset).aMip, dOffset);
     end 
 
-    dicomMetaData('set', tInitInput(dOffset).atDicomInfo);
+    dicomMetaData('set', atInitInput(dOffset).atDicomInfo);
 
     setQuantification(dOffset);
     
@@ -188,8 +193,7 @@ function resetSeries(dOffset, bInitDisplay)
 
     if bInitDisplay == true
         
-        if bImageIsResampled == true || ...
-           bReOrientedImage  == true      
+%        if bImageIsResampled 
 
             initWindowLevel('set', true);
 
@@ -197,21 +201,21 @@ function resetSeries(dOffset, bInitDisplay)
             initDisplay(3);
 
             dicomViewerCore();
-        else
-            [lMin, lMax] = setWindowLevel(aBuffer, tInitInput(dOffset).atDicomInfo);    
+%        else
+%            [lMin, lMax] = setWindowLevel(aBuffer, atInitInput(dOffset).atDicomInfo);    
 
-             set(axes1Ptr('get', [], dInitOffset), 'CLim', [lMin lMax]);
-             set(axes2Ptr('get', [], dInitOffset), 'CLim', [lMin lMax]);
-             set(axes3Ptr('get', [], dInitOffset), 'CLim', [lMin lMax]);
+%             set(axes1Ptr('get', [], dInitOffset), 'CLim', [lMin lMax]);
+%             set(axes2Ptr('get', [], dInitOffset), 'CLim', [lMin lMax]);
+%             set(axes3Ptr('get', [], dInitOffset), 'CLim', [lMin lMax]);
 
-             if strcmpi(tInitInput(dOffset).atDicomInfo{1}.Modality, 'ct')
-                [lMax, lMin] = computeWindowLevel(2500, 415);
-             end
+%             if strcmpi(atInitInput(dOffset).atDicomInfo{1}.Modality, 'ct')
+%                [lMax, lMin] = computeWindowLevel(2500, 415);
+%             end
 
-             set(axesMipPtr('get', [], dInitOffset), 'CLim', [lMin lMax]);         
-        end        
+%             set(axesMipPtr('get', [], dInitOffset), 'CLim', [lMin lMax]);         
+%        end        
 
-        refreshImages();
+%        refreshImages();
     end
     
     modifiedMatrixValueMenuOption('set', false);

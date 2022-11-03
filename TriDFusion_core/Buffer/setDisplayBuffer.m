@@ -30,13 +30,15 @@ function setDisplayBuffer()
 %       iInstanceNumber = 0;
     tInput = inputTemplate('get');
 %        aInput = ''; 
+    aInput = cell(numel(tInput));
     for i=1: numel(tInput)                                                                               
         if size(tInput(i).aDicomBuffer{1}, 4) == 1 
             aSize = size(tInput(i).aDicomBuffer{1});
     %        X(aSize(1), aSize(2), numel(tInput(i).asFilesList))=0;
     %        aInput{i} = gpuArray(X);
             if numel(aSize) == 2
-                aInput{i}(aSize(1), aSize(2), numel(tInput(i).asFilesList))=0;
+                
+                aInput{i} = zeros(aSize(1), aSize(2), numel(tInput(i).asFilesList));
 
          %       aInput = dicomread(char(tInput(1).asFilesList(1)));
 

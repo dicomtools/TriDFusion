@@ -191,7 +191,6 @@ function TriDFusion(varargin)
                 'title'          , 'Ready',...
                 'BackgroundColor', viewerBackgroundColor ('get'), ...
                 'ForegroundColor', viewerForegroundColor('get'), ...
-                'ShadowColor'    , viewerShadowColor('get'), ...     
                 'HighlightColor' , viewerHighlightColor('get') ...     
                 );       
     uiProgressWindowPtr('set', uiProgressWindow);
@@ -200,7 +199,6 @@ function TriDFusion(varargin)
     
     set(uiBar, 'BackgroundColor', viewerBackgroundColor('get'));
     set(uiBar, 'ForegroundColor', viewerForegroundColor('get'));     
-    set(uiBar, 'ShadowColor'    , viewerBackgroundColor('get'));
     set(uiBar, 'HighlightColor' , viewerBackgroundColor('get'));         
     uiBarPtr('set', uiBar);    
         
@@ -263,6 +261,7 @@ function TriDFusion(varargin)
     end                    
         
     function resizeFigureCallback(~,~)
+        
         if exist('resizeViewer', 'var')
             resizeViewer();
         end

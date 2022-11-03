@@ -617,17 +617,18 @@ function initKernelPanel()
 
             dSerieOffset = get(uiSeriesPtr('get'), 'Value');
 
-            set(uiSeriesPtr('get'), 'Value', tKernelCtDoseMap{dCtOffset}.dSeriesNumber);
+%            set(uiSeriesPtr('get'), 'Value', tKernelCtDoseMap{dCtOffset}.dSeriesNumber);
 
-            aCtBuffer = dicomBuffer('get');
+            aCtBuffer = dicomBuffer('get', [], tKernelCtDoseMap{dCtOffset}.dSeriesNumber);
 
             if isempty(aCtBuffer)
 
                 aInput = inputBuffer('get');
                 aCtBuffer = aInput{tKernelCtDoseMap{dCtOffset}.dSeriesNumber};
-                if strcmp(imageOrientation('get'), 'coronal')
+                
+                if strcmpi(imageOrientation('get'), 'coronal')
                     aCtBuffer = permute(aCtBuffer, [3 2 1]);
-                elseif strcmp(imageOrientation('get'), 'sagittal')
+                elseif strcmpi(imageOrientation('get'), 'sagittal')
                     aCtBuffer = permute(aCtBuffer, [2 3 1]);
                 else
                     aCtBuffer = permute(aCtBuffer, [1 2 3]);
@@ -645,18 +646,18 @@ function initKernelPanel()
                     aCtBuffer=aCtBuffer(:,:,end:-1:1);
                 end
 
-                dicomBuffer('set', aCtBuffer);
+                dicomBuffer('set', aCtBuffer, tKernelCtDoseMap{dCtOffset}.dSeriesNumber);
 
             end
 
-            atCtMetaData = dicomMetaData('get');
+            atCtMetaData = dicomMetaData('get', [], tKernelCtDoseMap{dCtOffset}.dSeriesNumber);
             if isempty(atCtMetaData)
 
                 atCtMetaData = tInput(tKernelCtDoseMap{dCtOffset}.dSeriesNumber).atDicomInfo;
-                dicomMetaData('set', atCtMetaData);
+                dicomMetaData('set', atCtMetaData, tKernelCtDoseMap{dCtOffset}.dSeriesNumber);
             end
 
-            set(uiSeriesPtr('get'), 'Value', dSerieOffset);
+  %          set(uiSeriesPtr('get'), 'Value', dSerieOffset);
 
             [aResamCt, ~] = resampleImage(aCtBuffer, atCtMetaData, aRefBuffer, atRefMetaData, 'Nearest', 2, false);
            
@@ -1624,6 +1625,7 @@ USE_LBM_METHOD = true;
 
                     aInput = inputBuffer('get');
                     aCtBuffer = aInput{tKernelCtDoseMap{dCtOffset}.dSeriesNumber};
+                    
                     if strcmpi(imageOrientation('get'), 'coronal')
                         aCtBuffer = permute(aCtBuffer, [3 2 1]);
                     elseif strcmpi(imageOrientation('get'), 'sagittal')
@@ -1805,21 +1807,21 @@ USE_LBM_METHOD = true;
            end
         end
 
-        if strcmp(imageOrientation('get'), 'coronal')
-            xPixel = sigmaX;
-            yPixel = sigmaZ;
-            zPixel = sigmaY;
-        end
-        if strcmp(imageOrientation('get'), 'sagittal')
-            xPixel = sigmaY;
-            yPixel = sigmaZ;
-            zPixel = sigmaX;
-        end
-        if strcmp(imageOrientation('get'), 'axial')
+%        if strcmp(imageOrientation('get'), 'coronal')
+%            xPixel = sigmaX;
+%            yPixel = sigmaZ;
+%            zPixel = sigmaY;
+%        end
+%        if strcmp(imageOrientation('get'), 'sagittal')
+%            xPixel = sigmaY;
+%            yPixel = sigmaZ;
+%            zPixel = sigmaX;
+%        end
+%        if strcmp(imageOrientation('get'), 'axial')
             xPixel = sigmaX;
             yPixel = sigmaY;
             zPixel = sigmaZ;
-        end
+%        end
 
         dicomBuffer('set', imgaussfilt3(aBuffer,[xPixel,yPixel,zPixel]));
 

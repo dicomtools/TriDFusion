@@ -32,6 +32,12 @@ function [aResampledImage, atResampledMetaData] = resampleMicrospereImage(aImage
 
     imageOrientation('set', 'axial');
     
+    atInput = inputTemplate('get');
+    
+    atInput(get(uiSeriesPtr('get'), 'Value')).sOrientationView = 'Axial';
+    
+    inputTemplate('set', atInput);
+    
     dimsDcm = size(aImage);
     
     % Set new dicom information 

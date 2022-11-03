@@ -1,5 +1,5 @@
-function writeDICOM(aBuffer, tMetaData, sWriteDir, iSeriesOffset)            
-%function writeDICOM(sOutDir, iSeriesOffset)
+function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset)            
+%function writeDICOM(sOutDir, dSeriesOffset)
 %Write a DICOM Series.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,8 +27,8 @@ function writeDICOM(aBuffer, tMetaData, sWriteDir, iSeriesOffset)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    tWriteTemplate = inputTemplate('get');
-    if iSeriesOffset > numel(tWriteTemplate)  
+    atInputTemplate = inputTemplate('get');
+    if dSeriesOffset > numel(atInputTemplate)  
         return;
     end      
     
@@ -50,31 +50,31 @@ function writeDICOM(aBuffer, tMetaData, sWriteDir, iSeriesOffset)
     if numel(aBufferSize) > 2
         array4d = zeros(aBufferSize(1), aBufferSize(2),1, aBufferSize(3));
         for slice = 1:aBufferSize(3)
-            if numel(tMetaData) == aBufferSize(3)
-                if isfield(tMetaData{slice}, 'RescaleIntercept') && ...
-                   isfield(tMetaData{slice}, 'RescaleSlope')     
-                    if tMetaData{slice}.RescaleSlope ~= 0
-                        aBuffer(:,:,slice) = (aBuffer(:,:,slice) - tMetaData{slice}.RescaleIntercept) / tMetaData{slice}.RescaleSlope;
+            if numel(atMetaData) ~= 1
+                if isfield(atMetaData{slice}, 'RescaleIntercept') && ...
+                   isfield(atMetaData{slice}, 'RescaleSlope')     
+                    if atMetaData{slice}.RescaleSlope ~= 0
+                        aBuffer(:,:,slice) = (aBuffer(:,:,slice) - atMetaData{slice}.RescaleIntercept) / atMetaData{slice}.RescaleSlope;
                     else
-                        if isfield(tMetaData{slice}, 'RealWorldValueMappingSequence') % SUV Spect
-                            if tMetaData{slice}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
-                                fSlope = tMetaData{slice}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
-                                fIntercept = tMetaData{slice}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
+                        if isfield(atMetaData{slice}, 'RealWorldValueMappingSequence') % SUV Spect
+                            if atMetaData{slice}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
+                                fSlope = atMetaData{slice}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
+                                fIntercept = atMetaData{slice}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
                                 aBuffer(:,:,slice) = (aBuffer(:,:,slice) - fIntercept) / fSlope;
                             end                        
                         end                           
                     end
                 end                            
             else
-                if isfield(tMetaData{1}, 'RescaleIntercept') && ...
-                   isfield(tMetaData{1}, 'RescaleSlope')     
-                    if tMetaData{1}.RescaleSlope ~= 0
-                        aBuffer(:,:,slice) = (aBuffer(:,:,slice) - tMetaData{1}.RescaleIntercept) / tMetaData{1}.RescaleSlope;
+                if isfield(atMetaData{1}, 'RescaleIntercept') && ...
+                   isfield(atMetaData{1}, 'RescaleSlope')     
+                    if atMetaData{1}.RescaleSlope ~= 0
+                        aBuffer(:,:,slice) = (aBuffer(:,:,slice) - atMetaData{1}.RescaleIntercept) / atMetaData{1}.RescaleSlope;
                     else                        
-                        if isfield(tMetaData{1}, 'RealWorldValueMappingSequence') % SUV Spect
-                            if tMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
-                                fSlope =  tMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
-                                fIntercept = tMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
+                        if isfield(atMetaData{1}, 'RealWorldValueMappingSequence') % SUV Spect
+                            if atMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
+                                fSlope =  atMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
+                                fIntercept = atMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
                                 aBuffer(:,:,slice) = (aBuffer(:,:,slice) - fIntercept) / fSlope;
                             end                        
                         end                                                 
@@ -84,15 +84,15 @@ function writeDICOM(aBuffer, tMetaData, sWriteDir, iSeriesOffset)
            array4d(:,:,1,slice) = aBuffer(:,:,slice);
         end            
     else
-        if isfield(tMetaData{1}, 'RescaleIntercept') && ...
-           isfield(tMetaData{1}, 'RescaleSlope') 
-            if tMetaData{1}.RescaleSlope ~= 0
-                aBuffer = (aBuffer - tMetaData{1}.RescaleIntercept) / tMetaData{1}.RescaleSlope;
+        if isfield(atMetaData{1}, 'RescaleIntercept') && ...
+           isfield(atMetaData{1}, 'RescaleSlope') 
+            if atMetaData{1}.RescaleSlope ~= 0
+                aBuffer = (aBuffer - atMetaData{1}.RescaleIntercept) / atMetaData{1}.RescaleSlope;
             else
-                if isfield(tMetaData{1}, 'RealWorldValueMappingSequence') % SUV Spect
-                    if tMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
-                        fSlope = tMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
-                        fIntercept = tMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
+                if isfield(atMetaData{1}, 'RealWorldValueMappingSequence') % SUV Spect
+                    if atMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
+                        fSlope = atMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
+                        fIntercept = atMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
                         aBuffer = (aBuffer - fIntercept) / fSlope;
                     end                        
                 end                
@@ -102,50 +102,51 @@ function writeDICOM(aBuffer, tMetaData, sWriteDir, iSeriesOffset)
         array4d = aBuffer;
     end
     
-    if numel(tWriteTemplate(iSeriesOffset).asFilesList)
-        for ww=1: numel(tWriteTemplate(iSeriesOffset).asFilesList)
+    if numel(atInputTemplate(dSeriesOffset).asFilesList)
+ %       for ww=1: numel(atInputTemplate(dSeriesOffset).asFilesList)
+        for ww=1: numel(atInputTemplate(dSeriesOffset).asFilesList)
 
-            tWriteMetaData{ww} = ...
-                dicominfo(char(tWriteTemplate(iSeriesOffset).asFilesList{ww}));
-            progressBar(ww / numel(tWriteTemplate(iSeriesOffset).asFilesList), ...
-                sprintf('Processing header %d/%d, please wait', ww, numel(tWriteTemplate(iSeriesOffset).asFilesList)));
+            atWriteMetaData{ww} = ...
+                dicominfo(char(atInputTemplate(dSeriesOffset).asFilesList{ww}));
+            progressBar(ww / numel(atInputTemplate(dSeriesOffset).asFilesList), ...
+                sprintf('Processing header %d/%d, please wait', ww, numel(atInputTemplate(dSeriesOffset).asFilesList)));
         end         
     else
-        for ww=1: numel(tWriteTemplate(iSeriesOffset).atDicomInfo)
-            tWriteMetaData{ww} = tWriteTemplate(iSeriesOffset).atDicomInfo{ww};
+        for ww=1: numel(atInputTemplate(dSeriesOffset).atDicomInfo)
+            atWriteMetaData{ww} = atInputTemplate(dSeriesOffset).atDicomInfo{ww};
         end        
     end
 
-    if numel(tMetaData) < numel(tWriteMetaData) && ...
-       numel(tMetaData) ~= 1   
-        tWriteMetaData = tWriteMetaData(1:numel(tMetaData));
+    if numel(atMetaData) < numel(atWriteMetaData) && ...
+       numel(atMetaData) ~= 1   
+        atWriteMetaData = atWriteMetaData(1:numel(atMetaData));
 
-    elseif numel(tMetaData) > numel(tWriteMetaData) && ...
-           numel(tMetaData) ~= 1   
+    elseif numel(atMetaData) > numel(atWriteMetaData) && ...
+           numel(atMetaData) ~= 1   
 
-        for cc=1:numel(tMetaData) - numel(tWriteMetaData)
-            tWriteMetaData{end+1} = tWriteMetaData{end}; %Add missing slice
+        for cc=1:numel(atMetaData) - numel(atWriteMetaData)
+            atWriteMetaData{end+1} = atWriteMetaData{end}; %Add missing slice
         end
     end    
 
-    if numel(tWriteMetaData) ~= 1
-        if isfield(tWriteMetaData{1}, 'ImagePositionPatient') && ...
-           isfield(tWriteMetaData{2}, 'ImagePositionPatient')
+    if numel(atWriteMetaData) ~= 1
+        if isfield(atWriteMetaData{1}, 'ImagePositionPatient') && ...
+           isfield(atWriteMetaData{2}, 'ImagePositionPatient')
 
-            if tWriteMetaData{2}.ImagePositionPatient(3) - ...
-               tWriteMetaData{1}.ImagePositionPatient(3) > 0                    
+            if atWriteMetaData{2}.ImagePositionPatient(3) - ...
+               atWriteMetaData{1}.ImagePositionPatient(3) > 0                    
                  array4d = array4d(:,:,:,end:-1:1);   
-                 tWriteMetaData = flip(tWriteMetaData);
+                 atWriteMetaData = flip(atWriteMetaData);
             end
         end
     else
-        if isfield(tWriteMetaData{1}, 'PatientPosition')
-            if strcmpi(tWriteMetaData{1}.PatientPosition, 'FFS')
+        if isfield(atWriteMetaData{1}, 'PatientPosition')
+            if strcmpi(atWriteMetaData{1}.PatientPosition, 'FFS')
                  array4d = array4d(:,:,:,end:-1:1);    
-                 tWriteMetaData = flip(tWriteMetaData);
+                 atWriteMetaData = flip(atWriteMetaData);
             end         
             
-            if strcmpi(tWriteMetaData{1}.PatientPosition, 'FFP')
+            if strcmpi(atWriteMetaData{1}.PatientPosition, 'FFP')
                  array4d = array4d(end:-1:1,:,:,:);    
             end               
         end
@@ -153,258 +154,267 @@ function writeDICOM(aBuffer, tMetaData, sWriteDir, iSeriesOffset)
 
     dSeriesInstanceUID = dicomuid;
     
-    dWriteEndLoop = numel(tWriteMetaData);
+%    dWriteEndLoop = numel(atWriteMetaData);
+    if numel(atWriteMetaData) > 1
+        dWriteEndLoop = aBufferSize(3);
+    else
+        dWriteEndLoop = 1;
+    end
+    
     for ww=1:dWriteEndLoop
-        tWriteMetaData{ww}.InstanceNumber  = tMetaData{ww}.InstanceNumber;                              
-        tWriteMetaData{ww}.PatientPosition = tMetaData{ww}.PatientPosition;                                                                  
-
-        tWriteMetaData{ww}.PixelSpacing            = tMetaData{ww}.PixelSpacing;                              
-        tWriteMetaData{ww}.SliceThickness          = tMetaData{ww}.SliceThickness;                 
-        tWriteMetaData{ww}.ImagePositionPatient    = tMetaData{ww}.ImagePositionPatient;               
-        tWriteMetaData{ww}.ImageOrientationPatient = tMetaData{ww}.ImageOrientationPatient;        
-
-        tWriteMetaData{ww}.Rows    = tMetaData{ww}.Rows;               
-        tWriteMetaData{ww}.Columns = tMetaData{ww}.Columns;           
         
-        tWriteMetaData{ww}.SeriesDescription = tMetaData{ww}.SeriesDescription; 
-        tWriteMetaData{ww}.SourceApplicationEntityTitle = 'TRIDFUSION';
+        atWriteMetaData{ww}.InstanceNumber  = atMetaData{ww}.InstanceNumber;                              
+        atWriteMetaData{ww}.PatientPosition = atMetaData{ww}.PatientPosition;                                                                  
+
+        atWriteMetaData{ww}.PixelSpacing            = atMetaData{ww}.PixelSpacing;                              
+%        atWriteMetaData{ww}.SliceThickness          = atMetaData{ww}.SliceThickness;                 
+%        atWriteMetaData{ww}.SpacingBetweenSlices    = atMetaData{ww}.SpacingBetweenSlices;     
+        atWriteMetaData{ww}.ImagePositionPatient    = atMetaData{ww}.ImagePositionPatient;               
+        atWriteMetaData{ww}.ImageOrientationPatient = atMetaData{ww}.ImageOrientationPatient;        
+                
+        atWriteMetaData{ww}.Rows    = atMetaData{ww}.Rows;               
+        atWriteMetaData{ww}.Columns = atMetaData{ww}.Columns;           
+        
+        atWriteMetaData{ww}.SeriesDescription = atMetaData{ww}.SeriesDescription; 
+        atWriteMetaData{ww}.SourceApplicationEntityTitle = 'TRIDFUSION';
         
         if updateDicomWriteSeriesInstanceUID('get') == true
-            tWriteMetaData{ww}.SeriesInstanceUID = dSeriesInstanceUID;
+            atWriteMetaData{ww}.SeriesInstanceUID = dSeriesInstanceUID;
         end
         
-        if isfield(tWriteMetaData{ww}, 'Modality')
-            tWriteMetaData{ww}.Modality = tMetaData{ww}.Modality;  
+        if isfield(atWriteMetaData{ww}, 'Modality')
+            atWriteMetaData{ww}.Modality = atMetaData{ww}.Modality;  
         else
-            if isfield(tMetaData{ww}, 'Modality')
-                if ~isempty(tMetaData{ww}.Modality)
-                    tWriteMetaData{ww}.Modality = ...
-                        tMetaData{ww}.Modality;
+            if isfield(atMetaData{ww}, 'Modality')
+                if ~isempty(atMetaData{ww}.Modality)
+                    atWriteMetaData{ww}.Modality = ...
+                        atMetaData{ww}.Modality;
                 end
             end            
         end
         
-        if isfield(tWriteMetaData{ww}, 'SOPClassUID')
-            tWriteMetaData{ww}.SOPClassUID = tMetaData{ww}.SOPClassUID; 
+        if isfield(atWriteMetaData{ww}, 'SOPClassUID')
+            atWriteMetaData{ww}.SOPClassUID = atMetaData{ww}.SOPClassUID; 
         else
-            if isfield(tMetaData{ww}, 'SOPClassUID')
-                if ~isempty(tMetaData{ww}.SOPClassUID)
-                    tWriteMetaData{ww}.SOPClassUID = ...
-                        tMetaData{ww}.SOPClassUID;
+            if isfield(atMetaData{ww}, 'SOPClassUID')
+                if ~isempty(atMetaData{ww}.SOPClassUID)
+                    atWriteMetaData{ww}.SOPClassUID = ...
+                        atMetaData{ww}.SOPClassUID;
                 end
             end             
         end  
         
-        if isfield(tWriteMetaData{ww}, 'MediaStorageSOPClassUID')
-            tWriteMetaData{ww}.SOPClassUID = tMetaData{ww}.MediaStorageSOPClassUID;         
+        if isfield(atWriteMetaData{ww}, 'MediaStorageSOPClassUID')
+            atWriteMetaData{ww}.SOPClassUID = atMetaData{ww}.MediaStorageSOPClassUID;         
         else
-            if isfield(tMetaData{ww}, 'MediaStorageSOPClassUID')
-                if ~isempty(tMetaData{ww}.MediaStorageSOPClassUID)
-                    tWriteMetaData{ww}.MediaStorageSOPClassUID = ...
-                        tMetaData{ww}.MediaStorageSOPClassUID;
+            if isfield(atMetaData{ww}, 'MediaStorageSOPClassUID')
+                if ~isempty(atMetaData{ww}.MediaStorageSOPClassUID)
+                    atWriteMetaData{ww}.MediaStorageSOPClassUID = ...
+                        atMetaData{ww}.MediaStorageSOPClassUID;
                 end
             end               
         end          
                
-        if isfield(tWriteMetaData{ww}, 'SliceLocation')
-            tWriteMetaData{ww}.SliceLocation = tMetaData{ww}.SliceLocation;     
+        if isfield(atWriteMetaData{ww}, 'SliceLocation')
+            atWriteMetaData{ww}.SliceLocation = atMetaData{ww}.SliceLocation;     
         else
-            if isfield(tMetaData{ww}, 'SliceLocation')
-                if ~isempty(tMetaData{ww}.SliceLocation)
-                    tWriteMetaData{ww}.SliceLocation = ...
-                        tMetaData{ww}.SliceLocation;
+            if isfield(atMetaData{ww}, 'SliceLocation')
+                if ~isempty(atMetaData{ww}.SliceLocation)
+                    atWriteMetaData{ww}.SliceLocation = ...
+                        atMetaData{ww}.SliceLocation;
                 end
             end             
         end
 
-        if isfield(tWriteMetaData{ww}, 'SpacingBetweenSlices')
-            tWriteMetaData{ww}.SpacingBetweenSlices = ...
-                tMetaData{ww}.SpacingBetweenSlices;
+        if isfield(atWriteMetaData{ww}, 'SpacingBetweenSlices')
+            atWriteMetaData{ww}.SpacingBetweenSlices = ...
+                atMetaData{ww}.SpacingBetweenSlices;
         else
-            if isfield(tMetaData{ww}, 'SpacingBetweenSlices')
-                if ~isempty(tMetaData{ww}.SpacingBetweenSlices)
-                    tWriteMetaData{ww}.SpacingBetweenSlices = ...
-                        tMetaData{ww}.SpacingBetweenSlices;
+            if isfield(atMetaData{ww}, 'SpacingBetweenSlices')
+%                if ~isempty(atMetaData{ww}.SpacingBetweenSlices)
+%                    atWriteMetaData{ww}.SpacingBetweenSlices = ...
+%                        atMetaData{ww}.SpacingBetweenSlices;
+%                end
+            end             
+        end
+
+        if isfield(atWriteMetaData{ww}, 'NumberOfSlices')
+            atWriteMetaData{ww}.NumberOfSlices = atMetaData{ww}.NumberOfSlices;
+        else
+            if isfield(atMetaData{ww}, 'NumberOfSlices')
+                if ~isempty(atMetaData{ww}.NumberOfSlices)
+                    atWriteMetaData{ww}.NumberOfSlices = ...
+                        atMetaData{ww}.NumberOfSlices;
                 end
             end             
         end
 
-        if isfield(tWriteMetaData{ww}, 'NumberOfSlices')
-            tWriteMetaData{ww}.NumberOfSlices = tMetaData{ww}.NumberOfSlices;
+        if isfield(atWriteMetaData{ww}, 'InstanceNumber')
+            atWriteMetaData{ww}.InstanceNumber = atMetaData{ww}.InstanceNumber;
         else
-            if isfield(tMetaData{ww}, 'NumberOfSlices')
-                if ~isempty(tMetaData{ww}.NumberOfSlices)
-                    tWriteMetaData{ww}.NumberOfSlices = ...
-                        tMetaData{ww}.NumberOfSlices;
-                end
-            end             
-        end
-
-        if isfield(tWriteMetaData{ww}, 'InstanceNumber')
-            tWriteMetaData{ww}.InstanceNumber = tMetaData{ww}.InstanceNumber;
-        else
-            if isfield(tMetaData{ww}, 'InstanceNumber')
-                if ~isempty(tMetaData{ww}.InstanceNumber)
-                    tWriteMetaData{ww}.InstanceNumber = ...
-                        tMetaData{ww}.InstanceNumber;
+            if isfield(atMetaData{ww}, 'InstanceNumber')
+                if ~isempty(atMetaData{ww}.InstanceNumber)
+                    atWriteMetaData{ww}.InstanceNumber = ...
+                        atMetaData{ww}.InstanceNumber;
                 end
             end              
         end
 
-        if isfield(tWriteMetaData{ww}, 'RescaleIntercept')
-            tWriteMetaData{ww}.RescaleIntercept = tMetaData{ww}.RescaleIntercept;
+        if isfield(atWriteMetaData{ww}, 'RescaleIntercept')
+            atWriteMetaData{ww}.RescaleIntercept = atMetaData{ww}.RescaleIntercept;
         else
-            if isfield(tMetaData{ww}, 'RescaleIntercept')
-                if ~isempty(tMetaData{ww}.RescaleIntercept)
-                    tWriteMetaData{ww}.RescaleIntercept = ...
-                        tMetaData{ww}.RescaleIntercept;
+            if isfield(atMetaData{ww}, 'RescaleIntercept')
+                if ~isempty(atMetaData{ww}.RescaleIntercept)
+                    atWriteMetaData{ww}.RescaleIntercept = ...
+                        atMetaData{ww}.RescaleIntercept;
                 end
             end               
         end
         
-        if isfield(tWriteMetaData{ww}, 'RescaleSlope')
-            tWriteMetaData{ww}.RescaleSlope = tMetaData{ww}.RescaleSlope;
+        if isfield(atWriteMetaData{ww}, 'RescaleSlope')
+            atWriteMetaData{ww}.RescaleSlope = atMetaData{ww}.RescaleSlope;
         else
-            if isfield(tMetaData{ww}, 'RescaleSlope')
-                if ~isempty(tMetaData{ww}.RescaleSlope)
-                    tWriteMetaData{ww}.RescaleSlope = ...
-                        tMetaData{ww}.RescaleSlope;
+            if isfield(atMetaData{ww}, 'RescaleSlope')
+                if ~isempty(atMetaData{ww}.RescaleSlope)
+                    atWriteMetaData{ww}.RescaleSlope = ...
+                        atMetaData{ww}.RescaleSlope;
                 end
             end             
         end        
         
-        if isfield(tWriteMetaData{ww}, 'Units')
-            tWriteMetaData{ww}.Units = tMetaData{ww}.Units;
+        if isfield(atWriteMetaData{ww}, 'Units')
+            atWriteMetaData{ww}.Units = atMetaData{ww}.Units;
         else
-            if isfield(tMetaData{ww}, 'Units')
-                if ~isempty(tMetaData{ww}.Units)
-                    tWriteMetaData{ww}.Units = tMetaData{ww}.Units;
+            if isfield(atMetaData{ww}, 'Units')
+                if ~isempty(atMetaData{ww}.Units)
+                    atWriteMetaData{ww}.Units = atMetaData{ww}.Units;
                 end
             end              
         end  
         
         % Fix patient dose
         
-        if isfield(tWriteMetaData{ww}, 'PatientWeight')
-            tWriteMetaData{ww}.PatientWeight = tMetaData{ww}.PatientWeight;
+        if isfield(atWriteMetaData{ww}, 'PatientWeight')
+            atWriteMetaData{ww}.PatientWeight = atMetaData{ww}.PatientWeight;
         else
-            if isfield(tMetaData{ww}, 'PatientWeight')
-                if ~isempty(tMetaData{ww}.PatientWeight)
-                    tWriteMetaData{ww}.PatientWeight = ...
-                        tMetaData{ww}.PatientWeight;
+            if isfield(atMetaData{ww}, 'PatientWeight')
+                if ~isempty(atMetaData{ww}.PatientWeight)
+                    atWriteMetaData{ww}.PatientWeight = ...
+                        atMetaData{ww}.PatientWeight;
                 end
             end
         end  
         
-        if isfield(tWriteMetaData{ww}, 'PatientSize')
-            tWriteMetaData{ww}.PatientSize = tMetaData{ww}.PatientSize;
+        if isfield(atWriteMetaData{ww}, 'PatientSize')
+            atWriteMetaData{ww}.PatientSize = atMetaData{ww}.PatientSize;
         else
-            if isfield(tMetaData{ww}, 'PatientSize')
-                if ~isempty(tMetaData{ww}.PatientSize)
-                    tWriteMetaData{ww}.PatientSize = ...
-                        tMetaData{ww}.PatientSize;
+            if isfield(atMetaData{ww}, 'PatientSize')
+                if ~isempty(atMetaData{ww}.PatientSize)
+                    atWriteMetaData{ww}.PatientSize = ...
+                        atMetaData{ww}.PatientSize;
                 end
             end            
         end  
         
-        if isfield(tWriteMetaData{ww}, 'SeriesDate')
-            tWriteMetaData{ww}.SeriesDate = tMetaData{ww}.SeriesDate;
+        if isfield(atWriteMetaData{ww}, 'SeriesDate')
+            atWriteMetaData{ww}.SeriesDate = atMetaData{ww}.SeriesDate;
         else
-            if isfield(tMetaData{ww}, 'SeriesDate')
-                if ~isempty(tMetaData{ww}.SeriesDate)
-                    tWriteMetaData{ww}.SeriesDate = ...
-                        tMetaData{ww}.SeriesDate;
+            if isfield(atMetaData{ww}, 'SeriesDate')
+                if ~isempty(atMetaData{ww}.SeriesDate)
+                    atWriteMetaData{ww}.SeriesDate = ...
+                        atMetaData{ww}.SeriesDate;
                 end
             end             
         end  
         
-        if isfield(tWriteMetaData{ww}, 'SeriesTime')
-            tWriteMetaData{ww}.SeriesTime = tMetaData{ww}.SeriesTime;
+        if isfield(atWriteMetaData{ww}, 'SeriesTime')
+            atWriteMetaData{ww}.SeriesTime = atMetaData{ww}.SeriesTime;
         else
-            if isfield(tMetaData{ww}, 'SeriesTime')
-                if ~isempty(tMetaData{ww}.SeriesTime)
-                    tWriteMetaData{ww}.SeriesTime = ...
-                        tMetaData{ww}.SeriesTime;
+            if isfield(atMetaData{ww}, 'SeriesTime')
+                if ~isempty(atMetaData{ww}.SeriesTime)
+                    atWriteMetaData{ww}.SeriesTime = ...
+                        atMetaData{ww}.SeriesTime;
                 end
             end             
         end    
         
-        if isfield(tWriteMetaData{ww}, 'AcquisitionDate')
-            tWriteMetaData{ww}.AcquisitionDate = tMetaData{ww}.AcquisitionDate;
+        if isfield(atWriteMetaData{ww}, 'AcquisitionDate')
+            atWriteMetaData{ww}.AcquisitionDate = atMetaData{ww}.AcquisitionDate;
         else
-            if isfield(tMetaData{ww}, 'AcquisitionDate')
-                if ~isempty(tMetaData{ww}.AcquisitionDate)
-                    tWriteMetaData{ww}.AcquisitionDate = ...
-                        tMetaData{ww}.AcquisitionDate;
+            if isfield(atMetaData{ww}, 'AcquisitionDate')
+                if ~isempty(atMetaData{ww}.AcquisitionDate)
+                    atWriteMetaData{ww}.AcquisitionDate = ...
+                        atMetaData{ww}.AcquisitionDate;
                 end
             end             
         end  
         
-        if isfield(tWriteMetaData{ww}, 'AcquisitionTime')
-            tWriteMetaData{ww}.AcquisitionTime = ...
-                tMetaData{ww}.AcquisitionTime;
+        if isfield(atWriteMetaData{ww}, 'AcquisitionTime')
+            atWriteMetaData{ww}.AcquisitionTime = ...
+                atMetaData{ww}.AcquisitionTime;
         else
-            if isfield(tMetaData{ww}, 'AcquisitionTime')
-                if ~isempty(tMetaData{ww}.AcquisitionTime)
-                    tWriteMetaData{ww}.AcquisitionTime = ...
-                        tMetaData{ww}.AcquisitionTime;
+            if isfield(atMetaData{ww}, 'AcquisitionTime')
+                if ~isempty(atMetaData{ww}.AcquisitionTime)
+                    atWriteMetaData{ww}.AcquisitionTime = ...
+                        atMetaData{ww}.AcquisitionTime;
                 end
             end              
         end   
         
-        if isfield(tWriteMetaData{ww}, 'RadiopharmaceuticalInformationSequence')
-            if isfield(tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence, 'Item_1')
+        if isfield(atWriteMetaData{ww}, 'RadiopharmaceuticalInformationSequence')
+            if isfield(atWriteMetaData{ww}.RadiopharmaceuticalInformationSequence, 'Item_1')
                 
-                if isfield(tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadionuclideTotalDose')
-                    tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose = ...
-                        tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose;
+                if isfield(atWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadionuclideTotalDose')
+                    atWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose = ...
+                        atMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose;
                 else
-                    if isfield(tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadionuclideTotalDose')
-                        if ~isempty(tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose)
-                            tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose = ...
-                                tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose;
+                    if isfield(atMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadionuclideTotalDose')
+                        if ~isempty(atMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose)
+                            atWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose = ...
+                                atMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose;
                         end
                     end                      
                 end
                 
-                if isfield(tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadiopharmaceuticalStartDateTime')
-                    tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime = ...
-                        tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;
+                if isfield(atWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadiopharmaceuticalStartDateTime')
+                    atWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime = ...
+                        atMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;
                 else
-                    if isfield(tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadiopharmaceuticalStartDateTime')
-                        if ~isempty(tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime)
-                            tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime = ...
-                                tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;
+                    if isfield(atMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadiopharmaceuticalStartDateTime')
+                        if ~isempty(atMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime)
+                            atWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime = ...
+                                atMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;
                         end
                     end    
                 end
                 
-                if isfield(tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadionuclideHalfLife')
-                    tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife = ...
-                        tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife;
+                if isfield(atWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadionuclideHalfLife')
+                    atWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife = ...
+                        atMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife;
                 else
-                    if isfield(tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadionuclideHalfLife')
-                        if ~isempty(tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife)
-                            tWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife = ...
-                                tMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife;
+                    if isfield(atMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1, 'RadionuclideHalfLife')
+                        if ~isempty(atMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife)
+                            atWriteMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife = ...
+                                atMetaData{ww}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife;
                         end
                     end                     
                 end                
             end
         end                   
         
-        sWriteFile = sprintf('%s.%d', tWriteMetaData{ww}.SeriesInstanceUID, ww);                                             
+        sWriteFile = sprintf('%s.%d', atWriteMetaData{ww}.SeriesInstanceUID, ww);                                             
         sOutFile = sprintf('%s%s',sTmpDir, sWriteFile);
 
         try      
-            tWriteMetaData{ww}.BitsAllocated = 16;
-            tWriteMetaData{ww}.BitsStored = 16;
-            tWriteMetaData{ww}.HighBit = 15;
+            atWriteMetaData{ww}.BitsAllocated = 16;
+            atWriteMetaData{ww}.BitsStored = 16;
+            atWriteMetaData{ww}.HighBit = 15;
 
-            if tWriteTemplate(iSeriesOffset).bMathApplied == true
+            if 0
+%            if atInputTemplate(dSeriesOffset).bMathApplied == true
                 
-                if strcmpi(tWriteMetaData{ww}.Modality, 'NM')
-                    if numel(tWriteMetaData) == 1                    
+                if strcmpi(atWriteMetaData{ww}.Modality, 'NM')
+                    if numel(atWriteMetaData) == 1                    
 
                         dTrueMin = min(array4d, [],'all');
                         dTrueMax = max(array4d, [],'all');
@@ -421,32 +431,32 @@ function writeDICOM(aBuffer, tMetaData, sWriteDir, iSeriesOffset)
                         array4d(:,:,:,ww) = array4d(:,:,:,ww).*inv(fSlope);
                     end    
 
-                    tWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.RealWorldValueLastValueMapped = 65535; 
-                    tWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.RealWorldValueFirstValueMapped = 0;
-                    tWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept = 0;  
-                    tWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope = fSlope; 
+                    atWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.RealWorldValueLastValueMapped = 65535; 
+                    atWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.RealWorldValueFirstValueMapped = 0;
+                    atWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept = 0;  
+                    atWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope = fSlope; 
 
-                    tWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue = '{counts}';
-                    tWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodingSchemeDesignator  = 'UCUM';
-                    tWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeMeaning =  'Counts';                    
+                    atWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue = '{counts}';
+                    atWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodingSchemeDesignator  = 'UCUM';
+                    atWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeMeaning =  'Counts';                    
                 end
             end
             
             
-            if numel(tWriteMetaData) == 1    
+            if numel(atWriteMetaData) == 1    
                 
-                dicomwrite(int16(array4d) , ...
+                dicomwrite(uint16(array4d) , ...
                            sOutFile          , ...
-                           tWriteMetaData{ww}, ...
+                           atWriteMetaData{ww}, ...
                            'CreateMode'      , ...
                            'Copy'            , ...
                            'WritePrivate'    , true ...
                            ); 
             else       
-   %             array4d = dicomread(char(tWriteTemplate(iSeriesOffset).asFilesList{ww}));
+   %             array4d = dicomread(char(atInputTemplate(dSeriesOffset).asFilesList{ww}));
                 dicomwrite(int16(array4d(:,:,:,ww)) , ...
                            sOutFile          , ...
-                           tWriteMetaData{ww}, ...
+                           atWriteMetaData{ww}, ...
                            'CreateMode'      , ...
                            'Copy'          , ...
                            'WritePrivate'    , true ...

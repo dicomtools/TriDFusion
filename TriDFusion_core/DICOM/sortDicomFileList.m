@@ -28,6 +28,8 @@ function tDataSets = sortDicomFileList(tFileList, iNbFiles)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
     iDataSetIDs = unique(tFileList.aHash(1:iNbFiles));
+    
+    tDataSets = struct('FileNames', cell(1, length(iDataSetIDs)), 'DicomInfos', cell(1, length(iDataSetIDs)), 'DicomBuffers', cell(1, length(iDataSetIDs)));
 
     for iLoop=1 : length(iDataSetIDs)
 
@@ -51,7 +53,7 @@ function tDataSets = sortDicomFileList(tFileList, iNbFiles)
         endJloop = length(h);
         for jLoop=1:endJloop
             
-            if mod(jLoop,5)==1 || jLoop == endJloop         
+            if mod(jLoop,15)==1 || jLoop == endJloop         
                 progressBar(jLoop / endJloop, sprintf('Sorting file list %d/%d', jLoop, endJloop) );
             end
 
@@ -59,6 +61,7 @@ function tDataSets = sortDicomFileList(tFileList, iNbFiles)
             tDataSets(iLoop).DicomInfos{jLoop}   = tFileList.DicomInfo{h(jLoop)} ;
             tDataSets(iLoop).DicomBuffers{jLoop} = readDcm4che3(tFileList.FileName{h(jLoop)}, tFileList.DicomInfo{h(jLoop)}.din);                    
 
+            tFileList.DicomInfo{h(jLoop)}.din.pixeldata = []; % Clear data
         end
         
         if isfield(tFileList, 'Contours') 

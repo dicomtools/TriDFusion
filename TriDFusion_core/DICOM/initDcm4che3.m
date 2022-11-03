@@ -41,15 +41,13 @@ function initDcm4che3()
 %        javaaddpath([libpath 'slf4j-log4j12-1.6.1.jar']);
 %        javaaddpath([libpath 'log4j-1.2.16.jar']);
 
-        javaaddpath([libpath 'dcm4che-core-5.17.0.jar']);
-        javaaddpath([libpath 'dcm4che-image-5.17.0.jar']);
-        javaaddpath([libpath 'dcm4che-imageio-5.17.0.jar']);
-        javaaddpath([libpath 'dcm4che-imageio-rle-5.17.0.jar'])
-        javaaddpath([libpath 'dcm4che-net-5.17.0.jar'])
 
-        javaaddpath([libpath 'slf4j-api-1.7.25.jar']);
-        javaaddpath([libpath 'slf4j-log4j12-1.7.25.jar']);
-        javaaddpath([libpath 'log4j-1.2.17.jar']);        
-
+       javaaddpath([libpath 'dcm4che-core-5.29.0.jar']);        
+       javaaddpath([libpath 'dcm4che-tool-common-5.29.0.jar']);        
+       javaaddpath([libpath 'slf4j-api-1.7.32.jar']);        
+       javaaddpath([libpath 'logback-core-1.2.9.jar']);        
+       javaaddpath([libpath 'commons-cli-1.4.jar']);        
+       
+        
     end
 end

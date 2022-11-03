@@ -27,6 +27,7 @@ function dicomViewerCore()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
 
     isCombineMultipleFusion('set', false);
@@ -73,13 +74,21 @@ function dicomViewerCore()
         lMax = lMin+1;
     end
 
-    tInput = inputTemplate('get');
+    atInput = inputTemplate('get');
 
     dOffset = get(uiSeriesPtr('get'), 'Value');
-    if dOffset > numel(tInput)
+    if dOffset > numel(atInput)
         return;
     end
-
+    
+    if     strcmpi(atInput(dOffset).sOrientationView, 'Axial')
+        imageOrientation('set', 'axial');
+    elseif strcmpi(atInput(dOffset).sOrientationView, 'Coronal')
+        imageOrientation('set', 'coronal');
+    elseif strcmpi(atInput(dOffset).sOrientationView, 'Sagittal')
+        imageOrientation('set', 'sagittal');
+    end
+   
     if isfield(atMetaData{1}, 'PatientName')
         sPatientName = atMetaData{1}.PatientName;
         sPatientName = strrep(sPatientName,'^',' ');
@@ -1538,27 +1547,29 @@ function dicomViewerCore()
             end
 
 
-           if strcmp(imageOrientation('get'), 'axial')
+ %          if strcmp(imageOrientation('get'), 'axial')
 
-                daspect(axes1Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-                daspect(axes2Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
-                daspect(axes3Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
-                daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+            daspect(axes1Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
+            daspect(axes2Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+            daspect(axes3Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
+            if isVsplash('get') == false
+                daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
+            end
 
-            elseif strcmp(imageOrientation('get'), 'coronal')
+%            elseif strcmp(imageOrientation('get'), 'coronal')
 
-                daspect(axes1Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
-                daspect(axes2Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [y z x]);
-                daspect(axes3Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-                daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
+%                daspect(axes1Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
+%                daspect(axes2Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [y z x]);
+%                daspect(axes3Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+%                daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
 
-            elseif strcmp(imageOrientation('get'), 'sagittal')
+%            elseif strcmp(imageOrientation('get'), 'sagittal')
 
-                daspect(axes1Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [y x z]);
-                daspect(axes2Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [x z y]);
-                daspect(axes3Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-                daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [x z y]);
-           end
+%                daspect(axes1Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [y x z]);
+%                daspect(axes2Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [x z y]);
+%                daspect(axes3Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+%                daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [x z y]);
+%           end
         else
             x =1;
             y =1;
@@ -1567,12 +1578,16 @@ function dicomViewerCore()
             daspect(axes1Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
             daspect(axes2Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
             daspect(axes3Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
-            daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
+            if isVsplash('get') == false
+                daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
+            end
 
             axis(axes1Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
             axis(axes2Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
             axis(axes3Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
-            axis(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
+            if isVsplash('get') == false
+                axis(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
+            end
         end
 
         aspectRatioValue('set', 'x', x);
@@ -1602,7 +1617,9 @@ function dicomViewerCore()
         colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , getColorMap('one', colorMapOffset('get')));
         colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , getColorMap('one', colorMapOffset('get')));
         colormap(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , getColorMap('one', colorMapOffset('get')));
-        colormap(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', colorMapOffset('get')));
+        if isVsplash('get') == false
+            colormap(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', colorMapOffset('get')));
+        end
 
          if isVsplash('get') == true && ...
             ~strcmpi(vSplahView('get'), 'all')

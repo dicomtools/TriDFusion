@@ -41,49 +41,49 @@ function dLength = computeLineLength(atRoiMetaData, sAxe, roiObject)
 
         if strcmpi(sAxe, 'Axes1') % Coronal    
 
-            if strcmp(imageOrientation('get'), 'coronal')
-                xPixel = xAxial;
-                yPixel = yAxial;
-            end
-            if strcmp(imageOrientation('get'), 'sagittal')
-                xPixel = yAxial;
-                yPixel = xAxial;
-            end
-            if strcmp(imageOrientation('get'), 'axial')
+%            if strcmp(imageOrientation('get'), 'coronal')
+%                xPixel = xAxial;
+%                yPixel = yAxial;
+%            end
+%            if strcmp(imageOrientation('get'), 'sagittal')
+%                xPixel = yAxial;
+%                yPixel = xAxial;
+%            end
+%            if strcmp(imageOrientation('get'), 'axial')
                 xPixel = yAxial;
                 yPixel = zAxial;
-            end
+%            end
        end
 
        if strcmpi(sAxe, 'Axes2') % Sagittal   
-            if strcmp(imageOrientation('get'), 'coronal')
-                xPixel = yAxial;
-                yPixel = xAxial;
-            end
-            if strcmp(imageOrientation('get'), 'sagittal')
-                xPixel = zAxial;
-                yPixel = yAxial;
-            end
-            if strcmp(imageOrientation('get'), 'axial')
-                xPixel = yAxial;
+%            if strcmp(imageOrientation('get'), 'coronal')
+%                xPixel = yAxial;
+%                yPixel = xAxial;
+%            end
+%            if strcmp(imageOrientation('get'), 'sagittal')
+%                xPixel = zAxial;
+%                yPixel = yAxial;
+%            end
+%            if strcmp(imageOrientation('get'), 'axial')
+                xPixel = xAxial;
                 yPixel = zAxial;
-            end                
+%            end                
         end
 
         if strcmpi(sAxe, 'Axes3') % Axial  
 
-            if strcmp(imageOrientation('get'), 'coronal')
-                xPixel = xAxial;
-                yPixel = zAxial;
-            end
-            if strcmp(imageOrientation('get'), 'sagittal')
-                xPixel = yAxial;
-                yPixel = zAxial;
-            end
-            if strcmp(imageOrientation('get'), 'axial')
+%            if strcmp(imageOrientation('get'), 'coronal')
+%                xPixel = xAxial;
+%                yPixel = zAxial;
+%            end
+%            if strcmp(imageOrientation('get'), 'sagittal')
+%                xPixel = yAxial;
+%                yPixel = zAxial;
+%            end
+%            if strcmp(imageOrientation('get'), 'axial')
                 xPixel = xAxial;
                 yPixel = yAxial;
-            end
+%            end
         end
 
     end

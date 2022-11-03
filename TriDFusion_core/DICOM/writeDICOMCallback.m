@@ -27,10 +27,10 @@ function writeDICOMCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tWriteTemplate = inputTemplate('get');
+    atInputTemplate = inputTemplate('get');
 
-    iOffset = get(uiSeriesPtr('get'), 'Value');
-    if iOffset > numel(tWriteTemplate)
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+    if dSeriesOffset > numel(atInputTemplate)
         return;
     end
     
@@ -81,9 +81,9 @@ function writeDICOMCallback(~, ~)
         end        
     end
     
-    atMetaData = dicomMetaData('get');
+    atMetaData = dicomMetaData('get', [], dSeriesOffset);
     if isempty(atMetaData)
-        atMetaData = tWriteTemplate(iOffset).atDicomInfo;
+        atMetaData = atInputTemplate(dSeriesOffset).atDicomInfo;
     end    
     
     % Set series label
@@ -99,34 +99,35 @@ function writeDICOMCallback(~, ~)
     
     % Set series buffer
     
-    aBuffer = dicomBuffer('get');
+    aBuffer = dicomBuffer('get', [], dSeriesOffset);
     if isempty(aBuffer)
-        aInput  = inputBuffer('get');      
-        aBuffer = aInput{iOffset};
         
-        if strcmp(imageOrientation('get'), 'coronal')
-            aBuffer = permute(aBuffer, [3 2 1]);
-        elseif strcmp(imageOrientation('get'), 'sagittal')
-            aBuffer = permute(aBuffer, [2 3 1]);
-        else
-            aBuffer = permute(aBuffer, [1 2 3]);
-        end
+        aInput  = inputBuffer('get');      
+        aBuffer = aInput{dSeriesOffset};
+        
+%        if strcmp(imageOrientation('get'), 'coronal')
+%            aBuffer = permute(aBuffer, [3 2 1]);
+%        elseif strcmp(imageOrientation('get'), 'sagittal')
+%            aBuffer = permute(aBuffer, [2 3 1]);
+%        else
+%            aBuffer = permute(aBuffer, [1 2 3]);
+%        end
 
-        if tWriteTemplate(iOffset).bFlipLeftRight == true
-            aBuffer=aBuffer(:,end:-1:1,:);
-        end
+%        if atInputTemplate(dSeriesOffset).bFlipLeftRight == true
+%            aBuffer=aBuffer(:,end:-1:1,:);
+%        end
 
-        if tWriteTemplate(iOffset).bFlipAntPost == true
-            aBuffer=aBuffer(end:-1:1,:,:);
-        end
+%        if atInputTemplate(dSeriesOffset).bFlipAntPost == true
+%            aBuffer=aBuffer(end:-1:1,:,:);
+%        end
 
-        if tWriteTemplate(iOffset).bFlipHeadFeet == true
-            aBuffer=aBuffer(:,:,end:-1:1);
-        end
+%        if atInputTemplate(dSeriesOffset).bFlipHeadFeet == true
+%            aBuffer=aBuffer(:,:,end:-1:1);
+%        end
     end
     
     % Write DICOM
         
-    writeDICOM(aBuffer, atMetaData, sWriteDir, iOffset);
+    writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset);
 
 end

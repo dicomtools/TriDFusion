@@ -230,18 +230,21 @@ function setSeriesCallback(~,~)
             atMetaData = tInput(iOffset).atDicomInfo;
             dicomMetaData('set', atMetaData);
         end
+        
+        imageOrientation('set', tInput(iOffset).sOrientationView);       
 
         aInput  = inputBuffer('get');
         aBuffer = dicomBuffer('get');
 
         if isempty(aBuffer)
-            if     strcmp(imageOrientation('get'), 'axial')
-                aBuffer = permute(aInput{iOffset}, [1 2 3]);
-            elseif strcmp(imageOrientation('get'), 'coronal')
-                aBuffer = permute(aInput{iOffset}, [3 2 1]);
-            elseif strcmp(imageOrientation('get'), 'sagittal')
-                aBuffer = permute(aInput{iOffset}, [3 1 2]);
-            end
+            aBuffer = aInput{iOffset};
+%            if     strcmp(imageOrientation('get'), 'axial')
+%                aBuffer = permute(aInput{iOffset}, [1 2 3]);
+%            elseif strcmp(imageOrientation('get'), 'coronal')
+%                aBuffer = permute(aInput{iOffset}, [3 2 1]);
+%            elseif strcmp(imageOrientation('get'), 'sagittal')
+%                aBuffer = permute(aInput{iOffset}, [3 1 2]);
+%            end
 
             dicomBuffer('set', aBuffer);
         end

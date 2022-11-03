@@ -678,13 +678,13 @@ end
         
                 set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
 
-                if strcmp(imageOrientation('get'), 'coronal')
-                    B = permute(B, [3 2 1]);
-                elseif strcmp(imageOrientation('get'), 'sagittal')
-                    B = permute(B, [2 3 1]);
-                else
-                    B = permute(B, [1 2 3]);
-                end
+%                if strcmp(imageOrientation('get'), 'coronal')
+%                    B = permute(B, [3 2 1]);
+%                elseif strcmp(imageOrientation('get'), 'sagittal')
+%                    B = permute(B, [2 3 1]);
+%                else
+%                    B = permute(B, [1 2 3]);
+%                end
 
 if 1
                 if dSeriesOffset ~= dFusionSeriesOffset
@@ -734,7 +734,11 @@ end
                         yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
 
                         if xMoveOffset ~= 0 || yMoveOffset ~= 0 
-                            aResampledMip = imtranslate(aResampledMip,[-yMoveOffset, 0, -xMoveOffset], 'nearest', 'OutputView', 'same', 'FillValues', min(aResampledMip, [], 'all') );    
+                            if xMoveOffset < 0 || yMoveOffset < 0
+                                aResampledMip = imtranslate(aResampledMip,[-yMoveOffset, 0, -xMoveOffset], 'nearest', 'OutputView', 'full', 'FillValues', min(aResampledMip, [], 'all') );    
+                            else
+                                aResampledMip = imtranslate(aResampledMip,[-yMoveOffset, 0, -xMoveOffset], 'nearest', 'OutputView', 'same', 'FillValues', min(aResampledMip, [], 'all') );    
+                            end
                         end                  
                     end                    
                     
@@ -755,7 +759,11 @@ end
                         yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
 
                         if xMoveOffset ~= 0 || yMoveOffset ~= 0 
-                            B = imtranslate(B,[-xMoveOffset, -yMoveOffset, 0], 'nearest', 'OutputView', 'same', 'FillValues', min(B, [], 'all') ); 
+                            if xMoveOffset < 0 || yMoveOffset < 0
+                                B = imtranslate(B,[-xMoveOffset, -yMoveOffset, 0], 'nearest', 'OutputView', 'full', 'FillValues', min(B, [], 'all') ); 
+                            else
+                                B = imtranslate(B,[-xMoveOffset, -yMoveOffset, 0], 'nearest', 'OutputView', 'same', 'FillValues', min(B, [], 'all') ); 
+                            end
                         end
                     else
                         [aResampled, atFusionMetaData] = ...
@@ -1118,30 +1126,37 @@ end
                         yf = computeAspectRatio('y', atFusionMetaData) ;
                         zf = 1;
                     end
-
-                   if strcmp(imageOrientation('get'), 'axial')
-                        daspect(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
-                        daspect(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
-                        daspect(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf zf]);
-                                                
-                        if link2DMip('get') == true && isVsplash('get') == false                       
-                            daspect(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
-                        end
-                   elseif strcmp(imageOrientation('get'), 'coronal')
-                        daspect(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf zf]);
-                        daspect(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [yf zf xf]);
-                        daspect(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
-                        if link2DMip('get') == true && isVsplash('get') == false                       
-                            daspect(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf zf]);
-                        end
-                    elseif strcmp(imageOrientation('get'), 'sagittal')
-                        daspect(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [yf xf zf]);
-                        daspect(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf zf yf]);
-                        daspect(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
-                        if link2DMip('get') == true && isVsplash('get') == false                       
-                            daspect(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [yf xf zf]);
-                        end
+                    
+                    daspect(axes1fPtr  ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
+                    daspect(axes2fPtr  ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
+                    daspect(axes3fPtr  ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf zf]);
+                    if isVsplash('get') == false
+                        daspect(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
                     end
+
+%                   if strcmp(imageOrientation('get'), 'axial')
+%                        daspect(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
+%                        daspect(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
+%                        daspect(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf zf]);
+                                                
+%                        if link2DMip('get') == true && isVsplash('get') == false                       
+%                            daspect(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
+%                        end
+%                   elseif strcmp(imageOrientation('get'), 'coronal')
+%                        daspect(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf zf]);
+%                        daspect(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [yf zf xf]);
+%                        daspect(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
+%                        if link2DMip('get') == true && isVsplash('get') == false                       
+%                            daspect(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf zf]);
+%                        end
+%                    elseif strcmp(imageOrientation('get'), 'sagittal')
+%                        daspect(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [yf xf zf]);
+%                        daspect(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf zf yf]);
+%                        daspect(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
+%                        if link2DMip('get') == true && isVsplash('get') == false                       
+%                            daspect(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [yf xf zf]);
+%                        end
+%                    end
                 else
                     xf =1;
                     yf =1;
@@ -1150,14 +1165,14 @@ end
                     daspect(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [1 1 1]);
                     daspect(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [1 1 1]);
                     daspect(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [1 1 1]);
-                    if link2DMip('get') == true && isVsplash('get') == false                       
+                    if isVsplash('get') == false                       
                         daspect(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [1 1 1]);
-                    end
+                   end
                     
                     axis(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');
                     axis(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');
                     axis(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');
-                    if link2DMip('get') == true && isVsplash('get') == false                                           
+                    if isVsplash('get') == false                                           
                         axis(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');
                     end
                 end

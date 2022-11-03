@@ -27,14 +27,16 @@ function multiGate3D(mPlay)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-     if size(dicomBuffer('get'), 3) == 1
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+     if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
         progressBar(1, 'Error: Require a 3D Volume!');
         multiFrame3DPlayback('set', false);
         mPlay.State = 'off';
         return;
      end
      
-    atVoi = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    atVoi = voiTemplate('get', dSeriesOffset);
 
     volGateObj = volGateObject('get');
     isoGateObj = isoGateObject('get');
@@ -45,11 +47,11 @@ function multiGate3D(mPlay)
     isoObjBak  = isoObject('get');
     mipObjBak  = mipObject('get');
     
-    atInput = inputTemplate('get');
+    atInputTemplate = inputTemplate('get');
 
     if isFusion('get') == true
         dFusionOffset  = get(uiFusedSeriesPtr('get'), 'Value');
-        atFuseMetaData = atInput(dFusionOffset).atDicomInfo;
+        atFuseMetaData = atInputTemplate(dFusionOffset).atDicomInfo;
     end
 
     volGateFusionObj = volGateFusionObject('get');
@@ -68,15 +70,15 @@ function multiGate3D(mPlay)
     dZoomBak = multiFrame3DZoom('get');
 
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-    if dSeriesOffset > numel(atInput) || ...
-       numel(atInput) < 2 % Need a least 2 series
+    if dSeriesOffset > numel(atInputTemplate) || ...
+       numel(atInputTemplate) < 2 % Need a least 2 series
         progressBar(1, 'Error: Require at least two 3D Volume!');
         multiFrame3DPlayback('set', false);
         mPlay.State = 'off';
         return;
     end
 
-    if ~isfield(atInput(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
+    if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
        gateUseSeriesUID('get') == true
         progressBar(1, 'Error: Require a dynamic 3D Volume!');
         multiFrame3DPlayback('set', false);
@@ -87,16 +89,16 @@ function multiGate3D(mPlay)
     if gateUseSeriesUID('get') == true
         dOffset = dSeriesOffset;
 
-        for idx=1: numel(atInput)
+        for idx=1: numel(atInputTemplate)
 
             dOffset = dOffset+1;
 
-            if dOffset > numel(atInput) || ... % End of list
-               ~strcmpi(atInput(dOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
-                        atInput(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
-                for bb=1:numel(atInput)
-                    if strcmpi(atInput(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
-                        atInput(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
+            if dOffset > numel(atInputTemplate) || ... % End of list
+               ~strcmpi(atInputTemplate(dOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
+                        atInputTemplate(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
+                for bb=1:numel(atInputTemplate)
+                    if strcmpi(atInputTemplate(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
+                        atInputTemplate(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
                         dOffset = bb;
                         break;
                     end
@@ -109,7 +111,7 @@ function multiGate3D(mPlay)
             end
         end
     else
-        iNbSeries = numel(atInput);
+        iNbSeries = numel(atInputTemplate);
     end
 
     set(btn3DPtr('get')        , 'Enable', 'off');
@@ -243,24 +245,26 @@ function multiGate3D(mPlay)
     for tt=1:iNbSeries
 
         set(uiSeriesPtr('get'), 'Value', dOffset);
-        atCoreMetaData = dicomMetaData('get');
-        if isempty(atCoreMetaData)
-            atCoreMetaData = atInput(dOffset).atDicomInfo;
-            dicomMetaData('set', atCoreMetaData);
+        
+        atMetaData = dicomMetaData('get', [], dOffset);
+        if isempty(atMetaData)
+            atMetaData = atInputTemplate(dOffset).atDicomInfo;
+            dicomMetaData('set', atMetaData, dOffset);
         end
 
-        aBuffer = squeeze(dicomBuffer('get'));
+        aBuffer = squeeze(dicomBuffer('get', [], dOffset));
 
         if isempty(aBuffer)
-            if     strcmp(imageOrientation('get'), 'axial')
-                aBuffer = permute(aInputBuffer{dOffset}, [1 2 3]);
-            elseif strcmp(imageOrientation('get'), 'coronal')
-                aBuffer = permute(aInputBuffer{dOffset}, [3 2 1]);
-            elseif strcmp(imageOrientation('get'), 'sagittal')
-                aBuffer = permute(aInputBuffer{dOffset}, [3 1 2]);
-            end
+            aBuffer = aInputBuffer{dOffset};
+%            if     strcmp(imageOrientation('get'), 'axial')
+%                aBuffer = permute(aInputBuffer{dOffset}, [1 2 3]);
+%            elseif strcmp(imageOrientation('get'), 'coronal')
+%                aBuffer = permute(aInputBuffer{dOffset}, [3 2 1]);
+%            elseif strcmp(imageOrientation('get'), 'sagittal')
+%                aBuffer = permute(aInputBuffer{dOffset}, [3 1 2]);
+%            end
 
-            dicomBuffer('set', aBuffer);
+            dicomBuffer('set', aBuffer, dOffset);
         end
 
         for dPriorityLoop=1:3
@@ -270,10 +274,10 @@ function multiGate3D(mPlay)
                 dPriority = surface3DPriority('get', 'MaximumIntensityProjection');
 
                 if isempty(mipGateObj)&&(dPriority == dPriorityLoop)
-                    mipObj{tt} = initVolShow(aBuffer, ui3DWindow{tt}, 'MaximumIntensityProjection', atCoreMetaData);
+                    mipObj{tt} = initVolShow(aBuffer, ui3DWindow{tt}, 'MaximumIntensityProjection', atMetaData);
                     if isFusion('get') == true
                         if isempty(mipGateFusionObj)
-                            mipFusionObj{tt} = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), ui3DWindow{tt}, 'MaximumIntensityProjection', atFuseMetaData);
+                            mipFusionObj{tt} = initVolShow(squeeze(fusionBuffer('get', [], dFusionOffset)), ui3DWindow{tt}, 'MaximumIntensityProjection', atFuseMetaData);
                         end
                     end
                 end
@@ -285,10 +289,10 @@ function multiGate3D(mPlay)
                 dPriority = surface3DPriority('get', 'Isosurface');
 
                 if isempty(isoGateObj) &&(dPriority == dPriorityLoop)
-                    isoObj{tt} = initVolShow(aBuffer, ui3DWindow{tt}, 'Isosurface', atCoreMetaData);
+                    isoObj{tt} = initVolShow(aBuffer, ui3DWindow{tt}, 'Isosurface', atMetaData);
                     if isFusion('get') == true
                         if isempty(isoGateFusionObj)
-                            isoFusionObj{tt} = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), ui3DWindow{tt}, 'Isosurface', atFuseMetaData);
+                            isoFusionObj{tt} = initVolShow(squeeze(fusionBuffer('get', [], dFusionOffset)), ui3DWindow{tt}, 'Isosurface', atFuseMetaData);
                         end
                     end
                 end
@@ -299,10 +303,10 @@ function multiGate3D(mPlay)
                 dPriority = surface3DPriority('get', 'VolumeRendering');
 
                 if isempty(volGateObj) &&(dPriority == dPriorityLoop)
-                    volObj{tt} = initVolShow(aBuffer, ui3DWindow{tt}, 'VolumeRendering', atCoreMetaData);
+                    volObj{tt} = initVolShow(aBuffer, ui3DWindow{tt}, 'VolumeRendering', atMetaData);
                     if isFusion('get') == true
                         if isempty(volGateFusionObj)
-                            volFusionObj{tt} = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), ui3DWindow{tt}, 'VolumeRendering', atFuseMetaData);
+                            volFusionObj{tt} = initVolShow(squeeze(fusionBuffer('get', [], dFusionOffset)), ui3DWindow{tt}, 'VolumeRendering', atFuseMetaData);
                         end
                     end
                 end
@@ -326,12 +330,12 @@ function multiGate3D(mPlay)
 
         if gateUseSeriesUID('get') == true
 
-            if dOffset > numel(atInput) || ... % End of list
-               ~strcmpi(atInput(dOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
-                        atInput(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
-                for bb=1:numel(atInput)
-                    if strcmpi(atInput(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
-                        atInput(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
+            if dOffset > numel(atInputTemplate) || ... % End of list
+               ~strcmpi(atInputTemplate(dOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
+                        atInputTemplate(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
+                for bb=1:numel(atInputTemplate)
+                    if strcmpi(atInputTemplate(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
+                        atInputTemplate(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
                         dOffset = bb;
                         break;
                     end
@@ -339,7 +343,7 @@ function multiGate3D(mPlay)
                 end
             end
         else
-            if dOffset > numel(atInput)
+            if dOffset > numel(atInputTemplate)
                 dOffset = 1;
             end
         end
@@ -673,23 +677,23 @@ function multiGate3D(mPlay)
                 end
 
                 if switchTo3DMode('get') == true
-                    aVolAlphamap = getVolAlphaMap('get', dicomBuffer('get'), atInput(tt).atDicomInfo);
+                    aVolAlphamap = getVolAlphaMap('get', dicomBuffer('get', [], tt), atInputTemplate(tt).atDicomInfo);
                     aVolColormap = get3DColorMap('one', colorMapVolOffset('get') );
                     bLighting    = volLighting('get');
 
                     if isFusion('get') == true
-                        aVolFusionAlphamap = getVolFusionAlphaMap('get', fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), atFuseMetaData);
+                        aVolFusionAlphamap = getVolFusionAlphaMap('get', fusionBuffer('get', [], dFusionOffset), atFuseMetaData);
                         aVolFusionColormap = get3DColorMap('one', colorMapVolFusionOffset('get') );
                         bFusionLighting    = volFusionLighting('get');
                     end
                 end
 
                 if switchToMIPMode('get') == true
-                    aMipAlphamap = getMipAlphaMap('get', dicomBuffer('get'), atInput(tt).atDicomInfo);
+                    aMipAlphamap = getMipAlphaMap('get', dicomBuffer('get', [], tt), atInputTemplate(tt).atDicomInfo);
                     aMipColormap = get3DColorMap('one', colorMapMipOffset('get') );
 
                     if isFusion('get') == true
-                        aMipFusionAlphamap = getMipFusionAlphaMap('get', fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), atFuseMetaData);
+                        aMipFusionAlphamap = getMipFusionAlphaMap('get', fusionBuffer('get', [], dFusionOffset), atFuseMetaData);
                         aMipFusionColormap = get3DColorMap('one', colorMapMipFusionOffset('get') );
                     end
 

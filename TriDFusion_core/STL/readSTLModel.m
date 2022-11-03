@@ -144,21 +144,26 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         % Series default
         
         atInput(numel(atInput)).asFilesList = [];
+        
+        atInput(numel(atInput)).sOrientationView    = 'Axial';
        
-        atInput(numel(atInput)).bEdgeDetection = false;
-        atInput(numel(atInput)).bFlipLeftRight = false;
-        atInput(numel(atInput)).bFlipAntPost   = false;
-        atInput(numel(atInput)).bFlipHeadFeet  = false;
-        atInput(numel(atInput)).bDoseKernel    = false;
-        atInput(numel(atInput)).bMathApplied   = false;
+        atInput(numel(atInput)).bEdgeDetection      = false;
+        atInput(numel(atInput)).bFlipLeftRight      = false;
+        atInput(numel(atInput)).bFlipAntPost        = false;
+        atInput(numel(atInput)).bFlipHeadFeet       = false;
+        atInput(numel(atInput)).bDoseKernel         = false;
+        atInput(numel(atInput)).bMathApplied        = false;
         atInput(numel(atInput)).bFusedDoseKernel    = false;
         atInput(numel(atInput)).bFusedEdgeDetection = false;
+        
         atInput(numel(atInput)).tMovement = [];
+        
         atInput(numel(atInput)).tMovement.bMovementApplied = false;
-        atInput(numel(atInput)).tMovement.aGeomtform = [];
-        atInput(numel(atInput)).tMovement.atSeq{1}.sAxe = [];
+        atInput(numel(atInput)).tMovement.aGeomtform       = [];
+        
+        atInput(numel(atInput)).tMovement.atSeq{1}.sAxe         = [];
         atInput(numel(atInput)).tMovement.atSeq{1}.aTranslation = [];
-        atInput(numel(atInput)).tMovement.atSeq{1}.dRotation = [];  
+        atInput(numel(atInput)).tMovement.atSeq{1}.dRotation    = [];  
         
         asSeries = get(uiSeriesPtr('get'), 'String');
         asSeries{numel(asSeries)+1} = asSeriesDescription{numel(asSeriesDescription)};   
@@ -218,23 +223,30 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         % Series default
         atInput(1).asFilesList = [];
         
-        atInput(1).bEdgeDetection = false;
-        atInput(1).bFlipLeftRight = false;
-        atInput(1).bFlipAntPost   = false;
-        atInput(1).bFlipHeadFeet  = false;
-        atInput(1).bDoseKernel    = false;
-        atInput(1).bMathApplied   = false;
+        atInput(1).sOrientationView    = 'Axial';
+        
+        atInput(1).bEdgeDetection      = false;
+        atInput(1).bFlipLeftRight      = false;
+        atInput(1).bFlipAntPost        = false;
+        atInput(1).bFlipHeadFeet       = false;
+        atInput(1).bDoseKernel         = false;
+        atInput(1).bMathApplied        = false;
         atInput(1).bFusedDoseKernel    = false;
         atInput(1).bFusedEdgeDetection = false;
+        
         atInput(1).tMovement = [];
+        
         atInput(1).tMovement.bMovementApplied = false;
-        atInput(1).tMovement.aGeomtform = [];
-        atInput(1).tMovement.atSeq{1}.sAxe = [];
+        atInput(1).tMovement.aGeomtform       = [];
+        
+        atInput(1).tMovement.atSeq{1}.sAxe         = [];
         atInput(1).tMovement.atSeq{1}.aTranslation = [];
-        atInput(1).tMovement.atSeq{1}.dRotation = [];  
+        atInput(1).tMovement.atSeq{1}.dRotation    = [];  
         
         asSeries{1} = asSeriesDescription{1};              
     end   
+    
+    imageOrientation('set', 'axial');
             
     seriesDescription('set', asSeriesDescription);
             

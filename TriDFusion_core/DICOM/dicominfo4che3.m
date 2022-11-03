@@ -35,6 +35,8 @@ function info = dicominfo4che3(fileInput)
     catch 
         try 
         info = dicominfo(char(fileInput)); 
+        info.din.rows       = info.Rows;
+        info.din.cols       = info.Columns;   
         catch
             info = [];
         end

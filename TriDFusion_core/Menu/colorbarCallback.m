@@ -520,9 +520,9 @@ function colorbarCallback(hObject, ~)
                         end
                     end
                                         
-                    if strcmp(imageOrientation('get'), 'coronal')
+                    if strcmpi(imageOrientation('get'), 'coronal')
                         aFuseImage = permute(aFuseImage, [3 2 1]);
-                    elseif strcmp(imageOrientation('get'), 'sagittal')
+                    elseif strcmpi(imageOrientation('get'), 'sagittal')
                         aFuseImage = permute(aFuseImage, [2 3 1]);
                     else
                         aFuseImage = permute(aFuseImage, [1 2 3]);

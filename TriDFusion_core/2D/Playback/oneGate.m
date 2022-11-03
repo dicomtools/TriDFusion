@@ -27,26 +27,30 @@ function oneGate(sDirection)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    aCurrentBuffer = dicomBuffer('get');
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+    aCurrentBuffer = dicomBuffer('get', [], dSeriesOffset);
     if size(aCurrentBuffer, 3) == 1
         progressBar(1, 'Error: Require a 3D Volume!');
+        set(uiSeriesPtr('get'), 'Enable', 'on');
         return;
     end
 
-    tInput = inputTemplate('get');
+    atInputTemplate = inputTemplate('get');
 
-    iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-    if iSeriesOffset > numel(tInput) || ...
-        numel(tInput) < 2 % Need a least 2 series
+    if dSeriesOffset > numel(atInputTemplate) || ...
+        numel(atInputTemplate) < 2 % Need a least 2 series
+        set(uiSeriesPtr('get'), 'Enable', 'on');
         return;
     end
 
-    if ~isfield(tInput(iSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
+    if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
        gateUseSeriesUID('get') == true
+        set(uiSeriesPtr('get'), 'Enable', 'on');
         return
     end
 
-    tRefreshRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    tRefreshRoi = roiTemplate('get', dSeriesOffset);
     if ~isempty(tRefreshRoi)
         for bb=1:numel(tRefreshRoi)
             if isvalid(tRefreshRoi{bb}.Object)
@@ -60,41 +64,41 @@ function oneGate(sDirection)
     aInput = inputBuffer('get');
 
     if strcmpi(sDirection, 'Foward')
-        iOffset = iSeriesOffset+1;
+        dOffset = dSeriesOffset+1;
         if gateUseSeriesUID('get') == true
-            if iOffset > numel(tInput) || ... % End of list
-               ~strcmpi(tInput(iSeriesOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
-                        tInput(iOffset).atDicomInfo{1}.SeriesInstanceUID)
-                for bb=1:numel(tInput)
-                    if strcmpi(tInput(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
-                               tInput(iSeriesOffset).atDicomInfo{1}.SeriesInstanceUID)
-                        iOffset = bb;
+            if dOffset > numel(atInputTemplate) || ... % End of list
+               ~strcmpi(atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
+                        atInputTemplate(dOffset).atDicomInfo{1}.SeriesInstanceUID)
+                for bb=1:numel(atInputTemplate)
+                    if strcmpi(atInputTemplate(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
+                               atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID)
+                        dOffset = bb;
                         break;
                     end
                 end
             end
         else
-            if iOffset > numel(tInput)
-                iOffset =1;
+            if dOffset > numel(atInputTemplate)
+                dOffset =1;
             end
         end
     else
-        iOffset = iSeriesOffset-1;
+        dOffset = dSeriesOffset-1;
 
         if gateUseSeriesUID('get') == true
-            if iOffset == 0 || ... % The list start at 1
-               ~strcmpi(tInput(iSeriesOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
-                        tInput(iOffset).atDicomInfo{1}.SeriesInstanceUID)
+            if dOffset == 0 || ... % The list start at 1
+               ~strcmpi(atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
+                        atInputTemplate(dOffset).atDicomInfo{1}.SeriesInstanceUID)
 
                 bOffsetFound = false;
-                for bb=1:numel(tInput)
-                    if strcmpi(tInput(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
-                               tInput(iSeriesOffset).atDicomInfo{1}.SeriesInstanceUID)
-                        for cc=bb:numel(tInput) % Found the first frame
-                            if cc >= numel(tInput) || ... % End of list
-                               ~strcmpi(tInput(iSeriesOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the last frame
-                                        tInput(cc).atDicomInfo{1}.SeriesInstanceUID)
-                                iOffset = cc-1;
+                for bb=1:numel(atInputTemplate)
+                    if strcmpi(atInputTemplate(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
+                               atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID)
+                        for cc=bb:numel(atInputTemplate) % Found the first frame
+                            if cc >= numel(atInputTemplate) || ... % End of list
+                               ~strcmpi(atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the last frame
+                                        atInputTemplate(cc).atDicomInfo{1}.SeriesInstanceUID)
+                                dOffset = cc-1;
                                 bOffsetFound = true;
                                 break;
                             end
@@ -108,97 +112,98 @@ function oneGate(sDirection)
                 end
             end
         else
-            if iOffset == 0
-                iOffset = numel(tInput);
+            if dOffset == 0
+                dOffset = numel(atInputTemplate);
             end
         end
     end
 
     % Get current Axes
 
-    axes1 = axes1Ptr('get', [], iSeriesOffset);
-    axes2 = axes2Ptr('get', [], iSeriesOffset);
-    axes3 = axes3Ptr('get', [], iSeriesOffset);
-    if link2DMip('get') == true && isVsplash('get') == false
-        axesMip = axesMipPtr('get', [], iSeriesOffset);
+    axes1 = axes1Ptr('get', [], dSeriesOffset);
+    axes2 = axes2Ptr('get', [], dSeriesOffset);
+    axes3 = axes3Ptr('get', [], dSeriesOffset);
+    if isVsplash('get') == false
+        axesMip = axesMipPtr('get', [], dSeriesOffset);
     end
 
     % Get current CData
 
-    imCoronal  = imCoronalPtr ('get', [], iSeriesOffset);
-    imSagittal = imSagittalPtr('get', [], iSeriesOffset);
-    imAxial    = imAxialPtr   ('get', [], iSeriesOffset);
-    if link2DMip('get') == true && isVsplash('get') == false
-        imMip = imMipPtr('get', [], iSeriesOffset);
+    imCoronal  = imCoronalPtr ('get', [], dSeriesOffset);
+    imSagittal = imSagittalPtr('get', [], dSeriesOffset);
+    imAxial    = imAxialPtr   ('get', [], dSeriesOffset);
+    if isVsplash('get') == false
+        imMip = imMipPtr('get', [], dSeriesOffset);
     end
 
     % Set new serie offset
 
-    set(uiSeriesPtr('get'), 'Value', iOffset);
+    set(uiSeriesPtr('get'), 'Value', dOffset);
 
     % Set new Axes
 
-    if isempty(axes1Ptr('get', [], iOffset))
-        axes1Ptr('set', axes1, iOffset);
+    if isempty(axes1Ptr('get', [], dOffset))
+        axes1Ptr('set', axes1, dOffset);
     end
 
-    if isempty(axes2Ptr('get', [], iOffset))
-        axes2Ptr('set', axes2, iOffset);
+    if isempty(axes2Ptr('get', [], dOffset))
+        axes2Ptr('set', axes2, dOffset);
     end
 
-    if isempty(axes3Ptr('get', [], iOffset))
-        axes3Ptr('set', axes3, iOffset);
+    if isempty(axes3Ptr('get', [], dOffset))
+        axes3Ptr('set', axes3, dOffset);
     end
 
-    if link2DMip('get') == true && isVsplash('get') == false
-        if isempty(axesMipPtr('get', [], iOffset))
-            axesMipPtr('set', axesMip, iOffset);
+    if isVsplash('get') == false
+        if isempty(axesMipPtr('get', [], dOffset))
+            axesMipPtr('set', axesMip, dOffset);
         end
     end
 
     % Set new CData
 
-    if isempty(imCoronalPtr('get', [], iOffset))
-        imCoronalPtr('set', imCoronal, iOffset);
+    if isempty(imCoronalPtr('get', [], dOffset))
+        imCoronalPtr('set', imCoronal, dOffset);
     end
 
-    if isempty(imSagittalPtr('get', [], iOffset))
-        imSagittalPtr('set', imSagittal, iOffset);
+    if isempty(imSagittalPtr('get', [], dOffset))
+        imSagittalPtr('set', imSagittal, dOffset);
     end
 
-    if isempty(imAxialPtr('get', [], iOffset))
-        imAxialPtr('set', imAxial, iOffset);
+    if isempty(imAxialPtr('get', [], dOffset))
+        imAxialPtr('set', imAxial, dOffset);
     end
 
-    if link2DMip('get') == true && isVsplash('get') == false
-        if isempty(imMipPtr('get', [], iOffset))
-            imMipPtr('set', imMip, iOffset);
+    if isVsplash('get') == false
+        if isempty(imMipPtr('get', [], dOffset))
+            imMipPtr('set', imMip, dOffset);
         end
     end
 
-    aBuffer = dicomBuffer('get');
+    aBuffer = dicomBuffer('get', [], dOffset);
     if isempty(aBuffer)
-        if     strcmp(imageOrientation('get'), 'axial')
-            aBuffer = permute(aInput{iOffset}, [1 2 3]);
-        elseif strcmp(imageOrientation('get'), 'coronal')
-            aBuffer = permute(aInput{iOffset}, [3 2 1]);
-        elseif strcmp(imageOrientation('get'), 'sagittal')
-            aBuffer = permute(aInput{iOffset}, [3 1 2]);
-        end
-        dicomBuffer('set', aBuffer);
+        aBuffer = aInput{dOffset};
+ %       if     strcmp(imageOrientation('get'), 'axial')
+ %           aBuffer = permute(aInput{dOffset}, [1 2 3]);
+ %       elseif strcmp(imageOrientation('get'), 'coronal')
+ %           aBuffer = permute(aInput{dOffset}, [3 2 1]);
+ %       elseif strcmp(imageOrientation('get'), 'sagittal')
+ %           aBuffer = permute(aInput{dOffset}, [3 1 2]);
+ %       end
+        dicomBuffer('set', aBuffer, dOffset);
     end
 
     if size(aCurrentBuffer) ~= size(aBuffer)
-        set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
+        set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
         set(uiSeriesPtr('get'), 'Enable', 'on');
         progressBar(1, 'Error: Resample or Register the series fail!');
         return;
     end
 
-    atCoreMetaData = dicomMetaData('get');
+    atCoreMetaData = dicomMetaData('get', [], dOffset);
     if isempty(atCoreMetaData)
-        atCoreMetaData = tInput(iOffset).atDicomInfo;
-        dicomMetaData('set', atCoreMetaData);
+        atCoreMetaData = atInputTemplate(dOffset).atDicomInfo;
+        dicomMetaData('set', atCoreMetaData, dOffset);
     end
 
     if gateUseSeriesUID('get') == false && ...
@@ -214,7 +219,7 @@ function oneGate(sDirection)
         else
             if strcmpi(gateLookupType('get'), 'Relative')
 
-                sUnitDisplay = getSerieUnitValue(iOffset);
+                sUnitDisplay = getSerieUnitValue(dOffset);
 
                 if strcmpi(sUnitDisplay, 'SUV')
                     tQuant = quantificationTemplate('get');
@@ -231,18 +236,18 @@ function oneGate(sDirection)
                 end
             else
                 for jj=1:numel(aInput)
-                    set(uiSeriesPtr('get'), 'Value', jj);
-                    aBuffer = dicomBuffer('get');
+%                    set(uiSeriesPtr('get'), 'Value', jj);
+                    aBuffer = dicomBuffer('get', [], jj);
                     if isempty(aBuffer)
                         aBuffer = aInput{jj};
-                        if     strcmp(imageOrientation('get'), 'axial')
-                            aBuffer = permute(aInput{iOffset}, [1 2 3]);
-                        elseif strcmp(imageOrientation('get'), 'coronal')
-                            aBuffer = permute(aInput{iOffset}, [3 2 1]);
-                        elseif strcmp(imageOrientation('get'), 'sagittal')
-                            aBuffer = permute(aInput{iOffset}, [3 1 2]);
-                        end
-                        dicomBuffer('set', aBuffer);
+%                        if     strcmp(imageOrientation('get'), 'axial')
+%                            aBuffer = permute(aInput{dOffset}, [1 2 3]);
+%                        elseif strcmp(imageOrientation('get'), 'coronal')
+%                            aBuffer = permute(aInput{dOffset}, [3 2 1]);
+%                        elseif strcmp(imageOrientation('get'), 'sagittal')
+%                            aBuffer = permute(aInput{dOffset}, [3 1 2]);
+%                        end
+                        dicomBuffer('set', aBuffer, jj);
                     end
 
                     if jj == 1
@@ -260,24 +265,25 @@ function oneGate(sDirection)
                     end
                 end
 
-                set(uiSeriesPtr('get'), 'Value', iOffset);
+%                set(uiSeriesPtr('get'), 'Value', dOffset);
 
             end
         end
         setWindowMinMax(lMax, lMin);
     end
 
-    aBuffer = dicomBuffer('get');
+    aBuffer = dicomBuffer('get', [], dOffset);
     if isempty(aBuffer)
-        if     strcmp(imageOrientation('get'), 'axial')
-            aBuffer = permute(aInput{iOffset}, [1 2 3]);
-        elseif strcmp(imageOrientation('get'), 'coronal')
-            aBuffer = permute(aInput{iOffset}, [3 2 1]);
-        elseif strcmp(imageOrientation('get'), 'sagittal')
-            aBuffer = permute(aInput{iOffset}, [3 1 2]);
-        end
+        aBuffer = aInput{dOffset};
+%        if     strcmp(imageOrientation('get'), 'axial')
+%            aBuffer = permute(aInput{dOffset}, [1 2 3]);
+%        elseif strcmp(imageOrientation('get'), 'coronal')
+%            aBuffer = permute(aInput{dOffset}, [3 2 1]);
+%        elseif strcmp(imageOrientation('get'), 'sagittal')
+%            aBuffer = permute(aInput{dOffset}, [3 1 2]);
+%        end
 
-        dicomBuffer('set', aBuffer);
+        dicomBuffer('set', aBuffer, dOffset);
     end
 
 
@@ -286,9 +292,10 @@ if 1
 
         if aspectRatio('get') == true
 
-            atCoreMetaData = dicomMetaData('get');
+            atCoreMetaData = dicomMetaData('get', [], dOffset);
 
             if ~isempty(atCoreMetaData{1}.PixelSpacing)
+                
                 x = atCoreMetaData{1}.PixelSpacing(1);
                 y = atCoreMetaData{1}.PixelSpacing(2);
                 z = computeSliceSpacing(atCoreMetaData);
@@ -310,48 +317,56 @@ if 1
                 y = computeAspectRatio('y', atCoreMetaData);
                 z = 1;
             end
+            
+            daspect(axes1Ptr('get', [], dOffset), [z y x]);
+            daspect(axes2Ptr('get', [], dOffset), [z x y]);
+            daspect(axes3Ptr('get', [], dOffset), [x y z]);
 
-           if strcmp(imageOrientation('get'), 'axial')
-                daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-                daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
-                daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
-                if link2DMip('get') == true && isVsplash('get') == false
-                    daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-                end
-           elseif strcmp(imageOrientation('get'), 'coronal')
-                daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
-                daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [y z x]);
-                daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-                if link2DMip('get') == true && isVsplash('get') == false
-                    daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
-                end
+            if isVsplash('get') == false                                    
+                daspect(axesMipPtr('get', [], dOffset), [z y x]);
+            end
+                    
+%           if strcmp(imageOrientation('get'), 'axial')
+%                daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+%                daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
+%                daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
+%                if link2DMip('get') == true && isVsplash('get') == false
+%                    daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+%                end
+%           elseif strcmp(imageOrientation('get'), 'coronal')
+%                daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
+%                daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [y z x]);
+%                daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+%                if link2DMip('get') == true && isVsplash('get') == false
+%                    daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
+%                end
 
-            elseif strcmp(imageOrientation('get'), 'sagittal')
-                daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [y x z]);
-                daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x z y]);
-                daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-                if link2DMip('get') == true && isVsplash('get') == false
-                    daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [y x z]);
-                end
-           end
+%            elseif strcmp(imageOrientation('get'), 'sagittal')
+%                daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [y x z]);
+%                daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x z y]);
+%                daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+%                if link2DMip('get') == true && isVsplash('get') == false
+%                    daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [y x z]);
+%                end
+%           end
 
         else
             x =1;
             y =1;
             z =1;
 
-            daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-            daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
-            daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
-            if link2DMip('get') == true && isVsplash('get') == false
-                daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+            daspect(axes1Ptr('get', [], dOffset), [z x y]);
+            daspect(axes2Ptr('get', [], dOffset), [z y x]);
+            daspect(axes3Ptr('get', [], dOffset), [x y z]);
+            if isVsplash('get') == false
+                daspect(axesMipPtr('get', [], dOffset), [z y x]);
             end
 
-            axis(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
-            axis(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
-            axis(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
-            if link2DMip('get') == true && isVsplash('get') == false
-                axis(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
+            axis(axes1Ptr('get', [], dOffset), 'normal');
+            axis(axes2Ptr('get', [], dOffset), 'normal');
+            axis(axes3Ptr('get', [], dOffset), 'normal');
+            if isVsplash('get') == false
+                axis(axesMipPtr('get', [], dOffset), 'normal');
             end
 
         end

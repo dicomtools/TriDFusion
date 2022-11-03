@@ -27,12 +27,14 @@ function multiFrame3D(mPlay)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-     if size(dicomBuffer('get'), 3) == 1
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
         progressBar(1, 'Error: Require a 3D Volume!');  
         multiFrame3DPlayback('set', false);
         mPlay.State = 'off';
         return;
-     end 
+    end 
 
     volObj = volObject('get');
     isoObj = isoObject('get');                        

@@ -27,91 +27,94 @@ function oneFrame(sDirection)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if size(dicomBuffer('get'), 3) == 1
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
         progressBar(1, 'Error: Require a 3D Volume!');               
-        return;
+        set(uiSeriesPtr('get'), 'Enable', 'on');
+       return;
     end               
     
     windowButton('set', 'down');  
 
-    if (gca == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  && playback2DMipOnly('get') == false) || ...
+    if (gca == axes1Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
        (isVsplash('get') == true && ...
         strcmpi(vSplahView('get'), 'coronal'))
 
-            iLastSlice = size(dicomBuffer('get'), 1);  
-            iCurrentSlice = sliceNumber('get', 'coronal');
+            dLastSlice = size(dicomBuffer('get'), 1);  
+            dCurrentSlice = sliceNumber('get', 'coronal');
 %             set(uiSliderCorPtr('get'), 'Value', iSlider);
             if strcmpi(sDirection, 'Foward')
-                if iCurrentSlice < iLastSlice
-                    iCurrentSlice = iCurrentSlice +1;
+                if dCurrentSlice < dLastSlice
+                    dCurrentSlice = dCurrentSlice +1;
                 end
 
-                if iCurrentSlice == iLastSlice
-                    iCurrentSlice = 1;
+                if dCurrentSlice == dLastSlice
+                    dCurrentSlice = 1;
                 end  
             else
-                if iCurrentSlice > 1
-                    iCurrentSlice = iCurrentSlice -1;
+                if dCurrentSlice > 1
+                    dCurrentSlice = dCurrentSlice -1;
                 else
-                    iCurrentSlice = iLastSlice;
+                    dCurrentSlice = dLastSlice;
                 end                              
             end
 
-            sliceNumber('set', 'coronal', iCurrentSlice);
+            sliceNumber('set', 'coronal', dCurrentSlice);
             
             set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get'), 1));
 
-    elseif (gca == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  && playback2DMipOnly('get') == false) || ...
+    elseif (gca == axes2Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
        (isVsplash('get') == true && ...
         strcmpi(vSplahView('get'), 'sagittal'))
     
 %              set(uiSliderSagPtr('get'), 'Value', iSlider);
-            iLastSlice = size(dicomBuffer('get'), 2);    
-            iCurrentSlice = sliceNumber('get', 'sagittal'); 
+            dLastSlice = size(dicomBuffer('get'), 2);    
+            dCurrentSlice = sliceNumber('get', 'sagittal'); 
 
             if strcmpi(sDirection, 'Foward')
-                if iCurrentSlice < iLastSlice
-                    iCurrentSlice = iCurrentSlice +1;
+                if dCurrentSlice < dLastSlice
+                    dCurrentSlice = dCurrentSlice +1;
                 end
 
-                if iCurrentSlice == iLastSlice
-                    iCurrentSlice = 1;
+                if dCurrentSlice == dLastSlice
+                    dCurrentSlice = 1;
                 end  
             else
-                if iCurrentSlice > 1
-                    iCurrentSlice = iCurrentSlice -1;
+                if dCurrentSlice > 1
+                    dCurrentSlice = dCurrentSlice -1;
                 else
-                    iCurrentSlice = iLastSlice;
+                    dCurrentSlice = dLastSlice;
                 end                              
             end  
 
-            sliceNumber('set', 'sagittal', iCurrentSlice);
+            sliceNumber('set', 'sagittal', dCurrentSlice);
             
             set(uiSliderSagPtr('get'), 'Value', sliceNumber('get', 'sagittal') / size(dicomBuffer('get'), 2));
 
-    elseif (gca == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  && playback2DMipOnly('get') == false) || ...
+    elseif (gca == axes3Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
        (isVsplash('get') == true && ...
         strcmpi(vSplahView('get'), 'axial'))
     
-            iLastSlice = size(dicomBuffer('get'), 3);            
-            iCurrentSlice = sliceNumber('get', 'axial');
+            dLastSlice = size(dicomBuffer('get'), 3);            
+            dCurrentSlice = sliceNumber('get', 'axial');
 
              if strcmpi(sDirection, 'Foward')
 
-                if iCurrentSlice > 1
-                    iCurrentSlice = iCurrentSlice -1;
+                if dCurrentSlice > 1
+                    dCurrentSlice = dCurrentSlice -1;
                 else
-                    iCurrentSlice = iLastSlice;
+                    dCurrentSlice = dLastSlice;
                 end 
             else
-                if iCurrentSlice < iLastSlice
-                    iCurrentSlice = iCurrentSlice +1;
+                if dCurrentSlice < dLastSlice
+                    dCurrentSlice = dCurrentSlice +1;
                 else
-                    iCurrentSlice = 1;
+                    dCurrentSlice = 1;
                 end                              
             end     
 
-            sliceNumber('set', 'axial', iCurrentSlice);
+            sliceNumber('set', 'axial', dCurrentSlice);
 
            set(uiSliderTraPtr('get'), 'Value', 1 - (sliceNumber('get', 'axial') / size(dicomBuffer('get'), 3)));                       
 

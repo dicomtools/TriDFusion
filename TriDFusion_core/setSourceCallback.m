@@ -458,20 +458,25 @@ function setSourceCallback(~, ~)
                     atNewInput(ii).atDicomInfo  = atNewDicomInfo{ii};
                     atNewInput(ii).aDicomBuffer = aNewDicomBuffer{ii};
 
-                    atNewInput(ii).bEdgeDetection = false;
-                    atNewInput(ii).bFlipLeftRight = false;
-                    atNewInput(ii).bFlipAntPost   = false;
-                    atNewInput(ii).bFlipHeadFeet  = false;
-                    atNewInput(ii).bDoseKernel    = false;
-                    atNewInput(ii).bMathApplied   = false;
+                    atNewInput(ii).sOrientationView    = 'Axial';
+                    
+                    atNewInput(ii).bEdgeDetection      = false;
+                    atNewInput(ii).bFlipLeftRight      = false;
+                    atNewInput(ii).bFlipAntPost        = false;
+                    atNewInput(ii).bFlipHeadFeet       = false;
+                    atNewInput(ii).bDoseKernel         = false;
+                    atNewInput(ii).bMathApplied        = false;
                     atNewInput(ii).bFusedDoseKernel    = false;
                     atNewInput(ii).bFusedEdgeDetection = false;
+                    
                     atNewInput(ii).tMovement = [];
+                    
                     atNewInput(ii).tMovement.bMovementApplied = false;
-                    atNewInput(ii).tMovement.aGeomtform = [];
-                    atNewInput(ii).tMovement.atSeq{1}.sAxe = [];
+                    atNewInput(ii).tMovement.aGeomtform       = [];
+                    
+                    atNewInput(ii).tMovement.atSeq{1}.sAxe         = [];
                     atNewInput(ii).tMovement.atSeq{1}.aTranslation = [];
-                    atNewInput(ii).tMovement.atSeq{1}.dRotation = [];                   
+                    atNewInput(ii).tMovement.atSeq{1}.dRotation    = [];                   
                 end
 
                 inputTemplate('set', atNewInput);

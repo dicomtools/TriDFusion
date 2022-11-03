@@ -138,20 +138,24 @@ function initTemplates()
                 tSetInputTemplate(dSeriesLoop).atDicomInfo  = atDicomInfo{dSeriesLoop};
                 tSetInputTemplate(dSeriesLoop).aDicomBuffer = aDicomBuffer{dSeriesLoop};
                 
-                tSetInputTemplate(dSeriesLoop).bEdgeDetection = false;
-                tSetInputTemplate(dSeriesLoop).bDoseKernel    = false;    
-                tSetInputTemplate(dSeriesLoop).bFlipLeftRight = false;
-                tSetInputTemplate(dSeriesLoop).bFlipAntPost   = false;
-                tSetInputTemplate(dSeriesLoop).bFlipHeadFeet  = false;
-                tSetInputTemplate(dSeriesLoop).bMathApplied   = false;
+                tSetInputTemplate(dSeriesLoop).sOrientationView    = 'Axial';
+                
+                tSetInputTemplate(dSeriesLoop).bEdgeDetection      = false;
+                tSetInputTemplate(dSeriesLoop).bDoseKernel         = false;    
+                tSetInputTemplate(dSeriesLoop).bFlipLeftRight      = false;
+                tSetInputTemplate(dSeriesLoop).bFlipAntPost        = false;
+                tSetInputTemplate(dSeriesLoop).bFlipHeadFeet       = false;
+                tSetInputTemplate(dSeriesLoop).bMathApplied        = false;
                 tSetInputTemplate(dSeriesLoop).bFusedDoseKernel    = false;
                 tSetInputTemplate(dSeriesLoop).bFusedEdgeDetection = false;
+                
                 tSetInputTemplate(dSeriesLoop).tMovement = [];
                 tSetInputTemplate(dSeriesLoop).tMovement.bMovementApplied = false;
-                tSetInputTemplate(dSeriesLoop).tMovement.aGeomtform = [];                
-                tSetInputTemplate(dSeriesLoop).tMovement.atSeq{1}.sAxe = [];
+                tSetInputTemplate(dSeriesLoop).tMovement.aGeomtform       = [];                
+                
+                tSetInputTemplate(dSeriesLoop).tMovement.atSeq{1}.sAxe         = [];
                 tSetInputTemplate(dSeriesLoop).tMovement.atSeq{1}.aTranslation = [];
-                tSetInputTemplate(dSeriesLoop).tMovement.atSeq{1}.dRotation = [];
+                tSetInputTemplate(dSeriesLoop).tMovement.atSeq{1}.dRotation    = [];
                 
             end 
                     

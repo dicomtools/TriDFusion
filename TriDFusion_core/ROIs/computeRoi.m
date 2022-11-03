@@ -129,6 +129,9 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
             zPixel = 1;
         else
             zPixel = computeSliceSpacing(atRoiMetaData)/10; 
+            if zPixel == 0
+                zPixel = 1;
+            end
         end
     end            
 

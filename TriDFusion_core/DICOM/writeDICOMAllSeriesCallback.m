@@ -27,10 +27,10 @@ function writeDICOMAllSeriesCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tWriteTemplate = inputTemplate('get');
+    atInputTemplate = inputTemplate('get');
 
-    iOffset = get(uiSeriesPtr('get'), 'Value');
-    if iOffset > numel(inputTemplate('get'))
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+    if dSeriesOffset > numel(atInputTemplate)
         return;
     end
     
@@ -92,9 +92,9 @@ function writeDICOMAllSeriesCallback(~, ~)
         
         % Set series label
         
-        atMetaData = dicomMetaData('get');
+        atMetaData = dicomMetaData('get', [], jj);
         if isempty(atMetaData)
-            atMetaData = tWriteTemplate(jj).atDicomInfo;
+            atMetaData = atInputTemplate(jj).atDicomInfo;
         end
         
         if jj == 1
@@ -114,30 +114,31 @@ function writeDICOMAllSeriesCallback(~, ~)
         
         % Set series buffer
    
-        aBuffer = dicomBuffer('get');
+        aBuffer = dicomBuffer('get', [], jj);
         if isempty(aBuffer)
+            
             aInput  = inputBuffer('get');      
             aBuffer = aInput{jj};
             
-            if strcmp(imageOrientation('get'), 'coronal')
-                aBuffer = permute(aBuffer, [3 2 1]);
-            elseif strcmp(imageOrientation('get'), 'sagittal')
-                aBuffer = permute(aBuffer, [2 3 1]);
-            else
-                aBuffer = permute(aBuffer, [1 2 3]);
-            end
+%            if strcmp(imageOrientation('get'), 'coronal')
+%                aBuffer = permute(aBuffer, [3 2 1]);
+%            elseif strcmp(imageOrientation('get'), 'sagittal')
+%                aBuffer = permute(aBuffer, [2 3 1]);
+%            else
+%                aBuffer = permute(aBuffer, [1 2 3]);
+%            end
 
-            if tWriteTemplate(jj).bFlipLeftRight == true
-                aBuffer=aBuffer(:,end:-1:1,:);
-            end
+%            if atInputTemplate(jj).bFlipLeftRight == true
+%                aBuffer=aBuffer(:,end:-1:1,:);
+%            end
 
-            if tWriteTemplate(jj).bFlipAntPost == true
-                aBuffer=aBuffer(end:-1:1,:,:);
-            end
+%            if atInputTemplate(jj).bFlipAntPost == true
+%                aBuffer=aBuffer(end:-1:1,:,:);
+%            end
 
-            if tWriteTemplate(jj).bFlipHeadFeet == true
-                aBuffer=aBuffer(:,:,end:-1:1);
-            end                           
+%            if atInputTemplate(jj).bFlipHeadFeet == true
+%                aBuffer=aBuffer(:,:,end:-1:1);
+%            end                           
         end                
         
         if bCreateSubDir == true
@@ -153,7 +154,8 @@ function writeDICOMAllSeriesCallback(~, ~)
         writeDICOM(aBuffer, atMetaData, sWriteDir, jj);
     end
 
-    set(uiSeriesPtr('get'), 'Value', iOffset);
+    set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
+    
     set(uiSeriesPtr('get'), 'Enable', 'on');
 
 end

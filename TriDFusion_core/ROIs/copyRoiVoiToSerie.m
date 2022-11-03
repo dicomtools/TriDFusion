@@ -41,25 +41,25 @@ function copyRoiVoiToSerie(dSeriesToOffset, tRoiVoiObject, bMirror)
 
     set(uiSeriesPtr('get'), 'Value', dSeriesToOffset); 
     
-    aRefBuffer = dicomBuffer('get');
+    aRefBuffer = dicomBuffer('get', [], dSeriesOffset);
     if isempty(aRefBuffer)
         
-        if     strcmp(imageOrientation('get'), 'axial')
-            aRefBuffer = permute(aBuffer{dSeriesToOffset}, [1 2 3]);
-        elseif strcmp(imageOrientation('get'), 'coronal')
-            aRefBuffer = permute(aBuffer{dSeriesToOffset}, [3 2 1]);
-        elseif strcmp(imageOrientation('get'), 'sagittal')
-            aRefBuffer = permute(aBuffer{dSeriesToOffset}, [3 1 2]);
-        end        
+        aRefBuffer = aBuffer{dSeriesToOffset};    
+%        if     strcmp(imageOrientation('get'), 'axial')
+%            aRefBuffer = permute(aBuffer{dSeriesToOffset}, [1 2 3]);
+%        elseif strcmp(imageOrientation('get'), 'coronal')
+%            aRefBuffer = permute(aBuffer{dSeriesToOffset}, [3 2 1]);
+%        elseif strcmp(imageOrientation('get'), 'sagittal')
+%            aRefBuffer = permute(aBuffer{dSeriesToOffset}, [3 1 2]);
+%        end        
     end
     
-    atRefInfo = dicomMetaData('get');
+    atRefInfo = dicomMetaData('get', [], dSeriesOffset);
     if isempty(atRefInfo)
          atRefInfo = atInput(dSeriesToOffset).atDicomInfo;
     end
     
     set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
-
     
     if strcmpi(tRoiVoiObject.ObjectType, 'voi')
 

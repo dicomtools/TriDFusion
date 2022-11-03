@@ -56,32 +56,11 @@ function mainWindowMenu()
     optionsPanelMenuObject('set', mOptions);
 
     mView = uimenu(fiMainWindowPtr('get'),'Label','View');
-    mAxial    = uimenu(mView, 'Label','Axial Plane'   , 'Callback', @setOrientationCallback);
-    mSagittal = uimenu(mView, 'Label','Sagittal Plane', 'Callback', @setOrientationCallback);
-    mCoronal  = uimenu(mView, 'Label','Coronal plane' , 'Callback', @setOrientationCallback);
-    
-    axialOrientationMenuPtr   ('set', mAxial   );
-    sagittalOrientationMenuPtr('set', mSagittal);
-    coronalOrientationMenuPtr ('set', mCoronal );
        
     mVsplashAxial    = uimenu(mView, 'Label','V-Splash Axial'   , 'Callback', @setVsplashViewCallback, 'Separator','on');
     mVsplashSagittal = uimenu(mView, 'Label','V-Splash Sagittal', 'Callback', @setVsplashViewCallback);
     mVslashCoronal   = uimenu(mView, 'Label','V-Splash Coronal' , 'Callback', @setVsplashViewCallback);
     mVslashAll       = uimenu(mView, 'Label','V-Splash All'     , 'Callback', @setVsplashViewCallback);
-
-    if strcmpi(imageOrientation('get'), 'Sagittal')
-        set(mAxial   , 'Checked', 'off');
-        set(mSagittal, 'Checked', 'on' );
-        set(mCoronal , 'Checked', 'off');
-    elseif strcmpi(imageOrientation('get'), 'Coronal')
-        set(mAxial   , 'Checked', 'off');
-        set(mSagittal, 'Checked', 'off' );
-        set(mCoronal , 'Checked', 'on');
-    else
-        set(mAxial   , 'Checked', 'on');
-        set(mSagittal, 'Checked', 'off' );
-        set(mCoronal , 'Checked', 'off');
-    end
 
     if strcmpi(vSplahView('get'), 'Coronal')
         set(mVsplashAxial   , 'Checked', 'off');
@@ -146,7 +125,29 @@ function mainWindowMenu()
     rotate3DMenu  ('set', uimenu(mTools, 'Label','Rotate 3D'  , 'Callback', @setRotate3DCallback));
  %   dataCursorMenu('set', uimenu(mTools, 'Label','Data Cursor', 'Callback', @setDataCursorCallback)); 
     uimenu(mTools, 'Label','Reset View', 'Callback','toolsmenufcn ResetView');
-  
+    
+    mAxial    = uimenu(mTools, 'Label','Original Orientation'     , 'Callback', @setOrientationCallback, 'Separator','on');
+    mCoronal  = uimenu(mTools, 'Label','Permute Coronal to Axial' , 'Callback', @setOrientationCallback);
+    mSagittal = uimenu(mTools, 'Label','Permute Sagittal to Axial', 'Callback', @setOrientationCallback);
+    
+    axialOrientationMenuPtr   ('set', mAxial   );
+    coronalOrientationMenuPtr ('set', mCoronal );    
+    sagittalOrientationMenuPtr('set', mSagittal);
+    
+    if strcmpi(imageOrientation('get'), 'Sagittal')
+        set(mAxial   , 'Checked', 'off');
+        set(mSagittal, 'Checked', 'on' );
+        set(mCoronal , 'Checked', 'off');
+    elseif strcmpi(imageOrientation('get'), 'Coronal')
+        set(mAxial   , 'Checked', 'off');
+        set(mSagittal, 'Checked', 'off' );
+        set(mCoronal , 'Checked', 'on');
+    else
+        set(mAxial   , 'Checked', 'on');
+        set(mSagittal, 'Checked', 'off' );
+        set(mCoronal , 'Checked', 'off');
+    end
+    
     uimenu(mTools, 'Label','Registration', 'Callback', @setRegistrationCallback, 'Separator','on');
     uimenu(mTools, 'Label','Mathematic'  , 'Callback', @setMathCallback);
 
@@ -198,16 +199,27 @@ function mainWindowMenu()
             
             if strcmpi(get(hObject, 'Label'), 'Axial Plane') && ...
                strcmpi(imageOrientation('get'), 'axial')
+           
+                set(fiMainWindowPtr('get'), 'Pointer', 'default');
+                drawnow;
                 return;
             end
             
             if strcmpi(get(hObject, 'Label'), 'Coronal Plane') && ...
                strcmpi(imageOrientation('get'), 'coronal')
+           
+                set(fiMainWindowPtr('get'), 'Pointer', 'default');
+                drawnow;           
+            
                 return;
             end
             
             if strcmpi(get(hObject, 'Label'), 'Sagittal Plane') && ...                
                strcmpi(imageOrientation('get'), 'sagittal')
+           
+                set(fiMainWindowPtr('get'), 'Pointer', 'default');
+                drawnow;
+            
                 return;
             end
                       
@@ -222,7 +234,7 @@ function mainWindowMenu()
             end
             
             atInputTemplate = inputTemplate('get');
-            aInputBuffer  = inputBuffer('get');
+            aInputBuffer    = inputBuffer('get');
 
             dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
             
@@ -232,105 +244,198 @@ function mainWindowMenu()
                 
                 if strcmpi(sSeriesInstanceUID, atInputTemplate(kk).atDicomInfo{1}.SeriesInstanceUID) % Same series
                                 
-%                    aDicomBuffer = dicomBuffer('get', [], kk);
-%                    if isempty(aDicomBuffer)
-                        aDicomBuffer = aInputBuffer{kk};
-%                    end
-                    
-                    if strcmpi(get(hObject, 'Label'), 'Axial Plane')
+                    aDicomBuffer = aInputBuffer{kk};
+                    atDicomInfo  = atInputTemplate(dSeriesOffset).atDicomInfo;
+                   
+                    if strcmpi(get(hObject, 'Label'), 'Original Orientation')
+                        
+                        atInputTemplate(kk).sOrientationView = 'Axial';
                         
                         imageOrientation('set', 'axial');
 
-                        viewSegPanel('set', false);
-                        objSegPanel = viewSegPanelMenuObject('get');
-                        if ~isempty(objSegPanel)
-                            objSegPanel.Checked = 'off';
-                        end
-
-                        viewKernelPanel('set', false);
-                        objKernelPanel = viewKernelPanelMenuObject('get');
-                        if ~isempty(objKernelPanel)
-                            objKernelPanel.Checked = 'off';
-                        end
-                
-                        if strcmpi(imageOrientation('get'), 'coronal')
-                            aDicomBuffer = permute(aDicomBuffer, [3 2 1]);
-                        elseif strcmpi(imageOrientation('get'), 'sagittal')
-                            aDicomBuffer = permute(aDicomBuffer, [2 3 1]);
-                        else
-                            aDicomBuffer = permute(aDicomBuffer, [1 2 3]);
-                        end
-
-                        dicomBuffer('set', aDicomBuffer, kk);
+                        dicomBuffer  ('set', aDicomBuffer, kk);
+                        dicomMetaData('set', atDicomInfo , kk);
                         
-                        aReorientedMip = computeMIP(aDicomBuffer);
-                        mipBuffer('set', aReorientedMip, kk);
+                        if link2DMip('get') == true                                                
+                            aReorientedMip = computeMIP(aDicomBuffer);
+                            mipBuffer('set', aReorientedMip, kk);
+                        end
                         
                         bRefresh = true;
 
-                    elseif strcmpi(get(hObject, 'Label'), 'Coronal Plane')
+                    elseif strcmpi(get(hObject, 'Label'), 'Permute Coronal to Axial')
+                        
+                        atInputTemplate(kk).sOrientationView = 'Coronal';
                        
                         imageOrientation('set', 'coronal');
 
-                        viewSegPanel('set', false);
-                        objSegPanel = viewSegPanelMenuObject('get');
-                        if ~isempty(objSegPanel)
-                            objSegPanel.Checked = 'off';
-                        end
-
-                        viewKernelPanel('set', false);
-                        objKernelPanel = viewKernelPanelMenuObject('get');
-                        if ~isempty(objKernelPanel)
-                            objKernelPanel.Checked = 'off';
-                        end
-
-                        if strcmpi(imageOrientation('get'), 'sagittal')
-                            aDicomBuffer = permute(aDicomBuffer, [1 3 2]);
-                        else
-                            aDicomBuffer = permute(aDicomBuffer, [3 2 1]);
-                        end
-                        
+                        aDicomBuffer = permute(aDicomBuffer, [3 2 1]);
+                                               
                         dicomBuffer('set', aDicomBuffer, kk);
                         
-                        aReorientedMip = computeMIP(aDicomBuffer);
-                        mipBuffer('set', aReorientedMip, kk);
+                        if link2DMip('get') == true
+                            aReorientedMip = computeMIP(aDicomBuffer);
+                            mipBuffer('set', aReorientedMip, kk);
+                        end
+                                               
+                        aImageOrientationPatient = zeros(6,1);
+        
+                        % Axial
+                        
+                        aImageOrientationPatient(1) = 1;
+                        aImageOrientationPatient(5) = 1;
+                        
+                        dImagePositionPatient = atDicomInfo{1}.ImagePositionPatient;
+        
+                        x = atDicomInfo{1}.PixelSpacing(1);
+                        y = atDicomInfo{1}.PixelSpacing(2);
+                        z = computeSliceSpacing(atDicomInfo);                        
+                        
+                        adBufferSize = size(aDicomBuffer);                        
+                        
+                        if numel(atDicomInfo) ~= 1
+                            if adBufferSize(3) < numel(atDicomInfo)
+                                atDicomInfo = atDicomInfo(1:numel(atDicomInfo)); % Remove some slices
+                            else
+                                for cc=1:adBufferSize(3) - numel(atDicomInfo)
+                                    atDicomInfo{end+1} = atDicomInfo{end}; %Add missing slice
+                                end            
+                            end                
+                        end
+                        
+                        for oo=0:numel(atDicomInfo)-1
+                            
+                            if oo+1 <= adBufferSize(3) 
+                                
+                                if isfield(atDicomInfo{oo+1}, 'RescaleSlope')
+                                    dTrueMin = min(aDicomBuffer(:,:,oo+1), [],'all');
+                                    dTrueMax = max(aDicomBuffer(:,:,oo+1), [],'all');
+                                    dTrueRange = dTrueMax-dTrueMin;
+                                    fSlope = dTrueRange/65535;                            
+
+
+                                    atDicomInfo{oo+1}.RescaleSlope = 1;
+                                end
+                                
+                                if isfield(atDicomInfo{oo+1}, 'RescaleIntercept')                                
+%                                    atDicomInfo{oo+1}.RescaleIntercept = 0;
+                                end
+                            end
+                            
+                            if isfield(atDicomInfo{oo+1}, 'InstanceNumber')
+                                atDicomInfo{oo+1}.InstanceNumber = oo+1;
+                            end
+                            
+                            atDicomInfo{oo+1}.PixelSpacing(1) = z;
+                            atDicomInfo{oo+1}.PixelSpacing(2) = y;
+                            atDicomInfo{oo+1}.NumberOfSlices  = adBufferSize(3);
+                            atDicomInfo{oo+1}.ImageOrientationPatient = aImageOrientationPatient; 
+                            atDicomInfo{oo+1}.ImagePositionPatient    = dImagePositionPatient + (oo*x);  
+                            
+                            atDicomInfo{oo+1}.SliceThickness  = x;
+                            atDicomInfo{oo+1}.SpacingBetweenSlices  = x;                             
+                        end
+                        
+                        dicomMetaData('set', atDicomInfo , kk);
                         
                         bRefresh = true;
 
-                   elseif strcmpi(get(hObject, 'Label'), 'Sagittal Plane')
+                   elseif strcmpi(get(hObject, 'Label'), 'Permute Sagittal to Axial')
+                       
+                        atInputTemplate(kk).sOrientationView = 'Sagittal';
 
                         imageOrientation('set', 'sagittal');
 
-                        viewSegPanel('set', false);
-                        objSegPanel = viewSegPanelMenuObject('get');
-                        if ~isempty(objSegPanel)
-                            objSegPanel.Checked = 'off';
-                        end
-
-                        viewKernelPanel('set', false);
-                        objKernelPanel = viewKernelPanelMenuObject('get');
-                        if ~isempty(objKernelPanel)
-                            objKernelPanel.Checked = 'off';
-                        end
-
-                        if strcmpi(imageOrientation('get'), 'coronal')
-                            aDicomBuffer = permute(aDicomBuffer, [1 3 2]);
-                        else
-                            aDicomBuffer = permute(aDicomBuffer, [3 1 2]);
-                        end
+                        aImageOrientationPatient = zeros(6,1);
+        
+                        % Axial
+                        
+                        aImageOrientationPatient(1) = 1;
+                        aImageOrientationPatient(5) = 1;
+                        
+                        dImagePositionPatient = atDicomInfo{1}.ImagePositionPatient;
+                                                
+                        x = atDicomInfo{1}.PixelSpacing(1);
+                        y = atDicomInfo{1}.PixelSpacing(2);
+                        z = computeSliceSpacing(atDicomInfo);  
+                                                
+                        aDicomBuffer = permute(aDicomBuffer,  [3 1 2]);                                               
                         
                         dicomBuffer('set', aDicomBuffer, kk);
                         
-                        aReorientedMip = computeMIP(aDicomBuffer);
-                        mipBuffer('set', aReorientedMip, kk);
-                
+                        if link2DMip('get') == true                        
+                            aReorientedMip = computeMIP(aDicomBuffer);
+                            mipBuffer('set', aReorientedMip, kk);
+                        end            
+                        
+                        adBufferSize = size(aDicomBuffer);
+                        
+                        if numel(atDicomInfo) ~= 1
+                            if adBufferSize(3) < numel(atDicomInfo)
+                                atDicomInfo = atDicomInfo(1:numel(atDicomInfo)); % Remove some slices
+                            else
+                                for cc=1:adBufferSize(3) - numel(atDicomInfo)
+                                    atDicomInfo{end+1} = atDicomInfo{end}; %Add missing slice
+                                end            
+                            end                
+                        end
+    
+                        for oo=0:numel(atDicomInfo)-1
+                            
+                            if oo+1 <= adBufferSize(3) 
+                                
+                                if isfield(atDicomInfo{oo+1}, 'RescaleSlope')
+                                    dTrueMin = min(aDicomBuffer(:,:,oo+1), [],'all');
+                                    dTrueMax = max(aDicomBuffer(:,:,oo+1), [],'all');
+                                    dTrueRange = dTrueMax-dTrueMin;
+                                    fSlope = dTrueRange/65535;                            
+
+
+                                    atDicomInfo{oo+1}.RescaleSlope = 1;
+                                end
+                                
+                                if isfield(atDicomInfo{oo+1}, 'RescaleIntercept')                                
+%                                    atDicomInfo{oo+1}.RescaleIntercept = 0;
+                                end
+                            end
+                            
+                            if isfield(atDicomInfo{oo+1}, 'InstanceNumber')
+                                atDicomInfo{oo+1}.InstanceNumber = oo+1;
+                            end
+                            
+                            atDicomInfo{oo+1}.PixelSpacing(1) = z;
+                            atDicomInfo{oo+1}.PixelSpacing(2) = x;
+                            atDicomInfo{oo+1}.NumberOfSlices  = adBufferSize(3);
+                            atDicomInfo{oo+1}.ImageOrientationPatient = aImageOrientationPatient; 
+                            atDicomInfo{oo+1}.ImagePositionPatient    = dImagePositionPatient + (oo*y);                            
+
+                            atDicomInfo{oo+1}.SliceThickness  = y;
+                            atDicomInfo{oo+1}.SpacingBetweenSlices  = y;                            
+                        end
+                        
+                        dicomMetaData('set', atDicomInfo , kk);
+               
                         bRefresh = true;
                     end
                 end
             end
             
-            if  bRefresh == true
+            inputTemplate('set', atInputTemplate);
 
+            if  bRefresh == true
+                
+                viewSegPanel('set', false);
+                objSegPanel = viewSegPanelMenuObject('get');
+                if ~isempty(objSegPanel)
+                    objSegPanel.Checked = 'off';
+                end
+
+                viewKernelPanel('set', false);
+                objKernelPanel = viewKernelPanelMenuObject('get');
+                if ~isempty(objKernelPanel)
+                    objKernelPanel.Checked = 'off';
+                end
+                        
                 clearDisplay();
                 initDisplay(3);
                 dicomViewerCore();

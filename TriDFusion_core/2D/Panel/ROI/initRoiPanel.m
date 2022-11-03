@@ -1762,9 +1762,10 @@ function initRoiPanel()
 
                     aInput = inputBuffer('get');
                     aCtBuffer = aInput{tRoiPanelCT{dCtOffset}.dSeriesNumber};
-                    if strcmp(imageOrientation('get'), 'coronal')
+                    
+                    if strcmpi(imageOrientation('get'), 'coronal')
                         aCtBuffer = permute(aCtBuffer, [3 2 1]);
-                    elseif strcmp(imageOrientation('get'), 'sagittal')
+                    elseif strcmpi(imageOrientation('get'), 'sagittal')
                         aCtBuffer = permute(aCtBuffer, [2 3 1]);
                     else
                         aCtBuffer = permute(aCtBuffer, [1 2 3]);
@@ -2241,9 +2242,10 @@ function initRoiPanel()
 
                     aInput = inputBuffer('get');
                     aCtBuffer = aInput{tRoiPanelCT{dCtOffset}.dSeriesNumber};
-                    if strcmp(imageOrientation('get'), 'coronal')
+                    
+                    if strcmpi(imageOrientation('get'), 'coronal')
                         aCtBuffer = permute(aCtBuffer, [3 2 1]);
-                    elseif strcmp(imageOrientation('get'), 'sagittal')
+                    elseif strcmpi(imageOrientation('get'), 'sagittal')
                         aCtBuffer = permute(aCtBuffer, [2 3 1]);
                     else
                         aCtBuffer = permute(aCtBuffer, [1 2 3]);

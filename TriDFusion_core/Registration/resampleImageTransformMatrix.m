@@ -54,7 +54,7 @@ function [resampImage, atDcmMetaData, xMoveOffset, yMoveOffset] = resampleImageT
         end
 %        if dimsRef(3)==dimsDcm(3)
 %            aResampledImageSize = size(resampImage);
-%            resampImage=imresize3(resampImage, [aResampledImageSize(1) aResampledImageSize(2) dimsRef(3)]);
+%            resampImage=imresize3(resampImage, [dimsRef(1) dimsRef(2) dimsRef(3)]);
 %        end
         
 

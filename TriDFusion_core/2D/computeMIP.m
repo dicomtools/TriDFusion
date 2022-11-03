@@ -61,6 +61,7 @@ if 1
     end    
 
     clear aImage;
+    clear aRotatedImage;
 
     progressBar(1, 'Ready');               
 else

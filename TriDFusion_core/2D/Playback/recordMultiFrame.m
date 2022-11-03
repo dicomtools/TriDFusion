@@ -27,42 +27,45 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if size(dicomBuffer('get'), 3) == 1
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
         progressBar(1, 'Error: Require a 3D Volume!');
         multiFrameRecord('set', false);
         mRecord.State = 'off';
+        set(uiSeriesPtr('get'), 'Enable', 'on');
         return;
     end
 
     atCoreMetaData = dicomMetaData('get');
 
-    if (gca == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  && playback2DMipOnly('get') == false) || ...
+    if (gca == axes1Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
        (isVsplash('get') == true && ...
         strcmpi(vSplahView('get'), 'coronal'))
 
-        iLastSlice = size(dicomBuffer('get'), 1);
-        iCurrentSlice = sliceNumber('get', 'coronal');
-        aAxe = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+        dLastSlice = size(dicomBuffer('get'), 1);
+        dCurrentSlice = sliceNumber('get', 'coronal');
+        aAxe = axes1Ptr('get', [], dSeriesOffset);
 
-    elseif (gca == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  && playback2DMipOnly('get') == false) || ...
+    elseif (gca == axes2Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
        (isVsplash('get') == true && ...
         strcmpi(vSplahView('get'), 'sagittal'))
     
-        iLastSlice = size(dicomBuffer('get'), 2);
-        iCurrentSlice = sliceNumber('get', 'sagittal');
-        aAxe = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+        dLastSlice = size(dicomBuffer('get'), 2);
+        dCurrentSlice = sliceNumber('get', 'sagittal');
+        aAxe = axes2Ptr('get', [], dSeriesOffset);
 
-    elseif (gca == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  && playback2DMipOnly('get') == false) || ...
+    elseif (gca == axes3Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
        (isVsplash('get') == true && ...
         strcmpi(vSplahView('get'), 'axial'))
     
-        iLastSlice = size(dicomBuffer('get'), 3);
-        iCurrentSlice = sliceNumber('get', 'axial');
-        aAxe = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+        dLastSlice = size(dicomBuffer('get'), 3);
+        dCurrentSlice = sliceNumber('get', 'axial');
+        aAxe = axes3Ptr('get', [], dSeriesOffset);
     else
-        iLastSlice = 32;
-        iCurrentSlice = mipAngle('get');
-        aAxe = axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'));       
+        dLastSlice = 32;
+        dCurrentSlice = mipAngle('get');
+        aAxe = axesMipPtr('get', [], dSeriesOffset);       
     end
 
     set(uiSliderSagPtr('get'), 'Visible', 'off');
@@ -72,7 +75,7 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
     
     if isVsplash('get') == false                       
                 
-        if aAxe == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+        if aAxe == axes1Ptr('get', [], dSeriesOffset)
             logoObj = logoObject('get');
             if ~isempty(logoObj)
                 delete(logoObj);
@@ -87,7 +90,7 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
         end        
     end
 
-%    if aAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+%    if aAxe == axes3Ptr('get', [], dSeriesOffset)
         set(uiSliderWindowPtr('get'), 'Visible', 'off');
         set(uiSliderLevelPtr('get') , 'Visible', 'off');
         set(uiColorbarPtr('get')    , 'Visible', 'off');
@@ -101,21 +104,21 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
 
     if overlayActivate('get') == true
 
-        if     aAxe == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+        if     aAxe == axes1Ptr('get', [], dSeriesOffset)
             pAxes1Text = axesText('get', 'axes1');
             pAxes1Text.Visible = 'off';
             
             pAxes1View = axesText('get', 'axes1View');
             pAxes1View.Visible = 'off';           
             
-        elseif aAxe == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+        elseif aAxe == axes2Ptr('get', [], dSeriesOffset)
             pAxes2Text = axesText('get', 'axes2');
             pAxes2Text.Visible = 'off';
             
             pAxes2View = axesText('get', 'axes2View');
             pAxes2View.Visible = 'off';  
             
-        elseif aAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+        elseif aAxe == axes3Ptr('get', [], dSeriesOffset)
             pAxes3Text = axesText('get', 'axes3');
             pAxes3Text.Visible = 'off';
             
@@ -142,22 +145,22 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
     if crossActivate('get') == true && ...
        isVsplash('get') == false
    
-        if     aAxe == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+        if     aAxe == axes1Ptr('get', [], dSeriesOffset)
             alAxes1Line = axesLine('get', 'axes1');
             for ii1=1:numel(alAxes1Line)
                 alAxes1Line{ii1}.Visible = 'off';
             end
-        elseif aAxe == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+        elseif aAxe == axes2Ptr('get', [], dSeriesOffset)
             alAxes2Line = axesLine('get', 'axes2');
             for ii2=1:numel(alAxes2Line)
                 alAxes2Line{ii2}.Visible = 'off';
             end
-        elseif aAxe == axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+        elseif aAxe == axesMipPtr('get', [], dSeriesOffset)
             alAxesMipLine = axesLine('get', 'axesMip');
             for ii4=1:numel(alAxesMipLine)
                 alAxesMipLine{ii4}.Visible = 'off';
             end            
-        elseif aAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+        elseif aAxe == axes3Ptr('get', [], dSeriesOffset)
             alAxes3Line = axesLine('get', 'axes3');
             for ii3=1:numel(alAxes3Line)
                 alAxes3Line{ii3}.Visible = 'off';
@@ -185,58 +188,58 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
         set(tOverlay, 'Visible', 'off');
     end
 
-    iSavedCurrentSlice = iCurrentSlice;
+    iSavedCurrentSlice = dCurrentSlice;
 
-    for idx = 1:iLastSlice
+    for idx = 1:dLastSlice
 
         if ~multiFrameRecord('get')
             break;
         end
 
-        if     aAxe == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-            sliceNumber('set', 'coronal', iCurrentSlice);
+        if     aAxe == axes1Ptr('get', [], dSeriesOffset)
+            sliceNumber('set', 'coronal', dCurrentSlice);
             if isVsplash('get') == true
-                [lFirst, lLast] = computeVsplashLayout(dicomBuffer('get'), 'coronal', iCurrentSlice);
-                sSliceNb = sprintf('\n%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(iLastSlice));
+                [lFirst, lLast] = computeVsplashLayout(dicomBuffer('get'), 'coronal', dCurrentSlice);
+                sSliceNb = sprintf('\n%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(dLastSlice));
             else
-                sSliceNb = sprintf('\n%s/%s', num2str(iCurrentSlice), num2str(iLastSlice));
+                sSliceNb = sprintf('\n%s/%s', num2str(dCurrentSlice), num2str(dLastSlice));
             end
 
-        elseif aAxe == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-            sliceNumber('set', 'sagittal', iCurrentSlice);
+        elseif aAxe == axes2Ptr('get', [], dSeriesOffset)
+            sliceNumber('set', 'sagittal', dCurrentSlice);
 
             if isVsplash('get') == true
-                [lFirst, lLast] = computeVsplashLayout(dicomBuffer('get'), 'sagittal', iCurrentSlice);
-                sSliceNb = sprintf('\n%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(iLastSlice));
+                [lFirst, lLast] = computeVsplashLayout(dicomBuffer('get'), 'sagittal', dCurrentSlice);
+                sSliceNb = sprintf('\n%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(dLastSlice));
             else
-                sSliceNb = sprintf('\n%s/%s', num2str(iCurrentSlice), num2str(iLastSlice));
+                sSliceNb = sprintf('\n%s/%s', num2str(dCurrentSlice), num2str(dLastSlice));
             end
-        elseif aAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-            sliceNumber('set', 'axial', iCurrentSlice);
+        elseif aAxe == axes3Ptr('get', [], dSeriesOffset)
+            sliceNumber('set', 'axial', dCurrentSlice);
             if isVsplash('get') == true
-                [lFirst, lLast] = computeVsplashLayout(dicomBuffer('get'), 'axial', iLastSlice-iCurrentSlice+1);
-                sSliceNb = sprintf('\n%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(iLastSlice));
+                [lFirst, lLast] = computeVsplashLayout(dicomBuffer('get'), 'axial', dLastSlice-dCurrentSlice+1);
+                sSliceNb = sprintf('\n%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(dLastSlice));
             else
-                sSliceNb = sprintf('\n%s/%s', num2str(1+iLastSlice-iCurrentSlice), num2str(iLastSlice));
+                sSliceNb = sprintf('\n%s/%s', num2str(1+dLastSlice-dCurrentSlice), num2str(dLastSlice));
             end
         else
-            mipAngle('set', iCurrentSlice);           
-            sSliceNb = sprintf('\n%s/%s', num2str(iCurrentSlice), num2str(iLastSlice));
+            mipAngle('set', dCurrentSlice);           
+            sSliceNb = sprintf('\n%s/%s', num2str(dCurrentSlice), num2str(dLastSlice));
         end
 
         set(tOverlay, 'String', sSliceNb);
 
         refreshImages();
 
-        if aAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-            iCurrentSlice = iCurrentSlice-1;
-            if iCurrentSlice <1
-                iCurrentSlice =iLastSlice;
+        if aAxe == axes3Ptr('get', [], dSeriesOffset)
+            dCurrentSlice = dCurrentSlice-1;
+            if dCurrentSlice <1
+                dCurrentSlice =dLastSlice;
             end
         else
-            iCurrentSlice = iCurrentSlice+1;
-            if iCurrentSlice > iLastSlice
-                iCurrentSlice =1;
+            dCurrentSlice = dCurrentSlice+1;
+            if dCurrentSlice > dLastSlice
+                dCurrentSlice =1;
             end
         end
 
@@ -288,15 +291,15 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
             end
         end
 
-        progressBar(idx / iLastSlice, 'Recording', 'red');
+        progressBar(idx / dLastSlice, 'Recording', 'red');
 
     end
 
-    if     aAxe == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+    if     aAxe == axes1Ptr('get', [], dSeriesOffset)
         sliceNumber('set', 'coronal', iSavedCurrentSlice);
-    elseif aAxe == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+    elseif aAxe == axes2Ptr('get', [], dSeriesOffset)
         sliceNumber('set', 'sagittal', iSavedCurrentSlice);
-    elseif aAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+    elseif aAxe == axes3Ptr('get', [], dSeriesOffset)
         sliceNumber('set', 'axial', iSavedCurrentSlice);
     else
         mipAngle('set', iSavedCurrentSlice);           
@@ -307,7 +310,7 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
     set(uiSliderTraPtr('get'), 'Visible', 'on');
     set(uiSliderMipPtr('get'), 'Visible', 'on');
 
-%    if aAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+%    if aAxe == axes3Ptr('get', [], dSeriesOffset)
         set(uiSliderWindowPtr('get'), 'Visible', 'on');
         set(uiSliderLevelPtr('get') , 'Visible', 'on');
         set(uiColorbarPtr('get')   , 'Visible', 'on');
@@ -321,21 +324,21 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
 
     if overlayActivate('get')
         
-        if     aAxe == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+        if     aAxe == axes1Ptr('get', [], dSeriesOffset)
             pAxes1Text = axesText('get', 'axes1');
             pAxes1Text.Visible = 'on';
             
             pAxes1View = axesText('get', 'axes1View');
             pAxes1View.Visible = 'on';           
             
-        elseif aAxe == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+        elseif aAxe == axes2Ptr('get', [], dSeriesOffset)
             pAxes2Text = axesText('get', 'axes2');
             pAxes2Text.Visible = 'on';
             
             pAxes2View = axesText('get', 'axes2View');
             pAxes2View.Visible = 'on';             
             
-        elseif aAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+        elseif aAxe == axes3Ptr('get', [], dSeriesOffset)
             pAxes3Text = axesText('get', 'axes3');
             pAxes3Text.Visible = 'on';
             
@@ -361,17 +364,17 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
 
     if crossActivate('get') == true && ...
        isVsplash('get') == false
-        if     aAxe == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+        if     aAxe == axes1Ptr('get', [], dSeriesOffset)
             alAxes1Line = axesLine('get', 'axes1');
             for ii1=1:numel(alAxes1Line)
                 alAxes1Line{ii1}.Visible = 'on';
             end
-        elseif aAxe == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+        elseif aAxe == axes2Ptr('get', [], dSeriesOffset)
             alAxes2Line = axesLine('get', 'axes2');
             for ii2=1:numel(alAxes2Line)
                 alAxes2Line{ii2}.Visible = 'on';
             end
-        elseif aAxe == axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+        elseif aAxe == axesMipPtr('get', [], dSeriesOffset)
             angle = mipAngle('get');
             if (angle == 0 || angle == 90 || angle == 180 || angle == 270)  
                 alAxesMipLine = axesLine('get', 'axesMip');
@@ -379,7 +382,7 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
                     alAxesMipLine{ii4}.Visible = 'on';
                 end            
             end
-        elseif aAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+        elseif aAxe == axes3Ptr('get', [], dSeriesOffset)
             alAxes3Line = axesLine('get', 'axes3');
             for ii3=1:numel(alAxes3Line)
                 alAxes3Line{ii3}.Visible = 'on';
@@ -393,7 +396,7 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
     
     if isVsplash('get') == false                       
 
-        if aAxe == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+        if aAxe == axes1Ptr('get', [], dSeriesOffset)
             uiLogo = displayLogo(uiCorWindowPtr('get'));
             logoObject('set', uiLogo);
         end
@@ -424,6 +427,6 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
         progressBar(1, sprintf('Write %s completed', sFileName));
     elseif strcmpi('*.jpg', sExtention) || ...
            strcmpi('*.bmp', sExtention)
-        progressBar(1, sprintf('Write %d files to %s completed', iLastSlice, sImgDirName));
+        progressBar(1, sprintf('Write %d files to %s completed', dLastSlice, sImgDirName));
     end
 end

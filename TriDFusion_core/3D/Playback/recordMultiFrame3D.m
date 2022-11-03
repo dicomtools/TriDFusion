@@ -27,14 +27,16 @@ function recordMultiFrame3D(mRecord, sPath, sFileName, sExtention)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if size(dicomBuffer('get'), 3) == 1
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
         progressBar(1, 'Error: Require a 3D Volume!');  
         multiFrame3DRecord('set', false);
         mRecord.State = 'off';
         return;
     end             
 
-    atCoreMetaData = dicomMetaData('get'); 
+    atMetaData = dicomMetaData('get'); 
 
     volObj = volObject('get');
     isoObj = isoObject('get');                        
@@ -152,7 +154,7 @@ function recordMultiFrame3D(mRecord, sPath, sFileName, sExtention)
             elseif strcmpi('*.jpg', sExtention) || ...
                    strcmpi('jpg', sExtention)
                
-                sDirName = sprintf('%s_%s_%s_JPG_3D', atCoreMetaData{1}.PatientName, atCoreMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
+                sDirName = sprintf('%s_%s_%s_JPG_3D', atMetaData{1}.PatientName, atMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
                 sImgDirName = [sPath sDirName '//' ];
 
                 if~(exist(char(sImgDirName), 'dir'))
@@ -166,7 +168,7 @@ function recordMultiFrame3D(mRecord, sPath, sFileName, sExtention)
             elseif strcmpi('*.bmp', sExtention) || ...
                    strcmpi('bmp', sExtention) 
                
-                sDirName = sprintf('%s_%s_%s_BMP_3D', atCoreMetaData{1}.PatientName, atCoreMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
+                sDirName = sprintf('%s_%s_%s_BMP_3D', atMetaData{1}.PatientName, atMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
                 sImgDirName = [sPath sDirName '//' ];
 
                 if~(exist(char(sImgDirName), 'dir'))

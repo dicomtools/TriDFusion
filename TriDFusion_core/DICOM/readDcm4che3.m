@@ -29,57 +29,28 @@ function aImage = readDcm4che3(fileInput, din)
 % pathDcm4che : path package dcm4che2
 % fileInput: noun and path file extension .dcm or no-extension dicom 
 
-%        try 
-%            din = org.dcm4che.io.DicomInputStream(...
-%                    java.io.BufferedInputStream(java.io.FileInputStream(char(fileInput))));    
-%        catch 
-%           aImage = ''; 
-%           return;
-%        end  
-
-%        dataset = din.readDataset(-1, -1);
-%        pixeldata = dataset.getInts(org.dcm4che.data.Tag.PixelData);
-
-%        rows = dataset.getInt(org.dcm4che.data.Tag.Rows, 0);
-%        cols = dataset.getInt(org.dcm4che.data.Tag.Columns,0);
-
 if 0
-    pixeldata = din.pixeldata;
-
-    rows = din.rows;
-    cols = din.cols;
-%        frames = din.nbOfFrames;
 
     try
-        pixeldata2 = unir_numeros(pixeldata,rows,cols);
-
-        aImg = reshape(pixeldata2, cols, rows);
-
-        aAlignImage = zeros(rows, cols);
-        for ii =1 :rows-1
-            for j=1 :cols-1
-                aAlignImage(ii, j)= aImg(cols-j,ii);
-            end
+        
+     aReshaped = reshape(din.pixeldata, din.cols, din.rows);
+     aImage    = cast(zeros(din.rows, din.cols), class(din.pixeldata));
+     
+     for i =1 :din.rows-1
+        for j=1 :din.cols-1
+            aImage(i, j)= aReshaped(din.cols-j,i);
         end
+     end
 
-        aImage = aAlignImage(1:rows,cols:-1:1);
-   catch
+    aImage = aImage(1:din.rows, din.cols:-1:1);
+    clear aReshaped;
+    
+    catch
         aImage = dicomread(char(fileInput));
     end
 else
     aImage = dicomread(char(fileInput));
 end
 
-    function pixeldata2 = unir_numeros(pixeldata, rows, cols)
-        pixeldata2 = zeros(rows*cols, 1);
-        fin = rows*cols*2;
-        cont = 0;
-        for jj = 1:2:fin
-            A = pixeldata(jj);
-            B = pixeldata(jj+1);
-            cont = cont + 1;
-            pixeldata2(cont,1) = A + B*65535;
-        end
-    end
 
 end

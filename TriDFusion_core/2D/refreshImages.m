@@ -29,16 +29,16 @@ function refreshImages()
 
     im = squeeze(dicomBuffer('get'));
 
-    tInput = inputTemplate('get');
+    atInputTemplate = inputTemplate('get');
 
     dOffset = get(uiSeriesPtr('get'), 'Value');
-    if dOffset > numel(tInput)
+    if dOffset > numel(atInputTemplate)
         return;
     end
 
     if overlayActivate('get') == true
 
-        atMetaData = dicomMetaData('get');
+        atMetaData = dicomMetaData('get', [], dOffset);
 
         if isfield(atMetaData{1}, 'PatientName')
             sPatientName = atMetaData{1}.PatientName;
@@ -271,7 +271,7 @@ function refreshImages()
                         imAxeF = imAxeFPtr('get', [], rr);
                         if ~isempty(imAxeF)
 
-                            atFuseMetaData = tInput(rr).atDicomInfo;
+                            atFuseMetaData = atInputTemplate(rr).atDicomInfo;
 
                             if isfield(atFuseMetaData{1}, 'SeriesDescription')
                                 sFusedSeriesDescription = atFuseMetaData{1}.SeriesDescription;
@@ -1276,7 +1276,7 @@ end
             end
 
             tQuantification = quantificationTemplate('get');
-            atMetaData = dicomMetaData('get');
+            atMetaData = dicomMetaData('get', [], dOffset);
 
             bDisplayAxe3 = true;
             mGate = gateIconMenuObject('get');
@@ -1430,7 +1430,7 @@ end
                                ~isempty(imSagittalF) && ...
                                ~isempty(imAxialF)
 
-                                atFuseMetaData = tInput(rr).atDicomInfo;
+                                atFuseMetaData = atInputTemplate(rr).atDicomInfo;
 
                                 if isfield(atFuseMetaData{1}, 'SeriesDescription')
                                     sFusedSeriesDescription = atFuseMetaData{1}.SeriesDescription;
@@ -1485,7 +1485,7 @@ end
                                         if strcmpi(sUnit, 'SUV')
 
                                             sSUVtype = viewerSUVtype('get');
-                                            suvValue = dFusedCurrent * tInput(rr).tQuant.tSUV.dScale;
+                                            suvValue = dFusedCurrent * atInputTemplate(rr).tQuant.tSUV.dScale;
 
                                             sAxes3fText = sprintf('%s\n%s\n%s\n%s\nColormap: %s\nCurrent SUV/%s: %s\n', ...
                                                             sAxes3fText, ...
