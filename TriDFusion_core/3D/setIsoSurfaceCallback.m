@@ -382,11 +382,7 @@ function setIsoSurfaceCallback(~, ~)
             end
         else
                 
-            switchToIsoSurface('set', true);
-            
-            if isFusion('get') == true
-                init3DfusionBuffer();  
-            end
+            switchToIsoSurface('set', true);            
                         
             atMetaData = dicomMetaData('get');
             
@@ -428,7 +424,11 @@ function setIsoSurfaceCallback(~, ~)
             
             if switchTo3DMode('get')  == false && ...
                switchToMIPMode('get') == false
-                
+           
+                if isFusion('get') == true
+                    init3DfusionBuffer();  
+                end
+            
                 surface3DPriority('set', 'Isosurface', 1);
                 
                 isPlotContours('set', false);

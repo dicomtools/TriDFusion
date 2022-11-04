@@ -386,16 +386,15 @@ function setMIPCallback(~, ~)
                 set(btnFusionPtr('get'), 'Enable', sFusionBtnEnable);                  
             end
         else            
-                
-            if isFusion('get') == true
-%                init3DfusionBuffer();  
-            end
-
-            switchToMIPMode('set', true);
-
+             switchToMIPMode('set', true);
+               
             if switchToIsoSurface('get') == false && ...
                 switchTo3DMode('get')    == false
-
+            
+                if isFusion('get') == true
+                    init3DfusionBuffer();  
+                end
+            
                 surface3DPriority('set', 'MaximumIntensityProjection', 1);
                 
                 isPlotContours('set', false);

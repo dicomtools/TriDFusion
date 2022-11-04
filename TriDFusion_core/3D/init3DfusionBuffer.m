@@ -42,7 +42,7 @@ function init3DfusionBuffer()
         A = aInput{dSeriesOffset};
     end
     
-    atMetaData  = dicomMetaData('get');
+    atMetaData  = dicomMetaData('get', [], dSeriesOffset);
     if isempty(atMetaData)
         atMetaData = atInputTemplate(dSeriesOffset).atDicomInfo;
     end
@@ -51,36 +51,38 @@ function init3DfusionBuffer()
     
     B = dicomBuffer('get', [], dFuseOffset);
     if isempty(B)
+        
         B = aInput{dFuseOffset};
+        
+        if strcmpi(imageOrientation('get'), 'coronal')
+            B = permute(B, [3 2 1]);
+        elseif strcmpi(imageOrientation('get'), 'sagittal')
+            B = permute(B, [2 3 1]);
+        else
+            B = permute(B, [1 2 3]);
+        end
+
+        if atInputTemplate(dSeriesOffset).bFlipLeftRight == true
+            B=B(:,end:-1:1,:);
+        end
+
+        if atInputTemplate(dSeriesOffset).bFlipAntPost == true
+            B=B(end:-1:1,:,:);
+        end
+
+        if atInputTemplate(dSeriesOffset).bFlipHeadFeet == true
+            B=B(:,:,end:-1:1);
+        end        
     end
-    
-    atFuseMetaData = dicomMetaData('get');
+ 
+    atFuseMetaData = dicomMetaData('get', [], dFuseOffset);
     if isempty(atFuseMetaData)
         atFuseMetaData = atInputTemplate(dFuseOffset).atDicomInfo;
     end
         
 %    set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
-                                                                                                  
-    if strcmpi(imageOrientation('get'), 'coronal')
-        B = permute(B, [3 2 1]);
-    elseif strcmpi(imageOrientation('get'), 'sagittal')
-        B = permute(B, [2 3 1]);
-    else
-        B = permute(B, [1 2 3]);
-    end
-
-    if atInputTemplate(dSeriesOffset).bFlipLeftRight == true
-        B=B(:,end:-1:1,:);
-    end
-
-    if atInputTemplate(dSeriesOffset).bFlipAntPost == true
-        B=B(end:-1:1,:,:);
-    end
-
-    if atInputTemplate(dSeriesOffset).bFlipHeadFeet == true
-        B=B(:,:,end:-1:1);
-    end                                 
-                                
+       
+    
     [aResampled, ~] = ...
         resampleImageTransformMatrix(B, ...
                                      atFuseMetaData, ...

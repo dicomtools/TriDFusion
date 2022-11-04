@@ -734,11 +734,11 @@ end
                         yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
 
                         if xMoveOffset ~= 0 || yMoveOffset ~= 0 
-                            if xMoveOffset < 0 || yMoveOffset < 0
-                                aResampledMip = imtranslate(aResampledMip,[-yMoveOffset, 0, -xMoveOffset], 'nearest', 'OutputView', 'full', 'FillValues', min(aResampledMip, [], 'all') );    
-                            else
+%                            if xMoveOffset < 0 || yMoveOffset < 0
+%                                aResampledMip = imtranslate(aResampledMip,[-yMoveOffset, 0, -xMoveOffset], 'nearest', 'OutputView', 'full', 'FillValues', min(aResampledMip, [], 'all') );    
+%                            else
                                 aResampledMip = imtranslate(aResampledMip,[-yMoveOffset, 0, -xMoveOffset], 'nearest', 'OutputView', 'same', 'FillValues', min(aResampledMip, [], 'all') );    
-                            end
+%                            end
                         end                  
                     end                    
                     

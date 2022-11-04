@@ -401,14 +401,14 @@ function set3DCallback(~, ~)
             end
         else                
             switchTo3DMode('set', true);
-
-            if isFusion('get') == true
-                init3DfusionBuffer();  
-            end
             
             if switchToIsoSurface('get') == false && ...
                switchToMIPMode('get')    == false
-                           
+           
+                if isFusion('get') == true
+                    init3DfusionBuffer();  
+                end
+            
                 if isFusion('get') == false
                     set(btnFusionPtr('get')    , 'Enable', 'off');
                 end
