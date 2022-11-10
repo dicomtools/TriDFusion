@@ -104,12 +104,16 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset)
     
     if numel(atInputTemplate(dSeriesOffset).asFilesList)
  %       for ww=1: numel(atInputTemplate(dSeriesOffset).asFilesList)
-        for ww=1: numel(atInputTemplate(dSeriesOffset).asFilesList)
+        dReadEndLoop = numel(atInputTemplate(dSeriesOffset).asFilesList);
+        for ww=1: dReadEndLoop
 
             atWriteMetaData{ww} = ...
                 dicominfo(char(atInputTemplate(dSeriesOffset).asFilesList{ww}));
-            progressBar(ww / numel(atInputTemplate(dSeriesOffset).asFilesList), ...
-                sprintf('Processing header %d/%d, please wait', ww, numel(atInputTemplate(dSeriesOffset).asFilesList)));
+            
+            if mod(ww,5)==1 || ww == dReadEndLoop       
+                progressBar(ww / numel(atInputTemplate(dSeriesOffset).asFilesList), ...
+                    sprintf('Processing header %d/%d, please wait', ww, numel(atInputTemplate(dSeriesOffset).asFilesList)));
+            end
         end         
     else
         for ww=1: numel(atInputTemplate(dSeriesOffset).atDicomInfo)

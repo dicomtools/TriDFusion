@@ -1130,7 +1130,7 @@ end
                     daspect(axes1fPtr  ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
                     daspect(axes2fPtr  ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
                     daspect(axes3fPtr  ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf zf]);
-                    if isVsplash('get') == false
+                    if isVsplash('get') == false && link2DMip('get') == true
                         daspect(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
                     end
 
