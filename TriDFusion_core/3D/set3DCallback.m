@@ -40,15 +40,9 @@ function set3DCallback(~, ~)
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
 
-        sMatlabVersion = version();
-        sMatlabVersion = extractBefore(sMatlabVersion,' ');
-
-        bLightingIsSupported = false;
-        if length(sMatlabVersion) > 3
-            dMatlabVersion = str2double(sMatlabVersion(1:3));
-            if dMatlabVersion >= 9.8
-                 bLightingIsSupported = true;
-            end
+        bLightingIsSupported = true;
+        if verLessThan('matlab','9.8')
+            bLightingIsSupported = false;                    
         end
 
 %                releaseRoiAxeWait();

@@ -192,7 +192,8 @@ end
             end
             init3DuicontrolPanel();
 
-         end  
+        end  
+
 
         switch sRenderer
             
@@ -204,17 +205,11 @@ end
          %       aAlphamap = interp1(intensity,alpha,queryPoints)';
 
                 [aAlphamap, sType]  = getVolAlphaMap('get', im, atMetaData);
-                aColormap = get3DColorMap('one', colorMapVolOffset('get'));
+                aColormap = get3DColorMap('one', colorMapVolOffset('get'));                
                 
-                sMatlabVersion = version();
-                sMatlabVersion = extractBefore(sMatlabVersion,' ');
-                
-                bLightingIsSupported = false;
-                if length(sMatlabVersion) > 3
-                    dMatlabVersion = str2double(sMatlabVersion(1:3));
-                    if dMatlabVersion >= 9.8
-                         bLightingIsSupported = true;
-                    end
+                bLightingIsSupported = true;
+                if verLessThan('matlab','9.8')
+                    bLightingIsSupported = false;                    
                 end
                 
                 if bLightingIsSupported == true                
@@ -225,8 +220,12 @@ end
                 end
 
 %                    volshow(im, 'Parent', uiOneWindowPtr('get'), 'Renderer', sRenderer)
+                if verLessThan('matlab','9.13')
+                    pObject = volshow(im, aInputArguments{:});
+                else
+                    pObject = images.compatibility.volshow.R2022a.volshow(im, aInputArguments{:});
+                end
 
-                pObject = volshow(im, aInputArguments{:});
                 set(pObject, 'ScaleFactors', aScaleFactors);
                 if isempty(isoObj)&&isempty(mipObj)&&multiFrame3DZoom('get')==0
                     multiFrame3DZoom('set', 3*dScaleMax);  % Normalize to 1
@@ -256,7 +255,12 @@ end
 
                 aInputArguments = [aInputArguments(:)', {'Isovalue'}, {aIsovalue}, {'IsosurfaceColor'}, {aIsosurfaceColor}];
 
-                pObject = volshow(im, aInputArguments{:});
+                if verLessThan('matlab','9.13')
+                    pObject = volshow(im, aInputArguments{:});
+                else
+                    pObject = images.compatibility.volshow.R2022a.volshow(im, aInputArguments{:});
+                end
+
                 set(pObject, 'ScaleFactors', aScaleFactors);
                 if isempty(volObj)&&isempty(mipObj)&&multiFrame3DZoom('get')==0
                     multiFrame3DZoom('set', 3*dScaleMax);  % Normalize to 1
@@ -276,7 +280,12 @@ end
 
                aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
 
-               pObject = volshow(im, aInputArguments{:});
+               if verLessThan('matlab','9.13')
+                    pObject = volshow(im, aInputArguments{:});
+               else
+                    pObject = images.compatibility.volshow.R2022a.volshow(im, aInputArguments{:});                   
+               end
+
                set(pObject, 'ScaleFactors', aScaleFactors);
                if isempty(volObj)&&isempty(isoObj)&&multiFrame3DZoom('get')==0
                     multiFrame3DZoom('set', 3*dScaleMax);  % Normalize to 1
