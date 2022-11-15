@@ -34,8 +34,8 @@ function [resampImage, atDcmMetaData] = resampleMipTransformMatrix(dcmImage, atD
     dimsDcm = size(dcmImage);
 
     dcmSliceThickness = computeSliceSpacing(atDcmMetaData);
-    refSliceThickness = computeSliceSpacing(atRefMetaData);       
-
+    refSliceThickness = computeSliceSpacing(atRefMetaData);           
+    
     [M, ~] = getTransformMatrix(atDcmMetaData{1}, dcmSliceThickness, atRefMetaData{1}, refSliceThickness);
     xScale    = M(1,1);
     zScale    = M(3,3);

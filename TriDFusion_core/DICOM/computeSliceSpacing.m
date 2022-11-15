@@ -29,7 +29,13 @@ function dSpacing = computeSliceSpacing(atDicomInfo)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     if numel(atDicomInfo) == 1
+        
         dSpacing = abs(atDicomInfo{1}.SpacingBetweenSlices);
+        
+        if dSpacing == 0
+            dSpacing = 1;
+        end
+        
         return;
     end
 
