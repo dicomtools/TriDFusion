@@ -47,11 +47,11 @@
 
 ## Installation
 
-* https://github.com/dicomtools/TriDFusion/wiki/Source-code-version-of-TriDFusion-(3DF)
+https://github.com/dicomtools/TriDFusion/wiki/Source-code-version-of-TriDFusion-(3DF)
 
 ## Optional:
 
-* https://github.com/cerr/CERR
+https://github.com/cerr/CERR
 
 Visit https://daniellafontaine.com/ for more information
 
