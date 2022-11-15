@@ -41,13 +41,17 @@
 - Lung Segmentation
 - Edge Detection
 
-## MATLAB version
+## MATLAB tested version
 
 * MATLAB 2020a
+
+## Installation
+
+* https://github.com/dicomtools/TriDFusion/wiki/Source-code-version-of-TriDFusion-(3DF)
 
 ## Optional:
 
 * https://github.com/cerr/CERR
 
-See https://daniellafontaine.com/ for more information
+Visit https://daniellafontaine.com/ for more information
 
