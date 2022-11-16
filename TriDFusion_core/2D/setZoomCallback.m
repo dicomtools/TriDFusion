@@ -41,6 +41,7 @@ function setZoomCallback(~, ~)
 
         set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnZoomPtr('get'), 'FontWeight', 'normal');
         
         zoomTool('set', false);
         zoom('off');           
@@ -53,6 +54,7 @@ function setZoomCallback(~, ~)
         else
             set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+            set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
             
             if isMoveImageActivated('get') == true
                 set(fiMainWindowPtr('get'), 'Pointer', 'fleur');           
@@ -78,10 +80,12 @@ function setZoomCallback(~, ~)
 
         set(btnTriangulatePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnTriangulatePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnTriangulatePtr('get'), 'FontWeight', 'normal');
             
         set(btnZoomPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
         set(btnZoomPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-        
+        set(btnZoomPtr('get'), 'FontWeight', 'bold');
+      
         zoomTool('set', true);
 
         hCMZ = uicontextmenu;

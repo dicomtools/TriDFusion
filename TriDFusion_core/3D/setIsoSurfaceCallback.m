@@ -45,16 +45,19 @@ function setIsoSurfaceCallback(~, ~)
 
         set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
         set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+        set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
             
         set(zoomMenu('get'), 'Checked', 'off');
         set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnZoomPtr('get'), 'FontWeight', 'normal');
         zoomTool('set', false);
         zoom('off');           
 
         set(panMenu('get'), 'Checked', 'off');
         set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
+        set(btnPanPtr('get'), 'FontWeight', 'normal');
         panTool('set', false);
         pan('off');     
 
@@ -134,6 +137,7 @@ function setIsoSurfaceCallback(~, ~)
             
             set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+            set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
                 
             if switchTo3DMode('get')  == false && ...
                switchToMIPMode('get') == false
@@ -991,6 +995,7 @@ end
             set(btnIsoSurfacePtr('get'), 'Enable', 'on');
             set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+            set(btnIsoSurfacePtr('get'), 'FontWeight', 'bold');
             
             set(btnMIPPtr('get'), 'Enable', 'on');            
             set(btn3DPtr('get') , 'Enable', 'on');

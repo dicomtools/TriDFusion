@@ -35,7 +35,12 @@ function [resampImage, atDcmMetaData, xMoveOffset, yMoveOffset] = resampleImageT
 
     dcmSliceThickness = computeSliceSpacing(atDcmMetaData);
     refSliceThickness = computeSliceSpacing(atRefMetaData);       
-
+    
+    if dcmSliceThickness == 1 && refSliceThickness == 1
+        resampImage = dcmImage;
+        return;
+    end
+    
     [M, ~] = getTransformMatrix(atDcmMetaData{1}, dcmSliceThickness, atRefMetaData{1}, refSliceThickness);
     TF = affine3d(M);
 

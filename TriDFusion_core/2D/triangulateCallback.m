@@ -33,18 +33,20 @@ function triangulateCallback(~, ~)
     
     set(fiMainWindowPtr('get'), 'Pointer', 'default');            
 %    isMoveImageActivated('set', false);
-            
+
     if switchTo3DMode('get')     == false && ...
        switchToIsoSurface('get') == false && ...  
        switchToMIPMode('get')    == false
 
         set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
         set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+        set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
             
         set(zoomMenu('get'), 'Checked', 'off');
         set(btnZoomPtr('get'), 'Enable', 'on');
         set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnZoomPtr('get'), 'FontWeight', 'normal');
         zoomTool('set', false);
         zoom('off');           
 
@@ -52,6 +54,7 @@ function triangulateCallback(~, ~)
         set(btnPanPtr('get'), 'Enable', 'on');
         set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
+        set(btnPanPtr('get'), 'FontWeight', 'normal');
         panTool('set', false);
         pan('off');     
 

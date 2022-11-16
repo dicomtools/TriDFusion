@@ -43,16 +43,19 @@ function setVsplashCallback(~, ~)
 
     set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
     set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+    set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
 
     set(zoomMenu('get'), 'Checked', 'off');
     set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+    set(btnZoomPtr('get'), 'FontWeight', 'normal');
     zoomTool('set', false);
     zoom('off');           
 
     set(panMenu('get'), 'Checked', 'off');
     set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
+    set(btnPanPtr('get'), 'FontWeight', 'normal');
     panTool('set', false);
     pan('off');     
 
@@ -95,6 +98,7 @@ function setVsplashCallback(~, ~)
 
         set(btnVsplashPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
         set(btnVsplashPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+        set(btnVsplashPtr('get'), 'FontWeight', 'bold');
         
         if isPlotContours('get') == true % Deactivate plot contour
             setPlotContoursCallback();            
@@ -117,6 +121,7 @@ function setVsplashCallback(~, ~)
 
         set(btnVsplashPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnVsplashPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnVsplashPtr('get'), 'FontWeight', 'normal');
         
 %        isPlotContours('set', false);
 

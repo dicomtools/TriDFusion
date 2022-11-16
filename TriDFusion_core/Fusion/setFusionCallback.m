@@ -54,6 +54,7 @@ function setFusionCallback(~, ~)
 
             set(btnFusionPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnFusionPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+            set(btnFusionPtr('get'), 'FontWeight', 'bold');
 
             atInputTemplate  = inputTemplate('get');
             dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
@@ -119,6 +120,7 @@ function setFusionCallback(~, ~)
 
             set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+            set(btnFusionPtr('get'), 'FontWeight', 'normal');
 
             if ~isempty(volFusionObj)
                 volFusionObj.Alphamap = zeros(256,1);
@@ -148,6 +150,7 @@ function setFusionCallback(~, ~)
             isFusion('set', false);
             set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+            set(btnFusionPtr('get'), 'FontWeight', 'normal');
             fusionBuffer('reset');
             return
         end
@@ -157,6 +160,7 @@ function setFusionCallback(~, ~)
             isFusion('set', false);
             set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+            set(btnFusionPtr('get'), 'FontWeight', 'normal');
             fusionBuffer('reset');
             return;
         end
@@ -166,6 +170,7 @@ function setFusionCallback(~, ~)
             isFusion('set', false);
             set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+            set(btnFusionPtr('get'), 'FontWeight', 'normal');
             fusionBuffer('reset');
             return;
         end
@@ -261,6 +266,7 @@ if 1
                 isFusion('set', false);
                 set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
                 set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+                set(btnFusionPtr('get'), 'FontWeight', 'normal');
                 fusionBuffer('reset');
                 return;
 
@@ -1191,6 +1197,7 @@ end
 
             set(btnFusionPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnFusionPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+            set(btnFusionPtr('get'), 'FontWeight', 'bold');
         else
                                                 
             if numel(atInputTemplate) == 1
@@ -1210,7 +1217,8 @@ end
 
            set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
            set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-           
+           set(btnFusionPtr('get'), 'FontWeight', 'normal');
+          
            if isPlotContours('get') == true % Deactivate plot contours
                setPlotContoursCallback();
            end

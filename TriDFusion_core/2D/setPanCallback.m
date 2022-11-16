@@ -41,6 +41,7 @@ function setPanCallback(~, ~)
 
         set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnPanPtr('get'), 'FontWeight', 'normal');
 
         panTool('set', false);
         pan('off'); 
@@ -53,6 +54,7 @@ function setPanCallback(~, ~)
         else
             set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+            set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
             
             if isMoveImageActivated('get') == true
                 set(fiMainWindowPtr('get'), 'Pointer', 'fleur');           
@@ -75,9 +77,11 @@ function setPanCallback(~, ~)
         
         set(btnTriangulatePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnTriangulatePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnTriangulatePtr('get'), 'FontWeight', 'normal');
             
         set(btnPanPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
         set(btnPanPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+        set(btnPanPtr('get'), 'FontWeight', 'bold');
         
         panTool('set', true);
 

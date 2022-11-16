@@ -43,16 +43,19 @@ function loadCerrDoseVolume(planC, structNamC)
 
     set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
     set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+    set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
 
     set(zoomMenu('get'), 'Checked', 'off');
     set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+    set(btnZoomPtr('get'), 'FontWeight', 'normal');
     zoomTool('set', false);
     zoom('off');           
 
     set(panMenu('get'), 'Checked', 'off');
     set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
+    set(btnPanPtr('get'), 'FontWeight', 'normal');
     panTool('set', false);
     pan('off');     
 
@@ -482,6 +485,7 @@ function loadCerrDoseVolume(planC, structNamC)
     isVsplash('set', false);
     set(btnVsplashPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnVsplashPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+    set(btnVsplashPtr('get'), 'FontWeight', 'normal');
 
     registrationReport('set', '');
 
@@ -493,18 +497,23 @@ function loadCerrDoseVolume(planC, structNamC)
 
     set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+    set(btnFusionPtr('get'), 'FontWeight', 'normal');
 
     set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+    set(btn3DPtr('get'), 'FontWeight', 'normal');
 
     set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+    set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
 
     set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+    set(btnMIPPtr('get'), 'FontWeight', 'normal');
 
     set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
     set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+    set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
 
     imageOrientation('set', 'axial');
 

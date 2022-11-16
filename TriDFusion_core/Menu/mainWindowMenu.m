@@ -150,7 +150,7 @@ function mainWindowMenu()
     
     uimenu(mTools, 'Label','Registration', 'Callback', @setRegistrationCallback, 'Separator','on');
     uimenu(mTools, 'Label','Mathematic'  , 'Callback', @setMathCallback);
-
+    uimenu(mTools, 'Label','Reset Series'  , 'Callback', @resetSeriesCallback, 'Separator','on');
 
     mHelp = uimenu(fiMainWindowPtr('get'),'Label','Help');
     uimenu(mHelp,'Label', 'Shortcuts', 'Callback', @shortcutsViewerCallback);
@@ -320,7 +320,7 @@ function mainWindowMenu()
                                 if isfield(atDicomInfo{oo+1}, 'RescaleIntercept')                                
 %                                    atDicomInfo{oo+1}.RescaleIntercept = 0;
                                 end
-                            end
+                           end
                             
                             if isfield(atDicomInfo{oo+1}, 'InstanceNumber')
                                 atDicomInfo{oo+1}.InstanceNumber = oo+1;
@@ -333,7 +333,10 @@ function mainWindowMenu()
                             atDicomInfo{oo+1}.ImagePositionPatient    = dImagePositionPatient + (oo*x);  
                             
                             atDicomInfo{oo+1}.SliceThickness  = x;
-                            atDicomInfo{oo+1}.SpacingBetweenSlices  = x;                             
+                            atDicomInfo{oo+1}.SpacingBetweenSlices  = x;       
+                            
+                            atDicomInfo{oo+1}.Rows    = adBufferSize(1);
+                            atDicomInfo{oo+1}.Columns = adBufferSize(2);                
                         end
                         
                         dicomMetaData('set', atDicomInfo , kk);
@@ -410,7 +413,10 @@ function mainWindowMenu()
                             atDicomInfo{oo+1}.ImagePositionPatient    = dImagePositionPatient + (oo*y);                            
 
                             atDicomInfo{oo+1}.SliceThickness  = y;
-                            atDicomInfo{oo+1}.SpacingBetweenSlices  = y;                            
+                            atDicomInfo{oo+1}.SpacingBetweenSlices  = y;  
+                            
+                            atDicomInfo{oo+1}.Rows    = adBufferSize(1);
+                            atDicomInfo{oo+1}.Columns = adBufferSize(2);                              
                         end
                         
                         dicomMetaData('set', atDicomInfo , kk);
@@ -801,4 +807,34 @@ function mainWindowMenu()
         activateuimode(hPlotEdit, hMode.Name);
 
     end
+
+    function resetSeriesCallback(~, ~)
+
+        try
+            
+        % Deactivate main tool bar 
+                
+        set(uiSeriesPtr('get'), 'Enable', 'off');                
+        mainToolBarEnable('off');
+        
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;        
+
+        resetSeries( get(uiSeriesPtr('get'), 'Value'), true);       
+                
+        progressBar(1,'Ready');        
+
+        catch
+            progressBar(1, 'Error:resetRegistrationCallback()');
+        end
+        
+        % Reactivate main tool bar 
+        set(uiSeriesPtr('get'), 'Enable', 'on');                
+        mainToolBarEnable('on');
+        
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;
+        
+    end
+
 end

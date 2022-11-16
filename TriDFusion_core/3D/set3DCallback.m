@@ -31,6 +31,7 @@ function set3DCallback(~, ~)
        size(dicomBuffer('get'), 3) ~= 1
 
         try
+            
         sFusionBtnEnable = get(btnFusionPtr('get'), 'Enable');
             
         % Deactivate main tool bar 
@@ -50,16 +51,19 @@ function set3DCallback(~, ~)
 
         set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
         set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+        set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
             
         set(zoomMenu('get'), 'Checked', 'off');
         set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnZoomPtr('get'), 'FontWeight', 'normal');
         zoomTool('set', false);
         zoom('off');           
 
         set(panMenu('get'), 'Checked', 'off');
         set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
+        set(btnPanPtr('get'), 'FontWeight', 'normal');
         panTool('set', false);
         pan('off');     
 
@@ -139,6 +143,7 @@ function set3DCallback(~, ~)
             
             set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));   
+            set(btn3DPtr('get'), 'FontWeight', 'normal');
                 
             if switchToIsoSurface('get') == false && ...
                switchToMIPMode('get')    == false
@@ -714,6 +719,7 @@ function set3DCallback(~, ~)
             set(btn3DPtr('get'), 'Enable', 'on');
             set(btn3DPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btn3DPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+            set(btn3DPtr('get'), 'FontWeight', 'bold');
 
             set(btnMIPPtr('get'), 'Enable', 'on');
             set(btnIsoSurfacePtr('get'), 'Enable', 'on');

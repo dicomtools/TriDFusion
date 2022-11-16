@@ -1163,9 +1163,11 @@ function resize = dicomViewer()
         if link2DMip('get') == true
             set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+            set(btnLinkMipPtr('get'), 'FontWeight', 'bold');
         else
             set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
             set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+            set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
         end
 
     end

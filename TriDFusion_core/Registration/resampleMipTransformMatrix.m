@@ -29,12 +29,17 @@ function [resampImage, atDcmMetaData] = resampleMipTransformMatrix(dcmImage, atD
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-
+        
     dimsRef = size(refImage);        
     dimsDcm = size(dcmImage);
 
     dcmSliceThickness = computeSliceSpacing(atDcmMetaData);
-    refSliceThickness = computeSliceSpacing(atRefMetaData);           
+    refSliceThickness = computeSliceSpacing(atRefMetaData);  
+    
+    if dcmSliceThickness == 1 && refSliceThickness == 1
+        resampImage = dcmImage;
+        return;
+    end
     
     [M, ~] = getTransformMatrix(atDcmMetaData{1}, dcmSliceThickness, atRefMetaData{1}, refSliceThickness);
     xScale    = M(1,1);
@@ -59,6 +64,7 @@ function [resampImage, atDcmMetaData] = resampleMipTransformMatrix(dcmImage, atD
     else
         [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
     end
+    
 %        if dimsRef(3)==dimsDcm(3)
 %            aResampledImageSize = size(resampImage);
 %            resampImage=imresize3(resampImage, [aResampledImageSize(1) aResampledImageSize(2) dimsRef(3)]);
