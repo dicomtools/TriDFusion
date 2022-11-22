@@ -286,6 +286,7 @@ function mainWindowMenu()
                         aImageOrientationPatient(5) = 1;
                         
                         dImagePositionPatient = atDicomInfo{1}.ImagePositionPatient;
+                        dSliceLocation        = atDicomInfo{1}.SliceLocation;
         
                         x = atDicomInfo{1}.PixelSpacing(1);
                         y = atDicomInfo{1}.PixelSpacing(2);
@@ -330,7 +331,9 @@ function mainWindowMenu()
                             atDicomInfo{oo+1}.PixelSpacing(2) = y;
                             atDicomInfo{oo+1}.NumberOfSlices  = adBufferSize(3);
                             atDicomInfo{oo+1}.ImageOrientationPatient = aImageOrientationPatient; 
-                            atDicomInfo{oo+1}.ImagePositionPatient    = dImagePositionPatient + (oo*x);  
+                            atDicomInfo{oo+1}.ImagePositionPatient(3) = dImagePositionPatient(3) - (oo*x);  
+                            
+                            atDicomInfo{oo+1}.SliceLocation = dSliceLocation - (oo*x);  
                             
                             atDicomInfo{oo+1}.SliceThickness  = x;
                             atDicomInfo{oo+1}.SpacingBetweenSlices  = x;       
@@ -357,6 +360,7 @@ function mainWindowMenu()
                         aImageOrientationPatient(5) = 1;
                         
                         dImagePositionPatient = atDicomInfo{1}.ImagePositionPatient;
+                        dSliceLocation        = atDicomInfo{1}.SliceLocation;
                                                 
                         x = atDicomInfo{1}.PixelSpacing(1);
                         y = atDicomInfo{1}.PixelSpacing(2);
@@ -410,7 +414,9 @@ function mainWindowMenu()
                             atDicomInfo{oo+1}.PixelSpacing(2) = x;
                             atDicomInfo{oo+1}.NumberOfSlices  = adBufferSize(3);
                             atDicomInfo{oo+1}.ImageOrientationPatient = aImageOrientationPatient; 
-                            atDicomInfo{oo+1}.ImagePositionPatient    = dImagePositionPatient + (oo*y);                            
+                            atDicomInfo{oo+1}.ImagePositionPatient(3)    = dImagePositionPatient(3) - (oo*y);                            
+                            
+                            atDicomInfo{oo+1}.SliceLocation = dSliceLocation - (oo*y);  
 
                             atDicomInfo{oo+1}.SliceThickness  = y;
                             atDicomInfo{oo+1}.SpacingBetweenSlices  = y;  

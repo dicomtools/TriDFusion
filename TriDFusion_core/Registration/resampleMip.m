@@ -43,7 +43,15 @@ function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaD
     end
     
     xScale    = M(1,1);
+    if xScale == 0
+        xScale = 1;
+    end
+    
     zScale    = M(3,3);
+    if zScale == 0
+       zScale = 1;
+    end
+    
     xExtended = M(4,1);
     zExtended = M(4,3);
  

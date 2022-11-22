@@ -363,7 +363,7 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset)
                         atMetaData{ww}.AcquisitionTime;
                 end
             end              
-        end   
+        end       
         
         if isfield(atWriteMetaData{ww}, 'RadiopharmaceuticalInformationSequence')
             if isfield(atWriteMetaData{ww}.RadiopharmaceuticalInformationSequence, 'Item_1')

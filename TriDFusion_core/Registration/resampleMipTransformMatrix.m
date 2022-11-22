@@ -42,8 +42,17 @@ function [resampImage, atDcmMetaData] = resampleMipTransformMatrix(dcmImage, atD
     end
     
     [M, ~] = getTransformMatrix(atDcmMetaData{1}, dcmSliceThickness, atRefMetaData{1}, refSliceThickness);
+    
     xScale    = M(1,1);
+    if xScale == 0
+        xScale = 1;
+    end
+    
     zScale    = M(3,3);
+    if zScale == 0
+        zScale = 1;
+    end
+    
     xExtended = M(4,1);
     zExtended = M(4,3);
  

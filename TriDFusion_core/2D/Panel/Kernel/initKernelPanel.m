@@ -1330,6 +1330,10 @@ function initKernelPanel()
                 aActivity = computeMicrospereActivity(aActivity, atCoreMetaData, sRadiopharmaceutical, dMicrosphereVolume);
                                 
 
+%                dicomBuffer('set', aActivity);
+%                return;
+                
+                
                 if bResizePixelSize == true
                     
                     progressBar(0.7, 'Resampling image, please wait.');
@@ -1340,7 +1344,9 @@ function initKernelPanel()
                     
                 end
 
+                
                 % Calibrate the activity 
+                                
                 
                 if dSpecimenVolume ~= 0                    
                     aActivity = aActivity/dSpecimenVolume;

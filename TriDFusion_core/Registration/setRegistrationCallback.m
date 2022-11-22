@@ -839,9 +839,9 @@ function setRegistrationCallback(~, ~)
         for hh=1:dNbElements
             for kk=1:numel(adLbSeries)
 
-                set(uiSeriesPtr('get'), 'Value', kk);
-                aBuffer    = dicomBuffer('get');
-                atMetaData = dicomMetaData('get');
+%                set(uiSeriesPtr('get'), 'Value', kk);
+                aBuffer    = dicomBuffer('get', [], kk);
+                atMetaData = dicomMetaData('get', [], kk);
 
                 if ~isempty(aInput{kk}) && ...
                    ~(size(aInput{kk}, 3) == 1)
@@ -877,8 +877,8 @@ function setRegistrationCallback(~, ~)
                     refImage = aBuffer;
                     dNextSeries = 2;
 
-                    dicomBuffer('set', refImage);
-                    dicomMetaData('set', atRefMetaData);
+                    dicomBuffer('set', refImage, kk);
+                    dicomMetaData('set', atRefMetaData, kk);
                     setQuantification(kk);
 
                     updateDescription('set', get(chkRegSeriesDescription, 'Value'));
@@ -923,8 +923,8 @@ function setRegistrationCallback(~, ~)
                 %        catch
                 %        end
 
-                        dicomMetaData('set', atResampledMetaData);
-                        dicomBuffer('set', aResampledBuffer);
+                        dicomMetaData('set', atResampledMetaData, kk);
+                        dicomBuffer('set', aResampledBuffer, kk);
 
                         setQuantification(kk);
 
@@ -1230,9 +1230,9 @@ function setRegistrationCallback(~, ~)
         for hh=1:dNbElements
             for kk=1:numel(adLbSeries)
 
-                set(uiSeriesPtr('get'), 'Value', kk);
-                aBuffer    = dicomBuffer('get');
-                atMetaData = dicomMetaData('get');
+%                set(uiSeriesPtr('get'), 'Value', kk);
+                aBuffer    = dicomBuffer('get', [], kk);
+                atMetaData = dicomMetaData('get', [], kk);
 
                 if ~isempty(aInput{kk})
 
@@ -1278,8 +1278,8 @@ function setRegistrationCallback(~, ~)
                         seriesDescription('set', asDescription);
                     end
 
-                    dicomBuffer('set', refImage);
-                    dicomMetaData('set', atRefMetaData);
+                    dicomBuffer('set', refImage, kk);
+                    dicomMetaData('set', atRefMetaData, kk);
                     setQuantification(kk);
 
                     updateDescription('set', get(chkRegSeriesDescription, 'Value'));
@@ -1435,8 +1435,8 @@ function setRegistrationCallback(~, ~)
                        %         dicomBuffer('set', aResampledBuffer);
                        %         dicomMetaData('set', atResampledMetaData);
                        %     else
-                                dicomBuffer('set', aRegistratedBuffer);
-                                dicomMetaData('set', atRegisteredMetaData);
+                                dicomBuffer('set', aRegistratedBuffer, kk);
+                                dicomMetaData('set', atRegisteredMetaData, kk);
                        %     end
 
                             if link2DMip('get') == true 
@@ -1460,8 +1460,8 @@ function setRegistrationCallback(~, ~)
 %                                    progressBar(ee/dNbOfAssociatedSeries-0.000001, sprintf('Moving sub series %d/%d, please wait', ee, dNbOfAssociatedSeries));
 
                                     set(uiSeriesPtr('get'), 'Value', dAssociatedSeries);
-                                    aBuffer    = dicomBuffer('get');
-                                    atMetaData = dicomMetaData('get');
+                                    aBuffer    = dicomBuffer('get', [], dAssociatedSeries);
+                                    atMetaData = dicomMetaData('get', [], dAssociatedSeries);
 
                                     if(size(aInput{dAssociatedSeries}, 3) == 1)
                                         if  isempty(aBuffer)
@@ -1521,8 +1521,8 @@ function setRegistrationCallback(~, ~)
                           %              dicomBuffer('set', aAssociatedResampledBuffer);
                           %              dicomMetaData('set', atAssiciatedResampledMetaData);
                           %          else
-                                        dicomBuffer('set', aAssociatedRegistratedBuffer);
-                                        dicomMetaData('set', atAssociatedRegisteredMetaData);
+                                        dicomBuffer('set', aAssociatedRegistratedBuffer, dAssociatedSeries);
+                                        dicomMetaData('set', atAssociatedRegisteredMetaData, dAssociatedSeries);
                           %          end
 
                                     if link2DMip('get') == true 
