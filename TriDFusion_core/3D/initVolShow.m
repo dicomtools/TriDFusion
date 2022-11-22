@@ -139,7 +139,7 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
 
 %            if  strcmpi(imageOrientation('get'), 'axial')   
 
-                aScaleFactors = [x y z];    
+                aScaleFactors = [y x z];    
 %            elseif strcmpi(imageOrientation('get'), 'coronal' )                           
 
 %                aScaleFactors = [y z x];   
