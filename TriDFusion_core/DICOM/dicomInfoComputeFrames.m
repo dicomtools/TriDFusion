@@ -29,14 +29,15 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
 
     tGate = [];
 
-    if strcmpi(atDicomInfo{1}.Modality, 'MR') || ...
-       strcmpi(atDicomInfo{1}.Modality, 'PT') && ...
-      ~strcmpi(atDicomInfo{1}.SeriesType{1}, 'STATIC') && ...
-       numel(atDicomInfo) > 2
+%    if strcmpi(atDicomInfo{1}.Modality, 'MR') || ...
+%       strcmpi(atDicomInfo{1}.Modality, 'PT') && ...
+%      ~strcmpi(atDicomInfo{1}.SeriesType{1}, 'STATIC') && ...
+     if numel(atDicomInfo) > 2
         dNbGate   =1;
         dNbSlices =1;
 
         dFirstSpacing = spacingBetweenTwoSlices(atDicomInfo{1},atDicomInfo{2});
+        dLastSpacing  = dFirstSpacing;
 
         for jj=1:numel(atDicomInfo)-1
 
@@ -49,6 +50,16 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
 
                 dNbGate = dNbGate+1;
                 dNbSlices = 0;
+                
+            elseif dLastSpacing > (2*dSliceSpacing) % Inconsistent spacing 
+                if ~strcmpi(atDicomInfo{1}.Modality, 'MR') % Patch
+                    tGate{dNbGate}.GateNumber = dNbGate;
+                    tGate{dNbGate}.NbSlices   = dNbSlices;       
+                    tGate{dNbGate}.SeriesInstanceUID = atDicomInfo{jj}.SeriesInstanceUID;       
+
+                    dNbGate = dNbGate+1;
+                    dNbSlices = 0;                
+                end
             else
                 if ~strcmp(atDicomInfo{jj}.FrameOfReferenceUID, atDicomInfo{jj+1}.FrameOfReferenceUID) % Different series
 
@@ -61,6 +72,7 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
                 end            
             end
             
+            dLastSpacing = dSliceSpacing;
             dNbSlices = dNbSlices+1;
 
         end
