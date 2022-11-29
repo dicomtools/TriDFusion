@@ -47,11 +47,11 @@ function dSpacing = spacingBetweenTwoSlices(tDicomInfo1, tDicomInfo2)
     sOrientation = getImageOrientation(tDicomInfo1.ImageOrientationPatient);
             
     if      strcmpi(sOrientation, 'Sagittal')
-        dSpacing = abs(pxyzLast(1) - pxyzFirst(1));
+        dSpacing = pxyzLast(1) - pxyzFirst(1);
     elseif  strcmpi(sOrientation, 'Coronal')
-        dSpacing = abs(pxyzLast(2) - pxyzFirst(2));
+        dSpacing = pxyzLast(2) - pxyzFirst(2);
     else    % Axial
-        dSpacing = abs(pxyzLast(3) - pxyzFirst(3));
+        dSpacing = pxyzLast(3) - pxyzFirst(3);
     end
         
 end

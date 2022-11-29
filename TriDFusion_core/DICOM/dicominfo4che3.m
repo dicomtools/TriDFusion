@@ -43,6 +43,12 @@ function info = dicominfo4che3(fileInput)
         return;
     end  
 
+    % Image information
+        
+    info.ImageType{1} = char(dataset.getString(org.dcm4che3.data.Tag.ImageType, 0));
+    info.ImageType{2} = char(dataset.getString(org.dcm4che3.data.Tag.ImageType, 1));
+    info.ImageType{3} = char(dataset.getString(org.dcm4che3.data.Tag.ImageType, 2));
+    info.ImageType{4} = char(dataset.getString(org.dcm4che3.data.Tag.ImageType, 3));
 
     % Patient information
 

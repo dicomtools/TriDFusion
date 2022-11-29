@@ -37,13 +37,16 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
         dNbSlices =1;
 
         dFirstSpacing = spacingBetweenTwoSlices(atDicomInfo{1},atDicomInfo{2});
-        dLastSpacing  = dFirstSpacing;
+     %   dLastSpacing  = dFirstSpacing;
 
         for jj=1:numel(atDicomInfo)-1
 
             dSliceSpacing = spacingBetweenTwoSlices(atDicomInfo{jj},atDicomInfo{jj+1});
 
-            if (dSliceSpacing - dFirstSpacing) > (2*dFirstSpacing) % Inconsistent spacing  
+            dComputedNextSliceLocation = str2double(sprintf('%.3f', atDicomInfo{jj}.SliceLocation + dSliceSpacing));
+            dNextSliceLocation         = str2double(sprintf('%.3f', atDicomInfo{jj+1}.SliceLocation));
+            
+            if (abs(dSliceSpacing) - abs(dFirstSpacing)) > (2*abs(dFirstSpacing)) % Inconsistent spacing  
                 tGate{dNbGate}.GateNumber = dNbGate;
                 tGate{dNbGate}.NbSlices   = dNbSlices;       
                 tGate{dNbGate}.SeriesInstanceUID = atDicomInfo{jj}.SeriesInstanceUID;       
@@ -51,15 +54,15 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
                 dNbGate = dNbGate+1;
                 dNbSlices = 0;
                 
-            elseif dLastSpacing > (2*dSliceSpacing) % Inconsistent spacing 
-                if ~strcmpi(atDicomInfo{1}.Modality, 'MR') % Patch
+            elseif dComputedNextSliceLocation ~= dNextSliceLocation % Inconsistent spacing 
+%                if ~strcmpi(atDicomInfo{1}.Modality, 'MR') % Patch
                     tGate{dNbGate}.GateNumber = dNbGate;
                     tGate{dNbGate}.NbSlices   = dNbSlices;       
                     tGate{dNbGate}.SeriesInstanceUID = atDicomInfo{jj}.SeriesInstanceUID;       
 
                     dNbGate = dNbGate+1;
                     dNbSlices = 0;                
-                end
+%                end
             else
                 if ~strcmp(atDicomInfo{jj}.FrameOfReferenceUID, atDicomInfo{jj+1}.FrameOfReferenceUID) % Different series
 
@@ -72,7 +75,7 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
                 end            
             end
             
-            dLastSpacing = dSliceSpacing;
+   %         dLastSpacing = dSliceSpacing;
             dNbSlices = dNbSlices+1;
 
         end

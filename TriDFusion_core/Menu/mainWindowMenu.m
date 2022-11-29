@@ -246,7 +246,7 @@ function mainWindowMenu()
                                 
                     aDicomBuffer = aInputBuffer{kk};
                     atDicomInfo  = atInputTemplate(dSeriesOffset).atDicomInfo;
-                   
+                                                           
                     if strcmpi(get(hObject, 'Label'), 'Original Orientation')
                         
                         atInputTemplate(kk).sOrientationView = 'Axial';
@@ -265,11 +265,16 @@ function mainWindowMenu()
 
                     elseif strcmpi(get(hObject, 'Label'), 'Permute Coronal to Axial')
                         
+                        if size(aDicomBuffer, 3) == 1
+                            continue;
+                        end
+                    
                         atInputTemplate(kk).sOrientationView = 'Coronal';
                        
                         imageOrientation('set', 'coronal');
 
-                        aDicomBuffer = permute(aDicomBuffer, [3 2 1]);
+                        aDicomBuffer = permute(aDicomBuffer, [3 2 1]); % Permute image 
+                        aDicomBuffer = aDicomBuffer(end:-1:1,:,:); % Flip ant \ post
                                                
                         dicomBuffer('set', aDicomBuffer, kk);
                         
@@ -348,6 +353,10 @@ function mainWindowMenu()
 
                    elseif strcmpi(get(hObject, 'Label'), 'Permute Sagittal to Axial')
                        
+                        if size(aDicomBuffer, 3) == 1
+                            continue;
+                        end
+                        
                         atInputTemplate(kk).sOrientationView = 'Sagittal';
 
                         imageOrientation('set', 'sagittal');
