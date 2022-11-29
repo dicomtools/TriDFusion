@@ -1552,6 +1552,7 @@ function dicomViewerCore()
             daspect(axes1Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
             daspect(axes2Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
             daspect(axes3Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
+            
             if isVsplash('get') == false
                 daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
             end

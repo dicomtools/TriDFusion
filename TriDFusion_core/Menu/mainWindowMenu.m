@@ -246,7 +246,12 @@ function mainWindowMenu()
                                 
                     aDicomBuffer = aInputBuffer{kk};
                     atDicomInfo  = atInputTemplate(dSeriesOffset).atDicomInfo;
-                                                           
+                    
+            
+                    if size(aDicomBuffer, 3) == 1
+                        continue;
+                    end
+            
                     if strcmpi(get(hObject, 'Label'), 'Original Orientation')
                         
                         atInputTemplate(kk).sOrientationView = 'Axial';
@@ -264,18 +269,13 @@ function mainWindowMenu()
                         bRefresh = true;
 
                     elseif strcmpi(get(hObject, 'Label'), 'Permute Coronal to Axial')
-                        
-                        if size(aDicomBuffer, 3) == 1
-                            continue;
-                        end
-                    
+                                            
                         atInputTemplate(kk).sOrientationView = 'Coronal';
                        
                         imageOrientation('set', 'coronal');
 
-                        aDicomBuffer = permute(aDicomBuffer, [3 2 1]); % Permute image 
-                        aDicomBuffer = aDicomBuffer(end:-1:1,:,:); % Flip ant \ post
-                                               
+                        aDicomBuffer = reorientBuffer(aDicomBuffer, 'coronal');
+                                             
                         dicomBuffer('set', aDicomBuffer, kk);
                         
                         if link2DMip('get') == true
@@ -335,7 +335,10 @@ function mainWindowMenu()
                             atDicomInfo{oo+1}.PixelSpacing(1) = z;
                             atDicomInfo{oo+1}.PixelSpacing(2) = y;
                             atDicomInfo{oo+1}.NumberOfSlices  = adBufferSize(3);
-                            atDicomInfo{oo+1}.ImageOrientationPatient = aImageOrientationPatient; 
+                            atDicomInfo{oo+1}.ImageOrientationPatient = aImageOrientationPatient;
+                            
+                            atDicomInfo{oo+1}.ImagePositionPatient(1) = dImagePositionPatient(1);
+                            atDicomInfo{oo+1}.ImagePositionPatient(2) = dImagePositionPatient(2);                            
                             atDicomInfo{oo+1}.ImagePositionPatient(3) = dImagePositionPatient(3) - (oo*x);  
                             
                             atDicomInfo{oo+1}.SliceLocation = dSliceLocation - (oo*x);  
@@ -352,11 +355,7 @@ function mainWindowMenu()
                         bRefresh = true;
 
                    elseif strcmpi(get(hObject, 'Label'), 'Permute Sagittal to Axial')
-                       
-                        if size(aDicomBuffer, 3) == 1
-                            continue;
-                        end
-                        
+                                               
                         atInputTemplate(kk).sOrientationView = 'Sagittal';
 
                         imageOrientation('set', 'sagittal');
@@ -374,8 +373,8 @@ function mainWindowMenu()
                         x = atDicomInfo{1}.PixelSpacing(1);
                         y = atDicomInfo{1}.PixelSpacing(2);
                         z = computeSliceSpacing(atDicomInfo);  
-                                                
-                        aDicomBuffer = permute(aDicomBuffer,  [3 1 2]);                                               
+                                                                        
+                        aDicomBuffer = reorientBuffer(aDicomBuffer, 'sagittal');
                         
                         dicomBuffer('set', aDicomBuffer, kk);
                         
@@ -419,11 +418,13 @@ function mainWindowMenu()
                                 atDicomInfo{oo+1}.InstanceNumber = oo+1;
                             end
                             
-                            atDicomInfo{oo+1}.PixelSpacing(1) = z;
-                            atDicomInfo{oo+1}.PixelSpacing(2) = x;
+                            atDicomInfo{oo+1}.PixelSpacing(1) = x;
+                            atDicomInfo{oo+1}.PixelSpacing(2) = z;
                             atDicomInfo{oo+1}.NumberOfSlices  = adBufferSize(3);
                             atDicomInfo{oo+1}.ImageOrientationPatient = aImageOrientationPatient; 
-                            atDicomInfo{oo+1}.ImagePositionPatient(3)    = dImagePositionPatient(3) - (oo*y);                            
+                            atDicomInfo{oo+1}.ImagePositionPatient(1) = dImagePositionPatient(1);
+                            atDicomInfo{oo+1}.ImagePositionPatient(2) = dImagePositionPatient(2);
+                            atDicomInfo{oo+1}.ImagePositionPatient(3) = dImagePositionPatient(3) - (oo*y);                            
                             
                             atDicomInfo{oo+1}.SliceLocation = dSliceLocation - (oo*y);  
 

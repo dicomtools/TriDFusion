@@ -705,10 +705,13 @@ end
                 asTag{hh}=aVoiRoiTag{hh}.Tag;
             end
             
+            
+            asTag = asTag(get(lbVoiRoiWindow, 'Value'));
+            
             aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), asTag(1) );
             aRoiTagOffset = find(aTagOffset, 1);   
                                 
-            createVoiFromRois(dSeriesOffset, asTag(get(lbVoiRoiWindow, 'Value')), [], atRoiInput{aRoiTagOffset}.Color, 'Unspecified');
+            createVoiFromRois(dSeriesOffset, asTag, [], atRoiInput{aRoiTagOffset}.Color, 'Unspecified');
 
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                 bSUVUnit = true;

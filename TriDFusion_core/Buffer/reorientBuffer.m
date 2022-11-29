@@ -1,13 +1,13 @@
-function c = permuteBuffer(b, sAxe)
-%function c = permuteBuffer(b, sAxe)
-%Return a 3D Permuted Buffer.
+function aBuffer = reorientBuffer(aBuffer, sOrientation)
+%function aBuffer = reorientBuffer(aBuffer, sOrientation)
+%Return a 3D Reoriented Buffer.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2022, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -27,13 +27,17 @@ function c = permuteBuffer(b, sAxe)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    b = permute(b, [2 1]);
-
-    aSize = size(b);
-
-    if strcmpi(sAxe, 'sagittal')
-        c = reshape(b, aSize(1), 1, aSize(2));
+    if strcmpi(sOrientation, 'coronal')
+        
+        aBuffer = permute(aBuffer, [3 2 1]); % Permute image 
+        aBuffer = aBuffer(end:-1:1,:,:); % Flip ant \ post      
+        
+    elseif strcmpi(sOrientation, 'sagittal')        
+        
+        aBuffer = permute(aBuffer,  [2 3 1]);                                               
+        
     else
-        c = reshape(b, 1, aSize(1), aSize(2));
+        aBuffer = permute(aBuffer, [1 2 3]);
     end
+        
 end

@@ -28,18 +28,18 @@ function setInputOrientation()
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     tInputTemplate = inputTemplate('get');
-
+    
     for pp=1: numel(tInputTemplate)
-
+        
         if  numel(tInputTemplate(pp).asFilesList) ~= 1 % Must be revisited!
 
             bFlip = getImagePosition(pp);
 
             if bFlip == true
-                tInputTemplate(pp).atDicomInfo  = flip(tInputTemplate(pp).atDicomInfo);
-                tInputTemplate(pp).asFilesList  = flip(tInputTemplate(pp).asFilesList);
+%                tInputTemplate(pp).atDicomInfo  = flip(tInputTemplate(pp).atDicomInfo);
+%                tInputTemplate(pp).asFilesList  = flip(tInputTemplate(pp).asFilesList);
                 tInputTemplate(pp).aDicomBuffer = flip(tInputTemplate(pp).aDicomBuffer);
-            end
+           end
         else
             tDicomInfo1 = tInputTemplate(pp).atDicomInfo{1};
             

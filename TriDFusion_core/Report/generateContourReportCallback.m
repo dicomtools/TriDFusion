@@ -190,7 +190,7 @@ function generateContourReportCallback(~, ~)
                   'FontWeight', 'bold',...
                   'FontSize'  , 10,...
                   'FontName'  , 'MS Sans Serif', ...
-                  'string'    , 'Nb Contour',...
+                  'string'    , 'Nb Contours',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
@@ -359,7 +359,13 @@ function generateContourReportCallback(~, ~)
         if ~isempty(tReport) % Fill information
 
             if isvalid(uiReportContourInformation) % Make sure the figure is still open     
-                 set(uiReportContourInformation, 'String', sprintf('Contour Information (%s)', getReportUnitValue()));               
+                
+                 if contains(getReportUnitValue(), 'SUV')
+                     set(uiReportContourInformation, 'String', sprintf('MTV: %s (ml), TLG: %s (%s)', ...
+                         num2str(tReport.All.Volume), num2str(tReport.All.Volume*tReport.All.Mean), getReportUnitValue() ) );               
+                 else
+                    set(uiReportContourInformation, 'String', sprintf('Contour Information (%s)', getReportUnitValue()));                            
+                 end
             end
            
             if isvalid(uiReportLesionNbContour) % Make sure the figure is still open        
@@ -860,7 +866,7 @@ function generateContourReportCallback(~, ~)
 
     function sReport = getReportLesionTypeInformation()
                 
-        sReport = sprintf('%s', char('All Contour'));      
+        sReport = sprintf('%s', char('All Contours'));      
       
         [~, asLesionList] = getLesionType('');
         
