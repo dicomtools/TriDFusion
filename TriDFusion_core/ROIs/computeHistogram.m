@@ -32,7 +32,7 @@ function [imCData, logicalMask] = computeHistogram(imInput, atInputMetaData, imR
     
     if strcmpi(ptrRoiVoi.ObjectType, 'roi') || ...
        strcmpi(ptrRoiVoi.ObjectType, 'voi-roi')
-   
+      
         progressBar(0.99, 'Computing Histogram, please wait!');          
         
         if bModifiedMatrix  == false && ... 
@@ -76,6 +76,8 @@ function [imCData, logicalMask] = computeHistogram(imInput, atInputMetaData, imR
         end
                             
     else
+        imRoiVoiBak = imRoiVoi;
+       
         for bb=1: numel(ptrRoiVoi.RoisTag)
             
             progressBar(bb/numel(ptrRoiVoi.RoisTag), sprintf('Computing Histogram ROI %d/%d, please wait!', bb, numel(ptrRoiVoi.RoisTag)));          
@@ -85,7 +87,7 @@ function [imCData, logicalMask] = computeHistogram(imInput, atInputMetaData, imR
                     
                     if bModifiedMatrix  == false && ... 
                        bMovementApplied == false        % Can't use input buffer if movement have been applied
-                       
+                        imRoiVoi = imRoiVoiBak;
                         if numel(imInput) ~= numel(imRoiVoi)
                             pTemp{1} = tRoiInput{cc};
                             ptrRoiTemp = resampleROIs(imRoiVoi, atRoiVoiMetaData, imInput, atInputMetaData, pTemp, false);
@@ -144,6 +146,9 @@ function [imCData, logicalMask] = computeHistogram(imInput, atInputMetaData, imR
         if exist('voiMask', 'var')
             logicalMask = voiMask;
         end
+        
+        clear imRoiVoiBak;
+        
     end
 
     if  (strcmpi(atRoiVoiMetaData{1}.Modality, 'pt') || ...
@@ -160,7 +165,7 @@ function [imCData, logicalMask] = computeHistogram(imInput, atInputMetaData, imR
   
         imCData = imCData(imCData>cropValue('get'));                            
     end    
-    
+        
     progressBar(1, 'Ready');          
     
 end
