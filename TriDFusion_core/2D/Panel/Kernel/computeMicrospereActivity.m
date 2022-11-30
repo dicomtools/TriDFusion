@@ -102,7 +102,7 @@ function aImage = computeMicrospereActivity(aImage, atMetaData, sTreatmentType, 
 
         dNbSphere = round(dContourVolume / dMicrosphereVolume);
 
-        aImage(voiMask~=0) = dNbSphere * dSphereMultiplicator / dNbCells;  
+        aImage(voiMask~=0) = dNbSphere * dSphereMultiplicator / dNbCells / dVoxVolume;  
     end
     
     progressBar(1, 'Ready');

@@ -36,8 +36,8 @@ function setInputOrientation()
             bFlip = getImagePosition(pp);
 
             if bFlip == true
-%                tInputTemplate(pp).atDicomInfo  = flip(tInputTemplate(pp).atDicomInfo);
-%                tInputTemplate(pp).asFilesList  = flip(tInputTemplate(pp).asFilesList);
+                tInputTemplate(pp).atDicomInfo  = flip(tInputTemplate(pp).atDicomInfo);
+                tInputTemplate(pp).asFilesList  = flip(tInputTemplate(pp).asFilesList);
                 tInputTemplate(pp).aDicomBuffer = flip(tInputTemplate(pp).aDicomBuffer);
            end
         else
