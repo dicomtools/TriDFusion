@@ -27,39 +27,40 @@ function copyRoiVoiToSerie(dSeriesToOffset, tRoiVoiObject, bMirror)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+%    tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
-    imRoi       = dicomBuffer('get');
-    atDicomInfo = dicomMetaData('get');
+    imRoi       = dicomBuffer('get', [], dSeriesToOffset);
+    atDicomInfo = dicomMetaData('get', [], dSeriesToOffset);
 
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
     atInput    = inputTemplate('get');
     atRoiInput = roiTemplate('get', dSeriesToOffset);
+    atRefRoiInput = roiTemplate('get', dSeriesOffset);
     
     aBuffer = inputBuffer('get');
 
-    set(uiSeriesPtr('get'), 'Value', dSeriesToOffset); 
+%    set(uiSeriesPtr('get'), 'Value', dSeriesToOffset); 
     
     aRefBuffer = dicomBuffer('get', [], dSeriesOffset);
-    if isempty(aRefBuffer)
-        
-        aRefBuffer = aBuffer{dSeriesToOffset};    
-%        if     strcmp(imageOrientation('get'), 'axial')
-%            aRefBuffer = permute(aBuffer{dSeriesToOffset}, [1 2 3]);
-%        elseif strcmp(imageOrientation('get'), 'coronal')
-%            aRefBuffer = permute(aBuffer{dSeriesToOffset}, [3 2 1]);
-%        elseif strcmp(imageOrientation('get'), 'sagittal')
-%            aRefBuffer = permute(aBuffer{dSeriesToOffset}, [3 1 2]);
-%        end        
+    if isempty(aRefBuffer)        
+        aRefBuffer = aBuffer{dSeriesOffset};            
     end
     
+    if isempty(imRoi)        
+        imRoi = aBuffer{dSeriesToOffset};         
+    end
+        
     atRefInfo = dicomMetaData('get', [], dSeriesOffset);
     if isempty(atRefInfo)
-         atRefInfo = atInput(dSeriesToOffset).atDicomInfo;
+         atRefInfo = atInput(dSeriesOffset).atDicomInfo;
     end
     
-    set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
+    if isempty(atDicomInfo)
+         atDicomInfo = atInput(dSeriesToOffset).atDicomInfo;
+    end
+    
+%    set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
     
     if strcmpi(tRoiVoiObject.ObjectType, 'voi')
 
@@ -70,13 +71,13 @@ function copyRoiVoiToSerie(dSeriesToOffset, tRoiVoiObject, bMirror)
         endIloop = numel(tRoiVoiObject.RoisTag);
         for kk=1:endIloop
 
-            for ll=1:numel(tRoiInput)
+            for ll=1:numel(atRefRoiInput)
 
-                if strcmpi(tRoiVoiObject.RoisTag{kk}, tRoiInput{ll}.Tag)
+                if strcmpi(tRoiVoiObject.RoisTag{kk}, atRefRoiInput{ll}.Tag)
 
                     if dSeriesOffset == dSeriesToOffset
 
-                        tRoi = tRoiInput{ll};
+                        tRoi = atRefRoiInput{ll};
                         tRoi.Tag = num2str(randi([-(2^52/2),(2^52/2)],1));
 
                         tRoi = addRoiFromTemplate(tRoi, dSeriesOffset);
@@ -85,11 +86,11 @@ function copyRoiVoiToSerie(dSeriesToOffset, tRoiVoiObject, bMirror)
                         tRoi.MaxDistances = tMaxDistances;
 
                     else
-                        tRoi     = tRoiInput{ll};
+                        tRoi     = atRefRoiInput{ll};
                         tRoi.Tag = num2str(randi([-(2^52/2),(2^52/2)],1));
                         tRoi.Object = [];
 
-                        [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(aRefBuffer, atRefInfo, imRoi, atDicomInfo, tRoi);
+                        [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(imRoi, atDicomInfo, aRefBuffer, atRefInfo, tRoi);
 
                         switch lower(tRoi.Type)
 
@@ -197,7 +198,7 @@ function copyRoiVoiToSerie(dSeriesToOffset, tRoiVoiObject, bMirror)
             tRoi.Tag = num2str(randi([-(2^52/2),(2^52/2)],1));
             tRoi.Object = [];
 
-            [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(aRefBuffer, atRefInfo, imRoi, atDicomInfo, tRoi);
+            [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(imRoi, atDicomInfo, aRefBuffer, atRefInfo, tRoi);
 
             switch lower(tRoi.Type)
 
