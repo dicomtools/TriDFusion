@@ -31,7 +31,10 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
 
 %    if strcmpi(atDicomInfo{1}.Modality, 'MR') || ...
 %       strcmpi(atDicomInfo{1}.Modality, 'PT') && ...
-%      ~strcmpi(atDicomInfo{1}.SeriesType{1}, 'STATIC') && ...
+     if strcmpi(atDicomInfo{1}.SeriesType{1}, 'STATIC') 
+         return;
+     end
+     
      if numel(atDicomInfo) > 2
                  
         dNbGate   =1;
@@ -42,7 +45,11 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
 
         for jj=1:numel(atDicomInfo)-1
 
-            dSliceSpacing = spacingBetweenTwoSlices(atDicomInfo{jj},atDicomInfo{jj+1});
+%            dSliceSpacing = spacingBetweenTwoSlices(atDicomInfo{jj},atDicomInfo{jj+1});
+            dSliceSpacing = atDicomInfo{jj}.SpacingBetweenSlices;
+            if dSliceSpacing == 0
+                dSliceSpacing = spacingBetweenTwoSlices(atDicomInfo{jj},atDicomInfo{jj+1});
+            end
 
             dComputedNextSliceLocation = str2double(sprintf('%.3f', atDicomInfo{jj}.SliceLocation + dSliceSpacing));
             dNextSliceLocation         = str2double(sprintf('%.3f', atDicomInfo{jj+1}.SliceLocation));

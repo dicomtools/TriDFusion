@@ -447,7 +447,8 @@ function resizeFigure(~, ~)
                          getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
                          ]...
            );
-       
+        
+        try
         txtMip = axesText('get', 'axesMip');
         if ~isempty(txtMip)
             if isvalid(txtMip.Parent)
@@ -458,7 +459,9 @@ function resizeFigure(~, ~)
                                  30]...
                     );                   
             end
-        end       
+        end
+        catch
+        end
     end  
     
     uiSliderCor = uiSliderCorPtr('get');

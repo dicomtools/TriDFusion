@@ -150,13 +150,13 @@ function mainWindowMenu()
     
     uimenu(mTools, 'Label','Registration', 'Callback', @setRegistrationCallback, 'Separator','on');
     uimenu(mTools, 'Label','Mathematic'  , 'Callback', @setMathCallback);
-    uimenu(mTools, 'Label','Reset Series'  , 'Callback', @resetSeriesCallback, 'Separator','on');
+%    uimenu(mTools, 'Label','Sum Series', 'Callback', @sumSeriesCallback, 'Separator','on');
+    uimenu(mTools, 'Label','Reset Series', 'Callback', @resetSeriesCallback, 'Separator','on');
 
     mHelp = uimenu(fiMainWindowPtr('get'),'Label','Help');
-    uimenu(mHelp,'Label', 'Shortcuts', 'Callback', @shortcutsViewerCallback);
+    uimenu(mHelp,'Label', 'Shortcuts', 'Callback'  , @shortcutsViewerCallback);
     uimenu(mHelp,'Label', 'User Manual', 'Callback', @helpViewerCallback);
-    uimenu(mHelp,'Label', 'About', 'Callback', @aboutViewerCallback, 'Separator','on');
-
+    uimenu(mHelp,'Label', 'About', 'Callback'      , @aboutViewerCallback, 'Separator','on');
     
     function copyDisplayCallback(~, ~)
         
@@ -852,5 +852,31 @@ function mainWindowMenu()
         drawnow;
         
     end
+
+    function sumSeriesCallback(~, ~)
+        
+        a = dicomBuffer('get');
+        
+        iAxial    = sliceNumber('get', 'axial');
+
+        for ll=1:size(a,3)
+            a(:,:,ll)=a(:,:,iAxial);
+        end
+        
+        b = imresize3(a,[512 512 512]);
+      
+        dicomBuffer('set', b);
+        
+        a2 = dicomMetaData('get', [], 1);
+        
+        for kk=1:numel(a2)
+            a2{kk}.Modality = 'nm';
+        end
+        
+        dicomMetaData('set', a2);
+        
+    end
+
+
 
 end
