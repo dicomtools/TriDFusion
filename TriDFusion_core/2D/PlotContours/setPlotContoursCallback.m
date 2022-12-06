@@ -57,7 +57,7 @@ function setPlotContoursCallback(~, ~)
                         'Visible' , 'off'...
                         );
                 axis(axeFc, 'tight');
-                axefPtr('set', axeFc, get(uiFusedSeriesPtr('get'), 'Value'));
+                axefcPtr('set', axeFc, get(uiFusedSeriesPtr('get'), 'Value'));
 
                 linkaxes([axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
                 uistack(axefcPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'top');
