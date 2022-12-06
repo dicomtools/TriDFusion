@@ -28,13 +28,13 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
     tGate = [];
-
+    
 %    if strcmpi(atDicomInfo{1}.Modality, 'MR') || ...
 %       strcmpi(atDicomInfo{1}.Modality, 'PT') && ...
      if strcmpi(atDicomInfo{1}.SeriesType{1}, 'STATIC') 
          return;
      end
-     
+          
      if numel(atDicomInfo) > 2
                  
         dNbGate   =1;

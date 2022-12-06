@@ -353,14 +353,26 @@ function setSourceCallback(~, ~)
                    isfield(tNewDatasets, 'DicomBuffers')
 
                     atNewFrameInfo = dicomInfoComputeFrames(tNewDatasets.DicomInfos);
+                    
+                    asSeriesType = lower(tNewDatasets.DicomInfos{1}.SeriesType{1});
 
+                    bGated = false;
+                    if find(contains(asSeriesType, 'gated'))
+                        bGated = true;
+                    end
+
+                    bDynamic = false;
+                    if find(contains(asSeriesType, 'dynamic'))
+                        bDynamic = true;
+                    end
+                
            %         sFileList = datasets.FileNames;
-                    if strcmpi(tNewDatasets.DicomInfos{1}.SeriesType{1}, 'GATED'  ) || ...
-                       strcmpi(tNewDatasets.DicomInfos{1}.SeriesType{1}, 'DYNAMIC') || ...
+                    if bGated   == true || ...
+                       bDynamic == true || ...
                        ~isempty(atNewFrameInfo)
 
-                        if strcmpi(tNewDatasets.DicomInfos{1}.SeriesType{1}, 'GATED'  ) || ...
-                           strcmpi(tNewDatasets.DicomInfos{1}.SeriesType{1}, 'DYNAMIC')
+                        if bGated   == true || ...
+                           bDynamic == true 
                        
                             dNewNbFrames    = numel(tNewDatasets.DicomInfos) / tNewDatasets.DicomInfos{1}.NumberOfSlices;
                             dNewNbOfSlices = tNewDatasets.DicomInfos{1}.NumberOfSlices;
@@ -376,8 +388,14 @@ function setSourceCallback(~, ~)
                                 aNewDicomBuffer{dNewNbEntry} = tNewDatasets.DicomBuffers(dNewFrom:dNewTo);
 
                                 for dNewSeriesLoop = 1: numel(atNewDicomInfo{dNewNbEntry})
-                                    atNewDicomInfo{dNewNbEntry}{dNewSeriesLoop}.SeriesDescription = ...
-                                        sprintf('%s (Frame %d)', atNewDicomInfo{dNewNbEntry}{dNewSeriesLoop}.SeriesDescription, dNewFramesLoop);
+                                    
+                                    if bGated == true
+                                        atNewDicomInfo{dNewNbEntry}{dNewSeriesLoop}.SeriesDescription = ...
+                                            sprintf('%s (Gate %d)', atNewDicomInfo{dNewNbEntry}{dNewSeriesLoop}.SeriesDescription, dNewFramesLoop);
+                                    else
+                                        atNewDicomInfo{dNewNbEntry}{dNewSeriesLoop}.SeriesDescription = ...
+                                            sprintf('%s (Dynamic %d)', atNewDicomInfo{dNewNbEntry}{dNewSeriesLoop}.SeriesDescription, dNewFramesLoop);                                        
+                                    end
                                     atNewDicomInfo{dNewNbEntry}{dNewSeriesLoop}.din.frame = dNewFramesLoop;
                                 end
 
@@ -416,12 +434,77 @@ function setSourceCallback(~, ~)
 
                         end
                     else
-                                                
-                        asNewFilesList{dNewNbEntry}  = tNewDatasets.FileNames;
-                        atNewDicomInfo{dNewNbEntry}  = tNewDatasets.DicomInfos;
-                        aNewDicomBuffer{dNewNbEntry} = tNewDatasets.DicomBuffers;
+                        if numel(tNewDatasets) == 1
+                            
+                            asImageType = lower(tNewDatasets.DicomInfos{1}.ImageType);  
+                            
+                            bStatic = false;
+                            if find(contains(asImageType, 'static')) 
+                                bStatic = true;
+                            end
+                            
+                            bWholeBody = false;
+                            if find(contains(asImageType, 'whole body')) 
+                                bWholeBody = true;
+                            end
+                            
+                            bScreenCapture = false;
+                            if find(contains(asImageType, 'secondary')) 
+                                bScreenCapture = true;
+                            end
+                            
+                            if bStatic    == true || ...
+                               bWholeBody == true || ...
+                               bScreenCapture == true
+                           
+                                sSeriesDescription = tNewDatasets.DicomInfos{1}.SeriesDescription;
+                                
+                                if size(tNewDatasets.DicomBuffers{1}, 3) == 1
+                                    dNbOfImages = size(tNewDatasets.DicomBuffers{1}, 4);
+                                else
+                                    dNbOfImages = size(tNewDatasets.DicomBuffers{1}, 3);
+                                end
+                                
+                                for ll=1:dNbOfImages
+                                    
+                                    if size(tNewDatasets.DicomBuffers{1}, 3) == 1
+                                        aTemp{1} = tNewDatasets.DicomBuffers{1}(:,:,1,ll);
+                                    else
+                                        aTemp{1} = tNewDatasets.DicomBuffers{1}(:,:,ll);
+                                    end
+                                    
+                                    aNewDicomBuffer{dNewNbEntry} = aTemp;
+                                    
+                                    if bStatic == true
+                                        tNewDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Static %d)', sSeriesDescription, ll);
+                                    elseif bWholeBody == true
+                                        tNewDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Whole Body %d)', sSeriesDescription, ll);
+                                    else
+                                        tNewDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Secondary %d)', sSeriesDescription, ll);
+                                    end
+                                    
+                                    asNewFilesList{dNewNbEntry}  = tNewDatasets.FileNames;
+                                    atNewDicomInfo{dNewNbEntry}  = tNewDatasets.DicomInfos;
+                                    
+                                    dNewNbEntry = dNewNbEntry+1;                                      
+                                end
+                                
+                                
+                            else
+                                asNewFilesList{dNewNbEntry}  = tNewDatasets.FileNames;
+                                atNewDicomInfo{dNewNbEntry}  = tNewDatasets.DicomInfos;
+                                aNewDicomBuffer{dNewNbEntry} = tNewDatasets.DicomBuffers;
 
-                        dNewNbEntry = dNewNbEntry+1;
+                                dNewNbEntry = dNewNbEntry+1;                                
+                            end
+                        else
+                            
+                            asNewFilesList{dNewNbEntry}  = tNewDatasets.FileNames;
+                            atNewDicomInfo{dNewNbEntry}  = tNewDatasets.DicomInfos;
+                            aNewDicomBuffer{dNewNbEntry} = tNewDatasets.DicomBuffers;
+
+                            dNewNbEntry = dNewNbEntry+1;
+                        end
                     end
 
                 end

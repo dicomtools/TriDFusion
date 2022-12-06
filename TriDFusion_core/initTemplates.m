@@ -50,13 +50,25 @@ function initTemplates()
 
                 atFrameInfo = dicomInfoComputeFrames(tDatasets.DicomInfos);
 
+                asSeriesType = lower(tDatasets.DicomInfos{1}.SeriesType{1});
+                
+                bGated = false;
+                if find(contains(asSeriesType, 'gated'))
+                    bGated = true;
+                end
+                
+                bDynamic = false;
+                if find(contains(asSeriesType, 'dynamic'))
+                    bDynamic = true;
+                end
+                
        %         sFileList = datasets.FileNames;
-                if strcmpi(tDatasets.DicomInfos{1}.SeriesType{1}, 'GATED'  ) || ...
-                   strcmpi(tDatasets.DicomInfos{1}.SeriesType{1}, 'DYNAMIC') || ...
+                if bGated   == true || ...
+                   bDynamic == true || ...
                    ~isempty(atFrameInfo)
 
-                    if strcmpi(tDatasets.DicomInfos{1}.SeriesType{1}, 'GATED'  ) || ...
-                       strcmpi(tDatasets.DicomInfos{1}.SeriesType{1}, 'DYNAMIC')
+                    if bGated   == true || ...
+                       bDynamic == true 
 
                         dNbFrames   = numel(tDatasets.DicomInfos) / tDatasets.DicomInfos{1}.NumberOfSlices;
                         dNbOfSlices = tDatasets.DicomInfos{1}.NumberOfSlices;
@@ -72,8 +84,13 @@ function initTemplates()
                             aDicomBuffer{dNbEntry} = tDatasets.DicomBuffers(dFrom:dTo);
 
                             for dSeriesLoop = 1: numel(atDicomInfo{dNbEntry})
-                                atDicomInfo{dNbEntry}{dSeriesLoop}.SeriesDescription = ...
-                                    sprintf('%s (Frame %d)', atDicomInfo{dNbEntry}{dSeriesLoop}.SeriesDescription, dFramesLoop);
+                                if bGated == true
+                                    atDicomInfo{dNbEntry}{dSeriesLoop}.SeriesDescription = ...
+                                        sprintf('%s (Gate %d)', atDicomInfo{dNbEntry}{dSeriesLoop}.SeriesDescription, dFramesLoop);
+                                else
+                                    atDicomInfo{dNbEntry}{dSeriesLoop}.SeriesDescription = ...
+                                        sprintf('%s (Dynamic %d)', atDicomInfo{dNbEntry}{dSeriesLoop}.SeriesDescription, dFramesLoop);                                    
+                                end
                                 atDicomInfo{dNbEntry}{dSeriesLoop}.din.frame = dFramesLoop;
                             end
 
@@ -115,11 +132,73 @@ function initTemplates()
 
                     end
                 else
-                    asFilesList{dNbEntry}  = tDatasets.FileNames;
-                    atDicomInfo{dNbEntry}  = tDatasets.DicomInfos;
-                    aDicomBuffer{dNbEntry} = tDatasets.DicomBuffers;
+                    if numel(tDatasets) == 1
+                        
+                        asImageType = lower(tDatasets.DicomInfos{1}.ImageType);  
+                        
+                        bStatic = false;
+                        if find(contains(asImageType, 'static')) 
+                            bStatic = true;
+                        end
 
-                    dNbEntry = dNbEntry+1;
+                        bWholeBody = false;
+                        if find(contains(asImageType, 'whole body')) 
+                            bWholeBody = true;
+                        end
+                        
+                        bScreenCapture = false;
+                        if find(contains(asImageType, 'secondary')) 
+                            bScreenCapture = true;
+                        end
+                            
+                        if bStatic    == true || ...
+                           bWholeBody == true || ...      
+                           bScreenCapture == true
+
+                            if size(tDatasets.DicomBuffers{1}, 3) == 1
+                                dNbOfImages = size(tDatasets.DicomBuffers{1}, 4);
+                            else
+                                dNbOfImages = size(tDatasets.DicomBuffers{1}, 3);
+                            end                       
+                       
+                            sSeriesDescription = tDatasets.DicomInfos{1}.SeriesDescription;
+                            for ll=1:dNbOfImages
+                                                                
+                                if size(tDatasets.DicomBuffers{1}, 3) == 1                                
+                                    aTemp{1} = tDatasets.DicomBuffers{1}(:,:,1,ll);
+                                else
+                                    aTemp{1} = tDatasets.DicomBuffers{1}(:,:,ll);
+                                end
+                                
+                                aDicomBuffer{dNbEntry} = aTemp;
+
+                                if bStatic == true 
+                                    tDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Static %d)', sSeriesDescription, ll);
+                                elseif bWholeBody == true 
+                                    tDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Whole Body %d)', sSeriesDescription, ll);
+                                else
+                                    tDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Secondary %d)', sSeriesDescription, ll);
+                                end
+                                
+                                asFilesList{dNbEntry}  = tDatasets.FileNames;
+                                atDicomInfo{dNbEntry}  = tDatasets.DicomInfos;
+                                
+                                dNbEntry = dNbEntry+1;                                      
+                            end
+                        else
+                            asFilesList{dNbEntry}  = tDatasets.FileNames;
+                            atDicomInfo{dNbEntry}  = tDatasets.DicomInfos;
+                            aDicomBuffer{dNbEntry} = tDatasets.DicomBuffers;
+
+                            dNbEntry = dNbEntry+1;                                
+                        end
+                    else                    
+                        asFilesList{dNbEntry}  = tDatasets.FileNames;
+                        atDicomInfo{dNbEntry}  = tDatasets.DicomInfos;
+                        aDicomBuffer{dNbEntry} = tDatasets.DicomBuffers;
+
+                        dNbEntry = dNbEntry+1;
+                    end
                 end
     %              sFileList = datasets.sFileName;
 

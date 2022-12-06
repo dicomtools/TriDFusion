@@ -863,7 +863,7 @@ function mainWindowMenu()
             a(:,:,ll)=a(:,:,iAxial);
         end
         
-        b = imresize3(a,[512 512 512]);
+        b = imresize3(a,[429 512 512]);
       
         dicomBuffer('set', b);
         
