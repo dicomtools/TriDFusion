@@ -150,7 +150,7 @@ function generateContourReportCallback(~, ~)
                   'FontWeight', 'bold',...
                   'FontSize'  , 11,...
                   'FontName'  , 'MS Sans Serif', ...
-                  'string'    , 'Contour Information',...
+                  'string'    , 'Contours Information',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
@@ -164,11 +164,11 @@ function generateContourReportCallback(~, ~)
                   'FontWeight', 'bold',...
                   'FontSize'  , 10,...
                   'FontName'  , 'MS Sans Serif', ...
-                  'string'    , 'Lesion Location',...
+                  'string'    , 'Location',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-100 FIG_REPORT_Y-130 125 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-100 FIG_REPORT_Y-130 115 20]...
                   ); 
               
         uicontrol(figContourReport,...
@@ -180,7 +180,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-100 FIG_REPORT_Y-460 125 320]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-100 FIG_REPORT_Y-460 115 320]...
                   );  
               
          % Nb Contour
@@ -194,7 +194,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+25 FIG_REPORT_Y-130 100 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+25 FIG_REPORT_Y-130 90 20]...
                   ); 
 
         uiReportLesionNbContour = ...       
@@ -207,7 +207,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+25 FIG_REPORT_Y-460 100 320]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+25 FIG_REPORT_Y-460 90 320]...
                   );  
               
          % Contour Mean
@@ -221,7 +221,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+125 FIG_REPORT_Y-130 100 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+125 FIG_REPORT_Y-130 90 20]...
                   ); 
               
         uiReportLesionMean = ...       
@@ -234,7 +234,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+125 FIG_REPORT_Y-460 100 320]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+125 FIG_REPORT_Y-460 90 320]...
                   );  
               
          % Contour Max
@@ -248,7 +248,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+225 FIG_REPORT_Y-130 100 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+225 FIG_REPORT_Y-130 90 20]...
                   ); 
               
         uiReportLesionMax = ...       
@@ -261,7 +261,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+225 FIG_REPORT_Y-460 100 320]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+225 FIG_REPORT_Y-460 90 320]...
                   ); 
               
           % Contour Volume
@@ -275,7 +275,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+325 FIG_REPORT_Y-130 100 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+325 FIG_REPORT_Y-130 90 20]...
                   ); 
               
         uiReportLesionVolume = ...       
@@ -288,7 +288,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+325 FIG_REPORT_Y-460 100 320]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+325 FIG_REPORT_Y-460 90 320]...
                   );               
               
         axeReport = ...
@@ -402,6 +402,7 @@ function generateContourReportCallback(~, ~)
             if isvalid(axeReport) % Make sure the figure is still open    
                 
                 try
+                    
                     ptrPlotCummulative = plotCummulative(axeReport, tReport.All.voiData, 'black');
                     axeReport.Title.String  = ' All Contours - Uptake Volume Histogram (UVH)';
                     axeReport.XLabel.String = sprintf('Uptake (%s)', getReportUnitValue());
@@ -415,6 +416,19 @@ function generateContourReportCallback(~, ~)
                     dTip = createDatatip(cDataCursor, ptrPlotCummulative);
                     dTip.Position(2) = 0.90;
 
+                    aXData = get(ptrPlotCummulative, 'XData');
+                    aYData = get(ptrPlotCummulative, 'YData');
+                                        
+                    [aYData,idx] = unique(aYData) ; 
+                    aXData = aXData(idx) ; 
+                    dD90 = interp1(aYData, aXData, .9);
+                    dD50 = interp1(aYData, aXData, .5);
+                    dD10 = interp1(aYData, aXData, .1);
+                    
+                    text(axeReport, max(aXData)*0.8, max(aYData)*0.95, sprintf('90%%: %.0f', dD90));
+                    text(axeReport, max(aXData)*0.8, max(aYData)*0.87, sprintf('50%%: %.0f', dD50));
+                    text(axeReport, max(aXData)*0.8, max(aYData)*0.79, sprintf('10%%: %.0f', dD10));
+
                 catch
                 end
             end
@@ -426,7 +440,7 @@ function generateContourReportCallback(~, ~)
         
         x = info.Position(1);
         y = info.Position(2);
-        txt = ['(' sprintf('%.0f', x) ', ' sprintf('%.2f', y*100) '%)'];
+        txt = ['(' sprintf('%.0f', x) ', ' sprintf('%.2f', y) ')'];
 
         set( axeReport.XLabel, 'String', sprintf('Uptake (%s)', getReportUnitValue() ) );
         set( axeReport.YLabel, 'String', sprintf('Total Volume Fraction (TVF)') );
@@ -913,7 +927,7 @@ function generateContourReportCallback(~, ~)
 
     function sReport = getReportLesionTypeInformation()
                 
-        sReport = sprintf('%s', char('All Contours'));      
+        sReport = sprintf('%s\n___________', char('Summary'));      
       
         [~, asLesionList] = getLesionType('');
         
@@ -927,16 +941,16 @@ function generateContourReportCallback(~, ~)
         [~, asLesionList] = getLesionType('');
         
         if strcmpi(sAction, 'init')
-            sReport = sprintf('%s', '-');      
+            sReport = sprintf('%s\n___________', '-');      
             for ll=1:numel(asLesionList)
                 sReport = sprintf('%s\n\n%s', sReport, '-');
             end       
         else
             
             if ~isempty(tReport.All.Count)
-                sReport = sprintf('%-12s', num2str(tReport.All.Count));      
+                sReport = sprintf('%-12s\n___________', num2str(tReport.All.Count));      
             else
-                sReport = sprintf('%s', '-');      
+                sReport = sprintf('%s\n___________', '-');      
             end
                 
             for ll=1:numel(asLesionList)      
@@ -1004,16 +1018,16 @@ function generateContourReportCallback(~, ~)
         [~, asLesionList] = getLesionType('');
         
         if strcmpi(sAction, 'init')
-            sReport = sprintf('%s', '-');      
+            sReport = sprintf('%s\n___________', '-');      
             for ll=1:numel(asLesionList)
                 sReport = sprintf('%s\n\n%s', sReport, '-');
             end       
         else
             
             if ~isempty(tReport.All.Mean)
-                sReport = sprintf('%-12s', num2str(tReport.All.Mean));      
+                sReport = sprintf('%-12s\n___________', num2str(tReport.All.Mean));      
             else
-                sReport = sprintf('%s', '-');      
+                sReport = sprintf('%s\n___________', '-');      
             end
                 
             for ll=1:numel(asLesionList)      
@@ -1081,16 +1095,16 @@ function generateContourReportCallback(~, ~)
         [~, asLesionList] = getLesionType('');
         
         if strcmpi(sAction, 'init')
-            sReport = sprintf('%s', '-');      
+            sReport = sprintf('%s\n___________', '-');      
             for ll=1:numel(asLesionList)
                 sReport = sprintf('%s\n\n%s', sReport, '-');
             end       
         else
             
             if ~isempty(tReport.All.Max)
-                sReport = sprintf('%-12s', num2str(tReport.All.Max));      
+                sReport = sprintf('%-12s\n___________', num2str(tReport.All.Max));      
             else
-                sReport = sprintf('%s', '-');      
+                sReport = sprintf('%s\n___________', '-');      
             end
                 
             for ll=1:numel(asLesionList)      
@@ -1158,16 +1172,16 @@ function generateContourReportCallback(~, ~)
         [~, asLesionList] = getLesionType('');
         
         if strcmpi(sAction, 'init')
-            sReport = sprintf('%s', '-');      
+            sReport = sprintf('%s\n___________', '-');      
             for ll=1:numel(asLesionList)
                 sReport = sprintf('%s\n\n%s', sReport, '-');
             end       
         else
             
             if ~isempty(tReport.All.Volume)
-                sReport = sprintf('%-12s', num2str(tReport.All.Volume));      
+                sReport = sprintf('%-12s\n___________', num2str(tReport.All.Volume));      
             else
-                sReport = sprintf('%s', '-');      
+                sReport = sprintf('%s\n___________', '-');      
             end
                 
             for ll=1:numel(asLesionList)      
