@@ -914,7 +914,9 @@ function setRegistrationCallback(~, ~)
                         if size(aInput{kk}, 3) ~= 1
                             if isVsplash('get') == false
 
-                                aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, sInterpolation, referenceOutputView('get'));
+                            %    aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, sInterpolation, referenceOutputView('get'));
+                                
+                                aResampledMip = computeMIP(aResampledBuffer);
 
                                 mipBuffer('set', aResampledMip, kk);
                             end

@@ -30,7 +30,7 @@ function setDisplayBuffer()
 %       iInstanceNumber = 0;
     tInput = inputTemplate('get');
 %        aInput = ''; 
-    aInput = cell(numel(tInput));
+    aInput = cell(numel(tInput), 1);
     for i=1: numel(tInput)                                                                               
         if size(tInput(i).aDicomBuffer{1}, 4) == 1 
             aSize = size(tInput(i).aDicomBuffer{1});

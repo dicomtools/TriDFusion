@@ -295,8 +295,8 @@ function dicomViewerCore()
 
         if aspectRatio('get') == true
 
-            x = computeAspectRatio('x', atMetaData);
-            y = computeAspectRatio('y', atMetaData);
+            x = atMetaData{1}.PixelSpacing(1);
+            y = atMetaData{1}.PixelSpacing(2);
 
             daspect(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , [x y 1]);
         end
@@ -422,8 +422,8 @@ function dicomViewerCore()
 
         if aspectRatio('get') == true
 
-            x = computeAspectRatio('x', atMetaData);
-            y = computeAspectRatio('y', atMetaData);
+            x = atMetaData{1}.PixelSpacing(1);
+            y = atMetaData{1}.PixelSpacing(2);
             z = 1;
 
             daspect(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , [x y z]);

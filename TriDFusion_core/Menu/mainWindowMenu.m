@@ -150,7 +150,7 @@ function mainWindowMenu()
     
     uimenu(mTools, 'Label','Registration', 'Callback', @setRegistrationCallback, 'Separator','on');
     uimenu(mTools, 'Label','Mathematic'  , 'Callback', @setMathCallback);
-%    uimenu(mTools, 'Label','Sum Series', 'Callback', @sumSeriesCallback, 'Separator','on');
+    uimenu(mTools, 'Label','Create Planar from a 3D Series', 'Callback', @convertSeriesToPlanarCallback, 'Separator','on');
     uimenu(mTools, 'Label','Reset Series', 'Callback', @resetSeriesCallback, 'Separator','on');
 
     mHelp = uimenu(fiMainWindowPtr('get'),'Label','Help');
@@ -853,28 +853,182 @@ function mainWindowMenu()
         
     end
 
-    function sumSeriesCallback(~, ~)
+    function convertSeriesToPlanarCallback(~, ~)
         
-        a = dicomBuffer('get');
-        
-        iAxial    = sliceNumber('get', 'axial');
+    DLG_CONVERT_TO_PLANAR_X = 380;
+    DLG_CONVERT_TO_PLANAR_Y = 150;
+    
+    dlgConvertToPlanar = ...
+        dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_CONVERT_TO_PLANAR_X/2) ...
+                            (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_CONVERT_TO_PLANAR_Y/2) ...
+                            DLG_CONVERT_TO_PLANAR_X ...
+                            DLG_CONVERT_TO_PLANAR_Y ...
+                            ],...
+               'MenuBar', 'none',...
+               'Resize', 'off', ...    
+               'NumberTitle','off',...
+               'MenuBar', 'none',...
+               'Color', viewerBackgroundColor('get'), ...
+               'Name', 'Convert 3D Series To Planar',...
+               'Toolbar','none'...               
+               );           
+           
+        axes(dlgConvertToPlanar, ...
+             'Units'   , 'pixels', ...
+             'Position', [0 0 DLG_CONVERT_TO_PLANAR_X DLG_CONVERT_TO_PLANAR_Y], ...
+             'Color'   , viewerBackgroundColor('get'),...
+             'XColor'  , viewerForegroundColor('get'),...
+             'YColor'  , viewerForegroundColor('get'),...
+             'ZColor'  , viewerForegroundColor('get'),...             
+             'Visible' , 'off'...             
+             );           
+         
+        uicontrol(dlgConvertToPlanar,...
+                  'style'   , 'text',...
+                  'string'  , 'Plane to convert',...
+                  'horizontalalignment', 'left',...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...                   
+                  'position', [20 62 150 20]...
+                  );
+              
+    uiPlaneSelection = ...
+        uicontrol(dlgConvertToPlanar, ...
+                  'enable'  , 'on',...
+                  'Style'   , 'popup', ...
+                  'position', [200 65 160 20],...
+                  'String'  , {'Coronal', 'Sagittal', 'Axial'}, ...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'Value'   , 1 ...
+                  );
+              
+     % Cancel or Proceed
 
-        for ll=1:size(a,3)
-            a(:,:,ll)=a(:,:,iAxial);
+     uicontrol(dlgConvertToPlanar,...
+               'String','Cancel',...
+               'Position',[285 7 75 25],...
+               'BackgroundColor', viewerBackgroundColor('get'), ...
+               'ForegroundColor', viewerForegroundColor('get'), ...                
+               'Callback', @cancelConvertToPlanarCallback...
+               );
+
+     uicontrol(dlgConvertToPlanar,...
+              'String','Proceed',...
+              'Position',[200 7 75 25],...
+              'BackgroundColor', viewerBackgroundColor('get'), ...
+              'ForegroundColor', viewerForegroundColor('get'), ...               
+              'Callback', @proceedConvertToPlanarCallback...
+              );
+          
+        function cancelConvertToPlanarCallback(~, ~)
+            delete(dlgConvertToPlanar);
         end
+          
+        function proceedConvertToPlanarCallback(~, ~)  
+            
+            dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+          
+            aOriginalImage    = dicomBuffer  ('get', [], dSeriesOffset);
+            aOriginalMetaData = dicomMetaData('get', [], dSeriesOffset);
+
+            aImageSize = size(aOriginalImage);
+
+            dXSize = aImageSize(1);
+            dYSize = aImageSize(2);
+            dZSize = aImageSize(3);
         
-        b = imresize3(a,[429 512 512]);
-      
-        dicomBuffer('set', b);
+            dPlaneValue   = get(uiPlaneSelection, 'Value');
+            asPlaneString = get(uiPlaneSelection, 'String');
+            sPlane = asPlaneString{dPlaneValue};
+            
+            dXPixel = aOriginalMetaData{1}.PixelSpacing(1);
+            dYPixel = aOriginalMetaData{1}.PixelSpacing(2);
+            dZPixel = computeSliceSpacing(aOriginalMetaData);
+                
+            if strcmpi(sPlane, 'coronal')     
+                
+                aNewImage = squeeze(max(aOriginalImage, [], 1));
+                aNewImage = permute(aNewImage, [2 1]);
+
+                aOriginalMetaData{1}.PixelSpacing(1) = dZPixel;
+                aOriginalMetaData{1}.PixelSpacing(2) = dXPixel;
+            else
+                aNewImage = squeeze(max(aOriginalImage, [], 3));
+                
+                aOriginalMetaData{1}.PixelSpacing(1) = dXPixel;
+                aOriginalMetaData{1}.PixelSpacing(2) = dYPixel;              
+            end
+
+
+            atInput = inputTemplate('get');
+
+            atInput(numel(atInput)+1) = atInput(dSeriesOffset);
+
+            atInput(numel(atInput)).bEdgeDetection = false;
+            atInput(numel(atInput)).bDoseKernel    = false;    
+            atInput(numel(atInput)).bFlipLeftRight = false;
+            atInput(numel(atInput)).bFlipAntPost   = false;
+            atInput(numel(atInput)).bFlipHeadFeet  = false;
+            atInput(numel(atInput)).bMathApplied   = false;
+            atInput(numel(atInput)).bFusedDoseKernel    = false;
+            atInput(numel(atInput)).bFusedEdgeDetection = false;
+            atInput(numel(atInput)).tMovement = [];
+            atInput(numel(atInput)).tMovement.bMovementApplied = false;
+            atInput(numel(atInput)).tMovement.aGeomtform = [];                
+            atInput(numel(atInput)).tMovement.atSeq{1}.sAxe = [];
+            atInput(numel(atInput)).tMovement.atSeq{1}.aTranslation = [];
+            atInput(numel(atInput)).tMovement.atSeq{1}.dRotation = [];            
+            atInput(numel(atInput)).aMip = [];
+
+            atInput(numel(atInput)).atDicomInfo = aOriginalMetaData(1);
+
+            asSeriesDescription = seriesDescription('get');
+            asSeriesDescription{numel(asSeriesDescription)+1}=sprintf('PLANAR %s', asSeriesDescription{dSeriesOffset});
+            seriesDescription('set', asSeriesDescription);
+
+            dSeriesInstanceUID = dicomuid;
+
+            for hh=1:numel(atInput(numel(atInput)).atDicomInfo)
+                atInput(numel(atInput)).atDicomInfo{hh}.SeriesDescription = asSeriesDescription{numel(asSeriesDescription)};
+                atInput(numel(atInput)).atDicomInfo{hh}.SeriesInstanceUID = dSeriesInstanceUID;
+            end
+
+            atInput(numel(atInput)).aDicomBuffer = aNewImage;
+
+            inputTemplate('set', atInput);
+
+            aInputBuffer = inputBuffer('get');
+            aInputBuffer{numel(aInputBuffer)+1} = aNewImage;
+            inputBuffer('set', aInputBuffer);
+
+            asSeries = get(uiSeriesPtr('get'), 'String');
+            asSeries{numel(asSeries)+1} = asSeriesDescription{numel(asSeriesDescription)};
+            set(uiSeriesPtr('get'), 'String', asSeries);
+            set(uiFusedSeriesPtr('get'), 'String', asSeries);
+
+            set(uiSeriesPtr('get'), 'Value', numel(atInput));
+            dicomMetaData('set', atInput(numel(atInput)).atDicomInfo);
+            dicomBuffer('set', aNewImage);
+            setQuantification(numel(atInput));
+
+            tQuant = quantificationTemplate('get');
+            atInput(numel(atInput)).tQuant = tQuant;
+
+            inputTemplate('set', atInput);
+                
+            clearDisplay();
+            initDisplay(1);
+
+            dicomViewerCore();
+
+            initWindowLevel('set', true);
+            
+            delete(dlgConvertToPlanar);
+            
+        %    quantificationTemplate('set', tInput(dInitOffset).tQuant);        
         
-        a2 = dicomMetaData('get', [], 1);
-        
-        for kk=1:numel(a2)
-            a2{kk}.Modality = 'nm';
         end
-        
-        dicomMetaData('set', a2);
-        
     end
 
 

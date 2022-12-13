@@ -1461,8 +1461,7 @@ function generateContourReportCallback(~, ~)
            
             switch lower(atVoiInput{vv}.LesionType)
                 
-                case 'unspecified'
-                    
+                case 'unspecified'                    
                     dFrom = dUnspecifiedRoisOffset;
                     dTo   = dUnspecifiedRoisOffset+dNbRois-1;
                     
@@ -1470,8 +1469,7 @@ function generateContourReportCallback(~, ~)
                     
                     dUnspecifiedRoisOffset = dUnspecifiedRoisOffset+dNbRois;
                    
-                case 'bone'
-                    
+                case 'bone'                    
                     dFrom = dBoneRoisOffset;
                     dTo   = dBoneRoisOffset+dNbRois-1;
                     
@@ -1479,8 +1477,7 @@ function generateContourReportCallback(~, ~)
                     
                     dBoneRoisOffset = dBoneRoisOffset+dNbRois;
                     
-                case 'soft tissue'
-                    
+                case 'soft tissue'                    
                     dFrom = dSoftTissueRoisOffset;
                     dTo   = dSoftTissueRoisOffset+dNbRois-1;
                     
