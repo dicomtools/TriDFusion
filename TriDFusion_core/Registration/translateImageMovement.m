@@ -1,5 +1,5 @@
 function aTranslatedImage = translateImageMovement(aImage, aPosition)
-%function  translateImageMovement(aImage, aAxe, aPosition)
+%function  translateImageMovement(aImage, aPosition)
 %Translate Movement of an Image. 
 %See TriDFuison.doc (or pdf) for more information about options.
 %

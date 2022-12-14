@@ -30,10 +30,10 @@ function dRatio = computeAspectRatio(sDirection, atDicomInfo)
     if atDicomInfo{1}.ReconstructionDiameter 
         if strcmp(sDirection, 'y')      
             dRatio = computeSliceSpacing(atDicomInfo) * ...
-                       (atDicomInfo{1}.din.rows / atDicomInfo{1}.ReconstructionDiameter);  
+                       (atDicomInfo{1}.Rows / atDicomInfo{1}.ReconstructionDiameter);  
         else      
             dRatio = computeSliceSpacing(atDicomInfo) * ...
-                       (atDicomInfo{1}.din.cols / atDicomInfo{1}.ReconstructionDiameter);                       
+                       (atDicomInfo{1}.Columns / atDicomInfo{1}.ReconstructionDiameter);                       
         end
     else
         dRatio = 1;

@@ -900,7 +900,7 @@ function mainWindowMenu()
                   'String'  , {'Coronal', 'Sagittal', 'Axial'}, ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...                    
-                  'Value'   , 1 ...
+                  'Value'   , 3 ...
                   );
               
      % Cancel or Proceed
@@ -931,12 +931,6 @@ function mainWindowMenu()
           
             aOriginalImage    = dicomBuffer  ('get', [], dSeriesOffset);
             aOriginalMetaData = dicomMetaData('get', [], dSeriesOffset);
-
-            aImageSize = size(aOriginalImage);
-
-            dXSize = aImageSize(1);
-            dYSize = aImageSize(2);
-            dZSize = aImageSize(3);
         
             dPlaneValue   = get(uiPlaneSelection, 'Value');
             asPlaneString = get(uiPlaneSelection, 'String');
@@ -959,7 +953,6 @@ function mainWindowMenu()
                 aOriginalMetaData{1}.PixelSpacing(1) = dXPixel;
                 aOriginalMetaData{1}.PixelSpacing(2) = dYPixel;              
             end
-
 
             atInput = inputTemplate('get');
 
@@ -1025,9 +1018,7 @@ function mainWindowMenu()
             initWindowLevel('set', true);
             
             delete(dlgConvertToPlanar);
-            
-        %    quantificationTemplate('set', tInput(dInitOffset).tQuant);        
-        
+                    
         end
     end
 

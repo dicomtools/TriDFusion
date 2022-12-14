@@ -35,8 +35,8 @@ function info = dicominfo4che3(fileInput)
     catch 
         try 
         info = dicominfo(char(fileInput)); 
-        info.din.rows       = info.Rows;
-        info.din.cols       = info.Columns;   
+%        info.din.rows       = info.Rows;
+%        info.din.cols       = info.Columns;   
         catch
             info = [];
         end
@@ -224,8 +224,21 @@ function info = dicominfo4che3(fileInput)
 %        info.din.pixeldata  = dataset.getInts(org.dcm4che3.data.Tag.PixelData);
 %    end
 
-    info.din.rows       = dataset.getInt(org.dcm4che3.data.Tag.Rows, 0);
-    info.din.cols       = dataset.getInt(org.dcm4che3.data.Tag.Columns,0);                                                           
+    detectorInformationSequence = dataset.getNestedDataset(org.dcm4che3.data.Tag.DetectorInformationSequence, 0); % Item_1
+    if ~isempty(detectorInformationSequence) 
+        info.DetectorInformationSequence.Item_1.FieldOfViewShape      = char(detectorInformationSequence.getString(org.dcm4che3.data.Tag.FieldOfViewShape, 0));                                                                                                                                                                                
+        info.DetectorInformationSequence.Item_1.FieldOfViewDimensions = double(detectorInformationSequence.getInts(org.dcm4che3.data.Tag.FieldOfViewDimensions));             
+    end
+
+    detectorInformationSequence = dataset.getNestedDataset(org.dcm4che3.data.Tag.DetectorInformationSequence, 1); % Item_2
+    if ~isempty(detectorInformationSequence) 
+        info.DetectorInformationSequence.Item_2.FieldOfViewShape      = char(detectorInformationSequence.getString(org.dcm4che3.data.Tag.FieldOfViewShape, 0));                                                                                                                                                                                
+        info.DetectorInformationSequence.Item_2.FieldOfViewDimensions = double(detectorInformationSequence.getInts(org.dcm4che3.data.Tag.FieldOfViewDimensions));               
+    end
+    
+%    info.din.rows       = info.Rows;
+%    info.din.cols       = info.Columns;  
+    
 %        info.din.nbOfFrames = dataset.getInt(org.dcm4che3.data.Tag.NumberOfFrames,0);
     info.NumberOfSlices = dataset.getInt(org.dcm4che3.data.Tag.NumberOfSlices,0);
     info.NumberOfTemporalPositions = dataset.getInt(org.dcm4che3.data.Tag.NumberOfTemporalPositions,0);

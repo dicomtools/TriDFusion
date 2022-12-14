@@ -95,7 +95,18 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
             end              
         end
     else
-        
+        REFERENCE_IS_2D = false;
+        if numel(aOffset) == 2 % Reference is a 2D image
+           
+            REFERENCE_IS_2D = true;
+
+           aOffsetTemp = zeros(1,3);
+           aOffsetTemp(1) = aOffset(1);
+           aOffsetTemp(2) = aOffset(2);
+           aOffset = aOffsetTemp;
+           clear aOffsetTemp;
+        end
+            
         if aOffset(1) ~= 0 || ...
            aOffset(2) ~= 0 || ...     
            aOffset(3) ~= 0 
@@ -133,6 +144,12 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
 
             [Mdti,~] = TransformMatrix(atDcmMetaData{1}, dcmSliceThickness);
             [Mtf,~]  = TransformMatrix(atRefMetaData{1}, refSliceThickness);
+            
+            if REFERENCE_IS_2D
+                Mtf=Mdti;
+                Mtf(1,1) = atRefMetaData{1}.PixelSpacing(2);
+                Mtf(2,2) = atRefMetaData{1}.PixelSpacing(1);
+            end
             
             transM = inv(Mdti) * Mtf;
             [outX, outY, outZ]  = applyTransMatrix(transM, aOffset(:,1), aOffset(:,2), aOffset(:,3)); 
