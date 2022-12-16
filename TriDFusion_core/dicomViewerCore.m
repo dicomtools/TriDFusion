@@ -298,6 +298,14 @@ function dicomViewerCore()
             x = atMetaData{1}.PixelSpacing(1);
             y = atMetaData{1}.PixelSpacing(2);
 
+            if x == 0
+                x=1;
+            end
+            
+            if y == 0 
+                y=1;
+            end
+            
             daspect(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , [x y 1]);
         end
 
@@ -426,6 +434,14 @@ function dicomViewerCore()
             y = atMetaData{1}.PixelSpacing(2);
             z = 1;
 
+            if x==0
+                x=1;
+            end
+            
+            if y == 0
+                y =1;
+            end
+            
             daspect(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , [x y z]);
         else
             x =1;
