@@ -10,7 +10,7 @@
 
 ![TriDFusion](images/TriDFusionMontage.png)
 
-## File format compatibility:
+## File format compatibility
 
 | Medical Imaging Modalities                 | Import / Export File Formats               |
 | ------------------------------------------ | ------------------------------------------ |
@@ -49,14 +49,13 @@
 
 * https://github.com/dicomtools/TriDFusion/wiki/Source-code-version-of-TriDFusion-(3DF)
 
-
-## Optional:
+## Optional
 
 * https://github.com/cerr/CERR
 
-### Reference 
+### References 
 
-If you use this tool please cite it.
+If you use this tool please cite it:
 https://ejnmmiphys.springeropen.com/articles/10.1186/s40658-022-00501-y
 
-Visit https://daniellafontaine.com/ for more information
+Visit https://daniellafontaine.com/ for more information.
