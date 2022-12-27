@@ -45,13 +45,18 @@
 
 * MATLAB 2020a
 
-## Optional:
-
-* https://github.com/cerr/CERR
-
 ## Installation
 
 * https://github.com/dicomtools/TriDFusion/wiki/Source-code-version-of-TriDFusion-(3DF)
 
-Visit https://daniellafontaine.com/ for more information
 
+## Optional:
+
+* https://github.com/cerr/CERR
+
+### Reference 
+
+If you use this tool please cite it.
+https://ejnmmiphys.springeropen.com/articles/10.1186/s40658-022-00501-y
+
+Visit https://daniellafontaine.com/ for more information
