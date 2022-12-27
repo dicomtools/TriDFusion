@@ -766,20 +766,44 @@ function generateContourReportCallback(~, ~)
         end
         
         % Acquisition Date Time
-                
+        
         sAcquisitionTime = atMetaData{1}.AcquisitionTime;
-        aAcquisitionDate = atMetaData{1}.AcquisitionDate;
         
         if isempty(sAcquisitionTime)
             sAcquisitionDateTime = '-';
         else
-            if numel(sAcquisitionTime) == 6
-                sAcquisitionTime = sprintf('%s.00', sAcquisitionTime);
-            end
+            if numel(atMetaData) > 1                
+                dayAcquisitionDate = inf;
+                for jj=1:numel(atMetaData)
 
-            sAcquisitionDateTime = datetime([aAcquisitionDate sAcquisitionTime],'InputFormat','yyyyMMddHHmmss.SS');
-        end
-        
+                    acquisitionTime = atMetaData{jj}.AcquisitionTime;
+                    acquisitionDate = atMetaData{jj}.AcquisitionDate;
+
+                    if numel(acquisitionTime) == 6
+                        acquisitionTime = sprintf('%s.00', acquisitionTime);
+                    end            
+
+                    datetimeAcquisitionDate = datetime([acquisitionDate acquisitionTime],'InputFormat','yyyyMMddHHmmss.SS');
+                    dayCurAcquisitionDate = datenum(datetimeAcquisitionDate);
+                    if dayCurAcquisitionDate < dayAcquisitionDate % Find min time
+                        dayAcquisitionDate = dayCurAcquisitionDate;
+                        sAcquisitionDateTime = datetime([acquisitionDate acquisitionTime],'InputFormat','yyyyMMddHHmmss.SS');
+                    end                    
+                end
+
+            else
+                acquisitionTime = atMetaData{1}.AcquisitionTime;
+                acquisitionDate = atMetaData{1}.AcquisitionDate;
+
+                if numel(acquisitionTime) == 6
+                    acquisitionTime = sprintf('%s.00', acquisitionTime);
+                end            
+
+                sAcquisitionDateTime = datetime([acquisitionDate acquisitionTime],'InputFormat','yyyyMMddHHmmss.SS');
+                dayAcquisitionDate = datenum(sAcquisitionDateTime);                
+            end
+        end        
+            
         sReport = sprintf('Series description:\n%s'         , char(sSeriesDescription));      
         sReport = sprintf('%s\n\nSeries date time:\n%s'     , sReport, char(sSeriesDateTime));
         sReport = sprintf('%s\n\nAcquisition date Time:\n%s', sReport, char(sAcquisitionDateTime));        
@@ -868,7 +892,12 @@ function generateContourReportCallback(~, ~)
                             daySeriesDate = datenum(sSeriesDateTime);
                             dateInjDate   = datenum(sInjDateTime);
 
+                            if daySeriesDate > dayAcquisitionDate
+                                daySeriesDate = dayAcquisitionDate;
+                            end
+                            
                             relT = seconds((daySeriesDate - dateInjDate)*(24*60*60)); 
+                   %         relT = seconds((dayAcquisitionDate - dateInjDate)*(24*60*60)); 
                             relT.Format = 'dd:hh:mm:ss';
                             sDecayTime = char(relT);
 
@@ -886,7 +915,7 @@ function generateContourReportCallback(~, ~)
 
                             case 'none'
 
-                            dayAcquisitionDate = datenum(sAcquisitionDateTime);
+                         %   dayAcquisitionDate = datenum(sAcquisitionDateTime);
                             dateInjDate        = datenum(sInjDateTime);
 
                             relT = seconds((dayAcquisitionDate - dateInjDate)*(24*60*60)); 

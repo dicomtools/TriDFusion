@@ -74,9 +74,7 @@ function maskToVoi(aMask, sLabel, aColor, sPlane, dSeriesOffset, bPixelEdge)
                 sliceNumber('set', 'sagittal', mm);
             else
                 sliceNumber('set', 'axial', mm);
-            end
-            
-            sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+            end            
 
             if bPixelEdge == true
                 aSlice = imresize(aSlice,3, 'nearest'); % do not go directly through pixel centers
@@ -86,6 +84,8 @@ function maskToVoi(aMask, sLabel, aColor, sPlane, dSeriesOffset, bPixelEdge)
 
             if ~isempty(maskSlice)
                 for jj=1:numel(maskSlice)
+                    
+                    sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
 
                     curentMask = maskSlice(jj);
                     

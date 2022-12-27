@@ -1,5 +1,5 @@
-function dSUVconv = computeSUV(tMetaData, suvType)
-%function dSUVconv = computeSUV(tMetaData)
+function dSUVconv = computeSUV(atMetaData, suvType)
+%function dSUVconv = computeSUV(atMetaData, suvType)
 %Compute SUV values.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -34,32 +34,59 @@ function dSUVconv = computeSUV(tMetaData, suvType)
 
     dSUVconv = 0;
 
-    if isfield(tMetaData, 'RadiopharmaceuticalInformationSequence') 
+    if isfield(atMetaData{1}, 'RadiopharmaceuticalInformationSequence') 
 
-        if ( ~isempty(tMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose) && ...
-             ~isempty(tMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime) ) || ...
-           ( ~isempty(tMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose) && ...
-             ~isempty(tMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartTime) )      
+        if ( ~isempty(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose) && ...
+             ~isempty(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime) ) || ...
+           ( ~isempty(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose) && ...
+             ~isempty(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartTime) )      
            
-            if isempty(tMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime) 
-                injDateTime = sprintf('%s%s', tMetaData.StudyDate, tMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartTime);
+            if isempty(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime) 
+                injDateTime = sprintf('%s%s', atMetaData{1}.StudyDate, atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartTime);
             else
-                injDateTime = tMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;      
+                injDateTime = atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;      
             end
             
-            injDose    = str2double(tMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose);
+            injDose    = str2double(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose);
             
-            seriesTime = tMetaData.SeriesTime;
-            seriesDate = tMetaData.SeriesDate;
+
+            % Acquisition Date Time
             
-            acquisitionTime = tMetaData.AcquisitionTime;
-            acquisitionDate = tMetaData.AcquisitionDate;
+            if numel(atMetaData) > 1                
+                dayAcquisitionDate = inf;
+                for jj=1:numel(atMetaData)
+                    
+                    acquisitionTime = atMetaData{jj}.AcquisitionTime;
+                    acquisitionDate = atMetaData{jj}.AcquisitionDate;
+
+                    if numel(acquisitionTime) == 6
+                        acquisitionTime = sprintf('%s.00', acquisitionTime);
+                    end            
+
+                    datetimeAcquisitionDate = datetime([acquisitionDate acquisitionTime],'InputFormat','yyyyMMddHHmmss.SS');
+                    dayCurAcquisitionDate = datenum(datetimeAcquisitionDate);
+                    if dayCurAcquisitionDate < dayAcquisitionDate % Find min time
+                        dayAcquisitionDate = dayCurAcquisitionDate;
+                    end                    
+                end
             
-            patWeight = tMetaData.PatientWeight;
+            else
+                acquisitionTime = atMetaData{1}.AcquisitionTime;
+                acquisitionDate = atMetaData{1}.AcquisitionDate;
+                
+                if numel(acquisitionTime) == 6
+                    acquisitionTime = sprintf('%s.00', acquisitionTime);
+                end            
+
+                datetimeAcquisitionDate = datetime([acquisitionDate acquisitionTime],'InputFormat','yyyyMMddHHmmss.SS');
+                dayAcquisitionDate = datenum(datetimeAcquisitionDate);                
+            end
+            
+            patWeight = atMetaData{1}.PatientWeight;
             if patWeight == 0 || isnan(patWeight)
                 patWeight =1;
             end
-            halfLife = str2double(tMetaData.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife);
+            halfLife = str2double(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife);
 
             % Radiopharmaceutical Date Time
             
@@ -71,7 +98,10 @@ function dSUVconv = computeSUV(tMetaData, suvType)
             dateInjDate = datenum(datetimeInjDate);
             
             % Series Date Time
-
+            
+            seriesTime = atMetaData{1}.SeriesTime;
+            seriesDate = atMetaData{1}.SeriesDate;
+            
             if numel(seriesTime) == 6
                 seriesTime = sprintf('%s.00', seriesTime);
             end
@@ -81,25 +111,30 @@ function dSUVconv = computeSUV(tMetaData, suvType)
 
             % Acquisition Date Time
             
-            if numel(acquisitionTime) == 6
-                acquisitionTime = sprintf('%s.00', acquisitionTime);
-            end            
+%            if numel(acquisitionTime) == 6
+%                acquisitionTime = sprintf('%s.00', acquisitionTime);
+%            end            
 
-            datetimeAcquisitionDate = datetime([acquisitionDate acquisitionTime],'InputFormat','yyyyMMddHHmmss.SS');
-            dayAcquisitionDate = datenum(datetimeAcquisitionDate);
+%            datetimeAcquisitionDate = datetime([acquisitionDate acquisitionTime],'InputFormat','yyyyMMddHHmmss.SS');
+%            dayAcquisitionDate = datenum(datetimeAcquisitionDate);
             
             % Decay correction
             
-            sDecayCorrection = tMetaData.DecayCorrection;
+            sDecayCorrection = atMetaData{1}.DecayCorrection;
             if strcmpi(sDecayCorrection, 'START')
+                if daySeriesDate > dayAcquisitionDate
+                    daySeriesDate = dayAcquisitionDate;
+                end
                 relT = (daySeriesDate - dateInjDate)*(24*60*60); % Acquisition start time
-            
+    %            relT = (dayAcquisitionDate - dateInjDate)*(24*60*60); % Acquisition start time min values
+           
             elseif strcmpi(sDecayCorrection, 'ADMIN')
                 relT = (dateInjDate - dateInjDate)*(24*60*60); % Radiopharmaceutical administration time
                     
             elseif strcmpi(sDecayCorrection, 'NONE')
                  %   relT = 0; % No decay
-                relT = (dayAcquisitionDate - dateInjDate)*(24*60*60); % No decay correction
+               %relT = (daySeriesDate - dateInjDate)*(24*60*60); % Acquisition start time
+               relT = (dayAcquisitionDate - dateInjDate)*(24*60*60); % No decay correction
            
             else
                 relT = inf;
@@ -118,7 +153,7 @@ function dSUVconv = computeSUV(tMetaData, suvType)
                     % Patient height
                     % (BSA in m2) = [(weight in kg)^0.425 \* (height in cm)^0.725 \* 0.007184].
                     % SUV-bsa = (PET image Pixels) \* (BSA in m2) \* (10000 cm2/m2) / (injected dose).
-                    patHeight = tMetaData.PatientSize;
+                    patHeight = atMetaData{1}.PatientSize;
                     if patHeight == 0 || isnan(patHeight)
                         dSUVconv =0;
                     else
@@ -128,8 +163,8 @@ function dSUVconv = computeSUV(tMetaData, suvType)
                     end
                         
                 elseif strcmpi(suvType, 'LBM') % lean body mass 
-                    patGender = tMetaData.PatientSex;
-                    patHeight = tMetaData.PatientSize;
+                    patGender = atMetaData{1}.PatientSex;
+                    patHeight = atMetaData{1}.PatientSize;
                     if patHeight == 0 || isnan(patHeight)
                         dSUVconv =0;
 
@@ -149,12 +184,12 @@ function dSUVconv = computeSUV(tMetaData, suvType)
                         
                 elseif strcmpi(suvType, 'LBMJANMA') % lean body mass by Janmahasatian method
                         
-                    patHeight = tMetaData.PatientSize;
+                    patHeight = atMetaData{1}.PatientSize;
                     if patHeight == 0 || isnan(patHeight)
                         dSUVconv =0;
                     else
                         bmi = (patHeight*2.20462 / (patHeight*39.3701)^2) * 703;
-                        patGender = tMetaData.PatientSex;
+                        patGender = atMetaData{1}.PatientSex;
                         if strcmpi(patGender,'M')
                             lbmKg = (9270 * patWeight) / (6680 + 216*bmi); % male
                         else
@@ -169,19 +204,19 @@ function dSUVconv = computeSUV(tMetaData, suvType)
                 
                 % SUV SPECT
 
-                if isfield(tMetaData, 'RealWorldValueMappingSequence')
-                    if isfield(tMetaData.RealWorldValueMappingSequence.Item_1, 'MeasurementUnitsCodeSequence')
-                        sUnits = tMetaData.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue;
+                if isfield(atMetaData{1}, 'RealWorldValueMappingSequence')
+                    if isfield(atMetaData{1}.RealWorldValueMappingSequence.Item_1, 'MeasurementUnitsCodeSequence')
+                        sUnits = atMetaData{1}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue;
                         if strcmpi(sUnits, 'Bq/ml')
                             sUnits = 'BQML';
                         else
-                            sUnits = tMetaData.Units;
+                            sUnits = atMetaData{1}.Units;
                         end
                     else
-                        sUnits = tMetaData.Units;
+                        sUnits = atMetaData{1}.Units;
                     end
                 else
-                    sUnits = tMetaData.Units;
+                    sUnits = atMetaData{1}.Units;
                 end
                 
                 % Transformation to Bq/L

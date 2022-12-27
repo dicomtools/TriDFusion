@@ -118,6 +118,8 @@ function mainWindowMenu()
     uimenu(mInsert, 'Label','Ellipse'     , 'Callback', @setInsertMenuCallback);
 
     mTools = uimenu(fiMainWindowPtr('get'),'Label','Tools');
+%    mTotalSegmentation = uimenu(mTools, 'Label','Total Segmentation', 'Callback', @totalSegmentationCallback);
+   
 %     uimenu(mTools, 'Label','Fusion'      , 'Callback', @setFusionCallback);
 %     rotate3DMenu  ('set', uimenu(mTools, 'Label','Rotate 3D'  , 'Callback', @setRotate3DCallback));
     panMenu       ('set', uimenu(mTools, 'Label','Pan'        , 'Callback', @setPanCallback));
@@ -151,6 +153,7 @@ function mainWindowMenu()
     uimenu(mTools, 'Label','Registration', 'Callback', @setRegistrationCallback, 'Separator','on');
     uimenu(mTools, 'Label','Mathematic'  , 'Callback', @setMathCallback);
     uimenu(mTools, 'Label','Create Planar from a 3D Series', 'Callback', @convertSeriesToPlanarCallback, 'Separator','on');
+    uimenu(mTools, 'Label','Dice Contours', 'Callback', @diceContoursCallback, 'Separator','on');
     uimenu(mTools, 'Label','Reset Series', 'Callback', @resetSeriesCallback, 'Separator','on');
 
     mHelp = uimenu(fiMainWindowPtr('get'),'Label','Help');
@@ -1022,6 +1025,268 @@ function mainWindowMenu()
         end
     end
 
+    function diceContoursCallback(~, ~)
+        
+        DLG_DICE_CONTOURS_X = 380;
+        DLG_DICE_CONTOURS_Y = 160;
+
+        dlgDiceContours = ...
+            dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_DICE_CONTOURS_X/2) ...
+                                (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_DICE_CONTOURS_Y/2) ...
+                                DLG_DICE_CONTOURS_X ...
+                                DLG_DICE_CONTOURS_Y ...
+                                ],...
+                   'MenuBar', 'none',...
+                   'Resize', 'off', ...    
+                   'NumberTitle','off',...
+                   'MenuBar', 'none',...
+                   'Color', viewerBackgroundColor('get'), ...
+                   'Name', 'Dice Contours',...
+                   'Toolbar','none'...               
+                   );           
+
+            axes(dlgDiceContours, ...
+                 'Units'   , 'pixels', ...
+                 'Position', [0 0 DLG_DICE_CONTOURS_X DLG_DICE_CONTOURS_Y], ...
+                 'Color'   , viewerBackgroundColor('get'),...
+                 'XColor'  , viewerForegroundColor('get'),...
+                 'YColor'  , viewerForegroundColor('get'),...
+                 'ZColor'  , viewerForegroundColor('get'),...             
+                 'Visible' , 'off'...             
+                 );
+                       
+        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        asContoursLabel = [];
+        dContour1Offset = 1;
+        dContour2Offset = 1;      
+        dNbVOIs = 0;
+        if ~isempty(atVoiInput)
+            dNbVOIs = numel(atVoiInput);
+            if dNbVOIs >= 2
+                for jj=1:dNbVOIs
+                    asContoursLabel{jj}=atVoiInput{jj}.Label;
+                    dContour1Offset = 1;
+                    dContour2Offset = 2;
+                end
+            else
+                asContoursLabel = ' ';                
+            end
+        else
+            asContoursLabel = ' ';            
+        end
+        
+             uicontrol(dlgDiceContours,...
+                      'style'   , 'text',...
+                      'string'  , 'Volume-of-interest 1',...
+                      'horizontalalignment', 'left',...
+                      'BackgroundColor', viewerBackgroundColor('get'), ...
+                      'ForegroundColor', viewerForegroundColor('get'), ...                   
+                      'position', [20 117 150 20]...
+                      );
+                  
+        uiContours1 = ...
+            uicontrol(dlgDiceContours, ...
+                      'enable'  , 'on',...
+                      'Style'   , 'popup', ...
+                      'position', [200 120 160 20],...
+                      'String'  , asContoursLabel, ...
+                      'BackgroundColor', viewerBackgroundColor('get'), ...
+                      'ForegroundColor', viewerForegroundColor('get'), ...                    
+                      'Value'   , dContour1Offset ...
+                      );
+                  
+            uicontrol(dlgDiceContours,...
+                      'style'   , 'text',...
+                      'string'  , 'Volume-of-interest 2',...
+                      'horizontalalignment', 'left',...
+                      'BackgroundColor', viewerBackgroundColor('get'), ...
+                      'ForegroundColor', viewerForegroundColor('get'), ...                   
+                      'position', [20 87 150 20]...
+                      );
+
+        uiContours2 = ...
+            uicontrol(dlgDiceContours, ...
+                      'enable'  , 'on',...
+                      'Style'   , 'popup', ...
+                      'position', [200 90 160 20],...
+                      'String'  , asContoursLabel, ...
+                      'BackgroundColor', viewerBackgroundColor('get'), ...
+                      'ForegroundColor', viewerForegroundColor('get'), ...                    
+                      'Value'   , dContour2Offset ...
+                      );
+                  
+            uicontrol(dlgDiceContours,...
+                      'style'   , 'text',...
+                      'string'  , 'Dice Value:',...
+                      'horizontalalignment', 'left',...
+                      'BackgroundColor', viewerBackgroundColor('get'), ...
+                      'ForegroundColor', viewerForegroundColor('get'), ...                   
+                      'position', [20 55 150 20]...
+                      );
+                  
+        txtDice = ...
+            uicontrol(dlgDiceContours,...
+                      'style'   , 'text',...
+                      'string'  , '0',...
+                      'horizontalalignment', 'left',...
+                      'BackgroundColor', viewerBackgroundColor('get'), ...
+                      'ForegroundColor', viewerForegroundColor('get'), ...                   
+                      'position', [200 55 150 20]...
+                      );
+                  
+         % Cancel or Proceed
+
+         uicontrol(dlgDiceContours,...
+                   'String','Cancel',...
+                   'Position',[285 7 75 25],...
+                   'BackgroundColor', viewerBackgroundColor('get'), ...
+                   'ForegroundColor', viewerForegroundColor('get'), ...                
+                   'Callback', @cancelDiceContoursCallback...
+                   );
+
+         uicontrol(dlgDiceContours,...
+                  'String','Compute',...
+                  'Position',[200 7 75 25],...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...               
+                  'Callback', @computeDiceContoursCallback...
+                  );  
+              
+        function cancelDiceContoursCallback(~, ~) 
+            
+            delete(dlgDiceContours);
+        end
+        
+        function computeDiceContoursCallback(~, ~)
+            
+            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            
+            if dNbVOIs >= 2
+                
+%                tQuant = quantificationTemplate('get');
+
+%                if isfield(tQuant, 'tSUV')
+%                    dSUVScale = tQuant.tSUV.dScale;
+%                else
+%                    dSUVScale = 0;
+%                end
+        
+ %               atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+                aDisplayBuffer = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
+                
+                aMask1 = zeros(size(aDisplayBuffer));
+                aMask2 = zeros(size(aDisplayBuffer));
+        
+                dContour1Offset = get(uiContours1, 'Value');
+                dContour2Offset = get(uiContours2, 'Value');
+                
+                asRoisTag1 = atVoiInput{dContour1Offset}.RoisTag;
+                        
+                for kk=1:numel(asRoisTag1)
+                    
+                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[asRoisTag1{kk}]} );
+                    ptrRoi = atRoiInput{find(aTagOffset, 1)};
+        
+                    switch lower(ptrRoi.Axe)    
+
+                        case 'axe'
+                            imCData = aDisplayBuffer(:,:); 
+
+                        case 'axes1'
+                            imCData = permute(aDisplayBuffer(ptrRoi.SliceNb,:,:), [3 2 1]);
+
+                        case 'axes2'
+                            imCData = permute(aDisplayBuffer(:,ptrRoi.SliceNb,:), [3 1 2]) ;
+
+                        case 'axes3'
+                            imCData = aDisplayBuffer(:,:,ptrRoi.SliceNb);  
+
+                        otherwise   
+                    end          
+                    
+                    mask = roiTemplateToMask(ptrRoi, imCData);  
+                    imCData(imCData~=0)=0;
+                    imCData(mask)=1;
+                    
+                    switch lower(ptrRoi.Axe)    
+
+                        case 'axe'
+                            aMask1 = imCData; 
+
+                        case 'axes1'
+                            aMask1(ptrRoi.SliceNb,:,:) = aMask1(ptrRoi.SliceNb,:,:)|imCData;
+
+                        case 'axes2'
+                            aMask1(:,ptrRoi.SliceNb,:) = aMask1(:,ptrRoi.SliceNb,:)|imCData;
+
+                        case 'axes3'
+                            aMask1(:,:,ptrRoi.SliceNb) = aMask1(:,:,ptrRoi.SliceNb)|imCData;  
+
+                        otherwise   
+                    end   
+                    
+                end
+                                
+                asRoisTag2 = atVoiInput{dContour2Offset}.RoisTag;
+                for kk=1:numel(asRoisTag2)
+                    
+                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[asRoisTag2{kk}]} );
+                    ptrRoi = atRoiInput{find(aTagOffset, 1)};
+        
+                    switch lower(ptrRoi.Axe)    
+
+                        case 'axe'
+                            imCData = aDisplayBuffer(:,:); 
+
+                        case 'axes1'
+                            imCData = permute(aDisplayBuffer(ptrRoi.SliceNb,:,:), [3 2 1]);
+
+                        case 'axes2'
+                            imCData = permute(aDisplayBuffer(:,ptrRoi.SliceNb,:), [3 1 2]) ;
+
+                        case 'axes3'
+                            imCData = aDisplayBuffer(:,:,ptrRoi.SliceNb);  
+
+                        otherwise   
+                    end          
+                    
+                    mask = roiTemplateToMask(ptrRoi, imCData);  
+                    imCData(imCData~=0)=0;
+                    imCData(mask)=1;
+                    
+                    switch lower(ptrRoi.Axe)    
+
+                        case 'axe'
+                            aMask2 =imCData; 
+
+                        case 'axes1'
+                            aMask2(ptrRoi.SliceNb,:,:) = aMask2(ptrRoi.SliceNb,:,:)|imCData;
+
+                        case 'axes2'
+                            aMask2(:,ptrRoi.SliceNb,:) = aMask2(:,ptrRoi.SliceNb,:)|imCData;
+
+                        case 'axes3'
+                            aMask2(:,:,ptrRoi.SliceNb) = aMask2(:,:,ptrRoi.SliceNb)|imCData;  
+
+                        otherwise   
+                    end   
+                    
+                end                
+                
+                dDiceValue = dice(aMask1, aMask2);
+                
+                set(txtDice, 'String', num2str(dDiceValue));
+                
+%                delete(dlgDiceContours);
+
+            else
+                
+                delete(dlgDiceContours);               
+            end
+        end
+        
+    end
 
 
 end

@@ -1759,7 +1759,7 @@ end
 
         sFontName = get(lbVoiRoiWindow, 'FontName');
 
-        atMetaData = dicomMetaData('get');
+        atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
 
         atInput = inputTemplate('get');
         dOffset = get(uiSeriesPtr('get'), 'Value');
@@ -1816,7 +1816,7 @@ end
         
         atInputMetaData = atInput(dOffset).atDicomInfo;
 
-        aDisplayBuffer = dicomBuffer('get');
+        aDisplayBuffer = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
         
         bDoseKernel      = atInput(dOffset).bDoseKernel;
         bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;

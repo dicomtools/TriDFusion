@@ -97,11 +97,10 @@ function setQuantification(dSeriesOffset)
             tInput(cc).tQuant.tHU.dMin = tInput(cc).tQuant.tCount.dMin;
             tInput(cc).tQuant.tHU.dMax = tInput(cc).tQuant.tCount.dMax;
             tInput(cc).tQuant.tHU.dTot = voxVolume * nbVoxels * volMean;
-            
+
         elseif strcmpi(sModality, 'pt') || strcmpi(sModality, 'nm')
 
-
-            dScale = computeSUV(atQuantDicomInfo{1}, viewerSUVtype('get'));
+            dScale = computeSUV(atQuantDicomInfo, viewerSUVtype('get'));
 
             if dScale ~= 0
                 xPixel = 0;
