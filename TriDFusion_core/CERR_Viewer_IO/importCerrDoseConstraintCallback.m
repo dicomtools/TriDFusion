@@ -76,12 +76,12 @@ function importCerrDoseConstraintCallback(~, ~)
         %sFileName = '0617-693410_09-09-2000-32821.mat';
 
         try
-            planC = loadPlanC(cerrFileName,tempdir);
+            planC = loadPlanC(cerrFileName, viewerTempDirectory('get'));
             planC = updatePlanFields(planC);
             planC = quality_assure_planC(cerrFileName,planC);
         catch
             progressBar(1, 'Error: loadCerrDoseConstraint() Cant Load CERR PlanC!');
-            return;
+%            return;
         end
         
         structNamC = {'Lung_IPSI','Lung_CNTR','PTV'};

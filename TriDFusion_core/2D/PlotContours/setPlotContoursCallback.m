@@ -27,6 +27,8 @@ function setPlotContoursCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    atInput = inputTemplate('get');
+
     if size(dicomBuffer('get'), 3) == 1 % 2D Image
 
         if isPlotContours('get') == true
@@ -68,6 +70,14 @@ function setPlotContoursCallback(~, ~)
             cla(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ,'reset');
 
             imf = squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+
+            sUnitDisplay = getSerieUnitValue(get(uiFusedSeriesPtr('get'), 'Value'));
+            if strcmpi(sUnitDisplay, 'SUV')
+                tQuantification = quantificationTemplate('get');
+                if atInput(get(uiFusedSeriesPtr('get'), 'Value')).bDoseKernel == false
+                    imf = imf*tQuantification.tSUV.dScale;
+                end
+            end
 
             if isShowTextContours('get', 'axe') == true
                 sShowTextEnable = 'on';
@@ -260,8 +270,17 @@ function setPlotContoursCallback(~, ~)
                 cla(axesMipfcPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')),'reset');
             end
 
-            imf = squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
-            imMf = mipFusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+            imf  = squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+            imMf = squeeze(mipFusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+
+            sUnitDisplay = getSerieUnitValue(get(uiFusedSeriesPtr('get'), 'Value'));
+            if strcmpi(sUnitDisplay, 'SUV')
+                tQuantification = quantificationTemplate('get');
+                if atInput(get(uiFusedSeriesPtr('get'), 'Value')).bDoseKernel == false
+                    imf = imf*tQuantification.tSUV.dScale;
+                    imMf = imMf*tQuantification.tSUV.dScale;
+                end
+            end
 
             if isShowTextContours('get', 'coronal') == true
                 sCoronalShowTextEnable = 'on';

@@ -33,10 +33,11 @@ function  [aAlphaMap, sAlphaType] = getVolFusionAlphaMap(sAction, im, sTypeOrtMe
     if strcmpi('set', sAction)
         if strcmpi(sTypeOrtMetaData, 'linear')
             if exist('aValue', 'var')
-                paAlphaMap   = aValue;
+                paAlphaMap = aValue;
             else
                 paAlphaMap = linspace(0, volLinearFusionAlphaValue('get'), 256)';                        
-            end
+          %      paAlphaMap = compute3DLinearAlphaMap(volLinearFusionAlphaValue('get'));                    
+           end
             pasAlphaType = sTypeOrtMetaData;
             
         elseif strcmpi(sTypeOrtMetaData, 'Custom')

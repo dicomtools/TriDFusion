@@ -1,5 +1,5 @@
-function maskToVoi(aMask, sLabel, aColor, sPlane, dSeriesOffset, bPixelEdge)
-%function maskToVoi(aMask, sLabel, aColor, sPlane, dSeriesOffset, bPixelEdge)
+function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bPixelEdge)
+%function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bPixelEdge)
 %Create a VOI from a 3D mask.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -106,9 +106,13 @@ function maskToVoi(aMask, sLabel, aColor, sPlane, dSeriesOffset, bPixelEdge)
                                                'Visible'       , 'off', ...
                                                'FaceSelectable', 0, ...
                                                'FaceAlpha'     , roiFaceAlphaValue('get'));  
+                    if bPixelEdge == true
+                        reduce(pRoi);
+                    end   
+
                     pRoi.Waypoints(:) = false;
 
-                    addRoi(pRoi, dSeriesOffset, 'Unspecified');                  
+                    addRoi(pRoi, dSeriesOffset, sLesionType);                  
 
                     roiDefaultMenu(pRoi);
 
@@ -133,7 +137,7 @@ function maskToVoi(aMask, sLabel, aColor, sPlane, dSeriesOffset, bPixelEdge)
     end
     
     if ~isempty(asTag)
-        createVoiFromRois(dSeriesOffset, asTag, sLabel, aColor, 'Unspecified');
+        createVoiFromRois(dSeriesOffset, asTag, sLabel, aColor, sLesionType);
         setVoiRoiSegPopup();
     end
     

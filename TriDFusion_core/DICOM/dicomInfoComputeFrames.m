@@ -28,7 +28,8 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
     tGate = [];
-    
+     
+   
 %    if strcmpi(atDicomInfo{1}.Modality, 'MR') || ...
 %       strcmpi(atDicomInfo{1}.Modality, 'PT') && ...
      if strcmpi(atDicomInfo{1}.SeriesType{1}, 'STATIC') 
@@ -44,6 +45,11 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
      %   dLastSpacing  = dFirstSpacing;
 
         for jj=1:numel(atDicomInfo)-1
+
+            if atDicomInfo{jj}.SliceLocation == 0 && ...
+               atDicomInfo{jj+1}.SliceLocation == 0     
+                continue;
+            end
 
 %            dSliceSpacing = spacingBetweenTwoSlices(atDicomInfo{jj},atDicomInfo{jj+1});
             dSliceSpacing = atDicomInfo{jj}.SpacingBetweenSlices;

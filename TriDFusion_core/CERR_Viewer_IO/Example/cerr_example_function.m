@@ -7,7 +7,7 @@ cerrStructTraC = {1, 0.9, 0, 0, 0, 0, 0, 0, 0}; % Transparency is from 0-1
 
 cerrMatFileName = 'H:\Public\Aditya\DoseConstraintDisplay\0617-693410_09-09-2000-32821.mat';
 
-cerrPlanC = loadPlanC(cerrMatFileName, tempdir);
+cerrPlanC = loadPlanC(cerrMatFileName, viewerTempDirectory('get'));
 cerrPlanC = quality_assure_planC(cerrMatFileName, cerrPlanC);        
 cerrPlanC = updatePlanFields(cerrPlanC);
 
@@ -28,7 +28,7 @@ cerrStructTraC = {1, 0.9, 0}; % Transparency is from 0-1
 
 cerrMatFileName = 'H:\Public\Aditya\DoseConstraintDisplay\0617-693410_09-09-2000-32821.mat';
 
-cerrPlanC = loadPlanC(cerrMatFileName, tempdir);
+cerrPlanC = loadPlanC(cerrMatFileName, viewerTempDirectory('get'));
 cerrPlanC = quality_assure_planC(cerrMatFileName, cerrPlanC);        
 cerrPlanC = updatePlanFields(cerrPlanC);
 

@@ -152,9 +152,29 @@ function mainWindowMenu()
     
     uimenu(mTools, 'Label','Registration', 'Callback', @setRegistrationCallback, 'Separator','on');
     uimenu(mTools, 'Label','Mathematic'  , 'Callback', @setMathCallback);
+    uimenu(mTools, 'Label','Compute 2D MIP', 'Callback', @computeMIPCallback, 'Separator','on');
     uimenu(mTools, 'Label','Create Planar from a 3D Series', 'Callback', @convertSeriesToPlanarCallback, 'Separator','on');
     uimenu(mTools, 'Label','Dice Contours', 'Callback', @diceContoursCallback, 'Separator','on');
     uimenu(mTools, 'Label','Reset Series', 'Callback', @resetSeriesCallback, 'Separator','on');
+ 
+if 1    
+    mModules = uimenu(fiMainWindowPtr('get'),'Label','Modules');
+    mMachineLearning = uimenu(mModules, 'Label','Machine Learning');
+    uimenu(mMachineLearning, 'Label','Machine Learning Segmentation', 'Callback', @setMachineLearningSegmentationCallback);
+
+    mMachineReport = uimenu(mMachineLearning, 'Label','Machine Learning Report', 'Separator','on');
+    uimenu(mMachineReport, 'Label','3D SPECT Lung Shunt Report', 'Callback', @generate3DLungShuntReportCallback);
+    uimenu(mMachineReport, 'Label','3D SPECT Lung Lobe Ration Report', 'Callback', @generate3DLungLobeReportCallback);
+ %   uimenu(mMachineReport, 'Label','PET Y90 Liver Dosimetry Report', 'Callback', @generatePETLiverDosimetryReportCallback);
+
+    uimenu(mMachineLearning, 'Label','3D SPECT Lung Shunt', 'Callback', @setMachineLearning3DLungShuntCallback, 'Separator','on');
+    uimenu(mMachineLearning, 'Label','3D SPECT Lung Lobe Ratio', 'Callback', @setMachineLearning3DLobeLungCallback);
+ %   uimenu(mMachineLearning, 'Label','PET Y90 Liver Dosimetry', 'Callback', @setMachineLearningPETLiverDosimetryCallback);
+
+    mRadiomics = uimenu(mModules, 'Label','Radiomics');
+    uimenu(mRadiomics, 'Label','Compute Radiomics', 'Callback', @extractRadiomicsFromContoursCallback);
+
+end
 
     mHelp = uimenu(fiMainWindowPtr('get'),'Label','Help');
     uimenu(mHelp,'Label', 'Shortcuts', 'Callback'  , @shortcutsViewerCallback);
@@ -885,7 +905,27 @@ function mainWindowMenu()
              'ZColor'  , viewerForegroundColor('get'),...             
              'Visible' , 'off'...             
              );           
-         
+
+        uicontrol(dlgConvertToPlanar,...
+                  'style'   , 'text',...
+                  'string'  , 'Convert method',...
+                  'horizontalalignment', 'left',...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...                   
+                  'position', [20 92 150 20]...
+                  );
+              
+    uiConverMethod = ...
+        uicontrol(dlgConvertToPlanar, ...
+                  'enable'  , 'on',...
+                  'Style'   , 'popup', ...
+                  'position', [200 95 160 20],...
+                  'String'  , {'Current slice', 'All slices add', 'All slices max'}, ...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'Value'   , 3 ...
+                  );
+
         uicontrol(dlgConvertToPlanar,...
                   'style'   , 'text',...
                   'string'  , 'Plane to convert',...
@@ -938,20 +978,68 @@ function mainWindowMenu()
             dPlaneValue   = get(uiPlaneSelection, 'Value');
             asPlaneString = get(uiPlaneSelection, 'String');
             sPlane = asPlaneString{dPlaneValue};
-            
+
+            dMethodValue   = get(uiConverMethod, 'Value');
+            asMethodString = get(uiConverMethod, 'String');
+            sMethod = asMethodString{dMethodValue};
+
             dXPixel = aOriginalMetaData{1}.PixelSpacing(1);
             dYPixel = aOriginalMetaData{1}.PixelSpacing(2);
             dZPixel = computeSliceSpacing(aOriginalMetaData);
-                
+
+
             if strcmpi(sPlane, 'coronal')     
                 
-                aNewImage = squeeze(max(aOriginalImage, [], 1));
-                aNewImage = permute(aNewImage, [2 1]);
+                switch lower(sMethod)
+                    case 'all slices max'
+                        aNewImage = squeeze(max(aOriginalImage, [], 1));                  
+                        aNewImage = permute(aNewImage, [2 1]);
+
+                    case 'current slice'
+                        aNewImage = squeeze(permute(aOriginalImage(sliceNumber('get', 'coronal' ),:,:), [3 2 1]));  
+
+                    case 'all slices add'
+                        aNewImage = squeeze(permute(aOriginalImage(1,:,:), [3 2 1]));  
+                        for jj=2:size(aOriginalImage, 2)
+                            aNewImage = squeeze(permute(aOriginalImage(jj,:,:), [3 2 1]))+aNewImage;
+                        end                          
+                end
 
                 aOriginalMetaData{1}.PixelSpacing(1) = dZPixel;
                 aOriginalMetaData{1}.PixelSpacing(2) = dXPixel;
+            elseif strcmpi(sPlane, 'sagittal')     
+                
+                switch lower(sMethod)
+                    case 'all slices max'
+                        aNewImage = squeeze(max(aOriginalImage, [], 2));
+                        aNewImage = permute(aNewImage, [2 1]);
+
+                    case 'current slice'
+                        aNewImage = squeeze(permute(aOriginalImage(:,sliceNumber('get', 'sagittal'),:), [3 1 2])); 
+
+                    case 'all slices add'
+                        aNewImage = squeeze(permute(aOriginalImage(:,1,:), [3 1 2]));
+                        for jj=2:size(aOriginalImage, 2)
+                            aNewImage = permute(aOriginalImage(:,jj,:), [3 1 2])+aNewImage;
+                        end                        
+                end
+
+                aOriginalMetaData{1}.PixelSpacing(1) = dZPixel;
+                aOriginalMetaData{1}.PixelSpacing(2) = dYPixel;                
             else
-                aNewImage = squeeze(max(aOriginalImage, [], 3));
+                switch lower(sMethod)
+                    case 'all slices max'
+                        aNewImage = squeeze(max(aOriginalImage, [], 3));
+
+                    case 'current slice'
+                        aNewImage = squeeze(aOriginalImage(:,:,sliceNumber('get', 'axial'))); 
+
+                    case 'all slices add'
+                        aNewImage = squeeze(aOriginalImage(:,:,1));
+                        for jj=2:size(aOriginalImage, 3)
+                            aNewImage = squeeze(aOriginalImage(:,:,jj)+aNewImage);
+                        end
+                end
                 
                 aOriginalMetaData{1}.PixelSpacing(1) = dXPixel;
                 aOriginalMetaData{1}.PixelSpacing(2) = dYPixel;              
@@ -1287,6 +1375,5 @@ function mainWindowMenu()
         end
         
     end
-
 
 end

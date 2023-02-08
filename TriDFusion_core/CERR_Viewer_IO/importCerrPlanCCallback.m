@@ -74,12 +74,12 @@ function importCerrPlanCCallback(~, ~)
               
         % Load planC
         try
-            planC = loadPlanC(cerrFileName,tempdir);
-            planC = quality_assure_planC(cerrFileName,planC);        
+            planC = loadPlanC(cerrFileName, viewerTempDirectory('get'));
             planC = updatePlanFields(planC);
+            planC = quality_assure_planC(cerrFileName,planC);        
         catch
             progressBar(1, 'Error: importCerrPlanCCallback() Cant Load CERR PlanC!');
-           return;
+            return;
         end
         
         loadCerrPlanC(planC);

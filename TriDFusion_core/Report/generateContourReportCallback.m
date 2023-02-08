@@ -32,10 +32,13 @@ function generateContourReportCallback(~, ~)
 %    xSize = dScreenSize(3);
 %    ySize = dScreenSize(4);
 
+    glVoiAllContoursMask = [];
+    gp3DObject = [];
+
     atInput = inputTemplate('get');
 
-    dOffset = get(uiSeriesPtr('get'), 'Value');
-    if dOffset > numel(atInput)
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+    if dSeriesOffset > numel(atInput)
         return;
     end
     
@@ -54,7 +57,8 @@ function generateContourReportCallback(~, ~)
                'Color', 'white', ...
                'Toolbar','none'...
                );
-           
+     figContourReportPtr('set', figContourReport);
+
      axeContourReport = ...
        axes(figContourReport, ...
              'Units'   , 'pixels', ...
@@ -65,8 +69,38 @@ function generateContourReportCallback(~, ~)
              'ZColor'  , viewerForegroundColor('get'),...             
              'Visible' , 'off'...             
              );  
-         
-        uicontrol(figContourReport,...
+
+      uiContourReport = ...
+         uipanel(figContourReport,...
+                 'Units'   , 'pixels',...
+                 'position', [0 ...
+                              0 ...
+                              FIG_REPORT_X ...
+                              FIG_REPORT_Y*4 ...
+                              ],...
+                'Visible', 'on', ...
+                'BackgroundColor', 'white', ...
+                'ForegroundColor', 'black' ...
+                );
+
+    aContourReportPosition = get(figContourReport, 'position');
+    uiContourReportSlider = ...
+        uicontrol('Style'   , 'Slider', ...
+                  'Parent'  , figContourReport,...
+                  'Units'   , 'pixels',...
+                  'position', [aContourReportPosition(3)-15 ...
+                               0 ...
+                               15 ...
+                               aContourReportPosition(4) ...
+                               ],...
+                  'Value', 1, ...
+                  'Callback',@uiContourReportSliderCallback, ...
+                  'BackgroundColor', 'white', ...
+                  'ForegroundColor', 'black' ...
+                  );
+    addlistener(uiContourReportSlider, 'Value', 'PreSet', @uiContourReportSliderCallback);
+
+        uicontrol(uiContourReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
                   'FontSize'  , 12,...
@@ -78,7 +112,7 @@ function generateContourReportCallback(~, ~)
                   'position', [0 FIG_REPORT_Y-30 FIG_REPORT_X 20]...
                   ); 
               
-        uicontrol(figContourReport,...
+        uicontrol(uiContourReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
                   'FontSize'  , 10,...
@@ -92,7 +126,7 @@ function generateContourReportCallback(~, ~)
          
          % Patient Information     
          
-         uicontrol(figContourReport,...
+         uicontrol(uiContourReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
                   'FontSize'  , 11,...
@@ -104,7 +138,7 @@ function generateContourReportCallback(~, ~)
                   'position', [0 FIG_REPORT_Y-100 FIG_REPORT_X/3-50 20]...
                   ); 
               
-        uicontrol(figContourReport,...
+        uicontrol(uiContourReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
                   'FontSize'  , 10,...
@@ -113,12 +147,12 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [0 FIG_REPORT_Y-640 FIG_REPORT_X/3-50 530]...
+                  'position', [0 FIG_REPORT_Y-485 FIG_REPORT_X/3-50 375]...
                   );    
               
          % Series Information     
               
-         uicontrol(figContourReport,...
+         uicontrol(uiContourReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
                   'FontSize'  , 11,...
@@ -130,7 +164,7 @@ function generateContourReportCallback(~, ~)
                   'position', [FIG_REPORT_X/3-50 FIG_REPORT_Y-100 FIG_REPORT_X/3-50 20]...
                   ); 
               
-        uicontrol(figContourReport,...
+        uicontrol(uiContourReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
                   'FontSize'  , 10,...
@@ -139,13 +173,13 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X/3-50 FIG_REPORT_Y-640 FIG_REPORT_X/3-50 530]...
+                  'position', [FIG_REPORT_X/3-50 FIG_REPORT_Y-590 FIG_REPORT_X/3-50 480]...
                   );    
               
-         % Contour Information              
+         % Contours Information              
          
          uiReportContourInformation = ...       
-         uicontrol(figContourReport,...
+         uicontrol(uiContourReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
                   'FontSize'  , 11,...
@@ -154,12 +188,12 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-100 FIG_REPORT_Y-100 FIG_REPORT_X/3+100 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-100 FIG_REPORT_X/3+100 20]...
                   ); 
               
          % Contour Type
               
-          uicontrol(figContourReport,...
+          uicontrol(uiContourReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
                   'FontSize'  , 10,...
@@ -168,10 +202,10 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-100 FIG_REPORT_Y-130 115 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-130 115 20]...
                   ); 
               
-        uicontrol(figContourReport,...
+        uicontrol(uiContourReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
                   'FontSize'  , 10,...
@@ -180,12 +214,12 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-100 FIG_REPORT_Y-460 115 320]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-460 115 320]...
                   );  
               
          % Nb Contour
               
-          uicontrol(figContourReport,...
+          uicontrol(uiContourReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
                   'FontSize'  , 10,...
@@ -194,11 +228,11 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+25 FIG_REPORT_Y-130 90 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+15 FIG_REPORT_Y-130 90 20]...
                   ); 
 
         uiReportLesionNbContour = ...       
-        uicontrol(figContourReport,...
+        uicontrol(uiContourReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
                   'FontSize'  , 10,...
@@ -207,12 +241,12 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+25 FIG_REPORT_Y-460 90 320]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+15 FIG_REPORT_Y-460 90 320]...
                   );  
               
          % Contour Mean
               
-          uicontrol(figContourReport,...
+          uicontrol(uiContourReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
                   'FontSize'  , 10,...
@@ -221,11 +255,11 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+125 FIG_REPORT_Y-130 90 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+115 FIG_REPORT_Y-130 90 20]...
                   ); 
               
         uiReportLesionMean = ...       
-        uicontrol(figContourReport,...
+        uicontrol(uiContourReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
                   'FontSize'  , 10,...
@@ -234,12 +268,12 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+125 FIG_REPORT_Y-460 90 320]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+115 FIG_REPORT_Y-460 90 320]...
                   );  
               
          % Contour Max
               
-          uicontrol(figContourReport,...
+          uicontrol(uiContourReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
                   'FontSize'  , 10,...
@@ -248,11 +282,11 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+225 FIG_REPORT_Y-130 90 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+215 FIG_REPORT_Y-130 90 20]...
                   ); 
               
         uiReportLesionMax = ...       
-        uicontrol(figContourReport,...
+        uicontrol(uiContourReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
                   'FontSize'  , 10,...
@@ -261,12 +295,12 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+225 FIG_REPORT_Y-460 90 320]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+215 FIG_REPORT_Y-460 90 320]...
                   ); 
               
           % Contour Volume
               
-          uicontrol(figContourReport,...
+          uicontrol(uiContourReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
                   'FontSize'  , 10,...
@@ -275,11 +309,11 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+325 FIG_REPORT_Y-130 90 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+315 FIG_REPORT_Y-130 90 20]...
                   ); 
               
         uiReportLesionVolume = ...       
-        uicontrol(figContourReport,...
+        uicontrol(uiContourReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
                   'FontSize'  , 10,...
@@ -288,13 +322,15 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+325 FIG_REPORT_Y-460 90 320]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+315 FIG_REPORT_Y-460 90 320]...
                   );               
-              
+
+        % Volume Histogram
+            
         axeReport = ...
-        axes(figContourReport, ...
+        axes(uiContourReport, ...
              'Units'   , 'pixels', ...
-             'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-50 60 440 300], ...
+             'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-55 60 440 300], ...
              'Color'   , 'White',...
              'XColor'  , 'Black',...
              'YColor'  , 'Black',...
@@ -305,9 +341,87 @@ function generateContourReportCallback(~, ~)
     axeReport.Title.String  = 'Uptake Volume Histogram (UVH)';
     axeReport.XLabel.String = 'Uptake';
     axeReport.YLabel.String = 'Total Volume Fraction (TVF)';
-       
+
+    % 3D Volume  
+
+     atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+     if ~strcmpi(atMetaData{1}.Modality, 'CT') && ...
+        ~strcmpi(atMetaData{1}.Modality, 'MR')    
+
+        ui3DWindow = ...
+        uipanel(uiContourReport,...
+                'Units'   , 'pixels',...
+                'BorderWidth', showBorder('get'),...
+                'HighlightColor', [0 1 1],...
+                'BackgroundColor', surfaceColor('get', background3DOffset('get')),...
+                'position', [20 15 FIG_REPORT_X/3-75-15 340]...
+                );  
+
+        uiSlider3Dintensity = ...
+        uicontrol(uiContourReport, ...
+                  'Style'   , 'Slider', ...
+                  'Position', [5 15 15 340], ...
+                  'Value'   , 0.9, ...
+                  'Enable'  , 'on', ...
+                  'Tooltip' , 'Intensity', ...
+                  'BackgroundColor', 'White', ...
+                  'CallBack', @slider3DintensityCallback ...
+                  );
+        addlistener(uiSlider3Dintensity, 'Value', 'PreSet', @slider3DintensityCallback);
+     else
+        ui3DWindow = ...
+        uipanel(uiContourReport,...
+                'Units'   , 'pixels',...
+                'BorderWidth', showBorder('get'),...
+                'HighlightColor', [0 1 1],...
+                'BackgroundColor', surfaceColor('get', background3DOffset('get')),...
+                'position', [5 15 FIG_REPORT_X/3-75 340]...
+                );           
+     end
+
+     uicontrol(uiContourReport,...
+              'style'     , 'text',...
+              'FontWeight', 'bold',...
+              'FontSize'  , 11,...
+              'FontName'  , 'MS Sans Serif', ...
+              'string'    , '3D Rendering',...
+              'horizontalalignment', 'left',...
+              'BackgroundColor', 'White', ...
+              'ForegroundColor', 'Black', ...
+              'position', [5 ui3DWindow.Position(4)+30 FIG_REPORT_X/3-75 20]...
+              );
+
+    % Notes
+
+    uiEditWindow = ...
+    uicontrol(uiContourReport,...       
+              'style'     , 'edit',...
+              'FontWeight', 'Normal',...
+              'FontSize'  , 10,...
+              'FontName'  , 'MS Sans Serif', ...
+              'horizontalalignment', 'left',...
+              'BackgroundColor', 'White', ...
+              'ForegroundColor', 'Black', ...              
+              'position', [FIG_REPORT_X/3-50 15 FIG_REPORT_X/3-75 225]...
+             );  
+    set(uiEditWindow, 'Min', 0, 'Max', 2);
+
+         uicontrol(uiContourReport,...
+                  'style'     , 'text',...
+                  'FontWeight', 'bold',...
+                  'FontSize'  , 11,...
+                  'FontName'  , 'MS Sans Serif', ...
+                  'string'    , 'Notes',...
+                  'horizontalalignment', 'left',...
+                  'BackgroundColor', 'White', ...
+                  'ForegroundColor', 'Black', ...
+                  'position', [FIG_REPORT_X/3-50 uiEditWindow.Position(4)+30 FIG_REPORT_X/3-75 20]...
+                  );
+
     mReportFile = uimenu(figContourReport,'Label','File');
-    uimenu(mReportFile,'Label', 'Export to .pdf...','Callback', @exportCurrentReportCallback);
+    uimenu(mReportFile,'Label', 'Export to .pdf...','Callback', @exportCurrentReportToPdfCallback);
+    uimenu(mReportFile,'Label', 'Export to DICOM print...','Callback', @exportCurrentReportToDicomCallback);
     uimenu(mReportFile,'Label', 'Close' ,'Callback', 'close', 'Separator','on');
 
     mReportEdit = uimenu(figContourReport,'Label','Edit');
@@ -316,7 +430,7 @@ function generateContourReportCallback(~, ~)
     mReportOptions = uimenu(figContourReport,'Label','Options', 'Callback', @figReportRefreshOption);    
     
     if suvMenuUnitOption('get') == true && ...
-       atInput(dOffset).bDoseKernel == false    
+       atInput(dSeriesOffset).bDoseKernel == false    
         sSuvChecked = 'on';
     else
         if suvMenuUnitOption('get') == true
@@ -328,7 +442,7 @@ function generateContourReportCallback(~, ~)
     if modifiedMatrixValueMenuOption('get') == true 
        sModifiedMatrixChecked = 'on';
     else
-        if atInput(dOffset).tMovement.bMovementApplied == true
+        if atInput(dSeriesOffset).tMovement.bMovementApplied == true
             sModifiedMatrixChecked = 'on';        
             modifiedMatrixValueMenuOption('set', true);
         else
@@ -348,7 +462,7 @@ function generateContourReportCallback(~, ~)
         sSegChecked = 'off';
     end
     
-    if atInput(dOffset).bDoseKernel == true
+    if atInput(dSeriesOffset).bDoseKernel == true
         sSuvEnable = 'off';
     else
         sSuvEnable = 'on';
@@ -379,7 +493,7 @@ function generateContourReportCallback(~, ~)
                      set(uiReportContourInformation, 'String', sprintf('All Contours - MTV: %s (ml), TLG: %s (%s)', ...
                          num2str(tReport.All.Volume), num2str(tReport.All.Volume*tReport.All.Mean), getReportUnitValue() ) );               
                  else
-                    set(uiReportContourInformation, 'String', sprintf('Contour Information (%s)', getReportUnitValue()));                            
+                    set(uiReportContourInformation, 'String', sprintf('Contours Information (%s)', getReportUnitValue()));                            
                  end
             end
            
@@ -399,8 +513,23 @@ function generateContourReportCallback(~, ~)
                 set(uiReportLesionVolume, 'String', getReportLesionVolumeInformation('get', tReport));
             end    
             
-            if isvalid(axeReport) % Make sure the figure is still open    
-                
+            if isvalid(axeReport) % Make sure the figure is still open   
+
+                aAxeReportPosition = get(axeReport, 'position'); 
+
+                delete(axeReport);
+
+                axeReport = ...
+                axes(uiContourReport, ...
+                     'Units'   , 'pixels', ...
+                     'Position', aAxeReportPosition, ...
+                     'Color'   , 'White',...
+                     'XColor'  , 'Black',...
+                     'YColor'  , 'Black',...
+                     'ZColor'  , 'Black',...
+                     'Visible' , 'on'...
+                     );
+
                 try
                     
                     ptrPlotCummulative = plotCummulative(axeReport, tReport.All.voiData, 'black');
@@ -410,7 +539,7 @@ function generateContourReportCallback(~, ~)
 
                     cDataCursor = datacursormode(figContourReport);
                     cDataCursor.UpdateFcn = @updateCursorCoordinates;
-                    set(cDataCursor, 'Enable', 'on');  
+                    set(cDataCursor, 'Enable', 'off');  
 
 
                     dTip = createDatatip(cDataCursor, ptrPlotCummulative);
@@ -434,6 +563,10 @@ function generateContourReportCallback(~, ~)
             end
             
         end
+
+        if isvalid(ui3DWindow)
+            display3Dobject(bModifiedMatrix);
+        end
     end
 
     function txt = updateCursorCoordinates(~,info)
@@ -453,7 +586,7 @@ function generateContourReportCallback(~, ~)
             return;
         end        
     
-        atMetaData = dicomMetaData('get');
+        atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
        
         if strcmpi(get(mSegmented, 'Checked'), 'on')
             sSegmented = ' - Masked Cells Subtracted';
@@ -474,17 +607,17 @@ function generateContourReportCallback(~, ~)
     end
     
     function sUnit = getReportUnitValue()
-        
-        atMetaData = dicomMetaData('get');
-       
+               
         atInput = inputTemplate('get');
-        dOffset = get(uiSeriesPtr('get'), 'Value');
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        atMetaData = dicomMetaData('get', [], dSeriesOffset);
     
-        if atInput(dOffset).bDoseKernel == true
+        if atInput(dSeriesOffset).bDoseKernel == true
             sUnit =  'Dose';
         else
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
-                sUnit = getSerieUnitValue(dOffset);
+                sUnit = getSerieUnitValue(dSeriesOffset);
                 if (strcmpi(atMetaData{1}.Modality, 'pt') || ...
                     strcmpi(atMetaData{1}.Modality, 'nm'))&& ...
                     strcmpi(sUnit, 'SUV' )
@@ -501,7 +634,7 @@ function generateContourReportCallback(~, ~)
                  if (strcmpi(atMetaData{1}.Modality, 'ct'))
                     sUnit =  'HU';
                  else
-                    sUnit = getSerieUnitValue(dOffset);
+                    sUnit = getSerieUnitValue(dSeriesOffset);
                     if (strcmpi(atMetaData{1}.Modality, 'pt') || ...
                         strcmpi(atMetaData{1}.Modality, 'nm'))&& ...
                         strcmpi(sUnit, 'SUV' )
@@ -573,7 +706,7 @@ function generateContourReportCallback(~, ~)
     function reportModifiedMatrixCallback(hObject, ~)
         
         atInput = inputTemplate('get');
-        dOffset = get(uiSeriesPtr('get'), 'Value');
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
         
         if strcmpi(get(mSUVUnit, 'Checked'), 'on')
             bSUVUnit = true;
@@ -589,7 +722,7 @@ function generateContourReportCallback(~, ~)
         
         if strcmpi(hObject.Checked, 'on')
             
-            if atInput(dOffset).tMovement.bMovementApplied == true
+            if atInput(dSeriesOffset).tMovement.bMovementApplied == true
                 modifiedMatrixValueMenuOption('set', true);                         
                 hObject.Checked = 'on';
                 
@@ -646,313 +779,6 @@ function generateContourReportCallback(~, ~)
 
         setReportFigureName();
     end
-
-    function sReport = getReportPatientInformation()
-        
-        atMetaData = dicomMetaData('get');
-        
-        % Patient Name
-       
-        if isempty(atMetaData{1}.PatientName)
-            sPatientName = '-';
-        else
-            sPatientName = atMetaData{1}.PatientName;
-            sPatientName = strrep(sPatientName,'^',' ');
-            sPatientName = strtrim(sPatientName);            
-        end
-        
-        % Patient ID
-
-        if isempty(atMetaData{1}.PatientID)
-            sPatientID = '-';
-        else
-            sPatientID = atMetaData{1}.PatientID;
-            sPatientID = strtrim(sPatientID);
-        end
-        
-        % Patient Sex
-        
-        if isempty(atMetaData{1}.PatientSex)
-            sPatientSex = '-';
-        else
-            sPatientSex = atMetaData{1}.PatientSex;
-            if strcmpi(sPatientSex, 'M')
-                sPatientSex = 'Male';
-            elseif strcmpi(sPatientSex, 'F')
-                 sPatientSex = 'Female';
-           elseif strcmpi(sPatientSex, 'O')
-                  sPatientSex = 'Other';
-           end
-                
-        end       
-        
-        % Patient Age
-       
-        if isempty(atMetaData{1}.PatientAge)
-            sPatientAge = '-';
-        else
-            sPatientAge = atMetaData{1}.PatientAge;
-        end
-        
-        % Patient Birth Date
-        
-        if isempty(atMetaData{1}.PatientBirthDate)
-            sPatientBirthDate = '-';
-        else
-            if numel(atMetaData{1}.PatientBirthDate) == 8
-                sPatientBirthDate = char(datetime(atMetaData{1}.PatientBirthDate,'InputFormat','yyyyMMdd'));
-            else
-                sPatientBirthDate = atMetaData{1}.PatientBirthDate;
-            end
-        end
-        
-        sReport = sprintf(' Patient name:\n %s'     , char(sPatientName));      
-        sReport = sprintf('%s\n\n Patient ID:\n %s' , sReport, char(sPatientID));
-        sReport = sprintf('%s\n\n Gender:\n %s'     , sReport, char(sPatientSex));
-        sReport = sprintf('%s\n\n Age:\n %s'        , sReport, char(sPatientAge));
-        sReport = sprintf('%s\n\n Birth date:\n %s' , sReport, char(sPatientBirthDate));
-        
-        % Patient Birth Weight
-        
-        if isempty(atMetaData{1}.PatientWeight)
-            sReport = sprintf('%s\n\n Weight:\n -', sReport);
-        else
-            sPatientWeight = atMetaData{1}.PatientWeight; % In float 
-            sPatientWeightLbs = num2str(sPatientWeight * 2.20462262185);
-            
-            sPatientWeight = num2str(sPatientWeight); % In string
-            
-            sReport = sprintf('%s\n\n Weight:\n %s Kg -- %s lbs', sReport, char(sPatientWeight), sPatientWeightLbs);
-        end
-        
-        % Patient Birth Size
-       
-        if isempty(atMetaData{1}.PatientSize)
-            sReport = sprintf('%s\n\n Height:\n -' , sReport);
-        else
-            sPatientSize = atMetaData{1}.PatientSize; % In float 
-            sPatientSizeFeet =  num2str(atMetaData{1}.PatientSize * 3.28084);
-            
-            sPatientSize = num2str(sPatientSize); % In string
-            
-            sReport = sprintf('%s\n\n Height:\n %s m -- %s foot' , sReport, char(sPatientSize), char(sPatientSizeFeet));
-        end       
-          
-    end
-
-    function sReport = getReportSeriesInformation()
-        
-        atMetaData = dicomMetaData('get');
-                
-        if isempty(atMetaData{1}.SeriesDescription)
-            sSeriesDescription = '-';
-        else
-            sSeriesDescription = atMetaData{1}.SeriesDescription;
-        end
-        
-        % Series Date Time
-        
-        sSeriesTime = atMetaData{1}.SeriesTime;
-        sSeriesDate = atMetaData{1}.SeriesDate;
-        
-        if isempty(sSeriesTime)
-            sSeriesDateTime = '-';
-        else
-            if numel(sSeriesTime) == 6
-                sSeriesTime = sprintf('%s.00', sSeriesTime);
-            end
-
-            sSeriesDateTime = datetime([sSeriesDate sSeriesTime],'InputFormat','yyyyMMddHHmmss.SS');
-        end
-        
-        % Acquisition Date Time
-        
-        sAcquisitionTime = atMetaData{1}.AcquisitionTime;
-        
-        if isempty(sAcquisitionTime)
-            sAcquisitionDateTime = '-';
-        else
-            if numel(atMetaData) > 1                
-                dayAcquisitionDate = inf;
-                for jj=1:numel(atMetaData)
-
-                    acquisitionTime = atMetaData{jj}.AcquisitionTime;
-                    acquisitionDate = atMetaData{jj}.AcquisitionDate;
-
-                    if numel(acquisitionTime) == 6
-                        acquisitionTime = sprintf('%s.00', acquisitionTime);
-                    end            
-
-                    datetimeAcquisitionDate = datetime([acquisitionDate acquisitionTime],'InputFormat','yyyyMMddHHmmss.SS');
-                    dayCurAcquisitionDate = datenum(datetimeAcquisitionDate);
-                    if dayCurAcquisitionDate < dayAcquisitionDate % Find min time
-                        dayAcquisitionDate = dayCurAcquisitionDate;
-                        sAcquisitionDateTime = datetime([acquisitionDate acquisitionTime],'InputFormat','yyyyMMddHHmmss.SS');
-                    end                    
-                end
-
-            else
-                acquisitionTime = atMetaData{1}.AcquisitionTime;
-                acquisitionDate = atMetaData{1}.AcquisitionDate;
-
-                if numel(acquisitionTime) == 6
-                    acquisitionTime = sprintf('%s.00', acquisitionTime);
-                end            
-
-                sAcquisitionDateTime = datetime([acquisitionDate acquisitionTime],'InputFormat','yyyyMMddHHmmss.SS');
-                dayAcquisitionDate = datenum(sAcquisitionDateTime);                
-            end
-        end        
-            
-        sReport = sprintf('Series description:\n%s'         , char(sSeriesDescription));      
-        sReport = sprintf('%s\n\nSeries date time:\n%s'     , sReport, char(sSeriesDateTime));
-        sReport = sprintf('%s\n\nAcquisition date Time:\n%s', sReport, char(sAcquisitionDateTime));        
-             
-        if isfield(atMetaData{1}, 'RadiopharmaceuticalInformationSequence') 
-
-            if ( ~isempty(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose) && ...
-                 ~isempty(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime) ) || ...
-               ( ~isempty(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose) && ...
-                 ~isempty(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartTime) )      
-             
-                 % Radiopharmaceutical Date Time
-
-                if isempty(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime) 
-                    sInjDateTime = sprintf('%s%s', atMetaData{1}.StudyDate, atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartTime);
-                else
-                    sInjDateTime = atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;      
-                end
-                
-                if isempty(sInjDateTime)
-                    sInjDateTime = '-';
-                else
-                    if numel(sInjDateTime) == 14
-                        sInjDateTime = sprintf('%s.00', sInjDateTime);
-                    end
-
-                    sInjDateTime = datetime(sInjDateTime,'InputFormat','yyyyMMddHHmmss.SS');
-                end
-                
-                % Radionuclide Total Dose
-                
-                if isempty(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose)
-                    sInjDose = '-';
-                    sInjDoseMCi = '-';
-                else
-                    sInjDose = str2double(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose);
-                    sInjDoseMCi = sInjDose / 3.7E7;
-                    
-                    sInjDose = num2str(sInjDose/1000000); % Convert to MBq
-                    
-                    sInjDoseMCi = num2str(sInjDoseMCi);
-                end
-                
-                % Radiopharmaceutical 
-                
-                if isempty(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.Radiopharmaceutical)
-                    sRadiopharmaceutical = '-';
-                else
-                    sRadiopharmaceutical = atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.Radiopharmaceutical;
-                    sRadiopharmaceutical = strrep(sRadiopharmaceutical,'^',' ');
-                    sRadiopharmaceutical = strtrim(sRadiopharmaceutical);
-                end   
-                
-                % Radiopharmaceutical 
-                
-                if isempty(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodeMeaning)
-                    sRadionuclide = '-';
-                else
-                    sRadionuclide = atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodeMeaning;
-                    sRadionuclide = strrep(sRadionuclide,'^',' ');
-                    sRadionuclide = strtrim(sRadionuclide);
-                end   
-                
-                % Radionuclide Half Life
-                
-                if isempty(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife)
-                    sHalfLife = '-';
-                else
-                    sHalfLife = atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife;
-                end                
-                 
-                
-                % Decay Correction
-                
-                sUnitDisplay = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
-                if strcmpi(sUnitDisplay, 'SUV')
-            
-                    if isempty(atMetaData{1}.DecayCorrection)
-                        sDecayCorrection = '-';
-                        sDecayTime = '';
-                    else
-                        switch lower(atMetaData{1}.DecayCorrection)
-
-                            case 'start'
-
-                            daySeriesDate = datenum(sSeriesDateTime);
-                            dateInjDate   = datenum(sInjDateTime);
-
-                            if daySeriesDate > dayAcquisitionDate
-                                daySeriesDate = dayAcquisitionDate;
-                            end
-                            
-                            relT = seconds((daySeriesDate - dateInjDate)*(24*60*60)); 
-                   %         relT = seconds((dayAcquisitionDate - dateInjDate)*(24*60*60)); 
-                            relT.Format = 'dd:hh:mm:ss';
-                            sDecayTime = char(relT);
-
-                            sDecayCorrection = 'Scan start time';
-
-                            case 'admin'
-
-                            dateInjDate = datenum(sInjDateTime);
-
-                            relT = seconds((dateInjDate - dateInjDate)*(24*60*60)); 
-                            relT.Format = 'dd:hh:mm:ss';
-                            sDecayTime = char(relT);
-
-                            sDecayCorrection = 'Administration time';
-
-                            case 'none'
-
-                         %   dayAcquisitionDate = datenum(sAcquisitionDateTime);
-                            dateInjDate        = datenum(sInjDateTime);
-
-                            relT = seconds((dayAcquisitionDate - dateInjDate)*(24*60*60)); 
-                            relT.Format = 'dd:hh:mm:ss';
-                            sDecayTime = char(relT);
-
-                            sDecayCorrection = 'No decay correction';
-
-                            otherwise
-                                sDecayCorrection = '-';
-                                sDecayTime = '';
-                        end                    
-                    end                   
-                
-                    tQuantification = quantificationTemplate('get');
-                    sTotal = num2str(tQuantification.tSUV.dTot/10000000); % In MBq
-                    sDmCi  = num2str(tQuantification.tSUV.dmCi);
-                    
-                    sReport = sprintf('%s\n\nInjection date time:\n%s'       , sReport, char(sInjDateTime));
-                    sReport = sprintf('%s\n\nRadiopharmaceutical:\n%s'       , sReport, char(sRadiopharmaceutical));
-                    sReport = sprintf('%s\n\nRadionuclide:\n%s'              , sReport, char(sRadionuclide));
-                    sReport = sprintf('%s\n\nHalf life:\n%s sec'             , sReport, char(sHalfLife));
-                    sReport = sprintf('%s\n\nSUV additional decay-correction:\n%s -- %s', sReport, char(sDecayCorrection), char(sDecayTime));
-                    sReport = sprintf('%s\n\nAdministrated activity:\n%s MBq -- %s mCi'   , sReport, char(sInjDose), char(sInjDoseMCi));
-                    sReport = sprintf('%s\n\nTotal calculated activity:\n%s MBq -- %s mCi', sReport, char(sTotal), char(sDmCi));
-                
-                else
-                    sReport = sprintf('%s\n\nInjection date time:\n%s'       , sReport, char(sInjDateTime));
-                    sReport = sprintf('%s\n\nRadiopharmaceutical:\n%s'       , sReport, char(sRadiopharmaceutical));
-                    sReport = sprintf('%s\n\nRadionuclide:\n%s'              , sReport, char(sRadionuclide));
-                    sReport = sprintf('%s\n\nHalf life:\n%s sec'             , sReport, char(sHalfLife));
-                    sReport = sprintf('%s\n\nAdministrated activity:\n%s MBq -- %s mCi'   , sReport, char(sInjDose), char(sInjDoseMCi));
-                end
-                                               
-            end
-        end                  
-    end    
 
     function sReport = getReportLesionTypeInformation()
                 
@@ -1054,7 +880,7 @@ function generateContourReportCallback(~, ~)
         else
             
             if ~isempty(tReport.All.Mean)
-                sReport = sprintf('%-12s\n___________', num2str(tReport.All.Mean));      
+                sReport = sprintf('%-.2f\n___________', tReport.All.Mean);      
             else
                 sReport = sprintf('%s\n___________', '-');      
             end
@@ -1065,49 +891,49 @@ function generateContourReportCallback(~, ~)
                     
                     case 'unspecified'
                         if ~isempty(tReport.Unspecified.Mean)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Unspecified.Mean));
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.Unspecified.Mean);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end      
                         
                     case 'bone'
                         if ~isempty(tReport.Bone.Mean)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Bone.Mean));
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.Bone.Mean);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end          
                         
                     case 'soft tissue'
                         if ~isempty(tReport.SoftTissue.Mean)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.SoftTissue.Mean));
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.SoftTissue.Mean);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end 
                         
                     case 'lung'
                         if ~isempty(tReport.Lung.Mean)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Lung.Mean));
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.Lung.Mean);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end  
                         
                     case 'liver'
                         if ~isempty(tReport.Liver.Mean)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Liver.Mean));
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.Liver.Mean);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end  
                         
                     case 'parotid'
                         if ~isempty(tReport.Parotid.Mean)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Parotid.Mean));
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.Parotid.Mean);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end 
                         
                     case 'blood pool'
                         if ~isempty(tReport.BloodPool.Mean)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.BloodPool.Mean));
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.BloodPool.Mean);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end 
@@ -1131,7 +957,7 @@ function generateContourReportCallback(~, ~)
         else
             
             if ~isempty(tReport.All.Max)
-                sReport = sprintf('%-12s\n___________', num2str(tReport.All.Max));      
+                sReport = sprintf('%-.2f\n___________', tReport.All.Max);      
             else
                 sReport = sprintf('%s\n___________', '-');      
             end
@@ -1142,49 +968,49 @@ function generateContourReportCallback(~, ~)
                     
                     case 'unspecified'
                         if ~isempty(tReport.Unspecified.Max)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Unspecified.Max));
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.Unspecified.Max);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end      
                         
                     case 'bone'
                         if ~isempty(tReport.Bone.Max)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Bone.Max));
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.Bone.Max);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end          
                         
                     case 'soft tissue'
                         if ~isempty(tReport.SoftTissue.Max)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.SoftTissue.Max));
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.SoftTissue.Max);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end    
                         
                     case 'lung'
                         if ~isempty(tReport.Lung.Max)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Lung.Max));
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.Lung.Max);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end  
                         
                     case 'liver'
                         if ~isempty(tReport.Liver.Max)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Liver.Max));
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.Liver.Max);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end  
                         
                     case 'parotid'
                         if ~isempty(tReport.Parotid.Max)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Parotid.Max));
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.Parotid.Max);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end 
                         
                     case 'blood pool'
                         if ~isempty(tReport.BloodPool.Max)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.BloodPool.Max));
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.BloodPool.Max);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end 
@@ -1208,7 +1034,7 @@ function generateContourReportCallback(~, ~)
         else
             
             if ~isempty(tReport.All.Volume)
-                sReport = sprintf('%-12s\n___________', num2str(tReport.All.Volume));      
+                sReport = sprintf('%-.3f\n___________', tReport.All.Volume);      
             else
                 sReport = sprintf('%s\n___________', '-');      
             end
@@ -1219,49 +1045,49 @@ function generateContourReportCallback(~, ~)
                     
                     case 'unspecified'
                         if ~isempty(tReport.Unspecified.Volume)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Unspecified.Volume));
+                            sReport = sprintf('%s\n\n%-.3f', sReport, tReport.Unspecified.Volume);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end      
                         
                     case 'bone'
                         if ~isempty(tReport.Bone.Count)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Bone.Volume));
+                            sReport = sprintf('%s\n\n%-.3f', sReport, tReport.Bone.Volume);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end          
                         
                     case 'soft tissue'
                         if ~isempty(tReport.SoftTissue.Volume)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.SoftTissue.Volume));
+                            sReport = sprintf('%s\n\n%-.3f', sReport, tReport.SoftTissue.Volume);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end   
                         
                     case 'lung'
                         if ~isempty(tReport.Lung.Volume)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Lung.Volume));
+                            sReport = sprintf('%s\n\n%-.3f', sReport, tReport.Lung.Volume);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end  
                         
                     case 'liver'
                         if ~isempty(tReport.Liver.Volume)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Liver.Volume));
+                            sReport = sprintf('%s\n\n%-.3f', sReport, tReport.Liver.Volume);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end  
                         
                     case 'parotid'
                         if ~isempty(tReport.Parotid.Volume)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Parotid.Volume));
+                            sReport = sprintf('%s\n\n%-.3f', sReport, tReport.Parotid.Volume);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end 
                         
                     case 'blood pool'
                         if ~isempty(tReport.BloodPool.Volume)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.BloodPool.Volume));
+                            sReport = sprintf('%s\n\n%-.3f', sReport, tReport.BloodPool.Volume);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end 
@@ -1278,9 +1104,9 @@ function generateContourReportCallback(~, ~)
         tReport = [];
         
         atInput = inputTemplate('get');
-        dOffset = get(uiSeriesPtr('get'), 'Value');
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
         
-        bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;
+        bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
                
         sUnitDisplay = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
         tQuantification = quantificationTemplate('get');
@@ -1295,44 +1121,38 @@ function generateContourReportCallback(~, ~)
         if bModifiedMatrix == false && ... 
            bMovementApplied == false        % Can't use input buffer if movement have been applied
         
-            atDicomMeta = dicomMetaData('get');                              
-            atMetaData  = atInput(dOffset).atDicomInfo;
+            atDicomMeta = dicomMetaData('get', [], dSeriesOffset);                              
+            atMetaData  = atInput(dSeriesOffset).atDicomInfo;
             aImage      = inputBuffer('get');
             
-            if     strcmpi(imageOrientation('get'), 'axial')
-                aImage = permute(aImage{dOffset}, [1 2 3]);
-            elseif strcmpi(imageOrientation('get'), 'coronal')
-                aImage = permute(aImage{dOffset}, [3 2 1]);
-            elseif strcmpi(imageOrientation('get'), 'sagittal')
-                aImage = permute(aImage{dOffset}, [3 1 2]);
-            end
+            aImage = aImage{dSeriesOffset};
 
             if size(aImage, 3) ==1
 
-                if atInput(dOffset).bFlipLeftRight == true
+                if atInput(dSeriesOffset).bFlipLeftRight == true
                     aImage=aImage(:,end:-1:1);
                 end
 
-                if atInput(dOffset).bFlipAntPost == true
+                if atInput(dSeriesOffset).bFlipAntPost == true
                     aImage=aImage(end:-1:1,:);
                 end            
             else
-                if atInput(dOffset).bFlipLeftRight == true
+                if atInput(dSeriesOffset).bFlipLeftRight == true
                     aImage=aImage(:,end:-1:1,:);
                 end
 
-                if atInput(dOffset).bFlipAntPost == true
+                if atInput(dSeriesOffset).bFlipAntPost == true
                     aImage=aImage(end:-1:1,:,:);
                 end
 
-                if atInput(dOffset).bFlipHeadFeet == true
+                if atInput(dSeriesOffset).bFlipHeadFeet == true
                     aImage=aImage(:,:,end:-1:1);
                 end 
             end              
 
         else
-            atMetaData = dicomMetaData('get');                              
-            aImage     = dicomBuffer('get');      
+            atMetaData = dicomMetaData('get', [], dSeriesOffset);                              
+            aImage     = dicomBuffer('get', [], dSeriesOffset);      
         end
         
         % Set Voxel Size
@@ -1451,7 +1271,7 @@ function generateContourReportCallback(~, ~)
             tReport.BloodPool.Count = dBloodPoolCount;
         end        
                 
-        if dUnspecifiedCount+dBoneCount+dSoftTissueCount+dUnknowCount == 0
+        if dUnspecifiedCount+dBoneCount+dSoftTissueCount+dLungCount+dLiverCount+dParotidCount+dBloodPoolCount+dUnknowCount == 0
             tReport.All.Count = [];
         else
             tReport.All.Count = dUnspecifiedCount+dBoneCount+dSoftTissueCount+dLungCount+dLiverCount+dParotidCount+dBloodPoolCount+dUnknowCount;
@@ -1571,9 +1391,9 @@ function generateContourReportCallback(~, ~)
                 if bModifiedMatrix == false && ... 
                    bMovementApplied == false        % Can't use input buffer if movement have been applied
 
-                    if numel(aImage) ~= numel(dicomBuffer('get'))
+                    if numel(aImage) ~= numel(dicomBuffer('get', [], dSeriesOffset))
                         pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                        ptrRoiTemp = resampleROIs(dicomBuffer('get', [], dSeriesOffset), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
                     end   
                 end
@@ -1667,9 +1487,9 @@ function generateContourReportCallback(~, ~)
                 if bModifiedMatrix  == false && ... 
                    bMovementApplied == false        % Can't use input buffer if movement have been applied
 
-                    if numel(aImage) ~= numel(dicomBuffer('get'))
+                    if numel(aImage) ~= numel(dicomBuffer('get', [], dSeriesOffset))
                         pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                        ptrRoiTemp = resampleROIs(dicomBuffer('get', [], dSeriesOffset), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
                     end   
                 end
@@ -1763,9 +1583,9 @@ function generateContourReportCallback(~, ~)
                 if bModifiedMatrix  == false && ... 
                    bMovementApplied == false        % Can't use input buffer if movement have been applied
 
-                    if numel(aImage) ~= numel(dicomBuffer('get'))
+                    if numel(aImage) ~= numel(dicomBuffer('get', [], dSeriesOffset))
                         pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                        ptrRoiTemp = resampleROIs(dicomBuffer('get', [], dSeriesOffset), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
                     end   
                 end
@@ -1859,9 +1679,9 @@ function generateContourReportCallback(~, ~)
                 if bModifiedMatrix  == false && ... 
                    bMovementApplied == false        % Can't use input buffer if movement have been applied
 
-                    if numel(aImage) ~= numel(dicomBuffer('get'))
+                    if numel(aImage) ~= numel(dicomBuffer('get'), [], dSeriesOffset)
                         pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                        ptrRoiTemp = resampleROIs(dicomBuffer('get', [], dSeriesOffset), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
                     end   
                 end
@@ -1955,9 +1775,9 @@ function generateContourReportCallback(~, ~)
                 if bModifiedMatrix  == false && ... 
                    bMovementApplied == false        % Can't use input buffer if movement have been applied
 
-                    if numel(aImage) ~= numel(dicomBuffer('get'))
+                    if numel(aImage) ~= numel(dicomBuffer('get', [], dSeriesOffset))
                         pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                        ptrRoiTemp = resampleROIs(dicomBuffer('get', [], dSeriesOffset), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
                     end   
                 end
@@ -2051,9 +1871,9 @@ function generateContourReportCallback(~, ~)
                 if bModifiedMatrix  == false && ... 
                    bMovementApplied == false        % Can't use input buffer if movement have been applied
 
-                    if numel(aImage) ~= numel(dicomBuffer('get'))
+                    if numel(aImage) ~= numel(dicomBuffer('get', [], dSeriesOffset))
                         pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                        ptrRoiTemp = resampleROIs(dicomBuffer('get', [], dSeriesOffset), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
                     end   
                 end
@@ -2147,9 +1967,9 @@ function generateContourReportCallback(~, ~)
                 if bModifiedMatrix  == false && ... 
                    bMovementApplied == false        % Can't use input buffer if movement have been applied
 
-                    if numel(aImage) ~= numel(dicomBuffer('get'))
+                    if numel(aImage) ~= numel(dicomBuffer('get', [], dSeriesOffset))
                         pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                        ptrRoiTemp = resampleROIs(dicomBuffer('get', [], dSeriesOffset), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
                     end   
                 end
@@ -2228,7 +2048,9 @@ function generateContourReportCallback(~, ~)
         progressBar( 0.99999 , 'Computing all lesion, please wait' );
         
         if numel(tReport.All.RoisTag) ~= 0
-            
+
+            glVoiAllContoursMask = false(size(aImage));
+
             voiMask = cell(1, numel(tReport.All.RoisTag));
             voiData = cell(1, numel(tReport.All.RoisTag));
             
@@ -2243,9 +2065,9 @@ function generateContourReportCallback(~, ~)
                 if bModifiedMatrix  == false && ... 
                    bMovementApplied == false        % Can't use input buffer if movement have been applied
 
-                    if numel(aImage) ~= numel(dicomBuffer('get'))
+                    if numel(aImage) ~= numel(dicomBuffer('get', [], dSeriesOffset))
                         pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                        ptrRoiTemp = resampleROIs(dicomBuffer('get', [], dSeriesOffset), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
                     end   
                 end
@@ -2255,21 +2077,30 @@ function generateContourReportCallback(~, ~)
                     case 'axe'
                         voiData{uu} = aImage(:,:);
                         voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
-                        
+
+                        glVoiAllContoursMask(:,:) = glVoiAllContoursMask(:,:)|voiMask{uu};
+                      
                     case 'axes1'
                         aSlice = permute(aImage(tRoi.SliceNb,:,:), [3 2 1]);
                         voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+
+                        glVoiAllContoursMask(tRoi.SliceNb,:,:) = glVoiAllContoursMask(tRoi.SliceNb,:,:)| permute(voiMask{uu}, [3 2 1]);
                         
                     case 'axes2'
                         aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
                         voiData{uu} = aSlice;                        
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
-                         
+
+                        glVoiAllContoursMask(:,tRoi.SliceNb,:) = glVoiAllContoursMask(:,tRoi.SliceNb,:)| permute(voiMask{uu}, [2 3 1]);
+                        
                    case 'axes3'
                         aSlice = aImage(:,:,tRoi.SliceNb);
                         voiData{uu} = aSlice;                        
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+
+                        glVoiAllContoursMask(:,:,tRoi.SliceNb) = glVoiAllContoursMask(:,:,tRoi.SliceNb)|voiMask{uu};
+
                 end
 
                 if bSegmented  == true && ...      
@@ -2282,7 +2113,19 @@ function generateContourReportCallback(~, ~)
                     dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
                 end                              
             end  
-            
+
+            if bModifiedMatrix  == true && ... 
+               bMovementApplied == true        % Can't use input buffer if movement have been applied
+
+                if numel(aImage) ~= numel(dicomBuffer('get', [], dSeriesOffset))
+                    if size(aImage, 3) ~= size(dicomBuffer('get', [], dSeriesOffset), 3)
+                        [glVoiAllContoursMask, ~] = resampleImage(glVoiAllContoursMask, atMetaData, dicomBuffer('get', [], dSeriesOffset),  atDicomMeta, 'Nearest', false, true);   
+                    else
+                        [glVoiAllContoursMask, ~] = resampleImage(glVoiAllContoursMask, atMetaData, dicomBuffer('get', [], dSeriesOffset),  atDicomMeta, 'Nearest', true, true);   
+                    end                
+                end
+            end
+
             voiMask = cat(1, voiMask{:});
             voiData = cat(1, voiData{:});
             
@@ -2302,7 +2145,8 @@ function generateContourReportCallback(~, ~)
                 
                 if bSUVUnit == true
                     tReport.All.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-                    tReport.All.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;             
+                    tReport.All.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;     
+                    tReport.All.voiData = voiData *tQuantification.tSUV.dScale;
                 else
                     tReport.All.Mean = mean(voiData, 'all');
                     tReport.All.Max  = max (voiData, [], 'all');
@@ -2327,9 +2171,9 @@ function generateContourReportCallback(~, ~)
        
     end
 
-    function exportCurrentReportCallback(~, ~)
+    function exportCurrentReportToPdfCallback(~, ~)
         
-        atMetaData = dicomMetaData('get');
+        atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
        
         try
        
@@ -2343,8 +2187,8 @@ function generateContourReportCallback(~, ~)
         if exist(sMatFile, 'file')
                         % lastDirMat mat file exists, load it
             load('-mat', sMatFile);
-            if exist('saveRoiLastUsedDir', 'var')
-               sCurrentDir = saveRoiLastUsedDir;
+            if exist('saveReportLastUsedDir', 'var')
+               sCurrentDir = saveReportLastUsedDir;
             end
             if sCurrentDir == 0
                 sCurrentDir = pwd;
@@ -2352,11 +2196,21 @@ function generateContourReportCallback(~, ~)
         end
             
         sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
-        [file, path] = uiputfile(filter, 'Save contour report', sprintf('%s/%s_%s_%s_%s_report_TriDFusion.pdf' , ...
+        [file, path] = uiputfile(filter, 'Save contour report', sprintf('%s/%s_%s_%s_%s_CONTOUR_REPORT_TriDFusion.pdf' , ...
             sCurrentDir, cleanString(atMetaData{1}.PatientName), cleanString(atMetaData{1}.PatientID), cleanString(atMetaData{1}.SeriesDescription), sDate) );
-        
+
+        set(figContourReport, 'Pointer', 'watch');
+        drawnow;
+
         if file ~= 0
-            
+
+            try
+                saveReportLastUsedDir = path;
+                save(sMatFile, 'saveReportLastUsedDir');
+            catch
+                progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
+            end 
+
             sFileName = sprintf('%s%s', path, file);
             
             if exist(sFileName, 'file')
@@ -2376,14 +2230,17 @@ function generateContourReportCallback(~, ~)
                 sFileName = [sFileName, '.pdf'];
             end
 
-            print(figContourReport, sFileName, '-painters', '-dpdf', '-r0');
+            print(figContourReport, sFileName, '-image', '-dpdf', '-r0');
 
             open(sFileName);
         end
         
         catch
-            progressBar( 1 , 'Error: exportCurrentReportCallback() cant export report' );
+            progressBar( 1 , 'Error: exportCurrentReportToPdfCallback() cant export report' );
         end
+
+        set(figContourReport, 'Pointer', 'default');
+        drawnow;        
     end
     
     function copyReportDisplayCallback(~, ~)
@@ -2407,4 +2264,165 @@ function generateContourReportCallback(~, ~)
         set(figContourReport, 'Pointer', 'default');
     end
 
+    function display3Dobject(bModifiedMatrix)
+
+        a3DWindowPosition = get(ui3DWindow, 'position'); 
+
+        delete(ui3DWindow);
+
+        ui3DWindow = ...
+        uipanel(uiContourReport,...
+                'Units'          , 'pixels',...
+                'BorderWidth'    , showBorder('get'),...
+                'HighlightColor' , [0 1 1],...
+                'BackgroundColor', surfaceColor('get', background3DOffset('get')),...
+                'position'       , a3DWindowPosition...
+                );  
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
+
+        if bModifiedMatrix == false && ... 
+           bMovementApplied == false        % Can't use input buffer if movement have been applied
+        
+            atMetaData  = atInput(dSeriesOffset).atDicomInfo;
+            aBuffer      = inputBuffer('get');
+
+            aBuffer = aBuffer{dSeriesOffset};
+
+            if size(aBuffer, 3) ==1
+
+                if atInput(dSeriesOffset).bFlipLeftRight == true
+                    aBuffer=aBuffer(:,end:-1:1);
+                end
+
+                if atInput(dSeriesOffset).bFlipAntPost == true
+                    aBuffer=aBuffer(end:-1:1,:);
+                end            
+            else
+                if atInput(dSeriesOffset).bFlipLeftRight == true
+                    aBuffer=aBuffer(:,end:-1:1,:);
+                end
+
+                if atInput(dSeriesOffset).bFlipAntPost == true
+                    aBuffer=aBuffer(end:-1:1,:,:);
+                end
+
+                if atInput(dSeriesOffset).bFlipHeadFeet == true
+                    aBuffer=aBuffer(:,:,end:-1:1);
+                end 
+            end      
+
+            x = atMetaData{1}.PixelSpacing(1);
+            y = atMetaData{1}.PixelSpacing(2);
+            z = computeSliceSpacing(atMetaData); 
+        else
+            atMetaData = dicomMetaData('get', [], dSeriesOffset);                              
+            aBuffer    = dicomBuffer  ('get', [], dSeriesOffset);      
+
+            x = aspectRatioValue('get', 'x');
+            y = aspectRatioValue('get', 'y');
+            z = aspectRatioValue('get', 'z');   
+
+        end
+
+        aBuffer = aBuffer(:,:,end:-1:1);                                                                 
+
+        aScaleFactor = [y x z];  
+        dScaleMax = max(aScaleFactor)*2.5;
+    
+        vec = linspace(0,2*pi(),120)';
+    
+        myPosition = [dScaleMax*cos(vec) dScaleMax*sin(vec) zeros(size(vec))];
+    
+        aCameraPosition = myPosition(1,:);
+        aCameraUpVector =  [0 0 1];
+    
+        for cc=1:numel(aCameraPosition) % Normalize to 1
+            aCameraPosition(cc) = aCameraPosition(cc) / dScaleMax;
+        end            
+    
+        [aCameraPosition, aCameraUpVector] = compute3Dflip(aCameraPosition, aCameraUpVector, 'right');
+    
+        for cc=1:numel(aCameraPosition) % Add the zoom
+            aCameraPosition(cc) = aCameraPosition(cc) *dScaleMax;
+        end 
+
+        % MIP display image 
+
+        if ~isempty(aBuffer)
+
+            aInputArguments = {'Parent', ui3DWindow, 'Renderer', 'MaximumIntensityProjection', 'BackgroundColor', 'white', 'ScaleFactors', aScaleFactor};
+    
+            if strcmpi(atMetaData{1}.Modality, 'CT')
+                aColormap = gray(256);
+                aAlphamap = defaultMipAlphaMap(aBuffer, 'CT');
+            elseif strcmpi(atMetaData{1}.Modality, 'MR')
+                aAlphamap = defaultMipAlphaMap(aBuffer, 'MR');
+                aColormap = getAngioColorMap();
+            else
+                aAlphamap = compute3DLinearAlphaMap(get(uiSlider3Dintensity,'value'));
+                aColormap = gray(256);
+            end  
+            
+            aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
+        
+            if verLessThan('matlab','9.13')
+                gp3DObject = volshow(squeeze(aBuffer),  aInputArguments{:});
+            else
+                gp3DObject = images.compatibility.volshow.R2022a.volshow(squeeze(aBuffer), aInputArguments{:});                   
+            end
+        
+            gp3DObject.CameraPosition = aCameraPosition;
+            gp3DObject.CameraUpVector = aCameraUpVector;  
+        end
+
+        % Volume redering all contours 
+
+        if ~isempty(glVoiAllContoursMask)
+
+            glVoiAllContoursMask = glVoiAllContoursMask(:,:,end:-1:1);
+    
+            aInputArguments = {'Parent', ui3DWindow, 'Renderer', 'VolumeRendering', 'BackgroundColor', 'white', 'ScaleFactors', aScaleFactor};
+    
+            aAlphamap = linspace(0, 1, 256)';
+            aColormap = getRedColorMap();
+    
+            aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
+      
+            if verLessThan('matlab','9.13')
+                p3DObject = volshow(squeeze(glVoiAllContoursMask),  aInputArguments{:});
+            else
+                p3DObject = images.compatibility.volshow.R2022a.volshow(squeeze(glVoiAllContoursMask), aInputArguments{:});                   
+            end
+    
+            p3DObject.CameraPosition = aCameraPosition;
+            p3DObject.CameraUpVector = aCameraUpVector;
+        end
+    end
+
+    function slider3DintensityCallback(~, ~)
+
+        aAlphamap = compute3DLinearAlphaMap(get(uiSlider3Dintensity,'value'));
+
+        set(gp3DObject, 'Alphamap', aAlphamap);
+    end
+    
+    function uiContourReportSliderCallback(~, ~)
+
+        val = get(uiContourReportSlider, 'Value');
+    
+        aPosition = get(uiContourReport, 'Position');
+    
+        dPanelOffset = -((1-val) * aPosition(4));
+    
+        set(uiContourReport, ...
+            'Position', [aPosition(1) ...
+                         0-dPanelOffset ...
+                         aPosition(3) ...
+                         aPosition(4) ...
+                         ] ...
+            );
+    end
 end

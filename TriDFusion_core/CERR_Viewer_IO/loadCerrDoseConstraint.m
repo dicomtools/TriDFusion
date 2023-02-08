@@ -668,7 +668,7 @@ function loadCerrDoseConstraint(planC, structNamC)
 %            end
 %        end
 %
-%        maskToVoi(strMaskC{mm}, structNamC{mm}, aVoiColor, false);
+%        maskToVoi(strMaskC{mm}, structNamC{mm}, 'Unspecified', aVoiColor, false);
 %    end
 
     set(uiCorWindowPtr('get'), 'Visible', 'on');

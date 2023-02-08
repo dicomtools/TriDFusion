@@ -109,9 +109,9 @@ function setDisplayBuffer()
     end                
     
  %   if canUseGPU()    
-%        for mm=1:numel(aInput)
-%            aInput{mm} = uint16(aInput{mm});
-%        end
+ %       for mm=1:numel(aInput)
+ %           aInput{mm} = uint16(aInput{mm});
+ %       end
  %   end
     
     inputBuffer('set', aInput);

@@ -29,7 +29,6 @@ function ptrPlotCummulative = plotCummulative(pAxe, imCData, aColor)
     
 %    my_bins = min(double(imCData),[],'all'):max(double(imCData),[],'all');
     
-
     my_bins = min(double(imCData),[],'all'):max(double(imCData),[],'all');    
     bin = unique(my_bins);
     [N, ~] = histcounts(imCData,bin);

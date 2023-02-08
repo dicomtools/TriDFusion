@@ -52,6 +52,10 @@ function initViewerGlobal()
     ui3DPanelPtr          ('set', '');
     ui3DPanelSliderPtr    ('set', '');
 
+    figContourReportPtr    ('set', '');
+    fig3DLungShuntReportPtr('set', '');
+    fig3DLobeLungReportPtr ('set', '');
+
     btn3DPtr         ('set', '');
     btnIsoSurfacePtr ('set', '');
     btnMIPPtr        ('set', '');
@@ -176,6 +180,8 @@ function initViewerGlobal()
     isRGBFusionRedEnable  ('set', true, []);
     isRGBFusionGreenEnable('set', true, []);
     isRGBFusionBlueEnable ('set', true, []);
+
+    machineLearning3DMask('init');
 
     imAxePtr  ('reset');
     imAxeFcPtr('reset');

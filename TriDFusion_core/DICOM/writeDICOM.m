@@ -37,7 +37,7 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset)
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;  
   
-    sTmpDir = sprintf('%stemp_dicom_%s//', tempdir, datetime('now','Format','MMMM-d-y-hhmmss'));
+    sTmpDir = sprintf('%stemp_dicom_%s//', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
     if exist(char(sTmpDir), 'dir')
         rmdir(char(sTmpDir), 's');
     end

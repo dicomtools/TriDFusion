@@ -55,6 +55,7 @@ function info = dicominfo4che3(fileInput)
     info.PatientName        = char(dataset.getString(org.dcm4che3.data.Tag.PatientName, 0));
     info.PatientID          = char(dataset.getString(org.dcm4che3.data.Tag.PatientID, 0));
     info.SeriesDescription  = char(dataset.getString(org.dcm4che3.data.Tag.SeriesDescription, 0));
+    info.StudyDescription   = char(dataset.getString(org.dcm4che3.data.Tag.StudyDescription, 0));
 
     info.Modality  = char(dataset.getStrings(org.dcm4che3.data.Tag.Modality));        
 

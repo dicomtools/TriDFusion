@@ -629,12 +629,12 @@ function initKernelPanel()
                 aInput = inputBuffer('get');
                 aCtBuffer = aInput{tKernelCtDoseMap{dCtOffset}.dSeriesNumber};
                 
-                if strcmpi(imageOrientation('get'), 'coronal')
-                    aCtBuffer = permute(aCtBuffer, [3 2 1]);
+                if     strcmpi(imageOrientation('get'), 'axial')
+                %    aCtBuffer = aCtBuffer;
+                elseif strcmpi(imageOrientation('get'), 'coronal')
+                    aCtBuffer = reorientBuffer(aCtBuffer, 'coronal');
                 elseif strcmpi(imageOrientation('get'), 'sagittal')
-                    aCtBuffer = permute(aCtBuffer, [2 3 1]);
-                else
-                    aCtBuffer = permute(aCtBuffer, [1 2 3]);
+                    aCtBuffer = reorientBuffer(aCtBuffer, 'sagittal');
                 end
 
                 if tInput(dSerieOffset).bFlipLeftRight == true
@@ -662,7 +662,14 @@ function initKernelPanel()
 
   %          set(uiSeriesPtr('get'), 'Value', dSerieOffset);
 
-            [aResamCt, ~] = resampleImage(aCtBuffer, atCtMetaData, aRefBuffer, atRefMetaData, 'Nearest', 2, false);
+            [aResamCt, ~] = ...
+                resampleImage(aCtBuffer, ...
+                              atCtMetaData, ...
+                              aRefBuffer, ...
+                              atRefMetaData, ...
+                              'Nearest', ...
+                              2, ...
+                              false);
            
             % Get constraint 
 
@@ -672,7 +679,12 @@ function initKernelPanel()
 
             tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
-            aLogicalMask = roiConstraintToMask(aResamCt, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);        
+            aLogicalMask = ...
+                roiConstraintToMask(aResamCt, ...
+                                    tRoiInput, ...
+                                    asConstraintTagList, ...
+                                    asConstraintTypeList, ...
+                                    bInvertMask);        
 
             dImageMin = min(double(aResamCt),[], 'all');
 
@@ -931,24 +943,6 @@ function initKernelPanel()
         
     end
 
-    function dCutOffValue = getKernelDefaultCutoffValue(sTissueDependent, sIsotope)
-        
-        switch lower(sIsotope)
-
-            case 'y90'
-                dCutOffValue = 99.9305;
-                
-            case 'y9010e7'     
-                dCutOffValue = 10;
-                
-            otherwise
-                dCutOffValue = kernelCutoff('get');
-        end        
-        
-        kernelCutoff('set', dCutOffValue);
-    end
-
-
     function uiKernelInterpolationCallback(~, ~)
        
         asKernelInterpolation = get(uiKernelInterpolation, 'String');
@@ -1122,8 +1116,43 @@ function initKernelPanel()
             return;
         end
 
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+
         try
-            setDoseKernel();
+            % Dectivate uipanel 
+            
+            set(uiKernelTissue       , 'Enable', 'off');
+            set(uiKernelIsotope      , 'Enable', 'off');
+            set(uiKernelModel        , 'Enable', 'off');
+            set(uiKernelInterpolation, 'Enable', 'off');
+            set(uiDoseKernelPanel    , 'Enable', 'off');            
+            set(uiEditKernelCutoff   , 'Enable', 'off');
+            set(uiPlotDistance       , 'Enable', 'off'); 
+
+            dModel    = get(uiKernelModel   , 'Value');
+        
+            dTissue   = get(uiKernelTissue , 'Value' );
+            asTissue  = get(uiKernelTissue , 'String');
+        
+            dIsotope  = get(uiKernelIsotope , 'Value' );
+            asIsotope = get(uiKernelIsotope, 'String');
+
+            asKernelInterpolation = get(uiKernelInterpolation, 'String');
+            dInterpolationValue   = get(uiKernelInterpolation, 'Value');
+
+            dKernelKernelCutoffDistance = str2double(get(uiEditKernelCutoff, 'String'));
+
+            bUseCtMap = get(chkUseCTdoseMapKernel, 'Value'); % CT Guided
+            dCtOffset = get(uiKernelSeries, 'Value');
+
+            setDoseKernel(dModel, ...
+                          asTissue{dTissue}, ...
+                          asIsotope{dIsotope}, ...
+                          dKernelKernelCutoffDistance, ...
+                          asKernelInterpolation{dInterpolationValue}, ...
+                          bUseCtMap, ...
+                          dCtOffset);
         catch
             progressBar(1, 'Error: An error occur during kernel processing!');
             h = msgbox('Error: doseKernelCallback(): An error occur during kernel processing!', 'Error');
@@ -1137,621 +1166,18 @@ function initKernelPanel()
 %            javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
         end
 
-% ASK: Dose Kernel set-up
-
-        function setDoseKernel()
-
-            tInput = inputTemplate('get');
-
-            dOffset = get(uiSeriesPtr('get'), 'Value');
-            if dOffset > numel(tInput)
-                return;
-            end
-
-            if switchTo3DMode('get')     == true ||  ...
-               switchToIsoSurface('get') == true || ...
-               switchToMIPMode('get')    == true
-
-                return;
-            end
-
-            if isempty(dicomBuffer('get'))
-                return;
-            end
-
-            try
-
-            set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-            drawnow;
-            
-            % Deactivate uipanel
-            
-            set(uiKernelTissue       , 'Enable', 'off');
-            set(uiKernelIsotope      , 'Enable', 'off');
-            set(uiKernelModel        , 'Enable', 'off');
-            set(uiKernelInterpolation, 'Enable', 'off');
-            set(uiDoseKernelPanel    , 'Enable', 'off');
-            set(uiEditKernelCutoff   , 'Enable', 'off');
-            set(uiPlotDistance       , 'Enable', 'off');            
-            
-            vBoundAxes1Ptr = visBoundAxes1Ptr('get');
-            vBoundAxes2Ptr = visBoundAxes2Ptr('get');
-            vBoundAxes3Ptr = visBoundAxes3Ptr('get');
-
-            if ~isempty(vBoundAxes1Ptr)
-                delete(vBoundAxes1Ptr);
-            end
-
-            if ~isempty(vBoundAxes2Ptr)
-                delete(vBoundAxes2Ptr);
-            end
-
-            if ~isempty(vBoundAxes3Ptr)
-                delete(vBoundAxes3Ptr);
-            end
-
-            tInput(dOffset).bDoseKernel = false;
-            if numel(tInput) == 1 && isFusion('get') == false
-                tInput(dOffset).bFusedDoseKernel = false;
-            end
-
-            progressBar(0.5, 'Processing kernel, please wait.');
-
-            dModel    = get(uiKernelModel   , 'Value');
-
-            dTissue   = get(uiKernelTissue , 'Value' );
-            asTissue  = get(uiKernelTissue , 'String');
-
-            dIsotope  = get(uiKernelIsotope , 'Value' );
-            asIsotope = get(uiKernelIsotope, 'String');
-
-            tKernel = tDoseKernel.Kernel{dModel}.(asTissue{dTissue}).(asIsotope{dIsotope});
-
-            asField = fieldnames(tKernel);
-
-            if numel(asField) == 2
-                aDistance = tKernel.(asField{1});
-                aDoseR2   = tKernel.(asField{2});
-            else
-                % Activate uipanel 
-
-                set(uiKernelTissue       , 'Enable', 'on');
-                set(uiKernelIsotope      , 'Enable', 'on');
-                set(uiKernelModel        , 'Enable', 'on');
-                set(uiKernelInterpolation, 'Enable', 'on');
-                set(uiDoseKernelPanel    , 'Enable', 'on');
-                set(uiEditKernelCutoff   , 'Enable', 'on');
-                set(uiPlotDistance       , 'Enable', 'on');            
-
-                progressBar(0, 'Error:setDoseKernel() invalid kernel!');
-
-                set(fiMainWindowPtr('get'), 'Pointer', 'default');
-                drawnow;                  
-                return;
-            end
-
-            aActivity = double(dicomBuffer('get'));
-
-            % For radioembolization using microspheres loaded with isotope with half-life T1/2
-            % 1)	From PET image – Activity A in kBq for each voxel at time of scan: Ascan= Bq/mL * Vvox(mL)
-            % 2)	Activity at injection of microspheres: A0=A*2[(Tscan-Tinjection)/T1/2]
-            % 3)	Calculate the total number of disintegrations in the voxel  [Bq * s] =
-            % = Cumulative activity Acum= A0 * T1/2(s) / ln(2) = A0 (Bq) *1.442695* T1/2 (s)
-            % 4)	Calculate total number of beta-particles (e.g. beta) using the yield Yb
-            % Nb= Acum * Yb
-            % 5)	Nb,scaled = Nb/(4*107  ) ; (4*10^7 primaries used per George Kagadis e-mail 5-14-20)
-
-            % 6)	Cumulative Dose to point at distance r (mm), D(r) = Nb,scaled * DPKr2(r) / r2
-
-            % For Y-90:
-            % T1/2 = 2.6684 d
-            % Yb = 1.0
-
-            % Note for non-microsphere tracers:  There will be:
-            % - uptake curve which will change step 2
-            % - effective half-life due to biological clearance which will change step 3 and trapezoidal integration may be used instead
-
-            atCoreMetaData = dicomMetaData('get');
-                        
-            if kernelMicrosphereInSpecimen('get') == true
-                
-               % RadiopharmaceuticalInformationSequence is missing, a popup
-               % window will be polulated
-               
-               tMicrosphereInfo = radiopharmaceuticalInformationDialog(); 
-               
-                if isempty(tMicrosphereInfo) % Cancel
-                    
-                    % Activate uipanel 
-
-                    set(uiKernelTissue       , 'Enable', 'on');
-                    set(uiKernelIsotope      , 'Enable', 'on');
-                    set(uiKernelModel        , 'Enable', 'on');
-                    set(uiKernelInterpolation, 'Enable', 'on');
-                    set(uiDoseKernelPanel    , 'Enable', 'on');
-                    set(uiEditKernelCutoff   , 'Enable', 'on');
-                    set(uiPlotDistance       , 'Enable', 'on');            
-            
-                    progressBar(0, 'Ready');
-                    
-                    set(fiMainWindowPtr('get'), 'Pointer', 'default');
-                    drawnow;                    
-                    return;
-                else 
-                    dPixelSpacingX = tMicrosphereInfo.dPixelSpacingX;     
-                    dPixelSpacingY = tMicrosphereInfo.dPixelSpacingY;          
-                    dPixelSpacingZ = tMicrosphereInfo.dPixelSpacingZ;      
-                    
-                    sSeriesDate = tMicrosphereInfo.sCallibrationDate;
-                    sSeriesTime = tMicrosphereInfo.sCallibrationTime;
-                    
-                    sRadiopharmaceuticalStartDate = tMicrosphereInfo.sInfusionDate;
-                    sRadiopharmaceuticalStartTime = tMicrosphereInfo.sInfusionTime;            
-                    
-                    sRadionuclideHalfLife = tMicrosphereInfo.sHalfLife;            
-                    sRadiopharmaceutical = tMicrosphereInfo.sTreatmentType;                         
-                    
-                    sRadiopharmaceuticalStartDateTime = ...
-                        sprintf('%s%s.00', sRadiopharmaceuticalStartDate, sRadiopharmaceuticalStartTime);
-                                
-                    for jj=1:numel(atCoreMetaData)
-                        atCoreMetaData{jj}.PixelSpacing(1) = dPixelSpacingX;
-                        atCoreMetaData{jj}.PixelSpacing(2) = dPixelSpacingY;
-                        atCoreMetaData{jj}.SpacingBetweenSlices = dPixelSpacingZ;
-
-                        atCoreMetaData{jj}.SeriesDate = sSeriesDate;
-                        atCoreMetaData{jj}.SeriesTime = sSeriesTime;
-
-                        atCoreMetaData{jj}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime = ...
-                            sRadiopharmaceuticalStartDateTime;
-
-                        atCoreMetaData{jj}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife = sRadionuclideHalfLife;
-
-                        atCoreMetaData{jj}.RadiopharmaceuticalInformationSequence.Item_1.Radiopharmaceutical = sRadiopharmaceutical;        
-                        atCoreMetaData{jj}.Modality = 'pt';
-                        
-                        if ~strcmpi(atCoreMetaData{jj}.SOPClassUID, atCoreMetaData{jj}.MediaStorageSOPClassUID)   
-                            atCoreMetaData{jj}.SOPClassUID = atCoreMetaData{jj}.MediaStorageSOPClassUID;  
-                        end
-                    end                                        
-                end
-  
-                bResizePixelSize   = tMicrosphereInfo.bResizePixelSize;            
-                dResizeX           = tMicrosphereInfo.dResizePixelSpacingX;            
-                dResizeY           = tMicrosphereInfo.dResizePixelSpacingY;            
-                dResizeZ           = tMicrosphereInfo.dResizePixelSpacingZ;            
-                dMicrosphereVolume = tMicrosphereInfo.dMicrosphereVolume;   
-                dSpecimenVolume    = tMicrosphereInfo.dSpecimenVolume;   
-                
-                progressBar(0.6, 'Processing microsphere, please wait.');
-                                  
-                aActivity(aActivity~=0)=0;
-                
-                aActivity = computeMicrospereActivity(aActivity, atCoreMetaData, sRadiopharmaceutical, dMicrosphereVolume);
-                                
-
-%                dicomBuffer('set', aActivity);
-%                return;
-                
-                
-                if bResizePixelSize == true
-                    
-                    progressBar(0.7, 'Resampling image, please wait.');
-                    
-                    % Resample image
-                    
-                    [aActivity, atCoreMetaData] = resampleMicrospereImage(aActivity, atCoreMetaData, dResizeX, dResizeY, dResizeZ);
-                    
-                end
-
-                
-                % Calibrate the activity 
-                                
-                
-                if dSpecimenVolume ~= 0                    
-                    aActivity = aActivity/dSpecimenVolume;
-                end
-                
-            else
-                if isempty(atCoreMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime)
-                    
-                    % Activate uipanel 
-                    
-                    set(uiKernelTissue       , 'Enable', 'on');
-                    set(uiKernelIsotope      , 'Enable', 'on');
-                    set(uiKernelModel        , 'Enable', 'on');
-                    set(uiKernelInterpolation, 'Enable', 'on');
-                    set(uiDoseKernelPanel    , 'Enable', 'on');
-                    set(uiEditKernelCutoff   , 'Enable', 'on');
-                    set(uiPlotDistance       , 'Enable', 'on');            
-                    
-                    set(fiMainWindowPtr('get'), 'Pointer', 'default');
-                    drawnow;
-                    
-                    progressBar(1, 'Error: Dose RadiopharmaceuticalStartDateTime is missing!');
-                    h = msgbox('Error: setDoseKernel(): Dose RadiopharmaceuticalStartDateTime is missing!', 'Error');
-    %                if integrateToBrowser('get') == true
-    %                    sLogo = './TriDFusion/logo.png';
-    %                else
-    %                    sLogo = './logo.png';
-    %                end
-
-    %                javaFrame = get(h, 'JavaFrame');
-    %                javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
-                    return;
-                end                
-            end
-            
-            for jj=1:numel(atCoreMetaData)
-                if isfield(atCoreMetaData{jj}, 'RescaleSlope')
-                    atCoreMetaData{jj}.RescaleSlope = 1;
-                end
-                if isfield(atCoreMetaData{jj}, 'RescaleIntercept')
-                    atCoreMetaData{jj}.RescaleIntercept = 0;
-                end
-                if isfield(atCoreMetaData{jj}, 'Units')
-                    atCoreMetaData{jj}.Units = 'DOSE';
-                end
-            end
-
-            dicomMetaData('set', atCoreMetaData);
-            
-            
-            % ASK: converting from mm to cm ??
-            
-            
-            xPixelInMm = atCoreMetaData{1}.PixelSpacing(1);
-            yPixelInMm = atCoreMetaData{1}.PixelSpacing(2);
-            zPixelInMm = computeSliceSpacing(atCoreMetaData);
- 
-            xPixelInCm = atCoreMetaData{1}.PixelSpacing(1)/10;
-            yPixelInCm = atCoreMetaData{1}.PixelSpacing(2)/10;
-            zPixelInCm = computeSliceSpacing(atCoreMetaData)/10;            
-            
-%            sigmaX = atCoreMetaData{1}.PixelSpacing(1)/10;
-%            sigmaY = atCoreMetaData{1}.PixelSpacing(2)/10;
-%            sigmaZ = computeSliceSpacing(atCoreMetaData)/10;
-                        
-%            if strcmpi(imageOrientation('get'), 'coronal')
-%                xPixel = sigmaX;
-%                yPixel = sigmaZ;
-%                zPixel = sigmaY;
-%            end
-            
-            
-%            if strcmpi(imageOrientation('get'), 'sagittal')
-%                xPixel = sigmaY;
-%                yPixel = sigmaZ;
-%                zPixel = sigmaX;
-%            end
-            
-%            if strcmpi(imageOrientation('get'), 'axial')
-%                xPixel = sigmaX;
-%                yPixel = sigmaY;
-%                zPixel = sigmaZ;
-%            end
-
-% ASK: Decay correction
-
-            injDateTime = atCoreMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;
-            acqTime     = atCoreMetaData{1}.SeriesTime;
-            acqDate     = atCoreMetaData{1}.SeriesDate;
-            halfLife    = str2double(atCoreMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife);
-
-            if numel(injDateTime) == 14
-                injDateTime = sprintf('%s.00', injDateTime);
-            end
-
-            datetimeInjDate = datetime(injDateTime,'InputFormat','yyyyMMddHHmmss.SS');
-            dateInjDate = datenum(datetimeInjDate);
-
-            if numel(acqTime) == 6
-                acqTime = sprintf('%s.00', acqTime);
-            end
-
-            datetimeAcqDate = datetime([acqDate acqTime],'InputFormat','yyyyMMddHHmmss.SS');
-            dayAcqDate = datenum(datetimeAcqDate);
-
-            TscanMinusTinjection = (dayAcqDate - dateInjDate)*(24*60*60); % Acquisition start time
-
-            switch lower(asIsotope{dIsotope})
-                
-                case 'y90'
-                    
-                    betaYield = 1; %Beta yield Y-90
-                    nbOfParticuleSimulated = 4E7;
-                    
-
-                case 'y9010e7'
-                    betaYield = 1; %Beta yield Y-90
-                    nbOfParticuleSimulated = 10E7; 
-                    
-                 case 'y9010e8'
-                    betaYield = 1; %Beta yield Y-90
-                    nbOfParticuleSimulated = 10E8;                    
-                otherwise
-                    
-                    % Activate uipanel 
-                    
-                    set(uiKernelTissue       , 'Enable', 'on');
-                    set(uiKernelIsotope      , 'Enable', 'on');
-                    set(uiKernelModel        , 'Enable', 'on');
-                    set(uiKernelInterpolation, 'Enable', 'on');
-                    set(uiDoseKernelPanel    , 'Enable', 'on');
-                    set(uiEditKernelCutoff   , 'Enable', 'on');
-                    set(uiPlotDistance       , 'Enable', 'on');            
-                    
-                    set(fiMainWindowPtr('get'), 'Pointer', 'default');
-                    drawnow;
-
-                     progressBar(1, 'Error: This isotope is not yet validated!');
-                     h = msgbox('Error: setDoseKernel(): This isotope is not yet validated!', 'Error');
-%                     if integrateToBrowser('get') == true
-%                        sLogo = './TriDFusion/logo.png';
-%                     else
-%                        sLogo = './logo.png';
-%                     end
-
-%                     javaFrame = get(h, 'JavaFrame');
-%                     javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
-                     return;
-
-             end
-% ASK: equations 
-USE_LBM_METHOD = true;
-
-            if USE_LBM_METHOD == true % LDM method
-                
-                switch lower(asTissue{dTissue})
-                        
-                    case 'water'
-                        dNormFactor = 49.7;
-                            
-                    case 'softtissue' % Liver
-                        dNormFactor = 47.8;
-                            
-                    otherwise
-                        dNormFactor = 49.7;
-                end
-
-                aActivity = dNormFactor*aActivity/10^6;
-            
-            else  % Kernel convolution method
-               
-                aActivity = aActivity*xPixelInCm*yPixelInCm*zPixelInCm;  % 1) From PET image – Activity A in Bq for each voxel at time of scan: Ascan= Bq/mL * Vvox(mL)
-                A0 = aActivity*2^(TscanMinusTinjection/halfLife); % 2) Activity at injection of microspheres: A0=A*2[(Tscan-Tinjection)/T1/2]
-                Acum  = A0 *halfLife *1/log(2);                   % 3) Calculate the total number of disintegrations in the voxel Acum = A0(Bq) *1.442695* T1/2(s)
-                Nb = Acum*betaYield;                              % 4) Calculate total number of beta-particles (e.g. beta) using the yield Yb Nb = Acum * Yb
-                aActivity = Nb/nbOfParticuleSimulated;            % 5) Nb,scaled = Nb/(4*107  )
-            end
-            
-            aDose = aDoseR2./aDistance.^2;                    % 6) Cumulative Dose to point at distance r (mm), D(r) = Nb,scaled * DPKr2(r) / r2  ???
-
- %           aActivity = NbScaled;
-
-            % Set Meshgrid
-            dKernelDistance = str2double(get(uiEditKernelCutoff, 'String'));
-
-%            dKernelCutoff = str2double(get(uiEditKernelCutoff, 'String'));
-% ASK: Kernel cut-off level
-%            dMax = max(aDose, [], 'all')/dKernelCutoff; % Dose kernel truncated to the cutoff of the max dose
-%            aVector = find(aDose<=dMax);
-
-%            dFirst = aVector(1);
-
-%            dDistance = aDistance(dFirst);
-            
-%            dDistance = aDistance(end); % mm
-%            dDistance = 100; % mm
-
- %ASK: size of kernel in voxels
-
-            fromToX = ceil(dKernelDistance/xPixelInMm);
-            fromX = -abs(fromToX);
-            toX   =  abs(fromToX);
-
-            fromToY = ceil(dKernelDistance/yPixelInMm);
-            fromY = -abs(fromToY);
-            toY   =  abs(fromToY);
-
-            fromToZ = ceil(dKernelDistance/zPixelInMm);
-            fromZ = -abs(fromToZ);
-            toZ   =  abs(fromToZ);
-            
-            progressBar(0.75, 'Creating meshgrid, please wait.');
-
-            try 
-                [X,Y,Z] = meshgrid(fromX:toX,fromY:toY,fromZ:toZ);
-            catch
-                % Try a meshgrid 10x smaler 
-                 [X,Y,Z] = meshgrid(fromX/10:toX/10,fromY/10:toY/10,fromZ/10:toZ/10);               
-            end
-            
-            % Interpolate Meshgrid
-
-            distanceMatrix = sqrt((X*xPixelInMm).^2+(Y*yPixelInMm).^2+(Z*zPixelInMm).^2);
-            
-%            vqKernel = interp1(aDistance, aDose, distanceMatrix, 'pchip', 'extrap'); %interpolation method: 'linear', 'nearest', 'next', 'previous', 'pchip', 'cubic', 'v5cubic', 'makima', or 'spline'.
-
-            asKernelInterpolation = get(uiKernelInterpolation, 'String');
-            dInterpolationValue   = get(uiKernelInterpolation, 'Value');
-            
-            progressBar(0.85, sprintf('Processing %s interpolatiion, please wait.', asKernelInterpolation{dInterpolationValue} ));
-            % Kernel in 3D in mm: 
-   %         vqKernel = interp1(aDistance, aDose, distanceMatrix, asKernelInterpolation{dInterpolationValue}, 'extrap'); %interpolation method: 'linear', 'nearest', 'next', 'previous', 'pchip', 'cubic', 'v5cubic', 'makima', or 'spline'.
-            vqKernel = interp1(aDistance, aDose, distanceMatrix, asKernelInterpolation{dInterpolationValue}, 'extrap'); %interpolation method: 'linear', 'nearest', 'next', 'previous', 'pchip', 'cubic', 'v5cubic', 'makima', or 'spline'.
- %           vqKernel = interp1(aDistance, aDose, distanceMatrix, asKernelInterpolation{dInterpolationValue}); %interpolation method: 'linear', 'nearest', 'next', 'previous', 'pchip', 'cubic', 'v5cubic', 'makima', or 'spline'.
-       %     vqKernel = vqKernel/sum(vqKernel, 'all')*49.67;
-
-% ASK: Kernel Convolution
-            % here; vqKernel has to be in voxels, not mm
-            if USE_LBM_METHOD == true
- 
-                dKernelSum = sum(vqKernel, 'all');
-                if dKernelSum == 0
-                    dKernelSum = 1;
-                end
-                vqKernel =  vqKernel/dKernelSum;
-            end
-            
-            progressBar(0.95, sprintf('Processing convolution, please wait.'));
-             
-            aActivity = convn(aActivity, vqKernel, 'same');
-                       
-            % check mean dose in center of sphere
-%            mean(aActivity(62:66,62:66,23:26), 'All')
-            
-            % Apply CT constraint 
-
-            bUseCtMap = get(chkUseCTdoseMapKernel, 'Value'); % CT Guided
-            if bUseCtMap == true
-                
-                progressBar(0.95, 'Processing CT mask, please wait.');
-
-                aRefBuffer = dicomBuffer('get');
-                atRefMetaData = dicomMetaData('get');
-
-                tInput = inputTemplate('get');
-
-                tKernelCtDoseMap = kernelCtDoseMapUiValues('get');
-
-                dCtOffset = get(uiKernelSeries, 'Value');
-
-                dSerieOffset = get(uiSeriesPtr('get'), 'Value');
-
-                set(uiSeriesPtr('get'), 'Value', tKernelCtDoseMap{dCtOffset}.dSeriesNumber);
-
-                aCtBuffer = dicomBuffer('get');
-
-                atCtMetaData = dicomMetaData('get');
-                if isempty(atCtMetaData)
-
-                    atCtMetaData = tInput(tKernelCtDoseMap{dCtOffset}.dSeriesNumber).atDicomInfo;
-                    dicomMetaData('set', atCtMetaData);
-                end
-
-                if isempty(aCtBuffer)
-
-                    aInput = inputBuffer('get');
-                    aCtBuffer = aInput{tKernelCtDoseMap{dCtOffset}.dSeriesNumber};
-                    
-                    if strcmpi(imageOrientation('get'), 'coronal')
-                        aCtBuffer = permute(aCtBuffer, [3 2 1]);
-                    elseif strcmpi(imageOrientation('get'), 'sagittal')
-                        aCtBuffer = permute(aCtBuffer, [2 3 1]);
-                    else
-                        aCtBuffer = permute(aCtBuffer, [1 2 3]);
-                    end
-
-                    if tInput(dSerieOffset).bFlipLeftRight == true
-                        aCtBuffer=aCtBuffer(:,end:-1:1,:);
-                    end
-
-                    if tInput(dSerieOffset).bFlipAntPost == true
-                        aCtBuffer=aCtBuffer(end:-1:1,:,:);
-                    end
-
-                    if tInput(dSerieOffset).bFlipHeadFeet == true
-                        aCtBuffer=aCtBuffer(:,:,end:-1:1);
-                    end
-
-                    dicomBuffer('set', aCtBuffer);
-
-                end
-
-                set(uiSeriesPtr('get'), 'Value', dSerieOffset);
-
-                dUpperValue = str2double( get(uiEditKernelUpperTreshold, 'String') );
-                dLowerValue = str2double( get(uiEditKernelLowerTreshold, 'String') );
-                if get(chkUnitTypeKernel, 'Value') == true
-                    [dUpperValue, dLowerValue] = computeWindowLevel(dUpperValue, dLowerValue);
-                end
-
-                dCtMIn = min(double(aCtBuffer),[], 'all');
-
-                aCtBuffer(aCtBuffer<=dLowerValue) = dCtMIn;
-                aCtBuffer(aCtBuffer>=dUpperValue) = dCtMIn;
-
-                aCtBuffer(aCtBuffer==dCtMIn)=0;
-                aCtBuffer(aCtBuffer~=0)=1;
-
-                [aResamCt, ~] = resampleImage(aCtBuffer, atCtMetaData, aRefBuffer, atRefMetaData, 'Nearest', 2, false);
-
-                dResampMIn = min(double(aResamCt),[], 'all');
-
-                aResamCt(aResamCt==dResampMIn)=0;
-                aResamCt(aResamCt~=0)=1;
-
-                aBuffer = dicomBuffer('get');
-                aActivity(aResamCt==0) = aBuffer(aResamCt==0);
-            end
-            
-             % Apply ROI constraint 
-
-            [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value'));
-
-            bInvertMask = invertConstraint('get');
-
-            tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-
-            aLogicalMask = roiConstraintToMask(aBuffer, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);        
-            
-            aActivity(aLogicalMask==0) = aBuffer(aLogicalMask==0); % Set constraint      
-            
-            dicomBuffer('set', aActivity);
-
-            if link2DMip('get') == true
-                imMip = computeMIP(aActivity);
-                mipBuffer('set', imMip, dOffset);
-            end
-
-            tInput(dOffset).bDoseKernel = true;
-            if numel(tInput) == 1 && isFusion('get') == false
-                tInput(dOffset).bFusedDoseKernel = true;
-            end
-
-            inputTemplate('set', tInput);
-
-            % Activate uipanel 
-            
-            set(uiKernelTissue       , 'Enable', 'on');
-            set(uiKernelIsotope      , 'Enable', 'on');
-            set(uiKernelModel        , 'Enable', 'on');
-            set(uiKernelInterpolation, 'Enable', 'on');
-            set(uiDoseKernelPanel    , 'Enable', 'on');            
-            set(uiEditKernelCutoff   , 'Enable', 'on');
-            set(uiPlotDistance       , 'Enable', 'on');            
-           
-            dMin = min(aActivity, [], 'all');
-            dMax = max(aActivity, [], 'all');
-            
-            if kernelMicrosphereInSpecimen('get') == true
-                if bResizePixelSize == true
-                    setWindowMinMax(dMax, dMin, false); % setWindowMinMax() will refreshImages(), need to clear the display before
-                    
-                    clearDisplay();
-                    initDisplay(3);
-
-                    dicomViewerCore();
-                else
-                    setWindowMinMax(dMax, dMin, true); % setWindowMinMax() will refreshImages()
-%                    refreshImages();
-                end
-            else
-                setWindowMinMax(dMax, dMin, true); % setWindowMinMax() will refreshImages()
-%                refreshImages();
-            end
-
-            progressBar(1, 'Ready');
-
-            catch
-                progressBar(1, 'Error:setDoseKernel()');
-            end
-
-            set(fiMainWindowPtr('get'), 'Pointer', 'default');
-            drawnow;
-
-        end
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;
+
+        % Activate uipanel 
+
+        set(uiKernelTissue       , 'Enable', 'on');
+        set(uiKernelIsotope      , 'Enable', 'on');
+        set(uiKernelModel        , 'Enable', 'on');
+        set(uiKernelInterpolation, 'Enable', 'on');
+        set(uiDoseKernelPanel    , 'Enable', 'on');            
+        set(uiEditKernelCutoff   , 'Enable', 'on');
+        set(uiPlotDistance       , 'Enable', 'on'); 
 
     end
 

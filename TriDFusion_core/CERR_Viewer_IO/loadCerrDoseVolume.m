@@ -618,7 +618,7 @@ function loadCerrDoseVolume(planC, structNamC)
             mainToolBarEnable('off');            
         end
 
-        maskToVoi(strMaskC{mm}, structNamC{mm}, aVoiColor, 'axial',  planC{4}(mm).associatedScan, false);
+        maskToVoi(strMaskC{mm}, structNamC{mm}, 'Unspecified' ,aVoiColor, 'axial',  planC{4}(mm).associatedScan, false);
     end
 
     set(uiCorWindowPtr('get'), 'Visible', 'on');

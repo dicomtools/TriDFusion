@@ -221,9 +221,9 @@ end
 
 %                    volshow(im, 'Parent', uiOneWindowPtr('get'), 'Renderer', sRenderer)
                 if verLessThan('matlab','9.13')
-                    pObject = volshow(im, aInputArguments{:});
+                    pObject = volshow(squeeze(im), aInputArguments{:});
                 else
-                    pObject = images.compatibility.volshow.R2022a.volshow(im, aInputArguments{:});
+                    pObject = images.compatibility.volshow.R2022a.volshow(squeeze(im), aInputArguments{:});
                 end
 
                 set(pObject, 'ScaleFactors', aScaleFactors);

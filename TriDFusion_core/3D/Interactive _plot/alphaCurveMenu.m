@@ -69,17 +69,17 @@ function alphaCurveMenu(axeAlphmap, sObject)
             if ~isempty(volICObj)
                 volICObj.mouseMode = dMouseMode;
             end
-        elseif strcmp(hObject.Parent.UserData, 'mip')
+        elseif strcmpi(hObject.Parent.UserData, 'mip')
             mipICObj = mipICObject('get');
             if ~isempty(mipICObj)
                 mipICObj.mouseMode = dMouseMode;
             end  
-        elseif strcmp(hObject.Parent.UserData, 'mipfusion')
+        elseif strcmpi(hObject.Parent.UserData, 'mipfusion')
             mipICFusionObj = mipICFusionObject('get');
             if ~isempty(mipICFusionObj)
                 mipICFusionObj.mouseMode = dMouseMode;
             end               
-        elseif strcmp(hObject.Parent.UserData, 'volfusion')
+        elseif strcmpi(hObject.Parent.UserData, 'volfusion')
             volICFusionObj = volICFusionObject('get');
             if ~isempty(volICFusionObj)
                 volICFusionObj.mouseMode = dMouseMode;

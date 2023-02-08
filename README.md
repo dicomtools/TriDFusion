@@ -40,10 +40,12 @@
 - Image Constraint
 - Lung Segmentation
 - Edge Detection
+- Machine Learning Segmentation
+- Radiomics
 
 ## MATLAB tested version
 
-* MATLAB 2020a
+* MATLAB 2022a
 
 ## Installation
 
@@ -51,7 +53,16 @@
 
 ## Optional
 
+# CERR 
 * https://github.com/cerr/CERR
+
+# Machine Learning Segmentation
+# TotalSegmentator
+* https://github.com/wasserth/TotalSegmentator
+
+# Radiomics
+# PY-Radiomics 
+* https://www.radiomics.io/
 
 ### References 
 

@@ -27,6 +27,7 @@ function dRatio = computeAspectRatio(sDirection, atDicomInfo)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.    
 
+
     if atDicomInfo{1}.ReconstructionDiameter 
         if strcmp(sDirection, 'y')      
             dRatio = computeSliceSpacing(atDicomInfo) * ...

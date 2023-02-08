@@ -220,6 +220,11 @@ function resize = dicomViewer()
     pixelEdgeRoiPanel('set', true);
     holesRoiPanel('set', false);
 
+    % Machine Learning
+
+    pixelEdgeMachineLearningDialog('set', true);
+    fastMachineLearningDialog('set', true);
+
     viewFarthestDistances('set', false);
     
     isShowTextContours('set', 'axe', true);

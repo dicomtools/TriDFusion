@@ -603,7 +603,7 @@ function loadCerrPlanC(planC)
         aVoiColor   = planC{4}(mm).structureColor;
         sStructName = planC{4}(mm).structureName;
 
-        maskToVoi(strMaskC{mm}, sStructName, aVoiColor, 'axial', planC{4}(mm).associatedScan, true);
+        maskToVoi(strMaskC{mm}, sStructName, 'Unspecified', aVoiColor, 'axial', planC{4}(mm).associatedScan, true);
     end
 
     set(uiCorWindowPtr('get'), 'Visible', 'on');

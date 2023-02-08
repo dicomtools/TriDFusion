@@ -77,9 +77,9 @@ function importCerrDoseVolumeCallback(~, ~)
               
         % Load planC
         try
-            planC = loadPlanC(cerrFileName,tempdir);
+            planC = loadPlanC(cerrFileName, viewerTempDirectory('get'));
+            planC = updatePlanFields(planC);            
             planC = quality_assure_planC(cerrFileName,planC);        
-            planC = updatePlanFields(planC);
         catch
             progressBar(1, 'Error: loadCerrDoseConstraint() Cant Load CERR PlanC!');
            return;

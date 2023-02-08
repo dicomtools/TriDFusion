@@ -36,6 +36,7 @@ function [aAlphaMap, sAlphaType] = getVolAlphaMap(sAction, im, sTypeOrtMetaData,
                 paAlphaMap   = aValue;
             else
                 paAlphaMap = linspace(0, volLinearAlphaValue('get'), 256)';                        
+           %     paAlphaMap = compute3DLinearAlphaMap(volLinearAlphaValue('get'));                    
             end
             pasAlphaType = sTypeOrtMetaData;
             

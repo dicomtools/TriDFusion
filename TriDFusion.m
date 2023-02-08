@@ -65,23 +65,34 @@ function TriDFusion(varargin)
  
     asRendererPriority = [];
     
-    varargin = replace(varargin, '"', '');
-    varargin = replace(varargin, ']', '');
-    varargin = replace(varargin, '[', '');
+%    varargin = replace(varargin, '"', '');
+%    varargin = replace(varargin, ']', '');
+%    varargin = replace(varargin, '[', '');
     
     argLoop=1;
     for k = 1 : length(varargin)
-   
-        switch lower(varargin{k})
+
+        sSwitchAndArgument = char(varargin{k});
+
+        sSwitchAndArgument = replace(sSwitchAndArgument, '"', '');
+        sSwitchAndArgument = replace(sSwitchAndArgument, ']', '');
+        sSwitchAndArgument = replace(sSwitchAndArgument, '[', '');
+
+        switch lower(sSwitchAndArgument)
             
             case '-r' % Output directory
                 if k+1 <= length(varargin)
                     if dOutputDirOffset == 0
-                        sOutputPath = varargin{k+1};
+
+                        sOutputPath = char(varargin{k+1});
+
+                        sOutputPath = replace(sOutputPath, '"', '');
+                        sOutputPath = replace(sOutputPath, ']', '');
+                        sOutputPath = replace(sOutputPath, '[', '');
+
                         if sOutputPath(end) ~= '/'
                             sOutputPath = [sOutputPath '/'];   
                             dOutputDirOffset = k+1;
-
                             outputDir('set', sOutputPath);                                                         
                         end               
                     end
@@ -111,7 +122,7 @@ function TriDFusion(varargin)
             otherwise
                 
                 if k ~= dOutputDirOffset % The output dir is set before
-                    asMainDirArg{argLoop} = varargin{k};
+                    asMainDirArg{argLoop} = sSwitchAndArgument;
                     if asMainDirArg{argLoop}(end) ~= '/'
                         asMainDirArg{argLoop} = [asMainDirArg{argLoop} '/'];                     
                     end
@@ -120,6 +131,12 @@ function TriDFusion(varargin)
                 end
         end
     end            
+    
+    viewerTempDirectory('set', char([tempname '/']));
+    if exist(viewerTempDirectory('get'), 'dir')
+        rmdir(viewerTempDirectory('get'), 's');
+    end
+    mkdir(viewerTempDirectory('get'));
     
     is3DEngine('set', arg3DEngine);
     showBorder('set', argBorder  );

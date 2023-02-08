@@ -793,6 +793,15 @@ function refreshImages()
                    imf = squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
                    if ~isempty(imf)
 
+                        sUnitDisplay = getSerieUnitValue(get(uiFusedSeriesPtr('get'), 'Value'));
+                        if strcmpi(sUnitDisplay, 'SUV')
+                            tQuantification = quantificationTemplate('get');
+                            if atInputTemplate(get(uiFusedSeriesPtr('get'), 'Value')).bDoseKernel == false
+                                imf = imf*tQuantification.tSUV.dScale;
+                                imMf = imMf*tQuantification.tSUV.dScale;
+                            end
+                        end
+
                         imCoronalFc.ZData  = permute(imf(iCoronal,:,:), [3 2 1]);
                         imSagittalFc.ZData = permute(imf(:,iSagittal,:), [3 1 2]);
                         imAxialFc.ZData    = imf(:,:,iAxial);

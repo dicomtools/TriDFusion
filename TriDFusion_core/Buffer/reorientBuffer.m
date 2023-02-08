@@ -30,7 +30,7 @@ function aBuffer = reorientBuffer(aBuffer, sOrientation)
     if strcmpi(sOrientation, 'coronal')
         
         aBuffer = permute(aBuffer, [3 2 1]); % Permute image 
-        aBuffer = aBuffer(end:-1:1,:,:); % Flip ant \ post      
+ %       aBuffer = aBuffer(end:-1:1,:,:); % Flip ant \ post      
         
     elseif strcmpi(sOrientation, 'sagittal')        
         

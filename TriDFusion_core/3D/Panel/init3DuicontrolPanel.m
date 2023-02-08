@@ -7,7 +7,7 @@ function init3DuicontrolPanel()
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2023, Daniel Lafontaine, on behalf of the TriDFusion development team.
 %
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 %
@@ -1715,7 +1715,7 @@ end
             end
 
             catch
-                progressBar(1, 'Error:chkVoiListCallback()');
+                progressBar(1, 'Error: chkVoiListCallback()');
             end
 
             set(dlgVoiListEnable, 'Pointer', 'default');
@@ -2743,11 +2743,11 @@ end
                             BWCT = aInputBuffer{dCTSeriesNumber};
                                                         
                             if     strcmpi(imageOrientation('get'), 'axial')
-                                BWCT = permute(BWCT, [1 2 3]);
+                            %    BWCT = BWCT;
                             elseif strcmpi(imageOrientation('get'), 'coronal')
-                                BWCT = permute(BWCT, [3 2 1]);
+                                BWCT = reorientBuffer(BWCT, 'coronal');
                             elseif strcmpi(imageOrientation('get'), 'sagittal')
-                                BWCT = permute(BWCT, [3 1 2]);
+                                BWCT = reorientBuffer(BWCT, 'sagittal');
                             end
 
                             if atInput(dCTSeriesNumber).bFlipLeftRight == true
@@ -2809,12 +2809,13 @@ end
                                                                 
                                 if isempty(BWCT)    
                                     BWCT = aInputBuffer{dFusedSeriesOffset};
+
                                     if     strcmpi(imageOrientation('get'), 'axial')
-                                        BWCT = permute(BWCT, [1 2 3]);
+                                    %    BWCT = BWCT;
                                     elseif strcmpi(imageOrientation('get'), 'coronal')
-                                        BWCT = permute(BWCT, [3 2 1]);
+                                        BWCT = reorientBuffer(BWCT, 'coronal');
                                     elseif strcmpi(imageOrientation('get'), 'sagittal')
-                                        BWCT = permute(BWCT, [3 1 2]);
+                                        BWCT = reorientBuffer(BWCT, 'sagittal');
                                     end
 
                                     if atInput(dFusedSeriesOffset).bFlipLeftRight == true

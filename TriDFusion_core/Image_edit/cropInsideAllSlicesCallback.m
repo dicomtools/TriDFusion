@@ -27,7 +27,7 @@ function cropInsideAllSlicesCallback(hObject,~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    im = dicomBuffer('get');  
+    im = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));  
     if isempty(im)        
         return;
     end
@@ -153,9 +153,13 @@ function cropInsideAllSlicesCallback(hObject,~)
 
     refreshImages();       
     
+    computeMIPCallback();
+    
     catch
         progressBar(1, 'Error:cropInsideAllSlicesCallback()');           
     end
+
+    clear im;
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow; 

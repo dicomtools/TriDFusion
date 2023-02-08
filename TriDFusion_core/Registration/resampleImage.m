@@ -33,6 +33,9 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
     dimsRef = size(refImage);        
     dimsDcm = size(dcmImage);        
     
+%    dimsRef(1)=477;
+%    dimsRef(2)=954;
+   
     dcmSliceThickness = computeSliceSpacing(atDcmMetaData);
     refSliceThickness = computeSliceSpacing(atRefMetaData);
           
@@ -51,96 +54,126 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
     if numel(dimsRef) == 2 % Reference is 2D
         
         if numel(dimsDcm) > 2 % Series is 3D
-             
-            Rdcm = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);            
-            
-            [Mdti,~] = TransformMatrix(atDcmMetaData{1}, dcmSliceThickness);
-            Mtf = Mdti;
-            Mtf(1,1) = atRefMetaData{1}.PixelSpacing(2);
-            Mtf(2,2) = atRefMetaData{1}.PixelSpacing(1);        
-            Mtf(3,3) = atRefMetaData{1}.PixelSpacing(1);
-
-            % First we transform into patient coordinates by multiplying by Mdti, and
-            % then we convert again into image coordinates of the second volume by
-            % multiplying by inv(Mtf)
-            M =  inv(Mtf) * Mdti;
-            M = M';
-
-            TF = affine3d(M);
-
-            [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
-                        
+                                                                        
             if isfield(atRefMetaData{1}, 'DetectorInformationSequence')
-                
+                Rdcm = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);            
+
+                [Mdti,~] = TransformMatrix(atDcmMetaData{1}, dcmSliceThickness);
+                Mtf = Mdti;
+                Mtf(1,1) = atRefMetaData{1}.PixelSpacing(2);
+                Mtf(2,2) = atRefMetaData{1}.PixelSpacing(1);        
+                Mtf(3,3) = atRefMetaData{1}.PixelSpacing(1);
+
+                % First we transform into patient coordinates by multiplying by Mdti, and
+                % then we convert again into image coordinates of the second volume by
+                % multiplying by inv(Mtf)
+                M =  inv(Mtf) * Mdti;
+                M = M';
+
+                TF = affine3d(M);
+            
                 sFieldOfViewShape       = atRefMetaData{1}.DetectorInformationSequence.Item_1.FieldOfViewShape;
                 adFieldOfViewDimensions = atRefMetaData{1}.DetectorInformationSequence.Item_1.FieldOfViewDimensions;
-                       
+                
+                dImageMin = min(dcmImage,[],'all');
+
+                [resampImage, ~] = imwarp(dcmImage, Rdcm, TF, 'Interp', sMode, 'FillValues', dImageMin);                                    
+           
                 if strcmpi(sFieldOfViewShape, 'RECTANGLE')
                     
                     dRowsSize    = atRefMetaData{1}.Rows*atRefMetaData{1}.PixelSpacing(1);
                     dColumnsSize = atRefMetaData{1}.Columns*atRefMetaData{1}.PixelSpacing(2);    
-
-                    dImageMin = min(resampImage, [], 'all');
                     
-                    % Compute the field of view offset
-                    
-                    dOffsetX = (dRowsSize/2)-(adFieldOfViewDimensions(1)/2);
-                    dOffsetY = (dColumnsSize/2)-(adFieldOfViewDimensions(2)/2);
+                    % Compute the field of view offset                    
                     
                     % Set a buffer form the image rows culumns size
 
                     aTemp = zeros([atRefMetaData{1}.Rows atRefMetaData{1}.Columns size(resampImage, 3)]);
-                    aTemp(:,:,:) = dImageMin;
+                    aTemp(aTemp==0) = dImageMin;
                     % Copy the image to the biging of the buffer
 
-                    aTemp(1:size(resampImage,1),1:size(resampImage,2),1:size(resampImage,3)) = resampImage;          
-                    
+                    dRspSizeX = size(resampImage,1);
+                    dRspSizeY = size(resampImage,2);
+                    dRspSizeZ = size(resampImage,3);
+
+                    dTmpSizeX = size(aTemp,1);
+                    dTmpSizeY = size(aTemp,2);
+                    dTmpSizeZ = size(aTemp,3);
+
+                    if dRspSizeX > dTmpSizeX
+                        dToX = dTmpSizeX;
+                    else
+                        dToX = dRspSizeX;                        
+                    end
+
+                    if dRspSizeY > dTmpSizeY
+                        dToY = dTmpSizeY;
+                    else
+                        dToY = dRspSizeY;                        
+                    end
+
+                    if dRspSizeZ > dTmpSizeZ
+                        dToZ = dTmpSizeZ;
+                    else
+                        dToZ = dRspSizeZ;                        
+                    end
+
+                    aTemp(1:dToX,1:dToY,1:dToZ) = resampImage(1:dToX, 1:dToY,1:dToZ);          
+
                     % Offset the image to the field of view position
-
-                    aTemp = imtranslate(aTemp,[dOffsetX, dOffsetY, 0], 'nearest', 'OutputView', 'same', 'FillValues', dImageMin );    
-
-                    resampImage = aTemp; 
+                    if isempty(adFieldOfViewDimensions) 
+                        dOffsetX = 0;
+                        dOffsetY = (dColumnsSize/2);
+                        aTemp = imtranslate(aTemp,[dOffsetX, dOffsetY, 0], 'nearest', 'OutputView', 'same', 'FillValues', dImageMin );                         
+                    else
+                        dOffsetX = (dRowsSize/2)-(adFieldOfViewDimensions(1)/2);
+                        dOffsetY = (dColumnsSize/2)-(adFieldOfViewDimensions(2)/2);
+                        aTemp = imtranslate(aTemp,[dOffsetX, dOffsetY, 0], 'nearest', 'OutputView', 'same', 'FillValues', dImageMin );   
+                    end
                     
+                    resampImage = aTemp;                     
+
                     clear aTemp;
+                    
+                    dimsRsp = size(resampImage);
 
-                end
-            end
+                    if numel(atDcmMetaData) ~= 1
+                        if dimsRsp(3) < numel(atDcmMetaData)
+                            atDcmMetaData = atDcmMetaData(1:dimsRsp(3)); % Remove some slices
+                        else
+                            for cc=1:dimsRsp(3) - numel(atDcmMetaData)
+                                atDcmMetaData{end+1} = atDcmMetaData{end}; %Add missing slice
+                            end            
+                        end                
+                    end
+
+                    computedSliceThikness = atRefMetaData{1}.PixelSpacing(1);
+
+                    for jj=1:numel(atDcmMetaData)
+
+                        atDcmMetaData{jj}.InstanceNumber  = jj;               
+                        atDcmMetaData{jj}.NumberOfSlices  = dimsRsp(3);                
+
+                        atDcmMetaData{jj}.PixelSpacing(1) = atRefMetaData{1}.PixelSpacing(1);
+                        atDcmMetaData{jj}.PixelSpacing(2) = atRefMetaData{1}.PixelSpacing(2);
+                        atDcmMetaData{jj}.SliceThickness  = computedSliceThikness;
+                        atDcmMetaData{jj}.SpacingBetweenSlices  = computedSliceThikness;
+
+                        atDcmMetaData{jj}.Rows    = dimsRsp(1);
+                        atDcmMetaData{jj}.Columns = dimsRsp(2);
+                        atDcmMetaData{jj}.NumberOfSlices = numel(atDcmMetaData);
+
+                        atDcmMetaData{jj}.ImagePositionPatient(1) = -(atDcmMetaData{jj}.PixelSpacing(1)*dimsRsp(1)/2);               
+                        atDcmMetaData{jj}.ImagePositionPatient(2) = -(atDcmMetaData{jj}.PixelSpacing(2)*dimsRsp(2)/2);               
+
+                        if bUpdateDescription == true 
+                            atDcmMetaData{jj}.SeriesDescription  = sprintf('RSP %s', atDcmMetaData{1}.SeriesDescription);
+                        end   
+                    end
             
-            dimsRsp = size(resampImage);
-
-            if numel(atDcmMetaData) ~= 1
-                if dimsRsp(3) < numel(atDcmMetaData)
-                    atDcmMetaData = atDcmMetaData(1:dimsRsp(3)); % Remove some slices
-                else
-                    for cc=1:dimsRsp(3) - numel(atDcmMetaData)
-                        atDcmMetaData{end+1} = atDcmMetaData{end}; %Add missing slice
-                    end            
                 end                
             end
-
-            computedSliceThikness = atRefMetaData{1}.PixelSpacing(1);
-
-            for jj=1:numel(atDcmMetaData)
-
-                atDcmMetaData{jj}.InstanceNumber  = jj;               
-                atDcmMetaData{jj}.NumberOfSlices  = dimsRsp(3);                
-
-                atDcmMetaData{jj}.PixelSpacing(1) = atRefMetaData{1}.PixelSpacing(1);
-                atDcmMetaData{jj}.PixelSpacing(2) = atRefMetaData{1}.PixelSpacing(2);
-                atDcmMetaData{jj}.SliceThickness  = computedSliceThikness;
-                atDcmMetaData{jj}.SpacingBetweenSlices  = computedSliceThikness;
-
-                atDcmMetaData{jj}.Rows    = dimsRsp(1);
-                atDcmMetaData{jj}.Columns = dimsRsp(2);
-                atDcmMetaData{jj}.NumberOfSlices = numel(atDcmMetaData);
-
-                atDcmMetaData{jj}.ImagePositionPatient(1) = -(atDcmMetaData{jj}.PixelSpacing(1)*dimsRsp(1)/2);               
-                atDcmMetaData{jj}.ImagePositionPatient(2) = -(atDcmMetaData{jj}.PixelSpacing(2)*dimsRsp(2)/2);               
-
-                if bUpdateDescription == true 
-                    atDcmMetaData{jj}.SeriesDescription  = sprintf('RSP %s', atDcmMetaData{1}.SeriesDescription);
-                end   
-            end
+            
         end
 
         for cc=1:numel(atDcmMetaData)-1

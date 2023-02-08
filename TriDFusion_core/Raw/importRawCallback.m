@@ -73,6 +73,8 @@ function importRawCallback(~, ~)
 %                javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
         end        
         
+%        mainDir('set', sPathName);
+       
         tFileInfo = dir(sprintf('%s/%s', sPathName, sFileName));
         dFileNbBytes = tFileInfo.bytes;
         

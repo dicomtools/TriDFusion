@@ -53,13 +53,13 @@ function init3DfusionBuffer()
     if isempty(B)
         
         B = aInput{dFuseOffset};
-        
-        if strcmpi(imageOrientation('get'), 'coronal')
-            B = permute(B, [3 2 1]);
+       
+        if     strcmpi(imageOrientation('get'), 'axial')
+        %    B = B;
+        elseif strcmpi(imageOrientation('get'), 'coronal')
+            B = reorientBuffer(B, 'coronal');
         elseif strcmpi(imageOrientation('get'), 'sagittal')
-            B = permute(B, [2 3 1]);
-        else
-            B = permute(B, [1 2 3]);
+            B = reorientBuffer(B, 'sagittal');
         end
 
         if atInputTemplate(dSeriesOffset).bFlipLeftRight == true
@@ -81,8 +81,7 @@ function init3DfusionBuffer()
     end
         
 %    set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
-       
-    
+           
     [aResampled, ~] = ...
         resampleImageTransformMatrix(B, ...
                                      atFuseMetaData, ...
@@ -108,5 +107,10 @@ function init3DfusionBuffer()
     end
     
     fusionBuffer('set', squeeze(aResampled), dFuseOffset);     
+    
+    clear A;
+    clear B;
+    clear aInput;
+    clear aResampled;
 
 end  

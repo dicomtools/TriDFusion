@@ -465,11 +465,11 @@ function colorbarCallback(hObject, ~)
             
             if bEdge == true
                 
-                aBufferImage = dicomBuffer('get');
+                aBufferImage = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
                 
-                tMetaData  = dicomMetaData('get');
+                tMetaData  = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
                 if isempty(tMetaData)
-                    tMetaData = tFuseInput(iSeriesOffset).atDicomInfo;
+                    tMetaData = tInput(iSeriesOffset).atDicomInfo;
                 end
                     
                 if numel(tInput) == 1
@@ -542,8 +542,10 @@ function colorbarCallback(hObject, ~)
                                                          tFuseMetaData, ...
                                                          aBufferImage, ...
                                                          tMetaData, ...
-                                                         'linear' ...
+                                                         'linear', ...
+                                                         false ...
                                                          );
+
                     end
 
 %                    else

@@ -291,7 +291,7 @@ function figRoiDialogCallback(hObject, ~)
                'String'  , 'Volume cm3'...
                );
 
-    tRoiMetaData = dicomMetaData('get');
+    tRoiMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
 
     if strcmpi(mSUVUnit.Checked, 'on')
         bSUVUnit = true;
@@ -425,7 +425,7 @@ end
                            'Callback' , @constraintContourFromMenuCallback ...
                           ); 
 
-                if size(dicomBuffer('get'), 3) ~= 1 % 2D Image
+                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 % 2D Image
                     
                     if bIsVoiTag == false
 
@@ -465,7 +465,7 @@ end
                           ); 
                       
             
-                if size(dicomBuffer('get'), 3) ~= 1 % 2D Image
+                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 % 2D Image
                     
                     if bIsVoiTag == false
                         uimenu(mFigRoiMask, ...
@@ -483,7 +483,7 @@ end
                 end
                 
                 uimenu(c,'Label', 'Bar Histogram'  , 'Separator', 'on' , 'Callback',@figRoiHistogramCallback);
-                uimenu(c,'Label', 'Cummulative DVH', 'Separator', 'off', 'Callback',@figRoiHistogramCallback);
+                uimenu(c,'Label', 'Cumulative DVH', 'Separator', 'off', 'Callback',@figRoiHistogramCallback);
 
                 if ~isempty(atRoiInput)
                     for dd=1:numel(atRoiInput)
@@ -510,12 +510,12 @@ end
                 end
             end
 
-            if bDispayMenu == true && size(dicomBuffer('get'), 3) ~= 1
+            if bDispayMenu == true && size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
                 c = uicontextmenu(figRoiWindow);
                 lbVoiRoiWindow.UIContextMenu = c;
 
                 uimenu(c,'Label', 'Create Volume-of-interest', 'Separator', 'off', 'Callback',@figRoiCreateVolumeCallback);
-                uimenu(c,'Label', 'Cummulative DVH', 'Separator', 'on' , 'Callback',@figRoiMultiplePlotCallback);
+                uimenu(c,'Label', 'Cumulative DVH', 'Separator', 'on' , 'Callback',@figRoiMultiplePlotCallback);
 
             else
                 lbVoiRoiWindow.UIContextMenu = [];
@@ -537,7 +537,7 @@ end
 
             set(mFigRoiConstraintInsideObject , 'Checked', 'off');                    
 
-            if size(dicomBuffer('get'), 3) ~= 1 % 2D Image   
+            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 % 2D Image   
                 if exist('mFigRoiConstraintInsideEverySlice', 'var')
                     set(mFigRoiConstraintInsideEverySlice , 'Checked', 'off'); 
                 end
@@ -570,12 +570,13 @@ end
             atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
             
             aInput = inputBuffer('get');
+
             if     strcmpi(imageOrientation('get'), 'axial')
-                aInputBuffer = permute(aInput{dOffset}, [1 2 3]);
+                aInputBuffer = aInput{dOffset};
             elseif strcmpi(imageOrientation('get'), 'coronal')
-                aInputBuffer = permute(aInput{dOffset}, [3 2 1]);
+                aInputBuffer = reorientBuffer(aInput{dOffset}, 'coronal');
             elseif strcmpi(imageOrientation('get'), 'sagittal')
-                aInputBuffer = permute(aInput{dOffset}, [3 1 2]);
+                aInputBuffer = reorientBuffer(aInput{dOffset}, 'sagittal');
             end
 
             if size(aInputBuffer, 3) ==1
@@ -608,7 +609,7 @@ end
                 histogramMenuOption('set', true);
                 cummulativeMenuOption('set', false);
                 profileMenuOption('set', false);
-            elseif strcmpi(get(hObject, 'Label'), 'Cummulative DVH')
+            elseif strcmpi(get(hObject, 'Label'), 'Cumulative DVH')
 
                 histogramMenuOption('set', false);
                 cummulativeMenuOption('set', true);
@@ -646,8 +647,14 @@ end
                         bDoseKernel      = atInput(dOffset).bDoseKernel;
                         bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;
         
-                        figRoiHistogram(aInputBuffer, atInputMetaData, atVoiInput{aa}, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied)
- 
+                        figRoiHistogram(aInputBuffer, ...
+                                        atInputMetaData, ...
+                                        atVoiInput{aa}, ...
+                                        bSUVUnit, ...
+                                        bModifiedMatrix, ...
+                                        bSegmented, ...
+                                        bDoseKernel, ...
+                                        bMovementApplied);
                         return;
                     end
 
@@ -683,13 +690,23 @@ end
                             bDoseKernel      = atInput(dOffset).bDoseKernel;
                             bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;
                         
-                            figRoiHistogram(aInputBuffer, atInputMetaData, atRoiInput{cc}, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
+                            figRoiHistogram(aInputBuffer, ...
+                                            atInputMetaData, ...
+                                            atRoiInput{cc}, ...
+                                            bSUVUnit, ...
+                                            bModifiedMatrix, ...
+                                            bSegmented, ...
+                                            bDoseKernel, ...
+                                            bMovementApplied);
                             return;
                        end
                     end
                 end
             end
-        end
+            
+        clear aInputBuffer
+        clear aInput;
+    end
 
         function figRoiCreateVolumeCallback(~, ~)
 
@@ -750,15 +767,15 @@ end
             aInput = inputBuffer('get');
             
             switch lower(imageOrientation('get'))
-                
+
                 case'axial'
-                    aInputBuffer = permute(aInput{dOffset}, [1 2 3]);
+                    aInputBuffer = aInput{dOffset};                   
                     
                 case 'coronal'
-                    aInputBuffer = permute(aInput{dOffset}, [3 2 1]);
+                    aInputBuffer = reorientBuffer(aInput{dOffset}, 'coronal');
                     
                 case'sagittal'
-                    aInputBuffer = permute(aInput{dOffset}, [3 1 2]);
+                    aInputBuffer = reorientBuffer(aInput{dOffset}, 'sagittal');
             end
 
             if size(aInputBuffer, 3) ==1
@@ -820,6 +837,9 @@ end
                                bDoseKernel, ...
                                bMovementApplied ...
                                );
+
+            clear aInputBuffer;
+            clear aInput;
 
         end
 
@@ -1767,13 +1787,14 @@ end
             return;
         end
 
- %       try
+        try
 
         set(figRoiWindow, 'Pointer', 'watch');
         drawnow;
 
         atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
         atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
         tQuant = quantificationTemplate('get');
 
         if isfield(tQuant, 'tSUV')
@@ -1783,12 +1804,13 @@ end
         end
 
         aInput = inputBuffer('get');
+
         if     strcmpi(imageOrientation('get'), 'axial')
-            aInputBuffer = permute(aInput{dOffset}, [1 2 3]);
+            aInputBuffer = aInput{dOffset};
         elseif strcmpi(imageOrientation('get'), 'coronal')
-            aInputBuffer = permute(aInput{dOffset}, [3 2 1]);
+            aInputBuffer = reorientBuffer(aInput{dOffset}, 'coronal');
         elseif strcmpi(imageOrientation('get'), 'sagittal')
-            aInputBuffer = permute(aInput{dOffset}, [3 1 2]);
+            aInputBuffer = reorientBuffer(aInput{dOffset}, 'sagittal');
         end
         
         if size(aInputBuffer, 3) ==1
@@ -1833,7 +1855,19 @@ end
                         end
                     end
 
-                    [tVoiComputed, atRoiComputed] = computeVoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atMetaData, atVoiInput{aa}, atRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
+                    [tVoiComputed, atRoiComputed] = ...
+                        computeVoi(aInputBuffer, ...
+                                   atInputMetaData, ...
+                                   aDisplayBuffer, ...
+                                   atMetaData, ...
+                                   atVoiInput{aa}, ...
+                                   atRoiInput, ...
+                                   dSUVScale, ...
+                                   bSUVUnit, ...
+                                   bModifiedMatrix, ...
+                                   bSegmented, ...
+                                   bDoseKernel, ...
+                                   bMovementApplied);
                    
                     if ~isempty(tVoiComputed)
                         sVoiName = atVoiInput{aa}.Label;
@@ -1959,7 +1993,18 @@ end
 %               if isvalid(atRoiInput{bb}.Object)
                     if strcmpi(atRoiInput{bb}.ObjectType, 'roi')
 
-                        tRoiComputed = computeRoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atMetaData, atRoiInput{bb}, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
+                        tRoiComputed = ...
+                            computeRoi(aInputBuffer, ...
+                                       atInputMetaData, ...
+                                       aDisplayBuffer, ...
+                                       atMetaData, ...
+                                       atRoiInput{bb}, ...
+                                       dSUVScale, ...
+                                       bSUVUnit, ...
+                                       bModifiedMatrix, ...
+                                       bSegmented, ...
+                                       bDoseKernel, ...
+                                       bMovementApplied);
 
                         sRoiName = atRoiInput{bb}.Label;
 
@@ -2045,9 +2090,13 @@ end
 
         progressBar(1, 'Ready');
 
-%        catch
-%            progressBar(1, 'Error:setVoiRoiListbox()');
-%        end
+        catch
+            progressBar(1, 'Error:setVoiRoiListbox()');
+        end
+
+        clear aInput;
+        clear aInputBuffer;
+        clear aDisplayBuffer;
 
         set(figRoiWindow, 'Pointer', 'default');
         drawnow;
@@ -2070,19 +2119,19 @@ end
             bExcelInstance = false;
         end
 
-        atMetaData = dicomMetaData('get');
+        atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
 
         atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
         atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
-        aDisplayBuffer = dicomBuffer('get');
+        aDisplayBuffer = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
 
-        aInput   = inputBuffer('get');
-        if     strcmp(imageOrientation('get'), 'axial')
+        aInput = inputBuffer('get');
+        if     strcmpi(imageOrientation('get'), 'axial')
             aInputBuffer = permute(aInput{dOffset}, [1 2 3]);
-        elseif strcmp(imageOrientation('get'), 'coronal')
+        elseif strcmpi(imageOrientation('get'), 'coronal')
             aInputBuffer = permute(aInput{dOffset}, [3 2 1]);
-        elseif strcmp(imageOrientation('get'), 'sagittal')
+        elseif strcmpi(imageOrientation('get'), 'sagittal')
             aInputBuffer = permute(aInput{dOffset}, [3 1 2]);
         end
   
@@ -2115,7 +2164,7 @@ end
            ~isempty(atVoiInput)
 
             filter = {'*.csv'};
-     %       info = dicomMetaData('get');
+     %       info = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
 
             sCurrentDir  = viewerRootPath('get');
 
@@ -2133,7 +2182,7 @@ end
             end
             
             sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
-            [file, path] = uiputfile(filter, 'Save ROI/VOI result', sprintf('%s/%s_%s_%s_%s_roivoi_TriDFusion.csv' , ...
+            [file, path] = uiputfile(filter, 'Save ROI/VOI result', sprintf('%s/%s_%s_%s_%s_CONTOURS_TriDFusion.csv' , ...
                 sCurrentDir, cleanString(atMetaData{1}.PatientName), cleanString(atMetaData{1}.PatientID), cleanString(atMetaData{1}.SeriesDescription), sDate) );
             if file ~= 0
 
@@ -2314,7 +2363,19 @@ end
                                 end
                             end
 
-                            [tVoiComputed, atRoiComputed] = computeVoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atMetaData, atVoiInput{aa}, atRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
+                            [tVoiComputed, atRoiComputed] = ...
+                                computeVoi(aInputBuffer, ...
+                                           atInputMetaData, ...
+                                           aDisplayBuffer, ...
+                                           atMetaData, ...
+                                           atVoiInput{aa}, ...
+                                           atRoiInput, ...
+                                           dSUVScale, ...
+                                           bSUVUnit, ...
+                                           bModifiedMatrix, ...
+                                           bSegmented, ...
+                                           bDoseKernel, ...
+                                           bMovementApplied);
                             
                             if ~isempty(tVoiComputed)
 
@@ -2405,7 +2466,18 @@ end
                                 end
                             end
 
-                            tRoiComputed = computeRoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atMetaData, atRoiInput{bb}, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
+                            tRoiComputed = ...
+                                computeRoi(aInputBuffer, ...
+                                           atInputMetaData, ...
+                                           aDisplayBuffer, ...
+                                           atMetaData, ...
+                                           atRoiInput{bb}, ...
+                                           dSUVScale, ...
+                                           bSUVUnit, ...
+                                           bModifiedMatrix, ...
+                                           bSegmented, ...
+                                           bDoseKernel, ...
+                                           bMovementApplied);
 
                             sRoiName = atRoiInput{bb}.Label;
 
@@ -2416,7 +2488,7 @@ end
                             elseif strcmpi(atRoiInput{bb}.Axe, 'Axes2')
                                 sSliceNb = ['S:' num2str(atRoiInput{bb}.SliceNb)];
                             elseif strcmpi(atRoiInput{bb}.Axe, 'Axes3')
-                                sSliceNb = ['A:' num2str(size(dicomBuffer('get'), 3)-atRoiInput{bb}.SliceNb+1)];
+                                sSliceNb = ['A:' num2str(size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3)-atRoiInput{bb}.SliceNb+1)];
                             end
 
                             asCell{dLineOffset, 1}  = (sRoiName);

@@ -884,6 +884,8 @@ function initSegPanel()
 
         refreshImages();
         
+        computeMIPCallback();
+       
         modifiedMatrixValueMenuOption('set', true);
 
         catch

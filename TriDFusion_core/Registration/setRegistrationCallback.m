@@ -843,24 +843,26 @@ function setRegistrationCallback(~, ~)
                 aBuffer    = dicomBuffer('get', [], kk);
                 atMetaData = dicomMetaData('get', [], kk);
 
-                if ~isempty(aInput{kk}) && ...
-                   ~(size(aInput{kk}, 3) == 1)
-
+                if ~isempty(aInput{kk}) 
+                   
                     if  isempty(aBuffer)
 
-                        if     strcmp(imageOrientation('get'), 'axial')
-                            aBuffer = permute(aInput{kk}, [1 2 3]);
-                        elseif strcmp(imageOrientation('get'), 'coronal')
-                            aBuffer = permute(aInput{kk}, [3 2 1]);
-                        elseif strcmp(imageOrientation('get'), 'sagittal')
-                            aBuffer = permute(aInput{kk}, [3 1 2]);
-                        end
+                    %    if     strcmp(imageOrientation('get'), 'axial')
+                   %         aBuffer = permute(aInput{kk}, [1 2 3]);
+                   %     elseif strcmp(imageOrientation('get'), 'coronal')
+                   %         aBuffer = permute(aInput{kk}, [3 2 1]);
+                   %     elseif strcmp(imageOrientation('get'), 'sagittal')
+                   %         aBuffer = permute(aInput{kk}, [3 1 2]);
+                   %     end
+                        aBuffer = aInput{kk};
+                  
                     end
 
-                    if isVsplash('get') == false
+                    if isVsplash('get') == false && ...
+                        ~(size(aInput{kk}, 3) == 1)
                         aMip = mipBuffer('get', [], kk);
                     end
-
+                
                 end
 
                 if isempty(atMetaData)
@@ -1245,12 +1247,13 @@ function setRegistrationCallback(~, ~)
                     else
 
                         if  isempty(aBuffer)
+
                             if     strcmpi(imageOrientation('get'), 'axial')
-                                aBuffer = permute(aInput{kk}, [1 2 3]);
+                                aBuffer = aInput{kk};
                             elseif strcmpi(imageOrientation('get'), 'coronal')
-                                aBuffer = permute(aInput{kk}, [3 2 1]);
+                                aBuffer = reorientBuffer(aInput{kk}, 'coronal');
                             elseif strcmpi(imageOrientation('get'), 'sagittal')
-                                aBuffer = permute(aInput{kk}, [3 1 2]);
+                                aBuffer = reorientBuffer(aInput{kk}, 'sagittal');
                             end
                         end
                     end
@@ -1472,13 +1475,14 @@ function setRegistrationCallback(~, ~)
                                     else
 
                                         if  isempty(aBuffer)
+
                                             if     strcmpi(imageOrientation('get'), 'axial')
-                                                aBuffer = permute(aInput{dAssociatedSeries}, [1 2 3]);
+                                                aBuffer = aInput{dAssociatedSeries};
                                             elseif strcmpi(imageOrientation('get'), 'coronal')
-                                                aBuffer = permute(aInput{dAssociatedSeries}, [3 2 1]);
+                                                aBuffer = reorientBuffer(aInput{dAssociatedSeries}, 'coronal');
                                             elseif strcmpi(imageOrientation('get'), 'sagittal')
-                                                aBuffer = permute(aInput{dAssociatedSeries}, [3 1 2]);
-                                            end
+                                                aBuffer = reorientBuffer(aInput{dAssociatedSeries}, 'sagittal');
+                                            end                                            
                                         end
                                     end
 

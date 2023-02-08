@@ -30,7 +30,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
     gtxtRoiList = [];
 
     tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-    atRoiVoiMetaData = dicomMetaData('get');
+    atRoiVoiMetaData = dicomMetaData('get', [],  get(uiSeriesPtr('get'), 'Value'));
 
     tQuant = quantificationTemplate('get');
     if isfield(tQuant, 'tSUV')
@@ -86,19 +86,52 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
     axeMultiplePlot.Title.String = sType;
     axeMultiplePlot.Title.Color  = viewerForegroundColor('get');
 
-    if contains(lower(sType), 'cummulative')
+    if contains(lower(sType), 'cumulative')
         if bDoseKernel == true
-            axeMultiplePlot.XLabel.String = 'Intensity (Gy)';
+            axeMultiplePlot.XLabel.String = 'Intensity (Gy)';          
         else
-            axeMultiplePlot.XLabel.String = 'Intensity';
+            if  (strcmpi(atRoiVoiMetaData{1}.Modality, 'pt') || ...
+                 strcmpi(atRoiVoiMetaData{1}.Modality, 'nm'))&& ...
+                 strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' ) 
+
+                if bSUVUnit == true                 
+                    axeMultiplePlot.XLabel.String = sprintf('Intensity (SUV/%s)', viewerSUVtype('get'));
+                else
+                    axeMultiplePlot.XLabel.String = 'Intensity (BQML)';
+                end
+            else
+                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct') 
+
+                    axeMultiplePlot.XLabel.String = 'Intensity (HU)';
+                else
+ 
+                    axeMultiplePlot.XLabel.String = 'Intensity (Count)';                    
+                end
+            end             
         end
-        axeMultiplePlot.YLabel.String = 'Probability';
+
+        axeMultiplePlot.YLabel.String = 'Fraction';
     else
         axeMultiplePlot.XLabel.String = 'cells';
         if bDoseKernel == true
             axeMultiplePlot.YLabel.String = 'Intensity (Gy)';
         else
-            axeMultiplePlot.YLabel.String = 'Intensity';
+            if  (strcmpi(atRoiVoiMetaData{1}.Modality, 'pt') || ...
+                 strcmpi(atRoiVoiMetaData{1}.Modality, 'nm'))&& ...
+                 strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' )
+
+                if bSUVUnit == true                 
+                    axeMultiplePlot.YLabel.String = sprintf('Intensity (SUV/%s)', viewerSUVtype('get'));
+                else
+                    axeMultiplePlot.YLabel.String = 'Intensity (BQML)';
+                end
+            else
+                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct') 
+                    axeMultiplePlot.YLabel.String = 'Intensity (HU)';
+                else
+                    axeMultiplePlot.YLabel.String = 'Intensity (Count)';                    
+                end
+            end  
         end
     end
 
@@ -285,7 +318,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
         tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
         tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-        atRoiVoiMetaData = dicomMetaData('get');
+        atRoiVoiMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
 
         tQuant = quantificationTemplate('get');
         if isfield(tQuant, 'tSUV')
@@ -306,7 +339,19 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                 if strcmp(atVoiRoiTag{aa}.Tag, tVoiInput{bb}.Tag)
 
                     try
-                    imCData = computeHistogram(aInputBuffer, atInputMetaData, dicomBuffer('get'), atRoiVoiMetaData, tVoiInput{bb}, tRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
+
+                    imCData = computeHistogram(aInputBuffer, ...
+                                               atInputMetaData, ...
+                                               dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                               atRoiVoiMetaData, ...
+                                               tVoiInput{bb}, ...
+                                               tRoiInput, ...
+                                               dSUVScale, ...
+                                               bSUVUnit, ...
+                                               bModifiedMatrix, ...
+                                               bSegmented, ...
+                                               bDoseKernel, ...
+                                               bMovementApplied);
 
                     set(axeMultiplePlot, 'XLim', [min(double(imCData),[],'all') max(double(imCData),[],'all')]);
                     set(axeMultiplePlot, 'YLim', [0 1]);
@@ -328,9 +373,26 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                     if bDoseKernel == true
                         axeMultiplePlot.XLabel.String = 'Intensity (Gy)';
                     else
-                        axeMultiplePlot.XLabel.String = 'Intensity';
+                        if  (strcmpi(atRoiVoiMetaData{1}.Modality, 'pt') || ...
+                             strcmpi(atRoiVoiMetaData{1}.Modality, 'nm'))&& ...
+                             strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' ) 
+
+                            if bSUVUnit == true                 
+                                axeMultiplePlot.XLabel.String = sprintf('Intensity (SUV/%s)', viewerSUVtype('get'));
+                            else
+                                axeMultiplePlot.XLabel.String = 'Intensity (BQML)';
+                            end
+                        else
+                            if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct') 
+
+                                axeMultiplePlot.XLabel.String = 'Intensity (HU)';
+                            else
+
+                                axeMultiplePlot.XLabel.String = 'Intensity (Count)';                                
+                            end
+                        end                
                     end
-                    axeMultiplePlot.YLabel.String = 'Probability';
+                    axeMultiplePlot.YLabel.String = 'Fraction';
 
                     axeMultiplePlot.Title.Color = viewerForegroundColor('get');
                     axeMultiplePlot.Color = viewerAxesColor('get');
@@ -360,7 +422,18 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                 for bb=1:numel(tRoiInput)
                     if strcmp(atVoiRoiTag{aa}.Tag, tRoiInput{bb}.Tag)
                         try
-                        imCData = computeHistogram(aInputBuffer, atInputMetaData, dicomBuffer('get'), atRoiVoiMetaData, tRoiInput{bb}, tRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);
+                        imCData = computeHistogram(aInputBuffer, ...
+                                                   atInputMetaData, ...
+                                                   dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                                   atRoiVoiMetaData, ...
+                                                   tRoiInput{bb}, ...
+                                                   tRoiInput, ...
+                                                   dSUVScale, ...
+                                                   bSUVUnit, ...
+                                                   bModifiedMatrix, ...
+                                                   bSegmented, ...
+                                                   bDoseKernel, ...
+                                                   bMovementApplied);
 
                         set(axeMultiplePlot, 'XLim', [min(double(imCData),[],'all') max(double(imCData),[],'all')]);
                         set(axeMultiplePlot, 'YLim', [0 1]);
@@ -382,9 +455,25 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                         if bDoseKernel == true
                             axeMultiplePlot.XLabel.String = 'Intensity (Gy)';
                         else
-                            axeMultiplePlot.XLabel.String = 'Intensity';
+                            if  (strcmpi(atRoiVoiMetaData{1}.Modality, 'pt') || ...
+                                 strcmpi(atRoiVoiMetaData{1}.Modality, 'nm'))&& ...
+                                 strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' ) 
+
+                                if bSUVUnit == true                 
+                                    axeMultiplePlot.XLabel.String = sprintf('Intensity (SUV/%s)', viewerSUVtype('get'));
+                                else
+                                    axeMultiplePlot.XLabel.String = 'Intensity (BQML)';
+                                end
+                            else
+                                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct') 
+
+                                    axeMultiplePlot.XLabel.String = 'Intensity (HU)';
+                                else
+                                    axeMultiplePlot.XLabel.String = 'Intensity (Count)';
+                                end
+                            end 
                         end
-                        axeMultiplePlot.YLabel.String = 'Probability';
+                        axeMultiplePlot.YLabel.String = 'Fraction';
 
                         axeMultiplePlot.Title.Color = viewerForegroundColor('get');
                         axeMultiplePlot.Color = viewerAxesColor('get');
@@ -471,22 +560,23 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
             return;
         end
 
-        atMetaData = dicomMetaData('get');
+        atMetaData = dicomMetaData('get', [], iOffset);
 
         tVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
         tRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
-        aDisplayBuffer = dicomBuffer('get');
+        aDisplayBuffer = dicomBuffer('get', [], iOffset);
 
-        aInput   = inputBuffer('get');
+        aInput = inputBuffer('get');
+
         if     strcmpi(imageOrientation('get'), 'axial')
-            aInputBuffer = permute(aInput{iOffset}, [1 2 3]);
+            aInputBuffer = aInput{iOffset};
         elseif strcmpi(imageOrientation('get'), 'coronal')
-            aInputBuffer = permute(aInput{iOffset}, [3 2 1]);
+            aInputBuffer = reorientBuffer(aInput{iOffset}, 'coronal');
         elseif strcmpi(imageOrientation('get'), 'sagittal')
-            aInputBuffer = permute(aInput{iOffset}, [3 1 2]);
+            aInputBuffer = reorientBuffer(aInput{iOffset}, 'sagittal');
         end
-        
+
         if size(aInputBuffer, 3) ==1
 
             if tInput(iOffset).bFlipLeftRight == true
@@ -521,7 +611,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
         end
 
         filter = {'*.csv'};
-        info = dicomMetaData('get');
+        info = dicomMetaData('get', [], iOffset);
 
         sCurrentDir  = viewerRootPath('get');
 
@@ -538,12 +628,12 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
         end
         
         sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
-        [file, path] = uiputfile(filter, 'Save Histogram Result', sprintf('%s/%s_%s_%s_%s_multiCummulativeDVH_TriDFusion.csv' , ...
+        [file, path] = uiputfile(filter, 'Save Histogram Result', sprintf('%s/%s_%s_%s_%s_MULTI_CUMULATIVE_DVH_TriDFusion.csv' , ...
             sCurrentDir, cleanString(info{1}.PatientName), cleanString(info{1}.PatientID), cleanString(info{1}.SeriesDescription), sDate) );
 
         if file ~= 0
 
-             try
+        %     try
 
             set(figRoiMultiplePlot, 'Pointer', 'watch');
             drawnow;
@@ -702,8 +792,20 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                     end
                                 end
 
-                                [tVoiComputed, atRoiComputed] = computeVoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atMetaData, tVoiInput{vv}, tRoiInput, dSUVScale, bSUVUnit, bSegmented, bDoseKernel, bMovementApplied);
-                                
+                                [tVoiComputed, atRoiComputed] = ...
+                                    computeVoi(aInputBuffer, ...
+                                               atInputMetaData, ...
+                                               aDisplayBuffer, ...
+                                               atMetaData, ...
+                                               tVoiInput{vv}, ...
+                                               tRoiInput, ...
+                                               dSUVScale, ...
+                                               bSUVUnit, ...
+                                               bModifiedMatrix, ...
+                                               bSegmented, ...
+                                               bDoseKernel, ...
+                                               bMovementApplied);
+               
                                 if ~isempty(tVoiComputed)
 
                                     sVoiName = tVoiInput{vv}.Label;
@@ -797,7 +899,18 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                             
                             if isvalid(tRoiInput{bb}.Object)
 
-                                tRoiComputed = computeRoi(aInputBuffer, atInputMetaData, aDisplayBuffer, atMetaData, tRoiInput{bb}, dSUVScale, bSUVUnit, bSegmented, bDoseKernel, bMovementApplied);
+                                tRoiComputed = ...
+                                    computeRoi(aInputBuffer, ...
+                                               atInputMetaData, ...
+                                               aDisplayBuffer, ...
+                                               atMetaData, ...
+                                               tRoiInput{bb}, ...
+                                               dSUVScale, ...
+                                               bModifiedMatrix, ...
+                                               bSUVUnit, ...
+                                               bSegmented, ...
+                                               bDoseKernel, ...
+                                               bMovementApplied);
 
                                 sRoiName = tRoiInput{bb}.Label;
 
@@ -808,7 +921,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                 elseif strcmpi(tRoiInput{bb}.Axe, 'Axes2')
                                     sSliceNb = ['S:' num2str(tRoiInput{bb}.SliceNb)];
                                 elseif strcmpi(tRoiInput{bb}.Axe, 'Axes3')
-                                    sSliceNb = ['A:' num2str(size(dicomBuffer('get'), 3)-tRoiInput{bb}.SliceNb+1)];
+                                    sSliceNb = ['A:' num2str(size(dicomBuffer('get', [], iOffset), 3)-tRoiInput{bb}.SliceNb+1)];
                                 end
 
                                 asCell{dLineOffset, 1}  = (sRoiName);
@@ -931,9 +1044,12 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
             progressBar(1, sprintf('Write %s%s completed', path, file));
 
-            catch
-                progressBar(1, 'Error: exportCurrentMultiplePlotCallback()');
-            end
+      %      catch
+      %          progressBar(1, 'Error: exportCurrentMultiplePlotCallback()');
+      %       end
+
+            clear aDisplayBuffer;
+            clear aInput;
 
             set(figRoiMultiplePlot, 'Pointer', 'default');
             drawnow;

@@ -70,6 +70,7 @@ function importSTLCallback(~, ~)
 %                javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
         end
      
+%        mainDir('set', path);
          
         xSize = 1;
         ySize = 1;

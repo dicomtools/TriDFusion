@@ -27,7 +27,7 @@ function maskContourFromMenuCallback(hObject, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    imBuffer = dicomBuffer('get');  
+    imBuffer = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));  
     if isempty(imBuffer)        
         return;
     end
@@ -38,8 +38,8 @@ function maskContourFromMenuCallback(hObject, ~)
     atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
     atVoi = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
-    if ~isempty(atRoi)
-        
+    if ~isempty(atRoi)        
+
         if isempty(atVoi)
             aTagOffset = 0;
         else
@@ -87,7 +87,7 @@ function maskContourFromMenuCallback(hObject, ~)
                     end
 
                     if strcmpi(sMaskType, 'Outside This Contour')
-
+                                                
                         imBuffer = cropOutside(aMask, ...
                                                imBuffer, ...
                                                atRoi{dRoiTagOffset}.SliceNb, ...
@@ -96,7 +96,6 @@ function maskContourFromMenuCallback(hObject, ~)
                     end                                                        
                 end
             end
-            
         else % tag is a roi
 
             aRoiTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {sMaskTag} );
@@ -201,6 +200,7 @@ function maskContourFromMenuCallback(hObject, ~)
 
         refreshImages();
 
+        clear imBuffer;
 %        progressBar(1, 'Ready');
 
     end               

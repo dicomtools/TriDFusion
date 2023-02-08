@@ -34,6 +34,7 @@ function aObject = btnMathPtr(sAction, aValue)
 
     if strcmpi('set', sAction)
        paObject = aValue;            
-    end      
+    end     
+    
     aObject = paObject;
 end

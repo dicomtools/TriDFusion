@@ -458,10 +458,15 @@ end
                 rightClickMenu('add', imAxeF);                   
                       
                 if aspectRatio('get') == true
-
-                    xf = computeAspectRatio('x', atFusionMetaData);
-                    yf = computeAspectRatio('y', atFusionMetaData);
-
+                    
+                    if ~isempty(atFusionMetaData{1}.PixelSpacing)
+                   
+                        xf = atFusionMetaData{1}.PixelSpacing(1);
+                        yf = atFusionMetaData{1}.PixelSpacing(2);
+                    else
+                        xf = computeAspectRatio('x', atFusionMetaData);
+                        yf = computeAspectRatio('y', atFusionMetaData);
+                    end
                     daspect(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf 1]);
 
                 else
@@ -766,9 +771,9 @@ end
 
                         if xMoveOffset ~= 0 || yMoveOffset ~= 0 
                             if xMoveOffset < 0 || yMoveOffset < 0
-                                B = imtranslate(B,[-xMoveOffset, -yMoveOffset, 0], 'nearest', 'OutputView', 'full', 'FillValues', min(B, [], 'all') ); 
+                                B = imtranslate(B,[-xMoveOffset-1, -yMoveOffset-1, 0], 'nearest', 'OutputView', 'full', 'FillValues', min(B, [], 'all') ); 
                             else
-                                B = imtranslate(B,[-xMoveOffset, -yMoveOffset, 0], 'nearest', 'OutputView', 'same', 'FillValues', min(B, [], 'all') ); 
+                                B = imtranslate(B,[-xMoveOffset-1, -yMoveOffset-1, 0], 'nearest', 'OutputView', 'same', 'FillValues', min(B, [], 'all') ); 
                             end
                         end
                     else

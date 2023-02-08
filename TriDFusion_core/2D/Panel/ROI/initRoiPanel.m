@@ -1749,15 +1749,15 @@ function initRoiPanel()
 
                 dSerieOffset = get(uiSeriesPtr('get'), 'Value');
 
-                set(uiSeriesPtr('get'), 'Value', tRoiPanelCT{dCtOffset}.dSeriesNumber);
+         %       set(uiSeriesPtr('get'), 'Value', tRoiPanelCT{dCtOffset}.dSeriesNumber);
 
-                aCtBuffer = dicomBuffer('get');
+                aCtBuffer = dicomBuffer('get', [], tRoiPanelCT{dCtOffset}.dSeriesNumber);
 
-                atCtMetaData = dicomMetaData('get');
+                atCtMetaData = dicomMetaData('get', [], tRoiPanelCT{dCtOffset}.dSeriesNumber);
                 if isempty(atCtMetaData)
 
                     atCtMetaData = tInput(tRoiPanelCT{dCtOffset}.dSeriesNumber).atDicomInfo;
-                    dicomMetaData('set', atCtMetaData);
+                    dicomMetaData('set', atCtMetaData, tRoiPanelCT{dCtOffset}.dSeriesNumber);
                 end
 
                 if isempty(aCtBuffer) 
@@ -1765,12 +1765,12 @@ function initRoiPanel()
                     aInput = inputBuffer('get');
                     aCtBuffer = aInput{tRoiPanelCT{dCtOffset}.dSeriesNumber};
                     
-                    if strcmpi(imageOrientation('get'), 'coronal')
-                        aCtBuffer = permute(aCtBuffer, [3 2 1]);
+                    if     strcmpi(imageOrientation('get'), 'axial')
+                     %   aCtBuffer = aCtBuffer;
+                    elseif strcmpi(imageOrientation('get'), 'coronal')
+                        aCtBuffer = reorientBuffer(aCtBuffer, 'coronal');
                     elseif strcmpi(imageOrientation('get'), 'sagittal')
-                        aCtBuffer = permute(aCtBuffer, [2 3 1]);
-                    else
-                        aCtBuffer = permute(aCtBuffer, [1 2 3]);
+                        aCtBuffer = reorientBuffer(aCtBuffer, 'sagittal');
                     end
 
                     if tInput(dSerieOffset).bFlipLeftRight == true
@@ -1785,13 +1785,22 @@ function initRoiPanel()
                         aCtBuffer=aCtBuffer(:,:,end:-1:1);
                     end
 
-                    dicomBuffer('set', aCtBuffer);
+                    dicomBuffer('set', aCtBuffer, tRoiPanelCT{dCtOffset}.dSeriesNumber);
 
+                    clear aCtBuffer;
+                    clear aInput;
                 end
 
-                set(uiSeriesPtr('get'), 'Value', dSerieOffset);
+      %          set(uiSeriesPtr('get'), 'Value', dSerieOffset);
 
-                [aBuffer, ~] = resampleImage(aCtBuffer, atCtMetaData, aBuffer, atRefMetaData, 'Nearest', 2, false);
+                [aBuffer, ~] = ...
+                    resampleImage(aCtBuffer, ...
+                                  atCtMetaData, ...
+                                  aBuffer, ...
+                                  atRefMetaData, ...
+                                  'Nearest', ...
+                                  2, ...
+                                  false);
                 
                 dImageMin = min(double(aBuffer),[], 'all');               
             end
@@ -2229,15 +2238,15 @@ function initRoiPanel()
 
                 dSerieOffset = get(uiSeriesPtr('get'), 'Value');
 
-                set(uiSeriesPtr('get'), 'Value', tRoiPanelCT{dCtOffset}.dSeriesNumber);
+     %           set(uiSeriesPtr('get'), 'Value', tRoiPanelCT{dCtOffset}.dSeriesNumber);
 
-                aCtBuffer = dicomBuffer('get');
+                aCtBuffer = dicomBuffer('get', [], tRoiPanelCT{dCtOffset}.dSeriesNumber);
 
-                atCtMetaData = dicomMetaData('get');
+                atCtMetaData = dicomMetaData('get', [], tRoiPanelCT{dCtOffset}.dSeriesNumber);
                 if isempty(atCtMetaData)
 
                     atCtMetaData = tInput(tRoiPanelCT{dCtOffset}.dSeriesNumber).atDicomInfo;
-                    dicomMetaData('set', atCtMetaData);
+                    dicomMetaData('set', atCtMetaData, tRoiPanelCT{dCtOffset}.dSeriesNumber);
                 end
 
                 if isempty(aCtBuffer)
@@ -2245,12 +2254,12 @@ function initRoiPanel()
                     aInput = inputBuffer('get');
                     aCtBuffer = aInput{tRoiPanelCT{dCtOffset}.dSeriesNumber};
                     
-                    if strcmpi(imageOrientation('get'), 'coronal')
-                        aCtBuffer = permute(aCtBuffer, [3 2 1]);
+                    if     strcmpi(imageOrientation('get'), 'axial')
+                     %   aCtBuffer = aCtBuffer;
+                    elseif strcmpi(imageOrientation('get'), 'coronal')
+                        aCtBuffer = reorientBuffer(aCtBuffer, 'coronal');
                     elseif strcmpi(imageOrientation('get'), 'sagittal')
-                        aCtBuffer = permute(aCtBuffer, [2 3 1]);
-                    else
-                        aCtBuffer = permute(aCtBuffer, [1 2 3]);
+                        aCtBuffer = reorientBuffer(aCtBuffer, 'sagittal');
                     end
 
                     if tInput(dSerieOffset).bFlipLeftRight == true
@@ -2265,13 +2274,22 @@ function initRoiPanel()
                         aCtBuffer=aCtBuffer(:,:,end:-1:1);
                     end
 
-                    dicomBuffer('set', aCtBuffer);
+                    dicomBuffer('set', aCtBuffer, tRoiPanelCT{dCtOffset}.dSeriesNumber);
 
+                    clear aCtBuffer;
+                    clear aInput;
                 end
 
-                set(uiSeriesPtr('get'), 'Value', dSerieOffset);
+%                set(uiSeriesPtr('get'), 'Value', dSerieOffset);
 
-                [aBuffer, ~] = resampleImage(aCtBuffer, atCtMetaData, aBuffer, atRefMetaData, 'Nearest', 2, false);
+                [aBuffer, ~] = ...
+                    resampleImage(aCtBuffer, ...
+                                  atCtMetaData, ...
+                                  aBuffer, ...
+                                  atRefMetaData, ...
+                                  'Nearest', ...
+                                  2, ...
+                                  false);
                 
                 aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint to CT
 

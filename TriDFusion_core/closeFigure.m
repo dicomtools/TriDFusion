@@ -28,6 +28,13 @@ function closeFigure(~, ~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     try
+        
+        % Delete temp directory
+        
+        if exist(viewerTempDirectory('get'), 'dir')
+            rmdir(viewerTempDirectory('get'), 's');
+        end
+    
         multiFramePlayback('set', false);
         multiFrame3DPlayback('set', false);
 
