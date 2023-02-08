@@ -40,6 +40,7 @@
 - Image Constraint
 - Lung Segmentation
 - Edge Detection
+- Voxel Dosimetry
 - Machine Learning Segmentation
 - Radiomics
 
@@ -53,15 +54,15 @@
 
 ## Optional
 
-# CERR 
+* CERR 
 * https://github.com/cerr/CERR
 
 # Machine Learning Segmentation
-# TotalSegmentator
+* TotalSegmentator
 * https://github.com/wasserth/TotalSegmentator
 
 # Radiomics
-# PY-Radiomics 
+* PY-Radiomics 
 * https://www.radiomics.io/
 
 ### References 
