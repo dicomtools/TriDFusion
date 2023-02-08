@@ -10,7 +10,7 @@
 
 ![TriDFusion](images/TriDFusionMontage.png)
 
-# File format compatibility
+## File format compatibility
 
 | Medical Imaging Modalities                 | Import / Export File Formats               |
 | ------------------------------------------ | ------------------------------------------ |
@@ -24,7 +24,7 @@
 | Mammography (MG)                           |                                            |
 | Ultrasonography (US)                       |                                            |
 
-# Main features
+## Main features
 - Multi-modality Image Viewer
 - Total Tumor Burden Determination
 - 3D Visualization
@@ -44,25 +44,25 @@
 - Machine Learning Segmentation
 - Radiomics
 
-# MATLAB tested version
+## MATLAB tested version
 
 * MATLAB 2022a
 
-# Installation
+## Installation
 
 * https://github.com/dicomtools/TriDFusion/wiki/Source-code-version-of-TriDFusion-(3DF)
 
-# Optional
+## Optional
 
 CERR 
 * https://github.com/cerr/CERR
 
-## Machine Learning Segmentation
+### Machine Learning Segmentation
 TotalSegmentator
 * https://github.com/wasserth/TotalSegmentator
 
-## Radiomics
-* PY-Radiomics 
+### Radiomics
+PY-Radiomics 
 * https://www.radiomics.io/
 
 ## References 
