@@ -149,8 +149,10 @@ function cropOutsideAllSlicesCallback(hObject,~)
 
     refreshImages();   
     
-    computeMIPCallback();
-
+    mipBuffer('set', computeMIP(gather(im)), get(uiSeriesPtr('get'), 'Value'));
+    
+    sliderMipCallback();
+    
     catch
         progressBar(1, 'Error:cropOutsideAllSlicesCallback()');           
     end

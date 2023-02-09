@@ -152,8 +152,10 @@ function cropInsideAllSlicesCallback(hObject,~)
     setQuantification(iOffset);                
 
     refreshImages();       
+
+    mipBuffer('set', computeMIP(gather(im)), get(uiSeriesPtr('get'), 'Value'));
     
-    computeMIPCallback();
+    sliderMipCallback();
     
     catch
         progressBar(1, 'Error:cropInsideAllSlicesCallback()');           

@@ -27,6 +27,7 @@ function computeMIPCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+
     im = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));  
 
     if isempty(im)        
@@ -44,7 +45,11 @@ function computeMIPCallback(~, ~)
           
     mipBuffer('set', computeMIP(gather(im)), get(uiSeriesPtr('get'), 'Value'));
 
-    if isVsplash('get') == false
+    if isVsplash('get') == false &&  ...
+       switchToMIPMode('get') == false && ...
+       switchToIsoSurface('get') == false && ... 
+       switchTo3DMode('get')    == false
+
         sliderMipCallback();
     end
     catch
