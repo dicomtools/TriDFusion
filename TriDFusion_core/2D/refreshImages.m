@@ -795,10 +795,12 @@ function refreshImages()
 
                         sUnitDisplay = getSerieUnitValue(get(uiFusedSeriesPtr('get'), 'Value'));
                         if strcmpi(sUnitDisplay, 'SUV')
-                            tQuantification = quantificationTemplate('get');
+                            tQuantification = quantificationTemplate('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
                             if atInputTemplate(get(uiFusedSeriesPtr('get'), 'Value')).bDoseKernel == false
-                                imf = imf*tQuantification.tSUV.dScale;
-                                imMf = imMf*tQuantification.tSUV.dScale;
+                                if ~isempty(tQuantification)
+                                    imf = imf*tQuantification.tSUV.dScale;
+                                    imMf = imMf*tQuantification.tSUV.dScale;
+                                end
                             end
                         end
 

@@ -93,6 +93,8 @@ function initViewerGlobal()
 
     uiProgressWindowPtr('set', '');
     uiBarPtr('set', '');
+    
+    quantificationTemplate('reset');
 
     dicomMetaData('reset');
     dicomBuffer  ('reset');

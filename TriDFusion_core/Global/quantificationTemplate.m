@@ -1,5 +1,5 @@
-function tQuant = quantificationTemplate(sAction, tValue)
-%function  tQuant = quantificationTemplate(sAction, tValue)
+function tQuant = quantificationTemplate(sAction, tValue,  dSeriesOffset)
+%function  tQuant = quantificationTemplate(sAction, tValue, dSeriesOffset)
 %Get\Set Quantification Template.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -32,9 +32,26 @@ function tQuant = quantificationTemplate(sAction, tValue)
 
     persistent ptQuant; 
 
-    if strcmpi('set', sAction)
-        ptQuant = tValue;            
+    uiSeries = uiSeriesPtr('get');
+    
+    if ~isempty(uiSeries)
+        if exist('dSeriesOffset', 'var')
+            iOffset = dSeriesOffset;
+        else
+            iOffset = get(uiSeries, 'Value');
+        end
+    else
+        iOffset = 1;
     end
 
-    tQuant = ptQuant;    
+    if strcmpi('set', sAction)
+        ptQuant{iOffset} = tValue; 
+     elseif strcmpi('reset', sAction)    
+        for aa=1:numel(ptQuant)
+            ptQuant{aa} = '';
+        end       
+    else
+        tQuant = ptQuant{iOffset};  
+    end
+
 end 

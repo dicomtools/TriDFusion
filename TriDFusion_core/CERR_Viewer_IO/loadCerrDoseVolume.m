@@ -80,6 +80,8 @@ function loadCerrDoseVolume(planC, structNamC)
     outputDir('set', '');
 
     dicomMetaData('reset');
+    
+    quantificationTemplate('reset');
 
     dicomBuffer  ('reset');
     fusionBuffer ('reset');

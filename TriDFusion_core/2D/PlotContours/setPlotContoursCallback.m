@@ -275,8 +275,13 @@ function setPlotContoursCallback(~, ~)
 
             sUnitDisplay = getSerieUnitValue(get(uiFusedSeriesPtr('get'), 'Value'));
             if strcmpi(sUnitDisplay, 'SUV')
-                tQuantification = quantificationTemplate('get');
+                tQuantification = quantificationTemplate('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
                 if atInput(get(uiFusedSeriesPtr('get'), 'Value')).bDoseKernel == false
+                    if ~isempty(tQuantification)
+                        setQuantification(get(uiFusedSeriesPtr('get'), 'Value'));
+                        tQuantification = quantificationTemplate('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                    end
+                    
                     imf = imf*tQuantification.tSUV.dScale;
                     imMf = imMf*tQuantification.tSUV.dScale;
                 end

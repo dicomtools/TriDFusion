@@ -81,6 +81,8 @@ function loadCerrDoseConstraint(planC, structNamC)
 
     dicomMetaData('reset');
 
+    quantificationTemplate('reset');
+
     dicomBuffer  ('reset');
     fusionBuffer ('reset');
 

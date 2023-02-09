@@ -128,6 +128,8 @@ function setSourceCallback(~, ~)
             inputBuffer('set', '');
             inputContours('set', '');
 
+            quantificationTemplate('reset');
+
             dicomMetaData('reset');
             dicomBuffer  ('reset');
             fusionBuffer ('reset');

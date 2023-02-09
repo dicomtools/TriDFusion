@@ -132,7 +132,7 @@ function setQuantification(dSeriesOffset)
 
     if exist('dSeriesOffset', 'var')
 
-        quantificationTemplate('set', tInput(dSeriesOffset).tQuant);
+        quantificationTemplate('set', tInput(dSeriesOffset).tQuant, dSeriesOffset);
 %            inputTemplate('set', tInput);
 %        cropValue('set', tInput(dSeriesOffset).tQuant.tCount.dMin);
         sModality = tInput(dSeriesOffset).atDicomInfo{1}.Modality;

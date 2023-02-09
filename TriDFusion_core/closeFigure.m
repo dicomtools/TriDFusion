@@ -28,13 +28,13 @@ function closeFigure(~, ~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     try
-        
+
         % Delete temp directory
-        
+
         if exist(viewerTempDirectory('get'), 'dir')
             rmdir(viewerTempDirectory('get'), 's');
         end
-    
+
         multiFramePlayback('set', false);
         multiFrame3DPlayback('set', false);
 
@@ -61,10 +61,10 @@ function closeFigure(~, ~)
 
         deleteObject(mipColorObject('get'));
         deleteObject(volColorObject('get'));
-    
-        imAxePtr  ('reset');                
-        imAxeFcPtr('reset');                
-        imAxeFPtr ('reset');                
+
+        imAxePtr  ('reset');
+        imAxeFcPtr('reset');
+        imAxeFPtr ('reset');
 
         axePtr  ('reset');
         axefcPtr('reset');
@@ -74,57 +74,57 @@ function closeFigure(~, ~)
         if ~isempty(uiOneWindow)
            delete(uiOneWindow);
         end
-        
-        imCoronalPtr ('reset');                
-        imSagittalPtr('reset');                
-        imAxialPtr   ('reset'); 
-        imMipPtr     ('reset');  
-        
+
+        imCoronalPtr ('reset');
+        imSagittalPtr('reset');
+        imAxialPtr   ('reset');
+        imMipPtr     ('reset');
+
         axes1Ptr  ('reset');
         axes2Ptr  ('reset');
         axes3Ptr  ('reset');
         axesMipPtr('reset');
-        
-        imCoronalFPtr ('reset');                
-        imSagittalFPtr('reset');                
-        imAxialFPtr   ('reset'); 
-        imMipFPtr     ('reset');                                    
-              
+
+        imCoronalFPtr ('reset');
+        imSagittalFPtr('reset');
+        imAxialFPtr   ('reset');
+        imMipFPtr     ('reset');
+
         axes1fPtr  ('reset');
         axes2fPtr  ('reset');
         axes3fPtr  ('reset');
-        axesMipfPtr('reset');       
-        
-        imCoronalFcPtr ('reset');                
-        imSagittalFcPtr('reset');                
-        imAxialFcPtr   ('reset'); 
-        imMipFcPtr     ('reset');  
-        
+        axesMipfPtr('reset');
+
+        imCoronalFcPtr ('reset');
+        imSagittalFcPtr('reset');
+        imAxialFcPtr   ('reset');
+        imMipFcPtr     ('reset');
+
         axes1fcPtr  ('reset');
         axes2fcPtr  ('reset');
         axes3fcPtr  ('reset');
-        axesMipfcPtr('reset');         
-        
+        axesMipfcPtr('reset');
+
         uiCorWindow = uiCorWindowPtr('get');
         if ~isempty(uiCorWindow)
             delete(uiCorWindow);
         end
-    
+
         uiSagWindow = uiSagWindowPtr('get');
         if ~isempty(uiSagWindow)
-            delete(uiSagWindow); 
-        end 
-    
+            delete(uiSagWindow);
+        end
+
         uiTraWindow = uiTraWindowPtr('get');
         if ~isempty(uiTraWindow)
-            delete(uiTraWindow); 
+            delete(uiTraWindow);
         end
-        
+
         uiMipWindow = uiMipWindowPtr('get');
         if ~isempty(uiMipWindow)
-            delete(uiMipWindow); 
-        end          
-    
+            delete(uiMipWindow);
+        end
+
         delete(uiSegPanelPtr       ('get'));
         delete(uiSegMainPanelPtr   ('get'));
         delete(uiKernelPanelPtr    ('get'));
@@ -133,6 +133,8 @@ function closeFigure(~, ~)
         delete(uiRoiMainPanelPtr   ('get'));
         delete(fiMainWindowPtr     ('get'));
         
+        quantificationTemplate('reset');
+
         dicomMetaData('reset');
         dicomBuffer  ('reset');
         fusionBuffer ('reset');
@@ -140,9 +142,9 @@ function closeFigure(~, ~)
 
         mipBuffer      ('reset');
         mipFusionBuffer('reset');
-        
+
 %        clear('all');
-  
+
     catch
     end
 

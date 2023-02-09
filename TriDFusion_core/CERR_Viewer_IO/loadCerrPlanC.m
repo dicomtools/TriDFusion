@@ -80,6 +80,8 @@ function loadCerrPlanC(planC)
     outputDir('set', '');
 
     dicomMetaData('reset');
+    
+    quantificationTemplate('reset');
 
     dicomBuffer  ('reset');
     fusionBuffer ('reset');
