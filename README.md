@@ -52,6 +52,16 @@
 
 * https://github.com/dicomtools/TriDFusion/wiki/Source-code-version-of-TriDFusion-(3DF)
 
+The source code of TriDFusion (3DF) is distributed on gitHub. Hence, the first step is to download the "main" branch of TriDFusion (3DF). This can be done using the git bash. After going to the directory where you want to download the files, use the following command to download the "main" branch of TriDFusion (3DF): 
+
+git clone https://github.com/dicomtools/TriDFusion.git
+
+After downloading the "main" branch to (say) /home/.../.../TriDFusion_from_gitHub/, follow the steps listed below to use TriDFusion (3DF).
+
+Fire up Matlab. Go to Home --> Set Path. Set the path to "Default". Add /home/.../.../TriDFusion_from_gitHub/ with sub-directories to the Matlab path.
+
+To use TriDFusion (3DF) Graphical User Interface, type TriDFusion('dicom_folder_name') in Matlab command window.
+
 ## Optional
 
 CERR 
@@ -63,7 +73,7 @@ TotalSegmentator
 
 ### Radiomics
 PY-Radiomics 
-* https://www.radiomics.io/
+* https://pyradiomics.readthedocs.io/en/latest/installation.html
 
 ## References 
 
