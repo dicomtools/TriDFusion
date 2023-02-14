@@ -1189,6 +1189,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
             
             struct2xml(st, sXmlProtocolFileName);
             
+            set(popMachineSegmentationProtocol, 'Value', 1);            
             set(popMachineSegmentationProtocol, 'String', getMchineLearningProtocolName());            
         end
             

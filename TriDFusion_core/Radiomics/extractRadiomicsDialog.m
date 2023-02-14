@@ -3013,6 +3013,7 @@ function extractRadiomicsDialog(sRadiomicsPath)
             
             struct2xml(st, sXmlProtocolFileName);
             
+            set(popRadiomicsProtocol, 'Value', 1);            
             set(popRadiomicsProtocol, 'String', getRadiomicsProtocolName());            
         end
             
