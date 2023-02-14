@@ -17,7 +17,10 @@ function TriDFusion(varargin)
 %TriDFusion('path_to_dicom_folder'); Open the graphical user interface with a dicom image
 %TriDFusion('path_to_dicom_folder','path_to_dicom_folder');  Open the graphical user interface with 2 dicom image
 %TriDFusion('path_to_dicom_folder','path_to_dicom_folder', '-fusion'); Open the graphical user interface with 2 dicom image and fused them
-%TriDFusion('path_to_dicom_folder', '-mip'); Open the graphical user interface with a dicom image and create a 2D mip.
+%TriDFusion('path_to_dicom_folder', '-mip'); Open the graphical user interface with a dicom image and create a 3D mip.
+%TriDFusion('path_to_dicom_folder', '-iso'); Open the graphical user interface with a dicom image and create a 3D iso surface model.
+%TriDFusion('path_to_dicom_folder', '-vol'); Open the graphical user interface with a dicom image and create a 3D volume rendering.
+%TriDFusion('path_to_dicom_folder', '-mip', '-iso', '-vol'); Open the graphical user interface with a dicom image and create a fusion of a 3D mip, iso surface and volume rendering. Any combinaison can be use. 
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %

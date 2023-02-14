@@ -60,20 +60,28 @@ After downloading the "main" branch to (say) /home/.../.../TriDFusion_from_gitHu
 
 Fire up Matlab. Go to Home --> Set Path. Set the path to "Default". Add /home/.../.../TriDFusion_from_gitHub/ with sub-directories to the Matlab path.
 
-To use TriDFusion (3DF) Graphical User Interface, type TriDFusion('dicom_folder_name') in Matlab command window.
+To use TriDFusion (3DF) Graphical User Interface, type TriDFusion() in Matlab command window.
+TriDFusion(); Open the graphical user interface.
+TriDFusion('path_to_dicom_folder'); Open the graphical user interface with a dicom image.
+TriDFusion('path_to_dicom_folder','path_to_dicom_folder');  Open the graphical user interface with 2 dicom image.
+TriDFusion('path_to_dicom_folder','path_to_dicom_folder', '-fusion'); Open the graphical user interface with 2 dicom image and fused them.
+TriDFusion('path_to_dicom_folder', '-mip'); Open the graphical user interface with a dicom image and create a 3D mip.
+TriDFusion('path_to_dicom_folder', '-iso'); Open the graphical user interface with a dicom image and create a 3D iso surface model.
+TriDFusion('path_to_dicom_folder', '-vol'); Open the graphical user interface with a dicom image and create a 3D volume rendering.
+TriDFusion('path_to_dicom_folder', '-mip', '-iso', '-vol'); Open the graphical user interface with a dicom image and create a fusion of a 3D mip, iso surface and volume rendering. Any combinaison can be use. 
 
 ## Optional
 
 CERR 
-* https://github.com/cerr/CERR
+https://github.com/cerr/CERR
 
 ### Machine Learning Segmentation
 TotalSegmentator
-* https://github.com/wasserth/TotalSegmentator
+https://github.com/wasserth/TotalSegmentator
 
 ### Radiomics
 PY-Radiomics 
-* https://pyradiomics.readthedocs.io/en/latest/installation.html
+https://pyradiomics.readthedocs.io/en/latest/installation.html
 
 ## References 
 

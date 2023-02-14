@@ -87,6 +87,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
     end
     
     bFlip = getImagePosition(dOffset);
+
     if bFlip == true
         dZsize = size(aDicomBuffer, 3);
     end
@@ -98,7 +99,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
         
     info.Filename = [];
     info.FileModDate = datetime;
-    info.ManufacturerModelName = 'TriDFusion1.0';
+    info.ManufacturerModelName = 'TriDFusion1.1';
     
     if isfield(tMetaData, 'StudyDate')
         info.StudyDate = tMetaData.StudyDate;
@@ -165,7 +166,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
     end
     
     info.SeriesNumber = 1;
-    info.StructureSetLabel = 'TriDFusion1.0';
+    info.StructureSetLabel = 'TriDFusion1.1';
 
     info.StructureSetDate = datestr(now, 'yyyymmdd');
     info.StructureSetTime = datestr(now,'HHMMSS.FFF');
@@ -257,7 +258,8 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                                 else
                                     azOffset(:)=atRoiInput{tt}.SliceNb;
                                 end
-    %                            a3DOffset(:,3)=atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
+                        %        azOffset(:)=atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
+
 
                                 if bFlip == true
                                     azOffset(:) = dZsize-azOffset(:);
@@ -271,7 +273,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
     %                            aY = out.Location(:,2);
 
                                 [aX, aY, outZ] = transformPointsForward(affine3d(xfm'), xy(:,1), xy(:,2), azOffset(:)); 
-                            
+                       %     outZ(:)=atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
 %                                 aX = (aBoundaries(:,2)-(size(aDicomBuffer,1)/2)) * atDicomMeta{atRoiInput{tt}.SliceNb}.PixelSpacing(1);
 %                                 aY = (aBoundaries(:,1)-(size(aDicomBuffer,2)/2)) * atDicomMeta{atRoiInput{tt}.SliceNb}.PixelSpacing(2);
 
@@ -284,10 +286,11 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                                     if atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation == 0
                                         aZ(:) = outZ(:);
                                     else
-                                        aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
+                                      %  aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
+                                        aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.ImagePositionPatient(3);
                                     end
                                  end
-                                 
+
                                  aXYZ = zeros(dNBoundaries*3, 1);
                           
                                  dXOffset=1;
@@ -361,8 +364,9 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                                 if atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation == 0
                                     aZ(:) = outZ(:);
                                 else
-                                    aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
-                                end
+                        %            aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
+                                    aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.ImagePositionPatient(3);
+                               end
                             end
                             
 
