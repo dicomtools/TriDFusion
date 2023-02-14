@@ -165,11 +165,11 @@ if 1
     mMachineReport = uimenu(mMachineLearning, 'Label','Machine Learning Report', 'Separator','on');
     uimenu(mMachineReport, 'Label','3D SPECT Lung Shunt Report', 'Callback', @generate3DLungShuntReportCallback);
     uimenu(mMachineReport, 'Label','3D SPECT Lung Lobe Ration Report', 'Callback', @generate3DLungLobeReportCallback);
- %   uimenu(mMachineReport, 'Label','PET Y90 Liver Dosimetry Report', 'Callback', @generatePETLiverDosimetryReportCallback);
+%    uimenu(mMachineReport, 'Label','PET Y90 Liver Dosimetry Report', 'Callback', @generatePETLiverDosimetryReportCallback);
 
     uimenu(mMachineLearning, 'Label','3D SPECT Lung Shunt', 'Callback', @setMachineLearning3DLungShuntCallback, 'Separator','on');
     uimenu(mMachineLearning, 'Label','3D SPECT Lung Lobe Ratio', 'Callback', @setMachineLearning3DLobeLungCallback);
- %   uimenu(mMachineLearning, 'Label','PET Y90 Liver Dosimetry', 'Callback', @setMachineLearningPETLiverDosimetryCallback);
+%    uimenu(mMachineLearning, 'Label','PET Y90 Liver Dosimetry', 'Callback', @setMachineLearningPETLiverDosimetryCallback);
 
     mRadiomics = uimenu(mModules, 'Label','Radiomics');
     uimenu(mRadiomics, 'Label','Compute Radiomics', 'Callback', @extractRadiomicsFromContoursCallback);

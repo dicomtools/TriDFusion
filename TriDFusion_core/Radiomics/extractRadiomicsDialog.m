@@ -3629,7 +3629,7 @@ function extractRadiomicsDialog(sRadiomicsPath)
                             set(chkSettingBinWidth, 'Value', str2double(stRadiomics.setting.field{1,st}.fieldValue.Text));  
 
                             % Set Edit Box width (1)
-                            set(edtSettingBinWidth, 'String', stRadiomics.setting.field{1,1}.field{1,st}.fieldValue.Text);  
+                            set(edtSettingBinWidth, 'String', stRadiomics.setting.field{1,st}.field.fieldValue.Text);  
                         end
 
                         % (2) Resegmentation
@@ -3652,7 +3652,7 @@ function extractRadiomicsDialog(sRadiomicsPath)
                             set(chkSettingBinPerRoi, 'Value', str2double(stRadiomics.setting.field{1,st}.fieldValue.Text));  
 
                             % Set Edit Box bin per roi (1)
-                            set(edtSettingBinPerRoi, 'String', stRadiomics.setting.field{1,st}.field{1,1}.fieldValue.Text);  
+                            set(edtSettingBinPerRoi, 'String', stRadiomics.setting.field{1,st}.field.fieldValue.Text);  
                         end
 
                         % (4) Resample Image
@@ -3724,7 +3724,7 @@ function extractRadiomicsDialog(sRadiomicsPath)
                             set(chkSettingOtherForce2D, 'Value', str2double(stRadiomics.setting.field{1,st}.fieldValue.Text));  
         
                             % Set Edit Box extraction dim (1)
-                            set(edtSettingOtherForce2D, 'String', stRadiomics.setting.field{1,st}.field{1,1}.fieldValue.Text);  
+                            set(edtSettingOtherForce2D, 'String', stRadiomics.setting.field{1,st}.field.fieldValue.Text);  
 
                         end
 
@@ -3749,7 +3749,7 @@ function extractRadiomicsDialog(sRadiomicsPath)
                             set(chkSettingOtherSetDistanceToNeighbour, 'Value', str2double(stRadiomics.setting.field{1,st}.fieldValue.Text));  
 
                             % Set Edit Box distance to neighbour (1)
-                            set(edtSettingOtherSetDistanceToNeighbour, 'String', stRadiomics.setting.field{1,st}.field{1,1}.fieldValue.Text);  
+                            set(edtSettingOtherSetDistanceToNeighbour, 'String', stRadiomics.setting.field{1,st}.field.fieldValue.Text);  
                         end
 
 
@@ -3765,7 +3765,7 @@ function extractRadiomicsDialog(sRadiomicsPath)
 
                         if strcmpi(stRadiomics.setting.field{1,st}.fieldName.Text, 'voxelArrayShift')
 
-                            set(edtSettingOtherFirstOrderVoxelArrayShift, 'Value', stRadiomics.setting.field{1,st}.fieldValue.Text);  
+                            set(edtSettingOtherFirstOrderVoxelArrayShift, 'String', stRadiomics.setting.field{1,st}.fieldValue.Text);  
                         end
 
 
@@ -3781,7 +3781,7 @@ function extractRadiomicsDialog(sRadiomicsPath)
 
                         if strcmpi(stRadiomics.setting.field{1,st}.fieldName.Text, 'gldm_a')
 
-                            set(edtSettingOtherGldmAlpha, 'Value', stRadiomics.setting.field{1,st}.fieldValue.Text);  
+                            set(edtSettingOtherGldmAlpha, 'String', stRadiomics.setting.field{1,st}.fieldValue.Text);  
                         end
                     end
 
@@ -3834,7 +3834,7 @@ function extractRadiomicsDialog(sRadiomicsPath)
                             set(chkImageTypeLoG, 'Value', str2double(stRadiomics.imageType.field{1,it}.fieldValue.Text));  
                         
                             % Set Edit Box sigma (1)
-                            set(edtImageTypeLoGSigma, 'String', stRadiomics.imageType.field{1,it}.field{1,1}.fieldValue.Text);  
+                            set(edtImageTypeLoGSigma, 'String', stRadiomics.imageType.field{1,it}.field.fieldValue.Text);  
                         end
 
                         % (6) Square
@@ -3855,10 +3855,10 @@ function extractRadiomicsDialog(sRadiomicsPath)
 
                         if strcmpi(stRadiomics.imageType.field{1,it}.fieldName.Text, 'Gradient')
 
-                            set(chkImageTypeGradient, 'Value', str2double(stRadiomics.imageType.field{1,st}.fieldValue.Text));  
+                            set(chkImageTypeGradient, 'Value', str2double(stRadiomics.imageType.field{1,it}.fieldValue.Text));  
         
                             % Set Check Box use spacing (1)
-                            set(chkImageTypeGradientUseSpacing, 'Value', str2double(stRadiomics.imageType.field{1,st}.field{1,1}.fieldValue.Text));  
+                            set(chkImageTypeGradientUseSpacing, 'Value', str2double(stRadiomics.imageType.field{1,it}.field.fieldValue.Text));  
                         end
                     end
                 end
