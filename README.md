@@ -61,11 +61,14 @@ After downloading the "main" branch to (say) /home/.../.../TriDFusion_from_gitHu
 Fire up Matlab. Go to Home --> Set Path. Set the path to "Default". Add /home/.../.../TriDFusion_from_gitHub/ with sub-directories to the Matlab path.
 
 To use TriDFusion (3DF) Graphical User Interface, type TriDFusion() in Matlab command window.
+
+## Usage
+
 * TriDFusion(); Open the graphical user interface.
 
 * TriDFusion('path_to_dicom_folder'); Open the graphical user interface with a dicom image.
 
-* TriDFusion('path_to_dicom_folder','path_to_dicom_folder');  Open the graphical user interface with 2 dicom image.
+* TriDFusion('path_to_dicom_folder','path_to_dicom_folder'); Open the graphical user interface with 2 dicom image.
 
 * TriDFusion('path_to_dicom_folder','path_to_dicom_folder', '-fusion'); Open the graphical user interface with 2 dicom image and fused them.
 
