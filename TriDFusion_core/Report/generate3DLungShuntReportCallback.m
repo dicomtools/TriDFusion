@@ -567,7 +567,7 @@ function generate3DLungShuntReportCallback(~, ~)
             sSuvChecked = 'off';
         end
               
-        set(mSUVUnit         , 'Checked', sSuvChecked);
+        set(mSUVUnit, 'Checked', sSuvChecked);
 
     end
 

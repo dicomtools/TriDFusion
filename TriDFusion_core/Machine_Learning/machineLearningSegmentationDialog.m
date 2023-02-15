@@ -1747,7 +1747,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
 
                 if adOffset(aa) == true
 
-                    progressBar(aa/numel(adOffset), sprintf('Importing skeleton mask %d/%d', aa, numel(adOffset) ));
+                    progressBar(aa/(numel(adOffset)-0.009), sprintf('Importing skeleton mask %d/%d', aa, numel(adOffset) ));
 
                     sObjectName = lower(asSkeletonName{aa});
 
@@ -2000,7 +2000,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
 
                 if adOffset(bb) == true
 
-                    progressBar(bb/numel(adOffset), sprintf('Importing cardiovascular system mask %d/%d', bb, numel(adOffset) ));
+                    progressBar(bb/(numel(adOffset)-0.009), sprintf('Importing cardiovascular system mask %d/%d', bb, numel(adOffset) ));
 
                     sObjectName = lower(asCardiovascularName{bb});
 
@@ -2098,7 +2098,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
 
                 if adOffset(cc) == true
 
-                    progressBar(cc/numel(adOffset), sprintf('Importing other organ mask %d/%d', cc, numel(adOffset) ));
+                    progressBar(cc/(numel(adOffset)-0.009), sprintf('Importing other organ mask %d/%d', cc, numel(adOffset) ));
 
                     sObjectName = lower(asOtherOrgansName{cc});
 
@@ -2242,7 +2242,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
 
                 if adOffset(dd) == true
 
-                    progressBar(dd/numel(adOffset), sprintf('Importing gastrointestinal tract mask %d/%d', dd, numel(adOffset) ));
+                    progressBar(dd/(numel(adOffset)-0.009), sprintf('Importing gastrointestinal tract mask %d/%d', dd, numel(adOffset) ));
 
                     sObjectName = lower(asGastrointestinalTractName{dd});
 
@@ -2281,7 +2281,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
 
                 if adOffset(ee) == true
 
-                    progressBar(ee/numel(adOffset), sprintf('Importing muscles mask %d/%d', ee, numel(adOffset) ));
+                    progressBar(ee/(numel(adOffset)-0.009), sprintf('Importing muscles mask %d/%d', ee, numel(adOffset) ));
 
                     sObjectName = lower(asMusclesName{ee});
 

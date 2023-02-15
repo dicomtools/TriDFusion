@@ -1,5 +1,5 @@
-function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, dContourOffset)
-%function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, dContourOffset)
+function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSUVScale, dContourOffset)
+%function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSUVScale, dContourOffset)
 %Run PyRadiomics, from a mask created from all contours.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -217,6 +217,10 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, dContourOffse
         sNrrdImagesName = sprintf('%simges.nrrd', sNrrdTmpDir);
         sNrrdMaskName   = sprintf('%smask.nrrd' , sNrrdTmpDir);
     
+        if bSUVUnit == true
+            aImages = aImages*dSUVScale;
+        end
+
         nrrdWriter(sNrrdImagesName, squeeze(aImages)    , pixelspacing, origin, 'raw'); % Write .nrrd images 
         nrrdWriter(sNrrdMaskName  , squeeze(aImagesMask), pixelspacing, origin, 'raw'); % Write .nrrd mask
     
@@ -233,7 +237,7 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, dContourOffse
             for vv=dVoiOffset:dNbVois
                
      %           if mod(vv, 5)==1 || vv == dNbVois
-                    progressBar(vv/dNbVois+0.00009, sprintf('Computing radiomics contour %s (%d/%d), it can take several minutes, please be patient.', atVoiInput{vv}.Label, vv, dNbVois));
+                    progressBar(vv/dNbVois-0.009, sprintf('Computing radiomics contour %s (%d/%d), it can take several minutes, please be patient.', atVoiInput{vv}.Label, vv, dNbVois));
      %           end
     
                 sParametersFile = sprintf('%sparameters%d.yaml', sNrrdTmpDir, vv);

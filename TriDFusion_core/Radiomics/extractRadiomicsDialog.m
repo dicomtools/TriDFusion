@@ -3873,17 +3873,34 @@ function extractRadiomicsDialog(sRadiomicsPath)
 
     function computeRadiomicsFromContoursCallback(~, ~)
 
+        atMetaData = dicomMetaData('get', [],  get(uiSeriesPtr('get'), 'Value'));
+
         tReadiomics = getReadiomicsFeaturestemplate();
 
         bAllContours   = get(chkRadiomicsAllContours, 'Value');
         dContourOffset = get(popRadiomicsContours, 'Value');
 
         delete(dlgRadiomics);
+       
+        sUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
+
+        if (strcmpi(atMetaData{1}.Modality, 'pt') || ...
+            strcmpi(atMetaData{1}.Modality, 'nm'))&& ...
+            strcmpi(sUnit, 'SUV' )
+
+            tQuantification = quantificationTemplate('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+            bSUVUnit  = true;
+            dSUVScale = tQuantification.tSUV.dScale;
+        else
+            bSUVUnit  = false;
+            dSUVScale = [];            
+        end
 
         if bAllContours == true % All Contours
-            extractRadiomicsFromContours(sRadiomicsPath, tReadiomics);
+            extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSUVScale);
         else % single contour
-            extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, dContourOffset);
+            extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSUVScale, dContourOffset);
         end
 
     end
