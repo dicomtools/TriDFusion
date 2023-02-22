@@ -1,5 +1,5 @@
-function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSUVScale, dContourOffset)
-%function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSUVScale, dContourOffset)
+function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSUVScale, bEntireVolume, dContourOffset)
+%function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSUVScale, bEntireVolume, dContourOffset)
 %Run PyRadiomics, from a mask created from all contours.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -59,6 +59,22 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
         errordlg('No images detected!', 'Image Validation');  
         return;
     end
+
+    asPatientInfoHeader{1,1} = sprintf('Patient Name');
+    asPatientInfoHeader{2,1} = sprintf('Patient ID');
+    asPatientInfoHeader{3,1} = sprintf('Series Description');
+    asPatientInfoHeader{4,1} = sprintf('Accession Number');
+    asPatientInfoHeader{5,1} = sprintf('Series Date');
+    asPatientInfoHeader{6,1} = sprintf('Series Time');
+    asPatientInfoHeader{7,1} = sprintf('Units');
+
+    asPatientInfoHeader{1,2} = sprintf('%s', cleanString(atMetaData{1}.PatientName, '_'));
+    asPatientInfoHeader{2,2} = sprintf('%s', atMetaData{1}.PatientID);
+    asPatientInfoHeader{3,2} = sprintf('%s', cleanString(atMetaData{1}.SeriesDescription, '_'));
+    asPatientInfoHeader{4,2} = sprintf('%s', atMetaData{1}.AccessionNumber);
+    asPatientInfoHeader{5,2} = sprintf('%s', atMetaData{1}.SeriesDate);
+    asPatientInfoHeader{6,2} = sprintf('%s', atMetaData{1}.SeriesTime);
+    asPatientInfoHeader{7,2} = sprintf('%s', getSerieUnitValue(get(uiSeriesPtr('get'), 'Value')));
 
     % Create an empty directory    
 
@@ -203,6 +219,11 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
             end
         end
     
+        if bEntireVolume == true
+            aEntireImagesMask = aImagesMask;
+            aEntireImagesMask(aEntireImagesMask~=0)=1;
+        end
+
         progressBar(2/5, 'Writing .nrrd files, please wait.');
     
         % Write .nrrd files 
@@ -223,17 +244,42 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
 
         nrrdWriter(sNrrdImagesName, squeeze(aImages)    , pixelspacing, origin, 'raw'); % Write .nrrd images 
         nrrdWriter(sNrrdMaskName  , squeeze(aImagesMask), pixelspacing, origin, 'raw'); % Write .nrrd mask
-    
+
+        if bEntireVolume == true
+            sNrrdEntireMaskName = sprintf('%sentire_mask.nrrd' , sNrrdTmpDir);
+            nrrdWriter(sNrrdEntireMaskName, squeeze(aEntireImagesMask), pixelspacing, origin, 'raw'); % Write .nrrd mask
+        end
+
         % Compute all contours
     
         progressBar(3/5, 'Computing radiomics, please wait');
-    
-        acResultFile = cell(dNbVois, 1);
 
+        acResultFile = cell(dNbVois, 1);
+        
         sAllContoursCmdout = '';
 
         if ispc % Windows
-    
+
+            if bEntireVolume == true % Entire volume
+
+                progressBar(1/2, sprintf('Computing radiomics total contoured volume, it can take several minutes, please be patient.'));
+
+                sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
+                writeYamlFile(sParametersFile, tReadiomics, 1);
+
+                sCommandLine = sprintf('cmd.exe /c %spyradiomics.exe %s %s', sRadiomicsPath, sNrrdImagesName, sNrrdEntireMaskName);    
+
+                sEntireMaskResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'TOTAL-CONTOURED-VOLUME');
+
+                [bStatus, sCmdout] = system([sCommandLine ' -o ' sEntireMaskResultFile ' -p ' sParametersFile]);
+
+                if bStatus 
+                    progressBar( 1, 'Error: An error occur during radiomics extraction!');
+                    errordlg(sprintf('An error occur during radiomics entire volume extraction: %s', sCmdout), 'Extraction Error');  
+                end                
+
+            end
+
             for vv=dVoiOffset:dNbVois
                
      %           if mod(vv, 5)==1 || vv == dNbVois
@@ -271,38 +317,99 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
 
             % Combine all .xls to a file
             progressBar(4/5, 'Combining results, please wait.');
-        
+
+            if bEntireVolume == true % Entire volume
+
+                current_table = readtable(sEntireMaskResultFile); 
+
+                current_table.(1) = [];
+    
+                aCurrentTableSize = size(current_table);
+                aPatientHeaderSize = size(asPatientInfoHeader);
+
+                cCurrenTable = table2cell(current_table);
+
+                if aCurrentTableSize(2) == 3
+                    cTempTable = cell(aCurrentTableSize(1), 4);
+                    for spl=1:aCurrentTableSize(1)
+                        cTempTable(spl,1:3) = cCurrenTable(spl,1:3);
+                        asSpLit = strsplit(cCurrenTable{spl,3},':');
+                        
+                        if numel(asSpLit) == 2
+                            cTempTable{spl,3}=asSpLit{1};
+                            cTempTable{spl,4}=asSpLit{2};
+                        end
+                    end
+                    cCurrenTable = cTempTable;
+                    aCurrentTableSize = size(cTempTable);
+                end
+
+                cTempTable = cell(aPatientHeaderSize(1), aCurrentTableSize(2));
+
+                cTempTable(1:aPatientHeaderSize(1),1)=asPatientInfoHeader(1:aPatientHeaderSize(1),1);
+                cTempTable(1:aPatientHeaderSize(1),2)=asPatientInfoHeader(1:aPatientHeaderSize(1),2);
+
+                cCombineTable = cell2table([cTempTable; cCurrenTable]);
+
+                writetable(cCombineTable, sXlsFileName, 'Sheet', 'TOTAL-CONTOURED-VOLUME', 'WriteVariableNames', false);
+            end
+
             bFirstLoop = true;
             for vv=dVoiOffset:dNbVois        
                 current_table = readtable(acResultFile{vv}); 
-    %            for nn=1:numel(current_table.(1))
-    %                current_table.(1){nn}=acResultFile{vv};
-    %            end
+
                 current_table.(1) = [];
     
-                if bFirstLoop == false
+                aCurrentTableSize = size(current_table);
+                aPatientHeaderSize = size(asPatientInfoHeader);
+
+                cCurrenTable = table2cell(current_table);
+
+                if aCurrentTableSize(2) == 3
+                    cTempTable = cell(aCurrentTableSize(1), 4);
+                    for spl=1:aCurrentTableSize(1)
+                        cTempTable(spl,1:3) = cCurrenTable(spl,1:3);
+                        asSpLit = strsplit(cCurrenTable{spl,3},':');
+                        
+                        if numel(asSpLit) == 2
+                            cTempTable{spl,3}=asSpLit{1};
+                            cTempTable{spl,4}=asSpLit{2};
+                        end
+                    end
+                    cCurrenTable = cTempTable;
+                    aCurrentTableSize = size(cTempTable);
+                end
+
+                cTempTable = cell(aPatientHeaderSize(1), aCurrentTableSize(2));
+
+                cTempTable(1:aPatientHeaderSize(1),1)=asPatientInfoHeader(1:aPatientHeaderSize(1),1);
+                cTempTable(1:aPatientHeaderSize(1),2)=asPatientInfoHeader(1:aPatientHeaderSize(1),2);
+
+                cCombineTable = cell2table([cTempTable; cCurrenTable]);
+
+                if bFirstLoop == false || bEntireVolume == true
     
                     [~,B]=xlsfinfo(sXlsFileName);
                     if any(strcmp(B, acResultFile{vv})) % If name exist 
-                        writetable(current_table, sXlsFileName, 'Sheet', vv);
+                        writetable(cCombineTable, sXlsFileName, 'Sheet', vv, 'WriteVariableNames', false);
                     else
-                        writetable(current_table, sXlsFileName, 'Sheet', atVoiInput{vv}.Label);
+                        writetable(cCombineTable, sXlsFileName, 'Sheet', atVoiInput{vv}.Label, 'WriteVariableNames', false);
                     end
                 else
                     bFirstLoop = false;
-                    writetable(current_table, sXlsFileName, 'Sheet', atVoiInput{vv}.Label);
+                    writetable(cCombineTable, sXlsFileName, 'Sheet', atVoiInput{vv}.Label, 'WriteVariableNames', false);
                 end
             end
     
         elseif isunix % Linux is not yet supported
     
-            progressBar( 1, 'Error: Radiomics under Linux is not supported');
-            errordlg('Radiomics under Linux is not supported', 'Machine Learning Validation');
+            progressBar( 1, 'Error: Radiomics under Linux is not yet supported');
+            errordlg('Radiomics under Linux is not yet supported', 'Machine Learning Validation');
     
         else % Mac is not yet supported
     
-            progressBar( 1, 'Error: Radiomics under Mac is not supported');
-            errordlg('Radiomics under Mac is not supported', 'Machine Learning Validation');
+            progressBar( 1, 'Error: Radiomics under Mac is not yet supported');
+            errordlg('Radiomics under Mac is not yet supported', 'Machine Learning Validation');
         end 
 
         catch 
@@ -321,6 +428,10 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
         % Clear mask
 
         clear aImagesMask;
+
+        if bEntireVolume == true % Entire volume
+            clear aEntireImagesMask;
+        end
 
     end
 

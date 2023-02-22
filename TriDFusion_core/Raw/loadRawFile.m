@@ -1,5 +1,5 @@
 function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ, dImageOffset, sUnit, sMachine)
-%function loadRawFile(rawFileName))
+%function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ, dImageOffset, sUnit, sMachine)
 %Load .raw file to TriDFusion.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -173,6 +173,7 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
         atInput(numel(atInput)).atDicomInfo{1}.PixelSpacing(1)      = voxelX;
         atInput(numel(atInput)).atDicomInfo{1}.PixelSpacing(2)      = voxelY;        
         atInput(numel(atInput)).atDicomInfo{1}.SpacingBetweenSlices = voxelZ;
+        atInput(numel(atInput)).atDicomInfo{1}.SliceThickness       = voxelZ;
         
         % Patient information
        
@@ -205,6 +206,7 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
         atInput(numel(atInput)).atDicomInfo{1}.StudyID           = '';
         atInput(numel(atInput)).atDicomInfo{1}.SeriesInstanceUID = '';
         atInput(numel(atInput)).atDicomInfo{1}.StudyInstanceUID  = '';
+        atInput(numel(atInput)).atDicomInfo{1}.AccessionNumber   = '';
         
         % Date Time
    
@@ -252,6 +254,7 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
         atInput(1).atDicomInfo{1}.PixelSpacing(1)      = voxelX;
         atInput(1).atDicomInfo{1}.PixelSpacing(2)      = voxelY;        
         atInput(1).atDicomInfo{1}.SpacingBetweenSlices = voxelZ;
+        atInput(1).atDicomInfo{1}.SliceThickness       = voxelZ;
         
         % Patient information
        
@@ -284,6 +287,7 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
         atInput(1).atDicomInfo{1}.StudyID           = '';
         atInput(1).atDicomInfo{1}.SeriesInstanceUID = '';
         atInput(1).atDicomInfo{1}.StudyInstanceUID  = '';
+        atInput(1).atDicomInfo{1}.AccessionNumber   = '';
         
         % Date Time
    
@@ -371,7 +375,9 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
     catch
         progressBar(1, 'Error:loadRawFile()');                        
     end
-    
+
+    clear aBuffer;
+  
     % Reactivate main tool bar 
     set(uiSeriesPtr('get'), 'Enable', 'on');        
     mainToolBarEnable('on');

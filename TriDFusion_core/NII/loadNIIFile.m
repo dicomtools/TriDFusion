@@ -1,31 +1,34 @@
-function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ, dPixelValue, bFillHoles)
-%function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ, dPixelValue, bFillHoles)
-%Read .stl Model.
+function loadNIIFile(sPath, sFileName)
+%function loadNIIFile(sPath, sFileName)
+%Load .nii file to TriDFusion.
 %See TriDFuison.doc (or pdf) for more information about options.
+%
+%Note: option settings must fit on one line and can contain one semicolon at most.
+%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
 % Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
-% 
+%
 % This file is part of The Triple Dimention Fusion (TriDFusion).
-% 
-% TriDFusion development has been led by:  Daniel Lafontaine
-% 
-% TriDFusion is distributed under the terms of the Lesser GNU Public License. 
-% 
+%
+% TriDFusion development has been led by: Daniel Lafontaine
+%
+% TriDFusion is distributed under the terms of the Lesser GNU Public License.
+%
 %     This version of TriDFusion is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 % TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 % without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 % See the GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     % Deactivate main tool bar 
     set(uiSeriesPtr('get'), 'Enable', 'off');                
@@ -90,22 +93,60 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
     set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
     set(btnMIPPtr('get'), 'FontWeight', 'normal');
     
-    progressBar(0.5, 'Reading stl, please wait.');
+    progressBar(0.5, 'Reading nii, please wait.');
 
-    FV = stlread(sprintf('%s%s', sPath, sFileName));            
-    
-    progressBar(0.999999, 'Converting polygon to voxel, please wait.');
+    nii = nii_tool('load', sprintf('%s%s',sPath, sFileName));
 
-%        aBuffer = polygon2voxel(FV, [dimX dimY dimZ], 'auto');
-    aBuffer = polygon2voxel(FV, [dimX dimY dimZ], 'auto');
-    if bFillHoles == true
-        aBuffer = imfill(aBuffer, 'holes');
+    if isfield(nii.hdr, 'dim')
+        rows    = nii.hdr.dim(2);
+        columns = nii.hdr.dim(3);
+    else
+        rows    = 0;
+        columns = 0;        
     end
+
+    if isfield(nii.hdr, 'pixdim')
+
+        if nii.hdr.dim(1) == 3
+            voxelX = nii.hdr.pixdim(2);
+            voxelY = nii.hdr.pixdim(3);
+            voxelZ = nii.hdr.pixdim(4);        
+        else    
+            voxelX = nii.hdr.pixdim(2);
+            voxelY = nii.hdr.pixdim(3);
+            voxelZ = 1;
+        end
+     else
+        voxelX = 1;
+        voxelY = 1;
+        voxelZ = 1;          
+    end
+
+    aImageOrientationPatient = zeros(6,1);
     
-    aBuffer = aBuffer(:,:,end:-1:1);
-    aBuffer = double(aBuffer);
-    aBuffer(aBuffer~=0) = dPixelValue;       
+    % Axial
     
+    aImageOrientationPatient(1) = 1;
+    aImageOrientationPatient(5) = 1;
+
+    aImagePositionPatient = zeros(6,1);
+
+    if isfield(nii.hdr, 'qoffset_x')
+        aImagePositionPatient(1) = nii.hdr.qoffset_x;   
+    end
+
+    if isfield(nii.hdr, 'qoffset_y')
+        aImagePositionPatient(2) = nii.hdr.qoffset_y;   
+    end
+
+    if isfield(nii.hdr, 'qoffset_z')
+        aImagePositionPatient(3) = nii.hdr.qoffset_z;   
+    end
+
+
+    aBuffer = imrotate3(double(nii.img), 90, [0 0 1], 'nearest');
+    aBuffer = aBuffer(end:-1:1,:,:);
+
     if ~isempty(atInput)
         
 %        atInput(numel(atInput)+1) = atInput(iSeriesOffset);
@@ -113,7 +154,7 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
 
 
         asSeriesDescription = seriesDescription('get');
-        asSeriesDescription{numel(asSeriesDescription)+1}=sprintf('STL-%s', sFileName);
+        asSeriesDescription{numel(asSeriesDescription)+1}=sprintf('NII-%s', sFileName);
         
         atInput(numel(atInput)+1).atDicomInfo = [];        
         
@@ -125,7 +166,10 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         atInput(numel(atInput)).atDicomInfo{1}.PixelSpacing(2)      = voxelY;        
         atInput(numel(atInput)).atDicomInfo{1}.SpacingBetweenSlices = voxelZ;
         atInput(numel(atInput)).atDicomInfo{1}.SliceThickness       = voxelZ;
-        
+
+        atInput(numel(atInput)).atDicomInfo{1}.Rows    = rows;
+        atInput(numel(atInput)).atDicomInfo{1}.Columns = columns;
+
         % Patient information
        
         atInput(numel(atInput)).atDicomInfo{1}.PatientName      = asSeriesDescription{1}; 
@@ -141,8 +185,8 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         
         atInput(numel(atInput)).atDicomInfo{1}.InstanceNumber          = 1; 
         atInput(numel(atInput)).atDicomInfo{1}.PatientPosition         = [];
-        atInput(numel(atInput)).atDicomInfo{1}.ImagePositionPatient    = zeros(3,1); 
-        atInput(numel(atInput)).atDicomInfo{1}.ImageOrientationPatient = zeros(6,1); 
+        atInput(numel(atInput)).atDicomInfo{1}.ImagePositionPatient    = aImagePositionPatient; 
+        atInput(numel(atInput)).atDicomInfo{1}.ImageOrientationPatient = aImageOrientationPatient; 
         
         % Series SOP
        
@@ -157,7 +201,7 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         atInput(numel(atInput)).atDicomInfo{1}.SeriesInstanceUID = '';
         atInput(numel(atInput)).atDicomInfo{1}.StudyInstanceUID  = '';
         atInput(numel(atInput)).atDicomInfo{1}.AccessionNumber   = '';
-        
+
         % Date Time
    
         atInput(numel(atInput)).atDicomInfo{1}.SeriesTime = '';
@@ -195,7 +239,7 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         
     else
         
-        asSeriesDescription{1}=sprintf('STL-%s', sFileName);
+        asSeriesDescription{1}=sprintf('NII-%s', sFileName);
 
         atInput(1).atDicomInfo{1}.Modality = 'ot';
         atInput(1).atDicomInfo{1}.SeriesDescription = asSeriesDescription{1}; 
@@ -206,7 +250,10 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         atInput(1).atDicomInfo{1}.PixelSpacing(2)      = voxelY;        
         atInput(1).atDicomInfo{1}.SpacingBetweenSlices = voxelZ;
         atInput(1).atDicomInfo{1}.SliceThickness       = voxelZ;
-        
+
+        atInput(1).atDicomInfo{1}.Rows    = rows;
+        atInput(1).atDicomInfo{1}.Columns = columns;
+
         % Patient information
        
         atInput(1).atDicomInfo{1}.PatientName      = asSeriesDescription{1}; 
@@ -222,8 +269,8 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         
         atInput(1).atDicomInfo{1}.InstanceNumber          = 1; 
         atInput(1).atDicomInfo{1}.PatientPosition         = [];
-        atInput(1).atDicomInfo{1}.ImagePositionPatient    = zeros(3,1); 
-        atInput(1).atDicomInfo{1}.ImageOrientationPatient = zeros(6,1); 
+        atInput(1).atDicomInfo{1}.ImagePositionPatient    = aImagePositionPatient; 
+        atInput(1).atDicomInfo{1}.ImageOrientationPatient = aImageOrientationPatient; 
         
         % Series SOP
        
@@ -238,7 +285,7 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         atInput(1).atDicomInfo{1}.SeriesInstanceUID = '';
         atInput(1).atDicomInfo{1}.StudyInstanceUID  = '';
         atInput(1).atDicomInfo{1}.AccessionNumber   = '';
-        
+       
         % Date Time
    
         atInput(1).atDicomInfo{1}.SeriesTime = '';
@@ -322,15 +369,16 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
     progressBar(1, sprintf('Import %s completed.', sFileName));
     
     catch
-        progressBar(1, 'Error:readSTLModel()');                        
+        progressBar(1, 'Error:loadNIIFile()');                        
     end
 
     clear aBuffer;
-   
+
     % Reactivate main tool bar 
     set(uiSeriesPtr('get'), 'Enable', 'on');        
     mainToolBarEnable('on');
     
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow; 
+
 end

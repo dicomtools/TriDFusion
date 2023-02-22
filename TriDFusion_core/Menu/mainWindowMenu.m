@@ -31,6 +31,8 @@ function mainWindowMenu()
     uimenu(mFile,'Label', 'Open...', 'Callback',@setSourceCallback);
     uimenu(mFile,'Label', 'Import .raw file...','Callback', @importRawCallback);
     uimenu(mFile,'Label', 'Import .stl file...','Callback', @importSTLCallback);
+    uimenu(mFile,'Label', 'Import .nii file...','Callback', @importNIICallback);
+    uimenu(mFile,'Label', 'Import .nii mask file...','Callback', @importNIIMaskCallback);
     uimenu(mFile,'Label', 'Import RT-Structure...','Callback', @importContoursCallback);    
     uimenu(mFile,'Label', 'Import CERR planC...','Callback', @importCerrPlanCCallback, 'Separator','on');
     uimenu(mFile,'Label', 'Import CERR Dose Volume...','Callback', @importCerrDoseVolumeCallback);
@@ -84,8 +86,8 @@ function mainWindowMenu()
         set(mVslashAll      , 'Checked', 'on');
     end
 
-    mViewCam      = uimenu(mView, 'Label','Camera Toolbar'   , 'Callback', @setViewToolbar, 'Separator','on');
-    mViewEdit     = uimenu(mView, 'Label','Plot Edit Toolbar', 'Callback', @setViewToolbar);
+    mViewCam  = uimenu(mView, 'Label','Camera Toolbar'   , 'Callback', @setViewToolbar, 'Separator','on');
+    mViewEdit = uimenu(mView, 'Label','Plot Edit Toolbar', 'Callback', @setViewToolbar);
 
     mViewRoi = uimenu(mView, 'Label','ROI Toolbar' , 'Callback', @setViewToolbar);
     viewRoiObject('set', mViewRoi);
