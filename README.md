@@ -12,17 +12,17 @@
 
 ## File format compatibility
 
-| Medical Imaging Modalities                 | Import / Export File Formats               |
-| ------------------------------------------ | ------------------------------------------ |
-| Positron Emission Tomography PET-CT (PT)   | DICOM using custom/vendor dictionaries     |
-| Gamma Camera, Nuclear Medicine (NM)        | Raw data from nuclear imaging devices      |
-| Computed Tomography (CT)                   | DICOM-RT structure (contours)              |
-| Digital Radiography (CR, DX)               | CERR planC, dose volumes and constraints   |
-| Digital Angiography (XA)                   | Comma separated values (.csv)              |
-| Magnetic Resonance (MR)                    | Standard triangle language (.stl)          |
-| Secondary Pictures and Scanned Images (SC) | Bitmap (.bmp)                              |
-| Mammography (MG)                           |                                            |
-| Ultrasonography (US)                       |                                            |
+| Medical Imaging Modalities                 | Import / Export File Formats                         |
+| ------------------------------------------ | ---------------------------------------------------- |
+| Positron Emission Tomography PET-CT (PT)   | DICOM using custom/vendor dictionaries               |
+| Gamma Camera, Nuclear Medicine (NM)        | Raw data from nuclear imaging devices                |
+| Computed Tomography (CT)                   | DICOM-RT structure (contours)                        |
+| Digital Radiography (CR, DX)               | CERR planC, dose volumes and constraints             |
+| Digital Angiography (XA)                   | Comma separated values (.csv)                        |
+| Magnetic Resonance (MR)                    | Standard triangle language (.stl)                    |
+| Secondary Pictures and Scanned Images (SC) | Bitmap (.bmp)                                        |
+| Mammography (MG)                           | Neuroimaging Informatics Technology Initiative (.nii)|
+| Ultrasonography (US)                       |                                                      |
 
 ## Main features
 - Multi-modality Image Viewer
