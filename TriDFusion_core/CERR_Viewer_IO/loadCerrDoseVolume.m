@@ -259,8 +259,9 @@ function loadCerrDoseVolume(planC, structNamC)
     atNewInput(2).aDicomBuffer = dose3M;
     
     for ii=1:numel(atNewInput)
-        atNewInput(ii).asFilesList = '';
-        
+        atNewInput(ii).asFilesList    = [];
+        atNewInput(ii).asFilesList{1} = '';
+       
         atNewInput(ii).sOrientationView    = 'Axial';
         
         atNewInput(ii).bEdgeDetection      = false;

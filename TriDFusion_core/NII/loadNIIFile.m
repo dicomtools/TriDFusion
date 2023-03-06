@@ -129,7 +129,7 @@ function loadNIIFile(sPath, sFileName)
     aImageOrientationPatient(1) = 1;
     aImageOrientationPatient(5) = 1;
 
-    aImagePositionPatient = zeros(6,1);
+    aImagePositionPatient = zeros(3,1);
 
     if isfield(nii.hdr, 'qoffset_x')
         aImagePositionPatient(1) = nii.hdr.qoffset_x;   
@@ -142,7 +142,6 @@ function loadNIIFile(sPath, sFileName)
     if isfield(nii.hdr, 'qoffset_z')
         aImagePositionPatient(3) = nii.hdr.qoffset_z;   
     end
-
 
     aBuffer = imrotate3(double(nii.img), 90, [0 0 1], 'nearest');
     aBuffer = aBuffer(end:-1:1,:,:);
@@ -197,9 +196,9 @@ function loadNIIFile(sPath, sFileName)
         
         % Series UID
         
-        atInput(numel(atInput)).atDicomInfo{1}.StudyID           = '';
-        atInput(numel(atInput)).atDicomInfo{1}.SeriesInstanceUID = '';
-        atInput(numel(atInput)).atDicomInfo{1}.StudyInstanceUID  = '';
+        atInput(numel(atInput)).atDicomInfo{1}.StudyID           = dicomuid;
+        atInput(numel(atInput)).atDicomInfo{1}.SeriesInstanceUID = dicomuid;
+        atInput(numel(atInput)).atDicomInfo{1}.StudyInstanceUID  = dicomuid;
         atInput(numel(atInput)).atDicomInfo{1}.AccessionNumber   = '';
 
         % Date Time
@@ -212,7 +211,8 @@ function loadNIIFile(sPath, sFileName)
         
         % Series default
         
-        atInput(numel(atInput)).asFilesList = [];
+        atInput(numel(atInput)).asFilesList    = [];
+        atInput(numel(atInput)).asFilesList{1} = sprintf('%s%s', sPath, sFileName);
         
         atInput(numel(atInput)).sOrientationView    = 'Axial';
        
@@ -281,9 +281,9 @@ function loadNIIFile(sPath, sFileName)
         
         % Series UID
         
-        atInput(1).atDicomInfo{1}.StudyID           = '';
-        atInput(1).atDicomInfo{1}.SeriesInstanceUID = '';
-        atInput(1).atDicomInfo{1}.StudyInstanceUID  = '';
+        atInput(1).atDicomInfo{1}.StudyID           = dicomuid;
+        atInput(1).atDicomInfo{1}.SeriesInstanceUID = dicomuid;
+        atInput(1).atDicomInfo{1}.StudyInstanceUID  = dicomuid;
         atInput(1).atDicomInfo{1}.AccessionNumber   = '';
        
         % Date Time
@@ -295,7 +295,8 @@ function loadNIIFile(sPath, sFileName)
         atInput(1).atDicomInfo{1}.AcquisitionDate = '';   
         
         % Series default
-        atInput(1).asFilesList = [];
+        atInput(1).asFilesList    = [];
+        atInput(1).asFilesList{1} = sprintf('%s%s', sPath, sFileName);
         
         atInput(1).sOrientationView    = 'Axial';
         

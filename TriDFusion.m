@@ -261,7 +261,7 @@ function TriDFusion(varargin)
     
  %   refreshImages();
        
-    if argFusion == true % Init 2D Fuison   
+    if argFusion == true % Init 2D Fusion   
         setFusionCallback();        
     end
     

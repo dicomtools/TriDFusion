@@ -2940,7 +2940,7 @@ end
         if dToOffset~=0 && ~isempty(tObject)
             
             % Copy the object
-            copyRoiVoiToSerie(dToOffset, tObject, false);
+            copyRoiVoiToSerie(dFromOffset, dToOffset, tObject, false);
             
             if dFromOffset == dToOffset % Refresh ROIs list
                 if strcmpi(get(mSUVUnit, 'Checked'), 'on')
@@ -3020,7 +3020,7 @@ end
 
         if dToOffset~=0 && ~isempty(tObject)
             % Copy the object
-            copyRoiVoiToSerie(dToOffset, tObject, true);
+            copyRoiVoiToSerie(dFromOffset, dToOffset, tObject, true);
             if dFromOffset == dToOffset % Refresh ROIs list
                 if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                     bSUVUnit = true;

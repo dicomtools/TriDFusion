@@ -201,11 +201,11 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
         atInput(numel(atInput)).atDicomInfo{1}.FrameOfReferenceUID = ''; 
         
         % Series UID
-         atInput(numel(atInput)).atDicomInfo{1}.AccessionNumber   = '';
+ %        atInput(numel(atInput)).atDicomInfo{1}.AccessionNumber   = '';
        
-        atInput(numel(atInput)).atDicomInfo{1}.StudyID           = '';
-        atInput(numel(atInput)).atDicomInfo{1}.SeriesInstanceUID = '';
-        atInput(numel(atInput)).atDicomInfo{1}.StudyInstanceUID  = '';
+        atInput(numel(atInput)).atDicomInfo{1}.StudyID           = dicomuid;
+        atInput(numel(atInput)).atDicomInfo{1}.SeriesInstanceUID = dicomuid;
+        atInput(numel(atInput)).atDicomInfo{1}.StudyInstanceUID  = dicomuid;
         atInput(numel(atInput)).atDicomInfo{1}.AccessionNumber   = '';
         
         % Date Time
@@ -218,8 +218,9 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
         
         % Series default
         
-        atInput(numel(atInput)).asFilesList = [];        
-        
+        atInput(numel(atInput)).asFilesList    = [];
+        atInput(numel(atInput)).asFilesList{1} = sprintf('%s%s', sPathName, sFileName);
+
         atInput(numel(atInput)).sOrientationView    = 'Axial';
        
         atInput(numel(atInput)).bEdgeDetection      = false;
@@ -282,11 +283,11 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
         atInput(1).atDicomInfo{1}.FrameOfReferenceUID = ''; 
         
         % Series UID
-        atInput(1).atDicomInfo{1}.AccessionNumber   = '';
+    %    atInput(1).atDicomInfo{1}.AccessionNumber   = '';
         
-        atInput(1).atDicomInfo{1}.StudyID           = '';
-        atInput(1).atDicomInfo{1}.SeriesInstanceUID = '';
-        atInput(1).atDicomInfo{1}.StudyInstanceUID  = '';
+        atInput(1).atDicomInfo{1}.StudyID           = dicomuid;
+        atInput(1).atDicomInfo{1}.SeriesInstanceUID = dicomuid;
+        atInput(1).atDicomInfo{1}.StudyInstanceUID  = dicomuid;
         atInput(1).atDicomInfo{1}.AccessionNumber   = '';
         
         % Date Time
@@ -298,8 +299,9 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
         atInput(1).atDicomInfo{1}.AcquisitionDate = '';           
         
         % Series default
-        atInput(1).asFilesList = [];
-        
+        atInput(1).asFilesList    = [];
+        atInput(1).asFilesList{1} = sprintf('%s%s', sPathName, sFileName);       
+
         atInput(1).sOrientationView    = 'Axial';
         
         atInput(1).bEdgeDetection      = false;

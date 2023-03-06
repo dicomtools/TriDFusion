@@ -27,7 +27,11 @@ function generate3DLungShuntReportCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    gp3DObject = [];
+
     gasOrganList={'Lungs','Liver'};
+
+    gasMask = {'lungs', 'liver'};
 
     atInput = inputTemplate('get');
 
@@ -351,8 +355,20 @@ function generate3DLungShuntReportCallback(~, ~)
             'BorderWidth', showBorder('get'),...
             'HighlightColor', [0 1 1],...
             'BackgroundColor', surfaceColor('get', background3DOffset('get')),...
-            'position', [5 15 FIG_REPORT_X/3-75 350]...
+            'position', [20 15 FIG_REPORT_X/3-75-15 340]...
             );  
+
+    uiSlider3Dintensity = ...
+    uicontrol(ui3DLungShuntReport, ...
+              'Style'   , 'Slider', ...
+              'Position', [5 15 15 340], ...
+              'Value'   , 0.9, ...
+              'Enable'  , 'on', ...
+              'Tooltip' , 'Intensity', ...
+              'BackgroundColor', 'White', ...
+              'CallBack', @slider3DLungLiverintensityCallback ...
+              );
+%    addlistener(uiSlider3Dintensity, 'Value', 'PreSet', @slider3DLungLiverintensityCallback);
 
      uicontrol(ui3DLungShuntReport,...
               'style'     , 'text',...
@@ -1437,32 +1453,52 @@ function generate3DLungShuntReportCallback(~, ~)
 
         end
 
-        % Mask Isosurface 
+        % Mask Volume Rendering 
 
-        asMask = {'lungs', 'liver'};
-        for jj=1:numel(asMask)
+        for jj=1:numel(gasMask)
     
-            [aMask, aColor] = machineLearning3DMask('get', asMask{jj});
+            [aMask, aColor] = machineLearning3DMask('get', gasMask{jj});
+
+            aMask = smooth3(aMask, 'box');
     
             if ~isempty(aMask)
-        
-                aInputArguments = {'Parent', ui3DWindow, 'Renderer', 'Isosurface', 'BackgroundColor', 'white', 'ScaleFactors', aScaleFactor};
+
+                aColormap = zeros(256,3);
+
+                aColormap(:,1) = aColor(1);
+                aColormap(:,2) = aColor(2);
+                aColormap(:,3) = aColor(3);
+
+                dTransparencyValue = get(uiSlider3Dintensity, 'Value');
+
+                aAlphamap = linspace(0, dTransparencyValue, 256)';
+
+                aInputArguments = {'Parent', ui3DWindow, 'Renderer', 'VolumeRendering', 'BackgroundColor', 'white', 'ScaleFactors', aScaleFactor};
         
                 aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
           
                 if verLessThan('matlab','9.13')
-                    pObject = volshow(squeeze(aMask),  aInputArguments{:});
+                    gp3DObject{jj} = volshow(squeeze(aMask),  aInputArguments{:});
                 else
-                    pObject = images.compatibility.volshow.R2022a.volshow(squeeze(aMask), aInputArguments{:});                   
+                    gp3DObject{jj} = images.compatibility.volshow.R2022a.volshow(squeeze(aMask), aInputArguments{:});                   
                 end
     
-                pObject.IsosurfaceColor = aColor;
-                pObject.Isovalue = 1;
-    
-                pObject.CameraPosition = aCameraPosition;
-                pObject.CameraUpVector = aCameraUpVector;
+                gp3DObject{jj}.CameraPosition = aCameraPosition;
+                gp3DObject{jj}.CameraUpVector = aCameraUpVector;
             end
         end
+    end
+
+    function slider3DLungLiverintensityCallback(~, ~)
+
+        dSliderValue = get(uiSlider3Dintensity, 'Value');
+
+        aAlphamap = linspace(0, dSliderValue, 256)';
+
+        for jj=1:numel(gasMask)
+            gp3DObject{jj}.Alphamap = aAlphamap;
+        end
+        
     end
 
     function ui3DLungShuntReportSliderCallback(~, ~)

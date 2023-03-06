@@ -147,27 +147,36 @@ function initTemplates()
                         end
                         
                         bScreenCapture = false;
-                        if find(contains(asImageType, 'secondary')) 
-                            bScreenCapture = true;
-                        end
+                   %     if find(contains(asImageType, 'secondary')) 
+                   %         bScreenCapture = true;
+                   %     end
                             
                         if bStatic    == true || ...
                            bWholeBody == true || ...      
                            bScreenCapture == true
 
-                            if size(tDatasets.DicomBuffers{1}, 3) == 1
-                                dNbOfImages = size(tDatasets.DicomBuffers{1}, 4);
+                            aBufferSize = size(tDatasets.DicomBuffers);
+                            if numel(aBufferSize) < 3
+                                dNbOfImages = aBufferSize(1);
                             else
-                                dNbOfImages = size(tDatasets.DicomBuffers{1}, 3);
-                            end                       
+                                if size(tDatasets.DicomBuffers{1}, 3) == 1
+                                    dNbOfImages = size(tDatasets.DicomBuffers{1}, 4);
+                                else
+                                    dNbOfImages = size(tDatasets.DicomBuffers{1}, 3);
+                                end
+                            end                     
                        
                             sSeriesDescription = tDatasets.DicomInfos{1}.SeriesDescription;
                             for ll=1:dNbOfImages
                                                                 
-                                if size(tDatasets.DicomBuffers{1}, 3) == 1                                
-                                    aTemp{1} = tDatasets.DicomBuffers{1}(:,:,1,ll);
+                                if numel(aBufferSize) < 3
+                                    aTemp{1} = tDatasets.DicomBuffers{ll};
                                 else
-                                    aTemp{1} = tDatasets.DicomBuffers{1}(:,:,ll);
+                                    if size(tDatasets.DicomBuffers{1}, 3) == 1
+                                        aTemp{1} = tDatasets.DicomBuffers{1}(:,:,1,ll);
+                                    else
+                                        aTemp{1} = tDatasets.DicomBuffers{1}(:,:,ll);
+                                    end
                                 end
                                 
                                 aDicomBuffer{dNbEntry} = aTemp;

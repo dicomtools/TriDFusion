@@ -247,7 +247,8 @@ function loadCerrPlanC(planC)
     end
 
     for ii=1:numel(atNewInput)
-        atNewInput(ii).asFilesList = '';
+        atNewInput(ii).asFilesList    = [];
+        atNewInput(ii).asFilesList{1} = '';
         
         atNewInput(ii).sOrientationView    = 'Axial';
         

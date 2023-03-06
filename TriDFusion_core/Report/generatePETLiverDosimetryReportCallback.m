@@ -32,8 +32,11 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 %    xSize = dScreenSize(3);
 %    ySize = dScreenSize(4);
 
+    gp3DObject = [];
+
     gasOrganList={'Liver'};
 
+    gasMask = {'liver'};
 
     atInput = inputTemplate('get');
 
@@ -188,9 +191,53 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-100 FIG_REPORT_X/3+100 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-70 FIG_REPORT_Y-100 FIG_REPORT_X/3+100 20]...
                   ); 
-              
+
+         uiPETLiverDosimetryContoursInformationReport = ...
+         uipanel(uiPETLiverDosimetryReport,...
+                 'Units'   , 'pixels',...
+                 'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-70 ...
+                              FIG_REPORT_Y-460 ...
+                              445 ...
+                              320 ...
+                              ],...
+                'Visible', 'on', ...
+                'HighlightColor' , 'white', ...
+                'BackgroundColor', 'white', ...
+                'ForegroundColor', 'black' ...
+                );
+
+         aContourInformationUiPosition = get(uiPETLiverDosimetryContoursInformationReport, 'position');
+
+         uiPETLiverDosimetryScrollableContoursInformationReport = ...
+         uipanel(uiPETLiverDosimetryContoursInformationReport,...
+                 'Units'   , 'pixels',...
+                 'position', [0 ...
+                              -((aContourInformationUiPosition(4)*4)-320) ...
+                              aContourInformationUiPosition(3) ...
+                              aContourInformationUiPosition(4)*4 ...
+                              ],...
+                'Visible', 'on', ...
+                'HighlightColor' , 'white', ...
+                'BackgroundColor', 'white', ...
+                'ForegroundColor', 'black' ...
+                );
+
+        gaContourInformationScrollableUiPosition = get(uiPETLiverDosimetryScrollableContoursInformationReport, 'position');
+
+        uiPETLiverDosimetryScrollableContoursInformation = ...
+        uicontrol(uiPETLiverDosimetryReport, ...
+                  'Style'   , 'Slider', ...
+                  'Position', [FIG_REPORT_X-35 aContourInformationUiPosition(2) 15 aContourInformationUiPosition(4)], ...
+                  'Value'   , 1, ...
+                  'Enable'  , 'on', ...
+                  'Tooltip' , 'Intensity', ...
+                  'BackgroundColor', 'White', ...
+                  'CallBack', @sliderScrollableContoursInformationCallback ...
+                  );
+        addlistener(uiPETLiverDosimetryScrollableContoursInformation, 'Value', 'PreSet', @sliderScrollableContoursInformationCallback);
+
          % Contour Type
               
           uicontrol(uiPETLiverDosimetryReport,...
@@ -202,10 +249,11 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-130 115 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-70 FIG_REPORT_Y-130 130 20]...
                   ); 
               
-        uicontrol(uiPETLiverDosimetryReport,...
+        uiReportLessionTypePETLiverDosimetry = ...       
+        uicontrol(uiPETLiverDosimetryScrollableContoursInformationReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
                   'FontSize'  , 10,...
@@ -214,35 +262,9 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-460 115 320]...
+                  'position', [0 -10 130 gaContourInformationScrollableUiPosition(4)]...
                   );  
               
-         % Nb Contour
-              
-          uicontrol(uiPETLiverDosimetryReport,...
-                  'style'     , 'text',...
-                  'FontWeight', 'bold',...
-                  'FontSize'  , 10,...
-                  'FontName'  , 'MS Sans Serif', ...
-                  'string'    , 'Nb Contours',...
-                  'horizontalalignment', 'left',...
-                  'BackgroundColor', 'White', ...
-                  'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+15 FIG_REPORT_Y-130 90 20]...
-                  ); 
-
-        uiReportLesionNbPETLiverDosimetry = ...       
-        uicontrol(uiPETLiverDosimetryReport,...
-                  'style'     , 'text',...
-                  'FontWeight', 'Normal',...
-                  'FontSize'  , 10,...
-                  'FontName'  , 'MS Sans Serif', ...
-                  'string'    , getPETLiverDosimetryReportLesionNbContoursInformation('init'),...
-                  'horizontalalignment', 'left',...
-                  'BackgroundColor', 'White', ...
-                  'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+15 FIG_REPORT_Y-460 90 320]...
-                  );  
               
          % Contour Mean
               
@@ -255,11 +277,11 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+115 FIG_REPORT_Y-130 90 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-70+130 FIG_REPORT_Y-130 90 20]...
                   ); 
               
         uiReportLesionMean = ...       
-        uicontrol(uiPETLiverDosimetryReport,...
+        uicontrol(uiPETLiverDosimetryScrollableContoursInformationReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
                   'FontSize'  , 10,...
@@ -268,7 +290,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+115 FIG_REPORT_Y-460 90 320]...
+                  'position', [130 -10 105 gaContourInformationScrollableUiPosition(4)]...
                   );  
               
          % Contour Max
@@ -282,11 +304,11 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+215 FIG_REPORT_Y-130 90 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-70+130+105 FIG_REPORT_Y-130 90 20]...
                   ); 
               
         uiReportLesionMax = ...       
-        uicontrol(uiPETLiverDosimetryReport,...
+        uicontrol(uiPETLiverDosimetryScrollableContoursInformationReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
                   'FontSize'  , 10,...
@@ -295,7 +317,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+215 FIG_REPORT_Y-460 90 320]...
+                  'position', [130+105 -10 105 gaContourInformationScrollableUiPosition(4)]...
                   ); 
               
           % Contour Volume
@@ -309,11 +331,11 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+315 FIG_REPORT_Y-130 90 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-70+130+2*105 FIG_REPORT_Y-130 90 20]...
                   ); 
               
         uiReportLesionVolume = ...       
-        uicontrol(uiPETLiverDosimetryReport,...
+        uicontrol(uiPETLiverDosimetryScrollableContoursInformationReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
                   'FontSize'  , 10,...
@@ -322,11 +344,23 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+315 FIG_REPORT_Y-460 90 320]...
+                  'position', [130+2*105 -10 105 gaContourInformationScrollableUiPosition(4)]...
                   );               
 
-        % Volume Histogram
-            
+       % Volume Histogram
+
+       popVolumeHistogram = ...
+       uicontrol(uiPETLiverDosimetryReport, ...
+                 'Style'   , 'popup', ...
+                 'Position', [760,390,465,20], ...
+                 'String'  , gasOrganList, ...
+                 'Value'   , 1 ,...
+                 'Enable'  , 'on', ...
+                 'BackgroundColor', 'white', ...
+                 'ForegroundColor', 'black', ...
+                 'Callback', @setVolumeHistogramCallback...
+                 );
+
         axeReport = ...
         axes(uiPETLiverDosimetryReport, ...
              'Units'   , 'pixels', ...
@@ -344,7 +378,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 
     % 3D Volume  
 
-     atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
+    atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
 
     ui3DWindow = ...
     uipanel(uiPETLiverDosimetryReport,...
@@ -352,9 +386,20 @@ function generatePETLiverDosimetryReportCallback(~, ~)
             'BorderWidth', showBorder('get'),...
             'HighlightColor', [0 1 1],...
             'BackgroundColor', surfaceColor('get', background3DOffset('get')),...
-            'position', [5 15 FIG_REPORT_X/3-75 340]...
+            'position', [20 15 FIG_REPORT_X/3-75-15 340]...
             );           
      
+    uiSlider3Dintensity = ...
+    uicontrol(uiPETLiverDosimetryReport, ...
+              'Style'   , 'Slider', ...
+              'Position', [5 15 15 340], ...
+              'Value'   , 0.9, ...
+              'Enable'  , 'on', ...
+              'Tooltip' , 'Intensity', ...
+              'BackgroundColor', 'White', ...
+              'CallBack', @slider3DDosimetryintensityCallback ...
+              );
+%    addlistener(uiSlider3Dintensity, 'Value', 'PreSet', @slider3DDosimetryintensityCallback);
 
      uicontrol(uiPETLiverDosimetryReport,...
               'style'     , 'text',...
@@ -404,33 +449,50 @@ function generatePETLiverDosimetryReportCallback(~, ~)
     uimenu(mReportEdit,'Label', 'Copy Display', 'Callback', @copyPETLiverDosimetryReportDisplayCallback);
     
     setPETLiverDosimetryReportFigureName();
-    
-    refreshReportLesionInformation(suvMenuUnitOption('get'), modifiedMatrixValueMenuOption('get'), modifiedMatrixValueMenuOption('get'));
-    
-    function refreshReportLesionInformation(bSUVUnit, bModifiedMatrix, bSegmented)
-      
-        tReport = computePETLiverDosimetryReportLesionInformation(bSUVUnit, bModifiedMatrix, bSegmented);
 
-        if ~isempty(tReport) % Fill information
+    gtReport = computePETLiverDosimetryReportLesionInformation(suvMenuUnitOption('get'), modifiedMatrixValueMenuOption('get'), modifiedMatrixValueMenuOption('get'));
+  
+    refreshReportLesionInformation();
+
+    function refreshReportLesionInformation()
+     
+        if ~isempty(gtReport) % Fill information
+
+            if ~isempty(gtReport.Other) % Add other VOIs to the global list
+                
+                cDummyList = cell(1, numel(gtReport.Other)+numel(gasOrganList));
+                for jj=1:numel(gasOrganList)
+                    cDummyList{jj}=gasOrganList{jj};
+                end
+
+                for jj=1:numel(gtReport.Other)
+                    cDummyList{numel(gasOrganList)+jj}=gtReport.Other{jj}.Label; 
+                end
+
+                gasOrganList = cDummyList;
+
+                % Update VOIs name list 
+
+                set(uiReportLessionTypePETLiverDosimetry, 'String', getPETLiverDosimetryReportLesionTypeInformation()); 
+                set(popVolumeHistogram, 'String', gasOrganList); 
+
+                clear cDummyList;
+            end
 
             if isvalid(uiReportPETLiverDosimetryInformation) % Make sure the figure is still open                     
                 set(uiReportPETLiverDosimetryInformation, 'String', sprintf('Contour Information (%s)', getPETLiverDosimetryReportUnitValue()));                                             
             end
            
-            if isvalid(uiReportLesionNbPETLiverDosimetry) % Make sure the figure is still open        
-                set(uiReportLesionNbPETLiverDosimetry, 'String', getPETLiverDosimetryReportLesionNbContoursInformation('get', tReport));
-            end
-
             if isvalid(uiReportLesionMean) % Make sure the figure is still open        
-                set(uiReportLesionMean, 'String', getPETLiverDosimetryReportLesionMeanInformation('get', tReport));
+                set(uiReportLesionMean, 'String', getPETLiverDosimetryReportLesionMeanInformation('get', gtReport));
             end        
             
             if isvalid(uiReportLesionMax) % Make sure the figure is still open        
-                set(uiReportLesionMax, 'String', getPETLiverDosimetryReportLesionMaxInformation('get', tReport));
+                set(uiReportLesionMax, 'String', getPETLiverDosimetryReportLesionMaxInformation('get', gtReport));
             end    
             
             if isvalid(uiReportLesionVolume) % Make sure the figure is still open        
-                set(uiReportLesionVolume, 'String', getPETLiverDosimetryReportLesionVolumeInformation('get', tReport));
+                set(uiReportLesionVolume, 'String', getPETLiverDosimetryReportLesionVolumeInformation('get', gtReport));
             end    
             
             if isvalid(axeReport) % Make sure the figure is still open   
@@ -452,7 +514,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 
                 try
                     
-                    ptrPlotCummulative = plotCummulative(axeReport, tReport.Liver.voiData, 'black');
+                    ptrPlotCummulative = plotCummulative(axeReport, gtReport.Liver.voiData, 'black');
                     axeReport.Title.String  = 'Liver - Dose Volume Histogram (DVH)';
                     axeReport.XLabel.String = sprintf('Uptake (%s)', getPETLiverDosimetryReportUnitValue());
                     axeReport.YLabel.String = 'Liver Volume Fraction';
@@ -490,14 +552,86 @@ function generatePETLiverDosimetryReportCallback(~, ~)
     end
 
     function txt = updateCursorCoordinates(~,info)
-        
+
+        dPopValue = get(popVolumeHistogram, 'value');
+
+        if numel(gasOrganList{dPopValue}) > 18
+            sName = gasOrganList{dPopValue}(1:18);
+        else
+            sName = gasOrganList{dPopValue};                
+        end
+
         x = info.Position(1);
         y = info.Position(2);
         txt = ['(' sprintf('%.0f', x) ', ' sprintf('%.2f', y) ')'];
 
         set( axeReport.XLabel, 'String', sprintf('Uptake (%s)', getPETLiverDosimetryReportUnitValue() ) );
-        set( axeReport.YLabel, 'String', sprintf('Liver Volume Fraction') );
+        set( axeReport.YLabel, 'String', sprintf('%s Volume Fraction', sName) );
 
+    end
+
+    function setVolumeHistogramCallback(~, ~)
+
+        dPopValue = get(popVolumeHistogram, 'value');
+
+        aAxeReportPosition = get(axeReport, 'position'); 
+    
+        delete(axeReport);
+    
+        axeReport = ...
+        axes(uiPETLiverDosimetryReport, ...
+             'Units'   , 'pixels', ...
+             'Position', aAxeReportPosition, ...
+             'Color'   , 'White',...
+             'XColor'  , 'Black',...
+             'YColor'  , 'Black',...
+             'ZColor'  , 'Black',...
+             'Visible' , 'on'...
+             );
+
+        try
+            if ~isempty(gtReport) % Fill information
+    
+                if dPopValue == 1 % Liver
+                    voiData = gtReport.Liver.voiData;
+                else
+                    voiData = gtReport.Other{dPopValue-1}.voiData; % - Liver
+                end
+
+                if numel(gasOrganList{dPopValue}) > 18
+                    sName = gasOrganList{dPopValue}(1:18);
+                else
+                    sName = gasOrganList{dPopValue};                
+                end
+
+                ptrPlotCummulative = plotCummulative(axeReport, voiData, 'black');
+                axeReport.Title.String  = sprintf('%s - Dose Volume Histogram (DVH)', sName);
+                axeReport.XLabel.String = sprintf('Uptake (%s)', getPETLiverDosimetryReportUnitValue());
+                axeReport.YLabel.String = sprintf('%s Volume Fraction', sName);
+    
+                cDataCursor = datacursormode(figPETLiverDosimetryReport);
+                cDataCursor.UpdateFcn = @updateCursorCoordinates;
+                set(cDataCursor, 'Enable', 'off');  
+    
+    
+                dTip = createDatatip(cDataCursor, ptrPlotCummulative);
+                dTip.Position(2) = 0.90;
+    
+                aXData = get(ptrPlotCummulative, 'XData');
+                aYData = get(ptrPlotCummulative, 'YData');
+                                    
+                [aYData,idx] = unique(aYData) ; 
+                aXData = aXData(idx) ; 
+                dD90 = interp1(aYData, aXData, .9);
+                dD50 = interp1(aYData, aXData, .5);
+                dD10 = interp1(aYData, aXData, .1);
+                
+                text(axeReport, max(aXData)*0.8, max(aYData)*0.95, sprintf('90%%: %.0f', dD90));
+                text(axeReport, max(aXData)*0.8, max(aYData)*0.87, sprintf('50%%: %.0f', dD50));
+                text(axeReport, max(aXData)*0.8, max(aYData)*0.79, sprintf('10%%: %.0f', dD10));
+            end
+        catch
+        end        
     end
 
     function setPETLiverDosimetryReportFigureName()
@@ -531,45 +665,13 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 %        sReport = sprintf('%s\n___________', char('Summary'));      
         sReport = ''; 
         for ll=1:numel(gasOrganList)
-            sReport = sprintf('%s%s', sReport, char(gasOrganList{ll}));
+            if numel(gasOrganList{ll}) > 18
+                sName = gasOrganList{ll}(1:18);
+            else
+                sName = gasOrganList{ll};                
+            end
+            sReport = sprintf('%s%s\n\n', sReport, sName);
         end       
-    end
-
-    function sReport = getPETLiverDosimetryReportLesionNbContoursInformation(sAction, tReport)
-                              
-        if strcmpi(sAction, 'init')
-%            sReport = sprintf('%s\n___________', '-');      
-            sReport = ''; 
-            for ll=1:numel(gasOrganList)
-                sReport = sprintf('%s\n\n%s', sReport, '-');
-            end       
-        else
-            
-%            if ~isempty(tReport.All.Count)
-%                sReport = sprintf('%-12s\n___________', num2str(tReport.All.Count));      
-%            else
-%                sReport = sprintf('%s\n___________', '-');      
-%            end
-
-            sReport = ''; 
-               
-            for ll=1:numel(gasOrganList)      
-                
-                switch lower(gasOrganList{ll})                    
-                        
-                    case 'liver'
-                        if ~isempty(tReport.Liver.Count)
-                            sReport = sprintf('%s%-12s', sReport, num2str(tReport.Liver.Count));
-                        else
-                            sReport = sprintf('%s\n\n%s', sReport, '-');
-                        end  
-                        
-                       
-                    otherwise    
-                        sReport = sprintf('%s\n\n%s', sReport, '-');
-                end
-            end             
-        end
     end
 
     function sReport = getPETLiverDosimetryReportLesionMeanInformation(sAction, tReport)
@@ -578,7 +680,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 %            sReport = sprintf('%s\n___________', '-');      
             sReport = ''; 
             for ll=1:numel(gasOrganList)
-                sReport = sprintf('%s\n\n%s', sReport, '-');
+                sReport = sprintf('%s%s\n\n', sReport, '-');
             end       
         else
             
@@ -589,22 +691,21 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 %            end
 
             sReport = ''; 
-                
-            for ll=1:numel(gasOrganList)      
-                
-                switch lower(gasOrganList{ll})
-                                            
-                    case 'liver'
-                        if ~isempty(tReport.Liver.Mean)
-                            sReport = sprintf('%s%-.2f', sReport, tReport.Liver.Mean);
-                        else
-                            sReport = sprintf('%s\n\n%s', sReport, '-');
-                        end  
-                        
-                    otherwise                        
-                        sReport = sprintf('%s\n\n%s', sReport, '-');
-                end
-            end             
+
+            if ~isempty(tReport.Liver.Mean)
+                sReport = sprintf('%s%-12s\n\n', sReport, num2str(tReport.Liver.Mean));
+            else
+                sReport = sprintf('%s\n\n%s', sReport, '-');
+            end     
+
+            for jj=1:numel(tReport.Other)
+                if ~isempty(tReport.Other{jj}.Mean)
+                    sReport = sprintf('%s%-12s\n\n', sReport, num2str(tReport.Other{jj}.Mean));
+                else
+                    sReport = sprintf('%s\n\n%s', sReport, '-');
+                end                             
+            end
+            
         end      
     end
 
@@ -614,7 +715,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
           %  sReport = sprintf('%s\n___________', '-');      
            sReport = ''; 
            for ll=1:numel(gasOrganList)
-                sReport = sprintf('%s\n\n%s', sReport, '-');
+                sReport = sprintf('%s%s\n\n', sReport, '-');
             end       
         else
             
@@ -625,22 +726,21 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 %            end
 
             sReport = ''; 
-               
-            for ll=1:numel(gasOrganList)      
-                
-                switch lower(gasOrganList{ll})
-                        
-                    case 'liver'
-                        if ~isempty(tReport.Liver.Max)
-                            sReport = sprintf('%s%-.2f', sReport, tReport.Liver.Max);
-                        else
-                            sReport = sprintf('%s\n\n%s', sReport, '-');
-                        end  
-                        
-                    otherwise    
-                        sReport = sprintf('%s\n\n%s', sReport, '-');
-                end
-            end             
+
+            if ~isempty(tReport.Liver.Max)
+                sReport = sprintf('%s%-12s\n\n', sReport, num2str(tReport.Liver.Max));
+            else
+                sReport = sprintf('%s\n\n%s', sReport, '-');
+            end     
+
+            for jj=1:numel(tReport.Other)
+                if ~isempty(tReport.Other{jj}.Max)
+                    sReport = sprintf('%s%-12s\n\n', sReport, num2str(tReport.Other{jj}.Max));
+                else
+                    sReport = sprintf('%s\n\n%s', sReport, '-');
+                end                             
+            end
+            
         end      
     end
 
@@ -650,7 +750,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 %            sReport = sprintf('%s\n___________', '-');      
             sReport = ''; 
             for ll=1:numel(gasOrganList)
-                sReport = sprintf('%s\n\n%s', sReport, '-');
+                sReport = sprintf('%s%s\n\n', sReport, '-');
             end       
         else
             
@@ -661,22 +761,21 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 %            end
 
             sReport = ''; 
-              
-            for ll=1:numel(gasOrganList)      
-                
-                switch lower(gasOrganList{ll}) 
-                        
-                    case 'liver'
-                        if ~isempty(tReport.Liver.Volume)
-                            sReport = sprintf('%s%-.3f', sReport, tReport.Liver.Volume);
-                        else
-                            sReport = sprintf('%s\n\n%s', sReport, '-');
-                        end  
 
-                    otherwise    
-                        sReport = sprintf('%s\n\n%s', sReport, '-');
-                end
-            end             
+            if ~isempty(tReport.Liver.Volume)
+                sReport = sprintf('%s%-12s\n\n', sReport, num2str(tReport.Liver.Volume));
+            else
+                sReport = sprintf('%s\n\n%s', sReport, '-');
+            end     
+
+            for jj=1:numel(tReport.Other)
+                if ~isempty(tReport.Other{jj}.Volume)
+                    sReport = sprintf('%s%-12s\n\n', sReport, num2str(tReport.Other{jj}.Volume));
+                else
+                    sReport = sprintf('%s\n\n%s', sReport, '-');
+                end                             
+            end
+           
         end         
     end
 
@@ -759,9 +858,17 @@ function generatePETLiverDosimetryReportCallback(~, ~)
         % Count contour Type number 
        
         dLiverCount  = 0;
-
         dNbLiverRois = 0;
-        
+
+        acOtherCount  = cell(1, numel(atVoiInput));
+        acNbOtherRois = cell(1, numel(atVoiInput));        
+
+        for jj=1:numel(atVoiInput) % initialize other than liver VOIs
+            acOtherCount{jj}  = 0;
+            acNbOtherRois{jj} = 0;
+        end
+
+
         for vv=1:numel(atVoiInput)
             
             dNbRois = numel(atVoiInput{vv}.RoisTag);
@@ -771,9 +878,19 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                 case 'liver'
                     dLiverCount  = dLiverCount+1;                    
                     dNbLiverRois = dNbLiverRois+dNbRois;
+
+                    acOtherCount{vv}  = [];
+                    acNbOtherRois{vv} = [];
+
+                otherwise   
+
+                    acOtherCount{vv}  = acOtherCount{vv}+1;
+                    acNbOtherRois{vv} = acNbOtherRois{vv}+dNbRois;
+
             end
         end
         
+
         % Set report type count
         
         if dLiverCount == 0
@@ -781,31 +898,89 @@ function generatePETLiverDosimetryReportCallback(~, ~)
         else
             tReport.Liver.Count = dLiverCount;
         end
-                                    
+     
+        tReport.Other = cell(numel(atVoiInput), 1);
+
+        for jj=1:numel(atVoiInput)
+            switch lower(atVoiInput{jj}.Label)
+
+                case 'liver'
+                    tReport.Other{jj}.Label = [];
+
+                otherwise
+                    tReport.Other{jj}.Label = atVoiInput{jj}.Label;
+               
+            end
+        end
+
+        for jj=1:numel(atVoiInput) % initialize other than liver VOIs
+
+            if isempty(acOtherCount{jj})
+                    tReport.Other{jj}.Count = [];
+            else
+                if acOtherCount{jj} == 0
+                    tReport.Other{jj}.Count = [];
+                else
+                    tReport.Other{jj}.Count = acOtherCount{jj};
+                end
+            end
+        end        
+
         % Clasify ROIs by lession type      
   
         tReport.Liver.RoisTag = cell(1, dNbLiverRois);    
            
         dLiverRoisOffset = 1;
-        
+
+        for jj=1:numel(atVoiInput)
+
+            if ~isempty(tReport.Other{jj}.Count)
+                tReport.Other{jj}.RoisTag = cell(1, acNbOtherRois{jj});
+            else
+                tReport.Other{jj}.RoisTag = [];
+            end
+        end
+
+        acOtherRoisOffset = cell(1, numel(atVoiInput));    
+        for jj=1:numel(atVoiInput)
+            acOtherRoisOffset{jj} = 1;
+        end
+
         for vv=1:numel(atVoiInput)
             
             dNbRois = numel(atVoiInput{vv}.RoisTag);
-            
-           
+                       
             switch lower(atVoiInput{vv}.Label)
                                                       
                 case 'liver'
+
                     dFrom = dLiverRoisOffset;
                     dTo   = dLiverRoisOffset+dNbRois-1;
                     
                     tReport.Liver.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
                     
                     dLiverRoisOffset = dLiverRoisOffset+dNbRois;               
+
+                otherwise   
+                    dFrom = acOtherRoisOffset{vv};
+                    dTo   = acOtherRoisOffset{vv}+dNbRois-1;                    
+
+                    tReport.Other{vv}.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
+
+                    acOtherRoisOffset{vv} = acOtherRoisOffset{vv}+dNbRois;
             end
         end    
         
+        % Remove the liver for the Other
+
+        for jj=1:numel(atVoiInput)
+            if isempty(tReport.Other{jj}.Count)
+                tReport.Other{jj} = [];
+            end
+        end
                         
+        tReport.Other(cellfun(@isempty, tReport.Other)) = [];
+
         % Compute Liver lesion
         
         progressBar( 1/2, 'Computing liver segmentation, please wait' );
@@ -902,7 +1077,107 @@ function generatePETLiverDosimetryReportCallback(~, ~)
             tReport.Liver.Mean   = [];            
             tReport.Liver.Max    = [];            
         end
-                  
+
+        % Computing other segmentation
+
+        for jj=1:numel(tReport.Other)
+
+            progressBar( (jj/numel(tReport.Other))/2 + 0.49999, sprintf('Computing %s segmentation, please wait', tReport.Other{jj}.Label) );
+                   
+            if numel(tReport.Other{jj}.RoisTag) ~= 0  
+            
+                voiMask = cell(1, numel(tReport.Other{jj}.RoisTag));
+                voiData = cell(1, numel(tReport.Other{jj}.RoisTag));
+                
+                dNbCells = 0;
+                
+                for uu=1:numel(tReport.Other{jj}.RoisTag)
+    
+                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.Other{jj}.RoisTag{uu}]} );                
+                    
+                    tRoi = atRoiInput{find(aTagOffset, 1)};
+                    
+                    if bModifiedMatrix  == false && ... 
+                       bMovementApplied == false        % Can't use input buffer if movement have been applied
+    
+                        if numel(aImage) ~= numel(dicomBuffer('get', [], dSeriesOffset))
+                            pTemp{1} = tRoi;
+                            ptrRoiTemp = resampleROIs(dicomBuffer('get', [], dSeriesOffset), atDicomMeta, aImage, atMetaData, pTemp, false);
+                            tRoi = ptrRoiTemp{1};
+                        end   
+                    end
+                    
+                    switch lower(tRoi.Axe)                    
+                        case 'axe'
+                            voiData{uu} = aImage(:,:);
+                            voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
+                            
+                        case 'axes1'
+                            aSlice = permute(aImage(tRoi.SliceNb,:,:), [3 2 1]);
+                            voiData{uu} = aSlice;
+                            voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+                            
+                        case 'axes2'
+                            aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
+                            voiData{uu} = aSlice;                        
+                            voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+                             
+                       case 'axes3'
+                            aSlice = aImage(:,:,tRoi.SliceNb);
+                            voiData{uu} = aSlice;                        
+                            voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+                    end              
+                    
+                    if bSegmented  == true && ...      
+                       bModifiedMatrix == true % Can't use original buffer   
+    
+                        voiDataTemp = voiData{uu}(voiMask{uu}); 
+                        voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
+                        dNbCells = dNbCells+numel(voiDataTemp);
+                    else
+                        dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
+                    end
+                end
+                
+                voiMask = cat(1, voiMask{:});
+                voiData = cat(1, voiData{:});
+                
+                voiData(voiMask~=1) = [];
+                
+                if bSegmented  == true && ...      
+                   bModifiedMatrix == true % Can't use original buffer   
+    
+                    voiData = voiData(voiData>cropValue('get'));                            
+                end
+                
+                tReport.Other{jj}.Cells  = dNbCells;
+                tReport.Other{jj}.Volume = dNbCells*dVoxVolume;
+                tReport.Other{jj}.voiData = voiData;
+                
+                if strcmpi(sUnitDisplay, 'SUV')
+                    
+                    if bSUVUnit == true
+                        tReport.Other{jj}.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
+                        tReport.Other{jj}.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;             
+                    else
+                        tReport.Other{jj}.Mean = mean(voiData, 'all');
+                        tReport.Other{jj}.Max  = max (voiData, [], 'all');
+                    end
+                else
+                    tReport.Other{jj}.Mean = mean(voiData, 'all');             
+                    tReport.Other{jj}.Max  = max (voiData, [], 'all');             
+                end
+             
+                clear voiMask;
+                clear voiData;     
+            else
+                tReport.Other{jj}.Cells  = [];
+                tReport.Other{jj}.Volume = [];
+                tReport.Other{jj}.Mean   = [];            
+                tReport.Other{jj}.Max    = [];            
+            end
+        end
+
         clear aImage;
         
         progressBar( 1 , 'Ready' );
@@ -1099,35 +1374,54 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 
         end
 
-        % Mask Isosurface 
+        % Mask Volume rendering 
 
-        asMask = {'liver'};
-        for jj=1:numel(asMask)
+        for jj=1:numel(gasMask)
     
-            [aMask, aColor] = machineLearning3DMask('get', asMask{jj});
+            [aMask, aColor] = machineLearning3DMask('get', gasMask{jj});
+
+            aMask = smooth3(aMask, 'box');
     
             if ~isempty(aMask)
-        
-                aInputArguments = {'Parent', ui3DWindow, 'Renderer', 'Isosurface', 'BackgroundColor', 'white', 'ScaleFactors', aScaleFactor};
+
+                aColormap = zeros(256,3);
+
+                aColormap(:,1) = aColor(1);
+                aColormap(:,2) = aColor(2);
+                aColormap(:,3) = aColor(3);
+
+                dTransparencyValue = get(uiSlider3Dintensity, 'Value');
+
+                aAlphamap = linspace(0, dTransparencyValue, 256)';
+
+                aInputArguments = {'Parent', ui3DWindow, 'Renderer', 'VolumeRendering', 'BackgroundColor', 'white', 'ScaleFactors', aScaleFactor};
         
                 aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
           
                 if verLessThan('matlab','9.13')
-                    pObject = volshow(squeeze(aMask),  aInputArguments{:});
+                    gp3DObject{jj} = volshow(squeeze(aMask),  aInputArguments{:});
                 else
-                    pObject = images.compatibility.volshow.R2022a.volshow(squeeze(aMask), aInputArguments{:});                   
+                    gp3DObject{jj} = images.compatibility.volshow.R2022a.volshow(squeeze(aMask), aInputArguments{:});                   
                 end
     
-                pObject.IsosurfaceColor = aColor;
-                pObject.Isovalue = 1;
-    
-                pObject.CameraPosition = aCameraPosition;
-                pObject.CameraUpVector = aCameraUpVector;
+                gp3DObject{jj}.CameraPosition = aCameraPosition;
+                gp3DObject{jj}.CameraUpVector = aCameraUpVector;
             end
         end
     end
 
-    
+    function slider3DDosimetryintensityCallback(~, ~)
+
+        dSliderValue = get(uiSlider3Dintensity, 'Value');
+
+        aAlphamap = linspace(0, dSliderValue, 256)';
+
+        for jj=1:numel(gasMask)
+            gp3DObject{jj}.Alphamap = aAlphamap;
+        end
+        
+    end
+
     function uiPETLiverDosimetryReportSliderCallback(~, ~)
 
         val = get(uiPETLiverDosimetryReportSlider, 'Value');
@@ -1144,4 +1438,22 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                          ] ...
             );
     end
+
+    function sliderScrollableContoursInformationCallback(~, ~)
+
+        val = get(uiPETLiverDosimetryScrollableContoursInformation, 'Value');
+    
+        aPosition = get(uiPETLiverDosimetryScrollableContoursInformationReport, 'Position');
+    
+        dPanelOffset = -((1-val) * aPosition(4));
+    
+        set(uiPETLiverDosimetryScrollableContoursInformationReport, ...
+            'Position', [aPosition(1) ...
+                         gaContourInformationScrollableUiPosition(2)-dPanelOffset ...
+                         aPosition(3) ...
+                         aPosition(4) ...
+                         ] ...
+            );        
+    end
+
 end

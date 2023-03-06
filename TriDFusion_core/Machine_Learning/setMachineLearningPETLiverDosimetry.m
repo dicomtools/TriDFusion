@@ -50,7 +50,7 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorPath)
 
     if isempty(dCTSerieOffset) || ...
        isempty(dPTSerieOffset)  
-        progressBar(1, 'Error: 3D Lung Liver Ratio require a CT and NM image!');
+        progressBar(1, 'Error: 3D Lung Liver Ratio require a CT and PT image!');
         errordlg('3D Lung Liver Ratio require a CT and PT image!', 'Modality Validation');  
         return;               
     end
@@ -156,6 +156,8 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorPath)
                 sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
                 
                 if exist(sNiiFileName, 'file')
+                    
+                    % Generate Liver 
 
                     nii = nii_tool('load', sNiiFileName);
 
@@ -165,6 +167,27 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorPath)
 
                     maskToVoi(aMask, 'Liver', 'Liver', aColor, 'axial', dPTSerieOffset, pixelEdgeMachineLearningDialog('get'));
                  
+                    % Import all other contours  
+
+                %    atRoiInput = roiTemplate('get', dCTSerieOffset);
+                    atVoiInput = voiTemplate('get', dCTSerieOffset); 
+
+                    if ~isempty(atVoiInput)
+
+                    %    aCTImage = dicomBuffer('get', [], dCTSerieOffset);
+
+                        for jj=1:numel(atVoiInput)
+
+                            if ~strcmpi(atVoiInput{jj}.Label, 'Liver')
+
+                                copyRoiVoiToSerie(dCTSerieOffset, dPTSerieOffset, atVoiInput{jj}, false); 
+                            
+                            end
+                        end
+
+                        clear aCTImage;
+                    end
+
                 end
 
             end

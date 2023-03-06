@@ -1,5 +1,5 @@
-function copyRoiVoiToSerie(dSeriesToOffset, tRoiVoiObject, bMirror)
-%function copyRoiVoiToSerie(dSeriesToOffset, tRoiVoiObject, bMirror)
+function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirror)
+%function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirror)
 %Copy ROI form a serie to another.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -32,7 +32,7 @@ function copyRoiVoiToSerie(dSeriesToOffset, tRoiVoiObject, bMirror)
     imRoi       = dicomBuffer('get', [], dSeriesToOffset);
     atDicomInfo = dicomMetaData('get', [], dSeriesToOffset);
 
-    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+%    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
     atInput    = inputTemplate('get');
     atRoiInput = roiTemplate('get', dSeriesToOffset);

@@ -326,9 +326,9 @@ function setDoseKernel(dModel, sTissue, sIsotope, dKernelKernelCutoffDistance, s
 
      end
 % ASK: equations 
-USE_LBM_METHOD = true;
+USE_LDM_METHOD = true;
 
-    if USE_LBM_METHOD == true % LDM method
+    if USE_LDM_METHOD == true % LDM method
         
         switch lower(sTissue)
                 
@@ -411,7 +411,7 @@ USE_LBM_METHOD = true;
 
 % ASK: Kernel Convolution
     % here; vqKernel has to be in voxels, not mm
-    if USE_LBM_METHOD == true
+    if USE_LDM_METHOD == true
 
         dKernelSum = sum(vqKernel, 'all');
         if dKernelSum == 0

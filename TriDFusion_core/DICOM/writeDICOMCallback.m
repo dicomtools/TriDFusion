@@ -127,7 +127,22 @@ function writeDICOMCallback(~, ~)
     end
     
     % Write DICOM
-        
-    writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset);
+    
+    bInputIsDicom = false;
+
+    try
+        if exist(char(atInputTemplate(dSeriesOffset).asFilesList{1}), 'file') % Input series is dicom
+            if isdicom(char(atInputTemplate(dSeriesOffset).asFilesList{1}))
+                bInputIsDicom = true;
+            end
+        end
+    catch
+    end
+
+    if bInputIsDicom == true % Input series is dicom
+        writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset);
+    else % Input series is another format 
+        writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset);
+    end
 
 end

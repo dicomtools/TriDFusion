@@ -70,7 +70,7 @@ function [tFileList, iNbFiles] = getDicomFileList(sDirName, tFileList)
                     end
 
                     iNbFiles = iNbFiles+1; 
-                    tFileList.FileName {iNbFiles}              = sFileName;
+                    tFileList.FileName {iNbFiles}              = char(sFileName);
                     tFileList.DicomInfo{iNbFiles}              = tInfo;
                     tFileList.InstanceNumber(iNbFiles)         = dInstanceNumber;
                     tFileList.ImagePositionPatient(iNbFiles,:) = adImagePositionPatient(:)';

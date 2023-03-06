@@ -37,7 +37,7 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
 %        return;
 %    end 
     
-    try
+%    try
                 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow; 
@@ -153,9 +153,9 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         
         % Series UID
         
-        atInput(numel(atInput)).atDicomInfo{1}.StudyID           = '';
-        atInput(numel(atInput)).atDicomInfo{1}.SeriesInstanceUID = '';
-        atInput(numel(atInput)).atDicomInfo{1}.StudyInstanceUID  = '';
+        atInput(numel(atInput)).atDicomInfo{1}.StudyID           = dicomuid;
+        atInput(numel(atInput)).atDicomInfo{1}.SeriesInstanceUID = dicomuid;
+        atInput(numel(atInput)).atDicomInfo{1}.StudyInstanceUID  = dicomuid;
         atInput(numel(atInput)).atDicomInfo{1}.AccessionNumber   = '';
         
         % Date Time
@@ -168,8 +168,9 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         
         % Series default
         
-        atInput(numel(atInput)).asFilesList = [];
-        
+        atInput(numel(atInput)).asFilesList    = [];
+        atInput(numel(atInput)).asFilesList{1} = sprintf('%s%s',sPath, sFileName);
+
         atInput(numel(atInput)).sOrientationView    = 'Axial';
        
         atInput(numel(atInput)).bEdgeDetection      = false;
@@ -234,9 +235,9 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         
         % Series UID
         
-        atInput(1).atDicomInfo{1}.StudyID           = '';
-        atInput(1).atDicomInfo{1}.SeriesInstanceUID = '';
-        atInput(1).atDicomInfo{1}.StudyInstanceUID  = '';
+        atInput(1).atDicomInfo{1}.StudyID           = dicomuid;
+        atInput(1).atDicomInfo{1}.SeriesInstanceUID = dicomuid;
+        atInput(1).atDicomInfo{1}.StudyInstanceUID  = dicomuid;
         atInput(1).atDicomInfo{1}.AccessionNumber   = '';
         
         % Date Time
@@ -248,8 +249,9 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         atInput(1).atDicomInfo{1}.AcquisitionDate = '';   
         
         % Series default
-        atInput(1).asFilesList = [];
-        
+        atInput(1).asFilesList    = [];
+        atInput(1).asFilesList{1} = sprintf('%s%s', sPath, sFileName);
+
         atInput(1).sOrientationView    = 'Axial';
         
         atInput(1).bEdgeDetection      = false;
@@ -321,9 +323,9 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
     
     progressBar(1, sprintf('Import %s completed.', sFileName));
     
-    catch
-        progressBar(1, 'Error:readSTLModel()');                        
-    end
+%    catch
+%        progressBar(1, 'Error:readSTLModel()');                        
+%    end
 
     clear aBuffer;
    

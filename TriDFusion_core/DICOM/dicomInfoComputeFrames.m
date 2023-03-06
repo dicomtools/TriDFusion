@@ -47,8 +47,12 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
         for jj=1:numel(atDicomInfo)-1
 
             if atDicomInfo{jj}.SliceLocation == 0 && ...
-               atDicomInfo{jj+1}.SliceLocation == 0     
-                continue;
+               atDicomInfo{jj+1}.SliceLocation == 0   
+                if atDicomInfo{jj}.Rows    == atDicomInfo{jj+1}.Rows && ...
+                   atDicomInfo{jj}.Columns == atDicomInfo{jj+1}.Columns     
+                    dNbSlices = dNbSlices+1;
+                    continue;
+                end
             end
 
 %            dSliceSpacing = spacingBetweenTwoSlices(atDicomInfo{jj},atDicomInfo{jj+1});
@@ -60,12 +64,16 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
             dComputedNextSliceLocation = str2double(sprintf('%.3f', atDicomInfo{jj}.SliceLocation + dSliceSpacing));
             dNextSliceLocation         = str2double(sprintf('%.3f', atDicomInfo{jj+1}.SliceLocation));
                     
-            if dComputedNextSliceLocation ~= dNextSliceLocation % Inconsistent spacing 
-                
+            if dComputedNextSliceLocation ~= dNextSliceLocation     || ... % Inconsistent spacing 
+               atDicomInfo{jj}.Rows       ~= atDicomInfo{jj+1}.Rows || ... % Inconsistent size
+               atDicomInfo{jj}.Columns    ~= atDicomInfo{jj+1}.Columns  
+
                 dComputedNextSliceLocation = str2double(sprintf('%.3f', atDicomInfo{jj}.SliceLocation - dSliceSpacing));
 
-                if dComputedNextSliceLocation ~= dNextSliceLocation
-                    
+                if dComputedNextSliceLocation ~= dNextSliceLocation      || ...
+                   atDicomInfo{jj}.Rows       ~= atDicomInfo{jj+1}.Rows  || ... % Inconsistent size
+                   atDicomInfo{jj}.Columns    ~= atDicomInfo{jj+1}.Columns  
+
                     tGate{dNbGate}.GateNumber = dNbGate;
                     tGate{dNbGate}.NbSlices   = dNbSlices;       
                     tGate{dNbGate}.SeriesInstanceUID = atDicomInfo{jj}.SeriesInstanceUID;       

@@ -446,8 +446,7 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset)
                     atWriteMetaData{ww}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeMeaning =  'Counts';                    
                 end
             end
-            
-            
+
             if numel(atWriteMetaData) == 1    
                 
                 dicomwrite(uint16(array4d)    , ...

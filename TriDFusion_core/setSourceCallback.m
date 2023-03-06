@@ -451,9 +451,9 @@ function setSourceCallback(~, ~)
                             end
                             
                             bScreenCapture = false;
-                            if find(contains(asImageType, 'secondary')) 
-                                bScreenCapture = true;
-                            end
+                    %        if find(contains(asImageType, 'secondary')) 
+                    %            bScreenCapture = true;
+                    %        end
                             
                             if bStatic    == true || ...
                                bWholeBody == true || ...
@@ -461,20 +461,29 @@ function setSourceCallback(~, ~)
                            
                                 sSeriesDescription = tNewDatasets.DicomInfos{1}.SeriesDescription;
                                 
-                                if size(tNewDatasets.DicomBuffers{1}, 3) == 1
-                                    dNbOfImages = size(tNewDatasets.DicomBuffers{1}, 4);
+                                aBufferSize = size(tNewDatasets.DicomBuffers);
+                                if numel(aBufferSize) < 3
+                                    dNbOfImages = aBufferSize(1);
                                 else
-                                    dNbOfImages = size(tNewDatasets.DicomBuffers{1}, 3);
-                                end
-                                
-                                for ll=1:dNbOfImages
-                                    
                                     if size(tNewDatasets.DicomBuffers{1}, 3) == 1
-                                        aTemp{1} = tNewDatasets.DicomBuffers{1}(:,:,1,ll);
+                                        dNbOfImages = size(tNewDatasets.DicomBuffers{1}, 4);
                                     else
-                                        aTemp{1} = tNewDatasets.DicomBuffers{1}(:,:,ll);
+                                        dNbOfImages = size(tNewDatasets.DicomBuffers{1}, 3);
                                     end
-                                    
+                                end
+
+                                for ll=1:dNbOfImages
+
+                                    if numel(aBufferSize) < 3
+                                        aTemp{1} = tNewDatasets.DicomBuffers{ll};
+                                    else
+                                        if size(tNewDatasets.DicomBuffers{1}, 3) == 1
+                                            aTemp{1} = tNewDatasets.DicomBuffers{1}(:,:,1,ll);
+                                        else
+                                            aTemp{1} = tNewDatasets.DicomBuffers{1}(:,:,ll);
+                                        end
+                                    end
+
                                     aNewDicomBuffer{dNewNbEntry} = aTemp;
                                     
                                     if bStatic == true

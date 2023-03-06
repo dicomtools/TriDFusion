@@ -922,11 +922,15 @@ end
     hold off;
 
     function display3DVoiTxtCallback(~, ~)
+
         if get(ui3DDispVoiPtr('get'), 'Value') == true
+
             set(ui3DDispVoiPtr('get'), 'Value', false);
+
             display3DVoiCallback();
         else
             set(ui3DDispVoiPtr('get'), 'Value', true);
+            
             display3DVoiCallback();
         end
     end

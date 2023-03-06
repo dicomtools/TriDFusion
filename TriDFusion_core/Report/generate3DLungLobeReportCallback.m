@@ -32,7 +32,11 @@ function generate3DLungLobeReportCallback(~, ~)
 %    xSize = dScreenSize(3);
 %    ySize = dScreenSize(4);
 
+    gp3DObject = [];
+
     gasOrganList={'Lungs','Lung Left', 'Lung Right', 'Upper Lobe Left', 'Lower Lobe Left', 'Upper Lobe Right', 'Middle Lobe Right', 'Lower Lobe Right'};
+
+    gasMask = {'lung_lower_lobe_right', 'lung_lower_lobe_left','lung_middle_lobe_right','lung_upper_lobe_right','lung_upper_lobe_left'};
    
     atInput = inputTemplate('get');
 
@@ -431,7 +435,8 @@ function generate3DLungLobeReportCallback(~, ~)
              'Color'   , 'white',...          
              'Visible' , 'off'...             
              );  
-    rectangle(axe3DLobesRectangle, 'position', [0 0 1 1], 'EdgeColor', [1 0.33 0.16]);         
+    rectangle(axe3DLobesRectangle, 'position', [0 0 1 1], 'EdgeColor', [1 0.33 0.16]);      
+
     % 3D Volume
 
     ui3DWindow = ...
@@ -440,8 +445,20 @@ function generate3DLungLobeReportCallback(~, ~)
             'BorderWidth', showBorder('get'),...
             'HighlightColor', [0 1 1],...
             'BackgroundColor', surfaceColor('get', background3DOffset('get')),...
-            'position', [5 15 FIG_REPORT_X/3-75 350]...
+            'position', [20 15 FIG_REPORT_X/3-75-15 340]...
             );  
+
+    uiSlider3Dintensity = ...
+    uicontrol(ui3DLobeLungReport, ...
+              'Style'   , 'Slider', ...
+              'Position', [5 15 15 340], ...
+              'Value'   , 0.9, ...
+              'Enable'  , 'on', ...
+              'Tooltip' , 'Intensity', ...
+              'BackgroundColor', 'White', ...
+              'CallBack', @slider3DLungLobesintensityCallback ...
+              );
+%    addlistener(uiSlider3Dintensity, 'Value', 'PreSet', @slider3DLungLobesintensityCallback);
 
      uicontrol(ui3DLobeLungReport,...
               'style'     , 'text',...
@@ -2488,31 +2505,51 @@ function generate3DLungLobeReportCallback(~, ~)
 
         end
 
-        % Mask Isosurface 
+        % Mask Volume Rendering 
 
-        asMask = {'lung_lower_lobe_right', 'lung_lower_lobe_left','lung_middle_lobe_right','lung_upper_lobe_right','lung_upper_lobe_left'};
-        for jj=1:numel(asMask)
+        for jj=1:numel(gasMask)
     
-            [aMask, aColor] = machineLearning3DMask('get', asMask{jj});
-    
+            [aMask, aColor] = machineLearning3DMask('get', gasMask{jj});
+
+            aMask = smooth3(aMask, 'box');
+
             if ~isempty(aMask)
-        
-                aInputArguments = {'Parent', ui3DWindow, 'Renderer', 'Isosurface', 'BackgroundColor', 'white', 'ScaleFactors', aScaleFactor};
+
+                aColormap = zeros(256,3);
+
+                aColormap(:,1) = aColor(1);
+                aColormap(:,2) = aColor(2);
+                aColormap(:,3) = aColor(3);
+
+                dTransparencyValue = get(uiSlider3Dintensity, 'Value');
+
+                aAlphamap = linspace(0, dTransparencyValue, 256)';
+
+                aInputArguments = {'Parent', ui3DWindow, 'Renderer', 'VolumeRendering', 'BackgroundColor', 'white', 'ScaleFactors', aScaleFactor};
         
                 aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
           
                 if verLessThan('matlab','9.13')
-                    pObject = volshow(squeeze(aMask),  aInputArguments{:});
+                    gp3DObject{jj} = volshow(squeeze(aMask),  aInputArguments{:});
                 else
-                    pObject = images.compatibility.volshow.R2022a.volshow(squeeze(aMask), aInputArguments{:});                   
+                    gp3DObject{jj} = images.compatibility.volshow.R2022a.volshow(squeeze(aMask), aInputArguments{:});                   
                 end
-    
-                pObject.IsosurfaceColor = aColor;
-                pObject.Isovalue = 1;
-    
-                pObject.CameraPosition = aCameraPosition;
-                pObject.CameraUpVector = aCameraUpVector;
+        
+                gp3DObject{jj}.CameraPosition = aCameraPosition;
+                gp3DObject{jj}.CameraUpVector = aCameraUpVector;
             end
+        end
+
+    end
+
+    function slider3DLungLobesintensityCallback(~, ~)
+
+        dSliderValue = get(uiSlider3Dintensity, 'Value');
+
+        aAlphamap = linspace(0, dSliderValue, 256)';
+
+        for jj=1:numel(gasMask)
+            set(gp3DObject{jj}, 'Alphamap', aAlphamap);
         end
 
     end
