@@ -241,6 +241,8 @@ function info = dicominfo4che3(fileInput)
 %    info.din.cols       = info.Columns;  
     
 %        info.din.nbOfFrames = dataset.getInt(org.dcm4che3.data.Tag.NumberOfFrames,0);
+    info.din = [];
+
     info.NumberOfSlices = dataset.getInt(org.dcm4che3.data.Tag.NumberOfSlices,0);
     info.NumberOfTemporalPositions = dataset.getInt(org.dcm4che3.data.Tag.NumberOfTemporalPositions,0);
 

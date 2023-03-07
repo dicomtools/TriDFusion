@@ -165,7 +165,9 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
 
         atInput(numel(atInput)).atDicomInfo{1}.AcquisitionTime = '';
         atInput(numel(atInput)).atDicomInfo{1}.AcquisitionDate = '';   
-        
+
+        atInput(numel(atInput)).atDicomInfo{1}.din = [];
+ 
         % Series default
         
         atInput(numel(atInput)).asFilesList    = [];
@@ -247,7 +249,9 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
 
         atInput(1).atDicomInfo{1}.AcquisitionTime = '';
         atInput(1).atDicomInfo{1}.AcquisitionDate = '';   
-        
+
+        atInput(1).atDicomInfo{1}.din = [];
+       
         % Series default
         atInput(1).asFilesList    = [];
         atInput(1).asFilesList{1} = sprintf('%s%s', sPath, sFileName);

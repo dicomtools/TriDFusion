@@ -241,6 +241,8 @@ function loadCerrPlanC(planC)
         end
 
         atNewInput(hh).atDicomInfo = atTemplate;
+        
+        atNewInput(hh).atDicomInfo{1}.din = [];
 
         aBuffer{hh}=planC{1,3}(hh).scanArray;
 

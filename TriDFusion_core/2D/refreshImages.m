@@ -1286,7 +1286,7 @@ end
                 tAxes2ViewText.Color  = overlayColor('get');
             end
 
-            tQuantification = quantificationTemplate('get');
+            tQuantification = quantificationTemplate('get', [], dOffset);
             atMetaData = dicomMetaData('get', [], dOffset);
 
             bDisplayAxe3 = true;

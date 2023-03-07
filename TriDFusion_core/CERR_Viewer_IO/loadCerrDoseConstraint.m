@@ -306,6 +306,10 @@ function loadCerrDoseConstraint(planC, structNamC)
 
     atNewInput(1).atDicomInfo = atTemplate;
     atNewInput(2).atDicomInfo = atTemplate;
+
+    atNewInput(1).atDicomInfo{1}.din = []; 
+    atNewInput(2).atDicomInfo{1}.din = [];
+
     for ii=1:numel(atNewInput(2).atDicomInfo)
         atNewInput(2).atDicomInfo{ii}.Modality = 'PT';
         atNewInput(2).atDicomInfo{ii}.SeriesDescription = sprintf('Constraint: %s', atNewInput(1).atDicomInfo{ii}.SeriesDescription);

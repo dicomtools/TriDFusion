@@ -244,11 +244,16 @@ function loadCerrDoseVolume(planC, structNamC)
             atTemplate{ii}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodeMeaning = ...
                 char(planC{1,3}(1).scanInfo(ii).DICOMHeaders.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodeMeaning);                 
         end      
-        
+
+
     end
 
     atNewInput(1).atDicomInfo = atTemplate;
     atNewInput(2).atDicomInfo = atTemplate;
+
+    atNewInput(1).atDicomInfo{1}.din = []; 
+    atNewInput(2).atDicomInfo{1}.din = [];
+
     for ii=1:numel(atNewInput(2).atDicomInfo)
         atNewInput(2).atDicomInfo{ii}.Modality = 'PT';
         atNewInput(2).atDicomInfo{ii}.SeriesDescription = sprintf('Dose: %s', atNewInput(1).atDicomInfo{ii}.SeriesDescription);

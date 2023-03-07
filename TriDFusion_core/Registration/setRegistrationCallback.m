@@ -950,7 +950,7 @@ function setRegistrationCallback(~, ~)
         set(dlgRegister, 'Pointer', 'default');
         delete(dlgRegister);
 
-        setQuantification(dInitOffset);
+%        setQuantification(dInitOffset);
 
 %        clearDisplay();
 %        initDisplay(3);
@@ -1440,8 +1440,9 @@ function setRegistrationCallback(~, ~)
                        %         dicomBuffer('set', aResampledBuffer);
                        %         dicomMetaData('set', atResampledMetaData);
                        %     else
-                                dicomBuffer('set', aRegistratedBuffer, kk);
-                                dicomMetaData('set', atRegisteredMetaData, kk);
+                            dicomBuffer('set', aRegistratedBuffer, kk);
+                            dicomMetaData('set', atRegisteredMetaData, kk);
+                            setQuantification(kk);
                        %     end
 
                             if link2DMip('get') == true 
@@ -1529,6 +1530,7 @@ function setRegistrationCallback(~, ~)
                           %          else
                                         dicomBuffer('set', aAssociatedRegistratedBuffer, dAssociatedSeries);
                                         dicomMetaData('set', atAssociatedRegisteredMetaData, dAssociatedSeries);
+                                        setQuantification(dAssociatedSeries);
                           %          end
 
                                     if link2DMip('get') == true 
@@ -1570,7 +1572,7 @@ function setRegistrationCallback(~, ~)
         set(dlgRegister, 'Pointer', 'default');
         delete(dlgRegister);
 
-        setQuantification(dInitOffset);
+%        setQuantification(dInitOffset);
 
 %        clearDisplay();
 %        initDisplay(3);
