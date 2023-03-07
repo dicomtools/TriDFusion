@@ -461,28 +461,20 @@ function setSourceCallback(~, ~)
                            
                                 sSeriesDescription = tNewDatasets.DicomInfos{1}.SeriesDescription;
                                 
-                                aBufferSize = size(tNewDatasets.DicomBuffers);
-                                if numel(aBufferSize) < 3
-                                    dNbOfImages = aBufferSize(1);
+                                if size(tNewDatasets.DicomBuffers{1}, 3) == 1
+                                    dNbOfImages = size(tNewDatasets.DicomBuffers{1}, 4);
                                 else
-                                    if size(tNewDatasets.DicomBuffers{1}, 3) == 1
-                                        dNbOfImages = size(tNewDatasets.DicomBuffers{1}, 4);
-                                    else
-                                        dNbOfImages = size(tNewDatasets.DicomBuffers{1}, 3);
-                                    end
+                                    dNbOfImages = size(tNewDatasets.DicomBuffers{1}, 3);
                                 end
+                                
 
                                 for ll=1:dNbOfImages
 
-                                    if numel(aBufferSize) < 3
-                                        aTemp{1} = tNewDatasets.DicomBuffers{ll};
+                                    if size(tNewDatasets.DicomBuffers{1}, 3) == 1
+                                        aTemp{1} = tNewDatasets.DicomBuffers{1}(:,:,1,ll);
                                     else
-                                        if size(tNewDatasets.DicomBuffers{1}, 3) == 1
-                                            aTemp{1} = tNewDatasets.DicomBuffers{1}(:,:,1,ll);
-                                        else
-                                            aTemp{1} = tNewDatasets.DicomBuffers{1}(:,:,ll);
-                                        end
-                                    end
+                                        aTemp{1} = tNewDatasets.DicomBuffers{1}(:,:,ll);
+                                    end                                    
 
                                     aNewDicomBuffer{dNewNbEntry} = aTemp;
                                     

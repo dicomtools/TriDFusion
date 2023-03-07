@@ -64,7 +64,19 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
             dComputedNextSliceLocation = str2double(sprintf('%.3f', atDicomInfo{jj}.SliceLocation + dSliceSpacing));
             dNextSliceLocation         = str2double(sprintf('%.3f', atDicomInfo{jj+1}.SliceLocation));
                     
-            if dComputedNextSliceLocation ~= dNextSliceLocation     || ... % Inconsistent spacing 
+            if dComputedNextSliceLocation>dNextSliceLocation % Patch for resul seies
+                dSliceRatio = dComputedNextSliceLocation/dNextSliceLocation;
+            else
+                dSliceRatio = dNextSliceLocation/dComputedNextSliceLocation;
+            end
+            
+            if dSliceRatio > 0.9 % Within 10% of the computed next slice
+                dInconsistentSpacing = false;
+            else
+                dInconsistentSpacing = true;
+            end
+
+            if dInconsistentSpacing == true                         || ... % Inconsistent spacing 
                atDicomInfo{jj}.Rows       ~= atDicomInfo{jj+1}.Rows || ... % Inconsistent size
                atDicomInfo{jj}.Columns    ~= atDicomInfo{jj+1}.Columns  
 

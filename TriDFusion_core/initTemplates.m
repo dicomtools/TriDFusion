@@ -155,28 +155,19 @@ function initTemplates()
                            bWholeBody == true || ...      
                            bScreenCapture == true
 
-                            aBufferSize = size(tDatasets.DicomBuffers);
-                            if numel(aBufferSize) < 3
-                                dNbOfImages = aBufferSize(1);
+                            if size(tDatasets.DicomBuffers{1}, 3) == 1
+                                dNbOfImages = size(tDatasets.DicomBuffers{1}, 4);
                             else
-                                if size(tDatasets.DicomBuffers{1}, 3) == 1
-                                    dNbOfImages = size(tDatasets.DicomBuffers{1}, 4);
-                                else
-                                    dNbOfImages = size(tDatasets.DicomBuffers{1}, 3);
-                                end
-                            end                     
+                                dNbOfImages = size(tDatasets.DicomBuffers{1}, 3);
+                            end
                        
                             sSeriesDescription = tDatasets.DicomInfos{1}.SeriesDescription;
                             for ll=1:dNbOfImages
                                                                 
-                                if numel(aBufferSize) < 3
-                                    aTemp{1} = tDatasets.DicomBuffers{ll};
+                                if size(tDatasets.DicomBuffers{1}, 3) == 1
+                                    aTemp{1} = tDatasets.DicomBuffers{1}(:,:,1,ll);
                                 else
-                                    if size(tDatasets.DicomBuffers{1}, 3) == 1
-                                        aTemp{1} = tDatasets.DicomBuffers{1}(:,:,1,ll);
-                                    else
-                                        aTemp{1} = tDatasets.DicomBuffers{1}(:,:,ll);
-                                    end
+                                    aTemp{1} = tDatasets.DicomBuffers{1}(:,:,ll);
                                 end
                                 
                                 aDicomBuffer{dNbEntry} = aTemp;
