@@ -227,7 +227,11 @@ function TriDFusion(varargin)
         imSplash = zeros([300 620 3]);
     else       
         sSplashFile = sprintf('%sscreenDefault.png', sRootPath);
-        [imSplash, ~] = imread(sSplashFile);
+        if exist(sSplashFile, 'file')
+            [imSplash, ~] = imread(sSplashFile);
+        else
+            imSplash = zeros([300 620 3]);
+        end
     end    
 
   %  imshow(imSplash, 'border', 'tight', 'Parent', uiSplashWindow);
