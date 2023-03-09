@@ -31,7 +31,9 @@ function tMetaData = dicomMetaData(sAction, tValue, dSeriesOffset)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     persistent ptMetaData;        
-    
+
+    uiSeries = uiSeriesPtr('get');
+
     if exist('dSeriesOffset', 'var')
         dOffset = dSeriesOffset;
     else
