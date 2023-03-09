@@ -347,6 +347,8 @@ function loadNIIFile(sPath, sFileName)
     atInput(numel(atInput)).aMip = aMip;   
     
     setQuantification(numel(atInput));
+    
+    cropValue('set', min(dicomBuffer('get'), [], 'all'));
 
     tQuant = quantificationTemplate('get');
     atInput(numel(atInput)).tQuant = tQuant;

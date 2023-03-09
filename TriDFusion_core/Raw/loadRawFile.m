@@ -352,6 +352,8 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
     atInput(numel(atInput)).aMip = aMip;   
     
     setQuantification(numel(atInput));
+    
+    cropValue('set', min(dicomBuffer('get'), [], 'all'));
 
     tQuant = quantificationTemplate('get');
     atInput(numel(atInput)).tQuant = tQuant;

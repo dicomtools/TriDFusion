@@ -762,6 +762,8 @@ end
     end
 %          dicomBuffer('set', aBackup);
     set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
+    
+    cropValue('set', min(dicomBuffer('get', [], dSeriesOffset), [], 'all'));
 
     if gateUseSeriesUID('get') == false && ...
        gateLookupTable('get') == true

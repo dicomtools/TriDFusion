@@ -281,6 +281,8 @@ function initTemplates()
                 end
             end
             
+            cropValue('set', min(dicomBuffer('get'), [], 'all'));
+          
         else
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
             drawnow;              

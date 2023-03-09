@@ -554,6 +554,8 @@ function loadCerrPlanC(planC)
 
     end
 
+    cropValue('set', min(dicomBuffer('get'), [], 'all'));
+
     clearDisplay();
     initDisplay(3);
 

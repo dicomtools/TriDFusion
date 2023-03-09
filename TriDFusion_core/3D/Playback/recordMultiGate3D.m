@@ -806,6 +806,8 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
 
     set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
 
+    cropValue('set', min(dicomBuffer('get', [], dSeriesOffset), [], 'all'));
+
     set(btn3DPtr('get')        , 'Enable', 'on');
     set(btnIsoSurfacePtr('get'), 'Enable', 'on');
     set(btnMIPPtr('get')       , 'Enable', 'on');

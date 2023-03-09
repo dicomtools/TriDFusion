@@ -626,6 +626,8 @@ function loadCerrDoseConstraint(planC, structNamC)
             set(uiFusedSeriesPtr('get'), 'Value', 1);
         end
     end
+    
+    cropValue('set', min(dicomBuffer('get'), [], 'all'));
 
     clearDisplay();
     initDisplay(3);

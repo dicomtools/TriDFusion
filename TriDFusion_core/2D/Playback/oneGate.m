@@ -286,6 +286,7 @@ function oneGate(sDirection)
         dicomBuffer('set', aBuffer, dOffset);
     end
 
+    cropValue('set', min(dicomBuffer('get', [], dOffset), [], 'all'));
 
 if 1
      if gateUseSeriesUID('get') == false
@@ -376,6 +377,7 @@ if 1
         aspectRatioValue('set', 'z', z);
     end
 end
+
     set(uiSeriesPtr('get'), 'Enable', 'on');
 
     refreshImages();

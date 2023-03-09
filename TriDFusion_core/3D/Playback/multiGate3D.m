@@ -1024,6 +1024,8 @@ function multiGate3D(mPlay)
     set(uiOneWindowPtr('get'), 'Visible', 'on');
 
     set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
+    
+    cropValue('set', min(dicomBuffer('get', [], dSeriesOffset), [], 'all'));
 
   %  dicomBuffer('set', aBackup);
 

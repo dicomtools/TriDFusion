@@ -241,7 +241,7 @@ function setSeriesCallback(~,~)
         imageOrientation('set', tInput(iOffset).sOrientationView);       
 
         aInput  = inputBuffer('get');
-        aBuffer = dicomBuffer('get');
+        aBuffer = dicomBuffer('get', [], iOffset);
 
         if isempty(aBuffer)
             aBuffer = aInput{iOffset};
@@ -253,14 +253,13 @@ function setSeriesCallback(~,~)
 %                aBuffer = permute(aInput{iOffset}, [3 1 2]);
 %            end
 
-            dicomBuffer('set', aBuffer);
+            dicomBuffer('set', aBuffer, iOffset);
         end
 
 %        quantificationTemplate('set', tInput(iOffset).tQuant);
         setQuantification(iOffset);
         
-        tQuant = quantificationTemplate('get');
-        cropValue('set', tQuant.tCount.dMin);
+        cropValue('set', min(dicomBuffer('get', [], iOffset), [], 'all'));
 
         imageSegTreshValue('set', 'lower', 0);
         imageSegTreshValue('set', 'upper', 1);

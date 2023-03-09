@@ -570,6 +570,7 @@ function loadCerrDoseVolume(planC, structNamC)
         end
     end
 
+    cropValue('set', min(dicomBuffer('get'), [], 'all'));
 
     clearDisplay();
     initDisplay(3);

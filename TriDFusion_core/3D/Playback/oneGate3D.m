@@ -146,10 +146,12 @@ function oneGate3D(sDirection)
 %            aBuffer = permute(aInputBuffer{dOffset}, [3 1 2]);
 %        end
 
-        dicomBuffer('set', aBuffer);
+        dicomBuffer('set', aBuffer, dOffset);
     end
 
     dicomMetaData('set', atInputTemplate(dOffset).atDicomInfo);
+
+    cropValue('set', min(dicomBuffer('get', [], dOffset), [], 'all'));
 
     if switchTo3DMode('get') == true
 
