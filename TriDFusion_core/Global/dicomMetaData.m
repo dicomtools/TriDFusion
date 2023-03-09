@@ -35,8 +35,6 @@ function tMetaData = dicomMetaData(sAction, tValue, dSeriesOffset)
     if exist('dSeriesOffset', 'var')
         dOffset = dSeriesOffset;
     else
-        uiSeries = uiSeriesPtr('get');
-
         if ~isempty(uiSeries)
             dOffset = get(uiSeries, 'Value');
         else

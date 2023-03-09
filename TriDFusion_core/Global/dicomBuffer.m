@@ -33,29 +33,29 @@ function aBuffer = dicomBuffer(sAction, aValue, dSeriesOffset)
     persistent paBuffer; 
 
     uiSeries = uiSeriesPtr('get');
-    
-    if ~isempty(uiSeries)
-        if exist('dSeriesOffset', 'var')
-            iOffset = dSeriesOffset;
-        else
-            iOffset = get(uiSeries, 'Value');
-        end
+
+    if exist('dSeriesOffset', 'var')
+        dOffset = dSeriesOffset;
     else
-        iOffset = 1;
+        if ~isempty(uiSeries)
+            dOffset = get(uiSeries, 'Value');
+        else
+            dOffset = 1;
+        end
     end
 
     if strcmpi('set', sAction)
-        paBuffer{iOffset} = aValue; 
+        paBuffer{dOffset} = aValue; 
     elseif strcmpi('reset', sAction)    
         for aa=1:numel(paBuffer)
             paBuffer{aa} = '';
         end
     end
 
-    if numel(paBuffer) < iOffset
+    if numel(paBuffer) < dOffset
         aBuffer = '';
     else
-        aBuffer = paBuffer{iOffset};
+        aBuffer = paBuffer{dOffset};
     end
 
 end

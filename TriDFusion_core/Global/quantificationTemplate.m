@@ -34,24 +34,24 @@ function tQuant = quantificationTemplate(sAction, tValue,  dSeriesOffset)
 
     uiSeries = uiSeriesPtr('get');
     
-    if ~isempty(uiSeries)
-        if exist('dSeriesOffset', 'var')
-            iOffset = dSeriesOffset;
-        else
-            iOffset = get(uiSeries, 'Value');
-        end
+    if exist('dSeriesOffset', 'var')
+        dOffset = dSeriesOffset;
     else
-        iOffset = 1;
+        if ~isempty(uiSeries)
+            dOffset = get(uiSeries, 'Value');
+        else
+            dOffset = 1;
+        end
     end
 
     if strcmpi('set', sAction)
-        ptQuant{iOffset} = tValue; 
+        ptQuant{dOffset} = tValue; 
      elseif strcmpi('reset', sAction)    
         for aa=1:numel(ptQuant)
             ptQuant{aa} = '';
         end       
     else
-        tQuant = ptQuant{iOffset};  
+        tQuant = ptQuant{dOffset};  
     end
 
 end 
