@@ -552,6 +552,9 @@ function loadCerrDoseVolume(planC, structNamC)
             sNewVolSeriesDescription = atNewInput(ii).atDicomInfo{1}.SeriesDescription;
 
             sNewVolumes{ii} = sprintf('%s %s', sNewVolSeriesDescription, sNewVolSeriesDate);
+
+            setQuantification(ii);
+
         end
 
         seriesDescription('set', sNewVolumes);
@@ -567,7 +570,6 @@ function loadCerrDoseVolume(planC, structNamC)
         end
     end
 
-    setQuantification();
 
     clearDisplay();
     initDisplay(3);

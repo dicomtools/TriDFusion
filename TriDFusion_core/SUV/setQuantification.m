@@ -30,7 +30,11 @@ function setQuantification(dSeriesOffset)
     tInput = inputTemplate('get');
 
     if exist('dSeriesOffset', 'var')
-        aInputBuffer  = dicomBuffer('get');
+        aInputBuffer  = dicomBuffer('get', [], dSeriesOffset);
+        if isempty(aInputBuffer)
+            aInputBuffer = inputBuffer('get');
+            aInputBuffer = aInputBuffer{dSeriesOffset};
+        end
 
         dLoopBegin = dSeriesOffset;
         dLoopEnd   = dSeriesOffset;
@@ -54,7 +58,10 @@ function setQuantification(dSeriesOffset)
         tInput(cc).tQuant.tCount.dSum = sum(aInput,'all');
 
         if exist('dSeriesOffset', 'var')
-            atQuantDicomInfo = dicomMetaData('get');
+            atQuantDicomInfo = dicomMetaData('get', [], dSeriesOffset);
+            if isempty(atQuantDicomInfo)
+                atQuantDicomInfo = tInput(dSeriesOffset).atDicomInfo;
+            end
         else
             atQuantDicomInfo = tInput(cc).atDicomInfo;
         end
@@ -131,6 +138,8 @@ function setQuantification(dSeriesOffset)
     end
 
     if exist('dSeriesOffset', 'var')
+        
+        inputTemplate('set', tInput);
 
         quantificationTemplate('set', tInput(dSeriesOffset).tQuant, dSeriesOffset);
 %            inputTemplate('set', tInput);

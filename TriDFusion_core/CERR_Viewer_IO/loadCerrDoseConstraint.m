@@ -609,6 +609,8 @@ function loadCerrDoseConstraint(planC, structNamC)
             sNewVolSeriesDescription = atNewInput(ii).atDicomInfo{1}.SeriesDescription;
 
             sNewVolumes{ii} = sprintf('%s %s', sNewVolSeriesDescription, sNewVolSeriesDate);
+
+            setQuantification(ii);
         end
 
         seriesDescription('set', sNewVolumes);
@@ -624,8 +626,6 @@ function loadCerrDoseConstraint(planC, structNamC)
             set(uiFusedSeriesPtr('get'), 'Value', 1);
         end
     end
-
-    setQuantification();
 
     clearDisplay();
     initDisplay(3);

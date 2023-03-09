@@ -536,6 +536,8 @@ function loadCerrPlanC(planC)
             sNewVolSeriesDescription = atNewInput(ii).atDicomInfo{1}.SeriesDescription;
 
             sNewVolumes{ii} = sprintf('%s %s', sNewVolSeriesDescription, sNewVolSeriesDate);
+
+            setQuantification(ii);
         end
 
         seriesDescription('set', sNewVolumes);
@@ -549,9 +551,8 @@ function loadCerrPlanC(planC)
             set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
             set(uiFusedSeriesPtr('get'), 'Value', 1);
         end
-    end
 
-    setQuantification();
+    end
 
     clearDisplay();
     initDisplay(3);
