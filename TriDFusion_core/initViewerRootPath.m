@@ -58,8 +58,28 @@ function initViewerRootPath()
            sRootDir(end) ~= '/'     
             sRootDir = [sRootDir '/'];
         end
-        
-        viewerRootPath('set', sRootDir);
+
+        if isfile(sprintf('%sscreenDefault.png', sRootDir))
+            viewerRootPath('set', sRootDir);
+        else
+            if integrateToBrowser('get') == true
+                if isfile(sprintf('%sTriDFusion/screenDefault.png', sRootDir))
+                    viewerRootPath('set', sprintf('%sTriDFusion/', sRootDir) );
+                end
+            else    
+                sRootDir = fileparts(mfilename('fullpath'));
+                sRootDir = erase(sRootDir, 'TriDFusion_core');        
+
+                if isfile(sprintf('%sscreenDefault.png', sRootDir))
+                    viewerRootPath('set', sRootDir);
+                end
+
+                if isfile(sprintf('%sTriDFusion/screenDefault.png', sRootDir))
+                    viewerRootPath('set', sprintf('%sTriDFusion/', sRootDir) );
+                end
+            end
+        end
+
     else               
         sRootDir = pwd;
         if sRootDir(end) ~= '\' || ...
