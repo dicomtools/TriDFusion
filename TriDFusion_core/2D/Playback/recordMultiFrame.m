@@ -276,6 +276,18 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
                 newName = erase(sFileName, '.bmp');
                 newName = sprintf('%s-%d.bmp', newName, idx);
                 imwrite(indI, cm, [sImgDirName newName], 'bmp');
+            elseif strcmpi('*.png', sExtention)
+                sDirName = sprintf('%s_%s_%s_PNG_2D', atCoreMetaData{1}.PatientName, atCoreMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
+                sDirName = cleanString(sDirName);
+                sImgDirName = [sPath sDirName '//' ];
+
+                if~(exist(char(sImgDirName), 'dir'))
+                    mkdir(char(sImgDirName));
+                end
+
+                newName = erase(sFileName, '.png');
+                newName = sprintf('%s-%d.png', newName, idx);
+                imwrite(indI, cm, [sImgDirName newName], 'png');                
             end
         else
             if strcmpi('*.gif', sExtention)
@@ -288,6 +300,10 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
                 newName = erase(sFileName, '.bmp');
                 newName = sprintf('%s-%d.bmp', newName, idx);
                 imwrite(indI, cm, [sImgDirName newName], 'bmp');
+            elseif strcmpi('*.png', sExtention)
+                newName = erase(sFileName, '.png');
+                newName = sprintf('%s-%d.png', newName, idx);
+                imwrite(indI, cm, [sImgDirName newName], 'png');                
             end
         end
 
@@ -426,7 +442,8 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
     if strcmpi('*.gif', sExtention)
         progressBar(1, sprintf('Write %s completed', sFileName));
     elseif strcmpi('*.jpg', sExtention) || ...
-           strcmpi('*.bmp', sExtention)
+           strcmpi('*.bmp', sExtention) || ...
+           strcmpi('*.png', sExtention)
         progressBar(1, sprintf('Write %d files to %s completed', dLastSlice, sImgDirName));
     end
 end

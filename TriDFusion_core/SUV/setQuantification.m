@@ -170,10 +170,10 @@ function setQuantification(dSeriesOffset)
             imageSegEditValue('set', 'upper', tInput(1).tQuant.tCount.dMax);
         end
 
-        setKernelCtDoseMapUiValues();
-        setResampleToCTIsoMaskValues();
-        setRoiPanelCtUiValues();
     end
-
+    
+    setKernelCtDoseMapUiValues();
+    setResampleToCTIsoMaskValues();
+    setRoiPanelCtUiValues();
 
 end

@@ -177,7 +177,20 @@ function recordMultiFrame3D(mRecord, sPath, sFileName, sExtention)
 
                 newName = erase(sFileName, '.bmp');
                 newName = sprintf('%s-%d.bmp', newName, idx);
-                imwrite(indI, cm, [sImgDirName newName], 'bmp');                        
+                imwrite(indI, cm, [sImgDirName newName], 'bmp');      
+            elseif strcmpi('*.png', sExtention) || ...
+                   strcmpi('png', sExtention) 
+               
+                sDirName = sprintf('%s_%s_%s_PNG_3D', atMetaData{1}.PatientName, atMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
+                sImgDirName = [sPath sDirName '//' ];
+
+                if~(exist(char(sImgDirName), 'dir'))
+                    mkdir(char(sImgDirName));
+                end
+
+                newName = erase(sFileName, '.png');
+                newName = sprintf('%s-%d.png', newName, idx);
+                imwrite(indI, cm, [sImgDirName newName], 'png');                    
             end
         else
             if strcmpi('*.gif', sExtention) || ...
@@ -198,6 +211,12 @@ function recordMultiFrame3D(mRecord, sPath, sFileName, sExtention)
                 newName = erase(sFileName, '.bmp');
                 newName = sprintf('%s-%d.bmp', newName, idx);
                 imwrite(indI, cm, [sImgDirName newName], 'bmp');
+            elseif strcmpi('*.png', sExtention) || ...
+                   strcmpi('png', sExtention)
+               
+                newName = erase(sFileName, '.png');
+                newName = sprintf('%s-%d.png', newName, idx);
+                imwrite(indI, cm, [sImgDirName newName], 'png');                
             end                        
         end                
 
@@ -209,8 +228,10 @@ function recordMultiFrame3D(mRecord, sPath, sFileName, sExtention)
         progressBar(1, sprintf('Write %s completed', sFileName));
     elseif strcmpi('*.jpg', sExtention) || ...
            strcmpi('*.bmp', sExtention) || ...
-           strcmpi('jpg', sExtention) || ...
-           strcmpi('bmp', sExtention)            
-        progressBar(1, sprintf('Write 120 files to %s completed', sImgDirName));
+           strcmpi('*.png', sExtention) || ...
+           strcmpi('jpg'  , sExtention) || ...
+           strcmpi('bmp'  , sExtention) || ...           
+           strcmpi('png'  , sExtention)            
+      progressBar(1, sprintf('Write 120 files to %s completed', sImgDirName));
     end                          
 end   
