@@ -43,7 +43,6 @@ function setResampleToCTIsoMaskValues()
             tResampleToCT{dNbCt}.sSeriesDescription = asSeriesDescription{tt};
             tResampleToCT{dNbCt}.dSeriesNumber = tt;
         end
-
     end
 
     resampleToCTIsoMaskUiValues('set', tResampleToCT);

@@ -39,11 +39,13 @@ function setKernelCtDoseMapUiValues()
 
     for tt=1:numel(tInput)
         if strcmpi (tInput(tt).atDicomInfo{1}.Modality, 'ct')
-            dNbCt = dNbCt+1;
-            tKernelCtDoseMap{dNbCt}.sSeriesDescription = asSeriesDescription{tt};
-            tKernelCtDoseMap{dNbCt}.dMin = tInput(tt).tQuant.tCount.dMin;
-            tKernelCtDoseMap{dNbCt}.dMax = tInput(tt).tQuant.tCount.dMax;
-            tKernelCtDoseMap{dNbCt}.dSeriesNumber = tt;
+            if ~isempty(tInput(tt).tQuant)
+                dNbCt = dNbCt+1;
+                tKernelCtDoseMap{dNbCt}.sSeriesDescription = asSeriesDescription{tt};
+                tKernelCtDoseMap{dNbCt}.dMin = tInput(tt).tQuant.tCount.dMin;
+                tKernelCtDoseMap{dNbCt}.dMax = tInput(tt).tQuant.tCount.dMax;
+                tKernelCtDoseMap{dNbCt}.dSeriesNumber = tt;
+            end
         end
 
     end
