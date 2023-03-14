@@ -80,6 +80,14 @@ To use TriDFusion (3DF) Graphical User Interface, type TriDFusion() in Matlab co
 
 * TriDFusion('path_to_dicom_folder', '-mip', '-iso', '-vol'); Open the graphical user interface with a dicom image and create a fusion of a 3D mip, iso surface and volume rendering. Any combinaison can be use. 
 
+DICOM directory:
+
+
+    |-- main_folder                               <-- The main folder or all series  
+
+    |      |-- parent folder (series folder 1)    <-- Individual series folder 1
+    |      |-- parent folder (series folder N)    <-- Individual series folder N
+	
 ## Optional
 
 CERR 
