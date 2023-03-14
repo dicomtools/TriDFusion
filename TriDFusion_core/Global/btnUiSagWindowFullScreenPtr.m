@@ -1,6 +1,6 @@
-function aObject = uiTraWindowPtr(sAction, aValue)
-%function aObject = uiTraWindowPtr(sAction, aValue)
-%Get\Set Axial Window Pointer.
+function aObject = btnUiSagWindowFullScreenPtr(sAction, aValue)
+%function aObject = btnUiSagWindowFullScreenPtr(sAction, aValue)
+%Get\Set Sagittal Full Screen Button Pointer.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.
@@ -10,7 +10,7 @@ function aObject = uiTraWindowPtr(sAction, aValue)
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2023, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 

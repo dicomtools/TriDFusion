@@ -639,6 +639,7 @@ function setOptionsCallback(~, ~)
                 end
             end
         end
+        
         if get(chkAspect, 'Value') == 0
 
             set(edtRatioX, 'Enable', 'off');
@@ -662,8 +663,11 @@ function setOptionsCallback(~, ~)
                                 axis(axef, 'normal');                                
                             end
 
-                        end                        
-
+                        end   
+                        
+                        if isPlotContours('get') == true 
+                            daspect(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [1 1 1]);                            
+                       end    
                     end
                 else
                     daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [1 1 1]);
@@ -771,6 +775,10 @@ function setOptionsCallback(~, ~)
                                     daspect(axef, [x y 1]);
                                 end
                             end
+
+                            if isPlotContours('get') == true 
+                                daspect(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [x y 1]);                            
+                           end                           
                         end
 
                     end

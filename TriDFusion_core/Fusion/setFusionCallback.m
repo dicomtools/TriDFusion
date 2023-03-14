@@ -735,7 +735,11 @@ end
                         aMip    = mipBuffer('get', [], dFusionSeriesOffset);
 
     %                    if numel(aMip) ~= numel(aRefMip)  % Resample mip  
+                         if size(A,3) ~= size(B,3)
                             aResampledMip = resampleMipTransformMatrix(aMip, atFusionMetaData, aRefMip, atMetaData, sInterpolation, false);   
+                         else
+                            aResampledMip = resampleMipTransformMatrix(aMip, atFusionMetaData, aRefMip, atMetaData, sInterpolation, true);   
+                         end
     %                    else
     %                        aResampledMip = aMip;
     %                    end
@@ -755,15 +759,28 @@ end
                     
     %                if numel(A) ~= numel(B) % Resample image                 
                     if isVsplash('get') == false
-                        [B, atFusionMetaData] = ...
-                            resampleImageTransformMatrix(B, ...
-                                                         atFusionMetaData, ...
-                                                         A, ...
-                                                         atMetaData, ...
-                                                         sInterpolation, ...
-                                                         false ...
-                                                         ); 
-                                  
+
+                        if size(A,3) ~= size(B,3)
+
+                            [B, atFusionMetaData] = ...
+                                resampleImageTransformMatrix(B, ...
+                                                             atFusionMetaData, ...
+                                                             A, ...
+                                                             atMetaData, ...
+                                                             sInterpolation, ...
+                                                             false ...
+                                                             ); 
+                        else
+                            [B, atFusionMetaData] = ...
+                                resampleImageTransformMatrix(B, ...
+                                                             atFusionMetaData, ...
+                                                             A, ...
+                                                             atMetaData, ...
+                                                             sInterpolation, ...
+                                                             true ...
+                                                             );                             
+                        end
+
                         dimsRef = size(A);         
                         dimsRsp = size(B);         
                         xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
@@ -1137,7 +1154,7 @@ end
                         yf = computeAspectRatio('y', atFusionMetaData) ;
                         zf = 1;
                     end
-                    
+
                     daspect(axes1fPtr  ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
                     daspect(axes2fPtr  ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
                     daspect(axes3fPtr  ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf zf]);
@@ -2136,6 +2153,88 @@ end
         % Reactivate main tool bar 
         set(uiSeriesPtr('get'), 'Enable', 'on');                        
         mainToolBarEnable('on');     
+
+        if isFusion('get') == true
+            
+            if size(dicomBuffer('get'), 3) == 1
+
+                if aspectRatio('get') == true
+
+                    x = aspectRatioValue('get', 'x');
+                    y = aspectRatioValue('get', 'y');
+                else
+                    x = 1;
+                    y = 1;                   
+                end
+                    
+                dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+                for rr=1:dNbFusedSeries
+    
+                    axef = axefPtr('get', [], rr);
+                    if ~isempty(axef)                          
+                        daspect(axef, [x y 1]);
+                    end
+                end    
+
+                if isPlotContours('get') == true 
+                    daspect(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [x y 1]);                            
+               end 
+            else
+                if aspectRatio('get') == true
+
+                    x = aspectRatioValue('get', 'x');
+                    y = aspectRatioValue('get', 'y');
+                    z = aspectRatioValue('get', 'z');
+                else
+                    x = 1;
+                    y = 1;
+                    z = 1;                    
+                end
+        
+                daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+                daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
+                daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
+                
+                if isVsplash('get') == false                       
+                    daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
+                end
+                
+                if isFusion('get') == true % TO DO, support fusion with is own aspect
+                    
+                    dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+                    for rr=1:dNbFusedSeries
+        
+                        axes1f = axes1fPtr('get', [], rr);
+                        axes2f = axes2fPtr('get', [], rr);
+                        axes3f = axes3fPtr('get', [], rr);
+        
+                        if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
+                            daspect(axes1f, [z x y]);
+                            daspect(axes2f, [z y x]);
+                            daspect(axes3f, [x y z]);                                        
+                        end
+                        
+                        if isVsplash('get') == false    
+                            axesMipf = axesMipfPtr('get', [], rr);
+                            if ~isempty(axesMipf)
+                                daspect(axesMipf, [z y x]);
+                            end
+                        end
+                        
+                    end
+                end
+                
+                if isPlotContours('get') == true && isVsplash('get') == false
+                    daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z x y]);
+                    daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z y x]);
+                    daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [x y z]);
+                    
+                    if isVsplash('get') == false                                                       
+                        daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z y x]);
+                    end                                
+                end
+            end
+        end
     end
     
     set(fiMainWindowPtr('get'), 'Pointer', 'default');

@@ -52,7 +52,7 @@ function [resampImage, atDcmMetaData, xMoveOffset, yMoveOffset] = resampleImageT
 %test    if numel(resampImage) ~=  numel(refImage) % SPECT and CT DX
 %sMode='Nearest'
         if bSameOutput == true
-            [resampImage, ~] = imwarp(dcmImage, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef));  
+            [resampImage, ~] = imwarp(dcmImage, TF, 'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef));  
         else
             [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
                    
