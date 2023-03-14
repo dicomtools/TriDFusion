@@ -735,8 +735,15 @@ end
                         aMip    = mipBuffer('get', [], dFusionSeriesOffset);
 
     %                    if numel(aMip) ~= numel(aRefMip)  % Resample mip  
-                         if size(A,3) ~= size(B,3)
-                            aResampledMip = resampleMipTransformMatrix(aMip, atFusionMetaData, aRefMip, atMetaData, sInterpolation, false);   
+                         if size(A,3) ~= size(B,3) % Z is different
+
+                            dMinMipFusion = min(aMip, [], 'all');
+
+                            aResampledMip = resampleMipTransformMatrix(aMip, atFusionMetaData, aRefMip, atMetaData, sInterpolation, true);  
+                            if isempty(aResampledMip(aResampledMip~=dMinMipFusion)) % The z is to far, need to change the method
+                                aResampledMip = resampleMipTransformMatrix(aMip, atFusionMetaData, aRefMip, atMetaData, sInterpolation, false);  
+                            end
+
                          else
                             aResampledMip = resampleMipTransformMatrix(aMip, atFusionMetaData, aRefMip, atMetaData, sInterpolation, true);   
                          end
@@ -760,16 +767,35 @@ end
     %                if numel(A) ~= numel(B) % Resample image                 
                     if isVsplash('get') == false
 
-                        if size(A,3) ~= size(B,3)
+                        dMinFusion = min(B, [], 'all');                       
 
+                        if size(A,3) ~= size(B,3) % Z is different
+
+                            Btemp = B;
+                            atFusionMetaDataTemp = atFusionMetaData;
+                            
                             [B, atFusionMetaData] = ...
                                 resampleImageTransformMatrix(B, ...
                                                              atFusionMetaData, ...
                                                              A, ...
                                                              atMetaData, ...
                                                              sInterpolation, ...
-                                                             false ...
+                                                             true ...
                                                              ); 
+
+                            if isempty(B(B~=dMinFusion)) % The z is to far, need to change the method
+                                [B, atFusionMetaData] = ...
+                                    resampleImageTransformMatrix(Btemp, ...
+                                                                 atFusionMetaDataTemp, ...
+                                                                 A, ...
+                                                                 atMetaData, ...
+                                                                 sInterpolation, ...
+                                                                 false ...
+                                                                 ); 
+                            end
+                            
+                            clear Btemp;
+                            clear atFusionMetaDataTemp; 
                         else
                             [B, atFusionMetaData] = ...
                                 resampleImageTransformMatrix(B, ...
@@ -780,6 +806,7 @@ end
                                                              true ...
                                                              );                             
                         end
+
 
                         dimsRef = size(A);         
                         dimsRsp = size(B);         
@@ -2155,7 +2182,7 @@ end
         mainToolBarEnable('on');     
 
         if isFusion('get') == true
-            
+
             if size(dicomBuffer('get'), 3) == 1
 
                 if aspectRatio('get') == true
