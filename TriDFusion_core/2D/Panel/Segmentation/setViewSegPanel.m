@@ -88,6 +88,15 @@ function setViewSegPanel(~, ~)
                                );
                         end
                     end
+
+                    btnUiCorWindowFullScreen = btnUiCorWindowFullScreenPtr('get');
+                
+                    if ~isempty(btnUiCorWindowFullScreen)
+                
+                        aUiCorPosition = get(uiCorWindow ,'Position');
+            
+                        set(btnUiCorWindowFullScreen, 'Position', [aUiCorPosition(3)-20 5 20 20]);           
+                    end                     
                 end 
 
                 uiSliderCor = uiSliderCorPtr('get');
@@ -149,6 +158,15 @@ function setViewSegPanel(~, ~)
                                );
                         end
                     end
+                    
+                   btnUiSagWindowFullScreen = btnUiSagWindowFullScreenPtr('get');
+                
+                   if ~isempty(btnUiSagWindowFullScreen)
+                
+                        aUiSagPosition = get(uiSagWindow ,'Position');
+            
+                        set(btnUiSagWindowFullScreen, 'Position', [aUiSagPosition(3)-20 5 20 20]);           
+                   end                    
                 end 
 
                 uiSliderSag = uiSliderSagPtr('get');
@@ -494,6 +512,15 @@ function setViewSegPanel(~, ~)
                                );
                         end
                     end
+
+                    btnUiCorWindowFullScreen = btnUiCorWindowFullScreenPtr('get');
+                
+                    if ~isempty(btnUiCorWindowFullScreen)
+                
+                        aUiCorPosition = get(uiCorWindow ,'Position');
+            
+                        set(btnUiCorWindowFullScreen, 'Position', [aUiCorPosition(3)-20 5 20 20]);           
+                    end                      
                 end  
 
                 uiSliderCor = uiSliderCorPtr('get');
@@ -557,7 +584,16 @@ function setViewSegPanel(~, ~)
                                              ]...
                               );
                         end
-                    end
+                   end
+
+                   btnUiSagWindowFullScreen = btnUiSagWindowFullScreenPtr('get');
+                
+                   if ~isempty(btnUiSagWindowFullScreen)
+                
+                        aUiSagPosition = get(uiSagWindow ,'Position');
+            
+                        set(btnUiSagWindowFullScreen, 'Position', [aUiSagPosition(3)-20 5 20 20]);           
+                   end                     
                 end 
 
                 uiSliderSag = uiSliderSagPtr('get');

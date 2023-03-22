@@ -570,8 +570,8 @@ end
 %                  'Position', [180 650 140 20], ...
 %                  'string'  , {'Fixed', ...
 %                               '(4.30/SUVmean)x(SUVmean + SD)', ...
-%                               '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map', ...
-%                               '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map', ...      
+%                               '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT Bone Map', ...
+%                               '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT ISO Map', ...      
 %                               'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map', ...
 %                               'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map' ...                                  
 %                               },...
@@ -589,8 +589,8 @@ end
                   'Position', [180 650 140 20], ...
                   'string'  , {'Fixed', ...
                                '(4.30/SUVmean)x(SUVmean + SD)', ...
-                               '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map', ...
-                               '(4.30/Liver SUVmean)x(Liver SUVmean + Liver SD), Soft Tissue & SUV 3, CT Bone Map', ...
+                               '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT Bone Map', ...
+                               '(4.30/Normal Liver SUVmean)x(Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map', ...
                                'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map', ...
                                },...
                   'Value'   , valueFormulaIsoMask('get'), ...
@@ -2222,8 +2222,8 @@ end
             end         
         end
         
-        if strcmpi(sFormula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map') || ... % Use CT HU treshold value
-           strcmpi(sFormula, '(4.30/Liver SUVmean)x(Liver SUVmean + Liver SD), Soft Tissue & SUV 3, CT Bone Map') || ...     
+        if strcmpi(sFormula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ... % Use CT HU treshold value
+           strcmpi(sFormula, '(4.30/Normal Liver SUVmean)x(Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...     
            strcmpi(sFormula, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map')
             
             tResampleToCT = resampleToCTIsoMaskUiValues('get');
@@ -2254,7 +2254,7 @@ end
             end
         end
         
-        if strcmpi(sFormula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map') || ... % Use CT ISO contour
+        if strcmpi(sFormula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT ISO Map') || ... % Use CT ISO contour
            strcmpi(sFormula, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map')     
             
             btnFusion = btnFusionPtr('get');
@@ -2353,13 +2353,13 @@ end
             dLiverMean = 0;
             dLiverSTD  = 0;   
                 
-            if strcmpi(asFormula{dFormula}, '(4.30/Liver SUVmean)x(Liver SUVmean + Liver SD), Soft Tissue & SUV 3, CT Bone Map') 
+            if strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') 
                                         
                 atRoiInput = roiTemplate('get', dSeriesOffset);
                
                 if ~isempty(atRoiInput)
                     
-                    aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Label, atRoiInput, 'uni', false ), {'Liver'} );            
+                    aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Label, atRoiInput, 'uni', false ), {'Normal Liver'} );            
                     dTagOffset = find(aTagOffset, 1);
                     
                     aSlice = [];
@@ -2388,12 +2388,12 @@ end
                             dSUVScale = 0;
                         end     
                         
-                        dLiverMean = mean(aSlice(aLogicalMask), 'all') * dSUVScale;
+                        dLiverMean = mean(aSlice(aLogicalMask), 'all')   * dSUVScale;
                         dLiverSTD  = std(aSlice(aLogicalMask), [],'all') * dSUVScale;     
                         
                         clear aSlice;
                     else
-                        msgbox('Error: createIsoMaskCallback(): Please define a Liver!', 'Error');   
+                        msgbox('Error: createIsoMaskCallback(): Please define a Normal Liver ROI!', 'Error');   
                         return;
                     end                
                 end
@@ -2488,6 +2488,7 @@ end
             
             BW = imfill(aVolume, 4, 'holes');            
 
+
 %            dScale = dMax*isoObj.Isovalue;
             
 %            BW = im;
@@ -2505,7 +2506,9 @@ end
             imMaskLiver = [];
  
             if strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map') || ...
-               strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map')
+               strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map') || ...
+               strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...
+               strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT ISO Map')
                                
                 if ~isempty(atRoiInput)
                     
@@ -2574,11 +2577,13 @@ end
                                 end
                         end                    
 
+                        % Those formulas require their own threshold
+
                         dMin = min(aVolume, [], 'all');
                         dMax = max(aVolume, [], 'all');
                         dScale = abs(dMin)+abs(dMax);
 
-                        dOffset = dScale*.20;
+                        dOffset = dScale*.15;
                         dIsoValue = dMin+dOffset;
 
                         fv = isosurface(aVolume, dIsoValue, aSurfaceColor{dColorOffset}); % Make patch w. faces "out"
@@ -2591,11 +2596,13 @@ end
                         imMaskLiver = im;
                         imMaskLiver(BWLIVER == 0) = dMin;
                     else
-                        msgbox('Error: createIsoMaskCallback(): Please define a Liver!', 'Error');                          
+                        msgbox('Error: createIsoMaskCallback(): Please define a Liver ROI on the coronal or sagittal plane!', 'Error');                          
                     end                
                 end
-             end
-            
+
+
+           end
+           
             imMask = im;
             imMask(BW == 0) = dMin;
             
@@ -2726,8 +2733,8 @@ end
                         
                         set(uiEditAddVoiIsoMask, 'String', num2str(dPercentMaxOrMaxSUVValue));
                         
-                    elseif strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map') || ...
-                           strcmpi(asFormula{dFormula}, '(4.30/Liver SUVmean)x(Liver SUVmean + Liver SD), Soft Tissue & SUV 3, CT Bone Map') || ...
+                    elseif strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...
+                           strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...
                            strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map')
                         
                         bUseFormula = true;   
@@ -2792,7 +2799,7 @@ end
                         BWCT(BWCT~=0) = 1;
                         BWCT(BWCT~=1) = 0;
                             
-                    elseif strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map') || ...
+                    elseif strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT ISO Map') || ...
                            strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map')
 
                         
@@ -2938,8 +2945,15 @@ end
                 if strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map') || ...
                    strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map')
                
-                   maskAddVoiToSeries(imMask, BW, bPixelEdge, true, 42, true, 65, false, sMinSUVformula, BWCT, dSmalestVoiValue);                    
+                   maskAddVoiToSeries(imMask     , BW     , bPixelEdge, true, 42, true, 65, false, sMinSUVformula, BWCT, dSmalestVoiValue);                    
                    maskAddVoiToSeries(imMaskLiver, BWLIVER, bPixelEdge, true, 42, false, dMultiplePeaksPercentValue, false, sMinSUVformula, BWCT, dSmalestVoiValue);
+
+                elseif strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...
+                       strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT ISO Map')      
+                   maskAddVoiToSeries(imMask     , BW, bPixelEdge, bPercentOfPeak, 3, false, 0, false, sMinSUVformula, BWCT, dSmalestVoiValue);                    
+                   maskAddVoiToSeries(imMaskLiver, BWLIVER, bPixelEdge, false, dPercentMaxOrMaxSUVValue, false, dMultiplePeaksPercentValue, true, sMinSUVformula, BWCT, dSmalestVoiValue, dLiverMean, dLiverSTD);
+
+
                 else
                     maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxOrMaxSUVValue, bMultiplePeaks, dMultiplePeaksPercentValue, bUseFormula, sMinSUVformula, BWCT, dSmalestVoiValue, dLiverMean, dLiverSTD);                    
                 end
@@ -3143,9 +3157,10 @@ end
 
                 if bPercentOfPeak == true % Percent of peak or SUV Value
                     
-                    if  strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map') || ...
-                        strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map')  || ...
-                        strcmpi(sMinSUVformula, '(4.30/Liver SUVmean)x(Liver SUVmean + Liver SD), Soft Tissue & SUV 3, CT Bone Map') || ...
+                    if  strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...
+                        strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT ISO Map')  || ...
+                        strcmpi(sMinSUVformula, '(4.30/Normal Liver SUVmean)x(Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...
+                        strcmpi(sMinSUVformula, '(4.30/Normal Liver SUVmean)x(Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT ISO Map') || ...
                         strcmpi(sMinSUVformula, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map')     || ...
                         strcmpi(sMinSUVformula, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map')
                         
@@ -3195,10 +3210,21 @@ end
                     if bUseFormula == false
 
                         if strcmpi(sMinSUVformula, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map') || ...
-                           strcmpi(sMinSUVformula, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map')   
-                            sLesionType = 'Liver';
-                        else
-                            sLesionType = 'Unspecified';
+                           strcmpi(sMinSUVformula, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map') || ...
+                           strcmpi(sMinSUVformula, '(4.30/Normal Liver SUVmean)x(Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...
+                           strcmpi(sMinSUVformula, '(4.30/Normal Liver SUVmean)x(Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT ISO Map') 
+
+                            BWANDBWCT = BW2&BWCT2;
+
+                            dBWnbPixel        = numel(BW2(BW2~=0));
+                            dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
+
+                            if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
+                                sLesionType = 'Bone';
+                            else
+                                sLesionType = 'Soft Tissue';
+                            end
+
                         end
                             
                         BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
@@ -3217,7 +3243,7 @@ end
                             BW2(BW2 ~= dMinValue) = 1;
                             BW2(BW2 == dMinValue) = 0;                                
 
-                        elseif strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT Bone Map') 
+                        elseif strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT Bone Map') 
 
                             BWANDBWCT = BW2&BWCT2;
 
@@ -3243,7 +3269,7 @@ end
                             BW2(BW2 == dMinValue) = 0;    
 
 %                                clear(BWANDBWCT);
-                        elseif strcmpi(sMinSUVformula, '(4.30/Liver SUVmean)x(Liver SUVmean + Liver SD), Soft Tissue & SUV 3, CT Bone Map')
+                        elseif strcmpi(sMinSUVformula, '(4.30/Normal Liver SUVmean)x(Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map')
                             
                             BWANDBWCT = BW2&BWCT2;
 
@@ -3268,7 +3294,7 @@ end
                             BW2(BW2 ~= dMinValue) = 1;
                             BW2(BW2 == dMinValue) = 0;                                
                             
-                        elseif strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & SUV 3, CT ISO Map') 
+                        elseif strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT ISO Map') 
 
                             BWANDBWCT = BW2&BWCT2;
 

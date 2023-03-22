@@ -31,6 +31,7 @@ function aList = getRoiLabelList()
     aList{numel(aList)+1}='Water';
     aList{numel(aList)+1}='Bone';
     aList{numel(aList)+1}='Liver';
+    aList{numel(aList)+1}='Normal Liver';
     aList{numel(aList)+1}='Lung';
     aList{numel(aList)+1}='Left Lung';
     aList{numel(aList)+1}='Right Lung';

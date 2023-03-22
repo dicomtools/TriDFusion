@@ -36,7 +36,7 @@ function clearDisplay()
         end
 %        ptrFusionColorbar.Position = [0 0 0 0];                
         clear ptrFusionColorbar;
-        uiFusionColorbarPtr('set' , '');
+        uiFusionColorbarPtr('set' , []);
     end
 
     uiFusionSliderLevel = uiFusionSliderLevelPtr('get');
@@ -46,7 +46,7 @@ function clearDisplay()
         end        
 %        uiFusionSliderLevel.Position = [0 0 0 0];
         clear uiFusionSliderLevel;               
-        uiFusionSliderLevelPtr('set', '');
+        uiFusionSliderLevelPtr('set', []);
     end
 
     uiFusionSliderWindow = uiFusionSliderWindowPtr('get');
@@ -56,7 +56,7 @@ function clearDisplay()
         end            
 %        uiFusionSliderWindow.Position = [0 0 0 0];
         clear uiFusionSliderWindow;               
-        uiFusionSliderWindowPtr('set', '');
+        uiFusionSliderWindowPtr('set', []);
     end
 
     uiAlphaSlider = uiAlphaSliderPtr('get');
@@ -66,112 +66,130 @@ function clearDisplay()
         end          
 %        uiAlphaSlider.Position = [0 0 0 0];
         clear uiAlphaSlider;               
-        uiAlphaSliderPtr('set', '');
+        uiAlphaSliderPtr('set', []);
     end
 
     uiSliderWindow = uiSliderWindowPtr('get');
     if ~isempty(uiSliderWindow)
         uiSliderWindow.Position = [0 0 0 0];
         clear uiSliderWindow;                
-        uiSliderWindowPtr('set', '');                
+        uiSliderWindowPtr('set', []);                
     end
 
     uiSliderLevel = uiSliderLevelPtr('get');
     if ~isempty(uiSliderLevel)
         uiSliderLevel.Position = [0 0 0 0];
         clear uiSliderLevel;               
-        uiSliderLevelPtr('set', '');                
+        uiSliderLevelPtr('set', []);                
     end
 
     ptrColorbar = uiColorbarPtr('get');
     if ~isempty(ptrColorbar)                
         ptrColorbar.Position = [0 0 0 0];                
         clear ptrColorbar;
-        uiColorbarPtr('set', '');
+        uiColorbarPtr('set', []);
+    end
+
+    btnUiCorWindowFullScreen = btnUiCorWindowFullScreenPtr('get');
+    if ~isempty(btnUiCorWindowFullScreen)                
+        clear btnUiCorWindowFullScreen;
+        btnUiCorWindowFullScreenPtr('set', []);
+    end
+
+    btnUiSagWindowFullScreen = btnUiSagWindowFullScreenPtr('get');
+    if ~isempty(btnUiSagWindowFullScreen)                
+        clear btnUiSagWindowFullScreen;
+        btnUiSagWindowFullScreenPtr('set', []);
+    end
+
+    btnUiTraWindowFullScreen = btnUiTraWindowFullScreenPtr('get');
+    if ~isempty(btnUiTraWindowFullScreen)                
+        clear btnUiTraWindowFullScreen;
+        btnUiTraWindowFullScreenPtr('set', []);
     end
 
     ui3DPanel = ui3DPanelPtr('get');
     if ~isempty(ui3DPanel)     
         delete(ui3DPanel);
         clear ui3DPanel;  
-        ui3DPanelPtr('set', '');
+        ui3DPanelPtr('set', []);
     end
 
     uiMain3DPanel = uiMain3DPanelPtr('get');
     if ~isempty(uiMain3DPanel)     
         delete(uiMain3DPanel);
         clear uiMain3DPanel;   
-        uiMain3DPanelPtr('set', '');
+        uiMain3DPanelPtr('set', []);
     end
 
     uiSegPanel = uiSegPanelPtr('get');
     if ~isempty(uiSegPanel)
         delete(uiSegPanel);            
         clear uiSegPanel;
-        uiSegPanelPtr('set', '');
+        uiSegPanelPtr('set', []);
     end 
 
     uiSegMainPanel = uiSegMainPanelPtr('get');
     if ~isempty(uiSegMainPanel)
         delete(uiSegMainPanel);            
         clear uiSegMainPanel;
-        uiSegMainPanelPtr('set', '');
+        uiSegMainPanelPtr('set', []);
     end 
 
     uiKernelPanel = uiKernelPanelPtr('get');
     if ~isempty(uiKernelPanel)
         delete(uiKernelPanel);            
         clear uiKernelPanel;
-        uiKernelPanelPtr('set', '');
+        uiKernelPanelPtr('set', []);
     end
 
     uiKernelMainPanel = uiKernelMainPanelPtr('get');
     if ~isempty(uiKernelMainPanel)
         delete(uiKernelMainPanel);            
         clear uiKernelMainPanel;
-        uiKernelMainPanelPtr('set', '');
+        uiKernelMainPanelPtr('set', []);
     end  
     
     uiRoiPanel = uiRoiPanelPtr('get');
     if ~isempty(uiRoiPanel)
         delete(uiRoiPanel);            
         clear uiRoiPanel;
-        uiRoiPanelPtr('set', '');
+        uiRoiPanelPtr('set', []);
     end
 
     uiRoiMainPanel = uiRoiMainPanelPtr('get');
     if ~isempty(uiRoiMainPanel)
         delete(uiRoiMainPanel);            
         clear uiRoiMainPanel;
-        uiRoiMainPanelPtr('set', '');
+        uiRoiMainPanelPtr('set', []);
     end 
     
     uiSliderCor = uiSliderCorPtr('get');
     if ~isempty(uiSliderCor)
         delete(uiSliderCor);
         clear uiSliderCor;   
-        uiSliderCorPtr('set', '');
+        uiSliderCorPtr('set', []);
     end
 
     uiSliderSag = uiSliderSagPtr('get');
     if ~isempty(uiSliderSag)
         delete(uiSliderSag);
         clear uiSliderSag;           
-        uiSliderSagPtr('set', '');
+        uiSliderSagPtr('set', []);
     end
 
     uiSliderTra = uiSliderTraPtr('get');
     if ~isempty(uiSliderTra)
         delete(uiSliderTra);
         clear uiSliderTra;           
-        uiSliderTraPtr('set', '');
+        uiSliderTraPtr('set', []);
     end   
     
     uiSliderMip = uiSliderMipPtr('get');
     if ~isempty(uiSliderMip)
         delete(uiSliderMip);
         clear uiSliderMip;           
-        uiSliderMipPtr('set', '');
+        uiSliderMipPtr('set', []);
     end   
     
     axesText('reset', 'axe');
@@ -205,7 +223,7 @@ function clearDisplay()
     if ~isempty(uiOneWindow)
        delete(uiOneWindow);
        clear uiOneWindow;
-       uiOneWindowPtr('set', '');
+       uiOneWindowPtr('set', []);
     end
     
     imCoronalPtr  ('reset');                
@@ -221,7 +239,7 @@ function clearDisplay()
     if ~isempty(uiCorWindow)
         delete(uiCorWindow);
         clear uiCorWindow;
-        uiCorWindowPtr('set', '');
+        uiCorWindowPtr('set', []);
     end
     
     imSagittalPtr  ('reset');                
@@ -237,7 +255,7 @@ function clearDisplay()
     if ~isempty(uiSagWindow)
         delete(uiSagWindow); 
         clear uiSagWindow;
-        uiSagWindowPtr('set', '');
+        uiSagWindowPtr('set', []);
     end              
     
     imAxialPtr  ('reset'); 
@@ -253,7 +271,7 @@ function clearDisplay()
     if ~isempty(uiTraWindow)
         delete(uiTraWindow); 
         clear uiTraWindow;
-        uiTraWindowPtr('set', '');
+        uiTraWindowPtr('set', []);
     end
     
     imMipPtr  ('reset');    
@@ -268,7 +286,7 @@ function clearDisplay()
     if ~isempty(uiMipWindow)
         delete(uiMipWindow); 
         clear uiMipWindow;
-        uiMipWindowPtr('set', '');
+        uiMipWindowPtr('set', []);
     end    
 
 end                  

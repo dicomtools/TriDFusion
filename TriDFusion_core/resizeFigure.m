@@ -117,7 +117,9 @@ function resizeFigure(~, ~)
                                      (getMainWindowSize('xsize')/4)-(uiSegMainPanel.Position(3)/2) ...
                                      getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
                                      ]...
-                       );                     
+                       );  
+
+                 
                 else
                     set(uiCorWindow, ...
                         'position', [uiSegMainPanel.Position(3) ...
@@ -126,6 +128,7 @@ function resizeFigure(~, ~)
                                      getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
                                      ]...
                        );  
+                   
                 end
             end
         elseif viewKernelPanel('get')
@@ -154,7 +157,7 @@ function resizeFigure(~, ~)
                                      (getMainWindowSize('xsize')/5)-(uiKernelMainPanel.Position(3)/2) ...
                                      getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
                                      ]...
-                       );  
+                       );                  
                 end
             end
         elseif viewRoiPanel('get')
@@ -184,6 +187,7 @@ function resizeFigure(~, ~)
                                      getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
                                      ]...
                        );  
+
                 end
             end            
         else
@@ -213,6 +217,7 @@ function resizeFigure(~, ~)
                                      getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
                                      ]...
                        );
+              
                 end
             end
         end
@@ -229,6 +234,15 @@ function resizeFigure(~, ~)
                     );         
             end
         end
+
+        btnUiCorWindowFullScreen = btnUiCorWindowFullScreenPtr('get');
+
+        if ~isempty(btnUiCorWindowFullScreen)
+
+            aUiCorPosition = get(uiCorWindow ,'Position');
+
+            set(btnUiCorWindowFullScreen, 'Position', [aUiCorPosition(3)-20 5 20 20]);
+        end        
     end   
 
     uiSagWindow = uiSagWindowPtr('get');
@@ -259,8 +273,9 @@ function resizeFigure(~, ~)
                                      (getMainWindowSize('xsize')/5)-(uiSegMainPanel.Position(3)/2) ...
                                      getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
                                      ]...
-                       );  
-               end
+                       ); 
+
+                end
             end
         elseif viewKernelPanel('get') 
            if isVsplash('get') == true && ...
@@ -289,6 +304,7 @@ function resizeFigure(~, ~)
                                      getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
                                      ]...
                        );
+                 
                end
            end
         elseif viewRoiPanel('get') 
@@ -318,6 +334,7 @@ function resizeFigure(~, ~)
                                      getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
                                      ]...
                        );
+               
                end
            end           
         else
@@ -346,7 +363,7 @@ function resizeFigure(~, ~)
                                      getMainWindowSize('xsize')/5 ...
                                      getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
                                      ]...
-                       );
+                       );                  
                 end
            end
         end
@@ -362,6 +379,15 @@ function resizeFigure(~, ~)
                     );  
             end
         end
+
+        btnUiSagWindowFullScreen = btnUiSagWindowFullScreenPtr('get');
+    
+        if ~isempty(btnUiSagWindowFullScreen)
+    
+            aUiSagPosition = get(uiSagWindow ,'Position');
+
+            set(btnUiSagWindowFullScreen, 'Position', [aUiSagPosition(3)-20 5 20 20]);           
+        end       
     end  
 
     uiTraWindow = uiTraWindowPtr('get');
@@ -420,6 +446,7 @@ function resizeFigure(~, ~)
                                  getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15 ...
                                  ]...
                    );
+
             end
         end
         
@@ -435,6 +462,20 @@ function resizeFigure(~, ~)
                     );                                               
             end
         end
+
+        btnUiTraWindowFullScreen = btnUiTraWindowFullScreenPtr('get');
+
+        if ~isempty(btnUiTraWindowFullScreen)
+
+            aUiTraPosition = get(uiTraWindow, 'Position');
+
+            if isFusion('get') == true
+                set(btnUiTraWindowFullScreen, 'Position', [aUiTraPosition(3)-73 25 20 20]);
+            else
+                set(btnUiTraWindowFullScreen, 'Position', [aUiTraPosition(3)-73 5 20 20]);
+            end
+        end
+
     end  
     
     uiMipWindow = uiMipWindowPtr('get');

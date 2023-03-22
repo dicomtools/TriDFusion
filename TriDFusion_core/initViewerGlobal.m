@@ -35,64 +35,68 @@ function initViewerGlobal()
     axesText('set', 'axes3'  , '');
     axesText('set', 'axesMip', '');
 
-    visBoundAxePtr  ('set', '');
-    visBoundAxes1Ptr('set', '');
-    visBoundAxes2Ptr('set', '');
-    visBoundAxes3Ptr('set', '');
+    visBoundAxePtr  ('set', []);
+    visBoundAxes1Ptr('set', []);
+    visBoundAxes2Ptr('set', []);
+    visBoundAxes3Ptr('set', []);
 
-    fiMainWindowPtr       ('set', '');
-    uiTopWindowPtr        ('set', '');
-    uiSegMainPanelPtr     ('set', '');
-    uiSegPanelSliderPtr   ('set', '');
-    uiSegPanelPtr         ('set', '');
-    uiKernelMainPanelPtr  ('set', '');
-    uiKernelPanelSliderPtr('set', '');
-    uiKernelPanelPtr      ('set', '');
-    uiMain3DPanelPtr      ('set', '');
-    ui3DPanelPtr          ('set', '');
-    ui3DPanelSliderPtr    ('set', '');
+    fiMainWindowPtr       ('set', []);
+    uiTopWindowPtr        ('set', []);
+    uiSegMainPanelPtr     ('set', []);
+    uiSegPanelSliderPtr   ('set', []);
+    uiSegPanelPtr         ('set', []);
+    uiKernelMainPanelPtr  ('set', []);
+    uiKernelPanelSliderPtr('set', []);
+    uiKernelPanelPtr      ('set', []);
+    uiMain3DPanelPtr      ('set', []);
+    ui3DPanelPtr          ('set', []);
+    ui3DPanelSliderPtr    ('set', []);
+
+    btnUiSagWindowFullScreenPtr('set', []);
+    btnUiCorWindowFullScreenPtr('set', []);
+    btnUiTraWindowFullScreenPtr('set', []);
 
     figContourReportPtr    ('set', '');
     fig3DLungShuntReportPtr('set', '');
     fig3DLobeLungReportPtr ('set', '');
 
-    btn3DPtr         ('set', '');
-    btnIsoSurfacePtr ('set', '');
-    btnMIPPtr        ('set', '');
-    btnTriangulatePtr('set', '');
-    btnPanPtr        ('set', '');
-    btnZoomPtr       ('set', '');
-    btnRegisterPtr   ('set', '');
-    btnMathPtr       ('set', '');
-    btnVsplashPtr    ('set', '');
-    uiEditVsplahXPtr ('set', '');
-    uiEditVsplahYPtr ('set', '');
-    btnFusionPtr     ('set', '');
+    btn3DPtr         ('set', []);
+    btnIsoSurfacePtr ('set', []);
+    btnMIPPtr        ('set', []);
+    btnTriangulatePtr('set', []);
+    btnPanPtr        ('set', []);
+    btnZoomPtr       ('set', []);
+    btnRegisterPtr   ('set', []);
+    btnMathPtr       ('set', []);
+    btnVsplashPtr    ('set', []);
+    uiEditVsplahXPtr ('set', []);
+    uiEditVsplahYPtr ('set', []);
+    btnFusionPtr     ('set', []);
 
-    uiOneWindowPtr('set', '');
-    uiCorWindowPtr('set', '');
-    uiSliderCorPtr('set', '');
-    uiSagWindowPtr('set', '');
-    uiSliderSagPtr('set', '');
-    uiTraWindowPtr('set', '');
-    uiSliderTraPtr('set', '');
-    uiMipWindowPtr('set', '');
-    uiSliderMipPtr('set', '');
+    uiOneWindowPtr('set', []);
+    uiCorWindowPtr('set', []);
+    uiSliderCorPtr('set', []);
+    uiSagWindowPtr('set', []);
+    uiSliderSagPtr('set', []);
+    uiTraWindowPtr('set', []);
+    uiSliderTraPtr('set', []);
+    uiMipWindowPtr('set', []);
+    uiSliderMipPtr('set', []);
 
-    uiSeriesPtr('set', '');
+    uiSeriesPtr('set', []);
     uiFusedSeriesPtr('set', '');
 
-    uiSliderWindowPtr('set', '');
-    uiSliderLevelPtr ('set', '');
-    uiColorbarPtr    ('set', '');
+    uiSliderWindowPtr('set', []);
+    uiSliderLevelPtr ('set', []);
+    uiColorbarPtr    ('set', []);
 
-    uiFusionSliderWindowPtr('set', '');
-    uiFusionSliderLevelPtr ('set', '');
-    uiAlphaSliderPtr       ('set', '');
-    uiFusionColorbarPtr    ('set', '');
+    uiFusionSliderWindowPtr('set', []);
+    uiFusionSliderLevelPtr ('set', []);
+    uiAlphaSliderPtr       ('set', []);
+    uiFusionColorbarPtr    ('set', []);
 
-    uiProgressWindowPtr('set', '');
-    uiBarPtr('set', '');
+    uiProgressWindowPtr('set', []);
+    uiBarPtr('set', []);
     
     quantificationTemplate('reset');
 
@@ -112,30 +116,30 @@ function initViewerGlobal()
     roiTemplate ('reset');
     voiTemplate ('reset');
 
-    volObject('set', '');
-    isoObject('set', '');
-    mipObject('set', '');
-    voiObject('set', '');
+    volObject('set', []);
+    isoObject('set', []);
+    mipObject('set', []);
+    voiObject('set', []);
 
-    volFusionObject('set', '');
-    isoFusionObject('set', '');
-    mipFusionObject('set', '');
+    volFusionObject('set', []);
+    isoFusionObject('set', []);
+    mipFusionObject('set', []);
 
-    voiGateObject('set', '');
-    ui3DGateWindowObject('set', '');
-    ui3DLogoObject('set', '');
+    voiGateObject('set', []);
+    ui3DGateWindowObject('set', []);
+    ui3DLogoObject('set', []);
 
     volumeScaleFator('set', 'x', 1);
     volumeScaleFator('set', 'y', 1);
     volumeScaleFator('set', 'z', 1);
 
-    volGateObject('set', '');
-    isoGateObject('set', '');
-    mipGateObject('set', '');
+    volGateObject('set', []);
+    isoGateObject('set', []);
+    mipGateObject('set', []);
 
-    volGateFusionObject('set', '');
-    isoGateFusionObject('set', '');
-    mipGateFusionObject('set', '');
+    volGateFusionObject('set', []);
+    isoGateFusionObject('set', []);
+    mipGateFusionObject('set', []);
 
     isFusion       ('set', false);
     isVsplash      ('set', false);
@@ -145,34 +149,34 @@ function initViewerGlobal()
     viewKernelPanel('set', false);
     viewRoiPanel('set', false);
 
-    optionsPanelMenuObject   ('set', '');
-    viewRoiObject            ('set', '');
-    viewSegPanelMenuObject   ('set', '');
-    viewKernelPanelMenuObject('set', '');
-    viewRoiPanelMenuObject   ('set', '');
-    view3DPanelMenuObject    ('set', '');
-    playIconMenuObject       ('set', '');
-    recordIconMenuObject     ('set', '');
-    gateIconMenuObject       ('set', '');
-    viewPlaybackObject       ('set', '');
-    playbackMenuObject       ('set', '');
-    roiMenuObject            ('set', '');
+    optionsPanelMenuObject   ('set', []);
+    viewRoiObject            ('set', []);
+    viewSegPanelMenuObject   ('set', []);
+    viewKernelPanelMenuObject('set', []);
+    viewRoiPanelMenuObject   ('set', []);
+    view3DPanelMenuObject    ('set', []);
+    playIconMenuObject       ('set', []);
+    recordIconMenuObject     ('set', []);
+    gateIconMenuObject       ('set', []);
+    viewPlaybackObject       ('set', []);
+    playbackMenuObject       ('set', []);
+    roiMenuObject            ('set', []);
 
-    volICObject('set', '');
-    mipICObject('set', '');
-    volICFusionObject('set', '');
-    mipICFusionObject('set', '');
+    volICObject('set', []);
+    mipICObject('set', []);
+    volICFusionObject('set', []);
+    mipICFusionObject('set', []);
 
-    mipColorObject('set', '');
-    volColorObject('set', '');
+    mipColorObject('set', []);
+    volColorObject('set', []);
 
-    logoObject('set', '');
+    logoObject('set', []);
 
-    ui3DVolumePtr('set', '');
+    ui3DVolumePtr('set', []);
 
     viewerRootPath('set', './');
 
-    copyRoiPtr('set', '');
+    copyRoiPtr('set', []);
 
     kernelCtDoseMapUiValues('set', []);
     resampleToCTIsoMaskUiValues ('set', []);

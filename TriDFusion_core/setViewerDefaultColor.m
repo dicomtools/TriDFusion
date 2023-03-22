@@ -347,7 +347,46 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                             colormap(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));   
                         end
                     end
-               end
+                end
+
+
+                if isVsplash('get') == false                                                       
+        
+                    btnUiTraWindowFullScreen = btnUiTraWindowFullScreenPtr('get');
+                    btnUiCorWindowFullScreen = btnUiCorWindowFullScreenPtr('get');
+                    btnUiSagWindowFullScreen = btnUiSagWindowFullScreenPtr('get');
+           
+                    if ~isempty(btnUiTraWindowFullScreen)&& ...
+                       ~isempty(btnUiCorWindowFullScreen)&& ...
+                       ~isempty(btnUiSagWindowFullScreen)
+               
+
+                        if strcmpi(backgroundColor('get'), 'white')
+                            if exist(sprintf('%s/icons/full-screen-black.png', viewerRootPath('get')), 'file')
+                                [imgFullScreenIcon,~] = imread(sprintf('%s/icons/full-screen-black.png', viewerRootPath('get')));
+                                imgFullScreenIcon = double(imgFullScreenIcon)/255;
+                            else
+                                imgFullScreenIcon = zeros([16 16 3]);
+                            end          
+                        else
+                            if exist(sprintf('%s/icons/full-screen-white.png', viewerRootPath('get')), 'file')
+                               [imgFullScreenIcon,~] = imread(sprintf('%s/icons/full-screen-white.png', viewerRootPath('get')));
+                                imgFullScreenIcon = double(imgFullScreenIcon)/255;
+                            else
+                                imgFullScreenIcon = zeros([16 16 3]);
+                            end                
+                        end            
+                        
+                        set(btnUiTraWindowFullScreen, 'CData', imgFullScreenIcon);
+                        set(btnUiCorWindowFullScreen, 'CData', imgFullScreenIcon);
+                        set(btnUiSagWindowFullScreen, 'CData', imgFullScreenIcon);
+
+                        set(btnUiTraWindowFullScreen, 'BackgroundColor', backgroundColor('get'));
+                        set(btnUiCorWindowFullScreen, 'BackgroundColor', backgroundColor('get'));
+                        set(btnUiSagWindowFullScreen, 'BackgroundColor', backgroundColor('get'));
+                    end          
+                end
+
             end                        
         end
 
