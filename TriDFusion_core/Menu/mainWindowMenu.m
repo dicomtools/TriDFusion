@@ -158,7 +158,12 @@ function mainWindowMenu()
     uimenu(mTools, 'Label','Create Planar from a 3D Series', 'Callback', @convertSeriesToPlanarCallback, 'Separator','on');
     uimenu(mTools, 'Label','Dice Contours', 'Callback', @diceContoursCallback, 'Separator','on');
     uimenu(mTools, 'Label','Reset Series', 'Callback', @resetSeriesCallback, 'Separator','on');
- 
+
+
+    mWorkflows = uimenu(fiMainWindowPtr('get'),'Label','Workflows');  
+    uimenu(mWorkflows, 'Label','FDG Tumor Segmentation', 'Callback', @setSegmentationFDGCallback);
+    uimenu(mWorkflows, 'Label','Ga68 DOTATATE Segmentation (Machine Learning)', 'Callback', @setMachineLearningGa68DOTATATECallback);
+    
 if 1    
     mModules = uimenu(fiMainWindowPtr('get'),'Label','Modules');
     mMachineLearning = uimenu(mModules, 'Label','Machine Learning');
@@ -177,6 +182,7 @@ if 1
     uimenu(mRadiomics, 'Label','Compute Radiomics', 'Callback', @extractRadiomicsFromContoursCallback);
 
 end
+
 
     mHelp = uimenu(fiMainWindowPtr('get'),'Label','Help');
     uimenu(mHelp,'Label', 'Shortcuts', 'Callback'  , @shortcutsViewerCallback);

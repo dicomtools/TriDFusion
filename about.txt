@@ -1,4 +1,4 @@
-TriDFusion (3DF) Image Viewer Version 1.1
+TriDFusion (3DF) Image Viewer Version 1.2
 
 Disclaimer Notice:
 
@@ -43,4 +43,9 @@ Contributors:
    Joseph O'Donoghue
    Memorial Sloan Kettering 
    Department of Medical Physics
+   New York, NY, USA
+
+   Simone Krebs
+   Memorial Sloan Kettering 
+   Departments of Radiology
    New York, NY, USA

@@ -1,5 +1,5 @@
-function setContours(tContours)
-%function setContours(tContours)
+function setContours(tContours, bInitDisplay)
+%function setContours(tContours, bInitDisplay)
 %Set Contours to Input Template.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -32,10 +32,14 @@ function setContours(tContours)
 
     atInput = inputTemplate('get');
     if exist('tContours','var')
-        bInitDisplay = false;
+         if ~exist('bInitDisplay','var')
+            bInitDisplay = false;
+         end
         atContours = tContours;
     else
-        bInitDisplay = true;
+        if ~exist('bInitDisplay','var')
+            bInitDisplay = true;
+        end
         atContours = inputContours('get');
     end
      
@@ -142,7 +146,18 @@ function setContours(tContours)
 
     %                                pRoi = drawfreehand(axRoi, 'Smoothing', 1, 'Position', ROI.Position, 'Color', aColor, 'LineWidth', 1, 'Label', sLabel, 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'off', 'FaceSelectable', 0, 'FaceAlpha', 0);  
     %                                pRoi.Waypoints(:) = false;
-                                    addContourToTemplate(bb, 'Axes3', dSliceNb, 'images.roi.freehand', ROI.Position, sLabel, 'off', aColor, 1, roiFaceAlphaValue('get'), 0, 1, sTag, 'Unspecified');
+
+                                    sLesionType = 'Unspecified';
+
+                                    [~, asLesionType, asLesionShortName] = getLesionType('');   
+                                    for jj=1:numel(asLesionShortName)
+                                        if contains(sLabel, asLesionShortName{jj})
+                                            sLesionType = asLesionType{jj};
+                                            break;
+                                        end
+                                    end
+
+                                    addContourToTemplate(bb, 'Axes3', dSliceNb, 'images.roi.freehand', ROI.Position, sLabel, 'off', aColor, 1, roiFaceAlphaValue('get'), 0, 1, sTag, sLesionType);
 
     %                                addRoi(pRoi, bb);                  
 
@@ -163,7 +178,7 @@ function setContours(tContours)
                                 end
 
                                 if ~isempty(asTag)
-                                    createVoiFromRois(bb, asTag, sLabel, aColor, 'Unspecified');                        
+                                    createVoiFromRois(bb, asTag, sLabel, aColor, sLesionType);                        
                                 end            
                             end
                         end

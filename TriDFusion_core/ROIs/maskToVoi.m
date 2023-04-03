@@ -83,6 +83,7 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
             [maskSlice, ~,~,~] = bwboundaries(aSlice, 'noholes', 4); 
 
             if ~isempty(maskSlice)
+
                 for jj=1:numel(maskSlice)
                     
                     sTag = num2str(randi([-(2^52/2),(2^52/2)],1));

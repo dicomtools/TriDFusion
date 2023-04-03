@@ -275,7 +275,7 @@ function importContoursCallback(~, ~)
                 
                     inputContours('add', atContours(dd));
                         
-                    setContours({atContours(dd)});                
+                    setContours({atContours(dd)}, true);                
                 end
             end
             

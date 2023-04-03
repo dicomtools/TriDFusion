@@ -222,15 +222,17 @@ function resize = dicomViewer()
 
     % Machine Learning
 
-    pixelEdgeMachineLearningDialog('set', true);
-    fastMachineLearningDialog('set', true);
+    pixelEdgeMachineLearningDialog ('set', true);
+    fastMachineLearningDialog      ('set', true);
+    forceSplitMachineLearningDialog('set', true);
+    bodySegMachineLearningDialog   ('set', true);
 
     viewFarthestDistances('set', false);
     
-    isShowTextContours('set', 'axe', true);
+    isShowTextContours('set', 'axe'     , true );
     isShowTextContours('set', 'coronal' , false);
     isShowTextContours('set', 'sagittal', false);
-    isShowTextContours('set', 'axial'   , true);
+    isShowTextContours('set', 'axial'   , true );
     isShowTextContours('set', 'mip'     , false);
    
     isShowFaceAlphaContours('set', true);
@@ -249,11 +251,35 @@ function resize = dicomViewer()
     % setIsoSurfaceCallback(~, ~). The default value are restored in
     % setSeriesCallback() and setSourceCallback().
     
-    defaultIsoColorOffset        ('set', isoColorOffset('get') ); 
-    defaultIsoSurfaceValue       ('set', isoSurfaceValue('get')); 
-    defaultIsoColorFusionOffset  ('set', isoColorFusionOffset('get')); 
-    defaultIsoSurfaceFusionValue ('set', isoSurfaceFusionValue('get'));
-    
+    defaultIsoColorOffset       ('set', isoColorOffset('get')       ); 
+    defaultIsoSurfaceValue      ('set', isoSurfaceValue('get')      ); 
+    defaultIsoColorFusionOffset ('set', isoColorFusionOffset('get') ); 
+    defaultIsoSurfaceFusionValue('set', isoSurfaceFusionValue('get'));
+
+
+    % Machine Learning Ga68 DOTATATE segmentation Other Organ
+    % Exclusion
+
+    excludeGa68DOTATATEBrain            ('set', true );
+    excludeGa68DOTATATETrachea          ('set', false);
+    excludeGa68DOTATATEAdrenalGlandLeft ('set', true );
+    excludeGa68DOTATATEAdrenalGlandRight('set', true );
+    excludeGa68DOTATATEGallbladder      ('set', false);
+    excludeGa68DOTATATEPancreas         ('set', false);
+    excludeGa68DOTATATEKidneyLeft       ('set', true );
+    excludeGa68DOTATATEKidneyRight      ('set', true );
+
+    % Machine Learning Ga68 DOTATATE segmentation Gastrointestinal Tract
+    % Exclusion
+
+    excludeGa68DOTATATESpleen        ('set', false);
+    excludeGa68DOTATATEUrinaryBladder('set', true );
+    excludeGa68DOTATATEColon         ('set', false);
+    excludeGa68DOTATATESmallBowel    ('set', false);
+    excludeGa68DOTATATEDuodenum      ('set', false);
+    excludeGa68DOTATATEStomach       ('set', false);
+    excludeGa68DOTATATEEsophagus     ('set', false);
+
     clearDisplay();
 
     uiTopWindow = ...

@@ -178,7 +178,7 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorPath)
 
                         for jj=1:numel(atVoiInput)
 
-                            if ~strcmpi(atVoiInput{jj}.Label, 'Liver')
+                            if ~contains(atVoiInput{jj}.Label, 'Liver')
 
                                 copyRoiVoiToSerie(dCTSerieOffset, dPTSerieOffset, atVoiInput{jj}, false); 
                             

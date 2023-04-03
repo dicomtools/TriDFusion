@@ -985,11 +985,11 @@ function generate3DLungShuntReportCallback(~, ~)
             
             switch lower(atVoiInput{vv}.Label)
                                     
-                case 'lungs'
+                case 'lungs-lun'
                     dLungsCount  = dLungsCount+1;                    
                     dNbLungsRois = dNbLungsRois+dNbRois;
                     
-                case 'liver'
+                case 'liver-liv'
                     dLiverCount  = dLiverCount+1;                    
                     dNbLiverRois = dNbLiverRois+dNbRois;
             end
@@ -1025,7 +1025,7 @@ function generate3DLungShuntReportCallback(~, ~)
            
             switch lower(atVoiInput{vv}.Label)
                                     
-                case 'lungs'
+                case 'lungs-lun'
                     dFrom = dLungsRoisOffset;
                     dTo   = dLungsRoisOffset+dNbRois-1;
                     
@@ -1033,7 +1033,7 @@ function generate3DLungShuntReportCallback(~, ~)
                     
                     dLungsRoisOffset = dLungsRoisOffset+dNbRois;
                     
-                case 'liver'
+                case 'liver-liv'
                     dFrom = dLiverRoisOffset;
                     dTo   = dLiverRoisOffset+dNbRois-1;
                     
@@ -1539,7 +1539,7 @@ function generate3DLungShuntReportCallback(~, ~)
 
             set(uiReport3DLungShuntLungRatio , 'string', sLungsShuntFraction);      
 
-            set(uiEditWindow, 'string', sprintf('Corrected lungs total: %.2f\nCorrected liver total  : %.2f', dLungsTotal, dLiverTotal));
+            set(uiEditWindow, 'string', sprintf('Updated lungs total: %.2f\nUpdated liver total  : %.2f', dLungsTotal, dLiverTotal));
         end
 
     end
@@ -1565,7 +1565,7 @@ function generate3DLungShuntReportCallback(~, ~)
 
             set(uiReport3DLungShuntLungRatio , 'string', sLungsShuntFraction);
 
-            set(uiEditWindow, 'string', sprintf('Corrected lungs total: %.2f\nCorrected liver total  : %.2f', dLungsTotal, dLiverTotal));
+            set(uiEditWindow, 'string', sprintf('Updated lungs total: %.2f\nUpdated liver total  : %.2f', dLungsTotal, dLiverTotal));
 
         end
     end

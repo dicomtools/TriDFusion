@@ -28,7 +28,7 @@ function setOptionsCallback(~, ~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     DLG_OPTIONS_X = 380;
-    DLG_OPTIONS_Y = 405;
+    DLG_OPTIONS_Y = 430;
     
     dlgOptions = ...
         dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_OPTIONS_X/2) ...
@@ -63,6 +63,43 @@ function setOptionsCallback(~, ~)
 %   javaFrame = get(dlgOptions,'JavaFrame');
 %   javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));                              
     % Show border
+
+         uicontrol(dlgOptions,...
+                  'style'   , 'text',...
+                  'string'  , 'SUV Type',...
+                  'horizontalalignment', 'left',...
+                  'position', [20 387 200 20],...
+                  'Enable', 'Inactive',...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get') ...                    
+                  );
+
+    gsSUVType = viewerSUVtype('get'); 
+
+    if strcmpi(gsSUVType, 'BW') % Body Weight
+        dSUVoffset = 1;
+    elseif strcmpi(gsSUVType, 'FDG') % Brads FDG specific SUV
+        dSUVoffset = 2;
+    elseif strcmpi(gsSUVType, 'BSA') % body surface area
+        dSUVoffset = 3;            
+    elseif strcmpi(gsSUVType, 'LBM') % lean body mass 
+        dSUVoffset = 4;
+    elseif strcmpi(gsSUVType, 'LBMJANMA') % lean body mass by Janmahasatian method
+        dSUVoffset = 5;
+    else
+        dSUVoffset = 1;
+    end
+
+        uicontrol(dlgOptions, ...
+                  'enable'  , 'on',...
+                  'Style'   , 'popup', ...
+                  'position', [200 390 160 20],...
+                  'String'  , {'BW', 'FDG', 'BSA', 'LBM', 'LBMJANMA'}, ...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'Value'   , dSUVoffset, ...
+                  'Callback', @updateSUVCallback...
+                  );
 
          uicontrol(dlgOptions,...
                   'style'   , 'text',...
@@ -455,7 +492,137 @@ function setOptionsCallback(~, ~)
               'Callback', @okOptionsCallback...
               );
 
-     function set3DEngineCallback(hObject, ~)
+    function updateSUVCallback(hObject, ~)
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+        dFusionOffset = get(uiFusedSeriesPtr('get'), 'Value');
+
+        asSUVType = get(hObject, 'String');
+        dSUVType  = get(hObject, 'Value');
+
+        viewerSUVtype('set', asSUVType{dSUVType});         
+
+        tInput = inputTemplate('get');                
+      
+        sUnitDisplay = getSerieUnitValue(dSeriesOffset);            
+        if strcmpi(sUnitDisplay, 'SUV')
+            dMax = windowLevel('get', 'max')*tInput(dSeriesOffset).tQuant.tSUV.dScale;
+            dMin = windowLevel('get', 'min')*tInput(dSeriesOffset).tQuant.tSUV.dScale;
+        end
+
+        if isFusion('get')
+
+            sUnitDisplay = getSerieUnitValue(dFusionOffset);            
+            if strcmpi(sUnitDisplay, 'SUV')        
+                dFusionMax = fusionWindowLevel('get', 'max')*tInput(dFusionOffset).tQuant.tSUV.dScale;
+                dFusionMin = fusionWindowLevel('get', 'min')*tInput(dFusionOffset).tQuant.tSUV.dScale;
+            end
+        end
+
+        if numel(tInput) ~= 0
+            for dTemplateLoop = 1 : numel(tInput)       
+                setQuantification(dTemplateLoop);
+            end
+        end
+
+        tInput = inputTemplate('get');                
+
+        sUnitDisplay = getSerieUnitValue(dSeriesOffset);            
+        if strcmpi(sUnitDisplay, 'SUV')
+            dMax = dMax/tInput(dSeriesOffset).tQuant.tSUV.dScale;
+            dMin = dMin/tInput(dSeriesOffset).tQuant.tSUV.dScale;
+
+            windowLevel('set', 'max', dMax);
+            windowLevel('set', 'min', dMin);
+
+            set(uiSliderWindowPtr('get'), 'value', 0.5);
+            set(uiSliderLevelPtr('get') , 'value', 0.5);           
+        end
+
+        if isFusion('get')
+
+            sUnitDisplay = getSerieUnitValue(dFusionOffset);            
+            
+            if strcmpi(sUnitDisplay, 'SUV') 
+    
+                dFusionMax = dFusionMax/tInput(dFusionOffset).tQuant.tSUV.dScale;
+                dFusionMin = dFusionMin/tInput(dFusionOffset).tQuant.tSUV.dScale;
+
+                fusionWindowLevel('set', 'max', dFusionMax);
+                fusionWindowLevel('set', 'min', dFusionMin);
+    
+                set(uiFusionSliderWindowPtr('get'), 'value', 0.5);
+                set(uiFusionSliderLevelPtr('get') , 'value', 0.5);
+
+            end
+
+        end 
+
+        if switchTo3DMode('get')     == false && ...
+           switchToIsoSurface('get') == false && ...
+           switchToMIPMode('get')    == false
+
+            sUnitDisplay = getSerieUnitValue(dSeriesOffset);            
+            if strcmpi(sUnitDisplay, 'SUV')
+    
+                if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1            
+                    set(axePtr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);
+                else
+                    set(axes1Ptr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);
+                    set(axes2Ptr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);
+                    set(axes3Ptr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);
+                    
+                    if link2DMip('get') == true && isVsplash('get') == false
+                        set(axesMipPtr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);            
+                    end
+                end
+            end
+
+            if isFusion('get')
+
+                dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+                for rr=1:dNbFusedSeries
+
+                    sUnitDisplay = getSerieUnitValue(rr);            
+                
+                    if strcmpi(sUnitDisplay, 'SUV') 
+    
+                        if size(dicomBuffer('get', [], dNbFusedSeries), 3) == 1 
+    
+                            axefPtr = axefPtr('get', [], rr);
+                            if ~isempty(axefPtr)
+                                set(axefPtr, 'CLim', [dFusionMin dFusionMax]);
+                            end
+                        else
+                            axes1f = axes1fPtr('get', [], rr);
+                            axes2f = axes2fPtr('get', [], rr);
+                            axes3f = axes3fPtr('get', [], rr);
+        
+                            if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
+                                set(axes1f, 'CLim', [dFusionMin dFusionMax]);
+                                set(axes2f, 'CLim', [dFusionMin dFusionMax]);
+                                set(axes3f, 'CLim', [dFusionMin dFusionMax]);                            
+                            end
+    
+                            if link2DMip('get') == true && isVsplash('get') == false
+                                axesMipf = axesMipfPtr('get', [], rr);
+                                if ~isempty(axesMipf)
+                                    set(axesMipf, 'CLim', [dFusionMin dFusionMax]);            
+                                end
+                            end
+                          
+                        end
+                    end
+                end
+               
+            end
+       
+            refreshImages();
+        end        
+
+    end
+
+    function set3DEngineCallback(hObject, ~)
 
         if get(chk3DEngine, 'Value') == 1
             if strcmpi(hObject.Style, 'checkbox')

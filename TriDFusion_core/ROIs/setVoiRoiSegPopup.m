@@ -69,7 +69,7 @@ function setVoiRoiSegPopup()
             
             sLesionType = atVoiInput{get(uiDeleteVoiRoiPanel, 'Value')}.LesionType;
             
-            [bLesionOffset, asLesionList] = getLesionType(sLesionType);
+            [bLesionOffset, asLesionList, ~] = getLesionType(sLesionType);
             set(uiLesionTypeVoiRoiPanel, 'Enable', 'on');
             set(uiLesionTypeVoiRoiPanel, 'String', asLesionList);
             set(uiLesionTypeVoiRoiPanel, 'Value' , bLesionOffset);

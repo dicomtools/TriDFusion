@@ -1337,35 +1337,35 @@ function generate3DLungLobeReportCallback(~, ~)
             
             switch lower(atVoiInput{vv}.Label)
                                     
-                case 'lungs'
+                case 'lungs-lun'
                     dLungsCount  = dLungsCount+1;                    
                     dNbLungsRois = dNbLungsRois+dNbRois;
                     
-                case 'lung left'
+                case 'lung left-lun'
                     dLungLeftCount  = dLungLeftCount+1;                    
                     dNbLungLeftRois = dNbLungLeftRois+dNbRois;
 
-                case 'lung right'
+                case 'lung right-lun'
                     dLungRightCount  = dLungRightCount+1;                    
                     dNbLungRightRois = dNbLungRightRois+dNbRois;   
 
-                case 'lung upper lobe left'
+                case 'lung upper lobe left-lun'
                     dLungUpperLobeLeftCount  = dLungUpperLobeLeftCount+1;                    
                     dNbLungUpperLobeLeftRois = dNbLungUpperLobeLeftRois+dNbRois;  
 
-                case 'lung lower lobe left'
+                case 'lung lower lobe left-lun'
                     dLungLowerLobeLeftCount  = dLungLowerLobeLeftCount+1;                    
                     dNbLungLowerLobeLeftRois = dNbLungLowerLobeLeftRois+dNbRois; 
 
-                case 'lung upper lobe right'
+                case 'lung upper lobe right-lun'
                     dLungUpperLobeRightCount  = dLungUpperLobeRightCount+1;                    
                     dNbLungUpperLobeRightRois = dNbLungUpperLobeRightRois+dNbRois;  
 
-                case 'lung middle lobe right'
+                case 'lung middle lobe right-lun'
                     dLungMiddleLobeRightCount  = dLungMiddleLobeRightCount+1;                    
                     dNbLungMiddleLobeRightRois = dNbLungMiddleLobeRightRois+dNbRois;  
 
-                case 'lung lower lobe right'
+                case 'lung lower lobe right-lun'
                     dLungLowerLobeRightCount  = dLungLowerLobeRightCount+1;                    
                     dNbLungLowerLobeRightRois = dNbLungLowerLobeRightRois+dNbRois; 
             end
@@ -1447,7 +1447,7 @@ function generate3DLungLobeReportCallback(~, ~)
            
             switch lower(atVoiInput{vv}.Label)
                                     
-                case 'lungs'
+                case 'lungs-lun'
                     dFrom = dLungsRoisOffset;
                     dTo   = dLungsRoisOffset+dNbRois-1;
                     
@@ -1455,7 +1455,7 @@ function generate3DLungLobeReportCallback(~, ~)
                     
                     dLungsRoisOffset = dLungsRoisOffset+dNbRois;
                     
-                case 'lung left'
+                case 'lung left-lun'
                     dFrom = dLungLeftRoisOffset;
                     dTo   = dLungLeftRoisOffset+dNbRois-1;
                     
@@ -1463,7 +1463,7 @@ function generate3DLungLobeReportCallback(~, ~)
                     
                     dLungLeftRoisOffset = dLungLeftRoisOffset+dNbRois;      
 
-                case 'lung right'
+                case 'lung right-lun'
                     dFrom = dLungRightRoisOffset;
                     dTo   = dLungRightRoisOffset+dNbRois-1;
                     
@@ -1471,7 +1471,7 @@ function generate3DLungLobeReportCallback(~, ~)
                     
                     dLungRightRoisOffset = dLungRightRoisOffset+dNbRois; 
 
-                case 'lung upper lobe left'
+                case 'lung upper lobe left-lun'
                     dFrom = dLungUpperLobeLeftRoisOffset;
                     dTo   = dLungUpperLobeLeftRoisOffset+dNbRois-1;
                     
@@ -1479,7 +1479,7 @@ function generate3DLungLobeReportCallback(~, ~)
                     
                     dLungUpperLobeLeftRoisOffset = dLungUpperLobeLeftRoisOffset+dNbRois; 
 
-                case 'lung lower lobe left'
+                case 'lung lower lobe left-lun'
                     dFrom = dLungLowerLobeLeftRoisOffset;
                     dTo   = dLungLowerLobeLeftRoisOffset+dNbRois-1;
                     
@@ -1487,7 +1487,7 @@ function generate3DLungLobeReportCallback(~, ~)
                     
                     dLungLowerLobeLeftRoisOffset = dLungLowerLobeLeftRoisOffset+dNbRois; 
 
-                case 'lung upper lobe right'
+                case 'lung upper lobe right-lun'
                     dFrom = dLungUpperLobeRightRoisOffset;
                     dTo   = dLungUpperLobeRightRoisOffset+dNbRois-1;
                     
@@ -1495,7 +1495,7 @@ function generate3DLungLobeReportCallback(~, ~)
                     
                     dLungUpperLobeRightRoisOffset = dLungUpperLobeRightRoisOffset+dNbRois; 
 
-                case 'lung middle lobe right'
+                case 'lung middle lobe right-lun'
                     dFrom = dLungMiddleLobeRightRoisOffset;
                     dTo   = dLungMiddleLobeRightRoisOffset+dNbRois-1;
                     
@@ -1503,7 +1503,7 @@ function generate3DLungLobeReportCallback(~, ~)
                     
                     dLungMiddleLobeRightRoisOffset = dLungMiddleLobeRightRoisOffset+dNbRois; 
 
-                case 'lung lower lobe right'
+                case 'lung lower lobe right-lun'
                     dFrom = dLungLowerLobeRightRoisOffset;
                     dTo   = dLungLowerLobeRightRoisOffset+dNbRois-1;
                     

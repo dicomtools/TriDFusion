@@ -136,7 +136,7 @@ function initRoiPanel()
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'text',...
                   'FontWeight', 'bold',...
-                  'string'  , 'Contour Face Alpha',...
+                  'string'  , 'Contour Transparency',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
@@ -486,7 +486,12 @@ function initRoiPanel()
         atVoiInput = voiTemplate('get', dSerieOffset);
 
         if ~isempty(atVoiInput)
-            
+
+            try
+                
+            set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+            drawnow;
+
             dVoiOffset = get(uiDeleteVoiRoiPanel, 'Value');
 
             bLesionOffset = get(hObject, 'Value');
@@ -494,19 +499,36 @@ function initRoiPanel()
             sLesionType = asLesionType{bLesionOffset};
                                     
             atVoiInput{dVoiOffset}.LesionType = sLesionType; 
+
+            [bLesionOffset, ~, asLesionShortName] = getLesionType(sLesionType);   
+            for jj=1:numel(asLesionShortName)
+                if contains(atVoiInput{dVoiOffset}.Label, asLesionShortName{jj})
+                    atVoiInput{dVoiOffset}.Label = replace(atVoiInput{dVoiOffset}.Label, asLesionShortName{jj}, asLesionShortName{bLesionOffset});
+                    break;
+                end
+            end
                         
             for rr=1:numel(atVoiInput{dVoiOffset}.RoisTag) % Set ROIs template
                 for tt=1:numel(atRoiInput)
                     if strcmp(atVoiInput{dVoiOffset}.RoisTag{rr}, atRoiInput{tt}.Tag)
                         atRoiInput{tt}.LesionType = sLesionType;
-                        break
+                        break;
                     end                   
                 end
             end
+
+            roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+            voiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atVoiInput);
+
+            setVoiRoiSegPopup();
+
+            catch
+            end
+            
+            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            drawnow;         
         end
                 
-        roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
-        voiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atVoiInput);
 
     end
 
@@ -526,7 +548,7 @@ function initRoiPanel()
             set(uiDeleteVoiRoiPanel, 'Value', dVoiOffset);
             
             sLesionType = atVoiInput{dVoiOffset}.LesionType;
-            [bLesionOffset, ~] = getLesionType(sLesionType);
+            [bLesionOffset, ~, ~] = getLesionType(sLesionType);
             set(uiLesionTypeVoiRoiPanel, 'Value', bLesionOffset);
                     
             sRoiTag = getLargestArea(atVoiInput{dVoiOffset}.RoisTag);
@@ -660,7 +682,7 @@ function initRoiPanel()
             set(uiDeleteVoiRoiPanel, 'Value', dVoiOffset);
 
             sLesionType = atVoiInput{dVoiOffset}.LesionType;
-            [bLesionOffset, ~] = getLesionType(sLesionType);
+            [bLesionOffset, ~, ~] = getLesionType(sLesionType);
             set(uiLesionTypeVoiRoiPanel, 'Value', bLesionOffset);
                  
             sRoiTag = getLargestArea(atVoiInput{dVoiOffset}.RoisTag);
@@ -698,7 +720,7 @@ function initRoiPanel()
             set(uiDeleteVoiRoiPanel, 'Value', dVoiOffset);
             
             sLesionType = atVoiInput{dVoiOffset}.LesionType;
-            [bLesionOffset, ~] = getLesionType(sLesionType);
+            [bLesionOffset, ~, ~] = getLesionType(sLesionType);
             set(uiLesionTypeVoiRoiPanel, 'Value', bLesionOffset);
             
             sRoiTag = getLargestArea(atVoiInput{dVoiOffset}.RoisTag);
@@ -819,7 +841,7 @@ function initRoiPanel()
 
             if numel(atVoiInput) >= dVoiOffset
                 sLesionType = atVoiInput{dVoiOffset}.LesionType;
-                [bLesionOffset, ~] = getLesionType(sLesionType);
+                [bLesionOffset, ~, ~] = getLesionType(sLesionType);
                 set(uiLesionTypeVoiRoiPanel, 'Value', bLesionOffset);
             else
                 set(uiLesionTypeVoiRoiPanel, 'Value' , 1);

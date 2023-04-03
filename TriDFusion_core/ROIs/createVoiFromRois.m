@@ -35,10 +35,17 @@ function createVoiFromRois(dSeriesOffset, asTag, sVoiName, sColor, sLesionType)
     atVoi = voiTemplate('get', dSeriesOffset);
     dVoiOffset = numel(atVoi)+1;
 
+    [bLesionOffset, ~, asLesionShortName] = getLesionType(sLesionType);
+
     if ~isempty(sVoiName)
-        atVoi{dVoiOffset}.Label = sVoiName;
+        
+        if contains(sVoiName, asLesionShortName{bLesionOffset})
+            atVoi{dVoiOffset}.Label = sVoiName;
+        else
+            atVoi{dVoiOffset}.Label = sprintf('%s-%s', sVoiName, asLesionShortName{bLesionOffset});
+        end
     else
-        atVoi{dVoiOffset}.Label = sprintf('VOI %d', dVoiOffset);
+        atVoi{dVoiOffset}.Label = sprintf('VOI %d-%s', dVoiOffset, asLesionShortName{bLesionOffset});
     end
 
     dRoiNb = 0;

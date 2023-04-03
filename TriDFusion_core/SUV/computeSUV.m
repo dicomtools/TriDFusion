@@ -12,6 +12,8 @@ function dSUVconv = computeSUV(atMetaData, suvType)
 % 
 %Last specifications modified:
 %
+% 2023-03-31 : Brad Beattie : added suvType == 'FDG'
+%
 % Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
@@ -148,6 +150,17 @@ function dSUVconv = computeSUV(atMetaData, suvType)
                 
                 if strcmpi(suvType, 'BW') % Body Weight
                     dSUVconv = patWeight/corrInj; % pt weight in grams
+
+                elseif strcmpi(suvType, 'FDG') % Brads FDG specific SUV
+
+                    patHeight = atMetaData{1}.PatientSize;
+                    if patHeight == 0 || isnan(patHeight)
+                        dSUVconv =0;
+                    else
+						x = patHeight / 100; y = patWeight;
+                        BHN = 100*exp(2.03*x^3-9.07*x^2+13.94*x+0.00539*y-2.04);
+                        dSUVconv = BHN/corrInj;
+                    end
 
                 elseif strcmpi(suvType, 'BSA') % body surface area
                     % Patient height

@@ -1,6 +1,6 @@
-function bFast = fastMachineLearningDialog(sAction, dValue)
-%function bFast = fastMachineLearningDialog(sAction, dValue)
-%Get/Set Fast Segmentation Machine Learning Dialog Value.
+function bCrop = bodySegMachineLearningDialog(sAction, dValue)
+%function bCrop = bodySegMachineLearningDialog(sAction, dValue)
+%Get/Set crop the image to the body region before processing it Machine Learning Dialog Value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.
@@ -30,11 +30,11 @@ function bFast = fastMachineLearningDialog(sAction, dValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent pbFast; 
+    persistent pbCrop; 
 
     if strcmpi('set', sAction)
-        pbFast = dValue;            
+        pbCrop = dValue;            
     end
 
-    bFast = pbFast;      
+    bCrop = pbCrop;      
 end

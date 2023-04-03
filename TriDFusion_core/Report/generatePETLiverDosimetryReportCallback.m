@@ -875,7 +875,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
             
             switch lower(atVoiInput{vv}.Label)
                                     
-                case 'liver'
+                case 'liver-liv'
                     dLiverCount  = dLiverCount+1;                    
                     dNbLiverRois = dNbLiverRois+dNbRois;
 
@@ -904,7 +904,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
         for jj=1:numel(atVoiInput)
             switch lower(atVoiInput{jj}.Label)
 
-                case 'liver'
+                case 'liver-liv'
                     tReport.Other{jj}.Label = [];
 
                 otherwise
@@ -952,7 +952,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                        
             switch lower(atVoiInput{vv}.Label)
                                                       
-                case 'liver'
+                case 'liver-liv'
 
                     dFrom = dLiverRoisOffset;
                     dTo   = dLiverRoisOffset+dNbRois-1;

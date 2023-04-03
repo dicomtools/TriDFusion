@@ -784,7 +784,7 @@ function generateContourReportCallback(~, ~)
                 
         sReport = sprintf('%s\n___________', char('Summary'));      
       
-        [~, asLesionList] = getLesionType('');
+        [~, asLesionList, ~] = getLesionType('');
         
         for ll=1:numel(asLesionList)
             sReport = sprintf('%s\n\n%s', sReport, char(asLesionList{ll}));
@@ -793,7 +793,7 @@ function generateContourReportCallback(~, ~)
 
     function sReport = getReportLesionNbContourInformation(sAction, tReport)
                       
-        [~, asLesionList] = getLesionType('');
+        [~, asLesionList, ~] = getLesionType('');
         
         if strcmpi(sAction, 'init')
             sReport = sprintf('%s\n___________', '-');      
@@ -870,7 +870,7 @@ function generateContourReportCallback(~, ~)
 
     function sReport = getReportLesionMeanInformation(sAction, tReport)
                 
-        [~, asLesionList] = getLesionType('');
+        [~, asLesionList, ~] = getLesionType('');
         
         if strcmpi(sAction, 'init')
             sReport = sprintf('%s\n___________', '-');      
@@ -947,7 +947,7 @@ function generateContourReportCallback(~, ~)
 
     function sReport = getReportLesionMaxInformation(sAction, tReport)
                 
-        [~, asLesionList] = getLesionType('');
+        [~, asLesionList, ~] = getLesionType('');
         
         if strcmpi(sAction, 'init')
             sReport = sprintf('%s\n___________', '-');      
@@ -1024,7 +1024,7 @@ function generateContourReportCallback(~, ~)
 
     function sReport = getReportLesionVolumeInformation(sAction, tReport)
                 
-        [~, asLesionList] = getLesionType('');
+        [~, asLesionList, ~] = getLesionType('');
         
         if strcmpi(sAction, 'init')
             sReport = sprintf('%s\n___________', '-');      
