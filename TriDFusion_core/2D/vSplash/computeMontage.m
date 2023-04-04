@@ -58,6 +58,8 @@ function imComputed = computeMontage(im, sAxe, dSlice)
             end
 
         case 'axial'
+%            tMontage = montage(im, 'Size', [dVsplashLayoutX dVsplashLayoutY]);
+%            imComputed = tMontage.CData;
              dAxialSliceNumber = size(dicomBuffer('get'), 3)-dSlice+1;
 
             [lFirst, ~] = computeVsplashLayout(im, sAxe, dSlice);   

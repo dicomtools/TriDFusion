@@ -183,7 +183,7 @@ function TriDFusion(varargin)
     
     set(fiMainWindow, 'DefaultUipanelUnits', 'normalized');
 
-    set(fiMainWindow, 'doublebuffer', 'off'   );   
+    set(fiMainWindow, 'doublebuffer', 'on'   );   
     set(fiMainWindow, 'Renderer'    , 'opengl'); 
 
 %    warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');  

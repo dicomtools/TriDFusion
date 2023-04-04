@@ -287,7 +287,7 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE)
                 imMask = aResampledPTImage;
                 imMask(aWholebodyBWMask == 0) = dMin;
 
-                dSmalestVoiValue = 0;
+                dSmalestVoiValue = 0.3;
 
                 setSeriesCallback();
 

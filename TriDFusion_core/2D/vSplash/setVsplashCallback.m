@@ -37,7 +37,7 @@ function setVsplashCallback(~, ~)
     set(uiSeriesPtr('get'), 'Enable', 'off');                        
     mainToolBarEnable('off');   
     
-    try
+%    try
         
     releaseRoiWait();
 
@@ -152,9 +152,9 @@ function setVsplashCallback(~, ~)
 
     refreshImages();
     
-    catch
-        progressBar(1, 'Error:setVsplashCallback()');                        
-    end
+%    catch
+%        progressBar(1, 'Error:setVsplashCallback()');                        
+%    end
     
     % Reactivate main tool bar 
     set(uiSeriesPtr('get'), 'Enable', 'on');                        

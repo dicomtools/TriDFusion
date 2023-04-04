@@ -261,19 +261,19 @@ function resize = dicomViewer()
     % Exclusion
 
     excludeGa68DOTATATEBrain            ('set', true );
-    excludeGa68DOTATATETrachea          ('set', false);
+    excludeGa68DOTATATETrachea          ('set', true);
     excludeGa68DOTATATEAdrenalGlandLeft ('set', true );
     excludeGa68DOTATATEAdrenalGlandRight('set', true );
-    excludeGa68DOTATATEGallbladder      ('set', false);
+    excludeGa68DOTATATEGallbladder      ('set', true );
     excludeGa68DOTATATEPancreas         ('set', false);
     excludeGa68DOTATATEKidneyLeft       ('set', true );
     excludeGa68DOTATATEKidneyRight      ('set', true );
+    excludeGa68DOTATATESpleen           ('set', true);
 
     % Machine Learning Ga68 DOTATATE segmentation Gastrointestinal Tract
     % Exclusion
 
-    excludeGa68DOTATATESpleen        ('set', false);
-    excludeGa68DOTATATEUrinaryBladder('set', true );
+    excludeGa68DOTATATEUrinaryBladder('set', true);
     excludeGa68DOTATATEColon         ('set', false);
     excludeGa68DOTATATESmallBowel    ('set', false);
     excludeGa68DOTATATEDuodenum      ('set', false);
