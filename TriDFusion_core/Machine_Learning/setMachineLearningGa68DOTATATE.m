@@ -1,5 +1,5 @@
-function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE)
-%function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE)
+function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE, dNormalLiverTresholdMultiplier)
+%function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE, dNormalLiverTresholdMultiplier)
 %Run machine learning Ga68 DOTATATE Segmentation.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -239,7 +239,7 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE)
 
                 progressBar(8/12, 'Computing liver mask, please wait.');
 
-                dLiverTreshold = (2*dNormalLiverMean);
+                dLiverTreshold = (dNormalLiverTresholdMultiplier*dNormalLiverMean);
 
 %                dLiverTreshold = (2*dLiverMean)
 

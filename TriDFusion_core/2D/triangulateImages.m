@@ -29,6 +29,12 @@ function triangulateImages()
 
     if size(dicomBuffer('get'), 3) ~= 1
 
+        if showBorder('get') == false 
+            % To reset next, delete, previous contour end of list
+%            set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 1]);
+            set(uiTraWindowPtr('get'), 'BorderWidth', 0);          
+        end
+
         im = dicomBuffer('get');
 
         iCoronalSize  = size(im,1);
@@ -91,6 +97,12 @@ function triangulateImages()
 
             end
 
+        end
+    else
+        if showBorder('get') == false 
+            % To reset next, delete, previous contour end of list
+ %           set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 1]);
+            set(uiOneWindowPtr('get'), 'BorderWidth', 0);
         end
     end
 end

@@ -256,6 +256,7 @@ function resize = dicomViewer()
     defaultIsoColorFusionOffset ('set', isoColorFusionOffset('get') ); 
     defaultIsoSurfaceFusionValue('set', isoSurfaceFusionValue('get'));
 
+    Ga68DOTATATENormalLiverTresholdMultiplier('set', 1.8);
 
     % Machine Learning Ga68 DOTATATE segmentation Other Organ
     % Exclusion

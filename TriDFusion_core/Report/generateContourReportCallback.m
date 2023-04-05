@@ -2195,9 +2195,20 @@ function generateContourReportCallback(~, ~)
             end
         end
             
-        sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
+  %      sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
+
+        % Series Date 
+        
+        sSeriesDate = atMetaData{1}.SeriesDate;
+        
+        if isempty(sSeriesDate)
+            sSeriesDate = '-';
+        else
+            sSeriesDate = datetime(sSeriesDate,'InputFormat','yyyyMMdd');
+        end
+
         [file, path] = uiputfile(filter, 'Save contour report', sprintf('%s/%s_%s_%s_%s_CONTOUR_REPORT_TriDFusion.pdf' , ...
-            sCurrentDir, cleanString(atMetaData{1}.PatientName), cleanString(atMetaData{1}.PatientID), cleanString(atMetaData{1}.SeriesDescription), sDate) );
+            sCurrentDir, cleanString(atMetaData{1}.PatientName), cleanString(atMetaData{1}.PatientID), cleanString(atMetaData{1}.SeriesDescription), sSeriesDate) );
 
         set(figContourReport, 'Pointer', 'watch');
         drawnow;

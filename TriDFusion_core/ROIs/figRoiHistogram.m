@@ -912,9 +912,18 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                 sHystogramType = '';
             end
             
-            sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
+ %           sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
+
+            sSeriesDate = info{1}.SeriesDate;
+            
+            if isempty(sSeriesDate)
+                sSeriesDate = '-';
+            else
+                sSeriesDate = datetime(sSeriesDate,'InputFormat','yyyyMMdd');
+            end
+
             [file, path] = uiputfile(filter, 'Save Histogram Result', sprintf('%s/%s_%s_%s_%s_%s_TriDFusion.csv' , ...
-                sCurrentDir, cleanString(info{1}.PatientName), cleanString(info{1}.PatientID), cleanString(info{1}.SeriesDescription), sDate, sHystogramType));
+                sCurrentDir, cleanString(info{1}.PatientName), cleanString(info{1}.PatientID), cleanString(info{1}.SeriesDescription), sSeriesDate, sHystogramType));
 
             if file ~= 0
 

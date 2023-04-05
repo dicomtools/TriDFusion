@@ -1,6 +1,6 @@
-function setSegmentationFDG()
-%function setSegmentationFDG()
-%Run machine learning Ga68 DOTATATE Segmentation.
+function setSegmentationFDG(dTreshold)
+%function setSegmentationFDG(dTreshold)
+%Run FDG Segmentation base on a treshold.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -120,8 +120,6 @@ function setSegmentationFDG()
 
 
     progressBar(7/10, 'Computing liver mask, please wait.');
-
-    dTreshold = 4; % SUV treshold
 
 
     aBWMask = aResampledPTImage;

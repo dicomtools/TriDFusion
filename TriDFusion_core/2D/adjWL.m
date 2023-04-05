@@ -90,4 +90,7 @@ function adjWL(dInitCoord)
 
     pdInitialCoord = get(0,'PointerLocation');
 
+    if isVsplash('get') == false      
+        refreshImages();
+    end
 end

@@ -161,10 +161,12 @@ function mainWindowMenu()
 
 
     mWorkflows = uimenu(fiMainWindowPtr('get'),'Label','Workflows');  
-    uimenu(mWorkflows, 'Label','FDG Tumor Segmentation', 'Callback', @setSegmentationFDGCallback);
-    uimenu(mWorkflows, 'Label','Ga68 DOTATATE Segmentation (Machine Learning)', 'Callback', @setMachineLearningGa68DOTATATECallback);
+    mSegmentation = uimenu(mWorkflows,'Label','Segmentation');  
+    uimenu(mSegmentation, 'Label','FDG Tumor Segmentation', 'Callback', @setSegmentationFDGCallback);
+    uimenu(mSegmentation, 'Label','Ga68 DOTATATE Segmentation (Machine Learning)', 'Callback', @setMachineLearningGa68DOTATATECallback);
+    uimenu(mWorkflows, 'Label','PET/CT Fusion', 'Callback', @setPETCTFusionCallback);
     
-if 1    
+    
     mModules = uimenu(fiMainWindowPtr('get'),'Label','Modules');
     mMachineLearning = uimenu(mModules, 'Label','Machine Learning');
     uimenu(mMachineLearning, 'Label','Machine Learning Segmentation', 'Callback', @setMachineLearningSegmentationCallback);
@@ -180,9 +182,6 @@ if 1
 
     mRadiomics = uimenu(mModules, 'Label','Radiomics');
     uimenu(mRadiomics, 'Label','Compute Radiomics', 'Callback', @extractRadiomicsFromContoursCallback);
-
-end
-
 
     mHelp = uimenu(fiMainWindowPtr('get'),'Label','Help');
     uimenu(mHelp,'Label', 'Shortcuts', 'Callback'  , @shortcutsViewerCallback);

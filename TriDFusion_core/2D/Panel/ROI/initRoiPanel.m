@@ -689,7 +689,20 @@ function initRoiPanel()
 %            dRodSerieOffset = round(numel(atVoiInput{dVoiOffset}.RoisTag)/2);
 
             triangulateRoi(sRoiTag);
-            
+
+            bViewAxeBorder = false;       
+            if dVoiOffset == 1 && dNbVOIs > 1
+                bViewAxeBorder = true;       
+            end
+    
+            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
+                set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
+                set(uiOneWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+            else
+                set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
+                set(uiTraWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+            end
+
             catch
             end
             
@@ -727,6 +740,19 @@ function initRoiPanel()
 
             triangulateRoi(sRoiTag);
             
+            bViewAxeBorder = false;       
+            if dVoiOffset == 1 && dNbVOIs > 1
+                bViewAxeBorder = true;       
+            end
+
+            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
+                set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
+                set(uiOneWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+            else
+                set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
+                set(uiTraWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+            end
+
             catch
             end
             
@@ -833,7 +859,15 @@ function initRoiPanel()
                 dVoiOffset = 1;
 
                 if dNbVOIs ~= 0
-                    warndlg('Warning: End of list, returning to first contour', 'Contour list');
+             
+                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
+                        set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
+                        set(uiOneWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+                    else
+                        set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
+                        set(uiTraWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+                    end
+     %               warndlg('Warning: End of list, returning to first contour', 'Contour list');
                 end
             end
 
@@ -898,7 +932,12 @@ function initRoiPanel()
     end
 
     function btnUnitTypeRoiPanelCallback(~, ~)
-        
+
+        try
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+
         dOffset = get(uiSeriesPtr('get'), 'Value');
 
         sUnitDisplay = getSerieUnitValue(dOffset);
@@ -953,9 +992,20 @@ function initRoiPanel()
         set(uiEditMinTresholdRoiPanel, 'String', num2str(dMinValue));
         set(uiEditMaxTresholdRoiPanel, 'String', num2str(dMaxValue));
 
+        catch
+            progressBar(1, 'Error:btnUnitTypeRoiPanelCallback()');
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;
     end
 
     function chkUseCTRoiPanelCallback(hObject, ~)
+
+        try
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
 
         if strcmpi(get(hObject, 'Style'), 'text')
             if get(chkUseCTRoiPanel, 'Value') == true
@@ -1042,9 +1092,21 @@ function initRoiPanel()
             set(uiEditMinTresholdRoiPanel, 'String', num2str(dMinValue));
             set(uiEditMaxTresholdRoiPanel, 'String', num2str(dMaxValue));
         end
+
+        catch
+            progressBar(1, 'Error:chkUseCTRoiPanelCallback()');
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;      
     end
 
     function chkHolesRoiPanelCallback(hObject, ~)
+
+        try
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
 
         if strcmpi(get(hObject, 'Style'), 'text')
             if get(chkHolesRoiPanel, 'Value') == true
@@ -1063,9 +1125,20 @@ function initRoiPanel()
 
         holesRoiPanel('set', get(chkHolesRoiPanel, 'Value'));
 
+        catch
+            progressBar(1, 'Error:chkHolesRoiPanelCallback()');
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow; 
     end
 
     function chkPixelEdgeRoiPanelCallback(hObject, ~)
+
+        try
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
 
         if strcmpi(get(hObject, 'Style'), 'text')
             if get(chkPixelEdgeRoiPanel, 'Value') == true
@@ -1083,9 +1156,21 @@ function initRoiPanel()
         end
 
         pixelEdgeRoiPanel('set', get(chkPixelEdgeRoiPanel, 'Value'));
+
+        catch
+            progressBar(1, 'Error:chkPixelEdgeRoiPanelCallback()');
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;        
     end
 
     function chkMultipleObjectsRoiPanelCallback(hObject, ~)
+
+        try
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
 
         if strcmpi(get(hObject, 'Style'), 'text')
             if get(chkMultipleObjectsRoiPanel, 'Value') == true
@@ -1104,6 +1189,12 @@ function initRoiPanel()
 
         multipleObjectsRoiPanel('set', get(chkMultipleObjectsRoiPanel, 'Value'));
 
+        catch
+            progressBar(1, 'Error:chkMultipleObjectsRoiPanelCallback()');
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow; 
     end
 
     function edtSmalestRegionCallback(hObject, ~)
@@ -1124,6 +1215,7 @@ function initRoiPanel()
                                get(chkUseCTRoiPanel    , 'Value'), ...
                                get(uiSeriesCTRoiPanel  , 'Value') ...
                                );
+      
     end
 
 
@@ -1434,6 +1526,11 @@ function initRoiPanel()
 
     function chkRelativeToMaxRoiPanelCallback(hObject, ~)
 
+        try
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+
         if strcmpi(get(hObject, 'Style'), 'text')
             if get(chkRelativeToMaxRoiPanel, 'Value') == true
 
@@ -1520,9 +1617,21 @@ function initRoiPanel()
 
         end
 
+        catch
+            progressBar(1, 'Error:chkRelativeToMaxRoiPanelCallback()');
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;
+
     end
 
     function chkInPercentRoiPanelCallback(hObject, ~)
+
+        try
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
 
         if strcmpi(get(hObject, 'Style'), 'text')
             if get(chkInPercentRoiPanel, 'Value') == true
@@ -1644,6 +1753,13 @@ function initRoiPanel()
             end
 
         end
+
+        catch
+            progressBar(1, 'Error:chkInPercentRoiPanelCallback()');
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;
 
 %        uiSliderMaxTresholdRoiListener = addlistener(uiSliderMaxTresholdRoiPanel, 'Value', 'PreSet', @sliderMaxTresholdRoiPanelCallback);
 %        if relativeToMaxRoiPanelValue('get') == false

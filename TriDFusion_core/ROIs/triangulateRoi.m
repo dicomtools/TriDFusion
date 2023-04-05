@@ -27,6 +27,7 @@ function triangulateRoi(sRoiTag)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+
     im = dicomBuffer('get');
     
     atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
@@ -35,12 +36,12 @@ function triangulateRoi(sRoiTag)
     end
 
     if size(im, 3) ~= 1 % 3D
-        
+   
        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), sRoiTag );                
        tRoi = atRoiInput{find(aTagOffset, 1)};
-       
+                       
        if ~isempty(tRoi)
-           
+          
             origInfo = getappdata(tRoi.Object.Parent, 'matlab_graphics_resetplotview');
             if isempty(origInfo)
                 bIsZoomed = false;
@@ -176,8 +177,6 @@ function triangulateRoi(sRoiTag)
        end
 
     else % 2D
-
-
     end
 
 end

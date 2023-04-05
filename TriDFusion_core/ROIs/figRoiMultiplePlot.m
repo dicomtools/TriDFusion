@@ -627,9 +627,17 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
             end
         end
         
-        sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
+%        sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
+        sSeriesDate = info{1}.SeriesDate;
+        
+        if isempty(sSeriesDate)
+            sSeriesDate = '-';
+        else
+            sSeriesDate = datetime(sSeriesDate,'InputFormat','yyyyMMdd');
+        end
+
         [file, path] = uiputfile(filter, 'Save Histogram Result', sprintf('%s/%s_%s_%s_%s_MULTI_CUMULATIVE_DVH_TriDFusion.csv' , ...
-            sCurrentDir, cleanString(info{1}.PatientName), cleanString(info{1}.PatientID), cleanString(info{1}.SeriesDescription), sDate) );
+            sCurrentDir, cleanString(info{1}.PatientName), cleanString(info{1}.PatientID), cleanString(info{1}.SeriesDescription), sSeriesDate) );
 
         if file ~= 0
 

@@ -2323,9 +2323,20 @@ function generate3DLungLobeReportCallback(~, ~)
             end
         end
             
-        sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
+%        sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
+
+        % Series Date 
+        
+        sSeriesDate = atMetaData{1}.SeriesDate;
+        
+        if isempty(sSeriesDate)
+            sSeriesDate = '-';
+        else
+            sSeriesDate = datetime(sSeriesDate,'InputFormat','yyyyMMdd');
+        end
+
         [file, path] = uiputfile(filter, 'Save 3D SPECT lung lobe report', sprintf('%s/%s_%s_%s_%s_LUNG_LOBE_REPORT_TriDFusion.pdf' , ...
-            sCurrentDir, cleanString(atMetaData{1}.PatientName), cleanString(atMetaData{1}.PatientID), cleanString(atMetaData{1}.SeriesDescription), sDate) );
+            sCurrentDir, cleanString(atMetaData{1}.PatientName), cleanString(atMetaData{1}.PatientID), cleanString(atMetaData{1}.SeriesDescription), sSeriesDate) );
 
         set(fig3DLobeLungReport, 'Pointer', 'watch');
         drawnow;
