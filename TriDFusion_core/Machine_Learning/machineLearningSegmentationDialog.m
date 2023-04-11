@@ -2306,26 +2306,33 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
 
                                 case 'liver'
                                     aColor=[1 0.41 0.16]; % Orange
+                                    sLesionType = 'Liver';
 
                                 case 'lung upper lobe left'
                                     aColor=[0 1 1]; % Cyan
+                                    sLesionType = 'Lung';
 
                                 case 'lung upper lobe right'
                                     aColor=[0 1 0]; % Green
+                                    sLesionType = 'Lung';
 
                                 case 'lung middle lobe right'
                                     aColor=[1 1 0]; % Yellow
+                                    sLesionType = 'Lung';
 
                                 case 'lung lower lobe left'
                                     aColor=[1 0 0]; % Red
+                                    sLesionType = 'Lung';
 
                                 case 'lung lower lobe right'
                                     aColor=[0 0.5 1]; % Blue
+                                    sLesionType = 'Lung';
 
                                 otherwise % Random
                                     xmin=0.5;
                                     xmax=1;
                                     aColor=xmin+rand(1,3)*(xmax-xmin);
+                                    sLesionType = 'Unspecified';
                             end
  
                             sNiiFileName = replace(lower(sObjectName), ' ', '_');
@@ -2336,7 +2343,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                                 nii = nii_tool('load', sNiiFileName);
                                 aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
                                 aMask = aMask(:,:,end:-1:1);
-                                maskToVoi(aMask, asOtherOrgansName{cc}, 'Unspecified', aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                                maskToVoi(aMask, asOtherOrgansName{cc}, sLesionType, aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
                             end
                     end
 

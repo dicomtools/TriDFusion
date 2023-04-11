@@ -52,13 +52,13 @@ function resize = dicomViewer()
     windowLevel('set', 'max', 0);
     windowLevel('set', 'min', 0);
 
-    kernelCtSerieOffset('set', 1);
-    kernelUseCtDoseMap('set', false);
-    kernelUnitTypeWindow('set', false);
-    kernelSegTreshValue('set', 'lower', 0);
-    kernelSegTreshValue('set', 'upper', 1);    
-    kernelInterpolation('set', 'Linear');    
-    kernelCutoff('set', 99.9305); % mm
+    kernelCtSerieOffset        ('set', 1);
+    kernelUseCtDoseMap         ('set', false);
+    kernelUnitTypeWindow       ('set', false);
+    kernelSegTreshValue        ('set', 'lower', 0);
+    kernelSegTreshValue        ('set', 'upper', 1);    
+    kernelInterpolation        ('set', 'Linear');    
+    kernelCutoff               ('set', 99.9305); % mm
     kernelMicrosphereInSpecimen('set', false);
     
     resizePixelSizeDoseInformationDialog('set', false);
@@ -72,7 +72,7 @@ function resize = dicomViewer()
     treatmentTypeDoseInformationDialog('set', 1); % TheraSphere    
     
     microspereVolumeDoseInformationDialog('set', 5E-8); % In cm3
-    specimenVolumeDoseInformationDialog('set', 0); % In ml
+    specimenVolumeDoseInformationDialog  ('set', 0   ); % In ml
     
     imageSegTreshValue('set', 'lower', 0);
     imageSegTreshValue('set', 'upper', 1);
@@ -87,35 +87,35 @@ function resize = dicomViewer()
     minTresholdRoiPanelValue('set', true, '', 0);
     maxTresholdRoiPanelValue('set', true, '', 0);
 
-    minTresholdSliderRoiPanelValue('set', 0);
-    maxTresholdSliderRoiPanelValue('set', 0.41) ;
+    minTresholdSliderRoiPanelValue('set', 0   );
+    maxTresholdSliderRoiPanelValue('set', 0.41);
 
     roiFaceAlphaValue('set', 0.7);
     
-    crossSize       ('set', 10      );
-    crossColor      ('set', 'Cyan'  );
-    crossActivate   ('set',  true   );
-    overlayActivate ('set',  true   );
-    overlayColor    ('set', 'black' );
-    windowButton    ('set', 'up'    );
-    invertColor     ('set', true    );
-    backgroundColor ('set', viewerAxesColor('get') );
-    background3DOffset('set', 7     ); % white
-    colorMapOffset  ('set', 10      );
-    fusionColorMapOffset('set', 20  ); % Hot Metal
-    volLinearAlphaValue('set', 1    );
+    crossSize              ('set', 10     );
+    crossColor             ('set', 'Cyan' );
+    crossActivate          ('set',  true  );
+    overlayActivate        ('set',  true  );
+    overlayColor           ('set', 'black');
+    windowButton           ('set', 'up'   );
+    invertColor            ('set', true   );
+    backgroundColor        ('set', viewerAxesColor('get') );
+    background3DOffset     ('set', 7 ); % white
+    colorMapOffset         ('set', 10);
+    fusionColorMapOffset   ('set', 20); % Hot Metal
+    volLinearAlphaValue    ('set', 1 );
     volLinearFusionAlphaValue('set', 1);
-    getVolAlphaMap      ('set', '', 'auto');
-    getVolFusionAlphaMap('set', '', 'auto');
-    colorMapVolOffset('set', 21     ); % angio
+    getVolAlphaMap         ('set', '', 'auto');
+    getVolFusionAlphaMap   ('set', '', 'auto');
+    colorMapVolOffset      ('set', 21); % angio
     colorMapVolFusionOffset('set', 21);% angio
-    colorMapMipOffset('set', 10     ); % gray
+    colorMapMipOffset      ('set', 10); % gray
     colorMapMipFusionOffset('set', 10);% gray
-    mipLinearAlphaValue('set', 1    );
+    mipLinearAlphaValue    ('set', 1 );
     mipLinearFuisonAlphaValue('set', 1);
-    getMipAlphaMap      ('set', '', 'auto');
-    getMipFusionAlphaMap('set', '', 'auto');
-    mipFusionBufferOffset('set', 1);
+    getMipAlphaMap         ('set', '', 'auto');
+    getMipFusionAlphaMap   ('set', '', 'auto');
+    mipFusionBufferOffset  ('set', 1);
 
     isoColorOffset        ('set', 4  ); % red
     isoSurfaceValue       ('set', 0.1); 
@@ -138,31 +138,31 @@ function resize = dicomViewer()
     volFusionLighting     ('set', true);
 
     %       surfaceAlpha    ('set', 1       );
-    sliderWindowLevelValue('set', 'max', 0.5);
-    sliderWindowLevelValue('set', 'min', 0.5);
+    sliderWindowLevelValue      ('set', 'max', 0.5);
+    sliderWindowLevelValue      ('set', 'min', 0.5);
     sliderFusionWindowLevelValue('set', 'max', 0.5);
     sliderFusionWindowLevelValue('set', 'min', 0.5);
-    sliderAlphaValue('set', 0.5);
+    sliderAlphaValue            ('set', 0.5);
 
-    vSplashLayout('set', 'x', 5     );
-    vSplashLayout('set', 'y', 3     );
+    vSplashLayout('set', 'x', 5);
+    vSplashLayout('set', 'y', 3);
 
-    addOnWidth       ('set', 0     );
-    zoomTool         ('set', false );
-    rotate3DTool     ('set', false );
-    dataCursorTool   ('set', false );
-    panTool          ('set', false );
-    editPlot         ('set', false );
-    editToolbar      ('set', false );
-    camToolbar       ('set', false );
-    playback3DToolbar('set', false );
-    roiToolbar       ('set', false );
+    addOnWidth       ('set', 0    );
+    zoomTool         ('set', false);
+    rotate3DTool     ('set', false);
+    dataCursorTool   ('set', false);
+    panTool          ('set', false);
+    editPlot         ('set', false);
+    editToolbar      ('set', false);
+    camToolbar       ('set', false);
+    playback3DToolbar('set', false);
+    roiToolbar       ('set', false);
 
     playback2DMipOnly('set', true);
 
-    multiFrameSpeed   ('set', 0.15   );
-    multiFramePlayback('set', false );
-    multiFrameRecord  ('set', false );
+    multiFrameSpeed   ('set', 0.15 );
+    multiFramePlayback('set', false);
+    multiFrameRecord  ('set', false);
     multiFrameZoom    ('set', 'in' , 1);
     multiFrameZoom    ('set', 'out', 1);
     multiFrameZoom    ('set', 'axe', []);
@@ -175,50 +175,50 @@ function resize = dicomViewer()
     
     export3DSliceThickess('set', 1);
 
-    voi3DEnableList('set', '');
-    voi3DTransparencyList('set', '');
-    voi3DRenderer('set', 'Isosurface');
+    voi3DEnableList             ('set', '');
+    voi3DTransparencyList       ('set', '');
+    voi3DRenderer               ('set', 'Isosurface');
     slider3DVoiTransparencyValue('set', 0);
 
     gaussFilter('set', false);
     
-    gaussFilterValue('set', 'x', 0.1 );
-    gaussFilterValue('set', 'y', 0.1 );
-    gaussFilterValue('set', 'z', 1   );
+    gaussFilterValue('set', 'x', 0.1);
+    gaussFilterValue('set', 'y', 0.1);
+    gaussFilterValue('set', 'z', 1  );
 
     displayVoi('set', false);
 
-    displayVolColorMap('set', false  );
-    displayMIPColorMap('set', false  );
+    displayVolColorMap('set', false);
+    displayMIPColorMap('set', false);
 
-    switchTo3DMode    ('set', false  );
-    switchToIsoSurface('set', false  );
-    switchToMIPMode   ('set', false  );
+    switchTo3DMode    ('set', false);
+    switchToIsoSurface('set', false);
+    switchToMIPMode   ('set', false);
 
-    initWindowLevel ('set', true     );
+    initWindowLevel      ('set', true);
     initFusionWindowLevel('set', true);
     
     getRGBColormapImage('set', 'rgb-plus.png');
         
-    suvMenuUnitOption('set', true);
-    segMenuOption    ('set', false);
+    suvMenuUnitOption            ('set', true);
+    segMenuOption                ('set', false);
     modifiedMatrixValueMenuOption('set', false);
-    isFigRoiInColor  ('set', true);
+    isFigRoiInColor              ('set', true);
 
     registrationTemplate('init');
-    registrationReport('set', '');
+    registrationReport  ('set', '');
 
-    updateDescription('set', true);
-    referenceOutputView('set', true);
+    updateDescription            ('set', true);
+    referenceOutputView          ('set', true);
     associateRegistrationModality('set', true);
 
-    roiPanelCtSerieOffset('set', 1);
-    roiPanelUseCt('set', false);
-    roiPanelUnitTypeWindow('set', false);
+    roiPanelCtSerieOffset     ('set', 1);
+    roiPanelUseCt             ('set', false);
+    roiPanelUnitTypeWindow    ('set', false);
     smalestRegionRoiPanelValue('set', 3);
-    multipleObjectsRoiPanel('set', true);
-    pixelEdgeRoiPanel('set', true);
-    holesRoiPanel('set', false);
+    multipleObjectsRoiPanel   ('set', true);
+    pixelEdgeRoiPanel         ('set', true);
+    holesRoiPanel             ('set', false);
 
     % Machine Learning
 
@@ -256,20 +256,20 @@ function resize = dicomViewer()
     defaultIsoColorFusionOffset ('set', isoColorFusionOffset('get') ); 
     defaultIsoSurfaceFusionValue('set', isoSurfaceFusionValue('get'));
 
-    Ga68DOTATATENormalLiverTresholdMultiplier('set', 1.8);
+    Ga68DOTATATENormalLiverTresholdMultiplier('set', 1.2);
 
     % Machine Learning Ga68 DOTATATE segmentation Other Organ
     % Exclusion
 
     excludeGa68DOTATATEBrain            ('set', true );
-    excludeGa68DOTATATETrachea          ('set', true);
+    excludeGa68DOTATATETrachea          ('set', true );
     excludeGa68DOTATATEAdrenalGlandLeft ('set', true );
     excludeGa68DOTATATEAdrenalGlandRight('set', true );
     excludeGa68DOTATATEGallbladder      ('set', true );
     excludeGa68DOTATATEPancreas         ('set', false);
     excludeGa68DOTATATEKidneyLeft       ('set', true );
     excludeGa68DOTATATEKidneyRight      ('set', true );
-    excludeGa68DOTATATESpleen           ('set', true);
+    excludeGa68DOTATATESpleen           ('set', true );
 
     % Machine Learning Ga68 DOTATATE segmentation Gastrointestinal Tract
     % Exclusion

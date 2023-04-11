@@ -126,7 +126,7 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE, dNormal
             return;
         end   
     else
-        msgbox('Error: setMachineLearningGa68DOTATATE(): Please define a Normal Liver ROI!', 'Error');   
+        msgbox('Error: setMachineLearningGa68DOTATATE(): Please define a Normal Liver ROI. Draw a ROI on the normal liver, right click on it and select Predefined Label \ Normal Liver.', 'Error');   
         return;
     end
 
