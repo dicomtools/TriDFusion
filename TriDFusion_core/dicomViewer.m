@@ -256,7 +256,7 @@ function resize = dicomViewer()
     defaultIsoColorFusionOffset ('set', isoColorFusionOffset('get') ); 
     defaultIsoSurfaceFusionValue('set', isoSurfaceFusionValue('get'));
 
-    Ga68DOTATATENormalLiverTresholdMultiplier('set', 1.2);
+    Ga68DOTATATENormalLiverTresholdMultiplier('set', 1.5);
 
     % Machine Learning Ga68 DOTATATE segmentation Other Organ
     % Exclusion
@@ -274,7 +274,7 @@ function resize = dicomViewer()
     % Machine Learning Ga68 DOTATATE segmentation Gastrointestinal Tract
     % Exclusion
 
-    excludeGa68DOTATATEUrinaryBladder('set', true);
+    excludeGa68DOTATATEUrinaryBladder('set', true );
     excludeGa68DOTATATEColon         ('set', false);
     excludeGa68DOTATATESmallBowel    ('set', false);
     excludeGa68DOTATATEDuodenum      ('set', false);

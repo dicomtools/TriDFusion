@@ -32,7 +32,7 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset)
         return;
     end      
     
-    try
+  %  try
                 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;  
@@ -160,7 +160,11 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset)
     
 %    dWriteEndLoop = numel(atWriteMetaData);
     if numel(atWriteMetaData) > 1
-        dWriteEndLoop = aBufferSize(3);
+        if size(aBufferSize, 3) == 1
+            dWriteEndLoop = 1;
+        else
+            dWriteEndLoop = aBufferSize(3);
+        end
     else
         dWriteEndLoop = 1;
     end
@@ -490,9 +494,9 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset)
     
     progressBar(1, sprintf('Export %d files completed %s', ww, char(sWriteDir)));
     
-    catch
-        progressBar(1, sprintf('Error:writeDICOM(), %s', char(sWriteDir)) );                
-    end
+%    catch
+%        progressBar(1, sprintf('Error:writeDICOM(), %s', char(sWriteDir)) );                
+%    end
     
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow; 
