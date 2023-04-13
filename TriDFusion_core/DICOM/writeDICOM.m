@@ -160,7 +160,7 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset)
     
 %    dWriteEndLoop = numel(atWriteMetaData);
     if numel(atWriteMetaData) > 1
-        if size(aBufferSize, 3) == 1
+        if size(aBuffer, 3) == 1
             dWriteEndLoop = 1;
         else
             dWriteEndLoop = aBufferSize(3);
