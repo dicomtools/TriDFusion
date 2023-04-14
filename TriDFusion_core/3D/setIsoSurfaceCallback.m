@@ -515,7 +515,7 @@ function setIsoSurfaceCallback(~, ~)
                             end  
 
                             if strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ... % ISO Only
-                               strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...
+                               strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...
                                strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map')
                                     
                                 tResampleToCT = resampleToCTIsoMaskUiValues('get');
@@ -730,7 +730,7 @@ function setIsoSurfaceCallback(~, ~)
                                     end  
 
                                     if strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ... % ISO & MIP and ro VOL 
-                                       strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...     
+                                       strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...     
                                        strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map')
                                     
                                         tResampleToCT = resampleToCTIsoMaskUiValues('get');
@@ -892,7 +892,7 @@ function setIsoSurfaceCallback(~, ~)
                                 end  
 
                                 if strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...
-                                   strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...     
+                                   strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...     
                                    strcmpi(asFormula{dFormula}, 'Liver Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map')
 
                                     tResampleToCT = resampleToCTIsoMaskUiValues('get');
