@@ -488,7 +488,15 @@ function initRoiPanel()
         if ~isempty(atVoiInput)
 
             try
-                
+
+%            set(uiDeleteVoiRoiPanel     , 'Enable', 'off');
+%            set(uiLesionTypeVoiRoiPanel , 'Enable', 'off');
+
+%            set(uiAddVoiRoiPanel , 'Enable', 'off');
+%            set(uiPrevVoiRoiPanel, 'Enable', 'off');
+%            set(uiNextVoiRoiPanel, 'Enable', 'off');
+%            set(uiDelVoiRoiPanel , 'Enable', 'off');
+
             set(fiMainWindowPtr('get'), 'Pointer', 'watch');
             drawnow;
 
@@ -500,17 +508,24 @@ function initRoiPanel()
                                     
             atVoiInput{dVoiOffset}.LesionType = sLesionType; 
 
+            sLesionShortName = '';
             [bLesionOffset, ~, asLesionShortName] = getLesionType(sLesionType);   
             for jj=1:numel(asLesionShortName)
                 if contains(atVoiInput{dVoiOffset}.Label, asLesionShortName{jj})
+                    sLesionShortName = asLesionShortName{jj};
                     atVoiInput{dVoiOffset}.Label = replace(atVoiInput{dVoiOffset}.Label, asLesionShortName{jj}, asLesionShortName{bLesionOffset});
                     break;
                 end
             end
+
+            voiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atVoiInput);
                         
             for rr=1:numel(atVoiInput{dVoiOffset}.RoisTag) % Set ROIs template
                 for tt=1:numel(atRoiInput)
                     if strcmp(atVoiInput{dVoiOffset}.RoisTag{rr}, atRoiInput{tt}.Tag)
+                        if contains(atRoiInput{tt}.Label, sLesionShortName)
+                            atRoiInput{tt}.Label = replace(atRoiInput{tt}.Label, sLesionShortName, asLesionShortName{bLesionOffset});
+                        end                      
                         atRoiInput{tt}.LesionType = sLesionType;
                         break;
                     end                   
@@ -518,13 +533,21 @@ function initRoiPanel()
             end
 
             roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
-            voiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atVoiInput);
 
             setVoiRoiSegPopup();
 
             catch
+                progressBar(1, 'Error:setLesionTypeRoiPanelCallback()');
             end
-            
+
+ %           set(uiDeleteVoiRoiPanel     , 'Enable', 'on');
+ %           set(uiLesionTypeVoiRoiPanel , 'Enable', 'on');
+
+ %           set(uiAddVoiRoiPanel , 'Enable', 'on');
+ %           set(uiPrevVoiRoiPanel, 'Enable', 'on');
+ %           set(uiNextVoiRoiPanel, 'Enable', 'on');
+ %           set(uiDelVoiRoiPanel , 'Enable', 'on');
+
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
             drawnow;         
         end
@@ -669,7 +692,15 @@ function initRoiPanel()
         if ~isempty(atVoiInput)
                         
             try
-                
+
+            set(uiDeleteVoiRoiPanel     , 'Enable', 'off');
+            set(uiLesionTypeVoiRoiPanel , 'Enable', 'off');
+
+            set(uiAddVoiRoiPanel , 'Enable', 'off');
+            set(uiPrevVoiRoiPanel, 'Enable', 'off');
+            set(uiNextVoiRoiPanel, 'Enable', 'off');
+            set(uiDelVoiRoiPanel , 'Enable', 'off');
+
             set(fiMainWindowPtr('get'), 'Pointer', 'watch');
             drawnow;
             
@@ -704,8 +735,17 @@ function initRoiPanel()
             end
 
             catch
+                progressBar(1, 'Error:previousVoiRoiPanelCallback()');
             end
-            
+
+            set(uiDeleteVoiRoiPanel     , 'Enable', 'on');
+            set(uiLesionTypeVoiRoiPanel , 'Enable', 'on');
+
+            set(uiAddVoiRoiPanel , 'Enable', 'on');
+            set(uiPrevVoiRoiPanel, 'Enable', 'on');
+            set(uiNextVoiRoiPanel, 'Enable', 'on');
+            set(uiDelVoiRoiPanel , 'Enable', 'on');
+
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
             drawnow;             
         end
@@ -720,7 +760,15 @@ function initRoiPanel()
         if ~isempty(atVoiInput)
             
             try
-                
+
+            set(uiDeleteVoiRoiPanel     , 'Enable', 'off');
+            set(uiLesionTypeVoiRoiPanel , 'Enable', 'off');
+
+            set(uiAddVoiRoiPanel , 'Enable', 'off');
+            set(uiPrevVoiRoiPanel, 'Enable', 'off');
+            set(uiNextVoiRoiPanel, 'Enable', 'off');
+            set(uiDelVoiRoiPanel , 'Enable', 'off');
+
             set(fiMainWindowPtr('get'), 'Pointer', 'watch');
             drawnow;
 
@@ -754,8 +802,17 @@ function initRoiPanel()
             end
 
             catch
+                progressBar(1, 'Error:nextVoiRoiPanelCallback()');
             end
-            
+
+            set(uiDeleteVoiRoiPanel     , 'Enable', 'on');
+            set(uiLesionTypeVoiRoiPanel , 'Enable', 'on');
+
+            set(uiAddVoiRoiPanel , 'Enable', 'on');
+            set(uiPrevVoiRoiPanel, 'Enable', 'on');
+            set(uiNextVoiRoiPanel, 'Enable', 'on');
+            set(uiDelVoiRoiPanel , 'Enable', 'on');
+
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
             drawnow;            
         end
@@ -772,10 +829,18 @@ function initRoiPanel()
         if ~isempty(atVoiInput)    
             
             try
-                
+    
+            set(uiDeleteVoiRoiPanel     , 'Enable', 'off');
+            set(uiLesionTypeVoiRoiPanel , 'Enable', 'off');
+
+            set(uiAddVoiRoiPanel , 'Enable', 'off');
+            set(uiPrevVoiRoiPanel, 'Enable', 'off');
+            set(uiNextVoiRoiPanel, 'Enable', 'off');
+            set(uiDelVoiRoiPanel , 'Enable', 'off');
+
             set(fiMainWindowPtr('get'), 'Pointer', 'watch');
             drawnow;
-
+              
             dVoiOffset = get(uiDeleteVoiRoiPanel, 'Value');
             ptrObject = atVoiInput{dVoiOffset};
             
@@ -862,10 +927,10 @@ function initRoiPanel()
              
                     if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
                         set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
-                        set(uiOneWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+                        set(uiOneWindowPtr('get'), 'BorderWidth'   , true);
                     else
                         set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
-                        set(uiTraWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+                        set(uiTraWindowPtr('get'), 'BorderWidth'   , true);
                     end
      %               warndlg('Warning: End of list, returning to first contour', 'Contour list');
                 end
@@ -892,8 +957,17 @@ function initRoiPanel()
             end
                 
             catch
+                progressBar(1, 'Error:deleteVoiRoiPanelCallback()');                
             end
-            
+
+            set(uiDeleteVoiRoiPanel     , 'Enable', 'on');
+            set(uiLesionTypeVoiRoiPanel , 'Enable', 'on');
+
+            set(uiAddVoiRoiPanel , 'Enable', 'on');
+            set(uiPrevVoiRoiPanel, 'Enable', 'on');
+            set(uiNextVoiRoiPanel, 'Enable', 'on');
+            set(uiDelVoiRoiPanel , 'Enable', 'on');
+
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
             drawnow;
         end
