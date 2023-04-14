@@ -231,8 +231,32 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                     end
 
                     BW2(BW2 ~= dMinValue) = 1;
-                    BW2(BW2 == dMinValue) = 0;                                
+                    BW2(BW2 == dMinValue) = 0;  
+
+                elseif strcmpi(sMinSUVformula, '(4.44/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map')
                     
+                    BWANDBWCT = BW2&BWCT2;
+
+                    dBWnbPixel        = numel(BW2(BW2~=0));
+                    dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
+
+                    if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
+                        sLesionType = 'Bone';
+
+                        dPercentMaxOrMaxSUVValue = 3;                                
+                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                    else
+                        sLesionType = 'Soft Tissue';
+
+%                                dMean = mean(BW2(BW2~=dMinValue), 'all') * dSUVScale;
+%                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
+
+                        dPercentMaxOrMaxSUVValue = (4.44/dLiverMean)*(dLiverMean + dLiverSTD);                                
+                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                    end
+
+                    BW2(BW2 ~= dMinValue) = 1;
+                    BW2(BW2 == dMinValue) = 0;                      
                 elseif strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT ISO Map') 
 
                     BWANDBWCT = BW2&BWCT2;

@@ -291,7 +291,7 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE, dNormal
 
                 setSeriesCallback();
 
-                sFormula = '(4.30/Normal Liver SUVmean)x(Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map';
+                sFormula = '(4.44/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map';
 
                 maskAddVoiToSeries(imMask, aWholebodyBWMask, true, false, dWholebodyTreshold, false, 0, true, sFormula, BWCT, dSmalestVoiValue, dNormalLiverMean, dNormalLiverSTD);                    
 
