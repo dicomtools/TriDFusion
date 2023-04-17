@@ -205,7 +205,7 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE, dNormal
        
                 aLiverMask   = getLiverMask(zeros(size(aCTImage)));
 
-                aLiverMask =  imdilate(aLiverMask, true(40)); % Increse Liver mask
+                aLiverMask =  imdilate(aLiverMask, true(50)); % Increse Liver mask
 
 
                 progressBar(5/12, 'Resampling series, please wait.');
@@ -239,7 +239,8 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE, dNormal
 
                 progressBar(8/12, 'Computing liver mask, please wait.');
 
-                dLiverTreshold = (dNormalLiverTresholdMultiplier*dNormalLiverMean);
+                dLiverTreshold = (1.5*dNormalLiverMean) + (2*dNormalLiverSTD);
+%                dLiverTreshold = (dNormalLiverTresholdMultiplier*dNormalLiverMean);
 
 %                dLiverTreshold = (2*dLiverMean)
 
