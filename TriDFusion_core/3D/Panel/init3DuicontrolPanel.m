@@ -2510,7 +2510,7 @@ end
                                
                 if ~isempty(atRoiInput)
                     
-                    aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Label, atRoiInput, 'uni', false ), {'Normal Liver'} );            
+                    aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Label, atRoiInput, 'uni', false ), {'Liver'} );            
                     dTagOffset = find(aTagOffset, 1);
 
                     if ~isempty(dTagOffset)

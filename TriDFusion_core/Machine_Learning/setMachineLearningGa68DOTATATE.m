@@ -201,12 +201,13 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE, dNormal
 
                 aExcludeMask = getExcludeMask(tGa68DOTATATE, zeros(size(aCTImage)));
 
+
                 progressBar(4/12, 'Importing liver mask, please wait.');
        
                 aLiverMask   = getLiverMask(zeros(size(aCTImage)));
 
-                aLiverMask =  imdilate(aLiverMask, true(50)); % Increse Liver mask
-
+                aLiverMask =  imdilate(aLiverMask, strel('sphere', 3)); % Increse Liver mask by 3 pixels
+                aExcludeMasksLiver = imdilate(aExcludeMask, strel('sphere', 1)); % Increse mask by 1 pixels
 
                 progressBar(5/12, 'Resampling series, please wait.');
                         
@@ -253,14 +254,14 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE, dNormal
                 aLiverBWMask = imbinarize(aLiverBWMask);
   
                 aLiverBWMask(aLiverMask==0)=0; 
-                aLiverBWMask(aExcludeMask~=0)=0; 
+                aLiverBWMask(aExcludeMasksLiver~=0)=0; 
 
 
                 progressBar(9/12, 'Computing wholebody mask, please wait.');
 
                 dWholebodyTreshold = 3;
 
-                aExcludeMask =  imdilate(aExcludeMask, true(10)); % Increse mask
+                aExcludeMasksWholebody = imdilate(aExcludeMask, strel('sphere', 3)); % Increse mask by 3 pixels
 
                 aWholebodyBWMask = aResampledPTImage;
 
@@ -269,19 +270,24 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE, dNormal
                 aWholebodyBWMask(aWholebodyBWMask*dSUVScale<dWholebodyTreshold) = dMin;
                 aWholebodyBWMask = imbinarize(aWholebodyBWMask);
 
-                aWholebodyBWMask(aExcludeMask~=0)=0;
+                aWholebodyBWMask(aExcludeMasksWholebody~=0)=0;
                 aWholebodyBWMask(aLiverMask~=0)=0;
 
 
                 progressBar(10/12, 'Computing ct map, please wait.');
+                
+                BWCT = getTotalSegmentorWholeBodyMask(sSegmentationFolderName, zeros(size(aCTImage)));
 
-                BWCT = aCTImage;
+                if ~aCTImage(aCTImage~=0) % If wholeBody mask fail
+                    BWCT = aCTImage;
+    
+                    BWCT(BWCT < 100) = 0;                                    
+                    BWCT = imfill(BWCT, 4, 'holes');                       
+            
+                    BWCT(BWCT~=0) = 1;
+                    BWCT(BWCT~=1) = 0;
+                end
 
-                BWCT(BWCT < 100) = 0;                                    
-                BWCT = imfill(BWCT, 4, 'holes');                       
-        
-                BWCT(BWCT~=0) = 1;
-                BWCT(BWCT~=1) = 0;
 
                 progressBar(11/12, 'Creating contours, please wait.');
 
@@ -304,6 +310,8 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE, dNormal
                 maskAddVoiToSeries(imMaskLiver, aLiverBWMask, true, false, dLiverTreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue);                    
 
                 clear aExcludeMask;
+                clear aExcludeMasksLiver;
+                clear aExcludeMasksWholebody;
                 clear aLiverMask;
                 clear aResampledPTImage;
                 clear aWholebodyBWMask;
@@ -696,4 +704,5 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE, dNormal
         aExcludeMask=aExcludeMask(:,:,end:-1:1);
 
     end
+
 end
