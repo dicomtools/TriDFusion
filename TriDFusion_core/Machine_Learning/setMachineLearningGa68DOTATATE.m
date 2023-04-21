@@ -252,7 +252,9 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE, dNormal
                 aLiverBWMask(aLiverBWMask*dSUVScale<dLiverTreshold)=dMin;
 
                 aLiverBWMask = imbinarize(aLiverBWMask);
-  
+%                aLiverBWMask(aLiverBWMask==dMin)=0;
+%                aLiverBWMask(aLiverBWMask~=0)=1;
+
                 aLiverBWMask(aLiverMask==0)=0; 
                 aLiverBWMask(aExcludeMasksLiver~=0)=0; 
 
@@ -267,8 +269,17 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE, dNormal
 
                 dMin = min(aWholebodyBWMask, [], 'all');
           
+
                 aWholebodyBWMask(aWholebodyBWMask*dSUVScale<dWholebodyTreshold) = dMin;
+%                if dNormalLiverMean > dWholebodyTreshold
+%                    aWholebodyBWMask(aWholebodyBWMask*dSUVScale<dWholebodyTreshold) = dMin;
+%                else
+%                    aWholebodyBWMask(aWholebodyBWMask*dSUVScale<dNormalLiverMean) = dMin;
+%                end
+
                 aWholebodyBWMask = imbinarize(aWholebodyBWMask);
+%                aWholebodyBWMask(aWholebodyBWMask==dMin)=0;
+%                aWholebodyBWMask(aWholebodyBWMask~=0)=1;
 
                 aWholebodyBWMask(aExcludeMasksWholebody~=0)=0;
                 aWholebodyBWMask(aLiverMask~=0)=0;

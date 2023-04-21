@@ -62,6 +62,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
     dMinValue = min(imMask, [], 'all');
 %            dMaxValue = max(imMask, [], 'all');
 
+%    CC = bwconncomp(gather(BW), 18);
     CC = bwconncomp(gather(BW), 6);
     dNbElements = numel(CC.PixelIdxList);
 

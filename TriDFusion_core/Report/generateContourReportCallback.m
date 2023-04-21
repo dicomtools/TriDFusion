@@ -2242,8 +2242,11 @@ function generateContourReportCallback(~, ~)
             end
 
             print(figContourReport, sFileName, '-image', '-dpdf', '-r0');
-
-            open(sFileName);
+            
+            try
+                open(sFileName);
+            catch
+            end
         end
         
         catch

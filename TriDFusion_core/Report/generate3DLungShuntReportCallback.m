@@ -1318,7 +1318,10 @@ function generate3DLungShuntReportCallback(~, ~)
 
             print(fig3DLungShuntReport, sFileName, '-image', '-dpdf', '-r0');
 
-            open(sFileName);
+            try
+                open(sFileName);
+            catch
+            end
         end
         
         catch
