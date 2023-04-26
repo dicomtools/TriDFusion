@@ -256,6 +256,13 @@ function resize = dicomViewer()
     defaultIsoColorFusionOffset ('set', isoColorFusionOffset('get') ); 
     defaultIsoSurfaceFusionValue('set', isoSurfaceFusionValue('get'));
 
+    % 3D Lung Shunt
+
+    lungShuntLiverVolumeOversized          ('set', 3); % Pixel(s) offset
+    lungShuntLiverTopOfVolumeExtraSlices   ('set', 0); % Slice cutoff
+    lungShuntLiverBottomOfVolumeExtraSlices('set', 0); % Slice cutoff
+    lungShuntLungsVolumeOversized          ('set', 1); % Pixel(s) offset 
+
     Ga68DOTATATENormalLiverTresholdMultiplier('set', 2);
 
     % Machine Learning Ga68 DOTATATE segmentation Other Organ

@@ -220,7 +220,7 @@ function setMachineLearning3DLungShunt(sSegmentatorPath)
 
     progressBar(5/6, 'Computing Lung Shunt, please wait.');
    
-    generate3DLungShuntReportCallback();
+    generate3DLungShuntReport(true);
       
     % Delete .nii folder    
     
