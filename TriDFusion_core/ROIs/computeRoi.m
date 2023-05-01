@@ -90,7 +90,7 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
         mask = roiTemplateToMask(ptrRoi, imCData);      
      end
 
-    imCData = imCData(mask);
+    imCData = double(imCData(mask));
     
     if bSegmented  == true && ...      
        bModifiedMatrix == true % Can't use original buffer   

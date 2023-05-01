@@ -342,7 +342,7 @@ end
 
 %        atMetaData = dicomMetaData('get');                
         sUnitDisplay = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));                        
-         if strcmpi(sUnitDisplay, 'SUV')
+        if strcmpi(sUnitDisplay, 'SUV')
 %            tQuant = quantificationTemplate('get');   
 %            lMin = suvWindowLevel('get', 'min')/tQuant.tSUV.dScale;  
 %            lMax = suvWindowLevel('get', 'max')/tQuant.tSUV.dScale;   

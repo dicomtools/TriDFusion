@@ -1879,6 +1879,10 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                             dObjectTo   = str2double(extractAfter (csEditValue,'-'));
 
                             for jj=dObjectFrom:dObjectTo
+
+                                progressBar(jj/dObjectTo-0.009, sprintf('Importing rib left %d/%d', jj, dObjectTo ));
+
+                             
                                 sNiiFileName = sprintf('rib_left_%d', jj);
                                 sNiiFileName = sprintf('%s%s.nii.gz', sSegmentationFolderName, sNiiFileName);
         
@@ -1904,6 +1908,9 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                             dObjectTo   = str2double(extractAfter (csEditValue,'-'));
 
                             for jj=dObjectFrom:dObjectTo
+
+                                progressBar(jj/dObjectTo-0.009, sprintf('Importing rib right %d/%d', jj, dObjectTo ));
+                   
                                 sNiiFileName = sprintf('rib_right_%d', jj);
                                 sNiiFileName = sprintf('%s%s.nii.gz', sSegmentationFolderName, sNiiFileName);
         
@@ -1929,6 +1936,9 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                             dObjectTo   = str2double(extractAfter (csEditValue,'-'));
 
                             for jj=dObjectFrom:dObjectTo
+
+                                progressBar(jj/dObjectTo-0.009, sprintf('Importing vertebrae C %d/%d', jj, dObjectTo ));
+                          
                                 sNiiFileName = sprintf('vertebrae_C%d', jj);
                                 sNiiFileName = sprintf('%s%s.nii.gz', sSegmentationFolderName, sNiiFileName);
         
@@ -1954,6 +1964,9 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                             dObjectTo   = str2double(extractAfter (csEditValue,'-'));
 
                             for jj=dObjectFrom:dObjectTo
+
+                                progressBar(jj/dObjectTo-0.009, sprintf('Importing vertebrae T %d/%d', jj, dObjectTo ));
+                    
                                 sNiiFileName = sprintf('vertebrae_T%d', jj);
                                 sNiiFileName = sprintf('%s%s.nii.gz', sSegmentationFolderName, sNiiFileName);
         
@@ -1979,6 +1992,9 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                             dObjectTo   = str2double(extractAfter (csEditValue,'-'));
 
                             for jj=dObjectFrom:dObjectTo
+
+                                progressBar(jj/dObjectTo-0.009, sprintf('Importing vertebrae L %d/%d', jj, dObjectTo ));
+                              
                                 sNiiFileName = sprintf('vertebrae_L%d', jj);
                                 sNiiFileName = sprintf('%s%s.nii.gz', sSegmentationFolderName, sNiiFileName);
         
