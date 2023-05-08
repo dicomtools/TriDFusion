@@ -317,7 +317,7 @@ function multiGate3D(mPlay)
         if isempty(voiGateObj)
             
             if ~isempty(atVoi)
-                voiGate{dOffset} = initVoiIsoSurface(ui3DWindow{tt});
+                voiGate{dOffset} = initVoiIsoSurface(ui3DWindow{tt}, voi3DSmooth('get'));
             else
                 voiGate{dOffset} = '';
             end

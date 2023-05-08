@@ -42,7 +42,7 @@
 
     voiObj = voiObject('get');
     if isempty(voiObj)
-        voiObj = initVoiIsoSurface(uiOneWindowPtr('get'));
+        voiObj = initVoiIsoSurface(uiOneWindowPtr('get'), voi3DSmooth('get'));
         voiObject('set', voiObj);
     else          
 

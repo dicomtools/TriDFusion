@@ -382,7 +382,7 @@ function oneGate3D(sDirection)
 
     if ~isempty(atVoi)
         
-        voiObj = initVoiIsoSurface(uiOneWindowPtr('get'));
+        voiObj = initVoiIsoSurface(uiOneWindowPtr('get'), voi3DSmooth('get'));
 
         if ~isempty(voiObj)
             for ll=1:numel(voiObj)

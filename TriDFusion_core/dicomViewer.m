@@ -179,6 +179,7 @@ function resize = dicomViewer()
     voi3DTransparencyList       ('set', '');
     voi3DRenderer               ('set', 'Isosurface');
     slider3DVoiTransparencyValue('set', 0);
+    voi3DSmooth                 ('set', true);
 
     gaussFilter('set', false);
     
@@ -262,8 +263,6 @@ function resize = dicomViewer()
     lungShuntLiverTopOfVolumeExtraSlices   ('set', 0); % Slice cutoff
     lungShuntLiverBottomOfVolumeExtraSlices('set', 0); % Slice cutoff
     lungShuntLungsVolumeOversized          ('set', 1); % Pixel(s) offset 
-
-    Ga68DOTATATENormalLiverTresholdMultiplier('set', 2);
 
     % Machine Learning Ga68 DOTATATE segmentation Other Organ
     % Exclusion

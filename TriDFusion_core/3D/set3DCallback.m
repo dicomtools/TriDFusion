@@ -138,7 +138,9 @@ function set3DCallback(~, ~)
         end
 
         if switchTo3DMode('get') == true
-            
+
+            displayVoi('set', false);
+
             switchTo3DMode('set', false);
             
             set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
@@ -475,7 +477,7 @@ function set3DCallback(~, ~)
                     voiObj = voiObject('get');
                     if isempty(voiObj)
 
-                        voiObj = initVoiIsoSurface(uiOneWindowPtr('get'));
+                        voiObj = initVoiIsoSurface(uiOneWindowPtr('get'), voi3DSmooth('get'));
                         voiObject('set', voiObj);
 
                     else

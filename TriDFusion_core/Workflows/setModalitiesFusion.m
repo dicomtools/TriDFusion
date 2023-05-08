@@ -1,5 +1,5 @@
-function setModalitiesFusion(sModality1, sModality2)
-%function setModalitiesFusion(sModality1, sModality2)
+function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1IntensityMax, dModality1MIPIntensityMin, dModality1MIPIntensityMax, sModality2, dModality2IntensityMin, dModality2IntensityMax, dModality2MIPIntensityMin, dModality2MIPIntensityMax, bLink2DMip)
+%function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1IntensityMax, dModality1MIPIntensityMin, dModality1MIPIntensityMax, sModality2, dModality2IntensityMin, dModality2IntensityMax, dModality2MIPIntensityMin, dModality2MIPIntensityMax, bLink2DMip)
 %Run fusion between 2 modalities. The second modality is use as resample source.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -143,16 +143,75 @@ function setModalitiesFusion(sModality1, sModality2)
 
     clear aResampledImage;
 
+    % Set Modality 1 intendity
+
+    % Set TCS Axes intensity
+
+    sUnitDisplay = getSerieUnitValue(dSerie1Offset);                        
+
+    switch lower(sUnitDisplay)
+       
+        case 'suv'
+
+            tQuant = atInput(dSerie1Offset).tQuant;
+
+            if isfield(tQuant, 'tSUV')
+                dSUVScale = tQuant.tSUV.dScale;
+            else
+                dSUVScale = 1;
+            end 
+
+            dSeries1Min    = dModality1IntensityMin/dSUVScale;
+            dSeries1Max    = dModality1IntensityMax/dSUVScale;
+
+            dSeries1MIPMin = dModality1MIPIntensityMin/dSUVScale;
+            dSeries1MIPMax = dModality1MIPIntensityMax/dSUVScale;
+
+        case 'hu'
+
+            [dSeries1Max   , dSeries1Min   ] = computeWindowLevel(dModality1IntensityMax   , dModality1IntensityMin   );
+            [dSeries1MIPMax, dSeries1MIPMin] = computeWindowLevel(dModality1MIPIntensityMax, dModality1MIPIntensityMin);
+
+        otherwise
+
+            dSeries1Min    = dModality1IntensityMin;
+            dSeries1Max    = dModality1IntensityMax;
+
+            dSeries1MIPMin = dModality1MIPIntensityMin;
+            dSeries1MIPMax = dModality1MIPIntensityMax;
+    end
+
+    % Set TCS Axes intensity
+
+    set(uiSliderWindowPtr('get'), 'value', 0.5);
+    set(uiSliderLevelPtr('get') , 'value', 0.5);
+
+    set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries1Max]);
+    set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries1Max]);
+    set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries1Max]);
+
+    windowLevel('set', 'max', dSeries1Max);
+    windowLevel('set', 'min' ,dSeries1Min);
+
+    % Set MIP Axe intensity
+
+    set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1MIPMin dSeries1MIPMax]);   
 
     % Deactivate MIP Fusion
 
-    link2DMip('set', false);
-
-    set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
-    set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
-
-    progressBar(3/4, 'Set fusion, please wait.');
+    if bLink2DMip == true
+        link2DMip('set', true);
+    
+        set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+        set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+        set(btnLinkMipPtr('get'), 'FontWeight', 'bold'); 
+    else
+        link2DMip('set', false);
+    
+        set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
+        set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+    end
 
     % Set fusion 
 
@@ -162,6 +221,63 @@ function setModalitiesFusion(sModality1, sModality2)
 
         setFusionCallback();
     end
+
+    % Set Modality 2 intendity
+
+    % Set TCS Axes intensity
+
+    sUnitDisplay = getSerieUnitValue(dSerie2Offset);                        
+
+    switch lower(sUnitDisplay)
+       
+        case 'suv'
+
+            tQuant = atInput(dSerie2Offset).tQuant;
+
+            if isfield(tQuant, 'tSUV')
+                dSUVScale = tQuant.tSUV.dScale;
+            else
+                dSUVScale = 1;
+            end 
+
+            dSeries2Min    = dModality2IntensityMin/dSUVScale;
+            dSeries2Max    = dModality2IntensityMax/dSUVScale;
+
+            dSeries2MIPMin = dModality2MIPIntensityMin/dSUVScale;
+            dSeries2MIPMax = dModality2MIPIntensityMax/dSUVScale;
+
+        case 'hu'
+
+            [dSeries2Max   , dSeries2Min   ] = computeWindowLevel(dModality2IntensityMax   , dModality2IntensityMin   );
+            [dSeries2MIPMax, dSeries2MIPMin] = computeWindowLevel(dModality2MIPIntensityMax, dModality2MIPIntensityMin);
+
+        otherwise
+
+            dSeries2Min    = dModality2IntensityMin;
+            dSeries2Max    = dModality2IntensityMax;
+
+            dSeries2MIPMin = dModality2MIPIntensityMin;
+            dSeries2MIPMax = dModality2MIPIntensityMax;
+    end
+
+    % Set Fusion TCS Axes intensity
+
+    set(uiFusionSliderWindowPtr('get'), 'value', 0.5);
+    set(uiFusionSliderLevelPtr('get') , 'value', 0.5);
+
+    set(axes1fPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries2Max]);
+    set(axes2fPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries2Max]);
+    set(axes3fPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries2Max]);
+
+
+    fusionWindowLevel('set', 'max', dSeries2Max);
+    fusionWindowLevel('set', 'min' ,dSeries2Min);
+
+    % Set Fusion MIP Axe intensity
+
+    set(axesMipfPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries2MIPMin dSeries2MIPMax]); 
+
+    progressBar(3/4, 'Set fusion, please wait.');
 
 
     refreshImages();
@@ -174,7 +290,7 @@ function setModalitiesFusion(sModality1, sModality2)
 
     catch 
         resetSeries(dSerie2Offset, true);       
-        progressBar( 1 , 'Error: setSegmentationFDG()' );
+        progressBar( 1 , 'Error: setModalitiesFusion()' );
     end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');

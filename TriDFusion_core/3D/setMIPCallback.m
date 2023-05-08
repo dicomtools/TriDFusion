@@ -131,6 +131,8 @@ function setMIPCallback(~, ~)
 
         if switchToMIPMode('get') == true
 
+            displayVoi('set', false);
+
             switchToMIPMode('set', false);
                 
             set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
@@ -516,7 +518,7 @@ end
                 if displayVoi('get') == true
                     voiObj = voiObject('get');
                     if isempty(voiObj)
-                        voiObj = initVoiIsoSurface(uiOneWindowPtr('get'));
+                        voiObj = initVoiIsoSurface(uiOneWindowPtr('get'), voi3DSmooth('get'));
                         voiObject('set', voiObj);
 
                     else

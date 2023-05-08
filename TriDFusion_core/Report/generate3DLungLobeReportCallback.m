@@ -2525,7 +2525,7 @@ function generate3DLungLobeReportCallback(~, ~)
     
             [aMask, aColor] = machineLearning3DMask('get', gasMask{jj});
 
-            aMask = smooth3(aMask, 'box');
+            aMask = smooth3(aMask, 'box', 3);
 
             if ~isempty(aMask)
 

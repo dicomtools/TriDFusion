@@ -1,6 +1,6 @@
 function bPlayback = multiFrame3DRecord(sAction, bValue)
 %function bPlayback = multiFrame3DRecord(sAction, bValue)
-%Get/Set Playback Multi-Frame Recoed.
+%Get/Set Playback Multi-Frame record.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org

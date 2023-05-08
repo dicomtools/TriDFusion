@@ -155,35 +155,62 @@ function initTemplates()
                            bWholeBody == true || ...      
                            bScreenCapture == true
 
-                            if size(tDatasets.DicomBuffers{1}, 3) == 1
-                                dNbOfImages = size(tDatasets.DicomBuffers{1}, 4);
-                            else
-                                dNbOfImages = size(tDatasets.DicomBuffers{1}, 3);
-                            end
-                       
                             sSeriesDescription = tDatasets.DicomInfos{1}.SeriesDescription;
-                            for ll=1:dNbOfImages
-                                                                
-                                if size(tDatasets.DicomBuffers{1}, 3) == 1
-                                    aTemp{1} = tDatasets.DicomBuffers{1}(:,:,1,ll);
-                                else
-                                    aTemp{1} = tDatasets.DicomBuffers{1}(:,:,ll);
-                                end
-                                
-                                aDicomBuffer{dNbEntry} = aTemp;
+                           
+                            if numel(tDatasets.DicomBuffers) > 1
 
-                                if bStatic == true 
-                                    tDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Static %d)', sSeriesDescription, ll);
-                                elseif bWholeBody == true 
-                                    tDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Whole Body %d)', sSeriesDescription, ll);
+                                dNbOfImages = numel(tDatasets.DicomBuffers);
+    
+                                for ll=1:dNbOfImages
+                                   
+                                    aTemp{1} = tDatasets.DicomBuffers{ll}(:,:);
+                             
+                                    aDicomBuffer{dNbEntry} = aTemp;
+                                
+                                    if bStatic == true
+                                        tDatasets.DicomInfos{ll}.SeriesDescription = sprintf('%s (Static %d)', sSeriesDescription, ll);
+                                    elseif bWholeBody == true
+                                        tDatasets.DicomInfos{ll}.SeriesDescription = sprintf('%s (Whole Body %d)', sSeriesDescription, ll);
+                                    else
+                                        tDatasets.DicomInfos{ll}.SeriesDescription = sprintf('%s (Secondary %d)', sSeriesDescription, ll);
+                                    end
+                                    
+                                    asFilesList{dNbEntry}  = tDatasets.FileNames(ll);
+                                    atDicomInfo{dNbEntry}  = tDatasets.DicomInfos(ll);
+                                    
+                                    dNbEntry = dNbEntry+1;             
+                                end                                
+                            else
+
+                                if size(tDatasets.DicomBuffers{1}, 3) == 1
+                                    dNbOfImages = size(tDatasets.DicomBuffers{1}, 4);
                                 else
-                                    tDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Secondary %d)', sSeriesDescription, ll);
+                                    dNbOfImages = size(tDatasets.DicomBuffers{1}, 3);
+                                end                          
+                                
+                                for ll=1:dNbOfImages
+                                                                    
+                                    if size(tDatasets.DicomBuffers{1}, 3) == 1
+                                        aTemp{1} = tDatasets.DicomBuffers{1}(:,:,1,ll);
+                                    else
+                                        aTemp{1} = tDatasets.DicomBuffers{1}(:,:,ll);
+                                    end
+                                    
+                                    aDicomBuffer{dNbEntry} = aTemp;
+    
+                                    if bStatic == true 
+                                        tDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Static %d)', sSeriesDescription, ll);
+                                    elseif bWholeBody == true 
+                                        tDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Whole Body %d)', sSeriesDescription, ll);
+                                    else
+                                        tDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Secondary %d)', sSeriesDescription, ll);
+                                    end
+                                    
+                                    asFilesList{dNbEntry}  = tDatasets.FileNames;
+                                    atDicomInfo{dNbEntry}  = tDatasets.DicomInfos;
+                                    
+                                    dNbEntry = dNbEntry+1;                                      
                                 end
-                                
-                                asFilesList{dNbEntry}  = tDatasets.FileNames;
-                                atDicomInfo{dNbEntry}  = tDatasets.DicomInfos;
-                                
-                                dNbEntry = dNbEntry+1;                                      
                             end
                         else
                             asFilesList{dNbEntry}  = tDatasets.FileNames;

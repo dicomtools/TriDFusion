@@ -1,6 +1,6 @@
-function dTresholdMultiplier = Ga68DOTATATENormalLiverTresholdMultiplier(sAction, dValue)
-%function dTresholdMultiplier = Ga68DOTATATENormalLiverTresholdMultiplier(sAction, dValue)
-%Get/Set Ga68DOTATATE nurmal liver treshold multiplier value.
+function bSmooth = voi3DSmooth(sAction, bValue)
+%function bSmooth = voi3DSmooth(sAction, bValue)
+%Get/Set 3D interface smooth VOI.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -25,13 +25,13 @@ function dTresholdMultiplier = Ga68DOTATATENormalLiverTresholdMultiplier(sAction
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    persistent pdTresholdMultiplier; 
+    persistent pbSmooth; 
 
     if strcmpi('set', sAction)
-        pdTresholdMultiplier = dValue;            
+        pbSmooth = bValue;            
     end
     
-    dTresholdMultiplier = pdTresholdMultiplier;
+    bSmooth = pbSmooth;             
 end

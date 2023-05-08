@@ -1,5 +1,5 @@
-function voiObj = initVoiIsoSurface(uiWindow)
-%function voiObj = initVoiIsoSurface(uiWindow)
+function voiObj = initVoiIsoSurface(uiWindow, bSmoothVoi)
+%function voiObj = initVoiIsoSurface(uiWindow, bSmoothVoi)
 %Create ISO Surface Objects from VOIs.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -152,8 +152,13 @@ function voiObj = initVoiIsoSurface(uiWindow)
                    
                 end
             end
+            
+            if bSmoothVoi == true
+                aBuffer = smooth3(aBuffer(:,:,end:-1:1), 'box', 3);
+            else
+                aBuffer = aBuffer(:,:,end:-1:1);
+            end
 
-            aBuffer = aBuffer(:,:,end:-1:1);
 %            Ds = interp3(im);
 %            Ds = smooth3(im, 'gaussian', 15);
 

@@ -2342,6 +2342,7 @@ function generateContourReportCallback(~, ~)
         end
 
         aBuffer = aBuffer(:,:,end:-1:1);                                                                 
+%        aBuffer = aBuffer(:,:,end:-1:1);                                                                 
 
         aScaleFactor = [y x z];  
         dScaleMax = max(aScaleFactor)*2.5;
@@ -2396,8 +2397,9 @@ function generateContourReportCallback(~, ~)
 
         if ~isempty(glVoiAllContoursMask)
 
+     %       glVoiAllContoursMask = smooth3(glVoiAllContoursMask(:,:,end:-1:1), 'box', 3);
             glVoiAllContoursMask = glVoiAllContoursMask(:,:,end:-1:1);
-    
+   
             aInputArguments = {'Parent', ui3DWindow, 'Renderer', 'VolumeRendering', 'BackgroundColor', 'white', 'ScaleFactors', aScaleFactor};
     
             aAlphamap = linspace(0, 1, 256)';

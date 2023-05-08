@@ -164,8 +164,8 @@ function mainWindowMenu()
     mWorkflows = uimenu(fiMainWindowPtr('get'),'Label','Workflows');  
     mSegmentation = uimenu(mWorkflows,'Label','Segmentation');  
     uimenu(mSegmentation, 'Label','FDG Tumor Segmentation'                       , 'Callback', @setSegmentationFDGCallback);
-%    uimenu(mSegmentation, 'Label','Ga68 DOTATATE Segmentation (Machine Learning)', 'Callback', @setMachineLearningGa68DOTATATECallback);
-    uimenu(mWorkflows   , 'Label','PET/CT Fusion', 'Callback', @setPETCTFusionCallback);
+ %   uimenu(mSegmentation, 'Label','Ga68 DOTATATE Segmentation (Machine Learning)', 'Callback', @setMachineLearningGa68DOTATATECallback);
+    uimenu(mWorkflows   , 'Label','Ga68 DOTATATE PET/CT Fusion', 'Callback', @setPETCTFusionCallback);
     
     
     mModules = uimenu(fiMainWindowPtr('get'),'Label','Modules');
