@@ -539,7 +539,7 @@ function generate3DLungShuntReport(bInitReport)
                   'FontWeight', 'normal',...
                   'FontSize'  , 11,...
                   'FontName'  , 'MS Sans Serif', ...
-                  'string'    , 'Cutoff for the extra slice(s) above the top of the liver volume-of-interest',...
+                  'string'    , 'Cutoff for the extra slice(s) above or bellow the top of the liver volume-of-interest',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
@@ -552,7 +552,7 @@ function generate3DLungShuntReport(bInitReport)
                   'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 240 60 25], ...
                   'String'   , num2str(lungShuntLiverTopOfVolumeExtraSlices('get')), ...
                   'Enable'  , 'on', ...
-                  'Tooltip' , 'Cutoff for the extra slice(s) above the top of the liver volume-of-interest', ...
+                  'Tooltip' , 'Cutoff for the extra slice(s) above or bellow the top of the liver volume-of-interest', ...
                   'BackgroundColor', 'White', ...
                   'CallBack', @uiEditLiverTopOfVolumeExtraSlicesCallback ...
                   );
@@ -579,7 +579,7 @@ function generate3DLungShuntReport(bInitReport)
                   'FontWeight', 'normal',...
                   'FontSize'  , 11,...
                   'FontName'  , 'MS Sans Serif', ...
-                  'string'    , 'Cutoff for the extra slice(s) under the bottom of the liver volume-of-interest',...
+                  'string'    , 'Cutoff for the extra slice(s) bellow or above the bottom of the liver volume-of-interest',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
@@ -592,7 +592,7 @@ function generate3DLungShuntReport(bInitReport)
                   'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 180 60 25], ...
                   'String'   , num2str(lungShuntLiverBottomOfVolumeExtraSlices('get')), ...
                   'Enable'  , 'on', ...
-                  'Tooltip' , 'Cutoff for the extra slice(s) under the bottom of the liver volume-of-interest', ...
+                  'Tooltip' , 'Cutoff for the extra slice(s) bellow or above the bottom of the liver volume-of-interest', ...
                   'BackgroundColor', 'White', ...
                   'CallBack', @uiEditLiverBottomOfVolumeExtraSlicesCallback ...
                   );
@@ -626,10 +626,38 @@ function generate3DLungShuntReport(bInitReport)
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 130 400 20]...
                   ); 
 
+    % Overlap the liver
+
+        uiCheckLungsVolumeOverlap = ...
+        uicontrol(ui3DLungShuntReport, ...
+                  'Style'   , 'checkbox', ...
+                  'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 100 25 25], ...
+                  'Value'   , lungShuntLungsVolumeOverlap('get'), ...
+                  'Enable'  , 'on', ...
+                  'Tooltip' , 'Overlap the liver', ...
+                  'BackgroundColor', 'White', ...
+                  'CallBack', @uiCheckLungsVolumeOverlapCallback ...
+                  );
+
+         uiTextLungsVolumeOverlap = ...
+         uicontrol(ui3DLungShuntReport,...
+                  'style'     , 'text',...
+                  'Enable'    , 'Inactive',...
+                  'FontWeight', 'normal',...
+                  'FontSize'  , 10,...
+                  'FontName'  , 'MS Sans Serif', ...
+                  'string'    , 'Overlap the liver',...
+                  'horizontalalignment', 'left',...
+                  'BackgroundColor', 'White', ...
+                  'ForegroundColor', 'Black', ...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90+21 97 200 25], ...
+                  'ButtonDownFcn', @uiCheckLungsVolumeOverlapCallback ...
+                  );
+
         uiEditLungsVolumeOversized = ...
         uicontrol(ui3DLungShuntReport, ...
                   'Style'   , 'edit', ...
-                  'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 100 60 25], ...
+                  'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 70 60 25], ...
                   'String'   , num2str(lungShuntLungsVolumeOversized('get')), ...
                   'Enable'  , 'on', ...
                   'Tooltip' , 'Lungs volume-of-interest oversized', ...
@@ -652,11 +680,12 @@ function generate3DLungShuntReport(bInitReport)
                   'position', [aEditLungsVolumeSizePosition(1)+aEditLungsVolumeSizePosition(3)+5 aEditLungsVolumeSizePosition(2)-3 200 20]...
                   ); 
 
+
         uiProceedLiverVolumeOversize = ...
          uicontrol(ui3DLungShuntReport,...
                   'String'  ,'Reprocess',...
                   'FontWeight', 'bold',...
-                  'Position',[FIG_REPORT_X-(FIG_REPORT_X/3)-90 50 90 30],...
+                  'Position',[FIG_REPORT_X-(FIG_REPORT_X/3)-90 20 90 30],...
                   'Enable'  , 'On', ...
                   'BackgroundColor', [0.75 0.75 0.75], ...
                   'ForegroundColor', [0.1 0.1 0.1], ...
@@ -1849,9 +1878,9 @@ function generate3DLungShuntReport(bInitReport)
 
         dNbExtraSlices = round(str2double(get(uiEditLiverTopOfVolumeExtraSlices, 'String')));
 
-        if dNbExtraSlices < 0
-            dNbExtraSlices = 0;
-        end
+%        if dNbExtraSlices < 0
+%            dNbExtraSlices = 0;
+%        end
 
         set(uiEditLiverTopOfVolumeExtraSlices, 'String', num2str(dNbExtraSlices));
 
@@ -1867,9 +1896,9 @@ function generate3DLungShuntReport(bInitReport)
 
         dNbExtraSlices = round(str2double(get(uiEditLiverBottomOfVolumeExtraSlices, 'String')));
 
-        if dNbExtraSlices < 0
-            dNbExtraSlices = 0;
-        end
+ %       if dNbExtraSlices < 0
+ %           dNbExtraSlices = 0;
+ %       end
 
         set(uiEditLiverBottomOfVolumeExtraSlices, 'String', num2str(dNbExtraSlices));
 
@@ -1877,6 +1906,25 @@ function generate3DLungShuntReport(bInitReport)
         set(uiTextLiverBottomOfVolumeExtraSlices, 'String', sExtraSlicesSize);
 
         lungShuntLiverBottomOfVolumeExtraSlices('set', dNbExtraSlices);
+
+    end
+
+    function uiCheckLungsVolumeOverlapCallback(hObject, ~)
+
+        bOverlap = get(uiCheckLungsVolumeOverlap, 'value');
+
+        if strcmpi(get(hObject, 'Style'), 'text')
+            if bOverlap == true
+                bOverlap = false;
+            else
+                 bOverlap = true;               
+            end
+
+            set(uiCheckLungsVolumeOverlap, 'value', bOverlap);
+
+        end
+
+        lungShuntLungsVolumeOverlap('set', bOverlap);
 
     end
 
@@ -1932,6 +1980,8 @@ function generate3DLungShuntReport(bInitReport)
         dLiverMaskOffset = round(str2double(get(uiEditLiverVolumeOversized, 'String')));
         dLungsMaskOffset = round(str2double(get(uiEditLungsVolumeOversized, 'String')));
 
+        bLungsCanOverlapTheLiver =  get(uiCheckLungsVolumeOverlap, 'value');
+
         if ~isempty(gtReport) 
             try
 
@@ -1946,7 +1996,9 @@ function generate3DLungShuntReport(bInitReport)
             set(uiEditLiverVolumeOversized          , 'Enable', 'off');
             set(uiEditLungsVolumeOversized          , 'Enable', 'off');
             set(uiProceedLiverVolumeOversize        , 'Enable', 'off');
- 
+            set(uiCheckLungsVolumeOverlap           , 'Enable', 'off');
+            set(uiTextLungsVolumeOverlap            , 'Enable', 'on');
+
             progressBar(1/4, 'Computing oversized liver mask, please wait.');
 
             dFirstSlice = [];
@@ -1964,13 +2016,34 @@ function generate3DLungShuntReport(bInitReport)
                 end
             end
 
-            aLiverMask = imdilate(aLiverMask, strel('sphere', dLiverMaskOffset)); % Increse mask by x pixels
+            if dLiverMaskOffset ~= 0
+                if dNbExtraSlicesAtTop < 0 || dNbExtraSlicesAtBottom < 0
 
-            
-            aLiverMask(:,:,1:dFirstSlice-1-dNbExtraSlicesAtTop) = 0;
-            aLiverMask(:,:,dLastSlice+1+dNbExtraSlicesAtBottom:end) = 0;
-            
-            
+                    aLiverMaskTemp = imdilate(aLiverMask, strel('sphere', dLiverMaskOffset)); % Increse mask by x pixels
+    
+                    aLiverMaskTemp(:,:,1:dFirstSlice-1-dNbExtraSlicesAtTop) = 0;
+                    aLiverMaskTemp(:,:,dLastSlice+1+dNbExtraSlicesAtBottom:end) = 0;
+
+                    if dNbExtraSlicesAtTop < 0
+                        aLiverMaskTemp(:,:,dFirstSlice:dFirstSlice-1-dNbExtraSlicesAtTop) = aLiverMask(:,:,dFirstSlice:dFirstSlice-1-dNbExtraSlicesAtTop);
+                    end
+
+                    if dNbExtraSlicesAtBottom < 0
+                        aLiverMaskTemp(:,:,dLastSlice+1+dNbExtraSlicesAtBottom:dLastSlice) = aLiverMask(:,:,dLastSlice+1+dNbExtraSlicesAtBottom:dLastSlice);
+                    end
+
+
+                    aLiverMask = aLiverMaskTemp;
+
+                    clear aLiverMaskTemp;
+                else
+                    aLiverMask = imdilate(aLiverMask, strel('sphere', dLiverMaskOffset)); % Increse mask by x pixels
+    
+                    aLiverMask(:,:,1:dFirstSlice-1-dNbExtraSlicesAtTop) = 0;
+                    aLiverMask(:,:,dLastSlice+1+dNbExtraSlicesAtBottom:end) = 0;                    
+                end
+            end
+                      
             deleteLungShuntVoiContours('Liver-LIV', dNMSerieOffset);
          
             maskToVoi(aLiverMask, 'Liver', 'Liver', gtReport.Liver.Color, 'axial', dNMSerieOffset, pixelEdgeMachineLearningDialog('get'));
@@ -1981,9 +2054,13 @@ function generate3DLungShuntReport(bInitReport)
 
             aLungsMask = gtReport.Lungs.Mask;
 
-            aLungsMask = imdilate(aLungsMask, strel('sphere', dLungsMaskOffset)); % Increse mask by x pixels
+            if dLungsMaskOffset ~= 0
+                aLungsMask = imdilate(aLungsMask, strel('sphere', dLungsMaskOffset)); % Increse mask by x pixels
+            end
 
-            aLungsMask(aLiverMask~=0)=0;
+            if bLungsCanOverlapTheLiver == false
+                aLungsMask(aLiverMask~=0)=0;
+            end
 
             deleteLungShuntVoiContours('Lungs-LUN', dNMSerieOffset);
 
@@ -2032,7 +2109,7 @@ function generate3DLungShuntReport(bInitReport)
                     dLiverTotal = gtReport.Liver.Total*100/dLiverPercent;
         
                     % 𝑆ℎ𝑢𝑛𝑡 = ( 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
-                    %        _________________________________
+                    %        ____________________________
                     %        ( L𝑣𝑒𝑟 𝐶𝑜𝑢𝑛𝑡𝑠 + 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 ) × 100
         
                     sLungsShuntFraction = sprintf('Lung Shunt: %2.2f%%',  dLungsTotal/(dLiverTotal+dLungsTotal)*100);
@@ -2058,6 +2135,8 @@ function generate3DLungShuntReport(bInitReport)
             set(uiEditLiverVolumeOversized          , 'Enable', 'on');
             set(uiEditLungsVolumeOversized          , 'Enable', 'on');
             set(uiProceedLiverVolumeOversize        , 'Enable', 'on');
+            set(uiCheckLungsVolumeOverlap           , 'Enable', 'on');
+            set(uiTextLungsVolumeOverlap            , 'Enable', 'inactive');
 
             set(fig3DLungShuntReport, 'Pointer', 'default');
             drawnow;
@@ -2175,7 +2254,7 @@ function generate3DLungShuntReport(bInitReport)
             dLiverTotal = gtReport.Liver.Total*100/dLiverPercent;
 
             % 𝑆ℎ𝑢𝑛𝑡 = ( 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
-            %        _________________________________
+            %        ____________________________
             %        ( L𝑣𝑒𝑟 𝐶𝑜𝑢𝑛𝑡𝑠 + 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 ) × 100
 
             sLungsShuntFraction = sprintf('Lung Shunt: %2.2f%%',  dLungsTotal/(dLiverTotal+dLungsTotal)*100);
@@ -2201,7 +2280,7 @@ function generate3DLungShuntReport(bInitReport)
             dLiverTotal = gtReport.Liver.Total*100/dLiverPercent;
 
             % 𝑆ℎ𝑢𝑛𝑡 = ( 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
-            %        _________________________________
+            %        ____________________________
             %        ( L𝑣𝑒𝑟 𝐶𝑜𝑢𝑛𝑡𝑠 + 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 ) × 100
 
             sLungsShuntFraction = sprintf('Lung Shunt: %2.2f%%',  dLungsTotal/(dLiverTotal+dLungsTotal)*100);

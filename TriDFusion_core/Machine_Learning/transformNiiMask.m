@@ -32,36 +32,157 @@ function aMask = transformNiiMask(aNiiImage, atNiiMetaData, aRefImage, atRefMeta
     aMask = imrotate3(aNiiImage, 90, [0 0 1], 'nearest');
     aMask = aMask(:,:,end:-1:1);
 
+if 1
+
+    xPixelSizeRatio = 0;
+    yPixelSizeRatio = 0;
+    zMoveOffset =0;
+
+    dMinFusion = min(aMask, [], 'all');                       
+
+    aZsize = size(aRefImage,3);
+    bZsize = size(aNiiImage,3); 
+
+    if aZsize ~= bZsize % Z is different
+
+        if aZsize > bZsize
+            dRatio = bZsize/aZsize*100;
+        else
+            dRatio = aZsize/bZsize*100;
+        end
+
+        if dRatio < 65  % The z is to far, need to change the method 
+            [aMask, ~] = ...
+                resampleImageTransformMatrix(aMask, ...
+                                             atNiiMetaData, ...
+                                             aRefImage, ...
+                                             atRefMetaData, ...
+                                             'cubic', ...
+                                             false ...
+                                             );                              
+        else
+            Btemp = aMask;
+            atFusionMetaDataTemp = atNiiMetaData;
+            
+            [aMask, ~] = ...
+                resampleImageTransformMatrix(aMask, ...
+                                             atNiiMetaData, ...
+                                             aRefImage, ...
+                                             atRefMetaData, ...
+                                             'cubic', ...
+                                             true ...
+                                             ); 
+
+            if isempty(aMask(aMask~=dMinFusion)) % The z is to far, need to change the method
+
+                [aMask, ~] = ...
+                    resampleImageTransformMatrix(Btemp, ...
+                                                 atFusionMetaDataTemp, ...
+                                                 aRefImage, ...
+                                                 atRefMetaData, ...
+                                                 'cubic', ...
+                                                 false ...
+                                                 ); 
+%                            B = imresize3(B, 'OutputSize',size(A));+
+            else
+                zMoveOffset = (aZsize-bZsize)/2;
+            end
+
+            dimsRef = size(aRefImage);         
+            dimsRsp = size(aMask);         
+            xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
+            yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
+
+            if xMoveOffset ~= 0 || yMoveOffset ~= 0 
+
+                xPixelSizeRatio = atFusionMetaDataTemp{1}.PixelSpacing(1);
+                yPixelSizeRatio = atFusionMetaDataTemp{1}.PixelSpacing(2);
+            else                              
+
+                xPixelSizeRatio = atRefMetaData{1}.PixelSpacing(1);
+                yPixelSizeRatio = atRefMetaData{1}.PixelSpacing(2);                                    
+            end
+
+            clear Btemp;
+            clear atFusionMetaDataTemp;                                 
+        end
+
+    else
+        [aMask, ~] = ...
+            resampleImageTransformMatrix(aMask, ...
+                                         atNiiMetaData, ...
+                                         aRefImage, ...
+                                         atRefMetaData, ...
+                                         'cubic', ...
+                                         false ...
+                                         );     
+        dimsRef = size(aRefImage);         
+        dimsRsp = size(aMask);         
+        xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
+        yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
+
+        if xMoveOffset ~= 0 || yMoveOffset ~= 0 
+            if xMoveOffset < 1 && yMoveOffset < 1
+               if xMoveOffset > 0 && yMoveOffset > 0    
+                    aMask=imresize3(aMask, size(aRefImage));
+               end
+            else
+                xPixelSizeRatio = 1;
+                yPixelSizeRatio = 1;
+            end
+        end
+    end
+
+    dimsRef = size(aRefImage);         
+    dimsRsp = size(aMask);         
+    xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
+    yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
+
+    if xMoveOffset ~= 0 || yMoveOffset ~= 0 || zMoveOffset ~= 0
+        if xMoveOffset < 0 || yMoveOffset < 0 
+            aMask = imtranslate(aMask,[-xMoveOffset-xPixelSizeRatio, -yMoveOffset-xPixelSizeRatio, zMoveOffset], 'nearest', 'OutputView', 'full', 'FillValues', min(aMask, [], 'all') ); 
+        else                              
+            aMask = imtranslate(aMask,[-xMoveOffset+xPixelSizeRatio, -yMoveOffset+yPixelSizeRatio, zMoveOffset], 'nearest', 'OutputView', 'same', 'FillValues', min(aMask, [], 'all') ); 
+        end
+    end
+else
     % Resample mask
 
     dimsNii = size(aNiiImage);         
+    dimsRef = size(aRefImage);         
 
     niiSliceThickness = computeSliceSpacing(atNiiMetaData);
     refSliceThickness = computeSliceSpacing(atRefMetaData);       
 
-    [Mnii,~] = TransformMatrix(atNiiMetaData{1}, niiSliceThickness);
-    [Mref,~] = TransformMatrix(atRefMetaData{1}, refSliceThickness);
+%    [Mnii,~] = TransformMatrix(atNiiMetaData{1}, niiSliceThickness);
+%    [Mref,~] = TransformMatrix(atRefMetaData{1}, refSliceThickness);
             
-    M=Mnii/Mref;
-    TF = affine3d(M');
+%    M=Mref/Mnii;
+
+%    TF = affine3d(M');
+
+    [M,~] = getTransformMatrix(atNiiMetaData{1}, niiSliceThickness, atRefMetaData{1}, refSliceThickness);
+    TF = affine3d(M);
 
     Rdcm = imref3d(dimsNii, atNiiMetaData{1}.PixelSpacing(2), atNiiMetaData{1}.PixelSpacing(1), niiSliceThickness);
 
-    [aMask, ~] = imwarp(aMask, Rdcm, TF, 'Interp', 'Nearest', 'FillValues', double(min(aNiiImage,[],'all')));  
+    [aMask, ~] = imwarp(aMask, Rdcm, TF, 'Interp', 'cubic', 'FillValues', double(min(aNiiImage,[],'all')));  
 
-    % Translate mask
-                
-    dimsRef = size(aRefImage);         
     dimsRsp = size(aMask);         
-    xMoveOffset = ((dimsRsp(1)-dimsRef(1))/2);
-    yMoveOffset = ((dimsRsp(2)-dimsRef(2))/2);
+    xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
+    yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
 
-    if xMoveOffset ~= 0 || yMoveOffset ~= 0 
-        if xMoveOffset < 0 || yMoveOffset < 0
-            aMask = imtranslate(aMask,[-xMoveOffset-1, -yMoveOffset-1, 0], 'nearest', 'OutputView', 'full', 'FillValues', min(aMask, [], 'all') ); 
-        else
-            aMask = imtranslate(aMask,[-xMoveOffset-1, -yMoveOffset-1, 0], 'nearest', 'OutputView', 'same', 'FillValues', min(aMask, [], 'all') ); 
+    xPixelSizeRatio = 0;
+    yPixelSizeRatio = 0;
+    zMoveOffset     = 0;
+
+    if xMoveOffset ~= 0 || yMoveOffset ~= 0 || zMoveOffset ~= 0
+        if xMoveOffset < 0 || yMoveOffset < 0 
+            aMask = imtranslate(aMask,[-xMoveOffset-xPixelSizeRatio, -yMoveOffset-xPixelSizeRatio, zMoveOffset], 'nearest', 'OutputView', 'full', 'FillValues', min(aMask, [], 'all') ); 
+        else                              
+            aMask = imtranslate(aMask,[-xMoveOffset+xPixelSizeRatio, -yMoveOffset+yPixelSizeRatio, zMoveOffset], 'nearest', 'OutputView', 'same', 'FillValues', min(aMask, [], 'all') ); 
         end
     end
+
 
 end

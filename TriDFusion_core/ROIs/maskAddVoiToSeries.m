@@ -63,7 +63,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 %            dMaxValue = max(imMask, [], 'all');
 
 %    CC = bwconncomp(gather(BW), 18);
-    CC = bwconncomp(gather(BW), 6);
+    CC = bwconncomp(gather(BW), 26);
     dNbElements = numel(CC.PixelIdxList);
 
 %            asAllTag = [];
@@ -383,6 +383,12 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 %                                    aPosition(:,2) = aPosition(:,2) + 0.5;
 
 %                                    bAddRoi = true;
+
+                if bPixelEdge == false
+            
+                    aPosition = smoothRoi(aPosition, size(imMask));
+                end
+
                 sliceNumber('set', 'axial', dCurrentSlice);
                 
                 roiPtr = images.roi.Freehand(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'Smoothing', 1, 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', roiFaceAlphaValue('get'), 'Visible', 'off');

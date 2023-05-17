@@ -839,6 +839,8 @@ function colorbarCallback(hObject, ~)
                 fusionWindowLevel('set', 'max', lMax);
                 fusionWindowLevel('set', 'min' ,lMin);
 
+                getFusionInitWindowMinMax('set', lMax, lMin);
+
                 set(uiFusionSliderWindowPtr('get'), 'value', 0.5);
                 set(uiFusionSliderLevelPtr('get') , 'value', 0.5);
 
@@ -863,6 +865,8 @@ function colorbarCallback(hObject, ~)
                     
                 windowLevel('set', 'max', lMax);
                 windowLevel('set', 'min' ,lMin);
+
+                getInitWindowMinMax('set', lMax, lMin);
 
                 set(uiSliderWindowPtr('get'), 'value', 0.5);
                 set(uiSliderLevelPtr('get') , 'value', 0.5);

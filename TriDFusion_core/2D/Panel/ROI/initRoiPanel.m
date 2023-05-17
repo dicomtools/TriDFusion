@@ -405,17 +405,12 @@ function initRoiPanel()
                   'Callback', @chkHolesRoiPanelCallback...
                   );
 
-    if pixelEdgeRoiPanel('get') == true
-        sPixelEdgeDisplay = 'Pixel Edge (slower)';
-    else
-        sPixelEdgeDisplay = 'Pixel Center';
-    end
 
     txtPixelEdgeRoiPanel = ...
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'text',...
                   'enable'  , 'Inactive',...
-                  'string'  , sPixelEdgeDisplay,...
+                  'string'  , 'Pixel Edge',...
                   'horizontalalignment', 'left',...
                   'position', [35 52 150 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -1221,12 +1216,6 @@ function initRoiPanel()
             else
                 set(chkPixelEdgeRoiPanel, 'Value', true);
             end
-        end
-
-        if get(chkPixelEdgeRoiPanel, 'Value') == true
-            set(txtPixelEdgeRoiPanel, 'String', 'Pixel Edge (slower)');
-        else
-            set(txtPixelEdgeRoiPanel, 'String', 'Pixel Center');
         end
 
         pixelEdgeRoiPanel('set', get(chkPixelEdgeRoiPanel, 'Value'));
@@ -2330,6 +2319,12 @@ function initRoiPanel()
 
                         aPosition = flip(curentMask{1}, 2);
 
+                        if bPixelEdge == false
+                        
+                            aPosition = smoothRoi(aPosition, size(aBuffer));
+
+                        end
+
                         bAddRoi = true;
                         
                         pRoi = images.roi.Freehand(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
@@ -2605,7 +2600,12 @@ function initRoiPanel()
                                 aPosition = flip(curentMask{1}, 2);
 
 %                                bAddRoi = true;
+                                if bPixelEdge == false
                                 
+                                    aPosition = smoothRoi(aPosition, size(aBuffer));
+
+                                end
+
                                 pRoi = images.roi.Freehand(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
                                                            'Smoothing'     , 1, ...
                                                            'Position'      , aPosition, ...

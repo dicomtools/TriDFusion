@@ -190,9 +190,11 @@ function setOptionsCallback(~, ~)
               
     sVoiRenderer = voi3DRenderer('get');
     if strcmpi(sVoiRenderer, 'VolumeRendering')
-        dVoiRendererOffset = 1;
+       dVoiRendererOffset = 1;  
+    elseif strcmpi(sVoiRenderer, 'Isosurface')
+       dVoiRendererOffset = 2;  
     else
-        dVoiRendererOffset = 2;
+       dVoiRendererOffset = 3;
     end
               
     uiVoiRenderer = ...
@@ -1693,10 +1695,12 @@ function setOptionsCallback(~, ~)
             playback2DMipOnly('set', false);
         end
         
-        if get(uiVoiRenderer, 'Value') == true
+        if get(uiVoiRenderer, 'Value') == 1
             voi3DRenderer('set', 'VolumeRendering');
-        else
-            voi3DRenderer('set', 'Isosurface');
+        elseif get(uiVoiRenderer, 'Value') == 2
+            voi3DRenderer('set', 'Isosurface');      
+        else            
+            voi3DRenderer('set', 'LabelRendering');      
         end
        
         if get(chk3DVoiSmooth, 'Value') == true

@@ -56,7 +56,7 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
         
     for mm=1: dMaskSize
         
-%         progressBar(mm/dMaskSize, sprintf('Processing Mask ROI %d/%d', mm, dMaskSize ) );      
+         progressBar(mm/dMaskSize, sprintf('Processing Mask ROI %d/%d', mm, dMaskSize ) );      
   
         if strcmpi(sPlane, 'coronal')
             aSlice = aMask(mm,:,:);
@@ -95,7 +95,13 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
                     end
                     
                     aPosition = flip(curentMask{1}, 2);
-           
+
+                    if bPixelEdge == false
+                        
+                        aPosition = smoothRoi(aPosition, aMaskSize);
+
+                    end
+
                     pRoi = images.roi.Freehand(axRoi, ...
                                                'Smoothing'     , 1, ...
                                                'Position'      , aPosition, ...

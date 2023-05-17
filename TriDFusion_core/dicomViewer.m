@@ -260,9 +260,10 @@ function resize = dicomViewer()
     % 3D Lung Shunt
 
     lungShuntLiverVolumeOversized          ('set', 3); % Pixel(s) offset
-    lungShuntLiverTopOfVolumeExtraSlices   ('set', 0); % Slice cutoff
-    lungShuntLiverBottomOfVolumeExtraSlices('set', 0); % Slice cutoff
+    lungShuntLiverTopOfVolumeExtraSlices   ('set', -2); % Slice cutoff
+    lungShuntLiverBottomOfVolumeExtraSlices('set', 2); % Slice cutoff
     lungShuntLungsVolumeOversized          ('set', 1); % Pixel(s) offset 
+    lungShuntLungsVolumeOverlap            ('set', false); % Lungs liver overlap
 
     % Machine Learning Ga68 DOTATATE segmentation Other Organ
     % Exclusion
@@ -286,6 +287,11 @@ function resize = dicomViewer()
     excludeGa68DOTATATEDuodenum      ('set', false);
     excludeGa68DOTATATEStomach       ('set', false);
     excludeGa68DOTATATEEsophagus     ('set', false);
+
+    % Machine Learning Ga68 DOTATATE Options
+    
+    Ga68DOTATATEPixelEdge      ('set', true);
+    Ga68DOTATATESmalestVoiValue('set', 0.3);
 
     clearDisplay();
 

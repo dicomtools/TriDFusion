@@ -51,8 +51,10 @@ function voiObj = initVoiIsoSurface(uiWindow, bSmoothVoi)
         
     if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
         aInputArguments = {'Parent', uiWindow, 'Renderer', 'VolumeRendering', 'BackgroundColor', surfaceColor('one', background3DOffset('get'))};
-    else
+    elseif strcmpi(voi3DRenderer('get'), 'Isosurface')
         aInputArguments = {'Parent', uiWindow, 'Renderer', 'Isosurface', 'BackgroundColor', surfaceColor('one', background3DOffset('get'))};
+    else % LabelRendering
+        aInputArguments = {'Parent', uiWindow, 'BackgroundColor', surfaceColor('one', background3DOffset('get'))};
     end
 
     if ~isempty(isoObj)
@@ -105,8 +107,19 @@ function voiObj = initVoiIsoSurface(uiWindow, bSmoothVoi)
             aIsovalue = compute3DVoiTransparency(aVoiTransparencyList{aa});
             aAlphamap = compute3DVoiAlphamap(aVoiTransparencyList{aa});
 
-            aInputArguments = [aInputArguments(:)', {'Isovalue'}, {aIsovalue}, {'IsosurfaceColor'}, {aIsosurfaceColor}, {'Colormap'}, {aColormap}, {'Alphamap'}, {aAlphamap}];
+            if strcmpi(voi3DRenderer('get'), 'VolumeRendering') 
+                aInputArguments = [aInputArguments(:)', {'Colormap'}, {aColormap}, {'Alphamap'}, {aAlphamap}];
+            elseif strcmpi(voi3DRenderer('get'), 'Isosurface')
+                aInputArguments = [aInputArguments(:)', {'Isovalue'}, {aIsovalue}, {'IsosurfaceColor'}, {aIsosurfaceColor}];
+            else
+                aLabelColor = zeros(2,3);
+                aLabelColor(1,:) = atVoiInput{aa}.Color;
+                aLabelColor(2,:) = atVoiInput{aa}.Color;
 
+                aInputArguments = [aInputArguments(:)', {'LabelColor'}, {aLabelColor}];
+                
+            end
+            
             dNbTags = numel(atVoiInput{aa}.RoisTag);
             for yy=1:dNbTags
 
@@ -167,8 +180,26 @@ function voiObj = initVoiIsoSurface(uiWindow, bSmoothVoi)
 %            K2 = padarray(K1,[10 10 10],'both');
 %            Ds = smooth3(K2);
 
+%            if contains(atVoiInput{aa}.Label, 'Lung' )
+%                aInputArguments{4} = 'VolumeRendering';
+%                voi3DRenderer('set', 'VolumeRendering');
+%            else
+%                aInputArguments{4} = 'Isosurface';
+%                voi3DRenderer('set', 'Isosurface');               
+%            end
 
-            voiObj{aa} = volshow(aBuffer, aInputArguments{:});
+
+     %       voiObj{aa} = volshow(aBuffer, aInputArguments{:});
+            if strcmpi(voi3DRenderer('get'), 'LabelRendering')
+                voiObj{aa} = labelvolshow(uint8(squeeze(aBuffer)), squeeze(aBuffer), aInputArguments{:});
+            else 
+                if verLessThan('matlab','9.13')
+                    voiObj{aa} = volshow(squeeze(aBuffer), aInputArguments{:});
+                else
+                    voiObj{aa} = images.compatibility.volshow.R2022a.volshow(squeeze(aBuffer), aInputArguments{:});
+                end
+            end
+
             set(voiObj{aa}, 'InteractionsEnabled', false);
 
             if aVoiEnableList{aa} == false
