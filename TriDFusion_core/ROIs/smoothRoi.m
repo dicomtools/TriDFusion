@@ -47,7 +47,11 @@ function aPosition = smoothRoi(aPosition, aSize)
     end
     
     dPolynomialOrder = 4;
-    
+    if numel(aRoiX) < dPolynomialOrder
+        dPolynomialOrder = 1;
+    end
+
+
     aSmoothedX = sgolayfilt(aRoiX, dPolynomialOrder, dWindowWidth);
     aSmoothedY = sgolayfilt(aRoiY, dPolynomialOrder, dWindowWidth);
     
