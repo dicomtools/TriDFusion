@@ -29,8 +29,7 @@ function aPosition = smoothRoi(aPosition, aSize)
 
     % Original ROI positions
 
-    if 1
-
+try
     aRoiX = aPosition(:,1);
     aRoiY = aPosition(:,2);
     
@@ -58,19 +57,7 @@ function aPosition = smoothRoi(aPosition, aSize)
     aPosition = zeros(numel(aSmoothedX), 2);
     aPosition(:,1) = aSmoothedX(:);
     aPosition(:,2) = aSmoothedY(:);
+catch
+end
 
-    else
-        aRoiX = aPosition(:,1);
-        aRoiY = aPosition(:,2);
-
-        numberOfPointsClicked = numel(aPosition(:,1));
-        % Interpolate with a spline curve and finer spacing.
-        originalSpacing = 1 : numberOfPointsClicked;
-        % Make 9 points in between our original points that the user clicked on.
-        finerSpacing = 1 : 0.1 : numberOfPointsClicked;
-        % Do the spline interpolation.
-        knots(:, numberOfPointsClicked) = [aRoiX; aRoiY];
-
-        aPosition = spline(originalSpacing, knots, finerSpacing);
-    end
 end
