@@ -1,5 +1,5 @@
-function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1IntensityMax, dModality1MIPIntensityMin, dModality1MIPIntensityMax, sModality2, dModality2IntensityMin, dModality2IntensityMax, dModality2MIPIntensityMin, dModality2MIPIntensityMax, bLink2DMip)
-%function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1IntensityMax, dModality1MIPIntensityMin, dModality1MIPIntensityMax, sModality2, dModality2IntensityMin, dModality2IntensityMax, dModality2MIPIntensityMin, dModality2MIPIntensityMax, bLink2DMip)
+function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1IntensityMax, dModality1MIPIntensityMin, dModality1MIPIntensityMax, sModality2, dModality2IntensityMin, dModality2IntensityMax, dModality2MIPIntensityMin, dModality2MIPIntensityMax, bLink2DMip, bViewContourPanel)
+%function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1IntensityMax, dModality1MIPIntensityMin, dModality1MIPIntensityMax, sModality2, dModality2IntensityMin, dModality2IntensityMax, dModality2MIPIntensityMin, dModality2MIPIntensityMax, bLink2DMip, bViewContourPanel)
 %Run fusion between 2 modalities. The second modality is use as resample source.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -123,9 +123,10 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
         roiTemplate('set', dSerie1Offset, atResampledRois);                   
 
         % Activate ROI Panel
-    
-        if viewRoiPanel('get') == false
-            setViewRoiPanel();
+        if bViewContourPanel == true
+            if viewRoiPanel('get') == false
+                setViewRoiPanel();
+            end
         end
 
          % Triangulate og 1st VOI
@@ -279,8 +280,11 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
     progressBar(3/4, 'Set fusion, please wait.');
 
+    sliderCorCallback();
+    sliderSagCallback();
+    sliderTraCallback();
 
-    refreshImages();
+%    refreshImages();
 
     clear aSerie1Image;
     clear aSerie2Image;

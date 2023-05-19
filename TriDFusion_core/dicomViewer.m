@@ -223,7 +223,7 @@ function resize = dicomViewer()
 
     % Machine Learning
 
-    pixelEdgeMachineLearningDialog ('set', true);
+    pixelEdgeMachineLearningDialog ('set', false);
     fastMachineLearningDialog      ('set', true);
     forceSplitMachineLearningDialog('set', true);
     bodySegMachineLearningDialog   ('set', true);
@@ -289,7 +289,7 @@ function resize = dicomViewer()
     excludeGa68DOTATATEEsophagus     ('set', false);
 
     % Machine Learning Ga68 DOTATATE Options
-    
+
     Ga68DOTATATEPixelEdge      ('set', true);
     Ga68DOTATATESmalestVoiValue('set', 0.3);
 

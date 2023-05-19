@@ -994,7 +994,11 @@ function setRegistrationCallback(~, ~)
             end
         end
 
-        refreshImages();
+        sliderCorCallback();
+        sliderSagCallback();
+        sliderTraCallback();
+
+%        refreshImages();
 
 %            refreshImages();
 %        atMetaData = dicomMetaData('get');
@@ -1611,6 +1615,10 @@ function setRegistrationCallback(~, ~)
                 dicomViewerCore();
  %           end
         end
+
+%        sliderCorCallback();
+%        sliderSagCallback();
+%        sliderTraCallback();
 
         refreshImages();
 

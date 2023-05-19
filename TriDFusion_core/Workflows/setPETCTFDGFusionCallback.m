@@ -1,5 +1,5 @@
-function setPETCTFusionCallback(~, ~)
-%function setPETCTFusionCallback()
+function setPETCTFDGFusionCallback(~, ~)
+%function setPETCTFDGFusionCallback()
 %Run FDG Tumor Segmentation, The tool is called from the main menu.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,6 +27,6 @@ function setPETCTFusionCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    setModalitiesFusion('pt', 0, 10, 0, 20, 'ct', 50, 500, 50, 500, false);
+    setModalitiesFusion('pt', 0, 7, 0, 7, 'ct', 50, 500, 50, 500, false, false);
 
 end
