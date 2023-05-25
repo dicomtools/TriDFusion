@@ -160,15 +160,25 @@ function mainWindowMenu()
     uimenu(mTools, 'Label','Dice Contours'                 , 'Callback', @diceContoursCallback, 'Separator','on');
     uimenu(mTools, 'Label','Reset Series'                  , 'Callback', @resetSeriesCallback, 'Separator','on');
 
+    % Workflows
 
     mWorkflows = uimenu(fiMainWindowPtr('get'),'Label','Workflows');  
-    mSegmentation = uimenu(mWorkflows,'Label','Segmentation');  
-    uimenu(mSegmentation, 'Label','FDG Tumor Segmentation'                       , 'Callback', @setSegmentationFDGCallback);
-   % uimenu(mSegmentation, 'Label','Ga68 DOTATATE Segmentation (Machine Learning)', 'Callback', @setMachineLearningGa68DOTATATECallback);
-    uimenu(mWorkflows   , 'Label','FDG PET/CT Fusion', 'Callback', @setPETCTFDGFusionCallback);
-   % uimenu(mWorkflows   , 'Label','Ga68 DOTATATE PET/CT Fusion', 'Callback', @setPETCTGa68DOTATATEFusionCallback);
-   
-    
+
+    mAnalCancer = uimenu(mWorkflows,'Label','Anal Cancer');  
+    uimenu(mAnalCancer, 'Label','Export Report', 'Callback', @setAnalCancerReportCallback);
+    uimenu(mAnalCancer, 'Label','PET/CT Fusion', 'Callback', @setPETCTAnalCancerFusionCallback);
+
+    mFDG = uimenu(mWorkflows,'Label','FDG - fluorodeoxyglucose');  
+    uimenu(mFDG, 'Label','Tumor Segmentation (SUV 4)'   , 'Callback', @setSegmentationFDGSUVCallback);
+    uimenu(mFDG, 'Label','Tumor Segmentation (42%, 65%)', 'Callback', @setSegmentationFDGPercentCallback);
+    uimenu(mFDG, 'Label','PET/CT Fusion'                , 'Callback', @setPETCTFDGFusionCallback);
+
+if 0    
+    mGa68DOTATATE = uimenu(mWorkflows,'Label','Ga68 DOTATATE');  
+    uimenu(mGa68DOTATATE, 'Label','Tumor Segmentation (Machine Learning)', 'Callback', @setMachineLearningGa68DOTATATECallback);
+    uimenu(mGa68DOTATATE, 'Label','PET/CT Fusion'                        , 'Callback', @setPETCTGa68DOTATATEFusionCallback);
+end
+
     mModules = uimenu(fiMainWindowPtr('get'),'Label','Modules');
     mMachineLearning = uimenu(mModules, 'Label','Machine Learning');
     uimenu(mMachineLearning, 'Label','Machine Learning Segmentation', 'Callback', @setMachineLearningSegmentationCallback);

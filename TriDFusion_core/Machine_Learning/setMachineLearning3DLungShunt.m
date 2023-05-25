@@ -82,6 +82,8 @@ function setMachineLearning3DLungShunt(sSegmentatorPath)
     
     try 
 
+    pixelEdgeMachineLearningDialog ('set', true);
+
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
 

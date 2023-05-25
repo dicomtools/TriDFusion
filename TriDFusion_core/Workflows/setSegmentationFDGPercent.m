@@ -1,6 +1,6 @@
-function setSegmentationFDG(dTreshold)
-%function setSegmentationFDG(dTreshold)
-%Run FDG Segmentation base on a treshold.
+function setSegmentationFDGPercent(dPercentOfPeak, multiPeakValue)
+%function setSegmentationFDGPercent(dPercentOfPeak, multiPeakValue)
+%Run FDG Segmentation base on a percent of peak treshold.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -54,7 +54,6 @@ function setSegmentationFDG(dTreshold)
         return;               
     end
 
-
     atPTMetaData = dicomMetaData('get', [], dPTSerieOffset);
     atCTMetaData = dicomMetaData('get', [], dCTSerieOffset);
 
@@ -83,14 +82,6 @@ function setSegmentationFDG(dTreshold)
 
         setSeriesCallback();
     end
-
-    tQuant = quantificationTemplate('get');
-
-    if isfield(tQuant, 'tSUV')
-        dSUVScale = tQuant.tSUV.dScale;
-    else
-        dSUVScale = 0;
-    end 
     
     resetSeries(dPTSerieOffset, true);       
 
@@ -126,7 +117,9 @@ function setSegmentationFDG(dTreshold)
 
     dMin = min(aBWMask, [], 'all');
 
-    aBWMask(aBWMask*dSUVScale<dTreshold)=dMin;
+    dTreshold = max(aResampledPTImage, [], 'all')*0.1;
+
+    aBWMask(aBWMask<dTreshold)=dMin;
 
     aBWMask = imbinarize(aBWMask);
 
@@ -150,9 +143,7 @@ function setSegmentationFDG(dTreshold)
     setSeriesCallback();
 
     sFormula = 'CT Bone Map';
-
-    maskAddVoiToSeries(imMask, aBWMask, true, false, dTreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue);                    
-  
+    maskAddVoiToSeries(imMask, aBWMask, true, true, dPercentOfPeak, true, multiPeakValue, false, sFormula, BWCT, dSmalestVoiValue);                    
 
     clear aResampledPTImage;
     clear aBWMask;

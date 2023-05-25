@@ -296,16 +296,16 @@ end
             switch lower(tRoi.Axe)
 
                 case lower('axe')
-                    aRadius = tRoi.Radius*xScale;
+                    aRadius = tRoi.Radius/xScale;
 
                 case lower('axes1')
-                    aRadius = tRoi.Radius*zScale;
+                    aRadius = tRoi.Radius/zScale;
 
                 case lower('axes2')
-                    aRadius = tRoi.Radius*zScale;
+                    aRadius = tRoi.Radius/zScale;
 
                 case lower('axes3')
-                    aRadius = tRoi.Radius*xScale;
+                    aRadius = tRoi.Radius/xScale;
             end
 
 
@@ -314,16 +314,16 @@ end
             switch lower(tRoi.Axe)
 
                 case lower('axe')
-                    aSemiAxes = tRoi.SemiAxes*xScale;
+                    aSemiAxes = tRoi.SemiAxes/xScale;
 
                 case lower('axes1')
-                    aSemiAxes = tRoi.SemiAxes*zScale;
+                    aSemiAxes = tRoi.SemiAxes/zScale;
 
                 case lower('axes2')
-                    aSemiAxes = tRoi.SemiAxes*zScale;
+                    aSemiAxes = tRoi.SemiAxes/zScale;
 
                 case lower('axes3')
-                    aSemiAxes = tRoi.SemiAxes*xScale;
+                    aSemiAxes = tRoi.SemiAxes/xScale;
             end
     end    
     

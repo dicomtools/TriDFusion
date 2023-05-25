@@ -178,7 +178,7 @@ function resize = dicomViewer()
     voi3DEnableList             ('set', '');
     voi3DTransparencyList       ('set', '');
     voi3DRenderer               ('set', 'Isosurface');
-    slider3DVoiTransparencyValue('set', 0);
+    slider3DVoiTransparencyValue('set', 1);
     voi3DSmooth                 ('set', true);
 
     gaussFilter('set', false);
@@ -733,9 +733,11 @@ function resize = dicomViewer()
      if numel(inputTemplate('get'))
         sBackgroundColor = viewerButtonPushedBackgroundColor('get');
         sForegroundColor = viewerButtonPushedForegroundColor('get');
-     else
+        sFontWeight = 'bold';
+    else
         sBackgroundColor = viewerBackgroundColor('get');
         sForegroundColor = viewerForegroundColor('get');
+        sFontWeight = 'normal';
      end
 
      btnTriangulate = ...
@@ -743,6 +745,7 @@ function resize = dicomViewer()
                    'Position'       , [492 8 65 25], ...
                    'Enable'         , 'off', ...
                    'String'         , 'Triangul...',...
+                   'FontWeight'     , sFontWeight, ...
                    'BackgroundColor', sBackgroundColor, ...
                    'ForegroundColor', sForegroundColor, ...
                    'Callback'       , @triangulateCallback ...

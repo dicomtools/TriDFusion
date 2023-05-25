@@ -1,5 +1,5 @@
-function [tVoiComputed, atRoiComputed] = computeVoi(imInput, atInputMetaData, imVoi, atVoiMetaData, ptrVoiInput, atRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied)
-%function [tVoiComputed, atRoiComputed] = computeVoi(imInput, atInputMetaData, imVoi, atVoiMetaData, ptrVoiInput, atRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied)
+function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMetaData, imVoi, atVoiMetaData, ptrVoiInput, atRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied)
+%function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMetaData, imVoi, atVoiMetaData, ptrVoiInput, atRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied)
 %Compute VOI values from ROIs object.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -216,6 +216,6 @@ function [tVoiComputed, atRoiComputed] = computeVoi(imInput, atInputMetaData, im
     end
     
     clear imCDataVoi;
-    clear imCData;
+%    clear imCData;
     clear imCMask;
 end

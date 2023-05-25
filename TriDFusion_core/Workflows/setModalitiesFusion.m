@@ -122,13 +122,6 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
         roiTemplate('set', dSerie1Offset, atResampledRois);                   
 
-        % Activate ROI Panel
-        if bViewContourPanel == true
-            if viewRoiPanel('get') == false
-                setViewRoiPanel();
-            end
-        end
-
          % Triangulate og 1st VOI
     
         atVoiInput = voiTemplate('get', dSerie1Offset);
@@ -143,6 +136,14 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
     end
 
     clear aResampledImage;
+
+    % Activate ROI Panel
+    if bViewContourPanel == true
+        if viewRoiPanel('get') == false
+            setViewRoiPanel();
+        end
+    end
+
 
     % Set Modality 1 intendity
 
