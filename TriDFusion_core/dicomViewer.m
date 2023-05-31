@@ -260,7 +260,7 @@ function resize = dicomViewer()
     % 3D Lung Shunt
 
     lungShuntLiverVolumeOversized          ('set',  3); % Pixel(s) offset
-    lungShuntLiverTopOfVolumeExtraSlices   ('set', -2); % Slice cutoff
+    lungShuntLiverTopOfVolumeExtraSlices   ('set',  1); % Slice cutoff
     lungShuntLiverBottomOfVolumeExtraSlices('set',  2); % Slice cutoff
     lungShuntLungsVolumeOversized          ('set',  1); % Pixel(s) offset 
     lungShuntLungsVolumeOverlap            ('set', false); % Lungs liver overlap

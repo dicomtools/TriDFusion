@@ -702,11 +702,11 @@ function generate3DLungShuntReport(bInitReport)
     else % First run
         gtReport = computeLungLiverReportContoursInformation(suvMenuUnitOption('get'), false, false, true);
 
-        if lungShuntLiverVolumeOversized('get') ~= 0 || ...
-           lungShuntLungsVolumeOversized('get') ~= 0     
+%        if lungShuntLiverVolumeOversized('get') ~= 0 || ...
+%           lungShuntLungsVolumeOversized('get') ~= 0     
 
             proceedLiverVolumeOversize();
-        end
+%        end
 
         if isvalid(ui3DWindow)
             display3DLungLiver();

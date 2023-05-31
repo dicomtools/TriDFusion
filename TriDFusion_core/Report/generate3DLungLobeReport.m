@@ -641,14 +641,10 @@ function generate3DLungLobeReport(bInitReport)
     if bInitReport == false % Reopen the report
         refreshReportLesionInformation(suvMenuUnitOption('get'));
     else % First run
-        gtReport = computeLobeLungReportContoursInformation(suvMenuUnitOption('get'), false, false, true);
+        gtReport = computeLobeLungReportContoursInformation(suvMenuUnitOption('get'), false, false, true);  
 
-        if lungShuntLiverVolumeOversized('get') ~= 0 || ...
-           lungShuntLungsVolumeOversized('get') ~= 0     
-
-            proceed3DLobesLiverVolumeOversize();
-        end
-
+        proceed3DLobesLiverVolumeOversize();
+        
         if isvalid(ui3DWindow)
             display3DLobeLung();
         end
