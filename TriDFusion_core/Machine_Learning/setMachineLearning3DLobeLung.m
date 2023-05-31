@@ -100,7 +100,7 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
     
     % Convert dicom to .nii     
     
-    progressBar(1/12, 'DICOM to NII conversion, please wait.');
+    progressBar(1/13, 'DICOM to NII conversion, please wait.');
 
     dicm2nii(sFilePath, sNiiTmpDir, 1);
     
@@ -123,7 +123,7 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
         errordlg('nii file mot found!!', '.nii file Validation'); 
     else
 
-        progressBar(2/12, 'Segmentation in progress, this might take several minutes, please be patient.');
+        progressBar(2/13, 'Segmentation in progress, this might take several minutes, please be patient.');
        
         sSegmentationFolderName = sprintf('%stemp_seg_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
         if exist(char(sSegmentationFolderName), 'dir')
@@ -146,9 +146,31 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
                 errordlg(sprintf('An error occur during machine learning segmentation: %s', sCmdout), 'Segmentation Error');  
             else % Process succeed
 
-                progressBar(3/12, 'Importing Lungs mask, please wait.');
+                % Liver
+
+                aColor=[1 0.41 0.16]; % Orange
+
+                sNiiFileName = 'liver.nii.gz';
+
+                sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
+                
+                if exist(sNiiFileName, 'file')
+
+                    nii = nii_tool('load', sNiiFileName);
+
+                    machineLearning3DMask('set', 'liver', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor);
+
+                    aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
+
+                    maskToVoi(aMask, 'Liver', 'Liver', aColor, 'axial', dNMSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                 
+                end
+
+                progressBar(3/13, 'Importing Liver mask, please wait.');
                 
                 % Lungs
+
+                progressBar(4/13, 'Importing Lung mask, please wait.');
 
                 aColor=[1 0.5 1]; % pink
 
@@ -177,7 +199,7 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
 
                 end
 
-                progressBar(4/12, 'Importing Lung Left mask, please wait.');
+                progressBar(5/13, 'Importing Lung Left mask, please wait.');
 
                 % Lung Left
 
@@ -208,7 +230,7 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
 
                 end
 
-                progressBar(5/12, 'Importing Lung Right mask, please wait.');
+                progressBar(6/13, 'Importing Lung Right mask, please wait.');
 
                 % Lung Right
 
@@ -239,7 +261,7 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
 
                 end
 
-                progressBar(6/12, 'Importing Lung Upper Lobe Left mask, please wait.');
+                progressBar(7/13, 'Importing Lung Upper Lobe Left mask, please wait.');
 
                 % Lung Upper Lobe Left
 
@@ -261,7 +283,7 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
                  
                 end
 
-                progressBar(7/12, 'Importing Lung Upper Lobe Right mask, please wait.');
+                progressBar(8/13, 'Importing Lung Upper Lobe Right mask, please wait.');
 
                 % Lung Upper Lobe Right
 
@@ -283,7 +305,7 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
                  
                 end         
 
-                progressBar(8/12, 'Importing Lung Middle Lobe mask, please wait.');
+                progressBar(9/13, 'Importing Lung Middle Lobe mask, please wait.');
 
                 % Lung Middle Lobe
 
@@ -305,7 +327,7 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
                  
                 end      
 
-                progressBar(9/12, 'Importing Lung Lower Lobe Left mask, please wait.');
+                progressBar(10/13, 'Importing Lung Lower Lobe Left mask, please wait.');
 
                 % Lung Lower Lobe Left
 
@@ -327,7 +349,7 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
                  
                 end   
 
-                progressBar(10/12, 'Importing Lung Lower Lobe Right mask, please wait.');
+                progressBar(11/13, 'Importing Lung Lower Lobe Right mask, please wait.');
 
                 % Lung Lower Lobe Right
 
@@ -369,9 +391,9 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
 
     refreshImages();
 
-    progressBar(11/12, 'Computing Lung Lobe Ratio, please wait.');
+    progressBar(12/13, 'Computing Lung Lobe Ratio, please wait.');
    
-    generate3DLungLobeReportCallback();
+    generate3DLungLobeReport(true);
 
     % Delete .nii folder    
     

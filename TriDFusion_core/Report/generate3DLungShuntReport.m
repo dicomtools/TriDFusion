@@ -217,32 +217,6 @@ function generate3DLungShuntReport(bInitReport)
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-240 115 100]...
                   );  
               
-         % Nb 3DLungShunt
-              
-          uicontrol(ui3DLungShuntReport,...
-                  'style'     , 'text',...
-                  'FontWeight', 'bold',...
-                  'FontSize'  , 10,...
-                  'FontName'  , 'MS Sans Serif', ...
-                  'string'    , 'Nb Contours',...
-                  'horizontalalignment', 'left',...
-                  'BackgroundColor', 'White', ...
-                  'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+15 FIG_REPORT_Y-130 90 20]...
-                  ); 
-
-        uiReportLesionNb3DLungShunt = ...       
-        uicontrol(ui3DLungShuntReport,...
-                  'style'     , 'text',...
-                  'FontWeight', 'Normal',...
-                  'FontSize'  , 10,...
-                  'FontName'  , 'MS Sans Serif', ...
-                  'string'    , getLungLiverReportNbContourstInformation('init'),...
-                  'horizontalalignment', 'left',...
-                  'BackgroundColor', 'White', ...
-                  'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+15 FIG_REPORT_Y-240 90 100]...
-                  );  
               
          % 3DLungShunt Mean
               
@@ -255,7 +229,7 @@ function generate3DLungShuntReport(bInitReport)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+115 FIG_REPORT_Y-130 90 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+15 FIG_REPORT_Y-130 90 20]...
                   ); 
               
         uiReportLesionMean = ...       
@@ -268,10 +242,10 @@ function generate3DLungShuntReport(bInitReport)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+115 FIG_REPORT_Y-240 90 100]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+15 FIG_REPORT_Y-240 90 100]...
                   );  
               
-         % 3DLungShunt Max
+         % 3DLungShunt Total
               
           uicontrol(ui3DLungShuntReport,...
                   'style'     , 'text',...
@@ -282,7 +256,7 @@ function generate3DLungShuntReport(bInitReport)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+215 FIG_REPORT_Y-130 90 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+115 FIG_REPORT_Y-130 90 20]...
                   ); 
               
         uiReportLesionMax = ...       
@@ -295,7 +269,7 @@ function generate3DLungShuntReport(bInitReport)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+215 FIG_REPORT_Y-240 90 100]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+115 FIG_REPORT_Y-240 90 100]...
                   ); 
               
           % Contour Volume
@@ -309,7 +283,7 @@ function generate3DLungShuntReport(bInitReport)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+315 FIG_REPORT_Y-130 90 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+215 FIG_REPORT_Y-130 90 20]...
                   ); 
               
         uiReportLesionVolume = ...       
@@ -322,7 +296,7 @@ function generate3DLungShuntReport(bInitReport)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+315 FIG_REPORT_Y-240 90 100]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+215 FIG_REPORT_Y-240 90 100]...
                   );               
 
           % Lung Shunt
@@ -749,10 +723,6 @@ function generate3DLungShuntReport(bInitReport)
                 set(uiReport3DLungShuntInformation, 'String', sprintf('Contours Information (%s)', getLungLiverReportUnitValue()));                                             
             end
            
-            if isvalid(uiReportLesionNb3DLungShunt) % Make sure the figure is still open        
-                set(uiReportLesionNb3DLungShunt, 'String', getLungLiverReportNbContourstInformation('get', gtReport));
-            end
-
             if isvalid(uiReportLesionMean) % Make sure the figure is still open        
                 set(uiReportLesionMean, 'String', getLungLiverReportMeanInformation('get', gtReport));
             end        
@@ -874,60 +844,6 @@ function generate3DLungShuntReport(bInitReport)
                 sReport = sprintf('%s\n\n%s', sReport, char(gasOrganList{ll}));
             end
         end       
-    end
-
-    function sReport = getLungLiverReportNbContourstInformation(sAction, tReport)
-                      
-        if strcmpi(sAction, 'init')
-      %      sReport = sprintf('%s\n___________', '-');      
-            sReport = '';
-            for ll=1:numel(gasOrganList)
-                if isempty(sReport)
-                    sReport = '-';
-                else
-                    sReport = sprintf('%s\n\n%s', sReport, '-');
-                end
-            end       
-        else
-            
-%            if ~isempty(tReport.All.Count)
-%                sReport = sprintf('%-12s\n___________', num2str(tReport.All.Count));      
-%            else
-%                sReport = sprintf('%s\n___________', '-');      
-%            end
-            sReport = '';    
-
-            for ll=1:numel(gasOrganList)      
-                
-                switch lower(gasOrganList{ll})
-                    
-                    case 'lungs'
-                        if ~isempty(tReport.Lungs.Count)
-                            sReport = sprintf('%s%-12s', sReport, num2str(tReport.Lungs.Count));
-                        else
-                            if isempty(sReport)
-                                sReport = '-';
-                            else
-                                sReport = sprintf('%s\n\n%s', sReport, '-');
-                            end
-                        end  
-                        
-                    case 'liver'
-                        if ~isempty(tReport.Liver.Count)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Liver.Count));
-                        else
-                            if isempty(sReport)
-                                sReport = '-';
-                            else
-                                sReport = sprintf('%s\n\n%s', sReport, '-');
-                            end
-                        end                         
-                        
-                    otherwise    
-                        sReport = sprintf('%s\n\n%s', sReport, '-');
-                end
-            end             
-        end
     end
 
     function sReport = getLungLiverReportMeanInformation(sAction, tReport)
@@ -1969,8 +1885,8 @@ function generate3DLungShuntReport(bInitReport)
 
         if isempty(dCTSerieOffset) || ...
            isempty(dNMSerieOffset)  
-            progressBar(1, 'Error: uiSliderLiverVolumeSizeCallback() 3D Lung Liver Ratio require a CT and NM image!');
-            errordlg('Error: uiSliderLiverVolumeSizeCallback() 3D Lung Liver Ratio require a CT and NM image!', 'Modality Validation');  
+            progressBar(1, 'Error: proceedLiverVolumeOversize() 3D Lung Liver Ratio require a CT and NM image!');
+            errordlg('Error: proceedLiverVolumeOversize() 3D Lung Liver Ratio require a CT and NM image!', 'Modality Validation');  
             return;               
         end
 
@@ -2077,10 +1993,6 @@ function generate3DLungShuntReport(bInitReport)
                 set(uiReport3DLungShuntInformation, 'String', sprintf('Contours Information (%s)', getLungLiverReportUnitValue()));                                             
             end
            
-            if isvalid(uiReportLesionNb3DLungShunt) % Make sure the figure is still open        
-                set(uiReportLesionNb3DLungShunt, 'String', getLungLiverReportNbContourstInformation('get', gtReport));
-            end
-
             if isvalid(uiReportLesionMean) % Make sure the figure is still open        
                 set(uiReportLesionMean, 'String', getLungLiverReportMeanInformation('get', gtReport));
             end        
@@ -2123,6 +2035,8 @@ function generate3DLungShuntReport(bInitReport)
 
             refreshImages();
 
+            progressBar(1, 'Ready');
+
             catch
                 progressBar(1, 'Error: proceedLiverVolumeOversize()');
             end
@@ -2140,8 +2054,6 @@ function generate3DLungShuntReport(bInitReport)
 
             set(fig3DLungShuntReport, 'Pointer', 'default');
             drawnow;
-
-            progressBar(1, 'Ready');
 
         end
 
