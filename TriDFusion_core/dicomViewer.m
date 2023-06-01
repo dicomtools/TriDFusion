@@ -267,7 +267,7 @@ function resize = dicomViewer()
 
     % 3D Lung Lobes
 
-    lungLobesLiverVolumeOversized       ('set', 1); % Pixel(s) offset
+    lungLobesLiverVolumeOversized       ('set', 2); % Pixel(s) offset
     lungLobesLiverTopOfVolumeExtraSlices('set', 1); % Slice cutoff 
 
     % Machine Learning Ga68 DOTATATE segmentation Other Organ
