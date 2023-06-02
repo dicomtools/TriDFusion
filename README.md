@@ -107,6 +107,8 @@ https://pyradiomics.readthedocs.io/en/latest/installation.html
 
 If you use this tool please cite it:
 https://ejnmmiphys.springeropen.com/articles/10.1186/s40658-022-00501-y
+```
 Lafontaine D, Schmidtlein CR, Kirov A, Reddy RP, Krebs S, Schöder H, Humm JL. TriDFusion (3DF) image viewer. EJNMMI Phys. 2022 Oct 18;9(1):72. doi: 10.1186/s40658-022-00501-y. PMID: 36258098; PMCID: PMC9579267.
+```
 
 Visit https://daniellafontaine.com/ for more information.
