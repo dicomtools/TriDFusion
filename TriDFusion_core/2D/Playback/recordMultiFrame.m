@@ -391,13 +391,11 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
                 alAxes2Line{ii2}.Visible = 'on';
             end
         elseif aAxe == axesMipPtr('get', [], dSeriesOffset)
-            angle = mipAngle('get');
-            if (angle == 0 || angle == 90 || angle == 180 || angle == 270)  
-                alAxesMipLine = axesLine('get', 'axesMip');
-                for ii4=1:numel(alAxesMipLine)
-                    alAxesMipLine{ii4}.Visible = 'on';
-                end            
-            end
+            alAxesMipLine = axesLine('get', 'axesMip');
+            for ii4=1:numel(alAxesMipLine)
+                alAxesMipLine{ii4}.Visible = 'on';
+            end            
+            
         elseif aAxe == axes3Ptr('get', [], dSeriesOffset)
             alAxes3Line = axesLine('get', 'axes3');
             for ii3=1:numel(alAxes3Line)

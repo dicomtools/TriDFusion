@@ -1195,8 +1195,9 @@ function initKernelPanel()
         end
 
         tInput = inputTemplate('get');
-        dOffset = get(uiSeriesPtr('get'), 'Value');
-        if dOffset > numel(tInput)
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+        if dSeriesOffset > numel(tInput)
             return;
         end
 
@@ -1205,7 +1206,7 @@ function initKernelPanel()
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
 
-        aBuffer = dicomBuffer('get');
+        aBuffer = dicomBuffer('get', [], dSeriesOffset);
 
         x = str2double(get(edtGaussFilterX, 'String'));
         y = str2double(get(edtGaussFilterY, 'String'));
@@ -1231,7 +1232,7 @@ function initKernelPanel()
         sigmaX = x/atCoreMetaData{1}.PixelSpacing(1);
         sigmaY = y/atCoreMetaData{1}.PixelSpacing(2);
 
-        if size(dicomBuffer('get'), 3) == 1
+        if size(aBuffer, 3) == 1
             sigmaZ = 1;
         else
             dComputed = computeSliceSpacing(atCoreMetaData);
@@ -1258,11 +1259,28 @@ function initKernelPanel()
             zPixel = sigmaZ;
 %        end
 
-        dicomBuffer('set', imgaussfilt3(aBuffer,[xPixel,yPixel,zPixel]));
+        aActivity = imgaussfilt3(aBuffer,[xPixel,yPixel,zPixel]);
+
+        % Apply ROI constraint 
+
+        [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dSeriesOffset);
+    
+        bInvertMask = invertConstraint('get');
+    
+        tRoiInput = roiTemplate('get', dSeriesOffset);
+    
+        aLogicalMask = roiConstraintToMask(aBuffer, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);        
+        
+        aActivity(aLogicalMask==0) = aBuffer(aLogicalMask==0); % Set constraint 
+
+        dicomBuffer('set', aActivity);
 
         refreshImages();
         
         modifiedMatrixValueMenuOption('set', true);
+
+        clear aActivity;
+        clear aBuffer;
 
         catch
             progressBar(1, 'Error:setDoseKernel()');

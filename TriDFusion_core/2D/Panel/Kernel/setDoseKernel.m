@@ -301,7 +301,6 @@ function setDoseKernel(dModel, sTissue, sIsotope, dKernelKernelCutoffDistance, s
             betaYield = 1; %Beta yield Y-90
             nbOfParticuleSimulated = 4E7;
             
-
         case 'y9010e7'
             betaYield = 1; %Beta yield Y-90
             nbOfParticuleSimulated = 10E7; 
@@ -311,7 +310,7 @@ function setDoseKernel(dModel, sTissue, sIsotope, dKernelKernelCutoffDistance, s
             nbOfParticuleSimulated = 10E8;       
 
         otherwise
-                              
+if 1                              
              progressBar(1, 'Error: This isotope is not yet validated!');
              h = msgbox('Error: setDoseKernel(): This isotope is not yet validated!', 'Error');
 %                     if integrateToBrowser('get') == true
@@ -323,7 +322,7 @@ function setDoseKernel(dModel, sTissue, sIsotope, dKernelKernelCutoffDistance, s
 %                     javaFrame = get(h, 'JavaFrame');
 %                     javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
              return;
-
+end
      end
 % ASK: equations 
 USE_LDM_METHOD = true;
@@ -346,14 +345,16 @@ USE_LDM_METHOD = true;
     
     else  % Kernel convolution method
        
-        aActivity = aActivity*xPixelInCm*yPixelInCm*zPixelInCm;  % 1) From PET image – Activity A in Bq for each voxel at time of scan: Ascan= Bq/mL * Vvox(mL)
-        A0 = aActivity*2^(TscanMinusTinjection/halfLife); % 2) Activity at injection of microspheres: A0=A*2[(Tscan-Tinjection)/T1/2]
-        Acum  = A0 *halfLife *1/log(2);                   % 3) Calculate the total number of disintegrations in the voxel Acum = A0(Bq) *1.442695* T1/2(s)
-        Nb = Acum*betaYield;                              % 4) Calculate total number of beta-particles (e.g. beta) using the yield Yb Nb = Acum * Yb
-        aActivity = Nb/nbOfParticuleSimulated;            % 5) Nb,scaled = Nb/(4*107  )
+        aActivity = aActivity .* (xPixelInCm .* yPixelInCm .* zPixelInCm); % 1) From PET image – Activity A in Bq for each voxel at time of scan: Ascan = Bq/mL * Vvox(mL)
+        A0 = aActivity * 2^((TscanMinusTinjection / halfLife));       % 2) Activity at injection of microspheres: A0 = A * 2^((Tscan - Tinjection) / T1/2)
+        Acum = A0 .* halfLife .* 1 / log(2);                            % 3) Calculate the total number of disintegrations in the voxel Acum = A0(Bq) * 1.442695 * T1/2(s)
+        Nb = Acum .* betaYield;                                        % 4) Calculate total number of beta-particles (e.g. beta) using the yield Yb Nb = Acum * Yb
+        aActivity = Nb ./ nbOfParticuleSimulated;                      % 5) Nb,scaled = Nb / (4*10^7)
+        aActivity = aActivity .* 202.53 ./atCoreMetaData{1}.PatientWeight;
+
     end
     
-    aDose = aDoseR2./aDistance.^2;                    % 6) Cumulative Dose to point at distance r (mm), D(r) = Nb,scaled * DPKr2(r) / r2  ???
+    aDose = aDoseR2./aDistance.^2;                                    % 6) Cumulative Dose to point at distance r (mm), D(r) = Nb,scaled * DPKr2(r) / r2  
 
 %           aActivity = NbScaled;
 
@@ -401,13 +402,33 @@ USE_LDM_METHOD = true;
     
 %            vqKernel = interp1(aDistance, aDose, distanceMatrix, 'pchip', 'extrap'); %interpolation method: 'linear', 'nearest', 'next', 'previous', 'pchip', 'cubic', 'v5cubic', 'makima', or 'spline'.
 
-    
+  
+
     progressBar(0.85, sprintf('Processing %s interpolatiion, please wait.', sKernelInterpolation ));
+
+if 1
+   [uniqueDistance, idx] = unique(aDistance);
+    uniqueDose = aDose(idx);
+
     % Kernel in 3D in mm: 
 %         vqKernel = interp1(aDistance, aDose, distanceMatrix, asKernelInterpolation{dInterpolationValue}, 'extrap'); %interpolation method: 'linear', 'nearest', 'next', 'previous', 'pchip', 'cubic', 'v5cubic', 'makima', or 'spline'.
-    vqKernel = interp1(aDistance, aDose, distanceMatrix, sKernelInterpolation, 'extrap'); %interpolation method: 'linear', 'nearest', 'next', 'previous', 'pchip', 'cubic', 'v5cubic', 'makima', or 'spline'.
+    vqKernel = interp1(uniqueDistance, uniqueDose, distanceMatrix, sKernelInterpolation, 'extrap'); %interpolation method: 'linear', 'nearest', 'next', 'previous', 'pchip', 'cubic', 'v5cubic', 'makima', or 'spline'.
 %           vqKernel = interp1(aDistance, aDose, distanceMatrix, asKernelInterpolation{dInterpolationValue}); %interpolation method: 'linear', 'nearest', 'next', 'previous', 'pchip', 'cubic', 'v5cubic', 'makima', or 'spline'.
 %     vqKernel = vqKernel/sum(vqKernel, 'all')*49.67;
+else
+    % Remove duplicate points from aDistance and aDose
+    [uniqueDistance, idx] = unique(aDistance);
+    uniqueDose = aDose(idx);
+    
+    % Create a gridded interpolant object using the 'linear' interpolation method
+    interpObj = griddedInterpolant(uniqueDistance, uniqueDose, 'linear');
+    
+    % Interpolate the values using the gridded interpolant
+    vqKernel = interpObj(distanceMatrix);
+    
+    % Handle extrapolation by setting values outside the domain to NaN
+    vqKernel(distanceMatrix < min(uniqueDistance) | distanceMatrix > max(uniqueDistance)) = NaN;   
+end
 
 % ASK: Kernel Convolution
     % here; vqKernel has to be in voxels, not mm
@@ -418,12 +439,19 @@ USE_LDM_METHOD = true;
             dKernelSum = 1;
         end
         vqKernel =  vqKernel/dKernelSum;
+       
     end
     
     progressBar(0.95, sprintf('Processing convolution, please wait.'));
      
     aActivity = convn(aActivity, vqKernel, 'same');
-               
+    % Pad the input array to handle boundary conditions
+%    padSize = floor(size(vqKernel)/2);
+%    aActivityPadded = padarray(aActivity, padSize, 'replicate');
+    
+    % Perform the convolution
+%    aActivity = convn(aActivityPadded, vqKernel, 'valid');
+
     % check mean dose in center of sphere
 %            mean(aActivity(62:66,62:66,23:26), 'All')
     
@@ -517,6 +545,8 @@ USE_LDM_METHOD = true;
     aActivity(aLogicalMask==0) = aBuffer(aLogicalMask==0); % Set constraint      
     
     dicomBuffer('set', aActivity, dSeriesOffset);
+
+    setQuantification(dSeriesOffset);
 
     if link2DMip('get') == true
         imMip = computeMIP(aActivity);

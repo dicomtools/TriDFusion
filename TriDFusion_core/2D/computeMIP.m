@@ -26,12 +26,7 @@ function imComputed = computeMIP(im)
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
-
- %   im=im(:,end:-1:1,:);     
- %   im=int16(im);
  
-if 1 
-    
     if canUseGPU()
         aImage = gpuArray(uint16(im));
     else
@@ -64,31 +59,6 @@ if 1
     clear aRotatedImage;
 
     progressBar(1, 'Ready');               
-else
-    aSize = size(im);
-    imComputed = zeros(32, aSize(2), aSize(3));
-    imComputed(1,:,:) = max(im, [], 1);
-    
-    parfor i = 2:32
-%        progressBar(i/32-0.00001, sprintf('Computing MIP angle %d/32', i));               
-       
-        rr=11*i;
-        aRotatedImage = imrotate(im, rr, 'bilinear','crop');
-        imComputed(i,:,:) = squeeze(max(aRotatedImage, [], 1));    
-
-    end
- 
-end
-
 
 end
 
-
-function [rotvol,newdim]=dopermrotate(vol,ang,ax,method,olddim)
-if ax=='X'
-    ang=ang*-1;
-end
-newdim=[find(~ismember('YXZ',ax)) find(ismember('YXZ',ax))]; %this is the permutation wrt original
-usedim=[find(olddim==newdim(1)) find(olddim==newdim(2)) find(olddim==newdim(3))];  %this is permutation wrt current
-rotvol=imrotate(permute(vol,usedim),ang,method);
-end

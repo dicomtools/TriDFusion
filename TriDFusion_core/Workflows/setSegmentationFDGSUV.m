@@ -91,7 +91,19 @@ function setSegmentationFDGSUV(dTreshold)
     else
         dSUVScale = 0;
     end 
+
+    % Apply ROI constraint 
+
+    [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dPTSerieOffset);
+
+    bInvertMask = invertConstraint('get');
+
+    tRoiInput = roiTemplate('get', dPTSerieOffset);
     
+    aPTImageTemp = aPTImage;
+    aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask); 
+    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint 
+
     resetSeries(dPTSerieOffset, true);       
 
     try 
@@ -101,10 +113,16 @@ function setSegmentationFDGSUV(dTreshold)
 
     progressBar(5/10, 'Resampling series, please wait.');
             
+    [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, true);   
     [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, true);   
-    
+   
     dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
     dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
+
+    aResampledPTImage = aResampledPTImageTemp;
+
+    clear aPTImageTemp;
+    clear aResampledPTImageTemp;
 
 
     progressBar(6/10, 'Resampling mip, please wait.');

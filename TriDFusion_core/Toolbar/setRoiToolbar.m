@@ -1333,6 +1333,34 @@ function setRoiToolbar(sVisible)
             viewFarthestDistances('set', false);
         end
 
+        if viewFarthestDistances('get') == false
+
+            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
+            if ~isempty(atRoiInput) && isVsplash('get') == false
+            
+                numRoiInputs = numel(atRoiInput);
+                
+                for bb = 1:numRoiInputs
+
+                    currentRoi = atRoiInput{bb};
+                    
+                    if isvalid(currentRoi.Object)
+
+                        currentDistances = currentRoi.MaxDistances;
+        
+                         if ~isempty(currentDistances) 
+                            currentDistances.MaxXY.Line.Visible = 'off';
+                            currentDistances.MaxCY.Line.Visible = 'off';
+                            currentDistances.MaxXY.Text.Visible = 'off';
+                            currentDistances.MaxCY.Text.Visible = 'off';                        
+                        end
+       
+                    end
+                end
+            end            
+        end
+
         if ~isempty(dicomBuffer('get'))
             refreshImages();
         end

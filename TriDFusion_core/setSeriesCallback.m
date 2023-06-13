@@ -32,9 +32,17 @@ function setSeriesCallback(~,~)
 
     if iOffset <= numel(tInput)
         
+        try
+
+        set(uiSeriesPtr('get'), 'Enable', 'off');                
+
         % Deactivate main tool bar 
         
         mainToolBarEnable('off');
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+
         
         % Restore ISOsurface default value. Those value will be use in
         % setIsoSurfaceCallback(~, ~). 
@@ -363,11 +371,19 @@ function setSeriesCallback(~,~)
         setViewerDefaultColor(true, dicomMetaData('get'));
         
         refreshImages();
+
+        catch
+            progressBar(1, 'Error:setSeriesCallback()');
+        end
         
         % Reactivate main tool bar 
+        set(uiSeriesPtr('get'), 'Enable', 'on');                
         
         mainToolBarEnable('on');
-        
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;
+
 %        atMetaData = dicomMetaData('get');
         
 %        if strcmpi(atMetaData{1}.Modality, 'ct')

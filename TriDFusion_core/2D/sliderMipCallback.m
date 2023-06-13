@@ -86,7 +86,85 @@ function sliderMipCallback(~, ~)
             tAxesMipViewText = axesText('get', 'axesMipView');                                      
             tAxesMipViewText.String = sMipAngleView;
             tAxesMipViewText.Color  = overlayColor('get');              
-        end        
-                
+        end  
+
+        if crossActivate('get') == true
+
+            iCoronal  = sliceNumber('get', 'coronal');
+            iSagittal = sliceNumber('get', 'sagittal');
+            iAxial    = sliceNumber('get', 'axial'   );
+
+            iCoronalSize  = size(dicomBuffer('get'),1);
+            iSagittalSize = size(dicomBuffer('get'),2);
+            iAxialSize    = size(dicomBuffer('get'),3);
+
+            alAxesMipLine = axesLine('get', 'axesMip');
+            
+            angle = (iMipAngle - 1) * 11.25; % to rotate 90 counterclockwise
+
+if 0
+            if angle >= 0 && angle < 180
+                ratio = (iMipAngle-1) * 0.102;
+
+            else
+                ratio = (17*0.102)-(iMipAngle-16)*0.102;
+            end
+
+            xOffset = (iSagittal * (1 - ratio)) + (iCoronal * ratio)
+else
+            if angle == 0
+                xOffset = iSagittal;
+            elseif angle == 90
+                xOffset = iCoronal;
+            elseif angle == 180
+                xOffset = iSagittalSize - iSagittal;
+            elseif angle == 270
+                xOffset = iCoronalSize - iCoronal;
+            else
+                angleRad = deg2rad(angle);
+                centerX = iSagittalSize / 2;
+                centerY = iCoronalSize / 2;
+                cosAngle = cos(angleRad);
+                sinAngle = sin(angleRad);
+                xOffset = (iSagittal - centerX) * cosAngle + (iCoronal - centerY) * sinAngle + centerX;
+            end    
+  
+end
+
+            % Set MIP Line 1-5 with found xOffset
+            
+            alAxesMipLine{1}.XData = [xOffset(1), xOffset(1)];
+            alAxesMipLine{1}.YData = [iAxial - 0.5, iAxial + 0.5];
+            
+            alAxesMipLine{2}.XData = [xOffset(1) - 0.5, xOffset(1) + 0.5];
+            alAxesMipLine{2}.YData = [iAxial, iAxial];
+            
+            alAxesMipLine{3}.XData = [0, xOffset(1) - crossSize('get')];
+            alAxesMipLine{3}.YData = [iAxial, iAxial];
+            
+            alAxesMipLine{4}.XData = [xOffset(1) + crossSize('get'), iCoronalSize];
+            alAxesMipLine{4}.YData = [iAxial, iAxial];
+            
+            alAxesMipLine{5}.XData = [xOffset(1), xOffset(1)];
+            alAxesMipLine{5}.YData = [0, iAxial - crossSize('get')];
+            
+            alAxesMipLine{6}.XData = [xOffset(1), xOffset(1)];
+            alAxesMipLine{6}.YData = [iAxial + crossSize('get'), iAxialSize];
+    
+            if multiFrameRecord('get') == false
+    
+                if multiFramePlayback('get') == false && ...
+                   crossActivate('get') == true
+
+                    for ll=1:numel(alAxesMipLine)
+                        set(alAxesMipLine{ll}, 'Visible', 'on');
+                    end
+                else
+                    for ll=1:numel(alAxesMipLine)
+                        set(alAxesMipLine{ll}, 'Visible', 'off');
+                    end
+                end
+            end          
+        end 
     end
 end

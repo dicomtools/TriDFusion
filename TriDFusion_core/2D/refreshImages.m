@@ -813,120 +813,54 @@ function refreshImages()
                     end
                 end
             end
-if 0
-            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-            for bb=1:numel(atRoiInput)
-
-                if isvalid(atRoiInput{bb}.Object)
-
-                    atRoiInput{bb}.Object.Visible = 'off';
-
-                    if ~isempty(atRoiInput{bb}.MaxDistances)
-                        atRoiInput{bb}.MaxDistances.MaxXY.Line.Visible = 'off';
-                        atRoiInput{bb}.MaxDistances.MaxCY.Line.Visible = 'off';
-                        atRoiInput{bb}.MaxDistances.MaxXY.Text.Visible = 'off';
-                        atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'off';
-                    end
-                end
-            end
-end            
+           
         end
+
+        % Contours
         
         atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-
-if 1 % Need to improve speed
-%tic
-        if ~isempty(atRoiInput) && isVsplash('get') == false
-
-    %        H = findobj('Type', 'images.roi.freehand');
-    %        set(H,'visible','off');
-
-            for bb=1:numel(atRoiInput)
-%               if isvalid(atRoiInput{bb}.Object)
-                   if (strcmpi(atRoiInput{bb}.Axe, 'Axes1') && ...
-                        iCoronal == atRoiInput{bb}.SliceNb) || ...
-                       (strcmpi(atRoiInput{bb}.Axe, 'Axes2')&& ...
-                        iSagittal == atRoiInput{bb}.SliceNb)|| ...
-                       (strcmpi(atRoiInput{bb}.Axe, 'Axes3') && ...
-                        iAxial == atRoiInput{bb}.SliceNb)
-
-                        atRoiInput{bb}.Object.Visible = 'on';
-                        if viewFarthestDistances('get') == true
-                            if ~isempty(atRoiInput{bb}.MaxDistances)
-                                atRoiInput{bb}.MaxDistances.MaxXY.Line.Visible = 'on';
-                                atRoiInput{bb}.MaxDistances.MaxCY.Line.Visible = 'on';
-                                atRoiInput{bb}.MaxDistances.MaxXY.Text.Visible = 'on';
-                                atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'on';
-                            end
-                        else
-                            if ~isempty(atRoiInput{bb}.MaxDistances)
-                                atRoiInput{bb}.MaxDistances.MaxXY.Line.Visible = 'off';
-                                atRoiInput{bb}.MaxDistances.MaxCY.Line.Visible = 'off';
-                                atRoiInput{bb}.MaxDistances.MaxXY.Text.Visible = 'off';
-                                atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'off';
-                            end
-                        end
-
-                    else
-                        atRoiInput{bb}.Object.Visible = 'off';
-
-                        if ~isempty(atRoiInput{bb}.MaxDistances)
-                            atRoiInput{bb}.MaxDistances.MaxXY.Line.Visible = 'off';
-                            atRoiInput{bb}.MaxDistances.MaxCY.Line.Visible = 'off';
-                            atRoiInput{bb}.MaxDistances.MaxXY.Text.Visible = 'off';
-                            atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'off';
-                        end
-                    end
-%               end
-            end
-        end
-%toc        
-else
     
-    if ~isempty(atRoiInput)
-tic        
-        % Deactivate all valid ROIs
+        if ~isempty(atRoiInput) && isVsplash('get') == false
         
-        aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Object.Visible, atRoiInput, 'uni', false ), {'on'} );
-        if aTagOffset(aTagOffset) 
-            for rr=1:numel(aTagOffset)
-                atRoiInput{rr}.Object.Visible = 'off';    
-                if ~isempty(atRoiInput{rr}.MaxDistances)
-                    atRoiInput{rr}.MaxDistances.MaxXY.Line.Visible = 'off';
-                    atRoiInput{rr}.MaxDistances.MaxCY.Line.Visible = 'off';
-                    atRoiInput{rr}.MaxDistances.MaxXY.Text.Visible = 'off';
-                    atRoiInput{rr}.MaxDistances.MaxCY.Text.Visible = 'off'; 
+            numRoiInputs = numel(atRoiInput);
+            viewFarthest = viewFarthestDistances('get');
+            
+            for bb = 1:numRoiInputs
+                currentRoi = atRoiInput{bb};
+                
+                if isvalid(currentRoi.Object)
+                    isCoronal = strcmpi(currentRoi.Axe, 'Axes1') && iCoronal == currentRoi.SliceNb;
+                    isSagittal = strcmpi(currentRoi.Axe, 'Axes2') && iSagittal == currentRoi.SliceNb;
+                    isAxial = strcmpi(currentRoi.Axe, 'Axes3') && iAxial == currentRoi.SliceNb;
+                    
+                    currentRoi.Object.Visible = 'off';
+                    currentDistances = currentRoi.MaxDistances;
+    
+                     if ~isempty(currentDistances) && viewFarthest == true
+                        currentDistances.MaxXY.Line.Visible = 'off';
+                        currentDistances.MaxCY.Line.Visible = 'off';
+                        currentDistances.MaxXY.Text.Visible = 'off';
+                        currentDistances.MaxCY.Text.Visible = 'off';                        
+                    end
+    
+                    if isCoronal || isSagittal || isAxial
+    
+                        currentRoi.Object.Visible = 'on';
+                        
+                        if viewFarthest == true
+                            currentDistances.MaxXY.Line.Visible = 'on';
+                            currentDistances.MaxCY.Line.Visible = 'on';
+                            currentDistances.MaxXY.Text.Visible = 'on';
+                            currentDistances.MaxCY.Text.Visible = 'on';
+                        end
+                        
+                    end
                 end
             end
-        end
-        
-        for bb=1:numel(atRoiInput)
-           if isvalid(atRoiInput{bb}.Object)
-               if (strcmpi(atRoiInput{bb}.Axe, 'Axes1') && ...
-                    iCoronal == atRoiInput{bb}.SliceNb) || ...
-                   (strcmpi(atRoiInput{bb}.Axe, 'Axes2')&& ...
-                    iSagittal == atRoiInput{bb}.SliceNb)|| ...
-                   (strcmpi(atRoiInput{bb}.Axe, 'Axes3') && ...
-                    iAxial == atRoiInput{bb}.SliceNb)
+        end       
 
-                    atRoiInput{bb}.Object.Visible = 'on';
-                    if viewFarthestDistances('get') == true
-                        if ~isempty(atRoiInput{bb}.MaxDistances)
-                            atRoiInput{bb}.MaxDistances.MaxXY.Line.Visible = 'on';
-                            atRoiInput{bb}.MaxDistances.MaxCY.Line.Visible = 'on';
-                            atRoiInput{bb}.MaxDistances.MaxXY.Text.Visible = 'on';
-                            atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'on';
-                        end
-                    end
-               end
-           end
-        end
-    end
-toc    
-end
-        if crossActivate('get') == true && ...
-           isVsplash('get') == false
-
+        if crossActivate('get') == true && isVsplash('get') == false
+           
             iSagittalSize = size(im,2);
             iCoronalSize  = size(im,1);
             iAxialSize    = size(im,3);
@@ -994,149 +928,47 @@ end
             alAxes3Line{6}.YData = [iCoronal+crossSize('get') iCoronalSize];
 
             alAxesMipLine = axesLine('get', 'axesMip');
+            
+            angle = (iMipAngle - 1) * 11.25; % to rotate 90 counterclockwise
 
-            angle = (iMipAngle-1)*11.25; % to rotate 90 counterclockwise
-
-    %            alAxesMipLine{1}.XData = [iSagittal iSagittal];
-    %            alAxesMipLine{1}.YData = [iAxial-0.5 iAxial+0.5];
-    %            alAxesMipLine{1}.ZData = [];
-
-    %            alAxesMipLine{2}.XData = [iSagittal-0.5 iSagittal+0.5];
-    %            alAxesMipLine{2}.YData = [iAxial iAxial];
-    %            alAxesMipLine{2}.ZData = [];
-
-    %            alAxesMipLine{3}.XData = [0 iSagittal-crossSize('get')];
-    %            alAxesMipLine{3}.YData = [iAxial iAxial];
-    %            alAxesMipLine{3}.ZData = [];
-
-    %            alAxesMipLine{4}.XData = [iSagittal+crossSize('get') iCoronalSize];
-    %            alAxesMipLine{4}.YData = [iAxial iAxial];
-    %            alAxesMipLine{4}.ZData = [];
-
-    %            alAxesMipLine{5}.XData = [iSagittal iSagittal];
-    %            alAxesMipLine{5}.YData = [0 iAxial-crossSize('get')];
-    %            alAxesMipLine{5}.ZData = [];
-
-    %            alAxesMipLine{6}.XData = [iSagittal iSagittal];
-    %            alAxesMipLine{6}.YData = [iAxial+crossSize('get') iAxialSize];
-    %            alAxesMipLine{6}.ZData =  [];
-
-            % Compute\Set MIP Line 6 to find the xOffet
-
-       %     xBackData = alAxes2Line{6}.XData;
-       %     yBackData = alAxes2Line{6}.YData;
-       %     zBackData = alAxes2Line{6}.ZData;
-
-        %    rotate(alAxes2Line{6},[1 0 0], angle);
-        %    xData = alAxes2Line{6}.XData;
-
-        %    alAxes2Line{6}.XData = xBackData;
-        %    alAxes2Line{6}.YData = yBackData;
-        %    alAxes2Line{6}.ZData = zBackData;
-
-    %            set(alAxesMipLine{6}, 'XData', [iSagittal iSagittal]);
-    %            rotate(alAxesMipLine{6},[0 -1 0], angle);
-    %            xSagOffset = get(alAxesMipLine{6}, 'XData');
-
-    %            set(alAxesMipLine{6}, 'XData', [iCoronal iCoronal]);
-    %            rotate(alAxesMipLine{6},[0 -1 0], angle-90);
-    %            xCorOffset = get(alAxesMipLine{6}, 'XData');
-
-
-            lSagLine = line(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
-                            'XData'  , [iCoronal iCoronal], ...
-                            'YData'  , [1 1], ...
-                            'ZData'  , [1 1], ...
-                            'Color'  , crossColor('get'), ...
-                            'Visible', 'off');
-            rotate(lSagLine,[0 -1 0], angle-90);
-            xSagOffset = get(lSagLine, 'XData');
-
-            lCorLine = line(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
-                            'XData'  , [iSagittal iSagittal], ...
-                            'YData'  , [1 1], ...
-                            'ZData'  , [1 1], ...
-                            'Color'  , crossColor('get'), ...
-                            'Visible', 'off');
-            rotate(lCorLine,[0 -1 0], angle);
-            xCorOffset = get(lCorLine, 'XData');
-
-    %            pCor=plot3(axesMipPtr('get'), [iSagittal iSagittal], [1 1], [1 1], 'Visible', 'off');
-
-            delete(lSagLine);
-            delete(lCorLine);
-
-            if     angle >= 0   && angle <= 90
-                ratio = angle / 90;
-                xOffset = (xCorOffset * (1-ratio)) + (xSagOffset * ratio);
-
-            elseif angle >= 91  && angle <= 180
-                ratio = (angle-90)/90;
-                xOffset = (xCorOffset * ratio) + (xSagOffset * (1-ratio));
-
-           elseif angle >= 181 && angle <= 270
-                ratio = (angle-180)/90;
-                xOffset = (xCorOffset * (1-ratio)) + (xSagOffset * ratio);
-
-            elseif angle >= 271 && angle <= 360
-                ratio = (angle-270)/90;
-                xOffset = (xCorOffset * ratio) + (xSagOffset * (1-ratio));
+            if angle == 0
+                xOffset = iSagittal;
+            elseif angle == 90
+                xOffset = iCoronal;
+            elseif angle == 180
+                xOffset = iSagittalSize - iSagittal;
+            elseif angle == 270
+                xOffset = iCoronalSize - iCoronal;
             else
-                % Error
-            end
+                angleRad = deg2rad(angle);
+                centerX = iSagittalSize / 2;
+                centerY = iCoronalSize / 2;
+                cosAngle = cos(angleRad);
+                sinAngle = sin(angleRad);
+                xOffset = (iSagittal - centerX) * cosAngle + (iCoronal - centerY) * sinAngle + centerX;
+            end    
 
 
-
-    %          xDiff  = diff([xSagOffset(1) iSagittal])
-
-    %        xOffset = xSagOffset
-    %         if gca == axes1Ptr('get')
-    %             xOffset = xSagOffset;
-    %         else
-    %             xOffset = xCorOffset;
-    %         end
-
-            % Set MIP Line 1-5 with found xOffet
-
-            alAxesMipLine{1}.XData = [xOffset(1) xOffset(2)];
-            alAxesMipLine{1}.YData = [iAxial-0.5 iAxial+0.5];
-%            alAxesMipLine{1}.ZData = [];
-
-            alAxesMipLine{2}.XData = [xOffset(1)-0.5 xOffset(2)+0.5];
-            alAxesMipLine{2}.YData = [iAxial iAxial];
-%            alAxesMipLine{2}.ZData = [];
-
-            alAxesMipLine{3}.XData = [0 xOffset(2)-crossSize('get')];
-            alAxesMipLine{3}.YData = [iAxial iAxial];
-%            alAxesMipLine{3}.ZData = [];
-
-            alAxesMipLine{4}.XData = [xOffset(1)+crossSize('get') iCoronalSize];
-            alAxesMipLine{4}.YData = [iAxial iAxial];
-%            alAxesMipLine{4}.ZData = [];
-
-            alAxesMipLine{5}.XData = [xOffset(1) xOffset(2)];
-            alAxesMipLine{5}.YData = [0 iAxial-crossSize('get')];
-%            alAxesMipLine{5}.ZData = [];
-
-            alAxesMipLine{6}.XData = [xOffset(1) xOffset(2)];
-            alAxesMipLine{6}.YData = [iAxial+crossSize('get') iAxialSize];
-%            alAxesMipLine{6}.ZData = [];
-
-        if multiFrameRecord('get') == false
-
-            if (angle == 0 || angle == 90 || angle == 180 || angle == 270) && ...
-               multiFramePlayback('get') == false && ...
-               crossActivate('get') == true
-                for ll=1:numel(alAxesMipLine)
-                    set(alAxesMipLine{ll}, 'Visible', 'on');
-                end
-            else
-                for ll=1:numel(alAxesMipLine)
-                    set(alAxesMipLine{ll}, 'Visible', 'off');
-                end
-            end
-        end
-
+            % Set MIP Line 1-5 with found xOffset
+            
+            alAxesMipLine{1}.XData = [xOffset(1), xOffset(1)];
+            alAxesMipLine{1}.YData = [iAxial - 0.5, iAxial + 0.5];
+            
+            alAxesMipLine{2}.XData = [xOffset(1) - 0.5, xOffset(1) + 0.5];
+            alAxesMipLine{2}.YData = [iAxial, iAxial];
+            
+            alAxesMipLine{3}.XData = [0, xOffset(1) - crossSize('get')];
+            alAxesMipLine{3}.YData = [iAxial, iAxial];
+            
+            alAxesMipLine{4}.XData = [xOffset(1) + crossSize('get'), iCoronalSize];
+            alAxesMipLine{4}.YData = [iAxial, iAxial];
+            
+            alAxesMipLine{5}.XData = [xOffset(1), xOffset(1)];
+            alAxesMipLine{5}.YData = [0, iAxial - crossSize('get')];
+            
+            alAxesMipLine{6}.XData = [xOffset(1), xOffset(1)];
+            alAxesMipLine{6}.YData = [iAxial + crossSize('get'), iAxialSize];
+        
         end
 
         if overlayActivate('get') == true
@@ -1182,7 +1014,7 @@ end
                                 sAxialSliceNumber, ...
                                 num2str(size(dicomBuffer('get'), 1)));
                     elseif isVsplash('get') == true && ...
-                           strcmpi(vSplahView('get'), 'coronal')
+                           strcmpi(vSplahView('get'), 'all')
                         [lFirst, lLast] = computeVsplashLayout(im, 'coronal', sliceNumber('get', 'coronal'));
                         sAxe1Text = sprintf('C:%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(size(dicomBuffer('get'), 1)));
                     else
@@ -1313,59 +1145,110 @@ end
 
                     lMin = windowLevel('get', 'min');
                     lMax = windowLevel('get', 'max');
-
-                    switch lower(atMetaData{1}.Modality)
-                        case {'pt', 'nm'}
-
-                            sUnit = getSerieUnitValue(dOffset);
-
-                            if strcmpi(sUnit, 'SUV')
-                                
-                                switch lower(atMetaData{1}.DecayCorrection)
-                                    case 'start'
-                                        sDecayCorrection = '(SUV is decay-corrected to scan start time)';
-                                        
-                                    case 'admin'
-                                        sDecayCorrection = '(SUV is decay-corrected to administration time)';
-
-                                    case 'none'
-                                        sDecayCorrection = '(No decay correction)';
-                                        
-                                    otherwise
-                                    sDecayCorrection = '';
+                    
+                    if atInputTemplate(dOffset).bDoseKernel == true
+                        sAxe3Text = sprintf('\n\n\n\n\n\n%s\n%s\n%s\n%s\nMin (dose): %s\nMax (dose): %s\nTotal (dose): %s\nCurrent (dose): %s\nLookup Table: %s - %s\nA: %s/%s', ...
+                            sPatientName, ...
+                            sPatientID, ...
+                            sSeriesDescription, ...
+                            sSeriesDate,...
+                            num2str(tQuantification.tCount.dMin), ...
+                            num2str(tQuantification.tCount.dMax), ...
+                            num2str(tQuantification.tCount.dSum), ...
+                            num2str(double(im(iCoronal,iSagittal,iAxial))), ...
+                            num2str(lMin), ...
+                            num2str(lMax), ...
+                            sAxialSliceNumber, ...
+                            num2str(size(dicomBuffer('get'), 3)));                                              
+                    else
+                        
+                        switch lower(atMetaData{1}.Modality)
+    
+                            case {'pt', 'nm'}
+    
+                                sUnit = getSerieUnitValue(dOffset);
+    
+                                if strcmpi(sUnit, 'SUV')
+                                    
+                                    switch lower(atMetaData{1}.DecayCorrection)
+                                        case 'start'
+                                            sDecayCorrection = '(SUV is decay-corrected to scan start time)';
+                                            
+                                        case 'admin'
+                                            sDecayCorrection = '(SUV is decay-corrected to administration time)';
+    
+                                        case 'none'
+                                            sDecayCorrection = '(No decay correction)';
+                                            
+                                        otherwise
+                                        sDecayCorrection = '';
+                                    end
+                                    
+                                    sSUVtype = viewerSUVtype('get');
+                                    suvValue = double(im(iCoronal,iSagittal,iAxial)) * tQuantification.tSUV.dScale;
+                                    sAxe3Text = sprintf('\n\n\n\n\n\n\n\n\n%s\n%s\n%s\n%s\n%s\n%s\nMin SUV/%s: %s -- %s Bq/cc\nMax SUV/%s: %s -- %s Bq/cc\nTotal activity: %s MBq -- %s mCi\nCurrent SUV/%s: %s -- %s Bq/cc\nLookup Table SUV/%s: %s - %s\nA: %s/%s', ...
+                                        sPatientName, ...
+                                        sPatientID, ...
+                                        sSeriesDescription, ...
+                                        sRadiopharmaceutical, ...
+                                        sSeriesDate,...
+                                        sDecayCorrection, ...
+                                        sSUVtype, ...
+                                        num2str(tQuantification.tSUV.dMin), ...
+                                        num2str(tQuantification.tCount.dMin), ...
+                                        sSUVtype, ...
+                                        num2str(tQuantification.tSUV.dMax), ...
+                                        num2str(tQuantification.tCount.dMax), ...
+                                        num2str(tQuantification.tSUV.dTot/10000000), ...
+                                        num2str(tQuantification.tSUV.dmCi), ...
+                                        sSUVtype, ...
+                                        num2str(suvValue), ...
+                                        num2str(double(im(iCoronal,iSagittal,iAxial))), ...
+                                        sSUVtype, ...
+                                        num2str(lMin*tQuantification.tSUV.dScale), ...
+                                        num2str(lMax*tQuantification.tSUV.dScale), ...
+                                        sAxialSliceNumber, ...
+                                        num2str(size(dicomBuffer('get'), 3)));
+                                else
+                                    sAxe3Text = sprintf('\n\n\n\n\n\n\n\n%s\n%s\n%s\n%s\n%s\nMin: %s\nMax: %s\nTotal: %s\nCurrent: %s\nLookup Table: %s - %s\nA: %s/%s', ...
+                                        sPatientName, ...
+                                        sPatientID, ...
+                                        sSeriesDescription, ...
+                                        sRadiopharmaceutical, ...
+                                        sSeriesDate,...
+                                        num2str(tQuantification.tCount.dMin), ...
+                                        num2str(tQuantification.tCount.dMax), ...
+                                        num2str(tQuantification.tCount.dSum), ...
+                                        num2str(double(im(iCoronal,iSagittal,iAxial))), ...
+                                        num2str(lMin), ...
+                                        num2str(lMax), ...
+                                        sAxialSliceNumber, ...
+                                        num2str(size(dicomBuffer('get'), 3)));
                                 end
-                                
-                                sSUVtype = viewerSUVtype('get');
-                                suvValue = double(im(iCoronal,iSagittal,iAxial)) * tQuantification.tSUV.dScale;
-                                sAxe3Text = sprintf('\n\n\n\n\n\n\n\n\n%s\n%s\n%s\n%s\n%s\n%s\nMin SUV/%s: %s -- %s Bq/cc\nMax SUV/%s: %s -- %s Bq/cc\nTotal activity: %s MBq -- %s mCi\nCurrent SUV/%s: %s -- %s Bq/cc\nLookup Table SUV/%s: %s - %s\nA: %s/%s', ...
+    
+                            case 'ct'
+    
+                                [dWindow, dLevel] = computeWindowMinMax(windowLevel('get', 'max'), windowLevel('get', 'min'));
+                                sWindowName = getWindowName(dWindow, dLevel);
+                                sAxe3Text = sprintf('\n\n\n\n\n\n%s\n%s\n%s\n%s\nMin HU: %s\nMax HU: %s\nCurrent HU: %s\nWindow/Level (%s): %s/%s\nA: %s/%s', ...
                                     sPatientName, ...
                                     sPatientID, ...
                                     sSeriesDescription, ...
-                                    sRadiopharmaceutical, ...
                                     sSeriesDate,...
-                                    sDecayCorrection, ...
-                                    sSUVtype, ...
-                                    num2str(tQuantification.tSUV.dMin), ...
-                                    num2str(tQuantification.tCount.dMin), ...
-                                    sSUVtype, ...
-                                    num2str(tQuantification.tSUV.dMax), ...
-                                    num2str(tQuantification.tCount.dMax), ...
-                                    num2str(tQuantification.tSUV.dTot/10000000), ...
-                                    num2str(tQuantification.tSUV.dmCi), ...
-                                    sSUVtype, ...
-                                    num2str(suvValue), ...
+                                    num2str(tQuantification.tHU.dMin), ...
+                                    num2str(tQuantification.tHU.dMax), ...
                                     num2str(double(im(iCoronal,iSagittal,iAxial))), ...
-                                    sSUVtype, ...
-                                    num2str(lMin*tQuantification.tSUV.dScale), ...
-                                    num2str(lMax*tQuantification.tSUV.dScale), ...
+                                    sWindowName,...
+                                    num2str(round(dWindow)), ...
+                                    num2str(round(dLevel)), ...
                                     sAxialSliceNumber, ...
                                     num2str(size(dicomBuffer('get'), 3)));
-                            else
-                                sAxe3Text = sprintf('\n\n\n\n\n\n\n\n%s\n%s\n%s\n%s\n%s\nMin: %s\nMax: %s\nTotal: %s\nCurrent: %s\nLookup Table: %s - %s\nA: %s/%s', ...
+    
+                           otherwise
+                                sAxe3Text = sprintf('\n\n\n\n\n\n%s\n%s\n%s\n%s\nMin: %s\nMax: %s\nTotal: %s\nCurrent: %s\nLookup Table: %s - %s\nA: %s/%s', ...
                                     sPatientName, ...
                                     sPatientID, ...
                                     sSeriesDescription, ...
-                                    sRadiopharmaceutical, ...
                                     sSeriesDate,...
                                     num2str(tQuantification.tCount.dMin), ...
                                     num2str(tQuantification.tCount.dMax), ...
@@ -1375,42 +1258,8 @@ end
                                     num2str(lMax), ...
                                     sAxialSliceNumber, ...
                                     num2str(size(dicomBuffer('get'), 3)));
-                            end
-
-                        case 'ct'
-
-                            [dWindow, dLevel] = computeWindowMinMax(windowLevel('get', 'max'), windowLevel('get', 'min'));
-                            sWindowName = getWindowName(dWindow, dLevel);
-                            sAxe3Text = sprintf('\n\n\n\n\n\n%s\n%s\n%s\n%s\nMin HU: %s\nMax HU: %s\nCurrent HU: %s\nWindow/Level (%s): %s/%s\nA: %s/%s', ...
-                                sPatientName, ...
-                                sPatientID, ...
-                                sSeriesDescription, ...
-                                sSeriesDate,...
-                                num2str(tQuantification.tHU.dMin), ...
-                                num2str(tQuantification.tHU.dMax), ...
-                                num2str(double(im(iCoronal,iSagittal,iAxial))), ...
-                                sWindowName,...
-                                num2str(round(dWindow)), ...
-                                num2str(round(dLevel)), ...
-                                sAxialSliceNumber, ...
-                                num2str(size(dicomBuffer('get'), 3)));
-
-                       otherwise
-                            sAxe3Text = sprintf('\n\n\n\n\n\n%s\n%s\n%s\n%s\nMin: %s\nMax: %s\nTotal: %s\nCurrent: %s\nLookup Table: %s - %s\nA: %s/%s', ...
-                                sPatientName, ...
-                                sPatientID, ...
-                                sSeriesDescription, ...
-                                sSeriesDate,...
-                                num2str(tQuantification.tCount.dMin), ...
-                                num2str(tQuantification.tCount.dMax), ...
-                                num2str(tQuantification.tCount.dSum), ...
-                                num2str(double(im(iCoronal,iSagittal,iAxial))), ...
-                                num2str(lMin), ...
-                                num2str(lMax), ...
-                                sAxialSliceNumber, ...
-                                num2str(size(dicomBuffer('get'), 3)));
+                        end
                     end
-
        %         sAxe3Text = sprintf('%s\n%s\n%s\nCurrent SUV/W:%s -- %d Bq/cc\nA :%s/%s', sPatientName, sPatientID, sSeriesDescription, num2str(suvValue),im(iCoronal,iSagittal,iAxial),num2str(sliceNumber('get', 'axial')),num2str(size(dicomBuffer('get'), 3)));
 
                     if gca == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) && strcmp(windowButton('get'), 'down')

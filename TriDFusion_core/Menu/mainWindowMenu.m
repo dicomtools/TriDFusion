@@ -33,7 +33,7 @@ function mainWindowMenu()
     uimenu(mFile,'Label', 'Import .stl file...'           ,'Callback', @importSTLCallback);
     uimenu(mFile,'Label', 'Import .nii file...'           ,'Callback', @importNIICallback);
     uimenu(mFile,'Label', 'Import .nii mask file...'      ,'Callback', @importNIIMaskCallback);
-    uimenu(mFile,'Label', 'Import RT-Structure...'        ,'Callback', @importContoursCallback);    
+    uimenu(mFile,'Label', 'Import RT-Structure...'        ,'Callback', @importContoursCallback);
     uimenu(mFile,'Label', 'Import CERR planC...'          ,'Callback', @importCerrPlanCCallback, 'Separator','on');
     uimenu(mFile,'Label', 'Import CERR Dose Volume...'    ,'Callback', @importCerrDoseVolumeCallback);
     uimenu(mFile,'Label', 'Import CERR Dose Constraint...','Callback', @importCerrDoseConstraintCallback);
@@ -46,20 +46,20 @@ function mainWindowMenu()
     uimenu(mFile,'Label', 'Export Contours to RT-Structure...','Callback', @writeRTStructCallback);
     uimenu(mFile,'Label', 'Export 3D ISO Model to STL...'     ,'Callback', @exportISOtoSTLCallback);
     uimenu(mFile,'Label', 'Export 3D Rendering to Slices...'  ,'Callback', @export3DToSlicesCallback);
-    
+
     uimenu(mFile,'Label', 'Print Preview...','Callback', 'filemenufcn(gcbf,''FilePrintPreview'')', 'Separator','on');
     uimenu(mFile,'Label', 'Print...','Callback', 'printdlg(gcbf)');
     uimenu(mFile,'Label', 'Exit' ,'Callback', 'close', 'Separator','on');
 
     mEdit = uimenu(fiMainWindowPtr('get'),'Label','Edit');
     uimenu(mEdit,'Label', 'Copy Display'   , 'Callback', @copyDisplayCallback);
-    uimenu(mEdit,'Label', 'Patient Dose...', 'Callback', @setPatientDoseCallback, 'Separator','on');    
+    uimenu(mEdit,'Label', 'Patient Dose...', 'Callback', @setPatientDoseCallback, 'Separator','on');
 
     mOptions = uimenu(mEdit,'Label', 'Viewer Properties...', 'Callback', @setOptionsCallback);
     optionsPanelMenuObject('set', mOptions);
 
     mView = uimenu(fiMainWindowPtr('get'),'Label','View');
-       
+
     mVsplashAxial    = uimenu(mView, 'Label','V-Splash Axial'   , 'Callback', @setVsplashViewCallback, 'Separator','on');
     mVsplashSagittal = uimenu(mView, 'Label','V-Splash Sagittal', 'Callback', @setVsplashViewCallback);
     mVslashCoronal   = uimenu(mView, 'Label','V-Splash Coronal' , 'Callback', @setVsplashViewCallback);
@@ -94,8 +94,8 @@ function mainWindowMenu()
     viewRoiObject('set', mViewRoi);
 
     mViewPlayback = uimenu(mView, 'Label','Playback Toolbar' , 'Callback', @setViewToolbar);
-    viewPlaybackObject('set', mViewPlayback);    
-    
+    viewPlaybackObject('set', mViewPlayback);
+
     mViewSegPanel = uimenu(mView, 'Label','Image Panel' , 'Callback', @setViewSegPanel, 'Separator', 'on');
     viewSegPanelMenuObject('set', mViewSegPanel);
 
@@ -104,7 +104,7 @@ function mainWindowMenu()
 
     mViewRoiPanel = uimenu(mView, 'Label','Contour Panel', 'Callback', @setViewRoiPanel);
     viewRoiPanelMenuObject('set', mViewRoiPanel);
-    
+
     m3DPanel = uimenu(mView, 'Label','3D Panel', 'Callback', @setView3DPanel);
     view3DPanelMenuObject('set', m3DPanel);
 
@@ -122,23 +122,23 @@ function mainWindowMenu()
 
     mTools = uimenu(fiMainWindowPtr('get'),'Label','Tools');
 %    mTotalSegmentation = uimenu(mTools, 'Label','Total Segmentation', 'Callback', @totalSegmentationCallback);
-   
+
 %     uimenu(mTools, 'Label','Fusion'      , 'Callback', @setFusionCallback);
 %     rotate3DMenu  ('set', uimenu(mTools, 'Label','Rotate 3D'  , 'Callback', @setRotate3DCallback));
     panMenu       ('set', uimenu(mTools, 'Label','Pan'      , 'Callback', @setPanCallback));
     zoomMenu      ('set', uimenu(mTools, 'Label','Zoom'     , 'Callback', @setZoomCallback));
     rotate3DMenu  ('set', uimenu(mTools, 'Label','Rotate 3D', 'Callback', @setRotate3DCallback));
- %   dataCursorMenu('set', uimenu(mTools, 'Label','Data Cursor', 'Callback', @setDataCursorCallback)); 
+ %   dataCursorMenu('set', uimenu(mTools, 'Label','Data Cursor', 'Callback', @setDataCursorCallback));
     uimenu(mTools, 'Label','Reset View', 'Callback','toolsmenufcn ResetView');
-    
+
     mAxial    = uimenu(mTools, 'Label','Original Orientation'     , 'Callback', @setOrientationCallback, 'Separator','on');
     mCoronal  = uimenu(mTools, 'Label','Permute Coronal to Axial' , 'Callback', @setOrientationCallback);
     mSagittal = uimenu(mTools, 'Label','Permute Sagittal to Axial', 'Callback', @setOrientationCallback);
-    
+
     axialOrientationMenuPtr   ('set', mAxial   );
-    coronalOrientationMenuPtr ('set', mCoronal );    
+    coronalOrientationMenuPtr ('set', mCoronal );
     sagittalOrientationMenuPtr('set', mSagittal);
-    
+
     if strcmpi(imageOrientation('get'), 'Sagittal')
         set(mAxial   , 'Checked', 'off');
         set(mSagittal, 'Checked', 'on' );
@@ -152,7 +152,7 @@ function mainWindowMenu()
         set(mSagittal, 'Checked', 'off' );
         set(mCoronal , 'Checked', 'off');
     end
-    
+
     uimenu(mTools, 'Label','Registration'                  , 'Callback', @setRegistrationCallback, 'Separator','on');
     uimenu(mTools, 'Label','Mathematic'                    , 'Callback', @setMathCallback);
     uimenu(mTools, 'Label','Compute 2D MIP'                , 'Callback', @computeMIPCallback, 'Separator','on');
@@ -162,19 +162,19 @@ function mainWindowMenu()
 
     % Workflows
 
-    mWorkflows = uimenu(fiMainWindowPtr('get'),'Label','Workflows');  
+    mWorkflows = uimenu(fiMainWindowPtr('get'),'Label','Workflows');
 
-    mAnalCancer = uimenu(mWorkflows,'Label','Anal Cancer');  
+    mAnalCancer = uimenu(mWorkflows,'Label','Anal Cancer');
     uimenu(mAnalCancer, 'Label','Export Report', 'Callback', @setAnalCancerReportCallback);
     uimenu(mAnalCancer, 'Label','PET/CT Fusion', 'Callback', @setPETCTAnalCancerFusionCallback);
 
-    mFDG = uimenu(mWorkflows,'Label','FDG - fluorodeoxyglucose');  
+    mFDG = uimenu(mWorkflows,'Label','FDG - fluorodeoxyglucose');
     uimenu(mFDG, 'Label','Tumor Segmentation (SUV 4)'   , 'Callback', @setSegmentationFDGSUVCallback);
     uimenu(mFDG, 'Label','Tumor Segmentation (42%, 65%)', 'Callback', @setSegmentationFDGPercentCallback);
     uimenu(mFDG, 'Label','PET/CT Fusion'                , 'Callback', @setPETCTFDGFusionCallback);
 
 if 0    
-    mGa68DOTATATE = uimenu(mWorkflows,'Label','Ga68 DOTATATE');  
+    mGa68DOTATATE = uimenu(mWorkflows,'Label','Ga68 DOTATATE');
     uimenu(mGa68DOTATATE, 'Label','Tumor Segmentation (Machine Learning)', 'Callback', @setMachineLearningGa68DOTATATECallback);
     uimenu(mGa68DOTATATE, 'Label','PET/CT Fusion'                        , 'Callback', @setPETCTGa68DOTATATEFusionCallback);
 end
@@ -199,14 +199,14 @@ end
     uimenu(mHelp,'Label', 'Shortcuts', 'Callback'  , @shortcutsViewerCallback);
     uimenu(mHelp,'Label', 'User Manual', 'Callback', @helpViewerCallback);
     uimenu(mHelp,'Label', 'About', 'Callback'      , @aboutViewerCallback, 'Separator','on');
-    
+
     function copyDisplayCallback(~, ~)
-        
+
         try
             hFig = fiMainWindowPtr('get');
-            
+
             set(hFig, 'Pointer', 'watch');
-            
+
 %            rdr = get(hFig,'Renderer');
             inv = get(hFig,'InvertHardCopy');
 
@@ -216,55 +216,55 @@ end
             drawnow;
             hgexport(hFig,'-clipboard');
 
-%            set(hFig,'Renderer',rdr);        
-            set(hFig,'InvertHardCopy',inv);        
+%            set(hFig,'Renderer',rdr);
+            set(hFig,'InvertHardCopy',inv);
         catch
         end
-        
+
         set(hFig, 'Pointer', 'default');
-        
-    end   
-    
+
+    end
+
     function setOrientationCallback(hObject, ~)
 
         bRefresh = false;
-        
+
         if switchTo3DMode('get')     == false && ...
            switchToIsoSurface('get') == false && ...
            switchToMIPMode('get')    == false && ...
            isVsplash('get') == false
-       
+
             try
 
             set(fiMainWindowPtr('get'), 'Pointer', 'watch');
             drawnow;
-            
+
             if strcmpi(get(hObject, 'Label'), 'Axial Plane') && ...
                strcmpi(imageOrientation('get'), 'axial')
-           
+
                 set(fiMainWindowPtr('get'), 'Pointer', 'default');
                 drawnow;
                 return;
             end
-            
+
             if strcmpi(get(hObject, 'Label'), 'Coronal Plane') && ...
                strcmpi(imageOrientation('get'), 'coronal')
-           
-                set(fiMainWindowPtr('get'), 'Pointer', 'default');
-                drawnow;           
-            
-                return;
-            end
-            
-            if strcmpi(get(hObject, 'Label'), 'Sagittal Plane') && ...                
-               strcmpi(imageOrientation('get'), 'sagittal')
-           
+
                 set(fiMainWindowPtr('get'), 'Pointer', 'default');
                 drawnow;
-            
+
                 return;
             end
-                      
+
+            if strcmpi(get(hObject, 'Label'), 'Sagittal Plane') && ...
+               strcmpi(imageOrientation('get'), 'sagittal')
+
+                set(fiMainWindowPtr('get'), 'Pointer', 'default');
+                drawnow;
+
+                return;
+            end
+
             releaseRoiWait();
 
             if isFusion('get') == true
@@ -274,220 +274,220 @@ end
             if isPlotContours('get') == true
                setPlotContoursCallback(); % Deactivate plot contours
             end
-            
+
             atInputTemplate = inputTemplate('get');
             aInputBuffer    = inputBuffer('get');
 
             dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-            
-            sSeriesInstanceUID = atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID;                        
-                   
+
+            sSeriesInstanceUID = atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID;
+
             for kk=1:numel(atInputTemplate) % Scan all series
-                
+
                 if strcmpi(sSeriesInstanceUID, atInputTemplate(kk).atDicomInfo{1}.SeriesInstanceUID) % Same series
-                                
+
                     aDicomBuffer = aInputBuffer{kk};
                     atDicomInfo  = atInputTemplate(dSeriesOffset).atDicomInfo;
-                    
-            
+
+
                     if size(aDicomBuffer, 3) == 1
                         continue;
                     end
-            
+
                     if strcmpi(get(hObject, 'Label'), 'Original Orientation')
-                        
+
                         atInputTemplate(kk).sOrientationView = 'Axial';
-                        
+
                         imageOrientation('set', 'axial');
 
                         dicomBuffer  ('set', aDicomBuffer, kk);
                         dicomMetaData('set', atDicomInfo , kk);
-                        
-                        if link2DMip('get') == true                                                
-                            aReorientedMip = computeMIP(aDicomBuffer);
-                            mipBuffer('set', aReorientedMip, kk);
-                        end
-                        
-                        bRefresh = true;
 
-                    elseif strcmpi(get(hObject, 'Label'), 'Permute Coronal to Axial')
-                                            
-                        atInputTemplate(kk).sOrientationView = 'Coronal';
-                       
-                        imageOrientation('set', 'coronal');
-
-                        aDicomBuffer = reorientBuffer(aDicomBuffer, 'coronal');
-                                             
-                        dicomBuffer('set', aDicomBuffer, kk);
-                        
                         if link2DMip('get') == true
                             aReorientedMip = computeMIP(aDicomBuffer);
                             mipBuffer('set', aReorientedMip, kk);
                         end
-                                               
+
+                        bRefresh = true;
+
+                    elseif strcmpi(get(hObject, 'Label'), 'Permute Coronal to Axial')
+
+                        atInputTemplate(kk).sOrientationView = 'Coronal';
+
+                        imageOrientation('set', 'coronal');
+
+                        aDicomBuffer = reorientBuffer(aDicomBuffer, 'coronal');
+
+                        dicomBuffer('set', aDicomBuffer, kk);
+
+                        if link2DMip('get') == true
+                            aReorientedMip = computeMIP(aDicomBuffer);
+                            mipBuffer('set', aReorientedMip, kk);
+                        end
+
                         aImageOrientationPatient = zeros(6,1);
-        
+
                         % Axial
-                        
+
                         aImageOrientationPatient(1) = 1;
                         aImageOrientationPatient(5) = 1;
-                        
+
                         dImagePositionPatient = atDicomInfo{1}.ImagePositionPatient;
                         dSliceLocation        = atDicomInfo{1}.SliceLocation;
-        
+
                         x = atDicomInfo{1}.PixelSpacing(1);
                         y = atDicomInfo{1}.PixelSpacing(2);
-                        z = computeSliceSpacing(atDicomInfo);                        
-                        
-                        adBufferSize = size(aDicomBuffer);                        
-                        
+                        z = computeSliceSpacing(atDicomInfo);
+
+                        adBufferSize = size(aDicomBuffer);
+
                         if numel(atDicomInfo) ~= 1
                             if adBufferSize(3) < numel(atDicomInfo)
                                 atDicomInfo = atDicomInfo(1:numel(atDicomInfo)); % Remove some slices
                             else
                                 for cc=1:adBufferSize(3) - numel(atDicomInfo)
                                     atDicomInfo{end+1} = atDicomInfo{end}; %Add missing slice
-                                end            
-                            end                
+                                end
+                            end
                         end
-                        
+
                         for oo=0:numel(atDicomInfo)-1
-                            
-                            if oo+1 <= adBufferSize(3) 
-                                
+
+                            if oo+1 <= adBufferSize(3)
+
                                 if isfield(atDicomInfo{oo+1}, 'RescaleSlope')
                                     dTrueMin = min(aDicomBuffer(:,:,oo+1), [],'all');
                                     dTrueMax = max(aDicomBuffer(:,:,oo+1), [],'all');
                                     dTrueRange = dTrueMax-dTrueMin;
-                                    fSlope = dTrueRange/65535;                            
+                                    fSlope = dTrueRange/65535;
 
 
                                     atDicomInfo{oo+1}.RescaleSlope = 1;
                                 end
-                                
-                                if isfield(atDicomInfo{oo+1}, 'RescaleIntercept')                                
+
+                                if isfield(atDicomInfo{oo+1}, 'RescaleIntercept')
 %                                    atDicomInfo{oo+1}.RescaleIntercept = 0;
                                 end
                            end
-                            
+
                             if isfield(atDicomInfo{oo+1}, 'InstanceNumber')
                                 atDicomInfo{oo+1}.InstanceNumber = oo+1;
                             end
-                            
+
                             atDicomInfo{oo+1}.PixelSpacing(1) = z;
                             atDicomInfo{oo+1}.PixelSpacing(2) = y;
                             atDicomInfo{oo+1}.NumberOfSlices  = adBufferSize(3);
                             atDicomInfo{oo+1}.ImageOrientationPatient = aImageOrientationPatient;
-                            
+
                             atDicomInfo{oo+1}.ImagePositionPatient(1) = dImagePositionPatient(1);
-                            atDicomInfo{oo+1}.ImagePositionPatient(2) = dImagePositionPatient(2);                            
-                            atDicomInfo{oo+1}.ImagePositionPatient(3) = dImagePositionPatient(3) - (oo*x);  
-                            
-                            atDicomInfo{oo+1}.SliceLocation = dSliceLocation - (oo*x);  
-                            
+                            atDicomInfo{oo+1}.ImagePositionPatient(2) = dImagePositionPatient(2);
+                            atDicomInfo{oo+1}.ImagePositionPatient(3) = dImagePositionPatient(3) - (oo*x);
+
+                            atDicomInfo{oo+1}.SliceLocation = dSliceLocation - (oo*x);
+
                             atDicomInfo{oo+1}.SliceThickness  = x;
-                            atDicomInfo{oo+1}.SpacingBetweenSlices  = x;       
-                            
+                            atDicomInfo{oo+1}.SpacingBetweenSlices  = x;
+
                             atDicomInfo{oo+1}.Rows    = adBufferSize(1);
-                            atDicomInfo{oo+1}.Columns = adBufferSize(2);                
+                            atDicomInfo{oo+1}.Columns = adBufferSize(2);
                         end
-                        
+
                         dicomMetaData('set', atDicomInfo , kk);
-                        
+
                         bRefresh = true;
 
                    elseif strcmpi(get(hObject, 'Label'), 'Permute Sagittal to Axial')
-                                               
+
                         atInputTemplate(kk).sOrientationView = 'Sagittal';
 
                         imageOrientation('set', 'sagittal');
 
                         aImageOrientationPatient = zeros(6,1);
-        
+
                         % Axial
-                        
+
                         aImageOrientationPatient(1) = 1;
                         aImageOrientationPatient(5) = 1;
-                        
+
                         dImagePositionPatient = atDicomInfo{1}.ImagePositionPatient;
                         dSliceLocation        = atDicomInfo{1}.SliceLocation;
-                                                
+
                         x = atDicomInfo{1}.PixelSpacing(1);
                         y = atDicomInfo{1}.PixelSpacing(2);
-                        z = computeSliceSpacing(atDicomInfo);  
-                                                                        
+                        z = computeSliceSpacing(atDicomInfo);
+
                         aDicomBuffer = reorientBuffer(aDicomBuffer, 'sagittal');
-                        
+
                         dicomBuffer('set', aDicomBuffer, kk);
-                        
-                        if link2DMip('get') == true                        
+
+                        if link2DMip('get') == true
                             aReorientedMip = computeMIP(aDicomBuffer);
                             mipBuffer('set', aReorientedMip, kk);
-                        end            
-                        
+                        end
+
                         adBufferSize = size(aDicomBuffer);
-                        
+
                         if numel(atDicomInfo) ~= 1
                             if adBufferSize(3) < numel(atDicomInfo)
                                 atDicomInfo = atDicomInfo(1:numel(atDicomInfo)); % Remove some slices
                             else
                                 for cc=1:adBufferSize(3) - numel(atDicomInfo)
                                     atDicomInfo{end+1} = atDicomInfo{end}; %Add missing slice
-                                end            
-                            end                
+                                end
+                            end
                         end
-    
+
                         for oo=0:numel(atDicomInfo)-1
-                            
-                            if oo+1 <= adBufferSize(3) 
-                                
+
+                            if oo+1 <= adBufferSize(3)
+
                                 if isfield(atDicomInfo{oo+1}, 'RescaleSlope')
                                     dTrueMin = min(aDicomBuffer(:,:,oo+1), [],'all');
                                     dTrueMax = max(aDicomBuffer(:,:,oo+1), [],'all');
                                     dTrueRange = dTrueMax-dTrueMin;
-                                    fSlope = dTrueRange/65535;                            
+                                    fSlope = dTrueRange/65535;
 
 
                                     atDicomInfo{oo+1}.RescaleSlope = 1;
                                 end
-                                
-                                if isfield(atDicomInfo{oo+1}, 'RescaleIntercept')                                
+
+                                if isfield(atDicomInfo{oo+1}, 'RescaleIntercept')
 %                                    atDicomInfo{oo+1}.RescaleIntercept = 0;
                                 end
                             end
-                            
+
                             if isfield(atDicomInfo{oo+1}, 'InstanceNumber')
                                 atDicomInfo{oo+1}.InstanceNumber = oo+1;
                             end
-                            
+
                             atDicomInfo{oo+1}.PixelSpacing(1) = x;
                             atDicomInfo{oo+1}.PixelSpacing(2) = z;
                             atDicomInfo{oo+1}.NumberOfSlices  = adBufferSize(3);
-                            atDicomInfo{oo+1}.ImageOrientationPatient = aImageOrientationPatient; 
+                            atDicomInfo{oo+1}.ImageOrientationPatient = aImageOrientationPatient;
                             atDicomInfo{oo+1}.ImagePositionPatient(1) = dImagePositionPatient(1);
                             atDicomInfo{oo+1}.ImagePositionPatient(2) = dImagePositionPatient(2);
-                            atDicomInfo{oo+1}.ImagePositionPatient(3) = dImagePositionPatient(3) - (oo*y);                            
-                            
-                            atDicomInfo{oo+1}.SliceLocation = dSliceLocation - (oo*y);  
+                            atDicomInfo{oo+1}.ImagePositionPatient(3) = dImagePositionPatient(3) - (oo*y);
+
+                            atDicomInfo{oo+1}.SliceLocation = dSliceLocation - (oo*y);
 
                             atDicomInfo{oo+1}.SliceThickness  = y;
-                            atDicomInfo{oo+1}.SpacingBetweenSlices  = y;  
-                            
+                            atDicomInfo{oo+1}.SpacingBetweenSlices  = y;
+
                             atDicomInfo{oo+1}.Rows    = adBufferSize(1);
-                            atDicomInfo{oo+1}.Columns = adBufferSize(2);                              
+                            atDicomInfo{oo+1}.Columns = adBufferSize(2);
                         end
-                        
+
                         dicomMetaData('set', atDicomInfo , kk);
-               
+
                         bRefresh = true;
                     end
                 end
             end
-            
+
             inputTemplate('set', atInputTemplate);
 
             if  bRefresh == true
-                
+
                 viewSegPanel('set', false);
                 objSegPanel = viewSegPanelMenuObject('get');
                 if ~isempty(objSegPanel)
@@ -499,21 +499,21 @@ end
                 if ~isempty(objKernelPanel)
                     objKernelPanel.Checked = 'off';
                 end
-                        
+
                 clearDisplay();
                 initDisplay(3);
                 dicomViewerCore();
 
                 refreshImages();
             end
-            
+
             catch
                 progressBar(1, 'Error:setOrientationCallback()');
-            end            
-            
+            end
+
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
             drawnow;
-            
+
         end
     end
 
@@ -737,9 +737,9 @@ end
 
                 set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 1]);
                 set(uiTraWindowPtr('get'), 'BorderWidth'   , 1);
-                
+
                 set(uiMipWindowPtr('get'), 'HighlightColor', [0 1 1]);
-                set(uiMipWindowPtr('get'), 'BorderWidth'   , 1);                
+                set(uiMipWindowPtr('get'), 'BorderWidth'   , 1);
             end
         else
 
@@ -869,37 +869,37 @@ end
     function resetSeriesCallback(~, ~)
 
         try
-            
-        % Deactivate main tool bar 
-                
-        set(uiSeriesPtr('get'), 'Enable', 'off');                
-        mainToolBarEnable('off');
-        
-        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-        drawnow;        
 
-        resetSeries( get(uiSeriesPtr('get'), 'Value'), true);       
-                
-        progressBar(1,'Ready');        
+        % Deactivate main tool bar
+
+        set(uiSeriesPtr('get'), 'Enable', 'off');
+        mainToolBarEnable('off');
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+
+        resetSeries( get(uiSeriesPtr('get'), 'Value'), true);
+
+        progressBar(1,'Ready');
 
         catch
             progressBar(1, 'Error:resetRegistrationCallback()');
         end
-        
-        % Reactivate main tool bar 
-        set(uiSeriesPtr('get'), 'Enable', 'on');                
+
+        % Reactivate main tool bar
+        set(uiSeriesPtr('get'), 'Enable', 'on');
         mainToolBarEnable('on');
-        
+
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;
-        
+
     end
 
     function convertSeriesToPlanarCallback(~, ~)
-        
+
     DLG_CONVERT_TO_PLANAR_X = 380;
     DLG_CONVERT_TO_PLANAR_Y = 200;
-    
+
     dlgConvertToPlanar = ...
         dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_CONVERT_TO_PLANAR_X/2) ...
                             (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_CONVERT_TO_PLANAR_Y/2) ...
@@ -907,33 +907,33 @@ end
                             DLG_CONVERT_TO_PLANAR_Y ...
                             ],...
                'MenuBar', 'none',...
-               'Resize', 'off', ...    
+               'Resize', 'off', ...
                'NumberTitle','off',...
                'MenuBar', 'none',...
                'Color', viewerBackgroundColor('get'), ...
                'Name', 'Convert 3D Series To Planar',...
-               'Toolbar','none'...               
-               );           
-           
+               'Toolbar','none'...
+               );
+
         axes(dlgConvertToPlanar, ...
              'Units'   , 'pixels', ...
              'Position', [0 0 DLG_CONVERT_TO_PLANAR_X DLG_CONVERT_TO_PLANAR_Y], ...
              'Color'   , viewerBackgroundColor('get'),...
              'XColor'  , viewerForegroundColor('get'),...
              'YColor'  , viewerForegroundColor('get'),...
-             'ZColor'  , viewerForegroundColor('get'),...             
-             'Visible' , 'off'...             
-             );           
+             'ZColor'  , viewerForegroundColor('get'),...
+             'Visible' , 'off'...
+             );
 
         uicontrol(dlgConvertToPlanar,...
                   'style'   , 'text',...
                   'string'  , 'Convert method',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                   
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [20 137 150 20]...
                   );
-              
+
     uiConverMethod = ...
         uicontrol(dlgConvertToPlanar, ...
                   'enable'  , 'on',...
@@ -941,7 +941,7 @@ end
                   'position', [200 140 160 20],...
                   'String'  , {'Current slice', 'All slices add', 'All slices max'}, ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Value'   , 2 ...
                  );
 
@@ -950,10 +950,10 @@ end
                   'string'  , 'Plane to convert',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                   
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [20 112 150 20]...
                   );
-              
+
     uiPlaneSelection = ...
         uicontrol(dlgConvertToPlanar, ...
                   'enable'  , 'on',...
@@ -961,7 +961,7 @@ end
                   'position', [200 115 160 20],...
                   'String'  , {'Coronal', 'Sagittal', 'Axial'}, ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Value'   , 3, ...
                   'Callback', @uiPlaneSelectionCallback...
                   );
@@ -972,7 +972,7 @@ end
                   'string'  , 'From slice:',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                   
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [20 87 150 20]...
                   );
 
@@ -982,7 +982,7 @@ end
                 'Background', 'white',...
                 'string'    , '1',...
                 'BackgroundColor', viewerBackgroundColor('get'), ...
-                'ForegroundColor', viewerForegroundColor('get'), ...                 
+                'ForegroundColor', viewerForegroundColor('get'), ...
                 'position'  , [200 90 145 20], ...
                 'Callback', @edtFromSliceCallback...
                 );
@@ -992,15 +992,15 @@ end
                   'string'  , 'To Slice:',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                   
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [20 62 150 20]...
                   );
 
-    dPlaneSelection  = get(uiPlaneSelection, 'Value');    
-    asPlaneSelection = get(uiPlaneSelection, 'String');    
-   
+    dPlaneSelection  = get(uiPlaneSelection, 'Value');
+    asPlaneSelection = get(uiPlaneSelection, 'String');
+
     if ~isempty(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')))
-        
+
         if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
             sToSlice = '1'; % 2D image
         else
@@ -1024,7 +1024,7 @@ end
                 'Background', 'white',...
                 'string'    , sToSlice,...
                 'BackgroundColor', viewerBackgroundColor('get'), ...
-                'ForegroundColor', viewerForegroundColor('get'), ...                 
+                'ForegroundColor', viewerForegroundColor('get'), ...
                 'position'  , [200 65 145 20], ...
                 'Callback', @edtToSliceCallback...
                 );
@@ -1035,7 +1035,7 @@ end
                'String','Cancel',...
                'Position',[285 7 75 25],...
                'BackgroundColor', viewerBackgroundColor('get'), ...
-               'ForegroundColor', viewerForegroundColor('get'), ...                
+               'ForegroundColor', viewerForegroundColor('get'), ...
                'Callback', @cancelConvertToPlanarCallback...
                );
 
@@ -1043,21 +1043,21 @@ end
               'String','Proceed',...
               'Position',[200 7 75 25],...
               'BackgroundColor', viewerBackgroundColor('get'), ...
-              'ForegroundColor', viewerForegroundColor('get'), ...               
+              'ForegroundColor', viewerForegroundColor('get'), ...
               'Callback', @proceedConvertToPlanarCallback...
               );
 
         function uiPlaneSelectionCallback(~, ~)
 
             if ~isempty(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')))
-                
+
                 if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
                     sToSlice = '1'; % 2D image
                 else
                     aImageSize = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')));
 
-                    dPlaneSelection  = get(uiPlaneSelection, 'Value');    
-                    asPlaneSelection = get(uiPlaneSelection, 'String');   
+                    dPlaneSelection  = get(uiPlaneSelection, 'Value');
+                    asPlaneSelection = get(uiPlaneSelection, 'String');
 
                     if     strcmpi(asPlaneSelection{dPlaneSelection}, 'Coronal')
                         sToSlice = num2str(aImageSize(1));
@@ -1072,21 +1072,21 @@ end
             end
 
             set(edtFromSlice, 'string', '1');
-            set(edtToSlice  , 'string', sToSlice);          
+            set(edtToSlice  , 'string', sToSlice);
         end
 
         function edtFromSliceCallback(~, ~)
 
-            dPlaneSelection  = get(uiPlaneSelection, 'Value');    
-            asPlaneSelection = get(uiPlaneSelection, 'String');    
+            dPlaneSelection  = get(uiPlaneSelection, 'Value');
+            asPlaneSelection = get(uiPlaneSelection, 'String');
 
             if ~isempty(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')))
-                
+
                 if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
                     dFromSliceMax = 1; % 2D image
                 else
                     aImageSize = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')));
-        
+
                     if     strcmpi(asPlaneSelection{dPlaneSelection}, 'Coronal')
                         dFromSliceMax = aImageSize(1);
                     elseif strcmpi(asPlaneSelection{dPlaneSelection}, 'Sagittal')
@@ -1119,16 +1119,16 @@ end
 
         function edtToSliceCallback(~, ~)
 
-            dPlaneSelection  = get(uiPlaneSelection, 'Value');    
-            asPlaneSelection = get(uiPlaneSelection, 'String');    
+            dPlaneSelection  = get(uiPlaneSelection, 'Value');
+            asPlaneSelection = get(uiPlaneSelection, 'String');
 
             if ~isempty(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')))
-                
+
                 if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
                     dToSliceMax = 1; % 2D image
                 else
                     aImageSize = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')));
-        
+
                     if     strcmpi(asPlaneSelection{dPlaneSelection}, 'Coronal')
                         dToSliceMax = aImageSize(1);
                     elseif strcmpi(asPlaneSelection{dPlaneSelection}, 'Sagittal')
@@ -1144,7 +1144,7 @@ end
             dFromSlice = str2double(get(edtFromSlice, 'string'));
             dToSlice   = str2double(get(edtToSlice  , 'string'));
 
-            if dToSlice < 0 
+            if dToSlice < 0
                 set(edtToSlice  , 'string', num2str(dToSliceMax));
                 dToSlice = dToSliceMax;
             end
@@ -1163,8 +1163,8 @@ end
         function cancelConvertToPlanarCallback(~, ~)
             delete(dlgConvertToPlanar);
         end
-          
-        function proceedConvertToPlanarCallback(~, ~)  
+
+        function proceedConvertToPlanarCallback(~, ~)
 
             dPlaneValue   = get(uiPlaneSelection, 'Value');
             asPlaneString = get(uiPlaneSelection, 'String');
@@ -1178,7 +1178,7 @@ end
             dToSlice   = str2double(get(edtToSlice  , 'String'));
 
             convert3DSeriesToPlanar(sPlane, sMethod, dFromSlice, dToSlice);
-            
+
             delete(dlgConvertToPlanar);
 
         end
@@ -1186,7 +1186,7 @@ end
     end
 
     function diceContoursCallback(~, ~)
-        
+
         DLG_DICE_CONTOURS_X = 380;
         DLG_DICE_CONTOURS_Y = 160;
 
@@ -1197,13 +1197,13 @@ end
                                 DLG_DICE_CONTOURS_Y ...
                                 ],...
                    'MenuBar', 'none',...
-                   'Resize', 'off', ...    
+                   'Resize', 'off', ...
                    'NumberTitle','off',...
                    'MenuBar', 'none',...
                    'Color', viewerBackgroundColor('get'), ...
                    'Name', 'Dice Contours',...
-                   'Toolbar','none'...               
-                   );           
+                   'Toolbar','none'...
+                   );
 
             axes(dlgDiceContours, ...
                  'Units'   , 'pixels', ...
@@ -1211,14 +1211,14 @@ end
                  'Color'   , viewerBackgroundColor('get'),...
                  'XColor'  , viewerForegroundColor('get'),...
                  'YColor'  , viewerForegroundColor('get'),...
-                 'ZColor'  , viewerForegroundColor('get'),...             
-                 'Visible' , 'off'...             
+                 'ZColor'  , viewerForegroundColor('get'),...
+                 'Visible' , 'off'...
                  );
-                       
+
         atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
         asContoursLabel = [];
         dContour1Offset = 1;
-        dContour2Offset = 1;      
+        dContour2Offset = 1;
         dNbVOIs = 0;
         if ~isempty(atVoiInput)
             dNbVOIs = numel(atVoiInput);
@@ -1229,21 +1229,21 @@ end
                     dContour2Offset = 2;
                 end
             else
-                asContoursLabel = ' ';                
+                asContoursLabel = ' ';
             end
         else
-            asContoursLabel = ' ';            
+            asContoursLabel = ' ';
         end
-        
+
              uicontrol(dlgDiceContours,...
                       'style'   , 'text',...
                       'string'  , 'Volume-of-interest 1',...
                       'horizontalalignment', 'left',...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
-                      'ForegroundColor', viewerForegroundColor('get'), ...                   
+                      'ForegroundColor', viewerForegroundColor('get'), ...
                       'position', [20 117 150 20]...
                       );
-                  
+
         uiContours1 = ...
             uicontrol(dlgDiceContours, ...
                       'enable'  , 'on',...
@@ -1251,16 +1251,16 @@ end
                       'position', [200 120 160 20],...
                       'String'  , asContoursLabel, ...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
-                      'ForegroundColor', viewerForegroundColor('get'), ...                    
+                      'ForegroundColor', viewerForegroundColor('get'), ...
                       'Value'   , dContour1Offset ...
                       );
-                  
+
             uicontrol(dlgDiceContours,...
                       'style'   , 'text',...
                       'string'  , 'Volume-of-interest 2',...
                       'horizontalalignment', 'left',...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
-                      'ForegroundColor', viewerForegroundColor('get'), ...                   
+                      'ForegroundColor', viewerForegroundColor('get'), ...
                       'position', [20 87 150 20]...
                       );
 
@@ -1271,36 +1271,36 @@ end
                       'position', [200 90 160 20],...
                       'String'  , asContoursLabel, ...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
-                      'ForegroundColor', viewerForegroundColor('get'), ...                    
+                      'ForegroundColor', viewerForegroundColor('get'), ...
                       'Value'   , dContour2Offset ...
                       );
-                  
+
             uicontrol(dlgDiceContours,...
                       'style'   , 'text',...
                       'string'  , 'Dice Value:',...
                       'horizontalalignment', 'left',...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
-                      'ForegroundColor', viewerForegroundColor('get'), ...                   
+                      'ForegroundColor', viewerForegroundColor('get'), ...
                       'position', [20 55 150 20]...
                       );
-                  
+
         txtDice = ...
             uicontrol(dlgDiceContours,...
                       'style'   , 'text',...
                       'string'  , '0',...
                       'horizontalalignment', 'left',...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
-                      'ForegroundColor', viewerForegroundColor('get'), ...                   
+                      'ForegroundColor', viewerForegroundColor('get'), ...
                       'position', [200 55 150 20]...
                       );
-                  
+
          % Cancel or Proceed
 
          uicontrol(dlgDiceContours,...
                    'String','Cancel',...
                    'Position',[285 7 75 25],...
                    'BackgroundColor', viewerBackgroundColor('get'), ...
-                   'ForegroundColor', viewerForegroundColor('get'), ...                
+                   'ForegroundColor', viewerForegroundColor('get'), ...
                    'Callback', @cancelDiceContoursCallback...
                    );
 
@@ -1308,21 +1308,21 @@ end
                   'String','Compute',...
                   'Position',[200 7 75 25],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...               
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @computeDiceContoursCallback...
-                  );  
-              
-        function cancelDiceContoursCallback(~, ~) 
-            
+                  );
+
+        function cancelDiceContoursCallback(~, ~)
+
             delete(dlgDiceContours);
         end
-        
+
         function computeDiceContoursCallback(~, ~)
-            
+
             atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-            
+
             if dNbVOIs >= 2
-                
+
 %                tQuant = quantificationTemplate('get');
 
 %                if isfield(tQuant, 'tSUV')
@@ -1330,28 +1330,28 @@ end
 %                else
 %                    dSUVScale = 0;
 %                end
-        
+
  %               atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
 
                 aDisplayBuffer = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
-                
+
                 aMask1 = zeros(size(aDisplayBuffer));
                 aMask2 = zeros(size(aDisplayBuffer));
-        
+
                 dContour1Offset = get(uiContours1, 'Value');
                 dContour2Offset = get(uiContours2, 'Value');
-                
+
                 asRoisTag1 = atVoiInput{dContour1Offset}.RoisTag;
-                        
+
                 for kk=1:numel(asRoisTag1)
-                    
+
                     aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[asRoisTag1{kk}]} );
                     ptrRoi = atRoiInput{find(aTagOffset, 1)};
-        
-                    switch lower(ptrRoi.Axe)    
+
+                    switch lower(ptrRoi.Axe)
 
                         case 'axe'
-                            imCData = aDisplayBuffer(:,:); 
+                            imCData = aDisplayBuffer(:,:);
 
                         case 'axes1'
                             imCData = permute(aDisplayBuffer(ptrRoi.SliceNb,:,:), [3 2 1]);
@@ -1360,19 +1360,19 @@ end
                             imCData = permute(aDisplayBuffer(:,ptrRoi.SliceNb,:), [3 1 2]) ;
 
                         case 'axes3'
-                            imCData = aDisplayBuffer(:,:,ptrRoi.SliceNb);  
+                            imCData = aDisplayBuffer(:,:,ptrRoi.SliceNb);
 
-                        otherwise   
-                    end          
-                    
-                    mask = roiTemplateToMask(ptrRoi, imCData);  
+                        otherwise
+                    end
+
+                    mask = roiTemplateToMask(ptrRoi, imCData);
                     imCData(imCData~=0)=0;
                     imCData(mask)=1;
-                    
-                    switch lower(ptrRoi.Axe)    
+
+                    switch lower(ptrRoi.Axe)
 
                         case 'axe'
-                            aMask1 = imCData; 
+                            aMask1 = imCData;
 
                         case 'axes1'
                             aMask1(ptrRoi.SliceNb,:,:) = aMask1(ptrRoi.SliceNb,:,:)|imCData;
@@ -1381,23 +1381,23 @@ end
                             aMask1(:,ptrRoi.SliceNb,:) = aMask1(:,ptrRoi.SliceNb,:)|imCData;
 
                         case 'axes3'
-                            aMask1(:,:,ptrRoi.SliceNb) = aMask1(:,:,ptrRoi.SliceNb)|imCData;  
+                            aMask1(:,:,ptrRoi.SliceNb) = aMask1(:,:,ptrRoi.SliceNb)|imCData;
 
-                        otherwise   
-                    end   
-                    
+                        otherwise
+                    end
+
                 end
-                                
+
                 asRoisTag2 = atVoiInput{dContour2Offset}.RoisTag;
                 for kk=1:numel(asRoisTag2)
-                    
+
                     aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[asRoisTag2{kk}]} );
                     ptrRoi = atRoiInput{find(aTagOffset, 1)};
-        
-                    switch lower(ptrRoi.Axe)    
+
+                    switch lower(ptrRoi.Axe)
 
                         case 'axe'
-                            imCData = aDisplayBuffer(:,:); 
+                            imCData = aDisplayBuffer(:,:);
 
                         case 'axes1'
                             imCData = permute(aDisplayBuffer(ptrRoi.SliceNb,:,:), [3 2 1]);
@@ -1406,19 +1406,19 @@ end
                             imCData = permute(aDisplayBuffer(:,ptrRoi.SliceNb,:), [3 1 2]) ;
 
                         case 'axes3'
-                            imCData = aDisplayBuffer(:,:,ptrRoi.SliceNb);  
+                            imCData = aDisplayBuffer(:,:,ptrRoi.SliceNb);
 
-                        otherwise   
-                    end          
-                    
-                    mask = roiTemplateToMask(ptrRoi, imCData);  
+                        otherwise
+                    end
+
+                    mask = roiTemplateToMask(ptrRoi, imCData);
                     imCData(imCData~=0)=0;
                     imCData(mask)=1;
-                    
-                    switch lower(ptrRoi.Axe)    
+
+                    switch lower(ptrRoi.Axe)
 
                         case 'axe'
-                            aMask2 =imCData; 
+                            aMask2 =imCData;
 
                         case 'axes1'
                             aMask2(ptrRoi.SliceNb,:,:) = aMask2(ptrRoi.SliceNb,:,:)|imCData;
@@ -1427,25 +1427,25 @@ end
                             aMask2(:,ptrRoi.SliceNb,:) = aMask2(:,ptrRoi.SliceNb,:)|imCData;
 
                         case 'axes3'
-                            aMask2(:,:,ptrRoi.SliceNb) = aMask2(:,:,ptrRoi.SliceNb)|imCData;  
+                            aMask2(:,:,ptrRoi.SliceNb) = aMask2(:,:,ptrRoi.SliceNb)|imCData;
 
-                        otherwise   
-                    end   
-                    
-                end                
-                
+                        otherwise
+                    end
+
+                end
+
                 dDiceValue = dice(aMask1, aMask2);
-                
+
                 set(txtDice, 'String', num2str(dDiceValue));
-                
+
 %                delete(dlgDiceContours);
 
             else
-                
-                delete(dlgDiceContours);               
+
+                delete(dlgDiceContours);
             end
         end
-        
+
     end
 
 end

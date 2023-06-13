@@ -729,171 +729,21 @@ end
 
                     tRegistration  = registrationTemplate('get');
                     sInterpolation = tRegistration.Interpolation;
-
-                    zMoveOffset =0;
                    
                     if isVsplash('get') == false
+
                         aRefMip = mipBuffer('get', [], dSeriesOffset);
                         aMip    = mipBuffer('get', [], dFusionSeriesOffset);
 
-                        aZsize = size(A,3);
-                        bZsize = size(B,3); 
-
-                        if aZsize ~= bZsize % Z is different
-
-                            dMinMipFusion = min(aMip, [], 'all');
-                            if aZsize > bZsize
-                                dRatio = bZsize/aZsize*100;
-                            else
-                                dRatio = aZsize/bZsize*100;
-                            end
-
-                            if dRatio < 65  % The z is to far, need to change the method 
-                                aResampledMip = resampleMipTransformMatrix(aMip, atFusionMetaData, aRefMip, atMetaData, sInterpolation, false);  
-                            else
-                                aResampledMip = resampleMipTransformMatrix(aMip, atFusionMetaData, aRefMip, atMetaData, sInterpolation, true);  
-    
-                                if isempty(aResampledMip(aResampledMip~=dMinMipFusion)) % The z is to far, need to change the method
-                                    
-                                    aResampledMip = resampleMipTransformMatrix(aMip, atFusionMetaData, aRefMip, atMetaData, sInterpolation, false);  
-                                else
-                                    zMoveOffset = (aZsize-bZsize)/2;
-                                end
-                            end
-
-                         else
-                            aResampledMip = resampleMipTransformMatrix(aMip, atFusionMetaData, aRefMip, atMetaData, sInterpolation, false);   
-                         end
-
-                        dimsRef = size(aRefMip);         
-                        dimsRsp = size(aResampledMip);   
-                        
-                        xMoveOffset = (dimsRsp(3)-dimsRef(3))/2;
-                        yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
-
-                        if xMoveOffset ~= 0 || yMoveOffset ~= 0 || zMoveOffset ~= 0
-%                            if xMoveOffset < 0 || yMoveOffset < 0
-%                                aResampledMip = imtranslate(aResampledMip,[-yMoveOffset, 0, -xMoveOffset], 'nearest', 'OutputView', 'full', 'FillValues', min(aResampledMip, [], 'all') );    
-%                            else
-                                aResampledMip = imtranslate(aResampledMip,[-yMoveOffset, 0, -xMoveOffset+zMoveOffset], 'nearest', 'OutputView', 'same', 'FillValues', min(aResampledMip, [], 'all') );    
-%                            end
-                        end                  
+                        aResampledMip = resample3DMIP(aMip, atFusionMetaData, aRefMip, atMetaData, sInterpolation);
+                 
                     end         
 
-                    xPixelSizeRatio = 0;
-                    yPixelSizeRatio = 0;
-                    zMoveOffset =0;
 
     %                if numel(A) ~= numel(B) % Resample image                 
                     if isVsplash('get') == false
 
-                        dMinFusion = min(B, [], 'all');                       
-
-                        aZsize = size(A,3);
-                        bZsize = size(B,3); 
-
-                        if aZsize ~= bZsize % Z is different
-
-                            if aZsize > bZsize
-                                dRatio = bZsize/aZsize*100;
-                            else
-                                dRatio = aZsize/bZsize*100;
-                            end
-
-                            if dRatio < 65  % The z is to far, need to change the method 
-                                [B, atFusionMetaData] = ...
-                                    resampleImageTransformMatrix(B, ...
-                                                                 atFusionMetaData, ...
-                                                                 A, ...
-                                                                 atMetaData, ...
-                                                                 sInterpolation, ...
-                                                                 false ...
-                                                                 );                              
-                            else
-                                Btemp = B;
-                                atFusionMetaDataTemp = atFusionMetaData;
-                                
-                                [B, atFusionMetaData] = ...
-                                    resampleImageTransformMatrix(B, ...
-                                                                 atFusionMetaData, ...
-                                                                 A, ...
-                                                                 atMetaData, ...
-                                                                 sInterpolation, ...
-                                                                 true ...
-                                                                 ); 
-    
-                                if isempty(B(B~=dMinFusion)) % The z is to far, need to change the method
-
-                                    [B, atFusionMetaData] = ...
-                                        resampleImageTransformMatrix(Btemp, ...
-                                                                     atFusionMetaDataTemp, ...
-                                                                     A, ...
-                                                                     atMetaData, ...
-                                                                     sInterpolation, ...
-                                                                     false ...
-                                                                     ); 
-         %                            B = imresize3(B, 'OutputSize',size(A));+
-                                else
-                                    zMoveOffset = (aZsize-bZsize)/2;
-                                end
-
-                                dimsRef = size(A);         
-                                dimsRsp = size(B);         
-                                xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
-                                yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
-        
-                                if xMoveOffset ~= 0 || yMoveOffset ~= 0 
-
-                                    xPixelSizeRatio = atFusionMetaDataTemp{1}.PixelSpacing(1);
-                                    yPixelSizeRatio = atFusionMetaDataTemp{1}.PixelSpacing(2);
-                                else                              
-
-                                    xPixelSizeRatio = atMetaData{1}.PixelSpacing(1);
-                                    yPixelSizeRatio = atMetaData{1}.PixelSpacing(2);                                    
-                                end
-
-                                clear Btemp;
-                                clear atFusionMetaDataTemp;                                 
-                            end
-
-                        else
-                            [B, atFusionMetaData] = ...
-                                resampleImageTransformMatrix(B, ...
-                                                             atFusionMetaData, ...
-                                                             A, ...
-                                                             atMetaData, ...
-                                                             sInterpolation, ...
-                                                             false ...
-                                                             );     
-                            dimsRef = size(A);         
-                            dimsRsp = size(B);         
-                            xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
-                            yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
-
-                            if xMoveOffset ~= 0 || yMoveOffset ~= 0 
-                                if xMoveOffset < 1 && yMoveOffset < 1
-                                   if xMoveOffset > 0 && yMoveOffset > 0    
-                                        B=imresize3(B, size(A));
-                                   end
-                                else
-                                    xPixelSizeRatio = 1;
-                                    yPixelSizeRatio = 1;
-                                end
-                            end
-                        end
-
-                        dimsRef = size(A);         
-                        dimsRsp = size(B);         
-                        xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
-                        yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
-
-                        if xMoveOffset ~= 0 || yMoveOffset ~= 0 || zMoveOffset ~= 0
-                            if xMoveOffset < 0 || yMoveOffset < 0 
-                                B = imtranslate(B,[-xMoveOffset-xPixelSizeRatio, -yMoveOffset-xPixelSizeRatio, zMoveOffset], 'nearest', 'OutputView', 'full', 'FillValues', min(B, [], 'all') ); 
-                            else                              
-                                B = imtranslate(B,[-xMoveOffset+xPixelSizeRatio, -yMoveOffset+yPixelSizeRatio, zMoveOffset], 'nearest', 'OutputView', 'same', 'FillValues', min(B, [], 'all') ); 
-                            end
-                        end
+                        [B, atFusionMetaData] = resample3DImage(B, atFusionMetaData, A, atMetaData, sInterpolation);
 
                     else
                         [aResampled, atFusionMetaData] = ...
@@ -923,36 +773,9 @@ end
                         end                                                    
                     end
             
-%                    [B, atFusionMetaData] = ...
-%                        resampleImage(B, ...
-%                                      atFusionMetaData, ...
-%                                      A, ...
-%                                      atMetaData, ...
-%                                      'bilinear', ...
-%                                      false, ...
-%                                      false ...
-%                                      );                                                     
-                                                     
-     %               end                             
-%                else
-                    
-%                    aRefMip = mipBuffer('get', [], dSeriesOffset);
-%                    aMip = mipBuffer('get', [], dFusionSeriesOffset);
 
-%                    aResampledMip = resampleMip(aMip, atFusionMetaData, aRefMip, atMetaData, 'bilinear');  
-                    
-%                    [B, atFusionMetaData] = ...
-%                        resampleImage(B, ...
-%                                      atFusionMetaData, ...
-%                                      A, ...
-%                                      atMetaData, ...
-%                                      'bilinear', ...
-%                                      false, ...
-%                                      );
-                                                                                                    
-%                end
-
-                fusionBuffer('set', B, dFusionSeriesOffset);     
+                fusionBuffer('set', B, dFusionSeriesOffset);  
+                
                 if link2DMip('get') == true && isVsplash('get') == false      
                     mipFusionBufferOffset('set', dFusionSeriesOffset);
                     mipFusionBuffer('set', aResampledMip, dFusionSeriesOffset);               
