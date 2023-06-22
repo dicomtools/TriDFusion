@@ -1,13 +1,16 @@
-function sliderSagCallback(~, ~)
-%function sliderSagCallback(~, ~)
-%Set Sagittal Slider.
+function aObject = currentRoiPointer(sAction, aValue)
+%function aObject = currentRoiPointer(sAction, aValue)
+%Get\Set current slice ROI objects pointer.
 %See TriDFuison.doc (or pdf) for more information about options.
+%
+%Note: option settings must fit on one line and can contain one semicolon at most.
+%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2021, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -27,20 +30,11 @@ function sliderSagCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if get(uiSliderSagPtr('get'), 'Value') >= 0 && ...
-       get(uiSliderSagPtr('get'), 'Value') <= 1 && ...
-       strcmpi(windowButton('get'), 'up')  
+    persistent paObject; 
 
-        if get(uiSliderSagPtr('get'), 'Value') == 0
-            iSliceNumber = 1;
-        else
-            iSliceNumber = round(get(uiSliderSagPtr('get'), 'Value') * size(dicomBuffer('get'), 2));
-        end
-
-        sliceNumber('set', 'sagittal', iSliceNumber); 
-        
-        refreshImages();
-        
-        drawnow;
-   end
-end    
+    if strcmpi('set', sAction)
+       paObject = aValue;            
+    end     
+    
+    aObject = paObject;
+end

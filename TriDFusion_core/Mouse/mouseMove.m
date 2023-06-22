@@ -27,33 +27,76 @@ function mouseMove(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    if strcmpi(windowButton('get'), 'down')
 
-        if switchTo3DMode('get')     == false && ...
-           switchToIsoSurface('get') == false && ...
-           switchToMIPMode('get')    == false
-
-            if strcmp(get(fiMainWindowPtr('get'),'selectiontype'),'alt')
-                if isMoveImageActivated('get') == true
-                    rotateFusedImage(false);                    
-                else
-                    adjWL();
-                end
-            else
-                if isMoveImageActivated('get') == true
-                    
-                    moveFusedImage(false);
-                else
-                    if size(dicomBuffer('get'), 3) ~= 1
-                        triangulateImages();  
+    if is2DBrush('get') == false
+    
+        if strcmpi(windowButton('get'), 'down')
+            if switchTo3DMode('get')     == false && ...
+               switchToIsoSurface('get') == false && ...
+               switchToMIPMode('get')    == false
+    
+                if strcmp(get(fiMainWindowPtr('get'),'selectiontype'),'alt')
+                    if isMoveImageActivated('get') == true
+                        rotateFusedImage(false);                    
                     else
-                        refreshImages();
+                        adjWL();
+                    end
+                else
+                    if isMoveImageActivated('get') == true
+                        
+                        moveFusedImage(false);
+                    else
+                        if size(dicomBuffer('get'), 3) ~= 1
+                            triangulateImages();  
+                        else
+                            refreshImages();
+                        end
                     end
                 end
+            else            
+                updateObjet3DPosition();      
             end
-        else            
-            updateObjet3DPosition();      
-        end
-    end    
+                
+        end    
+    else
+        if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt') && strcmpi(windowButton('get'), 'down') 
+
+            if isMoveImageActivated('get') == false   
+
+                rightClickMenu('off');
     
+                pRoiPtr = brush2Dptr('get');
+                if ~isempty(pRoiPtr) 
+                    adjBrush2D(pRoiPtr);
+                end
+            end
+        else
+
+            pRoiPtr = brush2Dptr('get');
+            if ~isempty(pRoiPtr)    
+
+                mousePos         = get(gca, 'CurrentPoint');
+                newPosition      = mousePos(1, 1:2);
+                pRoiPtr.Position = newPosition;
+        
+                if strcmpi(windowButton('get'), 'down') 
+                    if ~isempty(roiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
+                        acPtrList = currentRoiPointer('get');
+                        for jj=1:numel(acPtrList)
+                            if isvalid(acPtrList{jj}.Object)
+                                brushRoi2D(pRoiPtr, acPtrList{jj}.Object, acPtrList{jj}.xSize, acPtrList{jj}.ySize, acPtrList{jj}.VoiOffset, acPtrList{jj}.LesionType);
+                            end
+                        end
+                    else
+                        releaseRoiWait();
+                        roiSetAxeBorder(false);
+                        setCrossVisibility(true);
+                    end
+          %          brushRoi2D(a{3}.Object, a{2}.Object);
+                end
+            end
+        end
+    end
+
+
 end  

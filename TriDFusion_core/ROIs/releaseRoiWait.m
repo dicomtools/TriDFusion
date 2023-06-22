@@ -33,4 +33,27 @@ function releaseRoiWait()
     uiresume(fiMainWindowPtr('get'));
     robotReleaseKey();
     
+    if is2DBrush('get') == true
+
+        pRoiToolbar = roiMenuObject('get');
+        for jj=1:numel(pRoiToolbar.Children)
+            set(pRoiToolbar.Children, 'Enable', 'on');
+            set(pRoiToolbar.Children, 'State', 'off');
+        end
+
+        is2DBrush('set', false);
+ %       setCrossVisibility(true);
+
+        pRoiPtr = brush2Dptr('get');
+
+        if ~isempty(pRoiPtr)
+            delete(pRoiPtr);
+            brush2Dptr('set', []);        
+
+            roiSetAxeBorder(false);
+            setCrossVisibility(true);
+        end
+        
+    end
+
 end

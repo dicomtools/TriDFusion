@@ -40,5 +40,7 @@ function sliderCorCallback(~, ~)
         sliceNumber('set', 'coronal', iSliceNumber); 
         
         refreshImages();
+        
+        drawnow;
     end
 end

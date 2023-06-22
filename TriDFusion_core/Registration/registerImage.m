@@ -43,7 +43,8 @@ function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = regi
     end
     
     if bRefOutputView == false && bDemons == false  
-        [imReference, atReferenceMetaData] = resample3DImage(imReference, atReferenceMetaData, imToRegister, atImToRegisterMetaData, 'Nearest');
+        [imReference, atReferenceMetaData] = ...
+            resampleImage(imReference, atReferenceMetaData, imToRegister, atImToRegisterMetaData, 'Nearest', true, false);
     end
     
     fixedSliceThickness = computeSliceSpacing(atReferenceMetaData);

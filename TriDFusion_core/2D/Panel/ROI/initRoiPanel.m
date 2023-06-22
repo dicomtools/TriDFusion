@@ -569,6 +569,8 @@ function initRoiPanel()
             set(uiNextVoiRoiPanel, 'Enable', 'off');
             set(uiDelVoiRoiPanel , 'Enable', 'off');
 
+            setCrossVisibility(false);                    
+
             set(fiMainWindowPtr('get'), 'Pointer', 'watch');
             drawnow;
 
@@ -594,6 +596,8 @@ function initRoiPanel()
                 progressBar(1, 'Error:setVoiSeriesOffsetRoiPanelCallback()');
             end
 
+            setCrossVisibility(true);                    
+
             set(uiDeleteVoiRoiPanel     , 'Enable', 'on');
             set(uiLesionTypeVoiRoiPanel , 'Enable', 'on');
 
@@ -616,7 +620,7 @@ function initRoiPanel()
         
         dSerieOffset = get(uiSeriesPtr('get'), 'Value');
                 
-        aBuffer = dicomBuffer('get');
+        aBuffer = dicomBuffer('get', [], dSerieOffset);
         
         dVoiOffset = get(uiDeleteVoiRoiPanel, 'Value');
                 
@@ -638,9 +642,15 @@ function initRoiPanel()
         mouseFcn('reset');
         
         sRoiTag = num2str(randi([-(2^52/2),(2^52/2)],1));
-                
-        pRoi = drawpolygon(pAxe, 'Color', atVoiInput{dVoiOffset}.Color, 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', sRoiTag, 'FaceSelectable', 1, 'FaceAlpha', roiFaceAlphaValue('get'));
-        
+       
+        pRoi = drawfreehand(pAxe, 'Color', atVoiInput{dVoiOffset}.Color, 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', sRoiTag, 'FaceSelectable', 1, 'FaceAlpha', 0);
+        pRoi.FaceAlpha = roiFaceAlphaValue('get');
+
+        if is2DBrush('get') == true    
+            pRoi.Waypoints(:) = false;
+            pRoi.InteractionsAllowed = 'none';              
+        end
+
         % Add ROI right click menu
 
         addRoi(pRoi, dSerieOffset, atVoiInput{dVoiOffset}.LesionType);
@@ -656,17 +666,20 @@ function initRoiPanel()
 
         voiMenu(pRoi);
 
-        uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+        uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData', pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
         
         % Restore axe & viewer
                         
         windowButton('set', 'up');
         mouseFcn('set');
         mainToolBarEnable('on');
-        
-        roiSetAxeBorder(false, pAxe);
-       
-        setCrossVisibility(true);
+
+        if is2DBrush('get') == false
+ 
+            roiSetAxeBorder(false, pAxe);
+           
+            setCrossVisibility(true);
+        end
 
         % Add ROI to VOI
         
@@ -727,6 +740,8 @@ function initRoiPanel()
             set(uiNextVoiRoiPanel, 'Enable', 'off');
             set(uiDelVoiRoiPanel , 'Enable', 'off');
 
+            setCrossVisibility(false);                    
+
             set(fiMainWindowPtr('get'), 'Pointer', 'watch');
             drawnow;
             
@@ -747,22 +762,42 @@ function initRoiPanel()
 
             triangulateRoi(sRoiTag);
 
-            bViewAxeBorder = false;       
-            if dVoiOffset == 1 && dNbVOIs > 1
-                bViewAxeBorder = true;       
-            end
-    
-            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
-                set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
-                set(uiOneWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+            if is2DBrush('get') == false
+
+                bViewAxeBorder = false;       
+                if dVoiOffset == 1 && dNbVOIs > 1
+                    bViewAxeBorder = true;       
+                end
+        
+                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
+                    set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
+                    set(uiOneWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+                else
+                    set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
+                    set(uiTraWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+                end
             else
-                set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
-                set(uiTraWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+                if dVoiOffset == 1 && dNbVOIs > 1
+                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
+                        set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
+                    else
+                        set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
+                    end  
+                else
+                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
+                        set(uiOneWindowPtr('get'), 'HighlightColor', [1 0 0]);
+                    else
+                        set(uiTraWindowPtr('get'), 'HighlightColor', [1 0 0]);
+                    end                      
+                end
+
             end
 
             catch
                 progressBar(1, 'Error:previousVoiRoiPanelCallback()');
             end
+
+            setCrossVisibility(true);                    
 
             set(uiDeleteVoiRoiPanel     , 'Enable', 'on');
             set(uiLesionTypeVoiRoiPanel , 'Enable', 'on');
@@ -795,6 +830,8 @@ function initRoiPanel()
             set(uiNextVoiRoiPanel, 'Enable', 'off');
             set(uiDelVoiRoiPanel , 'Enable', 'off');
 
+            setCrossVisibility(false);                    
+
             set(fiMainWindowPtr('get'), 'Pointer', 'watch');
             drawnow;
 
@@ -813,23 +850,44 @@ function initRoiPanel()
             sRoiTag = getLargestArea(atVoiInput{dVoiOffset}.RoisTag);
 
             triangulateRoi(sRoiTag);
-            
-            bViewAxeBorder = false;       
-            if dVoiOffset == 1 && dNbVOIs > 1
-                bViewAxeBorder = true;       
+
+            if is2DBrush('get') == false
+        
+                bViewAxeBorder = false;       
+                if dVoiOffset == 1 && dNbVOIs > 1
+                    bViewAxeBorder = true;       
+                end
+    
+                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
+                    set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
+                    set(uiOneWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+                else
+                    set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
+                    set(uiTraWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+                end
+            else
+                if dVoiOffset == 1 && dNbVOIs > 1
+                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
+                        set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
+                    else
+                        set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
+                    end  
+                else
+                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
+                        set(uiOneWindowPtr('get'), 'HighlightColor', [1 0 0]);
+                    else
+                        set(uiTraWindowPtr('get'), 'HighlightColor', [1 0 0]);
+                    end                      
+                end
+       
             end
 
-            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
-                set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
-                set(uiOneWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
-            else
-                set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
-                set(uiTraWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
-            end
 
             catch
                 progressBar(1, 'Error:nextVoiRoiPanelCallback()');
             end
+
+            setCrossVisibility(true);                    
 
             set(uiDeleteVoiRoiPanel     , 'Enable', 'on');
             set(uiLesionTypeVoiRoiPanel , 'Enable', 'on');
@@ -863,6 +921,8 @@ function initRoiPanel()
             set(uiPrevVoiRoiPanel, 'Enable', 'off');
             set(uiNextVoiRoiPanel, 'Enable', 'off');
             set(uiDelVoiRoiPanel , 'Enable', 'off');
+
+            setCrossVisibility(false);                    
 
             set(fiMainWindowPtr('get'), 'Pointer', 'watch');
             drawnow;
@@ -950,14 +1010,19 @@ function initRoiPanel()
                 dVoiOffset = 1;
 
                 if dNbVOIs ~= 0
-             
-                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
-                        set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
-                        set(uiOneWindowPtr('get'), 'BorderWidth'   , true);
-                    else
-                        set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
-                        set(uiTraWindowPtr('get'), 'BorderWidth'   , true);
-                    end
+                    
+%                    if is2DBrush('get') == false
+
+                        if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
+                            set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
+                            set(uiOneWindowPtr('get'), 'BorderWidth'   , true);
+                        else
+                            set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
+                            set(uiTraWindowPtr('get'), 'BorderWidth'   , true);
+                        end
+                      
+                        setCrossVisibility(true);                    
+%                    end
      %               warndlg('Warning: End of list, returning to first contour', 'Contour list');
                 end
             end
@@ -974,25 +1039,34 @@ function initRoiPanel()
                 set(uiLesionTypeVoiRoiPanel, 'String', ' ');                   
             end
 
-            setVoiRoiSegPopup();
-
             if dNbVOIs ~= 0
                 sRoiTag = getLargestArea(atVoiInput{dVoiOffset}.RoisTag);
 
                 triangulateRoi(sRoiTag);
+            else
+                if is2DBrush('get') == true
+                    releaseRoiWait();                
+                end
             end
-                
+
+            setVoiRoiSegPopup();
+           
+            setCrossVisibility(true);                    
+          
             catch
                 progressBar(1, 'Error:deleteVoiRoiPanelCallback()');                
             end
 
-            set(uiDeleteVoiRoiPanel     , 'Enable', 'on');
-            set(uiLesionTypeVoiRoiPanel , 'Enable', 'on');
+            if numel(atVoiInput)
 
-            set(uiAddVoiRoiPanel , 'Enable', 'on');
-            set(uiPrevVoiRoiPanel, 'Enable', 'on');
-            set(uiNextVoiRoiPanel, 'Enable', 'on');
-            set(uiDelVoiRoiPanel , 'Enable', 'on');
+                set(uiDeleteVoiRoiPanel     , 'Enable', 'on');
+                set(uiLesionTypeVoiRoiPanel , 'Enable', 'on');
+    
+                set(uiAddVoiRoiPanel , 'Enable', 'on');
+                set(uiPrevVoiRoiPanel, 'Enable', 'on');
+                set(uiNextVoiRoiPanel, 'Enable', 'on');
+                set(uiDelVoiRoiPanel , 'Enable', 'on');
+            end
 
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
             drawnow;
@@ -2188,6 +2262,10 @@ function initRoiPanel()
             dCtOffset        = get(uiSeriesCTRoiPanel, 'Value');
 
 %            set(uiCreateVoiRoiPanel, 'String', 'Cancel');
+
+            if is2DBrush('get') == true
+                releaseRoiWait();                  
+            end
 
             cancelCreateVoiRoiPanel('set', false);
 

@@ -361,7 +361,7 @@ function figRoiDialogCallback(hObject, ~)
             
             bDispayMenu = false;
             
-            aVoiRoiTag = voiRoiTag('get', get(uiSeriesPtr('get'), 'Value'));
+            aVoiRoiTag  = voiRoiTag('get', get(uiSeriesPtr('get'), 'Value'));
             atRoiInput  = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
 
             adOffset = get(lbVoiRoiWindow, 'Value');

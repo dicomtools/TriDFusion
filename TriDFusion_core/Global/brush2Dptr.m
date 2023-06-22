@@ -1,7 +1,10 @@
-function sliderSagCallback(~, ~)
-%function sliderSagCallback(~, ~)
-%Set Sagittal Slider.
+function pRoiPtr = brush2Dptr(sAction, pValue)
+%function pRoiPtr = brush2Dptr(sAction, pValue)
+%Get/Set Is 2D brush roi pointer.
 %See TriDFuison.doc (or pdf) for more information about options.
+%
+%Note: option settings must fit on one line and can contain one semicolon at most.
+%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
@@ -27,20 +30,12 @@ function sliderSagCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if get(uiSliderSagPtr('get'), 'Value') >= 0 && ...
-       get(uiSliderSagPtr('get'), 'Value') <= 1 && ...
-       strcmpi(windowButton('get'), 'up')  
+    persistent ppRoiPtr;        
 
-        if get(uiSliderSagPtr('get'), 'Value') == 0
-            iSliceNumber = 1;
-        else
-            iSliceNumber = round(get(uiSliderSagPtr('get'), 'Value') * size(dicomBuffer('get'), 2));
-        end
+    if strcmpi('set', sAction)
+        ppRoiPtr = pValue;
+    end
 
-        sliceNumber('set', 'sagittal', iSliceNumber); 
-        
-        refreshImages();
-        
-        drawnow;
-   end
-end    
+    pRoiPtr = ppRoiPtr;      
+
+end

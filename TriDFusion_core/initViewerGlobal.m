@@ -147,8 +147,10 @@ function initViewerGlobal()
     view3DPanel    ('set', false);
     viewSegPanel   ('set', false);
     viewKernelPanel('set', false);
-    viewRoiPanel('set', false);
+    viewRoiPanel   ('set', false);
 
+    is2DBrush('set', false);
+ 
     optionsPanelMenuObject   ('set', []);
     viewRoiObject            ('set', []);
     viewSegPanelMenuObject   ('set', []);

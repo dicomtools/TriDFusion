@@ -43,11 +43,11 @@ function triangulateRoi(sRoiTag)
        if ~isempty(tRoi)
           
             origInfo = getappdata(tRoi.Object.Parent, 'matlab_graphics_resetplotview');
+
             if isempty(origInfo)
                 bIsZoomed = false;
             elseif isequal(get(tRoi.Object.Parent,'XLim'), origInfo.XLim) && ...
-                isequal(get(tRoi.Object.Parent,'YLim'), origInfo.YLim) && ...
-                isequal(get(tRoi.Object.Parent,'ZLim'), origInfo.ZLim)
+                isequal(get(tRoi.Object.Parent,'YLim'), origInfo.YLim) 
                 bIsZoomed = false;
             else
                 bIsZoomed = true;

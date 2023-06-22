@@ -32,6 +32,8 @@ function clickDown(hObject, ~)
 
     set(fiMainWindowPtr('get'), 'UserData', 'down');
 
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
     if switchTo3DMode('get')     == false && ...
        switchToIsoSurface('get') == false && ...
        switchToMIPMode('get')    == false             
@@ -41,78 +43,226 @@ function clickDown(hObject, ~)
 %                uiresume(gcf);
     end
 
-    if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
+    if is2DBrush('get') == true
 
-        if switchTo3DMode('get')     == false && ...
-           switchToIsoSurface('get') == false && ...
-           switchToMIPMode('get')    == false          
+        setCrossVisibility(false);                    
 
-            windowButton('set', 'down');                         
-            if isMoveImageActivated('get') == true
-                
-                set(fiMainWindowPtr('get'), 'Pointer', 'circle');
-                
-                rotateFusedImage(true);
-            else
-                adjWL(get(0, 'PointerLocation'));
+        windowButton('set', 'down');                      
+
+        isAxe      = gca == axePtr  ('get', [], dSeriesOffset); 
+        isCoronal  = gca == axes1Ptr('get', [], dSeriesOffset); 
+        isSagittal = gca == axes2Ptr('get', [], dSeriesOffset);
+        isAxial    = gca == axes3Ptr('get', [], dSeriesOffset);
+
+        if isAxe
+            set(uiOneWindowPtr('get'), 'HighlightColor', [1 0 0]);
+        elseif isCoronal
+            set(uiCorWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
+        elseif isSagittal 
+            set(uiSagWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
+        elseif isAxial
+            set(uiTraWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
+        end  
+
+        if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
+
+            pRoiPtr = brush2Dptr('get'); % Adjust brush size
+            if ~isempty(pRoiPtr)    
+               adjBrush2D(pRoiPtr, get(0, 'PointerLocation'));
+            end            
+        else
+
+            atRoiInput = roiTemplate('get', dSeriesOffset);
+            atVoiInput = voiTemplate('get', dSeriesOffset);
+     
+            if ~isempty(atRoiInput)
+
+                acPtrList=[];
+
+                aImageSize = size(dicomBuffer('get', [], dSeriesOffset));
+          
+                if size(dicomBuffer('get', [], dSeriesOffset), 3) ==1
+                     for jj=1:numel(atRoiInput)
+
+                        currentRoi = atRoiInput{jj};
+                        
+                        if isvalid(currentRoi.Object)
+
+                            isAxe = strcmpi(currentRoi.Axe, 'Axe') && gca == axePtr('get', [], dSeriesOffset); 
+                            
+                            if isAxe
+                               if strcmpi(currentRoi.Object.Type, 'images.roi.freehand') || ...
+                                  strcmpi(currentRoi.Object.Type, 'images.roi.polygon')   
+
+                                    dVoiOffset  = [];
+                                    sLesionType = [];
+
+                                    if strcmpi(currentRoi.ObjectType, 'voi-roi')
+
+                                        for vo=1:numel(atVoiInput)
+                                            dTagOffset = find(contains(atVoiInput{vo}.RoisTag,{currentRoi.Tag}), 1);
+                                            if ~isempty(dTagOffset) % tag exist
+                                                dVoiOffset=vo;
+                                                sLesionType = atVoiInput{vo}.LesionType;
+                                                break;
+                                            end
+                                        end
+
+                                    end
+
+                                    t.VoiOffset = dVoiOffset;
+                                    t.LesionType = sLesionType;
+
+                                    t.xSize = aImageSize(1);
+                                    t.ySize = aImageSize(2);                                 
+
+                                    t.Object = currentRoi.Object;
+                                    t.Tag = currentRoi.Tag;
+                                    acPtrList{numel(acPtrList)+1} = t;
+                               end
+                            end
+                        end
+                     end
+                else
+                            
+                    for jj=1:numel(atRoiInput)
+
+                        currentRoi = atRoiInput{jj};
+                        
+                        if isvalid(currentRoi.Object)
+    
+                            iCoronal  = sliceNumber('get', 'coronal' );
+                            iSagittal = sliceNumber('get', 'sagittal');
+                            iAxial    = sliceNumber('get', 'axial'   );
+    
+                            isCoronal  = strcmpi(currentRoi.Axe, 'Axes1') && iCoronal  == currentRoi.SliceNb && gca == axes1Ptr('get', [], dSeriesOffset); 
+                            isSagittal = strcmpi(currentRoi.Axe, 'Axes2') && iSagittal == currentRoi.SliceNb && gca == axes2Ptr('get', [], dSeriesOffset);
+                            isAxial    = strcmpi(currentRoi.Axe, 'Axes3') && iAxial    == currentRoi.SliceNb && gca == axes3Ptr('get', [], dSeriesOffset);
+    
+                            if isCoronal || isSagittal || isAxial
+                                if strcmpi(currentRoi.Object.Type, 'images.roi.freehand') || ...
+                                   strcmpi(currentRoi.Object.Type, 'images.roi.polygon')  
+
+                                    sLesionType = [];
+                                    dVoiOffset  = [];
+
+                                    if strcmpi(currentRoi.ObjectType, 'voi-roi')
+
+                                        for vo=1:numel(atVoiInput)
+                                            dTagOffset = find(contains(atVoiInput{vo}.RoisTag,{ currentRoi.Tag}), 1);
+                                            if ~isempty(dTagOffset) % tag exist
+                                                dVoiOffset=vo;
+                                                sLesionType = atVoiInput{vo}.LesionType;
+                                                break;
+                                            end
+                                        end
+
+                                    end
+
+                                    t.VoiOffset = dVoiOffset;
+                                    t.LesionType = sLesionType;
+
+                                    if isCoronal
+                                        t.xSize = aImageSize(1);
+                                        t.ySize = aImageSize(3);
+                                    elseif isSagittal 
+                                        t.xSize = aImageSize(2);
+                                        t.ySize = aImageSize(3);                                        
+                                    else
+                                        t.xSize = aImageSize(1);
+                                        t.ySize = aImageSize(2);                                        
+                                    end
+
+                                    t.Object = currentRoi.Object;
+                                    t.Tag = currentRoi.Tag;
+                                    acPtrList{numel(acPtrList)+1} = t;
+                                end
+                            end
+    
+                        end                    
+                    end
+                end
+                currentRoiPointer('set', acPtrList);
             end
 
-        else
-            windowButton('set', 'down');                      
+            triangulateImages();  
         end
-
+        
     else
 
-        if size(dicomBuffer('get'), 3) ~= 1
-
+        if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
+    
             if switchTo3DMode('get')     == false && ...
                switchToIsoSurface('get') == false && ...
-               switchToMIPMode('get')    == false
-
-                windowButton('set', 'down');
+               switchToMIPMode('get')    == false          
+    
+                windowButton('set', 'down');                         
                 if isMoveImageActivated('get') == true
                     
-                    set(fiMainWindowPtr('get'), 'Pointer', 'fleur');
-     
-                    moveFusedImage(true);
+                    set(fiMainWindowPtr('get'), 'Pointer', 'circle');
+                    
+                    rotateFusedImage(true);
                 else
-                    triangulateImages();
+                    adjWL(get(0, 'PointerLocation'));
+                end
+    
+            else
+                windowButton('set', 'down');                      
+            end
+    
+        else
+    
+            if size(dicomBuffer('get'), 3) ~= 1
+    
+                if switchTo3DMode('get')     == false && ...
+                   switchToIsoSurface('get') == false && ...
+                   switchToMIPMode('get')    == false
+    
+                    windowButton('set', 'down');
+                    if isMoveImageActivated('get') == true
+                        
+                        set(fiMainWindowPtr('get'), 'Pointer', 'fleur');
+         
+                        moveFusedImage(true);
+                    else
+                        triangulateImages();
+                    end
+                else
+                    windowButton('set', 'down');  
                 end
             else
-                windowButton('set', 'down');  
-            end
-        else
-            if switchTo3DMode('get')     == false && ...
-               switchToIsoSurface('get') == false && ...
-               switchToMIPMode('get')    == false
-
-                windowButton('set', 'down');
-                if isMoveImageActivated('get') == true
-                    
-                    set(fiMainWindowPtr('get'), 'Pointer', 'fleur');
-     
-                    moveFusedImage(true);
-                else
-                    triangulateImages();
-                end
-                
-                clickedPt = get(gca, 'CurrentPoint');
-
-                clickedPtX = round(clickedPt(1  ));
-                clickedPtY = round(clickedPt(1,2));
-
-                if clickedPtX > 0 && ...
-                   clickedPtY > 0 && ...
-                   gca == axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    axeClicked('set', true);
-                    uiresume(fiMainWindowPtr('get'));                      
-                end
-
-                refreshImages();
-
-            end
-        end
-    end      
+                if switchTo3DMode('get')     == false && ...
+                   switchToIsoSurface('get') == false && ...
+                   switchToMIPMode('get')    == false
     
+                    windowButton('set', 'down');
+                    if isMoveImageActivated('get') == true
+                        
+                        set(fiMainWindowPtr('get'), 'Pointer', 'fleur');
+         
+                        moveFusedImage(true);
+                    else
+                        triangulateImages();
+                    end
+                    
+                    clickedPt = get(gca, 'CurrentPoint');
+    
+                    clickedPtX = round(clickedPt(1  ));
+                    clickedPtY = round(clickedPt(1,2));
+    
+                    if clickedPtX > 0 && ...
+                       clickedPtY > 0 && ...
+                        gca == axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        axeClicked('set', true);
+                        uiresume(fiMainWindowPtr('get'));                      
+                    end
+    
+                    refreshImages();
+    
+                end
+            end
+        end      
+    end
+   
 end 
 

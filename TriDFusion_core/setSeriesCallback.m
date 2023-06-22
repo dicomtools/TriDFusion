@@ -50,8 +50,7 @@ function setSeriesCallback(~,~)
         isoColorOffset        ('set', defaultIsoColorOffset('get') ); 
         isoSurfaceValue       ('set', defaultIsoSurfaceValue('get')); 
         isoColorFusionOffset  ('set', defaultIsoColorFusionOffset('get')); 
-        isoSurfaceFusionValue ('set', defaultIsoSurfaceFusionValue('get'));
-        
+        isoSurfaceFusionValue ('set', defaultIsoSurfaceFusionValue('get'));        
     
         if isFusion('get') == true % Deactivate fusion
             

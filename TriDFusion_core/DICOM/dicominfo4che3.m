@@ -171,7 +171,18 @@ function info = dicominfo4che3(fileInput)
             info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalCodeSequence.Item_1.CodingSchemeDesignator = '';
             info.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalCodeSequence.Item_1.CodeMeaning = '';
         end
-        
+    
+        % RotationInformationSequence
+
+        datasetRotationInformation = dataset.getNestedDataset(org.dcm4che3.data.Tag.RotationInformationSequence, 0);
+        if ~isempty(datasetRotationInformation)
+    
+            info.RotationInformationSequence.Item_1.RotationDirection = char(datasetRotationInformation.getString(org.dcm4che3.data.Tag.RotationDirection, 0));
+            info.RotationInformationSequence.Item_1.RadialPosition = datasetRotationInformation.getDoubles(org.dcm4che3.data.Tag.RadialPosition);
+        end
+
+        % Dose information
+
         % RadionuclideCodeSequence
         
         datasetRadionuclide = datasetDose.getNestedDataset(org.dcm4che3.data.Tag.RadionuclideCodeSequence, 0);
@@ -225,18 +236,70 @@ function info = dicominfo4che3(fileInput)
 %        info.din.pixeldata  = dataset.getInts(org.dcm4che3.data.Tag.PixelData);
 %    end
 
+    % DetectorInformationSequence
+
+    dInformationSequenceItem = 0;
+
     detectorInformationSequence = dataset.getNestedDataset(org.dcm4che3.data.Tag.DetectorInformationSequence, 0); % Item_1
-    if ~isempty(detectorInformationSequence) 
-        info.DetectorInformationSequence.Item_1.FieldOfViewShape      = char(detectorInformationSequence.getString(org.dcm4che3.data.Tag.FieldOfViewShape, 0));                                                                                                                                                                                
-        info.DetectorInformationSequence.Item_1.FieldOfViewDimensions = double(detectorInformationSequence.getInts(org.dcm4che3.data.Tag.FieldOfViewDimensions));             
+    while ~isempty(detectorInformationSequence)
+
+        dInformationSequenceItem = dInformationSequenceItem+1;
+        sInformationSequenceItem = sprintf('Item_%d', dInformationSequenceItem);
+
+        info.DetectorInformationSequence.(sInformationSequenceItem).StartAngle            = double(detectorInformationSequence.getDoubles(org.dcm4che3.data.Tag.StartAngle));                                                                                                                                                                                
+        info.DetectorInformationSequence.(sInformationSequenceItem).FieldOfViewShape      = char(detectorInformationSequence.getString(org.dcm4che3.data.Tag.FieldOfViewShape, 0));                                                                                                                                                                                
+        info.DetectorInformationSequence.(sInformationSequenceItem).FieldOfViewDimensions = double(detectorInformationSequence.getInts(org.dcm4che3.data.Tag.FieldOfViewDimensions));   
+
+        detectorInformationSequence = dataset.getNestedDataset(org.dcm4che3.data.Tag.DetectorInformationSequence, dInformationSequenceItem); % Item_X
+
+        if dInformationSequenceItem > 1000 % Protection
+            break;
+        end
     end
 
-    detectorInformationSequence = dataset.getNestedDataset(org.dcm4che3.data.Tag.DetectorInformationSequence, 1); % Item_2
-    if ~isempty(detectorInformationSequence) 
-        info.DetectorInformationSequence.Item_2.FieldOfViewShape      = char(detectorInformationSequence.getString(org.dcm4che3.data.Tag.FieldOfViewShape, 0));                                                                                                                                                                                
-        info.DetectorInformationSequence.Item_2.FieldOfViewDimensions = double(detectorInformationSequence.getInts(org.dcm4che3.data.Tag.FieldOfViewDimensions));               
+    % EnergyWindowRangeSequence
+
+    dEnergyWindowInformationSequenceItem = 0;
+
+    energyWindowInformationSequence = dataset.getNestedDataset(org.dcm4che3.data.Tag.EnergyWindowInformationSequence, 0); % Item_1
+    while ~isempty(energyWindowInformationSequence)
+
+        dEnergyWindowInformationSequenceItem = dEnergyWindowInformationSequenceItem+1;
+        sEnergyWindowInformationSequenceItem = sprintf('Item_%d', dEnergyWindowInformationSequenceItem);
+
+        dEnergyWindowRangeSequence = 0;
+
+        energyWindowRangeSequence = energyWindowInformationSequence.getNestedDataset(org.dcm4che3.data.Tag.EnergyWindowRangeSequence, 0);
+        while ~isempty(energyWindowRangeSequence)
+
+            dEnergyWindowRangeSequence = dEnergyWindowRangeSequence+1;
+            sEnergyWindowRangeSequence = sprintf('Item_%d', dEnergyWindowRangeSequence);
+
+            info.EnergyWindowInformationSequence.(sEnergyWindowInformationSequenceItem).EnergyWindowRangeSequence.(sEnergyWindowRangeSequence).EnergyWindowLowerLimit = ...
+                double(energyWindowRangeSequence.getDoubles(org.dcm4che3.data.Tag.EnergyWindowLowerLimit));
+
+            info.EnergyWindowInformationSequence.(sEnergyWindowInformationSequenceItem).EnergyWindowRangeSequence.(sEnergyWindowRangeSequence).EnergyWindowUpperLimit = ...
+                double(energyWindowRangeSequence.getDoubles(org.dcm4che3.data.Tag.EnergyWindowUpperLimit));        
+
+            energyWindowRangeSequence = energyWindowInformationSequence.getNestedDataset(org.dcm4che3.data.Tag.EnergyWindowRangeSequence, dEnergyWindowRangeSequence);
+
+            if dEnergyWindowRangeSequence > 1000 % Protection
+                break;
+            end
+        end
+
+        info.EnergyWindowInformationSequence.(sEnergyWindowInformationSequenceItem).EnergyWindowName = char(energyWindowInformationSequence.getString(org.dcm4che3.data.Tag.EnergyWindowName, 0));
+
+        energyWindowInformationSequence = dataset.getNestedDataset(org.dcm4che3.data.Tag.EnergyWindowInformationSequence, dEnergyWindowInformationSequenceItem); % Item_X
+
+         if dEnergyWindowInformationSequenceItem > 1000 % Protection
+            break;
+        end          
     end
-    
+
+
+     %    E3 = info.EnergyWindowInformationSequence.Item_3.EnergyWindowRangeSequence.Item_1;
+
 %    info.din.rows       = info.Rows;
 %    info.din.cols       = info.Columns;  
     

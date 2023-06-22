@@ -126,7 +126,7 @@ function resize = dicomViewer()
     multiplePeaksIsoMask  ('set', true);
     peakSUVMaxIsoMask     ('set', 4);  % In SUV
     peakPercentIsoMask    ('set', 65); % In percent
-    voiIsoMaskMax         ('set', 42); % In percent
+    voiIsoMaskMax         ('set', 41); % In percent
     smalestIsoMask        ('set', 0.3); % In ml
     valueFormulaIsoMask   ('set', 1); %Fixed suv value
     pixelEdgeIsoMask      ('set', true);
@@ -242,8 +242,9 @@ function resize = dicomViewer()
     updateDicomWriteSeriesInstanceUID('set', true);
     modifiedImagesContourMatrix('set', false);
        
-    sphereDefaultDiameter('set', 100); % in mm
-    
+    sphereDefaultDiameter ('set', 50); % in mm
+    brush2dDefaultDiameter('set', 30); % in mm  
+
     mipAngle('set', 1);
 
     rng('shuffle');
@@ -1169,7 +1170,7 @@ function resize = dicomViewer()
     end
 
     if(numel(dicomBuffer('get')))
-        
+
         % Deactivate main tool bar 
         set(uiSeriesPtr('get'), 'Enable', 'off');                        
         mainToolBarEnable('off');    

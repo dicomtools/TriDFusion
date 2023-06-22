@@ -47,11 +47,11 @@ function setCrossVisibility(bStatus)
 
             for ii3=1:numel(alAxes3Line)    
                 alAxes3Line{ii3}.Visible = bStatus;
-            end   
+            end 
+
+            refreshImages();
 
         end                
     end
-
-    refreshImages();
 
 end

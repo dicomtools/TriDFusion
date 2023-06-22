@@ -28,8 +28,9 @@ function clickUp(~, ~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
     windowButton('set', 'up'); 
+
     set(fiMainWindowPtr('get'), 'UserData', 'up');
-    
+
     if switchTo3DMode('get')      == true || ...
        switchToIsoSurface('get')  == true || ...
        switchToMIPMode('get')     == true
@@ -63,10 +64,38 @@ function clickUp(~, ~)
         if isMoveImageActivated('get') == true
             
             set(fiMainWindowPtr('get'), 'Pointer', 'fleur');
-            
-            
-            
-            
+        else
+
+            if is2DBrush('{}get') == true
+
+                atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
+                acPtrList = currentRoiPointer('get'); 
+                for jj=1:numel(acPtrList) % Need to set ROI template new position
+                    if isvalid(acPtrList{jj}.Object)
+                        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), acPtrList{jj}.Tag );
+                        dTagOffset = find(aTagOffset, 1);
+                        if ~isempty(dTagOffset)
+                            atRoiInput{dTagOffset}.Position = acPtrList{jj}.Object.Position;
+                        end
+             %           editorRoiMoving(pRoiPtr, acPtrList{jj}.Object);
+                    end
+                end                
+
+                roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+
+                pRoiPtr = brush2Dptr('get');
+                if ~isempty(pRoiPtr)
+                    mousePos = get(gca, 'CurrentPoint');
+                    newPosition = mousePos(1, 1:2);
+                    
+                    pRoiPtr.Position = newPosition;
+                end
+            else
+                if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
+                    adjWL(get(0, 'PointerLocation'));                
+                end
+            end
 
         end
         

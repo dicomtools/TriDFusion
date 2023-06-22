@@ -68,8 +68,8 @@ function setRoiToolbar(sVisible)
         t.ClickedCallback = @drawfreehandCallback;
 
 %            img = zeros(16,16,3);
-        [img,~] = imread(sprintf('%s//assisted.png', sIconsPath));
-        img = double(img)/255;
+  %      [img,~] = imread(sprintf('%s//assisted.png', sIconsPath));
+  %      img = double(img)/255;
 
   %      t7 = uitoggletool(tbRoi,'CData',img,'TooltipString','Draw Assisted');
   %      t7.ClickedCallback = @drawassistedCallback;
@@ -116,10 +116,16 @@ function setRoiToolbar(sVisible)
         tContinuous = uitoggletool(tbRoi,'CData',img,'TooltipString','Continuous', 'Separator', 'on');
         tContinuous.ClickedCallback = @setContinuousCallback;
 
+        [img,~] = imread(sprintf('%s//brush.png', sIconsPath));
+        img = double(img)/255;
+
+        t2Dbrush = uitoggletool(tbRoi,'CData',img,'TooltipString','2D Brush', 'Separator', 'on');
+        t2Dbrush.ClickedCallback = @set2DBrushCallback;
+
         [img,~] = imread(sprintf('%s//result.png', sIconsPath));
         img = double(img)/255;
 
-        t10 = uitoggletool(tbRoi,'CData',img,'TooltipString','Result', 'Tag', 'toolbar');
+        t10 = uitoggletool(tbRoi,'CData',img,'TooltipString','Result', 'Tag', 'toolbar', 'Separator', 'on');
         t10.ClickedCallback = @figRoiDialogCallback;
 
 
@@ -381,7 +387,8 @@ function setRoiToolbar(sVisible)
                                 'FaceSelectable', 1, ...
                                 'FaceAlpha'     , 0 ...
                                 );
-                            
+                a.FaceAlpha = roiFaceAlphaValue('get');
+       
   %                  a.Waypoints(:) = false;
 %test hf=a;
                     if ~isvalid(t)
@@ -521,6 +528,7 @@ function setRoiToolbar(sVisible)
                                'FaceSelectable', 1, ...
                                'FaceAlpha'     , 0 ...
                                );
+                a.FaceAlpha = roiFaceAlphaValue('get');
 
                 if ~isvalid(t2)
                     return;
@@ -691,7 +699,8 @@ function setRoiToolbar(sVisible)
                                     'FaceSelectable', 1, ...
                                     'FaceAlpha'     , 0 ...
                                     );
-                                
+                    a.FaceAlpha = roiFaceAlphaValue('get');
+                               
                     if ~isvalid(t5)
                         return;
                     end
@@ -826,6 +835,8 @@ function setRoiToolbar(sVisible)
                                   'FaceSelectable', 1, ...
                                   'FaceAlpha'     , 0 ...
                                   );
+                a.FaceAlpha = roiFaceAlphaValue('get');
+
                 if ~isvalid(t3)
                     return;
                 end
@@ -960,6 +971,7 @@ function setRoiToolbar(sVisible)
                                 'FaceSelectable', 1, ...
                                 'FaceAlpha'     , 0 ...
                                 );
+                a.FaceAlpha = roiFaceAlphaValue('get');
 
                 if ~isvalid(t6)
                     return;
@@ -1132,7 +1144,8 @@ function setRoiToolbar(sVisible)
                                    'UserData'        , 'Sphere', ...
                                    'Visible'         , 'on' ...
                                    );
-                               
+             a.FaceAlpha = roiFaceAlphaValue('get');
+                              
              asTag{1} = sTag;
                         
             if ~isvalid(t11)
@@ -1284,10 +1297,10 @@ function setRoiToolbar(sVisible)
                     dSemiAxesX = maxDistance/2;
                     dSemiAxesY = maxDistance/2*dPixelRatio;
                     
-                    sliceNumber('set', sPlane, zz);                
-                    
+                    sliceNumber('set', sPlane, zz);  
+
                     sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
-                    
+                                     
                     a = images.roi.Ellipse(gca, ...
                                            'Center'             , [clickedPtX clickedPtY], ...
                                            'SemiAxes'           , [dSemiAxesX dSemiAxesY], ...
@@ -1303,12 +1316,15 @@ function setRoiToolbar(sVisible)
                                            'Tag'                , sTag, ...
                                            'FaceSelectable'     , 1, ...
                                            'FaceAlpha'          , 0, ...
-                                           'Visible'            , 'off' ...
+                                           'Visible'            , 'off', ...
+                                           'UserData'           , 'SphereROI' ...
                                            );
+                    a.FaceAlpha = roiFaceAlphaValue('get');
 
                     addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
-                    
+
                     asTag{numel(asTag)+1} = sTag;
+                    
                 end
             end
             
@@ -1366,6 +1382,148 @@ function setRoiToolbar(sVisible)
         end
     end
 
+    function draw2DbrushCallback(~,~)
+                
+        robotReleaseKey();
+
+        if strcmpi(get(t2Dbrush, 'State'), 'off')
+  %          robotReleaseKey();
+
+            set(t2Dbrush, 'State', 'off');
+%            roiSetAxeBorder(false);
+
+            windowButton('set', 'up');
+            mouseFcn('set');
+            mainToolBarEnable('on');
+            setCrossVisibility(true);
+
+            return;
+        end
+
+
+%             robotReleaseKey();
+
+        setCrossVisibility(false);
+
+        triangulateCallback();
+
+        axeClicked('set', false);
+        
+        uiwait(fiMainWindowPtr('get'));
+
+        if ~isvalid(t2Dbrush)
+            return;
+        end
+
+        if strcmpi(get(t2Dbrush, 'State'), 'off')
+            return;
+        end
+
+%               w = waitforbuttonpress;
+
+%            if w == 0
+        if  strcmpi(windowButton('get'), 'down')
+
+    %        robotClick();
+
+            mainToolBarEnable('off');
+            mouseFcn('reset');
+
+     %       roiSetAxeBorder(true, gca);
+
+        %    while strcmpi(get(t11, 'State'), 'on')
+        
+            clickedPt = get(gca,'CurrentPoint');
+            clickedPtX = clickedPt(1,1);
+            clickedPtY = clickedPt(1,2);
+            
+            atMetaData = dicomMetaData('get');
+            dSliceThickness = computeSliceSpacing(atMetaData);
+            
+            switch(gca)
+                
+                case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) % Coronal                    
+                    xPixel = atMetaData{1}.PixelSpacing(1);
+                    yPixel = dSliceThickness;                                       
+                    
+                case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) % Sagittal
+                    xPixel = atMetaData{1}.PixelSpacing(2);
+                    yPixel = dSliceThickness;
+                    
+                otherwise % Axial
+                    xPixel = atMetaData{1}.PixelSpacing(1);
+                    yPixel = atMetaData{1}.PixelSpacing(2);
+            end
+            
+            dSphereDiameter = brush2dDefaultDiameter('get'); % in mm
+            
+            if xPixel == 0
+                xPixel = 1;
+            end
+            
+            if yPixel == 0
+                yPixel = 1;
+            end
+            
+            if dSphereDiameter > 0
+                dSemiAxesX = dSphereDiameter/xPixel/2; % In pixel
+                dSemiAxesY = dSphereDiameter/yPixel/2; % In pixel
+            else
+                dSemiAxesX = xPixel/2;
+                dSemiAxesY = yPixel/2;                
+            end
+                        
+            pRoiPtr  = images.roi.Ellipse(gca, ...
+                                          'Center'             , [clickedPtX clickedPtY], ...
+                                          'SemiAxes'           , [dSemiAxesX dSemiAxesY], ...
+                                          'RotationAngle'      , 0, ...
+                                          'Deletable'          , 0, ...
+                                          'FixedAspectRatio'   , 1, ...
+                                          'StripeColor'        , 'k', ...
+                                          'Color'              , 'red', ...
+                                          'lineWidth'          , 1, ...
+                                          'Label'              , '2Dbrush', ...
+                                          'LabelVisible'       , 'off', ...
+                                          'InteractionsAllowed', 'none', ...
+                                          'FaceSelectable'     , 0, ...
+                                          'FaceAlpha'          , 0.03, ...
+                                          'UserData'           , '2Dbrush', ...
+                                          'Visible'            , 'on' ...
+                                          );
+                         
+            brush2Dptr('set', pRoiPtr);
+
+            if ~isvalid(t2Dbrush)
+                return;
+            end
+            
+            if strcmpi(get(t2Dbrush, 'State'), 'off')
+                
+                roiSetAxeBorder(false);
+
+%                            windowButton('set', 'up');
+%                            mouseFcn('set');
+%                            mainToolBarEnable('on');
+%                            setCrossVisibility(1);
+
+                return;
+            end
+
+     %       refreshImages();
+         %   end
+
+  %          roiSetAxeBorder(false);
+
+            windowButton('set', 'up');
+            mouseFcn('set');
+            mainToolBarEnable('on');
+            
+
+        end
+        
+        
+    end
+
     function setContinuousCallback(~, ~)
 
         axeClicked('set', true);
@@ -1383,4 +1541,123 @@ function setRoiToolbar(sVisible)
 
     end
 
+    function set2DBrushCallback(hObject, ~)   
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        if switchTo3DMode('get')     == true || ...
+           switchToIsoSurface('get') == true || ...
+           switchToMIPMode('get')    == true || ...
+           isVsplash('get')          == true       
+           set(hObject, 'State', 'off');
+           return;
+        end
+
+        try
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+
+        axeClicked('set', true);
+        uiresume(fiMainWindowPtr('get'));
+
+        set(t  , 'State', 'off');
+        set(t2 , 'State', 'off');
+        set(t3 , 'State', 'off');
+        set(t5 , 'State', 'off');
+        set(t6 , 'State', 'off');
+        set(t8 , 'State', 'off');
+        set(t11, 'State', 'off');
+
+        if is2DBrush('get') == false
+
+            is2DBrush('set', true);
+
+            setCrossVisibility(false);
+
+            set(t  , 'Enable', 'off');
+            set(t2 , 'Enable', 'off');
+            set(t3 , 'Enable', 'off');
+            set(t5 , 'Enable', 'off');
+            set(t6 , 'Enable', 'off');
+            set(t8 , 'Enable', 'off');
+            set(t11, 'Enable', 'off');     
+
+            atRoiInput = roiTemplate('get', dSeriesOffset);
+
+            if ~isempty(atRoiInput)
+                for rr=1:numel(atRoiInput)
+                    set(atRoiInput{rr}.Object, 'InteractionsAllowed', 'none');
+                end
+            end
+
+            draw2DbrushCallback();
+            
+            roiSetAxeBorder(true, gca);
+    
+            isAxe      = gca == axePtr  ('get', [], dSeriesOffset); 
+            isCoronal  = gca == axes1Ptr('get', [], dSeriesOffset); 
+            isSagittal = gca == axes2Ptr('get', [], dSeriesOffset);
+            isAxial    = gca == axes3Ptr('get', [], dSeriesOffset);
+
+            if isAxe
+                set(uiOneWindowPtr('get'), 'HighlightColor', [1 0 0]);
+            elseif isCoronal
+                set(uiCorWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
+            elseif isSagittal 
+                set(uiSagWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
+            elseif isAxial
+                set(uiTraWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
+            end          
+
+        else
+            is2DBrush('set', false);
+
+            pRoiPtr = brush2Dptr('get');
+
+            if ~isempty(pRoiPtr)
+                delete(pRoiPtr);
+                brush2Dptr('set', []);
+            end
+
+            atRoiInput = roiTemplate('get', dSeriesOffset);
+
+            if ~isempty(atRoiInput)
+                for rr=1:numel(atRoiInput)
+                    if ~strcmpi(get(atRoiInput{rr}.Object, 'UserData'), 'SphereROI')
+
+                        set(atRoiInput{rr}.Object, 'InteractionsAllowed', 'all');
+
+                        if strcmpi(atRoiInput{rr}.Object.Type, 'images.roi.freehand') || ...
+                           strcmpi(atRoiInput{rr}.Object.Type, 'images.roi.assistedfreehand')                    
+                            atRoiInput{rr}.Object.Waypoints(:) = false;
+                            atRoiInput{rr}.Waypoints = atRoiInput{rr}.Object.Waypoints;
+                        end
+
+                    end
+                end
+            end
+
+            roiTemplate('set', dSeriesOffset, atRoiInput);
+
+            roiSetAxeBorder(false);
+
+            setCrossVisibility(true);
+
+            set(t  , 'Enable', 'on');
+            set(t2 , 'Enable', 'on');
+            set(t3 , 'Enable', 'on');
+            set(t5 , 'Enable', 'on');
+            set(t6 , 'Enable', 'on');
+            set(t8 , 'Enable', 'on');
+            set(t11, 'Enable', 'on');         
+        end
+
+        catch
+            progressBar(1, 'Error:set2DBrushCallback()');
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;
+    end
 end

@@ -40,5 +40,7 @@ function sliderTraCallback(~, ~)
         sliceNumber('set', 'axial', iSliceNumber);    
 
         refreshImages();
+        
+        drawnow;
     end
 end
