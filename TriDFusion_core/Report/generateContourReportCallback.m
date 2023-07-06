@@ -640,7 +640,7 @@ function generateContourReportCallback(~, ~)
             end
 
             if isvalid(uiReportFDContourInformation) % Make sure the figure is still open    
-                set(uiReportFDContourInformation, 'String', sprintf('Contours farthest distance (FD): %s (mm)',  num2str(gdFarthestDistance))); 
+                set(uiReportFDContourInformation, 'String', sprintf('Maximal distance between contours (Dmax): %s (mm)',  num2str(gdFarthestDistance))); 
             end
            
             if isvalid(uiReportLesionNbContour) % Make sure the figure is still open        

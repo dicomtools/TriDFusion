@@ -960,14 +960,14 @@ function refreshImages()
             alAxesMipLine{3}.XData = [0, xOffset(1) - crossSize('get')];
             alAxesMipLine{3}.YData = [iAxial, iAxial];
             
-            alAxesMipLine{4}.XData = [xOffset(1) + crossSize('get'), iCoronalSize];
+            alAxesMipLine{4}.XData = [xOffset(1) + crossSize('get'), iSagittalSize];
             alAxesMipLine{4}.YData = [iAxial, iAxial];
             
             alAxesMipLine{5}.XData = [xOffset(1), xOffset(1)];
             alAxesMipLine{5}.YData = [0, iAxial - crossSize('get')];
             
             alAxesMipLine{6}.XData = [xOffset(1), xOffset(1)];
-            alAxesMipLine{6}.YData = [iAxial + crossSize('get'), iAxialSize];
+            alAxesMipLine{6}.YData = [iAxial + crossSize('get'), iAxialSize];      
         
         end
 

@@ -57,6 +57,7 @@ try
     aPosition = zeros(numel(aSmoothedX), 2);
     aPosition(:,1) = aSmoothedX(:);
     aPosition(:,2) = aSmoothedY(:);
+
 catch
 end
 

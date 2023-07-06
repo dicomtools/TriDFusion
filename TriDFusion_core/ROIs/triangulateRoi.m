@@ -37,11 +37,12 @@ function triangulateRoi(sRoiTag)
 
     if size(im, 3) ~= 1 % 3D
    
-       aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), sRoiTag );                
-       tRoi = atRoiInput{find(aTagOffset, 1)};
+       aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), sRoiTag ); 
+       dTagOffset = find(aTagOffset, 1);
                        
-       if ~isempty(tRoi)
-          
+       if ~isempty(dTagOffset)
+            tRoi = atRoiInput{dTagOffset};
+
             origInfo = getappdata(tRoi.Object.Parent, 'matlab_graphics_resetplotview');
 
             if isempty(origInfo)

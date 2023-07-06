@@ -34,7 +34,11 @@ function sliderCorCallback(~, ~)
         if get(uiSliderCorPtr('get'), 'Value') == 0
             iSliceNumber = 1;
         else
-            iSliceNumber = round(get(uiSliderCorPtr('get'), 'Value') * size(dicomBuffer('get'), 1));
+            iSliceNumber = round(get(uiSliderCorPtr('get'), 'Value') * size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1));
+        end
+
+        if iSliceNumber < 0
+            iSliceNumber = 1;
         end
 
         sliceNumber('set', 'coronal', iSliceNumber); 

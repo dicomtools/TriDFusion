@@ -1,6 +1,6 @@
-function bPixelEdge = pixelEdgeIsoMask(sAction, bValue)
-%function bPixelEdge = pixelEdgeIsoMask(sAction, bValue)
-%Get\Set pixel edge 3D iso mask value.
+function aObject = chkPixelEdgePtr(sAction, aValue)
+%function aObject = chkPixelEdgePtr(sAction, aValue)
+%Get\Set pixel edge contour panel check box pointer.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.
@@ -30,11 +30,11 @@ function bPixelEdge = pixelEdgeIsoMask(sAction, bValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-     persistent pbPixelEdge; 
+    persistent paObject; 
 
     if strcmpi('set', sAction)
-        pbPixelEdge = bValue;            
-    end      
+       paObject = aValue;            
+    end     
     
-    bPixelEdge = pbPixelEdge;
+    aObject = paObject;
 end

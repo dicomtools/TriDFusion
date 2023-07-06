@@ -488,6 +488,7 @@ end
                     alpha( axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
                     alpha( axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
                     if link2DMip('get') == true  && isVsplash('get') == false                                        
+                        set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
                         alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
                     end  
                     
@@ -496,7 +497,8 @@ end
                         alpha( axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
                         alpha( axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
                         if link2DMip('get') == true  && isVsplash('get') == false                                        
-                            alpha( axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
+                           set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
+                           alpha( axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
                         end                        
                     end
                 end
@@ -523,6 +525,7 @@ end
                         alpha( axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
                         alpha( axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
                         if link2DMip('get') == true  && isVsplash('get') == false                                        
+                            set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
                             alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
                         end 
                                                 
@@ -550,7 +553,8 @@ end
                             alpha( axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
                             alpha( axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
                             if link2DMip('get') == true  && isVsplash('get') == false                                        
-                                alpha( axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
+                            set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
+                            alpha( axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
                             end                        
                         end                        
                    end   
@@ -571,6 +575,7 @@ end
 
             setFusionColorbarLabel();
 
+                
             refreshImages();   
 
         end

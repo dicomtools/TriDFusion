@@ -55,7 +55,6 @@ function [resampImage, atDcmMetaData, xMoveOffset, yMoveOffset] = resampleImageT
             [resampImage, ~] = imwarp(dcmImage, TF, 'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef));  
         else
             [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
-                   
         end
 %        if dimsRef(3)==dimsDcm(3)
 %            aResampledImageSize = size(resampImage);

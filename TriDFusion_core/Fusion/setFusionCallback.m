@@ -643,7 +643,7 @@ end
                     set(tAxes3fText, 'Visible', 'off');
                 end
         
-                if link2DMip('get') == true && isVsplash('get') == false         
+                if isVsplash('get') == false         
                     if ~isempty(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')))
                         if isvalid(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')))
 %                            cla(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),'reset');
@@ -776,7 +776,7 @@ end
 
                 fusionBuffer('set', B, dFusionSeriesOffset);  
                 
-                if link2DMip('get') == true && isVsplash('get') == false      
+                if isVsplash('get') == false      
                     mipFusionBufferOffset('set', dFusionSeriesOffset);
                     mipFusionBuffer('set', aResampledMip, dFusionSeriesOffset);               
                 end
@@ -1007,9 +1007,7 @@ end
                 
                 % Set Mip
                 
-                if link2DMip('get') == true && ...
-                   isVsplash('get') == false         
-
+                if isVsplash('get') == false 
 
                     imComputedMipF = mipFusionBuffer('get', [], dFusionSeriesOffset);                                  
 
@@ -1083,7 +1081,7 @@ end
                     daspect(axes1fPtr  ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
                     daspect(axes2fPtr  ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
                     daspect(axes3fPtr  ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf zf]);
-                    if isVsplash('get') == false && link2DMip('get') == true
+                    if isVsplash('get') == false
                         daspect(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
                     end
 
@@ -1219,7 +1217,7 @@ end
                 set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);
                 set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);
                 set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);
-                if  link2DMip('get') == true && isVsplash('get') == false      
+                if  isVsplash('get') == false      
                     set(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);
                 end
             end
@@ -1233,7 +1231,7 @@ end
                 set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lFusionMin lFusionMax]);
                 set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lFusionMin lFusionMax]);
                 set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lFusionMin lFusionMax]);
-                if  link2DMip('get') == true && isVsplash('get') == false      
+                if isVsplash('get') == false      
                     set(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lFusionMin lFusionMax]);
                 end
             end
@@ -1458,7 +1456,7 @@ end
                 colormap(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
                 colormap(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));  
                 
-                if link2DMip('get') == true && isVsplash('get') == false      
+                if isVsplash('get') == false      
                     colormap(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));                 
                 end
             end
@@ -1927,7 +1925,7 @@ end
 
                 linkaxes([axes3 axes3f], 'xy');                 
                                
-                if link2DMip('get') == true && isVsplash('get') == false         
+                if isVsplash('get') == false         
                     
                     axesMip  = axesMipPtr ('get', [], get(uiSeriesPtr('get'), 'Value'));
                     axesMipf = axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));

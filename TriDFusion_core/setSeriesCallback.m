@@ -359,8 +359,10 @@ function setSeriesCallback(~,~)
         
         clearDisplay();
         initDisplay(3);
+
+        bLinkMip = link2DMip('get');
         
-%        link2DMip('set', true);
+        link2DMip('set', true);
 
 %        set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
 %        set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
@@ -370,6 +372,16 @@ function setSeriesCallback(~,~)
         setViewerDefaultColor(true, dicomMetaData('get'));
         
         refreshImages();
+
+        if bLinkMip == true
+            link2DMip('set', true);
+            set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+            set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));            
+        else
+            link2DMip('set', false);
+            set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+            set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));              
+        end
 
         catch
             progressBar(1, 'Error:setSeriesCallback()');

@@ -30,7 +30,7 @@ function setIsoSurfaceCallback(~, ~)
     if numel(dicomBuffer('get')) && ...
        size(dicomBuffer('get'), 3) ~= 1
    
-        try
+%        try
             
         sFusionBtnEnable = get(btnFusionPtr('get'), 'Enable');
         
@@ -1065,9 +1065,9 @@ end
             end
         end
         
-        catch
-            progressBar(1, 'Error:setIsoSurfaceCallback()');
-        end
+ %       catch
+%            progressBar(1, 'Error:setIsoSurfaceCallback()');
+ %       end
         
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;

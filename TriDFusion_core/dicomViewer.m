@@ -129,7 +129,6 @@ function resize = dicomViewer()
     voiIsoMaskMax         ('set', 41); % In percent
     smalestIsoMask        ('set', 0.3); % In ml
     valueFormulaIsoMask   ('set', 1); %Fixed suv value
-    pixelEdgeIsoMask      ('set', true);
     resampleToCTIsoMask   ('set', true);
     resampledContoursIsoMask('set', true);
     isoMaskCtSerieOffset  ('set', 1);
@@ -218,12 +217,11 @@ function resize = dicomViewer()
     roiPanelUnitTypeWindow    ('set', false);
     smalestRegionRoiPanelValue('set', 3);
     multipleObjectsRoiPanel   ('set', true);
-    pixelEdgeRoiPanel         ('set', true);
+    pixelEdge                 ('set', true);
     holesRoiPanel             ('set', false);
 
     % Machine Learning
 
-    pixelEdgeMachineLearningDialog ('set', false);
     fastMachineLearningDialog      ('set', true);
     forceSplitMachineLearningDialog('set', true);
     bodySegMachineLearningDialog   ('set', true);
@@ -296,7 +294,6 @@ function resize = dicomViewer()
 
     % Machine Learning Ga68 DOTATATE Options
 
-    Ga68DOTATATEPixelEdge      ('set', true);
     Ga68DOTATATESmalestVoiValue('set', 0.3);
 
     Ga68DOTATATENormalLiverTresholdMultiplierValue('set', 1.5);

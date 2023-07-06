@@ -76,8 +76,8 @@ function adjBrush2D(pRoiPtr, dInitCoord)
     dSemiAxesX = dSphereDiameter/xPixel/2; % In pixel
     dSemiAxesY = dSphereDiameter/yPixel/2; % In pixel
 
-    mousePos         = get(gca, 'CurrentPoint');
-    newPosition      = mousePos(1, 1:2);
+    mousePos    = get(gca, 'CurrentPoint');
+    newPosition = mousePos(1, 1:2);
 
     pRoiPtr.Position = newPosition;
     pRoiPtr.SemiAxes = [dSemiAxesX dSemiAxesY];

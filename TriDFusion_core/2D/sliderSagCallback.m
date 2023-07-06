@@ -34,9 +34,12 @@ function sliderSagCallback(~, ~)
         if get(uiSliderSagPtr('get'), 'Value') == 0
             iSliceNumber = 1;
         else
-            iSliceNumber = round(get(uiSliderSagPtr('get'), 'Value') * size(dicomBuffer('get'), 2));
+            iSliceNumber = round(get(uiSliderSagPtr('get'), 'Value') * size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 2));
         end
-
+        if iSliceNumber < 0
+            iSliceNumber = 1;
+        end
+        
         sliceNumber('set', 'sagittal', iSliceNumber); 
         
         refreshImages();

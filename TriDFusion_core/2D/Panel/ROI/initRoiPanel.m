@@ -27,8 +27,7 @@ function initRoiPanel()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    aBuffer = dicomBuffer('get');
-    if isempty(aBuffer)
+    if isempty(dicomBuffer('get'))
         return;
     end
 
@@ -168,7 +167,7 @@ function initRoiPanel()
                   );
 
     tRoiPanelCT = roiPanelCtUiValues('get');
-    if isempty(tRoiPanelCT) || size(aBuffer, 3) == 1
+    if isempty(tRoiPanelCT) || size(dicomBuffer('get'), 3) == 1
 
         sUseCtEnable    = 'off';
         sChkUseCTEnable = 'off';
@@ -405,8 +404,6 @@ function initRoiPanel()
                   'Callback', @chkHolesRoiPanelCallback...
                   );
 
-
-    txtPixelEdgeRoiPanel = ...
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'text',...
                   'enable'  , 'Inactive',...
@@ -415,19 +412,20 @@ function initRoiPanel()
                   'position', [35 52 150 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'ButtonDownFcn', @chkPixelEdgeRoiPanelCallback...
+                  'ButtonDownFcn', @chkPixelEdgeCallback...
                   );
 
-    chkPixelEdgeRoiPanel = ...
+    chkPixelEdge = ...
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'checkbox',...
                   'enable'  , 'on',...
-                  'value'   , pixelEdgeRoiPanel('get'),...
+                  'value'   , pixelEdge('get'),...
                   'position', [15 55 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'Callback', @chkPixelEdgeRoiPanelCallback...
+                  'Callback', @chkPixelEdgeCallback...
                   );
+    chkPixelEdgePtr('set', chkPixelEdge);
 
     if multipleObjectsRoiPanel('get') == true
         sMultipleObjectsDisplay = 'Multiple Objects';
@@ -937,8 +935,8 @@ function initRoiPanel()
                 dTagOffset = find(aTagOffset, 1);       
                 
                 if ~isempty(dTagOffset)
-                    atVoiInput{dTagOffset} = [];            
-                    atVoiInput(cellfun(@isempty, atVoiInput)) = [];
+                    atVoiInput(dTagOffset) = [];            
+%                    atVoiInput(cellfun(@isempty, atVoiInput)) = [];
                 end                   
 
                 voiTemplate('set', dSerieOffset, atVoiInput);
@@ -966,34 +964,23 @@ function initRoiPanel()
                              roiConstraintList('set', dSerieOffset,  asConstraintTagList{dConstraintOffset}, asConstraintTypeList{dConstraintOffset});
                         end    
                     end
-    
-                    % Delete ROI object
-                    
-                    if isvalid(atRoiInput{aRoisTagOffset(rr)}.Object)
-                        delete(atRoiInput{aRoisTagOffset(rr)}.Object);
-                    end
-                    
-                    % Delete ROI farthest distance object
 
+                     % Delete farthest distance objects
+        
                     if ~isempty(atRoiInput{aRoisTagOffset(rr)}.MaxDistances)
-                        
-                        if isvalid(atRoiInput{aRoisTagOffset(rr)}.MaxDistances.MaxXY.Line)
-                            delete(atRoiInput{aRoisTagOffset(rr)}.MaxDistances.MaxXY.Line);
-                        end
-                        
-                        if isvalid(atRoiInput{aRoisTagOffset(rr)}.MaxDistances.MaxCY.Line)
-                            delete(atRoiInput{aRoisTagOffset(rr)}.MaxDistances.MaxCY.Line);
-                        end
-                        
-                        if isvalid(atRoiInput{aRoisTagOffset(rr)}.MaxDistances.MaxXY.Text)
-                            delete(atRoiInput{aRoisTagOffset(rr)}.MaxDistances.MaxXY.Text);
-                        end
-                        
-                        if isvalid(atRoiInput{aRoisTagOffset(rr)}.MaxDistances.MaxCY.Text)
-                            delete(atRoiInput{aRoisTagOffset(rr)}.MaxDistances.MaxCY.Text);
-                        end
-                    end
+                        objectsToDelete = [atRoiInput{aRoisTagOffset(rr)}.MaxDistances.MaxXY.Line, ...
+                                           atRoiInput{aRoisTagOffset(rr)}.MaxDistances.MaxCY.Line, ...
+                                           atRoiInput{aRoisTagOffset(rr)}.MaxDistances.MaxXY.Text, ...
+                                           atRoiInput{aRoisTagOffset(rr)}.MaxDistances.MaxCY.Text];
+                        delete(objectsToDelete(isvalid(objectsToDelete)));
+                    end                   
                     
+                    % Delete ROI object 
+
+                    if isvalid(atRoiInput{aRoisTagOffset(rr)}.Object)
+                        delete(atRoiInput{aRoisTagOffset(rr)}.Object)
+                    end           
+
                     atRoiInput{aRoisTagOffset(rr)} = [];
                 end
 
@@ -1307,7 +1294,7 @@ function initRoiPanel()
         drawnow; 
     end
 
-    function chkPixelEdgeRoiPanelCallback(hObject, ~)
+    function chkPixelEdgeCallback(hObject, ~)
 
         try
 
@@ -1315,18 +1302,18 @@ function initRoiPanel()
         drawnow;
 
         if strcmpi(get(hObject, 'Style'), 'text')
-            if get(chkPixelEdgeRoiPanel, 'Value') == true
+            if get(chkPixelEdge, 'Value') == true
 
-                set(chkPixelEdgeRoiPanel, 'Value', false);
+                set(chkPixelEdge, 'Value', false);
             else
-                set(chkPixelEdgeRoiPanel, 'Value', true);
+                set(chkPixelEdge, 'Value', true);
             end
         end
 
-        pixelEdgeRoiPanel('set', get(chkPixelEdgeRoiPanel, 'Value'));
+        pixelEdge('set', get(chkPixelEdge, 'Value'));
 
         catch
-            progressBar(1, 'Error:chkPixelEdgeRoiPanelCallback()');
+            progressBar(1, 'Error:chkPixelEdgeCallback()');
         end
 
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
@@ -1378,7 +1365,7 @@ function initRoiPanel()
         smalestRegionRoiPanelValue('set', dValue);
 
         previewRoiSegmentation(str2double(get(edtSmalestRegion, 'String')), ...
-                               get(chkPixelEdgeRoiPanel, 'Value'), ...
+                               get(chkPixelEdge, 'Value'), ...
                                get(chkHolesRoiPanel    , 'Value'), ...
                                get(chkUseCTRoiPanel    , 'Value'), ...
                                get(uiSeriesCTRoiPanel  , 'Value') ...
@@ -1439,7 +1426,7 @@ function initRoiPanel()
         end
 
         previewRoiSegmentation(str2double(get(edtSmalestRegion, 'String')), ...
-                               get(chkPixelEdgeRoiPanel, 'Value'), ...
+                               get(chkPixelEdge, 'Value'), ...
                                get(chkHolesRoiPanel    , 'Value'), ...
                                get(chkUseCTRoiPanel    , 'Value'), ...
                                get(uiSeriesCTRoiPanel  , 'Value') ...
@@ -1528,7 +1515,7 @@ function initRoiPanel()
 %        uiSliderMaxTresholdRoiListener = addlistener(uiSliderMaxTresholdRoiPanel, 'Value', 'PreSet', @sliderMaxTresholdRoiPanelCallback);
 
         previewRoiSegmentation(str2double(get(edtSmalestRegion, 'String')), ...
-                               get(chkPixelEdgeRoiPanel, 'Value'), ...
+                               get(chkPixelEdge, 'Value'), ...
                                get(chkHolesRoiPanel    , 'Value'), ...
                                get(chkUseCTRoiPanel    , 'Value'), ...
                                get(uiSeriesCTRoiPanel  , 'Value') ...
@@ -1596,7 +1583,7 @@ function initRoiPanel()
         end
 
         previewRoiSegmentation(str2double(get(edtSmalestRegion, 'String')), ...
-                               get(chkPixelEdgeRoiPanel, 'Value'), ...
+                               get(chkPixelEdge, 'Value'), ...
                                get(chkHolesRoiPanel    , 'Value'), ...
                                get(chkUseCTRoiPanel    , 'Value'), ...
                                get(uiSeriesCTRoiPanel  , 'Value') ...
@@ -1685,7 +1672,7 @@ function initRoiPanel()
 %        uiSliderMinTresholdRoiListener = addlistener(uiSliderMinTresholdRoiPanel, 'Value', 'PreSet', @sliderMinTresholdRoiPanelCallback);
 
         previewRoiSegmentation(str2double(get(edtSmalestRegion, 'String')), ...
-                               get(chkPixelEdgeRoiPanel, 'Value'), ...
+                               get(chkPixelEdge, 'Value'), ...
                                get(chkHolesRoiPanel    , 'Value'), ...
                                get(chkUseCTRoiPanel    , 'Value'), ...
                                get(uiSeriesCTRoiPanel  , 'Value') ...
@@ -2009,9 +1996,9 @@ function initRoiPanel()
             end
 
             if bHoles == true
-                [originalMaskAxe,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 'holes', 8);
+                originalMaskAxe = bwboundaries(bwimage(aBuffer, dImageMin), 'holes', 8);
             else
-                [originalMaskAxe,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 'noholes', 8);
+                originalMaskAxe = bwboundaries(bwimage(aBuffer, dImageMin), 'noholes', 8);
             end
 
             if bPixelEdge == true
@@ -2019,9 +2006,9 @@ function initRoiPanel()
             end
 
             if bHoles == true
-                [maskAxe ,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 'holes', 8);
+                maskAxe = bwboundaries(bwimage(aBuffer, dImageMin), 'holes', 8);
             else
-                [maskAxe ,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 'noholes', 8);
+                maskAxe = bwboundaries(bwimage(aBuffer, dImageMin), 'noholes', 8);
             end
 
             if bPixelEdge == true
@@ -2037,6 +2024,7 @@ function initRoiPanel()
             if ~isempty(maskAxe)
 
                 maskAxe = deleteSmallElements(originalMaskAxe, maskAxe, dSmalestRoiSize);
+
                 if ~isempty(maskAxe)
                     vBoundAxePtr = visboundaries(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), maskAxe);
                     visBoundAxePtr('set', vBoundAxePtr);
@@ -2047,197 +2035,179 @@ function initRoiPanel()
 
             if bUseCtMap == true % Apply ct mask
 
-                atRefMetaData = dicomMetaData('get');
+                dSerieOffset   = get(uiSeriesPtr('get'), 'Value');
 
-                tInput = inputTemplate('get');
+                atRefMetaData = dicomMetaData('get', [], dSerieOffset);
 
-                tRoiPanelCT = roiPanelCtUiValues('get');
-
-                dSerieOffset = get(uiSeriesPtr('get'), 'Value');
-
-         %       set(uiSeriesPtr('get'), 'Value', tRoiPanelCT{dCtOffset}.dSeriesNumber);
-
-                aCtBuffer = dicomBuffer('get', [], tRoiPanelCT{dCtOffset}.dSeriesNumber);
-
+                tInput        = inputTemplate('get');
+                tRoiPanelCT   = roiPanelCtUiValues('get');
+                
+                aCtBuffer    = dicomBuffer('get', [], tRoiPanelCT{dCtOffset}.dSeriesNumber);
                 atCtMetaData = dicomMetaData('get', [], tRoiPanelCT{dCtOffset}.dSeriesNumber);
+                
                 if isempty(atCtMetaData)
-
                     atCtMetaData = tInput(tRoiPanelCT{dCtOffset}.dSeriesNumber).atDicomInfo;
                     dicomMetaData('set', atCtMetaData, tRoiPanelCT{dCtOffset}.dSeriesNumber);
                 end
-
-                if isempty(aCtBuffer) 
-
+                
+                if isempty(aCtBuffer)
                     aInput = inputBuffer('get');
                     aCtBuffer = aInput{tRoiPanelCT{dCtOffset}.dSeriesNumber};
                     
-                    if     strcmpi(imageOrientation('get'), 'axial')
-                     %   aCtBuffer = aCtBuffer;
-                    elseif strcmpi(imageOrientation('get'), 'coronal')
+                    if strcmpi(imageOrientation('get'), 'coronal')
                         aCtBuffer = reorientBuffer(aCtBuffer, 'coronal');
                     elseif strcmpi(imageOrientation('get'), 'sagittal')
                         aCtBuffer = reorientBuffer(aCtBuffer, 'sagittal');
                     end
-
+                    
                     if tInput(dSerieOffset).bFlipLeftRight == true
-                        aCtBuffer=aCtBuffer(:,end:-1:1,:);
+                        aCtBuffer = aCtBuffer(:,end:-1:1,:);
                     end
-
+                    
                     if tInput(dSerieOffset).bFlipAntPost == true
-                        aCtBuffer=aCtBuffer(end:-1:1,:,:);
+                        aCtBuffer = aCtBuffer(end:-1:1,:,:);
                     end
-
+                    
                     if tInput(dSerieOffset).bFlipHeadFeet == true
-                        aCtBuffer=aCtBuffer(:,:,end:-1:1);
+                        aCtBuffer = aCtBuffer(:,:,end:-1:1);
                     end
-
+                    
                     dicomBuffer('set', aCtBuffer, tRoiPanelCT{dCtOffset}.dSeriesNumber);
-
-                    clear aCtBuffer;
-                    clear aInput;
                 end
-
-      %          set(uiSeriesPtr('get'), 'Value', dSerieOffset);
-
-                [aBuffer, ~] = ...
-                    resampleImage(aCtBuffer, ...
-                                  atCtMetaData, ...
-                                  aBuffer, ...
-                                  atRefMetaData, ...
-                                  'Nearest', ...
-                                  2, ...
-                                  false);
                 
-                dImageMin = min(double(aBuffer),[], 'all');               
+                [aBuffer, ~] = resampleImage(aCtBuffer, atCtMetaData, aBuffer, atRefMetaData, 'Nearest', 2, false);
+                
+                dImageMin = min(double(aBuffer), [], 'all');
             end
             
-            aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint                            
+            aBuffer(aLogicalMask == 0) = dImageMin; % Apply constraint
             
             if bUseCtMap == true
                 dTresholdMin = roiPanelCTMinValue('get');
                 dTresholdMax = roiPanelCTMaxValue('get');
             else
-                dTresholdMin = min(double(aBuffer),[], 'all');
-                dTresholdMax = max(double(aBuffer),[], 'all');
+                dTresholdMin = min(double(aBuffer), [], 'all');
+                dTresholdMax = max(double(aBuffer), [], 'all');
             end
-
+            
             dBufferDiff = dTresholdMax - dTresholdMin;
-
-            dMinTreshold = (dSliderMin * dBufferDiff)+dTresholdMin;
-            dMaxTreshold = (dSliderMax * dBufferDiff)+dTresholdMin; 
-        
-            iCoronal  = sliceNumber('get', 'coronal' );
+            dMinTreshold = (dSliderMin * dBufferDiff) + dTresholdMin;
+            dMaxTreshold = (dSliderMax * dBufferDiff) + dTresholdMin;
+            
+            iCoronal  = sliceNumber('get', 'coronal');
             iSagittal = sliceNumber('get', 'sagittal');
-            iAxial    = sliceNumber('get', 'axial'   );
-                
-            aCoronal  = permute(aBuffer(iCoronal,:,:), [3 2 1]);
-            aSagittal = permute(aBuffer(:,iSagittal,:), [3 1 2]);
-            aAxial    = aBuffer(:,:,iAxial);
+            iAxial    = sliceNumber('get', 'axial');
+            
+            aCoronal  = permute(aBuffer(iCoronal, :, :), [3 2 1]);
+            aSagittal = permute(aBuffer(:, iSagittal, :), [3 1 2]);
+            aAxial    = aBuffer(:, :, iAxial);
             
             if bRelativeToMax == true
-                aCoronal (aCoronal  <= dMaxTreshold) = dImageMin;
+                aCoronal(aCoronal <= dMaxTreshold) = dImageMin;
                 aSagittal(aSagittal <= dMaxTreshold) = dImageMin;
-                aAxial   (aAxial    <= dMaxTreshold) = dImageMin;
+                aAxial(aAxial <= dMaxTreshold) = dImageMin;
             else
-                aCoronal (aCoronal <= dMinTreshold)  = dImageMin;
-                aCoronal (aCoronal >= dMaxTreshold)  = dImageMin;
-                
-                aSagittal(aSagittal <= dMinTreshold) = dImageMin;
-                aSagittal(aSagittal >= dMaxTreshold) = dImageMin;
-                
-                aAxial   (aAxial <= dMinTreshold)    = dImageMin;
-                aAxial   (aAxial >= dMaxTreshold)    = dImageMin;                
-            end 
+                aCoronal(aCoronal <= dMinTreshold | aCoronal >= dMaxTreshold) = dImageMin;
+                aSagittal(aSagittal <= dMinTreshold | aSagittal >= dMaxTreshold) = dImageMin;
+                aAxial(aAxial <= dMinTreshold | aAxial >= dMaxTreshold) = dImageMin;
+            end
             
             vBoundAxes1Ptr = visBoundAxes1Ptr('get');
             vBoundAxes2Ptr = visBoundAxes2Ptr('get');
             vBoundAxes3Ptr = visBoundAxes3Ptr('get');
-
+            
             if ~isempty(vBoundAxes1Ptr)
                 delete(vBoundAxes1Ptr);
             end
-
+            
             if ~isempty(vBoundAxes2Ptr)
                 delete(vBoundAxes2Ptr);
             end
-
+            
             if ~isempty(vBoundAxes3Ptr)
                 delete(vBoundAxes3Ptr);
-            end            
+            end
             
             if bHoles == true
-                [originalMaskCoronal ,~,~,~] = bwboundaries(bwimage(aCoronal , dImageMin), 'holes', 8);
-                [originalMaskSagittal,~,~,~] = bwboundaries(bwimage(aSagittal, dImageMin), 'holes', 8);
-                [originalMaskAxial   ,~,~,~] = bwboundaries(bwimage(aAxial   , dImageMin), 'holes', 8);
+                originalMaskCoronal  = bwboundaries(bwimage(aCoronal , dImageMin), 'holes', 8);
+                originalMaskSagittal = bwboundaries(bwimage(aSagittal, dImageMin), 'holes', 8);
+                originalMaskAxial    = bwboundaries(bwimage(aAxial   , dImageMin), 'holes', 8);
             else
-                [originalMaskCoronal ,~,~,~] = bwboundaries(bwimage(aCoronal , dImageMin), 'noholes', 8);
-                [originalMaskSagittal,~,~,~] = bwboundaries(bwimage(aSagittal, dImageMin), 'noholes', 8);
-                [originalMaskAxial   ,~,~,~] = bwboundaries(bwimage(aAxial   , dImageMin), 'noholes', 8);
+                originalMaskCoronal  = bwboundaries(bwimage(aCoronal , dImageMin), 'noholes', 8);
+                originalMaskSagittal = bwboundaries(bwimage(aSagittal, dImageMin), 'noholes', 8);
+                originalMaskAxial    = bwboundaries(bwimage(aAxial   , dImageMin), 'noholes', 8);
             end
-
+            
             if bPixelEdge == true
-                aCoronal  = imresize(aCoronal , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
-                aSagittal = imresize(aSagittal, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
-                aAxial    = imresize(aAxial   , PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+                aCoronal  = imresize(aCoronal  , PIXEL_EDGE_RATIO, 'nearest');
+                aSagittal = imresize(aSagittal, PIXEL_EDGE_RATIO, 'nearest');
+                aAxial    = imresize(aAxial   , PIXEL_EDGE_RATIO, 'nearest');
             end
-
+            
             if bHoles == true
-                [maskCoronal ,~,~,~] = bwboundaries(bwimage(aCoronal , dImageMin), 'holes', 8);
-                [maskSagittal,~,~,~] = bwboundaries(bwimage(aSagittal, dImageMin), 'holes', 8);
-                [maskAxial   ,~,~,~] = bwboundaries(bwimage(aAxial   , dImageMin), 'holes', 8);
+                maskCoronal  = bwboundaries(bwimage(aCoronal , dImageMin), 'holes', 8);
+                maskSagittal = bwboundaries(bwimage(aSagittal, dImageMin), 'holes', 8);
+                maskAxial    = bwboundaries(bwimage(aAxial   , dImageMin), 'holes', 8);
             else
-                [maskCoronal ,~,~,~] = bwboundaries(bwimage(aCoronal , dImageMin), 'noholes', 8);
-                [maskSagittal,~,~,~] = bwboundaries(bwimage(aSagittal, dImageMin), 'noholes', 8);
-                [maskAxial   ,~,~,~] = bwboundaries(bwimage(aAxial   , dImageMin), 'noholes', 8);
+                maskCoronal  = bwboundaries(bwimage(aCoronal , dImageMin), 'noholes', 8);
+                maskSagittal = bwboundaries(bwimage(aSagittal, dImageMin), 'noholes', 8);
+                maskAxial    = bwboundaries(bwimage(aAxial   , dImageMin), 'noholes', 8);
             end
-
+            
             if bPixelEdge == true
+
                 if ~isempty(maskCoronal)
-                    for jj=1:numel(maskCoronal)
-                        maskCoronal{jj} = (maskCoronal{jj} +1)/PIXEL_EDGE_RATIO;
+                    for jj = 1:numel(maskCoronal)
+                        maskCoronal{jj} = (maskCoronal{jj} + 1) / PIXEL_EDGE_RATIO;
                         maskCoronal{jj} = reducepoly(maskCoronal{jj});
-                        
                     end
                 end
-
+            
                 if ~isempty(maskSagittal)
-                    for jj=1:numel(maskSagittal)
-                        maskSagittal{jj} = (maskSagittal{jj} +1)/PIXEL_EDGE_RATIO;
+                    for jj = 1:numel(maskSagittal)
+                        maskSagittal{jj} = (maskSagittal{jj} + 1) / PIXEL_EDGE_RATIO;
                         maskSagittal{jj} = reducepoly(maskSagittal{jj});
                     end
                 end
-
+            
                 if ~isempty(maskAxial)
-                    for jj=1:numel(maskAxial)
-                        maskAxial{jj} = (maskAxial{jj} +1)/PIXEL_EDGE_RATIO;
+                    for jj = 1:numel(maskAxial)
+                        maskAxial{jj} = (maskAxial{jj} + 1) / PIXEL_EDGE_RATIO;
                         maskAxial{jj} = reducepoly(maskAxial{jj});
                     end
                 end
             end
-
+            
             if ~isempty(maskCoronal)
+
                 maskCoronal = deleteSmallElements(originalMaskCoronal, maskCoronal, dSmalestRoiSize);
+
                 if ~isempty(maskCoronal)
-                    vBoundAxes1Ptr = visboundaries(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), maskCoronal );
+                    vBoundAxes1Ptr = visboundaries(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), maskCoronal);
                     visBoundAxes1Ptr('set', vBoundAxes1Ptr);
                 end
             end
-
+            
             if ~isempty(maskSagittal)
+
                 maskSagittal = deleteSmallElements(originalMaskSagittal, maskSagittal, dSmalestRoiSize);
+
                 if ~isempty(maskSagittal)
                     vBoundAxes2Ptr = visboundaries(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), maskSagittal);
                     visBoundAxes2Ptr('set', vBoundAxes2Ptr);
                 end
             end
-
+            
             if ~isempty(maskAxial)
+
                 maskAxial = deleteSmallElements(originalMaskAxial, maskAxial, dSmalestRoiSize);
+                
                 if ~isempty(maskAxial)
                     vBoundAxes3Ptr = visboundaries(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), maskAxial);
                     visBoundAxes3Ptr('set', vBoundAxes3Ptr);
                 end
             end
+ 
         end
         
         catch
@@ -2252,16 +2222,19 @@ function initRoiPanel()
     function createVoiRoiPanelCallback(~, ~)
 
         if strcmpi(get(uiCreateVoiRoiPanel, 'String'), 'Cancel')
-            cancelCreateVoiRoiPanel('set', true);
+            cancelCreateVoiRoiPanel('set', true);            
         else
-            bPixelEdge       = get(chkPixelEdgeRoiPanel, 'Value');
+            bPixelEdge       = get(chkPixelEdge, 'Value');
             bMultipleObjects = get(chkMultipleObjectsRoiPanel, 'Value');
             bHoles           = get(chkHolesRoiPanel, 'Value');
             dSmalestRoiSize  = str2double(get(edtSmalestRegion, 'String'));
             bUseCtMap        = get(chkUseCTRoiPanel  , 'Value');
             dCtOffset        = get(uiSeriesCTRoiPanel, 'Value');
 
-%            set(uiCreateVoiRoiPanel, 'String', 'Cancel');
+            set(uiCreateVoiRoiPanel, 'String', 'Cancel');
+
+            set(uiCreateVoiRoiPanel, 'Background', [0.2 0.039 0.027]);
+            set(uiCreateVoiRoiPanel, 'Foreground', [0.94 0.94 0.94]);
 
             if is2DBrush('get') == true
                 releaseRoiWait();                  
@@ -2289,11 +2262,14 @@ function initRoiPanel()
 %                triangulateRoi(atVoiInput{dVoiOffset}.RoisTag{dRodSerieOffset}, true);
             end
 
+            cancelCreateVoiRoiPanel('set', false);
+    
+            set(uiCreateVoiRoiPanel, 'String', 'Segment');
+
+            set(uiCreateVoiRoiPanel, 'Background', [0.6300 0.6300 0.4000]);
+            set(uiCreateVoiRoiPanel, 'Foreground', [0.1 0.1 0.1]);            
+
         end
-
-        cancelCreateVoiRoiPanel('set', false);
-
-        set(uiCreateVoiRoiPanel, 'String', 'Segment');
 
     end
 
@@ -2301,10 +2277,13 @@ function initRoiPanel()
 
         PIXEL_EDGE_RATIO = 3;
 
-        aBuffer = dicomBuffer('get');
+        aBuffer = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
+
         if isempty(aBuffer)
             return;
         end
+
+        aBufferSize = size(aBuffer);
 
         if switchTo3DMode('get')     == true ||  ...
            switchToIsoSurface('get') == true || ...
@@ -2402,15 +2381,17 @@ function initRoiPanel()
                 maskAxe = deleteSmallElements(originalMaskAxe, maskAxe, dSmalestRoiSize);
                 if ~isempty(maskAxe)
 
-                    asTag = [];
-
                     if bMultipleObjects == false
                         xmin=0.5;
                         xmax=1;
                         aColor=xmin+rand(1,3)*(xmax-xmin);
                     end
 
-                    for jj=1:numel(maskAxe)
+                    dMaskSize = numel(maskAxe);
+
+                    asTag = [];
+
+                    for jj=1:dMaskSize
 
                         if cancelCreateVoiRoiPanel('get') == true
                             break;
@@ -2428,10 +2409,9 @@ function initRoiPanel()
 
                         aPosition = flip(curentMask{1}, 2);
 
-                        if bPixelEdge == false
-                        
-                            aPosition = smoothRoi(aPosition, size(aBuffer));
+                        if bPixelEdge == false    
 
+                            aPosition = smoothRoi(aPosition, aBufferSize);
                         end
 
                         bAddRoi = true;
@@ -2498,11 +2478,13 @@ function initRoiPanel()
 
                             asTag{numel(asTag)+1} = sTag;
                         end
+
+                        drawnow limitrate;
                     end
 
-                    if ~isempty(asTag) && ...
-                       bMultipleObjects == false && ...
-                       cancelCreateVoiRoiPanel('get') == false
+   %                 asTag(cellfun(@isempty, asTag)) = [];
+
+                    if ~isempty(asTag)
 
                         if bInPercent == true
                             dMinValue = dSliderMin*100;
@@ -2521,7 +2503,14 @@ function initRoiPanel()
                         createVoiFromRois(dSerieOffset, asTag, sLabel, aColor, 'Unspecified');
 
                     end
+                    
+                    setVoiRoiSegPopup();
+        
+                    refreshImages();
+        
+                    progressBar(1, 'Ready');                    
                 end
+
             end
 
         else % 3D Image
@@ -2640,7 +2629,6 @@ function initRoiPanel()
                     BW(CC.PixelIdxList{bb}) = 1;
                 end
 
-                asTag = [];
 
                 progressBar( bb/dNbElements-0.0001, sprintf('Computing Volume %d/%d, please wait', bb, dNbElements) );
 
@@ -2649,6 +2637,8 @@ function initRoiPanel()
                 aColor=xmin+rand(1,3)*(xmax-xmin);
 
                 aBufferSize = size(BW, 3);
+
+                asTag = [];
 
                 for aa=1:aBufferSize % Find ROI
 
@@ -2694,6 +2684,7 @@ function initRoiPanel()
                         end
 
                         if ~isempty(maskAxial)
+
                             for jj=1:numel(maskAxial)
 
                                 if cancelCreateVoiRoiPanel('get') == true
@@ -2711,8 +2702,7 @@ function initRoiPanel()
 %                                bAddRoi = true;
                                 if bPixelEdge == false
                                 
-                                    aPosition = smoothRoi(aPosition, size(aBuffer));
-
+                                    aPosition = smoothRoi(aPosition, aBufferSize);
                                 end
 
                                 pRoi = images.roi.Freehand(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
@@ -2759,12 +2749,15 @@ function initRoiPanel()
 
                                     asTag{numel(asTag)+1} = sTag;
 %                                end
+                                drawnow limitrate;
                             end
                         end
                     end
                 end
 
-                if ~isempty(asTag) && cancelCreateVoiRoiPanel('get') == false
+    %            asTag(cellfun(@isempty, asTag)) = [];
+
+                if ~isempty(asTag) 
 
                     if bInPercent == true
                         dMinValue = dSliderMin*100;
@@ -2789,9 +2782,10 @@ function initRoiPanel()
                     end
 
                     createVoiFromRois(dSerieOffset, asTag, sLabel, aColor, 'Unspecified');
-
                 end
             end
+            
+            clear BW;
 
             setVoiRoiSegPopup();
 
@@ -2800,9 +2794,12 @@ function initRoiPanel()
             progressBar(1, 'Ready');
 
         end
+
         catch
             progressBar(1, 'Error:createVoiRoi()');
         end
+
+        clear aBuffer;
 
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;
@@ -2865,6 +2862,8 @@ function initRoiPanel()
 
         dLargestMaskNbPixels = 0;
 
+        sRoiTag = asRoisTag{round(numel(asRoisTag)/2)};
+
         for at=1:numel(asRoisTag)
             
             aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), asRoisTag{at} );
@@ -2894,7 +2893,7 @@ function initRoiPanel()
 
                 if dMaskNbPixels > dLargestMaskNbPixels 
                     dLargestMaskNbPixels = dMaskNbPixels;
-                    sRoiTag = asRoisTag{at};
+                    sRoiTag = asRoisTag{at};                    
                 end                                               
             end                
         end

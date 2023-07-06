@@ -31,8 +31,8 @@ function deleteRoiEvents(hObject, ~)
 
     dSerieOffset = get(uiSeriesPtr('get'), 'Value');
 
-    atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-    atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));  
+    atRoiInput = roiTemplate('get', dSerieOffset);
+    atVoiInput = voiTemplate('get', dSerieOffset);  
             
     % Clear it constraint
 
@@ -57,35 +57,25 @@ function deleteRoiEvents(hObject, ~)
 
         if ~isempty(dTagOffset)
 
-            % Delete ROI object 
+            % Delete farthest distance objects
 
+            if ~isempty(atRoiInput{dTagOffset}.MaxDistances)
+                objectsToDelete = [atRoiInput{dTagOffset}.MaxDistances.MaxXY.Line, ...
+                                   atRoiInput{dTagOffset}.MaxDistances.MaxCY.Line, ...
+                                   atRoiInput{dTagOffset}.MaxDistances.MaxXY.Text, ...
+                                   atRoiInput{dTagOffset}.MaxDistances.MaxCY.Text];
+                delete(objectsToDelete(isvalid(objectsToDelete)));
+            end                   
+            
+            % Delete ROI object 
+            
             if isvalid(atRoiInput{dTagOffset}.Object)
                 delete(atRoiInput{dTagOffset}.Object)
             end
 
-            % Delete farthest distance object
+            atRoiInput(dTagOffset) = [];
 
-            if ~isempty(atRoiInput{dTagOffset}.MaxDistances)
-                if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Line)
-                    delete(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Line);
-                end
-
-                if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Line)
-                    delete(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Line);
-                end
-
-                if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Text)
-                    delete(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Text);
-                end
-
-                if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Text)
-                    delete(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Text);
-                end
-            end                        
-
-            atRoiInput{dTagOffset} = [];
-
-            atRoiInput(cellfun(@isempty, atRoiInput)) = [];
+  %          atRoiInput(cellfun(@isempty, atRoiInput)) = [];
 
             roiTemplate('set', dSerieOffset, atRoiInput);  
 
@@ -99,17 +89,19 @@ function deleteRoiEvents(hObject, ~)
                     dTagOffset = find(contains(atVoiInput{vo}.RoisTag,{sRoiTag}));
 
                     if ~isempty(dTagOffset) % tag exist
-                        atVoiInput{vo}.RoisTag{dTagOffset} = [];
-                        atVoiInput{vo}.RoisTag(cellfun(@isempty, atVoiInput{vo}.RoisTag)) = [];     
+
+                        atVoiInput{vo}.RoisTag(dTagOffset) = [];
+                     %   atVoiInput{vo}.RoisTag(cellfun(@isempty, atVoiInput{vo}.RoisTag)) = [];     
 
                         if isempty(atVoiInput{vo}.RoisTag)
-                            atVoiInput{vo} = [];
+                            atVoiInput(vo) = [];
+                            break;
                        end
 
                     end
                 end
 
-               atVoiInput(cellfun(@isempty, atVoiInput)) = [];
+  %             atVoiInput(cellfun(@isempty, atVoiInput)) = [];
 
                voiTemplate('set', dSerieOffset, atVoiInput);                                        
             end

@@ -82,7 +82,10 @@ function setMachineLearning3DLungShunt(sSegmentatorPath)
     
     try 
 
-    pixelEdgeMachineLearningDialog ('set', true);
+    pixelEdge('set', true);
+    
+    % Set contour panel checkbox
+    set(chkPixelEdgePtr('get'), 'Value', pixelEdge('get'));
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
@@ -173,7 +176,7 @@ function setMachineLearning3DLungShunt(sSegmentatorPath)
 
                         aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
 
-                        maskToVoi(aMask, 'Lungs', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                        maskToVoi(aMask, 'Lungs', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
 
                    end
 
@@ -197,7 +200,7 @@ function setMachineLearning3DLungShunt(sSegmentatorPath)
 
                     aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
 
-                    maskToVoi(aMask, 'Liver', 'Liver', aColor, 'axial', dNMSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                    maskToVoi(aMask, 'Liver', 'Liver', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
                  
                 end
 

@@ -365,6 +365,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
             maskAxial = bwboundaries(aAxial, 'noholes', 8);                    
              
             dSlicesNbElements = numel(maskAxial);
+            
             for jj=1:dSlicesNbElements
 
                 if bPixelEdge == true

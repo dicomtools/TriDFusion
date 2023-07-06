@@ -82,6 +82,11 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorPath)
 
     try 
 
+    pixelEdge('set', true);
+
+    % Set contour panel checkbox
+    set(chkPixelEdgePtr('get'), 'Value', pixelEdge('get'));
+
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
 
@@ -165,7 +170,7 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorPath)
 
                     aMask = transformNiiMask(nii.img, atCTMetaData, aPTImage, atPTMetaData);
 
-                    maskToVoi(aMask, 'Liver', 'Liver', aColor, 'axial', dPTSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                    maskToVoi(aMask, 'Liver', 'Liver', aColor, 'axial', dPTSerieOffset, pixelEdge('get'));
                  
                     % Import all other contours  
 

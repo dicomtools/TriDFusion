@@ -895,31 +895,20 @@ end
                                         end
                                     end
 
-                                    % Delete ROI object
-
-                                    if isvalid(atRoiInput{aRoisTagOffset(ro)}.Object)
-                                        delete(atRoiInput{aRoisTagOffset(ro)}.Object);
-                                    end
-
-                                    % Delete farthest distance object
-
+                                    % Delete farthest distance objects
+                        
                                     if ~isempty(atRoiInput{aRoisTagOffset(ro)}.MaxDistances)
-
-                                        if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Line)
-                                            delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Line);
-                                        end
-
-                                        if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Line)
-                                            delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Line);
-                                        end
-
-                                        if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Text)
-                                            delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Text);
-                                        end
-
-                                        if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Text)
-                                            delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Text);
-                                        end
+                                        objectsToDelete = [atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Line, ...
+                                                           atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Line, ...
+                                                           atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Text, ...
+                                                           atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Text];
+                                        delete(objectsToDelete(isvalid(objectsToDelete)));
+                                    end                   
+                                    
+                                    % Delete ROI object 
+                                    
+                                    if isvalid(atRoiInput{aRoisTagOffset(ro)}.Object)
+                                        delete(atRoiInput{aRoisTagOffset(ro)}.Object)
                                     end
 
                                     atRoiInput{aRoisTagOffset(ro)} = [];
@@ -933,8 +922,8 @@ end
 
                         % Clear voi from voi input template
 
-                        atVoiInput{dTagOffset} = [];            
-                        atVoiInput(cellfun(@isempty, atVoiInput)) = [];
+                        atVoiInput(dTagOffset) = [];            
+%                        atVoiInput(cellfun(@isempty, atVoiInput)) = [];
 
                         voiTemplate('set', dSerieOffset, atVoiInput);
 
@@ -987,37 +976,27 @@ end
                                 if ~isempty(dConstraintOffset) % tag exist
                                      roiConstraintList('set', dSerieOffset,  asConstraintTagList{dConstraintOffset}, asConstraintTypeList{dConstraintOffset});
                                 end
-                            end        
+                            end         
 
+                            % Delete farthest distance objects
+                
+                            if ~isempty(atRoiInput{dTagOffset}.MaxDistances)
+                                objectsToDelete = [atRoiInput{dTagOffset}.MaxDistances.MaxXY.Line, ...
+                                                   atRoiInput{dTagOffset}.MaxDistances.MaxCY.Line, ...
+                                                   atRoiInput{dTagOffset}.MaxDistances.MaxXY.Text, ...
+                                                   atRoiInput{dTagOffset}.MaxDistances.MaxCY.Text];
+                                delete(objectsToDelete(isvalid(objectsToDelete)));
+                            end                   
+                            
                             % Delete ROI object 
-
+                            
                             if isvalid(atRoiInput{dTagOffset}.Object)
                                 delete(atRoiInput{dTagOffset}.Object)
                             end
 
-                            % Delete farthest distance object
+                            atRoiInput(dTagOffset) = [];
 
-                            if ~isempty(atRoiInput{dTagOffset}.MaxDistances)
-                                if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Line)
-                                    delete(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Line);
-                                end
-
-                                if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Line)
-                                    delete(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Line);
-                                end
-
-                                if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Text)
-                                    delete(atRoiInput{dTagOffset}.MaxDistances.MaxXY.Text);
-                                end
-
-                                if isvalid(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Text)
-                                    delete(atRoiInput{dTagOffset}.MaxDistances.MaxCY.Text);
-                                end
-                            end                        
-
-                            atRoiInput{dTagOffset} = [];
-
-                            atRoiInput(cellfun(@isempty, atRoiInput)) = [];
+%                            atRoiInput(cellfun(@isempty, atRoiInput)) = [];
 
                             roiTemplate('set', dSerieOffset, atRoiInput);  
 
@@ -2774,33 +2753,23 @@ end
             % Delete object
             
             atRoi = roiTemplate('get', dOffset);
+
             for rr=1:numel(atRoi)
                 
-                 % Delete ROI object
-               
-                if isvalid(atRoi{rr}.Object)                                                             
-                    delete(atRoi{rr}.Object);
-                end
-                
-                % Delete ROI farthest distance object
-
+                % Delete farthest distance objects
+    
                 if ~isempty(atRoi{rr}.MaxDistances)
-
-                    if isvalid(atRoi{rr}.MaxDistances.MaxXY.Line)
-                        delete(atRoi{rr}.MaxDistances.MaxXY.Line);
-                    end
-
-                    if isvalid(atRoi{rr}.MaxDistances.MaxCY.Line)
-                        delete(atRoi{rr}.MaxDistances.MaxCY.Line);
-                    end
-
-                    if isvalid(atRoi{rr}.MaxDistances.MaxXY.Text)
-                        delete(atRoi{rr}.MaxDistances.MaxXY.Text);
-                    end
-
-                    if isvalid(atRoi{rr}.MaxDistances.MaxCY.Text)
-                        delete(atRoi{rr}.MaxDistances.MaxCY.Text);
-                    end
+                    objectsToDelete = [atRoi{rr}.MaxDistances.MaxXY.Line, ...
+                                       atRoi{rr}.MaxDistances.MaxCY.Line, ...
+                                       atRoi{rr}.MaxDistances.MaxXY.Text, ...
+                                       atRoi{rr}.MaxDistances.MaxCY.Text];
+                    delete(objectsToDelete(isvalid(objectsToDelete)));
+                end                   
+                
+                % Delete ROI object 
+                
+                if isvalid(atRoi{rr}.Object)
+                    delete(atRoi{rr}.Object)
                 end                
             end
             

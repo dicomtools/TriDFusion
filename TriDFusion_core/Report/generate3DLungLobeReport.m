@@ -822,7 +822,7 @@ function generate3DLungLobeReport(bInitReport)
                       
             delete3DLobesVoiContours('Liver-LIV', dNMSerieOffset);
          
-            maskToVoi(aLiverMask, 'Liver', 'Liver', gtReport.Liver.Color, 'axial', dNMSerieOffset, pixelEdgeMachineLearningDialog('get'));
+            maskToVoi(aLiverMask, 'Liver', 'Liver', gtReport.Liver.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
             
             % Clean Lungs Mask
 
@@ -834,7 +834,7 @@ function generate3DLungLobeReport(bInitReport)
             
             delete3DLobesVoiContours('Lungs-LUN', dNMSerieOffset);
 
-            maskToVoi(aLungsMask, 'Lungs', 'Lung', gtReport.Lungs.Color, 'axial', dNMSerieOffset, pixelEdgeMachineLearningDialog('get'));
+            maskToVoi(aLungsMask, 'Lungs', 'Lung', gtReport.Lungs.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
 
             clear aLungsMask;
 
@@ -848,7 +848,7 @@ function generate3DLungLobeReport(bInitReport)
             
             delete3DLobesVoiContours('Lung Left-LUN', dNMSerieOffset);
 
-            maskToVoi(aLungLeftMask, 'Lung Left', 'Lung', gtReport.LungLeft.Color, 'axial', dNMSerieOffset, pixelEdgeMachineLearningDialog('get'));
+            maskToVoi(aLungLeftMask, 'Lung Left', 'Lung', gtReport.LungLeft.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
 
             clear aLungLeftMask;
             
@@ -862,7 +862,7 @@ function generate3DLungLobeReport(bInitReport)
             
             delete3DLobesVoiContours('Lung Right-LUN', dNMSerieOffset);
 
-            maskToVoi(aLungRightMask, 'Lung Right', 'Lung', gtReport.LungRight.Color, 'axial', dNMSerieOffset, pixelEdgeMachineLearningDialog('get'));
+            maskToVoi(aLungRightMask, 'Lung Right', 'Lung', gtReport.LungRight.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
 
             clear aLungRightMask;
 
@@ -876,7 +876,7 @@ function generate3DLungLobeReport(bInitReport)
             
             delete3DLobesVoiContours('Lung Lower Lobe Left-LUN', dNMSerieOffset);
 
-            maskToVoi(aLungLowerLobeLeftMask, 'Lung Lower Lobe Left', 'Lung', gtReport.LungLowerLobeLeft.Color, 'axial', dNMSerieOffset, pixelEdgeMachineLearningDialog('get'));
+            maskToVoi(aLungLowerLobeLeftMask, 'Lung Lower Lobe Left', 'Lung', gtReport.LungLowerLobeLeft.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
 
             clear aLungLowerLobeLeftMask;
 
@@ -890,7 +890,7 @@ function generate3DLungLobeReport(bInitReport)
             
             delete3DLobesVoiContours('Lung Lower Lobe Right-LUN', dNMSerieOffset);
 
-            maskToVoi(aLungLowerLobeRightMask, 'Lung Lower Lobe Right', 'Lung', gtReport.LungLowerLobeRight.Color, 'axial', dNMSerieOffset, pixelEdgeMachineLearningDialog('get'));
+            maskToVoi(aLungLowerLobeRightMask, 'Lung Lower Lobe Right', 'Lung', gtReport.LungLowerLobeRight.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
 
             clear aLungLowerLobeRightMask;
 
@@ -904,7 +904,7 @@ function generate3DLungLobeReport(bInitReport)
             
             delete3DLobesVoiContours('Lung Middle Lobe Right-LUN', dNMSerieOffset);
 
-            maskToVoi(aLungMiddleLobeRightMask, 'Lung Middle Lobe Right', 'Lung', gtReport.LungMiddleLobeRight.Color, 'axial', dNMSerieOffset, pixelEdgeMachineLearningDialog('get'));
+            maskToVoi(aLungMiddleLobeRightMask, 'Lung Middle Lobe Right', 'Lung', gtReport.LungMiddleLobeRight.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
 
             clear aLungMiddleLobeRightMask;
 

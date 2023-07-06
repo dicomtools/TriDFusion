@@ -27,7 +27,9 @@ function movedRoiEvents(hObject, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+    atRoi = roiTemplate('get', dSeriesOffset);
     
     if isempty(atRoi)
         return;
@@ -51,7 +53,7 @@ function movedRoiEvents(hObject, ~)
                 
                 if strcmpi(hObject.UserData, 'Sphere')
                     
-                    atVoi = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+                    atVoi = voiTemplate('get', dSeriesOffset);
                                           
                     aSemiAxesRatio = atRoi{dTagOffset}.SemiAxes ./ hObject.SemiAxes;
                     
@@ -75,17 +77,19 @@ function movedRoiEvents(hObject, ~)
                                     atRoi{dTagOffset}.RotationAngle = hObject.RotationAngle;
                                     atRoi{dTagOffset}.Vertices      = hObject.Vertices;
                 
-                                    tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get'), dicomMetaData('get'), atRoi{dTagOffset}, false, false);
+                                    tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), atRoi{dTagOffset}, false, false);
 
                                     sVoiLable = sprintf('Sphere %s mm', num2str(tMaxDistances.MaxXY.Length));
                                     atVoi{vv}.Label = sVoiLable;
                                     
-                                    voiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atVoi);
+                                    voiTemplate('set', dSeriesOffset, atVoi);
                                     
                                     setVoiRoiSegPopup();
                                     
                                     atRoi{dTagOffset}.Object.Label = sprintf('%s (roi %d/%d)', sVoiLable, rr, numel(pRoisTag));
                                     atRoi{dTagOffset}.Label = sprintf('%s (roi %d/%d)', sVoiLable, rr, numel(pRoisTag));
+
+                                    atRoi{dTagOffset}.MaxDistances = tMaxDistances;    
 
                                     end
                                     
@@ -113,12 +117,13 @@ function movedRoiEvents(hObject, ~)
 
                                     atRoi{dVoiRoiTagOffset}.SemiAxes      = atRoi{dVoiRoiTagOffset}.Object.SemiAxes;
                                     atRoi{dVoiRoiTagOffset}.RotationAngle = atRoi{dVoiRoiTagOffset}.Object.RotationAngle;
-
-                                    tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get'), dicomMetaData('get'), atRoi{dVoiRoiTagOffset}, false, false);
-                                    atRoi{dVoiRoiTagOffset}.MaxDistances = tMaxDistances;    
+ 
 %                                    end
                                     
                                     atRoi{dVoiRoiTagOffset}.Vertices = atRoi{dVoiRoiTagOffset}.Object.Vertices;     
+
+                                    tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), atRoi{dVoiRoiTagOffset}, false, false);
+                                    atRoi{dVoiRoiTagOffset}.MaxDistances = tMaxDistances;                                       
                                     
                                 end   
                                                             
@@ -163,10 +168,10 @@ function movedRoiEvents(hObject, ~)
             end
         end
 
-        tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get'), dicomMetaData('get'), atRoi{dTagOffset}, false, false);
+        tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), atRoi{dTagOffset}, false, false);
         atRoi{dTagOffset}.MaxDistances = tMaxDistances;
 
-        roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoi);
+        roiTemplate('set', dSeriesOffset, atRoi);
 
         if viewFarthestDistances('get') == true
             refreshImages();

@@ -34,7 +34,11 @@ function sliderTraCallback(~, ~)
         if get(uiSliderTraPtr('get'), 'Value') == 1 
             iSliceNumber = 1;
         else
-            iSliceNumber = round((1-get(uiSliderTraPtr('get'), 'Value')) * size(dicomBuffer('get'), 3));
+            iSliceNumber = round((1-get(uiSliderTraPtr('get'), 'Value')) * size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3));
+        end
+
+        if iSliceNumber < 0
+            iSliceNumber = 1;
         end
 
         sliceNumber('set', 'axial', iSliceNumber);    

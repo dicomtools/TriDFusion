@@ -54,8 +54,16 @@ function aRspMip = resample3DMIP(aRspMip, atRspMetaData, aRefMip, atRefMetaData,
             end
         end
 
-     else
-        aResampledMip = resampleMipTransformMatrix(aRspMip, atRspMetaData, aRefMip, atRefMetaData, sInterpolation, false);   
+    else
+        dimsRef = size(aRefMip,2);
+        dimsRsp = size(aRspMip,2); 
+        
+        remainder = mod(dimsRef, dimsRsp);
+        if remainder == 0
+            aResampledMip = resampleMipTransformMatrix(aRspMip, atRspMetaData, aRefMip, atRefMetaData, sInterpolation, false);   
+        else
+            aResampledMip = resampleMipTransformMatrix(aRspMip, atRspMetaData, aRefMip, atRefMetaData, sInterpolation, true);   
+        end
      end
 
     dimsRef = size(aRefMip);         

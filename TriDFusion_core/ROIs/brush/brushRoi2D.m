@@ -26,62 +26,64 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType)
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
-%tic    
-    tmask = poly2mask(hf.Position(:,1), hf.Position(:,2), ySize, xSize);
- %   tmask = imresize(tmask , 3, 'nearest'); % do not go directly through pixel centers
 
-    % Create a binary mask for the target freehand.
-%    tmask = hf.createMask();
-    [m, n] = size(tmask);
-    
-    % Round the positions of the target freehand ROI
+    try 
+
+    hfMask = poly2mask(hf.Position(:,1), hf.Position(:,2), ySize, xSize);
+    [m, n] = size(hfMask);
     hfPos = round(hf.Position);
+    hfMask(sub2ind([m, n], hfPos(:, 2), hfPos(:, 1))) = true;
     
-    % Include the boundary pixels of the target freehand ROI
-    hfBoundaryInd = sub2ind([m, n], hfPos(:, 2), hfPos(:, 1));
-    tmask(hfBoundaryInd) = true;
-    
-    % Create a binary mask from the editor ROI
-    emask = poly2mask(he.Vertices(:, 1), he.Vertices(:, 2), ySize, xSize);   
-%    emask = imresize(emask , 3, 'nearest'); % do not go directly through pixel centers
-%    emask = he.createMask();
+    heMask = poly2mask(he.Vertices(:, 1), he.Vertices(:, 2), ySize, xSize);
     hePos = round(he.Position);
+    heMask(sub2ind([m, n], hePos(:, 2), hePos(:, 1))) = true;
     
-    % Include the boundary pixels of the editor ROI
-    heBoundaryInd = sub2ind([m, n], hePos(:, 2), hePos(:, 1));
-    emask(heBoundaryInd) = true;
-    
-    % Check if the center of the editor ROI is inside the target freehand.
     center = he.Center;
     
-    if hf.inROI(center(1), center(2)) % Add
-        newMask = tmask | emask;
+    if hf.inROI(center(1), center(2))
+        newMask = hfMask | heMask;
     else
-        newMask = tmask & ~emask;
-    end 
+        newMask = hfMask & ~heMask;
+    end
     
-    if any(tmask(:) ~= newMask(:))
+    if pixelEdge('get')
+        hfMask  = imresize(hfMask , 3, 'nearest');
+        newMask = imresize(newMask, 3, 'nearest');
+    end
+    
+    if any(hfMask(:) ~= newMask(:))
 
-        B = bwboundaries(newMask, 'noholes', 8);
-        
+        B = bwboundaries(newMask, 'noholes', 4);
+    
         if isempty(B)
-
             deleteRoiEvents(hf);
         else
-            if ~isempty(dVoiOffset) % Set Contour Panel, Contour review
-                if get(uiDeleteVoiRoiPanelObject('get'), 'Value') ~= dVoiOffset 
+            if ~isempty(dVoiOffset)
 
-                    set(uiDeleteVoiRoiPanelObject('get'), 'Value', dVoiOffset);         
+                if get(uiDeleteVoiRoiPanelObject('get'), 'Value') ~= dVoiOffset
+
+                    set(uiDeleteVoiRoiPanelObject('get'), 'Value', dVoiOffset);
                     
                     if ~isempty(sLesionType)
                         set(uiLesionTypeVoiRoiPanelObject('get'), 'Value', getLesionType(sLesionType));
                     end
                 end
             end
+    
+            if pixelEdge('get')
+                B{1} = (B{1} + 1) / 3;
+                B{1} = reducepoly(B{1});
+            else                        
+                aSize(1)=xSize;
+                aSize(2)=ySize;
+              
+                B{1} = smoothRoi(B{1}, aSize);
+            end
+    
+            hf.Position = [B{1}(:, 2), B{1}(:, 1)];
 
-           % hf.Position = [perimPos{end}(:, 2), perimPos{end}(:, 1)];
-            hf.Position = [B{1}(:, 2), B{1}(:, 1)]; 
         end
     end
-%toc    
+    catch
+    end
 end

@@ -771,7 +771,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                   'style'   , 'checkbox',...
                   'Units'   , 'normalized',...
                   'enable'  , 'on',...
-                  'value'   , pixelEdgeMachineLearningDialog('get'),...
+                  'value'   , pixelEdge('get'),...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [0.640 ...
@@ -899,7 +899,10 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
             set(chkMachineSegmentationPixelEdge, 'Value', ~bObjectValue);
         end
         
-        pixelEdgeMachineLearningDialog('set', get(chkMachineSegmentationPixelEdge, 'Value'));
+        pixelEdge('set', get(chkMachineSegmentationPixelEdge, 'Value'));
+
+        % Set contour panel checkbox
+        set(chkPixelEdgePtr('get'), 'Value', pixelEdge('get'));
 
     end
 
@@ -1862,7 +1865,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                                     aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
                                     aMask = aMask(:,:,end:-1:1);
 
-                                    maskToVoi(aMask, sprintf('Rib Left %d', jj), 'Bone', aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                                    maskToVoi(aMask, sprintf('Rib Left %d', jj), 'Bone', aColor, 'axial', dSerieOffset, pixelEdge('get'));
                                 end                                
                             end
 
@@ -1890,7 +1893,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                                     aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
                                     aMask = aMask(:,:,end:-1:1);
 
-                                    maskToVoi(aMask, sprintf('Rib Right %d', jj), 'Bone', aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                                    maskToVoi(aMask, sprintf('Rib Right %d', jj), 'Bone', aColor, 'axial', dSerieOffset, pixelEdge('get'));
                                 end                                
                             end
 
@@ -1918,7 +1921,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                                     aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
                                     aMask = aMask(:,:,end:-1:1);
 
-                                    maskToVoi(aMask, sprintf('Vertebrae C%d', jj), 'Bone', aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                                    maskToVoi(aMask, sprintf('Vertebrae C%d', jj), 'Bone', aColor, 'axial', dSerieOffset, pixelEdge('get'));
                                 end                                
                             end
 
@@ -1946,7 +1949,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                                     aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
                                     aMask = aMask(:,:,end:-1:1);
 
-                                    maskToVoi(aMask, sprintf('Vertebrae T%d', jj), 'Bone', aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                                    maskToVoi(aMask, sprintf('Vertebrae T%d', jj), 'Bone', aColor, 'axial', dSerieOffset, pixelEdge('get'));
                                 end                                
                             end
 
@@ -1974,7 +1977,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                                     aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
                                     aMask = aMask(:,:,end:-1:1);
 
-                                    maskToVoi(aMask, sprintf('Vertebrae L%d', jj), 'Bone', aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                                    maskToVoi(aMask, sprintf('Vertebrae L%d', jj), 'Bone', aColor, 'axial', dSerieOffset, pixelEdge('get'));
                                 end                                
                             end
 
@@ -2002,7 +2005,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                                     aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
                                     aMask = aMask(:,:,end:-1:1);
 
-                                    maskToVoi(aMask, asSkeletonName{aa}, 'Bone', aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                                    maskToVoi(aMask, asSkeletonName{aa}, 'Bone', aColor, 'axial', dSerieOffset, pixelEdge('get'));
                                end
             
                             end
@@ -2031,7 +2034,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                                     aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
                                     aMask = aMask(:,:,end:-1:1);
                                     
-                                    maskToVoi(aMask, asSkeletonName{aa}, 'Bone', aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                                    maskToVoi(aMask, asSkeletonName{aa}, 'Bone', aColor, 'axial', dSerieOffset, pixelEdge('get'));
                                end
             
                             end
@@ -2060,7 +2063,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                                     aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
                                     aMask = aMask(:,:,end:-1:1);
 
-                                    maskToVoi(aMask, asSkeletonName{aa}, 'Bone', aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                                    maskToVoi(aMask, asSkeletonName{aa}, 'Bone', aColor, 'axial', dSerieOffset, pixelEdge('get'));
                                end
             
                             end
@@ -2080,7 +2083,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                                 aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
                                 aMask = aMask(:,:,end:-1:1);
 
-                                maskToVoi(aMask, asSkeletonName{aa}, 'Bone', aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                                maskToVoi(aMask, asSkeletonName{aa}, 'Bone', aColor, 'axial', dSerieOffset, pixelEdge('get'));
                             end
                     end
 
@@ -2134,7 +2137,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                                     aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
                                     aMask = aMask(:,:,end:-1:1);
 
-                                    maskToVoi(aMask, asCardiovascularName{bb}, 'Unspecified', aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                                    maskToVoi(aMask, asCardiovascularName{bb}, 'Unspecified', aColor, 'axial', dSerieOffset, pixelEdge('get'));
                                end
             
                             end
@@ -2180,7 +2183,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                                 aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
                                 aMask = aMask(:,:,end:-1:1);
 
-                                maskToVoi(aMask, asCardiovascularName{bb}, 'Unspecified', aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                                maskToVoi(aMask, asCardiovascularName{bb}, 'Unspecified', aColor, 'axial', dSerieOffset, pixelEdge('get'));
                             end
                     end
 
@@ -2232,7 +2235,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                                     aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
                                     aMask = aMask(:,:,end:-1:1);
 
-                                    maskToVoi(aMask, asOtherOrgansName{cc}, 'Lung', aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                                    maskToVoi(aMask, asOtherOrgansName{cc}, 'Lung', aColor, 'axial', dSerieOffset, pixelEdge('get'));
                                end
             
                             end
@@ -2259,7 +2262,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                                     aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
                                     aMask = aMask(:,:,end:-1:1);
 
-                                    maskToVoi(aMask, asOtherOrgansName{cc}, 'Lung', aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                                    maskToVoi(aMask, asOtherOrgansName{cc}, 'Lung', aColor, 'axial', dSerieOffset, pixelEdge('get'));
                                end
             
                             end
@@ -2286,7 +2289,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                                     aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
                                     aMask = aMask(:,:,end:-1:1);
 
-                                    maskToVoi(aMask, asOtherOrgansName{cc}, 'Lung', aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                                    maskToVoi(aMask, asOtherOrgansName{cc}, 'Lung', aColor, 'axial', dSerieOffset, pixelEdge('get'));
                                end
             
                             end
@@ -2335,7 +2338,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                                 aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
                                 aMask = aMask(:,:,end:-1:1);
 
-                                maskToVoi(aMask, asOtherOrgansName{cc}, sLesionType, aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                                maskToVoi(aMask, asOtherOrgansName{cc}, sLesionType, aColor, 'axial', dSerieOffset, pixelEdge('get'));
                             end
                     end
 
@@ -2376,7 +2379,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                         aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
                         aMask = aMask(:,:,end:-1:1);
 
-                        maskToVoi(aMask, asGastrointestinalTractName{dd}, 'Unspecified', aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                        maskToVoi(aMask, asGastrointestinalTractName{dd}, 'Unspecified', aColor, 'axial', dSerieOffset, pixelEdge('get'));
                     end
 
                 end
@@ -2416,7 +2419,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
                         aMask = imrotate3(nii.img, 90, [0 0 1],'nearest');
                         aMask = aMask(:,:,end:-1:1);
 
-                        maskToVoi(aMask, asMusclesName{ee}, 'Unspecified', aColor, 'axial', dSerieOffset, pixelEdgeMachineLearningDialog('get'));
+                        maskToVoi(aMask, asMusclesName{ee}, 'Unspecified', aColor, 'axial', dSerieOffset, pixelEdge('get'));
                     end
 
                 end

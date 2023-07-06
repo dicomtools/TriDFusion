@@ -1962,7 +1962,7 @@ function generate3DLungShuntReport(bInitReport)
                       
             deleteLungShuntVoiContours('Liver-LIV', dNMSerieOffset);
          
-            maskToVoi(aLiverMask, 'Liver', 'Liver', gtReport.Liver.Color, 'axial', dNMSerieOffset, pixelEdgeMachineLearningDialog('get'));
+            maskToVoi(aLiverMask, 'Liver', 'Liver', gtReport.Liver.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
             
             % Clean Lungs Mask
 
@@ -1980,7 +1980,7 @@ function generate3DLungShuntReport(bInitReport)
 
             deleteLungShuntVoiContours('Lungs-LUN', dNMSerieOffset);
 
-            maskToVoi(aLungsMask, 'Lungs', 'Lung', gtReport.Lungs.Color, 'axial', dNMSerieOffset, pixelEdgeMachineLearningDialog('get'));
+            maskToVoi(aLungsMask, 'Lungs', 'Lung', gtReport.Lungs.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
 
             clear aLiverMask;
             clear aLungsMask;
