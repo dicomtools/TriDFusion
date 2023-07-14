@@ -1,6 +1,6 @@
-function uiObject = uiCTRoiPanelSeriesObject(sAction, aValue)
-%function  uiObject = uiCTRoiPanelSeriesObject(sAction, aValue)
-%Get\Set CT Series ROI Panel Object.
+function uiObject = uiCreateVoiRoiPanelObject(sAction, aValue)
+%function  uiObject = uiCreateVoiRoiPanelObject(sAction, aValue)
+%Get\Set Segment ROI Panel Object.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.
@@ -10,7 +10,7 @@ function uiObject = uiCTRoiPanelSeriesObject(sAction, aValue)
 %
 %Last specifications modified:
 %
-% Copyright 2021, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2023, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 

@@ -256,6 +256,10 @@ function resize = dicomViewer()
     defaultIsoColorFusionOffset ('set', isoColorFusionOffset('get') ); 
     defaultIsoSurfaceFusionValue('set', isoSurfaceFusionValue('get'));
 
+    % Radiomics
+    radiomicsEntireVolume('set', true);
+    radiomicsContourType('set', true);
+
     % 3D Lung Shunt
 
     lungShuntLiverVolumeOversized          ('set',  3); % Pixel(s) offset
@@ -297,6 +301,9 @@ function resize = dicomViewer()
     Ga68DOTATATESmalestVoiValue('set', 0.3);
 
     Ga68DOTATATENormalLiverTresholdMultiplierValue('set', 1.5);
+
+    Ga68DOTATATENormalLiverSDValue('set', 0.4);
+    Ga68DOTATATENormalLiverMeanValue('set', 4);
 
     clearDisplay();
 

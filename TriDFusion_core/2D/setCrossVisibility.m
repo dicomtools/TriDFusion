@@ -36,7 +36,7 @@ function setCrossVisibility(bStatus)
             alAxes1Line = axesLine('get', 'axes1');
             alAxes2Line = axesLine('get', 'axes2');
             alAxes3Line = axesLine('get', 'axes3');
-
+            
             for ii1=1:numel(alAxes1Line)    
                 alAxes1Line{ii1}.Visible = bStatus;
             end
@@ -49,7 +49,12 @@ function setCrossVisibility(bStatus)
                 alAxes3Line{ii3}.Visible = bStatus;
             end 
 
-            refreshImages();
+            alAxesMipLine = axesLine('get', 'axesMip');
+            for iiM=1:numel(alAxesMipLine)    
+                alAxesMipLine{iiM}.Visible = bStatus;
+            end 
+
+%            refreshImages();
 
         end                
     end

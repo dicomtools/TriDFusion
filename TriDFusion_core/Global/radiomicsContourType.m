@@ -1,16 +1,13 @@
-function uiObject = uiCTRoiPanelSeriesObject(sAction, aValue)
-%function  uiObject = uiCTRoiPanelSeriesObject(sAction, aValue)
-%Get\Set CT Series ROI Panel Object.
+function bContourType = radiomicsContourType(sAction, bValue)
+%function bContourType = radiomicsContourType(sAction, bValue)
+%Get/Set radiomics contour location (type) value.
 %See TriDFuison.doc (or pdf) for more information about options.
-%
-%Note: option settings must fit on one line and can contain one semicolon at most.
-%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2021, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2023, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -20,7 +17,7 @@ function uiObject = uiCTRoiPanelSeriesObject(sAction, aValue)
 % 
 %     This version of TriDFusion is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
-%     the Free Software Foundation, either version 3 of the License, or
+%     the Free Software Foundation, eithe`r version 3 of the License, or
 %     (at your option) any later version.
 % 
 % TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
@@ -28,13 +25,14 @@ function uiObject = uiCTRoiPanelSeriesObject(sAction, aValue)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-     persistent paObject; 
+    persistent pbContourType; 
 
-     if strcmpi('set', sAction)
-        paObject = aValue;            
-     end      
-     
-     uiObject = paObject;
+    if strcmpi('set', sAction)
+        pbContourType = bValue;
+    end
+
+    bContourType = pbContourType;
+    
 end

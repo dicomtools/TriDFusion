@@ -1,16 +1,13 @@
-function uiObject = uiCTRoiPanelSeriesObject(sAction, aValue)
-%function  uiObject = uiCTRoiPanelSeriesObject(sAction, aValue)
-%Get\Set CT Series ROI Panel Object.
+function dSDValue = Ga68DOTATATENormalLiverSDValue(sAction, dValue)
+%function dSDValue = Ga68DOTATATENormalLiverSDValue(sAction, dValue)
+%Get/Set Ga68DOTATATE Normal LiverTreshold MultiplierValue.
 %See TriDFuison.doc (or pdf) for more information about options.
-%
-%Note: option settings must fit on one line and can contain one semicolon at most.
-%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2021, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2023, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -28,13 +25,13 @@ function uiObject = uiCTRoiPanelSeriesObject(sAction, aValue)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-     persistent paObject; 
+    persistent pdSDValue; 
 
-     if strcmpi('set', sAction)
-        paObject = aValue;            
-     end      
-     
-     uiObject = paObject;
+    if strcmpi('set', sAction)
+        pdSDValue = dValue;            
+    end
+    
+    dSDValue = pdSDValue;
 end

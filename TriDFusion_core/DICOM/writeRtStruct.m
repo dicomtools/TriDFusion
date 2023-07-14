@@ -65,7 +65,15 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
     
     atRoiInput = roiTemplate('get', dOffset);
     atVoiInput = voiTemplate('get', dOffset);
-    
+
+    if isempty(atRoiInput)
+        return;
+    end
+
+    if isempty(atVoiInput)
+        return;
+    end
+
 %    for pp=1:numel(atVoiInput) % Patch, don't export total-mask
 %        if strcmpi(atVoiInput{pp}.Label, 'TOTAL-MASK')
 %            atVoiInput{pp} = [];

@@ -90,7 +90,7 @@ function mainWindowMenu()
     mViewCam  = uimenu(mView, 'Label','Camera Toolbar'   , 'Callback', @setViewToolbar, 'Separator','on');
     mViewEdit = uimenu(mView, 'Label','Plot Edit Toolbar', 'Callback', @setViewToolbar);
 
-    mViewRoi = uimenu(mView, 'Label','ROI Toolbar' , 'Callback', @setViewToolbar);
+    mViewRoi = uimenu(mView, 'Label','Contour Toolbar' , 'Callback', @setViewToolbar);
     viewRoiObject('set', mViewRoi);
 
     mViewPlayback = uimenu(mView, 'Label','Playback Toolbar' , 'Callback', @setViewToolbar);
@@ -690,7 +690,7 @@ end
                     setPlaybackToolbar('on');
                 end
 
-            case 'ROI Toolbar'
+            case 'Contour Toolbar'
                 if roiToolbar('get')
 
      %               set(mViewRoi, 'Checked', 'off');

@@ -32,7 +32,7 @@ function setSeriesCallback(~,~)
 
     if iOffset <= numel(tInput)
         
-        try
+  %      try
 
         set(uiSeriesPtr('get'), 'Enable', 'off');                
 
@@ -383,9 +383,9 @@ function setSeriesCallback(~,~)
             set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));              
         end
 
-        catch
-            progressBar(1, 'Error:setSeriesCallback()');
-        end
+%        catch
+ %           progressBar(1, 'Error:setSeriesCallback()');
+  %      end
         
         % Reactivate main tool bar 
         set(uiSeriesPtr('get'), 'Enable', 'on');                

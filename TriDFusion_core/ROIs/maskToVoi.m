@@ -56,8 +56,6 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
         
     for mm=1: dMaskSize
         
-         progressBar(mm/dMaskSize, sprintf('Processing Mask ROI %d/%d', mm, dMaskSize ) );      
-  
         if strcmpi(sPlane, 'coronal')
             aSlice = aMask(mm,:,:);
         elseif strcmpi(sPlane, 'sagittal')
@@ -67,15 +65,7 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
         end       
         
         if any(aSlice, 'all') 
-                        
-            if strcmpi(sPlane, 'coronal')
-                sliceNumber('set', 'coronal', mm);
-            elseif strcmpi(sPlane, 'sagittal')
-                sliceNumber('set', 'sagittal', mm);
-            else
-                sliceNumber('set', 'axial', mm);
-            end            
-
+                               
             if bPixelEdge == true
                 aSlice = imresize(aSlice,3, 'nearest'); % do not go directly through pixel centers
             end
@@ -83,6 +73,16 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
             [maskSlice, ~,~,~] = bwboundaries(aSlice, 'noholes', 4); 
 
             if ~isempty(maskSlice)
+
+                if strcmpi(sPlane, 'coronal')
+                    sliceNumber('set', 'coronal', mm);
+                elseif strcmpi(sPlane, 'sagittal')
+                    sliceNumber('set', 'sagittal', mm);
+                else
+                    sliceNumber('set', 'axial', mm);
+                end    
+
+                progressBar(mm/dMaskSize, sprintf('Processing mask slice %d/%d', mm, dMaskSize ) );      
 
                 for jj=1:numel(maskSlice)
                     
@@ -99,7 +99,6 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
                     if bPixelEdge == false
                         
                         aPosition = smoothRoi(aPosition, aMaskSize);
-
                     end
 
                     pRoi = images.roi.Freehand(axRoi, ...

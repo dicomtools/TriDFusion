@@ -176,11 +176,11 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
         otherwise
 
-            dSeries1Min    = dModality1IntensityMin;
-            dSeries1Max    = dModality1IntensityMax;
+            dSeries1Min    = min(aSerie1Image, [], 'all');
+            dSeries1Max    = max(aSerie1Image, [], 'all');
 
-            dSeries1MIPMin = dModality1MIPIntensityMin;
-            dSeries1MIPMax = dModality1MIPIntensityMax;
+            dSeries1MIPMin = min(aMip, [], 'all');
+            dSeries1MIPMax = max(aMip, [], 'all');
     end
 
     % Set TCS Axes intensity
@@ -255,11 +255,11 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
         otherwise
 
-            dSeries2Min    = dModality2IntensityMin;
-            dSeries2Max    = dModality2IntensityMax;
+            dSeries2Min    = min(aSerie2Image, [], 'all');
+            dSeries2Max    = max(aSerie2Image, [], 'all');
 
-            dSeries2MIPMin = dModality2MIPIntensityMin;
-            dSeries2MIPMax = dModality2MIPIntensityMax;
+            dSeries2MIPMin = min(refMip, [], 'all');
+            dSeries2MIPMax = max(refMip, [], 'all');
     end
 
     % Set Fusion TCS Axes intensity

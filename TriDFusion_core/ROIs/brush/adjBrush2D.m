@@ -45,7 +45,7 @@ function adjBrush2D(pRoiPtr, dInitCoord)
     switch(gca)
         
         case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) % Coronal                    
-            dSliceThickness = computeSliceSpacing(atMetaData);c
+            dSliceThickness = computeSliceSpacing(atMetaData);
             xPixel = atMetaData{1}.PixelSpacing(1);
             yPixel = dSliceThickness;                                       
             
