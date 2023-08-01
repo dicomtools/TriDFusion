@@ -275,25 +275,25 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                     end
                 end
 
-                uiSliderLevel = uiSliderLevelPtr('get');
-                if ~isempty(uiSliderLevel)                                
-                    set(uiSliderLevel , 'BackgroundColor',  backgroundColor('get'));
-                end
+%                 uiSliderLevel = uiSliderLevelPtr('get');
+%                 if ~isempty(uiSliderLevel)                                
+%                     set(uiSliderLevel , 'BackgroundColor',  backgroundColor('get'));
+%                 end
+ 
+%                 uiSliderWindow = uiSliderWindowPtr('get');
+%                 if ~isempty(uiSliderWindow)                               
+%                     set(uiSliderWindow, 'BackgroundColor',  backgroundColor('get'));
+%                 end
 
-                uiSliderWindow = uiSliderWindowPtr('get');
-                if ~isempty(uiSliderWindow)                               
-                    set(uiSliderWindow, 'BackgroundColor',  backgroundColor('get'));
-                end
+%                 uiFusionSliderLevel = uiFusionSliderLevelPtr('get');
+%                 if ~isempty(uiFusionSliderLevel)                              
+%                     set(uiFusionSliderLevel , 'BackgroundColor',  backgroundColor('get'));
+%                 end
 
-                uiFusionSliderLevel = uiFusionSliderLevelPtr('get');
-                if ~isempty(uiFusionSliderLevel)                              
-                    set(uiFusionSliderLevel , 'BackgroundColor',  backgroundColor('get'));
-                end
-
-                uiFusionSliderWindow = uiFusionSliderWindowPtr('get');
-                if ~isempty(uiFusionSliderWindow) 
-                    set(uiFusionSliderWindow, 'BackgroundColor',  backgroundColor('get'));                   
-                end
+%                 uiFusionSliderWindow = uiFusionSliderWindowPtr('get');
+%                 if ~isempty(uiFusionSliderWindow) 
+%                     set(uiFusionSliderWindow, 'BackgroundColor',  backgroundColor('get'));                   
+%                 end
 
                 uiAlphaSlider = uiAlphaSliderPtr('get');
                 if ~isempty(uiAlphaSlider) 

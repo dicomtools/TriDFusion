@@ -33,7 +33,7 @@ function adjWL(dInitCoord)
         pdInitialCoord = dInitCoord;
     end
 
-    dMIn = windowLevel('get', 'min');
+    dMin = windowLevel('get', 'min');
     dMax = windowLevel('get', 'max');
 
     dWLAdjCoe = (dMax + 1)/1024;
@@ -41,7 +41,7 @@ function adjWL(dInitCoord)
     aPosDiff = get(0, 'PointerLocation') - pdInitialCoord;
 
     dMax = dMax + aPosDiff(2) * dWLAdjCoe;
-    dMIn = dMIn + aPosDiff(1) * dWLAdjCoe;
+    dMin = dMin + aPosDiff(1) * dWLAdjCoe;
 
     if (dMax < 1)
         dMax = 1;
@@ -62,9 +62,26 @@ function adjWL(dInitCoord)
         rightClickMenu('off');
     end
 
-    if dMax > dMIn
+    if dMax > dMin
 
-        aCLim(1) = dMIn;
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        aInputBuffer = inputBuffer('get');
+    
+        dImageMin = min(aInputBuffer{dSeriesOffset}, [], 'all');
+        dImageMax = max(aInputBuffer{dSeriesOffset}, [], 'all');
+    
+        clear aInputBuffer;
+
+        if dMin < dImageMin
+            dMin = dImageMin;
+        end
+
+        if dMax > dImageMax
+            dMax = dImageMax;
+        end
+
+        aCLim(1) = dMin;
         aCLim(2) = dMax;
 
 %        getInitWindowMinMax('set', aCLim(2), aCLim(1));
@@ -75,22 +92,55 @@ function adjWL(dInitCoord)
         windowLevel('set', 'max', aCLim(2));
         windowLevel('set', 'min', aCLim(1));
 
-        if (size(dicomBuffer('get'), 3) == 1)
-            set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')),'CLim', aCLim);
-        else
-            set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')),'CLim', aCLim);
-            set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')),'CLim', aCLim);
-            set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')),'CLim', aCLim);
-%            if link2DMip('get') == true && isVsplash('get') == false  
-%                set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')),'CLim', aCLim);
-%            end
-        end
+%         bLinkMip = link2DMip('get');
+% 
+%         if bLinkMip == true
+%             link2DMip('set', false);
+%         end
+
+        % Compute colorbar line y offset
+    
+        dYOffsetMax = computeLineColorbarIntensityMaxYOffset(get(uiSeriesPtr('get'), 'Value'));
+        dYOffsetMin = computeLineColorbarIntensityMinYOffset(get(uiSeriesPtr('get'), 'Value'));
+
+        % Ajust the intensity 
+
+        set(lineColorbarIntensityMaxPtr('get'), 'YData', [0.1 0.1]);
+        set(lineColorbarIntensityMinPtr('get'), 'YData', [0.9 0.9]);
+
+        setColorbarIntensityMaxScaleValue(dYOffsetMax, ...
+                                          colorbarScale('get'), ...
+                                          isColorbarDefaultUnit('get'), ...
+                                          get(uiSeriesPtr('get'), 'Value')...
+                                          );
+
+        setColorbarIntensityMinScaleValue(dYOffsetMin, ...
+                                          colorbarScale('get'), ...
+                                          isColorbarDefaultUnit('get'), ...
+                                          get(uiSeriesPtr('get'), 'Value')...
+                                          );
+
+        setAxesIntensity(get(uiSeriesPtr('get'), 'Value'));
+
+%         link2DMip('set', bLinkMip);
+
+
+%         if (size(dicomBuffer('get'), 3) == 1)
+%             set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')),'CLim', aCLim);
+%         else
+%             set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')),'CLim', aCLim);
+%             set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')),'CLim', aCLim);
+%             set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')),'CLim', aCLim);
+% %            if link2DMip('get') == true && isVsplash('get') == false  
+% %                set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')),'CLim', aCLim);
+% %            end
+%         end
 
     end
 
     pdInitialCoord = get(0,'PointerLocation');
 
-    if isVsplash('get') == false      
-        refreshImages();
-    end
+%     if isVsplash('get') == false      
+%         refreshImages();
+%     end
 end

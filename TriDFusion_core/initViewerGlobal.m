@@ -85,15 +85,34 @@ function initViewerGlobal()
 
     uiSeriesPtr('set', []);
     uiFusedSeriesPtr('set', '');
-
-    uiSliderWindowPtr('set', []);
-    uiSliderLevelPtr ('set', []);
+% 
+%     uiSliderWindowPtr('set', []);
+%     uiSliderLevelPtr ('set', []);
     uiColorbarPtr    ('set', []);
-
-    uiFusionSliderWindowPtr('set', []);
-    uiFusionSliderLevelPtr ('set', []);
+% 
+%     uiFusionSliderWindowPtr('set', []);
+%     uiFusionSliderLevelPtr ('set', []);
     uiAlphaSliderPtr       ('set', []);
     uiFusionColorbarPtr    ('set', []);
+
+    % New line on clolorbar
+
+    lineColorbarIntensityMaxPtr('set', []);
+    lineColorbarIntensityMinPtr('set', []);
+    axeColorbarPtr('set', []);
+
+    lineFusionColorbarIntensityMaxPtr('set', []);
+    lineFusionColorbarIntensityMinPtr('set', []);
+    axeFusionColorbarPtr('set', []);
+    
+    isLineColorbarIntensityMaxClicked('set', false);
+    isLineColorbarIntensityMinClicked('set', false);
+
+    isLineFusionColorbarIntensityMaxClicked('set', false);
+    isLineFusionColorbarIntensityMinClicked('set', false);
+    
+    isColorbarDefaultUnit('reset');
+    isFusionColorbarDefaultUnit('reset');
 
     uiProgressWindowPtr('set', []);
     uiBarPtr('set', []);
@@ -228,5 +247,6 @@ function initViewerGlobal()
     axes2fcPtr  ('reset');
     axes3fcPtr  ('reset');
     axesMipfcPtr('reset');
+
 
 end

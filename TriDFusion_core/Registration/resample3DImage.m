@@ -139,8 +139,8 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
                     aRspImage=imresize3(aRspImage, size(aRefImage));
                end
             else
-                xPixelSizeRatio = 1;
-                yPixelSizeRatio = 1;
+                xPixelSizeRatio = atRefMetaData{1}.PixelSpacing(1);
+                yPixelSizeRatio = atRefMetaData{1}.PixelSpacing(2);
             end
         end
     end

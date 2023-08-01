@@ -29,6 +29,33 @@ function clickUp(~, ~)
 
     windowButton('set', 'up'); 
 
+    bRefreshImage = false;
+
+    if isLineColorbarIntensityMaxClicked('get') == true
+        isLineColorbarIntensityMaxClicked('set', false);
+        bRefreshImage = true;
+    end
+
+    if isLineColorbarIntensityMinClicked('get') == true   
+        isLineColorbarIntensityMinClicked('set', false);
+        bRefreshImage = true;
+    end
+    
+    if isLineFusionColorbarIntensityMaxClicked('get') == true
+        isLineFusionColorbarIntensityMaxClicked('set', false);
+        bRefreshImage = true;
+    end
+
+    if isLineFusionColorbarIntensityMinClicked('get') == true
+        isLineFusionColorbarIntensityMinClicked('set', false);
+        bRefreshImage = true;
+    end
+
+    if bRefreshImage == true
+       set(fiMainWindowPtr('get'), 'Pointer', 'default');            
+       refreshImages();
+    end
+
     set(fiMainWindowPtr('get'), 'UserData', 'up');
 
     if switchTo3DMode('get')      == true || ...
@@ -93,7 +120,8 @@ function clickUp(~, ~)
                 end
             else
                 if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
-                    adjWL(get(0, 'PointerLocation'));                
+                    adjWL(get(0, 'PointerLocation'));   
+                    refreshImages();
                 end
             end
 

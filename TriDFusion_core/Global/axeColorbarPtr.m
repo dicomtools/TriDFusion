@@ -1,6 +1,6 @@
-function uiPtr = uiFusionSliderLevelPtr(sAction, dValue)
-%function uiPtr = uiFusionSliderLevelPtr(sAction, dValue)
-%Get/Set ui Fusion Slider Level Pointer.
+function aObject = axeColorbarPtr(sAction, aValue)
+%function aObject = axeColorbarPtr(sAction, aValue)
+%Get\Set axe Colorbar Pointer.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.
@@ -30,12 +30,11 @@ function uiPtr = uiFusionSliderLevelPtr(sAction, dValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent pdPtr;        
+    persistent paObject; 
 
     if strcmpi('set', sAction)
-        pdPtr = dValue;
-    end
-
-    uiPtr = pdPtr;      
-
+       paObject = aValue;            
+    end  
+    
+    aObject = paObject;
 end

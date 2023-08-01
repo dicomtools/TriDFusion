@@ -28,7 +28,7 @@ function progressBar(lProgress, sStatus, sColor)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
     if ~exist('sColor', 'var')
-        sColor = 'cyan';
+        sColor = viewerProgressBarLineColor('get');
     end
 
     set(uiProgressWindowPtr('get'), 'title'   , sStatus);

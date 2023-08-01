@@ -33,6 +33,8 @@ function setSeriesCallback(~,~)
     if iOffset <= numel(tInput)
         
   %      try
+        isColorbarDefaultUnit('reset');
+        isFusionColorbarDefaultUnit('reset');
 
         set(uiSeriesPtr('get'), 'Enable', 'off');                
 
@@ -60,14 +62,23 @@ function setSeriesCallback(~,~)
             set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
             set(btnFusionPtr('get'), 'FontWeight', 'normal');
            
-            delete(uiFusionSliderWindowPtr('get'));
-            delete(uiFusionSliderLevelPtr('get'));
+%             delete(uiFusionSliderWindowPtr('get'));
+%             delete(uiFusionSliderLevelPtr('get'));
+
+            delete(lineFusionColorbarIntensityMaxPtr('get'));
+            delete(lineFusionColorbarIntensityMinPtr('get'));
+    
+            delete(textFusionColorbarIntensityMaxPtr('get'));
+            delete(textFusionColorbarIntensityMinPtr('get'));
+
+            delete(axeFusionColorbarPtr('get'));
+
             delete(uiFusionColorbarPtr('get'));
             delete(uiAlphaSliderPtr('get'));
 
             uiFusionColorbarPtr    ('set', '');
-            uiFusionSliderWindowPtr('set', '');
-            uiFusionSliderLevelPtr ('set', '');
+%             uiFusionSliderWindowPtr('set', '');
+%             uiFusionSliderLevelPtr ('set', '');
             uiAlphaSliderPtr       ('set', '');                  
             
             if size(dicomBuffer('get'), 3) == 1
@@ -129,15 +140,30 @@ function setSeriesCallback(~,~)
             
         end
         
+%         set(uiSliderWindowPtr('get'), 'Visible', 'off');
+%         set(uiSliderLevelPtr('get'), 'Visible', 'off'); 
+
+        set(lineColorbarIntensityMaxPtr('get'), 'Visible', 'off');
+        set(lineColorbarIntensityMinPtr('get'), 'Visible', 'off');
+
+        set(textColorbarIntensityMaxPtr('get'), 'Visible', 'off');
+        set(textColorbarIntensityMinPtr('get'), 'Visible', 'off');
+
         set(uiColorbarPtr('get'), 'Visible', 'off');
-        set(uiSliderWindowPtr('get'), 'Visible', 'off');
-        set(uiSliderLevelPtr('get'), 'Visible', 'off'); 
-        
+
         if isFusion('get')
+
+            set(lineFusionColorbarIntensityMaxPtr('get'), 'Visible', 'off');
+            set(lineFusionColorbarIntensityMinPtr('get'), 'Visible', 'off');
+    
+            set(textFusionColorbarIntensityMaxPtr('get'), 'Visible', 'off');
+            set(textFusionColorbarIntensityMinPtr('get'), 'Visible', 'off');
+
             set(uiAlphaSliderPtr('get'), 'Visible', 'off');
             set(uiFusionColorbarPtr('get'), 'Visible', 'off');
-            set(uiFusionSliderWindowPtr('get'), 'Visible', 'off');
-            set(uiFusionSliderLevelPtr('get'), 'Visible', 'off');             
+%             set(uiFusionSliderWindowPtr('get'), 'Visible', 'off');
+%             set(uiFusionSliderLevelPtr('get'), 'Visible', 'off');             
+
         end
                
         if size(dicomBuffer('get'), 3) == 1

@@ -43,14 +43,17 @@ function resize = dicomViewer()
 
     fusionWindowLevel('set', 'max', 0);
     fusionWindowLevel('set', 'min', 0);
-
-    fusionSliderLevel('set', 'max', 0);
-    fusionSliderLevel('set', 'min', 0);
+% 
+%     fusionSliderLevel('set', 'max', 0);
+%     fusionSliderLevel('set', 'min', 0);
 
     link2DMip('set', true);
 
     windowLevel('set', 'max', 0);
     windowLevel('set', 'min', 0);
+    
+    colorbarScale      ('set', 100);
+    fusionColorbarScale('set', 100); 
 
     kernelCtSerieOffset        ('set', 1);
     kernelUseCtDoseMap         ('set', false);
@@ -93,7 +96,7 @@ function resize = dicomViewer()
     roiFaceAlphaValue('set', 0.7);
     
     crossSize              ('set', 10     );
-    crossColor             ('set', 'Cyan' );
+    crossColor             ('set', viewerCrossLinesColor('get'));
     crossActivate          ('set',  true  );
     overlayActivate        ('set',  true  );
     overlayColor           ('set', 'black');
@@ -108,9 +111,9 @@ function resize = dicomViewer()
     getVolAlphaMap         ('set', '', 'auto');
     getVolFusionAlphaMap   ('set', '', 'auto');
     colorMapVolOffset      ('set', 21); % angio
-    colorMapVolFusionOffset('set', 21);% angio
+    colorMapVolFusionOffset('set', 21); % angio
     colorMapMipOffset      ('set', 10); % gray
-    colorMapMipFusionOffset('set', 10);% gray
+    colorMapMipFusionOffset('set', 10); % gray
     mipLinearAlphaValue    ('set', 1 );
     mipLinearFuisonAlphaValue('set', 1);
     getMipAlphaMap         ('set', '', 'auto');
@@ -272,6 +275,10 @@ function resize = dicomViewer()
 
     lungLobesLiverVolumeOversized       ('set', 2); % Pixel(s) offset
     lungLobesLiverTopOfVolumeExtraSlices('set', 1); % Slice cutoff 
+
+    % FDG segmentation
+
+    FDGSegmentationBoundaryPercentValue('set', 10);
 
     % Machine Learning Ga68 DOTATATE segmentation Other Organ
     % Exclusion
@@ -677,6 +684,7 @@ function resize = dicomViewer()
                       );
         uiSliderMipPtr('set', uiSliderMip);
         addlistener(uiSliderMip, 'Value', 'PreSet', @sliderMipCallback);
+
     end
 
     %        uiAddOnWindow =  uipanel(fiMainWindowPtr('get'),...

@@ -1,6 +1,6 @@
-function aObject = uiSliderWindowPtr(sAction, aValue)
-%function aObject = uiSliderWindowPtr(sAction, aValue)
-%Get\Set Slider Window Pointer.
+function aObject = lineColorbarIntensityMinPtr(sAction, aValue)
+%function aObject = lineColorbarIntensityMinPtr(sAction, aValue)
+%Get\Set colorbar line min intensity pointer.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.
@@ -10,7 +10,7 @@ function aObject = uiSliderWindowPtr(sAction, aValue)
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2023, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -34,6 +34,7 @@ function aObject = uiSliderWindowPtr(sAction, aValue)
 
     if strcmpi('set', sAction)
        paObject = aValue;            
-    end      
+    end  
+    
     aObject = paObject;
 end

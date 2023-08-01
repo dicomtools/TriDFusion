@@ -91,14 +91,29 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
     end
 
 %    if aAxe == axes3Ptr('get', [], dSeriesOffset)
-        set(uiSliderWindowPtr('get'), 'Visible', 'off');
-        set(uiSliderLevelPtr('get') , 'Visible', 'off');
-        set(uiColorbarPtr('get')    , 'Visible', 'off');
+%         set(uiSliderWindowPtr('get'), 'Visible', 'off');
+%         set(uiSliderLevelPtr('get') , 'Visible', 'off');
+
+        set(lineColorbarIntensityMaxPtr('get'), 'Visible', 'off');
+        set(lineColorbarIntensityMinPtr('get'), 'Visible', 'off');
+
+        set(textColorbarIntensityMaxPtr('get'), 'Visible', 'off');
+        set(textColorbarIntensityMinPtr('get'), 'Visible', 'off');
+
+        set(uiColorbarPtr('get'), 'Visible', 'off');
+
         if isFusion('get')
-            set(uiFusionSliderWindowPtr('get'), 'Visible', 'off');
-            set(uiFusionSliderLevelPtr('get') , 'Visible', 'off');
-            set(uiAlphaSliderPtr('get')       , 'Visible', 'off');
-            set(uiFusionColorbarPtr('get')    , 'Visible', 'off');
+%             set(uiFusionSliderWindowPtr('get'), 'Visible', 'off');
+%             set(uiFusionSliderLevelPtr('get') , 'Visible', 'off');
+
+            set(lineFusionColorbarIntensityMaxPtr('get'), 'Visible', 'off');
+            set(lineFusionColorbarIntensityMinPtr('get'), 'Visible', 'off');
+    
+            set(textFusionColorbarIntensityMaxPtr('get'), 'Visible', 'off');
+            set(textFusionColorbarIntensityMinPtr('get'), 'Visible', 'off');
+
+            set(uiAlphaSliderPtr('get')   , 'Visible', 'off');
+            set(uiFusionColorbarPtr('get'), 'Visible', 'off');
         end
 %    end
 
@@ -327,14 +342,29 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
     set(uiSliderMipPtr('get'), 'Visible', 'on');
 
 %    if aAxe == axes3Ptr('get', [], dSeriesOffset)
-        set(uiSliderWindowPtr('get'), 'Visible', 'on');
-        set(uiSliderLevelPtr('get') , 'Visible', 'on');
-        set(uiColorbarPtr('get')   , 'Visible', 'on');
+%         set(uiSliderWindowPtr('get'), 'Visible', 'on');
+%         set(uiSliderLevelPtr('get') , 'Visible', 'on');
+
+        set(lineColorbarIntensityMaxPtr('get'), 'Visible', 'on');
+        set(lineColorbarIntensityMinPtr('get'), 'Visible', 'on');
+
+        set(textColorbarIntensityMaxPtr('get'), 'Visible', 'on');
+        set(textColorbarIntensityMinPtr('get'), 'Visible', 'on');
+
+        set(uiColorbarPtr('get'), 'Visible', 'on');
+
         if isFusion('get')
-            set(uiFusionSliderWindowPtr('get'), 'Visible', 'on');
-            set(uiFusionSliderLevelPtr('get') , 'Visible', 'on');
-            set(uiAlphaSliderPtr('get')       , 'Visible', 'on');
-            set(uiFusionColorbarPtr('get')   , 'Visible', 'on');
+%             set(uiFusionSliderWindowPtr('get'), 'Visible', 'on');
+%             set(uiFusionSliderLevelPtr('get') , 'Visible', 'on');
+
+            set(lineFusionColorbarIntensityMaxPtr('get'), 'Visible', 'on');
+            set(lineFusionColorbarIntensityMinPtr('get'), 'Visible', 'on');
+    
+            set(textFusionColorbarIntensityMaxPtr('get'), 'Visible', 'on');
+            set(textFusionColorbarIntensityMinPtr('get'), 'Visible', 'on');
+
+            set(uiAlphaSliderPtr('get')   , 'Visible', 'on');
+            set(uiFusionColorbarPtr('get'), 'Visible', 'on');
         end
 %    end
 

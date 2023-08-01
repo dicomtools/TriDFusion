@@ -1,16 +1,13 @@
-function uiPtr = uiFusionSliderWindowPtr(sAction, dValue)
-%function uiPtr = uiFusionSliderWindowPtr(sAction, dValue)
-%Get/Set ui Fusion Slider Window Pointer.
+function dScale = fusionColorbarScale(sAction, dValue)
+%function dScale = fuisonColorbarScale(sAction, dValue)
+%Get/Set colorbar scale value.
 %See TriDFuison.doc (or pdf) for more information about options.
-%
-%Note: option settings must fit on one line and can contain one semicolon at most.
-%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2023, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -28,14 +25,13 @@ function uiPtr = uiFusionSliderWindowPtr(sAction, dValue)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    persistent pdPtr;        
+    persistent pdScale; 
 
     if strcmpi('set', sAction)
-        pdPtr = dValue;
+        pdScale = dValue;            
     end
-
-    uiPtr = pdPtr;      
-
+    
+    dScale = pdScale;
 end

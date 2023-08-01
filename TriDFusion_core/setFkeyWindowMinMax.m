@@ -36,27 +36,53 @@ function setFkeyWindowMinMax(lMax, lMin)
 
         getInitWindowMinMax('set', lMax, lMin);
 
-        set(uiSliderWindowPtr('get'), 'value', 0.5);
-        set(uiSliderLevelPtr('get') , 'value', 0.5);
+        % Compute colorbar line y offset
+    
+        dYOffsetMax = computeLineColorbarIntensityMaxYOffset(get(uiSeriesPtr('get'), 'Value'));
+        dYOffsetMin = computeLineColorbarIntensityMinYOffset(get(uiSeriesPtr('get'), 'Value'));
 
-        if switchTo3DMode('get')     == false && ...
-           switchToIsoSurface('get') == false && ...
-           switchToMIPMode('get')    == false
+        % Ajust the intensity 
 
-            if size(dicomBuffer('get'), 3) == 1            
-                set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-            else
-                set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);
-                set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);
-                set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);
-                
-                if link2DMip('get') == true && isVsplash('get') == false
-                    set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);                   
-                end
-            end
+        set(lineColorbarIntensityMaxPtr('get'), 'YData', [0.1 0.1]);
+        set(lineColorbarIntensityMinPtr('get'), 'YData', [0.9 0.9]);
 
-            refreshImages();
-        end
+        setColorbarIntensityMaxScaleValue(dYOffsetMax, ...
+                                          colorbarScale('get'), ...
+                                          isColorbarDefaultUnit('get'), ...
+                                          get(uiSeriesPtr('get'), 'Value')...
+                                          );
+
+        setColorbarIntensityMinScaleValue(dYOffsetMin, ...
+                                          colorbarScale('get'), ...
+                                          isColorbarDefaultUnit('get'), ...
+                                          get(uiSeriesPtr('get'), 'Value')...
+                                          );
+
+        setAxesIntensity(get(uiSeriesPtr('get'), 'Value'));
+
+        refreshImages();
+
+%         set(uiSliderWindowPtr('get'), 'value', 0.5);
+%         set(uiSliderLevelPtr('get') , 'value', 0.5);
+
+%         if switchTo3DMode('get')     == false && ...
+%            switchToIsoSurface('get') == false && ...
+%            switchToMIPMode('get')    == false
+% 
+%             if size(dicomBuffer('get'), 3) == 1            
+%                 set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+%             else
+%                 set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);
+%                 set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);
+%                 set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);
+%                 
+%                 if link2DMip('get') == true && isVsplash('get') == false
+%                     set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);                   
+%                 end
+%             end
+% 
+%             refreshImages();
+%         end
     end
 
     if isFusion('get') == true
@@ -69,29 +95,56 @@ function setFkeyWindowMinMax(lMax, lMin)
         else
             atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;                   
             if strcmpi(atFuseMetaData{1}.Modality, 'ct')
+
                 fusionWindowLevel('set', 'max', lMax);
                 fusionWindowLevel('set', 'min' ,lMin);
 
-                set(uiFusionSliderWindowPtr('get'), 'value', 0.5);
-                set(uiFusionSliderLevelPtr('get') , 'value', 0.5);
+                % Compute colorbar line y offset
+        
+                dYOffsetMax = computeLineFusionColorbarIntensityMaxYOffset(get(uiFusedSeriesPtr('get'), 'Value'));
+                dYOffsetMin = computeLineFusionColorbarIntensityMinYOffset(get(uiFusedSeriesPtr('get'), 'Value'));
 
-                if switchTo3DMode('get')     == false && ...
-                   switchToIsoSurface('get') == false && ...
-                   switchToMIPMode('get')    == false
+                % Ajust the intensity 
 
-                    if size(dicomBuffer('get'), 3) == 1            
-                        set(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-                    else
-                        set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);
-                        set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);
-                        set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);
-                        if link2DMip('get') == true                      
-                            set(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-                        end
-                    end
+                set(lineFusionColorbarIntensityMaxPtr('get'), 'YData', [0.1 0.1]);
+                set(lineFusionColorbarIntensityMinPtr('get'), 'YData', [0.9 0.9]);
 
-                    refreshImages();
-                end                        
+                setFusionColorbarIntensityMaxScaleValue(dYOffsetMax, ...
+                                                        fusionColorbarScale('get'), ...
+                                                        isFusionColorbarDefaultUnit('get'),...
+                                                        get(uiFusedSeriesPtr('get'), 'Value')...
+                                                       );
+                                                    
+                setFusionColorbarIntensityMinScaleValue(dYOffsetMin, ...
+                                                        fusionColorbarScale('get'), ...
+                                                        isFusionColorbarDefaultUnit('get'),...
+                                                        get(uiFusedSeriesPtr('get'), 'Value')...
+                                                        );
+
+                setFusionAxesIntensity(get(uiFusedSeriesPtr('get'), 'Value'));
+
+                refreshImages();
+
+%                 set(uiFusionSliderWindowPtr('get'), 'value', 0.5);
+%                 set(uiFusionSliderLevelPtr('get') , 'value', 0.5);
+% 
+%                 if switchTo3DMode('get')     == false && ...
+%                    switchToIsoSurface('get') == false && ...
+%                    switchToMIPMode('get')    == false
+% 
+%                     if size(dicomBuffer('get'), 3) == 1            
+%                         set(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+%                     else
+%                         set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);
+%                         set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);
+%                         set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);
+%                         if link2DMip('get') == true                      
+%                             set(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+%                         end
+%                     end
+% 
+%                     refreshImages();
+%                 end                        
             end
         end
     end 

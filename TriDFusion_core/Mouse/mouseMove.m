@@ -27,6 +27,58 @@ function mouseMove(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
+    if isLineColorbarIntensityMaxClicked('get') == true
+
+        axeColorbar = axeColorbarPtr('get');
+
+        setColorbarIntensityMaxScaleValue(axeColorbar.CurrentPoint(1,2), ...
+                                          colorbarScale('get'), ...
+                                          isColorbarDefaultUnit('get', get(uiSeriesPtr('get'), 'Value')), ...
+                                          get(uiSeriesPtr('get'), 'Value')...
+                                          );
+
+        setAxesIntensity(get(uiSeriesPtr('get'), 'Value'));
+      
+    end
+
+    if isLineColorbarIntensityMinClicked('get') == true
+        
+        axeColorbar = axeColorbarPtr('get');
+
+        setColorbarIntensityMinScaleValue(axeColorbar.CurrentPoint(1,2), ...
+                                          colorbarScale('get'), ...
+                                          isColorbarDefaultUnit('get', get(uiSeriesPtr('get'), 'Value')), ...
+                                          get(uiSeriesPtr('get'), 'Value')...
+                                          );
+
+        setAxesIntensity(get(uiSeriesPtr('get'), 'Value'));
+    end
+
+    if isLineFusionColorbarIntensityMaxClicked('get') == true
+
+        axeFusionColorbar = axeFusionColorbarPtr('get');
+
+        setFusionColorbarIntensityMaxScaleValue(axeFusionColorbar.CurrentPoint(1,2), ...
+                                                fusionColorbarScale('get'), ...
+                                                isFusionColorbarDefaultUnit('get', get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                                get(uiFusedSeriesPtr('get'), 'Value')...
+                                                );        
+
+        setFusionAxesIntensity(get(uiFusedSeriesPtr('get'), 'Value'));
+   end
+
+    if isLineFusionColorbarIntensityMinClicked('get') == true
+        
+        axeFusionColorbar = axeFusionColorbarPtr('get');
+
+        setFusionColorbarIntensityMinScaleValue(axeFusionColorbar.CurrentPoint(1,2), ...
+                                                fusionColorbarScale('get'), ...
+                                                isFusionColorbarDefaultUnit('get', get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                                get(uiFusedSeriesPtr('get'), 'Value')...
+                                                );        
+
+        setFusionAxesIntensity(get(uiFusedSeriesPtr('get'), 'Value'));
+    end
 
     if is2DBrush('get') == false
     
@@ -46,7 +98,7 @@ function mouseMove(~, ~)
                         
                         moveFusedImage(false);
                     else
-                        if size(dicomBuffer('get'), 3) ~= 1
+                        if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
                             triangulateImages();  
                         else
                             refreshImages();

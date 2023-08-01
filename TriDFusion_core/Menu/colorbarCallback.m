@@ -280,7 +280,7 @@ function colorbarCallback(hObject, ~)
     if strcmpi(sModality, 'CT')
         
         mF1 = uimenu(e,'Label','(F1) Lung'          , 'Callback',@setCTColorbarWindowLevel);
-        mF2 = uimenu(e,'Label','(F2) Soft'          , 'Callback',@setCTColorbarWindowLevel);
+        mF2 = uimenu(e,'Label','(F2) Soft Tissue'   , 'Callback',@setCTColorbarWindowLevel);
         mF3 = uimenu(e,'Label','(F3) Bone'          , 'Callback',@setCTColorbarWindowLevel);
         mF4 = uimenu(e,'Label','(F4) Liver'         , 'Callback',@setCTColorbarWindowLevel);
         mF5 = uimenu(e,'Label','(F5) Brain'         , 'Callback',@setCTColorbarWindowLevel);
@@ -289,7 +289,7 @@ function colorbarCallback(hObject, ~)
         mF8 = uimenu(e,'Label','(F8) Mediastinum'   , 'Callback',@setCTColorbarWindowLevel);
         mF91 = uimenu(e,'Label','(F9) Temporal Bone', 'Callback',@setCTColorbarWindowLevel);
         mF92 = uimenu(e,'Label','(F9) Vertebra'     , 'Callback',@setCTColorbarWindowLevel);
-        mF93 = uimenu(e,'Label','(F9) Scout CT'     , 'Callback',@setCTColorbarWindowLevel);
+%         mF93 = uimenu(e,'Label','(F9) Scout CT'     , 'Callback',@setCTColorbarWindowLevel);
         mF34 = uimenu(e,'Label','(F9) All'          , 'Callback',@setCTColorbarWindowLevel);
         mCtm = uimenu(e,'Label','Custom'            , 'Enable', 'off','Callback',@setCTColorbarWindowLevel);
         
@@ -305,30 +305,40 @@ function colorbarCallback(hObject, ~)
         sWindowName = getWindowName(dWindow, dLevel);
         
         switch lower(sWindowName)
-            case lower('Lung')
+
+            case 'lung'
                 set(mF1, 'Checked', 'on');
-            case lower('Soft')
+
+            case 'soft tissue'
                 set(mF2, 'Checked', 'on');
-            case lower('Bone')
+
+            case 'bone'
                 set(mF3, 'Checked', 'on');
-            case lower('Liver')
+
+            case 'liver'
                 set(mF4, 'Checked', 'on');
-            case lower('Brain')
+
+            case 'brain'
                 set(mF5, 'Checked', 'on');
-            case lower('Head and Neck')
+
+            case 'head and neck'
                 set(mF6, 'Checked', 'on');
-            case lower('Enchanced Lung')
+
+            case 'enhanced lung'
                 set(mF7, 'Checked', 'on');
-            case lower('Mediastinum')
+
+            case 'mediastinum'
                 set(mF8, 'Checked', 'on');
-            case lower('Temporal Bone')
+
+            case 'temporal bone'
                 set(mF91, 'Checked', 'on');
-            case lower('Vertebra')
+
+            case 'vertebra'
                 set(mF92, 'Checked', 'on');
-            case lower('Scout CT')
-                set(mF93, 'Checked', 'on');
-            case lower('All')
+
+            case 'all'
                 set(mF34, 'Checked', 'on');
+
             otherwise
                 set(mCtm, 'Checked', 'on');
         end       
@@ -595,7 +605,8 @@ function colorbarCallback(hObject, ~)
     end
 
     function setColorbarWindowLevel(hObject,~)
-        
+
+
         tInput = inputTemplate('get');                
 
         if strcmpi(get(get(hObject, 'Parent'), 'Tag'), 'Fusion Colorbar')
@@ -605,13 +616,18 @@ function colorbarCallback(hObject, ~)
             dOffset = get(uiFusedSeriesPtr('get'), 'Value');
         
             sUnitDisplay = getSerieUnitValue(dOffset);            
+
+            bDefaultUnit = isFusionColorbarDefaultUnit('get');
+
         else        
             dMax = windowLevel('get', 'max');
             dMin = windowLevel('get', 'min');
             
             dOffset = get(uiSeriesPtr('get'), 'Value');
         
-            sUnitDisplay = getSerieUnitValue(dOffset);                        
+            sUnitDisplay = getSerieUnitValue(dOffset);  
+
+            bDefaultUnit = isColorbarDefaultUnit('get');           
         end        
                        
         dlgWindowLevel = ...
@@ -624,24 +640,34 @@ function colorbarCallback(hObject, ~)
                   'Name', 'Set Window Level'...
                    );      
                
-        if strcmpi(sUnitDisplay, 'SUV') ||  strcmpi(sUnitDisplay, 'HU') 
+        if strcmpi(sUnitDisplay, 'SUV') || strcmpi(sUnitDisplay, 'HU') 
             if strcmpi(sUnitDisplay, 'HU') 
-                sUnitDisplay = 'Window Level';            
-
-                [dWindow, dLevel] = computeWindowMinMax(dMax, dMin);
+                if bDefaultUnit == true
+                    sUnitDisplay = 'Window Level';            
+    
+                    [dWindow, dLevel] = computeWindowMinMax(dMax, dMin);
+                else
+                    sUnitDisplay = 'HU';            
+                    
+                end
             else
-                dMax = dMax*tInput(dOffset).tQuant.tSUV.dScale;
-                dMin = dMin*tInput(dOffset).tQuant.tSUV.dScale;
-
+                if bDefaultUnit == true
+                    dMax = dMax*tInput(dOffset).tQuant.tSUV.dScale;
+                    dMin = dMin*tInput(dOffset).tQuant.tSUV.dScale;
+                end
             end
             bUnitEnable = 'on';
         else
             bUnitEnable = 'off';
         end
 
-        if strcmpi(sUnitDisplay, 'SUV')
-            sSUVtype = viewerSUVtype('get');
-            sUnitType = sprintf('Unit in SUV/%s', sSUVtype);
+        if strcmpi(sUnitDisplay, 'SUV') 
+            if bDefaultUnit == true
+                sSUVtype = viewerSUVtype('get');
+                sUnitType = sprintf('Unit in SUV/%s', sSUVtype);
+            else
+               sUnitType = 'Unit in BQML';
+            end
         else
             sUnitType = sprintf('Unit in %s', sUnitDisplay);
         end
@@ -650,7 +676,7 @@ function colorbarCallback(hObject, ~)
             uicontrol(dlgWindowLevel,...
                       'style'   , 'checkbox',...
                       'enable'  , bUnitEnable,...
-                      'value'   , 1,...
+                      'value'   , bDefaultUnit,...
                       'position', [20 115 20 20],...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
                       'ForegroundColor', viewerForegroundColor('get'), ...                    
@@ -693,8 +719,9 @@ function colorbarCallback(hObject, ~)
                     'string'    , sMaxValue,...
                     'BackgroundColor', viewerBackgroundColor('get'), ...
                     'ForegroundColor', viewerForegroundColor('get'), ...                 
-                    'position'  , [200 90 150 20]...
+                    'position'  , [200 90 150 20] ...
                     );
+      set(edtMaxValue, 'KeyPressFcn', @checkKeyPress);
 
       if strcmpi(sUnitDisplay, 'Window Level')
           sMinDisplay = 'Level Value';
@@ -719,9 +746,10 @@ function colorbarCallback(hObject, ~)
                     'string'    , sMinValue,...
                     'BackgroundColor', viewerBackgroundColor('get'), ...
                     'ForegroundColor', viewerForegroundColor('get'), ...                 
-                    'position'  , [200 65 150 20]...
+                    'position'  , [200 65 150 20] ...
                     );
-            
+     set(edtMinValue, 'KeyPressFcn', @checkKeyPress);
+          
      % Cancel or Proceed
 
      uicontrol(dlgWindowLevel,...
@@ -740,7 +768,13 @@ function colorbarCallback(hObject, ~)
               'Callback', @proceedWindowLCallback...
               );               
                
-          
+        function checkKeyPress(~, event)
+            if strcmp(event.Key, 'return')
+                drawnow;
+                proceedWindowLCallback();
+            end
+        end      
+
         function chkUnitTypeCallback(hChkObject, ~)            
             
             if strcmpi(get(chkUnitType, 'Enable'), 'off')
@@ -758,13 +792,13 @@ function colorbarCallback(hObject, ~)
             end 
             
             if  get(chkUnitType, 'Value') == false               
-                if strcmpi(sUnitDisplay, 'SUV')
+                if contains(lower(get(hChkObject, 'String')), 'suv') 
                     sUnitDisplay = 'BQML';
                 else
                     sUnitDisplay = 'HU';
                 end            
             else
-                if strcmpi(sUnitDisplay, 'BQML')
+                if contains(lower(get(hChkObject, 'String')), 'bqml') 
                     sUnitDisplay = 'SUV';
                 else
                     sUnitDisplay = 'Window Level';
@@ -772,7 +806,7 @@ function colorbarCallback(hObject, ~)
             end
             
             if strcmpi(sUnitDisplay, 'SUV')
-                sSUVtype = viewerSUVtype('get');
+                sSUVtype  = viewerSUVtype('get');
                 sUnitType = sprintf('Unit in SUV/%s', sSUVtype);
             else
                 sUnitType = sprintf('Unit in %s', sUnitDisplay);
@@ -781,9 +815,14 @@ function colorbarCallback(hObject, ~)
             set(txtUnitType, 'String', sUnitType);            
             
             if strcmpi(get(get(hObject, 'Parent'), 'Tag'), 'Fusion Colorbar')
+
+                isFusionColorbarDefaultUnit('set', get(chkUnitType, 'Value'));
+
                 dMaxValue = fusionWindowLevel('get', 'max');
                 dMinValue = fusionWindowLevel('get', 'min');  
             else
+                isColorbarDefaultUnit('set', get(chkUnitType, 'Value'));
+
                 dMaxValue = windowLevel('get', 'max');
                 dMinValue = windowLevel('get', 'min');                  
             end
@@ -803,10 +842,12 @@ function colorbarCallback(hObject, ~)
                     sMaxValue = num2str(dMaxValue);                  
                     
                 case 'SUV'
+
                     sMinValue = dMinValue*tInput(dOffset).tQuant.tSUV.dScale;
                     sMaxValue = dMaxValue*tInput(dOffset).tQuant.tSUV.dScale;
                     
                 case 'BQML'
+                    
                     sMinValue = num2str(dMinValue);
                     sMaxValue = num2str(dMaxValue);                     
             end
@@ -841,23 +882,48 @@ function colorbarCallback(hObject, ~)
 
                 getFusionInitWindowMinMax('set', lMax, lMin);
 
-                set(uiFusionSliderWindowPtr('get'), 'value', 0.5);
-                set(uiFusionSliderLevelPtr('get') , 'value', 0.5);
+%                 set(uiFusionSliderWindowPtr('get'), 'value', 0.5);
+%                 set(uiFusionSliderLevelPtr('get') , 'value', 0.5);
 
                 if switchTo3DMode('get')     == false && ...
                    switchToIsoSurface('get') == false && ...
                    switchToMIPMode('get')    == false
 
-                    if size(dicomBuffer('get'), 3) == 1            
-                        set(axefPtr('get'), 'CLim', [lMin lMax]);                      
-                    else
-                        set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);
-                        set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);
-                        set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);                        
-                        if link2DMip('get') == true && isVsplash('get') == false
-                            set(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-                        end                                                                        
-                    end
+%                     if size(dicomBuffer('get'), 3) == 1            
+%                         set(axefPtr('get'), 'CLim', [lMin lMax]);                      
+%                     else
+%                         set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);
+%                         set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);
+%                         set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 'CLim', [lMin lMax]);                        
+%                         if link2DMip('get') == true && isVsplash('get') == false
+%                             set(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+%                         end                                                                        
+%                     end
+
+
+                    % Compute colorbar line y offset
+            
+                    dYOffsetMax = computeLineFusionColorbarIntensityMaxYOffset(get(uiFusedSeriesPtr('get'), 'Value'));
+                    dYOffsetMin = computeLineFusionColorbarIntensityMinYOffset(get(uiFusedSeriesPtr('get'), 'Value'));
+
+                    % Ajust the intensity 
+
+                    set(lineFusionColorbarIntensityMaxPtr('get'), 'YData', [0.1 0.1]);
+                    set(lineFusionColorbarIntensityMinPtr('get'), 'YData', [0.9 0.9]);
+
+                    setFusionColorbarIntensityMaxScaleValue(dYOffsetMax, ...
+                                                            fusionColorbarScale('get'), ...
+                                                            isFusionColorbarDefaultUnit('get'),...
+                                                            get(uiFusedSeriesPtr('get'), 'Value')...
+                                                           );
+                                                        
+                    setFusionColorbarIntensityMinScaleValue(dYOffsetMin, ...
+                                                            fusionColorbarScale('get'), ...
+                                                            isFusionColorbarDefaultUnit('get'),...
+                                                            get(uiFusedSeriesPtr('get'), 'Value')...
+                                                            );
+
+                    setFusionAxesIntensity(get(uiFusedSeriesPtr('get'), 'Value'));
 
                     refreshImages();
                 end                 
@@ -868,23 +934,47 @@ function colorbarCallback(hObject, ~)
 
                 getInitWindowMinMax('set', lMax, lMin);
 
-                set(uiSliderWindowPtr('get'), 'value', 0.5);
-                set(uiSliderLevelPtr('get') , 'value', 0.5);
+%                 set(uiSliderWindowPtr('get'), 'value', 0.5);
+%                 set(uiSliderLevelPtr('get') , 'value', 0.5);
 
                 if switchTo3DMode('get')     == false && ...
                    switchToIsoSurface('get') == false && ...
                    switchToMIPMode('get')    == false
 
-                    if size(dicomBuffer('get'), 3) == 1            
-                        set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-                    else
-                        set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-                        set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-                        set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-                        if link2DMip('get') == true && isVsplash('get') == false
-                            set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);                  
-                        end 
-                    end
+%                     if size(dicomBuffer('get'), 3) == 1            
+%                         set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+%                     else
+%                         set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+%                         set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+%                         set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+%                         if link2DMip('get') == true && isVsplash('get') == false
+%                             set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);                  
+%                         end 
+%                     end
+
+                    % Compute colorbar line y offset
+                
+                    dYOffsetMax = computeLineColorbarIntensityMaxYOffset(get(uiSeriesPtr('get'), 'Value'));
+                    dYOffsetMin = computeLineColorbarIntensityMinYOffset(get(uiSeriesPtr('get'), 'Value'));
+
+                    % Ajust the intensity 
+
+                    set(lineColorbarIntensityMaxPtr('get'), 'YData', [0.1 0.1]);
+                    set(lineColorbarIntensityMinPtr('get'), 'YData', [0.9 0.9]);
+
+                    setColorbarIntensityMaxScaleValue(dYOffsetMax, ...
+                                                      colorbarScale('get'), ...
+                                                      isColorbarDefaultUnit('get'), ...
+                                                      get(uiSeriesPtr('get'), 'Value')...
+                                                      );
+
+                    setColorbarIntensityMinScaleValue(dYOffsetMin, ...
+                                                      colorbarScale('get'), ...
+                                                      isColorbarDefaultUnit('get'), ...
+                                                      get(uiSeriesPtr('get'), 'Value')...
+                                                      );
+
+                    setAxesIntensity(get(uiSeriesPtr('get'), 'Value'));
 
                     refreshImages();
                 end              
@@ -898,30 +988,41 @@ function colorbarCallback(hObject, ~)
     function setCTColorbarWindowLevel(hObject, ~)
         
         switch lower(get(hObject, 'Label'))
-            case lower('(F1) Lung')
+
+            case '(f1) lung'
                 [lMax, lMin] = computeWindowLevel(1200, -500);
-            case lower('(F2) Soft')
+
+            case '(f2) soft tissue'
                 [lMax, lMin] = computeWindowLevel(500, 50);
-            case lower('(F3) Bone')
+
+            case '(f3) bone'
                 [lMax, lMin] = computeWindowLevel(500, 200);
-            case lower('(F4) Liver')
+
+            case '(f4) liver'
                 [lMax, lMin] = computeWindowLevel(240, 40);
-            case lower('(F5) Brain')
+
+            case '(f5) brain'
                 [lMax, lMin] = computeWindowLevel(80, 40);
-            case lower('(F6) Head and Neck')
+
+            case '(f6) head and neck'
                 [lMax, lMin] = computeWindowLevel(350, 90);
-            case lower('(F7) Enchanced Lung')
+
+            case '(f7) enchanced lung'
                 [lMax, lMin] = computeWindowLevel(2000, -600);
-            case lower('(F8) Mediastinum')
+
+            case '(f8) mediastinum'
                 [lMax, lMin] = computeWindowLevel(350, 50);
-            case lower('(F9) Temporal Bone')
-                [lMax, lMin] = computeWindowLevel(2000, 0);
-            case lower('(F9) Vertebra')
-                [lMax, lMin] = computeWindowLevel(2500, 415);
-            case lower('(F9) Scout CT')
-                [lMax, lMin] = computeWindowLevel(350, 50);
-            case lower('(F9) All')
+
+            case '(f9) temporal bone'
                 [lMax, lMin] = computeWindowLevel(1000, 350);
+
+            case '(f9) vertebra'
+                [lMax, lMin] = computeWindowLevel(2500, 415);
+
+%             case lower('(F9) Scout CT')
+%                 [lMax, lMin] = computeWindowLevel(350, 50);
+            case '(f9) all'
+                [lMax, lMin] = computeWindowLevel(2000, 0);
             otherwise
                 % to do
         end        
@@ -931,30 +1032,81 @@ function colorbarCallback(hObject, ~)
             fusionWindowLevel('set', 'max', lMax);
             fusionWindowLevel('set', 'min' ,lMin);
                 
-            if size(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 3) == 1            
-                set(axefPtr('get'), 'CLim', [lMin lMax]);
-            else
-                set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-                set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-                set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);                
-                if link2DMip('get') == true && isVsplash('get') == false
-                    set(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-                end                
-            end            
+%             if size(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 3) == 1            
+%                 set(axefPtr('get'), 'CLim', [lMin lMax]);
+%             else
+%                 set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+%                 set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+%                 set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);                
+%                 if link2DMip('get') == true && isVsplash('get') == false
+%                     set(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+%                 end                
+%             end  
+
+            % Compute colorbar line y offset
+    
+            dYOffsetMax = computeLineFusionColorbarIntensityMaxYOffset(get(uiFusedSeriesPtr('get'), 'Value'));
+            dYOffsetMin = computeLineFusionColorbarIntensityMinYOffset(get(uiFusedSeriesPtr('get'), 'Value'));
+            
+            % Ajust the intensity 
+
+            set(lineFusionColorbarIntensityMaxPtr('get'), 'YData', [0.1 0.1]);
+            set(lineFusionColorbarIntensityMinPtr('get'), 'YData', [0.9 0.9]);
+
+            setFusionColorbarIntensityMaxScaleValue(dYOffsetMax, ...
+                                                    fusionColorbarScale('get'), ...
+                                                    isFusionColorbarDefaultUnit('get'),...
+                                                    get(uiFusedSeriesPtr('get'), 'Value')...
+                                                   );
+                                                
+            setFusionColorbarIntensityMinScaleValue(dYOffsetMin, ...
+                                                    fusionColorbarScale('get'), ...
+                                                    isFusionColorbarDefaultUnit('get'),...
+                                                    get(uiFusedSeriesPtr('get'), 'Value')...
+                                                    );
+
+            setFusionAxesIntensity(get(uiFusedSeriesPtr('get'), 'Value'));
         else    
             windowLevel('set', 'max', lMax);
             windowLevel('set', 'min' ,lMin);
             
-            if size(dicomBuffer('get'), 3) == 1            
-                set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-            else
-                set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-                set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-                set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-                if link2DMip('get') == true && isVsplash('get') == false
-                    set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);                   
-                end 
-            end
+%             if size(dicomBuffer('get'), 3) == 1            
+%                 set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+%             else
+%                 set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+%                 set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+%                 set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+%                 if link2DMip('get') == true && isVsplash('get') == false
+%                     set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);                   
+%                 end 
+%             end
+
+            % Ajust the intensity 
+
+            % Compute colorbar line y offset
+
+            dYOffsetMax = computeLineColorbarIntensityMaxYOffset(get(uiSeriesPtr('get'), 'Value'));
+            dYOffsetMin = computeLineColorbarIntensityMinYOffset(get(uiSeriesPtr('get'), 'Value'));
+
+            % Ajust the intensity 
+
+            set(lineColorbarIntensityMaxPtr('get'), 'YData', [0.1 0.1]);
+            set(lineColorbarIntensityMinPtr('get'), 'YData', [0.9 0.9]);
+
+            setColorbarIntensityMaxScaleValue(dYOffsetMax, ...
+                                              colorbarScale('get'), ...
+                                              isColorbarDefaultUnit('get'), ...
+                                              get(uiSeriesPtr('get'), 'Value')...
+                                              );
+
+            setColorbarIntensityMinScaleValue(dYOffsetMin, ...
+                                              colorbarScale('get'), ...
+                                              isColorbarDefaultUnit('get'), ...
+                                              get(uiSeriesPtr('get'), 'Value')...
+                                              );
+
+            setAxesIntensity(get(uiSeriesPtr('get'), 'Value'));
+           
         end              
         
     end

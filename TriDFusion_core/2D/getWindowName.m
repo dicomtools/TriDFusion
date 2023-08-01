@@ -27,41 +27,47 @@ function sWindowName = getWindowName(dWindow, dLevel)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    if     dWindow == 1200 &&...
-           dLevel  == -500
+    sWindow = sprintf('%.0f', dWindow);
+    if strcmpi(sWindow, '-0')
+        sWindow = '0';
+    end
+
+    sLevel  = sprintf('%.0f', dLevel);
+    if strcmpi(sLevel, '-0')
+        sLevel = '0';
+    end
+
+    if     strcmpi(sWindow, '1200') && strcmpi(sLevel, '-500')
         sWindowName = 'Lung';
-    elseif dWindow == 500 &&...   
-           dLevel  == 50
-        sWindowName = 'Soft';
-    elseif dWindow == 500 &&...   
-           dLevel  == 200
+
+    elseif strcmpi(sWindow, '500' ) && strcmpi(sLevel, '50'  )
+        sWindowName = 'Soft Tissue';
+
+    elseif strcmpi(sWindow, '500' ) && strcmpi(sLevel, '200' )
         sWindowName = 'Bone';           
-    elseif dWindow == 240 &&...   
-           dLevel  == 40
+
+    elseif strcmpi(sWindow, '240' ) && strcmpi(sLevel, '40'  )
         sWindowName = 'Liver';
-    elseif dWindow == 80 &&...   
-           dLevel  == 40
+
+    elseif strcmpi(sWindow, '80'  ) && strcmpi(sLevel, '40'  )
         sWindowName = 'Brain';                
-    elseif dWindow == 350 &&...   
-           dLevel  == 90
+
+    elseif strcmpi(sWindow, '350' ) && strcmpi(sLevel, '90'  )
         sWindowName = 'Head and Neck';                
-     elseif dWindow == 2000 &&...   
-            dLevel  == -600
+
+    elseif strcmpi(sWindow, '2000') && strcmpi(sLevel, '-600')
         sWindowName = 'Enhanced Lung';               
-    elseif dWindow == 350 &&...   
-           dLevel  == 50
+
+    elseif strcmpi(sWindow, '350' ) && strcmpi(sLevel, '50'  )
         sWindowName = 'Mediastinum';                
-    elseif dWindow == 1000 &&...   
-           dLevel  == 350
+
+    elseif strcmpi(sWindow, '1000') && strcmpi(sLevel, '350' )
         sWindowName = 'Temporal Bone';                
-    elseif dWindow == 2500 &&...   
-           dLevel  == 415
+
+    elseif strcmpi(sWindow, '2500') && strcmpi(sLevel, '415' )
         sWindowName = 'Vertebra';
-    elseif dWindow == 350 &&...   
-           dLevel  == 50
-        sWindowName = 'Scout CT';
-    elseif dWindow == 2000 &&...   
-           dLevel  == 0
+
+    elseif strcmpi(sWindow, '2000') && strcmpi(sLevel, '0'   )
         sWindowName = 'All';
     else
         sWindowName = 'Custom';

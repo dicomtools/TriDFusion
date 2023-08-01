@@ -39,25 +39,25 @@ function clearDisplay()
         uiFusionColorbarPtr('set' , []);
     end
 
-    uiFusionSliderLevel = uiFusionSliderLevelPtr('get');
-    if ~isempty(uiFusionSliderLevel) 
-        if isvalid(uiFusionSliderLevel)
-            delete(uiFusionSliderLevel);
-        end        
-%        uiFusionSliderLevel.Position = [0 0 0 0];
-        clear uiFusionSliderLevel;               
-        uiFusionSliderLevelPtr('set', []);
-    end
-
-    uiFusionSliderWindow = uiFusionSliderWindowPtr('get');
-    if ~isempty(uiFusionSliderWindow) 
-        if isvalid(uiFusionSliderWindow)
-            delete(uiFusionSliderWindow);
-        end            
-%        uiFusionSliderWindow.Position = [0 0 0 0];
-        clear uiFusionSliderWindow;               
-        uiFusionSliderWindowPtr('set', []);
-    end
+%     uiFusionSliderLevel = uiFusionSliderLevelPtr('get');
+%     if ~isempty(uiFusionSliderLevel) 
+%         if isvalid(uiFusionSliderLevel)
+%             delete(uiFusionSliderLevel);
+%         end        
+% %        uiFusionSliderLevel.Position = [0 0 0 0];
+%         clear uiFusionSliderLevel;               
+%         uiFusionSliderLevelPtr('set', []);
+%     end
+% 
+%     uiFusionSliderWindow = uiFusionSliderWindowPtr('get');
+%     if ~isempty(uiFusionSliderWindow) 
+%         if isvalid(uiFusionSliderWindow)
+%             delete(uiFusionSliderWindow);
+%         end            
+% %        uiFusionSliderWindow.Position = [0 0 0 0];
+%         clear uiFusionSliderWindow;               
+%         uiFusionSliderWindowPtr('set', []);
+%     end
 
     uiAlphaSlider = uiAlphaSliderPtr('get');
     if ~isempty(uiAlphaSlider) 
@@ -69,25 +69,89 @@ function clearDisplay()
         uiAlphaSliderPtr('set', []);
     end
 
-    uiSliderWindow = uiSliderWindowPtr('get');
-    if ~isempty(uiSliderWindow)
-        uiSliderWindow.Position = [0 0 0 0];
-        clear uiSliderWindow;                
-        uiSliderWindowPtr('set', []);                
-    end
-
-    uiSliderLevel = uiSliderLevelPtr('get');
-    if ~isempty(uiSliderLevel)
-        uiSliderLevel.Position = [0 0 0 0];
-        clear uiSliderLevel;               
-        uiSliderLevelPtr('set', []);                
-    end
+%     uiSliderWindow = uiSliderWindowPtr('get');
+%     if ~isempty(uiSliderWindow)
+%         uiSliderWindow.Position = [0 0 0 0];
+%         clear uiSliderWindow;                
+%         uiSliderWindowPtr('set', []);                
+%     end
+% 
+%     uiSliderLevel = uiSliderLevelPtr('get');
+%     if ~isempty(uiSliderLevel)
+%         uiSliderLevel.Position = [0 0 0 0];
+%         clear uiSliderLevel;               
+%         uiSliderLevelPtr('set', []);                
+%     end
 
     ptrColorbar = uiColorbarPtr('get');
     if ~isempty(ptrColorbar)                
         ptrColorbar.Position = [0 0 0 0];                
         clear ptrColorbar;
         uiColorbarPtr('set', []);
+    end
+
+    % New intensity line on colorbar 
+
+    lineColorbarIntensityMax = lineColorbarIntensityMaxPtr('get');
+    if ~isempty(lineColorbarIntensityMax)                
+        clear lineColorbarIntensityMax;
+        lineColorbarIntensityMaxPtr('set', []);
+    end
+
+    lineColorbarIntensityMin = lineColorbarIntensityMinPtr('get');
+    if ~isempty(lineColorbarIntensityMin)                
+        clear lineColorbarIntensityMin;
+        lineColorbarIntensityMinPtr('set', []);
+    end
+
+    textColorbarIntensityMax = textColorbarIntensityMaxPtr('get');
+    if ~isempty(textColorbarIntensityMax)                
+        clear textColorbarIntensityMax;
+        textColorbarIntensityMaxPtr('set', []);
+    end
+
+    textColorbarIntensityMin = textColorbarIntensityMinPtr('get');
+    if ~isempty(textColorbarIntensityMin)                
+        clear textColorbarIntensityMin;
+        textColorbarIntensityMinPtr('set', []);
+    end
+
+    axeColorbar = axeColorbarPtr('get');
+    if ~isempty(axeColorbar)                
+        clear axeColorbar;
+        axeColorbarPtr('set', []);
+    end
+
+    % New intensity line fusion on colorbar 
+
+    lineFusionColorbarIntensityMax = lineFusionColorbarIntensityMaxPtr('get');
+    if ~isempty(lineFusionColorbarIntensityMax)                
+        clear lineFusionColorbarIntensityMax;
+        lineFusionColorbarIntensityMaxPtr('set', []);
+    end
+
+    lineFusionColorbarIntensityMin = lineFusionColorbarIntensityMinPtr('get');
+    if ~isempty(lineFusionColorbarIntensityMin)                
+        clear lineFusionColorbarIntensityMin;
+        lineFusionColorbarIntensityMinPtr('set', []);
+    end
+
+    textFusionColorbarIntensityMax = textFusionColorbarIntensityMaxPtr('get');
+    if ~isempty(textFusionColorbarIntensityMax)                
+        clear textFusionColorbarIntensityMax;
+        textFusionColorbarIntensityMaxPtr('set', []);
+    end
+
+    textFusionColorbarIntensityMin = textFusionColorbarIntensityMinPtr('get');
+    if ~isempty(textFusionColorbarIntensityMin)                
+        clear textFusionColorbarIntensityMin;
+        textFusionColorbarIntensityMinPtr('set', []);
+    end
+
+    axeFusionColorbar = axeFusionColorbarPtr('get');
+    if ~isempty(axeFusionColorbar)                
+        clear axeFusionColorbar;
+        axeFusionColorbarPtr('set', []);
     end
 
     btnUiCorWindowFullScreen = btnUiCorWindowFullScreenPtr('get');

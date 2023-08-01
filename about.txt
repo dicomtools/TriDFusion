@@ -1,4 +1,4 @@
-TriDFusion (3DF) Image Viewer Version 1.7
+TriDFusion (3DF) Image Viewer Version 1.8
 
 Disclaimer Notice:
 

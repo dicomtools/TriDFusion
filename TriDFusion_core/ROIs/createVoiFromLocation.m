@@ -179,7 +179,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
                             aMask(aBuffer>=(dVoiMax*dMaxTreshold)) = 0;
                             aMask(aBuffer<=(dVoiMax*dMinTreshold)) = 0;
                         end
-                     
+                    
                         % Get the subscripts of the connected component voxels
 
                         switch (pAxe)

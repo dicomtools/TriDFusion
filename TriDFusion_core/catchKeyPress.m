@@ -340,20 +340,76 @@ end
             return;
         end
 
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');            
+
+        releaseRoiWait();
+
 %        atMetaData = dicomMetaData('get');                
         sUnitDisplay = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));                        
         if strcmpi(sUnitDisplay, 'SUV')
-%            tQuant = quantificationTemplate('get');   
-%            lMin = suvWindowLevel('get', 'min')/tQuant.tSUV.dScale;  
-%            lMax = suvWindowLevel('get', 'max')/tQuant.tSUV.dScale;   
-            lMin = min(dicomBuffer('get'), [], 'all');
-            lMax = max(dicomBuffer('get'), [], 'all');
+
+            tQuant = quantificationTemplate('get');   
+
+            lMin = suvWindowLevel('get', 'min')/tQuant.tSUV.dScale;  
+            lMax = suvWindowLevel('get', 'max')/tQuant.tSUV.dScale;   
+
+%            lMin = min(dicomBuffer('get'), [], 'all');
+%            lMax = max(dicomBuffer('get'), [], 'all');
         else
             lMin = min(dicomBuffer('get'), [], 'all');
             lMax = max(dicomBuffer('get'), [], 'all');
         end
 
         setWindowMinMax(lMax, lMin);                    
+
+%    isMoveImageActivated('set', false);
+    
+        if zoomTool('get')
+        
+            set(zoomMenu('get'), 'Checked', 'off');
+    
+            set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+            set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+            set(btnZoomPtr('get'), 'FontWeight', 'normal');
+            
+            zoomTool('set', false);
+            zoom(fiMainWindowPtr('get'), 'off');           
+        end  
+
+        if panTool('get')
+                  
+            set(panMenu('get'), 'Checked', 'off');
+    
+            set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+            set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+            set(btnPanPtr('get'), 'FontWeight', 'normal');
+    
+            panTool('set', false);
+            pan(fiMainWindowPtr('get'), 'off'); 
+    
+        end
+
+        set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+        set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+        set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+        
+        if isMoveImageActivated('get') == true
+            set(fiMainWindowPtr('get'), 'Pointer', 'fleur');           
+        end
+
+        if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1      
+             axis(axePtr('get', [], dSeriesOffset),'auto');          
+        else
+            axis(axes1Ptr('get', [], dSeriesOffset),'auto');
+            axis(axes2Ptr('get', [], dSeriesOffset),'auto');
+            axis(axes3Ptr('get', [], dSeriesOffset),'auto');
+            if link2DMip('get') == true && isVsplash('get') == false
+                axis(axesMipPtr('get', [], dSeriesOffset), 'auto');
+            end            
+        end
+
     end
 
     if strcmpi(evnt.Key,'c')
@@ -701,14 +757,15 @@ end
 
             set(fiMainWindowPtr('get'), 'Color', 'black');
        
-            set(uiSliderLevelPtr('get') , 'BackgroundColor',  'black');
-            set(uiSliderWindowPtr('get'), 'BackgroundColor',  'black');
+%             set(uiSliderLevelPtr('get') , 'BackgroundColor',  'black');
+%             set(uiSliderWindowPtr('get'), 'BackgroundColor',  'black');
 
-            set(uiFusionSliderLevelPtr('get') , 'BackgroundColor',  'black');
-            set(uiFusionSliderWindowPtr('get'), 'BackgroundColor',  'black');                   
-            set(uiAlphaSliderPtr('get')       , 'BackgroundColor',  'black');                   
-            set(uiColorbarPtr('get')          , 'Color',  'white');                   
-            set(uiFusionColorbarPtr('get')    , 'Color',  'white');                   
+%             set(uiFusionSliderLevelPtr('get') , 'BackgroundColor',  'black');
+%             set(uiFusionSliderWindowPtr('get'), 'BackgroundColor',  'black');     
+
+            set(uiAlphaSliderPtr('get')   , 'BackgroundColor',  'black');                   
+            set(uiColorbarPtr('get')      , 'Color',  'white');                   
+            set(uiFusionColorbarPtr('get'), 'Color',  'white');                   
 
             backgroundColor('set', 'black');
             if strcmp(getColorMap('one', colorMapOffset('get')), 'white')
@@ -821,15 +878,16 @@ end
             set(uiLogo.Children, 'Color', [0.1500 0.1500 0.1500]); 
 
             set(fiMainWindowPtr('get'), 'Color', 'white');
+% 
+%             set(uiSliderLevelPtr('get') , 'BackgroundColor',  'white');
+%             set(uiSliderWindowPtr('get'), 'BackgroundColor',  'white');  
+% 
+%             set(uiFusionSliderLevelPtr('get') , 'BackgroundColor',  'white');
+%             set(uiFusionSliderWindowPtr('get'), 'BackgroundColor',  'white');
 
-            set(uiSliderLevelPtr('get') , 'BackgroundColor',  'white');
-            set(uiSliderWindowPtr('get'), 'BackgroundColor',  'white');  
-
-            set(uiFusionSliderLevelPtr('get') , 'BackgroundColor',  'white');
-            set(uiFusionSliderWindowPtr('get'), 'BackgroundColor',  'white');                   
-            set(uiAlphaSliderPtr('get')       , 'BackgroundColor',  'white'); 
-            set(uiColorbarPtr('get')          , 'Color',  'black');                   
-            set(uiFusionColorbarPtr('get')    , 'Color',  'black');  
+            set(uiAlphaSliderPtr('get')   , 'BackgroundColor',  'white'); 
+            set(uiColorbarPtr('get')      , 'Color',  'black');                   
+            set(uiFusionColorbarPtr('get'), 'Color',  'black');  
 
             backgroundColor('set', 'white');
             if strcmpi(getColorMap('one', colorMapOffset('get')), 'black')

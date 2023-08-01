@@ -37,6 +37,7 @@ function setZoomCallback(~, ~)
     releaseRoiWait();
 
     if zoomTool('get')
+
         set(zoomMenu('get'), 'Checked', 'off');
 
         set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
@@ -44,7 +45,7 @@ function setZoomCallback(~, ~)
         set(btnZoomPtr('get'), 'FontWeight', 'normal');
         
         zoomTool('set', false);
-        zoom('off');           
+        zoom(fiMainWindowPtr('get'), 'off');           
 
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
@@ -93,6 +94,6 @@ function setZoomCallback(~, ~)
         
         hZoom = zoom(fiMainWindowPtr('get'));
         hZoom.UIContextMenu = hCMZ;
-        zoom(fiMainWindowPtr('get'));           
+        zoom(fiMainWindowPtr('get'), 'on');           
     end           
 end  

@@ -1,5 +1,5 @@
-function setSegmentationFDGPercent(dPercentOfPeak, multiPeakValue)
-%function setSegmentationFDGPercent(dPercentOfPeak, multiPeakValue)
+function setSegmentationFDGPercent(dBoundaryPercent, dPercentOfPeak, multiPeakValue)
+%function setSegmentationFDGPercent(dBoundariesPercent, dPercentOfPeak, multiPeakValue)
 %Run FDG Segmentation base on a percent of peak treshold.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -134,7 +134,7 @@ function setSegmentationFDGPercent(dPercentOfPeak, multiPeakValue)
 
     dMin = min(aBWMask, [], 'all');
 
-    dTreshold = max(aResampledPTImage, [], 'all')*0.1;
+    dTreshold = max(aResampledPTImage, [], 'all')*dBoundaryPercent;
 
     aBWMask(aBWMask<dTreshold)=dMin;
 

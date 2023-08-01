@@ -520,8 +520,8 @@ function setOptionsCallback(~, ~)
             windowLevel('set', 'max', dMax);
             windowLevel('set', 'min', dMin);
 
-            set(uiSliderWindowPtr('get'), 'value', 0.5);
-            set(uiSliderLevelPtr('get') , 'value', 0.5);           
+%             set(uiSliderWindowPtr('get'), 'value', 0.5);
+%             set(uiSliderLevelPtr('get') , 'value', 0.5);           
         end
 
         if isFusion('get')
@@ -536,8 +536,8 @@ function setOptionsCallback(~, ~)
                 fusionWindowLevel('set', 'max', dFusionMax);
                 fusionWindowLevel('set', 'min', dFusionMin);
     
-                set(uiFusionSliderWindowPtr('get'), 'value', 0.5);
-                set(uiFusionSliderLevelPtr('get') , 'value', 0.5);
+%                 set(uiFusionSliderWindowPtr('get'), 'value', 0.5);
+%                 set(uiFusionSliderLevelPtr('get') , 'value', 0.5);
 
             end
 
@@ -549,21 +549,25 @@ function setOptionsCallback(~, ~)
 
             sUnitDisplay = getSerieUnitValue(dSeriesOffset);            
             if strcmpi(sUnitDisplay, 'SUV')
-    
-                if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1            
-                    set(axePtr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);
-                else
-                    set(axes1Ptr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);
-                    set(axes2Ptr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);
-                    set(axes3Ptr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);
-                    
-                    if link2DMip('get') == true && isVsplash('get') == false
-                        set(axesMipPtr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);            
-                    end
-                end
+
+                setWindowMinMax(dMax, dMin);                    
+
+%                 if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1            
+%                     set(axePtr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);
+%                 else
+%                     set(axes1Ptr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);
+%                     set(axes2Ptr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);
+%                     set(axes3Ptr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);
+%                     
+%                     if link2DMip('get') == true && isVsplash('get') == false
+%                         set(axesMipPtr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);            
+%                     end
+%                 end
             end
 
             if isFusion('get')
+
+                setFusionWindowMinMax(dFusionMax, dFusionMin);                    
 
                 dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                 for rr=1:dNbFusedSeries

@@ -74,7 +74,7 @@ function importContoursCallback(~, ~)
                     
         progressBar(0.3 , sprintf('Importing Contours, please wait'));
         
-        try
+%        try
             
         % Deactivate main tool bar 
         set(uiSeriesPtr('get'), 'Enable', 'off');                        
@@ -130,8 +130,14 @@ function importContoursCallback(~, ~)
                 set(uiTraWindowPtr('get'), 'Visible', 'on');
                 set(uiMipWindowPtr('get'), 'Visible', 'on');
 
-                set(uiSliderLevelPtr ('get'), 'Visible', 'on');
-                set(uiSliderWindowPtr('get'), 'Visible', 'on');
+%                 set(uiSliderLevelPtr ('get'), 'Visible', 'on');
+%                 set(uiSliderWindowPtr('get'), 'Visible', 'on');
+
+                set(lineColorbarIntensityMaxPtr('get'), 'Visible', 'on');
+                set(lineColorbarIntensityMinPtr('get'), 'Visible', 'on');
+        
+                set(textColorbarIntensityMaxPtr('get'), 'Visible', 'on');
+                set(textColorbarIntensityMinPtr('get'), 'Visible', 'on');
 
                 set(uiSliderCorPtr('get'), 'Visible', 'on');
                 set(uiSliderSagPtr('get'), 'Visible', 'on');   
@@ -144,7 +150,7 @@ function importContoursCallback(~, ~)
                 refreshImages();
             end
             
-            if ~(numel(aContourImported(aContourImported==true)) == numel(atContours))
+            if numel(aContourImported(aContourImported==true)) == 0
 
                 displayContoursAssociationDialog(atContours, aContourImported);
             end
@@ -152,9 +158,9 @@ function importContoursCallback(~, ~)
              
         end
         
-        catch
-            progressBar(1, 'Error:importContoursCallback()');                          
-        end
+%        catch
+%            progressBar(1, 'Error:importContoursCallback()');                          
+%        end
         
         % Reactivate main tool bar 
         set(uiSeriesPtr('get'), 'Enable', 'on');                        
@@ -284,8 +290,14 @@ function importContoursCallback(~, ~)
             set(uiTraWindowPtr('get'), 'Visible', 'on');
             set(uiMipWindowPtr('get'), 'Visible', 'on');
 
-            set(uiSliderLevelPtr ('get'), 'Visible', 'on');
-            set(uiSliderWindowPtr('get'), 'Visible', 'on');
+%             set(uiSliderLevelPtr ('get'), 'Visible', 'on');
+%             set(uiSliderWindowPtr('get'), 'Visible', 'on');
+
+            set(lineColorbarIntensityMaxPtr('get'), 'Visible', 'on');
+            set(lineColorbarIntensityMinPtr('get'), 'Visible', 'on');
+    
+            set(textColorbarIntensityMaxPtr('get'), 'Visible', 'on');
+            set(textColorbarIntensityMinPtr('get'), 'Visible', 'on');
 
             set(uiSliderCorPtr('get'), 'Visible', 'on');
             set(uiSliderSagPtr('get'), 'Visible', 'on');   

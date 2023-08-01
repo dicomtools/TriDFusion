@@ -85,8 +85,14 @@ function setContours(tContours, bInitDisplay)
                             set(uiTraWindowPtr('get'), 'Visible', 'off');
                             set(uiMipWindowPtr('get'), 'Visible', 'off');
 
-                            set(uiSliderLevelPtr ('get'), 'Visible', 'off');
-                            set(uiSliderWindowPtr('get'), 'Visible', 'off');
+%                             set(uiSliderLevelPtr ('get'), 'Visible', 'off');
+%                             set(uiSliderWindowPtr('get'), 'Visible', 'off');
+
+                            set(lineColorbarIntensityMaxPtr('get'), 'Visible', 'off');
+                            set(lineColorbarIntensityMinPtr('get'), 'Visible', 'off');
+                    
+                            set(textColorbarIntensityMaxPtr('get'), 'Visible', 'off');
+                            set(textColorbarIntensityMinPtr('get'), 'Visible', 'off');
 
                             set(uiSliderCorPtr('get'), 'Visible', 'off');
                             set(uiSliderSagPtr('get'), 'Visible', 'off');   
@@ -201,8 +207,14 @@ function setContours(tContours, bInitDisplay)
             set(uiTraWindowPtr('get'), 'Visible', 'on');
             set(uiMipWindowPtr('get'), 'Visible', 'on');
 
-            set(uiSliderLevelPtr ('get'), 'Visible', 'on');
-            set(uiSliderWindowPtr('get'), 'Visible', 'on');
+%             set(uiSliderLevelPtr ('get'), 'Visible', 'on');
+%             set(uiSliderWindowPtr('get'), 'Visible', 'on');
+
+            set(lineColorbarIntensityMaxPtr('get'), 'Visible', 'on');
+            set(lineColorbarIntensityMinPtr('get'), 'Visible', 'on');
+    
+            set(textColorbarIntensityMaxPtr('get'), 'Visible', 'on');
+            set(textColorbarIntensityMinPtr('get'), 'Visible', 'on');
 
             set(uiSliderCorPtr('get'), 'Visible', 'on');
             set(uiSliderSagPtr('get'), 'Visible', 'on');   

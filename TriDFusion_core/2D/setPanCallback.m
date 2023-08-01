@@ -44,7 +44,7 @@ function setPanCallback(~, ~)
         set(btnPanPtr('get'), 'FontWeight', 'normal');
 
         panTool('set', false);
-        pan('off'); 
+        pan(fiMainWindowPtr('get'), 'off'); 
 
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
@@ -90,6 +90,6 @@ function setPanCallback(~, ~)
         
         hPan = pan(fiMainWindowPtr('get'));
         hPan.UIContextMenu = hCMZ;
-        pan('on');          
+        pan(fiMainWindowPtr('get'), 'on');          
     end           
 end

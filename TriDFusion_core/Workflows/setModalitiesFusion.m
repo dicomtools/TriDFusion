@@ -185,15 +185,18 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
     % Set TCS Axes intensity
 
-    set(uiSliderWindowPtr('get'), 'value', 0.5);
-    set(uiSliderLevelPtr('get') , 'value', 0.5);
-
-    set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries1Max]);
-    set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries1Max]);
-    set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries1Max]);
+%     set(uiSliderWindowPtr('get'), 'value', 0.5);
+%     set(uiSliderLevelPtr('get') , 'value', 0.5);
+% 
+%     set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries1Max]);
+%     set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries1Max]);
+%     set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries1Max]);
 
     windowLevel('set', 'max', dSeries1Max);
     windowLevel('set', 'min' ,dSeries1Min);
+
+    setWindowMinMax(dSeries1Max, dSeries1Min);                    
+
 
     % Set MIP Axe intensity
 
@@ -264,16 +267,18 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
     % Set Fusion TCS Axes intensity
 
-    set(uiFusionSliderWindowPtr('get'), 'value', 0.5);
-    set(uiFusionSliderLevelPtr('get') , 'value', 0.5);
-
-    set(axes1fPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries2Max]);
-    set(axes2fPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries2Max]);
-    set(axes3fPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries2Max]);
+%     set(uiFusionSliderWindowPtr('get'), 'value', 0.5);
+%     set(uiFusionSliderLevelPtr('get') , 'value', 0.5);
+% 
+%     set(axes1fPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries2Max]);
+%     set(axes2fPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries2Max]);
+%     set(axes3fPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries2Max]);
 
 
     fusionWindowLevel('set', 'max', dSeries2Max);
     fusionWindowLevel('set', 'min' ,dSeries2Min);
+
+    setFusionWindowMinMax(dSeries2Max, dSeries2Min);                    
 
     % Set Fusion MIP Axe intensity
 

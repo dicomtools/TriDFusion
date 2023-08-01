@@ -50,6 +50,8 @@ function TriDFusion(varargin)
     
     viewerSUVtype('set', 'BW'); % Body Weight
     
+    % Set view default color
+
     viewerAxesColor      ('set', [0.149 0.149 0.149]);
     viewerBackgroundColor('set', [0.16 0.18 0.20]);
     viewerForegroundColor('set', [0.94 0.94 0.94]);
@@ -58,9 +60,18 @@ function TriDFusion(varargin)
     
     viewerButtonPushedBackgroundColor('set', [0.53 0.63 0.40]);
     viewerButtonPushedForegroundColor('set', [0.1 0.1 0.1]);
-    
-    arg3DEngine    = false;
-    argBorder      = false;
+
+    viewerColorbarIntensityMaxLineColor('set', [0.27 0.30 0.40]);
+    viewerColorbarIntensityMinLineColor('set', [0.27 0.30 0.40]);
+    viewerFusionColorbarIntensityMaxLineColor('set', [0.27 0.30 0.40]);
+    viewerFusionColorbarIntensityMinLineColor('set', [0.27 0.30 0.40]);
+
+    viewerCrossLinesColor('set', [0 1 1]);
+
+    viewerProgressBarLineColor('set',  [0 1 1]);
+
+    arg3DEngine  = false;
+    argBorder    = false;
     argInternal    = false;
     argFusion      = false;
     
@@ -185,6 +196,8 @@ function TriDFusion(varargin)
 
     set(fiMainWindow, 'doublebuffer', 'on'   );   
     set(fiMainWindow, 'Renderer'    , 'opengl'); 
+
+    iptPointerManager(fiMainWindowPtr('get'));
 
 %    warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');  
     

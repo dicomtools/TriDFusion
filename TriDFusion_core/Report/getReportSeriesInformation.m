@@ -28,6 +28,8 @@ function sReport = getReportSeriesInformation()
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
     
     atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+    dayAcquisitionDate = inf;
             
     if isempty(atMetaData{1}.SeriesDescription)
         sSeriesDescription = '-';
@@ -57,8 +59,8 @@ function sReport = getReportSeriesInformation()
     if isempty(sAcquisitionTime)
         sAcquisitionDateTime = '-';
     else
-        if numel(atMetaData) > 1                
-            dayAcquisitionDate = inf;
+        if numel(atMetaData) > 1      
+
             for jj=1:numel(atMetaData)
 
                 acquisitionTime = atMetaData{jj}.AcquisitionTime;

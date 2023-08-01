@@ -38,14 +38,19 @@ function tContours = readDicomContours(sFileName)
         for i = 1:length(ROIContourSequence) % Loop through contours
 
             if isfield(rtssheader.ROIContourSequence.(ROIContourSequence{i}), 'ContourSequence')
-                tContours(i).Number = i;
-
-                tContours(i).ROIName = rtssheader.StructureSetROISequence.(ROIContourSequence{i}).ROIName;
 
                 ContourSequence = fieldnames(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence);
 
                 % Loop through segments (slices)
                 aSegments = cell(1,length(ContourSequence));
+                if isempty(aSegments)
+                    continue;
+                end
+
+                tContours(i).Number = i;
+
+                tContours(i).ROIName = rtssheader.StructureSetROISequence.(ROIContourSequence{i}).ROIName;
+
                 for j = 1:length(ContourSequence)
                     if strcmpi(rtssheader.ROIContourSequence.(ROIContourSequence{i}).ContourSequence.(ContourSequence{j}).ContourGeometricType, 'CLOSED_PLANAR')
 
@@ -75,7 +80,7 @@ function tContours = readDicomContours(sFileName)
                 tContours(i).Referenced.StudyInstanceUID  = rtssheader.StudyInstanceUID;
                 tContours(i).Referenced.SeriesInstanceUID = rtssheader.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.RTReferencedSeriesSequence.Item_1.SeriesInstanceUID;                
                 
-                tContours(i).Referenced.FrameOfReferenceUID = rtssheader.ReferencedFrameOfReferenceSequence.Item_1.FrameOfReferenceUID;                
+                tContours(i).Referenced.FrameOfReferenceUID = rtssheader.ReferencedFrameOfReferenceSequence.Item_1.FrameOfReferenceUID;                           
                 
             end
         end
