@@ -141,7 +141,9 @@ function convert3DSeriesToPlanar(sPlane, sMethod, dFromSlice, dToSlice)
         atInput(numel(atInput)).atDicomInfo{hh}.SeriesInstanceUID = dSeriesInstanceUID;
     end
 
-    atInput(numel(atInput)).aDicomBuffer = aNewImage;
+% To reduce memory usage                
+%    atInput(numel(atInput)).aDicomBuffer = aNewImage;
+% To reduce memory usage                
 
     inputTemplate('set', atInput);
 

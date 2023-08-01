@@ -38,20 +38,20 @@ if 0
     clear aInputBuffer;
 else
 
-    tInput = inputTemplate('get');
+    tQuantification = quantificationTemplate('get', [], dSeriesOffset);
 
-    dImageMin = tInput(dSeriesOffset).tQuant.tCount.dMin;
-    dImageMax = tInput(dSeriesOffset).tQuant.tCount.dMax;    
+    dImageMin = tQuantification.tCount.dMin;
+    dImageMax = tQuantification.tCount.dMax;       
 
 end
 
     dColorbarScale = fusionColorbarScale('get');
-
-    sUnitDisplay = getSerieUnitValue(dSeriesOffset);
-
-    if strcmpi(sUnitDisplay, 'HU')
-        dColorbarScale=100;
-    end
+ 
+%     sUnitDisplay = getSerieUnitValue(dSeriesOffset);
+% 
+%     if strcmpi(sUnitDisplay, 'HU')
+%         dColorbarScale=100;
+%     end
 
     dIntensityTotal = (dImageMax-dImageMin)*dColorbarScale/100;
 

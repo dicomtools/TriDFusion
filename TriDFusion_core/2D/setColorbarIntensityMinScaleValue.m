@@ -44,9 +44,9 @@ function setColorbarIntensityMinScaleValue(dYOffset, dRatio, bDefaultUnit, dSeri
 
     sUnitDisplay = getSerieUnitValue(dSeriesOffset);
 
-    if strcmpi(sUnitDisplay, 'HU')
-        dRatio=100;
-    end
+%     if strcmpi(sUnitDisplay, 'HU')
+%         dRatio=100;
+%     end
 
 if 0    
     aInputBuffer = inputBuffer('get');
@@ -56,10 +56,10 @@ if 0
 
     clear aInputBuffer;
 else
-    tInput = inputTemplate('get');
+    tQuantification = quantificationTemplate('get', [], dSeriesOffset);
 
-    dMin = tInput(dSeriesOffset).tQuant.tCount.dMin;
-    dMax = tInput(dSeriesOffset).tQuant.tCount.dMax;     
+    dMin = tQuantification.tCount.dMin;
+    dMax = tQuantification.tCount.dMax;     
 end
 
     % Compute intensity

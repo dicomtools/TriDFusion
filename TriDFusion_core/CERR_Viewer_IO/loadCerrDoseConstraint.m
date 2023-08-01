@@ -319,8 +319,10 @@ function loadCerrDoseConstraint(planC, structNamC)
     scan3M = scanArray3M;
     dose3M = maskEdge3M;
 
-    atNewInput(1).aDicomBuffer = scan3M;
-    atNewInput(2).aDicomBuffer = dose3M;
+% To reduce memory usage                
+%     atNewInput(1).aDicomBuffer = scan3M;
+%     atNewInput(2).aDicomBuffer = dose3M;
+% To reduce memory usage                
 
     for ii=1:numel(atNewInput)
         atNewInput(ii).asFilesList    = [];

@@ -259,9 +259,10 @@ function loadCerrDoseVolume(planC, structNamC)
         atNewInput(2).atDicomInfo{ii}.SeriesDescription = sprintf('Dose: %s', atNewInput(1).atDicomInfo{ii}.SeriesDescription);
         atNewInput(2).atDicomInfo{ii}.Units = 'DOSE';
     end
-
-    atNewInput(1).aDicomBuffer = scan3M;
-    atNewInput(2).aDicomBuffer = dose3M;
+% To reduce memory usage                
+%     atNewInput(1).aDicomBuffer = scan3M;
+%     atNewInput(2).aDicomBuffer = dose3M;
+% To reduce memory usage                
     
     for ii=1:numel(atNewInput)
         atNewInput(ii).asFilesList    = [];

@@ -242,10 +242,10 @@ end
                   );
 
     % Volume Lighting
-    
+
     bLightingIsSupported = true;
     if verLessThan('matlab','9.8')
-        bLightingIsSupported = false;                    
+        bLightingIsSupported = false;
     end
 
 
@@ -440,7 +440,7 @@ end
                   'ButtonDownFcn', @addVoiIsoMaskCallback...
                   );
     txtAddVoiIsoMaskPtr('set', txtAddVoiIsoMask);
-        
+
     chkPixelEdgeIsoMask = ...
         uicontrol(ui3DPanelPtr('get'),...
                   'style'   , 'checkbox',...
@@ -464,8 +464,8 @@ end
                   'Enable', 'On', ...
                   'ButtonDownFcn', @pixelEdgeIsoMaskCallback...
                   );
-    txtPixelEdgeIsoMaskPtr('set', txtPixelEdgeIsoMask);    
-    
+    txtPixelEdgeIsoMaskPtr('set', txtPixelEdgeIsoMask);
+
     uiEditAddVoiIsoMask = ...
         uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
@@ -477,7 +477,7 @@ end
                   'CallBack', @editVoiIsoMaxValue ...
                   );
     uiEditAddVoiIsoMaskPtr('set', uiEditAddVoiIsoMask);
-    
+
     sUnitDisplay = getSerieUnitValue( get(uiSeriesPtr('get'), 'Value'));
     if ~strcmpi(sUnitDisplay, 'SUV')
         percentOfPeakIsoMask('set', true);
@@ -553,7 +553,7 @@ end
                   'CallBack', @editPeakPercentIsoMaskValue ...
                   );
     uiEditPeakPercentIsoMaskPtr('set', uiEditPeakPercentIsoMask);
-    
+
        uicontrol(ui3DPanelPtr('get'),...
                   'style'   , 'text',...
                   'string'  , 'Min SUV Formula',...
@@ -571,9 +571,9 @@ end
 %                  'string'  , {'Fixed', ...
 %                               '(4.30/SUVmean)x(SUVmean + SD)', ...
 %                               '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT Bone Map', ...
-%                               '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT ISO Map', ...      
+%                               '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT ISO Map', ...
 %                               'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map', ...
-%                               'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map' ...                                  
+%                               'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map' ...
 %                               },...
 %                  'Value'   , valueFormulaIsoMask('get'), ...
 %                  'Enable'  , 'on', ...
@@ -581,7 +581,7 @@ end
 %                  'ForegroundColor', viewerForegroundColor('get'), ...
 %                  'CallBack', @minSuvFromFormulaIsoMaskValue ...
 %                  );
-%    uiValueFormulaIsoMaskPtr('set', uiValueFormulaIsoMask);    
+%    uiValueFormulaIsoMaskPtr('set', uiValueFormulaIsoMask);
 
     uiValueFormulaIsoMask = ...
         uicontrol(ui3DPanelPtr('get'), ...
@@ -597,8 +597,8 @@ end
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @minSuvFromFormulaIsoMaskValue ...
                   );
-    uiValueFormulaIsoMaskPtr('set', uiValueFormulaIsoMask);  
-    
+    uiValueFormulaIsoMaskPtr('set', uiValueFormulaIsoMask);
+
        uicontrol(ui3DPanelPtr('get'),...
                   'style'   , 'Text',...
                   'string'  , 'Smallest Contour (ml)',...
@@ -654,15 +654,15 @@ end
     else
         atDicomMeta = dicomMetaData('get');
         atInput = inputTemplate('get');
-        
+
         asCTSeries = num2cell(zeros(1,numel(tResampleToCT)));
 
         for cc=1:numel(tResampleToCT)
-            
+
             if strcmpi(atDicomMeta{1}.StudyInstanceUID, atInput(tResampleToCT{cc}.dSeriesNumber).atDicomInfo{1}.StudyInstanceUID)
                 isoMaskCtSerieOffset('set', cc);
             end
-            
+
             asCTSeries{cc} = tResampleToCT{cc}.sSeriesDescription;
         end
     end
@@ -679,7 +679,7 @@ end
                   'CallBack', @resampleToCTOffsetCallback ...
                   );
      uiResampleToCTIsoMaskPtr('set', uiResampleToCTIsoMask);
-     
+
 %    chkResampledContoursIsoMask = ...
 %        uicontrol(ui3DPanelPtr('get'),...
 %                  'style'   , 'checkbox',...
@@ -703,8 +703,8 @@ end
 %                  'Enable', 'On', ...
 %                  'ButtonDownFcn', @resampledContoursIsoMaskCallback...
 %                  );
-%    txtResampledContoursIsoMaskPtr('set', txtResampledContoursIsoMask);  
-                  
+%    txtResampledContoursIsoMaskPtr('set', txtResampledContoursIsoMask);
+
 %         uicontrol(ui3DPanelPtr('get'),...
 %                  'style'   , 'text',...
 %                  'string'  , 'Isosurface Mask',...
@@ -736,7 +736,7 @@ end
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [25 822 150 20]...
                   );
-    
+
     asColor = [surfaceColor('all') 'Custom'];
     uiIsoSurfaceColor = ...
        uicontrol(ui3DPanelPtr('get'), ...
@@ -771,10 +771,10 @@ end
                   'CallBack', @sliderIsoCallback ...
                   );
     ui3DSliderIsoSurfacePtr('set', uiSliderIsoSurface);
-    
-    bypassUiSliderIsoSurfaceListener('set', false);    
+
+    bypassUiSliderIsoSurfaceListener('set', false);
     uiSliderIsoSurfaceListener = addlistener(uiSliderIsoSurface,'Value','PreSet',@sliderIsoCallback);
-    
+
 
     uiEditIsoSurface = ...
         uicontrol(ui3DPanelPtr('get'), ...
@@ -929,7 +929,7 @@ end
             display3DVoiCallback();
         else
             set(ui3DDispVoiPtr('get'), 'Value', true);
-            
+
             display3DVoiCallback();
         end
     end
@@ -1532,10 +1532,10 @@ end
 %        for pp=1:numel(atVoiInput) % Patch, don't export total-mask
 %            if strcmpi(atVoiInput{pp}.Label, 'TOTAL-MASK')
 %                atVoiInput{pp} = [];
-%                atVoiInput(cellfun(@isempty, atVoiInput)) = [];       
+%                atVoiInput(cellfun(@isempty, atVoiInput)) = [];
 %            end
-%        end     
-        
+%        end
+
         if ~isempty(atVoiInput)
 
             dlgVoiListEnable = ...
@@ -1856,7 +1856,7 @@ end
            switchToMIPMode('get')    == false
             return;
         end
-        
+
         asColor = surfaceColor('get', get(hObject, 'Value'));
         if numel(asColor) ~= 1
 
@@ -1934,19 +1934,19 @@ end
                 set(chkResampleToCTIsoMask, 'Value', true);
             end
         end
-        
+
 %        if get(chkResampleToCTIsoMask, 'Value') == true && ...
 %          get(chkAddVoiIsoMask, 'Value') == true
-                        
-%            set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'on');                
+
+%            set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
 %            set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'Inactive');
 %        else
-%            set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'off');                
+%            set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'off');
 %            set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
-%        end         
-        
+%        end
+
         resampleToCTIsoMask('set', get(chkResampleToCTIsoMask, 'Value'));
-        
+
     end
 
 %    function resampledContoursIsoMaskCallback(hObject, ~)
@@ -1963,10 +1963,10 @@ end
 %            else
 %                set(chkResampledContoursIsoMask, 'Value', true);
 %            end
-%        end            
-%        
+%        end
+%
 %        resampledContoursIsoMask('set', get(chkResampledContoursIsoMask, 'Value'));
-%        
+%
 %    end
 
     function addVoiIsoMaskCallback(hObject, ~)
@@ -1986,12 +1986,12 @@ end
         end
 
         addVoiIsoMask('set', get(chkAddVoiIsoMask, 'Value'));
-    
+
         if addVoiIsoMask('get') == true
-            
+
             set(chkPixelEdgeIsoMaskPtr     ('get'), 'Enable', 'on');
-            set(txtPixelEdgeIsoMaskPtr     ('get'), 'Enable', 'Inactive' ); 
-            
+            set(txtPixelEdgeIsoMaskPtr     ('get'), 'Enable', 'Inactive' );
+
             set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'on');
 
             sUnitDisplay = getSerieUnitValue( get(uiSeriesPtr('get'), 'Value'));
@@ -2027,15 +2027,15 @@ end
             end
 
             set(uiEditSmalestIsoMaskPtr('get'), 'Enable', 'on');
-            
-%            if get(chkResampleToCTIsoMask, 'Value') == true                        
-%                set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'on');                
+
+%            if get(chkResampleToCTIsoMask, 'Value') == true
+%                set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
 %                set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'Inactive');
-%            end 
-        
+%            end
+
         else
             set(chkPixelEdgeIsoMaskPtr     ('get'), 'Enable', 'off');
-            set(txtPixelEdgeIsoMaskPtr     ('get'), 'Enable', 'on' );            
+            set(txtPixelEdgeIsoMaskPtr     ('get'), 'Enable', 'on' );
             set(chkPercentOfPeakIsoMaskPtr ('get'), 'Enable', 'off');
             set(txtPercentOfPeakIsoMaskPtr ('get'), 'Enable', 'on' );
             set(uiEditAddVoiIsoMaskPtr     ('get'), 'Enable', 'off');
@@ -2043,8 +2043,8 @@ end
             set(txtMultiplePeaksIsoMaskPtr ('get'), 'Enable', 'on' );
             set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'off');
             set(uiEditSmalestIsoMaskPtr    ('get'), 'Enable', 'off');
-%            set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'off');                
-%            set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');            
+%            set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'off');
+%            set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
         end
 
     end
@@ -2095,7 +2095,7 @@ end
         end
 
         pixelEdge('set', get(chkPixelEdgeIsoMask, 'Value'));
-        
+
         % Set contour panel checkbox
         set(chkPixelEdgePtr('get'), 'Value', pixelEdge('get'));
     end
@@ -2119,7 +2119,7 @@ end
         percentOfPeakIsoMask('set', get(chkPercentOfPeakIsoMask, 'Value'));
 
         if percentOfPeakIsoMask('get') == true
-            
+
             set(uiEditAddVoiIsoMaskPtr('get')    , 'Enable', 'on');
             set(uiEditAddVoiIsoMaskPtr('get')    , 'String', num2str(voiIsoMaskMax('get')));
             set(txtPercentOfPeakIsoMaskPtr('get'), 'String', 'Percent of Peak');
@@ -2132,9 +2132,9 @@ end
             else
                 set(uiEditPeakPercentIsoMaskPtr('get'), 'Enable', 'off');
             end
-            
+
             set(uiValueFormulaIsoMaskPtr('get'), 'Enable', 'off');
-           
+
         else
             set(uiEditAddVoiIsoMaskPtr('get')    , 'String', num2str(peakSUVMaxIsoMask('get')));
             set(txtPercentOfPeakIsoMaskPtr('get'), 'String', 'Min SUV Value');
@@ -2142,12 +2142,12 @@ end
             set(chkMultiplePeaksIsoMaskPtr('get'), 'Enable', 'off');
             set(txtMultiplePeaksIsoMaskPtr('get'), 'Enable', 'on');
             set(uiEditPeakPercentIsoMaskPtr        ('get'), 'Enable', 'off');
-            
+
             set(uiValueFormulaIsoMaskPtr('get'), 'Enable', 'on');
-        
+
             asFormula = get(uiValueFormulaIsoMaskPtr('get'), 'String');
             dFormula  = get(uiValueFormulaIsoMaskPtr('get'), 'Value');
-        
+
             if ~strcmpi(asFormula{dFormula}, 'Fixed')
                 set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'off');
             else
@@ -2201,43 +2201,43 @@ end
     end
 
     function minSuvFromFormulaIsoMaskValue(hObject, ~)
-        
+
         asFormulaString = get(hObject, 'String');
         dFormulaValue   = get(hObject, 'Value');
-        
+
         sFormula = asFormulaString{dFormulaValue};
-        
+
         if strcmpi(sFormula, '(4.30/SUVmean)x(SUVmean + SD)')
-            
-            sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));            
-            
+
+            sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
+
             % Need a quantified PT or NM
-            
-            if ~strcmpi(sSeriesUnit, 'SUV') 
+
+            if ~strcmpi(sSeriesUnit, 'SUV')
                 set(hObject, 'Value', 1);
                 valueFormulaIsoMask('set', 1);
 
                 errordlg('Error: A quantified PT or NM must be activated to use this formula!', 'Formula Dialog');
-                return;               
-            end         
+                return;
+            end
         end
-        
+
         if strcmpi(sFormula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ... % Use CT HU treshold value
-           strcmpi(sFormula, '(4.30/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...     
+           strcmpi(sFormula, '(4.30/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...
            strcmpi(sFormula, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map')
-            
+
             tResampleToCT = resampleToCTIsoMaskUiValues('get');
-            
+
             dCTOffset = isoMaskCtSerieOffset('get');
             if isempty(tResampleToCT)
                 set(hObject, 'Value', 1);
                 valueFormulaIsoMask('set', 1);
 
                 errordlg('Error: A quantified PT or NM and a CT is needed to use this formula!', 'Formula Dialog');
-                return;                   
-            else    
-                
-                dCTSeriesNumber = tResampleToCT{dCTOffset}.dSeriesNumber;         
+                return;
+            else
+
+                dCTSeriesNumber = tResampleToCT{dCTOffset}.dSeriesNumber;
 
                 sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
                 sCTUnit = getSerieUnitValue(dCTSeriesNumber);
@@ -2249,60 +2249,60 @@ end
                     valueFormulaIsoMask('set', 1);
 
                     errordlg('Error: A quantified PT or NM and a CT is needed to use this formula!', 'Formula Dialog');
-                    return;               
-                end 
+                    return;
+                end
             end
         end
-        
+
         if strcmpi(sFormula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT ISO Map') || ... % Use CT ISO contour
-           strcmpi(sFormula, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map')     
-            
+           strcmpi(sFormula, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map')
+
             btnFusion = btnFusionPtr('get');
-            if strcmpi(get(btnFusion, 'Enable'), 'off')  % Need a fuse CT  
+            if strcmpi(get(btnFusion, 'Enable'), 'off')  % Need a fuse CT
                 set(hObject, 'Value', 1);
                 valueFormulaIsoMask('set', 1);
 
                 errordlg('Error: A quantified PT or NM and a fuse CT is needed to use this formula!', 'Formula Dialog');
-                return;                   
+                return;
             end
-            
+
             sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get')     , 'Value'));
             sFusionUnit = getSerieUnitValue(get(uiFusedSeriesPtr('get'), 'Value'));
-            
+
             % Need a quantified PT or NM and a fused CT
-                      
+
             if ~(strcmpi(sSeriesUnit, 'SUV') && strcmpi(sFusionUnit, 'HU'))
                 set(hObject, 'Value', 1);
                 valueFormulaIsoMask('set', 1);
 
                 errordlg('Error: A quantified PT or NM and a fuse CT is needed to use this formula!', 'Formula Dialog');
-                return;               
-            end         
+                return;
+            end
         end
-                
+
         valueFormulaIsoMask('set', get(hObject, 'Value'));
-                
+
         asFormula = get(hObject, 'String');
         dFormula  = get(hObject, 'Value');
-        
+
         if ~strcmpi(asFormula{dFormula}, 'Fixed')
             set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'off');
         else
             set(uiEditAddVoiIsoMaskPtr('get'), 'Enable', 'on');
         end
-                        
+
 %        tQuant = quantificationTemplate('get');
 %        if isfield(tQuant, 'tSUV')
 %            dSUVScale = tQuant.tSUV.dScale;
 %        else
 %            dSUVScale = 0;
 %        end
-        
+
 %        dMean = mean(dicomBuffer('get'), 'all') * dSUVScale;
 %        dSTD = std(dicomBuffer('get'), [],'all') * dSUVScale;
-        
+
 %        dSUVmin = (4.30/dMean)*(dMean + dSTD);
-        
+
     end
 
     function editSmalestIsoMaskValue(hObject, ~)
@@ -2320,7 +2320,7 @@ end
     end
 
     function createIsoMaskCallback(~, ~)
-        
+
         isoObj = isoObject('get');
         if ~isempty(isoObj)
 
@@ -2328,7 +2328,7 @@ end
 
             set(fiMainWindowPtr('get'), 'Pointer', 'watch');
             drawnow;
-            
+
             dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
             set(uiSeriesPtr('get'), 'Enable', 'off');
@@ -2340,68 +2340,68 @@ end
 
             aSurfaceColor = surfaceColor('all');
             dColorOffset  = isoColorOffset('get');
-            
+
             atInput = inputTemplate('get');
 
             im = dicomBuffer('get', [], dSeriesOffset);
             atMetaData = dicomMetaData('get');
             aInputBuffer = inputBuffer('get');
-                    
+
             asFormula = get(uiValueFormulaIsoMask, 'String');
             dFormula  = get(uiValueFormulaIsoMask, 'Value');
-            
+
             dLiverMean = 0;
-            dLiverSTD  = 0;   
-                
-            if strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') 
-                                        
+            dLiverSTD  = 0;
+
+            if strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map')
+
                 atRoiInput = roiTemplate('get', dSeriesOffset);
-               
+
                 if ~isempty(atRoiInput)
-                    
-                    aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Label, atRoiInput, 'uni', false ), {'Normal Liver'} );            
+
+                    aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Label, atRoiInput, 'uni', false ), {'Normal Liver'} );
                     dTagOffset = find(aTagOffset, 1);
-                    
+
                     aSlice = [];
-                    
+
                     if ~isempty(dTagOffset)
-                        
+
                         switch lower(atRoiInput{dTagOffset}.Axe)
 
-                            case 'axes1'                            
+                            case 'axes1'
                                 aSlice = permute(im(atRoiInput{dTagOffset}.SliceNb,:,:), [3 2 1]);
 
                             case 'axes2'
                                 aSlice = permute(im(:,atRoiInput{dTagOffset}.SliceNb,:), [3 1 2]);
 
                             case 'axes3'
-                                aSlice = im(:,:,atRoiInput{dTagOffset}.SliceNb);       
+                                aSlice = im(:,:,atRoiInput{dTagOffset}.SliceNb);
                         end
-                        
+
                         aLogicalMask = roiTemplateToMask(atRoiInput{dTagOffset}, aSlice);
-                        
+
                         tQuant = quantificationTemplate('get');
 
                         if isfield(tQuant, 'tSUV')
                             dSUVScale = tQuant.tSUV.dScale;
                         else
                             dSUVScale = 0;
-                        end     
-                        
+                        end
+
                         dLiverMean = mean(aSlice(aLogicalMask), 'all')   * dSUVScale;
-                        dLiverSTD  = std(aSlice(aLogicalMask), [],'all') * dSUVScale;     
-                        
+                        dLiverSTD  = std(aSlice(aLogicalMask), [],'all') * dSUVScale;
+
                         clear aSlice;
                     else
-                        msgbox('Error: createIsoMaskCallback(): Please define a Normal Liver ROI!', 'Error');   
+                        msgbox('Error: createIsoMaskCallback(): Please define a Normal Liver ROI!', 'Error');
                         return;
-                    end                
+                    end
                 end
-            end            
-            
-            
+            end
+
+
             % Resample to CT
-            
+
             if resampledContoursIsoMask('get') == true
 
                 tResampleToCT = resampleToCTIsoMaskUiValues('get');
@@ -2412,16 +2412,16 @@ end
                     dCTSeriesNumber = tResampleToCT{dCTOffset}.dSeriesNumber;
 
                     refImage = aInputBuffer{dCTSeriesNumber};
-                    atRefMetaData = atInput(dCTSeriesNumber).atDicomInfo;           
-                    
+                    atRefMetaData = atInput(dCTSeriesNumber).atDicomInfo;
+
                     if numel(im) ~= numel(refImage)
-                        
+
                         progressBar(0.3, sprintf('Resampling series, please wait'));
-                        
+
                         if size(im, 3) ~= size(refImage, 3)
-                            [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', false, true);   
+                            [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', false, true);
                         else
-                            [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', true, true);   
+                            [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', true, true);
                         end
 
                         progressBar(0.6, sprintf('Resampling ROIs, please wait'));
@@ -2430,40 +2430,40 @@ end
 
                         atResampledRoi = resampleROIs(im, atMetaData, aResampledBuffer, atResampledMetaData, atRoi, true);
 
-                        roiTemplate('set', dSeriesOffset, atResampledRoi);  
+                        roiTemplate('set', dSeriesOffset, atResampledRoi);
 
                         progressBar(0.99999, sprintf('Resampling MIP, please wait'));
 
                         dicomMetaData('set', atResampledMetaData);
                         dicomBuffer('set', aResampledBuffer);
-                        
-                        refMip = mipBuffer('get', [], dCTSeriesNumber);                        
+
+                        refMip = mipBuffer('get', [], dCTSeriesNumber);
                           aMip = mipBuffer('get', [], dSeriesOffset);
-                      
+
                         if size(im, 3) ~= size(refImage, 3)
                             aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear', false);
                         else
                             aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear', true);
                         end
-                        
+
                         mipBuffer('set', aResampledMip, dSeriesOffset);
 
-                        setQuantification(dSeriesOffset);                               
+                        setQuantification(dSeriesOffset);
                     end
                 end
             end
-            
-            im = dicomBuffer('get');        
+
+            im = dicomBuffer('get');
             atDcmMetaData = dicomMetaData('get');
-            
+
             dMin = min(im, [], 'all');
             dMax = max(im, [], 'all');
             dScale = abs(dMin)+abs(dMax);
             dOffset = dScale*isoObj.Isovalue;
             dIsoValue = dMin+dOffset;
 
-            % Get constraint 
-            
+            % Get constraint
+
             progressBar(0.3, sprintf('Applying constraint, please wait'));
 
             [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value'));
@@ -2472,61 +2472,61 @@ end
 
             atRoiInput = roiTemplate('get', dSeriesOffset);
 
-            aLogicalMask = roiConstraintToMask(im, atRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);        
+            aLogicalMask = roiConstraintToMask(im, atRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
 
 %            dImageMin = min(double(im),[], 'all');
 
-%            im(aLogicalMask==0) = dImageMin; % Apply constraint            
-            
+%            im(aLogicalMask==0) = dImageMin; % Apply constraint
+
             % Get ISO value
-            
+
             progressBar(0.6, sprintf('Computing mask, please wait'));
 
             fv = isosurface(im, dIsoValue, aSurfaceColor{dColorOffset}); % Make patch w. faces "out"
 
             aVolume = polygon2voxel(fv, size(im), 'none');
-            
-            BW = imfill(aVolume, 4, 'holes');            
+
+            BW = imfill(aVolume, 4, 'holes');
 
 
 %            dScale = dMax*isoObj.Isovalue;
-            
+
 %            BW = im;
-%            BW(BW<dScale) = dMin;            
+%            BW(BW<dScale) = dMin;
 %            BW(BW~=dMin) = 1;
 %            BW(BW==dMin) = 0;
-%            BW = imfill(BW, 4, 'holes');            
-            
-        
+%            BW = imfill(BW, 4, 'holes');
+
+
             BW(aLogicalMask==0) = 0;
-            
+
        %     BW = volumeFill(aVolume);
-                 
+
             BWLIVER = [];
             imMaskLiver = [];
- 
+
             if strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map') || ...
                strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map') || ...
                strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...
                strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT ISO Map')
-                               
+
                 if ~isempty(atRoiInput)
-                    
-                    aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Label, atRoiInput, 'uni', false ), {'Liver'} );            
+
+                    aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Label, atRoiInput, 'uni', false ), {'Liver'} );
                     dTagOffset = find(aTagOffset, 1);
 
                     if ~isempty(dTagOffset)
 
                         switch lower(atRoiInput{dTagOffset}.Axe)
 
-                            case 'axes1'                            
+                            case 'axes1'
                                 aSlice = permute(im(atRoiInput{dTagOffset}.SliceNb,:,:), [3 2 1]);
 
                             case 'axes2'
                                 aSlice = permute(im(:,atRoiInput{dTagOffset}.SliceNb,:), [3 1 2]);
 
                             case 'axes3'
-                                aSlice = im(:,:,atRoiInput{dTagOffset}.SliceNb);       
+                                aSlice = im(:,:,atRoiInput{dTagOffset}.SliceNb);
                         end
 
 
@@ -2539,43 +2539,43 @@ end
 
                         switch lower(atRoiInput{dTagOffset}.Axe)
 
-                            case 'axes1'   
+                            case 'axes1'
 
                                 for kk=1:size(im, 1)
 
-                                    aSlice = permute(aVolume(kk,:,:), [3 2 1]); % 10% of treshold Liver 
+                                    aSlice = permute(aVolume(kk,:,:), [3 2 1]); % 10% of treshold Liver
                                     aSlice(aLogicalMask2==0)=0;
-                                    aVolume(kk,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);  
+                                    aVolume(kk,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
 
-                                    aSlice = permute(BW(kk,:,:), [3 2 1]);  % Outside Liver 
+                                    aSlice = permute(BW(kk,:,:), [3 2 1]);  % Outside Liver
                                     aSlice(aLogicalMask2==1)=0;
-                                    BW(kk,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);                                                                                            
+                                    BW(kk,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
                                 end
 
                             case 'axes2'
 
                                 for kk=1:size(aVolume, 2)
-                                    aSlice = permute(aVolume(:,kk,:), [3 1 2]); % 10% of treshold Liver 
+                                    aSlice = permute(aVolume(:,kk,:), [3 1 2]); % 10% of treshold Liver
                                     aSlice(aLogicalMask2==0)=0;
-                                    aVolume(:,kk,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);  
+                                    aVolume(:,kk,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
 
-                                    aSlice = permute(BW(:,kk,:), [3 1 2]);  % Outside Liver 
+                                    aSlice = permute(BW(:,kk,:), [3 1 2]);  % Outside Liver
                                     aSlice(aLogicalMask2==1)=0;
-                                    BW(:,kk,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]); 
+                                    BW(:,kk,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
                                 end
 
                             case 'axes3'
 
                                 for kk=1:size(aVolume, 3)
-                                    aSlice = aVolume(:,:,kk); % 10% of treshold Liver 
+                                    aSlice = aVolume(:,:,kk); % 10% of treshold Liver
                                     aSlice(aLogicalMask2==0)=0;
-                                    aVolume(:,:,kk) = aSlice;  
+                                    aVolume(:,:,kk) = aSlice;
 
-                                    aSlice = BW(:,:,kk);  % Outside Liver 
+                                    aSlice = BW(:,:,kk);  % Outside Liver
                                     aSlice(aLogicalMask2==1)=0;
-                                    BW(:,:,kk) = aSlice;                                 
+                                    BW(:,:,kk) = aSlice;
                                 end
-                        end                    
+                        end
 
                         % Those formulas require their own threshold
 
@@ -2596,24 +2596,24 @@ end
                         imMaskLiver = im;
                         imMaskLiver(BWLIVER == 0) = dMin;
                     else
-                        msgbox('Error: createIsoMaskCallback(): Please define a Liver ROI on the coronal or sagittal plane!', 'Error');                          
-                    end                
+                        msgbox('Error: createIsoMaskCallback(): Please define a Liver ROI on the coronal or sagittal plane!', 'Error');
+                    end
                 end
 
 
            end
-           
+
             imMask = im;
             imMask(BW == 0) = dMin;
-            
+
             if get(chkAddVoiIsoMask, 'Value') == false % test
-                                   
+
                 atInput = inputTemplate('get');
 
                 atInput(numel(atInput)+1) = atInput(dSeriesOffset);
 
                 atInput(numel(atInput)).bEdgeDetection = false;
-                atInput(numel(atInput)).bDoseKernel    = false;    
+                atInput(numel(atInput)).bDoseKernel    = false;
                 atInput(numel(atInput)).bFlipLeftRight = false;
                 atInput(numel(atInput)).bFlipAntPost   = false;
                 atInput(numel(atInput)).bFlipHeadFeet  = false;
@@ -2622,10 +2622,10 @@ end
                 atInput(numel(atInput)).bFusedEdgeDetection = false;
                 atInput(numel(atInput)).tMovement = [];
                 atInput(numel(atInput)).tMovement.bMovementApplied = false;
-                atInput(numel(atInput)).tMovement.aGeomtform = [];                
+                atInput(numel(atInput)).tMovement.aGeomtform = [];
                 atInput(numel(atInput)).tMovement.atSeq{1}.sAxe = [];
                 atInput(numel(atInput)).tMovement.atSeq{1}.aTranslation = [];
-                atInput(numel(atInput)).tMovement.atSeq{1}.dRotation = [];            
+                atInput(numel(atInput)).tMovement.atSeq{1}.dRotation = [];
 
                 atInput(numel(atInput)).atDicomInfo = atDcmMetaData;
 
@@ -2640,7 +2640,9 @@ end
                     atInput(numel(atInput)).atDicomInfo{hh}.SeriesInstanceUID = dSeriesInstanceUID;
                 end
 
-                atInput(numel(atInput)).aDicomBuffer = imMask;
+% To reduce memory usage
+%                 atInput(numel(atInput)).aDicomBuffer = imMask;
+% To reduce memory usage                
 
                 inputTemplate('set', atInput);
 
@@ -2667,7 +2669,7 @@ end
 
                 inputTemplate('set', atInput);
             end
-            
+
             set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
 
             progressBar(1, sprintf('Mask completed'));
@@ -2675,12 +2677,12 @@ end
             set(uiSeriesPtr('get'), 'Enable', 'on');
             set(btnIsoSurfacePtr('get'), 'Enable', 'on');
             set(btn3DPtr('get'), 'Enable', 'on');
-            set(btnMIPPtr('get'), 'Enable', 'on');            
+            set(btnMIPPtr('get'), 'Enable', 'on');
 
-            BWCT = [];            
-                
+            BWCT = [];
+
             if get(chkAddVoiIsoMask, 'Value') == true
-                              
+
                 % Set Pixel Edge
                 if get(chkPixelEdgeIsoMask, 'Value') == true
                     bPixelEdge = true;
@@ -2689,15 +2691,15 @@ end
                 end
 
                 % Set Percent to Max
-                
+
                 if get(chkPercentOfPeakIsoMask, 'Value') == true
-                    
-                    sMinSUVformula = [];                        
-                    
+
+                    sMinSUVformula = [];
+
                     bUseFormula = false;
 
                     bPercentOfPeak = true;
-                    
+
                     dPercentMaxOrMaxSUVValue = abs(str2double(get(uiEditAddVoiIsoMask, 'String')));
 
                     if dPercentMaxOrMaxSUVValue < 0
@@ -2709,51 +2711,51 @@ end
                     end
 
                     voiIsoMaskMax('set', dPercentMaxOrMaxSUVValue);
-                    
-                    set(uiEditAddVoiIsoMask, 'String', num2str(dPercentMaxOrMaxSUVValue));                    
+
+                    set(uiEditAddVoiIsoMask, 'String', num2str(dPercentMaxOrMaxSUVValue));
                 else
-                    bPercentOfPeak = false;                 
-                        
+                    bPercentOfPeak = false;
+
                     asFormula = get(uiValueFormulaIsoMask, 'String');
                     dFormula  = get(uiValueFormulaIsoMask, 'Value');
-                        
+
                     if strcmpi(asFormula{dFormula}, 'Fixed')
-                        
-                        sMinSUVformula = [];                        
-                        
+
+                        sMinSUVformula = [];
+
                         bUseFormula = false;
-                        
+
                         dPercentMaxOrMaxSUVValue = abs(str2double(get(uiEditAddVoiIsoMask, 'String')));
 
                         if dPercentMaxOrMaxSUVValue < 0
                             dPercentMaxOrMaxSUVValue = 0;
-                        end   
-                    
+                        end
+
                         peakSUVMaxIsoMask('set', dPercentMaxOrMaxSUVValue);
-                        
+
                         set(uiEditAddVoiIsoMask, 'String', num2str(dPercentMaxOrMaxSUVValue));
-                        
+
                     elseif strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...
                            strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...
                            strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map')
-                        
-                        bUseFormula = true;   
-                        
+
+                        bUseFormula = true;
+
                         dPercentMaxOrMaxSUVValue = 0;
-                        sMinSUVformula = asFormula{dFormula};                        
+                        sMinSUVformula = asFormula{dFormula};
                         valueFormulaIsoMask('set', dFormula);
-                        
+
                         tResampleToCT = resampleToCTIsoMaskUiValues('get');
-                      
+
                         dCTOffset = isoMaskCtSerieOffset('get');
                         dCTSeriesNumber = tResampleToCT{dCTOffset}.dSeriesNumber;
-                        
-                        BWCT = dicomBuffer('get', [], dCTSeriesNumber); 
-                                                
-                        if isempty(BWCT)        
-                            
+
+                        BWCT = dicomBuffer('get', [], dCTSeriesNumber);
+
+                        if isempty(BWCT)
+
                             BWCT = aInputBuffer{dCTSeriesNumber};
-                                                        
+
                             if     strcmpi(imageOrientation('get'), 'axial')
                             %    BWCT = BWCT;
                             elseif strcmpi(imageOrientation('get'), 'coronal')
@@ -2772,54 +2774,54 @@ end
 
                             if atInput(dCTSeriesNumber).bFlipHeadFeet == true
                                 BWCT=BWCT(:,:,end:-1:1);
-                            end   
+                            end
                         end
-                                        
+
                         atFuseMetaData = dicomMetaData('get', [], dCTSeriesNumber);
                         if isempty(atFuseMetaData)
                             atFuseMetaData = atInput(dCTSeriesNumber).atDicomInfo;
                         end
-                        
+
                         if resampleToCTIsoMask('get') == false || ... % Need to fit the CT to the PT or NM
                            (resampleToCTIsoMask('get') == true && resampledContoursIsoMask('get') == false)
-                       
-                            if numel(BWCT) ~= numel(im) 
+
+                            if numel(BWCT) ~= numel(im)
                                progressBar(0.6, sprintf('Resampling ct, please wait'));
-                               
-                                [BWCT, ~] = resampleImage(BWCT, atFuseMetaData, im, atMetaData, 'Nearest', true, false);   
-                                
+
+                                [BWCT, ~] = resampleImage(BWCT, atFuseMetaData, im, atMetaData, 'Nearest', true, false);
+
                             end
                         end
-                                                 
-                        progressBar(0.6, sprintf('Computing ct bone map, please wait'));                        
-                
-                        BWCT(BWCT < 100) = 0;                                    
-                        BWCT = imfill(BWCT, 4, 'holes');                       
-                
+
+                        progressBar(0.6, sprintf('Computing ct bone map, please wait'));
+
+                        BWCT(BWCT < 100) = 0;
+                        BWCT = imfill(BWCT, 4, 'holes');
+
                         BWCT(BWCT~=0) = 1;
                         BWCT(BWCT~=1) = 0;
-                            
+
                     elseif strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT ISO Map') || ...
                            strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map')
 
-                        
-                        bUseFormula = true;       
-                        
+
+                        bUseFormula = true;
+
                         dPercentMaxOrMaxSUVValue = 0;
-                        sMinSUVformula = asFormula{dFormula};                        
+                        sMinSUVformula = asFormula{dFormula};
                         valueFormulaIsoMask('set', dFormula);
-                        
+
                         dFusedSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
 
-                        BWCT = fusionBuffer('get', [], dFusedSeriesOffset); 
-                                                                                    
+                        BWCT = fusionBuffer('get', [], dFusedSeriesOffset);
+
                         if resampleToCTIsoMask('get') == true && resampledContoursIsoMask('get') == true
-                       
-                            if numel(BWCT) ~= numel(im) 
-                                
-                               BWCT = dicomBuffer('get', [], dFusedSeriesOffset); 
-                                                                
-                                if isempty(BWCT)    
+
+                            if numel(BWCT) ~= numel(im)
+
+                               BWCT = dicomBuffer('get', [], dFusedSeriesOffset);
+
+                                if isempty(BWCT)
                                     BWCT = aInputBuffer{dFusedSeriesOffset};
 
                                     if     strcmpi(imageOrientation('get'), 'axial')
@@ -2840,42 +2842,42 @@ end
 
                                     if atInput(dFusedSeriesOffset).bFlipHeadFeet == true
                                         BWCT=BWCT(:,:,end:-1:1);
-                                    end  
+                                    end
                                 end
                             end
                         end
 
                         isoFusionObj = isoFusionObject('get');
                         if ~isempty(isoFusionObj)
-                                                        
+
                             aSurfaceColor = surfaceColor('all');
                             dColorFusionOffset  = isoColorFusionOffset('get');
-            
+
                             dCTmin = min(BWCT, [], 'all');
                             dCTmax = max(BWCT, [], 'all');
                             dScale = abs(dCTmin)+abs(dCTmax);
                             dOffset = dScale*isoFusionObj.Isovalue;
-                            dIsoValue = dCTmin+dOffset;  
-                            
+                            dIsoValue = dCTmin+dOffset;
+
                             progressBar(0.6, sprintf('Computing ct iso map, please wait'));
 
                             fv = isosurface(BWCT, dIsoValue, aSurfaceColor{dColorFusionOffset}); % Make patch w. faces "out"
 
                             BWCT = imfill(polygon2voxel(fv, size(BWCT), 'none'), 4, 'holes');
-                                                     
+
                             BWCT(BWCT~=0) = 1;
                             BWCT(BWCT~=1) = 0;
                        %     BW = volumeFill(aVolume);
 
-%                            imCT(BWCT =~ 0) = dCTmin;                                                                                    
-                        end                        
-                    else            
-                        bUseFormula = true;                  
-                        
+%                            imCT(BWCT =~ 0) = dCTmin;
+                        end
+                    else
+                        bUseFormula = true;
+
                         dPercentMaxOrMaxSUVValue = 0;
-                        sMinSUVformula = asFormula{dFormula};                        
+                        sMinSUVformula = asFormula{dFormula};
                         valueFormulaIsoMask('set', dFormula);
-                    end                     
+                    end
                 end
 
                 % Set Multiple Peaks
@@ -2934,30 +2936,30 @@ end
                 if switchToIsoSurface('get') == true
                     setIsoSurfaceCallback();
                 end
-                
-                % Deactivate main tool bar 
-                set(uiSeriesPtr('get'), 'Enable', 'off');                        
+
+                % Deactivate main tool bar
+                set(uiSeriesPtr('get'), 'Enable', 'off');
                 mainToolBarEnable('off');
-        
+
                 % Create VOIs
 
-                
+
                 if strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map') || ...
                    strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map')
-               
-                   maskAddVoiToSeries(imMask     , BW     , bPixelEdge, true, 42, true, 65, false, sMinSUVformula, BWCT, dSmalestVoiValue);                    
+
+                   maskAddVoiToSeries(imMask     , BW     , bPixelEdge, true, 42, true, 65, false, sMinSUVformula, BWCT, dSmalestVoiValue);
                    maskAddVoiToSeries(imMaskLiver, BWLIVER, bPixelEdge, true, 42, false, dMultiplePeaksPercentValue, false, sMinSUVformula, BWCT, dSmalestVoiValue);
 
                 elseif strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...
-                       strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT ISO Map')      
-                   maskAddVoiToSeries(imMask     , BW, bPixelEdge, bPercentOfPeak, 3, false, 0, false, sMinSUVformula, BWCT, dSmalestVoiValue);                    
+                       strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT ISO Map')
+                   maskAddVoiToSeries(imMask     , BW, bPixelEdge, bPercentOfPeak, 3, false, 0, false, sMinSUVformula, BWCT, dSmalestVoiValue);
                    maskAddVoiToSeries(imMaskLiver, BWLIVER, bPixelEdge, false, dPercentMaxOrMaxSUVValue, false, dMultiplePeaksPercentValue, true, sMinSUVformula, BWCT, dSmalestVoiValue, dLiverMean, dLiverSTD);
 
 
                 else
-                    maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxOrMaxSUVValue, bMultiplePeaks, dMultiplePeaksPercentValue, bUseFormula, sMinSUVformula, BWCT, dSmalestVoiValue, dLiverMean, dLiverSTD);                    
+                    maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxOrMaxSUVValue, bMultiplePeaks, dMultiplePeaksPercentValue, bUseFormula, sMinSUVformula, BWCT, dSmalestVoiValue, dLiverMean, dLiverSTD);
                 end
-            
+
                 % Resample to CT
 
                 if resampledContoursIsoMask('get') == false
@@ -2969,20 +2971,20 @@ end
 
                         dCTOffset = isoMaskCtSerieOffset('get');
                         dCTSeriesNumber = tResampleToCT{dCTOffset}.dSeriesNumber;
-                        
-                        im = dicomBuffer('get');        
+
+                        im = dicomBuffer('get');
 
                         refImage = aInputBuffer{dCTSeriesNumber};
-                        atRefMetaData = atInput(dCTSeriesNumber).atDicomInfo;           
+                        atRefMetaData = atInput(dCTSeriesNumber).atDicomInfo;
 
                         if numel(im) ~= numel(refImage)
-                            
+
                             progressBar(0.3, sprintf('Resampling series, please wait'));
-                            
+
                             if size(im, 3) ~= size(refImage, 3)
-                                [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', false, true);   
+                                [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', false, true);
                             else
-                                [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', true, true);   
+                                [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', true, true);
                             end
 
                             progressBar(0.6, sprintf('Resampling ROIs, please wait'));
@@ -2991,7 +2993,7 @@ end
 
                             atResampledRoi = resampleROIs(im, atMetaData, aResampledBuffer, atResampledMetaData, atRoi, true);
 
-                            roiTemplate('set', dSeriesOffset, atResampledRoi);  
+                            roiTemplate('set', dSeriesOffset, atResampledRoi);
 
                             progressBar(0.99999, sprintf('Resampling MIP, please wait'));
 
@@ -3000,7 +3002,7 @@ end
 
                             refMip = mipBuffer('get', [], dCTSeriesNumber);
                             aMip = mipBuffer('get', [], dSeriesOffset);
-                            
+
                             if size(im, 3) ~= size(refImage, 3)
                                 aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, 'Linear', false);
                             else
@@ -3009,25 +3011,25 @@ end
 
                             mipBuffer('set', aResampledMip, dSeriesOffset);
 
-                            setQuantification(dSeriesOffset);     
-                                                        
+                            setQuantification(dSeriesOffset);
+
                         end
                     end
                 end
-            
-%                setSeriesCallback();                               
-                
+
+%                setSeriesCallback();
+
                 if resampleToCTIsoMask('get') == true && ...
-                   ~isempty(tResampleToCT) 
-                
+                   ~isempty(tResampleToCT)
+
                     % Deactivate MIP Fusion
 
                     link2DMip('set', false);
 
                     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-                    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
+                    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
                     set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
-                   
+
                     % Set fusion
 
                     if isFusion('get') == false
@@ -3036,7 +3038,7 @@ end
 
                         setFusionCallback();
                     end
-                    
+
                     progressBar(1, sprintf('Ready'));
 
                 end
@@ -3057,26 +3059,26 @@ end
                 if viewRoiPanel('get') == false
                     setViewRoiPanel();
                 end
-                
+
             else
 
             end
-                       
+
             catch
                 progressBar(1, 'Error: createIsoMaskCallback()');
             end
-            
-            clear BW;            
-            clear BWCT;       
+
+            clear BW;
+            clear BWCT;
             clear imMask;
             clear aVolume;
             clear BWLIVER;
             clear imMaskLiver;
-                 
-           % Reactivate main tool bar 
-            set(uiSeriesPtr('get'), 'Enable', 'on');                        
-            mainToolBarEnable('on');     
-                
+
+           % Reactivate main tool bar
+            set(uiSeriesPtr('get'), 'Enable', 'on');
+            mainToolBarEnable('on');
+
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
             drawnow;
 
@@ -3104,7 +3106,7 @@ end
            switchToMIPMode('get')    == false
             return;
         end
-        
+
        asColor = surfaceColor('get', get(hObject, 'Value'), true);
 
         if get(ui3DVolume, 'Value') == 2 % Fusion
@@ -3520,7 +3522,7 @@ end
            switchToMIPMode('get')    == false
             return;
         end
-        
+
         if bypassUiSliderIsoSurfaceListener('get') == true
             return;
         end
@@ -3548,7 +3550,7 @@ end
         end
 
         set(uiEditIsoSurface, 'String', num2str(get(uiSliderIsoSurface, 'Value')*100));
-        
+
         initGate3DObject('set', true);
 
     end
@@ -3560,7 +3562,7 @@ end
            switchToMIPMode('get')    == false
             return;
         end
-                
+
         bypassUiSliderIsoSurfaceListener('set', true);
 
         dValue = abs(str2double(get(uiEditIsoSurface, 'String')));
@@ -3594,7 +3596,7 @@ end
 
         set(uiEditIsoSurface  , 'String', num2str(dValue));
         set(uiSliderIsoSurface, 'Value', dValue/100 );
-        
+
         bypassUiSliderIsoSurfaceListener('set', false);
 
         initGate3DObject('set', true);

@@ -610,6 +610,9 @@ function colorbarCallback(hObject, ~)
         tInput = inputTemplate('get');                
 
         if strcmpi(get(get(hObject, 'Parent'), 'Tag'), 'Fusion Colorbar')
+
+             dColorbarScale = fusionColorbarScale('get');
+           
             dMax = fusionWindowLevel('get', 'max');
             dMin = fusionWindowLevel('get', 'min');
             
@@ -620,6 +623,9 @@ function colorbarCallback(hObject, ~)
             bDefaultUnit = isFusionColorbarDefaultUnit('get');
 
         else        
+
+            dColorbarScale = colorbarScale('get');
+
             dMax = windowLevel('get', 'max');
             dMin = windowLevel('get', 'min');
             
@@ -634,12 +640,32 @@ function colorbarCallback(hObject, ~)
             dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-380/2) ...
                                 (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-165/2) ...
                                 380 ...
-                                165 ...
+                                205 ...
                                 ],...
                   'Color', viewerBackgroundColor('get'), ...
-                  'Name', 'Set Window Level'...
+                  'Name', 'Lookup Table'...
                    );      
-               
+
+        edtColorbarScale = ...
+          uicontrol(dlgWindowLevel,...
+                    'style'     , 'edit',...
+                    'Background', 'white',...
+                    'string'    , num2str(dColorbarScale),...
+                    'BackgroundColor', viewerBackgroundColor('get'), ...
+                    'ForegroundColor', viewerForegroundColor('get'), ...                 
+                    'Callback', @edtColorbarScaleCallback, ...
+                    'position'  , [200 165 150 20] ...
+                    );
+
+         uicontrol(dlgWindowLevel,...
+                  'style'   , 'text',...
+                  'string'  , 'Colorbar Scale (%)',...
+                  'horizontalalignment', 'left',...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...                   
+                  'position', [20 162 150 20]...
+                  );
+
         if strcmpi(sUnitDisplay, 'SUV') || strcmpi(sUnitDisplay, 'HU') 
             if strcmpi(sUnitDisplay, 'HU') 
                 if bDefaultUnit == true
@@ -774,6 +800,13 @@ function colorbarCallback(hObject, ~)
                 proceedWindowLCallback();
             end
         end      
+        
+        function edtColorbarScaleCallback(hObject, ~)
+
+            if str2double(get(hObject, 'String')) < 0
+                set(hObject, 'String', '100');
+            end
+        end
 
         function chkUnitTypeCallback(hChkObject, ~)            
             
@@ -853,8 +886,7 @@ function colorbarCallback(hObject, ~)
             end
             
             set(edtMinValue, 'String', sMinValue);           
-            set(edtMaxValue, 'String', sMaxValue);           
-                        
+            set(edtMaxValue, 'String', sMaxValue);                                   
         end
             
         function cancelWindowLCallback(~, ~)               
@@ -862,7 +894,13 @@ function colorbarCallback(hObject, ~)
         end
         
         function proceedWindowLCallback(~, ~)     
-            
+                     
+            dColorbarScale = str2double(get(edtColorbarScale, 'String'));
+
+            if dColorbarScale < 0
+                dColorbarScale = 100;
+            end
+
             lMax = str2double(get(edtMaxValue, 'String'));
             lMin = str2double(get(edtMinValue, 'String'));
             
@@ -876,7 +914,9 @@ function colorbarCallback(hObject, ~)
             end
                     
             if strcmpi(get(get(hObject, 'Parent'), 'Tag'), 'Fusion Colorbar')
-                
+
+                fusionColorbarScale('set', dColorbarScale);
+               
                 fusionWindowLevel('set', 'max', lMax);
                 fusionWindowLevel('set', 'min' ,lMin);
 
@@ -928,7 +968,8 @@ function colorbarCallback(hObject, ~)
                     refreshImages();
                 end                 
             else    
-                    
+                colorbarScale('set', dColorbarScale);
+                  
                 windowLevel('set', 'max', lMax);
                 windowLevel('set', 'min' ,lMin);
 

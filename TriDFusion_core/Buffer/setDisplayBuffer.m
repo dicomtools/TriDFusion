@@ -105,7 +105,11 @@ function setDisplayBuffer()
                 end
             end  
         end
-    
+        
+% To reduce memory usage                
+        tInput(i).aDicomBuffer = [];
+% To reduce memory usage                
+        
     end                
     
  %   if canUseGPU()    
