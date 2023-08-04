@@ -42,6 +42,9 @@
 - Edge Detection
 - Voxel Dosimetry
 - Machine Learning Segmentation
+- Machine Learning 3D Lung Shunt & Lung Dose
+- Machine Learning 3D Lung Lobe Quantification
+- Machine Learning Y90 Dosimetry
 - Radiomics
 
 ## MATLAB tested version
