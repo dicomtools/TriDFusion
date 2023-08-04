@@ -1595,8 +1595,8 @@ end
     
             % Text on colorbar line
         
-            textFusionColorbarIntensityMax = text(axeFusionColorbar, 0.0,lineFusionColorbarIntensityMax.YData(1), ' ','Color', 'white','FontName', 'Arial', 'FontSize',7); %Helvetica
-            textFusionColorbarIntensityMin = text(axeFusionColorbar, 0.0,lineFusionColorbarIntensityMin.YData(1), ' ','Color', 'white','FontName', 'Arial', 'FontSize',7); %Helvetica
+            textFusionColorbarIntensityMax = text(axeFusionColorbar, 0.0,lineFusionColorbarIntensityMax.YData(1), ' ','Color', viewerFusionColorbarIntensityMaxTextColor('get'),'FontName', 'Arial', 'FontSize',7); %Helvetica
+            textFusionColorbarIntensityMin = text(axeFusionColorbar, 0.0,lineFusionColorbarIntensityMin.YData(1), ' ','Color', viewerFusionColorbarIntensityMinTextColor('get'),'FontName', 'Arial', 'FontSize',7); %Helvetica
         
             textFusionColorbarIntensityMaxPtr('set', textFusionColorbarIntensityMax);
             textFusionColorbarIntensityMinPtr('set', textFusionColorbarIntensityMin);

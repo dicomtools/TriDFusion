@@ -139,6 +139,9 @@ function info = dicominfo4che3(fileInput)
     info.ManufacturerModelName = char(dataset.getString(org.dcm4che3.data.Tag.ManufacturerModelName, 0));
     info.ProtocolName          = char(dataset.getString(org.dcm4che3.data.Tag.ProtocolName, 0)); 
     
+    info.NumberOfEnergyWindows = str2double(dataset.getString(org.dcm4che3.data.Tag.NumberOfEnergyWindows,0));
+    info.NumberOfDetectors     = str2double(dataset.getString(org.dcm4che3.data.Tag.NumberOfDetectors,0));
+    
     % Dose information
     
     datasetDose = dataset.getNestedDataset(org.dcm4che3.data.Tag.RadiopharmaceuticalInformationSequence, 0);
@@ -177,8 +180,11 @@ function info = dicominfo4che3(fileInput)
         datasetRotationInformation = dataset.getNestedDataset(org.dcm4che3.data.Tag.RotationInformationSequence, 0);
         if ~isempty(datasetRotationInformation)
     
-            info.RotationInformationSequence.Item_1.RotationDirection = char(datasetRotationInformation.getString(org.dcm4che3.data.Tag.RotationDirection, 0));
-            info.RotationInformationSequence.Item_1.RadialPosition = datasetRotationInformation.getDoubles(org.dcm4che3.data.Tag.RadialPosition);
+            info.RotationInformationSequence.Item_1.RotationDirection        = char(datasetRotationInformation.getString(org.dcm4che3.data.Tag.RotationDirection, 0));
+            info.RotationInformationSequence.Item_1.RadialPosition           = datasetRotationInformation.getDoubles(org.dcm4che3.data.Tag.RadialPosition);
+            info.RotationInformationSequence.Item_1.NumberOfFramesInRotation = str2double(datasetRotationInformation.getString(org.dcm4che3.data.Tag.NumberOfFramesInRotation));
+            info.RotationInformationSequence.Item_1.AngularStep              = double(datasetRotationInformation.getDoubles(org.dcm4che3.data.Tag.AngularStep));                                                                                                                                                                                
+            info.RotationInformationSequence.Item_1.StartAngle               = double(datasetRotationInformation.getDoubles(org.dcm4che3.data.Tag.StartAngle));                                                                                                                                                                                
         end
 
         % Dose information

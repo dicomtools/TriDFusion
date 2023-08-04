@@ -1,7 +1,10 @@
-function aMask = lungShuntMasks(sAction, sOrgan, aValue)
-%function aMask = lungShuntMasks(sAction, sOrgan, aValue)
-%Get/Set Lung Shunt init masks value.
+function aColor = viewerColorbarIntensityMaxTextColor(sAction, aValue)
+%function aColor = viewerColorbarIntensityMaxTextColor(sAction, aValue)
+%Get\Set Viewer colorbar intensity max text color.
 %See TriDFuison.doc (or pdf) for more information about options.
+%
+%Note: option settings must fit on one line and can contain one semicolon at most.
+%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
@@ -25,26 +28,13 @@ function aMask = lungShuntMasks(sAction, sOrgan, aValue)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent paMask; 
+    persistent paColor; 
 
     if strcmpi('set', sAction)
-        if strcmpi('liver', sOrgan)
-           paMask{1}=aValue;
-        else
-           paMask{2}=aValue;
-        end
-    else
-        if ~isempty(paMask)
-            if strcmpi('liver', sOrgan)
-                aMask = paMask{1};        
-            else
-                aMask = paMask{2};        
-            end
-        else
-            aMask = [];
-        end
-    end
+       paColor = aValue;            
+    end     
     
+    aColor = paColor;
 end

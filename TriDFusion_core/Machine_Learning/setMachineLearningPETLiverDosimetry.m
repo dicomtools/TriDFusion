@@ -82,6 +82,9 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorPath)
 
     try 
 
+    roiFaceAlphaValue('set', 0.1);
+    set(uiSliderRoisFaceAlphaRoiPanelObject('get'), 'Value', roiFaceAlphaValue('get'));
+
     pixelEdge('set', true);
 
     % Set contour panel checkbox

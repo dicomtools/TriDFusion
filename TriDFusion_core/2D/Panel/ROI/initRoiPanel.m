@@ -164,6 +164,7 @@ function initRoiPanel()
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @sliderRoisFaceAlphaRoiPanelCallback ...
                   );
+    uiSliderRoisFaceAlphaRoiPanelObject('set', uiSliderRoisFaceAlphaRoiPanel);
 %    addlistener(uiSliderRoisFaceAlphaRoiPanel, 'Value', 'PreSet', @sliderRoisFaceAlphaRoiPanelCallback);
 
     % Sphere Diameter

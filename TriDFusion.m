@@ -61,10 +61,15 @@ function TriDFusion(varargin)
     viewerButtonPushedBackgroundColor('set', [0.53 0.63 0.40]);
     viewerButtonPushedForegroundColor('set', [0.1 0.1 0.1]);
 
-    viewerColorbarIntensityMaxLineColor('set', [0.27 0.30 0.40]);
-    viewerColorbarIntensityMinLineColor('set', [0.27 0.30 0.40]);
-    viewerFusionColorbarIntensityMaxLineColor('set', [0.27 0.30 0.40]);
-    viewerFusionColorbarIntensityMinLineColor('set', [0.27 0.30 0.40]);
+    viewerColorbarIntensityMaxLineColor('set', [0.53 0.63 0.40]);
+    viewerColorbarIntensityMinLineColor('set', [0.53 0.63 0.40]);
+    viewerColorbarIntensityMaxTextColor('set', [0 0 0]);
+    viewerColorbarIntensityMinTextColor('set', [0 0 0]);
+
+    viewerFusionColorbarIntensityMaxLineColor('set', [0.53 0.63 0.40]);
+    viewerFusionColorbarIntensityMinLineColor('set', [0.53 0.63 0.40]);
+    viewerFusionColorbarIntensityMaxTextColor('set', [0 0 0]);
+    viewerFusionColorbarIntensityMinTextColor('set', [0 0 0]);
 
     viewerCrossLinesColor('set', [0 1 1]);
 
@@ -72,8 +77,8 @@ function TriDFusion(varargin)
 
     arg3DEngine  = false;
     argBorder    = false;
-    argInternal    = false;
-    argFusion      = false;
+    argInternal  = false;
+    argFusion    = false;
     
     dOutputDirOffset = 0;
  

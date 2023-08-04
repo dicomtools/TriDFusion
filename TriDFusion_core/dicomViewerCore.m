@@ -1888,8 +1888,8 @@ function dicomViewerCore()
 
     % Text on colorbar line
 
-    textColorbarIntensityMax = text(axeColorbar, 0.0,lineColorbarIntensityMax.YData(1), ' ','Color', 'white','FontName', 'Arial', 'FontSize',7); %Helvetica
-    textColorbarIntensityMin = text(axeColorbar, 0.0,lineColorbarIntensityMin.YData(1), ' ','Color', 'white','FontName', 'Arial', 'FontSize',7); %Helvetica
+    textColorbarIntensityMax = text(axeColorbar, 0.0,lineColorbarIntensityMax.YData(1), ' ','Color', viewerColorbarIntensityMaxTextColor('get'),'FontName', 'Arial', 'FontSize',7); %Helvetica
+    textColorbarIntensityMin = text(axeColorbar, 0.0,lineColorbarIntensityMin.YData(1), ' ','Color', viewerColorbarIntensityMinTextColor('get'),'FontName', 'Arial', 'FontSize',7); %Helvetica
 
     textColorbarIntensityMaxPtr('set', textColorbarIntensityMax);
     textColorbarIntensityMinPtr('set', textColorbarIntensityMin);

@@ -1,13 +1,16 @@
-function aMask = lungShuntMasks(sAction, sOrgan, aValue)
-%function aMask = lungShuntMasks(sAction, sOrgan, aValue)
-%Get/Set Lung Shunt init masks value.
+function uiObject = uiSliderRoisFaceAlphaRoiPanelObject(sAction, aValue)
+%function  uiObject = uiSliderRoisFaceAlphaRoiPanelObject(sAction, aValue)
+%Get\Set contour transparency slider Voi Roi Panel Object.
 %See TriDFuison.doc (or pdf) for more information about options.
+%
+%Note: option settings must fit on one line and can contain one semicolon at most.
+%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2023, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2021, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -25,26 +28,13 @@ function aMask = lungShuntMasks(sAction, sOrgan, aValue)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent paMask; 
+    persistent paObject; 
 
     if strcmpi('set', sAction)
-        if strcmpi('liver', sOrgan)
-           paMask{1}=aValue;
-        else
-           paMask{2}=aValue;
-        end
-    else
-        if ~isempty(paMask)
-            if strcmpi('liver', sOrgan)
-                aMask = paMask{1};        
-            else
-                aMask = paMask{2};        
-            end
-        else
-            aMask = [];
-        end
-    end
+        paObject = aValue;            
+    end      
     
+    uiObject = paObject;
 end
