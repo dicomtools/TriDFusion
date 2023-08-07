@@ -278,10 +278,10 @@ function importContoursCallback(~, ~)
             for jj=1:numel(atContours)
                 if aContourImported(jj) == false
                     atContours(jj).Referenced.SeriesInstanceUID = atInput(dSerieOffset).atDicomInfo{1}.SeriesInstanceUID;         
-                
-                    inputContours('add', atContours(dd));
+                                                                   
+                    inputContours('add', atContours(jj));
                         
-                    setContours({atContours(dd)}, true);                
+                    setContours({atContours(jj)}, false);                
                 end
             end
             
@@ -306,8 +306,16 @@ function importContoursCallback(~, ~)
 
 %            hold off;
 
-            refreshImages();
-            
+            clearDisplay();
+
+            if size(dicomBuffer('get'), 3) == 1
+                initDisplay(1);
+            else
+                initDisplay(3);
+            end
+
+            dicomViewerCore();    
+
             progressBar( 1, 'Ready');      
             
         end                 

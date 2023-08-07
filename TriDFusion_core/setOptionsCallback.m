@@ -567,7 +567,10 @@ function setOptionsCallback(~, ~)
 
             if isFusion('get')
 
-                setFusionWindowMinMax(dFusionMax, dFusionMin);                    
+                sUnitDisplay = getSerieUnitValue(dFusionOffset);                            
+                if strcmpi(sUnitDisplay, 'SUV') 
+                    setFusionWindowMinMax(dFusionMax, dFusionMin);                    
+                end
 
                 dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                 for rr=1:dNbFusedSeries

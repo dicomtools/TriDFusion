@@ -53,7 +53,7 @@ function aImage = computeMicrospereActivity(aImage, atMetaData, sTreatmentType, 
     if strcmpi(sTreatmentType, 'TheraSphere')
         dSphereMultiplicator = 2500; % BQ per sphere
     elseif strcmpi(sTreatmentType, 'SIRsphere')
-        dSphereMultiplicator = 50;
+        dSphereMultiplicator = 61.65;
     else
         sErrorMessage = sprintf('Error: %s is not supported', sTreatmentType);
         errordlg(sErrorMessage);
@@ -101,6 +101,9 @@ function aImage = computeMicrospereActivity(aImage, atMetaData, sTreatmentType, 
         dContourVolume = dNbCells*dVoxVolume;
 
         dNbSphere = round(dContourVolume / dMicrosphereVolume);
+        if dNbSphere == 0
+            dNbSphere = 1;
+        end
 
         aImage(voiMask~=0) = dNbSphere * dSphereMultiplicator / dNbCells / dVoxVolume;  
     end

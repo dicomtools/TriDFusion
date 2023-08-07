@@ -1393,10 +1393,10 @@ function generatePETLiverDosimetryReportCallback(~, ~)
         for jj=1:numel(gasMask)
     
             [aMask, aColor] = machineLearning3DMask('get', gasMask{jj});
-
-            aMask = smooth3(aMask, 'box');
     
             if ~isempty(aMask)
+
+                aMask = smooth3(aMask, 'box');
 
                 aColormap = zeros(256,3);
 

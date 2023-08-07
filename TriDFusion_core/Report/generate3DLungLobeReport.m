@@ -298,7 +298,7 @@ function generate3DLungLobeReport(bInitReport)
                   'FontWeight', 'bold',...
                   'FontSize'  , 10,...
                   'FontName'  , 'MS Sans Serif', ...
-                  'string'    , 'Total',...
+                  'string'    , 'Counts',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
@@ -416,7 +416,7 @@ function generate3DLungLobeReport(bInitReport)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 230+60 FIG_REPORT_X/3 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 220+60 FIG_REPORT_X/3 20]...
                   ); 
 
          uiReport3DLobeMiddleLobeRightLungRatio = ...       
@@ -429,7 +429,7 @@ function generate3DLungLobeReport(bInitReport)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 200+60 FIG_REPORT_X/3 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 190+60 FIG_REPORT_X/3 20]...
                   ); 
 
          uiReport3DLobeLowerLobeRightLungRatio = ...       
@@ -442,13 +442,13 @@ function generate3DLungLobeReport(bInitReport)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 170+60 FIG_REPORT_X/3 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 160+60 FIG_REPORT_X/3 20]...
                   ); 
 
      axe3DLobesRectangle = ...
        axes(ui3DLobeLungReport, ...
              'Units'   , 'pixels', ...
-             'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 160+60 FIG_REPORT_X/3+60 160], ...
+             'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 150+60 FIG_REPORT_X/3+60 170], ...
              'Color'   , 'white',...          
              'Visible' , 'off'...             
              );  
@@ -653,7 +653,9 @@ function generate3DLungLobeReport(bInitReport)
         gtReport = computeLobeLungReportContoursInformation(suvMenuUnitOption('get'), false, false, true);  
 
         proceed3DLobesLiverVolumeOversize();
-        
+
+        bInitReport = false;
+   
         if isvalid(ui3DWindow)
             display3DLobeLung();
         end
@@ -729,7 +731,7 @@ function generate3DLungLobeReport(bInitReport)
         sExtraPixelsSize = sprintf('pixel(s) (%2.2f mm)', getLobesLungVolumeOversizedSize(dNbPixels));
         set(uiText3DLobesLiverVolumeOversized, 'String', sExtraPixelsSize);
 
-        lungLobesLiverVolumeOversized('set', dNbPixels);        
+%         lungLobesLiverVolumeOversized('set', dNbPixels);        
 
     end
 
@@ -746,7 +748,7 @@ function generate3DLungLobeReport(bInitReport)
         sExtraSlicesSize = sprintf('slice(s) (%2.2f mm)', getLobesLungVolumeOversizedSize(dNbExtraSlices));
         set(uiText3DLobesLiverTopOfVolumeExtraSlices, 'String', sExtraSlicesSize);
 
-        lungLobesLiverTopOfVolumeExtraSlices('set', dNbExtraSlices);
+%         lungLobesLiverTopOfVolumeExtraSlices('set', dNbExtraSlices);
     end
 
     function proceed3DLobesLiverVolumeOversize(~, ~)
@@ -795,130 +797,138 @@ function generate3DLungLobeReport(bInitReport)
 
             progressBar(1/9, 'Computing oversized liver mask, please wait.');
 
-            dFirstSlice = [];
-
-            aLiverMask = gtReport.Liver.Mask;
-
-            for jj=1:size(aLiverMask, 3)
-                dOffset = find(aLiverMask(:,:,jj), 1);
-                if ~isempty(dOffset)
-                    if isempty(dFirstSlice)
-                        dFirstSlice = jj;
+            if dNbExtraSlicesAtTop    ~= lungLobesLiverTopOfVolumeExtraSlices('get')    || ...
+               dLiverMaskOffset       ~= lungLobesLiverVolumeOversized('get')           || ...
+               bInitReport            == true % First run
+                
+                dFirstSlice = [];
+    
+                aLiverMask = gtReport.Liver.Mask;
+    
+                for jj=1:size(aLiverMask, 3)
+                    dOffset = find(aLiverMask(:,:,jj), 1);
+                    if ~isempty(dOffset)
+                        if isempty(dFirstSlice)
+                            dFirstSlice = jj;
+                        end
                     end
                 end
-            end
-
-            if dLiverMaskOffset ~= 0
-                if dNbExtraSlicesAtTop < 0 
-
-                    aLiverMaskTemp = imdilate(aLiverMask, strel('sphere', dLiverMaskOffset)); % Increse mask by x pixels
     
-                    aLiverMaskTemp(:,:,1:dFirstSlice-1-dNbExtraSlicesAtTop) = 0;
-
-                    if dNbExtraSlicesAtTop < 0
-                        aLiverMaskTemp(:,:,dFirstSlice:dFirstSlice-1-dNbExtraSlicesAtTop) = aLiverMask(:,:,dFirstSlice:dFirstSlice-1-dNbExtraSlicesAtTop);
+                if dLiverMaskOffset ~= 0
+                    if dNbExtraSlicesAtTop < 0 
+    
+                        aLiverMaskTemp = imdilate(aLiverMask, strel('sphere', dLiverMaskOffset)); % Increse mask by x pixels
+        
+                        aLiverMaskTemp(:,:,1:dFirstSlice-1-dNbExtraSlicesAtTop) = 0;
+    
+                        if dNbExtraSlicesAtTop < 0
+                            aLiverMaskTemp(:,:,dFirstSlice:dFirstSlice-1-dNbExtraSlicesAtTop) = aLiverMask(:,:,dFirstSlice:dFirstSlice-1-dNbExtraSlicesAtTop);
+                        end
+    
+                        aLiverMask = aLiverMaskTemp;
+    
+                        clear aLiverMaskTemp;
+                    else
+                        aLiverMask = imdilate(aLiverMask, strel('sphere', dLiverMaskOffset)); % Increse mask by x pixels
+        
+                        aLiverMask(:,:,1:dFirstSlice-1-dNbExtraSlicesAtTop) = 0;
                     end
-
-                    aLiverMask = aLiverMaskTemp;
-
-                    clear aLiverMaskTemp;
-                else
-                    aLiverMask = imdilate(aLiverMask, strel('sphere', dLiverMaskOffset)); % Increse mask by x pixels
-    
-                    aLiverMask(:,:,1:dFirstSlice-1-dNbExtraSlicesAtTop) = 0;
                 end
+                          
+                delete3DLobesVoiContours('Liver-LIV', dNMSerieOffset);
+             
+                maskToVoi(aLiverMask, 'Liver', 'Liver', gtReport.Liver.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
+                
+                % Clean Lungs Mask
+    
+                progressBar(2/9, 'Computing oversized liver, lungs mask, please wait.');
+    
+                aLungsMask = gtReport.Lungs.Mask;
+    
+                aLungsMask(aLiverMask~=0)=0;
+                
+                delete3DLobesVoiContours('Lungs-LUN', dNMSerieOffset);
+    
+                maskToVoi(aLungsMask, 'Lungs', 'Lung', gtReport.Lungs.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
+    
+                clear aLungsMask;
+    
+                % Clean Lung Left Mask
+    
+                progressBar(3/9, 'Computing oversized liver, lung left mask, please wait.');
+    
+                aLungLeftMask = gtReport.LungLeft.Mask;
+    
+                aLungLeftMask(aLiverMask~=0)=0;
+                
+                delete3DLobesVoiContours('Lung Left-LUN', dNMSerieOffset);
+    
+                maskToVoi(aLungLeftMask, 'Lung Left', 'Lung', gtReport.LungLeft.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
+    
+                clear aLungLeftMask;
+                
+                % Clean Lung Right Mask
+    
+                progressBar(4/9, 'Computing oversized liver, lung right mask, please wait.');
+    
+                aLungRightMask = gtReport.LungRight.Mask;
+    
+                aLungRightMask(aLiverMask~=0)=0;
+                
+                delete3DLobesVoiContours('Lung Right-LUN', dNMSerieOffset);
+    
+                maskToVoi(aLungRightMask, 'Lung Right', 'Lung', gtReport.LungRight.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
+    
+                clear aLungRightMask;
+    
+                % Clean Lung Lower Lobe Left Mask
+    
+                progressBar(5/9, 'Computing oversized liver, lung lower left lobe mask, please wait.');
+    
+                aLungLowerLobeLeftMask = gtReport.LungLowerLobeLeft.Mask;
+    
+                aLungLowerLobeLeftMask(aLiverMask~=0)=0;
+                
+                delete3DLobesVoiContours('Lung Lower Lobe Left-LUN', dNMSerieOffset);
+    
+                maskToVoi(aLungLowerLobeLeftMask, 'Lung Lower Lobe Left', 'Lung', gtReport.LungLowerLobeLeft.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
+    
+                clear aLungLowerLobeLeftMask;
+    
+                % Clean Lung Lower Lobe Left Mask
+    
+                progressBar(6/9, 'Computing oversized liver, lung lower right lobe mask, please wait.');
+    
+                aLungLowerLobeRightMask = gtReport.LungLowerLobeRight.Mask;
+    
+                aLungLowerLobeRightMask(aLiverMask~=0)=0;
+                
+                delete3DLobesVoiContours('Lung Lower Lobe Right-LUN', dNMSerieOffset);
+    
+                maskToVoi(aLungLowerLobeRightMask, 'Lung Lower Lobe Right', 'Lung', gtReport.LungLowerLobeRight.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
+    
+                clear aLungLowerLobeRightMask;
+    
+                % Clean Lung Lower Lobe Left Mask
+    
+                progressBar(7/9, 'Computing oversized liver, lung middle right lobe mask, please wait.');
+    
+                aLungMiddleLobeRightMask = gtReport.LungMiddleLobeRight.Mask;
+    
+                aLungMiddleLobeRightMask(aLiverMask~=0)=0;
+                
+                delete3DLobesVoiContours('Lung Middle Lobe Right-LUN', dNMSerieOffset);
+    
+                maskToVoi(aLungMiddleLobeRightMask, 'Lung Middle Lobe Right', 'Lung', gtReport.LungMiddleLobeRight.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
+    
+                clear aLungMiddleLobeRightMask;
+    
+                clear aLiverMask;
+
+                lungLobesLiverTopOfVolumeExtraSlices   ('set', dNbExtraSlicesAtTop);    
+                lungLobesLiverVolumeOversized('set', dLiverMaskOffset);
+                
             end
-                      
-            delete3DLobesVoiContours('Liver-LIV', dNMSerieOffset);
-         
-            maskToVoi(aLiverMask, 'Liver', 'Liver', gtReport.Liver.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
-            
-            % Clean Lungs Mask
-
-            progressBar(2/9, 'Computing oversized liver, lungs mask, please wait.');
-
-            aLungsMask = gtReport.Lungs.Mask;
-
-            aLungsMask(aLiverMask~=0)=0;
-            
-            delete3DLobesVoiContours('Lungs-LUN', dNMSerieOffset);
-
-            maskToVoi(aLungsMask, 'Lungs', 'Lung', gtReport.Lungs.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
-
-            clear aLungsMask;
-
-            % Clean Lung Left Mask
-
-            progressBar(3/9, 'Computing oversized liver, lung left mask, please wait.');
-
-            aLungLeftMask = gtReport.LungLeft.Mask;
-
-            aLungLeftMask(aLiverMask~=0)=0;
-            
-            delete3DLobesVoiContours('Lung Left-LUN', dNMSerieOffset);
-
-            maskToVoi(aLungLeftMask, 'Lung Left', 'Lung', gtReport.LungLeft.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
-
-            clear aLungLeftMask;
-            
-            % Clean Lung Right Mask
-
-            progressBar(4/9, 'Computing oversized liver, lung right mask, please wait.');
-
-            aLungRightMask = gtReport.LungRight.Mask;
-
-            aLungRightMask(aLiverMask~=0)=0;
-            
-            delete3DLobesVoiContours('Lung Right-LUN', dNMSerieOffset);
-
-            maskToVoi(aLungRightMask, 'Lung Right', 'Lung', gtReport.LungRight.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
-
-            clear aLungRightMask;
-
-            % Clean Lung Lower Lobe Left Mask
-
-            progressBar(5/9, 'Computing oversized liver, lung lower left lobe mask, please wait.');
-
-            aLungLowerLobeLeftMask = gtReport.LungLowerLobeLeft.Mask;
-
-            aLungLowerLobeLeftMask(aLiverMask~=0)=0;
-            
-            delete3DLobesVoiContours('Lung Lower Lobe Left-LUN', dNMSerieOffset);
-
-            maskToVoi(aLungLowerLobeLeftMask, 'Lung Lower Lobe Left', 'Lung', gtReport.LungLowerLobeLeft.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
-
-            clear aLungLowerLobeLeftMask;
-
-            % Clean Lung Lower Lobe Left Mask
-
-            progressBar(6/9, 'Computing oversized liver, lung lower right lobe mask, please wait.');
-
-            aLungLowerLobeRightMask = gtReport.LungLowerLobeRight.Mask;
-
-            aLungLowerLobeRightMask(aLiverMask~=0)=0;
-            
-            delete3DLobesVoiContours('Lung Lower Lobe Right-LUN', dNMSerieOffset);
-
-            maskToVoi(aLungLowerLobeRightMask, 'Lung Lower Lobe Right', 'Lung', gtReport.LungLowerLobeRight.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
-
-            clear aLungLowerLobeRightMask;
-
-            % Clean Lung Lower Lobe Left Mask
-
-            progressBar(7/9, 'Computing oversized liver, lung middle right lobe mask, please wait.');
-
-            aLungMiddleLobeRightMask = gtReport.LungMiddleLobeRight.Mask;
-
-            aLungMiddleLobeRightMask(aLiverMask~=0)=0;
-            
-            delete3DLobesVoiContours('Lung Middle Lobe Right-LUN', dNMSerieOffset);
-
-            maskToVoi(aLungMiddleLobeRightMask, 'Lung Middle Lobe Right', 'Lung', gtReport.LungMiddleLobeRight.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
-
-            clear aLungMiddleLobeRightMask;
-
-            clear aLiverMask;
-
 
             progressBar(8/9, 'Reprocessing contours information, please wait.');
 
@@ -2045,15 +2055,18 @@ function generate3DLungLobeReport(bInitReport)
                 
                 if bSUVUnit == true
                     tReport.Lungs.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-                    tReport.Lungs.Total = tReport.Lungs.Mean*tReport.Lungs.Volume*tQuantification.tSUV.dScale;             
-                else
+%                     tReport.Lungs.Total = tReport.Lungs.Mean*tReport.Lungs.Volume*tQuantification.tSUV.dScale;             
+                    tReport.Lungs.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;             
+               else
                     tReport.Lungs.Mean  = mean(voiData, 'all');
-                    tReport.Lungs.Total = tReport.Lungs.Mean*tReport.Lungs.Volume;
+%                     tReport.Lungs.Total = tReport.Lungs.Mean*tReport.Lungs.Volume;
+                    tReport.Lungs.Total = sum(voiData, 'all');
                 end
             else
                 tReport.Lungs.Mean  = mean(voiData, 'all');             
-                tReport.Lungs.Total = tReport.Lungs.Mean*tReport.Lungs.Volume;             
-            end
+%                 tReport.Lungs.Total = tReport.Lungs.Mean*tReport.Lungs.Volume;             
+                tReport.Lungs.Total = sum(voiData, 'all');             
+           end
          
             clear voiMask;
             clear voiData;     
@@ -2169,14 +2182,17 @@ function generate3DLungLobeReport(bInitReport)
                 
                 if bSUVUnit == true
                     tReport.LungLeft.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-                    tReport.LungLeft.Total = tReport.LungLeft.Mean*tReport.LungLeft.Volume*tQuantification.tSUV.dScale;             
+%                     tReport.LungLeft.Total = tReport.LungLeft.Mean*tReport.LungLeft.Volume*tQuantification.tSUV.dScale;             
+                    tReport.LungLeft.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;             
                 else
                     tReport.LungLeft.Mean  = mean(voiData, 'all');
-                    tReport.LungLeft.Total = tReport.LungLeft.Mean*tReport.LungLeft.Volume;
-                end
+%                     tReport.LungLeft.Total = tReport.LungLeft.Mean*tReport.LungLeft.Volume;
+                    tReport.LungLeft.Total = sum(voiData, 'all');
+               end
             else
                 tReport.LungLeft.Mean  = mean(voiData, 'all');             
-                tReport.LungLeft.Total = tReport.LungLeft.Mean*tReport.LungLeft.Volume;             
+%                 tReport.LungLeft.Total = tReport.LungLeft.Mean*tReport.LungLeft.Volume;             
+                tReport.LungLeft.Total = sum(voiData, 'all');             
             end
          
             clear voiMask;
@@ -2293,14 +2309,17 @@ function generate3DLungLobeReport(bInitReport)
                 
                 if bSUVUnit == true
                     tReport.LungRight.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-                    tReport.LungRight.Total = tReport.LungRight.Mean*tReport.LungRight.Volume*tQuantification.tSUV.dScale;             
+%                     tReport.LungRight.Total = tReport.LungRight.Mean*tReport.LungRight.Volume*tQuantification.tSUV.dScale;             
+                    tReport.LungRight.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;             
                 else
                     tReport.LungRight.Mean  = mean(voiData, 'all');
-                    tReport.LungRight.Total = tReport.LungRight.Mean*tReport.LungRight.Volume;
+%                     tReport.LungRight.Total = tReport.LungRight.Mean*tReport.LungRight.Volume;
+                    tReport.LungRight.Total = sum(voiData, 'all');
                 end
             else
                 tReport.LungRight.Mean  = mean(voiData, 'all');             
-                tReport.LungRight.Total = tReport.LungRight.Mean*tReport.LungRight.Volume;             
+%                 tReport.LungRight.Total = tReport.LungRight.Mean*tReport.LungRight.Volume;             
+                tReport.LungRight.Total = sum(voiData, 'all');             
             end
          
             clear voiMask;
@@ -2417,14 +2436,17 @@ function generate3DLungLobeReport(bInitReport)
                 
                 if bSUVUnit == true
                     tReport.LungUpperLobeLeft.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-                    tReport.LungUpperLobeLeft.Total = tReport.LungUpperLobeLeft.Mean*tReport.LungUpperLobeLeft.Volume*tQuantification.tSUV.dScale;             
+%                     tReport.LungUpperLobeLeft.Total = tReport.LungUpperLobeLeft.Mean*tReport.LungUpperLobeLeft.Volume*tQuantification.tSUV.dScale;             
+                    tReport.LungUpperLobeLeft.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;             
                 else
                     tReport.LungUpperLobeLeft.Mean  = mean(voiData, 'all');
-                    tReport.LungUpperLobeLeft.Total = tReport.LungUpperLobeLeft.Mean*tReport.LungUpperLobeLeft.Volume;
+%                     tReport.LungUpperLobeLeft.Total = tReport.LungUpperLobeLeft.Mean*tReport.LungUpperLobeLeft.Volume;
+                    tReport.LungUpperLobeLeft.Total = sum(voiData, 'all');
                 end
             else
                 tReport.LungUpperLobeLeft.Mean  = mean(voiData, 'all');             
-                tReport.LungUpperLobeLeft.Total = tReport.LungUpperLobeLeft.Mean*tReport.LungUpperLobeLeft.Volume;             
+%                 tReport.LungUpperLobeLeft.Total = tReport.LungUpperLobeLeft.Mean*tReport.LungUpperLobeLeft.Volume;             
+                tReport.LungUpperLobeLeft.Total = sum(voiData, 'all');             
             end
          
             clear voiMask;
@@ -2541,14 +2563,17 @@ function generate3DLungLobeReport(bInitReport)
                 
                 if bSUVUnit == true
                     tReport.LungLowerLobeLeft.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-                    tReport.LungLowerLobeLeft.Total = tReport.LungLowerLobeLeft.Mean*tReport.LungLowerLobeLeft.Volume*tQuantification.tSUV.dScale;             
+%                     tReport.LungLowerLobeLeft.Total = tReport.LungLowerLobeLeft.Mean*tReport.LungLowerLobeLeft.Volume*tQuantification.tSUV.dScale;             
+                    tReport.LungLowerLobeLeft.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;             
                 else
                     tReport.LungLowerLobeLeft.Mean  = mean(voiData, 'all');
-                    tReport.LungLowerLobeLeft.Total = tReport.LungLowerLobeLeft.Mean*tReport.LungLowerLobeLeft.Volume;
+%                     tReport.LungLowerLobeLeft.Total = tReport.LungLowerLobeLeft.Mean*tReport.LungLowerLobeLeft.Volume;
+                    tReport.LungLowerLobeLeft.Total = sum(voiData, 'all');
                 end
             else
                 tReport.LungLowerLobeLeft.Mean  = mean(voiData, 'all');             
-                tReport.LungLowerLobeLeft.Total = tReport.LungLowerLobeLeft.Mean*tReport.LungLowerLobeLeft.Volume;             
+%                 tReport.LungLowerLobeLeft.Total = tReport.LungLowerLobeLeft.Mean*tReport.LungLowerLobeLeft.Volume;             
+                tReport.LungLowerLobeLeft.Total = sum(voiData, 'all');             
             end
          
             clear voiMask;
@@ -2665,14 +2690,17 @@ function generate3DLungLobeReport(bInitReport)
                 
                 if bSUVUnit == true
                     tReport.LungUpperLobeRight.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-                    tReport.LungUpperLobeRight.Total = tReport.LungUpperLobeRight.Mean*tReport.LungUpperLobeRight.Volume*tQuantification.tSUV.dScale;             
+%                     tReport.LungUpperLobeRight.Total = tReport.LungUpperLobeRight.Mean*tReport.LungUpperLobeRight.Volume*tQuantification.tSUV.dScale;             
+                    tReport.LungUpperLobeRight.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;             
                 else
                     tReport.LungUpperLobeRight.Mean  = mean(voiData, 'all');
-                    tReport.LungUpperLobeRight.Total = tReport.LungUpperLobeRight.Mean*tReport.LungUpperLobeRight.Volume;
+%                    tReport.LungUpperLobeRight.Total = tReport.LungUpperLobeRight.Mean*tReport.LungUpperLobeRight.Volume;
+                    tReport.LungUpperLobeRight.Total = sum(voiData, 'all');
                 end
             else
                 tReport.LungUpperLobeRight.Mean  = mean(voiData, 'all');             
-                tReport.LungUpperLobeRight.Total = tReport.LungUpperLobeRight.Mean*tReport.LungUpperLobeRight.Volume;             
+%                 tReport.LungUpperLobeRight.Total = tReport.LungUpperLobeRight.Mean*tReport.LungUpperLobeRight.Volume;             
+                tReport.LungUpperLobeRight.Total = sum(voiData, 'all');             
             end
          
             clear voiMask;
@@ -2789,14 +2817,17 @@ function generate3DLungLobeReport(bInitReport)
                 
                 if bSUVUnit == true
                     tReport.LungMiddleLobeRight.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-                    tReport.LungMiddleLobeRight.Total = tReport.LungMiddleLobeRight.Mean*tReport.LungMiddleLobeRight.Volume*tQuantification.tSUV.dScale;             
+%                     tReport.LungMiddleLobeRight.Total = tReport.LungMiddleLobeRight.Mean*tReport.LungMiddleLobeRight.Volume*tQuantification.tSUV.dScale;             
+                    tReport.LungMiddleLobeRight.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;             
                 else
                     tReport.LungMiddleLobeRight.Mean  = mean(voiData, 'all');
-                    tReport.LungMiddleLobeRight.Total = tReport.LungMiddleLobeRight.Mean*tReport.LungMiddleLobeRight.Volume;
-                end
+%                     tReport.LungMiddleLobeRight.Total = tReport.LungMiddleLobeRight.Mean*tReport.LungMiddleLobeRight.Volume;
+                    tReport.LungMiddleLobeRight.Total = sum(voiData, 'all'); 
+               end
             else
                 tReport.LungMiddleLobeRight.Mean  = mean(voiData, 'all');             
-                tReport.LungMiddleLobeRight.Total = tReport.LungMiddleLobeRight.Mean*tReport.LungMiddleLobeRight.Volume;             
+%                 tReport.LungMiddleLobeRight.Total = tReport.LungMiddleLobeRight.Mean*tReport.LungMiddleLobeRight.Volume;             
+                tReport.LungMiddleLobeRight.Total = sum(voiData, 'all');             
             end
          
             clear voiMask;
@@ -2914,14 +2945,17 @@ function generate3DLungLobeReport(bInitReport)
                 
                 if bSUVUnit == true
                     tReport.LungLowerLobeRight.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-                    tReport.LungLowerLobeRight.Total = tReport.LungLowerLobeRight.Mean*tReport.LungLowerLobeRight.Volume*tQuantification.tSUV.dScale;             
-                else
+%                     tReport.LungLowerLobeRight.Total = tReport.LungLowerLobeRight.Mean*tReport.LungLowerLobeRight.Volume*tQuantification.tSUV.dScale;             
+                    tReport.LungLowerLobeRight.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;             
+               else
                     tReport.LungLowerLobeRight.Mean  = mean(voiData, 'all');
-                    tReport.LungLowerLobeRight.Total = tReport.LungLowerLobeRight.Mean*tReport.LungLowerLobeRight.Volume;
-                end
+%                     tReport.LungLowerLobeRight.Total = tReport.LungLowerLobeRight.Mean*tReport.LungLowerLobeRight.Volume;
+                    tReport.LungLowerLobeRight.Total = sum(voiData, 'all');
+               end
             else
                 tReport.LungLowerLobeRight.Mean  = mean(voiData, 'all');             
-                tReport.LungLowerLobeRight.Total = tReport.LungLowerLobeRight.Mean*tReport.LungLowerLobeRight.Volume;             
+%                tReport.LungLowerLobeRight.Total = tReport.LungLowerLobeRight.Mean*tReport.LungLowerLobeRight.Volume;             
+                tReport.LungLowerLobeRight.Total = sum(voiData, 'all');             
             end
          
             clear voiMask;
@@ -3037,14 +3071,17 @@ function generate3DLungLobeReport(bInitReport)
                 
                 if bSUVUnit == true
                     tReport.Liver.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-                    tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume*tQuantification.tSUV.dScale;             
+%                    tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume*tQuantification.tSUV.dScale;             
+                    tReport.Liver.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;             
                 else
                     tReport.Liver.Mean  = mean(voiData, 'all');
-                    tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume;
+             %       tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume;
+                    tReport.Liver.Total = sum(voiData, 'all');
                 end
             else
                 tReport.Liver.Mean  = mean(voiData, 'all');             
-                tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume;             
+%                tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume;             
+                tReport.Liver.Total =  sum(voiData, 'all');             
             end
          
             clear voiMask;
@@ -3290,9 +3327,9 @@ function generate3DLungLobeReport(bInitReport)
     
             [aMask, aColor] = machineLearning3DMask('get', gasMask{jj});
 
-            aMask = smooth3(aMask, 'box', 3);
-
             if ~isempty(aMask)
+                
+                aMask = smooth3(aMask, 'box', 3);
 
                 aColormap = zeros(256,3);
 
