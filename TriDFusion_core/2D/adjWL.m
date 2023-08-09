@@ -33,23 +33,29 @@ function adjWL(dInitCoord)
         pdInitialCoord = dInitCoord;
     end
 
+    tQuantification = quantificationTemplate('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+    dImageMin = tQuantification.tCount.dMin;
+    dImageMax = tQuantification.tCount.dMax; 
+            
     dMin = windowLevel('get', 'min');
     dMax = windowLevel('get', 'max');
-
-    dWLAdjCoe = (dMax + 1)/1024;
+    
+    dWLAdjCoe = (dImageMax-dImageMin)/1024;
 
     aPosDiff = get(0, 'PointerLocation') - pdInitialCoord;
 
-    dMax = dMax + aPosDiff(2) * dWLAdjCoe;
-    dMin = dMin + aPosDiff(1) * dWLAdjCoe;
+    dMax = dMax + (aPosDiff(2) * dWLAdjCoe);
+    dMin = dMin + (aPosDiff(1) * dWLAdjCoe);
 
-    if (dMax < 1)
-        dMax = 1;
-    end
+%     if (dMax < 1)
+%         dMax = 1;
+%     end
 
     if aPosDiff(1) == 0 && aPosDiff(2) == 0
 
         if ~isempty(copyRoiPtr('get'))
+            
             rightClickMenu('on');
 
     %        windowButton('set', 'up'); % Fix for Linux
@@ -64,33 +70,41 @@ function adjWL(dInitCoord)
 
     if dMax > dMin
 
-        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+%         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+% 
+%         if 0    
+%     
+%             aInputBuffer = inputBuffer('get');
+%         
+%             dImageMin = min(aInputBuffer{dSeriesOffset}, [], 'all');
+%             dImageMax = max(aInputBuffer{dSeriesOffset}, [], 'all');
+%         
+%             clear aInputBuffer;
+%         else
+%             tQuantification = quantificationTemplate('get', [], dSeriesOffset);
+%         
+%             dImageMin = tQuantification.tCount.dMin;
+%             dImageMax = tQuantification.tCount.dMax;     
+%         end
 
-        aInputBuffer = inputBuffer('get');
-    
-        dImageMin = min(aInputBuffer{dSeriesOffset}, [], 'all');
-        dImageMax = max(aInputBuffer{dSeriesOffset}, [], 'all');
-    
-        clear aInputBuffer;
+%         if dMin < dImageMin
+%             dMin = dImageMin;
+%         end
+% 
+%         if dMax > dImageMax
+%             dMax = dImageMax;
+%         end
 
-        if dMin < dImageMin
-            dMin = dImageMin;
-        end
-
-        if dMax > dImageMax
-            dMax = dImageMax;
-        end
-
-        aCLim(1) = dMin;
-        aCLim(2) = dMax;
+%         aCLim(1) = dMin;
+%         aCLim(2) = dMax;
 
 %        getInitWindowMinMax('set', aCLim(2), aCLim(1));
 
 %        set(uiSliderWindowPtr('get'), 'value', 0.5);
 %        set(uiSliderLevelPtr('get') , 'value', 0.5);
         
-        windowLevel('set', 'max', aCLim(2));
-        windowLevel('set', 'min', aCLim(1));
+        windowLevel('set', 'max', dMax);
+        windowLevel('set', 'min', dMin);
 
 %         bLinkMip = link2DMip('get');
 % 
@@ -105,8 +119,8 @@ function adjWL(dInitCoord)
 
         % Ajust the intensity 
 
-        set(lineColorbarIntensityMaxPtr('get'), 'YData', [0.1 0.1]);
-        set(lineColorbarIntensityMinPtr('get'), 'YData', [0.9 0.9]);
+   %     set(lineColorbarIntensityMaxPtr('get'), 'YData', [0.1 0.1]);
+   %     set(lineColorbarIntensityMinPtr('get'), 'YData', [0.9 0.9]);
 
         setColorbarIntensityMaxScaleValue(dYOffsetMax, ...
                                           colorbarScale('get'), ...
@@ -135,7 +149,6 @@ function adjWL(dInitCoord)
 % %                set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')),'CLim', aCLim);
 % %            end
 %         end
-
     end
 
     pdInitialCoord = get(0,'PointerLocation');

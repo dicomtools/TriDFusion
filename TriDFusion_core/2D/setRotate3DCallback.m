@@ -52,6 +52,16 @@ function setRotate3DCallback(~, ~)
    %         rotate3d on;
         else
 
+            % Restore the original colorbar limits after rotating
+    
+            set(axeColorbarPtr('get'), 'XLim', [0 1], 'YLim', [0 1], 'View', [0 90]);
+    
+            % Restore the original fusion colorbar limits after rotatin
+    
+            if isFusion('get') == true
+                set(axeFusionColorbarPtr('get'), 'XLim', [0 1], 'YLim', [0 1], 'View', [0 90]);
+            end
+
             set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
             

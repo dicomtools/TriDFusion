@@ -1150,10 +1150,10 @@ function generate3DLungShuntReport(bInitReport)
                 dLungsVolume = gtReport.Lungs.Volume;
 
                 dInjectedActivity = dInjectedActivity/1000; % In GBq
-    
-                dLungMass = dLungsVolume*0.00105; % 1 cubic meter of Lung weighs 1 050 kilograms [kg]
+
+                dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
            
-                sCalculateDose = sprintf('Lung Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * dLungShuntFraction);
+                sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
                 set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
             end 
 
@@ -1404,15 +1404,17 @@ function generate3DLungShuntReport(bInitReport)
             tReport.Lungs.Cells  = dNbCells;
             tReport.Lungs.Volume = dNbCells*dVoxVolume;
 
-            if bUpdateMasks == true
+            if bUpdateMasks == true 
                 tReport.Lungs.Mask = lungsMask;
 
                 lungShuntMasks('set', 'Lungs', lungsMask);
-                clear lungsMask;
+
             else
                 tReport.Lungs.Mask = lungShuntMasks('get', 'Lungs');
             end
-            
+
+            clear lungsMask;
+           
             if strcmpi(sUnitDisplay, 'SUV')
                 
                 if bSUVUnit == true
@@ -1532,15 +1534,18 @@ function generate3DLungShuntReport(bInitReport)
             tReport.Liver.Cells  = dNbCells;
             tReport.Liver.Volume = dNbCells*dVoxVolume;
 
-            if bUpdateMasks == true
+            if bUpdateMasks == true 
                 tReport.Liver.Mask = liverMask;
 
                 lungShuntMasks('set', 'Liver', liverMask);
-                clear liverMask;
+
             else
-                tReport.Liver.Mask = lungShuntMasks('get', 'Liver');                
+
+                tReport.Liver.Mask = lungShuntMasks('get', 'Liver');                               
             end
-        
+
+            clear liverMask;
+
             if strcmpi(sUnitDisplay, 'SUV')
                 
                 if bSUVUnit == true
@@ -2025,7 +2030,7 @@ function generate3DLungShuntReport(bInitReport)
 
         if ~isempty(gtReport) 
 
-            try
+%              try
 
             set(fig3DLungShuntReport, 'Pointer', 'watch');
             drawnow;
@@ -2200,10 +2205,10 @@ function generate3DLungShuntReport(bInitReport)
                     if dInjectedActivity > 0 && ~isnan(dInjectedActivity)
         
                         dInjectedActivity = dInjectedActivity/1000; % In GBq
-            
-                        dLungMass = dLungsVolume*0.00105; % 1 cubic meter of Lung weighs 1 050 kilograms [kg]
+  
+                        dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
                    
-                        sCalculateDose = sprintf('Lung Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * dLungShuntFraction);
+                        sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
                         set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
                     end  
 
@@ -2214,9 +2219,9 @@ function generate3DLungShuntReport(bInitReport)
 
             progressBar(1, 'Ready');
 
-            catch
-                progressBar(1, 'Error: proceedLiverVolumeOversize()');
-            end
+%             catch
+%                 progressBar(1, 'Error: proceedLiverVolumeOversize()');
+%             end
 
             set(uiSliderLiverVolumeRatio, 'Enable', 'on');
             set(uiSliderLungsVolumeRatio, 'Enable', 'on');
@@ -2377,9 +2382,9 @@ function generate3DLungShuntReport(bInitReport)
 
                 dInjectedActivity = dInjectedActivity/1000; % In GBq
     
-                dLungMass = dLungsVolume*0.00105; % 1 cubic meter of Lung weighs 1 050 kilograms [kg]
+                dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
            
-                sCalculateDose = sprintf('Lung Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * dLungShuntFraction);
+                sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
                 set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
             end             
         end
@@ -2436,9 +2441,9 @@ function generate3DLungShuntReport(bInitReport)
 
                 dInjectedActivity = dInjectedActivity/1000; % In GBq
     
-                dLungMass = dLungsVolume*0.00105; % 1 cubic meter of Lung weighs 1 050 kilograms [kg]
+                dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
            
-                sCalculateDose = sprintf('Lung Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * dLungShuntFraction);
+                sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
                 set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
             end              
         end
@@ -2491,10 +2496,10 @@ function generate3DLungShuntReport(bInitReport)
             if dInjectedActivity > 0 && ~isnan(dInjectedActivity)
 
                 dInjectedActivity = dInjectedActivity/1000; % In GBq
-    
-                dLungMass = dLungsVolume*0.00105; % 1 cubic meter of Lung weighs 1 050 kilograms [kg]
+   
+                dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
            
-                sCalculateDose = sprintf('Lung Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * dLungShuntFraction);
+                sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
                 set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
             end            
         end
@@ -2550,9 +2555,9 @@ function generate3DLungShuntReport(bInitReport)
 
                 dInjectedActivity = dInjectedActivity/1000; % In GBq
     
-                dLungMass = dLungsVolume*0.00105; % 1 cubic meter of Lung weighs 1 050 kilograms [kg]
+                dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
            
-                sCalculateDose = sprintf('Lung Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * dLungShuntFraction);
+                sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
                 set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
             end
 
@@ -2605,10 +2610,10 @@ function generate3DLungShuntReport(bInitReport)
             %                                   Lung mass (Kg)
 
             dInjectedActivity = dInjectedActivity/1000; % In GBq
+           
+            dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
 
-            dLungMass = dLungsVolume*0.00105; % 1 cubic meter of Lung weighs 1 050 kilograms [kg]
-       
-            sCalculateDose = sprintf('Lung Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * dLungShuntFraction);
+            sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
             set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);
         end
 

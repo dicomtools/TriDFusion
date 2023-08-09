@@ -75,10 +75,10 @@ function TriDFusion(varargin)
 
     viewerProgressBarLineColor('set',  [0 1 1]);
 
-    arg3DEngine  = false;
-    argBorder    = false;
-    argInternal  = false;
-    argFusion    = false;
+    arg3DEngine = false;
+    argBorder   = false;
+    argInternal = false;
+    argFusion   = false;
     
     dOutputDirOffset = 0;
  

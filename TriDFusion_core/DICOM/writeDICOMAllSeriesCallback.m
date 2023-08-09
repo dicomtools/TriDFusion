@@ -42,7 +42,7 @@ function writeDICOMAllSeriesCallback(~, ~)
         
         sCurrentDir  = viewerRootPath('get');
 
-         sMatFile = [sCurrentDir '/' 'lastWriteDicomDir.mat'];
+         sMatFile = [sCurrentDir '/' 'exportDicomLastUsedDir.mat'];
          % load last data directory
          if exist(sMatFile, 'file')
                                     % lastDirMat mat file exists, load it

@@ -137,6 +137,10 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
 
         for jj=1:numel(boundary)
 
+            if cancelCreateVoiRoiPanel('get') == true
+                break;
+            end
+
             inBoundary = inpolygon(ptX, ptY, boundary{jj}(:, 2), boundary{jj}(:, 1));
 
             if inBoundary
@@ -160,6 +164,10 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
                 end
 
                 for kk=1:numel(boundary3D.PixelIdxList)
+
+                    if cancelCreateVoiRoiPanel('get') == true
+                        break;
+                    end
 
                     linearIndices = boundary3D.PixelIdxList{kk};
                     isInsideComponent = ismember(linearIndex, linearIndices);
@@ -201,6 +209,10 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
                         
                         % Create images.roi.Freehand objects for each unique subZ
                         for i = 1:numel(uniqueZ)
+
+                            if cancelCreateVoiRoiPanel('get') == true
+                                break;
+                            end
 
                             % Get the subscripts corresponding to the current uniqueZ value
                             currZ = uniqueZ(i);
@@ -291,7 +303,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
                         
                         clear aMask;
 
-                        bBreak =true;
+                        bBreak = true;
                         break;    
                     end
                 end
@@ -301,7 +313,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
                 end
 
             end
-
+            
         end
 
         if ~isempty(asTag)

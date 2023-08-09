@@ -37,6 +37,7 @@ function setPanCallback(~, ~)
     releaseRoiWait();
 
     if panTool('get')
+
         set(panMenu('get'), 'Checked', 'off');
 
         set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
@@ -52,6 +53,16 @@ function setPanCallback(~, ~)
 
             rotate3d on
         else
+           % Restore the original colorbar limits after panning     
+
+            set(axeColorbarPtr('get'), 'XLim', [0 1], 'YLim', [0 1], 'View', [0 90]);
+    
+            % Restore the original fusion colorbar limits after panning     
+    
+            if isFusion('get') == true
+                set(axeFusionColorbarPtr('get'), 'XLim', [0 1], 'YLim', [0 1], 'View', [0 90]);
+            end
+
             set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
             set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
             set(btnTriangulatePtr('get'), 'FontWeight', 'bold');

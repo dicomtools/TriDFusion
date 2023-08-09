@@ -1864,7 +1864,7 @@ function dicomViewerCore()
     end
 
     axeColorbarPtr('set', axeColorbar);
-    
+
     % Compute colorbar line y offset
 
     dYOffsetMax = computeLineColorbarIntensityMaxYOffset(dOffset);

@@ -2046,10 +2046,11 @@ function generate3DLungLobeReport(bInitReport)
                 tReport.Lungs.Mask = aMask;
 
                 lungLobesMasks('set', 'lungs', aMask);
-                clear aMask;
             else
                 tReport.Lungs.Mask = lungLobesMasks('get', 'lungs');                
             end
+
+            clear aMask;
 
             if strcmpi(sUnitDisplay, 'SUV')
                 
@@ -2173,10 +2174,11 @@ function generate3DLungLobeReport(bInitReport)
                 tReport.LungLeft.Mask = aMask;
 
                 lungLobesMasks('set', 'lungLeft', aMask);
-                clear aMask;
             else
                 tReport.LungLeft.Mask = lungLobesMasks('get', 'lungLeft');                
             end
+
+            clear aMask;
 
             if strcmpi(sUnitDisplay, 'SUV')
                 
@@ -2300,10 +2302,11 @@ function generate3DLungLobeReport(bInitReport)
                 tReport.LungRight.Mask = aMask;
 
                 lungLobesMasks('set', 'lungRight', aMask);
-                clear aMask;
             else
                 tReport.LungRight.Mask = lungLobesMasks('get', 'lungRight');                
             end
+
+            clear aMask;
 
             if strcmpi(sUnitDisplay, 'SUV')
                 
@@ -2554,10 +2557,11 @@ function generate3DLungLobeReport(bInitReport)
                 tReport.LungLowerLobeLeft.Mask = aMask;
 
                 lungLobesMasks('set', 'lungLowerLobeLeft', aMask);
-                clear aMask;
             else
                 tReport.LungLowerLobeLeft.Mask = lungLobesMasks('get', 'lungLowerLobeLeft');                
             end
+
+            clear aMask;
 
             if strcmpi(sUnitDisplay, 'SUV')
                 
@@ -2808,10 +2812,11 @@ function generate3DLungLobeReport(bInitReport)
                 tReport.LungMiddleLobeRight.Mask = aMask;
 
                 lungLobesMasks('set', 'lungMiddleLobeRight', aMask);
-                clear aMask;
             else
                 tReport.LungMiddleLobeRight.Mask = lungLobesMasks('get', 'lungMiddleLobeRight');                
             end
+
+            clear aMask;
 
             if strcmpi(sUnitDisplay, 'SUV')
                 
@@ -2936,10 +2941,11 @@ function generate3DLungLobeReport(bInitReport)
                 tReport.LungLowerLobeRight.Mask = aMask;
 
                 lungLobesMasks('set', 'LungLowerLobeRight', aMask);
-                clear aMask;
             else
                 tReport.LungLowerLobeRight.Mask = lungLobesMasks('get', 'lungLowerLobeRight');                
             end
+
+            clear aMask;
 
             if strcmpi(sUnitDisplay, 'SUV')
                 
@@ -3062,10 +3068,11 @@ function generate3DLungLobeReport(bInitReport)
                 tReport.Liver.Mask = aMask;
 
                 lungLobesMasks('set', 'Liver', aMask);
-                clear aMask;
             else
                 tReport.Liver.Mask = lungLobesMasks('get', 'Liver');                
             end
+
+            clear aMask;
 
             if strcmpi(sUnitDisplay, 'SUV')
                 

@@ -38,6 +38,16 @@ function triangulateCallback(~, ~)
        switchToIsoSurface('get') == false && ...  
        switchToMIPMode('get')    == false
 
+        % Restore the original colorbar limits after zooming or panning     
+
+        set(axeColorbarPtr('get'), 'XLim', [0 1], 'YLim', [0 1], 'View', [0 90]);
+
+        % Restore the original fusion colorbar limits after zooming or panning    
+
+        if isFusion('get') == true
+            set(axeFusionColorbarPtr('get'), 'XLim', [0 1], 'YLim', [0 1], 'View', [0 90]);
+        end
+
         set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
         set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
         set(btnTriangulatePtr('get'), 'FontWeight', 'bold');

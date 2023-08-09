@@ -41,6 +41,7 @@ function mainWindowMenu()
 
     uimenu(mFile,'Label', 'Export DICOM...'                   ,'Callback', @writeDICOMCallback, 'Separator','on');
     uimenu(mFile,'Label', 'Export DICOM All Series...'        ,'Callback', @writeDICOMAllSeriesCallback);
+    uimenu(mFile,'Label', 'Export DICOM to NII...'            ,'Callback', @writeDICOMtoNIICallback);
  %   uimenu(mFile,'Label', 'Export to Excel...','Callback', @exportAllSeriesResultCallback);
     uimenu(mFile,'Label', 'Export Contours to DICOM-Mask...'  ,'Callback', @writeRoisToDicomMaskCallback);
     uimenu(mFile,'Label', 'Export Contours to RT-Structure...','Callback', @writeRTStructCallback);
