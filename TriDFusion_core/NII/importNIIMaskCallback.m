@@ -37,7 +37,7 @@ function importNIIMaskCallback(~, ~)
          return;
      end     
         
-     filter = {'*.nii'};
+%      filter = {'*.nii'};
 
      sCurrentDir  = viewerRootPath('get');
 
@@ -54,7 +54,9 @@ function importNIIMaskCallback(~, ~)
         end
      end
 
-     [sFileName, sPath] = uigetfile(sprintf('%s%s', char(sCurrentDir), char(filter)), 'Import .nii file');
+%      [sFileName, sPath] = uigetfile({'*.gz';'*.nii'}, sprintf('%s', char(sCurrentDir), 'Import .nii file'));
+     [sFileName, sPath] = uigetfile(sprintf('%s%s', char(sCurrentDir), '*.gz;*.nii'), 'Import .nii mask file');
+
      if sFileName ~= 0
 
         try
@@ -67,7 +69,9 @@ function importNIIMaskCallback(~, ~)
         
 %        mainDir('set', sPathName);
 
-        loadNIIMaskFile(sPath, sFileName);                    
+        loadNIIMaskFile(sPath, sFileName); 
+
+        triangulateImages();
 
      end
 

@@ -184,8 +184,7 @@ function loadCerrDoseVolume(planC, structNamC)
         end
 
         if ~isfield(atTemplate{ii}, 'SeriesType')
-            atTemplate{ii}.SeriesType{1} = '';
-            atTemplate{ii}.SeriesType{2} = '';
+            atTemplate{ii}.SeriesType = '';
         end
 
         if ~isfield(atTemplate{ii}, 'AccessionNumber')

@@ -69,8 +69,8 @@ function tInformation = radiopharmaceuticalInformationDialog()
         sYZPixelSpacingEditEnable = 'off';
     end
 
-    sSeriesTime = atMetaData{1}.SeriesTime;
-    sSeriesDate = atMetaData{1}.SeriesDate;
+    sSeriesTime = strtrim(atMetaData{1}.SeriesTime);
+    sSeriesDate = strtrim(atMetaData{1}.SeriesDate);
 
     if isfield(atMetaData{1}, 'RadiopharmaceuticalInformationSequence')
 
@@ -566,13 +566,13 @@ function tInformation = radiopharmaceuticalInformationDialog()
 
         % Set Series Date\Time
 
-        sSeriesDate = get(edtSeriesDate, 'String');
-        sSeriesTime = get(edtSeriesTime, 'String');
+        sSeriesDate = strtrim(get(edtSeriesDate, 'String'));
+        sSeriesTime = strtrim(get(edtSeriesTime, 'String'));
 
         % Set Radiopharmaceutical Date\Time
 
-        sRadiopharmaceuticalStartDate = get(edtRadiopharmaceuticalStartDate, 'String');
-        sRadiopharmaceuticalStartTime = get(edtRadiopharmaceuticalStartTime, 'String');            
+        sRadiopharmaceuticalStartDate = strtrim(get(edtRadiopharmaceuticalStartDate, 'String'));
+        sRadiopharmaceuticalStartTime = strtrim(get(edtRadiopharmaceuticalStartTime, 'String'));            
 
         % Set Radionuclide Half Life
 

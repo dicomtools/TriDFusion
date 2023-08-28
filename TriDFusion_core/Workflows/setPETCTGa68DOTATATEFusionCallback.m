@@ -1,6 +1,6 @@
 function setPETCTGa68DOTATATEFusionCallback(~, ~)
 %function setPETCTGa68DOTATATEFusionCallback()
-%Run FDG Tumor Segmentation, The tool is called from the main menu.
+%Create a fuison between a PET and CT, The tool is called from the main menu.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org

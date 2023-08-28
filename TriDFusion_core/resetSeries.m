@@ -43,6 +43,7 @@ function resetSeries(dOffset, bInitDisplay)
         set(btnLinkMip, 'Enable', sLinkMipEnable);
         set(btnLinkMip, 'BackgroundColor', sLinkMipBackgroundColor);
         set(btnLinkMip, 'ForegroundColor', sLinkMipForegroundColor);
+        set(btnLinkMip, 'FontWeight', 'bold');
         
         link2DMip('set', true);
     end
@@ -75,7 +76,11 @@ function resetSeries(dOffset, bInitDisplay)
                 delete(atRoi{rr}.MaxDistances.MaxXY.Text);
                 delete(atRoi{rr}.MaxDistances.MaxCY.Text);
             end
-            delete(atRoi{rr}.Object);
+            try
+                delete(atRoi{rr}.Object);
+            catch
+                atRoi{rr}.Object = [];
+            end
         end
 
 

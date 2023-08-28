@@ -1,5 +1,5 @@
-function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset)            
-%function writeDICOM(sOutDir, dSeriesOffset)
+function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale)            
+%function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale) 
 %Write a DICOM Series.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -37,7 +37,7 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset)
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;  
   
-    sTmpDir = sprintf('%stemp_dicom_%s//', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
+    sTmpDir = sprintf('%stemp_dicom_%s//', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss-MS'));
     if exist(char(sTmpDir), 'dir')
         rmdir(char(sTmpDir), 's');
     end
@@ -48,56 +48,67 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset)
     if numel(aBufferSize) > 2
         array4d = zeros(aBufferSize(1), aBufferSize(2),1, aBufferSize(3));
         for slice = 1:aBufferSize(3)
-            if numel(atMetaData) ~= 1
-                if isfield(atMetaData{slice}, 'RescaleIntercept') && ...
-                   isfield(atMetaData{slice}, 'RescaleSlope')     
-                    if atMetaData{slice}.RescaleSlope ~= 0
-                        aBuffer(:,:,slice) = (aBuffer(:,:,slice) - atMetaData{slice}.RescaleIntercept) / atMetaData{slice}.RescaleSlope;
-                    else
-                        if isfield(atMetaData{slice}, 'RealWorldValueMappingSequence') % SUV Spect
-                            if atMetaData{slice}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
-                                fSlope = atMetaData{slice}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
-                                fIntercept = atMetaData{slice}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
-                                aBuffer(:,:,slice) = (aBuffer(:,:,slice) - fIntercept) / fSlope;
-                            end                        
-                        end                           
-                    end
-                end                            
-            else
-                if isfield(atMetaData{1}, 'RescaleIntercept') && ...
-                   isfield(atMetaData{1}, 'RescaleSlope')     
-                    if atMetaData{1}.RescaleSlope ~= 0
-                        aBuffer(:,:,slice) = (aBuffer(:,:,slice) - atMetaData{1}.RescaleIntercept) / atMetaData{1}.RescaleSlope;
-                    else                        
-                        if isfield(atMetaData{1}, 'RealWorldValueMappingSequence') % SUV Spect
-                            if atMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
-                                fSlope =  atMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
-                                fIntercept = atMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
-                                aBuffer(:,:,slice) = (aBuffer(:,:,slice) - fIntercept) / fSlope;
-                            end                        
-                        end                                                 
-                    end
-                end                  
+            if bRescale == true
+                if numel(atMetaData) ~= 1
+                    if isfield(atMetaData{slice}, 'RescaleIntercept') && ...
+                       isfield(atMetaData{slice}, 'RescaleSlope')     
+                        if atMetaData{slice}.RescaleSlope ~= 0
+                            aBuffer(:,:,slice) = (aBuffer(:,:,slice) - atMetaData{slice}.RescaleIntercept) / atMetaData{slice}.RescaleSlope;
+                        else
+                            if isfield(atMetaData{slice}, 'RealWorldValueMappingSequence') % SUV Spect
+                                if atMetaData{slice}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
+                                    fSlope = atMetaData{slice}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
+                                    fIntercept = atMetaData{slice}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
+                                    aBuffer(:,:,slice) = (aBuffer(:,:,slice) - fIntercept) / fSlope;
+                                end                        
+                            end                           
+                        end
+                    end                            
+                else
+                    if isfield(atMetaData{1}, 'RescaleIntercept') && ...
+                       isfield(atMetaData{1}, 'RescaleSlope')     
+                        if atMetaData{1}.RescaleSlope ~= 0
+                            aBuffer(:,:,slice) = (aBuffer(:,:,slice) - atMetaData{1}.RescaleIntercept) / atMetaData{1}.RescaleSlope;
+                        else                        
+                            if isfield(atMetaData{1}, 'RealWorldValueMappingSequence') % SUV Spect
+                                if atMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
+                                    fSlope =  atMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
+                                    fIntercept = atMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
+                                    aBuffer(:,:,slice) = (aBuffer(:,:,slice) - fIntercept) / fSlope;
+                                end                        
+                            end                                                 
+                        end
+                    end                  
+                end
             end
-           array4d(:,:,1,slice) = aBuffer(:,:,slice);
+            
+            array4d(:,:,1,slice) = aBuffer(:,:,slice);
+
         end            
+
+        array4d = array4d(:,:,:,end:-1:1);   
+      
     else
-        if isfield(atMetaData{1}, 'RescaleIntercept') && ...
-           isfield(atMetaData{1}, 'RescaleSlope') 
-            if atMetaData{1}.RescaleSlope ~= 0
-                aBuffer = (aBuffer - atMetaData{1}.RescaleIntercept) / atMetaData{1}.RescaleSlope;
-            else
-                if isfield(atMetaData{1}, 'RealWorldValueMappingSequence') % SUV Spect
-                    if atMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
-                        fSlope = atMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
-                        fIntercept = atMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
-                        aBuffer = (aBuffer - fIntercept) / fSlope;
-                    end                        
-                end                
-            end
-        end               
-        
+        if bRescale == true
+
+            if isfield(atMetaData{1}, 'RescaleIntercept') && ...
+               isfield(atMetaData{1}, 'RescaleSlope') 
+                if atMetaData{1}.RescaleSlope ~= 0
+                    aBuffer = (aBuffer - atMetaData{1}.RescaleIntercept) / atMetaData{1}.RescaleSlope;
+                else
+                    if isfield(atMetaData{1}, 'RealWorldValueMappingSequence') % SUV Spect
+                        if atMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
+                            fSlope = atMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
+                            fIntercept = atMetaData{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
+                            aBuffer = (aBuffer - fIntercept) / fSlope;
+                        end                        
+                    end                
+                end
+            end               
+        end
+
         array4d = aBuffer;
+
     end
 
     if numel(atMetaData) > 1
@@ -106,14 +117,17 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset)
         dWriteEndLoop = 1;
     end
 
-    array4d = array4d(:,:,:,end:-1:1);   
-
     dSeriesInstanceUID = dicomuid;
 
     atWriteMetaData = cell(1, dWriteEndLoop);
 
     for ww=1:dWriteEndLoop
-    
+
+        if mod(ww,5)==1 || ww == dWriteEndLoop       
+            progressBar(ww / dWriteEndLoop, ...
+                sprintf('Processing header %d/%d, please wait', ww, dWriteEndLoop));
+        end
+
         sWriteFile = sprintf('%s.%d', atMetaData{ww}.SeriesInstanceUID, ww);                                             
         sOutFile   = sprintf('%s%s' , sTmpDir, sWriteFile);
 
@@ -127,15 +141,23 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset)
 %        atWriteMetaData{ww}.TransferSyntaxUID          = '1.2.840.10008.1.2';
 %        atWriteMetaData{ww}.ImplementationClassUID     = '1.3.6.1.4.1.9590.100.1.3.100.9.4';
 %        atWriteMetaData{ww}.ImplementationVersionName  = 'MATLAB IPT 9.4';
-        atWriteMetaData{ww}.SOPClassUID                = '1.2.840.10008.5.1.4.1.1.20';
-        atWriteMetaData{ww}.SOPInstanceUID             = '1.2.752.37.54.2572.122881719510441496582642976905549489909';
+        if isempty(atWriteMetaData{ww}.SOPClassUID)
+            atWriteMetaData{ww}.SOPClassUID                = '1.2.840.10008.5.1.4.1.1.20';
+        end
+
+        if isempty(atWriteMetaData{ww}.SOPInstanceUID)       
+            atWriteMetaData{ww}.SOPInstanceUID             = '1.2.752.37.54.2572.122881719510441496582642976905549489909';
+        end
         
         atWriteMetaData{ww}.SeriesInstanceUID = dSeriesInstanceUID;
 
+        atWriteMetaData{ww}.BitsAllocated = 16;
+        atWriteMetaData{ww}.BitsStored    = 16;
+        atWriteMetaData{ww}.HighBit       = 15;
 
         % Date Time
    
-        dicomwrite(uint16(array4d)    , ...
+        dicomwrite(uint32(array4d)    , ...
                    sOutFile           , ...
                    atWriteMetaData{ww}, ...
                    'CreateMode'       , ...
@@ -145,8 +167,6 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset)
 
     end
     
-
-
     f = java.io.File(char(sTmpDir)); % Copy from temp folder to output dir
     dinfo = f.listFiles();                   
     for K = 1 : 1 : numel(dinfo)

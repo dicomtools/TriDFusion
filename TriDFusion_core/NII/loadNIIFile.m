@@ -143,8 +143,13 @@ function loadNIIFile(sPath, sFileName)
         aImagePositionPatient(3) = nii.hdr.qoffset_z;   
     end
 
-    aBuffer = imrotate3(double(nii.img), 90, [0 0 1], 'nearest');
-    aBuffer = aBuffer(end:-1:1,:,:);
+    if numel(size(nii.img)) >2
+        aBuffer = imrotate3(double(nii.img), 90, [0 0 1], 'nearest');
+        aBuffer = aBuffer(end:-1:1,:,:);
+    else
+        aBuffer = imrotate(double(nii.img), 90, 'nearest');
+        aBuffer = aBuffer(end:-1:1,:);        
+    end
 
     if ~isempty(atInput)
         
@@ -341,11 +346,13 @@ function loadNIIFile(sPath, sFileName)
     set(uiSeriesPtr('get'), 'Value', numel(atInput));
     dicomMetaData('set', atInput(numel(atInput)).atDicomInfo);
     dicomBuffer('set', aBuffer);
-    
-    aMip = computeMIP(aBuffer);
-    mipBuffer('set', aMip, numel(atInput)) ;
-    atInput(numel(atInput)).aMip = aMip;   
-    
+
+    if numel(size(nii.img)) >2   
+        aMip = computeMIP(aBuffer);
+        mipBuffer('set', aMip, numel(atInput)) ;
+        atInput(numel(atInput)).aMip = aMip;   
+    end
+
     setQuantification(numel(atInput));
     
     cropValue('set', min(dicomBuffer('get'), [], 'all'));

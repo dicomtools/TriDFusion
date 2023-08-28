@@ -140,7 +140,9 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
     % Activate ROI Panel
     if bViewContourPanel == true
         if viewRoiPanel('get') == false
-            setViewRoiPanel();
+            if ~isempty(voiTemplate('get', dSerie1Offset))
+                setViewRoiPanel();
+            end
         end
     end
 

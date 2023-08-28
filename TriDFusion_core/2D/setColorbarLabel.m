@@ -28,6 +28,7 @@ function setColorbarLabel()
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     tInput = inputTemplate('get');
+    
     dOffset = get(uiSeriesPtr('get'), 'Value');
     if dOffset > numel(tInput)
         return;
@@ -36,11 +37,15 @@ function setColorbarLabel()
     sLabel = '';
     
     if tInput(dOffset).bDoseKernel == true
-        sLabel = sprintf('%s, Dose', sLabel);
+        sLabel = sprintf('Dose');
     end
     
     if tInput(dOffset).bEdgeDetection == true
-        sLabel = sprintf('%s, Edge', sLabel);
+        if tInput(dOffset).bDoseKernel == true
+            sLabel = sprintf('%s, Edge', sLabel);
+        else
+            sLabel = sprintf('Edge');
+        end
     end    
                     
     ptrColorbar = uiColorbarPtr('get');

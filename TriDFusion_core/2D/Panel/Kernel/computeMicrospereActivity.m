@@ -1,5 +1,5 @@
-function aImage = computeMicrospereActivity(aImage, atMetaData, sTreatmentType, dMicrosphereVolume)
-%function aWithMicrosphereActivity = computeMicrospereActivity(aImage, sTreatmentType, dMicrosphereVolume)
+function [aImage, acReport] = computeMicrospereActivity(aImage, atMetaData, sTreatmentType, dMicrosphereVolume)
+%function [aImage, acReport] = computeMicrospereActivity(aImage, atMetaData, sTreatmentType, dMicrosphereVolume)
 %Add microsphere activity to an image.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -62,7 +62,9 @@ function aImage = computeMicrospereActivity(aImage, atMetaData, sTreatmentType, 
     end
        
     dNbVois = numel(atVoi);
-    
+
+    acReport = cell(dNbVois, 8);
+
     for vv=1:dNbVois
         
         dNbRois = numel(atVoi{vv}.RoisTag);
@@ -105,7 +107,17 @@ function aImage = computeMicrospereActivity(aImage, atMetaData, sTreatmentType, 
             dNbSphere = 1;
         end
 
-        aImage(voiMask~=0) = dNbSphere * dSphereMultiplicator / dNbCells / dVoxVolume;  
+        dActivity = dNbSphere * dSphereMultiplicator / dNbCells / dVoxVolume;
+        aImage(voiMask~=0) = dActivity;  
+
+        acReport{vv,1} = sprintf('Label: %s', atVoi{vv}.Label);
+        acReport{vv,2} = sprintf('Nb Cells: %s', num2str(dNbCells));
+        acReport{vv,3} = sprintf('Voxel Volume: %s', num2str(dVoxVolume));
+        acReport{vv,4} = sprintf('Volume (cm3): %s', num2str(dNbCells*dVoxVolume));
+        acReport{vv,5} = sprintf('Preset (cm3): %s',num2str(dMicrosphereVolume));
+        acReport{vv,6} = sprintf('Nb Sphere: %s',num2str(dNbSphere));
+        acReport{vv,7} = sprintf('Multiplicator: %s',num2str(dSphereMultiplicator));
+        acReport{vv,8} = sprintf('Activity: %s',num2str(dActivity));
     end
     
     progressBar(1, 'Ready');

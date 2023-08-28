@@ -38,13 +38,13 @@ function writeRoisToDicomMaskCallback(~, ~)
 
         sCurrentDir  = viewerRootPath('get');
 
-        sMatFile = [sCurrentDir '/' 'lastWriteDicomDir.mat'];
+        sMatFile = [sCurrentDir '/' 'exportDicomMaskLastUsedDir.mat'];
         % load last data directory
         if exist(sMatFile, 'file')
                                     % lastDirMat mat file exists, load it
            load('-mat', sMatFile);
-           if exist('exportDicomLastUsedDir', 'var')
-               sCurrentDir = exportDicomLastUsedDir;
+           if exist('exportDicomMaskLastUsedDir', 'var')
+               sCurrentDir = exportDicomMaskLastUsedDir;
            end
            if sCurrentDir == 0
                sCurrentDir = pwd;
@@ -58,8 +58,8 @@ function writeRoisToDicomMaskCallback(~, ~)
         sOutDir = [sOutDir '/'];
 
         try
-            exportDicomLastUsedDir = sOutDir;
-            save(sMatFile, 'exportDicomLastUsedDir');
+            exportDicomMaskLastUsedDir = sOutDir;
+            save(sMatFile, 'exportDicomMaskLastUsedDir');
         catch
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
     %        h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
@@ -77,6 +77,6 @@ function writeRoisToDicomMaskCallback(~, ~)
     tInput = inputTemplate('get');    
     aInputBuffer = inputBuffer('get');
     
-    writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer{dOffset}, tInput(dOffset).atDicomInfo, dicomBuffer('get'), dicomMetaData('get'), dOffset);
+    writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer{dOffset}, tInput(dOffset).atDicomInfo, dicomBuffer('get'), dicomMetaData('get'), dOffset, true);
 
 end

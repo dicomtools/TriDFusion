@@ -1,6 +1,6 @@
-function writeDICOMtoNIICallback(~, ~)
-%function writeDICOMtoNIICallback()
-%Import .nii file type to TriDFusion.
+function writeSeriestoNrrdCallback(~, ~)
+%function writeSeriestoNrrdCallback()
+%Export series to .nrrd file type.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.
@@ -10,7 +10,7 @@ function writeDICOMtoNIICallback(~, ~)
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2023, Daniel Lafontaine, on behalf of the TriDFusion development team.
 %
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 %
@@ -29,26 +29,34 @@ function writeDICOMtoNIICallback(~, ~)
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-           
+
+    try
+        
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    drawnow;
+
     atInputTemplate = inputTemplate('get');
 
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
     if dSeriesOffset > numel(atInputTemplate)
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;        
         return;
     end
     
     sOutDir = outputDir('get');
+    
     if isempty(sOutDir)
                 
         sCurrentDir  = viewerRootPath('get');
 
-         sMatFile = [sCurrentDir '/' 'exportNIILastUsedDir.mat'];
+         sMatFile = [sCurrentDir '/' 'exportNrrdLastUsedDir.mat'];
          % load last data directory
          if exist(sMatFile, 'file')
                                     % lastDirMat mat file exists, load it
             load('-mat', sMatFile);
-            if exist('exportNIILastUsedDir', 'var')
-                sCurrentDir = exportNIILastUsedDir;
+            if exist('exportNrrdLastUsedDir', 'var')
+                sCurrentDir = exportNrrdLastUsedDir;
             end
             if sCurrentDir == 0
                 sCurrentDir = pwd;
@@ -57,26 +65,61 @@ function writeDICOMtoNIICallback(~, ~)
 
         sOutDir = uigetdir(sCurrentDir);
         if sOutDir == 0
+            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            drawnow;
             return;
         end
         sOutDir = [sOutDir '/'];
 
         try
-            exportNIILastUsedDir = sOutDir;
-            save(sMatFile, 'exportNIILastUsedDir');
+            exportNrrdLastUsedDir = sOutDir;
+            save(sMatFile, 'exportNrrdLastUsedDir');
         catch
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
         end
     
         sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                
-        sOutDir = char(sOutDir) + "TriDFusion_NII_" + char(sDate) + '/';              
+        sOutDir = char(sOutDir) + "TriDFusion_NRRD_" + char(sDate) + '/';              
         if ~(exist(char(sOutDir), 'dir'))
             mkdir(char(sOutDir));
         end
     end
     
-    [sFilePath, ~, ~] = fileparts(char(atInputTemplate(dSeriesOffset).asFilesList{1}));
+%     [sFilePath, ~, ~] = fileparts(char(atInputTemplate(dSeriesOffset).asFilesList{1}));
+% 
+%     dicm2nii(sFilePath, sOutDir, 1);
 
-    dicm2nii(sFilePath, sOutDir, 1);
+    % Write .nrrd files 
 
+    atMetaData  = dicomMetaData('get', [], dSeriesOffset);
+        
+    origin = atMetaData{1}.ImagePositionPatient;
+    
+    pixelspacing = zeros(3,1);
+
+    pixelspacing(1) = atMetaData{1}.PixelSpacing(1);
+    pixelspacing(2) = atMetaData{1}.PixelSpacing(2);
+    pixelspacing(3) = computeSliceSpacing(atMetaData);
+
+    sNrrdImagesName = sprintf('%s%s.nrrd', sOutDir, cleanString(atMetaData{1}.SeriesDescription));
+
+    aBuffer = dicomBuffer('get', [], dSeriesOffset);
+
+%     if size(aBuffer, 3) ~=1
+% 
+%         aBuffer = aBuffer(:,:,end:-1:1);
+%     end
+
+    nrrdWriter(sNrrdImagesName, squeeze(aBuffer), pixelspacing, origin, 'raw'); % Write .nrrd images 
+    
+    clear aBuffer;
+
+    progressBar(1, sprintf('Export %s completed', sNrrdImagesName));
+
+    catch
+        progressBar(1, 'Error:writeDICOMtoNrrdCallback()');
+    end
+
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    drawnow;    
 end

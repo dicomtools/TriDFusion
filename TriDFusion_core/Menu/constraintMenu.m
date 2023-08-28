@@ -72,16 +72,18 @@ function constraintMenu(ptrRoi)
         
         ptrConstraintRoi = get(hObject, 'UserData'); 
         sConstraintTag   = get(ptrConstraintRoi, 'Tag');
-                
-        if size(dicomBuffer('get'), 3) == 1 % 2D Image       
-            set(mConstraintInsideEverySlice , 'Checked', 'off');                    
-        end
+%                 
+%         if size(dicomBuffer('get'), 3) == 1 % 2D Image       
+%             set(mConstraintInsideEverySlice , 'Checked', 'off');                    
+%         end
         
         [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value') );
         
         if isempty(asConstraintTagList)
-            set(mConstraintInsideObject    , 'Checked', 'off');                    
-            set(mConstraintInsideEverySlice, 'Checked', 'off');                                      
+            set(mConstraintInsideObject    , 'Checked', 'off');    
+            if size(dicomBuffer('get'), 3) ~= 1 % 2D Image       
+                set(mConstraintInsideEverySlice, 'Checked', 'off');  
+            end
         else
             aTagOffset = strcmp( cellfun( @(asConstraintTagList) asConstraintTagList, asConstraintTagList, 'uni', false ), sConstraintTag);
             dVoiTagOffset = find(aTagOffset, 1);   

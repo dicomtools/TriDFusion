@@ -42,9 +42,6 @@ function [aNewPosition, aRadius, aSemiAxes, transM] = computeRoiScaledPosition(r
     else
         aNewPosition = zeros(size(tRoi.Position, 1),3);
     end
-
-    dcmSliceThickness = computeSliceSpacing(atDcmMetaData);
-    refSliceThickness = computeSliceSpacing(atRefMetaData);
     
 %    dcmMatrix = TransformMatrix(atDcmMetaData{1}, dcmSliceThickness);
 %    refMatrix = TransformMatrix(atRefMetaData{1}, refSliceThickness);
@@ -57,9 +54,9 @@ function [aNewPosition, aRadius, aSemiAxes, transM] = computeRoiScaledPosition(r
 %    f(isinf(f))=0;
 %    TF = affine3d(f);
         
-    if dcmSliceThickness == 0  
-        dcmSliceThickness = 1;
-    end
+%     if dcmSliceThickness == 0  
+%         dcmSliceThickness = 1;
+%     end
       
     if atDcmMetaData{1}.PixelSpacing(1) == 0 && ...
        atDcmMetaData{1}.PixelSpacing(2) == 0 
@@ -69,9 +66,9 @@ function [aNewPosition, aRadius, aSemiAxes, transM] = computeRoiScaledPosition(r
         end       
     end
     
-    if refSliceThickness == 0  
-        refSliceThickness = 1;
-    end
+%     if refSliceThickness == 0  
+%         refSliceThickness = 1;
+%     end
       
     if atRefMetaData{1}.PixelSpacing(1) == 0 && ...
        atRefMetaData{1}.PixelSpacing(2) == 0 
@@ -79,6 +76,16 @@ function [aNewPosition, aRadius, aSemiAxes, transM] = computeRoiScaledPosition(r
             atRefMetaData{1}.PixelSpacing(1) =1;
             atRefMetaData{1}.PixelSpacing(2) =1;
         end       
+    end
+
+    dcmSliceThickness = computeSliceSpacing(atDcmMetaData);
+    if dcmSliceThickness == 0 % We can't determine the z size of a pixel, we will presume the pixel is square.
+        dcmSliceThickness = atDcmMetaData{1}.PixelSpacing(1);
+    end
+
+    refSliceThickness = computeSliceSpacing(atRefMetaData);
+    if refSliceThickness == 0 % We can't determine the z size of a pixel, we will presume the pixel is square.
+        refSliceThickness = atRefMetaData{1}.PixelSpacing(1);
     end
     
     Rdcm = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);

@@ -45,10 +45,28 @@ function info = dicominfo4che3(fileInput)
 
     % Image information
         
-    info.ImageType{1} = char(dataset.getString(org.dcm4che3.data.Tag.ImageType, 0));
-    info.ImageType{2} = char(dataset.getString(org.dcm4che3.data.Tag.ImageType, 1));
-    info.ImageType{3} = char(dataset.getString(org.dcm4che3.data.Tag.ImageType, 2));
-    info.ImageType{4} = char(dataset.getString(org.dcm4che3.data.Tag.ImageType, 3));
+    asImageType{1} = char(dataset.getString(org.dcm4che3.data.Tag.ImageType, 0));
+    asImageType{2} = char(dataset.getString(org.dcm4che3.data.Tag.ImageType, 1));
+    asImageType{3} = char(dataset.getString(org.dcm4che3.data.Tag.ImageType, 2));
+    asImageType{4} = char(dataset.getString(org.dcm4che3.data.Tag.ImageType, 3));
+
+    info.ImageType = '';
+
+    if ~isempty(asImageType{1})
+        info.ImageType = sprintf('%s', asImageType{1});
+    end
+
+    if ~isempty(asImageType{2})
+        info.ImageType = sprintf('%s\\%s', info.ImageType, asImageType{2});
+    end
+
+    if ~isempty(asImageType{3})
+        info.ImageType = sprintf('%s\\%s', info.ImageType, asImageType{3});
+    end
+
+    if ~isempty(asImageType{4})
+        info.ImageType = sprintf('%s\\%s', info.ImageType, asImageType{4});
+    end
 
     % Patient information
 
@@ -95,8 +113,28 @@ function info = dicominfo4che3(fileInput)
     info.SeriesTime = char(dataset.getString(org.dcm4che3.data.Tag.SeriesTime, 0));
     info.StudyTime  = char(dataset.getString(org.dcm4che3.data.Tag.StudyTime , 0));
 
-    info.SeriesType{1} = char(dataset.getString(org.dcm4che3.data.Tag.SeriesType, 0));
-    info.SeriesType{2} = char(dataset.getString(org.dcm4che3.data.Tag.SeriesType, 1));
+    asSeriesType{1} = char(dataset.getString(org.dcm4che3.data.Tag.SeriesType, 0));
+    asSeriesType{2} = char(dataset.getString(org.dcm4che3.data.Tag.SeriesType, 1));
+    asSeriesType{3} = char(dataset.getString(org.dcm4che3.data.Tag.SeriesType, 2));
+    asSeriesType{4} = char(dataset.getString(org.dcm4che3.data.Tag.SeriesType, 3));
+
+    info.SeriesType = '';
+
+    if ~isempty(asSeriesType{1})
+        info.SeriesType = sprintf('%s', asSeriesType{1});
+    end
+
+    if ~isempty(asSeriesType{2})
+        info.SeriesType = sprintf('%s\\%s', info.SeriesType, asSeriesType{2});
+    end
+
+    if ~isempty(asSeriesType{3})
+        info.SeriesType = sprintf('%s\\%s', info.SeriesType, asSeriesType{3});
+    end
+
+    if ~isempty(asSeriesType{4})
+        info.SeriesType = sprintf('%s\\%s', info.SeriesType, asSeriesType{4});
+    end
 
     info.AcquisitionTime  = char(dataset.getString(org.dcm4che3.data.Tag.AcquisitionTime, 0));
     info.AcquisitionDate  = char(dataset.getString(org.dcm4che3.data.Tag.AcquisitionDate , 0));                     
@@ -310,7 +348,7 @@ function info = dicominfo4che3(fileInput)
 %    info.din.cols       = info.Columns;  
     
 %        info.din.nbOfFrames = dataset.getInt(org.dcm4che3.data.Tag.NumberOfFrames,0);
-    info.din = [];
+%     info.din = [];
 
     info.NumberOfSlices = dataset.getInt(org.dcm4che3.data.Tag.NumberOfSlices,0);
     info.NumberOfTemporalPositions = dataset.getInt(org.dcm4che3.data.Tag.NumberOfTemporalPositions,0);

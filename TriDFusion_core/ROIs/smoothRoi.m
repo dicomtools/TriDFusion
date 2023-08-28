@@ -33,7 +33,8 @@ try
     aRoiX = aPosition(:,1);
     aRoiY = aPosition(:,2);
     
-    dWindowWidth = round(aSize(1)/12);
+%    dWindowWidth = round(aSize(1)/12);
+    dWindowWidth = 11;
     if rem(dWindowWidth,2) == 0 % Must be an odd number
         dWindowWidth = dWindowWidth-1;
     end

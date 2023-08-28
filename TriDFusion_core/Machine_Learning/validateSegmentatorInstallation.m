@@ -1,6 +1,6 @@
 function sSegmentatorPath = validateSegmentatorInstallation()
 %function sSegmentatorPath = validateSegmentatorInstallation()
-%Validate machine learning installation.
+%Validate machine learning totalSegmentor installation.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org

@@ -79,7 +79,15 @@ function figRoiDialogCallback(hObject, ~)
 
     if suvMenuUnitOption('get') == true && ...
        atInput(dOffset).bDoseKernel == false    
-        sSuvChecked = 'on';
+        sUnitDisplay = getSerieUnitValue(dOffset);  
+        if strcmpi(sUnitDisplay, 'SUV')
+            sSuvChecked = 'on';
+       else
+            if suvMenuUnitOption('get') == true
+                suvMenuUnitOption('set', false);
+            end            
+            sSuvChecked = 'off';
+        end
     else
         if suvMenuUnitOption('get') == true
             suvMenuUnitOption('set', false);
@@ -113,7 +121,12 @@ function figRoiDialogCallback(hObject, ~)
     if atInput(dOffset).bDoseKernel == true
         sSuvEnable = 'off';
     else
-        sSuvEnable = 'on';
+        sUnitDisplay = getSerieUnitValue(dOffset);  
+        if strcmpi(sUnitDisplay, 'SUV')        
+            sSuvEnable = 'on';
+        else
+            sSuvEnable = 'off';
+        end
     end
 
     if isFigRoiInColor('get') == true

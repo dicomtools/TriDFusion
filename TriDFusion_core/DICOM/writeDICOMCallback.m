@@ -140,9 +140,9 @@ function writeDICOMCallback(~, ~)
     end
 
     if bInputIsDicom == true % Input series is dicom
-        writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset);
+        writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, true);
     else % Input series is another format 
-        writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset);
+        writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, true);
     end
 
 end

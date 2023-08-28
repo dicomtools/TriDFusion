@@ -154,50 +154,50 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
 
             % Initialize contour type mask           
 
-            aUnspecifiedMask  = [];          
-            aBoneMask         = [];                         
-            aSoftTissueMask   = [];                         
-            aLungMask         = [];                         
-            aLiverMask        = [];                         
-            aParotidMask      = [];                         
-            aBloodPoolMask    = [];                      
-            aLymphNodesMask   = [];
-            aLocalDiseaseMask = [];
-            aUnknowMask       = []; 
+            aUnspecifiedMask    = [];          
+            aBoneMask           = [];                         
+            aSoftTissueMask     = [];                         
+            aLungMask           = [];                         
+            aLiverMask          = [];                         
+            aParotidMask        = [];                         
+            aBloodPoolMask      = [];                      
+            aLymphNodesMask     = [];
+            aPrimaryDiseaseMask = [];
+            aUnknowMask         = []; 
 
             for vv=1:numel(atVoiInput)
                                 
                 switch lower(atVoiInput{vv}.LesionType)
                     
                     case 'unspecified'
-                        aUnspecifiedMask  = zeros(size(aImages));
+                        aUnspecifiedMask    = zeros(size(aImages));
                         
                     case 'bone'
-                        aBoneMask         = zeros(size(aImages));
-                        
+                        aBoneMask           = zeros(size(aImages));
+                         
                     case 'soft tissue'
-                        aSoftTissueMask   = zeros(size(aImages));
+                        aSoftTissueMask     = zeros(size(aImages));
                         
                     case 'lung'
-                        aLungMask         = zeros(size(aImages));
+                        aLungMask           = zeros(size(aImages));
                         
                     case 'liver'
-                        aLiverMask        = zeros(size(aImages));
+                        aLiverMask          = zeros(size(aImages));
                         
                     case 'parotid'
-                        aParotidMask      = zeros(size(aImages));
+                        aParotidMask        = zeros(size(aImages));
                         
                     case 'blood pool'
-                        aBloodPoolMask    = zeros(size(aImages));
+                        aBloodPoolMask      = zeros(size(aImages));
 
                     case 'lymph nodes'
-                        aLymphNodesMask   = zeros(size(aImages));
+                        aLymphNodesMask     = zeros(size(aImages));
 
-                    case 'local disease'
-                        aLocalDiseaseMask = zeros(size(aImages));                        
+                    case 'primary disease'
+                        aPrimaryDiseaseMask = zeros(size(aImages));                        
 
                     otherwise
-                        aUnknowMask       = zeros(size(aImages));
+                        aUnknowMask         = zeros(size(aImages));
                 end
             end
         end
@@ -499,32 +499,32 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
                                     aLymphNodesMask(:,:,tRoi.SliceNb) = aMaskSlice;              
                             end  
 
-                        case 'local disease'
+                        case 'primary disease'
 
                             switch lower(tRoi.Axe)                    
                                 case 'axe'
-                                    aMaskSlice   = aLocalDiseaseMask(:,:);
+                                    aMaskSlice   = aPrimaryDiseaseMask(:,:);
                                     aMaskSlice(aCurrentMask==1) = 1;
                                     
-                                    aLocalDiseaseMask(:,:) = aMaskSlice;
+                                    aPrimaryDiseaseMask(:,:) = aMaskSlice;
                                     
                                 case 'axes1'
-                                    aMaskSlice = permute(aLocalDiseaseMask(tRoi.SliceNb,:,:), [3 2 1]);
+                                    aMaskSlice = permute(aPrimaryDiseaseMask(tRoi.SliceNb,:,:), [3 2 1]);
                                     aMaskSlice(aCurrentMask==1) = 1;
                                     
-                                    aLocalDiseaseMask(tRoi.SliceNb,:,:) = permute(aMaskSlice, [3 2 1]);
+                                    aPrimaryDiseaseMask(tRoi.SliceNb,:,:) = permute(aMaskSlice, [3 2 1]);
                 
                                 case 'axes2'
-                                    aMaskSlice   = permute(aLocalDiseaseMask(:,tRoi.SliceNb,:), [3 1 2]);
+                                    aMaskSlice   = permute(aPrimaryDiseaseMask(:,tRoi.SliceNb,:), [3 1 2]);
                                     aMaskSlice(aCurrentMask==1) = 1;
                                    
-                                    aLocalDiseaseMask(:,tRoi.SliceNb,:) = permute(aMaskSlice, [2 3 1]);
+                                    aPrimaryDiseaseMask(:,tRoi.SliceNb,:) = permute(aMaskSlice, [2 3 1]);
                                   
                                 case 'axes3'
-                                    aMaskSlice   = aLocalDiseaseMask(:,:,tRoi.SliceNb);
+                                    aMaskSlice   = aPrimaryDiseaseMask(:,:,tRoi.SliceNb);
                                     aMaskSlice(aCurrentMask==1) = 1;
 
-                                    aLocalDiseaseMask(:,:,tRoi.SliceNb) = aMaskSlice;              
+                                    aPrimaryDiseaseMask(:,:,tRoi.SliceNb) = aMaskSlice;              
                             end  
 
                             
@@ -587,10 +587,26 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
             aImages = aImages*dSUVScale;
         end
 
+%         if size(aImages, 3) ~=1
+% 
+%             aImages = aImages(:,:,end:-1:1);
+%         end
+
         nrrdWriter(sNrrdImagesName, squeeze(aImages)    , pixelspacing, origin, 'raw'); % Write .nrrd images 
+
+%         if size(aImagesMask, 3) ~=1
+% 
+%             aImagesMask = aImagesMask(:,:,end:-1:1);
+%         end
+        
         nrrdWriter(sNrrdMaskName  , squeeze(aImagesMask), pixelspacing, origin, 'raw'); % Write .nrrd mask
 
         if bEntireVolume == true   
+
+%             if size(aEntireImagesMask, 3) ~=1
+%     
+%                 aEntireImagesMask = aEntireImagesMask(:,:,end:-1:1);
+%             end
 
             sNrrdEntireMaskName = sprintf('%sentire_mask.nrrd' , sNrrdTmpDir);
             nrrdWriter(sNrrdEntireMaskName, squeeze(aEntireImagesMask), pixelspacing, origin, 'raw'); % Write .nrrd mask
@@ -598,20 +614,26 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
 
         if bContourType == true
 
-            sNrrdUnspecifiedMaskName  = '';
-            sNrrdBoneMaskName         = '';
-            sNrrdSoftTissueMaskName   = '';
-            sNrrdLungMaskName         = '';
-            sNrrdLiverMaskName        = '';
-            sNrrdParotidMaskName      = '';
-            sNrrdBloodPoolMaskName    = '';
-            sNrrdLymphNodesMaskName   = '';
-            sNrrdLocalDiseaseMaskName = '';            
-            sNrrdUnknowMaskName       = '';
+            sNrrdUnspecifiedMaskName    = '';
+            sNrrdBoneMaskName           = '';
+            sNrrdSoftTissueMaskName     = '';
+            sNrrdLungMaskName           = '';
+            sNrrdLiverMaskName          = '';
+            sNrrdParotidMaskName        = '';
+            sNrrdBloodPoolMaskName      = '';
+            sNrrdLymphNodesMaskName     = '';
+            sNrrdPrimaryDiseaseMaskName = '';            
+            sNrrdUnknowMaskName         = '';
 
             % Unspecified mask 
 
             if ~isempty(aUnspecifiedMask)
+
+%                 if size(aUnspecifiedMask, 3) ~=1
+%         
+%                     aUnspecifiedMask = aUnspecifiedMask(:,:,end:-1:1);
+%                 end   
+
                 sNrrdUnspecifiedMaskName = sprintf('%sunspecified_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdUnspecifiedMaskName, squeeze(aUnspecifiedMask), pixelspacing, origin, 'raw'); % Write .nrrd mask    
             end
@@ -619,6 +641,12 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
             % Bone mask
 
             if ~isempty(aBoneMask)
+
+%                 if size(aBoneMask, 3) ~=1
+%         
+%                     aBoneMask = aBoneMask(:,:,end:-1:1);
+%                 end 
+
                 sNrrdBoneMaskName = sprintf('%sbone_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdBoneMaskName, squeeze(aBoneMask), pixelspacing, origin, 'raw'); % Write .nrrd mask        
             end
@@ -626,6 +654,12 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
             % Soft Tissue mask
 
             if ~isempty(aSoftTissueMask)
+
+%                 if size(aSoftTissueMask, 3) ~=1
+%         
+%                     aSoftTissueMask = aSoftTissueMask(:,:,end:-1:1);
+%                 end 
+
                 sNrrdSoftTissueMaskName = sprintf('%ssoft_tissue_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdSoftTissueMaskName, squeeze(aSoftTissueMask), pixelspacing, origin, 'raw'); % Write .nrrd mask         
             end
@@ -633,6 +667,12 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
             % Lung mask
 
             if ~isempty(aLungMask)
+
+%                 if size(aLungMask, 3) ~=1
+%         
+%                     aLungMask = aLungMask(:,:,end:-1:1);
+%                 end 
+
                 sNrrdLungMaskName = sprintf('%slung_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdLungMaskName, squeeze(aLungMask), pixelspacing, origin, 'raw'); % Write .nrrd mask                              
             end
@@ -640,6 +680,12 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
             % Liver mask
 
             if ~isempty(aLiverMask)
+
+%                 if size(aLiverMask, 3) ~=1
+%         
+%                     aLiverMask = aLiverMask(:,:,end:-1:1);
+%                 end 
+
                 sNrrdLiverMaskName = sprintf('%sliver_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdLiverMaskName, squeeze(aLiverMask), pixelspacing, origin, 'raw'); % Write .nrrd mask               
             end
@@ -647,6 +693,12 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
             % Parotid mask
 
             if ~isempty(aParotidMask)
+
+%                 if size(aParotidMask, 3) ~=1
+%         
+%                     aParotidMask = aParotidMask(:,:,end:-1:1);
+%                 end 
+
                 sNrrdParotidMaskName = sprintf('%sparotid_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdParotidMaskName, squeeze(aParotidMask), pixelspacing, origin, 'raw'); % Write .nrrd mask                          
             end
@@ -654,6 +706,12 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
             % Blood Pool mask
 
             if ~isempty(aBloodPoolMask)
+
+%                 if size(aBloodPoolMask, 3) ~=1
+%         
+%                     aBloodPoolMask = aBloodPoolMask(:,:,end:-1:1);
+%                 end 
+
                 sNrrdBloodPoolMaskName = sprintf('%sblood_pool_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdBloodPoolMaskName, squeeze(aBloodPoolMask), pixelspacing, origin, 'raw'); % Write .nrrd mask                      
             end
@@ -661,18 +719,36 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
             % Lymph Nodes mask
 
             if ~isempty(aLymphNodesMask)
+
+%                 if size(aLymphNodesMask, 3) ~=1
+%         
+%                     aLymphNodesMask = aLymphNodesMask(:,:,end:-1:1);
+%                 end 
+
                 sNrrdLymphNodesMaskName = sprintf('%slymph_nodes_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdLymphNodesMaskName, squeeze(aLymphNodesMask), pixelspacing, origin, 'raw'); % Write .nrrd mask                      
             end
 
-            % Local Disease mask
+            % primary disease mask
 
-            if ~isempty(aLocalDiseaseMask)
-                sNrrdLocalDiseaseMaskName = sprintf('%slocal_disease_mask.nrrd' , sNrrdTmpDir);
-                nrrdWriter(sNrrdLocalDiseaseMaskName, squeeze(aLocalDiseaseMask), pixelspacing, origin, 'raw'); % Write .nrrd mask                      
+            if ~isempty(aPrimaryDiseaseMask)
+
+%                 if size(aPrimaryDiseaseMask, 3) ~=1
+%         
+%                     aPrimaryDiseaseMask = aPrimaryDiseaseMask(:,:,end:-1:1);
+%                 end 
+
+                sNrrdPrimaryDiseaseMaskName = sprintf('%sprimary_disease_mask.nrrd' , sNrrdTmpDir);
+                nrrdWriter(sNrrdPrimaryDiseaseMaskName, squeeze(aPrimaryDiseaseMask), pixelspacing, origin, 'raw'); % Write .nrrd mask                      
             end           
 
             if ~isempty(aUnknowMask)
+
+%                 if size(aUnknowMask, 3) ~=1
+%         
+%                     aUnknowMask = aUnknowMask(:,:,end:-1:1);
+%                 end 
+
                 sNrrdUnknowMaskName = sprintf('%sunknow_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdUnknowMaskName, squeeze(aUnknowMask), pixelspacing, origin, 'raw'); % Write .nrrd mask                    
             end
@@ -731,7 +807,7 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
                 sParotidResultFile         = '';
                 sBloodPoolResultFile       = '';
                 sLymphNodesResultFile      = '';
-                sLocalDiseaseResultFile    = '';
+                sPrimaryDiseaseResultFile  = '';
                 sUnknowResultFile          = '';
 
                 % Unspecified
@@ -903,24 +979,24 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
                     end                      
                 end  
 
-                % Local Disease
+                % primary disease
 
-                if ~isempty(sNrrdLocalDiseaseMaskName)
+                if ~isempty(sNrrdPrimaryDiseaseMaskName)
 
                     progressBar(bProgressBarOffset+7*bProgressBarTypeOffset, sprintf('Computing radiomics blood pool, it can take several minutes, please be patient.'));
     
                     sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
                     writeYamlFile(sParametersFile, tReadiomics, 1);
     
-                    sCommandLine = sprintf('cmd.exe /c %spyradiomics.exe %s %s', sRadiomicsPath, sNrrdImagesName, sNrrdLocalDiseaseMaskName);    
+                    sCommandLine = sprintf('cmd.exe /c %spyradiomics.exe %s %s', sRadiomicsPath, sNrrdImagesName, sNrrdPrimaryDiseaseMaskName);    
     
-                    sLocalDiseaseResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'LOCAL_DISEASE_MASK');
+                    sPrimaryDiseaseResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'PRIMARY_DISEASE_MASK');
     
-                    [bStatus, sCmdout] = system([sCommandLine ' -o ' sLocalDiseaseResultFile ' -p ' sParametersFile]);
+                    [bStatus, sCmdout] = system([sCommandLine ' -o ' sPrimaryDiseaseResultFile ' -p ' sParametersFile]);
 
                     if bStatus 
-                        progressBar( 1, 'Error: An error occur during radiomics local disease extraction!');
-                        errordlg(sprintf('An error occur during radiomics local disease extraction: %s', sCmdout), 'Extraction Error');  
+                        progressBar( 1, 'Error: An error occur during radiomics primary disease extraction!');
+                        errordlg(sprintf('An error occur during radiomics primary disease extraction: %s', sCmdout), 'Extraction Error');  
                     end                      
                 end  
                 
@@ -1327,11 +1403,11 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
                     writetable(cCombineTable, sXlsFileName, 'Sheet', 'LYMPH_NODES-LESIONS', 'WriteVariableNames', false);                      
                 end
 
-                % Local Disease lesions
+                % primary disease lesions
 
-                if ~isempty(sLocalDiseaseResultFile)
+                if ~isempty(sPrimaryDiseaseResultFile)
 
-                    current_table = readtable(sLocalDiseaseResultFile); 
+                    current_table = readtable(sPrimaryDiseaseResultFile); 
     
                     current_table.(1) = [];
         
@@ -1362,7 +1438,7 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
     
                     cCombineTable = cell2table([cTempTable; cCurrenTable]);
     
-                    writetable(cCombineTable, sXlsFileName, 'Sheet', 'LOCAL_DISEASE-LESIONS', 'WriteVariableNames', false);                      
+                    writetable(cCombineTable, sXlsFileName, 'Sheet', 'PRIMARY_DISEASE-LESIONS', 'WriteVariableNames', false);                      
                 end
 
                 % Unknow lesions
@@ -1494,7 +1570,7 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
             clear aParotidMask;                         
             clear aBloodPoolMask;    
             clear aLymphNodesMask;
-            clear aLocalDiseaseMask;     
+            clear aPrimaryDiseaseMask;     
             clear aUnknowMask;         
         end
     end

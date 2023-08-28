@@ -37,7 +37,7 @@ function importNIICallback(~, ~)
          return;
      end     
         
-     filter = {'*.nii'};
+%      filter = {'*.nii';'*.gz'};
 
      sCurrentDir  = viewerRootPath('get');
 
@@ -54,7 +54,9 @@ function importNIICallback(~, ~)
         end
      end
 
-     [sFileName, sPath] = uigetfile(sprintf('%s%s', char(sCurrentDir), char(filter)), 'Import .nii file');
+%      [sFileName, sPath] = uigetfile( {'*.gz';'*.nii'}, sprintf('%s', char(sCurrentDir), 'Import .nii file') );
+     [sFileName, sPath] = uigetfile(sprintf('%s%s', char(sCurrentDir), '*.gz;*.nii'), 'Import .nii file');
+     
      if sFileName ~= 0
 
         try
@@ -67,7 +69,7 @@ function importNIICallback(~, ~)
         
 %        mainDir('set', sPathName);
 
-        loadNIIFile(sPath, sFileName);                    
+        loadNIIFile(sPath, sFileName);    
 
      end
 

@@ -43,6 +43,34 @@ function wheelScroll(~, evnt)
             end
 
         else
+
+            % Get the current point
+            current_point = get(gcf, 'CurrentPoint');
+            mouseX = current_point(1, 1);
+            mouseY = current_point(1, 2);
+            
+            posCor = getpixelposition(uiCorWindowPtr('get', get(uiSeriesPtr('get'), 'Value')));
+            posSag = getpixelposition(uiSagWindowPtr('get', get(uiSeriesPtr('get'), 'Value')));
+            posTra = getpixelposition(uiTraWindowPtr('get', get(uiSeriesPtr('get'), 'Value')));
+
+
+            if mouseX > posCor(1) && mouseX < (posCor(1)+posCor(3)) && ... % Coronal
+               mouseY > posCor(2) && mouseY < (posCor(2)+posCor(4))     
+                gca = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+            elseif  mouseX > posSag(1) && mouseX < (posSag(1)+posSag(3)) && ... % Sagittal
+                    mouseY > posSag(2) && mouseY < (posSag(2)+posSag(4))     
+                gca = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+            elseif  mouseX > posTra(1) && mouseX < (posTra(1)+posTra(3)) && ... % Axial
+                    mouseY > posTra(2) && mouseY < (posTra(2)+posTra(4))    
+                gca = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+            else
+                gca = axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')); % MIP
+            end
+
+
             switch gca
                 case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     if evnt.VerticalScrollCount > 0

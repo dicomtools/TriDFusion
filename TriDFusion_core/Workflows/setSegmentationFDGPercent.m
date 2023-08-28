@@ -1,5 +1,5 @@
-function setSegmentationFDGPercent(dBoundaryPercent, dPercentOfPeak, multiPeakValue)
-%function setSegmentationFDGPercent(dBoundariesPercent, dPercentOfPeak, multiPeakValue)
+function setSegmentationFDGPercent(dBoneMaskThreshold, dBoundaryPercent, dSmalestVoiValue, dPixelEdge, dPercentOfPeak, multiPeaksValue)
+%function setSegmentationFDGPercent(dBoneMaskThreshold, dBoundaryPercent, dSmalestVoiValue, dPixelEdge, dPercentOfPeak, multiPeaksValue)
 %Run FDG Segmentation base on a percent of peak treshold.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -127,8 +127,7 @@ function setSegmentationFDGPercent(dBoundaryPercent, dPercentOfPeak, multiPeakVa
     setQuantification(dPTSerieOffset);    
 
 
-    progressBar(7/10, 'Computing liver mask, please wait.');
-
+    progressBar(7/10, 'Computing mask, please wait.');
 
     aBWMask = aResampledPTImage;
 
@@ -144,7 +143,7 @@ function setSegmentationFDGPercent(dBoundaryPercent, dPercentOfPeak, multiPeakVa
 
     BWCT = aCTImage;
 
-    BWCT(BWCT < 100) = 0;                                    
+    BWCT(BWCT < dBoneMaskThreshold) = 0;                                    
     BWCT = imfill(BWCT, 4, 'holes');                       
 
     BWCT(BWCT~=0) = 1;
@@ -155,12 +154,10 @@ function setSegmentationFDGPercent(dBoundaryPercent, dPercentOfPeak, multiPeakVa
     imMask = aResampledPTImage;
     imMask(aBWMask == 0) = dMin;
 
-    dSmalestVoiValue = 0;
-
     setSeriesCallback();            
 
     sFormula = 'CT Bone Map';
-    maskAddVoiToSeries(imMask, aBWMask, true, true, dPercentOfPeak, true, multiPeakValue, false, sFormula, BWCT, dSmalestVoiValue);                    
+    maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, true, dPercentOfPeak, true, multiPeaksValue, false, sFormula, BWCT, dSmalestVoiValue);                    
 
     clear aResampledPTImage;
     clear aBWMask;

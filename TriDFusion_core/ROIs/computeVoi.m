@@ -102,6 +102,9 @@ function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMet
         zPixel = 1;
     else
         zPixel = computeSliceSpacing(atVoiMetaData)/10; 
+        if zPixel == 0 % We can't determine the z size of a pixel, we will presume the pixel is square.
+            zPixel = xPixel;
+        end
     end
     
     dVoxVolume = xPixel * yPixel * zPixel; 

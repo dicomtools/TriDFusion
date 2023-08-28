@@ -50,7 +50,7 @@ function initTemplates()
 
                 atFrameInfo = dicomInfoComputeFrames(tDatasets.DicomInfos);
 
-                asSeriesType = lower(tDatasets.DicomInfos{1}.SeriesType{1});
+                asSeriesType = lower(tDatasets.DicomInfos{1}.SeriesType);
                 
                 bGated = false;
                 if find(contains(asSeriesType, 'gated'))

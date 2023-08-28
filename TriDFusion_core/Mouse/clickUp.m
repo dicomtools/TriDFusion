@@ -93,7 +93,7 @@ function clickUp(~, ~)
             set(fiMainWindowPtr('get'), 'Pointer', 'fleur');
         else
 
-            if is2DBrush('{}get') == true
+            if is2DBrush('get') == true
 
                 atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
@@ -104,6 +104,8 @@ function clickUp(~, ~)
                         dTagOffset = find(aTagOffset, 1);
                         if ~isempty(dTagOffset)
                             atRoiInput{dTagOffset}.Position = acPtrList{jj}.Object.Position;
+                            tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [],  get(uiSeriesPtr('get'), 'Value')), dicomMetaData('get', [],  get(uiSeriesPtr('get'), 'Value')), atRoiInput{dTagOffset}, false, false);
+                            atRoiInput{dTagOffset}.MaxDistances = tMaxDistances;   
                         end
              %           editorRoiMoving(pRoiPtr, acPtrList{jj}.Object);
                     end

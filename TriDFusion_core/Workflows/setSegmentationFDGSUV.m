@@ -1,5 +1,5 @@
-function setSegmentationFDGSUV(dTreshold)
-%function setSegmentationFDGSUV(dTreshold)
+function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, dTreshold)
+%function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, dTreshold)
 %Run FDG Segmentation base on a SUV treshold.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -152,7 +152,7 @@ function setSegmentationFDGSUV(dTreshold)
 
     BWCT = aCTImage;
 
-    BWCT(BWCT < 100) = 0;                                    
+    BWCT(BWCT < dBoneMaskThreshold) = 0;                                    
     BWCT = imfill(BWCT, 4, 'holes');                       
 
     BWCT(BWCT~=0) = 1;
@@ -163,13 +163,11 @@ function setSegmentationFDGSUV(dTreshold)
     imMask = aResampledPTImage;
     imMask(aBWMask == 0) = dMin;
 
-    dSmalestVoiValue = 0;
-
     setSeriesCallback();
 
     sFormula = 'CT Bone Map';
 
-    maskAddVoiToSeries(imMask, aBWMask, true, false, dTreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue);                    
+    maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, dTreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue);                    
   
     clear aResampledPTImage;
     clear aBWMask;

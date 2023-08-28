@@ -278,7 +278,37 @@ function resize = dicomViewer()
 
     % FDG segmentation
 
+    FDGSegmentationSUVThresholdValue('set', 4); % SUV
+    FDGSegmentationPercentOfPeakValue('set', 41); % Percent
+    FDGSegmentationMultiplePeaksValue('set', 65); % Percent
+    FDGSegmentationBoneMaskThresholdValue('set', 100); % HU
     FDGSegmentationBoundaryPercentValue('set', 10);
+    FDGSmalestVoiValue('set', 0.3);
+
+    % FDHT segmentation
+
+    FDHTSegmentationBoneMaskThresholdValue('set', 100); % HU
+    FDHTSegmentationBoundaryPercentValue('set', 10);
+    FDHTNormalLiverSDValue('set', 0.4);
+    FDHTNormalLiverMeanValue('set', 4);
+    FDHTSmalestVoiValue('set', 0.3);
+
+    % PSMA segmentation
+
+    PSMASegmentationBoneMaskThresholdValue('set', 150); % HU
+    PSMASegmentationBoundaryPercentValue('set', 10);
+    PSMANormalLiverSDValue('set', 0.4);
+    PSMANormalLiverMeanValue('set', 4);
+    PSMASmalestVoiValue('set', 0.3);
+
+    % Ga68DOTATATE segmentation
+
+    Ga68DOTATATESegmentationBoneMaskThresholdValue('set', 200); % HU
+    Ga68DOTATATESegmentationBoundaryPercentValue('set', 10);
+    Ga68DOTATATENormalLiverSDValue('set', 0.4);
+    Ga68DOTATATENormalLiverMeanValue('set', 4);
+    Ga68DOTATATESmalestVoiValue('set', 0.3);
+
 
     % Machine Learning Ga68 DOTATATE segmentation Other Organ
     % Exclusion
@@ -309,8 +339,14 @@ function resize = dicomViewer()
 
     Ga68DOTATATENormalLiverTresholdMultiplierValue('set', 1.5);
 
-    Ga68DOTATATENormalLiverSDValue('set', 0.4);
-    Ga68DOTATATENormalLiverMeanValue('set', 4);
+
+    % Machine Learning Full AI Ga68 DOTATATE Options
+
+    Ga68DOTATATEFullAITrainedModel('set', 2);
+    Ga68DOTATATEFullAISmalestVoiValue('set', 0.3);
+    Ga68DOTATATEFullAILesionClassification('set', true);
+    Ga68DOTATATEFullAISmoothMask('set', true);
+    Ga68DOTATATEFullAIEnhancedBoneMaskLesion('set', false);
 
     clearDisplay();
 

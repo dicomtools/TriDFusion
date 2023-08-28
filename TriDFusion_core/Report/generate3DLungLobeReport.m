@@ -628,7 +628,16 @@ function generate3DLungLobeReport(bInitReport)
     
     if suvMenuUnitOption('get') == true && ...
        atInput(dOffset).bDoseKernel == false    
-        sSuvChecked = 'on';
+
+        sUnitDisplay = getSerieUnitValue(dOffset);  
+        if strcmpi(sUnitDisplay, 'SUV')
+            sSuvChecked = 'on';
+        else
+            if suvMenuUnitOption('get') == true
+                suvMenuUnitOption('set', false);
+            end            
+            sSuvChecked = 'off';
+        end
     else
         if suvMenuUnitOption('get') == true
             suvMenuUnitOption('set', false);
@@ -639,7 +648,12 @@ function generate3DLungLobeReport(bInitReport)
     if atInput(dOffset).bDoseKernel == true
         sSuvEnable = 'off';
     else
-        sSuvEnable = 'on';
+        sUnitDisplay = getSerieUnitValue(dOffset);  
+        if strcmpi(sUnitDisplay, 'SUV')        
+            sSuvEnable = 'on';
+        else
+            sSuvEnable = 'off';
+        end
     end
     
     mSUVUnit = ...

@@ -30,6 +30,10 @@ function setDoseKernel(dModel, sTissue, sIsotope, dKernelKernelCutoffDistance, s
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    dlgMicrosphereReport = [];
+    axeMicrosphereReport = [];
+    listMicrosphereReport = [];
+
     tInput = inputTemplate('get');
 
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
@@ -180,7 +184,7 @@ function setDoseKernel(dModel, sTissue, sIsotope, dKernelKernelCutoffDistance, s
                           
         aActivity(aActivity~=0)=0;
         
-        aActivity = computeMicrospereActivity(aActivity, atCoreMetaData, sRadiopharmaceutical, dMicrosphereVolume);
+        [aActivity, acActivityReport] = computeMicrospereActivity(aActivity, atCoreMetaData, sRadiopharmaceutical, dMicrosphereVolume);
                         
 
 %                dicomBuffer('set', aActivity);
@@ -273,26 +277,31 @@ function setDoseKernel(dModel, sTissue, sIsotope, dKernelKernelCutoffDistance, s
 
 % ASK: Decay correction
 
-    injDateTime = atCoreMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;
-    acqTime     = atCoreMetaData{1}.SeriesTime;
-    acqDate     = atCoreMetaData{1}.SeriesDate;
-    halfLife    = str2double(atCoreMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife);
+USE_LDM_METHOD = true;
 
-    if numel(injDateTime) == 14
-        injDateTime = sprintf('%s.00', injDateTime);
+    if USE_LDM_METHOD == false
+
+        injDateTime = atCoreMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;
+        acqTime     = atCoreMetaData{1}.SeriesTime;
+        acqDate     = atCoreMetaData{1}.SeriesDate;
+        halfLife    = str2double(atCoreMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife);
+    
+        if numel(injDateTime) == 14
+            injDateTime = sprintf('%s.00', injDateTime);
+        end
+    
+        datetimeInjDate = datetime(injDateTime,'InputFormat','yyyyMMddHHmmss.SS');
+        dateInjDate = datenum(datetimeInjDate);
+    
+        if numel(acqTime) == 6
+            acqTime = sprintf('%s.00', acqTime);
+        end
+    
+        datetimeAcqDate = datetime([acqDate acqTime],'InputFormat','yyyyMMddHHmmss.SS');
+        dayAcqDate = datenum(datetimeAcqDate);
+    
+        TscanMinusTinjection = (dayAcqDate - dateInjDate)*(24*60*60); % Acquisition start time
     end
-
-    datetimeInjDate = datetime(injDateTime,'InputFormat','yyyyMMddHHmmss.SS');
-    dateInjDate = datenum(datetimeInjDate);
-
-    if numel(acqTime) == 6
-        acqTime = sprintf('%s.00', acqTime);
-    end
-
-    datetimeAcqDate = datetime([acqDate acqTime],'InputFormat','yyyyMMddHHmmss.SS');
-    dayAcqDate = datenum(datetimeAcqDate);
-
-    TscanMinusTinjection = (dayAcqDate - dateInjDate)*(24*60*60); % Acquisition start time
 
     switch lower(sIsotope)
         
@@ -325,7 +334,6 @@ if 1
 end
      end
 % ASK: equations 
-USE_LDM_METHOD = true;
 
     if USE_LDM_METHOD == true % LDM method
         
@@ -581,12 +589,92 @@ end
     end
 
     modifiedMatrixValueMenuOption('set', true);
-    
+
+    if exist('acActivityReport', 'var')
+        if ~isempty(acActivityReport)
+            sReport = strjoin(acActivityReport(1,:),',');    
+            for jj=2:size(acActivityReport, 1) 
+                sReport = sprintf('%s\n%s', sReport, strjoin(acActivityReport(jj,:),','));    
+            end
+
+            DLG_REPORT_X = 1024;
+            DLG_REPORT_Y = 480;
+            
+            dlgMicrosphereReport = ...
+                dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_REPORT_X/2) ...
+                                    (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_REPORT_Y/2) ...
+                                    DLG_REPORT_X ...
+                                    DLG_REPORT_Y ...
+                                    ],...
+                       'MenuBar'    , 'none',...
+                       'Resize'     , 'on', ...    
+                       'NumberTitle','off',...
+                       'MenuBar'    , 'none',...
+                       'Color'      , viewerBackgroundColor('get'), ...
+                       'Name'       , 'Microsphere Activity Report',...
+                       'Toolbar'    ,'none',...               
+                       'SizeChangedFcn',@resizeMicrosphereReportCallback...
+                       );     
+
+            axeMicrosphereReport = ...                   
+                axes(dlgMicrosphereReport, ...
+                     'Units'   , 'pixels', ...
+                     'Position', [0 0 DLG_REPORT_X DLG_REPORT_Y], ...
+                     'Color'   , viewerBackgroundColor('get'),...
+                     'XColor'  , viewerForegroundColor('get'),...
+                     'YColor'  , viewerForegroundColor('get'),...
+                     'ZColor'  , viewerForegroundColor('get'),...             
+                     'Visible' , 'off'...             
+                     );  
+
+            listMicrosphereReport = ...                   
+                uicontrol(dlgMicrosphereReport,...
+                          'style'   , 'listbox',...
+                          'position', [0 0 DLG_REPORT_X DLG_REPORT_Y],...
+                          'fontsize', 10,...
+                          'Fontname', 'Monospaced',...
+                          'Value'   , 1 ,...
+                          'Selected', 'off',...
+                          'enable'  , 'on',...
+                          'string'  , sReport...
+                          );          
+        end
+    end
+
     progressBar(1, 'Ready');
 
     catch
         progressBar(1, 'Error:setDoseKernel()');
     end
 
+    function resizeMicrosphereReportCallback(~, ~)
+
+        if ~isempty(dlgMicrosphereReport)
+              
+            aDialogPosition  = get(dlgMicrosphereReport, 'Position');
+    
+            if ~isempty(axeMicrosphereReport)
+
+                set(axeMicrosphereReport, ...
+                    'Position', ...
+                    [0 ...
+                     0 ...
+                     aDialogPosition(3) ...
+                     aDialogPosition(4) ...
+                    ]); 
+            end
+    
+            if ~isempty(listMicrosphereReport)
+
+                set(listMicrosphereReport, ...
+                    'Position', ...
+                    [0 ...
+                     0 ...
+                     aDialogPosition(3) ...
+                     aDialogPosition(4) ...
+                    ]);
+            end
+        end
+    end
 end
 

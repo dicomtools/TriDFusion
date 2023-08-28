@@ -27,18 +27,22 @@ function refreshImages()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    im = squeeze(dicomBuffer('get'));
 
     atInputTemplate = inputTemplate('get');
 
-    dOffset = get(uiSeriesPtr('get'), 'Value');
-    if dOffset > numel(atInputTemplate)
-        return;
-    end
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+    dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
+%     if dSeriesOffset > numel(atInputTemplate)
+%         return;
+%     end
+
+    im = squeeze(dicomBuffer('get', [], dSeriesOffset));
+
+    aBufferSize = size(im);
 
     if overlayActivate('get') == true
 
-        atMetaData = dicomMetaData('get', [], dOffset);
+        atMetaData = dicomMetaData('get', [], dSeriesOffset);
 
         if isfield(atMetaData{1}, 'PatientName')
             sPatientName = atMetaData{1}.PatientName;
@@ -102,7 +106,7 @@ function refreshImages()
         imAxeG = [];
         imAxeB = [];
 
-        imAxe  = imAxePtr ('get', [], get(uiSeriesPtr('get'), 'Value'));
+        imAxe  = imAxePtr ('get', [], dSeriesOffset);
 
         vBoundAxePtr = visBoundAxePtr('get');
         if ~isempty(vBoundAxePtr)
@@ -188,7 +192,7 @@ function refreshImages()
 %             if isShading('get') == true
 %                 shading(axe, 'interp');
 %             end
-        atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        atRoiInput = roiTemplate('get', dSeriesOffset);
         if ~isempty(atRoiInput)
             for bb=1:numel(atRoiInput)
                 if isvalid(atRoiInput{bb}.Object)
@@ -214,9 +218,9 @@ function refreshImages()
 
         if overlayActivate('get') == true
 
-            clickedPt = get(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CurrentPoint');
+            clickedPt = get(axePtr('get', [], dSeriesOffset), 'CurrentPoint');
 
-            aBufferSize = size(im);
+%             aBufferSize = size(im);
 
             clickedPtX = round(clickedPt(1,1));
             if clickedPtX < 1
@@ -355,18 +359,18 @@ function refreshImages()
         imAxialB    = [];
         imMipB      = [];
 
-        imCoronal  = imCoronalPtr ('get', [], get(uiSeriesPtr('get'), 'Value'));
-        imSagittal = imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
-        imAxial    = imAxialPtr   ('get', [], get(uiSeriesPtr('get'), 'Value'));
+        imCoronal  = imCoronalPtr ('get', [], dSeriesOffset);
+        imSagittal = imSagittalPtr('get', [], dSeriesOffset);
+        imAxial    = imAxialPtr   ('get', [], dSeriesOffset);
         if isVsplash('get') == false
-            imMip = imMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+            imMip = imMipPtr('get', [], dSeriesOffset);
         end
           
-        imCoronalFc  = imCoronalFcPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
-        imSagittalFc = imSagittalFcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
-        imAxialFc    = imAxialFcPtr   ('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+        imCoronalFc  = imCoronalFcPtr ('get', [], dFusionSeriesOffset);
+        imSagittalFc = imSagittalFcPtr('get', [], dFusionSeriesOffset);
+        imAxialFc    = imAxialFcPtr   ('get', [], dFusionSeriesOffset);
         if isVsplash('get') == false
-            imMipFc = imMipFcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+            imMipFc = imMipFcPtr('get', [], dFusionSeriesOffset);
         end
 
         iCoronal  = sliceNumber('get', 'coronal' );
@@ -417,7 +421,7 @@ function refreshImages()
             if strcmpi(vSplahView('get'), 'axial') || ...
                strcmpi(vSplahView('get'), 'all')
 
-                imComputed = computeMontage(im(:,:,end:-1:1), 'axial', size(dicomBuffer('get'), 3)-sliceNumber('get', 'axial')+1);
+                imComputed = computeMontage(im(:,:,end:-1:1), 'axial', aBufferSize(3)-sliceNumber('get', 'axial')+1);
 
                 imAxSize = size(imAxial.CData);
                 imComputed = imresize(imComputed, [imAxSize(1) imAxSize(2)]);
@@ -448,6 +452,7 @@ function refreshImages()
                 for rr=1:dNbFusedSeries
 
                     imf = squeeze(fusionBuffer('get', [], rr));
+
                     if ~isempty(imf)
 
                         if strcmpi(vSplahView('get'), 'coronal') || ...
@@ -515,7 +520,7 @@ function refreshImages()
                             imAxialF = imAxialFPtr('get', [], rr);
                             if ~isempty(imAxialF)
 
-                                imComputed = computeMontage(imf(:,:,end:-1:1), 'axial', size(dicomBuffer('get'), 3)-sliceNumber('get', 'axial')+1);
+                                imComputed = computeMontage(imf(:,:,end:-1:1), 'axial', aBufferSize(3)-sliceNumber('get', 'axial')+1);
 
                                 imAxSize = size(imAxialF.CData);
                                 imComputed = imresize(imComputed, [imAxSize(1) imAxSize(2)]);
@@ -547,7 +552,7 @@ function refreshImages()
                        strcmpi(vSplahView('get'), 'all')
                         cData = combineRGB(imCoronalR, imCoronalG, imCoronalB, 'Coronal');
                         if ~isempty(cData)
-                            imCoronalF  = imCoronalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                            imCoronalF  = imCoronalFPtr('get', [], dFusionSeriesOffset);
                             if ~isempty(imCoronalF)
                                 imCoronalF.CData = cData;
                             end
@@ -558,7 +563,7 @@ function refreshImages()
                        strcmpi(vSplahView('get'), 'all')
                         cData= combineRGB(imSagittalR, imSagittalG, imSagittalB, 'Sagittal');
                         if ~isempty(cData)
-                            imSagittalF = imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                            imSagittalF = imSagittalFPtr('get', [], dFusionSeriesOffset);
                             if ~isempty(imSagittalF)
                                 imSagittalF.CData = cData;
                             end
@@ -569,7 +574,7 @@ function refreshImages()
                        strcmpi(vSplahView('get'), 'all')
                         cData= combineRGB(imAxialR, imAxialG, imAxialB, 'Axial');
                         if ~isempty(cData)
-                            imAxialF = imAxialFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                            imAxialF = imAxialFPtr('get', [], dFusionSeriesOffset);
                             if ~isempty(imAxialF)
                                 imAxialF.CData = cData;
                             end
@@ -596,7 +601,7 @@ function refreshImages()
             iPointerOffset=1;
             for hh=1:dVsplashLayoutY
                 for jj=1:dVsplashLayoutX
-                    ptMontageAxes1{iPointerOffset} = text(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ((jj-1)*xOffset)+1, ((hh-1)*yOffset)+1, sprintf('\n%s', num2str(lFirst+iPointerOffset-1)), 'Color', overlayColor('get'));
+                    ptMontageAxes1{iPointerOffset} = text(axes1Ptr('get', [], dSeriesOffset), ((jj-1)*xOffset)+1, ((hh-1)*yOffset)+1, sprintf('\n%s', num2str(lFirst+iPointerOffset-1)), 'Color', overlayColor('get'));
                     if overlayActivate('get') == false
                         set(ptMontageAxes1{iPointerOffset}, 'Visible', 'off');
                     end
@@ -619,7 +624,7 @@ function refreshImages()
             iPointerOffset=1;
             for hh=1:dVsplashLayoutY
                 for jj=1:dVsplashLayoutX
-                    ptMontageAxes2{iPointerOffset} = text(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ((jj-1)*xOffset)+1, ((hh-1)*yOffset)+1, sprintf('\n%s', num2str(lFirst+iPointerOffset-1)), 'Color', overlayColor('get'));
+                    ptMontageAxes2{iPointerOffset} = text(axes2Ptr('get', [], dSeriesOffset), ((jj-1)*xOffset)+1, ((hh-1)*yOffset)+1, sprintf('\n%s', num2str(lFirst+iPointerOffset-1)), 'Color', overlayColor('get'));
                     if overlayActivate('get') == false
                         set(ptMontageAxes2{iPointerOffset}, 'Visible', 'off');
                     end
@@ -634,7 +639,7 @@ function refreshImages()
                 delete(ptMontageAxes3{aa});
             end
 
-            [lFirst, ~] = computeVsplashLayout(im, 'axial', size(dicomBuffer('get'), 3)-iAxial+1);
+            [lFirst, ~] = computeVsplashLayout(im, 'axial', aBufferSize(3)-iAxial+1);
 
             xOffset = imAxial.XData(2)/dVsplashLayoutX;
             yOffset = imAxial.YData(2)/dVsplashLayoutY;
@@ -642,7 +647,7 @@ function refreshImages()
             iPointerOffset=1;
             for hh=1:dVsplashLayoutY
                 for jj=1:dVsplashLayoutX
-                    ptMontageAxes3{iPointerOffset} = text(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ((jj-1)*xOffset)+1 , ((hh-1)*yOffset)+1, sprintf('\n%s', num2str(lFirst+iPointerOffset-1)), 'Color', overlayColor('get'));
+                    ptMontageAxes3{iPointerOffset} = text(axes3Ptr('get', [], dSeriesOffset), ((jj-1)*xOffset)+1 , ((hh-1)*yOffset)+1, sprintf('\n%s', num2str(lFirst+iPointerOffset-1)), 'Color', overlayColor('get'));
                     if overlayActivate('get') == false
                         set(ptMontageAxes3{iPointerOffset}, 'Visible', 'off');
                     end
@@ -653,7 +658,7 @@ function refreshImages()
             montageText('set', 'axes3', ptMontageAxes3);
 
         else
-            imM  = mipBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
+            imM  = mipBuffer('get', [], dSeriesOffset);
 
             imCoronal.CData  = permute(im(iCoronal,:,:), [3 2 1]);
             imSagittal.CData = permute(im(:,iSagittal,:), [3 1 2]) ;
@@ -679,6 +684,7 @@ function refreshImages()
                 for rr=1:dNbFusedSeries
 
                     imf = squeeze(fusionBuffer('get', [], rr));
+                    aFusionBufferSize = size(imf);
 
                     if ~isempty(imf)
 
@@ -689,10 +695,18 @@ function refreshImages()
                         if ~isempty(imCoronalF) && ...
                            ~isempty(imSagittalF) && ...
                            ~isempty(imAxialF)
+                            
+                            if aFusionBufferSize(1) > iCoronal
+                                imCoronalF.CData  = permute(imf(iCoronal,:,:) , [3 2 1]);
+                            end
 
-                            imCoronalF.CData  = permute(imf(iCoronal,:,:) , [3 2 1]);
-                            imSagittalF.CData = permute(imf(:,iSagittal,:), [3 1 2]) ;
-                            imAxialF.CData    = imf(:,:,iAxial);
+                            if aFusionBufferSize(2) > iSagittal                         
+                                imSagittalF.CData = permute(imf(:,iSagittal,:), [3 1 2]) ;
+                            end
+
+                            if aFusionBufferSize(3) > iAxial                         
+                                imAxialF.CData    = imf(:,:,iAxial);
+                            end
 
                             if isCombineMultipleFusion('get') == true
 
@@ -757,7 +771,7 @@ function refreshImages()
 
                     cData = combineRGB(imCoronalR, imCoronalG, imCoronalB, 'Coronal');
                     if ~isempty(cData)
-                        imCoronalF  = imCoronalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                        imCoronalF  = imCoronalFPtr('get', [], dFusionSeriesOffset);
                         if ~isempty(imCoronalF)
                             imCoronalF.CData = cData;
                         end
@@ -765,7 +779,7 @@ function refreshImages()
 
                     cData= combineRGB(imSagittalR, imSagittalG, imSagittalB, 'Sagittal');
                     if ~isempty(cData)
-                        imSagittalF = imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                        imSagittalF = imSagittalFPtr('get', [], dFusionSeriesOffset);
                         if ~isempty(imCoronalF)
                             imSagittalF.CData = cData;
                         end
@@ -773,7 +787,7 @@ function refreshImages()
 
                     cData= combineRGB(imAxialR, imAxialG, imAxialB, 'Axial');
                     if ~isempty(cData)
-                        imAxialF = imAxialFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                        imAxialF = imAxialFPtr('get', [], dFusionSeriesOffset);
                         if ~isempty(imAxialF)
                             imAxialF.CData = cData;
                         end
@@ -781,7 +795,7 @@ function refreshImages()
 
                     cData = combineRGB(imMipR, imMipG, imMipB, 'Mip');
                     if ~isempty(cData)
-                        imMipF = imMipFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                        imMipF = imMipFPtr('get', [], dFusionSeriesOffset);
                         if ~isempty(imMipF)
                             imMipF.CData = cData;
                         end
@@ -790,13 +804,13 @@ function refreshImages()
 
                 if isPlotContours('get') == true
 
-                   imf = squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+                   imf = squeeze(fusionBuffer('get', [], dFusionSeriesOffset));
                    if ~isempty(imf)
 
-                        sUnitDisplay = getSerieUnitValue(get(uiFusedSeriesPtr('get'), 'Value'));
+                        sUnitDisplay = getSerieUnitValue(dFusionSeriesOffset);
                         if strcmpi(sUnitDisplay, 'SUV')
-                            tQuantification = quantificationTemplate('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
-                            if atInputTemplate(get(uiFusedSeriesPtr('get'), 'Value')).bDoseKernel == false
+                            tQuantification = quantificationTemplate('get', [], dFusionSeriesOffset);
+                            if atInputTemplate(dFusionSeriesOffset).bDoseKernel == false
                                 if ~isempty(tQuantification)
                                     imf = imf*tQuantification.tSUV.dScale;
                                     imMf = imMf*tQuantification.tSUV.dScale;
@@ -818,7 +832,7 @@ function refreshImages()
 
         % Contours
         
-        atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        atRoiInput = roiTemplate('get', dSeriesOffset);
     
         if ~isempty(atRoiInput) && isVsplash('get') == false
         
@@ -861,9 +875,11 @@ function refreshImages()
 
         if crossActivate('get') == true && isVsplash('get') == false
            
-            iSagittalSize = size(im,2);
-            iCoronalSize  = size(im,1);
-            iAxialSize    = size(im,3);
+            iSagittalSize = aBufferSize(2);
+            iCoronalSize  = aBufferSize(1);
+            iAxialSize    = aBufferSize(3);
+
+            iCrossSize = crossSize('get');
 
             alAxes1Line = axesLine('get', 'axes1');
 
@@ -873,17 +889,17 @@ function refreshImages()
             alAxes1Line{2}.XData = [iSagittal-0.5 iSagittal+0.5];
             alAxes1Line{2}.YData = [iAxial iAxial];
 
-            alAxes1Line{3}.XData = [0 iSagittal-crossSize('get')];
+            alAxes1Line{3}.XData = [0 iSagittal-iCrossSize];
             alAxes1Line{3}.YData = [iAxial iAxial];
 
-            alAxes1Line{4}.XData = [iSagittal+crossSize('get') iSagittalSize];
+            alAxes1Line{4}.XData = [iSagittal+iCrossSize iSagittalSize];
             alAxes1Line{4}.YData = [iAxial iAxial];
 
             alAxes1Line{5}.XData = [iSagittal iSagittal];
-            alAxes1Line{5}.YData = [0 iAxial-crossSize('get')];
+            alAxes1Line{5}.YData = [0 iAxial-iCrossSize];
 
             alAxes1Line{6}.XData = [iSagittal iSagittal];
-            alAxes1Line{6}.YData = [iAxial+crossSize('get') iAxialSize];
+            alAxes1Line{6}.YData = [iAxial+iCrossSize iAxialSize];
 
 
             alAxes2Line = axesLine('get', 'axes2');
@@ -894,17 +910,17 @@ function refreshImages()
             alAxes2Line{2}.XData = [iCoronal-0.5 iCoronal+0.5];
             alAxes2Line{2}.YData = [iAxial iAxial];
 
-            alAxes2Line{3}.XData = [0 iCoronal-crossSize('get')];
+            alAxes2Line{3}.XData = [0 iCoronal-iCrossSize];
             alAxes2Line{3}.YData = [iAxial iAxial];
 
-            alAxes2Line{4}.XData = [iCoronal+crossSize('get') iCoronalSize];
+            alAxes2Line{4}.XData = [iCoronal+iCrossSize iCoronalSize];
             alAxes2Line{4}.YData = [iAxial iAxial];
 
             alAxes2Line{5}.XData = [iCoronal iCoronal];
-            alAxes2Line{5}.YData = [0 iAxial-crossSize('get')];
+            alAxes2Line{5}.YData = [0 iAxial-iCrossSize];
 
             alAxes2Line{6}.XData = [iCoronal iCoronal];
-            alAxes2Line{6}.YData = [iAxial+crossSize('get') iAxialSize];
+            alAxes2Line{6}.YData = [iAxial+iCrossSize iAxialSize];
 
 
             alAxes3Line = axesLine('get', 'axes3');
@@ -915,17 +931,17 @@ function refreshImages()
             alAxes3Line{2}.XData = [iSagittal-0.5 iSagittal+0.5];
             alAxes3Line{2}.YData = [iCoronal iCoronal];
 
-            alAxes3Line{3}.XData = [0  iSagittal-crossSize('get')];
+            alAxes3Line{3}.XData = [0  iSagittal-iCrossSize];
             alAxes3Line{3}.YData = [iCoronal iCoronal];
 
-            alAxes3Line{4}.XData = [iSagittal+crossSize('get') iSagittalSize];
+            alAxes3Line{4}.XData = [iSagittal+iCrossSize iSagittalSize];
             alAxes3Line{4}.YData = [iCoronal iCoronal];
 
             alAxes3Line{5}.XData = [iSagittal iSagittal];
-            alAxes3Line{5}.YData = [0 iCoronal-crossSize('get')];
+            alAxes3Line{5}.YData = [0 iCoronal-iCrossSize];
 
             alAxes3Line{6}.XData = [iSagittal iSagittal];
-            alAxes3Line{6}.YData = [iCoronal+crossSize('get') iCoronalSize];
+            alAxes3Line{6}.YData = [iCoronal+iCrossSize iCoronalSize];
 
             alAxesMipLine = axesLine('get', 'axesMip');
             
@@ -957,17 +973,17 @@ function refreshImages()
             alAxesMipLine{2}.XData = [xOffset(1) - 0.5, xOffset(1) + 0.5];
             alAxesMipLine{2}.YData = [iAxial, iAxial];
             
-            alAxesMipLine{3}.XData = [0, xOffset(1) - crossSize('get')];
+            alAxesMipLine{3}.XData = [0, xOffset(1) - iCrossSize];
             alAxesMipLine{3}.YData = [iAxial, iAxial];
             
-            alAxesMipLine{4}.XData = [xOffset(1) + crossSize('get'), iSagittalSize];
+            alAxesMipLine{4}.XData = [xOffset(1) + iCrossSize, iSagittalSize];
             alAxesMipLine{4}.YData = [iAxial, iAxial];
             
             alAxesMipLine{5}.XData = [xOffset(1), xOffset(1)];
-            alAxesMipLine{5}.YData = [0, iAxial - crossSize('get')];
+            alAxesMipLine{5}.YData = [0, iAxial - iCrossSize];
             
             alAxesMipLine{6}.XData = [xOffset(1), xOffset(1)];
-            alAxesMipLine{6}.YData = [iAxial + crossSize('get'), iAxialSize];      
+            alAxesMipLine{6}.YData = [iAxial + iCrossSize, iAxialSize];      
         
         end
 
@@ -979,7 +995,7 @@ function refreshImages()
             clickedPtX = num2str(round(clickedPt(1,1)));
             clickedPtY = num2str(round(clickedPt(1,2)));
 
-            if gca == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) || ...
+            if gca == axes1Ptr('get', [], dSeriesOffset) || ...
                (isVsplash('get') == true && ...
                 strcmpi(vSplahView('get'), 'coronal'))
 
@@ -994,13 +1010,13 @@ function refreshImages()
                             sPatientID, ...
                             sSeriesDescription, ...
                             sAxialSliceNumber, ...
-                            num2str(size(dicomBuffer('get'), 1)));
+                            num2str(aBufferSize(1)));
                     elseif isVsplash('get') == true && ...
                            strcmpi(vSplahView('get'), 'all')
                        [lFirst, lLast] = computeVsplashLayout(im, 'coronal', sliceNumber('get', 'coronal'));
-                        sAxe1Text = sprintf('C:%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(size(dicomBuffer('get'), 1)));
+                        sAxe1Text = sprintf('C:%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(aBufferSize(1)));
                     else
-                        sAxe1Text = sprintf('\nC:%s/%s\n[X,Y] %s,%s', num2str(sliceNumber('get', 'coronal' )), num2str(size(dicomBuffer('get'), 1)), clickedPtX, clickedPtY);
+                        sAxe1Text = sprintf('\nC:%s/%s\n[X,Y] %s,%s', num2str(sliceNumber('get', 'coronal' )), num2str(aBufferSize(1)), clickedPtX, clickedPtY);
                     end
                 else
                     if isVsplash('get') == true && ...
@@ -1012,13 +1028,13 @@ function refreshImages()
                                 sPatientID, ...
                                 sSeriesDescription, ...
                                 sAxialSliceNumber, ...
-                                num2str(size(dicomBuffer('get'), 1)));
+                                num2str(aBufferSize(1)));
                     elseif isVsplash('get') == true && ...
                            strcmpi(vSplahView('get'), 'all')
                         [lFirst, lLast] = computeVsplashLayout(im, 'coronal', sliceNumber('get', 'coronal'));
-                        sAxe1Text = sprintf('C:%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(size(dicomBuffer('get'), 1)));
+                        sAxe1Text = sprintf('C:%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(aBufferSize(1)));
                     else
-                        sAxe1Text = sprintf('C:%s/%s', num2str(sliceNumber('get', 'coronal' )), num2str(size(dicomBuffer('get'), 1)));
+                        sAxe1Text = sprintf('C:%s/%s', num2str(sliceNumber('get', 'coronal' )), num2str(aBufferSize(1)));
                     end
                 end
                 tAxes1Text.String = sAxe1Text;
@@ -1032,13 +1048,13 @@ function refreshImages()
                             sPatientID, ...
                             sSeriesDescription, ...
                             sAxialSliceNumber, ...
-                            num2str(size(dicomBuffer('get'), 1)));
+                            num2str(aBufferSize(1)));
                 elseif isVsplash('get') == true && ...
                        strcmpi(vSplahView('get'), 'all')
                     [lFirst, lLast] = computeVsplashLayout(im, 'coronal', sliceNumber('get', 'coronal'));
-                    tAxes1Text.String = ['C:' num2str(lFirst) '-' num2str(lLast) '/' num2str(size(dicomBuffer('get'), 1))];
+                    tAxes1Text.String = ['C:' num2str(lFirst) '-' num2str(lLast) '/' num2str(aBufferSize(1))];
                 else
-                    tAxes1Text.String = ['C:' num2str(sliceNumber('get', 'coronal' )) '/' num2str(size(dicomBuffer('get'), 1))];
+                    tAxes1Text.String = ['C:' num2str(sliceNumber('get', 'coronal' )) '/' num2str(aBufferSize(1))];
                 end
             end
             tAxes1Text.Color = overlayColor('get');
@@ -1050,7 +1066,7 @@ function refreshImages()
 
             tAxes2Text = axesText('get', 'axes2');
 
-            if gca == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) || ...
+            if gca == axes2Ptr('get', [], dSeriesOffset) || ...
                (isVsplash('get') == true && ...
                 strcmpi(vSplahView('get'), 'sagittal'))
 
@@ -1064,13 +1080,13 @@ function refreshImages()
                             sPatientID, ...
                             sSeriesDescription, ...
                             sAxialSliceNumber, ...
-                            num2str(size(dicomBuffer('get'), 2)));
+                            num2str(aBufferSize(2)));
                     elseif isVsplash('get') == true && ...
                            strcmpi(vSplahView('get'), 'all')
                         [lFirst, lLast] = computeVsplashLayout(im, 'sagittal', sliceNumber('get', 'sagittal'));
-                        sAxe2Text = sprintf('S:%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(size(dicomBuffer('get'), 2)));
+                        sAxe2Text = sprintf('S:%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(aBufferSize(2)));
                     else
-                        sAxe2Text = sprintf('\nS:%s/%s\n[X,Y] %s,%s', num2str(sliceNumber('get', 'sagittal' )), num2str(size(dicomBuffer('get'), 2)), clickedPtX, clickedPtY);
+                        sAxe2Text = sprintf('\nS:%s/%s\n[X,Y] %s,%s', num2str(sliceNumber('get', 'sagittal' )), num2str(aBufferSize(2)), clickedPtX, clickedPtY);
                     end
                 else
                     if isVsplash('get') == true && ...
@@ -1082,13 +1098,13 @@ function refreshImages()
                             sPatientID, ...
                             sSeriesDescription, ...
                             sAxialSliceNumber, ...
-                            num2str(size(dicomBuffer('get'), 2)));
+                            num2str(aBufferSize(2)));
                      elseif isVsplash('get') == true && ...
                            strcmpi(vSplahView('get'), 'all')
                        [lFirst, lLast] = computeVsplashLayout(im, 'sagittal', sliceNumber('get', 'sagittal'));
-                       sAxe2Text = sprintf('S:%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(size(dicomBuffer('get'), 2)));
+                       sAxe2Text = sprintf('S:%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(aBufferSize(2)));
                     else
-                        sAxe2Text = sprintf('S:%s/%s', num2str(sliceNumber('get', 'sagittal' )), num2str(size(dicomBuffer('get'), 2)));
+                        sAxe2Text = sprintf('S:%s/%s', num2str(sliceNumber('get', 'sagittal' )), num2str(aBufferSize(2)));
                     end
                 end
                 tAxes2Text.String = sAxe2Text;
@@ -1102,13 +1118,13 @@ function refreshImages()
                         sPatientID, ...
                         sSeriesDescription, ...
                         sAxialSliceNumber, ...
-                        num2str(size(dicomBuffer('get'), 2)));
+                        num2str(aBufferSize(2)));
                  elseif isVsplash('get') == true && ...
                         strcmpi(vSplahView('get'), 'all')
                     [lFirst, lLast] = computeVsplashLayout(im, 'sagittal', sliceNumber('get', 'sagittal'));
-                    tAxes2Text.String = ['S:' num2str(lFirst) '-' num2str(lLast) '/' num2str(size(dicomBuffer('get'), 2))];
+                    tAxes2Text.String = ['S:' num2str(lFirst) '-' num2str(lLast) '/' num2str(aBufferSize(2))];
                 else
-                    tAxes2Text.String = ['S:' num2str(sliceNumber('get', 'sagittal')) '/' num2str(size(dicomBuffer('get'), 2))];
+                    tAxes2Text.String = ['S:' num2str(sliceNumber('get', 'sagittal')) '/' num2str(aBufferSize(2))];
                 end
             end
             tAxes2Text.Color  = overlayColor('get');
@@ -1118,8 +1134,8 @@ function refreshImages()
                 tAxes2ViewText.Color  = overlayColor('get');
             end
 
-            tQuantification = quantificationTemplate('get', [], dOffset);
-            atMetaData = dicomMetaData('get', [], dOffset);
+            tQuantification = quantificationTemplate('get', [], dSeriesOffset);
+            atMetaData = dicomMetaData('get', [], dSeriesOffset);
 
             bDisplayAxe3 = true;
             mGate = gateIconMenuObject('get');
@@ -1132,21 +1148,21 @@ function refreshImages()
                 if isVsplash('get') == true && ...
                    (strcmpi(vSplahView('get'), 'axial') || ...
                     strcmpi(vSplahView('get'), 'all'))
-                    [lFirst, lLast] = computeVsplashLayout(im, 'axial', size(dicomBuffer('get'), 3)-sliceNumber('get', 'axial')+1);
+                    [lFirst, lLast] = computeVsplashLayout(im, 'axial', aBufferSize(3)-sliceNumber('get', 'axial')+1);
                     sAxialSliceNumber = [num2str(lFirst) '-' num2str(lLast)];
                     sAxe3Text = sprintf('\n\n\n%s\n%s\n%s\nA: %s/%s', ...
                         sPatientName, ...
                         sPatientID, ...
                         sSeriesDescription, ...
                         sAxialSliceNumber, ...
-                        num2str(size(dicomBuffer('get'), 3)));
+                        num2str(aBufferSize(3)));
                 else
-                    sAxialSliceNumber = num2str(size(dicomBuffer('get'), 3)-sliceNumber('get', 'axial')+1);
+                    sAxialSliceNumber = num2str(aBufferSize(3)-sliceNumber('get', 'axial')+1);
 
                     lMin = windowLevel('get', 'min');
                     lMax = windowLevel('get', 'max');
                     
-                    if atInputTemplate(dOffset).bDoseKernel == true
+                    if atInputTemplate(dSeriesOffset).bDoseKernel == true
                         sAxe3Text = sprintf('\n\n\n\n\n\n%s\n%s\n%s\n%s\nMin (dose): %s\nMax (dose): %s\nTotal (dose): %s\nCurrent (dose): %s\nLookup Table: %s - %s\nA: %s/%s', ...
                             sPatientName, ...
                             sPatientID, ...
@@ -1159,14 +1175,14 @@ function refreshImages()
                             num2str(lMin), ...
                             num2str(lMax), ...
                             sAxialSliceNumber, ...
-                            num2str(size(dicomBuffer('get'), 3)));                                              
+                            num2str(aBufferSize(3)));                                              
                     else
                         
                         switch lower(atMetaData{1}.Modality)
     
                             case {'pt', 'nm'}
     
-                                sUnit = getSerieUnitValue(dOffset);
+                                sUnit = getSerieUnitValue(dSeriesOffset);
     
                                 if strcmpi(sUnit, 'SUV')
                                     
@@ -1208,7 +1224,7 @@ function refreshImages()
                                         num2str(lMin*tQuantification.tSUV.dScale), ...
                                         num2str(lMax*tQuantification.tSUV.dScale), ...
                                         sAxialSliceNumber, ...
-                                        num2str(size(dicomBuffer('get'), 3)));
+                                        num2str(aBufferSize(3)));
                                 else
                                     sAxe3Text = sprintf('\n\n\n\n\n\n\n\n%s\n%s\n%s\n%s\n%s\nMin: %s\nMax: %s\nTotal: %s\nCurrent: %s\nLookup Table: %s - %s\nA: %s/%s', ...
                                         sPatientName, ...
@@ -1223,7 +1239,7 @@ function refreshImages()
                                         num2str(lMin), ...
                                         num2str(lMax), ...
                                         sAxialSliceNumber, ...
-                                        num2str(size(dicomBuffer('get'), 3)));
+                                        num2str(aBufferSize(3)));
                                 end
     
                             case 'ct'
@@ -1242,7 +1258,7 @@ function refreshImages()
                                     num2str(round(dWindow)), ...
                                     num2str(round(dLevel)), ...
                                     sAxialSliceNumber, ...
-                                    num2str(size(dicomBuffer('get'), 3)));
+                                    num2str(aBufferSize(3)));
     
                            otherwise
                                 sAxe3Text = sprintf('\n\n\n\n\n\n%s\n%s\n%s\n%s\nMin: %s\nMax: %s\nTotal: %s\nCurrent: %s\nLookup Table: %s - %s\nA: %s/%s', ...
@@ -1257,12 +1273,12 @@ function refreshImages()
                                     num2str(lMin), ...
                                     num2str(lMax), ...
                                     sAxialSliceNumber, ...
-                                    num2str(size(dicomBuffer('get'), 3)));
+                                    num2str(aBufferSize(3)));
                         end
                     end
        %         sAxe3Text = sprintf('%s\n%s\n%s\nCurrent SUV/W:%s -- %d Bq/cc\nA :%s/%s', sPatientName, sPatientID, sSeriesDescription, num2str(suvValue),im(iCoronal,iSagittal,iAxial),num2str(sliceNumber('get', 'axial')),num2str(size(dicomBuffer('get'), 3)));
 
-                    if gca == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) && strcmp(windowButton('get'), 'down')
+                    if gca == axes3Ptr('get', [], dSeriesOffset) && strcmp(windowButton('get'), 'down')
                         sAxe3Text = sprintf('\n%s\n[X,Y] %s,%s', sAxe3Text, clickedPtX, clickedPtY);
                     end
                 end
@@ -1279,6 +1295,7 @@ function refreshImages()
                     for rr=1:dNbFusedSeries
 
                         imf = squeeze(fusionBuffer('get', [], rr));
+                        aFusionBufferSize = size(imf);
 
                         if ~isempty(imf)
 
@@ -1286,7 +1303,7 @@ function refreshImages()
                             imSagittalF = imSagittalFPtr('get', [], rr);
                             imAxialF    = imAxialFPtr   ('get', [], rr);
 
-                            if ~isempty(imCoronalF) && ...
+                            if ~isempty(imCoronalF)  && ...
                                ~isempty(imSagittalF) && ...
                                ~isempty(imAxialF)
 
@@ -1334,7 +1351,14 @@ function refreshImages()
                                 sColorMap = getColorMap('name', [], colormap(imAxialF.Parent));
 
 %                                imf = squeeze(fusionBuffer('get', [], rr));
-                                dFusedCurrent = double(imf(iCoronal,iSagittal,iAxial));
+                                if aFusionBufferSize(1) > iCoronal  && ...
+                                   aFusionBufferSize(2) > iSagittal && ...                        
+                                   aFusionBufferSize(3) > iAxial                         
+                                    dFusedCurrent = double(imf(iCoronal,iSagittal,iAxial));
+                                else
+                                    dFusedCurrent = [];
+                                end
+
 
                                 switch lower(atFuseMetaData{1}.Modality)
 
@@ -1445,6 +1469,7 @@ function refreshImages()
     end
 
     setColorbarLabel();
+
     if isFusion('get') == true
         setFusionColorbarLabel();
     end

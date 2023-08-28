@@ -150,8 +150,23 @@ function writeDICOMAllSeriesCallback(~, ~)
         else
             sWriteDir = sOutDir;
         end
-    
-        writeDICOM(aBuffer, atMetaData, sWriteDir, jj);
+
+        bInputIsDicom = false;
+
+        try
+            if exist(char(atInputTemplate(jj).asFilesList{1}), 'file') % Input series is dicom
+                if isdicom(char(atInputTemplate(jj).asFilesList{1}))
+                    bInputIsDicom = true;
+                end
+            end
+        catch
+        end
+
+        if bInputIsDicom
+            writeDICOM(aBuffer, atMetaData, sWriteDir, jj, true);
+        else
+            writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, jj);
+        end
     end
 
     set(uiSeriesPtr('get'), 'Value', dSeriesOffset);

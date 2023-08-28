@@ -788,9 +788,18 @@ function generate3DLungShuntReport(bInitReport)
 
     mReportOptions = uimenu(fig3DLungShuntReport,'Label','Options', 'Callback', @figLungLiverRatioReportRefreshOption);    
     
-    if suvMenuUnitOption('get') == true && ...
+     if suvMenuUnitOption('get') == true && ...
        atInput(dOffset).bDoseKernel == false    
-        sSuvChecked = 'on';
+
+        sUnitDisplay = getSerieUnitValue(dOffset);  
+        if strcmpi(sUnitDisplay, 'SUV')
+            sSuvChecked = 'on';
+        else
+            if suvMenuUnitOption('get') == true
+                suvMenuUnitOption('set', false);
+            end            
+            sSuvChecked = 'off';
+        end
     else
         if suvMenuUnitOption('get') == true
             suvMenuUnitOption('set', false);
@@ -801,12 +810,16 @@ function generate3DLungShuntReport(bInitReport)
     if atInput(dOffset).bDoseKernel == true
         sSuvEnable = 'off';
     else
-        sSuvEnable = 'on';
+        sUnitDisplay = getSerieUnitValue(dOffset);  
+        if strcmpi(sUnitDisplay, 'SUV')        
+            sSuvEnable = 'on';
+        else
+            sSuvEnable = 'off';
+        end
     end
     
     mSUVUnit = uimenu(mReportOptions, 'Label', 'SUV Unit', 'Checked', sSuvChecked , 'Enable', sSuvEnable, 'Callback', @lungLiverReportSUVUnitCallback);
-       
-    
+           
     setLungLiverRatioReportFigureName();
 
     if bInitReport == false % Reopen the report
@@ -1615,7 +1628,7 @@ function generate3DLungShuntReport(bInitReport)
             sSeriesDate = datetime(sSeriesDate,'InputFormat','yyyyMMdd');
         end
 
-        [file, path] = uiputfile(filter, 'Save 3D SPECT lung shunt report', sprintf('%s/%s_%s_%s_%s_LUNG_SHUNT_REPORT_TriDFusion.pdf' , ...
+        [file, path] = uiputfile(filter, 'Save 3D SPECT lung shunt report', sprintf('%s/3D LSF %s_%s_%s_%s_LUNG_SHUNT_REPORT_TriDFusion.pdf' , ...
             sCurrentDir, cleanString(atMetaData{1}.PatientName), cleanString(atMetaData{1}.PatientID), cleanString(atMetaData{1}.SeriesDescription), sSeriesDate) );
 
         set(fig3DLungShuntReport, 'Pointer', 'watch');

@@ -27,26 +27,35 @@ function mainWindowMenu()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    mFile = uimenu(fiMainWindowPtr('get'),'Label','File');
-    uimenu(mFile,'Label', 'Open...'                       , 'Callback',@setSourceCallback);
-    uimenu(mFile,'Label', 'Import .raw file...'           ,'Callback', @importRawCallback);
-    uimenu(mFile,'Label', 'Import .stl file...'           ,'Callback', @importSTLCallback);
-    uimenu(mFile,'Label', 'Import .nii file...'           ,'Callback', @importNIICallback);
-    uimenu(mFile,'Label', 'Import .nii mask file...'      ,'Callback', @importNIIMaskCallback);
-    uimenu(mFile,'Label', 'Import RT-Structure...'        ,'Callback', @importContoursCallback);    
-    uimenu(mFile,'Label', 'Import CERR planC...'          ,'Callback', @importCerrPlanCCallback, 'Separator','on');
-    uimenu(mFile,'Label', 'Import CERR Dose Volume...'    ,'Callback', @importCerrDoseVolumeCallback);
-    uimenu(mFile,'Label', 'Import CERR Dose Constraint...','Callback', @importCerrDoseConstraintCallback);
-    uimenu(mFile,'Label', 'Import Dose Kernel...'         ,'Callback', @importDoseKernelCallback);
+    Ga68_DOTATATE = false;
+    SPECT_RECON = false;
 
-    uimenu(mFile,'Label', 'Export DICOM...'                   ,'Callback', @writeDICOMCallback, 'Separator','on');
-    uimenu(mFile,'Label', 'Export DICOM All Series...'        ,'Callback', @writeDICOMAllSeriesCallback);
-    uimenu(mFile,'Label', 'Export DICOM to NII...'            ,'Callback', @writeDICOMtoNIICallback);
+    mFile = uimenu(fiMainWindowPtr('get'),'Label','File');
+    uimenu(mFile,'Label', 'Open...'                         ,'Callback', @setSourceCallback);
+    uimenu(mFile,'Label', 'Import .raw file...'             ,'Callback', @importRawCallback);
+    uimenu(mFile,'Label', 'Import .stl file...'             ,'Callback', @importSTLCallback);
+    uimenu(mFile,'Label', 'Import .nii file...'             ,'Callback', @importNIICallback);
+    uimenu(mFile,'Label', 'Import .nrrd file...'            ,'Callback', @importNrrdCallback);
+    uimenu(mFile,'Label', 'Import .nii contours mask...'    ,'Callback', @importNIIMaskCallback, 'Separator','on');
+    uimenu(mFile,'Label', 'Import .nrrd contours mask...'   ,'Callback', @importNrrdMaskCallback);    
+    uimenu(mFile,'Label', 'Import DICOM contours mask...'   ,'Callback', @importDicomdMaskCallback);    
+    uimenu(mFile,'Label', 'Import DICOM RT-structure...'    ,'Callback', @importContoursCallback);    
+    uimenu(mFile,'Label', 'Import CERR planC...'            ,'Callback', @importCerrPlanCCallback, 'Separator','on');
+    uimenu(mFile,'Label', 'Import CERR Dose Volume...'      ,'Callback', @importCerrDoseVolumeCallback);
+    uimenu(mFile,'Label', 'Import CERR Dose Constraint...'  ,'Callback', @importCerrDoseConstraintCallback);
+    uimenu(mFile,'Label', 'Import Dose Kernel...'           ,'Callback', @importDoseKernelCallback);
+
+    uimenu(mFile,'Label', 'Export to DICOM...'              ,'Callback', @writeDICOMCallback, 'Separator','on');
+    uimenu(mFile,'Label', 'Export to DICOM all series...'   ,'Callback', @writeDICOMAllSeriesCallback);
+    uimenu(mFile,'Label', 'Export to .nii file...'          ,'Callback', @writeSeriestoNIICallback);
  %   uimenu(mFile,'Label', 'Export to Excel...','Callback', @exportAllSeriesResultCallback);
-    uimenu(mFile,'Label', 'Export Contours to DICOM-Mask...'  ,'Callback', @writeRoisToDicomMaskCallback);
-    uimenu(mFile,'Label', 'Export Contours to RT-Structure...','Callback', @writeRTStructCallback);
-    uimenu(mFile,'Label', 'Export 3D ISO Model to STL...'     ,'Callback', @exportISOtoSTLCallback);
-    uimenu(mFile,'Label', 'Export 3D Rendering to Slices...'  ,'Callback', @export3DToSlicesCallback);
+    uimenu(mFile,'Label', 'Export to .nrrd file...'           ,'Callback', @writeSeriestoNrrdCallback);
+    uimenu(mFile,'Label', 'Export Contours to .nii mask...'   ,'Callback', @writeRoisToNiiMaskCallback, 'Separator','on');
+    uimenu(mFile,'Label', 'Export Contours to .nrrd mask...'  ,'Callback', @writeRoisToNrrdMaskCallback);
+    uimenu(mFile,'Label', 'Export Contours to DICOM mask...'  ,'Callback', @writeRoisToDicomMaskCallback);
+    uimenu(mFile,'Label', 'Export Contours to RT-structure...','Callback', @writeRTStructCallback);
+    uimenu(mFile,'Label', 'Export 3D ISO model to .stl...'    ,'Callback', @exportISOtoSTLCallback, 'Separator','on');
+    uimenu(mFile,'Label', 'Export 3D rendering to slices...'  ,'Callback', @export3DToSlicesCallback);
     
     uimenu(mFile,'Label', 'Print Preview...','Callback', 'filemenufcn(gcbf,''FilePrintPreview'')', 'Separator','on');
     uimenu(mFile,'Label', 'Print...','Callback', 'printdlg(gcbf)');
@@ -154,7 +163,7 @@ function mainWindowMenu()
         set(mCoronal , 'Checked', 'off');
     end
 
-    if 0    
+    if SPECT_RECON    
         mReconstruction = uimenu(mTools,'Label','Reconstruction', 'Separator','on');  
         uimenu(mReconstruction, 'Label','SPECT Reconstruction','Callback', @GenerateSystemMatrixCallback);
     end
@@ -172,31 +181,60 @@ function mainWindowMenu()
 
     mAnalCancer = uimenu(mWorkflows,'Label','Anal Cancer');  
     uimenu(mAnalCancer, 'Label','Export Report', 'Callback', @setAnalCancerReportCallback);
-    uimenu(mAnalCancer, 'Label','PET/CT Fusion', 'Callback', @setPETCTAnalCancerFusionCallback);
+    uimenu(mAnalCancer, 'Label','PET/CT Fusion', 'Callback', @setPETCTAnalCancerFusionCallback, 'Separator','on');
+    
+    % FDG
 
     mFDG = uimenu(mWorkflows,'Label','FDG - fluorodeoxyglucose');  
-    uimenu(mFDG, 'Label','Tumor Segmentation (SUV 4)'   , 'Callback', @setSegmentationFDGSUVCallback);
-    uimenu(mFDG, 'Label','Tumor Segmentation (41%, 65%)', 'Callback', @setSegmentationFDGPercentCallback);
-    uimenu(mFDG, 'Label','PET/CT Fusion'                , 'Callback', @setPETCTFDGFusionCallback);
+    uimenu(mFDG, 'Label','FDG Tumor Segmentation (SUV)'    , 'Callback', @setSegmentationFDGSUVCallback);
+    uimenu(mFDG, 'Label','FDG Tumor Segmentation (Percent)', 'Callback', @setSegmentationFDGPercentCallback);
+    uimenu(mFDG, 'Label','PET/CT Fusion'                   , 'Callback', @setPETCTFDGFusionCallback, 'Separator','on');
 
-if 0    
+    % FDHT
+    
+    mFDHT = uimenu(mWorkflows,'Label','FDHT - fluorodihydrotestosterone');  
+    uimenu(mFDHT, 'Label','FDHT Tumor Segmentation (Threshold)', 'Callback', @setSegmentationFDHTCallback);
+    uimenu(mFDHT, 'Label','PET/CT Fusion'                      , 'Callback', @setPETCTFDHTFusionCallback, 'Separator','on');
+
+    % PSMA
+
+    mPSMA = uimenu(mWorkflows,'Label','PSMA - FDCFPyL');  
+    uimenu(mPSMA, 'Label','PSMA Tumor Segmentation (Threshold)', 'Callback', @setSegmentationPSMACallback);
+    uimenu(mPSMA, 'Label','PET/CT Fusion'                      , 'Callback', @setPETCTPSMAFusionCallback, 'Separator','on');
+
+    % Ga68 DOTATATE
+
     mGa68DOTATATE = uimenu(mWorkflows,'Label','Ga68 DOTATATE');  
-    uimenu(mGa68DOTATATE, 'Label','Tumor Segmentation (Machine Learning)', 'Callback', @setMachineLearningGa68DOTATATECallback);
-    uimenu(mGa68DOTATATE, 'Label','PET/CT Fusion'                        , 'Callback', @setPETCTGa68DOTATATEFusionCallback);
-end
+
+    if Ga68_DOTATATE
+        uimenu(mGa68DOTATATE, 'Label','Ga68 DOTATATE Tumor Segmentation (Threshold)'     , 'Callback', @setSegmentationGa68DOTATATECallback);
+        uimenu(mGa68DOTATATE, 'Label','Ga68 DOTATATE Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningGa68DOTATATECallback);
+        uimenu(mGa68DOTATATE, 'Label','Ga68 DOTATATE Tumor Segmentation (Full AI)'       , 'Callback', @setMachineLearningFullAIGa68DOTATATECallback);
+        uimenu(mGa68DOTATATE, 'Label','PET/CT Fusion'                                    , 'Callback', @setPETCTGa68DOTATATEFusionCallback, 'Separator','on');
+    else
+        uimenu(mGa68DOTATATE, 'Label','PET/CT Fusion'                   , 'Callback', @setPETCTGa68DOTATATEFusionCallback);
+    end
 
     mModules = uimenu(fiMainWindowPtr('get'),'Label','Modules');
     mMachineLearning = uimenu(mModules, 'Label','Machine Learning');
-    uimenu(mMachineLearning, 'Label','Machine Learning Segmentation', 'Callback', @setMachineLearningSegmentationCallback);
+    uimenu(mMachineLearning, 'Label','Machine Learning Organ Segmentation', 'Callback', @setMachineLearningSegmentationCallback);
 
-    mMachineReport = uimenu(mMachineLearning, 'Label','Machine Learning Report', 'Separator','on');
+    mMachineProcessing = uimenu(mMachineLearning, 'Label','Machine Learning Processing', 'Separator','on');
+
+    mMachineReport = uimenu(mMachineProcessing, 'Label','Report');
     uimenu(mMachineReport, 'Label','3D SPECT Lung Shunt Report'      , 'Callback', @generate3DLungShuntReportCallback);
     uimenu(mMachineReport, 'Label','3D SPECT Lung Lobe Ration Report', 'Callback', @generate3DLungLobeReportCallback);
     uimenu(mMachineReport, 'Label','PET Y90 Liver Dosimetry Report'  , 'Callback', @generatePETLiverDosimetryReportCallback);
 
-    uimenu(mMachineLearning, 'Label','3D SPECT Lung Shunt'     , 'Callback', @setMachineLearning3DLungShuntCallback, 'Separator','on');
-    uimenu(mMachineLearning, 'Label','3D SPECT Lung Lobe Ratio', 'Callback', @setMachineLearning3DLobeLungCallback);
-    uimenu(mMachineLearning, 'Label','PET Y90 Liver Dosimetry' , 'Callback', @setMachineLearningPETLiverDosimetryCallback);
+    uimenu(mMachineProcessing, 'Label','3D SPECT Lung Shunt'     , 'Callback', @setMachineLearning3DLungShuntCallback, 'Separator','on');
+    uimenu(mMachineProcessing, 'Label','3D SPECT Lung Lobe Ratio', 'Callback', @setMachineLearning3DLobeLungCallback);
+    uimenu(mMachineProcessing, 'Label','PET Y90 Liver Dosimetry' , 'Callback', @setMachineLearningPETLiverDosimetryCallback);
+
+    mMachineSegmentation = uimenu(mMachineLearning, 'Label','Machine Learning Tumor Segmentation');
+    if Ga68_DOTATATE
+        uimenu(mMachineSegmentation, 'Label','Ga68 DOTATATE Tumor Segmentation (Treshold + AI)', 'Callback', @setMachineLearningGa68DOTATATECallback);
+        uimenu(mMachineSegmentation, 'Label','Ga68 DOTATATE Tumor Segmentation (Full AI)'      , 'Callback', @setMachineLearningFullAIGa68DOTATATECallback);   
+    end
 
     mRadiomics = uimenu(mModules, 'Label','Radiomics');
     uimenu(mRadiomics, 'Label','Compute Radiomics', 'Callback', @extractRadiomicsFromContoursCallback);
@@ -225,9 +263,9 @@ end
 
 %            set(hFig,'Renderer',rdr);        
             set(hFig,'InvertHardCopy',inv);        
-       catch
-        progressBar(1, 'Error:copyDisplayCallback()');
-       end
+        catch
+            progressBar(1, 'Error:copyDisplayCallback()');
+        end
         
         set(hFig, 'Pointer', 'default');
         drawnow;

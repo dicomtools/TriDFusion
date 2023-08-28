@@ -257,7 +257,7 @@ function generateContourReportCallback(~, ~)
                   'FontWeight', 'bold',...
                   'FontSize'  , 10,...
                   'FontName'  , 'MS Sans Serif', ...
-                  'string'    , 'Location',...
+                  'string'    , 'Classification',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
@@ -579,7 +579,16 @@ function generateContourReportCallback(~, ~)
     
     if suvMenuUnitOption('get') == true && ...
        atInput(dSeriesOffset).bDoseKernel == false    
-        sSuvChecked = 'on';
+
+        sUnitDisplay = getSerieUnitValue(dSeriesOffset);  
+        if strcmpi(sUnitDisplay, 'SUV')
+            sSuvChecked = 'on';
+        else
+            if suvMenuUnitOption('get') == true
+                suvMenuUnitOption('set', false);
+            end            
+            sSuvChecked = 'off';
+        end
     else
         if suvMenuUnitOption('get') == true
             suvMenuUnitOption('set', false);
@@ -613,7 +622,12 @@ function generateContourReportCallback(~, ~)
     if atInput(dSeriesOffset).bDoseKernel == true
         sSuvEnable = 'off';
     else
-        sSuvEnable = 'on';
+        sUnitDisplay = getSerieUnitValue(dSeriesOffset);  
+        if strcmpi(sUnitDisplay, 'SUV')        
+            sSuvEnable = 'on';
+        else
+            sSuvEnable = 'off';
+        end
     end
     
     mSUVUnit          = ...
@@ -1049,9 +1063,9 @@ function generateContourReportCallback(~, ~)
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end 
 
-                    case 'local disease'
-                        if ~isempty(tReport.LocalDisease.Count)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.LocalDisease.Count));
+                    case 'primary disease'
+                        if ~isempty(tReport.PrimaryDisease.Count)
+                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.PrimaryDisease.Count));
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end      
@@ -1140,9 +1154,9 @@ function generateContourReportCallback(~, ~)
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end 
 
-                    case 'local disease'
-                        if ~isempty(tReport.LocalDisease.Mean)
-                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.LocalDisease.Mean);
+                    case 'primary disease'
+                        if ~isempty(tReport.PrimaryDisease.Mean)
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.PrimaryDisease.Mean);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end                         
@@ -1231,9 +1245,9 @@ function generateContourReportCallback(~, ~)
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end 
 
-                    case 'local disease'
-                        if ~isempty(tReport.LocalDisease.Max)
-                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.LocalDisease.Max);
+                    case 'primary disease'
+                        if ~isempty(tReport.PrimaryDisease.Max)
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.PrimaryDisease.Max);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end 
@@ -1322,9 +1336,9 @@ function generateContourReportCallback(~, ~)
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end 
 
-                    case 'local disease'
-                        if ~isempty(tReport.LocalDisease.Volume)
-                            sReport = sprintf('%s\n\n%-.3f', sReport, tReport.LocalDisease.Volume);
+                    case 'primary disease'
+                        if ~isempty(tReport.PrimaryDisease.Volume)
+                            sReport = sprintf('%s\n\n%-.3f', sReport, tReport.PrimaryDisease.Volume);
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end 
@@ -1415,7 +1429,7 @@ function generateContourReportCallback(~, ~)
         dParotidCount      = 0;
         dBloodPoolCount    = 0;
         dLymphNodesCount   = 0;
-        dLocalDiseaseCount = 0;
+        dPrimaryDiseaseCount = 0;
        
         dNbUnspecifiedRois  = 0;
         dNbBoneRois         = 0;
@@ -1426,7 +1440,7 @@ function generateContourReportCallback(~, ~)
         dNbParotidRois      = 0;
         dNbBloodPoolRois    = 0;
         dNbLymphNodesRois   = 0;
-        dNbLocalDiseaseRois = 0;
+        dNbPrimaryDiseaseRois = 0;
 
         for vv=1:numel(atVoiInput)
             
@@ -1466,9 +1480,9 @@ function generateContourReportCallback(~, ~)
                     dLymphNodesCount  = dLymphNodesCount+1;                    
                     dNbLymphNodesRois = dNbLymphNodesRois+dNbRois;
 
-                case 'local disease'
-                    dLocalDiseaseCount  = dLocalDiseaseCount+1;                    
-                    dNbLocalDiseaseRois = dNbLocalDiseaseRois+dNbRois;   
+                case 'primary disease'
+                    dPrimaryDiseaseCount  = dPrimaryDiseaseCount+1;                    
+                    dNbPrimaryDiseaseRois = dNbPrimaryDiseaseRois+dNbRois;   
 
                 otherwise
                     dUnknowCount  = dUnknowCount+1;
@@ -1526,16 +1540,16 @@ function generateContourReportCallback(~, ~)
             tReport.LymphNodes.Count = dLymphNodesCount;
         end    
 
-        if dLocalDiseaseCount == 0
-            tReport.LocalDisease.Count = [];
+        if dPrimaryDiseaseCount == 0
+            tReport.PrimaryDisease.Count = [];
         else
-            tReport.LocalDisease.Count = dLocalDiseaseCount;
+            tReport.PrimaryDisease.Count = dPrimaryDiseaseCount;
         end    
 
-        if dUnspecifiedCount+dBoneCount+dSoftTissueCount+dLungCount+dLiverCount+dParotidCount+dBloodPoolCount+dLymphNodesCount+dLocalDiseaseCount+dUnknowCount == 0
+        if dUnspecifiedCount+dBoneCount+dSoftTissueCount+dLungCount+dLiverCount+dParotidCount+dBloodPoolCount+dLymphNodesCount+dPrimaryDiseaseCount+dUnknowCount == 0
             tReport.All.Count = [];
         else
-            tReport.All.Count = dUnspecifiedCount+dBoneCount+dSoftTissueCount+dLungCount+dLiverCount+dParotidCount+dBloodPoolCount+dLymphNodesCount+dLocalDiseaseCount+dUnknowCount;
+            tReport.All.Count = dUnspecifiedCount+dBoneCount+dSoftTissueCount+dLungCount+dLiverCount+dParotidCount+dBloodPoolCount+dLymphNodesCount+dPrimaryDiseaseCount+dUnknowCount;
         end
         
         % Clasify ROIs by lession type      
@@ -1548,8 +1562,8 @@ function generateContourReportCallback(~, ~)
         tReport.Parotid.RoisTag      = cell(1, dNbParotidRois);
         tReport.BloodPool.RoisTag    = cell(1, dNbBloodPoolRois); 
         tReport.LymphNodes.RoisTag   = cell(1, dNbLymphNodesRois); 
-        tReport.LocalDisease.RoisTag = cell(1, dNbLocalDiseaseRois); 
-        tReport.All.RoisTag          = cell(1, dUnspecifiedCount+dBoneCount+dSoftTissueCount+dLungCount+dLiverCount+dParotidCount+dBloodPoolCount+dLymphNodesCount+dLocalDiseaseCount+dUnknowCount);        
+        tReport.PrimaryDisease.RoisTag = cell(1, dNbPrimaryDiseaseRois); 
+        tReport.All.RoisTag          = cell(1, dUnspecifiedCount+dBoneCount+dSoftTissueCount+dLungCount+dLiverCount+dParotidCount+dBloodPoolCount+dLymphNodesCount+dPrimaryDiseaseCount+dUnknowCount);        
         
         dUnspecifiedRoisOffset  = 1;
         dBoneRoisOffset         = 1;
@@ -1559,7 +1573,7 @@ function generateContourReportCallback(~, ~)
         dParotidRoisOffset      = 1;
         dBloodPoolRoisOffset    = 1;        
         dLymphNodesRoisOffset   = 1;        
-        dLocalDiseaseRoisOffset = 1;        
+        dPrimaryDiseaseRoisOffset = 1;        
         dAllRoisOffset          = 1;
         
         for vv=1:numel(atVoiInput)
@@ -1639,13 +1653,13 @@ function generateContourReportCallback(~, ~)
                     
                     dLymphNodesRoisOffset = dLymphNodesRoisOffset+dNbRois;  
 
-                case 'local disease'
-                    dFrom = dLocalDiseaseRoisOffset;
-                    dTo   = dLocalDiseaseRoisOffset+dNbRois-1;
+                case 'primary disease'
+                    dFrom = dPrimaryDiseaseRoisOffset;
+                    dTo   = dPrimaryDiseaseRoisOffset+dNbRois-1;
                     
-                    tReport.LocalDisease.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
+                    tReport.PrimaryDisease.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
                     
-                    dLocalDiseaseRoisOffset = dLocalDiseaseRoisOffset+dNbRois;                      
+                    dPrimaryDiseaseRoisOffset = dPrimaryDiseaseRoisOffset+dNbRois;                      
             end
         end    
         
@@ -2436,20 +2450,20 @@ function generateContourReportCallback(~, ~)
             tReport.LymphNodes.Max    = [];            
         end
 
-        % Compute LocalDisease lesion
+        % Compute PrimaryDisease lesion
         
-        progressBar( 9/10, 'Computing blood local disease, please wait' );
+        progressBar( 9/10, 'Computing blood primary disease, please wait' );
        
-        if numel(tReport.LocalDisease.RoisTag) ~= 0  
+        if numel(tReport.PrimaryDisease.RoisTag) ~= 0  
         
-            voiMask = cell(1, numel(tReport.LocalDisease.RoisTag));
-            voiData = cell(1, numel(tReport.LocalDisease.RoisTag));
+            voiMask = cell(1, numel(tReport.PrimaryDisease.RoisTag));
+            voiData = cell(1, numel(tReport.PrimaryDisease.RoisTag));
             
             dNbCells = 0;
             
-            for uu=1:numel(tReport.LocalDisease.RoisTag)
+            for uu=1:numel(tReport.PrimaryDisease.RoisTag)
 
-                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.LocalDisease.RoisTag{uu}]} );                
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.PrimaryDisease.RoisTag{uu}]} );                
                 
                 tRoi = atRoiInput{find(aTagOffset, 1)};
                 
@@ -2506,32 +2520,32 @@ function generateContourReportCallback(~, ~)
                 voiData = voiData(voiData>cropValue('get'));                            
             end
             
-            tReport.LocalDisease.Cells  = dNbCells;
-            tReport.LocalDisease.Volume = dNbCells*dVoxVolume;
-            tReport.LocalDisease.voiData = voiData;
+            tReport.PrimaryDisease.Cells  = dNbCells;
+            tReport.PrimaryDisease.Volume = dNbCells*dVoxVolume;
+            tReport.PrimaryDisease.voiData = voiData;
             
             if strcmpi(sUnitDisplay, 'SUV')
                 
                 if bSUVUnit == true
-                    tReport.LocalDisease.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-                    tReport.LocalDisease.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;             
-                    tReport.LocalDisease.voiData = voiData *tQuantification.tSUV.dScale;
+                    tReport.PrimaryDisease.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.PrimaryDisease.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;             
+                    tReport.PrimaryDisease.voiData = voiData *tQuantification.tSUV.dScale;
                 else
-                    tReport.LocalDisease.Mean = mean(voiData, 'all');
-                    tReport.LocalDisease.Max  = max (voiData, [], 'all');
+                    tReport.PrimaryDisease.Mean = mean(voiData, 'all');
+                    tReport.PrimaryDisease.Max  = max (voiData, [], 'all');
                 end
             else
-                tReport.LocalDisease.Mean = mean(voiData, 'all');             
-                tReport.LocalDisease.Max  = max (voiData, [], 'all');             
+                tReport.PrimaryDisease.Mean = mean(voiData, 'all');             
+                tReport.PrimaryDisease.Max  = max (voiData, [], 'all');             
             end
          
             clear voiMask;
             clear voiData;     
         else
-            tReport.LocalDisease.Cells  = [];
-            tReport.LocalDisease.Volume = [];
-            tReport.LocalDisease.Mean   = [];            
-            tReport.LocalDisease.Max    = [];            
+            tReport.PrimaryDisease.Cells  = [];
+            tReport.PrimaryDisease.Volume = [];
+            tReport.PrimaryDisease.Mean   = [];            
+            tReport.PrimaryDisease.Max    = [];            
         end
 
         % Compute All lesion
@@ -3143,8 +3157,8 @@ function generateContourReportCallback(~, ~)
                             voiData = gtReport.LymphNodes.voiData;
                             break;  
                                                          
-                        case 'local disease'
-                            voiData = gtReport.LocalDisease.voiData;
+                        case 'primary disease'
+                            voiData = gtReport.PrimaryDisease.voiData;
                             break;                              
                     end
 

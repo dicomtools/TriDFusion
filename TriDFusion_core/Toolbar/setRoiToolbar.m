@@ -1831,6 +1831,35 @@ function setRoiToolbar(sVisible)
         set(t11, 'State', 'off');
         set(t12, 'State', 'off');
 
+        if strcmpi(get(hObject, 'State'), 'on')
+
+            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
+            if ~isempty(atRoiInput) && isVsplash('get') == false
+            
+                numRoiInputs = numel(atRoiInput);
+                
+                for bb = 1:numRoiInputs
+
+                    currentRoi = atRoiInput{bb};
+                    
+                    if isvalid(currentRoi.Object)
+
+                        currentDistances = currentRoi.MaxDistances;
+        
+                         if ~isempty(currentDistances) 
+                            currentDistances.MaxXY.Line.Visible = 'off';
+                            currentDistances.MaxCY.Line.Visible = 'off';
+                            currentDistances.MaxXY.Text.Visible = 'off';
+                            currentDistances.MaxCY.Text.Visible = 'off';                        
+                         end       
+                    end
+                end
+
+                set(tFarthest, 'State', 'off');
+            end 
+        end
+
         if is2DBrush('get') == false
 
             is2DBrush('set', true);
@@ -1845,6 +1874,7 @@ function setRoiToolbar(sVisible)
             set(t8 , 'Enable', 'off');
             set(t11, 'Enable', 'off');     
             set(t12, 'Enable', 'off');     
+            set(tFarthest, 'Enable', 'off');
 
             atRoiInput = roiTemplate('get', dSeriesOffset);
 
@@ -1917,6 +1947,7 @@ function setRoiToolbar(sVisible)
             set(t8 , 'Enable', 'on');
             set(t11, 'Enable', 'on');         
             set(t12, 'Enable', 'on');         
+            set(tFarthest, 'Enable', 'on');
         end
 
         catch

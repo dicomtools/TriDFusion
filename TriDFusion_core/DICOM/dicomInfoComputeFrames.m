@@ -32,7 +32,7 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
    
 %    if strcmpi(atDicomInfo{1}.Modality, 'MR') || ...
 %       strcmpi(atDicomInfo{1}.Modality, 'PT') && ...
-     if strcmpi(atDicomInfo{1}.SeriesType{1}, 'STATIC') 
+     if contains(lower(atDicomInfo{1}.SeriesType), 'static') 
          return;
      end
           
@@ -69,7 +69,7 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
             else
                 dSliceRatio = dNextSliceLocation/dComputedNextSliceLocation;
             end
-            
+         
             if dSliceRatio > 0.9 % Within 10% of the computed next slice
                 dInconsistentSpacing = false;
             else

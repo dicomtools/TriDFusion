@@ -104,7 +104,14 @@ function setContours(tContours, bInitDisplay)
 
                     %            xfm = getAffineXfm(atInput(bb).atDicomInfo);
 
-                                sliceThikness = computeSliceSpacing(atInput(bb).atDicomInfo);       
+                                sliceThikness = computeSliceSpacing(atInput(bb).atDicomInfo);  
+                                if sliceThikness == 0 % We can't determine the z size of a pixel, we will presume the pixel is square.
+                                    if atInput(bb).atDicomInfo{1}.PixelSpacing(1) ~= 0
+                                        sliceThikness = atInput(bb).atDicomInfo{1}.PixelSpacing(1);
+                                    else
+                                        sliceThikness =1;
+                                    end
+                                end
                                 [xfm,~] = TransformMatrix(atInput(bb).atDicomInfo{1}, sliceThikness);
 
 
