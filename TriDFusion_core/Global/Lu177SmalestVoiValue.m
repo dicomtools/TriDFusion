@@ -1,6 +1,6 @@
-function dPercentValue = Ga68DOTATATESegmentationBoundaryPercentValue(sAction, dValue)
-%function dPercentValue = Ga68DOTATATESegmentationBoundaryPercentValue(sAction, dValue)
-%Get/Set pre-segmentation Ga68DOTATATE boundary percent value.
+function dSmallestSize = Lu177SmalestVoiValue(sAction, dValue)
+%function dSmallestSize = Lu177SmalestVoiValue(sAction, dValue)
+%Get/Set Lu177 smallest voi value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -27,11 +27,11 @@ function dPercentValue = Ga68DOTATATESegmentationBoundaryPercentValue(sAction, d
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    persistent pdPercentValue; 
+    persistent pdSmallestSize; 
 
     if strcmpi('set', sAction)
-        pdPercentValue = dValue;            
+        pdSmallestSize = dValue;            
     end
     
-    dPercentValue = pdPercentValue;
+    dSmallestSize = pdSmallestSize;
 end

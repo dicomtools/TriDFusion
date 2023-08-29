@@ -183,6 +183,12 @@ function mainWindowMenu()
     uimenu(mAnalCancer, 'Label','Export Report', 'Callback', @setAnalCancerReportCallback);
     uimenu(mAnalCancer, 'Label','PET/CT Fusion', 'Callback', @setPETCTAnalCancerFusionCallback, 'Separator','on');
     
+    % Lu177
+
+    mLu177 = uimenu(mWorkflows,'Label','PSMA - Lu177');  
+    uimenu(mLu177, 'Label','PSMA Lu177 Tumor Segmentation (Threshold)', 'Callback', @setSegmentationLu177Callback);
+    uimenu(mLu177, 'Label','PET/CT Fusion'                            , 'Callback', @setPETCTLu177FusionCallback, 'Separator','on');
+    
     % FDG
 
     mFDG = uimenu(mWorkflows,'Label','FDG - fluorodeoxyglucose');  
@@ -198,9 +204,9 @@ function mainWindowMenu()
 
     % PSMA
 
-    mPSMA = uimenu(mWorkflows,'Label','PSMA - FDCFPyL');  
-    uimenu(mPSMA, 'Label','PSMA Tumor Segmentation (Threshold)', 'Callback', @setSegmentationPSMACallback);
-    uimenu(mPSMA, 'Label','PET/CT Fusion'                      , 'Callback', @setPETCTPSMAFusionCallback, 'Separator','on');
+    mPSMA = uimenu(mWorkflows,'Label','PSMA - 18F-FDCFPyL');  
+    uimenu(mPSMA, 'Label','PSMA 18F-FDCFPyL Tumor Segmentation (Threshold)', 'Callback', @setSegmentationPSMACallback);
+    uimenu(mPSMA, 'Label','PET/CT Fusion'                                  , 'Callback', @setPETCTPSMAFusionCallback, 'Separator','on');
 
     % Ga68 DOTATATE
 

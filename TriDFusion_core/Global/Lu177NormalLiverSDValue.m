@@ -1,6 +1,6 @@
-function dPercentValue = FDHTSegmentationBoundaryPercentValue(sAction, dValue)
-%function dPercentValue = FDHTSegmentationBoundaryPercentValue(sAction, dValue)
-%Get/Set pre-segmentation FDHT boundary percent value.
+function dSDValue = Lu177NormalLiverSDValue(sAction, dValue)
+%function dSDValue = Lu177NormalLiverSDValue(sAction, dValue)
+%Get/Set Lu177 Normal LiverTreshold MultiplierValue.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -27,11 +27,11 @@ function dPercentValue = FDHTSegmentationBoundaryPercentValue(sAction, dValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    persistent pdPercentValue; 
+    persistent pdSDValue; 
 
     if strcmpi('set', sAction)
-        pdPercentValue = dValue;            
+        pdSDValue = dValue;            
     end
     
-    dPercentValue = pdPercentValue;
+    dSDValue = pdSDValue;
 end

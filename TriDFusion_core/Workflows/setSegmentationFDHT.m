@@ -1,5 +1,5 @@
-function setSegmentationFDHT(dBoneMaskThreshold, dBoundaryPercent, dSmalestVoiValue, dPixelEdge)
-%function setSegmentationFDHT(dBoneMaskThreshold, dBoundaryPercent, dSmalestVoiValue, dPixelEdge)
+function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
+%function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
 %Run FDHT Segmentation base on normal liver treshold.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -193,16 +193,27 @@ function setSegmentationFDHT(dBoneMaskThreshold, dBoundaryPercent, dSmalestVoiVa
 
     setQuantification(dPTSerieOffset);    
 
+    tQuant = quantificationTemplate('get');
+
+    if isfield(tQuant, 'tSUV')
+        dSUVScale = tQuant.tSUV.dScale;
+    else
+        dSUVScale = 1;
+    end 
 
     progressBar(7/10, 'Computing mask, please wait.');
 
-   aBWMask = aResampledPTImage;
+    aBWMask = aResampledPTImage;
 
     dMin = min(aBWMask, [], 'all');
 
-    dTreshold = max(aResampledPTImage, [], 'all')*dBoundaryPercent;
+%     dTreshold = max(aResampledPTImage, [], 'all')*dBoundaryPercent;
+    dTreshold = (4.44/gdNormalLiverMean)*(gdNormalLiverMean+gdNormalLiverSTD);
+    if dTreshold < 3
+        dTreshold = 3;
+    end
 
-    aBWMask(aBWMask<dTreshold)=dMin;
+    aBWMask(aBWMask*dSUVScale<dTreshold)=dMin;
 
     aBWMask = imbinarize(aBWMask);
 
@@ -233,8 +244,24 @@ function setSegmentationFDHT(dBoneMaskThreshold, dBoundaryPercent, dSmalestVoiVa
     clear BWCT;
     clear imMask;
 
-
     setVoiRoiSegPopup();
+
+    % Set TCS Axes intensity
+
+    dMin = 0/dSUVScale;
+    dMax = 7/dSUVScale;
+
+    windowLevel('set', 'max', dMax);
+    windowLevel('set', 'min' ,dMin);
+
+    setWindowMinMax(dMax, dMin);                    
+
+    dMin = 0/dSUVScale;
+    dMax = 10/dSUVScale;
+
+    % Set MIP Axe intensity
+
+    set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);   
 
     % Deactivate MIP Fusion
 
@@ -252,6 +279,13 @@ function setSegmentationFDHT(dBoneMaskThreshold, dBoundaryPercent, dSmalestVoiVa
 
         setFusionCallback();
     end
+
+    [dMax, dMin] = computeWindowLevel(500, 50);
+
+    fusionWindowLevel('set', 'max', dMax);
+    fusionWindowLevel('set', 'min' ,dMin);
+
+    setFusionWindowMinMax(dMax, dMin);  
 
     % Triangulate og 1st VOI
 

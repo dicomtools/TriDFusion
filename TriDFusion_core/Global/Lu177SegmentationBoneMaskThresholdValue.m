@@ -1,6 +1,6 @@
-function dPercentValue = PSMASegmentationBoundaryPercentValue(sAction, dValue)
-%function dPercentValue = PSMASegmentationBoundaryPercentValue(sAction, dValue)
-%Get/Set pre-segmentation PSMA boundary percent value.
+function dHUValue = Lu177SegmentationBoneMaskThresholdValue(sAction, dValue)
+%function dHUValue = Lu177SegmentationBoneMaskThresholdValue(sAction, dValue)
+%Get/Set segmentation Lu177 Bone Mask value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -27,11 +27,11 @@ function dPercentValue = PSMASegmentationBoundaryPercentValue(sAction, dValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    persistent pdPercentValue; 
+    persistent pdHUValue; 
 
     if strcmpi('set', sAction)
-        pdPercentValue = dValue;            
+        pdHUValue = dValue;            
     end
     
-    dPercentValue = pdPercentValue;
+    dHUValue = pdHUValue;
 end

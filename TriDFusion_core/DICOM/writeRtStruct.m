@@ -33,11 +33,6 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
     if dOffset > numel(atInput)
         return;
     end
-
-    try
-        
-    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-    drawnow;
     
     dicomdict('factory');    
     
@@ -82,6 +77,11 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 %    end
     
 %    bUseRoiTemplate = false;
+    try
+        
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    drawnow;
+    
     if modifiedImagesContourMatrix('get') == false
         if numel(aInputBuffer) ~= numel(aDicomBuffer)  
             

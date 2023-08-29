@@ -44,10 +44,10 @@ function writeSeriestoNIICallback(~, ~)
         return;
     end
     
-    sOutDir = outputDir('get');
-    if isempty(sOutDir)
+%     sOutDir = outputDir('get');
+%     if isempty(sOutDir)
                 
-        sCurrentDir  = viewerRootPath('get');
+         sCurrentDir  = viewerRootPath('get');
 
          sMatFile = [sCurrentDir '/' 'exportNIILastUsedDir.mat'];
          % load last data directory
@@ -82,7 +82,7 @@ function writeSeriestoNIICallback(~, ~)
         if ~(exist(char(sOutDir), 'dir'))
             mkdir(char(sOutDir));
         end
-    end
+%     end
     
     atMetaData  = dicomMetaData('get', [], dSeriesOffset);
 

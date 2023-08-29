@@ -45,10 +45,16 @@ function [atRoi, transM] = resampleROIs(dcmImage, atDcmMetaData, refImage, atRef
         end
         
         if ~isempty(atRoi{jj}.MaxDistances) 
-             atRoi{jj}.MaxDistances.MaxXY.Line.Visible = 'off';
-             atRoi{jj}.MaxDistances.MaxCY.Line.Visible = 'off';
-             atRoi{jj}.MaxDistances.MaxXY.Text.Visible = 'off';
-             atRoi{jj}.MaxDistances.MaxCY.Text.Visible = 'off';                        
+            
+            if isvalid(atRoi{jj}.MaxDistances.MaxXY.Line)
+                atRoi{jj}.MaxDistances.MaxXY.Line.Visible = 'off';
+                atRoi{jj}.MaxDistances.MaxCY.Line.Visible = 'off';
+            end
+
+            if isvalid(atRoi{jj}.MaxDistances.MaxXY.Text)
+                atRoi{jj}.MaxDistances.MaxXY.Text.Visible = 'off';
+                atRoi{jj}.MaxDistances.MaxCY.Text.Visible = 'off';                        
+            end
         end 
 
         switch lower( atRoi{jj}.Type)

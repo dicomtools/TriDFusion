@@ -2324,7 +2324,7 @@ end
         isoObj = isoObject('get');
         if ~isempty(isoObj)
 
-            try
+%             try
 
             set(fiMainWindowPtr('get'), 'Pointer', 'watch');
             drawnow;
@@ -3064,9 +3064,9 @@ end
 
             end
 
-            catch
-                progressBar(1, 'Error: createIsoMaskCallback()');
-            end
+%             catch
+%                 progressBar(1, 'Error: createIsoMaskCallback()');
+%             end
 
             clear BW;
             clear BWCT;

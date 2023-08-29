@@ -29,10 +29,10 @@ function writeRoisToNrrdMaskCallback(~, ~)
 
     dOffset = get(uiSeriesPtr('get'), 'Value');
     
-    bSubDir = false;
+%     bSubDir = false;
     
-    sOutDir = outputDir('get');
-    if isempty(sOutDir)
+%     sOutDir = outputDir('get');
+%     if isempty(sOutDir)
         
         bSubDir = true;
 
@@ -72,11 +72,11 @@ function writeRoisToNrrdMaskCallback(~, ~)
     %        javaFrame = get(h, 'JavaFrame');
     %        javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
         end
-    end    
+%     end    
     
     tInput = inputTemplate('get');    
     aInputBuffer = inputBuffer('get');
     
-    writeRoisToNrrdMask(sOutDir, bSubDir, aInputBuffer{dOffset}, tInput(dOffset).atDicomInfo, dicomBuffer('get'), dicomMetaData('get'), dOffset, true);
+    writeRoisToNrrdMask(sOutDir, bSubDir, aInputBuffer{dOffset}, tInput(dOffset).atDicomInfo, dicomBuffer('get',[],dOffset), dicomMetaData('get',[],dOffset), dOffset, true);
 
 end

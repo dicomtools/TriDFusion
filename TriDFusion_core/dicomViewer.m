@@ -288,15 +288,23 @@ function resize = dicomViewer()
     % FDHT segmentation
 
     FDHTSegmentationBoneMaskThresholdValue('set', 100); % HU
-    FDHTSegmentationBoundaryPercentValue('set', 10);
+%     FDHTSegmentationBoundaryPercentValue('set', 10);
     FDHTNormalLiverSDValue('set', 0.4);
     FDHTNormalLiverMeanValue('set', 4);
     FDHTSmalestVoiValue('set', 0.3);
 
+    % Lu177 segmentation
+
+    Lu177SegmentationBoneMaskThresholdValue('set', 150); % HU
+%     Lu177SegmentationBoundaryPercentValue('set', 20);
+    Lu177NormalLiverSDValue('set', 0.4);
+    Lu177NormalLiverMeanValue('set', 4);
+    Lu177SmalestVoiValue('set', 0.3);
+
     % PSMA segmentation
 
     PSMASegmentationBoneMaskThresholdValue('set', 150); % HU
-    PSMASegmentationBoundaryPercentValue('set', 10);
+%     PSMASegmentationBoundaryPercentValue('set', 10);
     PSMANormalLiverSDValue('set', 0.4);
     PSMANormalLiverMeanValue('set', 4);
     PSMASmalestVoiValue('set', 0.3);
@@ -304,7 +312,7 @@ function resize = dicomViewer()
     % Ga68DOTATATE segmentation
 
     Ga68DOTATATESegmentationBoneMaskThresholdValue('set', 200); % HU
-    Ga68DOTATATESegmentationBoundaryPercentValue('set', 10);
+%     Ga68DOTATATESegmentationBoundaryPercentValue('set', 10);
     Ga68DOTATATENormalLiverSDValue('set', 0.4);
     Ga68DOTATATENormalLiverMeanValue('set', 4);
     Ga68DOTATATESmalestVoiValue('set', 0.3);

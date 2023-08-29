@@ -44,9 +44,9 @@ function writeSeriestoNrrdCallback(~, ~)
         return;
     end
     
-    sOutDir = outputDir('get');
-    
-    if isempty(sOutDir)
+%     sOutDir = outputDir('get');
+%     
+%     if isempty(sOutDir)
                 
         sCurrentDir  = viewerRootPath('get');
 
@@ -83,7 +83,7 @@ function writeSeriestoNrrdCallback(~, ~)
         if ~(exist(char(sOutDir), 'dir'))
             mkdir(char(sOutDir));
         end
-    end
+%     end
     
 %     [sFilePath, ~, ~] = fileparts(char(atInputTemplate(dSeriesOffset).asFilesList{1}));
 % 

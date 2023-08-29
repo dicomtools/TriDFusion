@@ -28,9 +28,10 @@ function imComputed = computeMIP(im)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
  
     if canUseGPU()
-        aImage = gpuArray(uint16(im));
+%         aImage = gpuArray(uint16(im));
+        aImage = gpuArray(single(im));
     else
-        aImage = uint16(im);
+        aImage = single(im);
     end
 
     aSize = size(im);
@@ -47,13 +48,15 @@ function imComputed = computeMIP(im)
         
 
 %        aRotatedImage = imrotate3(im, rr, [0 0 1], 'linear','crop', 'FillValues', min(im, [], 'all'));
-        aRotatedImage=gather(imrotate(aImage, rr, 'bilinear','crop'));
+        aRotatedImage = imrotate(aImage, rr, 'bilinear','crop');
        
         imComputed(cc,:,:) = squeeze(max(aRotatedImage, [], 1));
         
         cc = cc+1;
         
     end    
+
+%     imComputed = gather(imComputed);
 
     clear aImage;
     clear aRotatedImage;
