@@ -168,11 +168,58 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
 
+    if 1
     progressBar(5/10, 'Resampling series, please wait.');
             
-    [aResampledNMImageTemp, ~] = resampleImage(aNMImageTemp, atNMMetaData, aCTImage, atCTMetaData, 'Linear', true, true);   
-    [aResampledNMImage, atResampledNMMetaData] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', true, true);   
-   
+    [aResampledNMImageTemp, ~] = resampleImage(aNMImageTemp, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, true);   
+    [aResampledNMImage, atResampledNMMetaData] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, true);   
+
+%      [aCTImage, ~] = resampleImage(aCTImage, atCTMetaData, aResampledNMImage, atResampledNMMetaData, 'Linear', true, false);
+
+    % Initialize a new array of zeros with the same size as aResampledNMImage
+%     [aCTImage, ~] = resample3DImage(aCTImage, atCTMetaData, aResampledNMImage, atResampledNMMetaData, 'Linear');
+
+    % Resize CT to aResampledNMImage field of view
+    if 0
+
+        if size(aCTImage, 1) > size(aResampledNMImage, 1)    
+            aCTImage = aCTImage(1:size(aResampledNMImage, 1),1:end,1:end);
+        end
+    
+        if size(aCTImage, 2) > size(aResampledNMImage, 2)    
+            aCTImage = aCTImage(1:end,1:size(aResampledNMImage, 2),1:end);
+        end
+    
+        if size(aCTImage, 3) > size(aResampledNMImage, 3)    
+            aCTImage = aCTImage(1:end,1:end,1:size(aResampledNMImage, 3));
+        end
+    
+        aResizedCT = zeros(size(aResampledNMImage)) + min(aCTImage, [], 'all');
+    
+        % Determine the starting indices for placing aCTImage in the center of output_image
+
+        start_row   = round((size(aResizedCT, 1) - size(aCTImage, 1)) / 2) + 1;
+        start_col   = round((size(aResizedCT, 2) - size(aCTImage, 2)) / 2) + 1;
+        start_depth = round((size(aResizedCT, 3) - size(aCTImage, 3)) / 2) + 1;
+        
+        % Place aCTImage in the specified region of output_image
+        aResizedCT(start_row:start_row+size(aCTImage,1)-1, ...
+                     start_col:start_col+size(aCTImage,2)-1, ...
+                     start_depth:start_depth+size(aCTImage,3)-1) = aCTImage;
+        
+        aCTImage = aResizedCT;
+        clear aResizedCT;
+    else
+        tRegistration = registrationTemplate('get');
+        optimizer = tRegistration.Optimizer;
+        metric = tRegistration.Metric;
+
+        [aCTImage, ~, ~, ~, ~] = ...
+            registerImage(aCTImage, atCTMetaData, aResampledNMImageTemp, atResampledNMMetaData, aLogicalMask, 'translation', 'multimodal', optimizer, metric, true, false);
+
+%         aCTImage = imresize3(aCTImage, size(aResampledNMImageTemp));      
+    end
+
     dicomMetaData('set', atResampledNMMetaData, dNMSerieOffset);
     dicomBuffer  ('set', aResampledNMImage, dNMSerieOffset);
 
@@ -187,7 +234,7 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
     refMip = mipBuffer('get', [], dCTSerieOffset);                        
     aMip   = mipBuffer('get', [], dNMSerieOffset);
   
-    aMip = resampleMip(aMip, atNMMetaData, refMip, atCTMetaData, 'Linear', true);
+    aMip = resampleMip(aMip, atNMMetaData, refMip, atCTMetaData, 'Linear', false);
                    
     mipBuffer('set', aMip, dNMSerieOffset);
 
@@ -200,6 +247,12 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
     else
         dSUVScale = 1;
     end
+    else
+        [aCTImage, ~] = resampleImage(aCTImage, atCTMetaData, aNMImage, atNMMetaData, 'Linear', true, true);   
+
+        aResampledNMImage = aNMImageTemp;
+        clear aNMImageTemp;
+    end
 
     progressBar(7/10, 'Computing mask, please wait.');
 
@@ -207,8 +260,9 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
 
     dMin = min(aBWMask, [], 'all');
 
-%     dTreshold = max(aResampledNMImage, [], 'all')*dBoundaryPercent;
-    dTreshold = (4.44/gdNormalLiverMean)*(gdNormalLiverMean+gdNormalLiverSTD);
+%    dTreshold = (4.44/gdNormalLiverMean)*(gdNormalLiverMean+gdNormalLiverSTD);
+    dTreshold = (1.5*gdNormalLiverMean) + (2*gdNormalLiverSTD);
+
     if dTreshold < 3
         dTreshold = 3;
     end
@@ -234,7 +288,8 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
 
     setSeriesCallback();            
 
-    sFormula = '(4.44/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map';
+%     sFormula = '(4.44/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map';
+    sFormula = '(1.5 x Normal Liver SUVmean)+(2 x Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map';
     maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, 0, false, 0, true, sFormula, BWCT, dSmalestVoiValue,  gdNormalLiverMean, gdNormalLiverSTD);                
 
     clear aResampledNMImage;
@@ -257,7 +312,7 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
     setWindowMinMax(dMax, dMin);                    
 
     dMin = 0/dSUVScale;
-    dMax = 10/dSUVScale;
+    dMax = 7/dSUVScale;
 
     % Set MIP Axe intensity
 

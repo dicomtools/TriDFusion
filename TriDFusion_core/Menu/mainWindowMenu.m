@@ -27,7 +27,7 @@ function mainWindowMenu()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    Ga68_DOTATATE = false;
+    Ga68_DOTATATE = true;
     SPECT_RECON = false;
 
     mFile = uimenu(fiMainWindowPtr('get'),'Label','File');
@@ -182,7 +182,7 @@ function mainWindowMenu()
     mAnalCancer = uimenu(mWorkflows,'Label','Anal Cancer');  
     uimenu(mAnalCancer, 'Label','Export Report', 'Callback', @setAnalCancerReportCallback);
     uimenu(mAnalCancer, 'Label','PET/CT Fusion', 'Callback', @setPETCTAnalCancerFusionCallback, 'Separator','on');
-    
+
     % Lu177
 
     mLu177 = uimenu(mWorkflows,'Label','PSMA - Lu177');  
@@ -218,7 +218,8 @@ function mainWindowMenu()
         uimenu(mGa68DOTATATE, 'Label','Ga68 DOTATATE Tumor Segmentation (Full AI)'       , 'Callback', @setMachineLearningFullAIGa68DOTATATECallback);
         uimenu(mGa68DOTATATE, 'Label','PET/CT Fusion'                                    , 'Callback', @setPETCTGa68DOTATATEFusionCallback, 'Separator','on');
     else
-        uimenu(mGa68DOTATATE, 'Label','PET/CT Fusion'                   , 'Callback', @setPETCTGa68DOTATATEFusionCallback);
+       uimenu(mGa68DOTATATE, 'Label','Ga68 DOTATATE Tumor Segmentation (Threshold)'      , 'Callback', @setSegmentationGa68DOTATATECallback);
+       uimenu(mGa68DOTATATE, 'Label','PET/CT Fusion'                                     , 'Callback', @setPETCTGa68DOTATATEFusionCallback, 'Separator','on');
     end
 
     mModules = uimenu(fiMainWindowPtr('get'),'Label','Modules');

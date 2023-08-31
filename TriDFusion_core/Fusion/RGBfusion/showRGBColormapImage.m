@@ -92,7 +92,7 @@ function showRGBColormapImage(bShowImage)
             [imRGBColors, ~, alphaRGBColors] = imread(sImageFile);
         end    
 
-        pRGBColors = imagesc(imRGBColors, 'Parent', axeRGBImage);
+        pRGBColors = imshow(imRGBColors, 'Parent', axeRGBImage);
         set(pRGBColors, 'AlphaData', alphaRGBColors);
               
         daspect(axeRGBImage, [1 1 1]); 

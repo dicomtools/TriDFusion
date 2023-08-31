@@ -91,8 +91,12 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
     drawnow;
 
     progressBar(1/4, 'Resampling series, please wait.');
-            
-    [aResampledImage, atResampledMetaData] = resampleImage(aSerie1Image, atSerie1MetaData, aSerie2Image, atSerie2MetaData, 'Linear', true, true);   
+    
+    if strcmpi(sModality1, 'nm')
+        [aResampledImage, atResampledMetaData] = resampleImage(aSerie1Image, atSerie1MetaData, aSerie2Image, atSerie2MetaData, 'Linear', false, true);   
+    else
+        [aResampledImage, atResampledMetaData] = resampleImage(aSerie1Image, atSerie1MetaData, aSerie2Image, atSerie2MetaData, 'Linear', true, true);   
+    end
     
     dicomMetaData('set', atResampledMetaData, dSerie1Offset);
     dicomBuffer  ('set', aResampledImage, dSerie1Offset);
@@ -102,8 +106,12 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
             
     refMip = mipBuffer('get', [], dSerie2Offset);                        
     aMip   = mipBuffer('get', [], dSerie1Offset);
-  
-    aMip = resampleMip(aMip, atSerie1MetaData, refMip, atSerie2MetaData, 'Linear', true);
+
+    if strcmpi(sModality1, 'nm')
+        aMip = resampleMip(aMip, atSerie1MetaData, refMip, atSerie2MetaData, 'Linear', false);
+    else
+        aMip = resampleMip(aMip, atSerie1MetaData, refMip, atSerie2MetaData, 'Linear', true);
+    end
                    
     mipBuffer('set', aMip, dSerie1Offset);
 

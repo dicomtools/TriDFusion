@@ -194,24 +194,39 @@ function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = regi
                 atImToRegisterMetaData{jj}.PatientPosition = atReferenceMetaData{jj}.PatientPosition;  
                 atImToRegisterMetaData{jj}.InstanceNumber  = atReferenceMetaData{jj}.InstanceNumber;               
                 atImToRegisterMetaData{jj}.NumberOfSlices  = atReferenceMetaData{jj}.NumberOfSlices;
+
+                atImToRegisterMetaData{jj}.PixelSpacing(1) = atReferenceMetaData{jj}.PixelSpacing(1);
+                atImToRegisterMetaData{jj}.PixelSpacing(2) = atReferenceMetaData{jj}.PixelSpacing(2);
+                
+                if atImToRegisterMetaData{jj}.SliceThickness ~= 0
+                    atImToRegisterMetaData{jj}.SliceThickness  = atReferenceMetaData{jj}.SliceThickness;
+                end
+                
+                if atReferenceMetaData{jj}.SpacingBetweenSlices == 0
+                    atImToRegisterMetaData{jj}.SpacingBetweenSlices = fixedSliceThickness;        
+                else
+                    atImToRegisterMetaData{jj}.SpacingBetweenSlices = atReferenceMetaData{jj}.SpacingBetweenSlices;        
+                end
+
             else
                 atImToRegisterMetaData{jj}.PatientPosition = atReferenceMetaData{1}.PatientPosition;  
                 atImToRegisterMetaData{jj}.InstanceNumber  = jj;               
-                atImToRegisterMetaData{jj}.NumberOfSlices  = numel(atReferenceMetaData);                
+                atImToRegisterMetaData{jj}.NumberOfSlices  = numel(atReferenceMetaData);    
+
+                atImToRegisterMetaData{jj}.PixelSpacing(1) = atReferenceMetaData{1}.PixelSpacing(1);
+                atImToRegisterMetaData{jj}.PixelSpacing(2) = atReferenceMetaData{1}.PixelSpacing(2);
+                
+                if atImToRegisterMetaData{jj}.SliceThickness ~= 0
+                    atImToRegisterMetaData{jj}.SliceThickness  = atReferenceMetaData{1}.SliceThickness;
+                end
+                
+                if atReferenceMetaData{1}.SpacingBetweenSlices == 0
+                    atImToRegisterMetaData{jj}.SpacingBetweenSlices = fixedSliceThickness;        
+                else
+                    atImToRegisterMetaData{jj}.SpacingBetweenSlices = atReferenceMetaData{1}.SpacingBetweenSlices;        
+                end                
             end
             
-            atImToRegisterMetaData{jj}.PixelSpacing(1) = atReferenceMetaData{jj}.PixelSpacing(1);
-            atImToRegisterMetaData{jj}.PixelSpacing(2) = atReferenceMetaData{jj}.PixelSpacing(2);
-            
-            if atImToRegisterMetaData{jj}.SliceThickness ~= 0
-                atImToRegisterMetaData{jj}.SliceThickness  = atReferenceMetaData{jj}.SliceThickness;
-            end
-            
-            if atReferenceMetaData{jj}.SpacingBetweenSlices == 0
-                atImToRegisterMetaData{jj}.SpacingBetweenSlices = fixedSliceThickness;        
-            else
-                atImToRegisterMetaData{jj}.SpacingBetweenSlices = atReferenceMetaData{jj}.SpacingBetweenSlices;        
-            end
             
             atImToRegisterMetaData{jj}.Rows    = dimsRef(1);
             atImToRegisterMetaData{jj}.Columns = dimsRef(2);
