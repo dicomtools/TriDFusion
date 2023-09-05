@@ -1,5 +1,5 @@
-function tGate = dicomInfoComputeFrames(atDicomInfo)
-%function tGate = dicomInfoComputeFrames(atDicomInfo)
+function actGate = dicomInfoComputeFrames(atDicomInfo)
+%function actGate = dicomInfoComputeFrames(atDicomInfo)
 %Split the 4D dicom images.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,7 +27,7 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    tGate = [];
+    actGate = [];
      
    
 %    if strcmpi(atDicomInfo{1}.Modality, 'MR') || ...
@@ -80,7 +80,20 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
                 
                 dInconsistentSpacing = false;                
             else
-                dInconsistentSpacing = true;
+                dComputedNextSliceLocation = atDicomInfo{jj}.SliceLocation - dSliceSpacing;
+                dNextSliceLocation         = atDicomInfo{jj+1}.SliceLocation;
+
+                if dComputedNextSliceLocation>dNextSliceLocation % For GE result seies
+                    dSliceRatio = dComputedNextSliceLocation/dNextSliceLocation;
+                else
+                    dSliceRatio = dNextSliceLocation/dComputedNextSliceLocation;
+                end
+             
+                if dSliceRatio > 0.9 && dSliceRatio < 1.1 % Within 10% of the computed next slice
+                    dInconsistentSpacing = false;
+                else
+                    dInconsistentSpacing = true;
+                end
             end
 
             if atDicomInfo{jj}.SpacingBetweenSlices ~= 0
@@ -99,9 +112,9 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
                    atDicomInfo{jj}.Rows       ~= atDicomInfo{jj+1}.Rows  || ... % Inconsistent size
                    atDicomInfo{jj}.Columns    ~= atDicomInfo{jj+1}.Columns  
 
-                    tGate{dNbGate}.GateNumber = dNbGate;
-                    tGate{dNbGate}.NbSlices   = dNbSlices;       
-                    tGate{dNbGate}.SeriesInstanceUID = atDicomInfo{jj}.SeriesInstanceUID;       
+                    actGate{dNbGate}.GateNumber = dNbGate;
+                    actGate{dNbGate}.NbSlices   = dNbSlices;       
+                    actGate{dNbGate}.SeriesInstanceUID = atDicomInfo{jj}.SeriesInstanceUID;       
 
                     dNbGate = dNbGate+1;
                     dNbSlices = 0;                
@@ -110,9 +123,9 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
                 if ~strcmp(atDicomInfo{jj}.FrameOfReferenceUID, atDicomInfo{jj+1}.FrameOfReferenceUID) % Different series
 
                     if dInconsistentSpacing == true
-                        tGate{dNbGate}.GateNumber = dNbGate;
-                        tGate{dNbGate}.NbSlices   = dNbSlices;       
-                        tGate{dNbGate}.SeriesInstanceUID = atDicomInfo{jj}.SeriesInstanceUID;       
+                        actGate{dNbGate}.GateNumber = dNbGate;
+                        actGate{dNbGate}.NbSlices   = dNbSlices;       
+                        actGate{dNbGate}.SeriesInstanceUID = atDicomInfo{jj}.SeriesInstanceUID;       
     
                         dNbGate = dNbGate+1;
                         dNbSlices = 0;                
@@ -127,9 +140,9 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
 
         if dNbGate ~= 1 % last frame
             
-            tGate{dNbGate}.GateNumber = dNbGate;
-            tGate{dNbGate}.NbSlices   = dNbSlices;       
-            tGate{dNbGate}.SeriesInstanceUID = atDicomInfo{jj}.SeriesInstanceUID; 
+            actGate{dNbGate}.GateNumber = dNbGate;
+            actGate{dNbGate}.NbSlices   = dNbSlices;       
+            actGate{dNbGate}.SeriesInstanceUID = atDicomInfo{jj}.SeriesInstanceUID; 
         end
 
     end                
