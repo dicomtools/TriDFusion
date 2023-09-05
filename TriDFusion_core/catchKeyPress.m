@@ -399,14 +399,15 @@ end
             set(fiMainWindowPtr('get'), 'Pointer', 'fleur');           
         end
 
+
         if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1      
-             axis(axePtr('get', [], dSeriesOffset),'auto');          
+             resetAxePlotView(axePtr('get', [], dSeriesOffset));          
         else
-            axis(axes1Ptr('get', [], dSeriesOffset),'auto');
-            axis(axes2Ptr('get', [], dSeriesOffset),'auto');
-            axis(axes3Ptr('get', [], dSeriesOffset),'auto');
+            resetAxePlotView(axes1Ptr('get', [], dSeriesOffset));
+            resetAxePlotView(axes2Ptr('get', [], dSeriesOffset));
+            resetAxePlotView(axes3Ptr('get', [], dSeriesOffset));
             if link2DMip('get') == true && isVsplash('get') == false
-                axis(axesMipPtr('get', [], dSeriesOffset), 'auto');
+                resetAxePlotView(axesMipPtr('get', [], dSeriesOffset));
             end            
         end
 

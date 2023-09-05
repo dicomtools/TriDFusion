@@ -136,6 +136,8 @@ function info = dicominfo4che3(fileInput)
         info.SeriesType = sprintf('%s\\%s', info.SeriesType, asSeriesType{4});
     end
 
+    info.ContentTime  = char(dataset.getString(org.dcm4che3.data.Tag.ContentTime , 0));
+
     info.AcquisitionTime  = char(dataset.getString(org.dcm4che3.data.Tag.AcquisitionTime, 0));
     info.AcquisitionDate  = char(dataset.getString(org.dcm4che3.data.Tag.AcquisitionDate , 0));                     
 

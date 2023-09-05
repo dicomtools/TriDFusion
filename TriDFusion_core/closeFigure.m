@@ -146,6 +146,7 @@ function closeFigure(~, ~)
 %        clear('all');
 
     catch
+        delete(gcf);
     end
 
 end

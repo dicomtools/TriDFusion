@@ -38,7 +38,7 @@ function setDisplayBuffer()
     %        aInput{i} = gpuArray(X);
             if numel(aSize) == 2
                 
-                aInput{i} = zeros(aSize(1), aSize(2), numel(tInput(i).asFilesList));
+                aInput{i} = single(zeros(aSize(1), aSize(2), numel(tInput(i).asFilesList)));
 
          %       aInput = dicomread(char(tInput(1).asFilesList(1)));
 
@@ -54,7 +54,7 @@ function setDisplayBuffer()
                                 if tInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
                                     fSlope = tInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
                                     fIntercept = tInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
-                                    aInput{i}(:,:,ii) = fIntercept + (double(aInput{i}(:,:,ii)) * fSlope);                            
+                                    aInput{i}(:,:,ii) = fIntercept + (aInput{i}(:,:,ii) * fSlope);                            
                                 end                        
                             end                            
                         end
@@ -64,7 +64,8 @@ function setDisplayBuffer()
                  for ii=1: numel(tInput(i).asFilesList)
 
                     if ~isempty(tInput(i).aDicomBuffer{ii})
-                        aInput{i} = tInput(i).aDicomBuffer{ii};
+
+                        aInput{i} = single(tInput(i).aDicomBuffer{ii});
 
                         if tInput(i).atDicomInfo{ii}.RescaleSlope ~= 0
                             aInput{i} = tInput(i).atDicomInfo{ii}.RescaleIntercept + (aInput{i} * tInput(i).atDicomInfo{ii}.RescaleSlope);
@@ -73,7 +74,7 @@ function setDisplayBuffer()
                                 if tInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
                                     fSlope = tInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
                                     fIntercept = tInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
-                                    aInput{i} = fIntercept + (double(aInput{i}) * fSlope);                            
+                                    aInput{i} = fIntercept + (aInput{i} * fSlope);                            
                                 end                        
                             end
                         end
@@ -87,7 +88,7 @@ function setDisplayBuffer()
             aSize = size(tInput(i).aDicomBuffer{1});
           %  X(aSize(1), aSize(2), aSize(4))=0;
             aInput{i}(aSize(1), aSize(2), aSize(4))=0;
-            aInput{i} = tInput(i).aDicomBuffer{1}(:,:,:);
+            aInput{i} = single(tInput(i).aDicomBuffer{1}(:,:,:));
 
             if isfield(tInput(i).atDicomInfo{1}, 'RescaleIntercept') && ...
                isfield(tInput(i).atDicomInfo{1}, 'RescaleSlope')
@@ -99,7 +100,7 @@ function setDisplayBuffer()
                         if tInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
                             fSlope     = tInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
                             fIntercept = tInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
-                            aInput{i} = fIntercept + (double(aInput{i}) * fSlope);                            
+                            aInput{i} = fIntercept + (aInput{i} * fSlope);                            
                         end                        
                     end
                 end

@@ -41,10 +41,14 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
         dNbGate   =1;
         dNbSlices =1;
 
+
      %   dFirstSpacing = spacingBetweenTwoSlices(atDicomInfo{1}, atDicomInfo{2});
      %   dLastSpacing  = dFirstSpacing;
 
         for jj=1:numel(atDicomInfo)-1
+
+%             if ~strcmpi(atDicomInfo{jj}.ContentTime,  atDicomInfo{jj+1}.ContentTime)
+%             end
 
             if atDicomInfo{jj}.SliceLocation == 0 && ...
                atDicomInfo{jj+1}.SliceLocation == 0   
@@ -55,32 +59,41 @@ function tGate = dicomInfoComputeFrames(atDicomInfo)
                 end
             end
 
-%            dSliceSpacing = spacingBetweenTwoSlices(atDicomInfo{jj},atDicomInfo{jj+1});
-            dSliceSpacing = atDicomInfo{jj}.SpacingBetweenSlices;
-            if dSliceSpacing == 0
-                dSliceSpacing = spacingBetweenTwoSlices(atDicomInfo{jj},atDicomInfo{jj+1});
-            end
+             dSliceSpacing = spacingBetweenTwoSlices(atDicomInfo{jj},atDicomInfo{jj+1});
+             if dSliceSpacing == 0
+                 dSliceSpacing = atDicomInfo{jj}.SpacingBetweenSlices;
+                 if dSliceSpacing == 0
+                     dSliceSpacing =1;
+                 end
+             end
 
-            dComputedNextSliceLocation = str2double(sprintf('%.3f', abs(atDicomInfo{jj}.SliceLocation) + abs(dSliceSpacing)));
-            dNextSliceLocation         = str2double(sprintf('%.3f', abs(atDicomInfo{jj+1}.SliceLocation)));
+            dComputedNextSliceLocation = atDicomInfo{jj}.SliceLocation + dSliceSpacing;
+            dNextSliceLocation         = atDicomInfo{jj+1}.SliceLocation;
                     
-            if dComputedNextSliceLocation>dNextSliceLocation % Patch for resul seies
+            if dComputedNextSliceLocation>dNextSliceLocation % For GE result seies
                 dSliceRatio = dComputedNextSliceLocation/dNextSliceLocation;
             else
                 dSliceRatio = dNextSliceLocation/dComputedNextSliceLocation;
             end
          
-            if dSliceRatio > 0.9 % Within 10% of the computed next slice
-                dInconsistentSpacing = false;
+            if dSliceRatio > 0.9 && dSliceRatio < 1.1 % Within 10% of the computed next slice
+                
+                dInconsistentSpacing = false;                
             else
                 dInconsistentSpacing = true;
+            end
+
+            if atDicomInfo{jj}.SpacingBetweenSlices ~= 0
+                if abs(dSliceSpacing) > (2*abs(atDicomInfo{jj}.SpacingBetweenSlices)) % The computed spacing is too far
+                    dInconsistentSpacing = true;
+                end
             end
 
             if dInconsistentSpacing == true                         || ... % Inconsistent spacing 
                atDicomInfo{jj}.Rows       ~= atDicomInfo{jj+1}.Rows || ... % Inconsistent size
                atDicomInfo{jj}.Columns    ~= atDicomInfo{jj+1}.Columns  
 
-                dComputedNextSliceLocation = str2double(sprintf('%.3f', atDicomInfo{jj}.SliceLocation - dSliceSpacing));
+                dComputedNextSliceLocation = atDicomInfo{jj}.SliceLocation + dSliceSpacing;
 
                 if dComputedNextSliceLocation ~= dNextSliceLocation      || ...
                    atDicomInfo{jj}.Rows       ~= atDicomInfo{jj+1}.Rows  || ... % Inconsistent size
