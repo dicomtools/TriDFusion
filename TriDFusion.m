@@ -199,7 +199,7 @@ function TriDFusion(varargin)
     
     set(fiMainWindow, 'DefaultUipanelUnits', 'normalized');
 
-    set(fiMainWindow, 'doublebuffer', 'on'   );   
+    set(fiMainWindow, 'doublebuffer', 'on'    );   
     set(fiMainWindow, 'Renderer'    , 'opengl'); 
 
     iptPointerManager(fiMainWindowPtr('get'));

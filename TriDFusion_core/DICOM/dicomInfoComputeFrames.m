@@ -38,8 +38,8 @@ function actGate = dicomInfoComputeFrames(atDicomInfo)
           
      if numel(atDicomInfo) > 2
                  
-        dNbGate   =1;
-        dNbSlices =1;
+        dNbGate   = 1;
+        dNbSlices = 1;
 
 
      %   dFirstSpacing = spacingBetweenTwoSlices(atDicomInfo{1}, atDicomInfo{2});
@@ -67,8 +67,8 @@ function actGate = dicomInfoComputeFrames(atDicomInfo)
                  end
              end
 
-            dComputedNextSliceLocation = atDicomInfo{jj}.SliceLocation + dSliceSpacing;
-            dNextSliceLocation         = atDicomInfo{jj+1}.SliceLocation;
+            dComputedNextSliceLocation = str2double(sprintf('%.3f', atDicomInfo{jj}.SliceLocation + dSliceSpacing));
+            dNextSliceLocation         = str2double(sprintf('%.3f', atDicomInfo{jj+1}.SliceLocation));
                     
             if dComputedNextSliceLocation>dNextSliceLocation % For GE result seies
                 dSliceRatio = dComputedNextSliceLocation/dNextSliceLocation;
@@ -76,12 +76,16 @@ function actGate = dicomInfoComputeFrames(atDicomInfo)
                 dSliceRatio = dNextSliceLocation/dComputedNextSliceLocation;
             end
          
+            if dNextSliceLocation == 0 && dComputedNextSliceLocation == 0 % Inf
+                dSliceRatio = 1;
+            end
+
             if dSliceRatio > 0.9 && dSliceRatio < 1.1 % Within 10% of the computed next slice
                 
                 dInconsistentSpacing = false;                
             else
-                dComputedNextSliceLocation = atDicomInfo{jj}.SliceLocation - dSliceSpacing;
-                dNextSliceLocation         = atDicomInfo{jj+1}.SliceLocation;
+                dComputedNextSliceLocation = str2double(sprintf('%.3f', atDicomInfo{jj}.SliceLocation - dSliceSpacing));
+                dNextSliceLocation         = str2double(sprintf('%.3f', atDicomInfo{jj+1}.SliceLocation));
 
                 if dComputedNextSliceLocation>dNextSliceLocation % For GE result seies
                     dSliceRatio = dComputedNextSliceLocation/dNextSliceLocation;
@@ -102,35 +106,28 @@ function actGate = dicomInfoComputeFrames(atDicomInfo)
                 end
             end
 
-            if dInconsistentSpacing == true                         || ... % Inconsistent spacing 
-               atDicomInfo{jj}.Rows       ~= atDicomInfo{jj+1}.Rows || ... % Inconsistent size
-               atDicomInfo{jj}.Columns    ~= atDicomInfo{jj+1}.Columns  
+            if dInconsistentSpacing == true                      || ... % Inconsistent spacing 
+               atDicomInfo{jj}.Rows    ~= atDicomInfo{jj+1}.Rows || ... % Inconsistent size
+               atDicomInfo{jj}.Columns ~= atDicomInfo{jj+1}.Columns  
 
-                dComputedNextSliceLocation = atDicomInfo{jj}.SliceLocation + dSliceSpacing;
+                actGate{dNbGate}.GateNumber = dNbGate;
+                actGate{dNbGate}.NbSlices   = dNbSlices;       
+                actGate{dNbGate}.SeriesInstanceUID = atDicomInfo{jj}.SeriesInstanceUID;       
 
-                if dComputedNextSliceLocation ~= dNextSliceLocation      || ...
-                   atDicomInfo{jj}.Rows       ~= atDicomInfo{jj+1}.Rows  || ... % Inconsistent size
-                   atDicomInfo{jj}.Columns    ~= atDicomInfo{jj+1}.Columns  
-
-                    actGate{dNbGate}.GateNumber = dNbGate;
-                    actGate{dNbGate}.NbSlices   = dNbSlices;       
-                    actGate{dNbGate}.SeriesInstanceUID = atDicomInfo{jj}.SeriesInstanceUID;       
-
-                    dNbGate = dNbGate+1;
-                    dNbSlices = 0;                
-                end
+                dNbGate = dNbGate+1;
+                dNbSlices = 0;                
             else
-                if ~strcmp(atDicomInfo{jj}.FrameOfReferenceUID, atDicomInfo{jj+1}.FrameOfReferenceUID) % Different series
-
-                    if dInconsistentSpacing == true
-                        actGate{dNbGate}.GateNumber = dNbGate;
-                        actGate{dNbGate}.NbSlices   = dNbSlices;       
-                        actGate{dNbGate}.SeriesInstanceUID = atDicomInfo{jj}.SeriesInstanceUID;       
-    
-                        dNbGate = dNbGate+1;
-                        dNbSlices = 0;                
-                    end
-                end            
+%                 if ~strcmp(atDicomInfo{jj}.FrameOfReferenceUID, atDicomInfo{jj+1}.FrameOfReferenceUID) % Different series
+% 
+%                     if dInconsistentSpacing == true
+%                         actGate{dNbGate}.GateNumber = dNbGate;
+%                         actGate{dNbGate}.NbSlices   = dNbSlices;       
+%                         actGate{dNbGate}.SeriesInstanceUID = atDicomInfo{jj}.SeriesInstanceUID;       
+%     
+%                         dNbGate = dNbGate+1;
+%                         dNbSlices = 0;                
+%                     end
+%                 end            
             end
             
    %         dLastSpacing = dSliceSpacing;

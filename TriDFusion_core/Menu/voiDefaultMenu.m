@@ -78,7 +78,19 @@ function voiDefaultMenu(ptrRoi, sTag)
                    'Callback' , @maskContourFromMenuCallback ...
                   ); 
 
-                
+            uimenu(mVoiFolder, ...
+                   'Label'    , 'Increase' , ...
+                   'UserData' , ptrRoi, ...
+                   'Visible'  , 'off', ...
+                   'Callback' , @increaseVoiPositionCallback ...
+                   ); 
+
+            uimenu(mVoiFolder, ...
+                   'Label'    , 'Decrease' , ...
+                   'UserData' , ptrRoi, ...
+                   'Visible'  , 'off', ...
+                   'Callback' , @decreaseVoiPositionCallback ...
+                   ); 
     else % Make menu visible (when creating a VOI)
              
         if ~isstruct(ptrRoi)
@@ -140,6 +152,17 @@ function voiDefaultMenu(ptrRoi, sTag)
                 end
             end        
         end
-    end           
-       
+    end
+
+    function increaseVoiPositionCallback(hObject, ~)
+
+        increaseVoiPosition(get(hObject, 'UserData'), 1);
+
+    end
+
+    function decreaseVoiPositionCallback(hObject, ~)
+
+        decreaseVoiPosition(get(hObject, 'UserData'), 5);
+
+    end       
 end
