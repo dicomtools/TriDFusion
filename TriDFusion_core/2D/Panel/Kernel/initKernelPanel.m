@@ -1014,7 +1014,9 @@ function initKernelPanel()
                  'ZColor'  , viewerForegroundColor('get'),...
                  'Visible' , 'on'...
                  );    
-                         
+        axePlotKernelDistance.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axePlotKernelDistance.Toolbar = [];  
+
         pDistancePlot = plot(axePlotKernelDistance, aDistance, log10(aDoseR2./aDistance.^2));
         set(pDistancePlot, 'Color', 'cyan');
 %        set(axePlotKernelDistance,'XDir','Reverse');

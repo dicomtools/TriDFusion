@@ -70,6 +70,8 @@ function setPlotContoursCallback(~, ~)
                         'Tag'     , 'axeFc', ...
                         'Visible' , 'off'...
                         );
+                axeFc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                axeFc.Toolbar = [];               
                 axis(axeFc, 'tight');
                 axefcPtr('set', axeFc, get(uiFusedSeriesPtr('get'), 'Value'));
 
@@ -206,6 +208,9 @@ function setPlotContoursCallback(~, ~)
                         'Tag'     , 'axes1fc', ...
                         'Visible' , 'off'...
                         );
+                axes1fc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                axes1fc.Toolbar = [];    
+
                 axis(axes1fc, 'tight');
                 axes1fcPtr('set', axes1fc, get(uiFusedSeriesPtr('get'), 'Value'));
 
@@ -244,6 +249,9 @@ function setPlotContoursCallback(~, ~)
                         'Tag'     , 'axes2fc', ...
                         'Visible' , 'off'...
                         );
+                axes2fc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                axes2fc.Toolbar = [];   
+
                 axis(axes2fc, 'tight');
                 axes2fcPtr('set', axes2fc, get(uiFusedSeriesPtr('get'), 'Value'));
 
@@ -282,6 +290,9 @@ function setPlotContoursCallback(~, ~)
                         'Tag'     , 'axes3fc', ...
                         'Visible' , 'off'...
                         );
+                axes3fc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                axes3fc.Toolbar = [];   
+
                 axis(axes3fc, 'tight');
                 axes3fcPtr('set', axes3fc, get(uiFusedSeriesPtr('get'), 'Value'));
 
@@ -321,6 +332,9 @@ function setPlotContoursCallback(~, ~)
                             'Tag'     , 'axesMipfc', ...
                             'Visible' , 'off'...
                             );
+                    axesMipfc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                    axesMipfc.Toolbar = []; 
+
                     axis(axesMipfc, 'tight');
                     axesMipfcPtr('set', axesMipfc, get(uiFusedSeriesPtr('get'), 'Value'));
 

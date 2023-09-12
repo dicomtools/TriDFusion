@@ -82,6 +82,9 @@ function showRGBColormapImage(bShowImage)
                 'Position', [0 0 1 0.5], ...
                 'Visible' , 'off'...
                );
+        axeRGBImage.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axeRGBImage.Toolbar = [];         
+
         axeRGBImagePtr('set', axeRGBImage);            
 
         sRootPath = viewerRootPath('get');

@@ -77,6 +77,8 @@ function generateContourReportCallback(~, ~)
              'ZColor'  , viewerForegroundColor('get'),...             
              'Visible' , 'off'...             
              );  
+    axeContourReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+    axeContourReport.Toolbar = [];
 
       uiContourReport = ...
          uipanel(figContourReport,...
@@ -411,7 +413,9 @@ function generateContourReportCallback(~, ~)
              'ZColor'  , 'Black',...
              'Visible' , 'on'...
              );
-         
+    axeReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+    axeReport.Toolbar = [];
+
     axeReport.Title.String  = 'Uptake Volume Histogram (UVH)';
     axeReport.XLabel.String = 'Uptake';
     axeReport.YLabel.String = 'Total Volume Fraction (TVF)';
@@ -705,6 +709,8 @@ function generateContourReportCallback(~, ~)
                      'ZColor'  , 'Black',...
                      'Visible' , 'on'...
                      );
+                axeReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                axeReport.Toolbar = [];
 
                 try
                     
@@ -3114,7 +3120,9 @@ function generateContourReportCallback(~, ~)
              'ZColor'  , 'Black',...
              'Visible' , 'on'...
              );
-
+        axeReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axeReport.Toolbar = [];
+        
         try
             if ~isempty(gtReport) % Fill information
 

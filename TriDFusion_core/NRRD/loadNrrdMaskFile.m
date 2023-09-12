@@ -41,8 +41,8 @@ function loadNrrdMaskFile(sPath, sFileName)
 
     [aMask, ~] = nrrdread( sprintf('%s%s',sPath, sFileName));
 
-    aMask = imrotate3(double(aMask), 90, [0 0 1], 'nearest');
-    aMask = aMask(end:-1:1,:,:);
+%     aMask = imrotate3(double(aMask), 90, [0 0 1], 'nearest');
+%     aMask = aMask(end:-1:1,:,:);
 
     dVoiMax = max(aMask, [], 'all');
 

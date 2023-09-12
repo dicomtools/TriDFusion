@@ -72,6 +72,8 @@ function generate3DLungLobeReport(bInitReport)
              'ZColor'  , viewerForegroundColor('get'),...             
              'Visible' , 'off'...             
              );  
+     axe3DLobeLungReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+     axe3DLobeLungReport.Toolbar = []; 
 
      ui3DLobeLungReport = ...
      uipanel(fig3DLobeLungReport,...
@@ -378,6 +380,9 @@ function generate3DLungLobeReport(bInitReport)
              'Color'   , 'white',...          
              'Visible' , 'off'...             
              );  
+     axe3DLungRectangle.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+     axe3DLungRectangle.Toolbar = [];    
+
      rectangle(axe3DLungRectangle, 'position', [0 0 1 1], 'EdgeColor', [1 0.33 0.16]);
 
          uiReport3DLobeUpperLobeLeftLungRatio = ...       
@@ -451,8 +456,11 @@ function generate3DLungLobeReport(bInitReport)
              'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 150+60 FIG_REPORT_X/3+60 170], ...
              'Color'   , 'white',...          
              'Visible' , 'off'...             
-             );  
-    rectangle(axe3DLobesRectangle, 'position', [0 0 1 1], 'EdgeColor', [1 0.33 0.16]);     
+             ); 
+     axe3DLobesRectangle.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+     axe3DLobesRectangle.Toolbar = [];       
+
+     rectangle(axe3DLobesRectangle, 'position', [0 0 1 1], 'EdgeColor', [1 0.33 0.16]);     
 
     % Liver volume-of-interest oversized
          
@@ -787,6 +795,19 @@ function generate3DLungLobeReport(bInitReport)
             end
         end
 
+        aNMImage = dicomBuffer('get', [], dNMSerieOffset);
+
+        aCTImage = dicomBuffer('get', [], dCTSerieOffset);
+        if isempty(aCTImage)
+            aInputBuffer = inputBuffer('get');
+            aCTImage = aInputBuffer{dCTSerieOffset};
+
+            clear aInputBuffer;
+        end
+
+        atNMMetaData = atInput(dNMSerieOffset).atDicomInfo;
+        atCTMetaData = atInput(dCTSerieOffset).atDicomInfo;
+
         if isempty(dCTSerieOffset) || ...
            isempty(dNMSerieOffset)  
             progressBar(1, 'Error: proceed3DLobesLiverVolumeOversize() 3D Lung Liver Ratio require a CT and NM image!');
@@ -794,7 +815,7 @@ function generate3DLungLobeReport(bInitReport)
             return;               
         end
 
-        dNbExtraSlicesAtTop    = round(str2double(get(uiEdit3DLobesLiverTopOfVolumeExtraSlices, 'String')));
+        dNbExtraSlicesAtTop = round(str2double(get(uiEdit3DLobesLiverTopOfVolumeExtraSlices, 'String')));
 
         dLiverMaskOffset = round(str2double(get(uiEdit3DLobesLiverVolumeOversized, 'String')));
 
@@ -850,7 +871,12 @@ function generate3DLungLobeReport(bInitReport)
                 end
                           
                 delete3DLobesVoiContours('Liver-LIV', dNMSerieOffset);
-             
+
+                if numel(aLiverMask) ~= numel(aNMImage)
+
+                    [aLiverMask, ~] = resampleImage(aLiverMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
+                end
+
                 maskToVoi(aLiverMask, 'Liver', 'Liver', gtReport.Liver.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
                 
                 % Clean Lungs Mask
@@ -858,7 +884,14 @@ function generate3DLungLobeReport(bInitReport)
                 progressBar(2/9, 'Computing oversized liver, lungs mask, please wait.');
     
                 aLungsMask = gtReport.Lungs.Mask;
-    
+
+                % Resample the mask
+
+                if numel(aLungsMask) ~= numel(aNMImage) 
+
+                    [aLungsMask, ~] = resampleImage(aLungsMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
+                end
+
                 aLungsMask(aLiverMask~=0)=0;
                 
                 delete3DLobesVoiContours('Lungs-LUN', dNMSerieOffset);
@@ -872,7 +905,14 @@ function generate3DLungLobeReport(bInitReport)
                 progressBar(3/9, 'Computing oversized liver, lung left mask, please wait.');
     
                 aLungLeftMask = gtReport.LungLeft.Mask;
-    
+
+                % Resample the mask
+
+                if numel(aLungLeftMask) ~= numel(aNMImage)
+
+                    [aLungLeftMask, ~] = resampleImage(aLungLeftMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
+                end
+
                 aLungLeftMask(aLiverMask~=0)=0;
                 
                 delete3DLobesVoiContours('Lung Left-LUN', dNMSerieOffset);
@@ -884,9 +924,16 @@ function generate3DLungLobeReport(bInitReport)
                 % Clean Lung Right Mask
     
                 progressBar(4/9, 'Computing oversized liver, lung right mask, please wait.');
-    
+
                 aLungRightMask = gtReport.LungRight.Mask;
-    
+
+                % Resample the mask
+
+                if numel(aLungRightMask) ~= numel(aNMImage)
+
+                    [aLungRightMask, ~] = resampleImage(aLungRightMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
+                end
+   
                 aLungRightMask(aLiverMask~=0)=0;
                 
                 delete3DLobesVoiContours('Lung Right-LUN', dNMSerieOffset);
@@ -900,7 +947,12 @@ function generate3DLungLobeReport(bInitReport)
                 progressBar(5/9, 'Computing oversized liver, lung lower left lobe mask, please wait.');
     
                 aLungLowerLobeLeftMask = gtReport.LungLowerLobeLeft.Mask;
-    
+
+                if numel(aLungLowerLobeLeftMask) ~= numel(aNMImage)
+
+                    [aLungLowerLobeLeftMask, ~] = resampleImage(aLungLowerLobeLeftMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
+                end
+
                 aLungLowerLobeLeftMask(aLiverMask~=0)=0;
                 
                 delete3DLobesVoiContours('Lung Lower Lobe Left-LUN', dNMSerieOffset);
@@ -914,7 +966,12 @@ function generate3DLungLobeReport(bInitReport)
                 progressBar(6/9, 'Computing oversized liver, lung lower right lobe mask, please wait.');
     
                 aLungLowerLobeRightMask = gtReport.LungLowerLobeRight.Mask;
-    
+
+                if numel(aLungLowerLobeRightMask) ~= numel(aNMImage)
+
+                    [aLungLowerLobeRightMask, ~] = resampleImage(aLungLowerLobeRightMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
+                end
+
                 aLungLowerLobeRightMask(aLiverMask~=0)=0;
                 
                 delete3DLobesVoiContours('Lung Lower Lobe Right-LUN', dNMSerieOffset);
@@ -928,7 +985,12 @@ function generate3DLungLobeReport(bInitReport)
                 progressBar(7/9, 'Computing oversized liver, lung middle right lobe mask, please wait.');
     
                 aLungMiddleLobeRightMask = gtReport.LungMiddleLobeRight.Mask;
-    
+
+                if numel(aLungMiddleLobeRightMask) ~= numel(aNMImage)
+
+                    [aLungMiddleLobeRightMask, ~] = resampleImage(aLungMiddleLobeRightMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
+                end
+
                 aLungMiddleLobeRightMask(aLiverMask~=0)=0;
                 
                 delete3DLobesVoiContours('Lung Middle Lobe Right-LUN', dNMSerieOffset);
@@ -943,6 +1005,9 @@ function generate3DLungLobeReport(bInitReport)
                 lungLobesLiverVolumeOversized('set', dLiverMaskOffset);
                 
             end
+    
+            clear aNMImage;
+            clear aCTImage;
 
             progressBar(8/9, 'Reprocessing contours information, please wait.');
 

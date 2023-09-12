@@ -959,6 +959,8 @@ function resize = dicomViewer()
                  'Position', [0 0 1 1], ...
                  'Visible' , 'off'...
                  );
+        axef.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axef.Toolbar = [];          
         axefPtr('set', axef, 1);
         
         axefc = ...
@@ -968,6 +970,8 @@ function resize = dicomViewer()
                  'Position', [0 0 1 1], ...
                  'Visible' , 'off'...
                  );
+        axefc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axefc.Toolbar = [];            
         axefcPtr('set', axefc, 1);
         
 %        axer = ...
@@ -987,6 +991,8 @@ function resize = dicomViewer()
                  'Position', [0 0 1 1], ...
                  'Visible' , 'off'...
                  );
+        axe.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axe.Toolbar = [];         
         axePtr('set', axe, 1);
         
 %        linkaxes([axe axer],'xy');                                
@@ -1006,6 +1012,8 @@ function resize = dicomViewer()
                 'color','none',...
                 'Visible' , 'off'...
                 );
+       axes1f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+       axes1f.Toolbar = [];         
        axes1fPtr('set', axes1f, 1);
        
        axes1fc = ...
@@ -1021,6 +1029,8 @@ function resize = dicomViewer()
                 'color','none',...
                 'Visible' , 'off'...
                 );
+       axes1fc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+       axes1fc.Toolbar = [];           
        axes1fcPtr('set', axes1fc, 1);    
        
 %       axes1r = ...
@@ -1050,6 +1060,8 @@ function resize = dicomViewer()
                 'Position', [0 0 1 1], ...
                 'Visible' , 'off'...
                 );
+       axes1.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+       axes1.Toolbar = [];       
        axes1Ptr('set', axes1, 1);                            
        
 %       linkaxes([axes1 axes1r],'xy');                                
@@ -1068,6 +1080,8 @@ function resize = dicomViewer()
                 'color','none',...
                 'Visible' , 'off'...
                 );
+       axes2f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+       axes2f.Toolbar = [];             
        axes2fPtr('set', axes2f, 1);
        
        axes2fc = ...
@@ -1083,6 +1097,8 @@ function resize = dicomViewer()
                 'color','none',...
                 'Visible' , 'off'...
                 );
+       axes2fc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+       axes2fc.Toolbar = [];            
        axes2fcPtr('set', axes2fc, 1);
        
 %       axes2r = ...
@@ -1112,6 +1128,8 @@ function resize = dicomViewer()
                 'Position', [0 0 1 1], ...
                 'Visible' , 'off'...
                );
+       axes2.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+       axes2.Toolbar = [];           
        axes2Ptr('set', axes2, 1);                            
        
 %       linkaxes([axes2 axes2r],'xy');                                
@@ -1130,6 +1148,8 @@ function resize = dicomViewer()
                 'color','none',...
                 'Visible' , 'off'...
                 );
+       axes3f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+       axes3f.Toolbar = [];           
        axes3fPtr('set', axes3f, 1);
        
        axes3fc = ...
@@ -1145,6 +1165,8 @@ function resize = dicomViewer()
                 'color','none',...
                 'Visible' , 'off'...
                 );
+       axes3fc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+       axes3fc.Toolbar = [];             
        axes3fcPtr('set', axes3fc, 1);
        
 %       axes3r = ...
@@ -1174,6 +1196,8 @@ function resize = dicomViewer()
                 'Position', [0 0 1 1], ...
                 'Visible' , 'off'...
                );
+       axes3.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+       axes3.Toolbar = [];           
        axes3Ptr('set', axes3, 1);         
        
 %       linkaxes([axes3 axes3r],'xy');                                
@@ -1192,6 +1216,8 @@ function resize = dicomViewer()
                 'color','none',...
                 'Visible' , 'off'...
                 );
+       axesMipf.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+       axesMipf.Toolbar = [];            
        axesMipfPtr('set', axesMipf, 1);
        
        axesMipfc = ...
@@ -1207,6 +1233,8 @@ function resize = dicomViewer()
                 'color','none',...
                 'Visible' , 'off'...
                 );
+       axesMipfc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+       axesMipfc.Toolbar = [];           
        axesMipfcPtr('set', axesMipfc, 1);
        
        axesMip = ...
@@ -1221,6 +1249,8 @@ function resize = dicomViewer()
                 'Position', [0 0 1 1], ...
                 'Visible' , 'off'...
                );
+       axesMip.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+       axesMip.Toolbar = [];        
        axesMipPtr('set', axesMip, 1);
             
     end

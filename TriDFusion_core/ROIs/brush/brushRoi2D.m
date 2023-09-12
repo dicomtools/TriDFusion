@@ -27,16 +27,15 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    try 
+%     try 
 
-    hfMask = poly2mask(hf.Position(:,1), hf.Position(:,2), ySize, xSize);
-    [m, n] = size(hfMask);
+    hfMask = poly2mask(hf.Position(:,1), hf.Position(:,2), xSize, ySize);
     hfPos = round(hf.Position);
-    hfMask(sub2ind([m, n], hfPos(:, 2), hfPos(:, 1))) = true;
+    hfMask(sub2ind([xSize, ySize], hfPos(:, 2), hfPos(:, 1))) = true;
     
-    heMask = poly2mask(he.Vertices(:, 1), he.Vertices(:, 2), ySize, xSize);
+    heMask = poly2mask(he.Vertices(:, 1), he.Vertices(:, 2), xSize, ySize);
     hePos = round(he.Position);
-    heMask(sub2ind([m, n], hePos(:, 2), hePos(:, 1))) = true;
+    heMask(sub2ind([xSize, ySize], hePos(:, 2), hePos(:, 1))) = true;
     
     center = he.Center;
     
@@ -46,14 +45,14 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType)
         newMask = hfMask & ~heMask;
     end
     
-    if pixelEdge('get')
-        hfMask  = imresize(hfMask , 3, 'nearest');
-        newMask = imresize(newMask, 3, 'nearest');
+    if pixelEdge('get')          
+        hfMask  = kron(hfMask, ones(3));
+        newMask = kron(newMask, ones(3));
     end
     
     if any(hfMask(:) ~= newMask(:))
 
-        B = bwboundaries(newMask, 'noholes', 4);
+        B = bwboundaries(newMask, 'noholes', 8);
     
         if isempty(B)
             deleteRoiEvents(hf);
@@ -69,21 +68,43 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType)
                     end
                 end
             end
-    
+
+            dBoundaryOffset = getLargestboundary(B);
+
             if pixelEdge('get')
-                B{1} = (B{1} + 1) / 3;
-                B{1} = reducepoly(B{1});
-            else                        
-                aSize(1)=xSize;
-                aSize(2)=ySize;
-              
-                B{1} = smoothRoi(B{1}, aSize);
+                  B{dBoundaryOffset} = (B{dBoundaryOffset} + 1) / 3;
+                  B{dBoundaryOffset} = reducepoly(B{dBoundaryOffset});
+            else                                      
+                B{dBoundaryOffset} = smoothRoi(B{dBoundaryOffset}, [xSize, ySize]);
             end
     
-            hf.Position = [B{1}(:, 2), B{1}(:, 1)];
+            hf.Position = [B{dBoundaryOffset}(:, 2), B{dBoundaryOffset}(:, 1)];
 
         end
     end
-    catch
+%     catch
+%     end
+
+    function largestBoundary = getLargestboundary(cBoundaries)    
+
+        % Initialize variables to keep track of the largest boundary and its size
+        largestBoundary = 1;
+        largestSize = 0;
+        
+        % Loop through each boundary in 'B'
+        for k = 1:length(cBoundaries)
+            % Get the current boundary
+            boundary = cBoundaries{k};
+            
+            % Calculate the size of the current boundary
+            boundarySize = size(boundary, 1);
+            
+            % Check if the current boundary is larger than the previous largest
+            if boundarySize > largestSize
+                largestSize = boundarySize;
+                largestBoundary = k;
+            end
+        end
     end
+
 end

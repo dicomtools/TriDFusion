@@ -31,7 +31,7 @@ function setMachineLearning3DLobeLungCallback(~, ~)
     
     if ~isempty(sSegmentatorPath) % External Segmentor is installed
         
-        setMachineLearning3DLobeLung(sSegmentatorPath);
+        setMachineLearning3DLobeLung(sSegmentatorPath, true, true);
     end
 
 end

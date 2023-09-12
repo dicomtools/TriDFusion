@@ -43,6 +43,8 @@ function uivolColorbar = volColorbar(uiWindow, aColorMap)
              'Units'   , 'pixels',...
              'position', [xOffset 40 250 100]...
             ); 
+    uivolColorbar.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+    uivolColorbar.Toolbar = [];
 
     x = 1:size(aColorMap,1);
 

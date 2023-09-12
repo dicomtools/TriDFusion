@@ -69,7 +69,9 @@ function generate3DLungShuntReport(bInitReport)
              'ZColor'  , viewerForegroundColor('get'),...             
              'Visible' , 'off'...             
              );  
-
+      axe3DLungShuntReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+      axe3DLungShuntReport.Toolbar = [];  
+     
       ui3DLungShuntReport = ...
          uipanel(fig3DLungShuntReport,...
                  'Units'   , 'pixels',...
@@ -321,6 +323,9 @@ function generate3DLungShuntReport(bInitReport)
              'Color'   , 'white',...          
              'Visible' , 'off'...             
              );  
+    axe3DLungShuntRectangle.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+    axe3DLungShuntRectangle.Toolbar = [];    
+
     rectangle(axe3DLungShuntRectangle, 'position', [0 0 1 1], 'EdgeColor', [1 0.33 0.16]);
 
     % 3D Volume
@@ -415,6 +420,9 @@ function generate3DLungShuntReport(bInitReport)
              'Color'   , 'white',...          
              'Visible' , 'off'...             
              );  
+    axe3DLungShuntEstimatedDoseRectangle.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+    axe3DLungShuntEstimatedDoseRectangle.Toolbar = [];
+
     rectangle(axe3DLungShuntEstimatedDoseRectangle, 'position', [0 0 1 1], 'EdgeColor', [0.75 0.75 0.75]);
 
      uiReport3DLungShuntCalculatedDose = ...       
@@ -437,6 +445,9 @@ function generate3DLungShuntReport(bInitReport)
              'Color'   , 'white',...          
              'Visible' , 'off'...             
              );  
+    axe3DLungShuntEstimatedDoseRectangle.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+    axe3DLungShuntEstimatedDoseRectangle.Toolbar = [];
+
     rectangle(axe3DLungShuntEstimatedDoseRectangle, 'position', [0 0 1 1], 'EdgeColor', [1 0.33 0.16]);
 
     uicontrol(ui3DLungShuntReport,...
@@ -568,6 +579,9 @@ function generate3DLungShuntReport(bInitReport)
          'Color'   , 'white',...          
          'Visible' , 'off'...             
          );  
+    axeVolumeRatio.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+    axeVolumeRatio.Toolbar = [];
+
     rectangle(axeVolumeRatio, 'position', [0 0 1 1], 'EdgeColor', [0.75 0.75 0.75]);
 
     % Liver volume-of-interest oversized
@@ -775,7 +789,10 @@ function generate3DLungShuntReport(bInitReport)
           'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 15 FIG_REPORT_X/3+60 340], ...
           'Color'   , 'white',...          
           'Visible' , 'off'...             
-         );  
+         );
+    axeProceedLiverVolumeOversize.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+    axeProceedLiverVolumeOversize.Toolbar = [];
+
     rectangle(axeProceedLiverVolumeOversize, 'position', [0 0 1 1], 'EdgeColor', [0.75 0.75 0.75]);
 
     mReportFile = uimenu(fig3DLungShuntReport,'Label','File');
@@ -1737,6 +1754,8 @@ function generate3DLungShuntReport(bInitReport)
         if isempty(aCTBuffer)
             aInputBuffer = inputBuffer('get');
             aCTBuffer = aInputBuffer{dCTSerieOffset};
+
+            clear aInputBuffer;
         end
 
         x = atCTMetaData{1}.PixelSpacing(1);
@@ -1819,7 +1838,7 @@ function generate3DLungShuntReport(bInitReport)
         for jj=1:numel(gasMask)
     
             [aMask, aColor] = machineLearning3DMask('get', gasMask{jj});
-
+            
             if ~isempty(aMask)
 
                 aMask = smooth3(aMask, 'box', 3);
@@ -1846,6 +1865,8 @@ function generate3DLungShuntReport(bInitReport)
     
                 gp3DObject{jj}.CameraPosition = aCameraPosition;
                 gp3DObject{jj}.CameraUpVector = aCameraUpVector;
+
+                clear aMask;
             end
         end
     end
@@ -2027,6 +2048,19 @@ function generate3DLungShuntReport(bInitReport)
             end
         end
 
+        aNMImage = dicomBuffer('get', [], dNMSerieOffset);
+
+        aCTImage = dicomBuffer('get', [], dCTSerieOffset);
+        if isempty(aCTImage)
+            aInputBuffer = inputBuffer('get');
+            aCTImage = aInputBuffer{dCTSerieOffset};
+
+            clear aInputBuffer;
+        end
+
+        atNMMetaData = atInput(dNMSerieOffset).atDicomInfo;
+        atCTMetaData = atInput(dCTSerieOffset).atDicomInfo;
+
         if isempty(dCTSerieOffset) || ...
            isempty(dNMSerieOffset)  
             progressBar(1, 'Error: proceedLiverVolumeOversize() 3D Lung Liver Ratio require a CT and NM image!');
@@ -2123,7 +2157,12 @@ function generate3DLungShuntReport(bInitReport)
                 end
                           
                 deleteLungShuntVoiContours('Liver-LIV', dNMSerieOffset);
-             
+
+                if numel(aLiverMask) ~= numel(aNMImage)
+
+                    [aLiverMask, ~] = resampleImage(aLiverMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
+                end
+
                 maskToVoi(aLiverMask, 'Liver', 'Liver', gtReport.Liver.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
                 
                 % Clean Lungs Mask
@@ -2135,13 +2174,19 @@ function generate3DLungShuntReport(bInitReport)
                 if dLungsMaskOffset ~= 0
                     aLungsMask = imdilate(aLungsMask, strel('sphere', dLungsMaskOffset)); % Increse mask by x pixels
                 end
-    
+
+                if numel(aLungsMask) ~= numel(dicomBuffer('get'))
+
+                    [aLungsMask, ~] = resampleImage(aLungsMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false);  
+
+                end  
+
                 if bLungsCanOverlapTheLiver == false
                     aLungsMask(aLiverMask~=0)=0;
                 end
         
                 deleteLungShuntVoiContours('Lungs-LUN', dNMSerieOffset);
-    
+
                 maskToVoi(aLungsMask, 'Lungs', 'Lung', gtReport.Lungs.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
     
                 clear aLiverMask;
@@ -2154,6 +2199,9 @@ function generate3DLungShuntReport(bInitReport)
                 lungShuntLungsVolumeOversized('set', dLungsMaskOffset);
 
             end
+            
+            clear aNMImage;
+            clear aCTImage;
 
             progressBar(3/4, 'Reprocessing contours information, please wait.');
 

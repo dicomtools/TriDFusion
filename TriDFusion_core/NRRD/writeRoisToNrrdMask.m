@@ -227,6 +227,14 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicom
 
     sNrrdImagesName = sprintf('%s%s.nrrd', sWriteDir, cleanString(atDicomMeta{1}.SeriesDescription));
 
+    if size(aMaskBuffer, 3) ~=1
+        aMaskBuffer = imrotate3(aMaskBuffer, 90, [0 0 1], 'nearest');
+        aMaskBuffer = aMaskBuffer(end:-1:1,:,:);
+    else
+        aMaskBuffer = imrotate(aMaskBuffer, 90, 'nearest');
+        aMaskBuffer = aMaskBuffer(end:-1:1,:);        
+    end
+
     nrrdWriter(sNrrdImagesName, squeeze(aMaskBuffer), pixelspacing, origin, 'raw'); % Write .nrrd images 
 
     progressBar(1, sprintf('Export NRRD mask to %s completed', char(sWriteDir)));

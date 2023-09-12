@@ -82,6 +82,8 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
              'ZColor'  , viewerForegroundColor('get'),...
              'Visible' , 'on'...
              );
+    axeMultiplePlot.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+    axeMultiplePlot.Toolbar = [];
 
     axeMultiplePlot.Title.String = sType;
     axeMultiplePlot.Title.Color  = viewerForegroundColor('get');

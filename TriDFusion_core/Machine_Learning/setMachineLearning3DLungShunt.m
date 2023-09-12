@@ -1,5 +1,5 @@
-function setMachineLearning3DLungShunt(sSegmentatorPath)
-%function setMachineLearning3DLungShunt(sSegmentatorPath)
+function setMachineLearning3DLungShunt(sSegmentatorPath, bPixelEdge, bResampleSeries)
+%function setMachineLearning3DLungShunt(sSegmentatorPath, bPixelEdge, bResampleSeries)
 %Run machine learning 3D Lung Liver Ratio.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -64,6 +64,8 @@ function setMachineLearning3DLungShunt(sSegmentatorPath)
     if isempty(aNMImage)
         aInputBuffer = inputBuffer('get');
         aNMImage = aInputBuffer{dNMSerieOffset};
+
+        clear aInputBuffer;
     end
 
     if isempty(atNMMetaData)
@@ -85,9 +87,10 @@ function setMachineLearning3DLungShunt(sSegmentatorPath)
     roiFaceAlphaValue('set', 0.1);
     set(uiSliderRoisFaceAlphaRoiPanelObject('get'), 'Value', roiFaceAlphaValue('get'));
 
-    pixelEdge('set', true);
+    pixelEdge('set', bPixelEdge);
     
     % Set contour panel checkbox
+
     set(chkPixelEdgePtr('get'), 'Value', pixelEdge('get'));
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
@@ -107,7 +110,7 @@ function setMachineLearning3DLungShunt(sSegmentatorPath)
     
     % Convert dicom to .nii     
     
-    progressBar(1/6, 'DICOM to NII conversion, please wait.');
+    progressBar(1/7, 'DICOM to NII conversion, please wait.');
 
     dicm2nii(sFilePath, sNiiTmpDir, 1);
     
@@ -129,7 +132,7 @@ function setMachineLearning3DLungShunt(sSegmentatorPath)
         progressBar(1, 'Error: nii file mot found!');
         errordlg('nii file mot found!!', '.nii file Validation'); 
     else
-        progressBar(2/6, 'Segmentation in progress, this might take several minutes, please be patient.');
+        progressBar(2/7, 'Segmentation in progress, this might take several minutes, please be patient.');
        
         sSegmentationFolderName = sprintf('%stemp_seg_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
         if exist(char(sSegmentationFolderName), 'dir')
@@ -152,7 +155,7 @@ function setMachineLearning3DLungShunt(sSegmentatorPath)
                 errordlg(sprintf('An error occur during machine learning segmentation: %s', sCmdout), 'Segmentation Error');  
             else % Process succeed
 
-                progressBar(3/6, 'Importing Lungs mask, please wait.');
+                progressBar(3/7, 'Importing Lungs mask, please wait.');
                 
                 % Lung
 
@@ -180,12 +183,13 @@ function setMachineLearning3DLungShunt(sSegmentatorPath)
                         aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
 
                         maskToVoi(aMask, 'Lungs', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-
+                        
+                        clear aMask;
                    end
 
                 end
 
-                progressBar(4/6, 'Importing Liver mask, please wait.');
+                progressBar(4/7, 'Importing Liver mask, please wait.');
 
                 % Liver
 
@@ -204,7 +208,8 @@ function setMachineLearning3DLungShunt(sSegmentatorPath)
                     aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
 
                     maskToVoi(aMask, 'Liver', 'Liver', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-                 
+
+                    clear aMask;
                 end
 
             end
@@ -222,19 +227,111 @@ function setMachineLearning3DLungShunt(sSegmentatorPath)
 
     end   
 
+    if bResampleSeries
+
+        progressBar(5/7, 'Resampling image, please wait.');
+       
+        aCTImage = dicomBuffer('get', [], dCTSerieOffset);
+        if isempty(aCTImage)
+            aInputBuffer = inputBuffer('get');
+            aCTImage = aInputBuffer{dCTSerieOffset};
+
+            clear aInputBuffer;
+        end
+
+        % Resample NM to CT dimension
+
+        [aResampledNMImage, atResampledNMMeta] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);   
+    
+        dicomMetaData('set', atResampledNMMeta, dNMSerieOffset);
+        dicomBuffer  ('set', aResampledNMImage, dNMSerieOffset);
+
+        % Resample NM to CT dimension
+   
+        aMip = computeMIP(aResampledNMImage);
+    
+        mipBuffer('set', aMip, dNMSerieOffset);
+    
+        atRoi = roiTemplate('get', dNMSerieOffset);
+    
+        atResampledRoi = resampleROIs(aNMImage, atNMMetaData, aResampledNMImage, atResampledNMMeta, atRoi, true);
+                                
+        roiTemplate('set', dNMSerieOffset, atResampledRoi);
+    
+        resampleAxes(aResampledNMImage, atResampledNMMeta);
+    
+        setImagesAspectRatio();
+
+        % Increase image intensity
+
+        dMax = max(aResampledNMImage, [], 'all')/5;
+        dMin = min(aResampledNMImage, [], 'all');
+
+        windowLevel('set', 'max', dMax);
+        windowLevel('set', 'min' ,dMin);
+
+        setWindowMinMax(dMax, dMin);  
+      
+        % Set fusion
+    
+        if isFusion('get') == false
+    
+            set(uiFusedSeriesPtr('get'), 'Value', dCTSerieOffset);
+    
+            setFusionCallback();
+        end
+    
+        % Set CT Window to Soft Tissue
+    
+        [dMax, dMin] = computeWindowLevel(500, 50);
+    
+        fusionWindowLevel('set', 'max', dMax);
+        fusionWindowLevel('set', 'min' ,dMin);
+    
+        setFusionWindowMinMax(dMax, dMin);  
+
+        % Set MIP CT Window to Temporal Bone
+
+        [dMax, dMin] = computeWindowLevel(1000, 350);
+       
+        if link2DMip('get') == true && isVsplash('get') == false
+            set(axesMipfPtr('get', [], dCTSerieOffset), 'CLim', [dMin dMax]);
+        end
+
+        sliderCorCallback();
+        sliderSagCallback();
+        sliderTraCallback();
+
+        % Clear buffer
+
+        clear aMip;
+        clear aCTImage;
+        clear aResampledNMImage;        
+    end
+
     setVoiRoiSegPopup();
+
+    % Activate ROI Panel
+
+    if viewRoiPanel('get') == false
+        setViewRoiPanel();
+    end
 
     refreshImages();
 
-    progressBar(5/6, 'Computing Lung Shunt, please wait.');
+    progressBar(6/7, 'Computing Lung Shunt, please wait.');
    
     generate3DLungShuntReport(true);
-      
+
     % Delete .nii folder    
     
     if exist(char(sNiiTmpDir), 'dir')
         rmdir(char(sNiiTmpDir), 's');
-    end                
+    end            
+
+    % Clear buffer
+ 
+    clear aNMImage;
 
     progressBar(1, 'Ready');
 

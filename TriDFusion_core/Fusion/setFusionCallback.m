@@ -326,6 +326,8 @@ end
                         'Tag'     , 'axeF', ...
                         'Visible' , 'off'...
                         );
+                axeF.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                axeF.Toolbar = [];                
                 axis(axeF, 'tight');
                 axefPtr('set', axeF, get(uiFusedSeriesPtr('get'), 'Value'));
 
@@ -346,6 +348,8 @@ end
                          'Visible' , 'off',...
                          'HandleVisibility', 'off' ...
                          );
+                axAxefText.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                axAxefText.Toolbar = []; 
 
                 if isfield(atFusionMetaData{1}, 'SeriesDescription')
                     sFusedSeriesDescription = atFusionMetaData{1}.SeriesDescription;
@@ -508,6 +512,8 @@ end
                         'Tag'     , 'axes1f', ...
                         'Visible' , 'off'...
                         );
+                axes1f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                axes1f.Toolbar = [];                 
                 axis(axes1f, 'tight');
                 axes1fPtr('set', axes1f, get(uiFusedSeriesPtr('get'), 'Value'));
                 
@@ -535,6 +541,8 @@ end
                         'Tag'     , 'axes2f', ...
                         'Visible' , 'off'...
                         );
+                axes2f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                axes2f.Toolbar = [];                  
                 axis(axes2f, 'tight');
                 axes2fPtr('set', axes2f, get(uiFusedSeriesPtr('get'), 'Value'));
 
@@ -562,6 +570,8 @@ end
                         'Tag'     , 'axes3f', ...
                         'Visible' , 'off'...
                         );
+                axes3f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                axes3f.Toolbar = [];                 
                 axis(axes3f, 'tight');
                 
 %                axes3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')  );
@@ -589,7 +599,9 @@ end
                          'Visible' , 'off',...
                          'HandleVisibility', 'off' ...
                          );
-                     
+                axAxes3fText.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                axAxes3fText.Toolbar = [];      
+
                 if isfield(atFusionMetaData{1}, 'SeriesDescription')
                     sFusedSeriesDescription = atFusionMetaData{1}.SeriesDescription;
                     sFusedSeriesDescription = strrep(sFusedSeriesDescription,'_',' ');
@@ -666,6 +678,9 @@ end
                             'Tag'     , 'axesMipf',...
                             'Visible' , 'off'...
                             );
+                    axesMipf.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                    axesMipf.Toolbar = [];  
+
                     axis(axesMipf, 'tight');
                     axesMipfPtr('set', axesMipf, get(uiFusedSeriesPtr('get'), 'Value'));
 

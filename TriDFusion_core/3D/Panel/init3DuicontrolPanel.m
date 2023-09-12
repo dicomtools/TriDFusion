@@ -403,6 +403,9 @@ end
              'ZColor'  , viewerForegroundColor('get'),...
              'position', [25 35 295 350]...
              );
+    axeVolAlphmap.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+    axeVolAlphmap.Toolbar = [];
+
     axe3DPanelVolAlphmapPtr('set', axeVolAlphmap);
  %   axeVolAlphmap.Title.String = 'Volume Alphamap';
 
@@ -907,6 +910,9 @@ end
              'ZColor'  , viewerForegroundColor('get'),...
              'position', [350 35 295 350]...
              );
+    axeMipAlphmap.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+    axeMipAlphmap.Toolbar = [];   
+    
     axe3DPanelMipAlphmapPtr('set', axeMipAlphmap);
 %      axeVolAlphmap.Title.String = 'MIP Alphamap';
 

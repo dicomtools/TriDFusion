@@ -31,7 +31,7 @@ function setMachineLearning3DLungShuntCallback(~, ~)
     
     if ~isempty(sSegmentatorPath) % External Segmentor is installed
 
-        setMachineLearning3DLungShunt(sSegmentatorPath);
+        setMachineLearning3DLungShunt(sSegmentatorPath, true, true);
         
     end
 

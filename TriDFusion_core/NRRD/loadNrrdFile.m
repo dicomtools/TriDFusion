@@ -153,14 +153,14 @@ function loadNrrdFile(sPath, sFileName)
         end
     end
 
-     if str2double(meta.dimension) == 3
-
-         aBuffer = imrotate3(double(aBuffer), 90, [0 0 1], 'nearest');
-         aBuffer = aBuffer(end:-1:1,:,:);
-     else
-          aBuffer = imrotate(double(aBuffer), 90, 'nearest');
-          aBuffer = aBuffer(end:-1:1,:);        
-     end
+%      if str2double(meta.dimension) == 3
+% 
+%          aBuffer = imrotate3(double(aBuffer), 90, [0 0 1], 'nearest');
+%          aBuffer = aBuffer(end:-1:1,:,:);
+%      else
+%           aBuffer = imrotate(double(aBuffer), 90, 'nearest');
+%           aBuffer = aBuffer(end:-1:1,:);        
+%      end
 
     if ~isempty(atInput)
         

@@ -1,5 +1,5 @@
-function setMachineLearning3DLobeLung(sSegmentatorPath)
-%function setMachineLearning3DLobeLung(sSegmentatorPath)
+function setMachineLearning3DLobeLung(sSegmentatorPath, bPixelEdge, bResampleSeries)
+%function setMachineLearning3DLobeLung(sSegmentatorPath, bPixelEdge, bResampleSeries)
 %Run machine learning 3D Lobe Lung Segmentation.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -63,6 +63,8 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
     if isempty(aNMImage)
         aInputBuffer = inputBuffer('get');
         aNMImage = aInputBuffer{dNMSerieOffset};
+
+        clear aInputBuffer;
     end
 
     if isempty(atNMMetaData)
@@ -84,9 +86,10 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
     roiFaceAlphaValue('set', 0.1);
     set(uiSliderRoisFaceAlphaRoiPanelObject('get'), 'Value', roiFaceAlphaValue('get'));
 
-    pixelEdge('set', true);
+    pixelEdge('set', bPixelEdge);
     
     % Set contour panel checkbox
+
     set(chkPixelEdgePtr('get'), 'Value', pixelEdge('get'));
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
@@ -106,7 +109,7 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
     
     % Convert dicom to .nii     
     
-    progressBar(1/13, 'DICOM to NII conversion, please wait.');
+    progressBar(1/14, 'DICOM to NII conversion, please wait.');
 
     dicm2nii(sFilePath, sNiiTmpDir, 1);
     
@@ -129,7 +132,7 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
         errordlg('nii file mot found!!', '.nii file Validation'); 
     else
 
-        progressBar(2/13, 'Segmentation in progress, this might take several minutes, please be patient.');
+        progressBar(2/14, 'Segmentation in progress, this might take several minutes, please be patient.');
        
         sSegmentationFolderName = sprintf('%stemp_seg_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
         if exist(char(sSegmentationFolderName), 'dir')
@@ -172,11 +175,11 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
                  
                 end
 
-                progressBar(3/13, 'Importing Liver mask, please wait.');
+                progressBar(3/14, 'Importing Liver mask, please wait.');
                 
                 % Lungs
 
-                progressBar(4/13, 'Importing Lung mask, please wait.');
+                progressBar(4/14, 'Importing Lung mask, please wait.');
 
                 aColor=[1 0.5 1]; % pink
 
@@ -205,7 +208,7 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
 
                 end
 
-                progressBar(5/13, 'Importing Lung Left mask, please wait.');
+                progressBar(5/14, 'Importing Lung Left mask, please wait.');
 
                 % Lung Left
 
@@ -236,7 +239,7 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
 
                 end
 
-                progressBar(6/13, 'Importing Lung Right mask, please wait.');
+                progressBar(6/14, 'Importing Lung Right mask, please wait.');
 
                 % Lung Right
 
@@ -262,12 +265,13 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
                         aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
 
                         maskToVoi(aMask, 'Lung Right', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-
+                        
+                        clear aMask;
                    end
 
                 end
 
-                progressBar(7/13, 'Importing Lung Upper Lobe Left mask, please wait.');
+                progressBar(7/14, 'Importing Lung Upper Lobe Left mask, please wait.');
 
                 % Lung Upper Lobe Left
 
@@ -286,10 +290,11 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
                     aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
 
                     maskToVoi(aMask, 'Lung Upper Lobe Left', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-                 
+
+                    clear aMask;
                 end
 
-                progressBar(8/13, 'Importing Lung Upper Lobe Right mask, please wait.');
+                progressBar(8/14, 'Importing Lung Upper Lobe Right mask, please wait.');
 
                 % Lung Upper Lobe Right
 
@@ -308,10 +313,11 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
                     aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
 
                     maskToVoi(aMask, 'Lung Upper Lobe Right', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-                 
+
+                    clear aMask;
                 end         
 
-                progressBar(9/13, 'Importing Lung Middle Lobe mask, please wait.');
+                progressBar(9/14, 'Importing Lung Middle Lobe mask, please wait.');
 
                 % Lung Middle Lobe
 
@@ -330,10 +336,11 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
                     aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
 
                     maskToVoi(aMask, 'Lung Middle Lobe Right', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-                 
+
+                    clear aMask;
                 end      
 
-                progressBar(10/13, 'Importing Lung Lower Lobe Left mask, please wait.');
+                progressBar(10/14, 'Importing Lung Lower Lobe Left mask, please wait.');
 
                 % Lung Lower Lobe Left
 
@@ -352,10 +359,11 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
                     aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
 
                     maskToVoi(aMask, 'Lung Lower Lobe Left', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-                 
+
+                    clear aMask;
                 end   
 
-                progressBar(11/13, 'Importing Lung Lower Lobe Right mask, please wait.');
+                progressBar(11/14, 'Importing Lung Lower Lobe Right mask, please wait.');
 
                 % Lung Lower Lobe Right
 
@@ -374,7 +382,8 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
                     aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
 
                     maskToVoi(aMask, 'Lung Lower Lobe Right', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-                 
+
+                    clear aMask;
                 end   
 
             end
@@ -391,13 +400,101 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
             errordlg('Machine Learning under Mac is not supported', 'Machine Learning Validation');
         end
 
-    end   
+    end  
+
+    if bResampleSeries
+
+        progressBar(12/14, 'Resampling image, please wait.');
+       
+        aCTImage = dicomBuffer('get', [], dCTSerieOffset);
+        if isempty(aCTImage)
+            aInputBuffer = inputBuffer('get');
+            aCTImage = aInputBuffer{dCTSerieOffset};
+
+            clear aInputBuffer;
+        end
+
+        % Resample NM to CT dimension
+
+        [aResampledNMImage, atResampledNMMeta] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);   
+    
+        dicomMetaData('set', atResampledNMMeta, dNMSerieOffset);
+        dicomBuffer  ('set', aResampledNMImage, dNMSerieOffset);
+
+        % Resample NM to CT dimension
+   
+        aMip = computeMIP(aResampledNMImage);
+    
+        mipBuffer('set', aMip, dNMSerieOffset);
+    
+        atRoi = roiTemplate('get', dNMSerieOffset);
+    
+        atResampledRoi = resampleROIs(aNMImage, atNMMetaData, aResampledNMImage, atResampledNMMeta, atRoi, true);
+                                
+        roiTemplate('set', dNMSerieOffset, atResampledRoi);
+    
+        resampleAxes(aResampledNMImage, atResampledNMMeta);
+    
+        setImagesAspectRatio();
+
+        % Increase image intensity
+
+        dMax = max(aResampledNMImage, [], 'all')/5;
+        dMin = min(aResampledNMImage, [], 'all');
+
+        windowLevel('set', 'max', dMax);
+        windowLevel('set', 'min' ,dMin);
+
+        setWindowMinMax(dMax, dMin);  
+      
+        % Set fusion
+    
+        if isFusion('get') == false
+    
+            set(uiFusedSeriesPtr('get'), 'Value', dCTSerieOffset);
+    
+            setFusionCallback();
+        end
+
+        % Set CT Window to Soft Tissue
+    
+        [dMax, dMin] = computeWindowLevel(500, 50);
+    
+        fusionWindowLevel('set', 'max', dMax);
+        fusionWindowLevel('set', 'min' ,dMin);
+    
+        setFusionWindowMinMax(dMax, dMin);  
+
+        % Set MIP CT Window to Temporal Bone
+
+        [dMax, dMin] = computeWindowLevel(1000, 350);
+       
+        if link2DMip('get') == true && isVsplash('get') == false
+            set(axesMipfPtr('get', [], dCTSerieOffset), 'CLim', [dMin dMax]);
+        end
+
+        sliderCorCallback();
+        sliderSagCallback();
+        sliderTraCallback();
+
+        % Clear buffer
+
+        clear aMip;
+        clear aCTImage;
+        clear aResampledNMImage;        
+    end
 
     setVoiRoiSegPopup();
 
+    % Activate ROI Panel
+
+    if viewRoiPanel('get') == false
+        setViewRoiPanel();
+    end
+
     refreshImages();
 
-    progressBar(12/13, 'Computing Lung Lobe Ratio, please wait.');
+    progressBar(13/14, 'Computing Lung Lobe Ratio, please wait.');
    
     generate3DLungLobeReport(true);
 
@@ -406,6 +503,10 @@ function setMachineLearning3DLobeLung(sSegmentatorPath)
     if exist(char(sNiiTmpDir), 'dir')
         rmdir(char(sNiiTmpDir), 's');
     end       
+
+    % Clear buffer
+ 
+    clear aNMImage;
 
     progressBar(1, 'Ready');
 

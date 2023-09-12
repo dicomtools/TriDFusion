@@ -266,6 +266,8 @@ function initDisplay(iMode)
                  'Tag'     , 'axef', ...
                  'Visible' , 'off'...
                  );
+        axef.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axef.Toolbar = [];         
         axefPtr('set', axef, get(uiFusedSeriesPtr('get'), 'Value'));
         
         axefc = ...
@@ -277,6 +279,8 @@ function initDisplay(iMode)
                  'Tag'     , 'axefc', ...
                  'Visible' , 'off'...
                  );
+        axefc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axefc.Toolbar = [];         
         axefcPtr('set', axefc, get(uiFusedSeriesPtr('get'), 'Value'));
         
 %        axer = ...
@@ -296,6 +300,8 @@ function initDisplay(iMode)
                  'Position', [0 0 1 1], ...
                  'Visible' , 'off'...
                  );
+        axe.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axe.Toolbar = [];          
         axePtr('set', axe, get(uiSeriesPtr('get'), 'Value'));
         
 %        linkaxes([axe axer],'xy');                                
@@ -524,6 +530,8 @@ end
                  'Tag'     , 'axes1f', ...
                  'Visible' , 'off'...
                  );
+        axes1f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axes1f.Toolbar = [];           
         axes1fPtr('set', axes1f, get(uiFusedSeriesPtr('get'), 'Value'));
         
         axes1fc = ...
@@ -540,6 +548,8 @@ end
                  'Tag'     , 'axes1fc', ...
                  'Visible' , 'off'...
                  );
+        axes1fc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axes1fc.Toolbar = [];           
         axes1fcPtr('set', axes1fc, get(uiFusedSeriesPtr('get'), 'Value'));
         
 %        axes1r = ...
@@ -571,6 +581,8 @@ end
                  'Tag'     , 'axes1', ...
                  'Visible' , 'off'...
                 );
+        axes1.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axes1.Toolbar = [];           
         axes1Ptr('set', axes1, get(uiSeriesPtr('get'), 'Value'));                            
         
 %        linkaxes([axes1 axes1r],'xy');                                
@@ -590,6 +602,8 @@ end
                  'Tag'     , 'axes2f', ...
                  'Visible' , 'off'...
                  );
+        axes2f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axes2f.Toolbar = [];         
         axes2fPtr('set', axes2f, get(uiFusedSeriesPtr('get'), 'Value'));
         
         axes2fc = ...
@@ -606,6 +620,8 @@ end
                  'Tag'     , 'axes2fc', ...
                  'Visible' , 'off'...
                  );
+        axes2fc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axes2fc.Toolbar = [];           
         axes2fcPtr('set', axes2fc, get(uiFusedSeriesPtr('get'), 'Value'));
         
 %         axes2r = ...
@@ -637,6 +653,8 @@ end
                  'Tag'     , 'axes2', ...
                  'Visible' , 'off'...
                  );
+        axes2.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axes2.Toolbar = [];            
         axes2Ptr('set', axes2, get(uiSeriesPtr('get'), 'Value'));        
         
 %        linkaxes([axes2 axes2r],'xy');                                
@@ -656,6 +674,8 @@ end
                  'Tag'     , 'axes3f', ...
                  'Visible' , 'off'...
                  );
+        axes3f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axes3f.Toolbar = [];         
         axes3fPtr('set', axes3f, get(uiFusedSeriesPtr('get'), 'Value'));
         
         axes3fc = ...
@@ -672,6 +692,8 @@ end
                  'Tag'     , 'axes3fc', ...
                  'Visible' , 'off'...
                  );
+        axes3fc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axes3fc.Toolbar = [];           
         axes3fcPtr('set', axes3fc, get(uiFusedSeriesPtr('get'), 'Value'));
         
 %        axes3r = ...
@@ -703,6 +725,8 @@ end
                  'Tag'     , 'axes3', ...
                  'Visible' , 'off'...
                  );
+        axes3.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axes3.Toolbar = [];           
         axes3Ptr('set', axes3, get(uiSeriesPtr('get'), 'Value'));                               
         
 %        linkaxes([axes3 axes3r],'xy');                                
@@ -722,6 +746,8 @@ end
                  'Tag'     , 'axesMipf', ...
                  'Visible' , 'off'...
                  );
+        axesMipf.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axesMipf.Toolbar = [];         
         axesMipfPtr('set', axesMipf, get(uiFusedSeriesPtr('get'), 'Value'));
         
         axesMipfc = ...
@@ -738,6 +764,8 @@ end
                  'Tag'     , 'axesMipfc', ...
                  'Visible' , 'off'...
                  );
+        axesMipfc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axesMipfc.Toolbar = [];           
         axesMipfcPtr('set', axesMipfc, get(uiFusedSeriesPtr('get'), 'Value'));
         
         axesMip = ...
@@ -753,6 +781,8 @@ end
                  'Tag'     , 'axesMip', ...
                  'Visible' , 'off'...
                  );
+        axesMip.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        axesMip.Toolbar = [];       
         axesMipPtr('set', axesMip, get(uiSeriesPtr('get'), 'Value'));
                 
     end
