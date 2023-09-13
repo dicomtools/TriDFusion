@@ -27,7 +27,7 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-%     try 
+    try 
 
     hfMask = poly2mask(hf.Position(:,1), hf.Position(:,2), xSize, ySize);
     hfPos = round(hf.Position);
@@ -82,8 +82,8 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType)
 
         end
     end
-%     catch
-%     end
+    catch
+    end
 
     function largestBoundary = getLargestboundary(cBoundaries)
 
