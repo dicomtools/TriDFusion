@@ -208,7 +208,8 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
     dMin = min(aBWMask, [], 'all');
 
 %     dTreshold = max(aResampledPTImage, [], 'all')*dBoundaryPercent;
-    dTreshold = (4.44/gdNormalLiverMean)*(gdNormalLiverMean+gdNormalLiverSTD);
+%    dTreshold = (4.44/gdNormalLiverMean)*(gdNormalLiverMean+gdNormalLiverSTD);
+    dTreshold = (1.5*gdNormalLiverMean)+(2*gdNormalLiverSTD);
     if dTreshold < 3
         dTreshold = 3;
     end
@@ -234,7 +235,9 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
 
     setSeriesCallback();            
 
-    sFormula = '(4.44/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map';
+ %   sFormula = '(4.44/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map';
+    sFormula = '(1.5 x Normal Liver SUVmean)+(2 x Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map';
+
     maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, 0, false, 0, true, sFormula, BWCT, dSmalestVoiValue,  gdNormalLiverMean, gdNormalLiverSTD);                
 
     clear aResampledPTImage;

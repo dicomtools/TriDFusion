@@ -148,12 +148,12 @@ function writeSeriestoNIICallback(~, ~)
     end
     mkdir(char(sTmpDir));  
 
-    if size(aBuffer, 3) ==1
-        aBuffer = aBuffer(end:-1:1,:);
-    else
-        aBuffer = aBuffer(:,:,end:-1:1);
-        aBuffer = aBuffer(end:-1:1,:,:);
-    end
+%     if size(aBuffer, 3) ==1
+%         aBuffer = aBuffer(end:-1:1,:);
+%     else
+%         aBuffer = aBuffer(:,:,end:-1:1);
+%         aBuffer = aBuffer(end:-1:1,:,:);
+%     end
     
     writeOtherFormatToDICOM(aBuffer, atDcmDicomMeta, sTmpDir, dSeriesOffset, false);
 

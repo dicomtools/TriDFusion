@@ -32,7 +32,12 @@ function setMachineLearning3DLungShuntCallback(~, ~)
     if ~isempty(sSegmentatorPath) % External Segmentor is installed
 
         setMachineLearning3DLungShunt(sSegmentatorPath, true, true);
-        
+
+%         pixelEdge('set', false);
+%         
+%         % Set contour panel checkbox
+%     
+%         set(chkPixelEdgePtr('get'), 'Value', pixelEdge('get'));      
     end
 
 end

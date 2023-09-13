@@ -41,8 +41,56 @@ function loadNIIMaskFile(sPath, sFileName)
 
     nii = nii_tool('load', sprintf('%s%s',sPath, sFileName));
 
-    aMask = imrotate3(double(nii.img), 90, [0 0 1], 'nearest');
-    aMask = aMask(end:-1:1,:,:);
+    if isfield(nii.hdr, 'pixdim')
+
+        if nii.hdr.dim(1) == 3
+%             voxelX = nii.hdr.pixdim(2);
+%             voxelY = nii.hdr.pixdim(3);
+            voxelZ = nii.hdr.pixdim(4);        
+        else    
+%             voxelX = nii.hdr.pixdim(2);
+%             voxelY = nii.hdr.pixdim(3);
+            voxelZ = 1;
+        end
+     else
+%         voxelX = 1;
+%         voxelY = 1;
+        voxelZ = 1;          
+    end
+
+    aImageOrientationPatient = zeros(6,1);
+    
+    % Axial
+    
+    aImageOrientationPatient(1) = 1;
+    aImageOrientationPatient(5) = 1;
+    
+    if numel(size(nii.img)) >2
+        aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
+%         aMask = aMask(end:-1:1,:,:);
+    else
+        aMask = imrotate(nii.img, 90, 'nearest');
+%         aMask = aMask(end:-1:1,:);        
+    end
+
+    sOrientation = getImageOrientation(aImageOrientationPatient);
+
+    if      strcmpi(sOrientation, 'Sagittal')
+        dCurrentLocation = aImageOrientationPatient(1);
+        dNextLocation = dCurrentLocation-voxelZ;
+    elseif  strcmpi(sOrientation, 'Coronal')
+        dCurrentLocation = aImageOrientationPatient(2);
+        dNextLocation = dCurrentLocation-voxelZ;
+    else    % Axial
+        dCurrentLocation = aImageOrientationPatient(3);
+        dNextLocation = dCurrentLocation-voxelZ;
+    end
+
+    if dCurrentLocation > dNextLocation                    
+        if size(aMask, 3) ~=1
+            aMask = aMask(:,:,end:-1:1);
+        end
+    end
 
     dVoiMax = max(aMask, [], 'all');
 

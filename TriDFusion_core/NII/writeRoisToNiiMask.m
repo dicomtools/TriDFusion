@@ -225,15 +225,15 @@ function writeRoisToNiiMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomB
     end
     mkdir(char(sDICOMPath)); 
 
-    if size(aMaskBuffer, 3) ==1
-        aMaskBuffer = aMaskBuffer(end:-1:1,:);
-    else
-        aMaskBuffer = aMaskBuffer(:,:,end:-1:1);
-        aMaskBuffer = aMaskBuffer(end:-1:1,:,:);
-
-%        aMaskBuffer = aMaskBuffer(:,:,2:end);
-
-    end
+%     if size(aMaskBuffer, 3) ==1
+%         aMaskBuffer = aMaskBuffer(end:-1:1,:);
+%     else
+%         aMaskBuffer = aMaskBuffer(:,:,end:-1:1);
+%         aMaskBuffer = aMaskBuffer(end:-1:1,:,:);
+% 
+% %        aMaskBuffer = aMaskBuffer(:,:,2:end);
+% 
+%     end
 % 
 %     for ww=1:numel(atDicomMeta)
 %         atDicomMeta{ww}.RescaleIntercept = 0;

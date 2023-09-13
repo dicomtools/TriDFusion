@@ -144,11 +144,11 @@ function loadNIIFile(sPath, sFileName)
     end
 
     if numel(size(nii.img)) >2
-        aBuffer = imrotate3(double(nii.img), 90, [0 0 1], 'nearest');
-        aBuffer = aBuffer(end:-1:1,:,:);
+        aBuffer = imrotate3(nii.img, 90, [0 0 1], 'nearest');
+%         aBuffer = aBuffer(end:-1:1,:,:);
     else
-        aBuffer = imrotate(double(nii.img), 90, 'nearest');
-        aBuffer = aBuffer(end:-1:1,:);        
+        aBuffer = imrotate(nii.img, 90, 'nearest');
+%         aBuffer = aBuffer(end:-1:1,:);        
     end
 
     if ~isempty(atInput)
@@ -328,8 +328,27 @@ function loadNIIFile(sPath, sFileName)
         atInput(1).tMovement.atSeq{1}.dRotation    = [];  
         
         asSeries{1} = asSeriesDescription{1};              
-    end   
-    
+    end 
+
+    sOrientation = getImageOrientation(aImageOrientationPatient);
+
+    if      strcmpi(sOrientation, 'Sagittal')
+        dCurrentLocation = aImageOrientationPatient(1);
+        dNextLocation = dCurrentLocation-voxelZ;
+    elseif  strcmpi(sOrientation, 'Coronal')
+        dCurrentLocation = aImageOrientationPatient(2);
+        dNextLocation = dCurrentLocation-voxelZ;
+    else    % Axial
+        dCurrentLocation = aImageOrientationPatient(3);
+        dNextLocation = dCurrentLocation-voxelZ;
+    end
+
+    if dCurrentLocation > dNextLocation                    
+        if size(aBuffer, 3) ~=1
+            aBuffer = aBuffer(:,:,end:-1:1);
+        end
+    end
+
     imageOrientation('set', 'axial');
             
     seriesDescription('set', asSeriesDescription);

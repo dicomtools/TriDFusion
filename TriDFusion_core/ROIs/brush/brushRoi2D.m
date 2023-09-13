@@ -53,7 +53,7 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType)
     if any(hfMask(:) ~= newMask(:))
 
         B = bwboundaries(newMask, 'noholes', 8);
-    
+
         if isempty(B)
             deleteRoiEvents(hf);
         else
@@ -72,8 +72,8 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType)
             dBoundaryOffset = getLargestboundary(B);
 
             if pixelEdge('get')
-                  B{dBoundaryOffset} = (B{dBoundaryOffset} + 1) / 3;
-                  B{dBoundaryOffset} = reducepoly(B{dBoundaryOffset});
+                B{dBoundaryOffset} = (B{dBoundaryOffset} + 1) / 3;
+                B{dBoundaryOffset} = reducepoly(B{dBoundaryOffset});
             else                                      
                 B{dBoundaryOffset} = smoothRoi(B{dBoundaryOffset}, [xSize, ySize]);
             end
@@ -85,20 +85,23 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType)
 %     catch
 %     end
 
-    function largestBoundary = getLargestboundary(cBoundaries)    
+    function largestBoundary = getLargestboundary(cBoundaries)
 
         % Initialize variables to keep track of the largest boundary and its size
         largestBoundary = 1;
         largestSize = 0;
-        
+    
+        % Determine the number of boundaries outside the loop for efficiency
+        numBoundaries = length(cBoundaries);
+    
         % Loop through each boundary in 'B'
-        for k = 1:length(cBoundaries)
+        for k = 1:numBoundaries
             % Get the current boundary
             boundary = cBoundaries{k};
-            
+    
             % Calculate the size of the current boundary
             boundarySize = size(boundary, 1);
-            
+    
             % Check if the current boundary is larger than the previous largest
             if boundarySize > largestSize
                 largestSize = boundarySize;
@@ -106,5 +109,4 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType)
             end
         end
     end
-
 end

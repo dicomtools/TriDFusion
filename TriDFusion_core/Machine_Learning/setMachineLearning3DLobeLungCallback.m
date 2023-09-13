@@ -32,6 +32,12 @@ function setMachineLearning3DLobeLungCallback(~, ~)
     if ~isempty(sSegmentatorPath) % External Segmentor is installed
         
         setMachineLearning3DLobeLung(sSegmentatorPath, true, true);
+
+%         pixelEdge('set', false);
+%         
+%         % Set contour panel checkbox
+%     
+%         set(chkPixelEdgePtr('get'), 'Value', pixelEdge('get'));  
     end
 
 end

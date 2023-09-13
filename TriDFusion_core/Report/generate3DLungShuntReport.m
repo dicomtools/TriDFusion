@@ -1344,7 +1344,7 @@ function generate3DLungShuntReport(bInitReport)
                 
         % Compute Lungs segmentation
         
-        progressBar( 1/2, 'Computing lungs segmentation, please wait' );
+        progressBar( 1/3, 'Computing lungs segmentation, please wait' );
        
         if numel(tReport.Lungs.RoisTag) ~= 0  
        
@@ -1353,7 +1353,7 @@ function generate3DLungShuntReport(bInitReport)
             
             dNbCells = 0;
 
-            lungsMask = zeros(size(aImage));
+            lungsMask = logical(false(size(aImage)));
          
             for uu=1:numel(tReport.Lungs.RoisTag)
 
@@ -1473,7 +1473,7 @@ function generate3DLungShuntReport(bInitReport)
         
         % Compute Liver lesion
         
-        progressBar( 1.9/2, 'Computing liver segmentation, please wait' );
+        progressBar( 2/3, 'Computing liver segmentation, please wait' );
        
         if numel(tReport.Liver.RoisTag) ~= 0  
 
@@ -1482,7 +1482,7 @@ function generate3DLungShuntReport(bInitReport)
             
             dNbCells = 0;
 
-            liverMask = zeros(size(aImage));
+            liverMask = logical(false(size(aImage)));
          
             for uu=1:numel(tReport.Liver.RoisTag)
 
@@ -2074,11 +2074,11 @@ function generate3DLungShuntReport(bInitReport)
         dLiverMaskOffset = round(str2double(get(uiEditLiverVolumeOversized, 'String')));
         dLungsMaskOffset = round(str2double(get(uiEditLungsVolumeOversized, 'String')));
 
-        bLungsCanOverlapTheLiver =  get(uiCheckLungsVolumeOverlap, 'value');
+        bLungsCanOverlapTheLiver = get(uiCheckLungsVolumeOverlap, 'value');
 
         if ~isempty(gtReport) 
 
-%              try
+             try
 
             set(fig3DLungShuntReport, 'Pointer', 'watch');
             drawnow;
@@ -2129,7 +2129,8 @@ function generate3DLungShuntReport(bInitReport)
     
                 if dLiverMaskOffset ~= 0
     
-                    if dNbExtraSlicesAtTop < 0 || dNbExtraSlicesAtBottom < 0
+                    if dNbExtraSlicesAtTop < 0 || ...
+                       dNbExtraSlicesAtBottom < 0
     
                         aLiverMaskTemp = imdilate(aLiverMask, strel('sphere', dLiverMaskOffset)); % Increse mask by x pixels
         
@@ -2137,11 +2138,13 @@ function generate3DLungShuntReport(bInitReport)
                         aLiverMaskTemp(:,:,dLastSlice+1+dNbExtraSlicesAtBottom:end) = 0;
     
                         if dNbExtraSlicesAtTop < 0
-                            aLiverMaskTemp(:,:,dFirstSlice:dFirstSlice-1-dNbExtraSlicesAtTop) = aLiverMask(:,:,dFirstSlice:dFirstSlice-1-dNbExtraSlicesAtTop);
+                            aLiverMaskTemp(:,:,dFirstSlice:dFirstSlice-1-dNbExtraSlicesAtTop) = ...
+                                aLiverMask(:,:,dFirstSlice:dFirstSlice-1-dNbExtraSlicesAtTop);
                         end
     
                         if dNbExtraSlicesAtBottom < 0
-                            aLiverMaskTemp(:,:,dLastSlice+1+dNbExtraSlicesAtBottom:dLastSlice) = aLiverMask(:,:,dLastSlice+1+dNbExtraSlicesAtBottom:dLastSlice);
+                            aLiverMaskTemp(:,:,dLastSlice+1+dNbExtraSlicesAtBottom:dLastSlice) = ...
+                                aLiverMask(:,:,dLastSlice+1+dNbExtraSlicesAtBottom:dLastSlice);
                         end
     
     
@@ -2158,10 +2161,20 @@ function generate3DLungShuntReport(bInitReport)
                           
                 deleteLungShuntVoiContours('Liver-LIV', dNMSerieOffset);
 
+%                 if pixelEdge('get') == false
+%                     aLiverMask = smooth3DMask(aLiverMask, 1.0, 5 ,0.1);
+%                 end
+
                 if numel(aLiverMask) ~= numel(aNMImage)
 
                     [aLiverMask, ~] = resampleImage(aLiverMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
                 end
+
+%                 if pixelEdge('get') == false
+%                     
+%                     % Smooth the 3D mask using smooth3
+%                     aLiverMask = smooth3(aLiverMask, 'box', 3);
+%                 end
 
                 maskToVoi(aLiverMask, 'Liver', 'Liver', gtReport.Liver.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
                 
@@ -2175,11 +2188,20 @@ function generate3DLungShuntReport(bInitReport)
                     aLungsMask = imdilate(aLungsMask, strel('sphere', dLungsMaskOffset)); % Increse mask by x pixels
                 end
 
-                if numel(aLungsMask) ~= numel(dicomBuffer('get'))
+%                 if pixelEdge('get') == false
+%                     aLungsMask = smooth3DMask(aLungsMask, 1.0, 5 ,0.1);
+%                 end
+
+                if numel(aLungsMask) ~= numel(aNMImage)
 
                     [aLungsMask, ~] = resampleImage(aLungsMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false);  
-
                 end  
+
+%                 if pixelEdge('get') == false
+%                     
+%                     % Smooth the 3D mask using smooth3
+%                     aLungsMask = smooth3(aLungsMask, 'box', 3);
+%                 end
 
                 if bLungsCanOverlapTheLiver == false
                     aLungsMask(aLiverMask~=0)=0;
@@ -2189,17 +2211,25 @@ function generate3DLungShuntReport(bInitReport)
 
                 maskToVoi(aLungsMask, 'Lungs', 'Lung', gtReport.Lungs.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
     
-                clear aLiverMask;
-                clear aLungsMask;
-
                 lungShuntLiverTopOfVolumeExtraSlices   ('set', dNbExtraSlicesAtTop);
                 lungShuntLiverBottomOfVolumeExtraSlices('set', dNbExtraSlicesAtBottom);
     
                 lungShuntLiverVolumeOversized('set', dLiverMaskOffset);
                 lungShuntLungsVolumeOversized('set', dLungsMaskOffset);
 
+%                 if numel(aLiverMask) ~= numel(aNMImage)
+% 
+%                     atRoi = roiTemplate('get', dNMSerieOffset);
+%                 
+%                     atResampledRoi = resampleROIs(aLiverMask, atNMMetaData, dicomBuffer('get'), dicomMetaData('get'), atRoi, true);
+%                                             
+%                     roiTemplate('set', dNMSerieOffset, atResampledRoi);
+%                 end
+
+                clear aLiverMask;
+                clear aLungsMask;
             end
-            
+
             clear aNMImage;
             clear aCTImage;
 
@@ -2281,9 +2311,9 @@ function generate3DLungShuntReport(bInitReport)
 
             progressBar(1, 'Ready');
 
-%             catch
-%                 progressBar(1, 'Error: proceedLiverVolumeOversize()');
-%             end
+            catch
+                progressBar(1, 'Error: proceedLiverVolumeOversize()');
+            end
 
             set(uiSliderLiverVolumeRatio, 'Enable', 'on');
             set(uiSliderLungsVolumeRatio, 'Enable', 'on');
