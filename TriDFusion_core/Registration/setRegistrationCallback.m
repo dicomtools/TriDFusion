@@ -1424,7 +1424,7 @@ function setRegistrationCallback(~, ~)
                             sReport = sprintf('%s\n\nMoving Series:\n%s', sReport, sRmoving);
                             sRregistered = R_regToString(Rregistered);
                             sReport = sprintf('%s\nRegistrated Series:\n%s\n', sReport, sRregistered);
-                                    if isfield(registratedGeomtform, 'T')                                  
+                            if isfield(registratedGeomtform, 'T')                                  
                                 sGeomtform = num2str(registratedGeomtform.T);
                                 dGeomtformSize = size(sGeomtform, 1);
                                 sReport = sprintf('%sGeomtform:',sReport);

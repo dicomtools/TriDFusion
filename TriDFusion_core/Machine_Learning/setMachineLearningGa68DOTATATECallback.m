@@ -878,7 +878,6 @@ function setMachineLearningGa68DOTATATECallback(~, ~)
 
         % Gastrointestinal Tract Name
 
-        tGa68DOTATATE.exclude.gastrointestinal.urinaryBladder = get(chkGa68DOTATATEUrinaryBladder, 'value');
         tGa68DOTATATE.exclude.gastrointestinal.esophagus      = get(chkGa68DOTATATEEsophagus     , 'value');
         tGa68DOTATATE.exclude.gastrointestinal.stomach        = get(chkGa68DOTATATEStomach       , 'value');
         tGa68DOTATATE.exclude.gastrointestinal.duodenum       = get(chkGa68DOTATATEDuodenum      , 'value');

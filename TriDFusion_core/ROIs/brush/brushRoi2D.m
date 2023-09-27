@@ -45,14 +45,13 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType)
         newMask = hfMask & ~heMask;
     end
     
-    if pixelEdge('get')          
-        hfMask  = kron(hfMask, ones(3));
-        newMask = kron(newMask, ones(3));
-    end
-    
     if any(hfMask(:) ~= newMask(:))
 
-        B = bwboundaries(newMask, 'noholes', 8);
+        if pixelEdge('get')          
+            newMask = kron(newMask, ones(3));
+        end
+
+        [B,~,n,~] = bwboundaries(newMask, 'noholes', 8);
 
         if isempty(B)
             deleteRoiEvents(hf);
@@ -68,8 +67,12 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType)
                     end
                 end
             end
-
-            dBoundaryOffset = getLargestboundary(B);
+            
+            if n > 1
+                dBoundaryOffset = getLargestboundary(B);
+            else
+                dBoundaryOffset = 1;
+            end
 
             if pixelEdge('get')
                 B{dBoundaryOffset} = (B{dBoundaryOffset} + 1) / 3;

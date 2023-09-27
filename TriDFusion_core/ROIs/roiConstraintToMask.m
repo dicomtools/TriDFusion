@@ -48,15 +48,16 @@ function aLogicalMaskOut = roiConstraintToMask(aImage, tRoiInput, asConstraintTa
                 sAxe   = tRoiInput{dTagOffset}.Axe;
 
                 switch lower(sAxe)
+
                     case 'axe'
 
                         aSlice = aImage(:,:);
                         roiMask = roiTemplateToMask(tRoiInput{dTagOffset}, aSlice);
 
-                        aSlice( roiMask) =1;
-                        aSlice(~roiMask) =0;
+                        aSlice( roiMask) = 1;
+                        aSlice(~roiMask) = 0;
 
-                        aLogicalMask(:,:) = aLogicalMask(:,:)|aSlice; % Add to final mask
+                        aLogicalMask(:,:) = aLogicalMask(:,:)+aSlice; % Add to final mask
                 end
 
             end
@@ -85,30 +86,30 @@ function aLogicalMaskOut = roiConstraintToMask(aImage, tRoiInput, asConstraintTa
                     case 'axes1' % Coronal
 
                          if strcmpi(sConstraintType, 'Inside Every Slice') 
-tic                            
+                            
                             roiMask = roiTemplateToMask(tRoiInput{dTagOffset}, permute(aImage(1,:,:), [3 2 1]));
                             for dd=1:size(aImage, 1)
 
                                 aSlice  = permute(aImage(dd,:,:), [3 2 1]);
-                                aSlice( roiMask) =1;
-                                aSlice(~roiMask) =0;
+                                aSlice( roiMask) = 1;
+                                aSlice(~roiMask) = 0;
 
                                 aSlice = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]); 
 
-                                aLogicalMask(dd,:,:) = aLogicalMask(dd,:,:)|aSlice; % Add to final mask                                        
+                                aLogicalMask(dd,:,:) = aLogicalMask(dd,:,:)+aSlice; % Add to final mask                                        
                             end
-toc
+
                          else
 
                             aSlice  = permute(aImage(dSliceNb,:,:), [3 2 1]);
                             roiMask = roiTemplateToMask(tRoiInput{dTagOffset}, aSlice);
 
-                            aSlice( roiMask) =1;
-                            aSlice(~roiMask) =0;
+                            aSlice( roiMask) = 1;
+                            aSlice(~roiMask) = 0;
 
                             aSlice = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);  
 
-                            aLogicalMask(dSliceNb,:,:) = aLogicalMask(dSliceNb,:,:)|aSlice; % Add to final mask                                    
+                            aLogicalMask(dSliceNb,:,:) = aLogicalMask(dSliceNb,:,:)+aSlice; % Add to final mask                                    
                          end
 
                     case 'axes2' % Sagittal
@@ -121,24 +122,24 @@ toc
 
                                 aSlice  = permute(aImage(:,dd,:), [3 1 2]);
                                 
-                                aSlice( roiMask) =1;
-                                aSlice(~roiMask) =0;
+                                aSlice( roiMask) = 1;
+                                aSlice(~roiMask) = 0;
 
                                 aSlice = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
 
-                                aLogicalMask(:,dd,:) = aLogicalMask(:,dd,:)|aSlice; % Add to final mask
+                                aLogicalMask(:,dd,:) = aLogicalMask(:,dd,:)+aSlice; % Add to final mask
                             end
                          else
 
                             aSlice = permute(aImage(:,dSliceNb,:), [3 1 2]);
                             roiMask = roiTemplateToMask(tRoiInput{dTagOffset}, aSlice);
                             
-                            aSlice( roiMask) =1;
-                            aSlice(~roiMask) =0;
+                            aSlice( roiMask) = 1;
+                            aSlice(~roiMask) = 0;
 
                             aSlice = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);  
 
-                            aLogicalMask(:,dSliceNb,:) = aLogicalMask(:,dSliceNb,:)|aSlice; % Add to final mask
+                            aLogicalMask(:,dSliceNb,:) = aLogicalMask(:,dSliceNb,:)+aSlice; % Add to final mask
 
                          end                                
 
@@ -152,10 +153,10 @@ toc
 
                                 aSlice  = aImage(:,:,dd);
 
-                                aSlice( roiMask) =1;
-                                aSlice(~roiMask) =0;
+                                aSlice( roiMask) = 1;
+                                aSlice(~roiMask) = 0;
 
-                                aLogicalMask(:,:,dd) = aLogicalMask(:,:,dd)|aSlice; % Add to final mask
+                                aLogicalMask(:,:,dd) = aLogicalMask(:,:,dd)+aSlice; % Add to final mask
                             end
                          else
 
@@ -165,7 +166,7 @@ toc
                             aSlice( roiMask) =1;
                             aSlice(~roiMask) =0;
 
-                            aLogicalMask(:,:,dSliceNb) = aLogicalMask(:,:,dSliceNb)|aSlice; % Add to final mask
+                            aLogicalMask(:,:,dSliceNb) = aLogicalMask(:,:,dSliceNb)+aSlice; % Add to final mask
 
                          end    
                 end
@@ -175,8 +176,14 @@ toc
       
     end
     
-    if aLogicalMask(aLogicalMask==1) % Need at least one constraint
-        
+    if aLogicalMask(aLogicalMask>0) % Need at least one constraint
+
+        if numel(asConstraintTagList) > 1
+            
+            aLogicalMask(aLogicalMask<numel(asConstraintTagList)) = 0;
+            aLogicalMask(aLogicalMask~=0)=1;
+        end
+         
         if bInvertMask == true
             aLogicalMask = ~aLogicalMask;
         else
@@ -186,7 +193,7 @@ toc
         aLogicalMask = [];
     end
 
-    aLogicalMaskOut = gather(aLogicalMask);
+    aLogicalMaskOut = logical(gather(aLogicalMask));
 
     clear aLogicalMask; 
 

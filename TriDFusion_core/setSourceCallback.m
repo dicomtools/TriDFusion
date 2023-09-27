@@ -47,7 +47,9 @@ function setSourceCallback(~, ~)
     sMainDir{1} = uigetdir(sCurrentDir);
 
     if sMainDir{1} ~= 0
-        
+
+        roiConstraintList('reset'); % Delete all masks
+       
          % Deactivate main tool bar 
         set(uiSeriesPtr('get'), 'Enable', 'off');                        
         mainToolBarEnable('off');       
@@ -653,10 +655,11 @@ function setSourceCallback(~, ~)
                 clearDisplay();
                 initDisplay(3);
 
-%                link2DMip('set', true);
+                link2DMip('set', true);
 
-%                set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
-%                set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get')); 
+                set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+                set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get')); 
+                set(btnLinkMipPtr('get'), 'FontWeight', 'bold');
                     
                 dicomViewerCore();
 

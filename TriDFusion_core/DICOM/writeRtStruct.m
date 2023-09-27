@@ -256,77 +256,91 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 %                                aBoundaries = aBoundaries{:};
 %                                aBoundaries = aBoundaries/PIXEL_EDGE_RATIO;
 
-                                xy = atRoiInput{tt}.Vertices-1;
+                            xy = atRoiInput{tt}.Vertices-1;
 
-                                dNBoundaries = size(xy,1);                          
+                            aBoundaries = zeros(size(xy, 1),2);
 
-                                azOffset = zeros(dNBoundaries, 1);
-                                if numel(atDicomMeta) ~= 1
-                                    azOffset(:)=atRoiInput{tt}.SliceNb-1;
+                            aBoundaries(:,1)=xy(:,2);
+                            aBoundaries(:,2)=xy(:,1);
+
+                            dNBoundaries = size(aBoundaries,1);
+
+                            a3DOffset = zeros(size(xy, 1),3);
+                
+                            a3DOffset(:,1)=xy(:,1)-1;
+                            a3DOffset(:,2)=xy(:,2)-1;
+                            if numel(atDicomMeta) ~= 1
+                                a3DOffset(:,3)=atRoiInput{tt}.SliceNb-1;
+                            else
+                                a3DOffset(:,3)=atRoiInput{tt}.SliceNb;
+                            end
+%                            a3DOffset(:,3)=atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
+
+                            if bFlip == true
+                                a3DOffset(:,3) = dZsize-a3DOffset(:,3);
+                            end
+                                
+                            sliceThikness = computeSliceSpacing(atDicomMeta);       
+                            [xfm,~] = TransformMatrix(atDicomMeta{1}, sliceThikness);
+%                            out = pctransform(pointCloud(a3DOffset), affine3d(xfm'));
+
+%                            aX = out.Location(:,1);
+%                            aY = out.Location(:,2);
+                            
+                            [outX, outY, outZ] = transformPointsForward(affine3d(xfm'), a3DOffset(:,1), a3DOffset(:,2), a3DOffset(:,3)); 
+                            
+                            aX = outX(:);
+                            aY = outY(:);
+                            
+%                            aZ = out.Location(:,3);
+                            aZ = zeros(dNBoundaries, 1);
+                            if numel(atDicomMeta) == 1
+%                                aZ(:) = a3DOffset(:,3);                                
+                                aZ = outZ(:);                                
+                            else
+                                if atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation == 0
+                                    aZ(:) = outZ(:);
                                 else
-                                    azOffset(:)=atRoiInput{tt}.SliceNb;
-                                end
-                        %        azOffset(:)=atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
+                        %            aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
+                                    aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.ImagePositionPatient(3);
+                               end
+                            end
+                            
 
+ %                           aZ = zeros(dNBoundaries, 1);
+ %                           aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
+ 
+                            aXYZ = zeros(dNBoundaries*3, 1);
 
-                                if bFlip == true
-                                    azOffset(:) = dZsize-azOffset(:);
-                                end
+                            dXOffset=1;
+                            for xx=1:3:numel(aXYZ)
+                                aXYZ(xx)=aX(dXOffset);
+                                dXOffset = dXOffset+1;
+                            end
 
-                                sliceThikness = computeSliceSpacing(atDicomMeta);       
-                                [xfm,~] = TransformMatrix(atDicomMeta{1}, sliceThikness);
-    %                            out = pctransform(pointCloud(a3DOffset), affine3d(xfm'));
-
-    %                            aX = out.Location(:,1);
-    %                            aY = out.Location(:,2);
-
-                                [aX, aY, outZ] = transformPointsForward(affine3d(xfm'), xy(:,1), xy(:,2), azOffset(:)); 
-                       %     outZ(:)=atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
-%                                 aX = (aBoundaries(:,2)-(size(aDicomBuffer,1)/2)) * atDicomMeta{atRoiInput{tt}.SliceNb}.PixelSpacing(1);
-%                                 aY = (aBoundaries(:,1)-(size(aDicomBuffer,2)/2)) * atDicomMeta{atRoiInput{tt}.SliceNb}.PixelSpacing(2);
-
-                                 
-                                 aZ = zeros(dNBoundaries, 1);
-                                 if numel(atDicomMeta) == 1
-    %                                aZ(:) = a3DOffset(:,3);                                
-                                    aZ = outZ(:);                                
-                                 else
-                                    if atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation == 0
-                                        aZ(:) = outZ(:);
-                                    else
-                                      %  aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
-                                        aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.ImagePositionPatient(3);
-                                    end
-                                 end
-
-                                 aXYZ = zeros(dNBoundaries*3, 1);
-                          
-                                 dXOffset=1;
-                                 for xx=1:3:size(aXYZ,1)
-                                    aXYZ(xx) = aX(dXOffset);
-                                    dXOffset = dXOffset+1;
-                                 end
+                            dYOffset=1;
+                            for yy=2:3:numel(aXYZ)
+                                aXYZ(yy) = aY(dYOffset);
+                                dYOffset = dYOffset+1;
+                            end
+                            
+                            dZOffset=1;
+                            for zz=3:3:numel(aXYZ)
+                                aXYZ(zz)=aZ(dZOffset);
+                                dZOffset = dZOffset+1;                               
+                            end
+                            
+                            if numel(aXYZ)*64/8 > 65534
+                                dNBoundaries = 1;
+                                aXYZ = zeros(dNBoundaries*3, 1);
+                            end
+                            
+                            info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPClassUID    = atRoiInput{tt}.SOPClassUID;
+                            info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPInstanceUID = atRoiInput{tt}.SOPInstanceUID;
+                            info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourGeometricType = 'CLOSED_PLANAR';
     
-                                 dYOffset=1;
-                                 for yy=2:3:size(aXYZ,1)
-                                    aXYZ(yy) = aY(dYOffset);
-                                    dYOffset = dYOffset+1;
-                                 end
-    
-                                 dZOffset=1;
-                                 for zz=3:3:size(aXYZ,1)
-                                    aXYZ(zz) = aZ(dZOffset);
-%                                    if bFlip == false % patch for spect, to revisit
-                                        dZOffset = dZOffset+1;
-%                                    end
-                                 end  
-
-                                 info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPClassUID = atRoiInput{tt}.SOPClassUID;
-                                 info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourImageSequence.Item_1.ReferencedSOPInstanceUID = atRoiInput{tt}.SOPInstanceUID;
-                                 info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourGeometricType = 'CLOSED_PLANAR';
-        
-                                 info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).NumberOfContourPoints = dNBoundaries; % To revisit
-                                 info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourData = aXYZ; % TO DO [NumberOfContourPoints * xyz]                                 
+                            info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).NumberOfContourPoints = dNBoundaries; % To revisit
+                            info.ROIContourSequence.(sVOIitemName).ContourSequence.(sROIitemName).ContourData = aXYZ; % TO DO [NumberOfContourPoints * xyz]                                   
 %                             end
                          else
                             aBoundaries = zeros(size(atRoiInput{tt}.Position, 1),2);

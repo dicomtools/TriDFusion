@@ -285,6 +285,13 @@ function resize = dicomViewer()
     FDGSegmentationBoundaryPercentValue('set', 10);
     FDGSmalestVoiValue('set', 0.3);
 
+    excludeLymphNodeSUVBrain('set', true);
+    excludeLymphNodeSUVUrinaryBladder('set', true);
+    excludeLymphNodeSUVKidneyLeft('set', false);
+    excludeLymphNodeSUVKidneyRight('set', false);
+    excludeLymphNodeSUVSmallBowel('set', false);
+    segmentLymphNodeSUVSpleen('set', true);
+
     % FDHT segmentation
 
     FDHTSegmentationBoneMaskThresholdValue('set', 100); % HU
@@ -300,6 +307,13 @@ function resize = dicomViewer()
     Lu177NormalLiverSDValue('set', 0.4);
     Lu177NormalLiverMeanValue('set', 4);
     Lu177SmalestVoiValue('set', 0.3);
+
+    excludeLu177Brain('set', true);
+    excludeLu177UrinaryBladder('set', true);
+    excludeLu177KidneyLeft('set', true);
+    excludeLu177KidneyRight('set', true);
+    excludeLu177SmallBowel('set', false);
+    excludeLu177Spleen('set', true);
 
     % PSMA segmentation
 

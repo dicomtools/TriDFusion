@@ -191,24 +191,6 @@ function aExcludeMask = getGa68DOTATATEExcludeMask(tGa68DOTATATE, sSegmentationF
 
     % Gastrointestinal Tract Name
 
-    % Urinary Bladder
-
-    if tGa68DOTATATE.exclude.gastrointestinal.urinaryBladder == true
-
-        sNiiFileName = sprintf('%s%s', sSegmentationFolderName, 'urinary_bladder.nii.gz');
-    
-        if exist(sNiiFileName, 'file')
-
-            nii = nii_tool('load', sNiiFileName);
-            aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
-
-            aExcludeMask(aObjectMask~=0)=1;
-
-            clear aObjectMask;
-            clear nii;
-        end
-    end 
-
     % Esophagus
 
     if tGa68DOTATATE.exclude.gastrointestinal.esophagus == true

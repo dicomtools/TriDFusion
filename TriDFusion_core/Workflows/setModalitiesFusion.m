@@ -121,6 +121,9 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
     setImagesAspectRatio();
 
+    refreshImages();
+    drawnow;
+
     progressBar(2/4, 'Resampling roi, please wait.');
     
     atRoi = roiTemplate('get', dSerie1Offset);

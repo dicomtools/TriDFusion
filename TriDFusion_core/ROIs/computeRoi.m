@@ -165,7 +165,7 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
         tRoiComputed.mean   = mean(imCData, 'all')   * dSUVScale;
         tRoiComputed.median = median(imCData, 'all') * dSUVScale;
 
-        volMean = mean(double(imCData), 'all'); % To verify              
+        volMean = mean(imCData, 'all'); % To verify              
         tRoiComputed.sum    = voxVolume * nbVoxels * volMean * dSUVScale;
         tRoiComputed.std    = std(imCData,[],'all') * dSUVScale;           
 

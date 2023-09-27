@@ -230,12 +230,12 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorPath, sOnnxPath, dMode
                    
                             aLiverMask = getLiverMask(zeros(size(aCTImage)), sSegmentationFolderName);
             
-                            aLiverMask =  logical(imdilate(aLiverMask, strel('sphere', 4))); % Increse Liver mask by 3 pixels
+                            aLiverMask =  imdilate(aLiverMask, strel('sphere', 4)); % Increse Liver mask by 3 pixels
     
     
                             progressBar(6/13, 'Computing bone map, please wait.');
                             
-                            aBoneMask = logical(getTotalSegmentorWholeBodyMask(sSegmentationFolderName, zeros(size(aCTImage))));
+                            aBoneMask = getTotalSegmentorWholeBodyMask(sSegmentationFolderName, zeros(size(aCTImage)));
                             aBoneMask = imfill(aBoneMask, 4, 'holes');                       
 %                            aBoneMask = imdilate(aBoneMask, strel('sphere', 1)); % Increse Liver mask by 3 pixels
 
@@ -244,19 +244,19 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorPath, sOnnxPath, dMode
 
                         progressBar(7/13, 'Resampling series, please wait.');
                                 
-                        [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, true);   
+                        [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
                        
                         dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
                         dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
    
                         
-                        progressBar(8/13, 'Resampling roi, please wait.');
-        
-                        atRoi = roiTemplate('get', dPTSerieOffset);
-        
-                        atResampledRoi = resampleROIs(aPTImage, atPTMetaData, aResampledPTImage, atResampledPTMetaData, atRoi, true);
-        
-                        roiTemplate('set', dPTSerieOffset, atResampledRoi);  
+%                         progressBar(8/13, 'Resampling roi, please wait.');
+%         
+%                         atRoi = roiTemplate('get', dPTSerieOffset);
+%         
+%                         atResampledRoi = resampleROIs(aPTImage, atPTMetaData, aResampledPTImage, atResampledPTMetaData, atRoi, true);
+%         
+%                         roiTemplate('set', dPTSerieOffset, atResampledRoi);  
         
         
                         progressBar(9/13, 'Resampling mip, please wait.');
@@ -277,7 +277,7 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorPath, sOnnxPath, dMode
                         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
                         drawnow;
 
-                        [aOnnxOutputMask, ~] = resampleImage(aOnnxOutputMask, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, true);   
+                        [aOnnxOutputMask, ~] = resampleImage(aOnnxOutputMask, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
 
                         if tGa68DOTATATE.options.smoothMask == true
                             aOnnxOutputMask = smooth3DMask(aOnnxOutputMask, 1.0, 5 ,0.1);
@@ -285,10 +285,46 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorPath, sOnnxPath, dMode
 
                         if tGa68DOTATATE.classification.enable == true 
 
+                            if ~isequal(size(aBoneMask), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+                        
+                                 aBoneMask = resample3DImage(aBoneMask, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
+                                 aBoneMask = imbinarize(aBoneMask);
+                        
+                                if ~isequal(size(aBoneMask), size(aResampledPTImage)) % Verify if both images are in the same field of view     
+                                    aBoneMask = resizeMaskToImageSize(aBoneMask, aResampledPTImage); 
+                                end
+                            else
+                                aBoneMask = imbinarize(aBoneMask);
+                            end
+
+                            if ~isequal(size(aLiverMask), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+                        
+                                 aLiverMask = resample3DImage(aLiverMask, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
+                                 aLiverMask = imbinarize(aLiverMask);
+                        
+                                if ~isequal(size(aLiverMask), size(aResampledPTImage)) % Verify if both images are in the same field of view     
+                                    aLiverMask = resizeMaskToImageSize(aLiverMask, aResampledPTImage); 
+                                end
+                            else
+                                aLiverMask = imbinarize(aLiverMask);
+                            end
+
                             progressBar(11/13, 'Importing exclusion masks, please wait.');
             
-                            aExcludeMask = logical(getGa68DOTATATEExcludeMask(tGa68DOTATATE, sSegmentationFolderName, zeros(size(aOnnxOutputMask))));
-                            
+                            aExcludeMask = getGa68DOTATATEExcludeMask(tGa68DOTATATE, sSegmentationFolderName, zeros(size(aCTImage)));
+
+                            if ~isequal(size(aExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+                        
+                                 aExcludeMask = resample3DImage(aExcludeMask, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
+                                 aExcludeMask = imbinarize(aExcludeMask);
+                        
+                                if ~isequal(size(aExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view     
+                                    aExcludeMask = resizeMaskToImageSize(aExcludeMask, aResampledPTImage); 
+                                end
+                            else
+                                aExcludeMask = imbinarize(aExcludeMask);
+                            end
+
                             aOnnxOutputMask(aExcludeMask) = 0;
                             
                             clear aExcludeMask;
@@ -306,9 +342,9 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorPath, sOnnxPath, dMode
                                     aWholebodyBWMask = zeros(size(aResampledPTImage));
                                     aWholebodyBWMask(aBoneMask) = aResampledPTImage(aBoneMask);
     
-                                    aWholebodyBWMask(aWholebodyBWMask*dSUVScale < 3) = 0;
-                                
+                                    aWholebodyBWMask(aWholebodyBWMask*dSUVScale < 3) = 0;                                
                                     aWholebodyBWMask(aWholebodyBWMask~=0)=1;
+
                                     aWholebodyBWMask(aLiverMask)=0;
                                     aOnnxOutputMask = aOnnxOutputMask | logical(aWholebodyBWMask);
                                     
@@ -317,8 +353,8 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorPath, sOnnxPath, dMode
                             end
 
                             aClassificationMask = ones(size(aOnnxOutputMask)); % Soft Tissue
-                            aClassificationMask(aBoneMask) = 2;  % Bone
-                            aClassificationMask(aLiverMask)= 3; % Liver
+                            aClassificationMask(aBoneMask)  = 2; % Bone
+                            aClassificationMask(aLiverMask) = 3; % Liver
 
                             clear aLiverMask;
                             clear aBoneMask;
@@ -329,12 +365,16 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorPath, sOnnxPath, dMode
                         maskImageToVoi(aOnnxOutputMask, dPTSerieOffset, aClassificationMask, tGa68DOTATATE.classification.enable, tGa68DOTATATE.options.pixelEdge, tGa68DOTATATE.options.smalestVoiValue);
 
                         clear aOnnxOutputMask;
+                        clear aClassificationMask;
                         clear aResampledPTImage;
                    end
 
-               end
-           end
+                end
 
+                if exist(char(sOnnxFolderName), 'dir')
+                    rmdir(char(sOnnxFolderName), 's');
+                end 
+           end
 
         elseif isunix % Linux is not yet supported
 
@@ -347,6 +387,9 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorPath, sOnnxPath, dMode
             errordlg('Machine Learning under Mac is not supported', 'Machine Learning Validation');
         end
 
+        if exist(char(sSegmentationFolderName), 'dir')
+            rmdir(char(sSegmentationFolderName), 's');
+        end 
     end   
 
     
@@ -398,7 +441,7 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorPath, sOnnxPath, dMode
     [dMax, dMin] = computeWindowLevel(500, 50);
 
     fusionWindowLevel('set', 'max', dMax);
-    fusionWindowLevel('set', 'min' ,dMin);
+    fusionWindowLevel('set', 'min', dMin);
 
     setFusionWindowMinMax(dMax, dMin);                    
 
@@ -435,14 +478,6 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorPath, sOnnxPath, dMode
 
     if exist(char(sPTNiiTmpDir), 'dir')
         rmdir(char(sPTNiiTmpDir), 's');
-    end 
-
-    if exist(char(sSegmentationFolderName), 'dir')
-        rmdir(char(sSegmentationFolderName), 's');
-    end 
-
-    if exist(char(sOnnxFolderName), 'dir')
-        rmdir(char(sOnnxFolderName), 's');
     end 
 
     progressBar(1, 'Ready');

@@ -2957,7 +2957,7 @@ function generateContourReportCallback(~, ~)
                 if verLessThan('matlab','9.13')
                     gp3DLine = volshow(squeeze(aLineBuffer),  aInputArguments{:});
                 else
-                    gp3DLine = images.compatibility.volshow.R2022a.volshow(squeeze(aTest), aInputArguments{:});                   
+                    gp3DLine = images.compatibility.volshow.R2022a.volshow(squeeze(aLineBuffer), aInputArguments{:});                   
                 end
         
                 gp3DLine.CameraPosition = aCameraPosition;

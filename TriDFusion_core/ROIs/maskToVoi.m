@@ -31,6 +31,7 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     aMaskSize = size(aMask);
+    aImageSize = size(dicomBuffer('get', [], dSeriesOffset));
 
     if numel(aMaskSize) ~= 3 % Must be 3D array
         return;
@@ -42,20 +43,27 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
     drawnow;   
     
     if strcmpi(sPlane, 'coronal')
-        axRoi = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-        dMaskSize = aMaskSize(1);
+        axRoi = axes1Ptr('get', [], dSeriesOffset);
+        dMaskSize  = aMaskSize(1);
+        dImageSize = aImageSize(1);
     elseif strcmpi(sPlane, 'sagittal')
-        axRoi = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-        dMaskSize = aMaskSize(2);
+        axRoi = axes2Ptr('get', [], dSeriesOffset);
+        dMaskSize  = aMaskSize(2);
+        dImageSize = aImageSize(2);
     else
-        axRoi = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-        dMaskSize = aMaskSize(3);
+        axRoi = axes3Ptr('get', [], dSeriesOffset);
+        dMaskSize  = aMaskSize(3);
+        dImageSize = aImageSize(3);
     end
      
     asTag = [];
         
     for mm=1: dMaskSize
         
+        if mm > dImageSize
+            break;
+        end
+
         if strcmpi(sPlane, 'coronal')
             aSlice = aMask(mm,:,:);
         elseif strcmpi(sPlane, 'sagittal')

@@ -1340,7 +1340,140 @@ function generate3DLungShuntReport(bInitReport)
                     tReport.Liver.Color = atVoiInput{vv}.Color;
            end
         end    
+
+        % Compute Liver lesion
         
+        progressBar( 1/3, 'Computing liver segmentation, please wait' );
+
+        if numel(tReport.Liver.RoisTag) ~= 0  
+
+            voiMask = cell(1, numel(tReport.Liver.RoisTag));
+            voiData = cell(1, numel(tReport.Liver.RoisTag));
+            
+            dNbCells = 0;
+
+            liverMask = logical(false(size(aImage)));
+         
+            for uu=1:numel(tReport.Liver.RoisTag)
+
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.Liver.RoisTag{uu}]} );                
+                
+                tRoi = atRoiInput{find(aTagOffset, 1)};
+                
+                if bModifiedMatrix  == false && ... 
+                   bMovementApplied == false        % Can't use input buffer if movement have been applied
+
+                    if numel(aImage) ~= numel(dicomBuffer('get'))
+                        pTemp{1} = tRoi;
+                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
+                        tRoi = ptrRoiTemp{1};
+                    end   
+                end
+                
+                switch lower(tRoi.Axe)  
+
+                    case 'axe'
+                        voiData{uu} = aImage(:,:);
+                        voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
+
+%                         if bUpdateMasks == true
+                            liverMask(:,:) = voiMask{uu}|liverMask(:,:);   
+%                         end
+
+                    case 'axes1'
+                        aSlice = permute(aImage(tRoi.SliceNb,:,:), [3 2 1]);
+                        voiData{uu} = aSlice;
+                        voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+
+%                         if bUpdateMasks == true
+                            liverMask(tRoi.SliceNb,:,:) = voiMask{uu}|liverMask(tRoi.SliceNb,:,:);   
+%                         end
+
+                    case 'axes2'
+                        aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
+                        voiData{uu} = aSlice;                        
+                        voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+
+%                         if bUpdateMasks == true
+                            liverMask(:,tRoi.SliceNb,:) = voiMask{uu}|liverMask(:,tRoi.SliceNb,:);   
+%                         end
+
+                   case 'axes3'
+                        aSlice = aImage(:,:,tRoi.SliceNb);
+                        voiData{uu} = aSlice;                        
+                        voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
+
+%                         if bUpdateMasks == true
+                            liverMask(:,:,tRoi.SliceNb) = voiMask{uu}|liverMask(:,:,tRoi.SliceNb);  
+%                         end
+
+                end              
+                
+                if bSegmented  == true && ...      
+                   bModifiedMatrix == true % Can't use original buffer   
+
+                    voiDataTemp = voiData{uu}(voiMask{uu}); 
+                    voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
+                    dNbCells = dNbCells+numel(voiDataTemp);
+                else
+                    dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
+                end
+            end
+            
+            voiMask = cat(1, voiMask{:});
+            voiData = cat(1, voiData{:});
+
+            voiData(voiMask~=1) = [];
+            
+            if bSegmented  == true && ...      
+               bModifiedMatrix == true % Can't use original buffer   
+
+                voiData = voiData(voiData>cropValue('get'));                            
+            end
+            
+            tReport.Liver.Cells  = dNbCells;
+            tReport.Liver.Volume = dNbCells*dVoxVolume;
+
+            if bUpdateMasks == true 
+                tReport.Liver.Mask = liverMask;
+
+                lungShuntMasks('set', 'Liver', liverMask);
+
+            else
+
+                tReport.Liver.Mask = lungShuntMasks('get', 'Liver');                               
+            end
+
+            aImage(liverMask) = min(aImage, [], 'all');
+
+            clear liverMask;
+
+            if strcmpi(sUnitDisplay, 'SUV')
+                
+                if bSUVUnit == true
+                    tReport.Liver.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.Liver.Total = sum (voiData, 'all')*tQuantification.tSUV.dScale;             
+%                    tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume*tQuantification.tSUV.dScale;             
+                else
+                    tReport.Liver.Mean  = mean(voiData, 'all');
+                    tReport.Liver.Total = sum (voiData, 'all');
+%                    tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume;
+                end
+            else
+                tReport.Liver.Mean  = mean(voiData, 'all');             
+                tReport.Liver.Total = sum (voiData, 'all');             
+%                tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume;             
+            end
+         
+            clear voiMask;
+            clear voiData;  
+
+        else
+            tReport.Liver.Cells  = [];
+            tReport.Liver.Volume = [];
+            tReport.Liver.Mean   = [];            
+            tReport.Liver.Total  = [];            
+        end        
                 
         % Compute Lungs segmentation
         
@@ -1424,7 +1557,7 @@ function generate3DLungShuntReport(bInitReport)
             voiData = cat(1, voiData{:});
             
             voiData(voiMask~=1) = [];
-            
+           
             if bSegmented  == true && ...      
                bModifiedMatrix == true % Can't use original buffer   
 
@@ -1470,139 +1603,7 @@ function generate3DLungShuntReport(bInitReport)
             tReport.Lungs.Mean   = [];            
             tReport.Lungs.Total  = [];            
         end
-        
-        % Compute Liver lesion
-        
-        progressBar( 2/3, 'Computing liver segmentation, please wait' );
-       
-        if numel(tReport.Liver.RoisTag) ~= 0  
-
-            voiMask = cell(1, numel(tReport.Liver.RoisTag));
-            voiData = cell(1, numel(tReport.Liver.RoisTag));
-            
-            dNbCells = 0;
-
-            liverMask = logical(false(size(aImage)));
-         
-            for uu=1:numel(tReport.Liver.RoisTag)
-
-                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.Liver.RoisTag{uu}]} );                
-                
-                tRoi = atRoiInput{find(aTagOffset, 1)};
-                
-                if bModifiedMatrix  == false && ... 
-                   bMovementApplied == false        % Can't use input buffer if movement have been applied
-
-                    if numel(aImage) ~= numel(dicomBuffer('get'))
-                        pTemp{1} = tRoi;
-                        ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
-                        tRoi = ptrRoiTemp{1};
-                    end   
-                end
-                
-                switch lower(tRoi.Axe)  
-
-                    case 'axe'
-                        voiData{uu} = aImage(:,:);
-                        voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
-
-                        if bUpdateMasks == true
-                            liverMask(:,:) = voiMask{uu}|liverMask(:,:);   
-                        end
-
-                    case 'axes1'
-                        aSlice = permute(aImage(tRoi.SliceNb,:,:), [3 2 1]);
-                        voiData{uu} = aSlice;
-                        voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
-
-                        if bUpdateMasks == true
-                            liverMask(tRoi.SliceNb,:,:) = voiMask{uu}|liverMask(tRoi.SliceNb,:,:);   
-                        end
-
-                    case 'axes2'
-                        aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
-                        voiData{uu} = aSlice;                        
-                        voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
-
-                        if bUpdateMasks == true
-                            liverMask(:,tRoi.SliceNb,:) = voiMask{uu}|liverMask(:,tRoi.SliceNb,:);   
-                        end
-
-                   case 'axes3'
-                        aSlice = aImage(:,:,tRoi.SliceNb);
-                        voiData{uu} = aSlice;                        
-                        voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
-
-                        if bUpdateMasks == true
-                            liverMask(:,:,tRoi.SliceNb) = voiMask{uu}|liverMask(:,:,tRoi.SliceNb);  
-                        end
-
-                end              
-                
-                if bSegmented  == true && ...      
-                   bModifiedMatrix == true % Can't use original buffer   
-
-                    voiDataTemp = voiData{uu}(voiMask{uu}); 
-                    voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
-                    dNbCells = dNbCells+numel(voiDataTemp);
-                else
-                    dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
-                end
-            end
-            
-            voiMask = cat(1, voiMask{:});
-            voiData = cat(1, voiData{:});
-            
-            voiData(voiMask~=1) = [];
-            
-            if bSegmented  == true && ...      
-               bModifiedMatrix == true % Can't use original buffer   
-
-                voiData = voiData(voiData>cropValue('get'));                            
-            end
-            
-            tReport.Liver.Cells  = dNbCells;
-            tReport.Liver.Volume = dNbCells*dVoxVolume;
-
-            if bUpdateMasks == true 
-                tReport.Liver.Mask = liverMask;
-
-                lungShuntMasks('set', 'Liver', liverMask);
-
-            else
-
-                tReport.Liver.Mask = lungShuntMasks('get', 'Liver');                               
-            end
-
-            clear liverMask;
-
-            if strcmpi(sUnitDisplay, 'SUV')
-                
-                if bSUVUnit == true
-                    tReport.Liver.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-                    tReport.Liver.Total = sum (voiData, 'all')*tQuantification.tSUV.dScale;             
-%                    tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume*tQuantification.tSUV.dScale;             
-                else
-                    tReport.Liver.Mean  = mean(voiData, 'all');
-                    tReport.Liver.Total = sum (voiData, 'all');
-%                    tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume;
-                end
-            else
-                tReport.Liver.Mean  = mean(voiData, 'all');             
-                tReport.Liver.Total = sum (voiData, 'all');             
-%                tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume;             
-            end
-         
-            clear voiMask;
-            clear voiData;  
-
-        else
-            tReport.Liver.Cells  = [];
-            tReport.Liver.Volume = [];
-            tReport.Liver.Mean   = [];            
-            tReport.Liver.Total  = [];            
-        end
-                  
+                         
         clear aImage;
         
         progressBar( 1 , 'Ready' );
@@ -2227,7 +2228,7 @@ function generate3DLungShuntReport(bInitReport)
 %                 end
 
                 clear aLiverMask;
-                clear aLungsMask;
+                clear aLungsMask;                  
             end
 
             clear aNMImage;

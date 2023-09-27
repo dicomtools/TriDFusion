@@ -235,15 +235,15 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE)
 
                 progressBar(4/12, 'Importing liver mask, please wait.');
        
-                aLiverMask   = getLiverMask(zeros(size(aCTImage)));
+                aLiverMask = getLiverMask(zeros(size(aCTImage)));
 
-                aLiverMask =  imdilate(aLiverMask, strel('sphere', 4)); % Increse Liver mask by 3 pixels
+                aLiverMask = imdilate(aLiverMask, strel('sphere', 4)); % Increse Liver mask by 3 pixels
                 aExcludeMasksLiver = imdilate(aExcludeMask, strel('sphere', 1)); % Increse mask by 1 pixels
 
                 progressBar(5/12, 'Resampling series, please wait.');
                         
-                [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, true);   
-                [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, true);   
+                [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
+                [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
                
                 dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
                 dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
@@ -253,14 +253,37 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE)
                 clear aPTImageTemp;
                 clear aResampledPTImageTemp;
 
+                if ~isequal(size(aLiverMask), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+            
+                     aLiverMask = resample3DImage(aLiverMask, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
+                     aLiverMask = imbinarize(aLiverMask);
+            
+                    if ~isequal(size(aLiverMask), size(aResampledPTImage)) % Verify if both images are in the same field of view     
+                        aLiverMask = resizeMaskToImageSize(aLiverMask, aResampledPTImage); 
+                    end
+                else
+                    aLiverMask = imbinarize(aLiverMask);
+                end
                 
-                progressBar(6/12, 'Resampling roi, please wait.');
-
-                atRoi = roiTemplate('get', dPTSerieOffset);
-
-                atResampledRoi = resampleROIs(aPTImage, atPTMetaData, aResampledPTImage, atResampledPTMetaData, atRoi, true);
-
-                roiTemplate('set', dPTSerieOffset, atResampledRoi);  
+                if ~isequal(size(aExcludeMasksLiver), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+            
+                     aExcludeMasksLiver = resample3DImage(aExcludeMasksLiver, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
+                     aExcludeMasksLiver = imbinarize(aExcludeMasksLiver);
+            
+                    if ~isequal(size(aExcludeMasksLiver), size(aResampledPTImage)) % Verify if both images are in the same field of view     
+                        aExcludeMasksLiver = resizeMaskToImageSize(aExcludeMasksLiver, aResampledPTImage); 
+                    end
+                else
+                    aExcludeMasksLiver = imbinarize(aExcludeMasksLiver);
+                end
+% 
+%                 progressBar(6/12, 'Resampling roi, please wait.');
+% 
+%                 atRoi = roiTemplate('get', dPTSerieOffset);
+% 
+%                 atResampledRoi = resampleROIs(aPTImage, atPTMetaData, aResampledPTImage, atResampledPTMetaData, atRoi, true);
+% 
+%                 roiTemplate('set', dPTSerieOffset, atResampledRoi);  
 
 
                 progressBar(7/12, 'Resampling mip, please wait.');
@@ -289,10 +312,6 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE)
 
                 aLiverBWMask(aLiverBWMask*dSUVScale<dLiverTreshold)=dMin;
 
-                aLiverBWMask = imbinarize(aLiverBWMask);
-%                aLiverBWMask(aLiverBWMask==dMin)=0;
-%                aLiverBWMask(aLiverBWMask~=0)=1;
-
                 aLiverBWMask(aLiverMask==0)=0; 
                 aLiverBWMask(aExcludeMasksLiver~=0)=0; 
 
@@ -302,6 +321,18 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE)
                 dWholebodyTreshold = 3;
 
                 aExcludeMasksWholebody = imdilate(aExcludeMask, strel('sphere', 3)); % Increse mask by 3 pixels
+
+                if ~isequal(size(aExcludeMasksWholebody), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+            
+                     aExcludeMasksWholebody = resample3DImage(aExcludeMasksWholebody, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
+                     aExcludeMasksWholebody = imbinarize(aExcludeMasksWholebody);
+            
+                    if ~isequal(size(aExcludeMasksWholebody), size(aResampledPTImage)) % Verify if both images are in the same field of view     
+                        aExcludeMasksWholebody = resizeMaskToImageSize(aExcludeMasksWholebody, aResampledPTImage); 
+                    end
+                else
+                    aExcludeMasksWholebody = imbinarize(aExcludeMasksWholebody);
+                end
 
                 aWholebodyBWMask = aResampledPTImage;
 
@@ -329,14 +360,16 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE)
                 BWCT = imfill(BWCT, 4, 'holes');                       
 %                BWCT =  imdilate(BWCT, strel('sphere', 1)); % Increse the mask by 1 pixel
 
-                if ~aCTImage(aCTImage~=0) % If wholeBody mask fail
-                    BWCT = aCTImage;
-    
-                    BWCT(BWCT < 100) = 0;                                    
-                    BWCT = imfill(BWCT, 4, 'holes');                       
+                if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view 
             
-                    BWCT(BWCT~=0) = 1;
-                    BWCT(BWCT~=1) = 0;
+                     BWCT = resample3DImage(BWCT, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
+                     BWCT = imbinarize(BWCT);
+            
+                    if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view     
+                        BWCT = resizeMaskToImageSize(BWCT, aResampledPTImage); 
+                    end
+                else
+                    BWCT = imbinarize(BWCT);
                 end
 
 
@@ -388,6 +421,9 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE)
             errordlg('Machine Learning under Mac is not supported', 'Machine Learning Validation');
         end
 
+        if exist(char(sSegmentationFolderName), 'dir')
+            rmdir(char(sSegmentationFolderName), 's');
+        end 
     end   
 
     setVoiRoiSegPopup();
@@ -482,10 +518,6 @@ function setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE)
         rmdir(char(sNiiTmpDir), 's');
     end       
     
-    if exist(char(sSegmentationFolderName), 'dir')
-        rmdir(char(sSegmentationFolderName), 's');
-    end 
-
     progressBar(1, 'Ready');
 
     catch 

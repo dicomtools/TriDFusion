@@ -64,7 +64,14 @@ function resampImage = resampleMip(dcmImage, atDcmMetaData, refImage, atRefMetaD
     TF = affine3d(f);
        
     Rdcm  = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
-%    Rref  = imref3d(size(refImage), atRefMetaData{1}.PixelSpacing(2), atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
+    Rref  = imref3d(dimsRef, atRefMetaData{1}.PixelSpacing(2), atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
+
+    if (round(Rdcm.ImageExtentInWorldX) ~= round(Rref.ImageExtentInWorldX)) && ...
+       (round(Rdcm.ImageExtentInWorldY) ~= round(Rref.ImageExtentInWorldY))
+        if dRefOutputView == true
+            dRefOutputView = 2;
+        end
+    end
 
     if dRefOutputView == 2
         [resampImage, ~] = imwarp(dcmImage, TF, 'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef));      

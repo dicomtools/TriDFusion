@@ -76,7 +76,26 @@ function movedRoiEvents(hObject, ~)
                                     atRoi{dTagOffset}.SemiAxes      = hObject.SemiAxes;
                                     atRoi{dTagOffset}.RotationAngle = hObject.RotationAngle;
                                     atRoi{dTagOffset}.Vertices      = hObject.Vertices;
-                
+
+                                    if ~isempty(atRoi{dTagOffset}.MaxDistances)
+                        
+                                        if isvalid(atRoi{dTagOffset}.MaxDistances.MaxXY.Line)
+                                            delete(atRoi{dTagOffset}.MaxDistances.MaxXY.Line);
+                                        end
+                                        
+                                        if isvalid(atRoi{dTagOffset}.MaxDistances.MaxCY.Line)
+                                            delete(atRoi{dTagOffset}.MaxDistances.MaxCY.Line);
+                                        end
+                                        
+                                        if isvalid(atRoi{dTagOffset}.MaxDistances.MaxXY.Text)
+                                            delete(atRoi{dTagOffset}.MaxDistances.MaxXY.Text);
+                                        end
+                                        
+                                        if isvalid(atRoi{dTagOffset}.MaxDistances.MaxCY.Text)
+                                            delete(atRoi{dTagOffset}.MaxDistances.MaxCY.Text);
+                                        end
+                                    end
+
                                     tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), atRoi{dTagOffset}, false, false);
 
                                     sVoiLable = sprintf('Sphere %s mm', num2str(tMaxDistances.MaxXY.Length));

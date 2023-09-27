@@ -651,7 +651,7 @@ function initRoiPanel()
 
     
     function addVoiRoiPanelCallback(~, ~)
-        
+                
         triangulateCallback()
         
         dSerieOffset = get(uiSeriesPtr('get'), 'Value');
@@ -678,7 +678,7 @@ function initRoiPanel()
         mouseFcn('reset');
         
         sRoiTag = num2str(randi([-(2^52/2),(2^52/2)],1));
-       
+        
         pRoi = drawfreehand(pAxe, 'Color', atVoiInput{dVoiOffset}.Color, 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', sRoiTag, 'FaceSelectable', 1, 'FaceAlpha', 0);
         pRoi.FaceAlpha = roiFaceAlphaValue('get');
 
@@ -1415,6 +1415,11 @@ function initRoiPanel()
 
     function edtSmalestRegionCallback(hObject, ~)
 
+        try
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+
         sValue = get(hObject, 'String');
         dValue = str2double(sValue);
 
@@ -1431,11 +1436,23 @@ function initRoiPanel()
                                get(chkUseCTRoiPanel    , 'Value'), ...
                                get(uiSeriesCTRoiPanel  , 'Value') ...
                                );
+
+        catch
+            progressBar(1, 'Error:edtSmalestRegionCallback()');
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;         
       
     end
 
 
     function sliderMaxTresholdRoiPanelCallback(~, hEvent)
+
+        try
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
 
         aBuffer = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
         if isempty(aBuffer)
@@ -1498,9 +1515,21 @@ function initRoiPanel()
                                get(chkUseCTRoiPanel    , 'Value'), ...
                                get(uiSeriesCTRoiPanel  , 'Value') ...
                                );
+
+        catch
+            progressBar(1, 'Error:sliderMaxTresholdRoiPanelCallback()');
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;         
     end
 
     function editMaxTresholdRoiPanelCallback(hObject, ~)
+
+        try
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
 
         aBuffer = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
         if isempty(aBuffer)
@@ -1592,9 +1621,20 @@ function initRoiPanel()
                                get(chkUseCTRoiPanel    , 'Value'), ...
                                get(uiSeriesCTRoiPanel  , 'Value') ...
                                );
+        catch
+            progressBar(1, 'Error:editMaxTresholdRoiPanelCallback()');
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;        
     end
 
     function sliderMinTresholdRoiPanelCallback(~, hEvent)
+
+        try
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
 
         aBuffer = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
         if isempty(aBuffer)
@@ -1665,9 +1705,21 @@ function initRoiPanel()
                                get(chkUseCTRoiPanel    , 'Value'), ...
                                get(uiSeriesCTRoiPanel  , 'Value') ...
                                );
+
+        catch
+            progressBar(1, 'Error:sliderMinTresholdRoiPanelCallback()');
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;
     end
 
     function editMinTresholdRoiPanelCallback(hObject, ~)
+
+        try
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
 
         aBuffer = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
         if isempty(aBuffer)
@@ -1759,6 +1811,12 @@ function initRoiPanel()
                                get(chkUseCTRoiPanel    , 'Value'), ...
                                get(uiSeriesCTRoiPanel  , 'Value') ...
                                );
+        catch
+            progressBar(1, 'Error:editMinTresholdRoiPanelCallback()');
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;        
     end
 
     function chkRelativeToMaxRoiPanelCallback(hObject, ~)
@@ -2030,10 +2088,10 @@ function initRoiPanel()
             return;
         end
 
-        try
-
-        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-        drawnow;
+%         try
+% 
+%         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+%         drawnow;
 
         refreshImages();        
             
@@ -2045,25 +2103,28 @@ function initRoiPanel()
         % Get constraint 
 
         [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value'));
+        if ~isempty(asConstraintTagList)   
+            bInvertMask = invertConstraint('get');
+    
+            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    
+            aLogicalMask = roiConstraintToMask(aBuffer, atRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);        
+        end
 
-        bInvertMask = invertConstraint('get');
-
-        atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-
-        aLogicalMask = roiConstraintToMask(aBuffer, atRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);        
-                
-        dImageMin = min(double(aBuffer),[], 'all');        
+        dImageMin = min(aBuffer,[], 'all');        
         
         if size(aBuffer, 3) == 1
-            
-            aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
-            
+
+            if ~isempty(asConstraintTagList)
+                aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
+            end
+
             if bUseCtMap == true
                 dTresholdMin = roiPanelCTMinValue('get');
                 dTresholdMax = roiPanelCTMaxValue('get');
             else
-                dTresholdMin = min(double(aBuffer),[], 'all');
-                dTresholdMax = max(double(aBuffer),[], 'all');
+                dTresholdMin = min(aBuffer,[], 'all');
+                dTresholdMax = max(aBuffer,[], 'all');
             end
 
             dBufferDiff = dTresholdMax - dTresholdMin;
@@ -2123,7 +2184,7 @@ function initRoiPanel()
 
             if bUseCtMap == true % Apply ct mask
 
-                dSerieOffset   = get(uiSeriesPtr('get'), 'Value');
+                dSerieOffset  = get(uiSeriesPtr('get'), 'Value');
 
                 atRefMetaData = dicomMetaData('get', [], dSerieOffset);
 
@@ -2165,17 +2226,20 @@ function initRoiPanel()
                 
                 [aBuffer, ~] = resampleImage(aCtBuffer, atCtMetaData, aBuffer, atRefMetaData, 'Nearest', 2, false);
                 
-                dImageMin = min(double(aBuffer), [], 'all');
+                dImageMin = min(aBuffer, [], 'all');
             end
-            
-            aBuffer(aLogicalMask == 0) = dImageMin; % Apply constraint
-            
+
+            if ~isempty(asConstraintTagList)
+           
+                aBuffer(aLogicalMask == 0) = dImageMin; % Apply constraint
+            end
+
             if bUseCtMap == true
                 dTresholdMin = roiPanelCTMinValue('get');
                 dTresholdMax = roiPanelCTMaxValue('get');
             else
-                dTresholdMin = min(double(aBuffer), [], 'all');
-                dTresholdMax = max(double(aBuffer), [], 'all');
+                dTresholdMin = min(aBuffer, [], 'all');
+                dTresholdMax = max(aBuffer, [], 'all');
             end
             
             dBufferDiff = dTresholdMax - dTresholdMin;
@@ -2227,7 +2291,7 @@ function initRoiPanel()
             end
             
             if bPixelEdge == true
-                aCoronal  = imresize(aCoronal  , PIXEL_EDGE_RATIO, 'nearest');
+                aCoronal  = imresize(aCoronal , PIXEL_EDGE_RATIO, 'nearest');
                 aSagittal = imresize(aSagittal, PIXEL_EDGE_RATIO, 'nearest');
                 aAxial    = imresize(aAxial   , PIXEL_EDGE_RATIO, 'nearest');
             end
@@ -2298,12 +2362,12 @@ function initRoiPanel()
  
         end
         
-        catch
-            progressBar(1, 'Error:previewRoiSegmentation()');
-        end
-
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');
-        drawnow;
+%         catch
+%             progressBar(1, 'Error:previewRoiSegmentation()');
+%         end
+% 
+%         set(fiMainWindowPtr('get'), 'Pointer', 'default');
+%         drawnow;
 
     end
 
@@ -2408,7 +2472,7 @@ function initRoiPanel()
 
         aLogicalMask = roiConstraintToMask(aBuffer, atRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);        
                 
-        dImageMin = min(double(aBuffer),[], 'all');
+        dImageMin = min(aBuffer,[], 'all');
 
         aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
         
@@ -2416,8 +2480,8 @@ function initRoiPanel()
             dTresholdMin = roiPanelCTMinValue('get');
             dTresholdMax = roiPanelCTMaxValue('get');
         else
-            dTresholdMin = min(double(aBuffer),[], 'all');
-            dTresholdMax = max(double(aBuffer),[], 'all');
+            dTresholdMin = min(aBuffer,[], 'all');
+            dTresholdMax = max(aBuffer,[], 'all');
         end
 
         dBufferDiff = dTresholdMax - dTresholdMin;
@@ -2656,15 +2720,15 @@ function initRoiPanel()
                     end
 
                     if tInput(dSerieOffset).bFlipLeftRight == true
-                        aCtBuffer=aCtBuffer(:,end:-1:1,:);
+                        aCtBuffer = aCtBuffer(:,end:-1:1,:);
                     end
 
                     if tInput(dSerieOffset).bFlipAntPost == true
-                        aCtBuffer=aCtBuffer(end:-1:1,:,:);
+                        aCtBuffer = aCtBuffer(end:-1:1,:,:);
                     end
 
                     if tInput(dSerieOffset).bFlipHeadFeet == true
-                        aCtBuffer=aCtBuffer(:,:,end:-1:1);
+                        aCtBuffer = aCtBuffer(:,:,end:-1:1);
                     end
 
                     dicomBuffer('set', aCtBuffer, tRoiPanelCT{dCtOffset}.dSeriesNumber);
@@ -2924,22 +2988,26 @@ function initRoiPanel()
         if dUseCT == true
             dMin = roiPanelCTMinValue('get');
             dMax = roiPanelCTMaxValue('get');
-        else                            
+        else        
+            
             [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dOffset);
+            if ~isempty(asConstraintTagList)
+                bInvertMask = invertConstraint('get');
+    
+                atRoiInput = roiTemplate('get', dOffset);
+    
+                aLogicalMask = roiConstraintToMask(aBuffer, atRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);      
+    
+                dImageMin = min(aBuffer,[], 'all');
+    
+                aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
+            end
 
-            bInvertMask = invertConstraint('get');
+             dMin = min(aBuffer,[], 'all');
+             dMax = max(aBuffer,[], 'all'); 
 
-            atRoiInput = roiTemplate('get', dOffset);
-
-            aLogicalMask = roiConstraintToMask(aBuffer, atRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);      
-
-            dImageMin = min(double(aBuffer),[], 'all');
-
-            aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
-
-            dMin = min(double(aBuffer),[], 'all');
-            dMax = max(double(aBuffer),[], 'all'); 
         end
+        
     end
 
     function sRoiTag = getLargestArea(asRoisTag)

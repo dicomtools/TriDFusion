@@ -1,5 +1,5 @@
 function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = registerImage(imToRegister, atImToRegisterMetaData, imReference, atReferenceMetaData, aLogicalMask, sType, sModality, tOptimizer, tMetric, bRefOutputView, bUpdateDescription, registratedGeomtform)
-%function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed] = registerImage(imToRegister, atImToRegisterMetaData, dImToRegisterOffset,imReference, atReferenceMetaData, dReferenceOffset, sType, sModality, tOptimizer, tMetric,  bRefOutputView, bUpdateDescription, registratedGeomtform)
+%function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = registerImage(imToRegister, atImToRegisterMetaData, dImToRegisterOffset,imReference, atReferenceMetaData, dReferenceOffset, sType, sModality, tOptimizer, tMetric,  bRefOutputView, bUpdateDescription, registratedGeomtform)
 %Register any modalities.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -43,8 +43,10 @@ function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = regi
     end
     
     if bRefOutputView == false && bDemons == false  
-        [imReference, atReferenceMetaData] = ...
-            resampleImage(imReference, atReferenceMetaData, imToRegister, atImToRegisterMetaData, 'Nearest', true, false);
+        if ~isequal(size(imReference), size(imToRegister))      
+            [imReference, atReferenceMetaData] = ...
+                resampleImage(imReference, atReferenceMetaData, imToRegister, atImToRegisterMetaData, 'Nearest', true, false);
+        end
     end
     
     fixedSliceThickness = computeSliceSpacing(atReferenceMetaData);
@@ -147,18 +149,24 @@ function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = regi
            
             [geomtform, imRegistered] = registerDemons(imToRegister, imReference, optimizer.MaximumIterations, bRefOutputView);
         else
-            if ~isempty(aLogicalMask) % Use a logical mask 
+            if ~isempty(aLogicalMask(aLogicalMask)) % Use a logical mask 
 
-                imToRegisterMasked = imToRegister;                        
-                [aLogicalMask, ~] = ...
-                    resampleImage(double(aLogicalMask), atReferenceMetaData, imToRegister, atImToRegisterMetaData, 'Nearest', true, false);                
-                aLogicalMask = logical(imbinarize(aLogicalMask));
+                imToRegisterMasked = imToRegister;  
+
+                if ~isequal(size(imToRegisterMasked), size(aLogicalMask))
+                    [aLogicalMask, ~] = ...
+                        resampleImage(double(aLogicalMask), atReferenceMetaData, imToRegister, atImToRegisterMetaData, 'Nearest', true, false);                
+                    aLogicalMask = logical(imbinarize(aLogicalMask));
+                end
+
                 imToRegisterMasked(aLogicalMask==0) = min(imToRegister, [], 'all'); 
 
                 imReferenceMasked = imReference;          
                 imReferenceMasked(aLogicalMask==0) = min(imReference, [], 'all');  
 
                 geomtform = imregtform(imToRegisterMasked, Rmoving, imReferenceMasked, Rfixed, sType, optimizer, metric);
+
+                clear imToRegisterMasked;
             else    
                 geomtform = imregtform(imToRegister, Rmoving, imReference, Rfixed, sType, optimizer, metric);
             end

@@ -1,6 +1,6 @@
-function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
-%function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
-%Run Lu177 Segmentation base on normal liver treshold.
+function setMachineLearningLu177(sSegmentatorPath, tLu177)
+%function setMachineLearningLu177(sSegmentatorPath, tLu177)
+%Run Lu177 threshold base segmentation with machine learning organ exclusion.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -53,8 +53,8 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
 
     if isempty(dCTSerieOffset) || ...
        isempty(dNMSerieOffset)  
-        progressBar(1, 'Error: FDG tumor segmentation require a CT and NM image!');
-        errordlg('FDG tumor segmentation require a CT and NM image!', 'Modality Validation');  
+        progressBar(1, 'Error: Lu177 tumor segmentation require a CT and NM image!');
+        errordlg('Lu177 tumor segmentation require a CT and NM image!', 'Modality Validation');  
         return;               
     end
 
@@ -166,128 +166,200 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
     try 
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-    drawnow;
- 
-    progressBar(5/10, 'Resampling series, please wait.');
-            
-    [aResampledNMImageTemp, ~] = resampleImage(aNMImageTemp, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);   
-    [aResampledNMImage, atResampledNMMetaData] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, true);   
+    drawnow;    
 
-    dicomMetaData('set', atResampledNMMetaData, dNMSerieOffset);
-    dicomBuffer  ('set', aResampledNMImage, dNMSerieOffset);
-
-    aResampledNMImage = aResampledNMImageTemp;
-
-    clear aNMImageTemp;
-    clear aResampledNMImageTemp;
-
-    progressBar(6/10, 'Resampling mip, please wait.');
-            
-    refMip = mipBuffer('get', [], dCTSerieOffset);                        
-    aMip   = mipBuffer('get', [], dNMSerieOffset);
-  
-    aMip = resampleMip(aMip, atNMMetaData, refMip, atCTMetaData, 'Linear', false);
-                   
-    mipBuffer('set', aMip, dNMSerieOffset);
-
-    setQuantification(dNMSerieOffset);    
-
-    tQuant = quantificationTemplate('get');
-
-    if isfield(tQuant, 'tSUV')
-        dSUVScale = tQuant.tSUV.dScale;
-    else
-        dSUVScale = 1;
-    end      
+    % Get DICOM directory directory    
     
-    progressBar(7/10, 'Computing mask, please wait.');
+    [sFilePath, ~, ~] = fileparts(char(atInput(dCTSerieOffset).asFilesList{1}));
+    
+    % Create an empty directory    
 
-    aBWMask = aResampledNMImage;
-
-    dMin = min(aBWMask, [], 'all');
-
-%    dTreshold = (4.44/gdNormalLiverMean)*(gdNormalLiverMean+gdNormalLiverSTD);
-    dTreshold = (1.5*gdNormalLiverMean) + (2*gdNormalLiverSTD);
-
-    if dTreshold < 2.5
-        dTreshold = 2.5;
+    sNiiTmpDir = sprintf('%stemp_nii_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
+    if exist(char(sNiiTmpDir), 'dir')
+        rmdir(char(sNiiTmpDir), 's');
     end
-
-    aBWMask(aBWMask*dSUVScale<dTreshold)=dMin;
-
-    aBWMask = imbinarize(aBWMask);
-
-    progressBar(8/10, 'Computing ct map, please wait.');
-
-%     tRegistration = registrationTemplate('get');
-% 
-%     optimizer = tRegistration.Optimizer;
-%     metric    = tRegistration.Metric;
-
-%     [BWCT, ~, ~, ~, ~] = ...
-%         registerImage(aCTImage             , ...
-%                       atCTMetaData         , ...
-%                       aResampledNMImage    , ...
-%                       atResampledNMMetaData, ...
-%                       aLogicalMask         , ...
-%                       'translation', 'multimodal', ...
-%                       optimizer            , ...
-%                       metric               , ...
-%                       true                 , ...
-%                       false                );
-    BWCT = aCTImage;
+    mkdir(char(sNiiTmpDir));    
     
-    BWCT(BWCT < dBoneMaskThreshold) = 0;                                    
-    BWCT = imfill(BWCT, 4, 'holes');                       
+    % Convert dicom to .nii     
+    
+    progressBar(1/8, 'DICOM to NII conversion, please wait.');
 
-    if ~isequal(size(BWCT), size(aResampledNMImage)) % Verify if both images are in the same field of view 
-
-         BWCT = resample3DImage(BWCT, atCTMetaData, aResampledNMImage, atResampledNMMetaData, 'Cubic');
-         BWCT = imbinarize(BWCT);
-
-        if ~isequal(size(BWCT), size(aResampledNMImage)) % Verify if both images are in the same field of view     
-            BWCT = resizeMaskToImageSize(BWCT, aResampledNMImage); 
+    dicm2nii(sFilePath, sNiiTmpDir, 1);
+    
+    sNiiFullFileName = '';
+    
+    f = java.io.File(char(sNiiTmpDir)); % Get .nii file name
+    dinfo = f.listFiles();                   
+    for K = 1 : 1 : numel(dinfo)
+        if ~(dinfo(K).isDirectory)
+            if contains(sprintf('%s%s', sNiiTmpDir, dinfo(K).getName()), '.nii.gz')
+                sNiiFullFileName = sprintf('%s%s', sNiiTmpDir, dinfo(K).getName());
+                break;
+            end
         end
+    end 
+
+    if isempty(sNiiFullFileName)
+        
+        progressBar(1, 'Error: nii file mot found!');
+        errordlg('nii file mot found!!', '.nii file Validation'); 
     else
-        BWCT = imbinarize(BWCT);
-    end
+
+        progressBar(2/8, 'Machine learning in progress, this might take several minutes, please be patient.');
+       
+        sSegmentationFolderName = sprintf('%stemp_seg_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
+        if exist(char(sSegmentationFolderName), 'dir')
+            rmdir(char(sSegmentationFolderName), 's');
+        end
+        mkdir(char(sSegmentationFolderName)); 
     
-    progressBar(9/10, 'Creating contours, please wait.');
+        if ispc % Windows
+      
+%            if fastMachineLearningDialog('get') == true
+%                sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s --fast', sSegmentatorPath, sNiiFullFileName, sSegmentationFolderName);    
+%            else
+                sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s --fast --force_split --body_seg', sSegmentatorPath, sNiiFullFileName, sSegmentationFolderName);    
+%            end
+        
+            [bStatus, sCmdout] = system(sCommandLine);
+            
+            if bStatus 
+                progressBar( 1, 'Error: An error occur during machine learning segmentation!');
+                errordlg(sprintf('An error occur during machine learning segmentation: %s', sCmdout), 'Segmentation Error');  
+            else % Process succeed
 
-    imMask = aResampledNMImage;
-    imMask(aBWMask == 0) = dMin;
+                progressBar(4/8, 'Resampling series, please wait.');
 
-    setSeriesCallback();            
+                [aResampledNMImageTemp, ~] = resampleImage(aNMImageTemp, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);   
+                [aResampledNMImage, atResampledNMMetaData] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);   
 
-%     sFormula = '(4.44/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map';
-    sFormula = '(1.5 x Normal Liver SUVmean)+(2 x Normal Liver SD), Lymph Nodes & Bone SUV 2.5, CT Bone Map';
-    maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, 0, false, 0, true, sFormula, BWCT, dSmalestVoiValue,  gdNormalLiverMean, gdNormalLiverSTD, 'TUMOR');                
+                dicomMetaData('set', atResampledNMMetaData, dNMSerieOffset);
+                dicomBuffer  ('set', aResampledNMImage, dNMSerieOffset);
+            
+                aResampledNMImage = aResampledNMImageTemp;
 
-    clear aResampledNMImage;
-    clear aBWMask;
-    clear refMip;                        
-    clear aMip;
-    clear BWCT;
-    clear imMask;
+                clear aNMImageTemp;
+                clear aResampledNMImageTemp;
+            
+                progressBar(5/8, 'Resampling mip, please wait.');
+                        
+                refMip = mipBuffer('get', [], dCTSerieOffset);                        
+                aMip   = mipBuffer('get', [], dNMSerieOffset);
+              
+                aMip = resampleMip(aMip, atNMMetaData, refMip, atCTMetaData, 'Linear', false);
+                               
+                mipBuffer('set', aMip, dNMSerieOffset);
+            
+                setQuantification(dNMSerieOffset);    
+                       
+                resampleAxes(aResampledNMImage, atResampledNMMetaData);
+                
+                setImagesAspectRatio();
+
+                refreshImages();
+                drawnow;
+
+                progressBar(5/8, 'Computing ct map, please wait.');
+            
+                BWCT = getTotalSegmentorWholeBodyMask(sSegmentationFolderName, zeros(size(aCTImage)));
+                BWCT = imfill(BWCT, 4, 'holes');
+             
+                if ~isequal(size(BWCT), size(aResampledNMImage)) % Verify if both images are in the same field of view 
+
+                    BWCT = resample3DImage(BWCT, atCTMetaData, aResampledNMImage, atResampledNMMetaData, 'Cubic');
+                    BWCT = imbinarize(BWCT);
+
+                    if ~isequal(size(BWCT), size(aResampledNMImage)) % Verify if both images are in the same field of view 
+                        BWCT = resizeMaskToImageSize(BWCT, aResampledNMImage); 
+                    end
+                else
+                    BWCT = imbinarize(BWCT);
+                end
+
+%                 BWCT = resampleImage(BWCT, atCTMetaData, aResampledNMImage, atResampledNMMetaData, 'Linear', false, false);   
+%                 BWCT = imageFieldOfView(BWCT, aResampledNMImage, atResampledNMMetaData); 
+
+
+                progressBar(6/8, 'Importing exclusion masks, please wait.');
+
+                aExcludeMask = getLu177ExcludeMask(tLu177, sSegmentationFolderName, zeros(size(aCTImage)));
+                aExcludeMask = imdilate(aExcludeMask, strel('sphere', 2)); % Increse mask by 2 pixels
+
+                if ~isequal(size(aExcludeMask), size(aResampledNMImage)) % Verify if both images are in the same field of view 
+
+                     aExcludeMask = resample3DImage(aExcludeMask, atCTMetaData, aResampledNMImage, atResampledNMMetaData, 'Cubic');
+                     aExcludeMask = imbinarize(aExcludeMask);
+
+                    if ~isequal(size(aExcludeMask), size(aResampledNMImage)) % Verify if both images are in the same field of view     
+                        aExcludeMask = resizeMaskToImageSize(aExcludeMask, aResampledNMImage); 
+                    end
+                else
+                    aExcludeMask = imbinarize(aExcludeMask);                    
+                end
+%                 aExcludeMask = imageFieldOfView(aExcludeMask, aResampledNMImage, atResampledNMMetaData); 
+
+
+                aResampledNMImage(aExcludeMask) = min(aResampledNMImage, [], 'all');  % Exclude mask
+
+                clear aExcludeMask;
+
+
+                progressBar(7/8, 'Computing mask, please wait.');
+            
+                aBWMask = aResampledNMImage;
+            
+                dMin = min(aBWMask, [], 'all');
+
+                dTreshold = (1.5*gdNormalLiverMean) + (2*gdNormalLiverSTD);
+            
+                if dTreshold < 2.5
+                    dTreshold = 2.5;
+                end
+
+                aBWMask(aBWMask*dSUVScale<dTreshold)=dMin;
+            
+                aBWMask = imbinarize(aBWMask); 
+
+                progressBar(8/10, 'Creating contours, please wait.');
+            
+                imMask = aResampledNMImage;
+                imMask(aBWMask == 0) = dMin;
+            
+                setSeriesCallback();
+            
+
+                dSmalestVoiValue = tLu177.options.smalestVoiValue;
+                bPixelEdge = tLu177.options.pixelEdge;
+
+                sFormula = '(1.5 x Normal Liver SUVmean)+(2 x Normal Liver SD), Lymph Nodes & Bone SUV 2.5, CT Bone Map';
+                maskAddVoiToSeries(imMask, aBWMask, bPixelEdge, false, 0, false, 0, true, sFormula, BWCT, dSmalestVoiValue,  gdNormalLiverMean, gdNormalLiverSTD, 'TUMOR');    
+
+                clear aResampledNMImage;
+                clear aBWMask;
+                clear refMip;                        
+                clear aMip;
+                clear BWCT;
+                clear imMask;
+
+            end
+
+        elseif isunix % Linux is not yet supported
+
+            progressBar( 1, 'Error: Machine Learning under Linux is not supported');
+            errordlg('Machine Learning under Linux is not supported', 'Machine Learning Validation');
+
+        else % Mac is not yet supported
+
+            progressBar( 1, 'Error: Machine Learning under Mac is not supported');
+            errordlg('Machine Learning under Mac is not supported', 'Machine Learning Validation');
+        end
+
+        if exist(char(sSegmentationFolderName), 'dir')
+            rmdir(char(sSegmentationFolderName), 's');
+        end         
+    end
 
     setVoiRoiSegPopup();
-
-    % Set TCS Axes intensity
-
-    dMin = 0/dSUVScale;
-    dMax = 7/dSUVScale;
-
-    windowLevel('set', 'max', dMax);
-    windowLevel('set', 'min' ,dMin);
-
-    setWindowMinMax(dMax, dMin);                    
-
-    dMin = 0/dSUVScale;
-    dMax = 7/dSUVScale;
-
-    % Set MIP Axe intensity
-
-    set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);   
 
     % Deactivate MIP Fusion
 
@@ -305,13 +377,6 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
 
         setFusionCallback();
     end
-
-    [dMax, dMin] = computeWindowLevel(500, 50);
-
-    fusionWindowLevel('set', 'max', dMax);
-    fusionWindowLevel('set', 'min' ,dMin);
-
-    setFusionWindowMinMax(dMax, dMin);  
 
     % Triangulate og 1st VOI
 
@@ -334,19 +399,24 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
 
     clear aNMImage;
     clear aCTImage;
-     
 
+    % Delete .nii folder    
+    
+    if exist(char(sNiiTmpDir), 'dir')
+        rmdir(char(sNiiTmpDir), 's');
+    end       
+    
     progressBar(1, 'Ready');
 
     catch 
         resetSeries(dNMSerieOffset, true);       
-        progressBar( 1 , 'Error: setSegmentationLu177()' );
+        progressBar( 1 , 'Error: setSegmentationFDGLu177()' );
     end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;
-    
-    function Lu177NormalLiverMeanSDDialog()
+
+      function Lu177NormalLiverMeanSDDialog()
 
         DLG_Lu177_MEAN_SD_X = 380;
         DLG_Lu177_MEAN_SD_Y = 150;
@@ -470,5 +540,5 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
             delete(dlgLu177meanSD);
             gbProceedWithSegmentation = false;
         end
-    end
+    end          
 end

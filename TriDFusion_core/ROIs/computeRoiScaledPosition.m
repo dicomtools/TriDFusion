@@ -104,9 +104,9 @@ function [aNewPosition, aRadius, aSemiAxes, transM] = computeRoiScaledPosition(r
 
 if 1    
     if ~((round(Rdcm.ImageExtentInWorldX) > round(Rref.ImageExtentInWorldX)) && ...
-        (round(Rdcm.ImageExtentInWorldX) > round(Rref.ImageExtentInWorldX))) && ...
+        (round(Rdcm.ImageExtentInWorldY) > round(Rref.ImageExtentInWorldY))) && ...
         ~((round(Rdcm.ImageExtentInWorldX) < round(Rref.ImageExtentInWorldX)) && ...
-          (round(Rdcm.ImageExtentInWorldX) < round(Rref.ImageExtentInWorldX)))   
+          (round(Rdcm.ImageExtentInWorldY) < round(Rref.ImageExtentInWorldY)))   
     
         atDcmMetaData{1}.ImagePositionPatient(1) = -(atDcmMetaData{1}.PixelSpacing(1)/2);
         atDcmMetaData{1}.ImagePositionPatient(2) = -(atDcmMetaData{1}.PixelSpacing(2)/2);
@@ -191,27 +191,29 @@ end
 %    [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', 'Linear');      
 %    dimsRsp = size(resampImage);         
 
-if 1
+if 0 
     if    (round(Rdcm.ImageExtentInWorldX) > round(Rref.ImageExtentInWorldX)) && ...
-          (round(Rdcm.ImageExtentInWorldX) > round(Rref.ImageExtentInWorldX))   
+          (round(Rdcm.ImageExtentInWorldY) > round(Rref.ImageExtentInWorldY))   
 
         xMoveOffset = Rref.PixelExtentInWorldX/xScale;
         yMoveOffset = Rref.PixelExtentInWorldY/yScale;
 
 
     elseif(round(Rdcm.ImageExtentInWorldX) < round(Rref.ImageExtentInWorldX)) && ...
-          (round(Rdcm.ImageExtentInWorldX) < round(Rref.ImageExtentInWorldX))
+          (round(Rdcm.ImageExtentInWorldY) < round(Rref.ImageExtentInWorldY))
 
         xMoveOffset = -Rref.PixelExtentInWorldX/xScale;
         yMoveOffset = -Rref.PixelExtentInWorldY/yScale;
 
-    else
-        xMoveOffset = 0;
-        yMoveOffset = 0;        
+    else      
+         xMoveOffset = 0;
+         yMoveOffset = 0;        
     end
 else
-    xMoveOffset = 0;
-    yMoveOffset = 0;
+%     xMoveOffset = (dimsDcm(1)-dimsRef(1))/2;
+%     yMoveOffset = (dimsDcm(2)-dimsRef(2))/2;
+     xMoveOffset = 0;
+     yMoveOffset = 0;
 end
 
 
@@ -291,7 +293,7 @@ end
                     aNewPosition(:,2) = outY(:)-yMoveOffset;
 %                    aNewPosition(:,1) = outX(:);
 %                    aNewPosition(:,2) = outY(:);
-                    aNewPosition(:,3) = outZ(:);                    
+                    aNewPosition(:,3) = outZ(:);           
 
             end
     end

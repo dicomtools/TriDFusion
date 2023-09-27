@@ -2425,9 +2425,9 @@ end
                         progressBar(0.3, sprintf('Resampling series, please wait'));
 
                         if size(im, 3) ~= size(refImage, 3)
-                            [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', false, true);
+                            [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', false, false);
                         else
-                            [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', true, true);
+                            [aResampledBuffer, atResampledMetaData] = resampleImage(im, atMetaData, refImage, atRefMetaData, 'Linear', true, false);
                         end
 
                         progressBar(0.6, sprintf('Resampling ROIs, please wait'));
@@ -2756,6 +2756,8 @@ end
                         dCTOffset = isoMaskCtSerieOffset('get');
                         dCTSeriesNumber = tResampleToCT{dCTOffset}.dSeriesNumber;
 
+                        progressBar(0.6, sprintf('Computing ct bone map, please wait'));
+
                         BWCT = dicomBuffer('get', [], dCTSeriesNumber);
 
                         if isempty(BWCT)
@@ -2783,33 +2785,37 @@ end
                             end
                         end
 
+                        BWCT(BWCT < 100) = 0;
+                        BWCT = imfill(BWCT, 4, 'holes');
+
                         atFuseMetaData = dicomMetaData('get', [], dCTSeriesNumber);
                         if isempty(atFuseMetaData)
                             atFuseMetaData = atInput(dCTSeriesNumber).atDicomInfo;
                         end
 
-                        if resampleToCTIsoMask('get') == false || ... % Need to fit the CT to the PT or NM
-                           (resampleToCTIsoMask('get') == true && resampledContoursIsoMask('get') == false)
+%                         if resampleToCTIsoMask('get') == true && ...
+%                            resampledContoursIsoMask('get') == true
 
-                            if numel(BWCT) ~= numel(im)
-                               progressBar(0.6, sprintf('Resampling ct, please wait'));
+                            if ~isequal(size(BWCT), size(im))
 
-                                [BWCT, ~] = resampleImage(BWCT, atFuseMetaData, im, atMetaData, 'Nearest', true, false);
+                                progressBar(0.6, sprintf('Resampling ct, please wait'));
 
+                                BWCT = resample3DImage(BWCT, atFuseMetaData, im, atMetaData, 'Cubic');                                 
+                                BWCT = imbinarize(BWCT);                        
+
+                                if ~isequal(size(BWCT), size(im)) % Verify if both images are in the same field of view     
+                                    BWCT = resizeMaskToImageSize(BWCT, im); 
+                                end
+                            else
+                                BWCT = imbinarize(BWCT);                                                      
                             end
-                        end
+%                         else
+%                             BWCT = imbinarize(BWCT);                        
+%                         end
 
-                        progressBar(0.6, sprintf('Computing ct bone map, please wait'));
-
-                        BWCT(BWCT < 100) = 0;
-                        BWCT = imfill(BWCT, 4, 'holes');
-
-                        BWCT(BWCT~=0) = 1;
-                        BWCT(BWCT~=1) = 0;
 
                     elseif strcmpi(asFormula{dFormula}, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT ISO Map') || ...
                            strcmpi(asFormula{dFormula}, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT ISO Map')
-
 
                         bUseFormula = true;
 
@@ -2821,35 +2827,28 @@ end
 
                         BWCT = fusionBuffer('get', [], dFusedSeriesOffset);
 
-                        if resampleToCTIsoMask('get') == true && resampledContoursIsoMask('get') == true
-
-                            if numel(BWCT) ~= numel(im)
-
-                               BWCT = dicomBuffer('get', [], dFusedSeriesOffset);
-
-                                if isempty(BWCT)
-                                    BWCT = aInputBuffer{dFusedSeriesOffset};
-
-                                    if     strcmpi(imageOrientation('get'), 'axial')
-                                    %    BWCT = BWCT;
-                                    elseif strcmpi(imageOrientation('get'), 'coronal')
-                                        BWCT = reorientBuffer(BWCT, 'coronal');
-                                    elseif strcmpi(imageOrientation('get'), 'sagittal')
-                                        BWCT = reorientBuffer(BWCT, 'sagittal');
-                                    end
-
-                                    if atInput(dFusedSeriesOffset).bFlipLeftRight == true
-                                        BWCT=BWCT(:,end:-1:1,:);
-                                    end
-
-                                    if atInput(dFusedSeriesOffset).bFlipAntPost == true
-                                        BWCT=BWCT(end:-1:1,:,:);
-                                    end
-
-                                    if atInput(dFusedSeriesOffset).bFlipHeadFeet == true
-                                        BWCT=BWCT(:,:,end:-1:1);
-                                    end
-                                end
+                        if isempty(BWCT)
+    
+                            BWCT = aInputBuffer{dFusedSeriesOffset};
+    
+                            if     strcmpi(imageOrientation('get'), 'axial')
+                            %    BWCT = BWCT;
+                            elseif strcmpi(imageOrientation('get'), 'coronal')
+                                BWCT = reorientBuffer(BWCT, 'coronal');
+                            elseif strcmpi(imageOrientation('get'), 'sagittal')
+                                BWCT = reorientBuffer(BWCT, 'sagittal');
+                            end
+    
+                            if atInput(dFusedSeriesOffset).bFlipLeftRight == true
+                                BWCT=BWCT(:,end:-1:1,:);
+                            end
+    
+                            if atInput(dFusedSeriesOffset).bFlipAntPost == true
+                                BWCT=BWCT(end:-1:1,:,:);
+                            end
+    
+                            if atInput(dFusedSeriesOffset).bFlipHeadFeet == true
+                                BWCT=BWCT(:,:,end:-1:1);
                             end
                         end
 
@@ -2876,7 +2875,34 @@ end
                        %     BW = volumeFill(aVolume);
 
 %                            imCT(BWCT =~ 0) = dCTmin;
+                        else
+                            BWCT(BWCT < 100) = 0;
+                            BWCT = imfill(BWCT, 4, 'holes');                            
                         end
+
+%                         if resampleToCTIsoMask('get') == true && ...
+%                            resampledContoursIsoMask('get') == true
+
+                            if ~isequal(size(BWCT), size(im))
+
+                                progressBar(0.6, sprintf('Resampling ct, please wait'));
+
+                                atFuseMetaData = dicomMetaData('get', [], dCTSeriesNumber);
+                                if isempty(atFuseMetaData)
+                                    atFuseMetaData = atInput(dCTSeriesNumber).atDicomInfo;
+                                end
+
+                                BWCT = resample3DImage(BWCT, atFuseMetaData, im, atMetaData, 'Cubic');                                 
+                                BWCT = imbinarize(BWCT);                        
+
+                                if ~isequal(size(BWCT), size(im)) % Verify if both images are in the same field of view     
+                                    BWCT = resizeMaskToImageSize(BWCT, im); 
+                                end
+                            else
+                                BWCT = imbinarize(BWCT);                                                      
+                            end
+%                         end                       
+
                     else
                         bUseFormula = true;
 
@@ -2958,6 +2984,7 @@ end
 
                 elseif strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...
                        strcmpi(asFormula{dFormula}, '(4.30/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT ISO Map')
+
                    maskAddVoiToSeries(imMask     , BW, bPixelEdge, bPercentOfPeak, 3, false, 0, false, sMinSUVformula, BWCT, dSmalestVoiValue);
                    maskAddVoiToSeries(imMaskLiver, BWLIVER, bPixelEdge, false, dPercentMaxOrMaxSUVValue, false, dMultiplePeaksPercentValue, true, sMinSUVformula, BWCT, dSmalestVoiValue, dLiverMean, dLiverSTD);
 
@@ -2973,7 +3000,6 @@ end
                     tResampleToCT = resampleToCTIsoMaskUiValues('get');
                     if resampleToCTIsoMask('get') == true && ...
                        ~isempty(tResampleToCT)
-
 
                         dCTOffset = isoMaskCtSerieOffset('get');
                         dCTSeriesNumber = tResampleToCT{dCTOffset}.dSeriesNumber;

@@ -186,15 +186,17 @@ function mainWindowMenu()
     % Lu177
 
     mLu177 = uimenu(mWorkflows,'Label','PSMA - Lu177');  
-    uimenu(mLu177, 'Label','PSMA Lu177 Tumor Segmentation (Threshold)', 'Callback', @setSegmentationLu177Callback);
-    uimenu(mLu177, 'Label','PET/CT Fusion'                            , 'Callback', @setPETCTLu177FusionCallback, 'Separator','on');
+    uimenu(mLu177, 'Label','PSMA Lu177 Tumor Segmentation (Threshold)'     , 'Callback', @setSegmentationLu177Callback);
+    uimenu(mLu177, 'Label','PSMA Lu177 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningLu177Callback);
+    uimenu(mLu177, 'Label','PET/CT Fusion'                                 , 'Callback', @setPETCTLu177FusionCallback, 'Separator','on');
     
     % FDG
 
     mFDG = uimenu(mWorkflows,'Label','FDG - fluorodeoxyglucose');  
-    uimenu(mFDG, 'Label','FDG Tumor Segmentation (SUV)'    , 'Callback', @setSegmentationFDGSUVCallback);
-    uimenu(mFDG, 'Label','FDG Tumor Segmentation (Percent)', 'Callback', @setSegmentationFDGPercentCallback);
-    uimenu(mFDG, 'Label','PET/CT Fusion'                   , 'Callback', @setPETCTFDGFusionCallback, 'Separator','on');
+    uimenu(mFDG, 'Label','FDG Tumor Segmentation (SUV)'                      , 'Callback', @setSegmentationFDGSUVCallback);
+    uimenu(mFDG, 'Label','FDG Tumor Segmentation (Percent)'                  , 'Callback', @setSegmentationFDGPercentCallback);
+    uimenu(mFDG, 'Label','FDG Tumor Segmentation Lymph Node (Threshold + AI)', 'Callback', @setMachineLearningFDGLymphNodeSUVCallback);
+    uimenu(mFDG, 'Label','PET/CT Fusion'                                     , 'Callback', @setPETCTFDGFusionCallback, 'Separator','on');
 
     % FDHT
     
@@ -238,9 +240,18 @@ function mainWindowMenu()
     uimenu(mMachineProcessing, 'Label','PET Y90 Liver Dosimetry' , 'Callback', @setMachineLearningPETLiverDosimetryCallback);
 
     mMachineSegmentation = uimenu(mMachineLearning, 'Label','Machine Learning Tumor Segmentation');
+
+    mLu177 = uimenu(mMachineSegmentation,'Label','PSMA - Lu177');  
+    uimenu(mLu177, 'Label','PSMA Lu177 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningLu177Callback);
+
+    mFDG = uimenu(mMachineSegmentation,'Label','FDG - fluorodeoxyglucose');  
+    uimenu(mFDG, 'Label','FDG Tumor Segmentation Lymph Node (Threshold + AI)', 'Callback', @setMachineLearningFDGLymphNodeSUVCallback);
+
     if Ga68_DOTATATE
-        uimenu(mMachineSegmentation, 'Label','Ga68 DOTATATE Tumor Segmentation (Treshold + AI)', 'Callback', @setMachineLearningGa68DOTATATECallback);
-        uimenu(mMachineSegmentation, 'Label','Ga68 DOTATATE Tumor Segmentation (Full AI)'      , 'Callback', @setMachineLearningFullAIGa68DOTATATECallback);   
+        mGa68DOTATATE = uimenu(mMachineSegmentation,'Label','Ga68 DOTATATE');  
+       
+        uimenu(mGa68DOTATATE, 'Label','Ga68 DOTATATE Tumor Segmentation (Treshold + AI)', 'Callback', @setMachineLearningGa68DOTATATECallback);
+        uimenu(mGa68DOTATATE, 'Label','Ga68 DOTATATE Tumor Segmentation (Full AI)'      , 'Callback', @setMachineLearningFullAIGa68DOTATATECallback);   
     end
 
     mRadiomics = uimenu(mModules, 'Label','Radiomics');

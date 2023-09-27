@@ -170,8 +170,8 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
 
     progressBar(5/10, 'Resampling series, please wait.');
             
-    [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, true);   
-    [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, true);   
+    [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
+    [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
    
     dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
     dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
@@ -225,8 +225,17 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
     BWCT(BWCT < dBoneMaskThreshold) = 0;                                    
     BWCT = imfill(BWCT, 4, 'holes');                       
 
-    BWCT(BWCT~=0) = 1;
-    BWCT(BWCT~=1) = 0;
+    if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+
+         BWCT = resample3DImage(BWCT, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
+         BWCT = imbinarize(BWCT);
+
+        if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view     
+            BWCT = resizeMaskToImageSize(BWCT, aResampledPTImage); 
+        end
+    else
+        BWCT = imbinarize(BWCT);
+    end
 
     progressBar(9/10, 'Creating contours, please wait.');
 

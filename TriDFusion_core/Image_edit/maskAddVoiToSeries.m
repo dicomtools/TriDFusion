@@ -257,7 +257,8 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                     end
 
                     BW2(BW2 ~= dMinValue) = 1;
-                    BW2(BW2 == dMinValue) = 0;                      
+                    BW2(BW2 == dMinValue) = 0;   
+                    
                 elseif strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT ISO Map') 
 
                     BWANDBWCT = BW2&BWCT2;

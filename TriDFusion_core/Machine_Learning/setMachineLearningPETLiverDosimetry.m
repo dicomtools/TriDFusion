@@ -210,7 +210,10 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorPath)
             progressBar( 1, 'Error: Machine Learning under Mac is not supported');
             errordlg('Machine Learning under Mac is not supported', 'Machine Learning Validation');
         end
-
+        
+        if exist(char(sSegmentationFolderName), 'dir')
+            rmdir(char(sSegmentationFolderName), 's');
+        end
     end   
 
     setVoiRoiSegPopup();

@@ -169,7 +169,7 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
                     aSlice = aPTImage(:,:,atRoiInput{dTagOffset}.SliceNb);
             end
 
-            gaLiverMask = logical(false(size(aPTImage)));
+            gaLiverMask = false(size(aPTImage));
 
             aLogicalMask = roiTemplateToMask(atRoiInput{dTagOffset}, aSlice);
 
@@ -226,8 +226,8 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
 
     progressBar(5/11, 'Resampling series, please wait.');
             
-    [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, true);   
-    [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, true);   
+    [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
+    [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
    
     dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
     dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
@@ -299,8 +299,17 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
     BWCT(BWCT < dBoneMaskThreshold) = 0;                                    
     BWCT = imfill(BWCT, 4, 'holes');                       
 
-    BWCT(BWCT~=0) = 1;
-    BWCT(BWCT~=1) = 0;
+    if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+
+         BWCT = resample3DImage(BWCT, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
+         BWCT = imbinarize(BWCT);
+
+        if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view     
+            BWCT = resizeMaskToImageSize(BWCT, aResampledPTImage); 
+        end
+    else
+        BWCT = imbinarize(BWCT);
+    end
 
     progressBar(10/11, 'Creating contours, please wait.');
 
@@ -308,9 +317,10 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
     imMask(aBWMask == 0) = dMin;
 
     if ~isempty(gaLiverMask)
-        aBWMask(gaLiverMask)= 0;
-        imMask(gaLiverMask) = dMin;
-   end
+
+        aBWMask(gaLiverMask) = 0;
+        imMask (gaLiverMask) = dMin;
+    end
 
     setSeriesCallback();            
 
@@ -322,13 +332,14 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
         sFormula = 'Liver';
     
         imMaskLiver = aResampledPTImage;
-        imMaskLiver(aLiverBWMask == 0) = dMin;
+        imMaskLiver(gaLiverMask == 0) = dMin;
     
         maskAddVoiToSeries(imMaskLiver, aLiverBWMask, dPixelEdge, false, dLiverTreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue);  
 
         clear imMaskLiver;       
         clear aLiverBWMask;
-    end
+        clear gaLiverMask;    
+   end
 
     clear aResampledPTImage;
     clear aBWMask;

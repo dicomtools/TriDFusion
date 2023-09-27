@@ -49,8 +49,8 @@ function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge,
 
     if isempty(dCTSerieOffset) || ...
        isempty(dPTSerieOffset)  
-        progressBar(1, 'Error: FDG tumor segmentation require a CT and PT image!');
-        errordlg('FDG tumor segmentation require a CT and PT image!', 'Modality Validation');  
+        progressBar(1, 'Error: FDG SUV tumor segmentation require a CT and PT image!');
+        errordlg('FDG SUV tumor segmentation require a CT and PT image!', 'Modality Validation');  
         return;               
     end
 
@@ -113,8 +113,8 @@ function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge,
 
     progressBar(5/10, 'Resampling series, please wait.');
             
-    [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, true);   
-    [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, true);   
+    [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
+    [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
    
     dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
     dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
@@ -137,7 +137,7 @@ function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge,
     setQuantification(dPTSerieOffset);    
 
 
-    progressBar(7/10, 'Computing liver mask, please wait.');
+    progressBar(7/10, 'Computing mask, please wait.');
 
 
     aBWMask = aResampledPTImage;
@@ -155,8 +155,17 @@ function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge,
     BWCT(BWCT < dBoneMaskThreshold) = 0;                                    
     BWCT = imfill(BWCT, 4, 'holes');                       
 
-    BWCT(BWCT~=0) = 1;
-    BWCT(BWCT~=1) = 0;
+    if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+
+         BWCT = resample3DImage(BWCT, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
+         BWCT = imbinarize(BWCT);
+
+        if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view     
+            BWCT = resizeMaskToImageSize(BWCT, aResampledPTImage); 
+        end
+    else
+        BWCT = imbinarize(BWCT);
+    end
 
     progressBar(9/10, 'Creating contours, please wait.');
 
