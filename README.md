@@ -99,13 +99,12 @@ CERR
 https://github.com/cerr/CERR
 
 ### Machine Learning Segmentation
-TotalSegmentator
+TotalSegmentator (Tested version: pip install totalsegmentator==1.5.6)
 https://github.com/wasserth/TotalSegmentator
 
 ### Radiomics
 PY-Radiomics 
 https://pyradiomics.readthedocs.io/en/latest/installation.html
-Tested version: pip install totalsegmentator==1.5.6
 
 ## References 
 
