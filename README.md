@@ -105,6 +105,7 @@ https://github.com/wasserth/TotalSegmentator
 ### Radiomics
 PY-Radiomics 
 https://pyradiomics.readthedocs.io/en/latest/installation.html
+Tested version: pip install totalsegmentator==1.5.6
 
 ## References 
 
