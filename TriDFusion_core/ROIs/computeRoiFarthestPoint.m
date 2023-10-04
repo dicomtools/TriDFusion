@@ -1,5 +1,5 @@
-function tPointsComputed = computeRoiFarthestPoint(imRoi, atSliceMeta, atRoi, bPlotLine, bPlotText)
-%function  tPointsComputed = computeRoiFarthestPoint(imRoi, atSliceMeta, atRoi, bPlotLine, bPlotText)
+function tPoints = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlotLine, bPlotText)
+%function  tPoints = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlotLine, bPlotText)
 %Compute ROI farthest values from ROI object.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,12 +27,13 @@ function tPointsComputed = computeRoiFarthestPoint(imRoi, atSliceMeta, atRoi, bP
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tPointsComputed = []; 
+    tPoints = []; 
     isRoiValid = true;
 
     bFoundMaxDistance = false;
 
     if ~strcmpi(atRoi.Type, 'images.roi.line')
+
         try
             if size(imRoi, 3) == 1 
                 if strcmpi(atRoi.Axe, 'Axe')
@@ -101,7 +102,7 @@ function tPointsComputed = computeRoiFarthestPoint(imRoi, atSliceMeta, atRoi, bP
                     longSlope = (y(longestIndex1) - y(longestIndex2)) / (x(longestIndex1) - x(longestIndex2));
                     perpendicularSlope = -1/longSlope;
 
-                    % Use point slope formula (y-ym) = slope * (x - xm) to get points
+                    % Use point slope formula (y-ym) = slope * (x - xm) to get points                    
                     y1 = perpendicularSlope * (1 - xMidPoint) + yMidPoint;
                     y2 = perpendicularSlope * (columns - xMidPoint) + yMidPoint;
 
@@ -109,7 +110,7 @@ function tPointsComputed = computeRoiFarthestPoint(imRoi, atSliceMeta, atRoi, bP
 
                         % Get the profile perpendicular to the midpoint so we can find out when if first enters and last leaves the object.
                         [cxMax, cyMax, cMax] = improfile(aBinaryImage, [1, columns], [y1, y2]);
-
+ 
                         % Get rid of NAN's that occur when the line's endpoints go above or below the image.
                         cMax(isnan(cMax)) = 0;
                         perpendicularIndex1 = find(cMax, 1, 'first');
@@ -118,28 +119,43 @@ function tPointsComputed = computeRoiFarthestPoint(imRoi, atSliceMeta, atRoi, bP
                         if ~isempty(perpendicularIndex1) && ... % Find a perpendicular
                            ~isempty(perpendicularIndex2)
 
+                            % Use the coordinates from improfile directly
+                            x1CY = cxMax(perpendicularIndex1);
+                            y1CY = cyMax(perpendicularIndex1);
+                            x2CY = cxMax(perpendicularIndex2);
+                            y2CY = cyMax(perpendicularIndex2);
+                                                   
+                            % Find the closest points on the contour to ensure lCY endpoints are on the contour
+                            [x1CY, y1CY] = findClosestContourPoint(x1CY, y1CY, x, y);
+                            [x2CY, y2CY] = findClosestContourPoint(x2CY, y2CY, x, y);
+                 
+                            x1XY = x(longestIndex1);
+                            x2XY = x(longestIndex2);
+                            y1XY = y(longestIndex1);
+                            y2XY = y(longestIndex2);
+
                             if bPlotLine == true 
                                 sLineVisible = 'on';
                             else
                                 sLineVisible = 'off';
                             end
 
-                            lXY = line(atRoi.Object.Parent, [x(longestIndex1), x(longestIndex2)], [y(longestIndex1), y(longestIndex2)], 'Color', 'r', 'LineWidth', 1, 'Visible', sLineVisible);	
-                            lCY = line(atRoi.Object.Parent, [cxMax(perpendicularIndex1), cxMax(perpendicularIndex2)], [cyMax(perpendicularIndex1), cyMax(perpendicularIndex2)], 'Color', 'm', 'LineWidth', 1, 'Visible', sLineVisible);
+                            lXY = line(atRoi.Object.Parent, [x1XY, x2XY], [y1XY, y2XY], 'Color', 'r', 'LineWidth', 1, 'Visible', sLineVisible);	
+                            lCY = line(atRoi.Object.Parent, [x1CY, x2CY], [y1CY, y2CY], 'Color', 'm', 'LineWidth', 1, 'Visible', sLineVisible);
 
-                            tPointsComputed.MaxXY.Line = lXY;
-                            tPointsComputed.MaxCY.Line = lCY;
+                            tPoints.MaxXY.Line = lXY;
+                            tPoints.MaxCY.Line = lCY;
 
                             if is3DEngine('get') == true
 
                                 if size(imRoi, 3) == 1 
                                     if strcmpi(atRoi.Axe, 'Axe')
-                                        imPtr  = imAxePtr ('get', [], get(uiSeriesPtr('get'), 'Value') );
+                                        imPtr = imAxePtr ('get', [], get(uiSeriesPtr('get'), 'Value') );
                                    end
                                 else
                                     switch(lower(atRoi.Axe))
                                         case lower( 'Axes1')                        
-                                            imPtr  = imCoronalPtr ('get', [], get(uiSeriesPtr('get'), 'Value') );
+                                            imPtr = imCoronalPtr ('get', [], get(uiSeriesPtr('get'), 'Value') );
 
                                         case lower( 'Axes2')                   
                                             imPtr = imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value') );
@@ -155,25 +171,25 @@ function tPointsComputed = computeRoiFarthestPoint(imRoi, atSliceMeta, atRoi, bP
 
                             % Compute XY distance in mm
 
-                            roiObject.Position(1,1) = x(longestIndex1);
-                            roiObject.Position(1,2) = y(longestIndex1);
+                            roiObject.Position(1,1) = x1XY;
+                            roiObject.Position(1,2) = y1XY;
 
-                            roiObject.Position(2,1) = x(longestIndex2);
-                            roiObject.Position(2,2) = y(longestIndex2);
+                            roiObject.Position(2,1) = x2XY;
+                            roiObject.Position(2,2) = y2XY;
 
-                            dXYLength = computeLineLength(atSliceMeta, atRoi.Axe, roiObject);
-                            tPointsComputed.MaxXY.Length = dXYLength;                    
+                            dXYLength = computeLineLength(atMetaData, atRoi.Axe, roiObject);
+                            tPoints.MaxXY.Length = dXYLength;                    
 
                             % Compute CY distance in mm
 
-                            roiObject.Position(1,1) = cxMax(perpendicularIndex1);
-                            roiObject.Position(1,2) = cyMax(perpendicularIndex1);
+                            roiObject.Position(1,1) = x1CY;
+                            roiObject.Position(1,2) = y1CY;
 
-                            roiObject.Position(2,1) = cxMax(perpendicularIndex2);
-                            roiObject.Position(2,2) = cyMax(perpendicularIndex2);
+                            roiObject.Position(2,1) = x2CY;
+                            roiObject.Position(2,2) = y2CY;
 
-                            dCYLength = computeLineLength(atSliceMeta, atRoi.Axe, roiObject);
-                            tPointsComputed.MaxCY.Length = dCYLength;                    
+                            dCYLength = computeLineLength(atMetaData, atRoi.Axe, roiObject);
+                            tPoints.MaxCY.Length = dCYLength;                    
 
                             if bPlotText == true  
                                 sTextVisible = 'on';
@@ -181,17 +197,27 @@ function tPointsComputed = computeRoiFarthestPoint(imRoi, atSliceMeta, atRoi, bP
                                 sTextVisible = 'off';
                             end
 
-                            tXY = text(atRoi.Object.Parent, x(longestIndex1), y(longestIndex1), sprintf('%s mm', num2str(dXYLength)), 'Color', 'r', 'Visible', sTextVisible);
-                            tCY = text(atRoi.Object.Parent, cxMax(perpendicularIndex2), cyMax(perpendicularIndex2), sprintf('%s mm', num2str(dCYLength)), 'Color','m', 'Visible', sTextVisible);
+                            tXY = text(atRoi.Object.Parent, x1XY, y1XY, sprintf('%s mm', num2str(dXYLength)), 'Color', 'r', 'Visible', sTextVisible);
+                            tCY = text(atRoi.Object.Parent, x2CY, y2CY, sprintf('%s mm', num2str(dCYLength)), 'Color', 'm', 'Visible', sTextVisible);
 
-                            tPointsComputed.MaxXY.Text = tXY;
-                            tPointsComputed.MaxCY.Text = tCY;                    
+                            tPoints.MaxXY.Text = tXY;
+                            tPoints.MaxCY.Text = tCY;                    
                         end
                     end
                 end
             end
         catch
-            tPointsComputed = []; 
+            tPoints = []; 
         end
     end
+
+    % Function to find the closest contour point
+
+    function [xClosest, yClosest] = findClosestContourPoint(x, y, xContour, yContour)
+
+        [~, index] = min(sqrt((xContour - x).^2 + (yContour - y).^2));
+        xClosest = xContour(index);
+        yClosest = yContour(index);
+    end
+ 
 end

@@ -94,8 +94,9 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                 sLesionType = 'Unspecified';
             else
                 if  contains(sMinSUVformula, 'CT Bone Map') || ...
-                    contains(sMinSUVformula, 'CT ISO Map')  
-                    
+                    contains(sMinSUVformula, 'CT ISO Map')  || ...
+                    contains(sMinSUVformula, 'Lymph Nodes')
+
                     BWANDBWCT = BW2&BWCT2;
     
                     dBWnbPixel        = numel(BW2(BW2~=0));
@@ -104,7 +105,11 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                     if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
                         sLesionType = 'Bone';
                     else
-                        sLesionType = 'Soft Tissue';
+                        if contains(sMinSUVformula, 'Lymph Nodes')
+                            sLesionType = 'Lymph Nodes';
+                        else
+                            sLesionType = 'Soft Tissue';
+                        end
                     end
     
                 elseif  strcmpi(sMinSUVformula, 'Liver') 
@@ -149,8 +154,9 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                     sLesionType = 'Unknow';
                 else
                     if  contains(sMinSUVformula, 'CT Bone Map') || ...
-                        contains(sMinSUVformula, 'CT ISO Map')   
-    
+                        contains(sMinSUVformula, 'CT ISO Map')  || ... 
+                        contains(sMinSUVformula, 'Lymph Nodes')
+
                         BWANDBWCT = BW2&BWCT2;
     
                         dBWnbPixel        = numel(BW2(BW2~=0));
@@ -159,7 +165,11 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                         if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
                             sLesionType = 'Bone';
                         else
-                            sLesionType = 'Soft Tissue';
+                            if contains(sMinSUVformula, 'Lymph Nodes')
+                                sLesionType = 'Lymph Nodes';
+                            else
+                                sLesionType = 'Soft Tissue';
+                            end
                         end
                         
                     elseif  strcmpi(sMinSUVformula, 'Liver') 
@@ -257,7 +267,8 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                     end
 
                     BW2(BW2 ~= dMinValue) = 1;
-                    BW2(BW2 == dMinValue) = 0;                      
+                    BW2(BW2 == dMinValue) = 0;   
+                    
                 elseif strcmpi(sMinSUVformula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT ISO Map') 
 
                     BWANDBWCT = BW2&BWCT2;
@@ -376,7 +387,30 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 
                     BW2(BW2 ~= dMinValue) = 1;
                     BW2(BW2 == dMinValue) = 0; 
+                elseif strcmpi(sMinSUVformula, '(1.5 x Normal Liver SUVmean)+(2 x Normal Liver SD), Soft Tissue & Bone SUV 2.5, CT Bone Map')
+                    
+                    BWANDBWCT = BW2&BWCT2;
 
+                    dBWnbPixel        = numel(BW2(BW2~=0));
+                    dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
+
+                    if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
+                        sLesionType = 'Bone';
+
+                        dPercentMaxOrMaxSUVValue = 2.5;                                
+                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                    else
+                        sLesionType = 'Soft Tissue';
+
+%                                dMean = mean(BW2(BW2~=dMinValue), 'all') * dSUVScale;
+%                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
+
+                        dPercentMaxOrMaxSUVValue = (1.5*dLiverMean)+(2 * dLiverSTD);                                
+                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                    end
+
+                    BW2(BW2 ~= dMinValue) = 1;
+                    BW2(BW2 == dMinValue) = 0; 
                 elseif strcmpi(sMinSUVformula, '(1.5 x Normal Liver SUVmean)+(2 x Normal Liver SD), Lymph Nodes & Bone SUV 2.5, CT Bone Map')
                     
                     BWANDBWCT = BW2&BWCT2;
@@ -401,6 +435,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 
                     BW2(BW2 ~= dMinValue) = 1;
                     BW2(BW2 == dMinValue) = 0; 
+
                 else
                     return;
                 end

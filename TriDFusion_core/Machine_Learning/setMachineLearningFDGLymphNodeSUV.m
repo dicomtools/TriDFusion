@@ -253,7 +253,7 @@ function setMachineLearningFDGLymphNodeSUV(sSegmentatorPath, tLymphNodeSUV)
             
                 setSeriesCallback();
             
-                sFormula = 'CT Bone Map';
+                sFormula = 'Lymph Nodes';
 
                 dSmalestVoiValue = tLymphNodeSUV.options.smalestVoiValue;
                 bPixelEdge = tLymphNodeSUV.options.pixelEdge;

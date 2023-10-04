@@ -201,14 +201,16 @@ function mainWindowMenu()
     % FDHT
     
     mFDHT = uimenu(mWorkflows,'Label','FDHT - fluorodihydrotestosterone');  
-    uimenu(mFDHT, 'Label','FDHT Tumor Segmentation (Threshold)', 'Callback', @setSegmentationFDHTCallback);
-    uimenu(mFDHT, 'Label','PET/CT Fusion'                      , 'Callback', @setPETCTFDHTFusionCallback, 'Separator','on');
+    uimenu(mFDHT, 'Label','FDHT Tumor Segmentation (Threshold)'     , 'Callback', @setSegmentationFDHTCallback);
+    uimenu(mFDHT, 'Label','FDHT Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningFDHTCallback);
+    uimenu(mFDHT, 'Label','PET/CT Fusion'                           , 'Callback', @setPETCTFDHTFusionCallback, 'Separator','on');
 
     % PSMA
 
     mPSMA = uimenu(mWorkflows,'Label','PSMA - 18F-FDCFPyL');  
-    uimenu(mPSMA, 'Label','PSMA 18F-FDCFPyL Tumor Segmentation (Threshold)', 'Callback', @setSegmentationPSMACallback);
-    uimenu(mPSMA, 'Label','PET/CT Fusion'                                  , 'Callback', @setPETCTPSMAFusionCallback, 'Separator','on');
+    uimenu(mPSMA, 'Label','PSMA 18F-FDCFPyL Tumor Segmentation (Threshold)'     , 'Callback', @setSegmentationPSMACallback);
+    uimenu(mPSMA, 'Label','PSMA 18F-FDCFPyL Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningPSMACallback);
+    uimenu(mPSMA, 'Label','PET/CT Fusion'                                       , 'Callback', @setPETCTPSMAFusionCallback, 'Separator','on');
 
     % Ga68 DOTATATE
 
@@ -240,12 +242,28 @@ function mainWindowMenu()
     uimenu(mMachineProcessing, 'Label','PET Y90 Liver Dosimetry' , 'Callback', @setMachineLearningPETLiverDosimetryCallback);
 
     mMachineSegmentation = uimenu(mMachineLearning, 'Label','Machine Learning Tumor Segmentation');
+    
+    % Lu177
 
     mLu177 = uimenu(mMachineSegmentation,'Label','PSMA - Lu177');  
     uimenu(mLu177, 'Label','PSMA Lu177 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningLu177Callback);
 
+    % FDG
+
     mFDG = uimenu(mMachineSegmentation,'Label','FDG - fluorodeoxyglucose');  
     uimenu(mFDG, 'Label','FDG Tumor Segmentation Lymph Node (Threshold + AI)', 'Callback', @setMachineLearningFDGLymphNodeSUVCallback);
+
+    % FDHT
+    
+    mFDHT = uimenu(mMachineSegmentation,'Label','FDHT - fluorodihydrotestosterone');  
+    uimenu(mFDHT, 'Label','FDHT Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningFDHTCallback);
+
+    % PSMA
+
+    mPSMA = uimenu(mMachineSegmentation,'Label','PSMA - 18F-FDCFPyL');  
+    uimenu(mPSMA, 'Label','PSMA 18F-FDCFPyL Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningPSMACallback);
+
+    % Ga68 DOTATATE
 
     if Ga68_DOTATATE
         mGa68DOTATATE = uimenu(mMachineSegmentation,'Label','Ga68 DOTATATE');  

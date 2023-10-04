@@ -174,7 +174,7 @@ function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge,
 
     setSeriesCallback();
 
-    sFormula = 'CT Bone Map';
+    sFormula = 'Lymph Nodes';
 
     maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, dTreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue);                    
   

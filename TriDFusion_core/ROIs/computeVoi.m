@@ -153,25 +153,26 @@ function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMet
         tVoiComputed.std  = std(imCData,[],'all') * dSUVScale;  
 
         if ~isempty(tVoiComputed.max)
-
-            % Initialization SUVpeak
-            ROIonlyPET = padarray(imCData * dSUVScale,[1 1 1],NaN);
-
-            % SUVmax
-            [~,indMax] = max(ROIonlyPET(:));         
-            % SUVpeak (using 26 neighbors around SUVmax)
-            [indMaxX,indMaxY,indMaxZ] = ind2sub(size(ROIonlyPET),indMax);
-            connectivity = getneighbors(strel('arbitrary',conndef(3,'maximal')));
-            nPeak = length(connectivity);
-            neighborsMax = zeros(1,nPeak);
-            for i=1:nPeak
-                if connectivity(i,1)+indMaxX ~= 0 && ...
-                   connectivity(i,2)+indMaxY ~= 0 && ...
-                   connectivity(i,3)+indMaxZ ~= 0
-                    neighborsMax(i) = ROIonlyPET(connectivity(i,1)+indMaxX,connectivity(i,2)+indMaxY,connectivity(i,3)+indMaxZ);
-                end
-            end
-            tVoiComputed.peak = mean(neighborsMax(~isnan(neighborsMax)));
+% 
+%             % Initialization SUVpeak
+%             ROIonlyPET = padarray(imCData * dSUVScale,[1 1 1],NaN);
+% 
+%             % SUVmax
+%             [~,indMax] = max(ROIonlyPET(:));         
+%             % SUVpeak (using 26 neighbors around SUVmax)
+%             [indMaxX,indMaxY,indMaxZ] = ind2sub(size(ROIonlyPET),indMax);
+%             connectivity = getneighbors(strel('arbitrary',conndef(3,'maximal')));
+%             nPeak = length(connectivity);
+%             neighborsMax = zeros(1,nPeak);
+%             for i=1:nPeak
+%                 if connectivity(i,1)+indMaxX ~= 0 && ...
+%                    connectivity(i,2)+indMaxY ~= 0 && ...
+%                    connectivity(i,3)+indMaxZ ~= 0
+%                     neighborsMax(i) = ROIonlyPET(connectivity(i,1)+indMaxX,connectivity(i,2)+indMaxY,connectivity(i,3)+indMaxZ);
+%                 end
+%             end
+%             tVoiComputed.peak = mean(neighborsMax(~isnan(neighborsMax)));
+            tVoiComputed.peak = computePeak(imCData, dSUVScale);
         else
             tVoiComputed.peak = []; 
         end
@@ -190,24 +191,26 @@ function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMet
 
         if ~isempty(tVoiComputed.max)
 
-            % Initialization SUVpeak
-            ROIonlyPET = padarray(imCData,[1 1 1],NaN);
+%             % Initialization SUVpeak
+%             ROIonlyPET = padarray(imCData,[1 1 1],NaN);
+% 
+%             % SUVmax 
+%             [~,indMax] = max(ROIonlyPET(:));         
+%             % SUVpeak (using 26 neighbors around SUVmax)
+%             [indMaxX,indMaxY,indMaxZ] = ind2sub(size(ROIonlyPET),indMax);
+%             connectivity = getneighbors(strel('arbitrary',conndef(3,'maximal')));
+%             nPeak = length(connectivity);
+%             neighborsMax = zeros(1,nPeak);
+%             for i=1:nPeak
+%                 if connectivity(i,1)+indMaxX ~= 0 && ...
+%                    connectivity(i,2)+indMaxY ~= 0 && ...
+%                    connectivity(i,3)+indMaxZ ~= 0
+%                     neighborsMax(i) = ROIonlyPET(connectivity(i,1)+indMaxX,connectivity(i,2)+indMaxY,connectivity(i,3)+indMaxZ);
+%                 end
+%             end
+%             tVoiComputed.peak = mean(neighborsMax(~isnan(neighborsMax)));   
+            tVoiComputed.peak = computePeak(imCData);
 
-            % SUVmax 
-            [~,indMax] = max(ROIonlyPET(:));         
-            % SUVpeak (using 26 neighbors around SUVmax)
-            [indMaxX,indMaxY,indMaxZ] = ind2sub(size(ROIonlyPET),indMax);
-            connectivity = getneighbors(strel('arbitrary',conndef(3,'maximal')));
-            nPeak = length(connectivity);
-            neighborsMax = zeros(1,nPeak);
-            for i=1:nPeak
-                if connectivity(i,1)+indMaxX ~= 0 && ...
-                   connectivity(i,2)+indMaxY ~= 0 && ...
-                   connectivity(i,3)+indMaxZ ~= 0
-                    neighborsMax(i) = ROIonlyPET(connectivity(i,1)+indMaxX,connectivity(i,2)+indMaxY,connectivity(i,3)+indMaxZ);
-                end
-            end
-            tVoiComputed.peak = mean(neighborsMax(~isnan(neighborsMax)));                
         else
             tVoiComputed.peak = [];                   
         end

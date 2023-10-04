@@ -1,6 +1,6 @@
-function setMachineLearningLu177(sSegmentatorPath, tLu177)
-%function setMachineLearningLu177(sSegmentatorPath, tLu177)
-%Run Lu177 threshold base segmentation with machine learning organ exclusion.
+function setMachineLearningFDHT(sSegmentatorPath, tFDHT)
+%function setMachineLearningFDHT(sSegmentatorPath, tFDHT)
+%Run FDHT threshold base segmentation with machine learning organ exclusion.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -43,29 +43,29 @@ function setMachineLearningLu177(sSegmentatorPath, tLu177)
         end
     end
 
-    dNMSerieOffset = [];
+    dPTSerieOffset = [];
     for tt=1:numel(atInput)
-        if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'nm')
-            dNMSerieOffset = tt;
+        if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'pt')
+            dPTSerieOffset = tt;
             break
         end
     end
 
     if isempty(dCTSerieOffset) || ...
-       isempty(dNMSerieOffset)  
-        progressBar(1, 'Error: Lu177 tumor segmentation require a CT and NM image!');
-        errordlg('Lu177 tumor segmentation require a CT and NM image!', 'Modality Validation');  
+       isempty(dPTSerieOffset)  
+        progressBar(1, 'Error: FDHT tumor segmentation require a CT and PT image!');
+        errordlg('FDHT tumor segmentation require a CT and PT image!', 'Modality Validation');  
         return;               
     end
 
 
-    atNMMetaData = dicomMetaData('get', [], dNMSerieOffset);
+    atPTMetaData = dicomMetaData('get', [], dPTSerieOffset);
     atCTMetaData = dicomMetaData('get', [], dCTSerieOffset);
 
-    aNMImage = dicomBuffer('get', [], dNMSerieOffset);
-    if isempty(aNMImage)
+    aPTImage = dicomBuffer('get', [], dPTSerieOffset);
+    if isempty(aPTImage)
         aInputBuffer = inputBuffer('get');
-        aNMImage = aInputBuffer{dNMSerieOffset};
+        aPTImage = aInputBuffer{dPTSerieOffset};
     end
 
     aCTImage = dicomBuffer('get', [], dCTSerieOffset);
@@ -74,16 +74,16 @@ function setMachineLearningLu177(sSegmentatorPath, tLu177)
         aCTImage = aInputBuffer{dCTSerieOffset};
     end
 
-    if isempty(atNMMetaData)
-        atNMMetaData = atInput(dNMSerieOffset).atDicomInfo;
+    if isempty(atPTMetaData)
+        atPTMetaData = atInput(dPTSerieOffset).atDicomInfo;
     end
 
     if isempty(atCTMetaData)
         atCTMetaData = atInput(dCTSerieOffset).atDicomInfo;
     end
 
-    if get(uiSeriesPtr('get'), 'Value') ~= dNMSerieOffset
-        set(uiSeriesPtr('get'), 'Value', dNMSerieOffset);
+    if get(uiSeriesPtr('get'), 'Value') ~= dPTSerieOffset
+        set(uiSeriesPtr('get'), 'Value', dPTSerieOffset);
 
         setSeriesCallback();
     end
@@ -96,7 +96,7 @@ function setMachineLearningLu177(sSegmentatorPath, tLu177)
         dSUVScale = 0;
     end 
 
-    atRoiInput = roiTemplate('get', dNMSerieOffset);
+    atRoiInput = roiTemplate('get', dPTSerieOffset);
    
     if ~isempty(atRoiInput)
         
@@ -110,13 +110,13 @@ function setMachineLearningLu177(sSegmentatorPath, tLu177)
             switch lower(atRoiInput{dTagOffset}.Axe)
 
                 case 'axes1'                            
-                    aSlice = permute(aNMImage(atRoiInput{dTagOffset}.SliceNb,:,:), [3 2 1]);
+                    aSlice = permute(aPTImage(atRoiInput{dTagOffset}.SliceNb,:,:), [3 2 1]);
 
                 case 'axes2'
-                    aSlice = permute(aNMImage(:,atRoiInput{dTagOffset}.SliceNb,:), [3 1 2]);
+                    aSlice = permute(aPTImage(:,atRoiInput{dTagOffset}.SliceNb,:), [3 1 2]);
 
                 case 'axes3'
-                    aSlice = aNMImage(:,:,atRoiInput{dTagOffset}.SliceNb);       
+                    aSlice = aPTImage(:,:,atRoiInput{dTagOffset}.SliceNb);       
             end
             
             aLogicalMask = roiTemplateToMask(atRoiInput{dTagOffset}, aSlice);
@@ -133,7 +133,7 @@ function setMachineLearningLu177(sSegmentatorPath, tLu177)
         else
             waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
 
-            Lu177NormalLiverMeanSDDialog();
+            FDHTNormalLiverMeanSDDialog();
 
             if gbProceedWithSegmentation == false
                 return;
@@ -142,7 +142,7 @@ function setMachineLearningLu177(sSegmentatorPath, tLu177)
     else
         waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
 
-        Lu177NormalLiverMeanSDDialog();
+        FDHTNormalLiverMeanSDDialog();
 
         if gbProceedWithSegmentation == false
             return;
@@ -151,19 +151,19 @@ function setMachineLearningLu177(sSegmentatorPath, tLu177)
 
     % Apply ROI constraint 
 
-    [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dNMSerieOffset);
+    [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dPTSerieOffset);
 
     bInvertMask = invertConstraint('get');
 
-    tRoiInput = roiTemplate('get', dNMSerieOffset);
+    tRoiInput = roiTemplate('get', dPTSerieOffset);
     
-    aNMImageTemp = aNMImage;
-    aLogicalMask = roiConstraintToMask(aNMImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask); 
-    aNMImageTemp(aLogicalMask==0) = 0;  % Set constraint 
+    aPTImageTemp = aPTImage;
+    aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask); 
+    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint 
 
-    resetSeries(dNMSerieOffset, true);       
+    resetSeries(dPTSerieOffset, true);       
 
-    try 
+%     try 
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;    
@@ -230,29 +230,29 @@ function setMachineLearningLu177(sSegmentatorPath, tLu177)
 
                 progressBar(4/8, 'Resampling series, please wait.');
 
-                [aResampledNMImageTemp, ~] = resampleImage(aNMImageTemp, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);   
-                [aResampledNMImage, atResampledNMMetaData] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);   
+                [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
+                [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
 
-                dicomMetaData('set', atResampledNMMetaData, dNMSerieOffset);
-                dicomBuffer  ('set', aResampledNMImage, dNMSerieOffset);
+                dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
+                dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
             
-                aResampledNMImage = aResampledNMImageTemp;
+                aResampledPTImage = aResampledPTImageTemp;
 
-                clear aNMImageTemp;
-                clear aResampledNMImageTemp;
+                clear aPTImageTemp;
+                clear aResampledPTImageTemp;
             
                 progressBar(5/8, 'Resampling mip, please wait.');
                         
                 refMip = mipBuffer('get', [], dCTSerieOffset);                        
-                aMip   = mipBuffer('get', [], dNMSerieOffset);
+                aMip   = mipBuffer('get', [], dPTSerieOffset);
               
-                aMip = resampleMip(aMip, atNMMetaData, refMip, atCTMetaData, 'Linear', false);
+                aMip = resampleMip(aMip, atPTMetaData, refMip, atCTMetaData, 'Linear', true);
                                
-                mipBuffer('set', aMip, dNMSerieOffset);
+                mipBuffer('set', aMip, dPTSerieOffset);
             
-                setQuantification(dNMSerieOffset);    
+                setQuantification(dPTSerieOffset);    
                        
-                resampleAxes(aResampledNMImage, atResampledNMMetaData);
+                resampleAxes(aResampledPTImage, atResampledPTMetaData);
                 
                 setImagesAspectRatio();
 
@@ -264,56 +264,55 @@ function setMachineLearningLu177(sSegmentatorPath, tLu177)
                 BWCT = getTotalSegmentorWholeBodyMask(sSegmentationFolderName, zeros(size(aCTImage)));
                 BWCT = imfill(BWCT, 4, 'holes');
              
-                if ~isequal(size(BWCT), size(aResampledNMImage)) % Verify if both images are in the same field of view 
+                if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view 
 
-                    BWCT = resample3DImage(BWCT, atCTMetaData, aResampledNMImage, atResampledNMMetaData, 'Cubic');
+                    BWCT = resample3DImage(BWCT, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
                     BWCT = imbinarize(BWCT);
 
-                    if ~isequal(size(BWCT), size(aResampledNMImage)) % Verify if both images are in the same field of view 
-                        BWCT = resizeMaskToImageSize(BWCT, aResampledNMImage); 
+                    if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+                        BWCT = resizeMaskToImageSize(BWCT, aResampledPTImage); 
                     end
                 else
                     BWCT = imbinarize(BWCT);
                 end
 
-%                 BWCT = resampleImage(BWCT, atCTMetaData, aResampledNMImage, atResampledNMMetaData, 'Linear', false, false);   
-%                 BWCT = imageFieldOfView(BWCT, aResampledNMImage, atResampledNMMetaData); 
+%                 BWCT = resampleImage(BWCT, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Linear', false, false);   
+%                 BWCT = imageFieldOfView(BWCT, aResampledPTImage, atResampledPTMetaData); 
 
 
                 progressBar(6/8, 'Importing exclusion masks, please wait.');
 
-                aExcludeMask = getLu177ExcludeMask(tLu177, sSegmentationFolderName, zeros(size(aCTImage)));
+                aExcludeMask = getFDHTExcludeMask(tFDHT, sSegmentationFolderName, zeros(size(aCTImage)));
                 aExcludeMask = imdilate(aExcludeMask, strel('sphere', 2)); % Increse mask by 2 pixels
 
-                if ~isequal(size(aExcludeMask), size(aResampledNMImage)) % Verify if both images are in the same field of view 
+                if ~isequal(size(aExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view 
 
-                     aExcludeMask = resample3DImage(aExcludeMask, atCTMetaData, aResampledNMImage, atResampledNMMetaData, 'Cubic');
+                     aExcludeMask = resample3DImage(aExcludeMask, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
                      aExcludeMask = imbinarize(aExcludeMask);
 
-                    if ~isequal(size(aExcludeMask), size(aResampledNMImage)) % Verify if both images are in the same field of view     
-                        aExcludeMask = resizeMaskToImageSize(aExcludeMask, aResampledNMImage); 
+                    if ~isequal(size(aExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view     
+                        aExcludeMask = resizeMaskToImageSize(aExcludeMask, aResampledPTImage); 
                     end
                 else
                     aExcludeMask = imbinarize(aExcludeMask);                    
                 end
-%                 aExcludeMask = imageFieldOfView(aExcludeMask, aResampledNMImage, atResampledNMMetaData); 
+%                 aExcludeMask = imageFieldOfView(aExcludeMask, aResampledPTImage, atResampledPTMetaData); 
 
 
-                aResampledNMImage(aExcludeMask) = min(aResampledNMImage, [], 'all');  % Exclude mask
+                aResampledPTImage(aExcludeMask) = min(aResampledPTImage, [], 'all');  % Exclude mask
 
                 clear aExcludeMask;
 
 
                 progressBar(7/8, 'Computing mask, please wait.');
             
-                aBWMask = aResampledNMImage;
+                aBWMask = aResampledPTImage;
             
                 dMin = min(aBWMask, [], 'all');
 
-                dTreshold = (1.5*gdNormalLiverMean) + (2*gdNormalLiverSTD);
-            
-                if dTreshold < 2.5
-                    dTreshold = 2.5;
+                dTreshold = (1.5*gdNormalLiverMean) + (2*gdNormalLiverSTD);         
+                if dTreshold < 3
+                    dTreshold = 3;
                 end
 
                 aBWMask(aBWMask*dSUVScale<dTreshold)=dMin;
@@ -322,19 +321,19 @@ function setMachineLearningLu177(sSegmentatorPath, tLu177)
 
                 progressBar(8/10, 'Creating contours, please wait.');
             
-                imMask = aResampledNMImage;
+                imMask = aResampledPTImage;
                 imMask(aBWMask == 0) = dMin;
             
                 setSeriesCallback();
             
 
-                dSmalestVoiValue = tLu177.options.smalestVoiValue;
-                bPixelEdge = tLu177.options.pixelEdge;
+                dSmalestVoiValue = tFDHT.options.smalestVoiValue;
+                bPixelEdge = tFDHT.options.pixelEdge;
 
-                sFormula = '(1.5 x Normal Liver SUVmean)+(2 x Normal Liver SD), Soft Tissue & Bone SUV 2.5, CT Bone Map';
+                sFormula = '(1.5 x Normal Liver SUVmean)+(2 x Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map';
                 maskAddVoiToSeries(imMask, aBWMask, bPixelEdge, false, 0, false, 0, true, sFormula, BWCT, dSmalestVoiValue,  gdNormalLiverMean, gdNormalLiverSTD, 'TUMOR');    
 
-                clear aResampledNMImage;
+                clear aResampledPTImage;
                 clear aBWMask;
                 clear refMip;                        
                 clear aMip;
@@ -380,7 +379,7 @@ function setMachineLearningLu177(sSegmentatorPath, tLu177)
 
     % Triangulate og 1st VOI
 
-    atVoiInput = voiTemplate('get', dNMSerieOffset);
+    atVoiInput = voiTemplate('get', dPTSerieOffset);
 
     if ~isempty(atVoiInput)
 
@@ -397,7 +396,7 @@ function setMachineLearningLu177(sSegmentatorPath, tLu177)
 
     refreshImages();
 
-    clear aNMImage;
+    clear aPTImage;
     clear aCTImage;
 
     % Delete .nii folder    
@@ -408,37 +407,37 @@ function setMachineLearningLu177(sSegmentatorPath, tLu177)
     
     progressBar(1, 'Ready');
 
-    catch 
-        resetSeries(dNMSerieOffset, true);       
-        progressBar( 1 , 'Error: setSegmentationLu177()' );
-    end
+%     catch 
+%         resetSeries(dPTSerieOffset, true);       
+%         progressBar( 1 , 'Error: setSegmentationFDHT()' );
+%     end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;
 
-      function Lu177NormalLiverMeanSDDialog()
+      function FDHTNormalLiverMeanSDDialog()
 
-        DLG_Lu177_MEAN_SD_X = 380;
-        DLG_Lu177_MEAN_SD_Y = 150;
+        DLG_FDHT_MEAN_SD_X = 380;
+        DLG_FDHT_MEAN_SD_Y = 150;
     
-        dlgLu177meanSD = ...
-            dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_Lu177_MEAN_SD_X/2) ...
-                                (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_Lu177_MEAN_SD_Y/2) ...
-                                DLG_Lu177_MEAN_SD_X ...
-                                DLG_Lu177_MEAN_SD_Y ...
+        dlgFDHTmeanSD = ...
+            dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_FDHT_MEAN_SD_X/2) ...
+                                (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_FDHT_MEAN_SD_Y/2) ...
+                                DLG_FDHT_MEAN_SD_X ...
+                                DLG_FDHT_MEAN_SD_Y ...
                                 ],...
                    'MenuBar', 'none',...
                    'Resize', 'off', ...    
                    'NumberTitle','off',...
                    'MenuBar', 'none',...
                    'Color', viewerBackgroundColor('get'), ...
-                   'Name', 'Lu177 Segmentation Mean and SD',...
+                   'Name', 'FDHT Segmentation Mean and SD',...
                    'Toolbar','none'...               
                    ); 
 
             % Normal Liver Mean
     
-            uicontrol(dlgLu177meanSD,...
+            uicontrol(dlgFDHTmeanSD,...
                       'style'   , 'text',...
                       'Enable'  , 'On',...
                       'string'  , 'Normal Liver Mean',...
@@ -448,20 +447,20 @@ function setMachineLearningLu177(sSegmentatorPath, tLu177)
                       'position', [20 87 250 20]...
                       );
     
-        edtLu177NormalLiverMeanValue = ...
-            uicontrol(dlgLu177meanSD, ...
+        edtFDHTNormalLiverMeanValue = ...
+            uicontrol(dlgFDHTmeanSD, ...
                       'Style'   , 'Edit', ...
                       'Position', [285 90 75 20], ...
-                      'String'  , num2str(Lu177NormalLiverMeanValue('get')), ...
+                      'String'  , num2str(FDHTNormalLiverMeanValue('get')), ...
                       'Enable'  , 'on', ...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
                       'ForegroundColor', viewerForegroundColor('get'), ...
-                      'CallBack', @edtLu177NormalLiverMeanValueCallback ...
+                      'CallBack', @edtFDHTNormalLiverMeanValueCallback ...
                       );
 
             % Normal Liver Standard Deviation
     
-            uicontrol(dlgLu177meanSD,...
+            uicontrol(dlgFDHTmeanSD,...
                       'style'   , 'text',...
                       'Enable'  , 'On',...
                       'string'  , 'Normal Liver Standard Deviation',...
@@ -471,73 +470,73 @@ function setMachineLearningLu177(sSegmentatorPath, tLu177)
                       'position', [20 62 250 20]...
                       );
     
-        edtLu177NormalLiverSDValue = ...
-            uicontrol(dlgLu177meanSD, ...
+        edtFDHTNormalLiverSDValue = ...
+            uicontrol(dlgFDHTmeanSD, ...
                       'Style'   , 'Edit', ...
                       'Position', [285 65 75 20], ...
-                      'String'  , num2str(Lu177NormalLiverSDValue('get')), ...
+                      'String'  , num2str(FDHTNormalLiverSDValue('get')), ...
                       'Enable'  , 'on', ...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
                       'ForegroundColor', viewerForegroundColor('get'), ...
-                      'CallBack', @edtLu177NormalLiverSDValueCallback ...
+                      'CallBack', @edtFDHTNormalLiverSDValueCallback ...
                       ); 
 
          % Cancel or Proceed
     
-         uicontrol(dlgLu177meanSD,...
+         uicontrol(dlgFDHTmeanSD,...
                    'String','Cancel',...
                    'Position',[285 7 75 25],...
                    'BackgroundColor', viewerBackgroundColor('get'), ...
                    'ForegroundColor', viewerForegroundColor('get'), ...                
-                   'Callback', @cancelLu177meanSDCallback...
+                   'Callback', @cancelFDHTmeanSDCallback...
                    );
     
-         uicontrol(dlgLu177meanSD,...
+         uicontrol(dlgFDHTmeanSD,...
                   'String','Continue',...
                   'Position',[200 7 75 25],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...               
-                  'Callback', @proceedLu177meanSDCallback...
+                  'Callback', @proceedFDHTmeanSDCallback...
                   );
 
-        waitfor(dlgLu177meanSD);
+        waitfor(dlgFDHTmeanSD);
 
-        function edtLu177NormalLiverMeanValueCallback(~, ~)
+        function edtFDHTNormalLiverMeanValueCallback(~, ~)
     
-            dMeanValue = str2double(get(edtLu177NormalLiverMeanValue, 'Value'));
+            dMeanValue = str2double(get(edtFDHTNormalLiverMeanValue, 'Value'));
     
             if dMeanValue < 0 
                 dMeanValue = 0.1;
-                set(edtLu177NormalLiverMeanValue, 'Value', num2str(dMeanValue));
+                set(edtFDHTNormalLiverMeanValue, 'Value', num2str(dMeanValue));
             end
     
-            Lu177NormalLiverMeanValue('set', dMeanValue);
+            FDHTNormalLiverMeanValue('set', dMeanValue);
         end
     
-        function edtLu177NormalLiverSDValueCallback(~, ~)
+        function edtFDHTNormalLiverSDValueCallback(~, ~)
     
-            dSDValue = str2double(get(edtLu177NormalLiverSDValue, 'Value'));
+            dSDValue = str2double(get(edtFDHTNormalLiverSDValue, 'Value'));
     
             if dSDValue < 0 
                 dSDValue = 0.1;
-                set(edtLu177NormalLiverSDValue, 'Value', num2str(dSDValue));
+                set(edtFDHTNormalLiverSDValue, 'Value', num2str(dSDValue));
             end
     
-            Lu177NormalLiverSDValue('set', dSDValue);
+            FDHTNormalLiverSDValue('set', dSDValue);
         end
     
-        function proceedLu177meanSDCallback(~, ~)
+        function proceedFDHTmeanSDCallback(~, ~)
     
-            gdNormalLiverMean = str2double(get(edtLu177NormalLiverMeanValue, 'String'));        
-            gdNormalLiverSTD  = str2double(get(edtLu177NormalLiverSDValue, 'String'));
+            gdNormalLiverMean = str2double(get(edtFDHTNormalLiverMeanValue, 'String'));        
+            gdNormalLiverSTD  = str2double(get(edtFDHTNormalLiverSDValue, 'String'));
     
-            delete(dlgLu177meanSD);
+            delete(dlgFDHTmeanSD);
             gbProceedWithSegmentation = true;      
         end
     
-        function cancelLu177meanSDCallback(~, ~)
+        function cancelFDHTmeanSDCallback(~, ~)
          
-            delete(dlgLu177meanSD);
+            delete(dlgFDHTmeanSD);
             gbProceedWithSegmentation = false;
         end
     end          

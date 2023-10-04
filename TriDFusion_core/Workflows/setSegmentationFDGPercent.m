@@ -165,7 +165,7 @@ function setSegmentationFDGPercent(dBoneMaskThreshold, dBoundaryPercent, dSmales
 
     setSeriesCallback();            
 
-    sFormula = 'CT Bone Map';
+    sFormula = 'Lymph Nodes';
     maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, true, dPercentOfPeak, true, multiPeaksValue, false, sFormula, BWCT, dSmalestVoiValue);                    
 
     clear aResampledPTImage;

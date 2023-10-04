@@ -207,6 +207,7 @@ function resize = dicomViewer()
     segMenuOption                ('set', false);
     modifiedMatrixValueMenuOption('set', false);
     isFigRoiInColor              ('set', true);
+    centroidMenuOption           ('set', false)
 
     registrationTemplate('init');
     registrationReport  ('set', '');
@@ -300,6 +301,13 @@ function resize = dicomViewer()
     FDHTNormalLiverMeanValue('set', 4);
     FDHTSmalestVoiValue('set', 0.3);
 
+    excludeFDHTBrain('set', true);
+    excludeFDHTUrinaryBladder('set', true);
+    excludeFDHTKidneyLeft('set', true);
+    excludeFDHTKidneyRight('set', true);
+    excludeFDHTSmallBowel('set', true);
+    excludeFDHTSpleen('set', true);
+
     % Lu177 segmentation
 
     Lu177SegmentationBoneMaskThresholdValue('set', 150); % HU
@@ -322,6 +330,13 @@ function resize = dicomViewer()
     PSMANormalLiverSDValue('set', 0.4);
     PSMANormalLiverMeanValue('set', 4);
     PSMASmalestVoiValue('set', 0.3);
+
+    excludePSMABrain('set', true);
+    excludePSMAUrinaryBladder('set', true);
+    excludePSMAKidneyLeft('set', true);
+    excludePSMAKidneyRight('set', true);
+    excludePSMASmallBowel('set', true);
+    excludePSMASpleen('set', true);
 
     % Ga68DOTATATE segmentation
 

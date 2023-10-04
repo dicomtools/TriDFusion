@@ -171,7 +171,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X/3-50 FIG_REPORT_Y-80 FIG_REPORT_X/3-50 20]...
+                  'position', [FIG_REPORT_X/3-50 FIG_REPORT_Y-80 FIG_REPORT_X/3-90 20]...
                   ); 
               
         uicontrol(uiContourReport,...
@@ -183,7 +183,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X/3-50 FIG_REPORT_Y-570 FIG_REPORT_X/3-50 480]...
+                  'position', [FIG_REPORT_X/3-50 FIG_REPORT_Y-570 FIG_REPORT_X/3-90 480]...
                   );    
               
          % Contours Information              
@@ -197,7 +197,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-80 FIG_REPORT_X/3+100 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-130 FIG_REPORT_Y-80 FIG_REPORT_X/3+100 20]...
                   ); 
 
          uiReportMTVContourInformation = ...       
@@ -210,7 +210,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-110 FIG_REPORT_X/3+100 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-130 FIG_REPORT_Y-110 FIG_REPORT_X/3+100 20]...
                   ); 
 
          uiReportTLGContourInformation = ...       
@@ -223,7 +223,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-135 FIG_REPORT_X/3+100 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-130 FIG_REPORT_Y-135 FIG_REPORT_X/3+100 20]...
                   ); 
 
          uiReportFDContourInformation = ...       
@@ -236,7 +236,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-160 FIG_REPORT_X/3+100 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-130 FIG_REPORT_Y-160 FIG_REPORT_X/3+100 20]...
                   );         
 
          uiReportContourTitle = ...       
@@ -249,7 +249,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-200 FIG_REPORT_X/3+100 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-130 FIG_REPORT_Y-200 FIG_REPORT_X/3+100 20]...
                   ); 
 
          % Contour Type
@@ -263,7 +263,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-230 115 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-130 FIG_REPORT_Y-230 115 20]...
                   ); 
               
         uicontrol(uiContourReport,...
@@ -275,7 +275,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-560 115 320]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-130 FIG_REPORT_Y-560 115 320]...
                   );  
               
          % Nb Contour
@@ -285,11 +285,11 @@ function generateContourReportCallback(~, ~)
                   'FontWeight', 'bold',...
                   'FontSize'  , 10,...
                   'FontName'  , 'MS Sans Serif', ...
-                  'string'    , 'Nb Contours',...
+                  'string'    , 'Count',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+15 FIG_REPORT_Y-230 90 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-25 FIG_REPORT_Y-230 60 20]...
                   ); 
 
         uiReportLesionNbContour = ...       
@@ -302,7 +302,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+15 FIG_REPORT_Y-560 90 320]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-25 FIG_REPORT_Y-560 60 320]...
                   );  
               
          % Contour Mean
@@ -316,7 +316,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+115 FIG_REPORT_Y-230 90 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+45 FIG_REPORT_Y-230 80 20]...
                   ); 
               
         uiReportLesionMean = ...       
@@ -329,7 +329,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+115 FIG_REPORT_Y-560 90 320]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+45 FIG_REPORT_Y-560 80 320]...
                   );  
               
          % Contour Max
@@ -343,7 +343,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+215 FIG_REPORT_Y-230 90 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+135 FIG_REPORT_Y-230 80 20]...
                   ); 
               
         uiReportLesionMax = ...       
@@ -352,13 +352,40 @@ function generateContourReportCallback(~, ~)
                   'FontWeight', 'Normal',...
                   'FontSize'  , 10,...
                   'FontName'  , 'MS Sans Serif', ...
-                  'string'    , getReportLesionMeanInformation('init'),...
+                  'string'    , getReportLesionMaxInformation('init'),...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+215 FIG_REPORT_Y-560 90 320]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+135 FIG_REPORT_Y-560 80 320]...
+                  ); 
+
+         % Contour Peak
+              
+          uicontrol(uiContourReport,...
+                  'style'     , 'text',...
+                  'FontWeight', 'bold',...
+                  'FontSize'  , 10,...
+                  'FontName'  , 'MS Sans Serif', ...
+                  'string'    , 'Peak',...
+                  'horizontalalignment', 'left',...
+                  'BackgroundColor', 'White', ...
+                  'ForegroundColor', 'Black', ...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+225 FIG_REPORT_Y-230 80 20]...
                   ); 
               
+        uiReportLesionPeak = ...       
+        uicontrol(uiContourReport,...
+                  'style'     , 'text',...
+                  'FontWeight', 'Normal',...
+                  'FontSize'  , 10,...
+                  'FontName'  , 'MS Sans Serif', ...
+                  'string'    , getReportLesionPeakInformation('init'),...
+                  'horizontalalignment', 'left',...
+                  'BackgroundColor', 'White', ...
+                  'ForegroundColor', 'Black', ...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+225 FIG_REPORT_Y-560 80 320]...
+                  ); 
+
           % Contour Volume
               
           uicontrol(uiContourReport,...
@@ -370,7 +397,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+315 FIG_REPORT_Y-230 90 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+315 FIG_REPORT_Y-230 80 20]...
                   ); 
               
         uiReportLesionVolume = ...       
@@ -383,7 +410,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+315 FIG_REPORT_Y-560 90 320]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+315 FIG_REPORT_Y-560 80 320]...
                   );               
 
         % Volume Histogram
@@ -394,7 +421,7 @@ function generateContourReportCallback(~, ~)
        popReportVolumeHistogram = ...
        uicontrol(uiContourReport, ...
                  'Style'   , 'popup', ...
-                 'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 280 485 20], ...
+                 'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-130 280 525 20], ...
                  'String'  , gasLesionType, ...
                  'Value'   , 1 ,...
                  'Enable'  , 'on', ...
@@ -406,7 +433,7 @@ function generateContourReportCallback(~, ~)
         axeReport = ...
         axes(uiContourReport, ...
              'Units'   , 'pixels', ...
-             'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-55 50 440 200], ...
+             'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-95 50 480 200], ...
              'Color'   , 'White',...
              'XColor'  , 'Black',...
              'YColor'  , 'Black',...
@@ -555,7 +582,7 @@ function generateContourReportCallback(~, ~)
               'horizontalalignment', 'left',...
               'BackgroundColor', 'White', ...
               'ForegroundColor', 'Black', ...              
-              'position', [FIG_REPORT_X/3-50 15 FIG_REPORT_X/3-55 250]...
+              'position', [FIG_REPORT_X/3-50 15 FIG_REPORT_X/3-95 250]...
              );  
     set(uiEditWindow, 'Min', 0, 'Max', 2);
 
@@ -568,7 +595,7 @@ function generateContourReportCallback(~, ~)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X/3-50 uiEditWindow.Position(4)+30 FIG_REPORT_X/3-75 20]...
+                  'position', [FIG_REPORT_X/3-50 uiEditWindow.Position(4)+30 FIG_REPORT_X/3-115 20]...
                   );
 
     mReportFile = uimenu(figContourReport,'Label','File');
@@ -633,22 +660,36 @@ function generateContourReportCallback(~, ~)
             sSuvEnable = 'off';
         end
     end
-    
-    mSUVUnit          = ...
+
+    if centroidMenuOption('get') == true
+        sCentroidChecked = 'on';
+    else
+        sCentroidChecked = 'off';
+    end
+
+    mSUVUnit        = ...
         uimenu(mReportOptions, 'Label', 'SUV Unit', 'Checked', sSuvChecked , 'Enable', sSuvEnable, 'Callback', @reportSUVUnitCallback);
     
-    mModifiedMatrix   = ...
+    mModifiedMatrix = ...
         uimenu(mReportOptions, 'Label', 'Display Image Cells Value' , 'Checked', sModifiedMatrixChecked, 'Callback', @reportModifiedMatrixCallback);
     
-    mSegmented        = ...
+    mSegmented      = ...
         uimenu(mReportOptions, 'Label', 'Subtract Masked Cells' , 'Checked', sSegChecked, 'Callback', @reportSegmentedCallback);
-    
+
+    mCentroid      = ...
+        uimenu(mReportOptions, 'Label', 'Maximal distance from the centroid' , 'Checked', sCentroidChecked, 'Callback', @reportCentroidCallback);
+
     setReportFigureName();
     
-    refreshReportLesionInformation(suvMenuUnitOption('get'), modifiedMatrixValueMenuOption('get'), modifiedMatrixValueMenuOption('get'));
+    refreshReportLesionInformation(suvMenuUnitOption('get'), modifiedMatrixValueMenuOption('get'), modifiedMatrixValueMenuOption('get'), centroidMenuOption('get'));
   
-    function refreshReportLesionInformation(bSUVUnit, bModifiedMatrix, bSegmented)
+    function refreshReportLesionInformation(bSUVUnit, bModifiedMatrix, bSegmented, bCentroid)
         
+        if isvalid(figContourReport)
+            set(figContourReport, 'Pointer', 'watch');
+            drawnow;            
+        end
+
         set(btnContourReport3DRenderingFullScreen, 'Enable', 'off');
 
         set(chkContourReportViewContours, 'Enable', 'off');
@@ -657,7 +698,7 @@ function generateContourReportCallback(~, ~)
         set(chkContourReportViewFarthestDistance, 'Enable', 'off');
         set(txtContourReportViewFarthestDistance, 'Enable', 'off');
 
-        gtReport = computeReportLesionInformation(bSUVUnit, bModifiedMatrix, bSegmented);
+        gtReport = computeReportLesionInformation(bSUVUnit, bModifiedMatrix, bSegmented, bCentroid);
 
         if ~isempty(gtReport) % Fill information
 
@@ -688,7 +729,11 @@ function generateContourReportCallback(~, ~)
             if isvalid(uiReportLesionMax) % Make sure the figure is still open        
                 set(uiReportLesionMax, 'String', getReportLesionMaxInformation('get', gtReport));
             end    
-            
+
+            if isvalid(uiReportLesionPeak) % Make sure the figure is still open        
+                set(uiReportLesionPeak, 'String', getReportLesionPeakInformation('get', gtReport));
+            end  
+
             if isvalid(uiReportLesionVolume) % Make sure the figure is still open        
                 set(uiReportLesionVolume, 'String', getReportLesionVolumeInformation('get', gtReport));
             end    
@@ -763,6 +808,11 @@ function generateContourReportCallback(~, ~)
             set(chkContourReportViewFarthestDistance, 'Enable', 'on');
             set(txtContourReportViewFarthestDistance, 'Enable', 'inactive');
         end    
+
+        if isvalid(figContourReport)
+            set(figContourReport, 'Pointer', 'default');
+            drawnow;               
+        end        
     end
 
     function txt = updateCursorCoordinates(~,info)
@@ -803,8 +853,6 @@ function generateContourReportCallback(~, ~)
         if isvalid(uiReportContourTitle)
             set(uiReportContourTitle, 'String', sprintf('Contours Information (%s)', getReportUnitValue()));                            
         end
-
-
     end
     
     function sUnit = getReportUnitValue()
@@ -868,10 +916,17 @@ function generateContourReportCallback(~, ~)
         else
             sSegChecked = 'off';
         end
-      
+
+        if centroidMenuOption('get') == true
+            sCentroidChecked = 'on';
+        else
+            sCentroidChecked = 'off';
+        end
+
         set(mSUVUnit         , 'Checked', sSuvChecked);
         set(mModifiedMatrix  , 'Checked', sModifiedMatrixChecked);
         set(mSegmented       , 'Checked', sSegChecked);
+        set(mCentroid        , 'Checked', sCentroidChecked);
 
     end
 
@@ -888,17 +943,23 @@ function generateContourReportCallback(~, ~)
         else
             bModifiedMatrix = false;
         end
-                
+
+        if strcmpi(get(mCentroid, 'Checked'), 'on')
+            bCentroid = true;
+        else
+            bCentroid = false;
+        end
+
         if strcmpi(hObject.Checked, 'on')
             hObject.Checked = 'off';
             suvMenuUnitOption('set', false);
             
-            refreshReportLesionInformation(false, bModifiedMatrix, bSegmented);            
+            refreshReportLesionInformation(false, bModifiedMatrix, bSegmented, bCentroid);            
         else
             hObject.Checked = 'on';
             suvMenuUnitOption('set', true);
             
-            refreshReportLesionInformation(true, bModifiedMatrix, bSegmented);            
+            refreshReportLesionInformation(true, bModifiedMatrix, bSegmented, bCentroid);            
         end
 
         setReportFigureName();
@@ -920,14 +981,20 @@ function generateContourReportCallback(~, ~)
         else
             bSegmented = false;
         end
-        
+
+        if strcmpi(get(mCentroid, 'Checked'), 'on')
+            bCentroid = true;
+        else
+            bCentroid = false;
+        end
+
         if strcmpi(hObject.Checked, 'on')
             
             if atInput(dSeriesOffset).tMovement.bMovementApplied == true
                 modifiedMatrixValueMenuOption('set', true);                         
                 hObject.Checked = 'on';
                 
-                refreshReportLesionInformation(bSUVUnit, true, bSegmented);           
+                refreshReportLesionInformation(bSUVUnit, true, bSegmented, bCentroid);           
             else
                 modifiedMatrixValueMenuOption('set', false);                         
                 hObject.Checked = 'off';      
@@ -935,13 +1002,13 @@ function generateContourReportCallback(~, ~)
                 segMenuOption('set', false);
                 set(mSegmented, 'Checked', 'off');                
                 
-                refreshReportLesionInformation(bSUVUnit, false, false);           
+                refreshReportLesionInformation(bSUVUnit, false, false, bCentroid);           
             end
         else
             modifiedMatrixValueMenuOption('set', true);                               
             hObject.Checked = 'on';
             
-            refreshReportLesionInformation(bSUVUnit, true, bSegmented);
+            refreshReportLesionInformation(bSUVUnit, true, bSegmented, bCentroid);
        end
 
         setReportFigureName();
@@ -960,22 +1027,63 @@ function generateContourReportCallback(~, ~)
         else
             bModifiedMatrix = false;
         end
-        
+
+        if strcmpi(get(mCentroid, 'Checked'), 'on')
+            bCentroid = true;
+        else
+            bCentroid = false;
+        end
+
         if strcmpi(hObject.Checked, 'on')
             hObject.Checked = 'off';
             segMenuOption('set', false);
             
-            refreshReportLesionInformation(bSUVUnit, bModifiedMatrix, false);
+            refreshReportLesionInformation(bSUVUnit, bModifiedMatrix, false, bCentroid);
         else
             if bModifiedMatrix == true
                 hObject.Checked = 'on';
                 segMenuOption('set', true);
                 
-                refreshReportLesionInformation(bSUVUnit, bModifiedMatrix, true);
+                refreshReportLesionInformation(bSUVUnit, bModifiedMatrix, true, bCentroid);
             else
                 hObject.Checked = 'off';
                 segMenuOption('set', false);                
             end
+       end
+
+        setReportFigureName();
+    end
+
+    function reportCentroidCallback(hObject, ~)
+
+        if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+            bSUVUnit = true;
+        else
+            bSUVUnit = false;
+        end
+        
+        if strcmpi(get(mModifiedMatrix, 'Checked'), 'on')
+            bModifiedMatrix = true;
+        else
+            bModifiedMatrix = false;
+        end
+        
+        if strcmpi(get(mSegmented, 'Checked'), 'on')
+            bSegmented = true;
+        else
+            bSegmented = false;
+        end
+
+        if strcmpi(hObject.Checked, 'on')
+
+            hObject.Checked = 'off';
+            centroidMenuOption('set', false);
+            
+            refreshReportLesionInformation(bSUVUnit, bModifiedMatrix, bSegmented, false);
+        else
+            centroidMenuOption('set', true);
+
+            refreshReportLesionInformation(bSUVUnit, bModifiedMatrix, bSegmented, true);
        end
 
         setReportFigureName();
@@ -997,16 +1105,16 @@ function generateContourReportCallback(~, ~)
         [~, asLesionList, ~] = getLesionType('');
         
         if strcmpi(sAction, 'init')
-            sReport = sprintf('%s\n___________', '-');      
+            sReport = sprintf('%s\n________', '-');      
             for ll=1:numel(asLesionList)
                 sReport = sprintf('%s\n\n%s', sReport, '-');
             end       
         else
             
             if ~isempty(tReport.All.Count)
-                sReport = sprintf('%-12s\n___________', num2str(tReport.All.Count));      
+                sReport = sprintf('%-8s\n________', num2str(tReport.All.Count));      
             else
-                sReport = sprintf('%s\n___________', '-');      
+                sReport = sprintf('%s\n________', '-');      
             end
                 
             for ll=1:numel(asLesionList)      
@@ -1015,63 +1123,63 @@ function generateContourReportCallback(~, ~)
                     
                     case 'unspecified'
                         if ~isempty(tReport.Unspecified.Count)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Unspecified.Count));
+                            sReport = sprintf('%s\n\n%-8s', sReport, num2str(tReport.Unspecified.Count));
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end      
                         
                     case 'bone'
                         if ~isempty(tReport.Bone.Count)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Bone.Count));
+                            sReport = sprintf('%s\n\n%-8s', sReport, num2str(tReport.Bone.Count));
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end          
                         
                     case 'soft tissue'
                         if ~isempty(tReport.SoftTissue.Count)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.SoftTissue.Count));
+                            sReport = sprintf('%s\n\n%-8s', sReport, num2str(tReport.SoftTissue.Count));
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end     
                         
                     case 'lung'
                         if ~isempty(tReport.Lung.Count)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Lung.Count));
+                            sReport = sprintf('%s\n\n%-8s', sReport, num2str(tReport.Lung.Count));
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end  
                         
                     case 'liver'
                         if ~isempty(tReport.Liver.Count)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Liver.Count));
+                            sReport = sprintf('%s\n\n%-8s', sReport, num2str(tReport.Liver.Count));
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end  
                         
                     case 'parotid'
                         if ~isempty(tReport.Parotid.Count)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.Parotid.Count));
+                            sReport = sprintf('%s\n\n%-8s', sReport, num2str(tReport.Parotid.Count));
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end 
                         
                     case 'blood pool'
                         if ~isempty(tReport.BloodPool.Count)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.BloodPool.Count));
+                            sReport = sprintf('%s\n\n%-8s', sReport, num2str(tReport.BloodPool.Count));
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end 
 
                     case 'lymph nodes'
                         if ~isempty(tReport.LymphNodes.Count)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.LymphNodes.Count));
+                            sReport = sprintf('%s\n\n%-8s', sReport, num2str(tReport.LymphNodes.Count));
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end 
 
                     case 'primary disease'
                         if ~isempty(tReport.PrimaryDisease.Count)
-                            sReport = sprintf('%s\n\n%-12s', sReport, num2str(tReport.PrimaryDisease.Count));
+                            sReport = sprintf('%s\n\n%-8s', sReport, num2str(tReport.PrimaryDisease.Count));
                         else
                             sReport = sprintf('%s\n\n%s', sReport, '-');
                         end      
@@ -1265,6 +1373,97 @@ function generateContourReportCallback(~, ~)
         end      
     end
 
+    function sReport = getReportLesionPeakInformation(sAction, tReport)
+                
+        [~, asLesionList, ~] = getLesionType('');
+        
+        if strcmpi(sAction, 'init')
+            sReport = sprintf('%s\n___________', '-');      
+            for ll=1:numel(asLesionList)
+                sReport = sprintf('%s\n\n%s', sReport, '-');
+            end       
+        else
+            
+            if ~isempty(tReport.All.Peak)
+                sReport = sprintf('%-.2f\n___________', tReport.All.Peak);      
+            else
+                sReport = sprintf('%s\n___________', '-');      
+            end
+                
+            for ll=1:numel(asLesionList)      
+                
+                switch lower(asLesionList{ll})
+                    
+                    case 'unspecified'
+                        if ~isempty(tReport.Unspecified.Peak)
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.Unspecified.Peak);
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end      
+                        
+                    case 'bone'
+                        if ~isempty(tReport.Bone.Peak)
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.Bone.Peak);
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end          
+                        
+                    case 'soft tissue'
+                        if ~isempty(tReport.SoftTissue.Peak)
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.SoftTissue.Peak);
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end    
+                        
+                    case 'lung'
+                        if ~isempty(tReport.Lung.Peak)
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.Lung.Peak);
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end  
+                        
+                    case 'liver'
+                        if ~isempty(tReport.Liver.Peak)
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.Liver.Peak);
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end  
+                        
+                    case 'parotid'
+                        if ~isempty(tReport.Parotid.Peak)
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.Parotid.Peak);
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end 
+                        
+                    case 'blood pool'
+                        if ~isempty(tReport.BloodPool.Peak)
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.BloodPool.Peak);
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end 
+
+                    case 'lymph nodes'
+                        if ~isempty(tReport.LymphNodes.Peak)
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.LymphNodes.Peak);
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end 
+
+                    case 'primary disease'
+                        if ~isempty(tReport.PrimaryDisease.Peak)
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.PrimaryDisease.Peak);
+                        else
+                            sReport = sprintf('%s\n\n%s', sReport, '-');
+                        end 
+
+                    otherwise    
+                        sReport = sprintf('%s\n\n%s', sReport, '-');
+                end
+            end             
+        end      
+    end
+
     function sReport = getReportLesionVolumeInformation(sAction, tReport)
                 
         [~, asLesionList, ~] = getLesionType('');
@@ -1356,7 +1555,7 @@ function generateContourReportCallback(~, ~)
         end         
     end
 
-    function tReport = computeReportLesionInformation(bSUVUnit, bModifiedMatrix, bSegmented)
+    function tReport = computeReportLesionInformation(bSUVUnit, bModifiedMatrix, bSegmented, bCentroid)
         
         tReport = [];
         
@@ -1751,14 +1950,17 @@ function generateContourReportCallback(~, ~)
                 if bSUVUnit == true
                     tReport.Unspecified.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
                     tReport.Unspecified.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;     
+                    tReport.Unspecified.Peak = computePeak(voiData, tQuantification.tSUV.dScale);
                     tReport.Unspecified.voiData = voiData *tQuantification.tSUV.dScale;
                 else
                     tReport.Unspecified.Mean = mean(voiData, 'all');
                     tReport.Unspecified.Max  = max (voiData, [], 'all');
-                end
+                    tReport.Unspecified.Peak = computePeak(voiData);
+               end
             else
                 tReport.Unspecified.Mean = mean(voiData, 'all');             
                 tReport.Unspecified.Max  = max (voiData, [], 'all');             
+                tReport.Unspecified.Peak = computePeak(voiData);
             end
          
             clear voiMask;
@@ -1767,7 +1969,8 @@ function generateContourReportCallback(~, ~)
             tReport.Unspecified.Cells  = [];
             tReport.Unspecified.Volume = [];
             tReport.Unspecified.Mean   = [];            
-            tReport.Unspecified.Max    = [];            
+            tReport.Unspecified.Max    = []; 
+            tReport.Unspecified.Peak   = [];
         end
         
         % Compute bone lesion
@@ -1849,14 +2052,17 @@ function generateContourReportCallback(~, ~)
                 if bSUVUnit == true
                     tReport.Bone.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
                     tReport.Bone.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;   
+                    tReport.Bone.Peak = computePeak(voiData, tQuantification.tSUV.dScale);
                     tReport.Bone.voiData = voiData *tQuantification.tSUV.dScale;
                 else
                     tReport.Bone.Mean = mean(voiData, 'all');
                     tReport.Bone.Max  = max (voiData, [], 'all');
+                    tReport.Bone.Peak = computePeak(voiData);
                 end
             else
                 tReport.Bone.Mean = mean(voiData, 'all');             
                 tReport.Bone.Max  = max (voiData, [], 'all');             
+                tReport.Bone.Peak = computePeak(voiData);
             end
          
             clear voiMask;
@@ -1866,6 +2072,7 @@ function generateContourReportCallback(~, ~)
             tReport.Bone.Volume = [];
             tReport.Bone.Mean   = [];
             tReport.Bone.Max    = [];
+            tReport.Bone.Peak   = [];
         end
         
         % Compute SoftTissue lesion
@@ -1947,14 +2154,17 @@ function generateContourReportCallback(~, ~)
                 if bSUVUnit == true
                     tReport.SoftTissue.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
                     tReport.SoftTissue.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;   
+                    tReport.SoftTissue.Peak = computePeak(voiData, tQuantification.tSUV.dScale);
                     tReport.SoftTissue.voiData = voiData *tQuantification.tSUV.dScale;
                 else
                     tReport.SoftTissue.Mean = mean(voiData, 'all');
                     tReport.SoftTissue.Max  = max (voiData, [], 'all');
+                    tReport.SoftTissue.Peak = computePeak(voiData);
                 end
             else
                 tReport.SoftTissue.Mean = mean(voiData, 'all');             
                 tReport.SoftTissue.Max  = max (voiData, [], 'all');             
+                tReport.SoftTissue.Peak = computePeak(voiData);
             end
          
             clear voiMask;
@@ -1964,6 +2174,7 @@ function generateContourReportCallback(~, ~)
             tReport.SoftTissue.Volume = [];
             tReport.SoftTissue.Mean   = [];            
             tReport.SoftTissue.Max    = [];            
+            tReport.SoftTissue.Peak   = [];
         end
         
         % Compute Lung lesion
@@ -2045,14 +2256,17 @@ function generateContourReportCallback(~, ~)
                 if bSUVUnit == true
                     tReport.Lung.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
                     tReport.Lung.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;     
+                    tReport.Lung.Peak = computePeak(voiData, tQuantification.tSUV.dScale);
                     tReport.Lung.voiData = voiData *tQuantification.tSUV.dScale;
                 else
                     tReport.Lung.Mean = mean(voiData, 'all');
                     tReport.Lung.Max  = max (voiData, [], 'all');
+                    tReport.Lung.Peak = computePeak(voiData);
                 end
             else
                 tReport.Lung.Mean = mean(voiData, 'all');             
                 tReport.Lung.Max  = max (voiData, [], 'all');             
+                tReport.Lung.Peak = computePeak(voiData);
             end
          
             clear voiMask;
@@ -2062,6 +2276,7 @@ function generateContourReportCallback(~, ~)
             tReport.Lung.Volume = [];
             tReport.Lung.Mean   = [];            
             tReport.Lung.Max    = [];            
+            tReport.Lung.Peak   = [];
         end
         
         % Compute Liver lesion
@@ -2143,14 +2358,17 @@ function generateContourReportCallback(~, ~)
                 if bSUVUnit == true
                     tReport.Liver.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
                     tReport.Liver.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;     
+                    tReport.Liver.Peak = computePeak(voiData, tQuantification.tSUV.dScale);
                     tReport.Liver.voiData = voiData *tQuantification.tSUV.dScale;
                 else
                     tReport.Liver.Mean = mean(voiData, 'all');
                     tReport.Liver.Max  = max (voiData, [], 'all');
+                    tReport.Liver.Peak = computePeak(voiData);
                 end
             else
                 tReport.Liver.Mean = mean(voiData, 'all');             
                 tReport.Liver.Max  = max (voiData, [], 'all');             
+                tReport.Liver.Peak = computePeak(voiData);
             end
          
             clear voiMask;
@@ -2160,6 +2378,7 @@ function generateContourReportCallback(~, ~)
             tReport.Liver.Volume = [];
             tReport.Liver.Mean   = [];            
             tReport.Liver.Max    = [];            
+            tReport.Liver.Peak   = [];
         end
         
         % Compute Parotid lesion
@@ -2241,14 +2460,17 @@ function generateContourReportCallback(~, ~)
                 if bSUVUnit == true
                     tReport.Parotid.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
                     tReport.Parotid.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;        
+                    tReport.Parotid.Peak = computePeak(voiData, tQuantification.tSUV.dScale);
                     tReport.Parotid.voiData = voiData *tQuantification.tSUV.dScale;                    
                 else
                     tReport.Parotid.Mean = mean(voiData, 'all');
                     tReport.Parotid.Max  = max (voiData, [], 'all');
+                    tReport.Parotid.Peak = computePeak(voiData);
                 end
             else
                 tReport.Parotid.Mean = mean(voiData, 'all');             
                 tReport.Parotid.Max  = max (voiData, [], 'all');             
+                tReport.Parotid.Peak = computePeak(voiData);
             end
          
             clear voiMask;
@@ -2258,6 +2480,7 @@ function generateContourReportCallback(~, ~)
             tReport.Parotid.Volume = [];
             tReport.Parotid.Mean   = [];            
             tReport.Parotid.Max    = [];            
+            tReport.Parotid.Peak   = [];
         end
         
         % Compute BloodPool lesion
@@ -2339,15 +2562,18 @@ function generateContourReportCallback(~, ~)
                 if bSUVUnit == true
                     tReport.BloodPool.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
                     tReport.BloodPool.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;    
+                    tReport.BloodPool.Peak = computePeak(voiData, tQuantification.tSUV.dScale);
                     tReport.BloodPool.voiData = voiData *tQuantification.tSUV.dScale;
                 else
                     tReport.BloodPool.Mean = mean(voiData, 'all');
                     tReport.BloodPool.Max  = max (voiData, [], 'all');
+                    tReport.BloodPool.Peak = computePeak(voiData);
                 end
             else
                 tReport.BloodPool.Mean = mean(voiData, 'all');             
                 tReport.BloodPool.Max  = max (voiData, [], 'all');             
-            end
+                tReport.BloodPool.Peak = computePeak(voiData);
+           end
          
             clear voiMask;
             clear voiData;     
@@ -2356,6 +2582,7 @@ function generateContourReportCallback(~, ~)
             tReport.BloodPool.Volume = [];
             tReport.BloodPool.Mean   = [];            
             tReport.BloodPool.Max    = [];            
+            tReport.BloodPool.Peak   = [];
         end
 
         % Compute LymphNodes lesion
@@ -2437,15 +2664,18 @@ function generateContourReportCallback(~, ~)
                 if bSUVUnit == true
                     tReport.LymphNodes.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
                     tReport.LymphNodes.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;             
+                    tReport.LymphNodes.Peak = computePeak(voiData, tQuantification.tSUV.dScale);
                     tReport.LymphNodes.voiData = voiData *tQuantification.tSUV.dScale;
                 else
                     tReport.LymphNodes.Mean = mean(voiData, 'all');
                     tReport.LymphNodes.Max  = max (voiData, [], 'all');
+                    tReport.LymphNodes.Peak = computePeak(voiData);
                 end
             else
                 tReport.LymphNodes.Mean = mean(voiData, 'all');             
                 tReport.LymphNodes.Max  = max (voiData, [], 'all');             
-            end
+                tReport.LymphNodes.Peak = computePeak(voiData);
+           end
          
             clear voiMask;
             clear voiData;     
@@ -2454,6 +2684,7 @@ function generateContourReportCallback(~, ~)
             tReport.LymphNodes.Volume = [];
             tReport.LymphNodes.Mean   = [];            
             tReport.LymphNodes.Max    = [];            
+            tReport.LymphNodes.Peak   = [];
         end
 
         % Compute PrimaryDisease lesion
@@ -2535,14 +2766,17 @@ function generateContourReportCallback(~, ~)
                 if bSUVUnit == true
                     tReport.PrimaryDisease.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
                     tReport.PrimaryDisease.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;             
+                    tReport.PrimaryDisease.Peak = computePeak(voiData, tQuantification.tSUV.dScale);
                     tReport.PrimaryDisease.voiData = voiData *tQuantification.tSUV.dScale;
                 else
                     tReport.PrimaryDisease.Mean = mean(voiData, 'all');
                     tReport.PrimaryDisease.Max  = max (voiData, [], 'all');
+                    tReport.PrimaryDisease.Peak = computePeak(voiData);
                 end
             else
                 tReport.PrimaryDisease.Mean = mean(voiData, 'all');             
                 tReport.PrimaryDisease.Max  = max (voiData, [], 'all');             
+                tReport.PrimaryDisease.Peak = computePeak(voiData);
             end
          
             clear voiMask;
@@ -2552,6 +2786,7 @@ function generateContourReportCallback(~, ~)
             tReport.PrimaryDisease.Volume = [];
             tReport.PrimaryDisease.Mean   = [];            
             tReport.PrimaryDisease.Max    = [];            
+            tReport.PrimaryDisease.Peak   = [];
         end
 
         % Compute All lesion
@@ -2657,14 +2892,17 @@ function generateContourReportCallback(~, ~)
                 if bSUVUnit == true
                     tReport.All.Mean = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
                     tReport.All.Max  = max (voiData, [], 'all')*tQuantification.tSUV.dScale;     
+                    tReport.All.Peak = computePeak(voiData, tQuantification.tSUV.dScale);
                     tReport.All.voiData = voiData *tQuantification.tSUV.dScale;
                 else
                     tReport.All.Mean = mean(voiData, 'all');
                     tReport.All.Max  = max (voiData, [], 'all');
+                    tReport.All.Peak = computePeak(voiData);
                 end
             else
                 tReport.All.Mean = mean(voiData, 'all');             
                 tReport.All.Max  = max (voiData, [], 'all');             
+                tReport.All.Peak = computePeak(voiData);
             end
          
             clear voiMask;
@@ -2674,10 +2912,11 @@ function generateContourReportCallback(~, ~)
             tReport.All.Volume = [];
             tReport.All.Mean   = [];               
             tReport.All.Max    = [];               
+            tReport.All.Peak   = [];
         end
 
         if ~isempty(glVoiAllContoursMask)
-            [gdFarthestDistance, gadFarthestXYZ1, gadFarthestXYZ2] = computeMaskFarthestPoint(glVoiAllContoursMask(:,:,end:-1:1), atMetaData);     
+            [gdFarthestDistance, gadFarthestXYZ1, gadFarthestXYZ2] = computeMaskFarthestPoint(glVoiAllContoursMask(:,:,end:-1:1), atMetaData, bCentroid);     
         end
 
         clear aImage;
@@ -2816,8 +3055,8 @@ function generateContourReportCallback(~, ~)
         if bModifiedMatrix == false && ... 
            bMovementApplied == false        % Can't use input buffer if movement have been applied
         
-            atMetaData  = atInput(dSeriesOffset).atDicomInfo;
-            aBuffer      = inputBuffer('get');
+            atMetaData = atInput(dSeriesOffset).atDicomInfo;
+            aBuffer    = inputBuffer('get');
 
             aBuffer = aBuffer{dSeriesOffset};
 
