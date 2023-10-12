@@ -252,21 +252,22 @@ end
                 dLineOffset = dLineOffset+1;
             end
 
-            asCell{dLineOffset,1}  = 'Name';
+            asCell{dLineOffset,1} = 'Name';
 %            asCell{dLineOffset,2}  = 'Image number';
-            asCell{dLineOffset,2}  = 'Cells';
-            asCell{dLineOffset,3}  = 'Total';
-            asCell{dLineOffset,4}  = 'Mean';
-            asCell{dLineOffset,5}  = 'Min';
-            asCell{dLineOffset,6}  = 'Max';
-            asCell{dLineOffset,7}  = 'Median';
-            asCell{dLineOffset,8}  = 'Deviation';
+            asCell{dLineOffset,2} = 'Cells';
+            asCell{dLineOffset,3} = 'Total';
+            asCell{dLineOffset,4} = 'Mean';
+            asCell{dLineOffset,5} = 'Min';
+            asCell{dLineOffset,6} = 'Max';
+            asCell{dLineOffset,7} = 'Median';
+            asCell{dLineOffset,8} = 'Deviation';
             asCell{dLineOffset,9} = 'Peak';
  %           asCell{dLineOffset,11} = 'Max Diameter cm';
  %           asCell{dLineOffset,12} = 'Max SAD cm';
  %           asCell{dLineOffset,13} = 'Area cm2';
-            asCell{dLineOffset,10} = 'Volume (ml)';
-            for tt=15:21
+            asCell{dLineOffset,10} = 'Max distance cm';
+            asCell{dLineOffset,11} = 'Volume (ml)';
+            for tt=12:21
                 asCell{dLineOffset,tt}  = (' ');
             end
 
@@ -288,7 +289,7 @@ end
                             end
                         end
 
-                        [tVoiComputed, atRoiComputed, imCData] = ...
+                        [tVoiComputed, ~, imCData] = ...
                             computeVoi(aInputBuffer, ...
                                        atInputMetaData, ...
                                        aDisplayBuffer, ...
@@ -308,19 +309,24 @@ end
 
                             asCell{dLineOffset,1}  = (sVoiName);
  %                           asCell{dLineOffset,2}  = (' ');
-                            asCell{dLineOffset,2}  = [tVoiComputed.cells];
-                            asCell{dLineOffset,3}  = [tVoiComputed.sum];
-                            asCell{dLineOffset,4}  = [tVoiComputed.mean];
-                            asCell{dLineOffset,5}  = [tVoiComputed.min];
-                            asCell{dLineOffset,6}  = [tVoiComputed.max];
-                            asCell{dLineOffset,7}  = [tVoiComputed.median];
-                            asCell{dLineOffset,8}  = [tVoiComputed.std];
+                            asCell{dLineOffset,2} = [tVoiComputed.cells];
+                            asCell{dLineOffset,3} = [tVoiComputed.sum];
+                            asCell{dLineOffset,4} = [tVoiComputed.mean];
+                            asCell{dLineOffset,5} = [tVoiComputed.min];
+                            asCell{dLineOffset,6} = [tVoiComputed.max];
+                            asCell{dLineOffset,7} = [tVoiComputed.median];
+                            asCell{dLineOffset,8} = [tVoiComputed.std];
                             asCell{dLineOffset,9} = [tVoiComputed.peak];
   %                          asCell{dLineOffset,11} = (' ');
   %                          asCell{dLineOffset,12} = (' ');
   %                          asCell{dLineOffset,13} = (' ');
-                            asCell{dLineOffset,10} = [tVoiComputed.volume];
-                            for tt=15:21
+                            if tVoiComputed.maxDistance == 0
+                                asCell{dLineOffset,10} = ('NaN');
+                            else
+                                asCell{dLineOffset,10} = [tVoiComputed.maxDistance];
+                            end
+                            asCell{dLineOffset,11} = [tVoiComputed.volume];
+                            for tt=12:21
                                 asCell{dLineOffset,tt}  = (' ');
                             end
 

@@ -31,7 +31,7 @@ function figRoiDialogCallback(hObject, ~)
 
     ySize = dScreenSize(4);
 
-    FIG_ROI_X = 1500;
+    FIG_ROI_X = 1600;
     FIG_ROI_Y =  ySize*0.75;
 
     atInput = inputTemplate('get');
@@ -298,7 +298,14 @@ function figRoiDialogCallback(hObject, ~)
                );
 
      uicontrol(uiVoiRoiWindow,...
-               'Position', [1350 uiVoiRoiWindow.Position(4)-20 150 20],...
+               'Position', [1350 uiVoiRoiWindow.Position(4)-20 100 20],...
+               'BackgroundColor', viewerBackgroundColor('get'), ...
+               'ForegroundColor', viewerForegroundColor('get'), ...
+               'String'  , 'Max distance cm'...
+               );
+
+     uicontrol(uiVoiRoiWindow,...
+               'Position', [1450 uiVoiRoiWindow.Position(4)-20 150 20],...
                'BackgroundColor', viewerBackgroundColor('get'), ...
                'ForegroundColor', viewerForegroundColor('get'), ...
                'String'  , 'Volume cm3'...
@@ -1864,7 +1871,13 @@ end
                     if ~isempty(tVoiComputed)
                         sVoiName = atVoiInput{aa}.Label;
 
-                        sLine = sprintf('%-18s %-11s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s', ...
+                        if tVoiComputed.maxDistance == 0
+                            sMaxDistance = 'NaN';
+                        else
+                            sMaxDistance = num2str(tVoiComputed.maxDistance);
+                        end
+
+                        sLine = sprintf('%-18s %-11s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s', ...
                             maxLength(sVoiName, 17), ...
                             ' ', ...
                             num2str(tVoiComputed.cells), ...
@@ -1878,6 +1891,7 @@ end
                             ' ', ...
                             ' ', ...
                             ' ', ...
+                            sMaxDistance, ...
                             num2str(tVoiComputed.volume));
 
                         if isFigRoiInColor('get') == true
@@ -1921,15 +1935,25 @@ end
                                     sSliceNb = ['A:' num2str(size(aDisplayBuffer, 3)-atRoiComputed{bb}.SliceNb+1)];
                                 end
 
-                                if isfield(atRoiComputed{bb}, 'subtraction')
-                                    sSubtraction = num2str(atRoiComputed{bb}.subtraction);
-                                else
-                                    sSubtraction = 'N/A';
-                                end
+%                                 if isfield(atRoiComputed{bb}, 'subtraction')
+%                                     sSubtraction = num2str(atRoiComputed{bb}.subtraction);
+%                                 else
+%                                     sSubtraction = 'NaN';
+%                                 end
 
                                 if ~isempty(atRoiComputed{bb}.MaxDistances)
-                                    sMaxXY = num2str(atRoiComputed{bb}.MaxDistances.MaxXY.Length);
-                                    sMaxCY = num2str(atRoiComputed{bb}.MaxDistances.MaxCY.Length);
+
+                                    if atRoiComputed{bb}.MaxDistances.MaxXY.Length == 0
+                                        sMaxXY = 'NaN';
+                                    else
+                                        sMaxXY = num2str(atRoiComputed{bb}.MaxDistances.MaxXY.Length);
+                                    end
+
+                                    if atRoiComputed{bb}.MaxDistances.MaxCY.Length == 0
+                                        sMaxCY = 'NaN';
+                                    else
+                                        sMaxCY = num2str(atRoiComputed{bb}.MaxDistances.MaxCY.Length);
+                                    end
                                 else
                                     sMaxXY = ' ';
                                     sMaxCY = ' ';
@@ -2011,8 +2035,18 @@ end
                         end
 
                         if ~isempty(tRoiComputed.MaxDistances)
-                            sMaxXY = num2str(tRoiComputed.MaxDistances.MaxXY.Length);
-                            sMaxCY = num2str(tRoiComputed.MaxDistances.MaxCY.Length);
+
+                            if tRoiComputed.MaxDistances.MaxXY.Length == 0
+                                sMaxXY = 'NaN';
+                            else
+                                sMaxXY = num2str(tRoiComputed.MaxDistances.MaxXY.Length);
+                            end
+    
+                            if tRoiComputed.MaxDistances.MaxCY.Length == 0
+                                sMaxCY = 'NaN';
+                            else
+                                sMaxCY = num2str(tRoiComputed.MaxDistances.MaxCY.Length);
+                            end
                         else
                             sMaxXY = ' ';
                             sMaxCY = ' ';
@@ -2346,8 +2380,9 @@ end
                 asCell{dLineOffset,11} = 'Max Diameter cm';
                 asCell{dLineOffset,12} = 'Max SAD cm';
                 asCell{dLineOffset,13} = 'Area cm2';
-                asCell{dLineOffset,14} = 'Volume cm3';
-                for tt=15:21
+                asCell{dLineOffset,14} = 'Max distance cm';
+                asCell{dLineOffset,15} = 'Volume cm3';
+                for tt=16:21
                     asCell{dLineOffset,tt}  = (' ');
                 end
 
@@ -2395,8 +2430,13 @@ end
                                 asCell{dLineOffset,11} = (' ');
                                 asCell{dLineOffset,12} = (' ');
                                 asCell{dLineOffset,13} = (' ');
-                                asCell{dLineOffset,14} = [tVoiComputed.volume];
-                                for tt=15:21
+                                if tVoiComputed.maxDistance == 0
+                                    asCell{dLineOffset,14} = ('NaN');
+                                else
+                                    asCell{dLineOffset,14} = [tVoiComputed.maxDistance];
+                                end
+                                asCell{dLineOffset,15} = [tVoiComputed.volume];
+                                for tt=16:21
                                     asCell{dLineOffset,tt}  = (' ');
                                 end
 
@@ -2434,8 +2474,17 @@ end
                                         asCell{dLineOffset,9}  = [atRoiComputed{bb}.std];
                                         asCell{dLineOffset,10} = [atRoiComputed{bb}.peak];
                                         if ~isempty(atRoiComputed{bb}.MaxDistances)
-                                            asCell{dLineOffset,11} = [atRoiComputed{bb}.MaxDistances.MaxXY.Length];
-                                            asCell{dLineOffset,12} = [atRoiComputed{bb}.MaxDistances.MaxCY.Length];
+                                            if atRoiComputed{bb}.MaxDistances.MaxXY.Length == 0
+                                                asCell{dLineOffset, 11} = ('NaN');
+                                            else
+                                                asCell{dLineOffset, 11} = [atRoiComputed{bb}.MaxDistances.MaxXY.Length];
+                                            end
+            
+                                            if atRoiComputed{bb}.MaxDistances.MaxCY.Length == 0
+                                                asCell{dLineOffset, 12} = ('NaN');
+                                            else
+                                                asCell{dLineOffset, 12} = [atRoiComputed{bb}.MaxDistances.MaxCY.Length];
+                                            end
                                         else
                                             asCell{dLineOffset,11} = (' ');
                                             asCell{dLineOffset,12} = (' ');
@@ -2503,15 +2552,24 @@ end
                             asCell{dLineOffset, 9}  = [tRoiComputed.std];
                             asCell{dLineOffset, 10} = [tRoiComputed.peak];
                             if ~isempty(tRoiComputed.MaxDistances)
-                                asCell{dLineOffset, 11} = [tRoiComputed.MaxDistances.MaxXY.Length];
-                                asCell{dLineOffset, 12} = [tRoiComputed.MaxDistances.MaxCY.Length];
+                                if tRoiComputed.MaxDistances.MaxXY.Length == 0
+                                    asCell{dLineOffset, 11} = ('NaN');
+                                else
+                                    asCell{dLineOffset, 11} = [tRoiComputed.MaxDistances.MaxXY.Length];
+                                end
+
+                                if tRoiComputed.MaxDistances.MaxCY.Length == 0
+                                    asCell{dLineOffset, 12} = ('NaN');
+                                else
+                                    asCell{dLineOffset, 12} = [tRoiComputed.MaxDistances.MaxCY.Length];
+                                end
                             else
                                 asCell{dLineOffset, 11} = (' ');
                                 asCell{dLineOffset, 12} = (' ');
                             end
                             asCell{dLineOffset, 13} = tRoiComputed.area;
                             asCell{dLineOffset, 14} = (' ');
-                            asCell{dLineOffset,15} = (' ');
+                            asCell{dLineOffset, 15} = (' ');
                             
                             for tt=16:21
                                 asCell{dLineOffset,tt}  = (' ');

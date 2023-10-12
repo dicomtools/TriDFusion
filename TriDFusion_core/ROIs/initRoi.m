@@ -32,6 +32,8 @@ function initRoi()
         return;
     end
 
+    atVoi = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
     atDicomInfo = dicomMetaData('get');
 
     imRoi  = dicomBuffer('get');
@@ -298,7 +300,16 @@ function initRoi()
                     uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
     
             end
-    
+            
+            if strcmpi(atRoi{bb}.ObjectType, 'voi-roi') % Add VOI submenu
+                for vo=1:numel(atVoi)     
+                    if find(contains(atVoi{vo}.RoisTag, atRoi{bb}.Tag))         
+                        voiDefaultMenu(roiPtr, atVoi{vo}.Tag);
+                        break;
+                    end
+                end
+            end
+
             addlistener(roiPtr, 'DeletingROI', @deleteRoiEvents );
             addlistener(roiPtr, 'ROIMoved'   , @movedRoiEvents  );
     

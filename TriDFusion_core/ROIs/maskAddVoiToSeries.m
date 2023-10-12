@@ -29,6 +29,24 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 
     try
 
+    if viewRoiPanel('get') == true
+
+        set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'off'); 
+        set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'off');   
+        set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'off'); 
+        set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'off'); 
+        set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'off'); 
+        set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'off'); 
+    
+        uiCreateVoiRoiPanel = uiCreateVoiRoiPanelObject('get');
+    
+        set(uiCreateVoiRoiPanel, 'String', 'Cancel');            
+        set(uiCreateVoiRoiPanel, 'Background', [0.2 0.039 0.027]);
+        set(uiCreateVoiRoiPanel, 'Foreground', [0.94 0.94 0.94]);
+    
+        cancelCreateVoiRoiPanel('set', false);
+    end
+
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
 
@@ -66,6 +84,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
     CC = bwconncomp(gather(BW), 26);
     dNbElements = numel(CC.PixelIdxList);
 
+
 %            asAllTag = [];
      
     if canUseGPU()
@@ -77,12 +96,16 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
         BWCT2     = BWCT;
         BWANDBWCT = zeros(size(BWCT));                
     end
-    
+
     for bb=1:dNbElements  % Nb VOI
 
         progressBar( bb/dNbElements-0.0001, sprintf('Computing contour %d/%d, please wait', bb, dNbElements) );
 
 %                if numel(CC.PixelIdxList{bb}) 
+
+        if cancelCreateVoiRoiPanel('get') == true
+            break;
+        end
 
         BW2(BW2~=0) = 0; % Reset BW2 buffer
 
@@ -441,8 +464,10 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                 end
             end
         end
-
-        asTag = []; % Reset ROIs tag
+        
+         asTag = [];
+%         dTagOffset = 1;
+%         asTag = cell(1000, 1); % Reset ROIs tag
 
         xmin=0.5;
         xmax=1;
@@ -455,12 +480,16 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
             continue;
         end
 
-        [~,~,adSlices]=ind2sub(size(BW2), aPixelsList);
+        [~,~,adSlices] = ind2sub(size(BW2), aPixelsList);
         adSlices = unique(adSlices);                
         
         dNbComputedSlices = numel(adSlices);
 
         for aa=1:dNbComputedSlices % Find ROI
+
+            if cancelCreateVoiRoiPanel('get') == true
+                break;
+            end
 
             dCurrentSlice = adSlices(aa);
 
@@ -470,11 +499,15 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                 aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
             end
             
-            maskAxial = bwboundaries(aAxial, 'noholes', 8);                    
+            [maskAxial, ~, dNbSlicesElements]  = bwboundaries(aAxial, 'noholes', 8);                    
              
-            dSlicesNbElements = numel(maskAxial);
+%             dSlicesNbElements = numel(maskAxial);
             
-            for jj=1:dSlicesNbElements
+            for jj=1:dNbSlicesElements
+
+                if cancelCreateVoiRoiPanel('get') == true
+                    break;
+                end
 
                 if bPixelEdge == true
                     maskAxial{jj} = (maskAxial{jj} +1)/PIXEL_EDGE_RATIO;
@@ -521,9 +554,17 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 %                        addContourToTemplate(dSeriesOffset, 'Axes3', dCurrentSlice, 'images.roi.freehand', aPosition, '', 'off', aColor, 1, roiFaceAlphaValue('get'), 0, 1, sTag, sLesionType);
 
                 asTag{numel(asTag)+1} = sTag;
+%                 asTag{dTagOffset} = sTag;
+%                 dTagOffset=dTagOffset+1;
+                if viewRoiPanel('get') == true
+                    drawnow limitrate;
+                end
+
             end              
         end
         
+%         asTag(cellfun(@isempty, asTag)) = [];
+
         if ~isempty(asTag)
 
             if exist('sVOIName', 'var')
@@ -544,6 +585,24 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
         progressBar(1, 'Error:maskAddVoiToSeries()');
     end
     
+    if viewRoiPanel('get') == true
+
+        if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
+            set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on'); 
+            set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'on');   
+            set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'on'); 
+            set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'on'); 
+            set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'on'); 
+            set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'on'); 
+        end
+    
+        cancelCreateVoiRoiPanel('set', false);
+    
+        set(uiCreateVoiRoiPanel, 'String', 'Segment');        
+        set(uiCreateVoiRoiPanel, 'Background', [0.6300 0.6300 0.4000]);
+        set(uiCreateVoiRoiPanel, 'Foreground', [0.1 0.1 0.1]); 
+    end
+
     clear BW2;
     clear BWCT2; 
     clear BWANDBWCT; 

@@ -1,5 +1,5 @@
-function tPoints = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlotLine, bPlotText)
-%function  tPoints = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlotLine, bPlotText)
+function tMaxDistances = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlotLine, bPlotText)
+%function  tMaxDistances = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlotLine, bPlotText)
 %Compute ROI farthest values from ROI object.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,7 +27,7 @@ function tPoints = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlotLine, 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tPoints = []; 
+    tMaxDistances = []; 
     isRoiValid = true;
 
     bFoundMaxDistance = false;
@@ -143,8 +143,8 @@ function tPoints = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlotLine, 
                             lXY = line(atRoi.Object.Parent, [x1XY, x2XY], [y1XY, y2XY], 'Color', 'r', 'LineWidth', 1, 'Visible', sLineVisible);	
                             lCY = line(atRoi.Object.Parent, [x1CY, x2CY], [y1CY, y2CY], 'Color', 'm', 'LineWidth', 1, 'Visible', sLineVisible);
 
-                            tPoints.MaxXY.Line = lXY;
-                            tPoints.MaxCY.Line = lCY;
+                            tMaxDistances.MaxXY.Line = lXY;
+                            tMaxDistances.MaxCY.Line = lCY;
 
                             if is3DEngine('get') == true
 
@@ -178,7 +178,7 @@ function tPoints = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlotLine, 
                             roiObject.Position(2,2) = y2XY;
 
                             dXYLength = computeLineLength(atMetaData, atRoi.Axe, roiObject);
-                            tPoints.MaxXY.Length = dXYLength;                    
+                            tMaxDistances.MaxXY.Length = dXYLength;                    
 
                             % Compute CY distance in mm
 
@@ -189,7 +189,7 @@ function tPoints = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlotLine, 
                             roiObject.Position(2,2) = y2CY;
 
                             dCYLength = computeLineLength(atMetaData, atRoi.Axe, roiObject);
-                            tPoints.MaxCY.Length = dCYLength;                    
+                            tMaxDistances.MaxCY.Length = dCYLength;                    
 
                             if bPlotText == true  
                                 sTextVisible = 'on';
@@ -200,14 +200,14 @@ function tPoints = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlotLine, 
                             tXY = text(atRoi.Object.Parent, x1XY, y1XY, sprintf('%s mm', num2str(dXYLength)), 'Color', 'r', 'Visible', sTextVisible);
                             tCY = text(atRoi.Object.Parent, x2CY, y2CY, sprintf('%s mm', num2str(dCYLength)), 'Color', 'm', 'Visible', sTextVisible);
 
-                            tPoints.MaxXY.Text = tXY;
-                            tPoints.MaxCY.Text = tCY;                    
+                            tMaxDistances.MaxXY.Text = tXY;
+                            tMaxDistances.MaxCY.Text = tCY;                    
                         end
                     end
                 end
             end
         catch
-            tPoints = []; 
+            tMaxDistances = []; 
         end
     end
 

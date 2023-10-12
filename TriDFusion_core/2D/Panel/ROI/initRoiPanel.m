@@ -589,7 +589,6 @@ function initRoiPanel()
 
     function setVoiSeriesOffsetRoiPanelCallback(hObject, ~)
 
-
         atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
         dNbVOIs = numel(atVoiInput);
 
@@ -651,18 +650,16 @@ function initRoiPanel()
 
     
     function addVoiRoiPanelCallback(~, ~)
-                
-        triangulateCallback()
+         
+%        triangulateCallback()
         
         dSerieOffset = get(uiSeriesPtr('get'), 'Value');
-                
-        aBuffer = dicomBuffer('get', [], dSerieOffset);
-        
+                        
         dVoiOffset = get(uiDeleteVoiRoiPanel, 'Value');
                 
         atVoiInput = voiTemplate('get', dSerieOffset);
                 
-        if size(aBuffer, 3) == 1
+        if size(dicomBuffer('get', [], dSerieOffset), 3) == 1
             pAxe = axePtr('get', [], dSerieOffset);
         else
             pAxe = axes3Ptr('get', [], dSerieOffset);
@@ -2541,7 +2538,8 @@ function initRoiPanel()
 
                     dMaskSize = numel(maskAxe);
 
-                    asTag = [];
+%                     asTag = [];
+                    asTag = cell(dMaskSize, 1);
 
                     for jj=1:dMaskSize
 
@@ -2628,13 +2626,14 @@ function initRoiPanel()
 
                             uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
-                            asTag{numel(asTag)+1} = sTag;
-                        end
+%                             asTag{numel(asTag)+1} = sTag;
+                            asTag{jj} = sTag;
+                       end
 
                         drawnow limitrate;
                     end
 
-   %                 asTag(cellfun(@isempty, asTag)) = [];
+                    asTag(cellfun(@isempty, asTag)) = [];
 
                     if ~isempty(asTag)
 
@@ -2790,8 +2789,8 @@ function initRoiPanel()
 
                 aBufferSize = size(BW, 3);
 
-                asTag = [];
-
+%                 asTag = [];
+                asTag = cell(aBufferSize, 1);
                 for aa=1:aBufferSize % Find ROI
 
                     if bMultipleObjects == false
@@ -2899,7 +2898,8 @@ function initRoiPanel()
 
                                     uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
-                                    asTag{numel(asTag)+1} = sTag;
+%                                     asTag{numel(asTag)+1} = sTag;
+                                    asTag{aa} = sTag;
 %                                end
                                 drawnow limitrate;
                             end
@@ -2907,7 +2907,7 @@ function initRoiPanel()
                     end
                 end
 
-    %            asTag(cellfun(@isempty, asTag)) = [];
+                asTag(cellfun(@isempty, asTag)) = [];
 
                 if ~isempty(asTag) 
 

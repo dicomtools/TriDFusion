@@ -223,8 +223,8 @@ function triangulateImages()
     
     
                         if (iSagittal >= 1) && (iSagittal <= iSagittalSize) && ...
-                           (iCoronal >= 1) && (iCoronal <= iCoronalSize) && ...
-                           (iAxial >= 1) && (iAxial <= iAxialSize)
+                           (iCoronal  >= 1) && (iCoronal  <= iCoronalSize) && ...
+                           (iAxial    >= 1) && (iAxial    <= iAxialSize)
     
                             sliceNumber('set', 'sagittal', iSagittal);
                             sliceNumber('set', 'coronal', iCoronal);

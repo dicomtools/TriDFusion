@@ -779,8 +779,9 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
             asCell{dLineOffset,11} = 'Max XY cm';
             asCell{dLineOffset,12} = 'Max CY cm';
             asCell{dLineOffset,13} = 'Area cm2';
-            asCell{dLineOffset,14} = 'Volume cm3';
-            for tt=15:21
+            asCell{dLineOffset,14} = 'Max distance cm';
+            asCell{dLineOffset,15} = 'Volume cm3';
+            for tt=16:21
                 asCell{dLineOffset,tt}  = (' ');
             end
             
@@ -833,8 +834,13 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                     asCell{dLineOffset,11} = (' ');
                                     asCell{dLineOffset,12} = (' ');
                                     asCell{dLineOffset,13} = (' ');
-                                    asCell{dLineOffset,14} = [tVoiComputed.volume];
-                                    for tt=15:21
+                                    if tVoiComputed.maxDistance == 0
+                                        asCell{dLineOffset,14} = ('NaN');
+                                    else
+                                        asCell{dLineOffset,14} = [tVoiComputed.maxDistance];
+                                    end                                   
+                                    asCell{dLineOffset,15} = [tVoiComputed.volume];
+                                    for tt=16:21
                                         asCell{dLineOffset,tt}  = (' ');
                                     end
 
@@ -872,8 +878,17 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                             asCell{dLineOffset,9}  = [atRoiComputed{bb}.std];
                                             asCell{dLineOffset,10} = [atRoiComputed{bb}.peak];
                                             if ~isempty(atRoiComputed{bb}.MaxDistances)
-                                                asCell{dLineOffset,11} = [atRoiComputed{bb}.MaxDistances.MaxXY.Length];
-                                                asCell{dLineOffset,12} = [atRoiComputed{bb}.MaxDistances.MaxCY.Length];
+                                                if atRoiComputed{bb}.MaxDistances.MaxXY.Length == 0
+                                                    asCell{dLineOffset, 11} = ('NaN');
+                                                else
+                                                    asCell{dLineOffset, 11} = [atRoiComputed{bb}.MaxDistances.MaxXY.Length];
+                                                end
+                
+                                                if atRoiComputed{bb}.MaxDistances.MaxCY.Length == 0
+                                                    asCell{dLineOffset, 12} = ('NaN');
+                                                else
+                                                    asCell{dLineOffset, 12} = [atRoiComputed{bb}.MaxDistances.MaxCY.Length];
+                                                end
                                             else
                                                 asCell{dLineOffset,11} = (' ');
                                                 asCell{dLineOffset,12} = (' ');
@@ -945,15 +960,24 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                 asCell{dLineOffset, 9}  = [tRoiComputed.std];
                                 asCell{dLineOffset, 10} = [tRoiComputed.peak];
                                 if ~isempty(tRoiComputed.MaxDistances)
-                                    asCell{dLineOffset, 11} = [tRoiComputed.MaxDistances.MaxXY.Length];
-                                    asCell{dLineOffset, 12} = [tRoiComputed.MaxDistances.MaxCY.Length];
+                                    if tRoiComputed.MaxDistances.MaxXY.Length == 0
+                                        asCell{dLineOffset, 11} = ('NaN');
+                                    else
+                                        asCell{dLineOffset, 11} = [tRoiComputed.MaxDistances.MaxXY.Length];
+                                    end
+    
+                                    if tRoiComputed.MaxDistances.MaxCY.Length == 0
+                                        asCell{dLineOffset, 12} = ('NaN');
+                                    else
+                                        asCell{dLineOffset, 12} = [tRoiComputed.MaxDistances.MaxCY.Length];
+                                    end
                                 else
                                     asCell{dLineOffset, 11} = (' ');
                                     asCell{dLineOffset, 12} = (' ');
                                 end
                                 asCell{dLineOffset, 13} = tRoiComputed.area;
                                 asCell{dLineOffset, 14} = (' ');
-                                asCell{dLineOffset,15} = (' ');
+                                asCell{dLineOffset, 15} = (' ');
                                 
                                 for tt=16:21
                                     asCell{dLineOffset,tt}  = (' ');

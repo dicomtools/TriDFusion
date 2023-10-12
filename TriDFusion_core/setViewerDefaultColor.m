@@ -8,63 +8,63 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
 %Last specifications modified:
 %
 % Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
-% 
+%
 % This file is part of The Triple Dimention Fusion (TriDFusion).
-% 
+%
 % TriDFusion development has been led by:  Daniel Lafontaine
-% 
-% TriDFusion is distributed under the terms of the Lesser GNU Public License. 
-% 
+%
+% TriDFusion is distributed under the terms of the Lesser GNU Public License.
+%
 %     This version of TriDFusion is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 % TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 % without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 % See the GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tViewerTemplate = inputTemplate('get'); 
+    tViewerTemplate = inputTemplate('get');
     uiLogo = logoObject('get');
 
     iOffset = get(uiSeriesPtr('get'), 'Value');
     if iOffset > numel(tViewerTemplate) || ...
        isempty(dicomBuffer('get'))
         return;
-    else   
+    else
          if switchToIsoSurface('get') == true || ...
             switchTo3DMode('get')     == true || ...
-            switchToMIPMode('get')    == true 
-                
+            switchToMIPMode('get')    == true
+
              if switchToIsoSurface('get') == true  && ...
                 switchTo3DMode('get')     == false && ...
-                switchToMIPMode('get')    == false 
+                switchToMIPMode('get')    == false
 
-                invertColor     ('set', true   );    
-                backgroundColor ('set', 'white' );              
-                set(fiMainWindowPtr('get'), 'Color', 'white');  
+                invertColor     ('set', true   );
+                backgroundColor ('set', 'white' );
+                set(fiMainWindowPtr('get'), 'Color', 'white');
 
                 set(uiOneWindowPtr('get'), 'BackgroundColor', backgroundColor('get'));
-                
+
                 background3DOffset('set', 7);
             end
-        else   
-            
+        else
+
             dNbFusedAxes    = 0;
             dNMipFusedAxes  = 0;
-                
-            if isFusion('get') == true   
+
+            if isFusion('get') == true
                 if size(dicomBuffer('get'), 3) == 1
                     dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
-                    for rr=1:dNbFusedSeries   
+                    for rr=1:dNbFusedSeries
                         imAxeF = imAxeFPtr('get', [], rr);
-                        if ~isempty(imAxeF)     
-                            dNbFusedAxes = dNbFusedAxes+1; 
+                        if ~isempty(imAxeF)
+                            dNbFusedAxes = dNbFusedAxes+1;
                         end
-                    end                    
+                    end
                 else
 
                     dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
@@ -76,24 +76,24 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
 
                         if ~isempty(imCoronalF) && ...
                            ~isempty(imSagittalF) && ...
-                           ~isempty(imAxialF) 
+                           ~isempty(imAxialF)
 
-                            dNbFusedAxes = dNbFusedAxes+1; 
+                            dNbFusedAxes = dNbFusedAxes+1;
                         end
 
                         if link2DMip('get') == true && isVsplash('get') == false
 
-                            imMipF = imMipFPtr('get', [], rr);                                
+                            imMipF = imMipFPtr('get', [], rr);
                             if ~isempty(imMipF)
-                                dNMipFusedAxes = dNMipFusedAxes+1;  
+                                dNMipFusedAxes = dNMipFusedAxes+1;
                             end
                         end
-                    end  
+                    end
                 end
             end
-            
+
             if dNbFusedAxes < 2
-            
+
                 sModality = atMetaData{1}.Modality;
                 if exist('atFuseMetaData', 'var')
                     sFuseModality = atFuseMetaData{1}.Modality;
@@ -101,103 +101,103 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                     sFuseModality = 'null';
                 end
 
-                if bUpdateColorMap == true    
+                if bUpdateColorMap == true
                     if strcmpi(sModality, 'mr')&&strcmpi(sFuseModality, 'mr')
-                        colorMapOffset('set', 10); 
-                        fusionColorMapOffset('set', 10); 
+                        colorMapOffset('set', 10);
+                        fusionColorMapOffset('set', 10);
                     elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'mr')
                         if isFusion('get')
-                            colorMapOffset('set', 20); 
-                            fusionColorMapOffset('set', 10);   
+                            colorMapOffset('set', 20);
+                            fusionColorMapOffset('set', 10);
                         else
-                            colorMapOffset('set', 10); 
-                            fusionColorMapOffset('set', 20);                                 
+                            colorMapOffset('set', 10);
+                            fusionColorMapOffset('set', 20);
                         end
                     elseif strcmpi(sModality, 'nm')&&strcmpi(sFuseModality, 'mr')
                         if isFusion('get')
-                            colorMapOffset('set', 20); 
-                            fusionColorMapOffset('set', 10);   
+                            colorMapOffset('set', 20);
+                            fusionColorMapOffset('set', 10);
                         else
-                            colorMapOffset('set', 10); 
-                            fusionColorMapOffset('set', 20);                                 
-                        end  
-                    elseif strcmpi(sModality, 'mr')&&strcmpi(sFuseModality, 'nm')    
-                        colorMapOffset('set', 10); 
-                        fusionColorMapOffset('set', 20);   
-                    elseif strcmpi(sModality, 'mr')&&strcmpi(sFuseModality, 'ct')    
-                        colorMapOffset('set', 10); 
-                        fusionColorMapOffset('set', 20);      
-                    elseif strcmpi(sModality, 'ct')&&strcmpi(sFuseModality, 'mr')    
-                        colorMapOffset('set', 10); 
-                        fusionColorMapOffset('set', 10);                                
-                    elseif strcmpi(sModality, 'mr')&&strcmpi(sFuseModality, 'pt')    
-                        colorMapOffset('set', 10); 
-                        fusionColorMapOffset('set', 20);      
-                    elseif strcmpi(sModality, 'nm')&&strcmpi(sFuseModality, 'nm')    
-                        colorMapOffset('set', 10); 
-                        fusionColorMapOffset('set', 20); 
-                    elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'pt')    
-                        colorMapOffset('set', 10); 
-                        fusionColorMapOffset('set', 20); 
-                    elseif strcmpi(sModality, 'nm')&&strcmpi(sFuseModality, 'pt')    
-                        colorMapOffset('set', 10); 
-                        fusionColorMapOffset('set', 20); 
-                    elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'nm')    
-                        colorMapOffset('set', 10); 
-                        fusionColorMapOffset('set', 20); 
-                    elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'pt')    
-                        colorMapOffset('set', 10); 
-                        fusionColorMapOffset('set', 20); 
-                    elseif strcmpi(sModality, 'ct')&&strcmpi(sFuseModality, 'ct')    
-                        colorMapOffset('set', 10); 
-                        fusionColorMapOffset('set', 20);                                         
-                    elseif strcmpi(sModality, 'nm')&&strcmpi(sFuseModality, 'ct')    
-                        if isFusion('get')
-                            colorMapOffset('set', 20); 
-                            fusionColorMapOffset('set', 10);   
-                        else
-                            colorMapOffset('set', 10); 
-                            fusionColorMapOffset('set', 20);                                 
-                        end     
-                    elseif strcmpi(sModality, 'ct')&&strcmpi(sFuseModality, 'nm')    
-
-                        if isFusion('get') && keyPressFusionStatus('get') == 1
-                            colorMapOffset('set', 20); 
-                            fusionColorMapOffset('set', 10);   
-                        else
-                            colorMapOffset('set', 10); 
-                            fusionColorMapOffset('set', 20);                                 
-                        end                      
-                    elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'ct')    
-                        if isFusion('get')
-                            colorMapOffset('set', 20); 
-                            fusionColorMapOffset('set', 10);   
-                        else
-                            colorMapOffset('set', 10); 
-                            fusionColorMapOffset('set', 20);                                 
-                        end  
-                    elseif strcmpi(sModality, 'ct')&&strcmpi(sFuseModality, 'pt')    
-
-                        if isFusion('get') && keyPressFusionStatus('get') == 1
-                            colorMapOffset('set', 20); 
-                            fusionColorMapOffset('set', 10);   
-                        else
-                            colorMapOffset('set', 10); 
-                            fusionColorMapOffset('set', 20);                                 
-                        end                      
-                    else                                           
-                        colorMapOffset('set', 10); 
-                        if bUpdateColorMap == true
-                            fusionColorMapOffset('set', 20);                               
+                            colorMapOffset('set', 10);
+                            fusionColorMapOffset('set', 20);
                         end
-                    end                          
+                    elseif strcmpi(sModality, 'mr')&&strcmpi(sFuseModality, 'nm')
+                        colorMapOffset('set', 10);
+                        fusionColorMapOffset('set', 20);
+                    elseif strcmpi(sModality, 'mr')&&strcmpi(sFuseModality, 'ct')
+                        colorMapOffset('set', 10);
+                        fusionColorMapOffset('set', 20);
+                    elseif strcmpi(sModality, 'ct')&&strcmpi(sFuseModality, 'mr')
+                        colorMapOffset('set', 10);
+                        fusionColorMapOffset('set', 10);
+                    elseif strcmpi(sModality, 'mr')&&strcmpi(sFuseModality, 'pt')
+                        colorMapOffset('set', 10);
+                        fusionColorMapOffset('set', 20);
+                    elseif strcmpi(sModality, 'nm')&&strcmpi(sFuseModality, 'nm')
+                        colorMapOffset('set', 10);
+                        fusionColorMapOffset('set', 20);
+                    elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'pt')
+                        colorMapOffset('set', 10);
+                        fusionColorMapOffset('set', 20);
+                    elseif strcmpi(sModality, 'nm')&&strcmpi(sFuseModality, 'pt')
+                        colorMapOffset('set', 10);
+                        fusionColorMapOffset('set', 20);
+                    elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'nm')
+                        colorMapOffset('set', 10);
+                        fusionColorMapOffset('set', 20);
+                    elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'pt')
+                        colorMapOffset('set', 10);
+                        fusionColorMapOffset('set', 20);
+                    elseif strcmpi(sModality, 'ct')&&strcmpi(sFuseModality, 'ct')
+                        colorMapOffset('set', 10);
+                        fusionColorMapOffset('set', 20);
+                    elseif strcmpi(sModality, 'nm')&&strcmpi(sFuseModality, 'ct')
+                        if isFusion('get')
+                            colorMapOffset('set', 20);
+                            fusionColorMapOffset('set', 10);
+                        else
+                            colorMapOffset('set', 10);
+                            fusionColorMapOffset('set', 20);
+                        end
+                    elseif strcmpi(sModality, 'ct')&&strcmpi(sFuseModality, 'nm')
+
+                        if isFusion('get') && keyPressFusionStatus('get') == 1
+                            colorMapOffset('set', 20);
+                            fusionColorMapOffset('set', 10);
+                        else
+                            colorMapOffset('set', 10);
+                            fusionColorMapOffset('set', 20);
+                        end
+                    elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'ct')
+                        if isFusion('get')
+                            colorMapOffset('set', 20);
+                            fusionColorMapOffset('set', 10);
+                        else
+                            colorMapOffset('set', 10);
+                            fusionColorMapOffset('set', 20);
+                        end
+                    elseif strcmpi(sModality, 'ct')&&strcmpi(sFuseModality, 'pt')
+
+                        if isFusion('get') && keyPressFusionStatus('get') == 1
+                            colorMapOffset('set', 20);
+                            fusionColorMapOffset('set', 10);
+                        else
+                            colorMapOffset('set', 10);
+                            fusionColorMapOffset('set', 20);
+                        end
+                    else
+                        colorMapOffset('set', 10);
+                        if bUpdateColorMap == true
+                            fusionColorMapOffset('set', 20);
+                        end
+                    end
                 end
 
-                if bUpdateColorMap == true    
+                if bUpdateColorMap == true
 
                     if strcmpi(sModality, 'nm') || ...
                        strcmpi(sModality, 'pt') || ...
-                       strcmpi(sModality, 'ot') 
+                       strcmpi(sModality, 'ot')
 
                         if isFusion('get') == true && keyPressFusionStatus('get')
                             if strcmpi(sFuseModality, 'mr') || ...
@@ -208,7 +208,7 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                                 overlayColor    ('set', 'white' );
 
                                 if ~isempty(uiLogo)
-                                    set(uiLogo.Children, 'Color', [0.8500 0.8500 0.8500]); 
+                                    set(uiLogo.Children, 'Color', [0.8500 0.8500 0.8500]);
                                 end
                             else
 
@@ -218,12 +218,12 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                                 overlayColor    ('set', 'black' );
 
                                 if ~isempty(uiLogo)
-                                    set(uiLogo.Children, 'Color', [0.1500 0.1500 0.1500]); 
-                                end                                
+                                    set(uiLogo.Children, 'Color', [0.1500 0.1500 0.1500]);
+                                end
                             end
 
                         else
-                            % colorMapOffset('set', 11); 
+                            % colorMapOffset('set', 11);
 
                             invertColor('set', true);
 
@@ -231,73 +231,73 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                             overlayColor    ('set', 'black' );
 
                             if ~isempty(uiLogo)
-                                set(uiLogo.Children, 'Color', [0.1500 0.1500 0.1500]); 
+                                set(uiLogo.Children, 'Color', [0.1500 0.1500 0.1500]);
                             end
 
-                        end                            
+                        end
                     else
                         if strcmpi(sFuseModality, 'nm') || ...
-                           strcmpi(sFuseModality, 'pt') 
+                           strcmpi(sFuseModality, 'pt')
                             if isFusion('get') == true && keyPressFusionStatus('get') == 1
-                                invertColor     ('set', true   );    
-                                backgroundColor ('set', 'white' );   
-                                overlayColor    ('set', 'black' );                        
+                                invertColor     ('set', true   );
+                                backgroundColor ('set', 'white' );
+                                overlayColor    ('set', 'black' );
 
-                                set(uiLogo.Children, 'Color', [0.1500 0.1500 0.1500]);                              
+                                set(uiLogo.Children, 'Color', [0.1500 0.1500 0.1500]);
                             else
-                                invertColor     ('set', false   );    
-                                backgroundColor ('set', 'black' );   
-                                overlayColor    ('set', 'white' );                        
+                                invertColor     ('set', false   );
+                                backgroundColor ('set', 'black' );
+                                overlayColor    ('set', 'white' );
 
-                                set(uiLogo.Children, 'Color', [0.8500 0.8500 0.8500]);                             
+                                set(uiLogo.Children, 'Color', [0.8500 0.8500 0.8500]);
                            end
                         else
 
-                            invertColor     ('set', false   );    
-                            backgroundColor ('set', 'black' );   
-                            overlayColor    ('set', 'white' );                        
+                            invertColor     ('set', false   );
+                            backgroundColor ('set', 'black' );
+                            overlayColor    ('set', 'white' );
 
-                            set(uiLogo.Children, 'Color', [0.8500 0.8500 0.8500]);  
+                            set(uiLogo.Children, 'Color', [0.8500 0.8500 0.8500]);
                         end
 
                     end
-                end            
-                            
+                end
+
                 if size(dicomBuffer('get'), 3) == 1
                     set(uiOneWindowPtr('get'), 'BackgroundColor', backgroundColor('get'));
                 else
                     set(uiCorWindowPtr('get'), 'BackgroundColor', backgroundColor('get'));
                     set(uiSagWindowPtr('get'), 'BackgroundColor', backgroundColor('get'));
-                    set(uiTraWindowPtr('get'), 'BackgroundColor', backgroundColor('get'));   
+                    set(uiTraWindowPtr('get'), 'BackgroundColor', backgroundColor('get'));
 
-                    if link2DMip('get') == true && isVsplash('get') == false      
-                        set(uiMipWindowPtr('get'), 'BackgroundColor', backgroundColor('get'));                                            
+                    if link2DMip('get') == true && isVsplash('get') == false
+                        set(uiMipWindowPtr('get'), 'BackgroundColor', backgroundColor('get'));
                     end
                 end
 
 %                 uiSliderLevel = uiSliderLevelPtr('get');
-%                 if ~isempty(uiSliderLevel)                                
+%                 if ~isempty(uiSliderLevel)
 %                     set(uiSliderLevel , 'BackgroundColor',  backgroundColor('get'));
 %                 end
- 
+
 %                 uiSliderWindow = uiSliderWindowPtr('get');
-%                 if ~isempty(uiSliderWindow)                               
+%                 if ~isempty(uiSliderWindow)
 %                     set(uiSliderWindow, 'BackgroundColor',  backgroundColor('get'));
 %                 end
 
 %                 uiFusionSliderLevel = uiFusionSliderLevelPtr('get');
-%                 if ~isempty(uiFusionSliderLevel)                              
+%                 if ~isempty(uiFusionSliderLevel)
 %                     set(uiFusionSliderLevel , 'BackgroundColor',  backgroundColor('get'));
 %                 end
 
 %                 uiFusionSliderWindow = uiFusionSliderWindowPtr('get');
-%                 if ~isempty(uiFusionSliderWindow) 
-%                     set(uiFusionSliderWindow, 'BackgroundColor',  backgroundColor('get'));                   
+%                 if ~isempty(uiFusionSliderWindow)
+%                     set(uiFusionSliderWindow, 'BackgroundColor',  backgroundColor('get'));
 %                 end
 
                 uiAlphaSlider = uiAlphaSliderPtr('get');
-                if ~isempty(uiAlphaSlider) 
-                    set(uiAlphaSlider, 'BackgroundColor',  backgroundColor('get'));    
+                if ~isempty(uiAlphaSlider)
+                    set(uiAlphaSlider, 'BackgroundColor',  backgroundColor('get'));
                 end
 
                 ptrColorbar = uiColorbarPtr('get');
@@ -306,90 +306,82 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                 end
 
                 ptrFusionColorbar = uiFusionColorbarPtr('get');
-                if ~isempty(ptrFusionColorbar)            
-                    set(ptrFusionColorbar   , 'Color',  overlayColor('get'));       
+                if ~isempty(ptrFusionColorbar)
+                    set(ptrFusionColorbar   , 'Color',  overlayColor('get'));
                 end
 
-                set(fiMainWindowPtr('get'), 'Color', backgroundColor('get'));  
+                set(fiMainWindowPtr('get'), 'Color', backgroundColor('get'));
             end
-            
+
             if size(dicomBuffer('get'), 3) == 1
-                
+
                 colormap(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , getColorMap('one', colorMapOffset('get')));
-                
-                if isFusion('get') == true                                                                    
-                    
+
+                if isFusion('get') == true
+
                     if dNbFusedAxes < 2
                         colormap(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
                     end
                 end
-            else               
+            else
                 colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', colorMapOffset('get')));
                 colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', colorMapOffset('get')));
-                colormap(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', colorMapOffset('get')));    
-                
-                if link2DMip('get') == true && isVsplash('get') == false      
-                    colormap(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', colorMapOffset('get')));                     
+                colormap(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', colorMapOffset('get')));
+
+                if link2DMip('get') == true && isVsplash('get') == false
+                    colormap(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', colorMapOffset('get')));
                 end
-                
-                if isFusion('get') == true   
-                                         
+
+                if isFusion('get') == true
+
                     if dNbFusedAxes < 2
-                        
+
                         colormap(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
                         colormap(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
-                        colormap(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));   
+                        colormap(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
                     end
-                    
-                    if link2DMip('get') == true && isVsplash('get') == false     
-                        
+
+                    if link2DMip('get') == true && isVsplash('get') == false
+
                         if dNMipFusedAxes < 2
-                            colormap(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));   
+                            colormap(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
                         end
                     end
                 end
 
 
-                if isVsplash('get') == false                                                       
-        
+                if isVsplash('get') == false
+
                     btnUiTraWindowFullScreen = btnUiTraWindowFullScreenPtr('get');
                     btnUiCorWindowFullScreen = btnUiCorWindowFullScreenPtr('get');
                     btnUiSagWindowFullScreen = btnUiSagWindowFullScreenPtr('get');
-           
+                    btnUiMipWindowFullScreen = btnUiMipWindowFullScreenPtr('get');
+
                     if ~isempty(btnUiTraWindowFullScreen)&& ...
                        ~isempty(btnUiCorWindowFullScreen)&& ...
-                       ~isempty(btnUiSagWindowFullScreen)
-               
+                       ~isempty(btnUiSagWindowFullScreen)&& ...
+                       ~isempty(btnUiMipWindowFullScreen)
 
-                        if strcmpi(backgroundColor('get'), 'white')
-                            if exist(sprintf('%s/icons/full-screen-black.png', viewerRootPath('get')), 'file')
-                                [imgFullScreenIcon,~] = imread(sprintf('%s/icons/full-screen-black.png', viewerRootPath('get')));
-                                imgFullScreenIcon = double(imgFullScreenIcon)/255;
-                            else
-                                imgFullScreenIcon = zeros([16 16 3]);
-                            end          
-                        else
-                            if exist(sprintf('%s/icons/full-screen-white.png', viewerRootPath('get')), 'file')
-                               [imgFullScreenIcon,~] = imread(sprintf('%s/icons/full-screen-white.png', viewerRootPath('get')));
-                                imgFullScreenIcon = double(imgFullScreenIcon)/255;
-                            else
-                                imgFullScreenIcon = zeros([16 16 3]);
-                            end                
-                        end            
-                        
-                        set(btnUiTraWindowFullScreen, 'CData', imgFullScreenIcon);
-                        set(btnUiCorWindowFullScreen, 'CData', imgFullScreenIcon);
-                        set(btnUiSagWindowFullScreen, 'CData', imgFullScreenIcon);
+                        bIsTraFullScreen = isPanelFullScreen(btnUiTraWindowFullScreen);
+                        bIsCorFullScreen = isPanelFullScreen(btnUiCorWindowFullScreen);
+                        bIsSagFullScreen = isPanelFullScreen(btnUiSagWindowFullScreen);
+                        bIsMipFullScreen = isPanelFullScreen(btnUiMipWindowFullScreen);
+
+                        set(btnUiTraWindowFullScreen, 'CData', getFullScreenIconImage(~bIsTraFullScreen));
+                        set(btnUiCorWindowFullScreen, 'CData', getFullScreenIconImage(~bIsCorFullScreen));
+                        set(btnUiSagWindowFullScreen, 'CData', getFullScreenIconImage(~bIsSagFullScreen));
+                        set(btnUiMipWindowFullScreen, 'CData', getFullScreenIconImage(~bIsMipFullScreen));
 
                         set(btnUiTraWindowFullScreen, 'BackgroundColor', backgroundColor('get'));
                         set(btnUiCorWindowFullScreen, 'BackgroundColor', backgroundColor('get'));
                         set(btnUiSagWindowFullScreen, 'BackgroundColor', backgroundColor('get'));
-                    end          
+                        set(btnUiMipWindowFullScreen, 'BackgroundColor', backgroundColor('get'));
+                    end
                 end
 
-            end                        
+            end
         end
 
-    end  
+    end
 
-end   
+end

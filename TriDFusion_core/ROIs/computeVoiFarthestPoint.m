@@ -1,5 +1,5 @@
-function [dFarthestDistance, adFarthestXYZ1, adFarthestXYZ2] = computeVoiFarthestPoint(imVoi, atMetaData, atRoiInput, atVoiInput)
-%function  [dFarthestDistance, adFarthestXYZ1, adFarthestXYZ2] = computeVoiFarthestPoint(imVoi, atMetaData, atRoiInput, atVoiInput)
+function dMaxDistance = computeVoiFarthestPoint(imMask, atMetaData)
+%function  dMaxDistance = computeVoiFarthestPoint(imMask, atMetaData)
 %Compute ROI farthest values from ROI object.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,99 +27,32 @@ function [dFarthestDistance, adFarthestXYZ1, adFarthestXYZ2] = computeVoiFarthes
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    dFarthestDistance = 0;
-    adFarthestXYZ1    = [];
-    adFarthestXYZ2    = []; 
+    dMaxDistance = 0;
 
-    % create a global mask of all VOI
-
-    imMask = zeros(size(imVoi));
- 
-    for aa=1:numel(atVoiInput)
-     
-        dNbTags = numel(atVoiInput{aa}.RoisTag);
-        for yy=1:dNbTags
-    
-            
-            aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), atVoiInput{aa}.RoisTag{yy} );
-            dRoiTagOffset = find(aTagOffset, 1); 
-            
-            if ~isempty(dRoiTagOffset)
-                
-                sAxe = atRoiInput{dRoiTagOffset}.Axe;
-                dSliceNb = atRoiInput{dRoiTagOffset}.SliceNb;
-    
-                switch lower(sAxe)
-                    
-                    case 'axes1'
-                    im = permute(imVoi(dSliceNb,:,:), [3 2 1]);
-                    
-                    case 'axes2'
-                    im = permute(imVoi(:,dSliceNb,:), [3 1 2]);
-                    
-                    otherwise
-                    im = imVoi(:,:,dSliceNb);
-                end                                    
-                            
-                bw = roiTemplateToMask(atRoiInput{dRoiTagOffset}, im);
-  %              bw(bw~=0)=aa; % Label the VOI 
-    
-                switch lower(sAxe)
-                    
-                    case 'axes1'
-                    imMask(dSliceNb, :, :) = imMask(dSliceNb, :, :)|permuteBuffer(bw, 'coronal');
-                    
-                    case 'axes2'
-                    imMask(:, dSliceNb, :) = imMask(:, dSliceNb, :)|permuteBuffer(bw, 'sagittal');
-                    
-                    otherwise
-                    imMask(:, :, dSliceNb) = imMask(:, :, dSliceNb)|bw;
-               end 
-               
-            end
-        end
-    end
-
-    imMask=imMask(:,:,end:-1:1);
-    
     xPixelSize = atMetaData{1}.PixelSpacing(1);
     yPixelSize = atMetaData{1}.PixelSpacing(2);
     zPixelSize = computeSliceSpacing(atMetaData);
-
-    stats = regionprops(bwlabeln(imMask));
-
-    if ~isempty(stats) % Found some stats 
-
-        for jj = numel(stats) % Compare all stats one to the other
             
-            for kk=1:numel(stats)
+    % Get the coordinates of all voxels in the regions
 
-                if jj==kk
-                    continue;
-                end
+    [x, y, z] = ind2sub(size(imMask), find(imMask));
 
-                yxz1 = stats(jj).Centroid;
-                yxz2 = stats(kk).Centroid;
-                          
-                yxz1Resized(1) = yxz1(1)*xPixelSize;
-                yxz1Resized(2) = yxz1(2)*yPixelSize;
-                yxz1Resized(3) = yxz1(3)*zPixelSize;
-                               
-                yxz2Resized(1) = yxz2(1)*xPixelSize;
-                yxz2Resized(2) = yxz2(2)*yPixelSize;
-                yxz2Resized(3) = yxz2(3)*zPixelSize;
-                
-                % Euclidean distance
-    
-                dCurentDistance = sqrt((yxz1Resized(1)-yxz2Resized(1))^2 + (yxz1Resized(2)-yxz2Resized(2))^2 + (yxz1Resized(3)-yxz2Resized(3))^2);
-    
-                if dCurentDistance > dFarthestDistance
-                    dFarthestDistance = dCurentDistance;
+    dNumVoxels = numel(x);
         
-                    adFarthestXYZ1 = yxz1;
-                    adFarthestXYZ2 = yxz2;
-                end
+    % Iterate through all pairs of voxels to find the farthest distance
+
+    for i = 1:dNumVoxels
+        for j = i+1:dNumVoxels
+            % Calculate the distance between the two voxels
+            dCurrentdistance = sqrt((x(i) - x(j))^2 * xPixelSize^2 + ...
+                                    (y(i) - y(j))^2 * yPixelSize^2 + ...
+                                    (z(i) - z(j))^2 * zPixelSize^2);
+            
+            % Update maxDistance if this distance is greater
+            if dCurrentdistance > dMaxDistance
+                dMaxDistance = dCurrentdistance;
             end
         end
-    end
+    end       
+ 
 end

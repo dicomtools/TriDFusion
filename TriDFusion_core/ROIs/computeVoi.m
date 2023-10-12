@@ -33,8 +33,12 @@ function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMet
     if bModifiedMatrix  == false && ... 
        bMovementApplied == false        % Can't use input buffer if movement have been applied
         imCDataVoi = imInput;
+        atMetaData = atInputMetaData;
+        imMask = false(size(imInput));
     else
         imCDataVoi = imVoi;        
+        atMetaData = atVoiMetaData;
+        imMask = false(size(imVoi));
     end
     
     dNbRoi = numel(ptrVoiInput.RoisTag);
@@ -76,6 +80,21 @@ function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMet
                 
             case 'axes3'
                 imCData{uu} = imCDataVoi(:,:,atRoiComputed{uu}.SliceNb);                   
+        end 
+
+    
+        switch lower(tRoi.Axe)    
+            case 'axe'
+            imMask(:, :) = imMask(:, :)| imCMask{uu};
+
+            case 'axes1'
+            imMask(atRoiComputed{uu}.SliceNb, :, :) = imMask(atRoiComputed{uu}.SliceNb, :, :)|permuteBuffer(imCMask{uu}, 'coronal');
+            
+            case 'axes2'
+            imMask(:, atRoiComputed{uu}.SliceNb, :) = imMask(:, atRoiComputed{uu}.SliceNb, :)|permuteBuffer(imCMask{uu}, 'sagittal');
+            
+            case 'axes3'
+            imMask(:, :, atRoiComputed{uu}.SliceNb) = imMask(:, :, atRoiComputed{uu}.SliceNb)|imCMask{uu};
         end 
 
         if bSegmented      == true && ...
@@ -220,7 +239,10 @@ function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMet
         tVoiComputed.volume = dNbCells * dVoxVolume;
     
     end
-    
+
+    tVoiComputed.maxDistance = computeVoiFarthestPoint(imMask, atMetaData);
+
+    clear imMask;
     clear imCDataVoi;
 %    clear imCData;
     clear imCMask;

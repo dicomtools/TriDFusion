@@ -43,70 +43,47 @@ function wheelScroll(~, evnt)
             end
 
         else
+            dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+            aImageSize = size(dicomBuffer('get', [], dSeriesOffset));
 
-            % Get the current point
-            current_point = get(gcf, 'CurrentPoint');
-            mouseX = current_point(1, 1);
-            mouseY = current_point(1, 2);
-            
-            posCor = getpixelposition(uiCorWindowPtr('get', get(uiSeriesPtr('get'), 'Value')));
-            posSag = getpixelposition(uiSagWindowPtr('get', get(uiSeriesPtr('get'), 'Value')));
-            posTra = getpixelposition(uiTraWindowPtr('get', get(uiSeriesPtr('get'), 'Value')));
-
-
-            if mouseX > posCor(1) && mouseX < (posCor(1)+posCor(3)) && ... % Coronal
-               mouseY > posCor(2) && mouseY < (posCor(2)+posCor(4))     
-                gca = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-
-            elseif  mouseX > posSag(1) && mouseX < (posSag(1)+posSag(3)) && ... % Sagittal
-                    mouseY > posSag(2) && mouseY < (posSag(2)+posSag(4))     
-                gca = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-
-            elseif  mouseX > posTra(1) && mouseX < (posTra(1)+posTra(3)) && ... % Axial
-                    mouseY > posTra(2) && mouseY < (posTra(2)+posTra(4))    
-                gca = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-
-            else
-                gca = axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')); % MIP
-            end
-
+            gca = getAxeFromMousePosition(dSeriesOffset);
 
             switch gca
-                case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                case axes1Ptr('get', [], dSeriesOffset)
                     if evnt.VerticalScrollCount > 0
                         if sliceNumber('get', 'coronal') > 1
                             sliceNumber('set', 'coronal', ...
                             sliceNumber('get', 'coronal')-1);
                         end
                     else
-                        if sliceNumber('get', 'coronal') < size(dicomBuffer('get'), 1)
+                        if sliceNumber('get', 'coronal') < aImageSize(1)
                             sliceNumber('set', 'coronal', ...
                             sliceNumber('get', 'coronal')+1);
                         end
                     end
 
-                    set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get'), 1));
+                    set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / aImageSize(1));
 
-                case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                case axes2Ptr('get', [], dSeriesOffset)
                     if evnt.VerticalScrollCount > 0
                          if sliceNumber('get', 'sagittal') > 1
                              sliceNumber('set', 'sagittal', ...
                              sliceNumber('get', 'sagittal')-1);
                          end
                     else
-                         if sliceNumber('get', 'sagittal') < size(dicomBuffer('get'), 2)
+                         if sliceNumber('get', 'sagittal') < aImageSize(2)
                              sliceNumber('set', 'sagittal', ...
                              sliceNumber('get', 'sagittal')+1);
                          end
                     end
 
-                    set(uiSliderSagPtr('get'), 'Value', sliceNumber('get', 'sagittal') / size(dicomBuffer('get'), 2));
+                    set(uiSliderSagPtr('get'), 'Value', sliceNumber('get', 'sagittal') / aImageSize(2));
 
-                case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                case axes3Ptr('get', [], dSeriesOffset)
 
                     if evnt.VerticalScrollCount > 0
 
-                        if sliceNumber('get', 'axial') < size(dicomBuffer('get'), 3)
+                        if sliceNumber('get', 'axial') < aImageSize(3)
                              sliceNumber('set', 'axial', ...
                              sliceNumber('get', 'axial')+1);
                         end
@@ -117,9 +94,9 @@ function wheelScroll(~, evnt)
                          end
                     end
 
-                    set(uiSliderTraPtr('get'), 'Value', 1 - (sliceNumber('get', 'axial') / size(dicomBuffer('get'), 3)));
+                    set(uiSliderTraPtr('get'), 'Value', 1 - (sliceNumber('get', 'axial') / aImageSize(3)));
                     
-                case axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                case axesMipPtr('get', [], dSeriesOffset)
                                         
                     iMipAngleValue = mipAngle('get');
                     

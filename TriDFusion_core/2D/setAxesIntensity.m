@@ -38,6 +38,10 @@ function setAxesIntensity(dSeriesOffset)
         dLevelMax = dLevelMin+1;
     end
 
+    if dLevelMin == dLevelMax
+        dLevelMax = dLevelMax+1;
+    end
+
     % Set axes intensity
 
     if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1            

@@ -376,6 +376,7 @@ function setRoiToolbar(sVisible)
             if  strcmpi(windowButton('get'), 'down')
 
                 robotClick();
+%                 gca = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
 
                 mainToolBarEnable('off');
                 mouseFcn('reset');

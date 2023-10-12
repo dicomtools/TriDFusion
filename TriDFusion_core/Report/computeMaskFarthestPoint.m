@@ -102,7 +102,6 @@ function [dFarthestDistance, adFarthestXYZ1, adFarthestXYZ2] = computeMaskFarthe
                     end
                 end
             end
-        end
-       
+        end       
     end
 end

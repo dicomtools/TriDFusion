@@ -55,6 +55,7 @@ function initViewerGlobal()
     btnUiSagWindowFullScreenPtr('set', []);
     btnUiCorWindowFullScreenPtr('set', []);
     btnUiTraWindowFullScreenPtr('set', []);
+    btnUiMipWindowFullScreenPtr('set', []);
 
     figContourReportPtr    ('set', '');
     fig3DLungShuntReportPtr('set', '');
@@ -85,11 +86,11 @@ function initViewerGlobal()
 
     uiSeriesPtr('set', []);
     uiFusedSeriesPtr('set', '');
-% 
+%
 %     uiSliderWindowPtr('set', []);
 %     uiSliderLevelPtr ('set', []);
     uiColorbarPtr    ('set', []);
-% 
+%
 %     uiFusionSliderWindowPtr('set', []);
 %     uiFusionSliderLevelPtr ('set', []);
     uiAlphaSliderPtr       ('set', []);
@@ -104,19 +105,19 @@ function initViewerGlobal()
     lineFusionColorbarIntensityMaxPtr('set', []);
     lineFusionColorbarIntensityMinPtr('set', []);
     axeFusionColorbarPtr('set', []);
-    
+
     isLineColorbarIntensityMaxClicked('set', false);
     isLineColorbarIntensityMinClicked('set', false);
 
     isLineFusionColorbarIntensityMaxClicked('set', false);
     isLineFusionColorbarIntensityMinClicked('set', false);
-    
+
     isColorbarDefaultUnit('reset');
     isFusionColorbarDefaultUnit('reset');
 
     uiProgressWindowPtr('set', []);
     uiBarPtr('set', []);
-    
+
     quantificationTemplate('reset');
 
     dicomMetaData('reset');
@@ -169,7 +170,7 @@ function initViewerGlobal()
     viewRoiPanel   ('set', false);
 
     is2DBrush('set', false);
- 
+
     optionsPanelMenuObject   ('set', []);
     viewRoiObject            ('set', []);
     viewSegPanelMenuObject   ('set', []);
