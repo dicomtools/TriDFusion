@@ -121,7 +121,7 @@ function setDoseKernel(dModel, sTissue, sIsotope, dKernelKernelCutoffDistance, s
     % - uptake curve which will change step 2
     % - effective half-life due to biological clearance which will change step 3 and trapezoidal integration may be used instead
 
-    atCoreMetaData = dicomMetaData('get');
+    atCoreMetaData = dicomMetaData('get', [], dSeriesOffset);
                 
     if kernelMicrosphereInSpecimen('get') == true
         
@@ -158,6 +158,8 @@ function setDoseKernel(dModel, sTissue, sIsotope, dKernelKernelCutoffDistance, s
 
                 atCoreMetaData{jj}.SeriesDate = sSeriesDate;
                 atCoreMetaData{jj}.SeriesTime = sSeriesTime;
+
+                atCoreMetaData{jj}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideCodeSequence.Item_1.CodeMeaning = [];
 
                 atCoreMetaData{jj}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime = ...
                     sRadiopharmaceuticalStartDateTime;
@@ -238,7 +240,7 @@ function setDoseKernel(dModel, sTissue, sIsotope, dKernelKernelCutoffDistance, s
         end
     end
 
-    dicomMetaData('set', atCoreMetaData);
+    dicomMetaData('set', atCoreMetaData, dSeriesOffset);
     
     
     % ASK: converting from mm to cm ??
@@ -530,7 +532,7 @@ end
         aCtBuffer(aCtBuffer==dCtMIn)=0;
         aCtBuffer(aCtBuffer~=0)=1;
 
-        [aResamCt, ~] = resampleImage(aCtBuffer, atCtMetaData, aRefBuffer, atRefMetaData, 'Nearest', 2, false);
+        [aResamCt, ~] = resampleImage(aCtBuffer, atCtMetaData, aRefBuffer, atRefMetaData, 'Nearest', true, false);
 
         dResampMIn = min(double(aResamCt),[], 'all');
 
@@ -587,6 +589,15 @@ end
         setWindowMinMax(dMax, dMin, true); % setWindowMinMax() will refreshImages()
 %                refreshImages();
     end
+
+    % Set total dose
+
+    tQuantification = quantificationTemplate('get', [], dSeriesOffset);
+    atCoreMetaData = dicomMetaData('get', [], dSeriesOffset);
+    for jj=1:numel(atCoreMetaData)
+        atCoreMetaData{jj}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose = tQuantification.tCount.dSum;
+    end
+    dicomMetaData('set', atCoreMetaData, dSeriesOffset);
 
     modifiedMatrixValueMenuOption('set', true);
 

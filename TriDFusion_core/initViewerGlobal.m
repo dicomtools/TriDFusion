@@ -136,6 +136,11 @@ function initViewerGlobal()
     roiTemplate ('reset');
     voiTemplate ('reset');
 
+    viewerFullScreenIconBlack('set', []);
+    viewerFullScreenIconWhite('set', []);
+    viewerExitFullScreenIconBlack('set', []);
+    viewerExitFullScreenIconWhite('set', []);
+
     volObject('set', []);
     isoObject('set', []);
     mipObject('set', []);

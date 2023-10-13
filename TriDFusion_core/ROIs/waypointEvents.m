@@ -31,7 +31,7 @@ function waypointEvents(hObject, ~)
     
     if ~isempty(atRoiInput) 
         
-        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );            
+        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.Tag} );            
         dTagOffset = find(aTagOffset, 1);
 
         if ~isempty(dTagOffset)

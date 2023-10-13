@@ -27,7 +27,7 @@ function pAxe = getAxeFromMousePosition(dSeriesOffset)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    if size(dicomBuffer('get'), 3) == 1
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
         pAxe = axePtr('get', [], dSeriesOffset);
     else
         

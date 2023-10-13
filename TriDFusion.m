@@ -175,6 +175,8 @@ function TriDFusion(varargin)
     imageCropEditValue('set', 'upper', 1); 
      
     initViewerRootPath();
+    
+    viewerSetFullScreenIcon();
 
     dScreenSize  = get(groot, 'Screensize');
 

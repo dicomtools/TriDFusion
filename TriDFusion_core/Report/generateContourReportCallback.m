@@ -3096,6 +3096,18 @@ function generateContourReportCallback(~, ~)
 
         end
 
+        if x == 0
+            x=1;
+        end
+
+        if y == 0
+            y=1;
+        end
+
+        if z == 0
+            z=1;
+        end
+
         aBuffer = aBuffer(:,:,end:-1:1);                                                                 
 %        aBuffer = aBuffer(:,:,end:-1:1);                                                                 
 

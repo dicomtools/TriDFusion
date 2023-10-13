@@ -1,6 +1,6 @@
-function aImgFullScreenIcon = getFullScreenIconImage(bGoFullScreen)
-%function aImgFullScreenIcon = getFullScreenIconImage(bGoFullScreen)
-%The function will return full screen mode icon image.
+function aImage = viewerFullScreenIconWhite(sAction, aValue)
+%function aImage = viewerFullScreenIconWhite(sAction, aValue)
+%Get\Set full screen white icon image.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -27,18 +27,12 @@ function aImgFullScreenIcon = getFullScreenIconImage(bGoFullScreen)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if bGoFullScreen == true
+persistent paImage;
 
-        if strcmpi(backgroundColor('get'), 'white')
-            aImgFullScreenIcon = viewerFullScreenIconBlack('get');
-        else
-            aImgFullScreenIcon = viewerFullScreenIconWhite('get');             
-        end
-    else
-        if strcmpi(backgroundColor('get'), 'white')
-            aImgFullScreenIcon = viewerExitFullScreenIconBlack('get');        
-        else
-            aImgFullScreenIcon = viewerExitFullScreenIconWhite('get');                     
-        end
+    if strcmpi(sAction, 'set')
+        paImage = aValue;
     end
+
+    aImage = paImage;
+
 end

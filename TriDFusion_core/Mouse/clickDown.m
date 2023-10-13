@@ -1,4 +1,4 @@
-function clickDown(hObject, event)
+function clickDown(~, ~)
 %function  clickDown(~, ~)
 %Mouse Click Down Action.
 %See TriDFuison.doc (or pdf) for more information about options.

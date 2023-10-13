@@ -29,25 +29,28 @@ function bIsFullScreen = isPanelFullScreen(btnUiWindowFullScreenPtr)
 
     bIsFullScreen = false;
 
-    if isempty(btnUiWindowFullScreenPtr) || ~isvalid(btnUiWindowFullScreenPtr)
+    if isempty(btnUiWindowFullScreenPtr) || ...
+       ~isvalid(btnUiWindowFullScreenPtr)
+
         return;
     end
 
-    if exist(sprintf('%s/icons/exit-full-screen-white.png', viewerRootPath('get')), 'file') && ... 
-       exist(sprintf('%s/icons/exit-full-screen-black.png', viewerRootPath('get')), 'file') 
+    aImgFullScreenWhiteIcon = viewerExitFullScreenIconWhite('get');
+    aImgFullScreenBlackIcon = viewerExitFullScreenIconBlack('get');
 
-        [aImgFullScreenIcon,~] = imread(sprintf('%s/icons/exit-full-screen-black.png', viewerRootPath('get')));
-        aImgFullScreenIcon = double(aImgFullScreenIcon)/255;
-     
-        if all(btnUiWindowFullScreenPtr.CData == aImgFullScreenIcon) 
+    if isempty(aImgFullScreenWhiteIcon) || ...
+       isempty(aImgFullScreenBlackIcon)
+
+        return;
+    end
+
+    if all(btnUiWindowFullScreenPtr.CData == aImgFullScreenWhiteIcon)
+        bIsFullScreen = true;
+    else
+        if all(btnUiWindowFullScreenPtr.CData == aImgFullScreenBlackIcon)   
+
             bIsFullScreen = true;
-        else
-            [aImgFullScreenIcon,~] = imread(sprintf('%s/icons/exit-full-screen-white.png', viewerRootPath('get')));
-            aImgFullScreenIcon = double(aImgFullScreenIcon)/255; 
-            if all(btnUiWindowFullScreenPtr.CData == aImgFullScreenIcon) 
-                bIsFullScreen = true;
-            end    
-        end
+       end
+    end
         
-    end          
 end

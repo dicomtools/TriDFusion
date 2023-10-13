@@ -99,41 +99,49 @@ function resizeFigure(~, ~)
     
     uiCorWindow = uiCorWindowPtr('get');
     if ~isempty(uiCorWindow)
+        
         setCorWindowPosition(uiCorWindow);
     end   
 
     uiSagWindow = uiSagWindowPtr('get');
     if ~isempty(uiSagWindow)
+
         setSagWindowPosition(uiSagWindow);
     end  
 
     uiTraWindow = uiTraWindowPtr('get');
     if ~isempty(uiTraWindow)
+
         setTraWindowPosition(uiTraWindow);
     end  
     
     uiMipWindow = uiMipWindowPtr('get');
     if ~isempty(uiTraWindow)
+
         setMipWindowPosition(uiMipWindow);
     end  
     
     uiSliderCor = uiSliderCorPtr('get');
     if ~isempty(uiSliderCor)                               
+
         setCorSliderPosition(uiSliderCor);
     end    
 
     uiSliderSag = uiSliderSagPtr('get');
     if ~isempty(uiSliderSag)                 
+
         setSagSliderPosition(uiSliderSag);     
     end
 
     uiSliderTra = uiSliderTraPtr('get');
     if ~isempty(uiSliderTra)   
+
         setTraSliderPosition(uiSliderTra);
     end
     
     uiSliderMip = uiSliderMipPtr('get');
     if ~isempty(uiSliderMip)  
+
         setMipSliderPosition(uiSliderMip);        
     end
         
@@ -292,6 +300,7 @@ function resizeFigure(~, ~)
 
     ptrColorbar = uiColorbarPtr('get');
     if ~isempty(ptrColorbar)  
+
         setColorbarPosition(ptrColorbar);
     end
 

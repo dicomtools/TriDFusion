@@ -60,46 +60,55 @@ function setViewSegPanel(~, ~)
 
                 uiCorWindow = uiCorWindowPtr('get');
                 if ~isempty(uiCorWindow)
+
                     setCorWindowPosition(uiCorWindow);
                 end    
 
                 uiSliderCor = uiSliderCorPtr('get');
-                if ~isempty(uiSliderCor)                               
+                if ~isempty(uiSliderCor)    
+
                     setCorSliderPosition(uiSliderCor);
                 end     
 
                 uiSagWindow = uiSagWindowPtr('get');
                 if ~isempty(uiSagWindow)
+
                     setSagWindowPosition(uiSagWindow);
                 end   
 
                 uiSliderSag = uiSliderSagPtr('get');
-                if ~isempty(uiSliderSag)                 
+                if ~isempty(uiSliderSag)    
+
                     setSagSliderPosition(uiSliderSag);     
                 end
 
                 uiTraWindow = uiTraWindowPtr('get');
                 if ~isempty(uiTraWindow)
+
                     setTraWindowPosition(uiTraWindow);
                 end  
 
                 uiSliderTra = uiSliderTraPtr('get');
                 if ~isempty(uiSliderTra) 
+
                     setTraSliderPosition(uiSliderTra);
                 end
                 
                 uiMipWindow = uiMipWindowPtr('get');
                 if ~isempty(uiTraWindow)
+
                     setMipWindowPosition(uiMipWindow);
                 end 
 
                 uiSliderMip = uiSliderMipPtr('get');
                 if ~isempty(uiSliderMip)  
+
                     setMipSliderPosition(uiSliderMip);        
                 end 
                 
                 ptrColorbar = uiColorbarPtr('get');
                 if ~isempty(ptrColorbar)  
+
                     setColorbarPosition(ptrColorbar);
                 end
 
@@ -107,6 +116,7 @@ function setViewSegPanel(~, ~)
 
                     uiAlphaSlider = uiAlphaSliderPtr('get');
                     if ~isempty(uiAlphaSlider) 
+
                         setAlphaSliderPosition(uiAlphaSlider);
                     end   
 
@@ -161,46 +171,55 @@ function setViewSegPanel(~, ~)
 
                 uiCorWindow = uiCorWindowPtr('get');
                 if ~isempty(uiCorWindow)
+
                     setCorWindowPosition(uiCorWindow);
                 end   
 
                 uiSliderCor = uiSliderCorPtr('get');
-                if ~isempty(uiSliderCor)                               
+                if ~isempty(uiSliderCor)      
+
                     setCorSliderPosition(uiSliderCor);
                 end    
 
                 uiSagWindow = uiSagWindowPtr('get');
                 if ~isempty(uiSagWindow)
+
                     setSagWindowPosition(uiSagWindow);
                 end  
 
                 uiSliderSag = uiSliderSagPtr('get');
-                if ~isempty(uiSliderSag)                 
+                if ~isempty(uiSliderSag)  
+
                     setSagSliderPosition(uiSliderSag);     
                 end
 
                 uiTraWindow = uiTraWindowPtr('get');
                 if ~isempty(uiTraWindow)
+
                     setTraWindowPosition(uiTraWindow);
                 end  
 
                 uiSliderTra = uiSliderTraPtr('get');
                 if ~isempty(uiSliderTra) 
+
                     setTraSliderPosition(uiSliderTra);  
                 end  
                 
                 uiMipWindow = uiMipWindowPtr('get');
                 if ~isempty(uiTraWindow)
+
                     setMipWindowPosition(uiMipWindow);
                 end 
 
                 uiSliderMip = uiSliderMipPtr('get');
-                if ~isempty(uiSliderMip)  
+                if ~isempty(uiSliderMip) 
+
                     setMipSliderPosition(uiSliderMip);        
                 end
                 
                 ptrColorbar = uiColorbarPtr('get');
                 if ~isempty(ptrColorbar)  
+
                     setColorbarPosition(ptrColorbar);
                 end
 
@@ -208,6 +227,7 @@ function setViewSegPanel(~, ~)
 
                     uiAlphaSlider = uiAlphaSliderPtr('get');
                     if ~isempty(uiAlphaSlider) 
+                        
                         setAlphaSliderPosition(uiAlphaSlider);
                     end   
 
