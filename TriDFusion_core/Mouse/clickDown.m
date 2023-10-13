@@ -34,6 +34,8 @@ function clickDown(~, ~)
 
     persistent lastClickTime;
     persistent isDoubleClick;
+    
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
     if isempty(lastClickTime)  % First click
         lastClickTime = now;
@@ -60,8 +62,6 @@ function clickDown(~, ~)
 
         % Perform full screen action on double-click
 
-        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-
         gca = getAxeFromMousePosition(dSeriesOffset);
 
         isCoronal  = gca == axes1Ptr('get', [], dSeriesOffset); 
@@ -79,10 +79,7 @@ function clickDown(~, ~)
             btnUiMipWindowFullScreenCallback();
         end
     else
-
         set(fiMainWindowPtr('get'), 'UserData', 'down');
-    
-        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
         if is2DBrush('get') == true
     

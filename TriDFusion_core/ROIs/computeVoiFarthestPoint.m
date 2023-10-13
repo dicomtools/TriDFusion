@@ -32,7 +32,20 @@ function dMaxDistance = computeVoiFarthestPoint(imMask, atMetaData)
     xPixelSize = atMetaData{1}.PixelSpacing(1);
     yPixelSize = atMetaData{1}.PixelSpacing(2);
     zPixelSize = computeSliceSpacing(atMetaData);
-            
+        
+
+    if xPixelSize == 0
+        return;
+    end
+
+    if yPixelSize == 0
+        return;
+    end
+
+    if zPixelSize == 0
+        return;
+    end
+
     % Get the coordinates of all voxels in the regions
 
     [x, y, z] = ind2sub(size(imMask), find(imMask));

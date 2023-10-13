@@ -61,8 +61,17 @@ function [aNewPosition, aRadius, aSemiAxes, transM] = computeRoiScaledPosition(r
     if atDcmMetaData{1}.PixelSpacing(1) == 0 && ...
        atDcmMetaData{1}.PixelSpacing(2) == 0 
         for jj=1:numel(atDcmMetaData)
-            atDcmMetaData{1}.PixelSpacing(1) =1;
-            atDcmMetaData{1}.PixelSpacing(2) =1;
+            if atRefMetaData{1}.PixelSpacing(1) ~= 0
+                atDcmMetaData{1}.PixelSpacing(1) = atRefMetaData{1}.PixelSpacing(1);
+            else
+                atDcmMetaData{1}.PixelSpacing(1) =1;
+            end
+
+            if atRefMetaData{1}.PixelSpacing(2) ~= 0
+                atDcmMetaData{1}.PixelSpacing(2) = atRefMetaData{1}.PixelSpacing(2);
+            else
+                atDcmMetaData{1}.PixelSpacing(2) =1;
+            end
         end       
     end
     
@@ -73,8 +82,17 @@ function [aNewPosition, aRadius, aSemiAxes, transM] = computeRoiScaledPosition(r
     if atRefMetaData{1}.PixelSpacing(1) == 0 && ...
        atRefMetaData{1}.PixelSpacing(2) == 0 
         for jj=1:numel(atRefMetaData)
-            atRefMetaData{1}.PixelSpacing(1) =1;
-            atRefMetaData{1}.PixelSpacing(2) =1;
+            if atDcmMetaData{1}.PixelSpacing(1) ~= 0
+                atRefMetaData{1}.PixelSpacing(1) = atDcmMetaData{1}.PixelSpacing(1);
+            else
+                atRefMetaData{1}.PixelSpacing(1) = 1;
+            end
+
+            if atDcmMetaData{1}.PixelSpacing(2) ~= 0
+                atRefMetaData{1}.PixelSpacing(2) = atDcmMetaData{1}.PixelSpacing(2);
+            else
+                atRefMetaData{1}.PixelSpacing(2) =1;
+            end
         end       
     end
 

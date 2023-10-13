@@ -54,7 +54,9 @@ function adjWL(dInitCoord)
 
     if aPosDiff(1) == 0 && aPosDiff(2) == 0
 
-        if ~isempty(copyRoiPtr('get'))
+        ptrRoi = copyRoiPtr('get');
+
+        if ~isempty(ptrRoi) && isvalid(ptrRoi) && ptrRoi.Parent == gca
             
             rightClickMenu('on');
 

@@ -112,7 +112,8 @@ function mouseMove(~, ~)
                 
         end    
     else
-        if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt') && strcmpi(windowButton('get'), 'down') 
+        if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt') && ...
+           strcmpi(windowButton('get'), 'down') 
 
             if isMoveImageActivated('get') == false   
 
