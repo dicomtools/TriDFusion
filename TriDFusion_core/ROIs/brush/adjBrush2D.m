@@ -30,7 +30,7 @@ function adjBrush2D(pRoiPtr, dInitCoord)
     persistent pdInitialCoord;
     persistent pdInitialDiameter;
 
-    dWLAdjCoe = 1;
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
     if exist('dInitCoord', 'var')
         pdInitialCoord = dInitCoord;
@@ -40,16 +40,16 @@ function adjBrush2D(pRoiPtr, dInitCoord)
 
     aPosDiff = get(0, 'PointerLocation') - pdInitialCoord;
  
-    atMetaData = dicomMetaData('get');
+    atMetaData = dicomMetaData('get', [], dSeriesOffset);
     
     switch(gca)
         
-        case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) % Coronal                    
+        case axes1Ptr('get', [], dSeriesOffset) % Coronal                    
             dSliceThickness = computeSliceSpacing(atMetaData);
             xPixel = atMetaData{1}.PixelSpacing(1);
             yPixel = dSliceThickness;                                       
             
-        case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) % Sagittal
+        case axes2Ptr('get', [], dSeriesOffset) % Sagittal
             dSliceThickness = computeSliceSpacing(atMetaData);
             xPixel = atMetaData{1}.PixelSpacing(2);
             yPixel = dSliceThickness;
@@ -59,7 +59,6 @@ function adjBrush2D(pRoiPtr, dInitCoord)
             yPixel = atMetaData{1}.PixelSpacing(2);
     end
     
-    dSphereDiameter = pdInitialDiameter+aPosDiff(2) / dWLAdjCoe;
 
     if xPixel == 0
         xPixel = 1;
@@ -68,23 +67,29 @@ function adjBrush2D(pRoiPtr, dInitCoord)
     if yPixel == 0
         yPixel = 1;
     end
+
+    dWLAdjCoe = 1/xPixel;
+
+    dSphereDiameter = pdInitialDiameter+aPosDiff(2) / dWLAdjCoe;
     
-    if dSphereDiameter < 5
-        dSphereDiameter = 5;
+    if dSphereDiameter > 0
+    %     if dSphereDiameter < 5
+    %         dSphereDiameter = 5;
+    %     end
+    
+        dSemiAxesX = dSphereDiameter/xPixel/2; % In pixel
+        dSemiAxesY = dSphereDiameter/yPixel/2; % In pixel
+    
+        mousePos    = get(gca, 'CurrentPoint');
+        newPosition = mousePos(1, 1:2);
+    
+        pRoiPtr.Position = newPosition;
+        pRoiPtr.SemiAxes = [dSemiAxesX dSemiAxesY];
+    
+      %  set(pRoiPtr, 'SemiAxes', [dSemiAxesX dSemiAxesY]);
+    
+        brush2dDefaultDiameter('set', dSphereDiameter);  
     end
-
-    dSemiAxesX = dSphereDiameter/xPixel/2; % In pixel
-    dSemiAxesY = dSphereDiameter/yPixel/2; % In pixel
-
-    mousePos    = get(gca, 'CurrentPoint');
-    newPosition = mousePos(1, 1:2);
-
-    pRoiPtr.Position = newPosition;
-    pRoiPtr.SemiAxes = [dSemiAxesX dSemiAxesY];
-
-  %  set(pRoiPtr, 'SemiAxes', [dSemiAxesX dSemiAxesY]);
-
-    brush2dDefaultDiameter('set', dSphereDiameter);  
    % pdInitialCoord = get(0,'PointerLocation');
 
 %    refreshImages();

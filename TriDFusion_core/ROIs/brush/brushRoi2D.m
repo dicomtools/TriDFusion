@@ -1,5 +1,5 @@
-function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType)
-%function  brushRoi2D(he, hf, xSize, ySize)
+function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
+%function  brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
 %Edit an ROI position from another ROI position.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -30,12 +30,12 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType)
     try 
 
     hfMask = poly2mask(hf.Position(:,1), hf.Position(:,2), xSize, ySize);
-    hfPos = round(hf.Position);
+    hfPos = round(hf.Position);        
     hfMask(sub2ind([xSize, ySize], hfPos(:, 2), hfPos(:, 1))) = true;
-    
+
     heMask = poly2mask(he.Vertices(:, 1), he.Vertices(:, 2), xSize, ySize);
-    hePos = round(he.Position);
-    heMask(sub2ind([xSize, ySize], hePos(:, 2), hePos(:, 1))) = true;
+    hePos = round(he.Position);        
+    heMask(sub2ind([xSize, ySize], hePos(:, 2), hePos(:, 1))) = true;        
     
     center = he.Center;
     
@@ -69,7 +69,23 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType)
             end
             
             if n > 1
+
                 dBoundaryOffset = getLargestboundary(B);
+                
+                B2 = B;
+                B2(dBoundaryOffset) = [];
+
+                dSecondBoundaryOffset = getLargestboundary(B2);
+
+
+                if pixelEdge('get')
+                    B2{dSecondBoundaryOffset} = (B2{dSecondBoundaryOffset} + 1) / 3;
+                    B2{dSecondBoundaryOffset} = reducepoly(B2{dSecondBoundaryOffset});
+                else                                      
+                    B2{dSecondBoundaryOffset} = smoothRoi(B2{dSecondBoundaryOffset}, [xSize, ySize]);
+                end
+                
+                addFreehandRoi([B2{dSecondBoundaryOffset}(:, 2), B2{dSecondBoundaryOffset}(:, 1)], dVoiOffset, hf.Color, sLesionType, dSerieOffset);
             else
                 dBoundaryOffset = 1;
             end
@@ -111,5 +127,66 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType)
                 largestBoundary = k;
             end
         end
+    end
+
+    function addFreehandRoi(aPosition, dVoiOffset, aColor, sLesionType, dSerieOffset)
+
+        sRoiTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+        
+        pRoi = drawfreehand(gca, 'Color', aColor,'Position', aPosition, 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', sRoiTag, 'FaceSelectable', 1, 'FaceAlpha', 0);
+        pRoi.FaceAlpha = roiFaceAlphaValue('get');
+
+        pRoi.Waypoints(:) = false;
+        pRoi.InteractionsAllowed = 'none';              
+        
+        % Add ROI right click menu
+
+        addRoi(pRoi, dSerieOffset, sLesionType);
+
+        roiDefaultMenu(pRoi);
+
+        uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
+        uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
+
+        constraintMenu(pRoi);
+
+        cropMenu(pRoi);
+
+        voiMenu(pRoi);
+
+        uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData', pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+
+        if ~isempty(dVoiOffset)
+
+            atVoiInput = voiTemplate('get', dSerieOffset);
+      
+            atVoiInput{dVoiOffset}.RoisTag{end+1} = sRoiTag;
+                            
+            dRoiNb  = numel(atVoiInput{dVoiOffset}.RoisTag);
+            dNbTags = numel(atVoiInput{dVoiOffset}.RoisTag);
+            
+            atRoi = roiTemplate('get', dSerieOffset);
+            
+            if ~isempty(atRoi)
+                aTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {sRoiTag} );
+                dTagOffset = find(aTagOffset, 1);       
+    
+                if ~isempty(dTagOffset)
+    
+                    atRoi{dTagOffset}.ObjectType  = 'voi-roi';
+    
+                    sLabel = sprintf('%s (roi %d/%d)', atVoiInput{dVoiOffset}.Label, dRoiNb, dNbTags);
+    
+                    atRoi{dTagOffset}.Label = sLabel;
+                    atRoi{dTagOffset}.Object.Label = sLabel;   
+    
+                    voiDefaultMenu(atRoi{dTagOffset}.Object, atVoiInput{dVoiOffset}.Tag);
+    
+                end
+            end
+            
+            roiTemplate('set', dSerieOffset, atRoi);
+            voiTemplate('set', dSerieOffset, atVoiInput);
+        end        
     end
 end

@@ -27,6 +27,7 @@ function mouseMove(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
     if isLineColorbarIntensityMaxClicked('get') == true
 
@@ -34,11 +35,11 @@ function mouseMove(~, ~)
 
         setColorbarIntensityMaxScaleValue(axeColorbar.CurrentPoint(1,2), ...
                                           colorbarScale('get'), ...
-                                          isColorbarDefaultUnit('get', get(uiSeriesPtr('get'), 'Value')), ...
-                                          get(uiSeriesPtr('get'), 'Value')...
+                                          isColorbarDefaultUnit('get', dSeriesOffset), ...
+                                          dSeriesOffset...
                                           );
 
-        setAxesIntensity(get(uiSeriesPtr('get'), 'Value'));
+        setAxesIntensity(dSeriesOffset);
       
     end
 
@@ -48,11 +49,11 @@ function mouseMove(~, ~)
 
         setColorbarIntensityMinScaleValue(axeColorbar.CurrentPoint(1,2), ...
                                           colorbarScale('get'), ...
-                                          isColorbarDefaultUnit('get', get(uiSeriesPtr('get'), 'Value')), ...
-                                          get(uiSeriesPtr('get'), 'Value')...
+                                          isColorbarDefaultUnit('get', dSeriesOffset), ...
+                                          dSeriesOffset...
                                           );
 
-        setAxesIntensity(get(uiSeriesPtr('get'), 'Value'));
+        setAxesIntensity(dSeriesOffset);
     end
 
     if isLineFusionColorbarIntensityMaxClicked('get') == true
@@ -99,7 +100,7 @@ function mouseMove(~, ~)
                         
                         moveFusedImage(false);
                     else
-                        if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
+                        if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
                             triangulateImages();  
                         else
                             refreshImages();
@@ -134,11 +135,11 @@ function mouseMove(~, ~)
                 pRoiPtr.Position = newPosition;
         
                 if strcmpi(windowButton('get'), 'down') 
-                    if ~isempty(roiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
+                    if ~isempty(roiTemplate('get', dSeriesOffset))
                         acPtrList = currentRoiPointer('get');
                         for jj=1:numel(acPtrList)
                             if isvalid(acPtrList{jj}.Object)
-                                brushRoi2D(pRoiPtr, acPtrList{jj}.Object, acPtrList{jj}.xSize, acPtrList{jj}.ySize, acPtrList{jj}.VoiOffset, acPtrList{jj}.LesionType);
+                                brushRoi2D(pRoiPtr, acPtrList{jj}.Object, acPtrList{jj}.xSize, acPtrList{jj}.ySize, acPtrList{jj}.VoiOffset, acPtrList{jj}.LesionType, dSeriesOffset);
                             end
                         end
                     else

@@ -101,7 +101,9 @@ function clickDown(~, ~)
             elseif isSagittal 
                 set(uiSagWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
             elseif isAxial
-                set(uiTraWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
+                set(uiTraWindowPtr('get'), 'HighlightColor', [1 0 0]); 
+            else
+                set(uiMipWindowPtr('get'), 'HighlightColor', [1 0 0]); 
             end  
     
             if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
@@ -119,7 +121,7 @@ function clickDown(~, ~)
     
                     acPtrList=[];
     
-                    aImageSize = size(dicomBuffer('get', [], dSeriesOffset));
+%                     aImageSize = size(dicomBuffer('get', [], dSeriesOffset));
               
                     if size(dicomBuffer('get', [], dSeriesOffset), 3) ==1
                          for jj=1:numel(atRoiInput)
@@ -152,7 +154,11 @@ function clickDown(~, ~)
     
                                         t.VoiOffset = dVoiOffset;
                                         t.LesionType = sLesionType;
-    
+                                        
+                                        imAxe = imAxePtr('get', [], dSeriesOffset);
+
+                                        aImageSize = size(imAxe.CData);
+
                                         t.xSize = aImageSize(1);
                                         t.ySize = aImageSize(2);                                 
     
@@ -203,16 +209,26 @@ function clickDown(~, ~)
                                         t.LesionType = sLesionType;
     
                                         if isCoronal
-                                            t.xSize = aImageSize(1);
-                                            t.ySize = aImageSize(3);
+                                            imPrt = imCoronalPtr('get', [], dSeriesOffset);
+%                                             t.xSize = aImageSize(1);
+%                                             t.ySize = aImageSize(3);
                                         elseif isSagittal 
-                                            t.xSize = aImageSize(2);
-                                            t.ySize = aImageSize(3);                                        
+                                            imPrt = imSagittalPtr('get', [], dSeriesOffset);
+%                                             t.xSize = aImageSize(2);
+%                                             t.ySize = aImageSize(3);                                        
+                                        elseif isAxial
+                                            imPrt = imAxialPtr('get', [], dSeriesOffset);
+%                                             t.xSize = aImageSize(1);
+%                                             t.ySize = aImageSize(2);   
                                         else
-                                            t.xSize = aImageSize(1);
-                                            t.ySize = aImageSize(2);                                        
+                                            imPrt = imMipPtr('get', [], dSeriesOffset);                                            
                                         end
-    
+
+                                        aImageSize = size(imPrt.CData);
+
+                                        t.xSize = aImageSize(1);
+                                        t.ySize = aImageSize(2);
+
                                         t.Object = currentRoi.Object;
                                         t.Tag = currentRoi.Tag;
                                         acPtrList{numel(acPtrList)+1} = t;
@@ -252,7 +268,7 @@ function clickDown(~, ~)
         
             else
         
-                if size(dicomBuffer('get'), 3) ~= 1
+                if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
         
                     if switchTo3DMode('get')     == false && ...
                        switchToIsoSurface('get') == false && ...
@@ -295,6 +311,7 @@ function clickDown(~, ~)
                         if clickedPtX > 0 && ...
                            clickedPtY > 0 && ...
                             gca == axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
                             axeClicked('set', true);
                             uiresume(fiMainWindowPtr('get'));                      
                         end

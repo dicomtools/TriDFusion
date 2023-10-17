@@ -33,7 +33,6 @@ function dMaxDistance = computeVoiFarthestPoint(imMask, atMetaData)
     yPixelSize = atMetaData{1}.PixelSpacing(2);
     zPixelSize = computeSliceSpacing(atMetaData);
         
-
     if xPixelSize == 0
         return;
     end
@@ -46,12 +45,25 @@ function dMaxDistance = computeVoiFarthestPoint(imMask, atMetaData)
         return;
     end
 
+%     % Define a threshold for small pixel sizes
+%     dThreshold = 1e-2; % Adjust the value as needed
+% 
+%     if xPixelSize <= dThreshold || yPixelSize <= dThreshold || zPixelSize <= dThreshold
+%         % If any of the pixel sizes is too small, don't execute the loop
+%         return;
+%     end
+
     % Get the coordinates of all voxels in the regions
 
     [x, y, z] = ind2sub(size(imMask), find(imMask));
 
     dNumVoxels = numel(x);
-        
+
+    % If there is more than 10,000 voxels, don't execute the loop
+    if dNumVoxels > 100000
+        return;
+    end
+
     % Iterate through all pairs of voxels to find the farthest distance
 
     for i = 1:dNumVoxels

@@ -1655,7 +1655,8 @@ function setRoiToolbar(sVisible)
 
             return;
         end
-
+        
+        aImageSize = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')));
 
 %             robotReleaseKey();
 
@@ -1702,17 +1703,24 @@ function setRoiToolbar(sVisible)
                     xPixel = atMetaData{1}.PixelSpacing(1);
                     yPixel = dSliceThickness;                                       
                     
+                    xImageSize = aImageSize(1);
+%                     yImageSize = aImageSize(3);
+            
                 case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) % Sagittal
                     xPixel = atMetaData{1}.PixelSpacing(2);
                     yPixel = dSliceThickness;
-                    
+
+                    xImageSize = aImageSize(2);
+%                     yImageSize = aImageSize(3);
+
                 otherwise % Axial
                     xPixel = atMetaData{1}.PixelSpacing(1);
                     yPixel = atMetaData{1}.PixelSpacing(2);
+
+                    xImageSize = aImageSize(1);
+%                     yImageSize = aImageSize(2);                    
             end
-            
-            dSphereDiameter = brush2dDefaultDiameter('get'); % in mm
-            
+
             if xPixel == 0
                 xPixel = 1;
             end
@@ -1720,7 +1728,13 @@ function setRoiToolbar(sVisible)
             if yPixel == 0
                 yPixel = 1;
             end
-            
+if 0            
+            dSphereDiameter = brush2dDefaultDiameter('get'); % in mm
+else
+            dSphereDiameter = (xImageSize/10)*xPixel;
+            brush2dDefaultDiameter('set', dSphereDiameter);
+end
+
             if dSphereDiameter > 0
                 dSemiAxesX = dSphereDiameter/xPixel/2; % In pixel
                 dSemiAxesY = dSphereDiameter/yPixel/2; % In pixel
