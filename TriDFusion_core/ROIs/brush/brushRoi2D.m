@@ -29,6 +29,9 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
 
     try 
 
+    xSize = xSize+1;
+    ySize = ySize+1;
+
     hfMask = poly2mask(hf.Position(:,1), hf.Position(:,2), xSize, ySize);
     hfPos = round(hf.Position);        
     hfMask(sub2ind([xSize, ySize], hfPos(:, 2), hfPos(:, 1))) = true;
@@ -51,9 +54,16 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
             newMask = kron(newMask, ones(3));
         end
 
-        [B,~,n,~] = bwboundaries(newMask, 'noholes', 8);
+        [B,~,n,~] = bwboundaries(newMask, 'noholes', 4);
 
-        if isempty(B)
+        bDeleteRoi = false;
+        if n == 1
+            if size(B{1}, 1) < 3
+                bDeleteRoi = true;
+            end
+        end
+
+        if isempty(B) || bDeleteRoi == true
             deleteRoiEvents(hf);
         else
             if ~isempty(dVoiOffset)
@@ -84,8 +94,10 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
                 else                                      
                     B2{dSecondBoundaryOffset} = smoothRoi(B2{dSecondBoundaryOffset}, [xSize, ySize]);
                 end
-                
-                addFreehandRoi([B2{dSecondBoundaryOffset}(:, 2), B2{dSecondBoundaryOffset}(:, 1)], dVoiOffset, hf.Color, sLesionType, dSerieOffset);
+
+                 if size(B2{dSecondBoundaryOffset}, 1) > 2
+                     addFreehandRoi([B2{dSecondBoundaryOffset}(:, 2), B2{dSecondBoundaryOffset}(:, 1)], dVoiOffset, hf.Color, sLesionType, dSerieOffset);
+                 end
             else
                 dBoundaryOffset = 1;
             end
@@ -161,31 +173,42 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
             atVoiInput = voiTemplate('get', dSerieOffset);
       
             atVoiInput{dVoiOffset}.RoisTag{end+1} = sRoiTag;
-                            
-            dRoiNb  = numel(atVoiInput{dVoiOffset}.RoisTag);
-            dNbTags = numel(atVoiInput{dVoiOffset}.RoisTag);
+                                     
+            atRoiInput = roiTemplate('get', dSerieOffset);
             
-            atRoi = roiTemplate('get', dSerieOffset);
-            
-            if ~isempty(atRoi)
-                aTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {sRoiTag} );
+            if ~isempty(atRoiInput)
+
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {sRoiTag} );
                 dTagOffset = find(aTagOffset, 1);       
     
                 if ~isempty(dTagOffset)
+        
+                    voiDefaultMenu(atRoiInput{dTagOffset}.Object, atVoiInput{dVoiOffset}.Tag);
+
+                    dNbTags = numel(atVoiInput{dVoiOffset}.RoisTag);
     
-                    atRoi{dTagOffset}.ObjectType  = 'voi-roi';
+                    for dRoiNb=1:dNbTags
     
-                    sLabel = sprintf('%s (roi %d/%d)', atVoiInput{dVoiOffset}.Label, dRoiNb, dNbTags);
+                        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), atVoiInput{dVoiOffset}.RoisTag{dRoiNb} );
     
-                    atRoi{dTagOffset}.Label = sLabel;
-                    atRoi{dTagOffset}.Object.Label = sLabel;   
+                        if ~isempty(aTagOffset)
     
-                    voiDefaultMenu(atRoi{dTagOffset}.Object, atVoiInput{dVoiOffset}.Tag);
+                            dTagOffset = find(aTagOffset, 1);
     
+                            if~isempty(dTagOffset)
+    
+                                sLabel = sprintf('%s (roi %d/%d)', atVoiInput{dVoiOffset}.Label, dRoiNb, dNbTags);
+    
+                                atRoiInput{dTagOffset}.Label = sLabel;
+                                atRoiInput{dTagOffset}.Object.Label = sLabel;                           
+                                atRoiInput{dTagOffset}.ObjectType  = 'voi-roi';
+                           end
+                        end                 
+                    end
                 end
             end
             
-            roiTemplate('set', dSerieOffset, atRoi);
+            roiTemplate('set', dSerieOffset, atRoiInput);
             voiTemplate('set', dSerieOffset, atVoiInput);
         end        
     end

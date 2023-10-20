@@ -27,7 +27,7 @@ function writeRTStructCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    dOffset = get(uiSeriesPtr('get'), 'Value');
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
     
     bSubDir = false;
     
@@ -77,6 +77,6 @@ function writeRTStructCallback(~, ~)
     tInput = inputTemplate('get');    
     aInputBuffer = inputBuffer('get');
   
-    writeRtStruct(sOutDir, bSubDir, aInputBuffer{dOffset}, tInput(dOffset).atDicomInfo, dicomBuffer('get'), dicomMetaData('get'), dOffset);
+    writeRtStruct(sOutDir, bSubDir, aInputBuffer{dSeriesOffset}, tInput(dSeriesOffset).atDicomInfo, dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), dSeriesOffset);
 
 end

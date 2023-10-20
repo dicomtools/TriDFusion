@@ -1,4 +1,4 @@
-function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dOffset)
+function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dSeriesOffset)
 %function writeRtStruct(sOutDir, tMetaData)
 %Export ROIs To DICOM RT-Structure.
 %See TriDFuison.doc (or pdf) for more information about options.
@@ -30,17 +30,17 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 %    PIXEL_EDGE_RATIO = 3;
 
     atInput = inputTemplate('get');
-    if dOffset > numel(atInput)
+    if dSeriesOffset > numel(atInput)
         return;
     end
     
     dicomdict('factory');    
     
-    if ~isempty(atInput(dOffset).asFilesList)
-        sInputFile = atInput(dOffset).asFilesList{1};
+    if ~isempty(atInput(dSeriesOffset).asFilesList)
+        sInputFile = atInput(dSeriesOffset).asFilesList{1};
         tMetaData = dicominfo(string(sInputFile));
     else % CERR
-        tMetaData = atInput(dOffset).atDicomInfo{1};
+        tMetaData = atInput(dSeriesOffset).atDicomInfo{1};
     end
         
     % Set series label
@@ -58,8 +58,8 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
     
     % Resample contours (if needed)
     
-    atRoiInput = roiTemplate('get', dOffset);
-    atVoiInput = voiTemplate('get', dOffset);
+    atRoiInput = roiTemplate('get', dSeriesOffset);
+    atVoiInput = voiTemplate('get', dSeriesOffset);
 
     if isempty(atRoiInput)
         return;
@@ -94,7 +94,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
         end        
     end
     
-    bFlip = getImagePosition(dOffset);
+    bFlip = getImagePosition(dSeriesOffset);
 
     if bFlip == true
         dZsize = size(aDicomBuffer, 3);

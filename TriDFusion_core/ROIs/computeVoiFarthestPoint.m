@@ -33,34 +33,17 @@ function dMaxDistance = computeVoiFarthestPoint(imMask, atMetaData)
     yPixelSize = atMetaData{1}.PixelSpacing(2);
     zPixelSize = computeSliceSpacing(atMetaData);
         
-    if xPixelSize == 0
+    if xPixelSize == 0 || yPixelSize == 0 || zPixelSize == 0
         return;
     end
 
-    if yPixelSize == 0
-        return;
-    end
-
-    if zPixelSize == 0
-        return;
-    end
-
-%     % Define a threshold for small pixel sizes
-%     dThreshold = 1e-2; % Adjust the value as needed
-% 
-%     if xPixelSize <= dThreshold || yPixelSize <= dThreshold || zPixelSize <= dThreshold
-%         % If any of the pixel sizes is too small, don't execute the loop
-%         return;
-%     end
-
-    % Get the coordinates of all voxels in the regions
-
+if 0
     [x, y, z] = ind2sub(size(imMask), find(imMask));
 
     dNumVoxels = numel(x);
 
     % If there is more than 10,000 voxels, don't execute the loop
-    if dNumVoxels > 100000
+    if dNumVoxels > 10000
         return;
     end
 
@@ -79,5 +62,31 @@ function dMaxDistance = computeVoiFarthestPoint(imMask, atMetaData)
             end
         end
     end       
+else
+    % Find the coordinates of all non-zero voxels
+    [nonZeroX, nonZeroY, nonZeroZ] = ind2sub(size(imMask), find(imMask));
+
+    numNonZeroVoxels = numel(nonZeroX);
+    if numNonZeroVoxels > 10000
+        return;
+    end
+
+    % Iterate through the non-zero voxel coordinates
+    for i = 1:numNonZeroVoxels
+        x1 = nonZeroX(i);
+        y1 = nonZeroY(i);
+        z1 = nonZeroZ(i);
+
+        % Calculate the Euclidean distance from voxel (x1, y1, z1) to all other non-zero voxels
+        distances  = sqrt((x1 - nonZeroX).^2 * xPixelSize^2 + ...
+                          (y1 - nonZeroY).^2 * yPixelSize^2 + ...
+                          (z1 - nonZeroZ).^2 * zPixelSize^2);
+
+        % Find the maximum distance in the current iteration
+        maxDistance  = max(distances);
+        dMaxDistance = max(dMaxDistance, maxDistance);
+
+    end    
+end
  
 end

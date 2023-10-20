@@ -1583,6 +1583,14 @@ function generateContourReportCallback(~, ~)
             
             aImage = aImage{dSeriesOffset};
 
+            if     strcmpi(imageOrientation('get'), 'axial')
+%                 aImage = aImage;
+            elseif strcmpi(imageOrientation('get'), 'coronal')
+                aImage = reorientBuffer(aImage, 'coronal');
+            elseif strcmpi(imageOrientation('get'), 'sagittal')
+                aImage = reorientBuffer(aImage, 'sagittal');
+            end
+
             if size(aImage, 3) ==1
 
                 if atInput(dSeriesOffset).bFlipLeftRight == true
@@ -1619,6 +1627,10 @@ function generateContourReportCallback(~, ~)
             zPixel = 1;
         else
             zPixel = computeSliceSpacing(atMetaData)/10; 
+            
+            if zPixel == 0 % We can't determine the z size of a pixel, we will presume the pixel is square.
+                zPixel = xPixel;
+            end          
         end
         
         dVoxVolume = xPixel * yPixel * zPixel;            
@@ -3059,6 +3071,14 @@ function generateContourReportCallback(~, ~)
             aBuffer    = inputBuffer('get');
 
             aBuffer = aBuffer{dSeriesOffset};
+
+            if     strcmpi(imageOrientation('get'), 'axial')
+%                 aBuffer = aBuffer;
+            elseif strcmpi(imageOrientation('get'), 'coronal')
+                aBuffer = reorientBuffer(aBuffer, 'coronal');
+            elseif strcmpi(imageOrientation('get'), 'sagittal')
+                aBuffer = reorientBuffer(aBuffer, 'sagittal');
+            end
 
             if size(aBuffer, 3) ==1
 

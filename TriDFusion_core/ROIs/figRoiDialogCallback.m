@@ -36,8 +36,8 @@ function figRoiDialogCallback(hObject, ~)
 
     atInput = inputTemplate('get');
 
-    dOffset = get(uiSeriesPtr('get'), 'Value');
-    if dOffset > numel(atInput)
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+    if dSeriesOffset > numel(atInput)
         return;
     end
             
@@ -74,12 +74,20 @@ function figRoiDialogCallback(hObject, ~)
 
     mRoiEdit = uimenu(figRoiWindow,'Label','Edit');
     uimenu(mRoiEdit,'Label', 'Copy Display', 'Callback', @copyRoiDialogDisplayCallback);
+%     uimenu(mRoiEdit,'Label', 'Copy Display', 'Callback', @copyAllContoursToSeriesCallback);
+    mCopyAllObjects = uimenu(mRoiEdit,'Label', 'Copy All Contours To');
+    asSeriesDescription = seriesDescription('get');
+    for yy=1:numel(asSeriesDescription)
+        if yy ~= dSeriesOffset
+            uimenu(mCopyAllObjects,'Text', asSeriesDescription{yy}, 'MenuSelectedFcn', @figRoiCopyAllObjectsCallback);
+        end
+    end
 
     mRoiOptions = uimenu(figRoiWindow,'Label','Options', 'Callback', @figRoiRefreshOption);
 
     if suvMenuUnitOption('get') == true && ...
-       atInput(dOffset).bDoseKernel == false    
-        sUnitDisplay = getSerieUnitValue(dOffset);  
+       atInput(dSeriesOffset).bDoseKernel == false    
+        sUnitDisplay = getSerieUnitValue(dSeriesOffset);  
         if strcmpi(sUnitDisplay, 'SUV')
             sSuvChecked = 'on';
        else
@@ -98,7 +106,7 @@ function figRoiDialogCallback(hObject, ~)
     if modifiedMatrixValueMenuOption('get') == true 
        sModifiedMatrixChecked = 'on';
     else
-        if atInput(dOffset).tMovement.bMovementApplied == true
+        if atInput(dSeriesOffset).tMovement.bMovementApplied == true
             sModifiedMatrixChecked = 'on';        
             modifiedMatrixValueMenuOption('set', true);
         else
@@ -118,10 +126,10 @@ function figRoiDialogCallback(hObject, ~)
         sSegChecked = 'off';
     end
     
-    if atInput(dOffset).bDoseKernel == true
+    if atInput(dSeriesOffset).bDoseKernel == true
         sSuvEnable = 'off';
     else
-        sUnitDisplay = getSerieUnitValue(dOffset);  
+        sUnitDisplay = getSerieUnitValue(dSeriesOffset);  
         if strcmpi(sUnitDisplay, 'SUV')        
             sSuvEnable = 'on';
         else
@@ -399,7 +407,9 @@ function figRoiDialogCallback(hObject, ~)
                 mCopyObject = uimenu(c,'Label', 'Copy Contour To');
                 asSeriesDescription = seriesDescription('get');
                 for sd=1:numel(asSeriesDescription)
-                    uimenu(mCopyObject,'Text', asSeriesDescription{sd}, 'MenuSelectedFcn', @figRoiCopyObjectCallback);
+                    if sd ~= dSeriesOffset
+                        uimenu(mCopyObject, 'Text', asSeriesDescription{sd}, 'MenuSelectedFcn', @figRoiCopyObjectCallback);
+                    end
                 end
 
 if 0
@@ -531,10 +541,32 @@ end
             end
 
             if bDispayMenu == true && size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
+
                 c = uicontextmenu(figRoiWindow);
                 lbVoiRoiWindow.UIContextMenu = c;
 
                 uimenu(c,'Label', 'Create Volume-of-interest', 'Separator', 'off', 'Callback',@figRoiCreateVolumeCallback);
+
+                if numel(adOffset) == 2
+                    atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            
+                    bIsVoiTag= false;
+                    if ~isempty(atVoiInput)
+                        for ll=1:numel(adOffset)
+                            aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{adOffset(ll)}.Tag} );
+                            if aTagOffset(aTagOffset==1) % tag is a voi
+                                bIsVoiTag = true;
+                                break
+                            end
+                        end
+                    end
+
+                    if bIsVoiTag == false
+                        uimenu(c,'Label', 'Insert Region-of-interest between', 'Separator', 'off', 'Callback',@figRoiInsertBetweenRoisCallback);
+                    end
+                    
+                end
+
                 uimenu(c,'Label', 'Cumulative DVH', 'Separator', 'on' , 'Callback',@figRoiMultiplePlotCallback);
 
             else
@@ -579,8 +611,8 @@ end
         function figRoiHistogramCallback(hObject, ~)
             
             atInput = inputTemplate('get');
-            dOffset = get(uiSeriesPtr('get'), 'Value');
-            if dOffset > numel(atInput)
+            dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+            if dSeriesOffset > numel(atInput)
                 return;
             end
         
@@ -592,37 +624,37 @@ end
             aInput = inputBuffer('get');
 
             if     strcmpi(imageOrientation('get'), 'axial')
-                aInputBuffer = aInput{dOffset};
+                aInputBuffer = aInput{dSeriesOffset};
             elseif strcmpi(imageOrientation('get'), 'coronal')
-                aInputBuffer = reorientBuffer(aInput{dOffset}, 'coronal');
+                aInputBuffer = reorientBuffer(aInput{dSeriesOffset}, 'coronal');
             elseif strcmpi(imageOrientation('get'), 'sagittal')
-                aInputBuffer = reorientBuffer(aInput{dOffset}, 'sagittal');
+                aInputBuffer = reorientBuffer(aInput{dSeriesOffset}, 'sagittal');
             end
 
             if size(aInputBuffer, 3) ==1
 
-                if atInput(dOffset).bFlipLeftRight == true
+                if atInput(dSeriesOffset).bFlipLeftRight == true
                     aInputBuffer=aInputBuffer(:,end:-1:1);
                 end
 
-                if atInput(dOffset).bFlipAntPost == true
+                if atInput(dSeriesOffset).bFlipAntPost == true
                     aInputBuffer=aInputBuffer(end:-1:1,:);
                 end            
             else
-                if atInput(dOffset).bFlipLeftRight == true
+                if atInput(dSeriesOffset).bFlipLeftRight == true
                     aInputBuffer=aInputBuffer(:,end:-1:1,:);
                 end
 
-                if atInput(dOffset).bFlipAntPost == true
+                if atInput(dSeriesOffset).bFlipAntPost == true
                     aInputBuffer=aInputBuffer(end:-1:1,:,:);
                 end
 
-                if atInput(dOffset).bFlipHeadFeet == true
+                if atInput(dSeriesOffset).bFlipHeadFeet == true
                     aInputBuffer=aInputBuffer(:,:,end:-1:1);
                 end 
             end   
 
-            atInputMetaData = atInput(dOffset).atDicomInfo;
+            atInputMetaData = atInput(dSeriesOffset).atDicomInfo;
         
             if     strcmpi(get(hObject, 'Label'), 'Bar Histogram')
                 
@@ -664,8 +696,8 @@ end
                             bModifiedMatrix = false;
                         end
                         
-                        bDoseKernel      = atInput(dOffset).bDoseKernel;
-                        bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;
+                        bDoseKernel      = atInput(dSeriesOffset).bDoseKernel;
+                        bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
         
                         figRoiHistogram(aInputBuffer, ...
                                         atInputMetaData, ...
@@ -707,8 +739,8 @@ end
                                 bModifiedMatrix = false;
                             end
                             
-                            bDoseKernel      = atInput(dOffset).bDoseKernel;
-                            bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;
+                            bDoseKernel      = atInput(dSeriesOffset).bDoseKernel;
+                            bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
                         
                             figRoiHistogram(aInputBuffer, ...
                                             atInputMetaData, ...
@@ -730,8 +762,7 @@ end
 
         function figRoiCreateVolumeCallback(~, ~)
 
-            uiSeries = uiSeriesPtr('get');
-            dSeriesOffset = get(uiSeries, 'Value');
+            dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
             aVoiRoiTag = voiRoiTag('get');
             atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
@@ -739,7 +770,7 @@ end
             asTag = cell(1, numel(aVoiRoiTag));
 
             for hh=1:numel(aVoiRoiTag)
-                asTag{hh}=aVoiRoiTag{hh}.Tag;
+                asTag{hh} = aVoiRoiTag{hh}.Tag;
             end
             
             
@@ -777,8 +808,8 @@ end
         function figRoiMultiplePlotCallback(hObject, ~)
             
             atInput = inputTemplate('get');
-            dOffset = get(uiSeriesPtr('get'), 'Value');
-            if dOffset > numel(atInput)
+            dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+            if dSeriesOffset > numel(atInput)
                 return;
             end
         
@@ -789,39 +820,39 @@ end
             switch lower(imageOrientation('get'))
 
                 case'axial'
-                    aInputBuffer = aInput{dOffset};                   
+                    aInputBuffer = aInput{dSeriesOffset};                   
                     
                 case 'coronal'
-                    aInputBuffer = reorientBuffer(aInput{dOffset}, 'coronal');
+                    aInputBuffer = reorientBuffer(aInput{dSeriesOffset}, 'coronal');
                     
                 case'sagittal'
-                    aInputBuffer = reorientBuffer(aInput{dOffset}, 'sagittal');
+                    aInputBuffer = reorientBuffer(aInput{dSeriesOffset}, 'sagittal');
             end
 
             if size(aInputBuffer, 3) ==1
 
-                if atInput(dOffset).bFlipLeftRight == true
+                if atInput(dSeriesOffset).bFlipLeftRight == true
                     aInputBuffer=aInputBuffer(:,end:-1:1);
                 end
 
-                if atInput(dOffset).bFlipAntPost == true
+                if atInput(dSeriesOffset).bFlipAntPost == true
                     aInputBuffer=aInputBuffer(end:-1:1,:);
                 end            
             else
-                if atInput(dOffset).bFlipLeftRight == true
+                if atInput(dSeriesOffset).bFlipLeftRight == true
                     aInputBuffer=aInputBuffer(:,end:-1:1,:);
                 end
 
-                if atInput(dOffset).bFlipAntPost == true
+                if atInput(dSeriesOffset).bFlipAntPost == true
                     aInputBuffer=aInputBuffer(end:-1:1,:,:);
                 end
 
-                if atInput(dOffset).bFlipHeadFeet == true
+                if atInput(dSeriesOffset).bFlipHeadFeet == true
                     aInputBuffer=aInputBuffer(:,:,end:-1:1);
                 end 
             end   
 
-            atInputMetaData = atInput(dOffset).atDicomInfo;
+            atInputMetaData = atInput(dSeriesOffset).atDicomInfo;
             
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                 bSUVUnit = true;
@@ -841,8 +872,8 @@ end
                 bModifiedMatrix = false;
             end
             
-            bDoseKernel      = atInput(dOffset).bDoseKernel;
-            bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;  
+            bDoseKernel      = atInput(dSeriesOffset).bDoseKernel;
+            bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;  
             
             sType = get(hObject, 'Label');
             atVoiRoiTag = aVoiRoiTag(get(lbVoiRoiWindow, 'Value'));
@@ -947,6 +978,7 @@ end
 
                         voiTemplate('set', dSerieOffset, atVoiInput);
 
+
                         % Refresh contour figure
 
                         setVoiRoiSegPopup();
@@ -1035,6 +1067,31 @@ end
 
                                         if isempty(atVoiInput{vo}.RoisTag)
                                             atVoiInput{vo} = [];
+                                        else
+                                            % Rename voi-roi label
+                                            atRoiInput = roiTemplate('get', dSerieOffset);
+
+                                            dNbTags = numel(atVoiInput{vo}.RoisTag);
+                            
+                                            for dRoiNb=1:dNbTags
+                            
+                                                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), atVoiInput{vo}.RoisTag{dRoiNb} );
+                            
+                                                if ~isempty(aTagOffset)
+                            
+                                                    dTagOffset = find(aTagOffset, 1);
+                            
+                                                    if~isempty(dTagOffset)
+                            
+                                                        sLabel = sprintf('%s (roi %d/%d)', atVoiInput{vo}.Label, dRoiNb, dNbTags);
+                            
+                                                        atRoiInput{dTagOffset}.Label = sLabel;
+                                                        atRoiInput{dTagOffset}.Object.Label = sLabel;                           
+                                                   end
+                                                end                 
+                                            end
+                            
+                                            roiTemplate('set', dSerieOffset, atRoiInput);
                                        end
 
                                     end
@@ -1310,7 +1367,7 @@ end
                     end
 
                     if strcmpi(get(mSegmented, 'Checked'), 'on') && ...
-                       atInput(dOffset).bDoseKernel == false
+                       atInput(dSeriesOffset).bDoseKernel == false
                         bSegmented = true;
                     else
                         bSegmented = false;
@@ -1733,11 +1790,11 @@ end
             sModified = ' - Cells Value: Unmodified Image';
         end       
         
-        if atInput(dOffset).bDoseKernel == true
+        if atInput(dSeriesOffset).bDoseKernel == true
             sUnits =  'Unit: Dose';
         else
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
-                sUnits = getSerieUnitValue(dOffset);
+                sUnits = getSerieUnitValue(dSeriesOffset);
                 if (strcmpi(tRoiMetaData{1}.Modality, 'pt') || ...
                     strcmpi(tRoiMetaData{1}.Modality, 'nm'))&& ...
                     strcmpi(sUnits, 'SUV' )
@@ -1754,7 +1811,7 @@ end
                  if (strcmpi(tRoiMetaData{1}.Modality, 'ct'))
                     sUnits =  'Unit: HU';
                  else
-                    sUnits = getSerieUnitValue(dOffset);
+                    sUnits = getSerieUnitValue(dSeriesOffset);
                     if (strcmpi(tRoiMetaData{1}.Modality, 'pt') || ...
                         strcmpi(tRoiMetaData{1}.Modality, 'nm'))&& ...
                         strcmpi(sUnits, 'SUV' )
@@ -1781,8 +1838,8 @@ end
         atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
 
         atInput = inputTemplate('get');
-        dOffset = get(uiSeriesPtr('get'), 'Value');
-        if dOffset > numel(atInput)
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+        if dSeriesOffset > numel(atInput)
             return;
         end
 
@@ -1805,42 +1862,42 @@ end
         aInput = inputBuffer('get');
 
         if     strcmpi(imageOrientation('get'), 'axial')
-            aInputBuffer = aInput{dOffset};
+            aInputBuffer = aInput{dSeriesOffset};
         elseif strcmpi(imageOrientation('get'), 'coronal')
-            aInputBuffer = reorientBuffer(aInput{dOffset}, 'coronal');
+            aInputBuffer = reorientBuffer(aInput{dSeriesOffset}, 'coronal');
         elseif strcmpi(imageOrientation('get'), 'sagittal')
-            aInputBuffer = reorientBuffer(aInput{dOffset}, 'sagittal');
+            aInputBuffer = reorientBuffer(aInput{dSeriesOffset}, 'sagittal');
         end
         
         if size(aInputBuffer, 3) ==1
             
-            if atInput(dOffset).bFlipLeftRight == true
+            if atInput(dSeriesOffset).bFlipLeftRight == true
                 aInputBuffer=aInputBuffer(:,end:-1:1);
             end
 
-            if atInput(dOffset).bFlipAntPost == true
+            if atInput(dSeriesOffset).bFlipAntPost == true
                 aInputBuffer=aInputBuffer(end:-1:1,:);
             end            
         else
-            if atInput(dOffset).bFlipLeftRight == true
+            if atInput(dSeriesOffset).bFlipLeftRight == true
                 aInputBuffer=aInputBuffer(:,end:-1:1,:);
             end
 
-            if atInput(dOffset).bFlipAntPost == true
+            if atInput(dSeriesOffset).bFlipAntPost == true
                 aInputBuffer=aInputBuffer(end:-1:1,:,:);
             end
 
-            if atInput(dOffset).bFlipHeadFeet == true
+            if atInput(dSeriesOffset).bFlipHeadFeet == true
                 aInputBuffer=aInputBuffer(:,:,end:-1:1);
             end 
         end   
         
-        atInputMetaData = atInput(dOffset).atDicomInfo;
+        atInputMetaData = atInput(dSeriesOffset).atDicomInfo;
 
         aDisplayBuffer = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
         
-        bDoseKernel      = atInput(dOffset).bDoseKernel;
-        bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;
+        bDoseKernel      = atInput(dSeriesOffset).bDoseKernel;
+        bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
 
         dNbVois = numel(atVoiInput);
         if ~isempty(atVoiInput)
@@ -2132,8 +2189,8 @@ end
     function exportCurrentSeriesResultCallback(~, ~)
 
         atInput = inputTemplate('get');
-        dOffset = get(uiSeriesPtr('get'), 'Value');
-        if dOffset > numel(atInput)
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+        if dSeriesOffset > numel(atInput)
             return;
         end
 
@@ -2154,37 +2211,37 @@ end
 
         aInput = inputBuffer('get');
         if     strcmpi(imageOrientation('get'), 'axial')
-            aInputBuffer = permute(aInput{dOffset}, [1 2 3]);
+            aInputBuffer = permute(aInput{dSeriesOffset}, [1 2 3]);
         elseif strcmpi(imageOrientation('get'), 'coronal')
-            aInputBuffer = permute(aInput{dOffset}, [3 2 1]);
+            aInputBuffer = permute(aInput{dSeriesOffset}, [3 2 1]);
         elseif strcmpi(imageOrientation('get'), 'sagittal')
-            aInputBuffer = permute(aInput{dOffset}, [3 1 2]);
+            aInputBuffer = permute(aInput{dSeriesOffset}, [3 1 2]);
         end
   
         if size(aDisplayBuffer, 3) ==1
             
-            if atInput(dOffset).bFlipLeftRight == true
+            if atInput(dSeriesOffset).bFlipLeftRight == true
                 aInputBuffer=aInputBuffer(:,end:-1:1);
             end
 
-            if atInput(dOffset).bFlipAntPost == true
+            if atInput(dSeriesOffset).bFlipAntPost == true
                 aInputBuffer=aInputBuffer(end:-1:1,:);
             end            
         else
-            if atInput(dOffset).bFlipLeftRight == true
+            if atInput(dSeriesOffset).bFlipLeftRight == true
                 aInputBuffer=aInputBuffer(:,end:-1:1,:);
             end
 
-            if atInput(dOffset).bFlipAntPost == true
+            if atInput(dSeriesOffset).bFlipAntPost == true
                 aInputBuffer=aInputBuffer(end:-1:1,:,:);
             end
 
-            if atInput(dOffset).bFlipHeadFeet == true
+            if atInput(dSeriesOffset).bFlipHeadFeet == true
                 aInputBuffer=aInputBuffer(:,:,end:-1:1);
             end 
         end
         
-        atInputMetaData = atInput(dOffset).atDicomInfo;
+        atInputMetaData = atInput(dSeriesOffset).atDicomInfo;
 
         if ~isempty(atRoiInput) || ...
            ~isempty(atVoiInput)
@@ -2305,8 +2362,8 @@ end
                     end
                 end
 
-                bDoseKernel      = atInput(dOffset).bDoseKernel;
-                bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;
+                bDoseKernel      = atInput(dSeriesOffset).bDoseKernel;
+                bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
                 
                 if bDoseKernel == true
                     sUnits = 'Dose';
@@ -2635,6 +2692,7 @@ end
 %            set(hFig,'Renderer',rdr);
             set(figRoiWindow,'InvertHardCopy',inv);
         catch
+            progressBar(1, 'Error:copyRoiDialogDisplayCallback()');
         end
 
         set(figRoiWindow, 'Pointer', 'default');
@@ -2672,7 +2730,7 @@ end
     function modifiedMatrixCallback(hObject, ~)
         
         atInput = inputTemplate('get');
-        dOffset = get(uiSeriesPtr('get'), 'Value');
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
         
         if strcmpi(get(mSUVUnit, 'Checked'), 'on')
             bSUVUnit = true;
@@ -2688,7 +2746,7 @@ end
         
         if strcmpi(hObject.Checked, 'on')
             
-            if atInput(dOffset).tMovement.bMovementApplied == true
+            if atInput(dSeriesOffset).tMovement.bMovementApplied == true
                 modifiedMatrixValueMenuOption('set', true);                         
                 hObject.Checked = 'on';
                 
@@ -2807,7 +2865,7 @@ end
 
     function clearAllContoursCallback(~, ~)
 
-        dOffset = get(uiSeriesPtr('get'), 'Value');
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
         sAnswer = questdlg('Pressing will delete all contours', 'Warning', 'Delete', 'Exit', 'Exit');
 
@@ -2817,13 +2875,13 @@ end
             set(figRoiWindow, 'Pointer', 'watch');
             drawnow; 
     
-            roiConstraintList('reset', dOffset); % Delete all masks
+            roiConstraintList('reset', dSeriesOffset); % Delete all masks
 
             voiRoiTag('set', '');
 
             % Delete object
             
-            atRoi = roiTemplate('get', dOffset);
+            atRoi = roiTemplate('get', dSeriesOffset);
 
             for rr=1:numel(atRoi)
                 
@@ -2846,8 +2904,8 @@ end
             
             % Reset template
                 
-            roiTemplate('reset', dOffset);
-            voiTemplate('reset', dOffset);
+            roiTemplate('reset', dSeriesOffset);
+            voiTemplate('reset', dSeriesOffset);
 
             setVoiRoiSegPopup();
 
@@ -2870,13 +2928,13 @@ end
             end
         
             setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
-            
-            set(figRoiWindow, 'Pointer', 'default');            
-            drawnow;  
-            
+                        
             catch
                 progressBar(1, 'Error: clearAllContoursCallback()' );                
             end
+
+            set(figRoiWindow, 'Pointer', 'default');            
+            drawnow;              
         end
 
     end
@@ -2934,35 +2992,106 @@ end
 
     end
 
-    function figRoiCopyObjectCallback(hObject, ~)
+    function figRoiCopyAllObjectsCallback(hObject, ~)
 
-        dToOffset = 0;
-        tObject = [];
-
-        dFromOffset = get(uiSeriesPtr('get'), 'Value');
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
         sCopyTo = get(hObject, 'Text');
+
+        dToSeriesOffset = 0;
 
         asSeriesDescription = seriesDescription('get');
         for sd=1:numel(asSeriesDescription)
             if strcmpi(sCopyTo, asSeriesDescription{sd})
-                dToOffset = sd;
+                dToSeriesOffset = sd;
                 break;
             end
         end
+
+        if dSeriesOffset == dToSeriesOffset 
+            return;
+        end
+
+        try            
+            
+        set(figRoiWindow, 'Pointer', 'watch');
+        drawnow; 
+
+        atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
+        % Copy all VOIs
+
+        if ~isempty(atVoiInput) 
+
+            for aa=1:numel(atVoiInput)
+                
+                copyRoiVoiToSerie(dSeriesOffset, dToSeriesOffset, atVoiInput{aa}, false);
+            end
+        end
+
+        % Copy all ROIs 
+
+        if ~isempty(atRoiInput)
+
+            for cc=1:numel(atRoiInput)
+
+                if isvalid(atRoiInput{cc}.Object)
+                    if ~strcmpi(atRoiInput{cc}.ObjectType, 'voi-roi')
+                        copyRoiVoiToSerie(dSeriesOffset, dToSeriesOffset, atRoiInput{cc}, false);
+                    end
+                end
+            end
+        end
+        
+        catch
+            progressBar(1, 'Error: figRoiCopyAllObjectsCallback()' );                
+        end       
+
+        set(figRoiWindow, 'Pointer', 'default');            
+        drawnow;        
+    end
+
+    function figRoiCopyObjectCallback(hObject, ~)
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        sCopyTo = get(hObject, 'Text');
+
+        dToSeriesOffset = 0;
+
+        asSeriesDescription = seriesDescription('get');
+        for sd=1:numel(asSeriesDescription)
+            if strcmpi(sCopyTo, asSeriesDescription{sd})
+                dToSeriesOffset = sd;
+                break;
+            end
+        end
+
+        if dSeriesOffset == dToSeriesOffset 
+            return;
+        end
+
+        try            
+            
+        set(figRoiWindow, 'Pointer', 'watch');
+        drawnow; 
 
         aVoiRoiTag = voiRoiTag('get');
 
         atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
         atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
-        bObjectIsVoi = false; 
+        bObjectIsVoi = false;
+
         if ~isempty(atVoiInput) && ...
            ~isempty(aVoiRoiTag)
             for aa=1:numel(atVoiInput)
                 if strcmpi(atVoiInput{aa}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+                    
                     % Object is a VOI
-                    tObject = atVoiInput{aa};
+
+                    copyRoiVoiToSerie(dSeriesOffset, dToSeriesOffset, atVoiInput{aa}, false);
                     bObjectIsVoi = true;
                     break;
                 end
@@ -2978,59 +3107,327 @@ end
                     if isvalid(atRoiInput{cc}.Object)
                         if strcmpi(atRoiInput{cc}.Tag, aVoiRoiTag{lbVoiRoiWindow.Value}.Tag)
                             % Object is a ROI
-                            tObject = atRoiInput{cc};
+                            copyRoiVoiToSerie(dSeriesOffset, dToSeriesOffset, atRoiInput{cc}, false);
                             break;
                         end
                     end
                 end
             end
         end
-        
-        if dToOffset~=0 && ~isempty(tObject)
-            
-            % Copy the object
-            copyRoiVoiToSerie(dFromOffset, dToOffset, tObject, false);
-            
-            if dFromOffset == dToOffset % Refresh ROIs list
-                if strcmpi(get(mSUVUnit, 'Checked'), 'on')
-                    bSUVUnit = true;
-                else
-                    bSUVUnit = false;
-                end
 
-                if strcmpi(get(mSegmented, 'Checked'), 'on') && ...
-                   atInput(dOffset).bDoseKernel == false
-                    bSegmented = true;
-                else
-                    bSegmented = false;
-                end
-                
-                if strcmpi(get(mModifiedMatrix, 'Checked'), 'on')
-                    bModifiedMatrix = true;
-                else
-                    bModifiedMatrix = false;
-                end
+        catch
+            progressBar(1, 'Error: figRoiCopyObjectCallback()' );                
+        end       
+
+        set(figRoiWindow, 'Pointer', 'default');            
+        drawnow; 
+    end
+
+    function figRoiInsertBetweenRoisCallback(~, ~)
+
+        dSerieOffset = get(uiSeriesPtr('get'), 'Value');
+
+        atRoiInput = roiTemplate('get', dSerieOffset);
+        atVoiInput = voiTemplate('get', dSerieOffset);
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        aVoiRoiTag = voiRoiTag('get');
         
-                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+        asTag = cell(1, numel(aVoiRoiTag));
+
+        for hh=1:numel(aVoiRoiTag)
+            asTag{hh} = aVoiRoiTag{hh}.Tag;
+        end
+        
+        
+        asTag = asTag(get(lbVoiRoiWindow, 'Value'));
+        
+        if numel(asTag) == 2
+
+            aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), asTag(1) );
+            aRoiTagOffset1 = find(aTagOffset, 1);
+    
+            aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), asTag(2) );
+            aRoiTagOffset2 = find(aTagOffset, 1);
+
+            if isempty(aRoiTagOffset1) || ...
+               isempty(aRoiTagOffset2)
+                return;
+            end
+            
+            if ~strcmpi(atRoiInput{aRoiTagOffset1}.Axe, atRoiInput{aRoiTagOffset2}.Axe) % Not same plane
+                return;
             end
 
-        end
+            if strcmpi(atRoiInput{aRoiTagOffset1}.Type, 'images.roi.line') || ... % Cant interpolate a line
+               strcmpi(atRoiInput{aRoiTagOffset2}.Type, 'images.roi.line')
+                return;
+            end
 
+            if atRoiInput{aRoiTagOffset1}.SliceNb == ... % Need to be on a different slice
+               atRoiInput{aRoiTagOffset2}.SliceNb
+                return;
+            end
+
+            try
+    
+            set(figRoiWindow, 'Pointer', 'watch');
+            drawnow;
+
+            imRoi = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+            ptrRoi = atRoiInput{aRoiTagOffset1};
+
+            switch lower(ptrRoi.Axe)    
+                                        
+                case 'axes1'
+                    imCData = permute(imRoi(ptrRoi.SliceNb,:,:), [3 2 1]);
+                    sPlane = 'coronal';
+                    pAxe = axes1Ptr('get', [], dSerieOffset);
+
+                case 'axes2'
+                    imCData = permute(imRoi(:,ptrRoi.SliceNb,:), [3 1 2]) ;
+                    sPlane = 'sagittal';
+                    pAxe = axes2Ptr('get', [], dSerieOffset);
+                
+                case 'axes3'
+                    imCData  = imRoi(:,:,ptrRoi.SliceNb);  
+                    sPlane = 'axial';
+                    pAxe = axes3Ptr('get', [], dSerieOffset);
+                
+                otherwise   
+                    return;
+            end
+
+            aMask1 = double(roiTemplateToMask(ptrRoi, imCData));      
+
+            ptrRoi = atRoiInput{aRoiTagOffset2};
+
+            switch lower(ptrRoi.Axe)    
+                                        
+                case 'axes1'
+                    imCData = permute(imRoi(ptrRoi.SliceNb,:,:), [3 2 1]);
+                    
+                case 'axes2'
+                    imCData = permute(imRoi(:,ptrRoi.SliceNb,:), [3 1 2]) ;
+                    
+                case 'axes3'
+                    imCData  = imRoi(:,:,ptrRoi.SliceNb);  
+                    
+                otherwise   
+                    return;
+            end
+
+            aMask2 = double(roiTemplateToMask(ptrRoi, imCData));      
+          
+            clear imRoi;
+
+            if atRoiInput{aRoiTagOffset1}.SliceNb > atRoiInput{aRoiTagOffset2}.SliceNb
+                dNbSlices = atRoiInput{aRoiTagOffset1}.SliceNb - atRoiInput{aRoiTagOffset2}.SliceNb -1;
+%                 if strcmpi(sPlane, 'Axial')
+                    dStartSliceOffset = atRoiInput{aRoiTagOffset1}.SliceNb;
+%                 else
+%                     dStartSliceOffset = atRoiInput{aRoiTagOffset2}.SliceNb;
+%                 end
+            else
+                dNbSlices = atRoiInput{aRoiTagOffset2}.SliceNb - atRoiInput{aRoiTagOffset1}.SliceNb -1;                
+%                 if strcmpi(sPlane, 'Axial')
+                    dStartSliceOffset = atRoiInput{aRoiTagOffset1}.SliceNb;
+%                 else
+%                     dStartSliceOffset = atRoiInput{aRoiTagOffset2}.SliceNb;
+%                 end
+            end
+                        
+            dCurrentSliceNumber = sliceNumber('get', sPlane);
+
+            % Linear interpolation between the two masks
+            for i = 1:dNbSlices
+                 
+%                 if strcmpi(sPlane, 'Axial')
+                    if atRoiInput{aRoiTagOffset1}.SliceNb > atRoiInput{aRoiTagOffset2}.SliceNb
+                        sliceNumber('set', sPlane, dStartSliceOffset-i);
+                    else
+                        sliceNumber('set', sPlane, dStartSliceOffset+i);
+                    end
+%                 else
+%                     sliceNumber('set', sPlane, dStartSliceOffset+i);
+%                 end
+
+                alpha = i / (dNbSlices + 1); % Interpolation factor
+                aInterpolatedMask = (1 - alpha) * aMask1 + alpha * aMask2;
+
+                aInterpolatedMask = imbinarize(aInterpolatedMask);
+
+
+                [B,~,n,~] = bwboundaries(aInterpolatedMask, 'noholes', 8);
+%                 dBoundaryOffset = getLargestboundary(B);
+
+                bEditRoisLabel = false;
+
+                for dBoundaryOffset = 1: n
+
+                    aPosition = [B{dBoundaryOffset}(:, 2), B{dBoundaryOffset}(:, 1)];
+    
+                    sRoiTag = num2str(randi([-(2^52/2),(2^52/2)],1));
+                    
+                    aColor = atRoiInput{aRoiTagOffset1}.Color;
+                    sLesionType = atRoiInput{aRoiTagOffset1}.LesionType;
+
+                    pRoi = drawfreehand(pAxe, 'Color', aColor,'Position', aPosition, 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', sRoiTag, 'FaceSelectable', 1, 'FaceAlpha', 0);
+                    pRoi.FaceAlpha = roiFaceAlphaValue('get');
+            
+                    pRoi.Waypoints(:) = false;
+%                     pRoi.InteractionsAllowed = 'none';              
+                    
+                    % Add ROI right click menu
+            
+                    addRoi(pRoi, dSerieOffset, sLesionType);
+            
+                    roiDefaultMenu(pRoi);
+            
+                    uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
+                    uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
+            
+                    constraintMenu(pRoi);
+            
+                    cropMenu(pRoi);
+            
+                    voiMenu(pRoi);
+            
+                    uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData', pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+
+                    if strcmpi(atRoiInput{aRoiTagOffset1}.ObjectType, 'voi-roi') && ...
+                       strcmpi(atRoiInput{aRoiTagOffset2}.ObjectType, 'voi-roi')     
+
+                        dVoiOffset1 = [];
+                        sRoi1Tag = atRoiInput{aRoiTagOffset1}.Tag;
+                        for vo=1:numel(atVoiInput)    
+
+                            dTagOffset = find(contains(atVoiInput{vo}.RoisTag, sRoi1Tag), 1);
+
+                            if ~isempty(dTagOffset) % tag exist
+                                dVoiOffset1 = vo;
+                                break;
+                            end
+                        end
+
+                        dVoiOffset2 = [];
+                        sRoi2Tag = atRoiInput{aRoiTagOffset2}.Tag;
+                        for vo=1:numel(atVoiInput)    
+
+                            dTagOffset = find(contains(atVoiInput{vo}.RoisTag, sRoi2Tag), 1);
+
+                            if ~isempty(dTagOffset) % tag exist
+                                dVoiOffset2 = vo;
+                                break;
+                            end
+                        end
+
+                        % Add new roi to existing voi
+
+                        if ~isempty(dVoiOffset1) && ~isempty(dVoiOffset2) 
+
+                            if dVoiOffset1 == dVoiOffset2
+
+                                atRoiInput = roiTemplate('get', dSerieOffset);
+                                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {sRoiTag} );
+
+                                if ~isempty(aTagOffset)
+
+                                    dNewRoiOffset = find(aTagOffset,1);
+    
+                                    if ~isempty(dNewRoiOffset)
+    
+                                        atVoiInput{dVoiOffset1}.RoisTag{end+1} = sRoiTag;
+    
+                                        voiDefaultMenu(atRoiInput{dNewRoiOffset}.Object, atVoiInput{dVoiOffset1}.Tag);
+                                        bEditRoisLabel = true;
+                                    end
+                                end                 
+                            end
+                        end
+                    end
+                end
+            end
+
+            % Rename voi-roi label
+
+            if bEditRoisLabel == true
+              
+                dNbTags = numel(atVoiInput{dVoiOffset1}.RoisTag);
+
+                for dRoiNb=1:dNbTags
+
+                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), atVoiInput{dVoiOffset1}.RoisTag{dRoiNb} );
+
+                    if ~isempty(aTagOffset)
+
+                        dTagOffset = find(aTagOffset, 1);
+
+                        if~isempty(dTagOffset)
+
+                            sLabel = sprintf('%s (roi %d/%d)', atVoiInput{dVoiOffset1}.Label, dRoiNb, dNbTags);
+
+                            atRoiInput{dTagOffset}.Label = sLabel;
+                            atRoiInput{dTagOffset}.Object.Label = sLabel;                           
+                            atRoiInput{dTagOffset}.ObjectType  = 'voi-roi';
+                       end
+                    end                 
+                end
+
+                roiTemplate('set', dSerieOffset, atRoiInput);
+                voiTemplate('set', dSerieOffset, atVoiInput);             
+            end
+
+            sliceNumber('set', sPlane, dCurrentSliceNumber);
+
+            refreshImages();
+
+            if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+                bSUVUnit = true;
+            else
+                bSUVUnit = false;
+            end
+    
+            if strcmpi(get(mSegmented, 'Checked'), 'on')
+                bSegmented = true;
+            else
+                bSegmented = false;
+            end
+            
+            if strcmpi(get(mModifiedMatrix, 'Checked'), 'on')
+                bModifiedMatrix = true;
+            else
+                bModifiedMatrix = false;
+            end
+
+            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);            
+
+            catch
+                progressBar(1, 'Error:figRoiInsertBetweenRoisCallback()');
+            end
+
+            set(figRoiWindow, 'Pointer', 'default');            
+            drawnow;  
+
+        end
+ 
     end
 
     function figRoiCopyMirrorCallback(hObject, ~)
 
-        dToOffset = 0;
+        dToSeriesOffset = 0;
         tObject = [];
 
-        dFromOffset = get(uiSeriesPtr('get'), 'Value');
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
         sCopyTo = get(hObject, 'Text');
 
         asSeriesDescription = seriesDescription('get');
         for sd=1:numel(asSeriesDescription)
             if strcmpi(sCopyTo, asSeriesDescription{sd})
-                dToOffset = sd;
+                dToSeriesOffset = sd;
                 break;
             end
         end
@@ -3067,10 +3464,10 @@ end
             end
         end
 
-        if dToOffset~=0 && ~isempty(tObject)
+        if dToSeriesOffset~=0 && ~isempty(tObject)
             % Copy the object
-            copyRoiVoiToSerie(dFromOffset, dToOffset, tObject, true);
-            if dFromOffset == dToOffset % Refresh ROIs list
+            copyRoiVoiToSerie(dSeriesOffset, dToSeriesOffset, tObject, true);
+            if dSeriesOffset == dToSeriesOffset % Refresh ROIs list
                 if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                     bSUVUnit = true;
                 else
@@ -3078,7 +3475,7 @@ end
                 end
 
                 if strcmpi(get(mSegmented, 'Checked'), 'on') && ...
-                   atInput(dOffset).bDoseKernel == false
+                   atInput(dSeriesOffset).bDoseKernel == false
                     bSegmented = true;
                 else
                     bSegmented = false;
@@ -3105,5 +3502,28 @@ end
         end
 
     end
-
+%     function largestBoundary = getLargestboundary(cBoundaries)
+% 
+%         % Initialize variables to keep track of the largest boundary and its size
+%         largestBoundary = 1;
+%         largestSize = 0;
+%     
+%         % Determine the number of boundaries outside the loop for efficiency
+%         numBoundaries = length(cBoundaries);
+%     
+%         % Loop through each boundary in 'B'
+%         for k = 1:numBoundaries
+%             % Get the current boundary
+%             boundary = cBoundaries{k};
+%     
+%             % Calculate the size of the current boundary
+%             boundarySize = size(boundary, 1);
+%     
+%             % Check if the current boundary is larger than the previous largest
+%             if boundarySize > largestSize
+%                 largestSize = boundarySize;
+%                 largestBoundary = k;
+%             end
+%         end
+%     end   
 end

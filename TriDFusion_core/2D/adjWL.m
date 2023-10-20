@@ -68,90 +68,37 @@ function adjWL(dInitCoord)
 
     else
         rightClickMenu('off');
-    end
-
-    if dMax > dMin
-
-%         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-% 
-%         if 0    
-%     
-%             aInputBuffer = inputBuffer('get');
-%         
-%             dImageMin = min(aInputBuffer{dSeriesOffset}, [], 'all');
-%             dImageMax = max(aInputBuffer{dSeriesOffset}, [], 'all');
-%         
-%             clear aInputBuffer;
-%         else
-%             tQuantification = quantificationTemplate('get', [], dSeriesOffset);
-%         
-%             dImageMin = tQuantification.tCount.dMin;
-%             dImageMax = tQuantification.tCount.dMax;     
-%         end
-
-%         if dMin < dImageMin
-%             dMin = dImageMin;
-%         end
-% 
-%         if dMax > dImageMax
-%             dMax = dImageMax;
-%         end
-
-%         aCLim(1) = dMin;
-%         aCLim(2) = dMax;
-
-%        getInitWindowMinMax('set', aCLim(2), aCLim(1));
-
-%        set(uiSliderWindowPtr('get'), 'value', 0.5);
-%        set(uiSliderLevelPtr('get') , 'value', 0.5);
         
-        windowLevel('set', 'max', dMax);
-        windowLevel('set', 'min', dMin);
-
-%         bLinkMip = link2DMip('get');
-% 
-%         if bLinkMip == true
-%             link2DMip('set', false);
-%         end
-
-        % Compute colorbar line y offset
+        if dMax > dMin
+            
+            windowLevel('set', 'max', dMax);
+            windowLevel('set', 'min', dMin);
     
-        dYOffsetMax = computeLineColorbarIntensityMaxYOffset(get(uiSeriesPtr('get'), 'Value'));
-        dYOffsetMin = computeLineColorbarIntensityMinYOffset(get(uiSeriesPtr('get'), 'Value'));
-
-        % Ajust the intensity 
-
-   %     set(lineColorbarIntensityMaxPtr('get'), 'YData', [0.1 0.1]);
-   %     set(lineColorbarIntensityMinPtr('get'), 'YData', [0.9 0.9]);
-
-        setColorbarIntensityMaxScaleValue(dYOffsetMax, ...
-                                          colorbarScale('get'), ...
-                                          isColorbarDefaultUnit('get'), ...
-                                          get(uiSeriesPtr('get'), 'Value')...
-                                          );
-
-        setColorbarIntensityMinScaleValue(dYOffsetMin, ...
-                                          colorbarScale('get'), ...
-                                          isColorbarDefaultUnit('get'), ...
-                                          get(uiSeriesPtr('get'), 'Value')...
-                                          );
-
-        setAxesIntensity(get(uiSeriesPtr('get'), 'Value'));
-
-%         link2DMip('set', bLinkMip);
-
-
-%         if (size(dicomBuffer('get'), 3) == 1)
-%             set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')),'CLim', aCLim);
-%         else
-%             set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')),'CLim', aCLim);
-%             set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')),'CLim', aCLim);
-%             set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')),'CLim', aCLim);
-% %            if link2DMip('get') == true && isVsplash('get') == false  
-% %                set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')),'CLim', aCLim);
-% %            end
-%         end
+            % Compute colorbar line y offset
+        
+            dYOffsetMax = computeLineColorbarIntensityMaxYOffset(get(uiSeriesPtr('get'), 'Value'));
+            dYOffsetMin = computeLineColorbarIntensityMinYOffset(get(uiSeriesPtr('get'), 'Value'));
+    
+            % Ajust the intensity 
+    
+            setColorbarIntensityMaxScaleValue(dYOffsetMax, ...
+                                              colorbarScale('get'), ...
+                                              isColorbarDefaultUnit('get'), ...
+                                              get(uiSeriesPtr('get'), 'Value')...
+                                              );
+    
+            setColorbarIntensityMinScaleValue(dYOffsetMin, ...
+                                              colorbarScale('get'), ...
+                                              isColorbarDefaultUnit('get'), ...
+                                              get(uiSeriesPtr('get'), 'Value')...
+                                              );
+    
+            setAxesIntensity(get(uiSeriesPtr('get'), 'Value'));
+    
+        end        
     end
+
+
 
     pdInitialCoord = get(0,'PointerLocation');
 

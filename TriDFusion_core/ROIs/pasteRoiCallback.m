@@ -95,13 +95,15 @@ function pasteRoiCallback(~, ~)
 
         case lower('images.roi.freehand')
             
-            xOffset = ptrRoi.Position(1,1)-clickedPtX;
-            yOffset = ptrRoi.Position(1,2)-clickedPtY;
+%             xOffset = ptrRoi.Position(1,1)-clickedPtX;
+%             yOffset = ptrRoi.Position(1,2)-clickedPtY;
+%             
+%             aFreehandPosition = zeros(numel(ptrRoi.Position(:,1)),2);
+%             aFreehandPosition(:,1) = ptrRoi.Position(:,1) - xOffset;
+%             aFreehandPosition(:,2) = ptrRoi.Position(:,2) - yOffset;
             
-            aFreehandPosition = zeros(numel(ptrRoi.Position(:,1)),2);
-            aFreehandPosition(:,1) = ptrRoi.Position(:,1) - xOffset;
-            aFreehandPosition(:,2) = ptrRoi.Position(:,2) - yOffset;
-            
+            aFreehandPosition = ptrRoi.Position;
+
             pRoi = images.roi.Freehand(ptrRoi.Parent, ...
                                        'Position'           , aFreehandPosition, ...
                                        'Smoothing'          , ptrRoi.Smoothing, ...
@@ -138,13 +140,15 @@ function pasteRoiCallback(~, ~)
 
         case lower('images.roi.polygon')
             
-            xOffset = ptrRoi.Position(1,1)-clickedPtX;
-            yOffset = ptrRoi.Position(1,2)-clickedPtY;
-            
-            aPolygonPosition = zeros(numel(ptrRoi.Position(:,1)),2);
-            aPolygonPosition(:,1) = ptrRoi.Position(:,1) - xOffset;
-            aPolygonPosition(:,2) = ptrRoi.Position(:,2) - yOffset;
-            
+%             xOffset = ptrRoi.Position(1,1)-clickedPtX;
+%             yOffset = ptrRoi.Position(1,2)-clickedPtY;
+%             
+%             aPolygonPosition = zeros(numel(ptrRoi.Position(:,1)),2);
+%             aPolygonPosition(:,1) = ptrRoi.Position(:,1) - xOffset;
+%             aPolygonPosition(:,2) = ptrRoi.Position(:,2) - yOffset;
+
+            aPolygonPosition = ptrRoi.Position;
+
             pRoi = images.roi.Polygon(ptrRoi.Parent, ...
                                       'Position'           , aPolygonPosition, ...
                                       'Color'              , ptrRoi.Color, ...

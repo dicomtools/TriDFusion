@@ -1939,9 +1939,12 @@ end
                         set(atRoiInput{rr}.Object, 'InteractionsAllowed', 'all');
 
                         if strcmpi(atRoiInput{rr}.Object.Type, 'images.roi.freehand') || ...
-                           strcmpi(atRoiInput{rr}.Object.Type, 'images.roi.assistedfreehand')                    
-                            atRoiInput{rr}.Object.Waypoints(:) = false;
-                            atRoiInput{rr}.Waypoints = atRoiInput{rr}.Object.Waypoints;
+                           strcmpi(atRoiInput{rr}.Object.Type, 'images.roi.assistedfreehand') 
+                           
+                            if isempty(find(atRoiInput{rr}.Waypoints, 1))
+                                atRoiInput{rr}.Object.Waypoints(:) = false;
+                                atRoiInput{rr}.Waypoints = atRoiInput{rr}.Object.Waypoints;
+                            end
                         end
 
                     end

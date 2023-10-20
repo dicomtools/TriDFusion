@@ -117,8 +117,11 @@ function initRoi()
                                                  'Visible'            , 'off' ...
                                                  );  
                                              
-                    if isempty(atRoi{bb}.Waypoints(atRoi{bb}.Waypoints==1))
-                        roiPtr.Waypoints(:) = false;                    
+                    if isempty(find(atRoi{bb}.Waypoints, 1))
+                        try
+                            roiPtr.Waypoints(:) = false;                    
+                        catch
+                        end
                     end
                                     
                     roiDefaultMenu(roiPtr);
@@ -154,8 +157,11 @@ function initRoi()
                                                          'UserData'           , atRoi{bb}.UserData, ...   
                                                          'Visible'            , 'off' ...
                                                          );
-                    if atRoi{bb}.Waypoints(atRoi{bb}.Waypoints==1)
-                        roiPtr.Waypoints(:) = false;                    
+                    if isempty(find(atRoi{bb}.Waypoints, 1))
+                        try
+                            roiPtr.Waypoints(:) = false;                    
+                        catch
+                        end
                     end
     
                     roiDefaultMenu(roiPtr);
@@ -310,8 +316,8 @@ function initRoi()
                 end
             end
 
-            addlistener(roiPtr, 'DeletingROI', @deleteRoiEvents );
-            addlistener(roiPtr, 'ROIMoved'   , @movedRoiEvents  );
+            addlistener(roiPtr, 'DeletingROI', @deleteRoiEvents);
+            addlistener(roiPtr, 'ROIMoved'   , @movedRoiEvents );
     
             atRoi{bb}.Object = roiPtr;
     

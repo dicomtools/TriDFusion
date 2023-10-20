@@ -1780,6 +1780,14 @@ function generate3DLungLobeReport(bInitReport)
 
             aImage = aImage{dOffset};
 
+            if     strcmpi(imageOrientation('get'), 'axial')
+%                 aImage = aImage;
+            elseif strcmpi(imageOrientation('get'), 'coronal')
+                aImage = reorientBuffer(aImage, 'coronal');
+            elseif strcmpi(imageOrientation('get'), 'sagittal')
+                aImage = reorientBuffer(aImage, 'sagittal');
+            end
+
             if size(aImage, 3) ==1
 
                 if atInput(dOffset).bFlipLeftRight == true
@@ -1816,6 +1824,10 @@ function generate3DLungLobeReport(bInitReport)
             zPixel = 1;
         else
             zPixel = computeSliceSpacing(atMetaData)/10; 
+            
+            if zPixel == 0 % We can't determine the z size of a pixel, we will presume the pixel is square.
+                zPixel = xPixel;
+            end           
         end
         
         dVoxVolume = xPixel * yPixel * zPixel;            
