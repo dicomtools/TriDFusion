@@ -324,7 +324,7 @@ function initDisplay(iMode)
 
         if isVsplash('get') == false
             
-            aImgFullScreenIcon = getFullScreenIconImage(true);
+            aImgFullScreenIcon = getFullScreenIconImage(uiCorWindow, true);
                 
             if ~isempty(aImgFullScreenIcon)
 
@@ -382,7 +382,7 @@ function initDisplay(iMode)
 
         if isVsplash('get') == false
 
-            aImgFullScreenIcon = getFullScreenIconImage(true);
+            aImgFullScreenIcon = getFullScreenIconImage(uiSagWindow, true);
 
             if ~isempty(aImgFullScreenIcon)
 
@@ -438,7 +438,7 @@ function initDisplay(iMode)
 
         if isVsplash('get') == false
 
-            aImgFullScreenIcon = getFullScreenIconImage(true);
+            aImgFullScreenIcon = getFullScreenIconImage(uiTraWindow, true);
 
             if ~isempty(aImgFullScreenIcon)
 
@@ -494,7 +494,7 @@ function initDisplay(iMode)
 
         if isVsplash('get') == false
             
-            aImgFullScreenIcon = getFullScreenIconImage(true);
+            aImgFullScreenIcon = getFullScreenIconImage(uiMipWindow, true);
 
             if ~isempty(aImgFullScreenIcon)
 

@@ -1956,7 +1956,7 @@ end
 
                             aColor = atVoiInput{aa}.Color;
                             sColor = reshape(dec2hex([int32(aColor(1)*255) int32(aColor(2)*255) int32(aColor(3)*255)], 2)',1, 6);
-                            sLine  = sprintf('<HTML><FONT color="%s" face="%s">%s', sColor, sFontName, sLine);
+                            sLine  = sprintf('<HTML><FONT color="%s" face="%s"><b>%s</b>', sColor, sFontName, sLine);
                         end
 
                         sLbWindow = sprintf('%s%s\n', sLbWindow, sLine);

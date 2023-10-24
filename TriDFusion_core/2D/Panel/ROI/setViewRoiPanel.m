@@ -31,7 +31,8 @@ function setViewRoiPanel(~, ~)
 
     if switchTo3DMode('get')     == false && ...
        switchToIsoSurface('get') == false && ...
-       switchToMIPMode('get')    == false        
+       switchToMIPMode('get')    == false && ...       
+       isVsplash('get')          == false
 
         releaseRoiWait();
 
@@ -43,17 +44,13 @@ function setViewRoiPanel(~, ~)
 
             uiRoiMainPanel = uiRoiMainPanelPtr('get');
             if ~isempty(uiRoiMainPanel)
-                uiRoiMainPanel.Visible = 'off'; 
+                
+                set(uiRoiMainPanel, 'Visible', 'off'); 
 
                 uiOneWindow = uiOneWindowPtr('get');
                 if ~isempty(uiOneWindow)
-                    set(uiOneWindow, ...
-                        'position', [0,...
-                                     addOnWidth('get')+30 ...
-                                     getMainWindowSize('xsize') ...
-                                     getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30 ...
-                                     ]...
-                        );                                                     
+
+                    setOneWindowPosition(uiOneWindow);
                 end
 
                 uiCorWindow = uiCorWindowPtr('get');
@@ -148,23 +145,19 @@ function setViewRoiPanel(~, ~)
             
             viewKernelPanel('set', false);           
             viewSegPanel   ('set', false);         
-            viewRoiPanel   ('set', true);            
+            viewRoiPanel   ('set', true );            
 
             hObject.Checked = 'on';
 
             uiRoiMainPanel = uiRoiMainPanelPtr('get');
             if ~isempty(uiRoiMainPanel)
-                uiRoiMainPanel.Visible = 'on'; 
+
+                set(uiRoiMainPanel, 'Visible', 'on'); 
 
                 uiOneWindow = uiOneWindowPtr('get');
                 if ~isempty(uiOneWindow)
-                    set(uiOneWindow, ...
-                        'position', [uiRoiMainPanel.Position(3)...
-                                     addOnWidth('get')+30 ...
-                                     getMainWindowSize('xsize')-uiRoiMainPanel.Position(3) ...
-                                     getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30 ...
-                                     ]...
-                        );                                                     
+
+                    setOneWindowPosition(uiOneWindow);
                 end
 
                 uiCorWindow = uiCorWindowPtr('get');

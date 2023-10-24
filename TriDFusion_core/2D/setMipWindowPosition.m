@@ -27,88 +27,90 @@ function setMipWindowPosition(uiMipWindow)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
     
-    uiSegMainPanel    = uiSegMainPanelPtr('get');
-    uiKernelMainPanel = uiKernelMainPanelPtr('get');
-    uiRoiMainPanel    = uiRoiMainPanelPtr('get');
-
-    if isPanelFullScreen(btnUiMipWindowFullScreenPtr('get')) 
-
-         if viewSegPanel('get') == true
-
-            dXoffset = uiSegMainPanel.Position(3); 
-            dYoffset = addOnWidth('get')+30+15; 
-            dXsize   = getMainWindowSize('xsize')-uiSegMainPanel.Position(3);
-            dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;
-
-        elseif viewKernelPanel('get') == true
-
-            dXoffset = uiKernelMainPanel.Position(3); 
-            dYoffset = addOnWidth('get')+30+15; 
-            dXsize   = getMainWindowSize('xsize')-uiKernelMainPanel.Position(3);
-            dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;
-
-        elseif viewRoiPanel('get') == true
-
-            dXoffset = uiRoiMainPanel.Position(3); 
-            dYoffset = addOnWidth('get')+30+15; 
-            dXsize   = getMainWindowSize('xsize')-uiRoiMainPanel.Position(3);
-            dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;
-
-         else
-            dXoffset = 0;
-            dYoffset = addOnWidth('get')+30+15;
-            dXsize   = getMainWindowSize('xsize');
-            dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;
-         end 
-    else
-        dXoffset = (getMainWindowSize('xsize')/1.25);
-        dYoffset = addOnWidth('get')+30+15;
-        dXsize   = getMainWindowSize('xsize')/5;
-        dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;
-    end    
+    if isVsplash('get') == false
+        
+        uiSegMainPanel    = uiSegMainPanelPtr('get');
+        uiKernelMainPanel = uiKernelMainPanelPtr('get');
+        uiRoiMainPanel    = uiRoiMainPanelPtr('get');
     
-    set(uiMipWindow, ...
-        'Position', [dXoffset ...
-                     dYoffset ...
-                     dXsize ...
-                     dYsize ...
-                     ] ...
-       );
-
-    txtMip = axesText('get', 'axesMip');
-    if ~isempty(txtMip)
-        if isvalid(txtMip.Parent)
-            set(txtMip.Parent, ...
-                'Position', [5 ...
-                             uiMipWindow.Position(4)-5 ...
-                             70 ...
-                             30]...
-                );                   
-        end
-    end
-
-    btnUiMipWindowFullScreen = btnUiMipWindowFullScreenPtr('get');
-    if ~isempty(btnUiMipWindowFullScreen)
-
-        if isFusion('get') == true && ...
-           isPanelFullScreen(btnUiMipWindowFullScreenPtr('get'))  
-
-            set(btnUiMipWindowFullScreen, ...
-                'Position', [dXsize-20 ...
-                             25 ...
-                             20 ...
-                             20 ... 
-                             ] ...
-               );
+        if isPanelFullScreen(btnUiMipWindowFullScreenPtr('get')) 
+    
+             if viewSegPanel('get') == true
+    
+                dXoffset = uiSegMainPanel.Position(3); 
+                dYoffset = addOnWidth('get')+30+15; 
+                dXsize   = getMainWindowSize('xsize')-uiSegMainPanel.Position(3);
+                dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;
+    
+            elseif viewKernelPanel('get') == true
+    
+                dXoffset = uiKernelMainPanel.Position(3); 
+                dYoffset = addOnWidth('get')+30+15; 
+                dXsize   = getMainWindowSize('xsize')-uiKernelMainPanel.Position(3);
+                dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;
+    
+            elseif viewRoiPanel('get') == true
+    
+                dXoffset = uiRoiMainPanel.Position(3); 
+                dYoffset = addOnWidth('get')+30+15; 
+                dXsize   = getMainWindowSize('xsize')-uiRoiMainPanel.Position(3);
+                dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;
+    
+             else
+                dXoffset = 0;
+                dYoffset = addOnWidth('get')+30+15;
+                dXsize   = getMainWindowSize('xsize');
+                dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;
+             end 
         else
-            set(btnUiMipWindowFullScreen, ...
-                'Position', [dXsize-20 ...
-                             5 ...
-                             20 ...
-                             20 ...
-                             ] ...
-               );
+            dXoffset = (getMainWindowSize('xsize')/1.25);
+            dYoffset = addOnWidth('get')+30+15;
+            dXsize   = getMainWindowSize('xsize')/5;
+            dYsize   = getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30-15;
+        end    
+        
+        set(uiMipWindow, ...
+            'Position', [dXoffset ...
+                         dYoffset ...
+                         dXsize ...
+                         dYsize ...
+                         ] ...
+           );
+    
+        txtMip = axesText('get', 'axesMip');
+        if ~isempty(txtMip)
+            if isvalid(txtMip.Parent)
+                set(txtMip.Parent, ...
+                    'Position', [5 ...
+                                 uiMipWindow.Position(4)-5 ...
+                                 70 ...
+                                 30]...
+                    );                   
+            end
+        end
+    
+        btnUiMipWindowFullScreen = btnUiMipWindowFullScreenPtr('get');
+        if ~isempty(btnUiMipWindowFullScreen)
+    
+            if isFusion('get') == true && ...
+               isPanelFullScreen(btnUiMipWindowFullScreenPtr('get'))  
+    
+                set(btnUiMipWindowFullScreen, ...
+                    'Position', [dXsize-20 ...
+                                 25 ...
+                                 20 ...
+                                 20 ... 
+                                 ] ...
+                   );
+            else
+                set(btnUiMipWindowFullScreen, ...
+                    'Position', [dXsize-20 ...
+                                 5 ...
+                                 20 ...
+                                 20 ...
+                                 ] ...
+                   );
+            end
         end
     end
-   
 end

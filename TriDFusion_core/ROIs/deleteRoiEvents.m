@@ -77,8 +77,6 @@ function deleteRoiEvents(hObject, ~)
 
   %          atRoiInput(cellfun(@isempty, atRoiInput)) = [];
 
-            roiTemplate('set', dSerieOffset, atRoiInput);  
-
 
             % Clear roi from voi input template (if exist)
 
@@ -86,23 +84,47 @@ function deleteRoiEvents(hObject, ~)
 
                 for vo=1:numel(atVoiInput)     
 
-                    dTagOffset = find(contains(atVoiInput{vo}.RoisTag,{sRoiTag}));
+                    dTagOffset = find(contains(atVoiInput{vo}.RoisTag, sRoiTag));
 
                     if ~isempty(dTagOffset) % tag exist
 
                         atVoiInput{vo}.RoisTag(dTagOffset) = [];
                      %   atVoiInput{vo}.RoisTag(cellfun(@isempty, atVoiInput{vo}.RoisTag)) = [];     
-
                         if isempty(atVoiInput{vo}.RoisTag)
                             atVoiInput(vo) = [];
                             break;
-                       end
-
+                        else
+                            
+                            if ~isempty(atRoiInput)               
+                
+                                dNbTags = numel(atVoiInput{vo}.RoisTag);
+                
+                                for dRoiNb=1:dNbTags
+                
+                                    aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), atVoiInput{vo}.RoisTag{dRoiNb} );
+                
+                                    if ~isempty(aTagOffset)
+                
+                                        dTagOffset = find(aTagOffset, 1);
+                
+                                        if~isempty(dTagOffset)
+                
+                                            sLabel = sprintf('%s (roi %d/%d)', atVoiInput{vo}.Label, dRoiNb, dNbTags);
+                
+                                            atRoiInput{dTagOffset}.Label = sLabel;
+                                            atRoiInput{dTagOffset}.Object.Label = sLabel;                           
+                                            atRoiInput{dTagOffset}.ObjectType  = 'voi-roi';
+                                       end
+                                    end                 
+                                end
+                            end
+                            
+                        end
                     end
                 end
 
   %             atVoiInput(cellfun(@isempty, atVoiInput)) = [];
-
+               roiTemplate('set', dSerieOffset, atRoiInput);  
                voiTemplate('set', dSerieOffset, atVoiInput);                                        
             end
 

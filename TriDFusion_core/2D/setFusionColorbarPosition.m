@@ -26,7 +26,11 @@ function setFusionColorbarPosition(ptrFusionColorbar)
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-    
+
+    uiSegMainPanel    = uiSegMainPanelPtr('get');
+    uiKernelMainPanel = uiKernelMainPanelPtr('get');
+    uiRoiMainPanel    = uiRoiMainPanelPtr('get');
+
     aAxePosition = ptrFusionColorbar.Parent.Position;
     if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
 
@@ -41,36 +45,69 @@ function setFusionColorbarPosition(ptrFusionColorbar)
 
             if viewSegPanel('get') 
 
-                dXoffset = aAxePosition(3)-(uiSegMainPanel.Position(3)/2)-48;
-                dYoffset = 30;
-                dXsize   = 40;
-                dYsize   = ((aAxePosition(4))/2)-44; 
-
+                if keyPressFusionStatus('get') == 1
+                    dXoffset = aAxePosition(3)-(uiSegMainPanel.Position(3)/2)-48;
+                    dYoffset = 7+24;
+                    dXsize   = 40;
+                    dYsize   = aAxePosition(4)-11-24;                   
+                else
+                    dXoffset = aAxePosition(3)-(uiSegMainPanel.Position(3)/2)-48;
+                    dYoffset = 30;
+                    dXsize   = 40;
+                    dYsize   = ((aAxePosition(4))/2)-44; 
+                end
             elseif viewKernelPanel('get') == true 
 
-                dXoffset = aAxePosition(3)-(uiKernelMainPanel.Position(3)/2)-48;
-                dYoffset = 30;
-                dXsize   = 40;
-                dYsize   = ((aAxePosition(4))/2)-44; 
-
+                if keyPressFusionStatus('get') == 1
+                    dXoffset = aAxePosition(3)-(uiKernelMainPanel.Position(3)/2)-48;
+                    dYoffset = 7+24;
+                    dXsize   = 40;
+                    dYsize   = aAxePosition(4)-11-24;                      
+                else
+                    dXoffset = aAxePosition(3)-(uiKernelMainPanel.Position(3)/2)-48;
+                    dYoffset = 30;
+                    dXsize   = 40;
+                    dYsize   = ((aAxePosition(4))/2)-44; 
+                end
             elseif viewRoiPanel('get') == true 
 
-                dXoffset = aAxePosition(3)-(uiRoiMainPanel.Position(3)/2)-48;
-                dYoffset = 30;
+                if keyPressFusionStatus('get') == 1
+                    dXoffset = aAxePosition(3)-(uiRoiMainPanel.Position(3)/2)-48;
+                    dYoffset = 7+24;
+                    dXsize   = 40;
+                    dYsize   = aAxePosition(4)-11-24;                   
+                else
+                    dXoffset = aAxePosition(3)-(uiRoiMainPanel.Position(3)/2)-48;
+                    dYoffset = 30;
+                    dXsize   = 40;
+                    dYsize   = ((aAxePosition(4))/2)-44;
+                end 
+            else
+                if keyPressFusionStatus('get') == 1
+                    dXoffset = aAxePosition(3)-48;
+                    dYoffset = 7+24;
+                    dXsize   = 40;
+                    dYsize   = aAxePosition(4)-11-24;                    
+                else
+                    dXoffset = aAxePosition(3)-48;
+                    dYoffset = 30;
+                    dXsize   = 40;
+                    dYsize   = ((aAxePosition(4))/2)-44;
+                end
+            end
+        else
+            if keyPressFusionStatus('get') == 1
+
+                dXoffset = aAxePosition(3)-48;
+                dYoffset = 7+24;
                 dXsize   = 40;
-                dYsize   = ((aAxePosition(4))/2)-44;
-                     
+                dYsize   = aAxePosition(4)-11-24;            
             else
                 dXoffset = aAxePosition(3)-48;
                 dYoffset = 30;
                 dXsize   = 40;
                 dYsize   = ((aAxePosition(4))/2)-44;
             end
-        else
-            dXoffset = aAxePosition(3)-48;
-            dYoffset = 30;
-            dXsize   = 40;
-            dYsize   = ((aAxePosition(4))/2)-44;
         end
     end
 

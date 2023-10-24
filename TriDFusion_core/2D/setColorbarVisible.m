@@ -1,6 +1,6 @@
-function aImgFullScreenIcon = getFullScreenIconImage(uiPtr, bGoFullScreen)
-%function aImgFullScreenIcon = getFullScreenIconImage(uiPtr, bGoFullScreen)
-%The function will return full screen mode icon image.
+function setColorbarVisible(sVisible)
+%function setColorbarVisible(sVisible)
+%Set 2D colorbar visibility.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -27,24 +27,12 @@ function aImgFullScreenIcon = getFullScreenIconImage(uiPtr, bGoFullScreen)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if isempty(uiPtr)
-        aBackgroundColor = [1 1 1];
-    else
-        aBackgroundColor = get(uiPtr, 'BackgroundColor');
-    end
+    set(uiColorbarPtr('get'), 'visible', sVisible);
 
-    if bGoFullScreen == true
+    set(lineColorbarIntensityMaxPtr('get'), 'visible', sVisible);
+    set(lineColorbarIntensityMinPtr('get'), 'visible', sVisible);
 
-        if isequal(aBackgroundColor, [1 1 1]) % White
-            aImgFullScreenIcon = viewerFullScreenIconBlack('get');
-        else
-            aImgFullScreenIcon = viewerFullScreenIconWhite('get');             
-        end
-    else
-        if isequal(aBackgroundColor, [1 1 1]) % White
-            aImgFullScreenIcon = viewerExitFullScreenIconBlack('get');        
-        else
-            aImgFullScreenIcon = viewerExitFullScreenIconWhite('get');                     
-        end
-    end
+    set(textColorbarIntensityMaxPtr('get'), 'visible', sVisible);
+    set(textColorbarIntensityMinPtr('get'), 'visible', sVisible);
+
 end

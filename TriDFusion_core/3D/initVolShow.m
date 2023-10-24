@@ -73,7 +73,7 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
          if  bPlaybackState == true
              multiFrame3DPlayback('set', false);
          end
-
+         
          aInputArguments = {'Parent', uiWindow, 'Renderer', sRenderer, 'BackgroundColor', surfaceColor('one', background3DOffset('get'))};
 
          % Set object position

@@ -77,7 +77,7 @@ function decreaseVoiPosition(sRoiTag, dNbPixels)
                             
                             new_x = centerX + (x - centerX) * (1 - dNbPixels / 100); % Adjust the factor as needed
                             new_y = centerY + (y - centerY) * (1 - dNbPixels / 100); % Adjust the factor as needed
-                            
+
                             atRoi{dRoiTagOffset}.Position(i, 1) = new_x;
                             atRoi{dRoiTagOffset}.Position(i, 2) = new_y;
                         end

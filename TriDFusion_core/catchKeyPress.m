@@ -27,7 +27,7 @@ function catchKeyPress(~,evnt)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    if isempty(dicomBuffer('get'))
+    if isempty(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')))
         return;
     end
 
@@ -48,7 +48,7 @@ function catchKeyPress(~,evnt)
             
             initGate3DObject('set', true);
         else
-            if size(dicomBuffer('get'), 3) ~=1
+            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~=1
 
                 multiFrameZoom('set', 'out', 1);
 
@@ -103,7 +103,7 @@ function catchKeyPress(~,evnt)
 
              initGate3DObject('set', true);     
         else
-            if size(dicomBuffer('get'), 3) ~=1
+            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~=1
 
                 multiFrameZoom('set', 'in', 1);
 
@@ -150,12 +150,12 @@ function catchKeyPress(~,evnt)
 
             flip3Dobject('up');    
         else               
-            if size(dicomBuffer('get'), 3) ~= 1
+            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
                 
                 windowButton('set', 'down');  
                 switch gca
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                        if sliceNumber('get', 'coronal') == size(dicomBuffer('get'), 1)
+                        if sliceNumber('get', 'coronal') == size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1)
                             iSliceNumber = 1;
                         else
                             iSliceNumber = sliceNumber('get', 'coronal')+1;
@@ -163,10 +163,10 @@ function catchKeyPress(~,evnt)
 
                         sliceNumber('set', 'coronal', iSliceNumber);    
 
-                        set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get'), 1));
+                        set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1));
                         
                     case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                        if sliceNumber('get', 'sagittal') == size(dicomBuffer('get'), 2)
+                        if sliceNumber('get', 'sagittal') == size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 2)
                             iSliceNumber = 1;
                         else
                             iSliceNumber = sliceNumber('get', 'sagittal')+1;
@@ -174,18 +174,18 @@ function catchKeyPress(~,evnt)
 
                         sliceNumber('set', 'sagittal', iSliceNumber);    
 
-                        set(uiSliderSagPtr('get'), 'Value', sliceNumber('get', 'sagittal') / size(dicomBuffer('get'), 2));
+                        set(uiSliderSagPtr('get'), 'Value', sliceNumber('get', 'sagittal') / size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 2));
                         
                     otherwise  
                         if sliceNumber('get', 'axial') == 1
-                            iSliceNumber = size(dicomBuffer('get'), 3);
+                            iSliceNumber = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3);
                         else
                             iSliceNumber = sliceNumber('get', 'axial')-1;
                         end
 
                         sliceNumber('set', 'axial', iSliceNumber);    
                 end
-                set(uiSliderTraPtr('get'), 'Value', 1 - (sliceNumber('get', 'axial') / size(dicomBuffer('get'), 3)));
+                set(uiSliderTraPtr('get'), 'Value', 1 - (sliceNumber('get', 'axial') / size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3)));
                 
                 refreshImages();                
                 
@@ -198,7 +198,7 @@ if 0
 
             B = imrotate3(im,45,[0 1 0],'nearest','loose','FillValues',0);
 
-            dicomBuffer('set', B);
+            dicomBuffer('set', B, get(uiSeriesPtr('get'), 'Value'));
             refreshImages();
 end                    
         end
@@ -212,34 +212,34 @@ end
 
             flip3Dobject('down');   
         else
-            if size(dicomBuffer('get'), 3) ~= 1
+            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
                 
                 windowButton('set', 'down');  
                 switch gca
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                         if sliceNumber('get', 'coronal') == 1
-                            iSliceNumber = size(dicomBuffer('get'), 1);
+                            iSliceNumber = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1);
                         else
                             iSliceNumber = sliceNumber('get', 'coronal')-1;
                         end
 
                         sliceNumber('set', 'coronal', iSliceNumber);    
 
-                        set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get'), 1));
+                        set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1));
                         
                     case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                         if sliceNumber('get', 'sagittal') == 1
-                            iSliceNumber = size(dicomBuffer('get'), 2);
+                            iSliceNumber = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 2);
                         else
                             iSliceNumber = sliceNumber('get', 'sagittal')-1;
                         end
 
                         sliceNumber('set', 'sagittal', iSliceNumber);    
 
-                        set(uiSliderSagPtr('get'), 'Value', sliceNumber('get', 'sagittal') / size(dicomBuffer('get'), 2));
+                        set(uiSliderSagPtr('get'), 'Value', sliceNumber('get', 'sagittal') / size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 2));
                         
                     otherwise                
-                        if sliceNumber('get', 'axial') == size(dicomBuffer('get'), 3)
+                        if sliceNumber('get', 'axial') == size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3)
                             iSliceNumber = 1;
                         else
                             iSliceNumber = sliceNumber('get', 'axial')+1;
@@ -247,7 +247,7 @@ end
 
                         sliceNumber('set', 'axial', iSliceNumber);    
 
-                        set(uiSliderTraPtr('get'), 'Value', 1 - (sliceNumber('get', 'axial') / size(dicomBuffer('get'), 3)));                       
+                        set(uiSliderTraPtr('get'), 'Value', 1 - (sliceNumber('get', 'axial') / size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3)));                       
                 end
                 
                 refreshImages();
@@ -265,7 +265,8 @@ end
 
              flip3Dobject('left');                             
         else
-            if size(dicomBuffer('get'), 3) ~= 1 && isVsplash('get') == false    
+            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 && ...
+               isVsplash('get') == false    
                 
                 windowButton('set', 'down');  
 
@@ -296,13 +297,14 @@ end
     end
     
     if strcmpi(evnt.Key,'rightarrow')
+
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true 
 
               flip3Dobject('right');                             
         else
-            if size(dicomBuffer('get'), 3) ~= 1 && isVsplash('get') == false    
+            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 && isVsplash('get') == false    
                 
                 windowButton('set', 'down');  
                 
@@ -336,7 +338,8 @@ end
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
-           isempty(dicomBuffer('get'))
+           isempty(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')))
+
             return;
         end
 
@@ -358,8 +361,8 @@ end
 %            lMin = min(dicomBuffer('get'), [], 'all');
 %            lMax = max(dicomBuffer('get'), [], 'all');
         else
-            lMin = min(dicomBuffer('get'), [], 'all');
-            lMax = max(dicomBuffer('get'), [], 'all');
+            lMin = min(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), [], 'all');
+            lMax = max(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), [], 'all');
         end
 
         setWindowMinMax(lMax, lMin);                    
@@ -418,7 +421,8 @@ end
        if switchTo3DMode('get')     == true || ...
           switchToIsoSurface('get') == true || ...
           switchToMIPMode('get')    == true || ...
-          isVsplash('get') == true        
+          isVsplash('get')          == true        
+
             return;
         end
 
@@ -438,7 +442,7 @@ end
 
         end 
 
-        if size(dicomBuffer('get'), 3) == 1
+        if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
         %    delete(findobj(axe, 'Type', 'line'))
         else
             alAxes1Line   = axesLine('get', 'axes1');
@@ -492,7 +496,7 @@ end
 
         dNbFusedSeries = 0;
         
-        if size(dicomBuffer('get'), 3) == 1
+        if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
             dNbSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
             for rr=1:dNbSeries
                 imAxeF = imAxeFPtr('get', [], rr);
@@ -535,7 +539,7 @@ end
 %                set(uiAlphaSliderPtr('get') , 'Value', 1);
 %                sliderAlphaValue('set', 1);   
 
-                if size(dicomBuffer('get'), 3) == 1
+                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
                     alpha( axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
                     if dNbFusedSeries == 1
                         alpha( axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
@@ -565,7 +569,22 @@ end
                 tFuseInput  = inputTemplate('get');
                 atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
 
+                % Deactivate colobar
+
+                setColorbarVisible('off');
+
+                ptrFusionColorbar = uiFusionColorbarPtr('get');
+                if ~isempty(ptrFusionColorbar) 
+        
+                    setFusionColorbarPosition(ptrFusionColorbar);
+                end
+
+                setFusionColorbarVisible('on');
+
+                set(uiAlphaSliderPtr('get'), 'Enable', 'off');
+
                 setViewerDefaultColor(true, dicomMetaData('get'), atFuseMetaData);                        
+
 
             else
                 if keyPressFusionStatus('get') == 1
@@ -575,7 +594,7 @@ end
 %                    set(uiAlphaSliderPtr('get') , 'Value', 0);
 %                    sliderAlphaValue('set', 0);   
 
-                    if size(dicomBuffer('get'), 3) == 1
+                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
                         alpha( axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
                     else
                         alpha( axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
@@ -588,14 +607,28 @@ end
                                                 
                     end
 
-                    setViewerDefaultColor(true, dicomMetaData('get'));                           
+                    % Deactivate fusion colobar
+
+                    setColorbarVisible('on');
+
+                    setFusionColorbarVisible('off');
+               
+                    ptrColorbar = uiColorbarPtr('get');
+                    if ~isempty(ptrColorbar) 
+            
+                        setColorbarPosition(ptrColorbar);
+                    end
+
+                    set(uiAlphaSliderPtr('get'), 'Enable', 'off');
+
+                    setViewerDefaultColor(true, dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value')));                           
                 else
                     keyPressFusionStatus('set', 2);
 
 %                    set(uiAlphaSliderPtr('get') , 'Value', pdAlphaSlider);     
 %                    sliderAlphaValue('set', pdAlphaSlider);
 
-                    if size(dicomBuffer('get'), 3) == 1
+                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
                         alpha( axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
                     else
                         alpha( axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
@@ -624,7 +657,28 @@ end
                     backgroundColor ('set', pdBackgroundColor);
                     overlayColor    ('set', pdOverlayColor);
 
-                    setViewerDefaultColor(false, dicomMetaData('get'));
+                    % Reactivate all colobars
+
+                    ptrColorbar = uiColorbarPtr('get');
+                    if ~isempty(ptrColorbar) 
+            
+                        setColorbarPosition(ptrColorbar);
+                    end
+
+                    ptrFusionColorbar = uiFusionColorbarPtr('get');
+                    if ~isempty(ptrFusionColorbar) 
+            
+                        setFusionColorbarPosition(ptrFusionColorbar);
+                    end
+
+                    setColorbarVisible('on');
+
+                    setFusionColorbarVisible('on');
+
+                    set(uiAlphaSliderPtr('get'), 'Enable', 'on');
+
+                    setViewerDefaultColor(false, dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value')));
+                 
                 end
             end
             
@@ -652,7 +706,7 @@ end
             
             invertColor('set', false);
 
-            if size(dicomBuffer('get'), 3) == 1
+            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
                 
                 set(uiOneWindowPtr('get'), 'BackgroundColor', 'black');
                 
@@ -778,7 +832,7 @@ end
              
             invertColor('set', true);
 
-            if size(dicomBuffer('get'), 3) == 1 
+            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1 
                 
                 set(uiOneWindowPtr('get'), 'BackgroundColor', 'white');
                 
@@ -896,7 +950,40 @@ end
             else
                 overlayColor ('set', 'black' ); 
             end
-         end
+        end
+
+        if size(dicomBuffer('get', [],  get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 && ...
+           switchTo3DMode('get')     == false && ...
+           switchToIsoSurface('get') == false && ...
+           switchToMIPMode('get')    == false && ...
+           isVsplash('get')          == false
+
+            btnUiTraWindowFullScreen = btnUiTraWindowFullScreenPtr('get');
+            btnUiCorWindowFullScreen = btnUiCorWindowFullScreenPtr('get');
+            btnUiSagWindowFullScreen = btnUiSagWindowFullScreenPtr('get');
+            btnUiMipWindowFullScreen = btnUiMipWindowFullScreenPtr('get');
+
+            if ~isempty(btnUiTraWindowFullScreen)&& ...
+               ~isempty(btnUiCorWindowFullScreen)&& ...
+               ~isempty(btnUiSagWindowFullScreen)&& ...
+               ~isempty(btnUiMipWindowFullScreen)
+
+                bIsTraFullScreen = isPanelFullScreen(btnUiTraWindowFullScreen);
+                bIsCorFullScreen = isPanelFullScreen(btnUiCorWindowFullScreen);
+                bIsSagFullScreen = isPanelFullScreen(btnUiSagWindowFullScreen);
+                bIsMipFullScreen = isPanelFullScreen(btnUiMipWindowFullScreen);
+
+                set(btnUiTraWindowFullScreen, 'CData', getFullScreenIconImage(uiTraWindowPtr('get'), ~bIsTraFullScreen));
+                set(btnUiCorWindowFullScreen, 'CData', getFullScreenIconImage(uiCorWindowPtr('get'), ~bIsCorFullScreen));
+                set(btnUiSagWindowFullScreen, 'CData', getFullScreenIconImage(uiSagWindowPtr('get'), ~bIsSagFullScreen));
+                set(btnUiMipWindowFullScreen, 'CData', getFullScreenIconImage(uiMipWindowPtr('get'), ~bIsMipFullScreen));
+
+                set(btnUiTraWindowFullScreen, 'BackgroundColor', get(uiTraWindowPtr('get'), 'BackgroundColor'));
+                set(btnUiCorWindowFullScreen, 'BackgroundColor', get(uiCorWindowPtr('get'), 'BackgroundColor'));
+                set(btnUiSagWindowFullScreen, 'BackgroundColor', get(uiSagWindowPtr('get'), 'BackgroundColor'));
+                set(btnUiMipWindowFullScreen, 'BackgroundColor', get(uiMipWindowPtr('get'), 'BackgroundColor'));
+            end
+        end
 
 %                bInitSegPanel = false;                
 %                if  viewSegPanel('get')
@@ -957,7 +1044,7 @@ end
         if overlayActivate('get')
             overlayActivate('set', false);
 
-            if size(dicomBuffer('get'), 3) == 1
+            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
                 pAxeText = axesText('get', 'axe');
                 pAxeText.Visible = 'off';
                 
@@ -1016,7 +1103,7 @@ end
         else
             overlayActivate('set', true);  
 
-            if size(dicomBuffer('get'), 3) == 1
+            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
                 pAxeText = axesText('get', 'axe');
                 pAxeText.Visible = 'on';
                 
@@ -1085,29 +1172,29 @@ end
            switchToMIPMode('get')    == true 
            return;
         end
-        
-        if size(dicomBuffer('get'), 3) == 1            
-            return;
-        end   
-        
+                
         tInput = inputTemplate('get');
         
-        dOffset = get(uiSeriesPtr('get'), 'Value');
-        if dOffset > numel(tInput)
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+        if dSeriesOffset > numel(tInput)
             return;
         end                      
-        
-        if tInput(dOffset).bFlipHeadFeet == true
-            tInput(dOffset).bFlipHeadFeet = false;
+
+        if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1            
+            return;
+        end  
+
+        if tInput(dSeriesOffset).bFlipHeadFeet == true
+            tInput(dSeriesOffset).bFlipHeadFeet = false;
         else
-            tInput(dOffset).bFlipHeadFeet = true;
+            tInput(dSeriesOffset).bFlipHeadFeet = true;
         end
 
         inputTemplate('set', tInput);  
                 
-        im = dicomBuffer('get');   
+        im = dicomBuffer('get', [], dSeriesOffset);   
         im=im(:,:,end:-1:1);
-        dicomBuffer('set', im);     
+        dicomBuffer('set', im, dSeriesOffset);     
         
         if isFusion('get')
                              
@@ -1140,27 +1227,29 @@ end
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true 
+
             return;
         end
         
         tInput = inputTemplate('get');
         
-        dOffset = get(uiSeriesPtr('get'), 'Value');
-        if dOffset > numel(tInput)
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+        if dSeriesOffset > numel(tInput)
+
             return;
         end                      
         
-        if tInput(dOffset).bFlipLeftRight == true
-            tInput(dOffset).bFlipLeftRight = false;
+        if tInput(dSeriesOffset).bFlipLeftRight == true
+            tInput(dSeriesOffset).bFlipLeftRight = false;
         else
-            tInput(dOffset).bFlipLeftRight = true;
+            tInput(dSeriesOffset).bFlipLeftRight = true;
         end     
         
         inputTemplate('set', tInput);        
         
-        im = dicomBuffer('get');                   
+        im = dicomBuffer('get', [], dSeriesOffset);                   
 
-        if size(dicomBuffer('get'), 3) == 1                              
+        if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1                              
             im=im(:,end:-1:1);     
         else
             im=im(:,end:-1:1,:);     
@@ -1181,7 +1270,7 @@ end
             end            
         end
         
-        dicomBuffer('set', im);
+        dicomBuffer('set', im, dSeriesOffset);
 
         if isFusion('get')
                              
@@ -1225,21 +1314,22 @@ end
         
         tInput = inputTemplate('get');
         
-        dOffset = get(uiSeriesPtr('get'), 'Value');
-        if dOffset > numel(tInput)
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+        if dSeriesOffset > numel(tInput)
             return;
         end                      
         
-        if tInput(dOffset).bFlipAntPost == true
-            tInput(dOffset).bFlipAntPost = false;
+        if tInput(dSeriesOffset).bFlipAntPost == true
+            tInput(dSeriesOffset).bFlipAntPost = false;
         else
-            tInput(dOffset).bFlipAntPost = true;
+            tInput(dSeriesOffset).bFlipAntPost = true;
         end      
         
         inputTemplate('set', tInput);
         
-        im = dicomBuffer('get');   
-        if size(dicomBuffer('get'), 3) == 1                              
+        im = dicomBuffer('get', [], dSeriesOffset);  
+
+        if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1                              
             im=im(end:-1:1,:);
         else
             im=im(end:-1:1,:,:);
@@ -1260,7 +1350,7 @@ end
             end             
         end
         
-        dicomBuffer('set', im);
+        dicomBuffer('set', im, dSeriesOffset);
   
         if isFusion('get')
                              

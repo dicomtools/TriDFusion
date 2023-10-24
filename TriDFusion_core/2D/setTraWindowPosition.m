@@ -32,7 +32,8 @@ function setTraWindowPosition(uiTraWindow)
     uiRoiMainPanel    = uiRoiMainPanelPtr('get');
     
     if isVsplash('get') == true && ...
-       ~strcmpi(vSplahView('get'), 'all')                 
+       ~strcmpi(vSplahView('get'), 'all')
+        
         if viewSegPanel('get')
 
             dXoffset = uiSegMainPanel.Position(3);

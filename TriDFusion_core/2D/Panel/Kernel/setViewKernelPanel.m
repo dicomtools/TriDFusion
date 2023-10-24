@@ -31,7 +31,8 @@ function setViewKernelPanel(~, ~)
 
     if switchTo3DMode('get')     == false && ...
        switchToIsoSurface('get') == false && ...
-       switchToMIPMode('get')    == false        
+       switchToMIPMode('get')    == false && ...       
+       isVsplash('get')          == false
 
         releaseRoiWait();
 
@@ -44,17 +45,12 @@ function setViewKernelPanel(~, ~)
             uiKernelMainPanel = uiKernelMainPanelPtr('get');
             if ~isempty(uiKernelMainPanel)
 
-                uiKernelMainPanel.Visible = 'off'; 
+                set(uiKernelMainPanel, 'Visible', 'off'); 
 
                 uiOneWindow = uiOneWindowPtr('get');
                 if ~isempty(uiOneWindow)
-                    set(uiOneWindow, ...
-                        'position', [0,...
-                                     addOnWidth('get')+30 ...
-                                     getMainWindowSize('xsize') ...
-                                     getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30 ...
-                                     ]...
-                        );                                                     
+
+                    setOneWindowPosition(uiOneWindow);
                 end
 
                 uiCorWindow = uiCorWindowPtr('get');
@@ -154,17 +150,13 @@ function setViewKernelPanel(~, ~)
 
             uiKernelMainPanel = uiKernelMainPanelPtr('get');
             if ~isempty(uiKernelMainPanel)
-                uiKernelMainPanel.Visible = 'on'; 
+
+                set(uiKernelMainPanel, 'Visible', 'on'); 
 
                 uiOneWindow = uiOneWindowPtr('get');
                 if ~isempty(uiOneWindow)
-                    set(uiOneWindow, ...
-                        'position', [uiKernelMainPanel.Position(3)...
-                                     addOnWidth('get')+30 ...
-                                     getMainWindowSize('xsize')-uiKernelMainPanel.Position(3) ...
-                                     getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30 ...
-                                     ]...
-                        );                                                     
+
+                    setOneWindowPosition(uiOneWindow);
                 end
 
                 uiCorWindow = uiCorWindowPtr('get');

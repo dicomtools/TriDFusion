@@ -26,7 +26,11 @@ function setColorbarPosition(ptrColorbar)
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-    
+
+    uiSegMainPanel    = uiSegMainPanelPtr('get');
+    uiKernelMainPanel = uiKernelMainPanelPtr('get');
+    uiRoiMainPanel    = uiRoiMainPanelPtr('get');
+
     if isFusion('get')
 
         aAxePosition = ptrColorbar.Parent.Position;
@@ -42,37 +46,78 @@ function setColorbarPosition(ptrColorbar)
 
                 if viewSegPanel('get')
 
-                    dXoffset = aAxePosition(3)-(uiSegMainPanel.Position(3)/2)-48;
-                    dYoffset = (aAxePosition(4)/2);
-                    dXsize   = 40;
-                    dYsize   = (aAxePosition(4)/2)-4; 
+                    if keyPressFusionStatus('get') == 2
+
+                        dXoffset = aAxePosition(3)-(uiSegMainPanel.Position(3)/2)-48;
+                        dYoffset = (aAxePosition(4)/2);
+                        dXsize   = 40;
+                        dYsize   = (aAxePosition(4)/2)-4; 
+                    else
+                        dXoffset = aAxePosition(3)-(uiSegMainPanel.Position(3)/2)-48;
+                        dYoffset = 7+24;
+                        dXsize   = 40;
+                        dYsize   = aAxePosition(4)-11-24;                       
+                    end
 
                 elseif viewKernelPanel('get') == true 
 
-                    dXoffset = aAxePosition(3)-(uiKernelMainPanel.Position(3)/2)-48;
-                    dYoffset = (aAxePosition(4)/2);
-                    dXsize   = 40;
-                    dYsize   = (aAxePosition(4)/2)-4; 
+                    if keyPressFusionStatus('get') == 2
+
+                        dXoffset = aAxePosition(3)-(uiKernelMainPanel.Position(3)/2)-48;
+                        dYoffset = (aAxePosition(4)/2);
+                        dXsize   = 40;
+                        dYsize   = (aAxePosition(4)/2)-4; 
+                    else
+                        dXoffset = aAxePosition(3)-(uiKernelMainPanel.Position(3)/2)-48;
+                        dYoffset = 7+24;
+                        dXsize   = 40;
+                        dYsize   = aAxePosition(4)-11-24;                   
+                    end
 
                 elseif viewRoiPanel('get') == true 
 
-                    dXoffset = aAxePosition(3)-(uiRoiMainPanel.Position(3)/2)-48;
-                    dYoffset = (aAxePosition(4)/2);
-                    dXsize   = 40;
-                    dYsize   = (aAxePosition(4)/2)-4;                     
+                    if keyPressFusionStatus('get') == 2
+
+                        dXoffset = aAxePosition(3)-(uiRoiMainPanel.Position(3)/2)-48;
+                        dYoffset = (aAxePosition(4)/2);
+                        dXsize   = 40;
+                        dYsize   = (aAxePosition(4)/2)-4;                     
+                    else
+                        dXoffset = aAxePosition(3)-(uiRoiMainPanel.Position(3)/2)-48;
+                        dYoffset = 7+24;
+                        dXsize   = 40;
+                        dYsize   = aAxePosition(4)-11-24;                       
+                    end
                       
                 else
-                    dXoffset = aAxePosition(3)-48;
-                    dYoffset = aAxePosition(4)/2;
-                    dXsize   = 40;
-                    dYsize   = (aAxePosition(4)/2)-4; 
+                    if keyPressFusionStatus('get') == 2
+                  
+                        dXoffset = aAxePosition(3)-48;
+                        dYoffset = aAxePosition(4)/2;
+                        dXsize   = 40;
+                        dYsize   = (aAxePosition(4)/2)-4; 
+                    else
+                        dXoffset = aAxePosition(3)-48;
+                        dYoffset = 7+24;
+                        dXsize   = 40;
+                        dYsize   = aAxePosition(4)-11-24;                          
+                    end
 
                 end
             else  
-                dXoffset = aAxePosition(3)-48;
-                dYoffset = aAxePosition(4)/2;
-                dXsize   = 40;
-                dYsize   = (aAxePosition(4)/2)-4;                
+
+                if keyPressFusionStatus('get') == 2
+
+                    dXoffset = aAxePosition(3)-48;
+                    dYoffset = aAxePosition(4)/2;
+                    dXsize   = 40;                    
+                    dYsize   = (aAxePosition(4)/2)-4;                
+                else
+                    dXoffset = aAxePosition(3)-48;
+                    dYoffset = 7+24;
+                    dXsize   = 40;
+                    dYsize   = aAxePosition(4)-11-24;                 
+                end
             end
         end        
     else

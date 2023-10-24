@@ -242,9 +242,14 @@ function dicomViewerCore()
 %     end
 
     bInitSegPanel = false;
-    if  viewSegPanel('get')
-        bInitSegPanel = true;
+    if viewSegPanel('get') 
+
+        if isVsplash('get') == false
+            bInitSegPanel = true;
+        end
+
         viewSegPanel('set', false);
+        
         objSegPanel = viewSegPanelMenuObject('get');
         if ~isempty(objSegPanel)
             objSegPanel.Checked = 'off';
@@ -252,9 +257,14 @@ function dicomViewerCore()
     end
 
     bInitKernelPanel = false;
-    if  viewKernelPanel('get')
-        bInitKernelPanel = true;
+    if  viewKernelPanel('get')  
+
+        if isVsplash('get') == false
+            bInitKernelPanel = true;
+        end
+
         viewKernelPanel('set', false);
+
         objKernelPanel = viewKernelPanelMenuObject('get');
         if ~isempty(objKernelPanel)
             objKernelPanel.Checked = 'off';
@@ -262,9 +272,14 @@ function dicomViewerCore()
     end
 
     bInitRoiPanel = false;
-    if  viewRoiPanel('get')
-        bInitRoiPanel = true;
+    if  viewRoiPanel('get')  
+
+        if isVsplash('get') == false
+            bInitRoiPanel = true;
+        end
+
         viewRoiPanel('set', false);
+
         objRoiPanel = viewRoiPanelMenuObject('get');
         if ~isempty(objRoiPanel)
             objRoiPanel.Checked = 'off';
@@ -1949,6 +1964,15 @@ function dicomViewerCore()
         end        
     end
 
+    if isVsplash('get') == true
+        
+        if strcmpi(vSplahView('get'), 'Coronal') || ...
+           strcmpi(vSplahView('get'), 'Sagittal')     
+
+            setColorbarVisible('off');
+        end
+    end
+%                     setFusionColorbarVisible('off');  
 %    sUnitDisplay = getSerieUnitValue(dOffset);
 
 %     if strcmpi(sUnitDisplay, 'SUV')
@@ -2021,7 +2045,7 @@ function dicomViewerCore()
         setFusionCallback();
     end
 
-    if bInitSegPanel == true
+    if bInitSegPanel == true 
        setViewSegPanel();
     end
 

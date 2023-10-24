@@ -1,13 +1,13 @@
-function aImgFullScreenIcon = getFullScreenIconImage(uiPtr, bGoFullScreen)
-%function aImgFullScreenIcon = getFullScreenIconImage(uiPtr, bGoFullScreen)
-%The function will return full screen mode icon image.
+function setFusionColorbarVisible(sVisible)
+%function setFusionColorbarVisible(sVisible)
+%Set 2D fusion colorbar visibility.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2023, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
 %
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 %
@@ -27,24 +27,13 @@ function aImgFullScreenIcon = getFullScreenIconImage(uiPtr, bGoFullScreen)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if isempty(uiPtr)
-        aBackgroundColor = [1 1 1];
-    else
-        aBackgroundColor = get(uiPtr, 'BackgroundColor');
-    end
+    
+    set(uiFusionColorbarPtr('get'), 'visible', sVisible);
 
-    if bGoFullScreen == true
+    set(lineFusionColorbarIntensityMaxPtr('get'), 'visible', sVisible);
+    set(lineFusionColorbarIntensityMinPtr('get'), 'visible', sVisible);
 
-        if isequal(aBackgroundColor, [1 1 1]) % White
-            aImgFullScreenIcon = viewerFullScreenIconBlack('get');
-        else
-            aImgFullScreenIcon = viewerFullScreenIconWhite('get');             
-        end
-    else
-        if isequal(aBackgroundColor, [1 1 1]) % White
-            aImgFullScreenIcon = viewerExitFullScreenIconBlack('get');        
-        else
-            aImgFullScreenIcon = viewerExitFullScreenIconWhite('get');                     
-        end
-    end
+    set(textFusionColorbarIntensityMaxPtr('get'), 'visible', sVisible);
+    set(textFusionColorbarIntensityMinPtr('get'), 'visible', sVisible);
+
 end

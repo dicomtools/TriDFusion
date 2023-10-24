@@ -601,6 +601,7 @@ function mainWindowMenu()
     end
 
     function setVsplashViewCallback(hObject, ~)
+
         if switchTo3DMode('get')     == false && ...
            switchToIsoSurface('get') == false && ...
            switchToMIPMode('get')    == false && ...
@@ -619,6 +620,10 @@ function mainWindowMenu()
                 set(mVslashAll      , 'Checked', 'off');
 
                 bChangeActiveView = true;
+
+                setColorbarVisible('on');
+
+                setFusionColorbarVisible('on');
 
             elseif strcmpi(get(hObject, 'Label'), 'V-Splash Coronal') && ...
               ~strcmpi(vSplahView('get'), 'coronal')
@@ -655,7 +660,6 @@ function mainWindowMenu()
                 set(mVslashAll      , 'Checked', 'on');
 
                 bChangeActiveView = true;
-
             end
 
             if bChangeActiveView == true && ...
@@ -692,6 +696,7 @@ function mainWindowMenu()
                 dicomViewerCore();
 
                 % restore position
+
                 set(uiSliderCorPtr('get'), 'Value', iCoronal / iCoronalSize);
                 sliceNumber('set', 'coronal', iCoronal);
 

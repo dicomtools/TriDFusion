@@ -57,8 +57,8 @@ function clickDown(~, ~)
        isVsplash('get')          == false && ...
        switchTo3DMode('get')     == false && ...
        switchToIsoSurface('get') == false && ...
-       switchToMIPMode('get')    == false 
-       
+       switchToMIPMode('get')    == false && ...
+      ~strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'custom')
 
         % Perform full screen action on double-click
 
@@ -253,6 +253,7 @@ function clickDown(~, ~)
                    switchToMIPMode('get')    == false          
         
                     windowButton('set', 'down');                         
+
                     if isMoveImageActivated('get') == true
                         
                         set(fiMainWindowPtr('get'), 'Pointer', 'circle');
@@ -310,7 +311,7 @@ function clickDown(~, ~)
         
                         if clickedPtX > 0 && ...
                            clickedPtY > 0 && ...
-                            gca == axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                           gca == axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
 
                             axeClicked('set', true);
                             uiresume(fiMainWindowPtr('get'));                      

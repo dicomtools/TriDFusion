@@ -44,33 +44,48 @@ function pAxe = getAxeFromMousePosition(dSeriesOffset)
             pAxe = axesMipPtr('get', [], dSeriesOffset); % MIP
        
         else
+            if isVsplash('get') == true &&  ~strcmpi(vSplahView('get'), 'all')
+                
+                if strcmpi(vSplahView('get'), 'Coronal')
+                    pAxe = axes1Ptr('get', [], dSeriesOffset);   % Coronal
 
-            % Get the current point
-    
-            current_point = get(fiMainWindowPtr('get'), 'CurrentPoint');
-            mouseX = current_point(1, 1);
-            mouseY = current_point(1, 2);
-            
-            posCor = getpixelposition(uiCorWindowPtr('get', dSeriesOffset));
-            posSag = getpixelposition(uiSagWindowPtr('get', dSeriesOffset));
-            posTra = getpixelposition(uiTraWindowPtr('get', dSeriesOffset));
-    
-            if mouseX > posCor(1) && mouseX < (posCor(1)+posCor(3)) && ...      % Coronal
-               mouseY > posCor(2) && mouseY < (posCor(2)+posCor(4))   
-    
-                pAxe = axes1Ptr('get', [], dSeriesOffset);
-    
-            elseif  mouseX > posSag(1) && mouseX < (posSag(1)+posSag(3)) && ... % Sagittal
-                    mouseY > posSag(2) && mouseY < (posSag(2)+posSag(4))     
-                pAxe = axes2Ptr('get', [], dSeriesOffset);
-    
-            elseif  mouseX > posTra(1) && mouseX < (posTra(1)+posTra(3)) && ... % Axial
-                    mouseY > posTra(2) && mouseY < (posTra(2)+posTra(4))    
-                pAxe = axes3Ptr('get', [], dSeriesOffset);
-    
+                elseif strcmpi(vSplahView('get'), 'Sagittal')
+                    pAxe = axes2Ptr('get', [], dSeriesOffset);   % Sagittal
+
+                elseif strcmpi(vSplahView('get'), 'Axial')
+                    pAxe = axes3Ptr('get', [], dSeriesOffset);   % Axial
+                else
+
+                end
             else
-                pAxe = axesMipPtr('get', [], dSeriesOffset); % MIP
-            end     
+
+                % Get the current point
+        
+                current_point = get(fiMainWindowPtr('get'), 'CurrentPoint');
+                mouseX = current_point(1, 1);
+                mouseY = current_point(1, 2);
+                
+                posCor = getpixelposition(uiCorWindowPtr('get', dSeriesOffset));
+                posSag = getpixelposition(uiSagWindowPtr('get', dSeriesOffset));
+                posTra = getpixelposition(uiTraWindowPtr('get', dSeriesOffset));
+        
+                if mouseX > posCor(1) && mouseX < (posCor(1)+posCor(3)) && ...      % Coronal
+                   mouseY > posCor(2) && mouseY < (posCor(2)+posCor(4))   
+        
+                    pAxe = axes1Ptr('get', [], dSeriesOffset);
+        
+                elseif  mouseX > posSag(1) && mouseX < (posSag(1)+posSag(3)) && ... % Sagittal
+                        mouseY > posSag(2) && mouseY < (posSag(2)+posSag(4))     
+                    pAxe = axes2Ptr('get', [], dSeriesOffset);
+        
+                elseif  mouseX > posTra(1) && mouseX < (posTra(1)+posTra(3)) && ... % Axial
+                        mouseY > posTra(2) && mouseY < (posTra(2)+posTra(4))    
+                    pAxe = axes3Ptr('get', [], dSeriesOffset);
+        
+                else
+                    pAxe = axesMipPtr('get', [], dSeriesOffset); % MIP
+                end     
+            end
         end
     end
 end

@@ -145,9 +145,9 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                     elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'nm')
                         colorMapOffset('set', 10);
                         fusionColorMapOffset('set', 20);
-                    elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'pt')
-                        colorMapOffset('set', 10);
-                        fusionColorMapOffset('set', 20);
+%                     elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'pt')
+%                         colorMapOffset('set', 10);
+%                         fusionColorMapOffset('set', 20);
                     elseif strcmpi(sModality, 'ct')&&strcmpi(sFuseModality, 'ct')
                         colorMapOffset('set', 10);
                         fusionColorMapOffset('set', 20);
@@ -367,15 +367,15 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                         bIsSagFullScreen = isPanelFullScreen(btnUiSagWindowFullScreen);
                         bIsMipFullScreen = isPanelFullScreen(btnUiMipWindowFullScreen);
 
-                        set(btnUiTraWindowFullScreen, 'CData', getFullScreenIconImage(~bIsTraFullScreen));
-                        set(btnUiCorWindowFullScreen, 'CData', getFullScreenIconImage(~bIsCorFullScreen));
-                        set(btnUiSagWindowFullScreen, 'CData', getFullScreenIconImage(~bIsSagFullScreen));
-                        set(btnUiMipWindowFullScreen, 'CData', getFullScreenIconImage(~bIsMipFullScreen));
+                        set(btnUiTraWindowFullScreen, 'CData', getFullScreenIconImage(uiTraWindowPtr('get'), ~bIsTraFullScreen));
+                        set(btnUiCorWindowFullScreen, 'CData', getFullScreenIconImage(uiCorWindowPtr('get'), ~bIsCorFullScreen));
+                        set(btnUiSagWindowFullScreen, 'CData', getFullScreenIconImage(uiSagWindowPtr('get'), ~bIsSagFullScreen));
+                        set(btnUiMipWindowFullScreen, 'CData', getFullScreenIconImage(uiMipWindowPtr('get'), ~bIsMipFullScreen));
 
-                        set(btnUiTraWindowFullScreen, 'BackgroundColor', backgroundColor('get'));
-                        set(btnUiCorWindowFullScreen, 'BackgroundColor', backgroundColor('get'));
-                        set(btnUiSagWindowFullScreen, 'BackgroundColor', backgroundColor('get'));
-                        set(btnUiMipWindowFullScreen, 'BackgroundColor', backgroundColor('get'));
+                        set(btnUiTraWindowFullScreen, 'BackgroundColor', get(uiTraWindowPtr('get'), 'BackgroundColor'));
+                        set(btnUiCorWindowFullScreen, 'BackgroundColor', get(uiCorWindowPtr('get'), 'BackgroundColor'));
+                        set(btnUiSagWindowFullScreen, 'BackgroundColor', get(uiSagWindowPtr('get'), 'BackgroundColor'));
+                        set(btnUiMipWindowFullScreen, 'BackgroundColor', get(uiMipWindowPtr('get'), 'BackgroundColor'));
                     end
                 end
 
