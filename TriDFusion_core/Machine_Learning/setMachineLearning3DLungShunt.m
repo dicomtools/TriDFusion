@@ -1,5 +1,5 @@
-function setMachineLearning3DLungShunt(sSegmentatorPath, bPixelEdge, bResampleSeries)
-%function setMachineLearning3DLungShunt(sSegmentatorPath, bPixelEdge, bResampleSeries)
+function setMachineLearning3DLungShunt(sSegmentatorScript, sSegmentatorCombineMasks, bPixelEdge, bResampleSeries)
+%function setMachineLearning3DLungShunt(sSegmentatorScript, sSegmentatorCombineMasks, bPixelEdge, bResampleSeries)
 %Run machine learning 3D Lung Liver Ratio.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -143,9 +143,9 @@ function setMachineLearning3DLungShunt(sSegmentatorPath, bPixelEdge, bResampleSe
         if ispc % Windows
       
 %            if fastMachineLearningDialog('get') == true
-%                sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s --fast', sSegmentatorPath, sNiiFullFileName, sSegmentationFolderName);    
+%                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s --fast', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName);    
 %            else
-                sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s --fast', sSegmentatorPath, sNiiFullFileName, sSegmentationFolderName);    
+                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s --fast', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName);    
 %            end
         
             [bStatus, sCmdout] = system(sCommandLine);
@@ -165,7 +165,7 @@ function setMachineLearning3DLungShunt(sSegmentatorPath, bPixelEdge, bResampleSe
     
                     sNiiFileName = 'combined_lungs.nii.gz';
     
-                    sCommandLine = sprintf('cmd.exe /c python.exe %stotalseg_combine_masks -i %s -o %s%s -m lung', sSegmentatorPath, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
+                    sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m lung', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
         
                     [bStatus, sCmdout] = system(sCommandLine);
     
@@ -250,7 +250,7 @@ function setMachineLearning3DLungShunt(sSegmentatorPath, bPixelEdge, bResampleSe
             
                     sNiiFileName = 'combined_lungs.nii.gz';
             
-                    sCommandLine = sprintf('cmd.exe /c python.exe %stotalseg_combine_masks -i %s -o %s%s -m lung', sSegmentatorPath, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
+                    sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m lung', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
             
                     [bStatus, sCmdout] = system(sCommandLine);
             

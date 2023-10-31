@@ -1,5 +1,5 @@
-function machineLearningSegmentationDialog(sSegmentatorPath)
-%function machineLearningSegmentationDialog(sSegmentatorPath)
+function machineLearningSegmentationDialog(sSegmentatorScript, sSegmentatorCombineMasks)
+%function machineLearningSegmentationDialog(sSegmentatorScript, sSegmentatorCombineMasks)
 %Run machine learning segmentation.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -1769,7 +1769,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
 
 
      %           if fastMachineLearningDialog('get') == true
-                    sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s %s', sSegmentatorPath, sNiiFullFileName, sSegmentationFolderName, sOption);    
+                    sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s %s', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName, sOption);    
      %           else
      %               sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s --force_split --body_seg', sSegmentatorPath, sNiiFullFileName, sSegmentationFolderName);    
      %           end
@@ -1995,7 +1995,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
 
                             sNiiFileName = 'combined_ribs.nii.gz';
     
-                            sCommandLine = sprintf('cmd.exe /c python.exe %stotalseg_combine_masks -i %s -o %s%s -m ribs', sSegmentatorPath, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
+                            sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m ribs', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
                 
                             [bStatus, sCmdout] = system(sCommandLine);
     
@@ -2024,7 +2024,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
 
                             sNiiFileName = 'combined_vertebrae.nii.gz';
     
-                            sCommandLine = sprintf('cmd.exe /c python.exe %stotalseg_combine_masks -i %s -o %s%s -m vertebrae', sSegmentatorPath, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
+                            sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m vertebrae', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
                 
                             [bStatus, sCmdout] = system(sCommandLine);
     
@@ -2053,7 +2053,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
 
                             sNiiFileName = 'combined_vertebrae.nii.gz';
     
-                            sCommandLine = sprintf('cmd.exe /c python.exe %stotalseg_combine_masks -i %s -o %s%s -m vertebrae_ribs', sSegmentatorPath, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
+                            sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m vertebrae_ribs', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
                 
                             [bStatus, sCmdout] = system(sCommandLine);
     
@@ -2127,7 +2127,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
 
                             sNiiFileName = 'combined_heart.nii.gz';
     
-                            sCommandLine = sprintf('cmd.exe /c python.exe %stotalseg_combine_masks -i %s -o %s%s -m heart', sSegmentatorPath, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
+                            sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m heart', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
                 
                             [bStatus, sCmdout] = system(sCommandLine);
     
@@ -2225,7 +2225,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
 
                             sNiiFileName = 'combined_lungs.nii.gz';
     
-                            sCommandLine = sprintf('cmd.exe /c python.exe %stotalseg_combine_masks -i %s -o %s%s -m lung', sSegmentatorPath, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
+                            sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m lung', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
                 
                             [bStatus, sCmdout] = system(sCommandLine);
     
@@ -2252,7 +2252,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
 
                             sNiiFileName = 'combined_lung_left.nii.gz';
     
-                            sCommandLine = sprintf('cmd.exe /c python.exe %stotalseg_combine_masks -i %s -o %s%s -m lung_left', sSegmentatorPath, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
+                            sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m lung_left', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
                 
                             [bStatus, sCmdout] = system(sCommandLine);
     
@@ -2279,7 +2279,7 @@ function machineLearningSegmentationDialog(sSegmentatorPath)
 
                             sNiiFileName = 'combined_lung_right.nii.gz';
     
-                            sCommandLine = sprintf('cmd.exe /c python.exe %stotalseg_combine_masks -i %s -o %s%s -m lung_right', sSegmentatorPath, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
+                            sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m lung_right', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
                 
                             [bStatus, sCmdout] = system(sCommandLine);
     

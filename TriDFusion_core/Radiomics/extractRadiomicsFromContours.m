@@ -1,5 +1,5 @@
-function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSUVScale, bEntireVolume, bContourType, dContourOffset)
-%function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSUVScale, bEntireVolume, bContourType, dContourOffset)
+function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, dSUVScale, bEntireVolume, bContourType, dContourOffset)
+%function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, dSUVScale, bEntireVolume, bContourType, dContourOffset)
 %Run PyRadiomics, from a mask created from all contours.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -760,7 +760,7 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
                 sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
                 writeYamlFile(sParametersFile, tReadiomics, 1);
 
-                sCommandLine = sprintf('cmd.exe /c %spyradiomics.exe %s %s', sRadiomicsPath, sNrrdImagesName, sNrrdEntireMaskName);    
+                sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdEntireMaskName);    
 
                 sEntireMaskResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'TOTAL-CONTOURED-VOLUME');
 
@@ -803,7 +803,7 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
                     sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
                     writeYamlFile(sParametersFile, tReadiomics, 1);
     
-                    sCommandLine = sprintf('cmd.exe /c %spyradiomics.exe %s %s', sRadiomicsPath, sNrrdImagesName, sNrrdUnspecifiedMaskName);    
+                    sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdUnspecifiedMaskName);    
     
                     sUnspecifiedMaskResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'UNSPECIFIED_MASK');
     
@@ -824,7 +824,7 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
                     sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
                     writeYamlFile(sParametersFile, tReadiomics, 1);
     
-                    sCommandLine = sprintf('cmd.exe /c %spyradiomics.exe %s %s', sRadiomicsPath, sNrrdImagesName, sNrrdBoneMaskName);    
+                    sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdBoneMaskName);    
     
                     sBoneMaskResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'BONE_MASK');
     
@@ -846,7 +846,7 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
                     sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
                     writeYamlFile(sParametersFile, tReadiomics, 1);
     
-                    sCommandLine = sprintf('cmd.exe /c %spyradiomics.exe %s %s', sRadiomicsPath, sNrrdImagesName, sNrrdSoftTissueMaskName);    
+                    sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdSoftTissueMaskName);    
     
                     sSoftTissueResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'SOFT_TISSUE_MASK');
     
@@ -867,7 +867,7 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
                     sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
                     writeYamlFile(sParametersFile, tReadiomics, 1);
     
-                    sCommandLine = sprintf('cmd.exe /c %spyradiomics.exe %s %s', sRadiomicsPath, sNrrdImagesName, sNrrdLungMaskName);    
+                    sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdLungMaskName);    
     
                     sLungResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'LUNG_MASK');
     
@@ -888,7 +888,7 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
                     sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
                     writeYamlFile(sParametersFile, tReadiomics, 1);
     
-                    sCommandLine = sprintf('cmd.exe /c %spyradiomics.exe %s %s', sRadiomicsPath, sNrrdImagesName, sNrrdLiverMaskName);    
+                    sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdLiverMaskName);    
     
                     sLiverResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'LIVER_MASK');
     
@@ -909,7 +909,7 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
                     sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
                     writeYamlFile(sParametersFile, tReadiomics, 1);
     
-                    sCommandLine = sprintf('cmd.exe /c %spyradiomics.exe %s %s', sRadiomicsPath, sNrrdImagesName, sNrrdParotidMaskName);    
+                    sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdParotidMaskName);    
     
                     sParotidResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'PAROTID_MASK');
     
@@ -930,7 +930,7 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
                     sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
                     writeYamlFile(sParametersFile, tReadiomics, 1);
     
-                    sCommandLine = sprintf('cmd.exe /c %spyradiomics.exe %s %s', sRadiomicsPath, sNrrdImagesName, sNrrdBloodPoolMaskName);    
+                    sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdBloodPoolMaskName);    
     
                     sBloodPoolResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'BLOOD_POOL_MASK');
     
@@ -951,7 +951,7 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
                     sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
                     writeYamlFile(sParametersFile, tReadiomics, 1);
     
-                    sCommandLine = sprintf('cmd.exe /c %spyradiomics.exe %s %s', sRadiomicsPath, sNrrdImagesName, sNrrdLymphNodesMaskName);    
+                    sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdLymphNodesMaskName);    
     
                     sLymphNodesResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'LYMPH_NODES_MASK');
     
@@ -972,7 +972,7 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
                     sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
                     writeYamlFile(sParametersFile, tReadiomics, 1);
     
-                    sCommandLine = sprintf('cmd.exe /c %spyradiomics.exe %s %s', sRadiomicsPath, sNrrdImagesName, sNrrdPrimaryDiseaseMaskName);    
+                    sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdPrimaryDiseaseMaskName);    
     
                     sPrimaryDiseaseResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'PRIMARY_DISEASE_MASK');
     
@@ -993,7 +993,7 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
                     sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
                     writeYamlFile(sParametersFile, tReadiomics, 1);
     
-                    sCommandLine = sprintf('cmd.exe /c %spyradiomics.exe %s %s', sRadiomicsPath, sNrrdImagesName, sNrrdUnknowMaskName);    
+                    sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdUnknowMaskName);    
     
                     sUnknowResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'UNKNOW_MASK');
     
@@ -1016,7 +1016,7 @@ function extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSU
                 sParametersFile = sprintf('%sparameters%d.yaml', sNrrdTmpDir, vv);
                 writeYamlFile(sParametersFile, tReadiomics, vv);
         
-                sCommandLine = sprintf('cmd.exe /c %spyradiomics.exe %s %s', sRadiomicsPath, sNrrdImagesName, sNrrdMaskName);    
+                sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdMaskName);    
     
                 acResultFile{vv} = sprintf('%s%s.csv', sNrrdTmpDir, cleanString(atVoiInput{vv}.Label));
                 

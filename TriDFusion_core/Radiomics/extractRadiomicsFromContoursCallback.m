@@ -27,11 +27,11 @@ function extractRadiomicsFromContoursCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    sRadiomicsPath = validateSegmentatorInstallation();
+    sRadiomicsScript = validateRadiomicsInstallation();
     
-    if ~isempty(sRadiomicsPath) % External PyRadiomics is installed
+    if ~isempty(sRadiomicsScript) % External PyRadiomics is installed
 
-        extractRadiomicsDialog(sRadiomicsPath);
+        extractRadiomicsDialog(sRadiomicsScript);
         
     end
 

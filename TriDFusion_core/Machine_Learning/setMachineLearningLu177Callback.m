@@ -27,10 +27,11 @@ function setMachineLearningLu177Callback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    sSegmentatorPath = validateSegmentatorInstallation();
+    [sSegmentatorScript, ~] = validateSegmentatorInstallation();
+
     dlgMachineLearningLu177  = [];
   
-    if ~isempty(sSegmentatorPath) % External Segmentor is installed
+    if ~isempty(sSegmentatorScript) % External Segmentor is installed
 
         DLG_LU177_PERCENT_X = 380;
         DLG_LU177_PERCENT_Y = 355;
@@ -434,7 +435,7 @@ function setMachineLearningLu177Callback(~, ~)
 
         delete(dlgMachineLearningLu177);
 
-        setMachineLearningLu177(sSegmentatorPath, tLu177); 
+        setMachineLearningLu177(sSegmentatorScript, tLu177); 
     end
     
 end

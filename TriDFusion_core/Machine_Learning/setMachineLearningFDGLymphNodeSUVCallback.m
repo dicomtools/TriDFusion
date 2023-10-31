@@ -26,11 +26,14 @@ function setMachineLearningFDGLymphNodeSUVCallback(~, ~)
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-    sSegmentatorPath = validateSegmentatorInstallation();
+
+    [sSegmentatorScript, ~] = validateSegmentatorInstallation();
+    
+
     dlgFDGLymphNodeSUVSegmentation  = [];
   
-    if ~isempty(sSegmentatorPath) % External Segmentor is installed
-
+    if ~isempty(sSegmentatorScript) ... % External Segmentor is installed
+        
         DLG_FDGLYMPHNODE_PERCENT_X = 380;
         DLG_FDGLYMPHNODE_PERCENT_Y = 440;
     
@@ -489,7 +492,7 @@ function setMachineLearningFDGLymphNodeSUVCallback(~, ~)
 
         delete(dlgFDGLymphNodeSUVSegmentation);
 
-        setMachineLearningFDGLymphNodeSUV(sSegmentatorPath, tLymphNodeSUV); 
+        setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV); 
     end
     
 end

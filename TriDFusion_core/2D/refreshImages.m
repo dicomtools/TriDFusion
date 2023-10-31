@@ -38,6 +38,7 @@ function refreshImages()
 
     im = squeeze(dicomBuffer('get', [], dSeriesOffset));
 
+
     aBufferSize = size(im);
 
     if overlayActivate('get') == true

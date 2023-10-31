@@ -27,11 +27,12 @@ function setMachineLearning3DLungShuntCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    sSegmentatorPath = validateSegmentatorInstallation();
+    [sSegmentatorScript, sSegmentatorCombineMasks] = validateSegmentatorInstallation();
     
-    if ~isempty(sSegmentatorPath) % External Segmentor is installed
+    if ~isempty(sSegmentatorScript) && ... % External Segmentor is installed
+       ~isempty(sSegmentatorCombineMasks)
 
-        setMachineLearning3DLungShunt(sSegmentatorPath, true, true);
+        setMachineLearning3DLungShunt(sSegmentatorScript, sSegmentatorCombineMasks, true, true);
 
 %         pixelEdge('set', false);
 %         

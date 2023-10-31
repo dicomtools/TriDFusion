@@ -27,11 +27,11 @@ function setMachineLearningPETLiverDosimetryCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    sSegmentatorPath = validateSegmentatorInstallation();
+    [sSegmentatorScript, ~] = validateSegmentatorInstallation();
     
-    if ~isempty(sSegmentatorPath) % External Segmentor is installed
+    if ~isempty(sSegmentatorScript) % External Segmentor is installed
 
-        setMachineLearningPETLiverDosimetry(sSegmentatorPath);
+        setMachineLearningPETLiverDosimetry(sSegmentatorScript);
         
     end
 

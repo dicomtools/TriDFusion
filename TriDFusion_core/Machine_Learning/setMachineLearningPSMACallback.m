@@ -26,10 +26,12 @@ function setMachineLearningPSMACallback(~, ~)
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-    sSegmentatorPath = validateSegmentatorInstallation();
+
+    [sSegmentatorScript, ~] = validateSegmentatorInstallation();
+
     dlgMachineLearningPSMA  = [];
   
-    if ~isempty(sSegmentatorPath) % External Segmentor is installed
+    if ~isempty(sSegmentatorScript) % External Segmentor is installed
 
         DLG_PSMA_PERCENT_X = 380;
         DLG_PSMA_PERCENT_Y = 355;
@@ -419,7 +421,7 @@ function setMachineLearningPSMACallback(~, ~)
         tPSMA.exclude.organ.brain       = get(chkPSMABrain      , 'value');
         tPSMA.exclude.organ.kidneyLeft  = get(chkPSMAKidneyLeft , 'value');
         tPSMA.exclude.organ.kidneyRight = get(chkPSMAKidneyRight, 'value');
-        tPSMA.exclude.organ.spleen      = get(chkPSMASpleen, 'value');
+        tPSMA.exclude.organ.spleen      = get(chkPSMASpleen     , 'value');
 
         % Gastrointestinal Tract Name
 
@@ -433,7 +435,7 @@ function setMachineLearningPSMACallback(~, ~)
 
         delete(dlgMachineLearningPSMA);
 
-        setMachineLearningPSMA(sSegmentatorPath, tPSMA); 
+        setMachineLearningPSMA(sSegmentatorScript, tPSMA); 
     end
     
 end

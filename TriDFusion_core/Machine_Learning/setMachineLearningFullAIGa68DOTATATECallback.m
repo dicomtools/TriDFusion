@@ -27,10 +27,11 @@ function setMachineLearningFullAIGa68DOTATATECallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    sSegmentatorPath = validateSegmentatorInstallation();
+    [sSegmentatorScript, ~] = validateSegmentatorInstallation();
+
     sOnnxPath = validateOnnxInstallation();
   
-    if ~isempty(sSegmentatorPath) && ... % External Segmentor is installed
+    if ~isempty(sSegmentatorScript) && ... % External Segmentor is installed
        ~isempty(sOnnxPath)
 
         DLG_Ga68DOTATATE_X = 380;
@@ -1003,6 +1004,7 @@ function setMachineLearningFullAIGa68DOTATATECallback(~, ~)
         excludeGa68DOTATATEUrinaryBladder('set', bObjectValue);
 
     end
+
     function chkFullAIGa68DOTATATEEnhancedBoneMaskLesionCallback(hObject, ~)
 
         bObjectValue = get(chkFullAIGa68DOTATATEEnhancedBoneMaskLesion, 'Value');
@@ -1091,7 +1093,7 @@ function setMachineLearningFullAIGa68DOTATATECallback(~, ~)
 
         delete(dlgFullAIGa68DOTATATE);
 
-        setMachineLearningFullAIGa68DOTATATE(sSegmentatorPath, sOnnxPath, dTrainedModel, tGa68DOTATATE);
+        setMachineLearningFullAIGa68DOTATATE(sSegmentatorScript, sOnnxPath, dTrainedModel, tGa68DOTATATE);
 
     end
 

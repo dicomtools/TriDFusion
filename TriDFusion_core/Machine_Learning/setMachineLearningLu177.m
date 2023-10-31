@@ -1,5 +1,5 @@
-function setMachineLearningLu177(sSegmentatorPath, tLu177)
-%function setMachineLearningLu177(sSegmentatorPath, tLu177)
+function setMachineLearningLu177(sSegmentatorScript, tLu177)
+%function setMachineLearningLu177(sSegmentatorScript, tLu177)
 %Run Lu177 threshold base segmentation with machine learning organ exclusion.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -216,9 +216,9 @@ function setMachineLearningLu177(sSegmentatorPath, tLu177)
         if ispc % Windows
       
 %            if fastMachineLearningDialog('get') == true
-%                sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s --fast', sSegmentatorPath, sNiiFullFileName, sSegmentationFolderName);    
+%                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s --fast', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName);    
 %            else
-                sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s --fast --force_split --body_seg', sSegmentatorPath, sNiiFullFileName, sSegmentationFolderName);    
+                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s --fast --force_split --body_seg', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName);    
 %            end
         
             [bStatus, sCmdout] = system(sCommandLine);

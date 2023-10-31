@@ -1,5 +1,5 @@
-function setMachineLearningFDGLymphNodeSUV(sSegmentatorPath, tLymphNodeSUV)
-%function setMachineLearningFDGLymphNodeSUV(sSegmentatorPath, tLymphNodeSUV)
+function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
+%function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
 %Run FDG Lymph Node Segmentation base on a SUV treshold.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -159,9 +159,9 @@ function setMachineLearningFDGLymphNodeSUV(sSegmentatorPath, tLymphNodeSUV)
         if ispc % Windows
       
 %            if fastMachineLearningDialog('get') == true
-%                sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s --fast', sSegmentatorPath, sNiiFullFileName, sSegmentationFolderName);    
+%                sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s --fast', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName);    
 %            else
-                sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s --fast --force_split --body_seg', sSegmentatorPath, sNiiFullFileName, sSegmentationFolderName);    
+                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s --fast --force_split --body_seg', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName);    
 %            end
         
             [bStatus, sCmdout] = system(sCommandLine);

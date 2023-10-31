@@ -27,10 +27,11 @@ function setMachineLearningGa68DOTATATECallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    sSegmentatorPath = validateSegmentatorInstallation();
+    [sSegmentatorScript, ~] = validateSegmentatorInstallation();
+
     dlgGa68DOTATATE  = [];
   
-    if ~isempty(sSegmentatorPath) % External Segmentor is installed
+    if ~isempty(sSegmentatorScript) % External Segmentor is installed
         
         DLG_Ga68DOTATATE_X = 380;
         DLG_Ga68DOTATATE_Y = 650;
@@ -891,7 +892,7 @@ function setMachineLearningGa68DOTATATECallback(~, ~)
         
         delete(dlgGa68DOTATATE);
 
-        setMachineLearningGa68DOTATATE(sSegmentatorPath, tGa68DOTATATE);
+        setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE);
     end
 
 end

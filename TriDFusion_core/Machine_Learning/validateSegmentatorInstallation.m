@@ -1,5 +1,5 @@
-function sSegmentatorPath = validateSegmentatorInstallation()
-%function sSegmentatorPath = validateSegmentatorInstallation()
+function [sSegmentatorScript, sSegmentatorCombineMasks] = validateSegmentatorInstallation()
+%function [sSegmentatorScript, sSegmentatorCombineMasks] = validateSegmentatorInstallation()
 %Validate machine learning totalSegmentor installation.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,7 +27,8 @@ function sSegmentatorPath = validateSegmentatorInstallation()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    sSegmentatorPath = ''; 
+    sSegmentatorScript = '';
+    sSegmentatorCombineMasks = '';
 
     if ispc % Windows
         
@@ -37,9 +38,15 @@ function sSegmentatorPath = validateSegmentatorInstallation()
             progressBar( 1, 'Error: TotalSegmentator not detected!');
             errordlg(sprintf('TotalSegmentator not detected!\n Installation instruction can be found at:\n https://github.com/wasserth/TotalSegmentator'), 'TotalSegmentator Validation');  
         else
-            [sFilePath, ~, ~] = fileparts(char(sCmdout));
+             sSegmentatorScript = strtrim(char(sCmdout));
 
-            sSegmentatorPath = sprintf('%s/', strtrim(sFilePath));
+             [bStatus, sCmdout] = system('WHERE totalseg_combine_masks');
+             if bStatus 
+                progressBar( 1, 'Error: TotalSegmentator totalseg_combine_masks not detected!');
+                errordlg(sprintf('TotalSegmentator totalseg_combine_masks not detected!\n Installation instruction can be found at:\n https://github.com/wasserth/TotalSegmentator'), 'TotalSegmentator Validation');  
+             else
+                sSegmentatorCombineMasks = strtrim(char(sCmdout));                 
+             end
         end
               
         

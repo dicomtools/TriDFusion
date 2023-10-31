@@ -26,10 +26,12 @@ function setMachineLearningFDHTCallback(~, ~)
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-    sSegmentatorPath = validateSegmentatorInstallation();
+
+    [sSegmentatorScript, ~] = validateSegmentatorInstallation();
+
     dlgMachineLearningFDHT  = [];
   
-    if ~isempty(sSegmentatorPath) % External Segmentor is installed
+    if ~isempty(sSegmentatorScript) % External Segmentor is installed
 
         DLG_FDHT_PERCENT_X = 380;
         DLG_FDHT_PERCENT_Y = 355;
@@ -433,7 +435,7 @@ function setMachineLearningFDHTCallback(~, ~)
 
         delete(dlgMachineLearningFDHT);
 
-        setMachineLearningFDHT(sSegmentatorPath, tFDHT); 
+        setMachineLearningFDHT(sSegmentatorScript, tFDHT); 
     end
     
 end

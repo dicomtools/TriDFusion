@@ -1,5 +1,5 @@
-function setMachineLearningFullAIGa68DOTATATE(sSegmentatorPath, sOnnxPath, dModel, tGa68DOTATATE)
-%function setMachineLearningFullAIGa68DOTATATE(sSegmentatorPath, sOnnxPath, dModel, tGa68DOTATATE)
+function setMachineLearningFullAIGa68DOTATATE(sSegmentatorScript, sOnnxPath, dModel, tGa68DOTATATE)
+%function setMachineLearningFullAIGa68DOTATATE(sSegmentatorScript, sOnnxPath, dModel, tGa68DOTATATE)
 %Run machine learning full AI Ga68 DOTATATE Segmentation.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -177,7 +177,7 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorPath, sOnnxPath, dMode
         if ispc % Windows
       
             if tGa68DOTATATE.classification.enable == true 
-                sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s --fast --force_split --body_seg', sSegmentatorPath, sCTNiiFullFileName, sSegmentationFolderName);    
+                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s --fast --force_split --body_seg', sSegmentatorScript, sCTNiiFullFileName, sSegmentationFolderName);    
         
                 [bStatus, sCmdout] = system(sCommandLine);
             else

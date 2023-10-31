@@ -1,5 +1,5 @@
-function sRadiomicsPath = validateRadiomicsInstallation()
-%function sRadiomicsPath = validateRadiomicsInstallation()
+function sRadiomicsScript = validateRadiomicsInstallation()
+%function sRadiomicsScript = validateRadiomicsInstallation()
 %Validate radiomics installation.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,31 +27,29 @@ function sRadiomicsPath = validateRadiomicsInstallation()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    sRadiomicsPath = ''; 
+    sRadiomicsScript = '';
 
     if ispc % Windows
         
-        [bStatus, sCmdout] = system('WHERE pyradiomics.exe');
+        [bStatus, sCmdout] = system('WHERE pyRadiomics');
         
         if bStatus 
-            progressBar( 1, 'Error: Pyradiomics not detected!');
-            errordlg(sprintf('Pyradiomics not detected!\n Installation instruction can be found at:\n https://pyradiomics.readthedocs.io/en/latest/installation.html'), 'Pyradiomics Validation');  
+            progressBar( 1, 'Error: pyRadiomics not detected!');
+            errordlg(sprintf('pyRadiomics not detected!\n Installation instruction can be found at:\n https://pyradiomics.readthedocs.io/en/latest/installation.html'), 'Radiomics Validation');  
         else
-            [sFilePath, ~, ~] = fileparts(char(sCmdout));
-
-            sRadiomicsPath = sprintf('%s/', strtrim(sFilePath));
+             sRadiomicsScript = strtrim(char(sCmdout));
         end
               
         
     elseif isunix % Linux is not yet supported
                 
         progressBar( 1, 'Error: Radiomics for Linux is not supported');
-        errordlg('Radiomics for Linux is not supported', 'Machine Learning Validation');
+        errordlg('Radiomics for Linux is not supported', 'Radiomics Validation');
         
     else % Mac is not yet supported
                 
         progressBar( 1, 'Error: Radiomics for Mac is not supported');
-        errordlg('Radiomics for Mac is not supported', 'Machine Learning Validation');
+        errordlg('Radiomics for Mac is not supported', 'Radiomics Validation');
     end
               
     

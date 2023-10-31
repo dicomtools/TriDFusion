@@ -1,5 +1,5 @@
-function extractRadiomicsDialog(sRadiomicsPath)
-%function extractRadiomicsFromContours(sRadiomicsPath)
+function extractRadiomicsDialog(sRadiomicsScript)
+%function extractRadiomicsFromContours(sRadiomicsScript)
 %Run PyRadiomics, from a mask created from all contours.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -4045,13 +4045,13 @@ function extractRadiomicsDialog(sRadiomicsPath)
         end
 
         if bAllContours == true % All Contours
-            extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSUVScale, bEntireVolume, bContourType);
+            extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, dSUVScale, bEntireVolume, bContourType);
         else % single contour
             if bContour == false && bEntireVolume == false % 
                 progressBar('Error: At least one contour option must be selected!');
                 errordlg('At least one contour option must be selected!!', 'Contour validation');  
             else    
-                extractRadiomicsFromContours(sRadiomicsPath, tReadiomics, bSUVUnit, dSUVScale, bEntireVolume, bContourType, dContourOffset);
+                extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, dSUVScale, bEntireVolume, bContourType, dContourOffset);
             end
         end
 
