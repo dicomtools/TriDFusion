@@ -1,31 +1,31 @@
-function aLogicalMaskOut = roiConstraintToMask(aImage, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask)
-%function  aLogicalMaskOut = roiConstraintToMask(aImage, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask) 
+function aLogicalMaskOut = roiConstraintToMask(aImage, atRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask)
+%function  aLogicalMaskOut = roiConstraintToMask(aImage, atRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask) 
 %Return a constrainted image from the roi tag.
-%See TdTagOffsetDFuison.doc (or pdf) for more information about options.
+%See TdRoiTagOffsetDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% CopydTagOffsetght 2022, Daniel Lafontaine, on behalf of the TdTagOffsetDFusion development team.
+% CopydRoiTagOffsetght 2022, Daniel Lafontaine, on behalf of the TdRoiTagOffsetDFusion development team.
 % 
-% This file is part of The TdTagOffsetple Dimention Fusion (TdTagOffsetDFusion).
+% This file is part of The TdRoiTagOffsetple Dimention Fusion (TdRoiTagOffsetDFusion).
 % 
-% TdTagOffsetDFusion development has been led by:  Daniel Lafontaine
+% TdRoiTagOffsetDFusion development has been led by:  Daniel Lafontaine
 % 
-% TdTagOffsetDFusion is distdTagOffsetbuted under the terms of the Lesser GNU Public License. 
+% TdRoiTagOffsetDFusion is distdRoiTagOffsetbuted under the terms of the Lesser GNU Public License. 
 % 
-%     This version of TdTagOffsetDFusion is free software: you can redistdTagOffsetbute it and/or modify
+%     This version of TdRoiTagOffsetDFusion is free software: you can redistdRoiTagOffsetbute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
 % 
-% TdTagOffsetDFusion is distdTagOffsetbuted in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+% TdRoiTagOffsetDFusion is distdRoiTagOffsetbuted in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 % without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TdTagOffsetDFusion. If not, see <http://www.gnu.org/licenses/>. 
+% along with TdRoiTagOffsetDFusion. If not, see <http://www.gnu.org/licenses/>. 
 
     if canUseGPU()        
         aLogicalMask = gpuArray(zeros(size(aImage)));
@@ -39,20 +39,20 @@ function aLogicalMaskOut = roiConstraintToMask(aImage, tRoiInput, asConstraintTa
             
             sConstraintTag  = asConstraintTagList{cl};
             
-            aTagOffset = strcmp( cellfun( @(tRoiInput) tRoiInput.Tag, tRoiInput, 'uni', false ), sConstraintTag );
+            aRoiTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), sConstraintTag );
              
-            dTagOffset = find(aTagOffset, 1);
+            dRoiTagOffset = find(aRoiTagOffset, 1);
 
-            if ~isempty(dTagOffset)
+            if ~isempty(dRoiTagOffset)
                                           
-                sAxe   = tRoiInput{dTagOffset}.Axe;
+                sAxe   = atRoiInput{dRoiTagOffset}.Axe;
 
                 switch lower(sAxe)
 
                     case 'axe'
 
                         aSlice = aImage(:,:);
-                        roiMask = roiTemplateToMask(tRoiInput{dTagOffset}, aSlice);
+                        roiMask = roiTemplateToMask(atRoiInput{dRoiTagOffset}, aSlice);
 
                         aSlice( roiMask) = 1;
                         aSlice(~roiMask) = 0;
@@ -71,15 +71,14 @@ function aLogicalMaskOut = roiConstraintToMask(aImage, tRoiInput, asConstraintTa
             sConstraintTag  = asConstraintTagList{cl};
             sConstraintType = asConstraintTypeList{cl};
 
-            aTagOffset = strcmp( cellfun( @(tRoiInput) tRoiInput.Tag, tRoiInput, 'uni', false ), sConstraintTag );
+            aRoiTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), sConstraintTag );
              
-            dTagOffset = find(aTagOffset, 1);
+            dRoiTagOffset = find(aRoiTagOffset, 1);
 
-
-            if ~isempty(dTagOffset)
-                                            
-                dSliceNb = tRoiInput{dTagOffset}.SliceNb;
-                sAxe     = tRoiInput{dTagOffset}.Axe;
+            if ~isempty(dRoiTagOffset)
+                 
+                dSliceNb = atRoiInput{dRoiTagOffset}.SliceNb;
+                sAxe     = atRoiInput{dRoiTagOffset}.Axe;
 
                 switch lower(sAxe)
 
@@ -87,7 +86,7 @@ function aLogicalMaskOut = roiConstraintToMask(aImage, tRoiInput, asConstraintTa
 
                          if strcmpi(sConstraintType, 'Inside Every Slice') 
                             
-                            roiMask = roiTemplateToMask(tRoiInput{dTagOffset}, permute(aImage(1,:,:), [3 2 1]));
+                            roiMask = roiTemplateToMask(atRoiInput{dRoiTagOffset}, permute(aImage(1,:,:), [3 2 1]));
                             for dd=1:size(aImage, 1)
 
                                 aSlice  = permute(aImage(dd,:,:), [3 2 1]);
@@ -102,7 +101,7 @@ function aLogicalMaskOut = roiConstraintToMask(aImage, tRoiInput, asConstraintTa
                          else
 
                             aSlice  = permute(aImage(dSliceNb,:,:), [3 2 1]);
-                            roiMask = roiTemplateToMask(tRoiInput{dTagOffset}, aSlice);
+                            roiMask = roiTemplateToMask(atRoiInput{dRoiTagOffset}, aSlice);
 
                             aSlice( roiMask) = 1;
                             aSlice(~roiMask) = 0;
@@ -116,7 +115,7 @@ function aLogicalMaskOut = roiConstraintToMask(aImage, tRoiInput, asConstraintTa
 
                          if strcmpi(sConstraintType, 'Inside Every Slice')
 
-                            roiMask = roiTemplateToMask(tRoiInput{dTagOffset}, permute(aImage(:,1,:), [3 1 2]));
+                            roiMask = roiTemplateToMask(atRoiInput{dRoiTagOffset}, permute(aImage(:,1,:), [3 1 2]));
 
                             for dd=1:size(aImage, 2)
 
@@ -132,7 +131,7 @@ function aLogicalMaskOut = roiConstraintToMask(aImage, tRoiInput, asConstraintTa
                          else
 
                             aSlice = permute(aImage(:,dSliceNb,:), [3 1 2]);
-                            roiMask = roiTemplateToMask(tRoiInput{dTagOffset}, aSlice);
+                            roiMask = roiTemplateToMask(atRoiInput{dRoiTagOffset}, aSlice);
                             
                             aSlice( roiMask) = 1;
                             aSlice(~roiMask) = 0;
@@ -147,7 +146,7 @@ function aLogicalMaskOut = roiConstraintToMask(aImage, tRoiInput, asConstraintTa
 
                          if strcmpi(sConstraintType, 'Inside Every Slice') 
 
-                            roiMask = roiTemplateToMask(tRoiInput{dTagOffset}, aImage(:,:,1));
+                            roiMask = roiTemplateToMask(atRoiInput{dRoiTagOffset}, aImage(:,:,1));
 
                             for dd=1:size(aImage, 3)
 
@@ -161,7 +160,7 @@ function aLogicalMaskOut = roiConstraintToMask(aImage, tRoiInput, asConstraintTa
                          else
 
                             aSlice  = aImage(:,:,dSliceNb);
-                            roiMask = roiTemplateToMask(tRoiInput{dTagOffset}, aSlice);
+                            roiMask = roiTemplateToMask(atRoiInput{dRoiTagOffset}, aSlice);
 
                             aSlice( roiMask) =1;
                             aSlice(~roiMask) =0;
@@ -178,9 +177,11 @@ function aLogicalMaskOut = roiConstraintToMask(aImage, tRoiInput, asConstraintTa
     
     if aLogicalMask(aLogicalMask>0) % Need at least one constraint
 
-        if numel(asConstraintTagList) > 1
+        dNbConstraint = max(aLogicalMask, [], 'all');
+
+        if dNbConstraint > 1
             
-            aLogicalMask(aLogicalMask<numel(asConstraintTagList)) = 0;
+            aLogicalMask(aLogicalMask<dNbConstraint) = 0;
             aLogicalMask(aLogicalMask~=0)=1;
         end
          

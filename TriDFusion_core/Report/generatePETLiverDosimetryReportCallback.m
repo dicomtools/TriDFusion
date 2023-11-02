@@ -1262,6 +1262,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
             end
                 
             set(axePETLiverDosimetryReport,'LooseInset', get(axePETLiverDosimetryReport,'TightInset'));
+            unit = get(figPETLiverDosimetryReport,'Units');
             set(figPETLiverDosimetryReport,'Units','inches');
             pos = get(figPETLiverDosimetryReport,'Position');
 
@@ -1276,6 +1277,8 @@ function generatePETLiverDosimetryReportCallback(~, ~)
             end
 
             print(figPETLiverDosimetryReport, sFileName, '-image', '-dpdf', '-r0');
+
+            set(figPETLiverDosimetryReport,'Units',unit);
 
             try
                 open(sFileName);

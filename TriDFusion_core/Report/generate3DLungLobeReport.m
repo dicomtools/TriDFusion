@@ -3294,6 +3294,7 @@ function generate3DLungLobeReport(bInitReport)
             end
                 
             set(axe3DLobeLungReport,'LooseInset', get(axe3DLobeLungReport,'TightInset'));
+            unit = get(fig3DLobeLungReport,'Units');
             set(fig3DLobeLungReport,'Units','inches');
             pos = get(fig3DLobeLungReport,'Position');
 
@@ -3308,6 +3309,7 @@ function generate3DLungLobeReport(bInitReport)
             end
 
             print(fig3DLobeLungReport, sFileName, '-image', '-dpdf', '-r0');
+            set(fig3DLobeLungReport,'Units',unit);
 
             try
                 open(sFileName);

@@ -2995,6 +2995,7 @@ function generateContourReportCallback(~, ~)
             end
                 
             set(axeContourReport,'LooseInset', get(axeContourReport,'TightInset'));
+            unit = get(figContourReport,'Units');
             set(figContourReport,'Units','inches');
             pos = get(figContourReport,'Position');
 
@@ -3009,7 +3010,10 @@ function generateContourReportCallback(~, ~)
             end
 
             print(figContourReport, sFileName, '-image', '-dpdf', '-r0');
-            
+         
+            set(figContourReport,'Units',unit);
+  
+        
             try
                 open(sFileName);
             catch
@@ -3279,7 +3283,8 @@ function generateContourReportCallback(~, ~)
                 imgFullScreenIcon = double(imgFullScreenIcon)/255;
             else
                 imgFullScreenIcon = zeros([16 16 3]);
-            end             
+            end      
+
             aFigPosition = get(figContourReport, 'Position');
             aBtnPosition = [aFigPosition(3)-40 aFigPosition(4)-25 20 20];
 

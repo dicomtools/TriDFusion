@@ -1680,6 +1680,7 @@ function generate3DLungShuntReport(bInitReport)
             end
                 
             set(axe3DLungShuntReport,'LooseInset', get(axe3DLungShuntReport,'TightInset'));
+            unit = get(fig3DLungShuntReport,'Units');
             set(fig3DLungShuntReport,'Units','inches');
             pos = get(fig3DLungShuntReport,'Position');
 
@@ -1694,6 +1695,7 @@ function generate3DLungShuntReport(bInitReport)
             end
 
             print(fig3DLungShuntReport, sFileName, '-image', '-dpdf', '-r0');
+            set(fig3DLungShuntReport,'Units',unit);
 
             try
                 open(sFileName);
