@@ -2042,7 +2042,9 @@ end
                     alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-get(uiAlphaSliderPtr('get'), 'Value') );                                
                 end 
             end
-            
+
+            setFusionColorbarLabel();         
+
         else
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
             isMoveImageActivated('set', false);
@@ -2136,14 +2138,20 @@ end
                 end
                 
                 if link2DMip('get') == true && isVsplash('get') == false      
+
                     mipFusionBuffer('reset');               
+                    
                     axesMip = axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
                     if ~isempty(axesMip)
                         alpha(axesMip, 1 );                                
                     end
                 end                 
-            end            
-        
+            end      
+
+            setColorbarLabel();
+
+            setColorbarVisible('on');
+       
         end
         
         uiLogo = logoObject('get');

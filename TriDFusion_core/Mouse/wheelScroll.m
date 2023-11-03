@@ -35,7 +35,9 @@ function wheelScroll(~, evnt)
        switchToMIPMode('get')     == false
 
         mGate = gateIconMenuObject('get');
+
         if strcmpi(get(mGate, 'State'), 'on')
+
             if evnt.VerticalScrollCount > 0                       
                 oneGate('Backward');                                              
             else
@@ -49,14 +51,19 @@ function wheelScroll(~, evnt)
             gca = getAxeFromMousePosition(dSeriesOffset);
 
             switch gca
+
                 case axes1Ptr('get', [], dSeriesOffset)
+
                     if evnt.VerticalScrollCount > 0
+
                         if sliceNumber('get', 'coronal') > 1
+
                             sliceNumber('set', 'coronal', ...
                             sliceNumber('get', 'coronal')-1);
                         end
                     else
                         if sliceNumber('get', 'coronal') < aImageSize(1)
+
                             sliceNumber('set', 'coronal', ...
                             sliceNumber('get', 'coronal')+1);
                         end
@@ -65,13 +72,17 @@ function wheelScroll(~, evnt)
                     set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / aImageSize(1));
 
                 case axes2Ptr('get', [], dSeriesOffset)
+
                     if evnt.VerticalScrollCount > 0
+
                          if sliceNumber('get', 'sagittal') > 1
+
                              sliceNumber('set', 'sagittal', ...
                              sliceNumber('get', 'sagittal')-1);
                          end
                     else
                          if sliceNumber('get', 'sagittal') < aImageSize(2)
+                             
                              sliceNumber('set', 'sagittal', ...
                              sliceNumber('get', 'sagittal')+1);
                          end

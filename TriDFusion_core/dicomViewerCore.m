@@ -1972,6 +1972,9 @@ function dicomViewerCore()
             setColorbarVisible('off');
         end
     end
+
+    setColorbarLabel();
+ 
 %                     setFusionColorbarVisible('off');  
 %    sUnitDisplay = getSerieUnitValue(dOffset);
 
@@ -2039,6 +2042,7 @@ function dicomViewerCore()
             set(uiSliderTraPtr('get'), 'Visible', 'on');
         end
     end
+
 
     if isFusion('get') == true
         isFusion('set', false);

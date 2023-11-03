@@ -88,7 +88,7 @@ function aBufferEdge = getEdgeDetection(aBuffer, sMethod, dFudgeFactor)
     aBufferEdge = aBuffer;
     
     catch
-        progressBar(1, 'Error:getEdgeDetection()');           
+        progressBar(1, 'Error: getEdgeDetection()');           
     end
     
     if isMoveImageActivated('get') == true

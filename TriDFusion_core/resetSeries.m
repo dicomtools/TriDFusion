@@ -198,6 +198,8 @@ function resetSeries(dOffset, bInitDisplay)
     
     set(uiSeriesPtr('get'), 'Value', dInitOffset);
 
+    setColorbarLabel();
+
     if bInitDisplay == true
         
 %        if bImageIsResampled 

@@ -29,19 +29,20 @@ function setColorbarLabel()
 
     tInput = inputTemplate('get');
     
-    dOffset = get(uiSeriesPtr('get'), 'Value');
-    if dOffset > numel(tInput)
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+    if dSeriesOffset > numel(tInput)
         return;
     end
     
     sLabel = '';
     
-    if tInput(dOffset).bDoseKernel == true
+    if tInput(dSeriesOffset).bDoseKernel == true
         sLabel = sprintf('Dose');
     end
     
-    if tInput(dOffset).bEdgeDetection == true
-        if tInput(dOffset).bDoseKernel == true
+    if tInput(dSeriesOffset).bEdgeDetection == true
+
+        if tInput(dSeriesOffset).bDoseKernel == true
             sLabel = sprintf('%s, Edge', sLabel);
         else
             sLabel = sprintf('Edge');

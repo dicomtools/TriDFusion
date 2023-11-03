@@ -1469,11 +1469,11 @@ function refreshImages()
 
     end
 
-    setColorbarLabel();
-
-    if isFusion('get') == true
-        setFusionColorbarLabel();
-    end
+%     setColorbarLabel();
+% 
+%     if isFusion('get') == true
+%         setFusionColorbarLabel();
+%     end
 
     refreshImageRotation();
 

@@ -4,9 +4,6 @@ function initKernelPanel()
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
-%        Brad Beattie, beattieb@mskcc.org
-%        C. Ross Schmidtlein, schmidtr@mskcc.org
-%        Assen Kirov, kirova@mskcc.org
 %
 %Last specifications modified:
 %
@@ -1155,6 +1152,9 @@ function initKernelPanel()
                           asKernelInterpolation{dInterpolationValue}, ...
                           bUseCtMap, ...
                           dCtOffset);
+
+            setColorbarLabel();
+           
         catch
             progressBar(1, 'Error: An error occur during kernel processing!');
             h = msgbox('Error: doseKernelCallback(): An error occur during kernel processing!', 'Error');
@@ -1276,6 +1276,8 @@ function initKernelPanel()
         aActivity(aLogicalMask==0) = aBuffer(aLogicalMask==0); % Set constraint 
 
         dicomBuffer('set', aActivity);
+        
+        setColorbarLabel();
 
         refreshImages();
         

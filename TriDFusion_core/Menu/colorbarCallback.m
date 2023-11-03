@@ -546,7 +546,8 @@ function colorbarCallback(hObject, ~)
 %                       numel(tMetaData) ~= 1 && ...
 %                       numel(tFuseMetaData) ~= 1
                  
-                    if numel(aFuseImage) ~= numel(aBufferImage) % Resample image                 
+                    if numel(aFuseImage) ~= numel(aBufferImage) % Resample image       
+
                         [aFuseImage, ~] = ...
                             resampleImageTransformMatrix(aFuseImage, ...
                                                          tFuseMetaData, ...
@@ -599,6 +600,8 @@ function colorbarCallback(hObject, ~)
                         
             inputTemplate('set', tInput);
 
+            setFusionColorbarLabel();         
+            
             refreshImages();
 
         end

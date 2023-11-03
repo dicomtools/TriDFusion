@@ -593,15 +593,18 @@ end
     % Set total dose
 
     tQuantification = quantificationTemplate('get', [], dSeriesOffset);
+    
     atCoreMetaData = dicomMetaData('get', [], dSeriesOffset);
     for jj=1:numel(atCoreMetaData)
         atCoreMetaData{jj}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose = tQuantification.tCount.dSum;
     end
+
     dicomMetaData('set', atCoreMetaData, dSeriesOffset);
 
     modifiedMatrixValueMenuOption('set', true);
 
     if exist('acActivityReport', 'var')
+
         if ~isempty(acActivityReport)
             sReport = strjoin(acActivityReport(1,:),',');    
             for jj=2:size(acActivityReport, 1) 

@@ -913,6 +913,8 @@ function initSegPanel()
 
         setQuantification(iOffset);
 
+        setColorbarLabel();
+
         refreshImages();
         
         computeMIPCallback();
@@ -1023,6 +1025,8 @@ function initSegPanel()
         lungSegmentation(dLungSegTreshValue, dLungSegRadiusValue);
 
         lungSegTreshValue('set', str2double(get(uiEditLungTreshold, 'String')));
+        
+        setColorbarLabel();
 
     end
 
@@ -1224,7 +1228,9 @@ function initSegPanel()
             aEdgeMip = computeMIP(aBuffer);
             mipBuffer('set', aEdgeMip, get(uiSeriesPtr('get'), 'Value'));
         end
-    
+
+        setColorbarLabel();
+
         refreshImages();
 
         set(hObject, 'Enable', 'on');

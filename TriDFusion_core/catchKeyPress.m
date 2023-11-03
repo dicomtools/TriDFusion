@@ -27,11 +27,14 @@ function catchKeyPress(~,evnt)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
+    persistent pdToggle;
+
     if isempty(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')))
         return;
     end
 
     if strcmpi(evnt.Key,'add')
+
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true 
@@ -52,6 +55,8 @@ function catchKeyPress(~,evnt)
 
                 multiFrameZoom('set', 'out', 1);
 
+                gca = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+
                 if multiFrameZoom('get', 'axe') ~= gca
                     multiFrameZoom('set', 'in', 1);
                 end
@@ -60,20 +65,26 @@ function catchKeyPress(~,evnt)
                 dZFactor = dZFactor+0.025;
                 multiFrameZoom('set', 'in', dZFactor);
 
+
                 switch gca
+
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
                         zoom(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
                         multiFrameZoom('set', 'axe', axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
 
                     case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
                         zoom(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
                         multiFrameZoom('set', 'axe', axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
                         
                     case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
                         zoom(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
                         multiFrameZoom('set', 'axe', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
                         
                     case axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
                         zoom(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
                         multiFrameZoom('set', 'axe', axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')));
                         
@@ -107,30 +118,39 @@ function catchKeyPress(~,evnt)
 
                 multiFrameZoom('set', 'in', 1);
 
+                gca = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+
                 if multiFrameZoom('get', 'axe') ~= gca
                     multiFrameZoom('set', 'out', 1);
                 end
 
                 dZFactor = multiFrameZoom('get', 'out');
+
                 if dZFactor > 0.025
                     dZFactor = dZFactor-0.025;
                     multiFrameZoom('set', 'out', dZFactor);
                 end
 
+
                 switch gca
+
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
                         zoom(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
                         multiFrameZoom('set', 'axe', axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
 
                     case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
                         zoom(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
                         multiFrameZoom('set', 'axe', axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
                         
                     case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
                         zoom(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
                         multiFrameZoom('set', 'axe', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
                         
                     case axesMIpPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
                         zoom(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
                         multiFrameZoom('set', 'axe', axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')));
                         
@@ -151,10 +171,15 @@ function catchKeyPress(~,evnt)
             flip3Dobject('up');    
         else               
             if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
-                
+
                 windowButton('set', 'down');  
+
+                gca = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+             
                 switch gca
+
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
                         if sliceNumber('get', 'coronal') == size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1)
                             iSliceNumber = 1;
                         else
@@ -166,6 +191,7 @@ function catchKeyPress(~,evnt)
                         set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1));
                         
                     case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
                         if sliceNumber('get', 'sagittal') == size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 2)
                             iSliceNumber = 1;
                         else
@@ -213,10 +239,15 @@ end
             flip3Dobject('down');   
         else
             if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
-                
+
                 windowButton('set', 'down');  
+
+                gca = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+           
                 switch gca
+
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
                         if sliceNumber('get', 'coronal') == 1
                             iSliceNumber = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1);
                         else
@@ -228,6 +259,7 @@ end
                         set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1));
                         
                     case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
                         if sliceNumber('get', 'sagittal') == 1
                             iSliceNumber = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 2);
                         else
@@ -402,13 +434,14 @@ end
             set(fiMainWindowPtr('get'), 'Pointer', 'fleur');           
         end
 
+        if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1   
 
-        if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1      
              resetAxePlotView(axePtr('get', [], dSeriesOffset));          
         else
             resetAxePlotView(axes1Ptr('get', [], dSeriesOffset));
             resetAxePlotView(axes2Ptr('get', [], dSeriesOffset));
             resetAxePlotView(axes3Ptr('get', [], dSeriesOffset));
+
             if link2DMip('get') == true && isVsplash('get') == false
                 resetAxePlotView(axesMipPtr('get', [], dSeriesOffset));
             end            
@@ -540,6 +573,7 @@ end
 %                sliderAlphaValue('set', 1);   
 
                 if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
+
                     alpha( axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
                     if dNbFusedSeries == 1
                         alpha( axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
@@ -548,15 +582,18 @@ end
                     alpha( axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
                     alpha( axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
                     alpha( axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
+
                     if link2DMip('get') == true  && isVsplash('get') == false                                        
                         set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
                         alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
                     end  
                     
                     if dNbFusedSeries == 1
+
                         alpha( axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
                         alpha( axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
                         alpha( axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
+
                         if link2DMip('get') == true  && isVsplash('get') == false                                        
                            set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
                            alpha( axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
@@ -579,12 +616,25 @@ end
                     setFusionColorbarPosition(ptrFusionColorbar);
                 end
 
+
+                asSeriesString = seriesDescription('get');
+
+                if ~isempty(asSeriesString) && dNbFusedSeries == 1
+
+                    if numel(asSeriesString) >= get(uiFusedSeriesPtr('get'), 'Value')
+                        
+                        ptrFusionColorbar = uiFusionColorbarPtr('get');
+                        
+                        ptrFusionColorbar.Label.String = asSeriesString{get(uiFusedSeriesPtr('get'), 'Value')};         
+                        uiFusionColorbarPtr('set', ptrFusionColorbar);
+                    end
+                end
+
                 setFusionColorbarVisible('on');
 
                 set(uiAlphaSliderPtr('get'), 'Enable', 'off');
 
                 setViewerDefaultColor(true, dicomMetaData('get'), atFuseMetaData);                        
-
 
             else
                 if keyPressFusionStatus('get') == 1
@@ -595,11 +645,13 @@ end
 %                    sliderAlphaValue('set', 0);   
 
                     if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
+
                         alpha( axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
                     else
                         alpha( axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
                         alpha( axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
                         alpha( axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
+
                         if link2DMip('get') == true  && isVsplash('get') == false                                        
                             set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
                             alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
@@ -608,6 +660,19 @@ end
                     end
 
                     % Deactivate fusion colobar
+
+                    asSeriesString = seriesDescription('get');
+
+                    if ~isempty(asSeriesString) && dNbFusedSeries == 1
+
+                        if numel(asSeriesString) >= get(uiSeriesPtr('get'), 'Value')
+        
+                            ptrColorbar = uiColorbarPtr('get');
+        
+                            ptrColorbar.Label.String = asSeriesString{get(uiSeriesPtr('get'), 'Value')};         
+                            uiColorbarPtr('set', ptrColorbar);
+                        end
+                    end
 
                     setColorbarVisible('on');
 
@@ -634,17 +699,20 @@ end
                         alpha( axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
                         alpha( axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
                         alpha( axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
+
                         if link2DMip('get') == true && isVsplash('get') == false                       
                             alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
                         end
                         
                         if dNbFusedSeries == 1
+
                             alpha( axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
                             alpha( axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
                             alpha( axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
+
                             if link2DMip('get') == true  && isVsplash('get') == false                                        
-                            set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
-                            alpha( axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
+                                set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
+                                alpha( axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
                             end                        
                         end                        
                    end   
@@ -671,7 +739,11 @@ end
                         setFusionColorbarPosition(ptrFusionColorbar);
                     end
 
+                    setColorbarLabel();                  
+
                     setColorbarVisible('on');
+
+                    setFusionColorbarLabel();
 
                     setFusionColorbarVisible('on');
 
@@ -684,7 +756,7 @@ end
             
 %            sliderAlphaCallback();
 
-            setFusionColorbarLabel();
+%             setFusionColorbarLabel();
 
                 
             refreshImages();   
@@ -1064,6 +1136,7 @@ end
                 pAxesMipText.Visible = 'off';
                
                 if isVsplash('get') == false
+
                     pAxes1ViewText   = axesText('get', 'axes1View'  );
                     pAxes2ViewText   = axesText('get', 'axes2View'  );
                     pAxes3ViewText   = axesText('get', 'axes3View'  );
@@ -1085,6 +1158,7 @@ end
             end
 
             if isVsplash('get') == true
+
                 ptMontageAxes1 = montageText('get', 'axes1');                 
                 for aa=1:numel(ptMontageAxes1)
                     ptMontageAxes1{aa}.Visible = 'off';
@@ -1104,6 +1178,7 @@ end
             overlayActivate('set', true);  
 
             if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
+
                 pAxeText = axesText('get', 'axe');
                 pAxeText.Visible = 'on';
                 
@@ -1143,6 +1218,7 @@ end
             end
 
             if isVsplash('get') == true
+
                 ptMontageAxes1 = montageText('get', 'axes1');                 
                 for aa=1:numel(ptMontageAxes1)
                     ptMontageAxes1{aa}.Visible = 'on';
@@ -1435,8 +1511,6 @@ end
     end
 
     if strcmpi(evnt.Key,'f9')
-
-         persistent pdToggle;
 
          if  pdToggle == 0
 
