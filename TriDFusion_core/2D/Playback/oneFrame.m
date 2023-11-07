@@ -30,6 +30,7 @@ function oneFrame(sDirection)
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
     if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
+
         progressBar(1, 'Error: Require a 3D Volume!');               
         set(uiSeriesPtr('get'), 'Enable', 'on');
        return;
@@ -38,13 +39,13 @@ function oneFrame(sDirection)
     windowButton('set', 'down');  
 
     if (gca == axes1Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
-       (isVsplash('get') == true && ...
-        strcmpi(vSplahView('get'), 'coronal'))
-
-            dLastSlice = size(dicomBuffer('get'), 1);  
+       (isVsplash('get') == true && strcmpi(vSplahView('get'), 'coronal'))
+        
+            dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 1);  
             dCurrentSlice = sliceNumber('get', 'coronal');
 %             set(uiSliderCorPtr('get'), 'Value', iSlider);
             if strcmpi(sDirection, 'Foward')
+
                 if dCurrentSlice < dLastSlice
                     dCurrentSlice = dCurrentSlice +1;
                 end
@@ -65,11 +66,11 @@ function oneFrame(sDirection)
             set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get'), 1));
 
     elseif (gca == axes2Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
-       (isVsplash('get') == true && ...
-        strcmpi(vSplahView('get'), 'sagittal'))
+           (isVsplash('get') == true && strcmpi(vSplahView('get'), 'sagittal'))
+        
     
 %              set(uiSliderSagPtr('get'), 'Value', iSlider);
-            dLastSlice = size(dicomBuffer('get'), 2);    
+            dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 2);    
             dCurrentSlice = sliceNumber('get', 'sagittal'); 
 
             if strcmpi(sDirection, 'Foward')
@@ -93,10 +94,9 @@ function oneFrame(sDirection)
             set(uiSliderSagPtr('get'), 'Value', sliceNumber('get', 'sagittal') / size(dicomBuffer('get'), 2));
 
     elseif (gca == axes3Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
-       (isVsplash('get') == true && ...
-        strcmpi(vSplahView('get'), 'axial'))
-    
-            dLastSlice = size(dicomBuffer('get'), 3);            
+           (isVsplash('get') == true && strcmpi(vSplahView('get'), 'axial'))
+         
+            dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 3);            
             dCurrentSlice = sliceNumber('get', 'axial');
 
              if strcmpi(sDirection, 'Foward')
@@ -120,6 +120,7 @@ function oneFrame(sDirection)
 
     else
         if isVsplash('get') == false
+            
             iMipAngleValue = mipAngle('get');
 
             if strcmpi(sDirection, 'Foward')

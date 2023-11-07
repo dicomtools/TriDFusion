@@ -64,14 +64,20 @@ function oneGate(sDirection)
     aInput = inputBuffer('get');
 
     if strcmpi(sDirection, 'Foward')
+
         dOffset = dSeriesOffset+1;
+
         if gateUseSeriesUID('get') == true
+
             if dOffset > numel(atInputTemplate) || ... % End of list
                ~strcmpi(atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
                         atInputTemplate(dOffset).atDicomInfo{1}.SeriesInstanceUID)
+
                 for bb=1:numel(atInputTemplate)
+
                     if strcmpi(atInputTemplate(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
                                atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID)
+
                         dOffset = bb;
                         break;
                     end
@@ -86,18 +92,24 @@ function oneGate(sDirection)
         dOffset = dSeriesOffset-1;
 
         if gateUseSeriesUID('get') == true
+
             if dOffset == 0 || ... % The list start at 1
                ~strcmpi(atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
                         atInputTemplate(dOffset).atDicomInfo{1}.SeriesInstanceUID)
 
                 bOffsetFound = false;
+
                 for bb=1:numel(atInputTemplate)
+
                     if strcmpi(atInputTemplate(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
                                atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID)
+
                         for cc=bb:numel(atInputTemplate) % Found the first frame
+
                             if cc >= numel(atInputTemplate) || ... % End of list
                                ~strcmpi(atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the last frame
                                         atInputTemplate(cc).atDicomInfo{1}.SeriesInstanceUID)
+
                                 dOffset = cc-1;
                                 bOffsetFound = true;
                                 break;
@@ -123,6 +135,7 @@ function oneGate(sDirection)
     axes1 = axes1Ptr('get', [], dSeriesOffset);
     axes2 = axes2Ptr('get', [], dSeriesOffset);
     axes3 = axes3Ptr('get', [], dSeriesOffset);
+
     if isVsplash('get') == false
         axesMip = axesMipPtr('get', [], dSeriesOffset);
     end
@@ -132,6 +145,7 @@ function oneGate(sDirection)
     imCoronal  = imCoronalPtr ('get', [], dSeriesOffset);
     imSagittal = imSagittalPtr('get', [], dSeriesOffset);
     imAxial    = imAxialPtr   ('get', [], dSeriesOffset);
+
     if isVsplash('get') == false
         imMip = imMipPtr('get', [], dSeriesOffset);
     end
@@ -182,18 +196,33 @@ function oneGate(sDirection)
 
     aBuffer = dicomBuffer('get', [], dOffset);
     if isempty(aBuffer)
+
         aBuffer = aInput{dOffset};
- %       if     strcmp(imageOrientation('get'), 'axial')
- %           aBuffer = permute(aInput{dOffset}, [1 2 3]);
- %       elseif strcmp(imageOrientation('get'), 'coronal')
- %           aBuffer = permute(aInput{dOffset}, [3 2 1]);
- %       elseif strcmp(imageOrientation('get'), 'sagittal')
- %           aBuffer = permute(aInput{dOffset}, [3 1 2]);
- %       end
+
+        if     strcmpi(imageOrientation('get'), 'axial')
+%                 aImage = aImage;
+        elseif strcmpi(imageOrientation('get'), 'coronal')
+
+            aBuffer = reorientBuffer(aBuffer, 'coronal');
+
+            atInputTemplate(dOffset).sOrientationView = 'coronal';
+        
+            inputTemplate('set', atInputTemplate);
+
+        elseif strcmpi(imageOrientation('get'), 'sagittal')
+
+            aBuffer = reorientBuffer(aBuffer, 'sagittal');
+
+            atInputTemplate(dOffset).sOrientationView = 'sagittal';
+        
+            inputTemplate('set', atInputTemplate);
+        end
+
         dicomBuffer('set', aBuffer, dOffset);
     end
 
     if size(aCurrentBuffer) ~= size(aBuffer)
+
         set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
         set(uiSeriesPtr('get'), 'Enable', 'on');
         progressBar(1, 'Error: Resample or Register the series fail!');
@@ -202,12 +231,13 @@ function oneGate(sDirection)
 
     atCoreMetaData = dicomMetaData('get', [], dOffset);
     if isempty(atCoreMetaData)
+
         atCoreMetaData = atInputTemplate(dOffset).atDicomInfo;
         dicomMetaData('set', atCoreMetaData, dOffset);
     end
 
     if gateUseSeriesUID('get') == false && ...
-       gateLookupTable('get') == true
+       gateLookupTable('get')  == true
 
         if strcmpi(atCoreMetaData{1}.Modality, 'ct')
             if min(aBuffer, [], 'all') >= 0
@@ -239,14 +269,28 @@ function oneGate(sDirection)
 %                    set(uiSeriesPtr('get'), 'Value', jj);
                     aBuffer = dicomBuffer('get', [], jj);
                     if isempty(aBuffer)
+
                         aBuffer = aInput{jj};
-%                        if     strcmp(imageOrientation('get'), 'axial')
-%                            aBuffer = permute(aInput{dOffset}, [1 2 3]);
-%                        elseif strcmp(imageOrientation('get'), 'coronal')
-%                            aBuffer = permute(aInput{dOffset}, [3 2 1]);
-%                        elseif strcmp(imageOrientation('get'), 'sagittal')
-%                            aBuffer = permute(aInput{dOffset}, [3 1 2]);
-%                        end
+        
+                        if     strcmpi(imageOrientation('get'), 'axial')
+            %                 aImage = aImage;
+                        elseif strcmpi(imageOrientation('get'), 'coronal')
+            
+                            aBuffer = reorientBuffer(aBuffer, 'coronal');
+            
+                            atInputTemplate(jj).sOrientationView = 'coronal';
+                        
+                            inputTemplate('set', atInputTemplate);
+            
+                        elseif strcmpi(imageOrientation('get'), 'sagittal')
+            
+                            aBuffer = reorientBuffer(aBuffer, 'sagittal');
+            
+                            atInputTemplate(jj).sOrientationView = 'sagittal';
+                        
+                            inputTemplate('set', atInputTemplate);
+                        end
+
                         dicomBuffer('set', aBuffer, jj);
                     end
 
@@ -256,10 +300,14 @@ function oneGate(sDirection)
                     else
                         lBufferMin = min(aBuffer, [], 'all');
                         lBufferMax = max(aBuffer, [], 'all');
+
                         if lBufferMin < lMin
+
                             lMin = lBufferMin;
                         end
+
                         if lBufferMax > lMax
+
                             lMax = lBufferMax;
                         end
                     end
@@ -269,20 +317,34 @@ function oneGate(sDirection)
 
             end
         end
+
         setWindowMinMax(lMax, lMin);
     end
 
     aBuffer = dicomBuffer('get', [], dOffset);
     if isempty(aBuffer)
-        aBuffer = aInput{dOffset};
-%        if     strcmp(imageOrientation('get'), 'axial')
-%            aBuffer = permute(aInput{dOffset}, [1 2 3]);
-%        elseif strcmp(imageOrientation('get'), 'coronal')
-%            aBuffer = permute(aInput{dOffset}, [3 2 1]);
-%        elseif strcmp(imageOrientation('get'), 'sagittal')
-%            aBuffer = permute(aInput{dOffset}, [3 1 2]);
-%        end
 
+        aBuffer = aInput{dOffset};
+
+        if     strcmpi(imageOrientation('get'), 'axial')
+    %                 aImage = aImage;
+        elseif strcmpi(imageOrientation('get'), 'coronal')
+    
+            aBuffer = reorientBuffer(aBuffer, 'coronal');
+    
+            atInputTemplate(dOffset).sOrientationView = 'coronal';
+        
+            inputTemplate('set', atInputTemplate);
+    
+        elseif strcmpi(imageOrientation('get'), 'sagittal')
+    
+            aBuffer = reorientBuffer(aBuffer, 'sagittal');
+    
+            atInputTemplate(dOffset).sOrientationView = 'sagittal';
+        
+            inputTemplate('set', atInputTemplate);
+        end
+        
         dicomBuffer('set', aBuffer, dOffset);
     end
 

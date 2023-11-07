@@ -30,6 +30,7 @@ function multiFrame(mPlay)
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
     if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
+
         progressBar(1, 'Error: Require a 3D Volume');  
         multiFramePlayback('set', false);                
         mPlay.State = 'off';
@@ -40,9 +41,8 @@ function multiFrame(mPlay)
     while multiFramePlayback('get')                       
         
         if (gca == axes1Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
-           (isVsplash('get') == true && ...
-            strcmpi(vSplahView('get'), 'coronal'))
-
+           (isVsplash('get') == true && strcmpi(vSplahView('get'), 'coronal'))
+            
             dLastSlice = size(dicomBuffer('get'), 1);  
             dCurrentSlice = sliceNumber('get', 'coronal');
 %             set(uiSliderCorPtr('get'), 'Value', iSlider);
@@ -55,8 +55,8 @@ function multiFrame(mPlay)
             sliceNumber('set', 'coronal', dCurrentSlice);
 
         elseif (gca == axes2Ptr('get', [], dSeriesOffset) && playback2DMipOnly('get') == false) || ...
-           (isVsplash('get') == true && ...
-            strcmpi(vSplahView('get'), 'sagittal'))
+               (isVsplash('get') == true &&  strcmpi(vSplahView('get'), 'sagittal'))
+           
 %              set(uiSliderSagPtr('get'), 'Value', iSlider);
             dLastSlice = size(dicomBuffer('get'), 2);    
             dCurrentSlice = sliceNumber('get', 'sagittal'); 
@@ -70,9 +70,8 @@ function multiFrame(mPlay)
             sliceNumber('set', 'sagittal', dCurrentSlice);
 
         elseif (gca == axes3Ptr('get', [], dSeriesOffset) && playback2DMipOnly('get') == false) || ...
-           (isVsplash('get') == true && ...
-            strcmpi(vSplahView('get'), 'axial'))
-
+               (isVsplash('get') == true && strcmpi(vSplahView('get'), 'axial'))
+            
             dLastSlice = size(dicomBuffer('get'), 3);            
             dCurrentSlice = sliceNumber('get', 'axial');
 
@@ -91,6 +90,7 @@ function multiFrame(mPlay)
    %         set(uiSliderTraPtr('get'), 'Value', iSlider);
         else
             if isVsplash('get') == false
+                
                 iMipAngleValue = mipAngle('get');
 
                 iMipAngleValue = iMipAngleValue+1;

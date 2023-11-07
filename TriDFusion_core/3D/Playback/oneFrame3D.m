@@ -39,12 +39,15 @@ function oneFrame3D()
     myPosition = [multiFrame3DZoom('get')*cos(vec) multiFrame3DZoom('get')*sin(vec) zeros(size(vec))];
 
     if ~isempty(mipObj)
+
         mipObj.CameraPosition = myPosition(idxOffset,:);
         mipObj.CameraUpVector = [0 0 1];   
         
         if isFusion('get')
+
             mipFusionObj = mipFusionObject('get');  
             if ~isempty(mipFusionObj)
+
                 mipFusionObj.CameraPosition = myPosition(idxOffset,:);
                 mipFusionObj.CameraUpVector = [0 0 1];                   
             end
@@ -53,12 +56,15 @@ function oneFrame3D()
     end
 
     if ~isempty(isoObj)
+
         isoObj.CameraPosition = myPosition(idxOffset,:);
         isoObj.CameraUpVector = [0 0 1];   
         
         if isFusion('get')
+
             isoFusionObj = isoFusionObject('get');  
             if ~isempty(isoFusionObj)
+
                 isoFusionObj.CameraPosition = myPosition(idxOffset,:);
                 isoFusionObj.CameraUpVector = [0 0 1];                   
             end
@@ -66,12 +72,15 @@ function oneFrame3D()
     end
 
     if ~isempty(volObj)
+
         volObj.CameraPosition = myPosition(idxOffset,:);
         volObj.CameraUpVector = [0 0 1];  
         
         if isFusion('get')
+
             volFusionObj = volFusionObject('get');  
             if ~isempty(volFusionObj)
+
                 volFusionObj.CameraPosition = myPosition(idxOffset,:);
                 volFusionObj.CameraUpVector = [0 0 1];                   
             end
@@ -79,7 +88,9 @@ function oneFrame3D()
     end   
 
     if ~isempty(voiObj)
+
         for ff=1:numel(voiObj)
+            
             voiObj{ff}.CameraPosition = myPosition(idxOffset,:);
             voiObj{ff}.CameraUpVector =  [0 0 1];
         end

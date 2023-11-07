@@ -30,6 +30,7 @@ function multiFrame3D(mPlay)
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
     if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
+        
         progressBar(1, 'Error: Require a 3D Volume!');  
         multiFrame3DPlayback('set', false);
         mPlay.State = 'off';
@@ -50,23 +51,30 @@ function multiFrame3D(mPlay)
 
     vec = linspace(0,2*pi(),120)';
 
-    
     while multiFrame3DPlayback('get')           
        
         for idx = 1:120
 
             if ~multiFrame3DPlayback('get')
                 multiFrame3DIndex('set', idxOffset);
+
                 break;
             end
                                     
             if ~isempty(mipObj)  
+
                 aCameraUpVector = mipObj.CameraUpVector;            
+
             elseif ~isempty(volObj) 
+
                 aCameraUpVector = volObj.CameraUpVector;            
+
             elseif ~isempty(isoObj) 
+
                 aCameraUpVector = isoObj.CameraUpVector;            
+
             elseif ~isempty(voiObj) 
+
                 aCameraUpVector = voiObj{1}.CameraUpVector;
             else
                 aCameraUpVector = [0 0 1];
@@ -76,6 +84,7 @@ function multiFrame3D(mPlay)
                    abs(aCameraUpVector(1)) > abs(aCameraUpVector(3))
 
                 aCameraUpVector = [round(aCameraUpVector(1)) 0 0];
+
             elseif abs(aCameraUpVector(2)) > abs(aCameraUpVector(1)) && ...
                    abs(aCameraUpVector(2)) > abs(aCameraUpVector(3))
 
@@ -85,8 +94,11 @@ function multiFrame3D(mPlay)
             end
             
             if     abs(round(aCameraUpVector(1))) == 1
+
                 myPosition = [zeros(size(vec)) multiFrame3DZoom('get')*sin(vec) multiFrame3DZoom('get')*cos(vec)];
+
             elseif abs(round(aCameraUpVector(2))) == 1   
+
                 myPosition = [multiFrame3DZoom('get')*sin(vec) zeros(size(vec)) multiFrame3DZoom('get')*cos(vec)];           
             else
                 myPosition = [multiFrame3DZoom('get')*cos(vec) multiFrame3DZoom('get')*sin(vec) zeros(size(vec))];
@@ -95,37 +107,45 @@ function multiFrame3D(mPlay)
             aPosition = myPosition(idxOffset,:);
             
             if ~isempty(mipObj)                    
+
                 mipObj.CameraPosition = aPosition;  
                 mipObj.CameraUpVector = aCameraUpVector;
             end
 
             if ~isempty(isoObj)                        
+
                 isoObj.CameraPosition = aPosition;
                 isoObj.CameraUpVector = aCameraUpVector;
             end
 
             if ~isempty(volObj)
+
                 volObj.CameraPosition = aPosition;
                 volObj.CameraUpVector = aCameraUpVector;
             end
             
             if ~isempty(mipFusionObj)                    
+
                 mipFusionObj.CameraPosition = aPosition;  
                 mipFusionObj.CameraUpVector = aCameraUpVector;
             end
 
             if ~isempty(isoFusionObj)                        
+
                 isoFusionObj.CameraPosition = aPosition;
                 isoFusionObj.CameraUpVector = aCameraUpVector;
             end
 
             if ~isempty(volFusionObj)
+
                 volFusionObj.CameraPosition = aPosition;
                 volFusionObj.CameraUpVector = aCameraUpVector;
             end
             
             if ~isempty(voiObj)
+
                 for ff=1:numel(voiObj)
+
                     voiObj{ff}.CameraPosition = aPosition;
                     voiObj{ff}.CameraUpVector = aCameraUpVector;
                 end

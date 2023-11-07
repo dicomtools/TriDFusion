@@ -1,5 +1,5 @@
-function objectToDicomJpg(sOutDir, pObject, sSeriesDescription, dSeriesOffset)
-%function objectToDicomJpg(sOutDir, pObject, sSeriesDescription, dSeriesOffset)
+function objectToDicomMultiFrame(sOutFile, pObject, sSeriesDescription, cSeriesInstanceUID, dInstanceNumber, dNumberOfFrames, dSeriesOffset)
+%function objectToDicomMultiFrame(sOutFile, pObject, sSeriesDescription, cSeriesInstanceUID, dInstanceNumber, dNumberOfFrames, dSeriesOffset)
 %Export axe to dicom screen capture file.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -82,14 +82,28 @@ function objectToDicomJpg(sOutDir, pObject, sSeriesDescription, dSeriesOffset)
 
     atMetaData{1}.AccessionNumber = atAssociateMetaData{1}.AccessionNumber;
 
+    atMetaData{1}.ImageType = 'DERIVED\SECONDARY';
+      
+    atMetaData{1}.InstanceNumber = dInstanceNumber;
+    atMetaData{1}.NumberOfFrames = dNumberOfFrames;
+
+    atMetaData{1}.PageNumberVector = zeros(1, dNumberOfFrames);
+    for jj=1:dNumberOfFrames
+
+        atMetaData{1}.PageNumberVector(jj) = jj;
+    end
+
+    atMetaData{1}.FrameIncrementPointer = [24, 8193]; 
+    atMetaData{1}.PlanarConfiguration = 0;
+    atMetaData{1}.PhotometricInterpretation = 'RGB';
+    atMetaData{1}.SamplesPerPixel = 3;
+
     % Export dicom
 
-    atMetaData{1}.SeriesInstanceUID = dicomuid;
-
-    sOutFile = sprintf('%s%s.dcm', sOutDir, atMetaData{1}.SeriesInstanceUID);
+    atMetaData{1}.SeriesInstanceUID = cSeriesInstanceUID;
 
     atMetaData{1}.Filename = sOutFile;
-    
+
     atMetaData{1}.SourceApplicationEntityTitle = 'TRIDFUSION';
 
     dicomwrite(aDicomImage    , ...

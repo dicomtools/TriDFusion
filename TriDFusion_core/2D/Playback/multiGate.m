@@ -32,6 +32,7 @@ function multiGate(mPlay)
 
     aCurrentBuffer = dicomBuffer('get', [], dSeriesOffset);
     if size(aCurrentBuffer, 3) == 1
+
         progressBar(1, 'Error: Require a 3D Volume!');
         multiFramePlayback('set', false);
         mPlay.State = 'off';
@@ -41,7 +42,18 @@ function multiGate(mPlay)
 
     if dSeriesOffset > numel(atInputTemplate) || ...
        numel(atInputTemplate) < 2 % Need a least 2 series
+
         progressBar(1, 'Error: Require at least two 3D Volume!');
+        multiFramePlayback('set', false);
+        mPlay.State = 'off';
+        set(uiSeriesPtr('get'), 'Enable', 'on');
+        return;
+    end
+
+    if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}, 'din') && ...
+       gateUseSeriesUID('get') == true
+
+        progressBar(1, 'Error: Require a 4D series!');
         multiFramePlayback('set', false);
         mPlay.State = 'off';
         set(uiSeriesPtr('get'), 'Enable', 'on');
@@ -50,6 +62,7 @@ function multiGate(mPlay)
 
     if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
        gateUseSeriesUID('get') == true
+
         progressBar(1, 'Error: Require a 4D series!');
         multiFramePlayback('set', false);
         mPlay.State = 'off';
@@ -67,6 +80,7 @@ function multiGate(mPlay)
 
     pAxes3fText  = axesText('get', 'axes3f');
     if ~isempty(pAxes3fText)
+
         asAxes3fText = pAxes3fText.String;
         pAxes3fText.String = '';
     end
@@ -88,29 +102,46 @@ function multiGate(mPlay)
         for jj=1:numel(atInputTemplate)
 %            set(uiSeriesPtr('get'), 'Value', jj);
             aBuffer = dicomBuffer('get', [], jj);
+
             if isempty(aBuffer)
+
                 aBuffer = aInput{jj};
-%                if     strcmpi(imageOrientation('get'), 'axial')
-%                    aBuffer = permute(aInput{jj}, [1 2 3]);
-%                elseif strcmpi(imageOrientation('get'), 'coronal')
-%                    aBuffer = permute(aInput{jj}, [3 2 1]);
-%                elseif strcmpi(imageOrientation('get'), 'sagittal')
-%                    aBuffer = permute(aInput{jj}, [3 1 2]);
-%                end
+
+                if     strcmpi(imageOrientation('get'), 'axial')
+    %                 aImage = aImage;
+                elseif strcmpi(imageOrientation('get'), 'coronal')
+    
+                    aBuffer = reorientBuffer(aBuffer, 'coronal');
+    
+                    atInputTemplate(jj).sOrientationView = 'coronal';
+                
+                    inputTemplate('set', atInputTemplate);
+    
+                elseif strcmpi(imageOrientation('get'), 'sagittal')
+    
+                    aBuffer = reorientBuffer(aBuffer, 'sagittal');
+    
+                    atInputTemplate(jj).sOrientationView = 'sagittal';
+                
+                    inputTemplate('set', atInputTemplate);
+                end
                 
                 dicomBuffer('set', aBuffer, jj);
                 
             end
 
             if jj == 1
+
                 lAbsoluteMin = min(aBuffer, [], 'all');
                 lAbsoluteMax = max(aBuffer, [], 'all');
             else
                 lBufferMin = min(aBuffer, [], 'all');
                 lBufferMax = max(aBuffer, [], 'all');
+
                 if lBufferMin < lAbsoluteMin
                     lAbsoluteMin = lBufferMin;
                 end
+
                 if lBufferMax > lAbsoluteMax
                     lAbsoluteMax = lBufferMax;
                 end
@@ -127,7 +158,9 @@ function multiGate(mPlay)
         axes1 = axes1Ptr('get', [], dSeriesOffset);
         axes2 = axes2Ptr('get', [], dSeriesOffset);
         axes3 = axes3Ptr('get', [], dSeriesOffset);
+
         if isVsplash('get') == false
+            
             axesMip = axesMipPtr('get', [], dSeriesOffset);
         end
 
@@ -136,6 +169,7 @@ function multiGate(mPlay)
         imCoronal  = imCoronalPtr ('get', [], dSeriesOffset);
         imSagittal = imSagittalPtr('get', [], dSeriesOffset);
         imAxial    = imAxialPtr   ('get', [], dSeriesOffset);
+
         if isVsplash('get') == false
             imMip = imMipPtr('get', [], dSeriesOffset);
         end
@@ -147,19 +181,24 @@ function multiGate(mPlay)
         % Set new Axes
 
         if isempty(axes1Ptr('get', [], dOffset))
+
             axes1Ptr('set', axes1, dOffset);
         end
 
         if isempty(axes2Ptr('get', [], dOffset))
+
             axes2Ptr('set', axes2, dOffset);
         end
 
         if isempty(axes3Ptr('get', [], dOffset))
+
             axes3Ptr('set', axes3, dOffset);
         end
 
         if isVsplash('get') == false
+
             if isempty(axesMipPtr('get', [], dOffset))
+
                 axesMipPtr('set', axesMip, dOffset);
             end
         end
@@ -186,20 +225,34 @@ function multiGate(mPlay)
 
         aBuffer = dicomBuffer('get', [], dOffset);
         if isempty(aBuffer)
+
             aBuffer = aInput{dOffset};
             
-%            if     strcmpi(imageOrientation('get'), 'axial')
-%                aBuffer = permute(aInput{dOffset}, [1 2 3]);
-%            elseif strcmpi(imageOrientation('get'), 'coronal')
-%                aBuffer = permute(aInput{dOffset}, [3 2 1]);
-%            elseif strcmp(imageOrientation('get'), 'sagittal')
-%                aBuffer = permute(aInput{dOffset}, [3 1 2]);
-%            end
+            if     strcmpi(imageOrientation('get'), 'axial')
+%                 aImage = aImage;
+            elseif strcmpi(imageOrientation('get'), 'coronal')
+
+                aBuffer = reorientBuffer(aBuffer, 'coronal');
+
+                atInputTemplate(dOffset).sOrientationView = 'coronal';
+            
+                inputTemplate('set', atInputTemplate);
+
+            elseif strcmpi(imageOrientation('get'), 'sagittal')
+
+                aBuffer = reorientBuffer(aBuffer, 'sagittal');
+
+                atInputTemplate(dOffset).sOrientationView = 'sagittal';
+            
+                inputTemplate('set', atInputTemplate);
+
+            end
             
             dicomBuffer('set', aBuffer, dOffset);
         end
 
         if size(aCurrentBuffer) ~= size(aBuffer)
+
             progressBar(1, 'Error: Resample or Register the series!');
             mPlay.State = 'off';
             multiFramePlayback('set', false);
@@ -208,6 +261,7 @@ function multiGate(mPlay)
 
         atCoreMetaData = dicomMetaData('get', [], dOffset);
         if isempty(atCoreMetaData)
+
             atCoreMetaData = atInputTemplate(dOffset).atDicomInfo;
             dicomMetaData('set', atCoreMetaData, dOffset);
         end
@@ -216,7 +270,9 @@ function multiGate(mPlay)
            gateLookupTable('get') == true
 
             if strcmpi(atCoreMetaData{1}.Modality, 'ct')
+
                 if min(aBuffer, [], 'all') >= 0
+
                     lMin = min(aBuffer, [], 'all');
                     lMax = max(aBuffer, [], 'all');
                 else
@@ -228,7 +284,9 @@ function multiGate(mPlay)
                     sUnitDisplay = getSerieUnitValue(dOffset);
 
                     if strcmpi(sUnitDisplay, 'SUV')
+
                         tQuant = quantificationTemplate('get');
+
                         if tQuant.tSUV.dScale
                             lMin = suvWindowLevel('get', 'min')/tQuant.tSUV.dScale;
                             lMax = suvWindowLevel('get', 'max')/tQuant.tSUV.dScale;
@@ -245,6 +303,7 @@ function multiGate(mPlay)
                     lMax = lAbsoluteMax;
                 end
             end
+
             setWindowMinMax(lMax, lMin);
         end
 
@@ -255,6 +314,7 @@ if 1
             if aspectRatio('get') == true
 
                 if ~isempty(atCoreMetaData{1}.PixelSpacing)
+
                     x = atCoreMetaData{1}.PixelSpacing(1);
                     y = atCoreMetaData{1}.PixelSpacing(2);
                     z = computeSliceSpacing(atCoreMetaData);
@@ -345,13 +405,25 @@ end
             
             aBuffer = aInput{dOffset};
             
-%            if     strcmp(imageOrientation('get'), 'axial')
-%                aBuffer = permute(aInput{dOffset}, [1 2 3]);
-%            elseif strcmp(imageOrientation('get'), 'coronal')
-%                aBuffer = permute(aInput{dOffset}, [3 2 1]);
-%            elseif strcmp(imageOrientation('get'), 'sagittal')
-%                aBuffer = permute(aInput{dOffset}, [3 1 2]);
-%            end
+            if     strcmpi(imageOrientation('get'), 'axial')
+%                 aImage = aImage;
+            elseif strcmpi(imageOrientation('get'), 'coronal')
+
+                aBuffer = reorientBuffer(aBuffer, 'coronal');
+
+                atInputTemplate(dOffset).sOrientationView = 'coronal';
+            
+                inputTemplate('set', atInputTemplate);
+
+            elseif strcmpi(imageOrientation('get'), 'sagittal')
+
+                aBuffer = reorientBuffer(aBuffer, 'sagittal');
+
+                atInputTemplate(dOffset).sOrientationView = 'sagittal';
+            
+                inputTemplate('set', atInputTemplate);
+
+            end
 
             dicomBuffer('set', aBuffer, dOffset);
         end
@@ -430,9 +502,12 @@ end
             if dOffset > numel(atInputTemplate) || ... % End of list
                ~strcmpi(atInputTemplate(dOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
                         atInputTemplate(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
+
                 for bb=1:numel(atInputTemplate)
+
                     if strcmpi(atInputTemplate(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
                         atInputTemplate(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
+
                         dOffset = bb;
                         break;
                     end

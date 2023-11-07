@@ -30,6 +30,7 @@ function multiGate3D(mPlay)
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
      if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
+
         progressBar(1, 'Error: Require a 3D Volume!');
         multiFrame3DPlayback('set', false);
         mPlay.State = 'off';
@@ -50,6 +51,7 @@ function multiGate3D(mPlay)
     atInputTemplate = inputTemplate('get');
 
     if isFusion('get') == true
+
         dFusionOffset  = get(uiFusedSeriesPtr('get'), 'Value');
         atFuseMetaData = atInputTemplate(dFusionOffset).atDicomInfo;
     end
@@ -72,6 +74,7 @@ function multiGate3D(mPlay)
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
     if dSeriesOffset > numel(atInputTemplate) || ...
        numel(atInputTemplate) < 2 % Need a least 2 series
+
         progressBar(1, 'Error: Require at least two 3D Volume!');
         multiFrame3DPlayback('set', false);
         mPlay.State = 'off';
@@ -80,6 +83,7 @@ function multiGate3D(mPlay)
 
     if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
        gateUseSeriesUID('get') == true
+
         progressBar(1, 'Error: Require a dynamic 3D Volume!');
         multiFrame3DPlayback('set', false);
         mPlay.State = 'off';
@@ -87,6 +91,7 @@ function multiGate3D(mPlay)
     end
 
     if gateUseSeriesUID('get') == true
+
         dOffset = dSeriesOffset;
 
         for idx=1: numel(atInputTemplate)
@@ -96,16 +101,21 @@ function multiGate3D(mPlay)
             if dOffset > numel(atInputTemplate) || ... % End of list
                ~strcmpi(atInputTemplate(dOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
                         atInputTemplate(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
+
                 for bb=1:numel(atInputTemplate)
+
                     if strcmpi(atInputTemplate(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
                         atInputTemplate(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
+
                         dOffset = bb;
                         break;
                     end
 
                 end
             end
+
             if dOffset == dSeriesOffset
+
                 iNbSeries = idx;
                 break
             end
@@ -131,7 +141,9 @@ function multiGate3D(mPlay)
     if isempty(ui3DGateWindow)
 
         for tt=1:iNbSeries
+
             if view3DPanel('get') == false
+
                 ui3DWindow{tt} = uipanel(fiMainWindowPtr('get'),...
                                       'Units'   , 'pixels',...
                                       'BorderWidth', showBorder('get'),...
@@ -152,12 +164,14 @@ function multiGate3D(mPlay)
                                                    getMainWindowSize('xsize')-680 ...
                                                    getMainWindowSize('ysize')-getTopWindowSize('ysize')-addOnWidth('get')-30]);
             end
+
             ui3DWindow{tt}.Visible = 'off';
         end
 
     end
 
     if isempty(ui3DGateWindow)
+
         ui3DGateWindowObject('set', ui3DWindow);
     else
         ui3DWindow = ui3DGateWindow;
@@ -165,53 +179,60 @@ function multiGate3D(mPlay)
 
     ui3DLogo = ui3DLogoObject('get');
     if ~isempty(ui3DLogo)
+
         for tt=1:numel(ui3DLogo)
+
             delete(ui3DLogo{tt});
         end
     end
 
     for tt=1:iNbSeries
+
         ui3DLogo{tt} = displayLogo(ui3DWindow{tt});
     end
     ui3DLogoObject('set', ui3DLogo);
 
     uiVolColorbar = volColorObject('get');
     if ~isempty(uiVolColorbar)
+
         delete(uiVolColorbar);
     end
     volColorObject('set', '');
 
     uiMipColorbar = mipColorObject('get');
     if ~isempty(uiMipColorbar)
+
         delete(uiMipColorbar);
     end
     mipColorObject('set', '');
 
     for tt=1:iNbSeries
-        if displayVolColorMap('get') == true && ...
-           switchTo3DMode('get') == true
-            if isFusion('get') == true && ...
-               get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+
+        if displayVolColorMap('get') == true && switchTo3DMode('get') == true           
+
+            if isFusion('get') == true && get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+              
                 ui3DVolColorbar{tt} = volColorbar(ui3DWindow{tt}, get3DColorMap('one', colorMapVolFusionOffset('get')));
             else
                 ui3DVolColorbar{tt} = volColorbar(ui3DWindow{tt}, get3DColorMap('one', colorMapVolOffset('get')));
             end
+
             volColorObject('set', ui3DVolColorbar{tt});
         end
     end
 
-    if displayVolColorMap('get') == false || ...
-       switchTo3DMode('get') == false
-
+    if displayVolColorMap('get') == false || switchTo3DMode('get') == false
+       
         ui3DVolColorbar = '';
         volColorObject('set', '');
     end
 
     for tt=1:iNbSeries
-        if displayMIPColorMap('get') == true && ...
-           switchToMIPMode('get') == true
-            if isFusion('get') == true && ...
-               get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+
+        if displayMIPColorMap('get') == true && switchToMIPMode('get') == true
+
+            if isFusion('get') == true && get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+               
                 ui3DMipColorbar{tt} = mipColorbar(ui3DWindow{tt}, get3DColorMap('one', colorMapMipFusionOffset('get')));
             else
                 ui3DMipColorbar{tt} = mipColorbar(ui3DWindow{tt}, get3DColorMap('one', colorMapMipOffset('get')));
@@ -220,8 +241,8 @@ function multiGate3D(mPlay)
         end
     end
 
-    if displayMIPColorMap('get') == false || ...
-       switchToMIPMode('get') == false
+    if displayMIPColorMap('get') == false || switchToMIPMode('get') == false
+      
         ui3DMipColorbar = '';
         mipColorObject('set', '');
     end
@@ -230,24 +251,29 @@ function multiGate3D(mPlay)
 
     dNbSurface = 0;
     if switchToMIPMode('get') == true
+
         dNbSurface = dNbSurface+1;
     end
 
     if switchToIsoSurface('get') == true
+
         dNbSurface = dNbSurface+1;
     end
 
     if switchTo3DMode('get') == true
+
         dNbSurface = dNbSurface+1;
     end
 
     dOffset = dSeriesOffset;
+
     for tt=1:iNbSeries
 
         set(uiSeriesPtr('get'), 'Value', dOffset);
         
         atMetaData = dicomMetaData('get', [], dOffset);
         if isempty(atMetaData)
+
             atMetaData = atInputTemplate(dOffset).atDicomInfo;
             dicomMetaData('set', atMetaData, dOffset);
         end
@@ -255,14 +281,27 @@ function multiGate3D(mPlay)
         aBuffer = squeeze(dicomBuffer('get', [], dOffset));
 
         if isempty(aBuffer)
+
             aBuffer = aInputBuffer{dOffset};
-%            if     strcmp(imageOrientation('get'), 'axial')
-%                aBuffer = permute(aInputBuffer{dOffset}, [1 2 3]);
-%            elseif strcmp(imageOrientation('get'), 'coronal')
-%                aBuffer = permute(aInputBuffer{dOffset}, [3 2 1]);
-%            elseif strcmp(imageOrientation('get'), 'sagittal')
-%                aBuffer = permute(aInputBuffer{dOffset}, [3 1 2]);
-%            end
+
+            if     strcmpi(imageOrientation('get'), 'axial')
+%                 aImage = aImage;
+            elseif strcmpi(imageOrientation('get'), 'coronal')
+
+                aBuffer = reorientBuffer(aBuffer, 'coronal');
+
+                atInputTemplate(dOffset).sOrientationView = 'coronal';
+            
+                inputTemplate('set', atInputTemplate);
+
+            elseif strcmpi(imageOrientation('get'), 'sagittal')
+
+                aBuffer = reorientBuffer(aBuffer, 'sagittal');
+
+                atInputTemplate(dOffset).sOrientationView = 'sagittal';
+            
+                inputTemplate('set', atInputTemplate);
+            end
 
             dicomBuffer('set', aBuffer, dOffset);
         end
@@ -274,9 +313,13 @@ function multiGate3D(mPlay)
                 dPriority = surface3DPriority('get', 'MaximumIntensityProjection');
 
                 if isempty(mipGateObj)&&(dPriority == dPriorityLoop)
+
                     mipObj{tt} = initVolShow(aBuffer, ui3DWindow{tt}, 'MaximumIntensityProjection', atMetaData);
+
                     if isFusion('get') == true
+
                         if isempty(mipGateFusionObj)
+
                             mipFusionObj{tt} = initVolShow(squeeze(fusionBuffer('get', [], dFusionOffset)), ui3DWindow{tt}, 'MaximumIntensityProjection', atFuseMetaData);
                         end
                     end
@@ -289,9 +332,13 @@ function multiGate3D(mPlay)
                 dPriority = surface3DPriority('get', 'Isosurface');
 
                 if isempty(isoGateObj) &&(dPriority == dPriorityLoop)
+
                     isoObj{tt} = initVolShow(aBuffer, ui3DWindow{tt}, 'Isosurface', atMetaData);
+
                     if isFusion('get') == true
+
                         if isempty(isoGateFusionObj)
+
                             isoFusionObj{tt} = initVolShow(squeeze(fusionBuffer('get', [], dFusionOffset)), ui3DWindow{tt}, 'Isosurface', atFuseMetaData);
                         end
                     end
@@ -303,9 +350,13 @@ function multiGate3D(mPlay)
                 dPriority = surface3DPriority('get', 'VolumeRendering');
 
                 if isempty(volGateObj) &&(dPriority == dPriorityLoop)
+
                     volObj{tt} = initVolShow(aBuffer, ui3DWindow{tt}, 'VolumeRendering', atMetaData);
+
                     if isFusion('get') == true
+
                         if isempty(volGateFusionObj)
+
                             volFusionObj{tt} = initVolShow(squeeze(fusionBuffer('get', [], dFusionOffset)), ui3DWindow{tt}, 'VolumeRendering', atFuseMetaData);
                         end
                     end
@@ -317,6 +368,7 @@ function multiGate3D(mPlay)
         if isempty(voiGateObj)
             
             if ~isempty(atVoi)
+
                 voiGate{dOffset} = initVoiIsoSurface(ui3DWindow{tt}, voi3DSmooth('get'));
             else
                 voiGate{dOffset} = '';
@@ -333,9 +385,12 @@ function multiGate3D(mPlay)
             if dOffset > numel(atInputTemplate) || ... % End of list
                ~strcmpi(atInputTemplate(dOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
                         atInputTemplate(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
+
                 for bb=1:numel(atInputTemplate)
+
                     if strcmpi(atInputTemplate(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
                         atInputTemplate(dOffset-1).atDicomInfo{1}.SeriesInstanceUID)
+
                         dOffset = bb;
                         break;
                     end
@@ -344,6 +399,7 @@ function multiGate3D(mPlay)
             end
         else
             if dOffset > numel(atInputTemplate)
+
                 dOffset = 1;
             end
         end
@@ -353,6 +409,7 @@ function multiGate3D(mPlay)
     end
 
     if isempty(voiGateObj)
+
         voiGateObject('set', voiGate);
     else
         voiGate = voiGateObj;
@@ -361,13 +418,16 @@ function multiGate3D(mPlay)
     if switchToMIPMode('get') == true
 
         if isempty(mipGateObj)
+
             mipGateObject('set', mipObj);
         else
             mipObj = mipGateObj;
         end
 
         if isFusion('get') == true
+
             if isempty(mipGateFusionObj)
+
                 mipGateFusionObject('set', mipFusionObj);
             else
                 mipFusionObj = mipGateFusionObj;
@@ -385,18 +445,22 @@ function multiGate3D(mPlay)
         aMipColormap     = mipObjBak.Colormap;
 
         if isFusion('get') == true
+
             aMipFusionAlphamap = mipFusionObjBak.Alphamap;
             aMipFusionColormap = mipFusionObjBak.Colormap;
         else
             if ~isempty(mipGateFusionObj)
+
                 aZeros = zeros(256,1);
                 for tt=1:numel(mipGateFusionObj)
+
                     mipGateFusionObj{tt}.Alphamap = aZeros;
                 end
             end
         end
 
         for tt=1:numel(mipObj)
+
             mipObj{tt}.ScaleFactors    = aScaleFactors;
             mipObj{tt}.BackgroundColor = aBackgroundColor;
             mipObj{tt}.CameraPosition  = aPosition;
@@ -416,15 +480,19 @@ function multiGate3D(mPlay)
         end
     else
         if ~isempty(mipGateObj)
+
             aZeros = zeros(256,1);
             for tt=1:numel(mipGateObj)
+
                 mipGateObj{tt}.Alphamap = aZeros;
             end
         end
 
         if ~isempty(mipGateFusionObj)
+
             aZeros = zeros(256,1);
             for tt=1:numel(mipGateFusionObj)
+
                 mipGateFusionObj{tt}.Alphamap = aZeros;
             end
         end
@@ -433,13 +501,16 @@ function multiGate3D(mPlay)
     if switchToIsoSurface('get') == true
 
         if isempty(isoGateObj)
+
             isoGateObject('set', isoObj);
         else
             isoObj = isoGateObj;
         end
 
         if isFusion('get') == true
+
             if isempty(isoGateFusionObj)
+
                 isoGateFusionObject('set', isoFusionObj);
             else
                 isoFusionObj = isoGateFusionObj;
@@ -457,6 +528,7 @@ function multiGate3D(mPlay)
         aIsosurfaceColor = isoObjBak.IsosurfaceColor;
 
         if isFusion('get') == true
+
             aFusionIsovalue        = isoFusionObjBak.Isovalue;
             aFusionIsosurfaceColor = isoFusionObjBak.IsosurfaceColor;
         else
@@ -464,6 +536,7 @@ function multiGate3D(mPlay)
         end
 
         for tt=1:numel(isoObj)
+
             isoObj{tt}.ScaleFactors    = aScaleFactors;
             isoObj{tt}.BackgroundColor = aBackgroundColor;
             isoObj{tt}.CameraPosition  = aPosition;
@@ -483,27 +556,35 @@ function multiGate3D(mPlay)
         end
     else
         if ~isempty(isoGateObj)
+
             for tt=1:numel(isoGateObj)
+
                 isoGateObj{tt}.Isovalue = 1;
             end
         end
 
         if ~isempty(isoGateFusionObj)
+
             for tt=1:numel(isoGateFusionObj)
+
                 isoGateFusionObj{tt}.Isovalue = 1;
             end
         end
     end
 
     if switchTo3DMode('get') == true
+
         if isempty(volGateObj)
+
             volGateObject('set', volObj);
         else
             volObj = volGateObj;
         end
 
         if isFusion('get') == true
+
             if isempty(volGateFusionObj)
+
                 volGateFusionObject('set', volFusionObj);
             else
                 volFusionObj = volGateFusionObj;
@@ -522,13 +603,16 @@ function multiGate3D(mPlay)
         aVolColormap     = volObjBak.Colormap;
 
         if isFusion('get') == true
+
             bFusionLighting    = volFusionObjBak.Lighting;
             aVolFusionAlphamap = volFusionObjBak.Alphamap;
             aVolFusionColormap = volFusionObjBak.Colormap;
         else
             if ~isempty(volGateFusionObj)
+
                 aZeros = zeros(256,1);
                 for tt=1:numel(volGateFusionObj)
+
                     volGateFusionObj{tt}.Alphamap = aZeros;
                 end
             end
@@ -545,6 +629,7 @@ function multiGate3D(mPlay)
             volObj{tt}.Colormap        = aVolColormap;
 
             if isFusion('get') == true
+
                 volFusionObj{tt}.Lighting        = bFusionLighting;
                 volFusionObj{tt}.ScaleFactors    = aScaleFactors;
                 volFusionObj{tt}.BackgroundColor = aBackgroundColor;
@@ -556,25 +641,34 @@ function multiGate3D(mPlay)
         end
     else
         if ~isempty(volGateObj)
+
             aZeros = zeros(256,1);
             for tt=1:numel(volGateObj)
+
                 volGateObj{tt}.Alphamap = aZeros;
             end
         end
 
         if ~isempty(volGateFusionObj)
+
             aZeros = zeros(256,1);
             for tt=1:numel(volGateFusionObj)
+
                 volGateFusionObj{tt}.Alphamap = aZeros;
             end
         end
     end
 
     if ~isempty(voiGate)
+
          for tt=1:numel(voiGate)
+
             if ~isempty(voiGate{tt})
+
                 for ll=1:numel(voiGate{tt})
+
                     if displayVoi('get') == true
+
                         set(voiGate{tt}{ll}, 'Renderer', 'Isosurface');
                     else
                         set(voiGate{tt}{ll}, 'Renderer', 'LabelOverlayRendering');
@@ -612,8 +706,8 @@ function multiGate3D(mPlay)
             if switchTo3DMode('get') == true
                 volObject('set', volObj{tt});
 
-                if isFusion('get') == true && ...
-                   get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+                if isFusion('get') == true && get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+                   
                     volIc = volICFusionObject('get');
                     if ~isempty(volIc)
                         volIc.surfObj = volFusionObj{tt};
@@ -630,27 +724,31 @@ function multiGate3D(mPlay)
 
                 mipObject('set', mipObj{tt});
 
-                if isFusion('get') == true && ...
-                    get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+                if isFusion('get') == true && get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+                    
                     mipIc = mipICFusionObject('get');
                     if ~isempty(mipIc)
+
                         mipIc.surfObj = mipFusionObj{tt};
                    end
                 else
                     mipIc = mipICObject('get');
                     if ~isempty(mipIc)
+
                         mipIc.surfObj = mipObj{tt};
                     end
                 end
             end
 
             if switchToIsoSurface('get') == true
+
                 isoObject('set', isoObj{tt});
             end
 
             pause(multiFrame3DSpeed('get'));
 
             if strcmpi(windowButton('get'), 'down')
+
                 initGate3DObject('set', true);
             end
 
@@ -663,10 +761,13 @@ function multiGate3D(mPlay)
                 dCameraViewAngle = multiFrame3DZoom('get');
 
                 if switchTo3DMode('get') == true
+
                     aScaleFactors = volObj{tt}.ScaleFactors;
                     aPosition = volObj{tt}.CameraPosition;
                     aUpVector = volObj{tt}.CameraUpVector;
+
                 elseif switchToMIPMode('get') == true
+
                     aScaleFactors = mipObj{tt}.ScaleFactors;
                     aPosition = mipObj{tt}.CameraPosition;
                     aUpVector = mipObj{tt}.CameraUpVector;
@@ -677,11 +778,13 @@ function multiGate3D(mPlay)
                 end
 
                 if switchTo3DMode('get') == true
+
                     aVolAlphamap = getVolAlphaMap('get', dicomBuffer('get', [], tt), atInputTemplate(tt).atDicomInfo);
                     aVolColormap = get3DColorMap('one', colorMapVolOffset('get') );
                     bLighting    = volLighting('get');
 
                     if isFusion('get') == true
+
                         aVolFusionAlphamap = getVolFusionAlphaMap('get', fusionBuffer('get', [], dFusionOffset), atFuseMetaData);
                         aVolFusionColormap = get3DColorMap('one', colorMapVolFusionOffset('get') );
                         bFusionLighting    = volFusionLighting('get');
@@ -689,10 +792,12 @@ function multiGate3D(mPlay)
                 end
 
                 if switchToMIPMode('get') == true
+
                     aMipAlphamap = getMipAlphaMap('get', dicomBuffer('get', [], tt), atInputTemplate(tt).atDicomInfo);
                     aMipColormap = get3DColorMap('one', colorMapMipOffset('get') );
 
                     if isFusion('get') == true
+
                         aMipFusionAlphamap = getMipFusionAlphaMap('get', fusionBuffer('get', [], dFusionOffset), atFuseMetaData);
                         aMipFusionColormap = get3DColorMap('one', colorMapMipFusionOffset('get') );
                     end
@@ -700,10 +805,12 @@ function multiGate3D(mPlay)
                 end
 
                 if switchToIsoSurface('get') == true
+
                     aIsovalue        =  isoSurfaceValue('get');
                     aIsosurfaceColor =  surfaceColor('one', isoColorOffset('get') );
 
                     if isFusion('get') == true
+
                         aFusionIsovalue        =  isoSurfaceFusionValue('get');
                         aFusionIsosurfaceColor =  surfaceColor('one', isoColorFusionOffset('get') );
                     end
@@ -711,22 +818,29 @@ function multiGate3D(mPlay)
                 end
 
                 if ~isempty(ui3DVolColorbar)
+
                     for oo=1:numel(ui3DVolColorbar)
+
                         delete(ui3DVolColorbar{oo});
                     end
+
                     volColorObject('set', '');
                 end
 
                 if ~isempty(ui3DMipColorbar)
+
                     for oo=1:numel(ui3DMipColorbar)
+
                         delete(ui3DMipColorbar{oo});
                     end
+
                     mipColorObject('set', '');
                 end
 
                 for oo=1:iNbSeries
 
                     if switchTo3DMode('get') == true
+
                         volObj{oo}.Lighting        = bLighting;
                         volObj{oo}.ScaleFactors    = aScaleFactors;
                         volObj{oo}.CameraPosition  = aPosition;
@@ -737,6 +851,7 @@ function multiGate3D(mPlay)
                         volObj{oo}.BackgroundColor = aBackgroundColor;
 
                         if isFusion('get') == true
+
                             volFusionObj{oo}.Lighting        = bFusionLighting;
                             volFusionObj{oo}.ScaleFactors    = aScaleFactors;
                             volFusionObj{oo}.CameraPosition  = aPosition;
@@ -749,6 +864,7 @@ function multiGate3D(mPlay)
                     end
 
                     if switchToMIPMode('get') == true
+
                         mipObj{oo}.ScaleFactors    = aScaleFactors;
                         mipObj{oo}.CameraPosition  = aPosition;
                         mipObj{oo}.CameraUpVector  = aUpVector;
@@ -758,6 +874,7 @@ function multiGate3D(mPlay)
                         mipObj{oo}.BackgroundColor = aBackgroundColor;
 
                         if isFusion('get') == true
+
                             mipFusionObj{oo}.ScaleFactors    = aScaleFactors;
                             mipFusionObj{oo}.CameraPosition  = aPosition;
                             mipFusionObj{oo}.CameraUpVector  = aUpVector;
@@ -769,6 +886,7 @@ function multiGate3D(mPlay)
                     end
 
                     if switchToIsoSurface('get') == true
+
                         isoObj{oo}.ScaleFactors    = aScaleFactors;
                         isoObj{oo}.CameraPosition  = aPosition;
                         isoObj{oo}.CameraUpVector  = aUpVector;
@@ -778,6 +896,7 @@ function multiGate3D(mPlay)
                         isoObj{oo}.BackgroundColor = aBackgroundColor;
 
                         if isFusion('get') == true
+
                             isoFusionObj{oo}.ScaleFactors    = aScaleFactors;
                             isoFusionObj{oo}.CameraPosition  = aPosition;
                             isoFusionObj{oo}.CameraUpVector  = aUpVector;
@@ -786,12 +905,14 @@ function multiGate3D(mPlay)
                             isoFusionObj{oo}.IsosurfaceColor = aFusionIsosurfaceColor;
                             isoFusionObj{oo}.BackgroundColor = aBackgroundColor;
                         end
-
                     end
 
                     if ~isempty(voiGate)
+
                         for ll=1:numel(voiGate{oo})
+
                             if displayVoi('get') == true
+
                                 set(voiGate{oo}{ll}, 'Renderer', 'Isosurface');
                                 set(voiGate{oo}{ll}, 'CameraPosition' , aPosition);
                                 set(voiGate{oo}{ll}, 'CameraUpVector' , aUpVector);
@@ -806,11 +927,10 @@ function multiGate3D(mPlay)
                     delete(ui3DLogo{oo});
                     ui3DLogo{oo} = displayLogo(ui3DWindow{oo});
 
-                    if displayVolColorMap('get') == true && ...
-                       switchTo3DMode('get') == true
-
-                        if isFusion('get') == true && ...
-                            get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+                    if displayVolColorMap('get') == true && switchTo3DMode('get') == true
+                       
+                        if isFusion('get') == true && get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+                            
                             ui3DVolColorbar{oo} = volColorbar(ui3DWindow{oo}, aVolFusionColormap);
                         else
                             ui3DVolColorbar{oo} = volColorbar(ui3DWindow{oo}, aVolColormap);
@@ -819,10 +939,10 @@ function multiGate3D(mPlay)
                         volColorObject('set', ui3DVolColorbar{oo});
                     end
 
-                    if displayMIPColorMap('get') == true && ...
-                       switchToMIPMode('get') == true
-                        if isFusion('get') == true && ...
-                           get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+                    if displayMIPColorMap('get') == true && switchToMIPMode('get') == true
+                       
+                        if isFusion('get') == true && get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+                           
                             ui3DMipColorbar{oo} = mipColorbar(ui3DWindow{oo}, aMipFusionColormap);
                         else
                             ui3DMipColorbar{oo} = mipColorbar(ui3DWindow{oo}, aMipColormap);
@@ -850,28 +970,32 @@ function multiGate3D(mPlay)
     end
 
     if ~isempty(ui3DVolColorbar)
+
         for oo=1:numel(ui3DVolColorbar)
+
             delete(ui3DVolColorbar{oo});
         end
         volColorObject('set', '');
     else
         volColorObj = volColorObject('get');
-        if ~isempty(volColorObj) && ...
-            displayVolColorMap('get') == false
+        if ~isempty(volColorObj) && displayVolColorMap('get') == false
+          
             delete(volColorObj);
             volColorObject('set', '');
         end
     end
 
     if ~isempty(ui3DMipColorbar)
+
         for oo=1:numel(ui3DMipColorbar)
+
             delete(ui3DMipColorbar{oo});
         end
         mipColorObject('set', '');
     else
         mipColorObj = mipColorObject('get');
-        if ~isempty(mipColorObj) && ...
-            displayMIPColorMap('get') == false
+        if ~isempty(mipColorObj) && displayMIPColorMap('get') == false
+            
             delete(mipColorObj);
             mipColorObject('set', '');
         end
@@ -879,6 +1003,7 @@ function multiGate3D(mPlay)
 
 
     for tt=1:numel(ui3DWindow)
+
         set(ui3DWindow{tt}, 'Visible', 'off');
     end
 
@@ -896,6 +1021,7 @@ function multiGate3D(mPlay)
         volObject('set', volObjBak);
 
         if isFusion('get') == true
+
             volFusionObjBak.Lighting        = volFusionObj{1}.Lighting;
             volFusionObjBak.ScaleFactors    = volFusionObj{1}.ScaleFactors;
             volFusionObjBak.BackgroundColor = volFusionObj{1}.BackgroundColor;
@@ -910,16 +1036,17 @@ function multiGate3D(mPlay)
 
         volIc = volICObject('get');
         if ~isempty(volIc)
+
             volIc.surfObj = volObjBak;
             volICObject('set', volIc);
         end
 
         volIc = volICFusionObject('get');
         if ~isempty(volIc)
+
             volIc.surfObj = volFusionObjBak;
             volICFusionObject('set', volIc);
         end
-
     end
 
     if switchToMIPMode('get') == true
@@ -933,6 +1060,7 @@ function multiGate3D(mPlay)
         mipObjBak.Colormap        = mipObj{1}.Colormap;
 
         if isFusion('get') == true
+
             mipFusionObjBak.ScaleFactors    = mipFusionObj{1}.ScaleFactors;
             mipFusionObjBak.BackgroundColor = mipFusionObj{1}.BackgroundColor;
             mipFusionObjBak.CameraPosition  = mipFusionObj{1}.CameraPosition;
@@ -948,16 +1076,17 @@ function multiGate3D(mPlay)
 
         mipIc = mipICObject('get');
         if ~isempty(mipIc)
+
             mipIc.surfObj = mipObjBak;
             mipICObject('set', mipIc);
         end
 
         mipIc = mipICFusionObject('get');
         if ~isempty(mipIc)
+
             mipIc.surfObj = mipFusionObjBak;
             mipICFusionObject('set', mipIc);
         end
-
     end
 
     if switchToIsoSurface('get') == true
@@ -973,6 +1102,7 @@ function multiGate3D(mPlay)
         isoObject('set', isoObjBak);
 
         if isFusion('get') == true
+
             isoFusionObjBak.ScaleFactors    = isoFusionObj{1}.ScaleFactors;
             isoFusionObjBak.BackgroundColor = isoFusionObj{1}.BackgroundColor;
             isoFusionObjBak.CameraPosition  = isoFusionObj{1}.CameraPosition;
@@ -985,26 +1115,27 @@ function multiGate3D(mPlay)
         end
     end
 
-    if displayVolColorMap('get') == true && ...
-       switchTo3DMode('get') == true
-
-        if isFusion('get') == true && ...
-           get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+    if displayVolColorMap('get') == true &&  switchTo3DMode('get') == true
+      
+        if isFusion('get') == true && get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+           
             uivolColorbar = volColorbar(uiOneWindowPtr('get'), get3DColorMap('one', colorMapVolFusionOffset('get')) );
         else
             uivolColorbar = volColorbar(uiOneWindowPtr('get'), get3DColorMap('one', colorMapVolOffset('get')) );
         end
+
         volColorObject('set', uivolColorbar);
     end
 
-    if displayMIPColorMap('get') == true && ...
-        switchToMIPMode('get') == true
-        if isFusion('get') == true && ...
-           get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+    if displayMIPColorMap('get') == true && switchToMIPMode('get') == true
+        
+        if isFusion('get') == true && get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+           
             uimipColorbar = mipColorbar(uiOneWindowPtr('get'), get3DColorMap('one', colorMapMipFusionOffset('get')));
         else
             uimipColorbar = mipColorbar(uiOneWindowPtr('get'), get3DColorMap('one', colorMapMipOffset('get')));
         end
+
         mipColorObject('set', uimipColorbar);
     end
 
@@ -1034,6 +1165,7 @@ function multiGate3D(mPlay)
     set(btnMIPPtr('get')       , 'Enable', 'on');
 
     if isFusion('get') == true
+        
         set(btnFusionPtr ('get')   , 'Enable', 'on');
         set(btnLinkMipPtr('get')   , 'Enable', 'on');
         set(uiFusedSeriesPtr('get'), 'Enable', 'on');

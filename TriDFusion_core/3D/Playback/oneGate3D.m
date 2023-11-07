@@ -34,6 +34,7 @@ function oneGate3D(sDirection)
     atInputTemplate = inputTemplate('get');
     
     if isFusion('get') == true
+
         dFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
         atFuseMetaData = atInputTemplate(dFuseOffset).atDicomInfo;
     end
@@ -44,7 +45,8 @@ function oneGate3D(sDirection)
 
     voiObjBak = voiObject('get');
 
-    if size(dicomBuffer('get'), 3) == 1
+    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
+
         progressBar(1, 'Error: Require a 3D Volume!');
         return;
     end
@@ -56,25 +58,33 @@ function oneGate3D(sDirection)
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
     if dSeriesOffset > numel(atInputTemplate) || ...
         numel(atInputTemplate) < 2 % Need a least 2 series
+
         return;
     end
 
     if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
        gateUseSeriesUID('get') == true
+
         return
     end
 
     aInputBuffer  = inputBuffer('get');
 
     if strcmpi(sDirection, 'Foward')
+
         dOffset = dSeriesOffset+1;
+
         if gateUseSeriesUID('get') == true
+
             if dOffset > numel(atInputTemplate) || ... % End of list
                ~strcmpi(atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
                         atInputTemplate(dOffset).atDicomInfo{1}.SeriesInstanceUID)
+
                 for bb=1:numel(atInputTemplate)
+
                     if strcmpi(atInputTemplate(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
                                atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID)
+
                         dOffset = bb;
                         break;
                     end
@@ -82,6 +92,7 @@ function oneGate3D(sDirection)
             end
         else
             if dOffset > numel(atInputTemplate)
+
                 dOffset =1;
             end
         end
@@ -89,18 +100,24 @@ function oneGate3D(sDirection)
         dOffset = dSeriesOffset-1;
 
         if gateUseSeriesUID('get') == true
+
             if dOffset == 0 || ... % The list start at 1
                ~strcmpi(atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Not the same series
                         atInputTemplate(dOffset).atDicomInfo{1}.SeriesInstanceUID)
 
                 bOffsetFound = false;
+
                 for bb=1:numel(atInputTemplate)
+
                     if strcmpi(atInputTemplate(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the first frame
                                atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID)
+
                         for cc=bb:numel(atInputTemplate) % Found the first frame
+
                             if cc >= numel(atInputTemplate) || ... % End of list
                                ~strcmpi(atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID, ... % Try to find the last frame
                                         atInputTemplate(cc).atDicomInfo{1}.SeriesInstanceUID)
+
                                 dOffset = cc;
                                 bOffsetFound = true;
                                 break;
@@ -109,19 +126,22 @@ function oneGate3D(sDirection)
                     end
 
                     if bOffsetFound == true
-                        break
+
+                        break;
                     end
 
                 end
             end
         else
             if dOffset == 0
+
                 dOffset = numel(atInputTemplate);
             end
         end
     end
     
     if isempty( axePtr('get', [], dOffset) )
+
         axe = axePtr('get', [], dSeriesOffset);
         axePtr('set', axe, dOffset);
     end
@@ -130,6 +150,7 @@ function oneGate3D(sDirection)
     
     atMetaData = dicomMetaData('get', [], dOffset);
     if isempty(atMetaData)
+
         atMetaData = atInputTemplate(dOffset).atDicomInfo;
         dicomMetaData('set', atMetaData, dOffset);
     end
@@ -137,14 +158,27 @@ function oneGate3D(sDirection)
     aBuffer = squeeze(dicomBuffer('get', [], dOffset));
 
     if isempty(aBuffer)
+
         aBuffer = aInputBuffer{dOffset};
-%        if     strcmp(imageOrientation('get'), 'axial')
-%            aBuffer = permute(aInputBuffer{dOffset}, [1 2 3]);
-%        elseif strcmp(imageOrientation('get'), 'coronal')
-%            aBuffer = permute(aInputBuffer{dOffset}, [3 2 1]);
-%        elseif strcmp(imageOrientation('get'), 'sagittal')
-%            aBuffer = permute(aInputBuffer{dOffset}, [3 1 2]);
-%        end
+
+        if     strcmpi(imageOrientation('get'), 'axial')
+%                 aImage = aImage;
+        elseif strcmpi(imageOrientation('get'), 'coronal')
+
+            aBuffer = reorientBuffer(aBuffer, 'coronal');
+
+            atInputTemplate(dOffset).sOrientationView = 'coronal';
+        
+            inputTemplate('set', atInputTemplate);
+
+        elseif strcmpi(imageOrientation('get'), 'sagittal')
+
+            aBuffer = reorientBuffer(aBuffer, 'sagittal');
+
+            atInputTemplate(dOffset).sOrientationView = 'sagittal';
+        
+            inputTemplate('set', atInputTemplate);
+        end
 
         dicomBuffer('set', aBuffer, dOffset);
     end
@@ -164,6 +198,7 @@ function oneGate3D(sDirection)
         aVolColormap        = volObjBak.Colormap;
 
         if isFusion('get') == true
+
             bFusionLighting    = volFusionObjBak.Lighting;
             aVolFusionAlphamap = volFusionObjBak.Alphamap;
             aVolFusionColormap = volFusionObjBak.Colormap;
@@ -195,6 +230,7 @@ function oneGate3D(sDirection)
         aIsosurfaceColor    = isoObjBak.IsosurfaceColor;
 
         if isFusion('get') == true
+
             aFusionIsovalue        = isoFusionObjBak.Isovalue;
             aFusionIsosurfaceColor = isoFusionObjBak.IsosurfaceColor;
         end
@@ -206,6 +242,7 @@ function oneGate3D(sDirection)
         volObject('set', '');
 
         if isFusion('get') == true
+
             delete(volFusionObjBak);
             volFusionObject('set', '');
         end
@@ -217,21 +254,26 @@ function oneGate3D(sDirection)
         mipObject('set', '');
 
         if isFusion('get') == true
+
             delete(mipFusionObjBak);
             mipFusionObject('set', '');
         end
     end
 
     if switchToIsoSurface('get') == true
+
         delete(isoObjBak);
         isoObject('set', '');
+
         if isFusion('get') == true
+
             delete(isoFusionObjBak);
             isoFusionObject('set', '');
         end
     end
 
     if ~isempty(voiObjBak)
+
         for ll=1:numel(voiObjBak)
             delete(voiObjBak{ll});
         end
@@ -246,32 +288,41 @@ function oneGate3D(sDirection)
     init3DPanel('set', true);
 
     for dPriorityLoop=1:3
+
         if switchToMIPMode('get') == true
+
             dPriority = surface3DPriority('get', 'MaximumIntensityProjection');
             if dPriority == dPriorityLoop
 
                 mipObj = initVolShow(aBuffer, uiOneWindowPtr('get'), 'MaximumIntensityProjection', atMetaData);
                 if isFusion('get') == true
+
                     mipFusionObj = initVolShow(squeeze(fusionBuffer('get', [], dFuseOffset)), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);
                 end
             end
         end
 
         if switchToIsoSurface('get') == true
+
             dPriority = surface3DPriority('get', 'Isosurface');
             if dPriority == dPriorityLoop
+
                 isoObj = initVolShow(aBuffer, uiOneWindowPtr('get'), 'Isosurface', atMetaData);
                 if isFusion('get') == true
+
                     isoFusionObj = initVolShow(squeeze(fusionBuffer('get', [], dFuseOffset)), uiOneWindowPtr('get'), 'Isosurface', atFuseMetaData);
                 end
             end
         end
 
         if switchTo3DMode('get') == true
+
             dPriority = surface3DPriority('get', 'VolumeRendering');
             if dPriority == dPriorityLoop
+
                 volObj = initVolShow(aBuffer, uiOneWindowPtr('get'), 'VolumeRendering', atMetaData);
                 if isFusion('get') == true
+
                     volFusionObj = initVolShow(squeeze(fusionBuffer('get', [], dFuseOffset)), uiOneWindowPtr('get'), 'VolumeRendering', atFuseMetaData);
                 end
             end
@@ -279,6 +330,7 @@ function oneGate3D(sDirection)
     end
 
     if switchTo3DMode('get') == true
+
         volObj.Lighting        = bLighting;
         volObj.ScaleFactors    = aVolScaleFactors;
         volObj.BackgroundColor = aVolBackgroundColor;
@@ -290,6 +342,7 @@ function oneGate3D(sDirection)
         volObject('set', volObj);
 
         if isFusion('get') == true
+
             volFusionObj.Lighting        = bFusionLighting;
             volFusionObj.ScaleFactors    = aVolScaleFactors;
             volFusionObj.BackgroundColor = aVolBackgroundColor;
@@ -303,8 +356,9 @@ function oneGate3D(sDirection)
 
         volIc = volICObject('get');
         if ~isempty(volIc)
-            if isFusion('get') == true && ...
-               get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+
+            if isFusion('get') == true && get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+               
                 volIc.surfObj = volFusionObj;
             else
                 volIc.surfObj = volObj;
@@ -312,6 +366,7 @@ function oneGate3D(sDirection)
         end
 
         if displayVolColorMap('get') == true
+
             uivolColorbar = volColorbar(uiOneWindowPtr('get'), aVolColormap);
             volColorObject('set', uivolColorbar);
         end
@@ -329,6 +384,7 @@ function oneGate3D(sDirection)
         mipObject('set', mipObj);
 
         if isFusion('get') == true
+
             mipFusionObj.ScaleFactors    = aMipScaleFactors;
             mipFusionObj.BackgroundColor = aMipBackgroundColor;
             mipFusionObj.CameraPosition  = aMipCameraPosition;
@@ -342,16 +398,17 @@ function oneGate3D(sDirection)
 
         mipIc = mipICObject('get');
         if ~isempty(mipIc)
-            if isFusion('get') == true && ...
-               get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+
+            if isFusion('get') == true && get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+               
                 mipIc.surfObj = mipFusionObj;
             else
                 mipIc.surfObj = mipObj;
             end
         end
 
-        if displayMIPColorMap('get') == true && ...
-            switchToMIPMode('get') == true
+        if displayMIPColorMap('get') == true && switchToMIPMode('get') == true
+            
             uimipColorbar = mipColorbar(uiOneWindowPtr('get'), aMipAlphamap);
             mipColorObject('set', uimipColorbar);
         end
@@ -369,6 +426,7 @@ function oneGate3D(sDirection)
         isoObject('set', isoObj);
 
         if isFusion('get') == true
+
             isoFusionObj.ScaleFactors    = aIsoScaleFactors;
             isoFusionObj.BackgroundColor = aIsoBackgroundColor;
             isoFusionObj.CameraPosition  = aIsoCameraPosition;
@@ -385,8 +443,11 @@ function oneGate3D(sDirection)
         voiObj = initVoiIsoSurface(uiOneWindowPtr('get'), voi3DSmooth('get'));
 
         if ~isempty(voiObj)
+
             for ll=1:numel(voiObj)
+
                 if displayVoi('get') == true
+                    
                     set(voiObj{ll}, 'Renderer', 'Isosurface');
                 else
                     set(voiObj{ll}, 'Renderer', 'LabelOverlayRendering');

@@ -202,9 +202,10 @@ function setPlaybackToolbar(sVisible)
                  case 'Record'
 
                     if multiFrame3DPlayback('get') == false
+                        
                         if multiFrame3DRecord('get') == false
 
-                            filter = {'*.gif';'*.jpg';'*.bmp';'*.png'};
+                            filter = {'*.avi';'*.mp4';'*.gif';'*.dcm';'*.jpg';'*.bmp';'*.png'};
                             info = dicomMetaData('get');
 
                             sCurrentDir  = viewerRootPath('get');
@@ -382,9 +383,10 @@ function setPlaybackToolbar(sVisible)
                  case 'Record'
 
                     if multiFramePlayback('get') == false
+
                         if multiFrameRecord('get') == false
 
-                            filter = {'*.gif';'*.jpg';'*.bmp';'*.png'};
+                            filter = {'*.avi';'*.mp4';'*.gif';'*.dcm';'*.jpg';'*.bmp';'*.png'};
                             info = dicomMetaData('get');
 
                             sCurrentDir  = viewerRootPath('get');

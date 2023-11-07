@@ -45,6 +45,16 @@ function computeMIPCallback(~, ~)
           
     mipBuffer('set', computeMIP(gather(im)), get(uiSeriesPtr('get'), 'Value'));
 
+    clear im;
+
+    if isFusion('get') == true
+        
+        imf = fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'));  
+        mipFusionBuffer('set', computeMIP(gather(imf)), get(uiFusedSeriesPtr('get'), 'Value'));
+
+        clear imf;
+    end
+
     if isVsplash('get') == false &&  ...
        switchToMIPMode('get') == false && ...
        switchToIsoSurface('get') == false && ... 
@@ -52,6 +62,8 @@ function computeMIPCallback(~, ~)
 
         sliderMipCallback();
     end
+     
+
     catch
         progressBar(1, 'Error:compute2DMIPCallback()');           
     end

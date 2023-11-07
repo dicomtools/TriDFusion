@@ -107,7 +107,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
         
     info.Filename = [];
     info.FileModDate = datetime;
-    info.ManufacturerModelName = 'TriDFusion1.1';
+    info.ManufacturerModelName = 'TRIDFUSION';
     
     if isfield(tMetaData, 'StudyDate')
         info.StudyDate = tMetaData.StudyDate;
@@ -174,7 +174,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
     end
     
     info.SeriesNumber = 1;
-    info.StructureSetLabel = 'TriDFusion1.1';
+    info.StructureSetLabel = 'TRIDFUSION';
 
     info.StructureSetDate = datestr(now, 'yyyymmdd');
     info.StructureSetTime = datestr(now,'HHMMSS.FFF');

@@ -27,42 +27,61 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    bWriteSucceed = true;
+
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
     if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
+
         progressBar(1, 'Error: Require a 3D Volume!');
+
         multiFrameRecord('set', false);
         mRecord.State = 'off';
         set(uiSeriesPtr('get'), 'Enable', 'on');
+
         return;
     end
+    
+    atMetaData = dicomMetaData('get', [], dSeriesOffset);
 
-    atCoreMetaData = dicomMetaData('get');
+    if strcmpi('*.dcm', sExtention) || ...
+       strcmpi('dcm'  , sExtention)
+
+        if isfield(atMetaData{1}, 'SeriesDescription')
+            sSeriesDescription = atMetaData{1}.SeriesDescription;
+        else
+            sSeriesDescription = '';
+        end
+
+        sSeriesDescription = getViewerSeriesDescriptionDialog(sprintf('MFSC-%s', sSeriesDescription));
+
+        if isempty(sSeriesDescription)
+            return;
+        end
+    end
 
     if (gca == axes1Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
-       (isVsplash('get') == true && ...
-        strcmpi(vSplahView('get'), 'coronal'))
-
-        dLastSlice = size(dicomBuffer('get'), 1);
+       (isVsplash('get') == true && strcmpi(vSplahView('get'), 'coronal'))
+        
+        dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 1);
         dCurrentSlice = sliceNumber('get', 'coronal');
         aAxe = axes1Ptr('get', [], dSeriesOffset);
 
     elseif (gca == axes2Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
-       (isVsplash('get') == true && ...
-        strcmpi(vSplahView('get'), 'sagittal'))
-    
-        dLastSlice = size(dicomBuffer('get'), 2);
+           (isVsplash('get') == true && strcmpi(vSplahView('get'), 'sagittal'))
+            
+        dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 2);
         dCurrentSlice = sliceNumber('get', 'sagittal');
         aAxe = axes2Ptr('get', [], dSeriesOffset);
 
     elseif (gca == axes3Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
-       (isVsplash('get') == true && ...
-        strcmpi(vSplahView('get'), 'axial'))
-    
-        dLastSlice = size(dicomBuffer('get'), 3);
+           (isVsplash('get') == true && strcmpi(vSplahView('get'), 'axial'))
+        
+        dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 3);
         dCurrentSlice = sliceNumber('get', 'axial');
         aAxe = axes3Ptr('get', [], dSeriesOffset);
     else
+
         dLastSlice = 32;
         dCurrentSlice = mipAngle('get');
         aAxe = axesMipPtr('get', [], dSeriesOffset);       
@@ -76,50 +95,54 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
     if isVsplash('get') == false                       
                 
         if aAxe == axes1Ptr('get', [], dSeriesOffset)
+
             logoObj = logoObject('get');
+
             if ~isempty(logoObj)
+
                 delete(logoObj);
                 logoObject('set', '');
             end
         end
     else
+
         logoObj = logoObject('get');
+
         if ~isempty(logoObj)
+
             delete(logoObj);
             logoObject('set', '');
         end        
     end
 
-%    if aAxe == axes3Ptr('get', [], dSeriesOffset)
-%         set(uiSliderWindowPtr('get'), 'Visible', 'off');
-%         set(uiSliderLevelPtr('get') , 'Visible', 'off');
+    % Colorbar 
 
-        set(lineColorbarIntensityMaxPtr('get'), 'Visible', 'off');
-        set(lineColorbarIntensityMinPtr('get'), 'Visible', 'off');
+    set(lineColorbarIntensityMaxPtr('get'), 'Visible', 'off');
+    set(lineColorbarIntensityMinPtr('get'), 'Visible', 'off');
 
-        set(textColorbarIntensityMaxPtr('get'), 'Visible', 'off');
-        set(textColorbarIntensityMinPtr('get'), 'Visible', 'off');
+    set(textColorbarIntensityMaxPtr('get'), 'Visible', 'off');
+    set(textColorbarIntensityMinPtr('get'), 'Visible', 'off');
 
-        set(uiColorbarPtr('get'), 'Visible', 'off');
+    set(uiColorbarPtr('get'), 'Visible', 'off');
 
-        if isFusion('get')
-%             set(uiFusionSliderWindowPtr('get'), 'Visible', 'off');
-%             set(uiFusionSliderLevelPtr('get') , 'Visible', 'off');
+    if isFusion('get')
 
-            set(lineFusionColorbarIntensityMaxPtr('get'), 'Visible', 'off');
-            set(lineFusionColorbarIntensityMinPtr('get'), 'Visible', 'off');
-    
-            set(textFusionColorbarIntensityMaxPtr('get'), 'Visible', 'off');
-            set(textFusionColorbarIntensityMinPtr('get'), 'Visible', 'off');
+        set(lineFusionColorbarIntensityMaxPtr('get'), 'Visible', 'off');
+        set(lineFusionColorbarIntensityMinPtr('get'), 'Visible', 'off');
 
-            set(uiAlphaSliderPtr('get')   , 'Visible', 'off');
-            set(uiFusionColorbarPtr('get'), 'Visible', 'off');
-        end
-%    end
+        set(textFusionColorbarIntensityMaxPtr('get'), 'Visible', 'off');
+        set(textFusionColorbarIntensityMinPtr('get'), 'Visible', 'off');
+
+        set(uiAlphaSliderPtr('get')   , 'Visible', 'off');
+        set(uiFusionColorbarPtr('get'), 'Visible', 'off');
+    end
+
+    % Overlay text
 
     if overlayActivate('get') == true
 
-        if     aAxe == axes1Ptr('get', [], dSeriesOffset)
+        if aAxe == axes1Ptr('get', [], dSeriesOffset)
+            
             pAxes1Text = axesText('get', 'axes1');
             pAxes1Text.Visible = 'off';
             
@@ -127,6 +150,7 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
             pAxes1View.Visible = 'off';           
             
         elseif aAxe == axes2Ptr('get', [], dSeriesOffset)
+
             pAxes2Text = axesText('get', 'axes2');
             pAxes2Text.Visible = 'off';
             
@@ -134,20 +158,25 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
             pAxes2View.Visible = 'off';  
             
         elseif aAxe == axes3Ptr('get', [], dSeriesOffset)
+
             pAxes3Text = axesText('get', 'axes3');
             pAxes3Text.Visible = 'off';
             
             pAxes3View = axesText('get', 'axes3View');
+
             for tt=1:numel(pAxes3View)
+
                 pAxes3View{tt}.Visible = 'off';             
             end
             
             if isFusion('get') == true
+
                 pAxes3fText = axesText('get', 'axes3f');
                 pAxes3fText.Visible = 'off';                    
             end             
         else
-            if isVsplash('get') == false                       
+            if isVsplash('get') == false  
+
                 pAxesMipText = axesText('get', 'axesMip');
                 pAxesMipText.Visible = 'off';
 
@@ -157,53 +186,122 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
         end
     end
 
-    if crossActivate('get') == true && ...
-       isVsplash('get') == false
-   
-        if     aAxe == axes1Ptr('get', [], dSeriesOffset)
+    % Triangulation cross
+
+    if crossActivate('get') == true && isVsplash('get') == false
+          
+        if aAxe == axes1Ptr('get', [], dSeriesOffset)
+
             alAxes1Line = axesLine('get', 'axes1');
+
             for ii1=1:numel(alAxes1Line)
                 alAxes1Line{ii1}.Visible = 'off';
             end
+
         elseif aAxe == axes2Ptr('get', [], dSeriesOffset)
+
             alAxes2Line = axesLine('get', 'axes2');
+
             for ii2=1:numel(alAxes2Line)
                 alAxes2Line{ii2}.Visible = 'off';
             end
-        elseif aAxe == axesMipPtr('get', [], dSeriesOffset)
-            alAxesMipLine = axesLine('get', 'axesMip');
-            for ii4=1:numel(alAxesMipLine)
-                alAxesMipLine{ii4}.Visible = 'off';
-            end            
+
         elseif aAxe == axes3Ptr('get', [], dSeriesOffset)
+
             alAxes3Line = axesLine('get', 'axes3');
+
             for ii3=1:numel(alAxes3Line)
                 alAxes3Line{ii3}.Visible = 'off';
             end
-        else
+
+         elseif aAxe == axesMipPtr('get', [], dSeriesOffset)
+
+            alAxesMipLine = axesLine('get', 'axesMip');
+
+            for ii4=1:numel(alAxesMipLine)
+                alAxesMipLine{ii4}.Visible = 'off';
+            end            
         end
+    end
+
+    if isVsplash('get') == false
+
+        btnUiCorWindowFullScreen = btnUiCorWindowFullScreenPtr('get');
+        if ~isempty(btnUiCorWindowFullScreen)
+
+            btnUiCorWindowFullScreen.Visible = 'off';
+        end
+
+        btnUiSagWindowFullScreen = btnUiSagWindowFullScreenPtr('get');
+        if ~isempty(btnUiSagWindowFullScreen)
+        
+            btnUiSagWindowFullScreen.Visible = 'off';
+        end
+
+        btnUiTraWindowFullScreen = btnUiTraWindowFullScreenPtr('get');
+        if ~isempty(btnUiTraWindowFullScreen)
+     
+            btnUiTraWindowFullScreen.Visible = 'off';
+        end
+
+        btnUiMipWindowFullScreen = btnUiMipWindowFullScreenPtr('get');
+        if ~isempty(btnUiMipWindowFullScreen)
+    
+            btnUiMipWindowFullScreen.Visible = 'off';
+        end
+
     end
 
     sLogo = sprintf('%s\n', 'TriDFusion (3DF)');  
     tLogo = text(aAxe, 0.02, 0.03, sLogo, 'Units','normalized');
-    if strcmp(backgroundColor('get'), 'black')
+
+    if strcmpi(backgroundColor('get'), 'black')
+
         tLogo.Color = [0.8500 0.8500 0.8500];
     else
         tLogo.Color = [0.1500 0.1500 0.1500];
     end
 
     tOverlay = text(aAxe, 0.02, 0.97, '', 'Units','normalized');
-    if strcmp(backgroundColor('get'), 'black')
+
+    if strcmpi(backgroundColor('get'), 'black')
+
         tOverlay.Color = [0.8500 0.8500 0.8500];
     else
         tOverlay.Color = [0.1500 0.1500 0.1500];
     end
 
     if overlayActivate('get') == false
+
         set(tOverlay, 'Visible', 'off');
     end
 
     iSavedCurrentSlice = dCurrentSlice;
+
+    if strcmpi('*.avi', sExtention) || ...
+       strcmpi('avi'  , sExtention) || ...
+       strcmpi('*.mp4', sExtention) || ...
+       strcmpi('mp4'  , sExtention)
+        
+        if strcmpi('*.avi', sExtention) || ...
+           strcmpi('avi'  , sExtention)
+
+            tClassVideoWriter = VideoWriter([sPath sFileName], 'Motion JPEG AVI');
+
+        else
+            tClassVideoWriter = VideoWriter([sPath sFileName],  'MPEG-4');
+        end
+
+        tClassVideoWriter.FrameRate = 1/multiFrameSpeed('get');
+        tClassVideoWriter.Quality = 100;
+
+        open(tClassVideoWriter);
+    end
+
+    try
+
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    drawnow;
 
     for idx = 1:dLastSlice
 
@@ -211,28 +309,36 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
             break;
         end
 
-        if     aAxe == axes1Ptr('get', [], dSeriesOffset)
+        if aAxe == axes1Ptr('get', [], dSeriesOffset)
+
             sliceNumber('set', 'coronal', dCurrentSlice);
+
             if isVsplash('get') == true
-                [lFirst, lLast] = computeVsplashLayout(dicomBuffer('get'), 'coronal', dCurrentSlice);
+
+                [lFirst, lLast] = computeVsplashLayout(dicomBuffer('get', [], dSeriesOffset), 'coronal', dCurrentSlice);
                 sSliceNb = sprintf('\n%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(dLastSlice));
             else
                 sSliceNb = sprintf('\n%s/%s', num2str(dCurrentSlice), num2str(dLastSlice));
             end
 
         elseif aAxe == axes2Ptr('get', [], dSeriesOffset)
+
             sliceNumber('set', 'sagittal', dCurrentSlice);
 
             if isVsplash('get') == true
-                [lFirst, lLast] = computeVsplashLayout(dicomBuffer('get'), 'sagittal', dCurrentSlice);
+
+                [lFirst, lLast] = computeVsplashLayout(dicomBuffer('get', [], dSeriesOffset), 'sagittal', dCurrentSlice);
                 sSliceNb = sprintf('\n%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(dLastSlice));
             else
                 sSliceNb = sprintf('\n%s/%s', num2str(dCurrentSlice), num2str(dLastSlice));
             end
         elseif aAxe == axes3Ptr('get', [], dSeriesOffset)
+
             sliceNumber('set', 'axial', dCurrentSlice);
+
             if isVsplash('get') == true
-                [lFirst, lLast] = computeVsplashLayout(dicomBuffer('get'), 'axial', dLastSlice-dCurrentSlice+1);
+
+                [lFirst, lLast] = computeVsplashLayout(dicomBuffer('get', [], dSeriesOffset), 'axial', dLastSlice-dCurrentSlice+1);
                 sSliceNb = sprintf('\n%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(dLastSlice));
             else
                 sSliceNb = sprintf('\n%s/%s', num2str(1+dLastSlice-dCurrentSlice), num2str(dLastSlice));
@@ -247,6 +353,7 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
         refreshImages();
 
         if aAxe == axes3Ptr('get', [], dSeriesOffset)
+
             dCurrentSlice = dCurrentSlice-1;
             if dCurrentSlice <1
                 dCurrentSlice =dLastSlice;
@@ -263,15 +370,27 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
 
         if idx == 1
 
-            if strcmpi('*.gif', sExtention)
-                imwrite(indI, cm, [sPath sFileName], 'gif', 'Loopcount', inf, 'DelayTime', multiFrameSpeed('get'));
-            elseif strcmpi('*.jpg', sExtention)
+            if strcmpi('*.avi', sExtention) || ...
+               strcmpi('avi'  , sExtention) || ...
+               strcmpi('*.mp4', sExtention) || ...
+               strcmpi('mp4'  , sExtention)
 
-                sDirName = sprintf('%s_%s_%s_JPG_2D', atCoreMetaData{1}.PatientName, atCoreMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
+                 writeVideo(tClassVideoWriter, I);
+
+            elseif strcmpi('*.gif', sExtention) || ...
+                   strcmpi('gif'  , sExtention) 
+
+                imwrite(indI, cm, [sPath sFileName], 'gif', 'Loopcount', inf, 'DelayTime', multiFrameSpeed('get'));
+
+            elseif strcmpi('*.jpg', sExtention) || ...
+                   strcmpi('jpg', sExtention)
+
+                sDirName = sprintf('%s_%s_%s_JPG_2D', atMetaData{1}.PatientName, atMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
                 sDirName = cleanString(sDirName);
-                sImgDirName = [sPath sDirName '//' ];
+                sImgDirName = [sPath sDirName '//'];
 
                 if~(exist(char(sImgDirName), 'dir'))
+                    
                     mkdir(char(sImgDirName));
                 end
 
@@ -279,58 +398,136 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
                 newName = sprintf('%s-%d.jpg', newName, idx);
                 imwrite(indI, cm, [sImgDirName newName], 'jpg');
 
-            elseif strcmpi('*.bmp', sExtention)
-                sDirName = sprintf('%s_%s_%s_BMP_2D', atCoreMetaData{1}.PatientName, atCoreMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
+            elseif strcmpi('*.bmp', sExtention) || ...
+                   strcmpi('bmp'  , sExtention)
+
+                sDirName = sprintf('%s_%s_%s_BMP_2D', atMetaData{1}.PatientName, atMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
                 sDirName = cleanString(sDirName);
-                sImgDirName = [sPath sDirName '//' ];
+                sImgDirName = [sPath sDirName '//'];
 
                 if~(exist(char(sImgDirName), 'dir'))
+
                     mkdir(char(sImgDirName));
                 end
 
                 newName = erase(sFileName, '.bmp');
                 newName = sprintf('%s-%d.bmp', newName, idx);
                 imwrite(indI, cm, [sImgDirName newName], 'bmp');
-            elseif strcmpi('*.png', sExtention)
-                sDirName = sprintf('%s_%s_%s_PNG_2D', atCoreMetaData{1}.PatientName, atCoreMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
+
+            elseif strcmpi('*.png', sExtention) || ...
+                   strcmpi('png'  , sExtention)
+
+                sDirName = sprintf('%s_%s_%s_PNG_2D', atMetaData{1}.PatientName, atMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
                 sDirName = cleanString(sDirName);
-                sImgDirName = [sPath sDirName '//' ];
+                sImgDirName = [sPath sDirName '//'];
 
                 if~(exist(char(sImgDirName), 'dir'))
+
                     mkdir(char(sImgDirName));
                 end
 
                 newName = erase(sFileName, '.png');
                 newName = sprintf('%s-%d.png', newName, idx);
                 imwrite(indI, cm, [sImgDirName newName], 'png');                
+
+            elseif strcmpi('*.dcm', sExtention) || ...
+                   strcmpi('dcm'  , sExtention)
+
+                sDcmDirName = outputDir('get');
+
+                if isempty(sDcmDirName)
+
+                    sDirName = sprintf('%s_%s_%s_DCM_2D', atMetaData{1}.PatientName, atMetaData{1}.PatientID, datetime('now','Format','MMMM-d-y-hhmmss'));
+                    sDirName = cleanString(sDirName);
+                    sDcmDirName = [sPath sDirName '//'];
+    
+                    if~(exist(char(sDcmDirName), 'dir'))
+
+                        mkdir(char(sDcmDirName));
+                    end
+                end
+
+                cSeriesInstanceUID = dicomuid;
+
+                sOutFile = fullfile(sDcmDirName, sprintf('frame%d.dcm', idx));
+
+                objectToDicomMultiFrame(sOutFile, aAxe, sSeriesDescription, cSeriesInstanceUID, idx, dLastSlice, dSeriesOffset);
+
             end
         else
-            if strcmpi('*.gif', sExtention)
+             if strcmpi('*.avi', sExtention) || ...
+                strcmpi('avi'  , sExtention) || ...
+                strcmpi('*.mp4', sExtention) || ...
+                strcmpi('mp4'  , sExtention)
+
+                 writeVideo(tClassVideoWriter, I);
+
+             elseif strcmpi('*.gif', sExtention) || ...
+                    strcmpi('gif'  , sExtention)    
+
                 imwrite(indI, cm, [sPath sFileName], 'gif', 'WriteMode', 'append', 'DelayTime', multiFrameSpeed('get'));
-            elseif strcmpi('*.jpg', sExtention)
+
+            elseif strcmpi('*.jpg', sExtention) || ...  
+                   strcmpi('jpg'  , sExtention) 
+
                 newName = erase(sFileName, '.jpg');
                 newName = sprintf('%s-%d.jpg', newName, idx);
                 imwrite(indI, cm, [sImgDirName newName], 'jpg');
-            elseif strcmpi('*.bmp', sExtention)
+
+            elseif strcmpi('*.bmp', sExtention) || ...
+                   strcmpi('bmp'  , sExtention)
+
                 newName = erase(sFileName, '.bmp');
                 newName = sprintf('%s-%d.bmp', newName, idx);
                 imwrite(indI, cm, [sImgDirName newName], 'bmp');
-            elseif strcmpi('*.png', sExtention)
+
+            elseif strcmpi('*.png', sExtention) || ...
+                   strcmpi('png'  , sExtention)
+
                 newName = erase(sFileName, '.png');
                 newName = sprintf('%s-%d.png', newName, idx);
                 imwrite(indI, cm, [sImgDirName newName], 'png');                
+
+            elseif strcmpi('*.dcm', sExtention) || ...
+                   strcmpi('dcm'  , sExtention)
+
+                 sOutFile = fullfile(sDcmDirName, sprintf('frame%d.dcm', idx));
+
+                 objectToDicomMultiFrame(sOutFile, aAxe, sSeriesDescription, cSeriesInstanceUID, idx, dLastSlice, dSeriesOffset); 
             end
+
         end
 
         progressBar(idx / dLastSlice, 'Recording', 'red');
 
     end
 
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    drawnow;
+
+    if strcmpi('*.avi', sExtention) || ...
+       strcmpi('avi'  , sExtention) || ...     
+       strcmpi('*.mp4', sExtention) || ...
+       strcmpi('mp4'  , sExtention)
+
+        close(tClassVideoWriter);
+    end
+
+    catch
+        bWriteSucceed = false;
+        progressBar(1, sprintf('Error: recordMultiFrame()'));
+    end
+
     if     aAxe == axes1Ptr('get', [], dSeriesOffset)
+
         sliceNumber('set', 'coronal', iSavedCurrentSlice);
+
     elseif aAxe == axes2Ptr('get', [], dSeriesOffset)
+
         sliceNumber('set', 'sagittal', iSavedCurrentSlice);
+
     elseif aAxe == axes3Ptr('get', [], dSeriesOffset)
+
         sliceNumber('set', 'axial', iSavedCurrentSlice);
     else
         mipAngle('set', iSavedCurrentSlice);           
@@ -341,36 +538,32 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
     set(uiSliderTraPtr('get'), 'Visible', 'on');
     set(uiSliderMipPtr('get'), 'Visible', 'on');
 
-%    if aAxe == axes3Ptr('get', [], dSeriesOffset)
-%         set(uiSliderWindowPtr('get'), 'Visible', 'on');
-%         set(uiSliderLevelPtr('get') , 'Visible', 'on');
+    % Colorbar
 
-        set(lineColorbarIntensityMaxPtr('get'), 'Visible', 'on');
-        set(lineColorbarIntensityMinPtr('get'), 'Visible', 'on');
+    set(lineColorbarIntensityMaxPtr('get'), 'Visible', 'on');
+    set(lineColorbarIntensityMinPtr('get'), 'Visible', 'on');
 
-        set(textColorbarIntensityMaxPtr('get'), 'Visible', 'on');
-        set(textColorbarIntensityMinPtr('get'), 'Visible', 'on');
+    set(textColorbarIntensityMaxPtr('get'), 'Visible', 'on');
+    set(textColorbarIntensityMinPtr('get'), 'Visible', 'on');
 
-        set(uiColorbarPtr('get'), 'Visible', 'on');
+    set(uiColorbarPtr('get'), 'Visible', 'on');
 
-        if isFusion('get')
-%             set(uiFusionSliderWindowPtr('get'), 'Visible', 'on');
-%             set(uiFusionSliderLevelPtr('get') , 'Visible', 'on');
+    if isFusion('get')
 
-            set(lineFusionColorbarIntensityMaxPtr('get'), 'Visible', 'on');
-            set(lineFusionColorbarIntensityMinPtr('get'), 'Visible', 'on');
-    
-            set(textFusionColorbarIntensityMaxPtr('get'), 'Visible', 'on');
-            set(textFusionColorbarIntensityMinPtr('get'), 'Visible', 'on');
+        set(lineFusionColorbarIntensityMaxPtr('get'), 'Visible', 'on');
+        set(lineFusionColorbarIntensityMinPtr('get'), 'Visible', 'on');
 
-            set(uiAlphaSliderPtr('get')   , 'Visible', 'on');
-            set(uiFusionColorbarPtr('get'), 'Visible', 'on');
-        end
-%    end
+        set(textFusionColorbarIntensityMaxPtr('get'), 'Visible', 'on');
+        set(textFusionColorbarIntensityMinPtr('get'), 'Visible', 'on');
+
+        set(uiAlphaSliderPtr('get')   , 'Visible', 'on');
+        set(uiFusionColorbarPtr('get'), 'Visible', 'on');
+    end
 
     if overlayActivate('get')
         
         if     aAxe == axes1Ptr('get', [], dSeriesOffset)
+
             pAxes1Text = axesText('get', 'axes1');
             pAxes1Text.Visible = 'on';
             
@@ -378,6 +571,7 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
             pAxes1View.Visible = 'on';           
             
         elseif aAxe == axes2Ptr('get', [], dSeriesOffset)
+
             pAxes2Text = axesText('get', 'axes2');
             pAxes2Text.Visible = 'on';
             
@@ -385,6 +579,7 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
             pAxes2View.Visible = 'on';             
             
         elseif aAxe == axes3Ptr('get', [], dSeriesOffset)
+
             pAxes3Text = axesText('get', 'axes3');
             pAxes3Text.Visible = 'on';
             
@@ -408,34 +603,67 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
         end
     end
 
-    if crossActivate('get') == true && ...
-       isVsplash('get') == false
+    if crossActivate('get') == true && isVsplash('get') == false
+       
         if     aAxe == axes1Ptr('get', [], dSeriesOffset)
+
             alAxes1Line = axesLine('get', 'axes1');
             for ii1=1:numel(alAxes1Line)
                 alAxes1Line{ii1}.Visible = 'on';
             end
+
         elseif aAxe == axes2Ptr('get', [], dSeriesOffset)
+
             alAxes2Line = axesLine('get', 'axes2');
             for ii2=1:numel(alAxes2Line)
                 alAxes2Line{ii2}.Visible = 'on';
             end
+
         elseif aAxe == axesMipPtr('get', [], dSeriesOffset)
+
             alAxesMipLine = axesLine('get', 'axesMip');
             for ii4=1:numel(alAxesMipLine)
                 alAxesMipLine{ii4}.Visible = 'on';
             end            
             
         elseif aAxe == axes3Ptr('get', [], dSeriesOffset)
+
             alAxes3Line = axesLine('get', 'axes3');
             for ii3=1:numel(alAxes3Line)
                 alAxes3Line{ii3}.Visible = 'on';
             end
-        else
+        end
+    end
+
+    if isVsplash('get') == false
+
+        btnUiCorWindowFullScreen = btnUiCorWindowFullScreenPtr('get');
+        if ~isempty(btnUiCorWindowFullScreen)
+
+            btnUiCorWindowFullScreen.Visible = 'on';
+        end
+
+        btnUiSagWindowFullScreen = btnUiSagWindowFullScreenPtr('get');
+        if ~isempty(btnUiSagWindowFullScreen)
+        
+            btnUiSagWindowFullScreen.Visible = 'on';
+        end
+
+        btnUiTraWindowFullScreen = btnUiTraWindowFullScreenPtr('get');
+        if ~isempty(btnUiTraWindowFullScreen)
+     
+            btnUiTraWindowFullScreen.Visible = 'on';
+        end
+
+        btnUiMipWindowFullScreen = btnUiMipWindowFullScreenPtr('get');
+        if ~isempty(btnUiMipWindowFullScreen)
+    
+            btnUiMipWindowFullScreen.Visible = 'on';
         end
     end
 
     delete(tLogo);
+    
     delete(tOverlay);
     
     if isVsplash('get') == false                       
@@ -446,16 +674,20 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
         end
     else
         
-        if strcmpi(vSplahView('get'), 'coronal')                                  
+        if strcmpi(vSplahView('get'), 'coronal')  
+
             uiLogo = displayLogo(uiCorWindowPtr('get'));
             
         elseif strcmpi(vSplahView('get'), 'sagittal')                                                
+
             uiLogo = displayLogo(uiSagWindowPtr('get'));
             
         elseif  strcmpi(vSplahView('get'), 'axial')                             
+
             uiLogo = displayLogo(uiTraWindowPtr('get'));
             
         elseif strcmpi(vSplahView('get'), 'all')                                 
+
             uiLogo = displayLogo(uiCorWindowPtr('get'));
             
         else            
@@ -467,11 +699,31 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
     
     refreshImages();
 
-    if strcmpi('*.gif', sExtention)
-        progressBar(1, sprintf('Write %s completed', sFileName));
-    elseif strcmpi('*.jpg', sExtention) || ...
-           strcmpi('*.bmp', sExtention) || ...
-           strcmpi('*.png', sExtention)
-        progressBar(1, sprintf('Write %d files to %s completed', dLastSlice, sImgDirName));
+    if bWriteSucceed == true
+
+        if strcmpi('*.avi', sExtention) || ...
+           strcmpi('avi'  , sExtention) || ...
+           strcmpi('*.mp4', sExtention) || ...
+           strcmpi('mp4'  , sExtention) || ...
+           strcmpi('*.gif', sExtention) || ...
+           strcmpi('gif'  , sExtention)
+    
+            progressBar(1, sprintf('Write %s completed', [sPath sFileName]));
+    
+        elseif strcmpi('*.jpg', sExtention) || ...
+               strcmpi('jpg'  , sExtention) || ...
+               strcmpi('*.bmp', sExtention) || ...
+               strcmpi('bmp'  , sExtention) || ...
+               strcmpi('*.png', sExtention) || ...
+               strcmpi('png'  , sExtention) 
+    
+            progressBar(1, sprintf('Write %d files to %s completed', dLastSlice, sImgDirName));
+    
+    elseif strcmpi('*.dcm', sExtention) || ...
+           strcmpi('dcm'  , sExtention)
+
+            progressBar(1, sprintf('Write %d files to %s completed', dLastSlice, sDcmDirName));
+            
+        end
     end
 end
