@@ -20,9 +20,15 @@
 | Digital Radiography (CR, DX)               | CERR planC, dose volumes and constraints             |
 | Digital Angiography (XA)                   | Comma Separated Values (.csv)                        |
 | Magnetic Resonance (MR)                    | Standard Triangle Language (.stl)                    |
-| Secondary Pictures and Scanned Images (SC) | Bitmap (.bmp)                                        |
-| Mammography (MG)                           | Neuroimaging Informatics Technology Initiative (.nii)|
-| Ultrasonography (US)                       | Nearly Raw Raster Data (.nrrd)                       |
+| Secondary Pictures and Scanned Images (SC) | Audio Video Interleave (.avi)                        |
+| Mammography (MG)                           | Moving Pictures Expert Group 4 (.mp4)                |
+| Ultrasonography (US) 						 | Graphics Interchange Format (.gif)                   |
+|											 | Digital Imaging and Communications (.dcm)            |
+|											 | Joint Photographic Experts Group (.jpg)              |
+|											 | Bitmap (.bmp)                                        |
+|											 | Portable Network Graphics (.png)                     |
+|                                            | Neuroimaging Informatics Technology Initiative (.nii)|
+|                                            | Nearly Raw Raster Data (.nrrd)                       |
 
 ## Main features
 - Multi-modality Image Viewer
