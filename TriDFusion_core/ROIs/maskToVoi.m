@@ -78,7 +78,7 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
                 aSlice = imresize(aSlice,3, 'nearest'); % do not go directly through pixel centers
             end
             
-            [maskSlice, ~,~,~] = bwboundaries(aSlice, 'noholes', 4); 
+            [maskSlice, ~,~,~] = bwboundaries(aSlice, 4, 'noholes'); 
 
             if ~isempty(maskSlice)
 

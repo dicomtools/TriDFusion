@@ -263,7 +263,7 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
         
                             nii = nii_tool('load', sNiiFileName);
         
-                            machineLearning3DMask('set', 'lung_upper_lobe_left', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor);
+                            machineLearning3DMask('set', 'lung_upper_lobe_left', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
         
                             aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
         
@@ -286,7 +286,7 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
         
                             nii = nii_tool('load', sNiiFileName);
         
-                            machineLearning3DMask('set', 'lung_upper_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor);
+                            machineLearning3DMask('set', 'lung_upper_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
         
                             aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
         
@@ -309,7 +309,7 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
         
                             nii = nii_tool('load', sNiiFileName);
         
-                            machineLearning3DMask('set', 'lung_middle_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor);
+                            machineLearning3DMask('set', 'lung_middle_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
         
                             aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
         
@@ -332,7 +332,7 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
         
                             nii = nii_tool('load', sNiiFileName);
         
-                            machineLearning3DMask('set', 'lung_lower_lobe_left', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor);
+                            machineLearning3DMask('set', 'lung_lower_lobe_left', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
         
                             aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
         
@@ -355,7 +355,7 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
         
                             nii = nii_tool('load', sNiiFileName);
         
-                            machineLearning3DMask('set', 'lung_lower_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor);
+                            machineLearning3DMask('set', 'lung_lower_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
         
                             aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
         
@@ -378,7 +378,7 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
         
                             nii = nii_tool('load', sNiiFileName);
         
-                            machineLearning3DMask('set', 'liver', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor);
+                            machineLearning3DMask('set', 'liver', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
         
                             aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
         
@@ -437,7 +437,7 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
             
                             nii = nii_tool('load', sNiiFileName);
 
-                            machineLearning3DMask('set', 'lungs', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor);
+                            machineLearning3DMask('set', 'lungs', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
       
                             aMask = transformNiiMask(nii.img, atCTMetaData, aResampledNMImage, atResampledNMMeta);
      
@@ -521,7 +521,7 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
             
                                 nii = nii_tool('load', sNiiFileName);
             
-                                machineLearning3DMask('set', 'lung_upper_lobe_left', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor);
+                                machineLearning3DMask('set', 'lung_upper_lobe_left', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
             
                                 aMask = transformNiiMask(nii.img, atCTMetaData, aResampledNMImage, atResampledNMMeta);
             
@@ -544,7 +544,7 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
             
                                 nii = nii_tool('load', sNiiFileName);
             
-                                machineLearning3DMask('set', 'lung_upper_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor);
+                                machineLearning3DMask('set', 'lung_upper_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
             
                                 aMask = transformNiiMask(nii.img, atCTMetaData, aResampledNMImage, atResampledNMMeta);
             
@@ -567,7 +567,7 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
             
                                 nii = nii_tool('load', sNiiFileName);
             
-                                machineLearning3DMask('set', 'lung_middle_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor);
+                                machineLearning3DMask('set', 'lung_middle_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
             
                                 aMask = transformNiiMask(nii.img, atCTMetaData, aResampledNMImage, atResampledNMMeta);
             
@@ -590,7 +590,7 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
             
                                 nii = nii_tool('load', sNiiFileName);
             
-                                machineLearning3DMask('set', 'lung_lower_lobe_left', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor);
+                                machineLearning3DMask('set', 'lung_lower_lobe_left', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
             
                                 aMask = transformNiiMask(nii.img, atCTMetaData, aResampledNMImage, atResampledNMMeta);
             
@@ -613,7 +613,7 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
             
                                 nii = nii_tool('load', sNiiFileName);
             
-                                machineLearning3DMask('set', 'lung_lower_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor);
+                                machineLearning3DMask('set', 'lung_lower_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
             
                                 aMask = transformNiiMask(nii.img, atCTMetaData, aResampledNMImage, atResampledNMMeta);
             
@@ -637,7 +637,7 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
             
                                 nii = nii_tool('load', sNiiFileName);
 
-                                machineLearning3DMask('set', 'liver', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor);
+                                machineLearning3DMask('set', 'liver', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
             
                                 aMask = transformNiiMask(nii.img, atCTMetaData, aResampledNMImage, atResampledNMMeta);
 

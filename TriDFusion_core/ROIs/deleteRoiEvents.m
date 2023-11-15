@@ -39,7 +39,9 @@ function deleteRoiEvents(hObject, ~)
     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dSerieOffset);
 
     if ~isempty(asConstraintTagList)
+
         dConstraintOffset = find(contains(asConstraintTagList, {sRoiTag}));
+
         if ~isempty(dConstraintOffset) % tag exist
              roiConstraintList('set', dSerieOffset,  asConstraintTagList{dConstraintOffset}, asConstraintTypeList{dConstraintOffset});
         end    
@@ -70,6 +72,7 @@ function deleteRoiEvents(hObject, ~)
             % Delete ROI object 
             
             if isvalid(atRoiInput{dTagOffset}.Object)
+
                 delete(atRoiInput{dTagOffset}.Object)
             end
 
@@ -95,6 +98,7 @@ function deleteRoiEvents(hObject, ~)
                             break;
                         else
                             
+if 0 % Need to improve the operation speed  
                             if ~isempty(atRoiInput)               
                 
                                 dNbTags = numel(atVoiInput{vo}.RoisTag);
@@ -118,7 +122,7 @@ function deleteRoiEvents(hObject, ~)
                                     end                 
                                 end
                             end
-                            
+end
                         end
                     end
                 end

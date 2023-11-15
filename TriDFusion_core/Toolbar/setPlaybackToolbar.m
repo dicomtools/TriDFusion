@@ -202,7 +202,7 @@ function setPlaybackToolbar(sVisible)
                  case 'Record'
 
                     if multiFrame3DPlayback('get') == false
-                        
+
                         if multiFrame3DRecord('get') == false
 
                             filter = {'*.avi';'*.mp4';'*.gif';'*.dcm';'*.jpg';'*.bmp';'*.png'};
@@ -395,10 +395,12 @@ function setPlaybackToolbar(sVisible)
                             % load last data directory
                             if exist(sMatFile, 'file')
 
-                                load('-mat', sMatFile);
+                                load(sMatFile, 'animatedGifLastUsedDir');
                                 if exist('animatedGifLastUsedDir', 'var')
+
                                    sCurrentDir = animatedGifLastUsedDir;
                                 end
+                                
                                 if sCurrentDir == 0
                                     sCurrentDir = pwd;
                                 end

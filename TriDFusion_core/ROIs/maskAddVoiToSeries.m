@@ -499,7 +499,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                 aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
             end
             
-            [maskAxial, ~, dNbSlicesElements]  = bwboundaries(aAxial, 'noholes', 8);                    
+            [maskAxial, ~, dNbSlicesElements]  = bwboundaries(aAxial, 8, 'noholes');                    
              
 %             dSlicesNbElements = numel(maskAxial);
             

@@ -72,7 +72,7 @@ function aNewMask = resizeMaskToImageSize(aMask, aImage)
            
         if any(aSlice, 'all') 
                                            
-            [aBoundaries, ~,nbBoundaries,~] = bwboundaries(aSlice, 'noholes', 4); 
+            [aBoundaries, ~,nbBoundaries,~] = bwboundaries(aSlice, 4, 'noholes'); 
 
             if ~isempty(aBoundaries)
      
@@ -100,7 +100,7 @@ function aNewMask = resizeMaskToImageSize(aMask, aImage)
                
             if any(aSlice, 'all') 
                                                
-                [aBoundaries, ~,nbBoundaries,~] = bwboundaries(aSlice, 'noholes', 4); 
+                [aBoundaries, ~,nbBoundaries,~] = bwboundaries(aSlice, 4, 'noholes'); 
     
                 if ~isempty(aBoundaries)
          

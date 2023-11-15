@@ -115,7 +115,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
     aSlice(aSlice<=dValue) = 0;
     aSlice(aSlice~=0) =1; 
 
-    boundary = bwboundaries(aSlice, 'noholes', 8);
+    boundary = bwboundaries(aSlice, 8, 'noholes');
 
     if ~isempty(boundary)
 
@@ -243,7 +243,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
                                aSlice = imresize(aSlice,3, 'nearest'); % do not go directly through pixel centers
                             end
 
-                            B = bwboundaries(aSlice, 'noholes');
+                            B = bwboundaries(aSlice, 8, 'noholes');
                             if isempty(B)
                                 continue;
                             end

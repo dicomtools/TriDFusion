@@ -62,19 +62,22 @@ function clickDown(~, ~)
 
         % Perform full screen action on double-click
 
-        gca = getAxeFromMousePosition(dSeriesOffset);
+        pAxe = getAxeFromMousePosition(dSeriesOffset);
 
-        isCoronal  = gca == axes1Ptr('get', [], dSeriesOffset); 
-        isSagittal = gca == axes2Ptr('get', [], dSeriesOffset);
-        isAxial    = gca == axes3Ptr('get', [], dSeriesOffset);
-        isMip      = gca == axesMipPtr('get', [], dSeriesOffset);
+        isCoronal  = pAxe == axes1Ptr('get', [], dSeriesOffset); 
+        isSagittal = pAxe == axes2Ptr('get', [], dSeriesOffset);
+        isAxial    = pAxe == axes3Ptr('get', [], dSeriesOffset);
+        isMip      = pAxe == axesMipPtr('get', [], dSeriesOffset);
 
         if isCoronal
             btnUiCorWindowFullScreenCallback();
+
         elseif isSagittal 
             btnUiSagWindowFullScreenCallback();
+
         elseif isAxial
             btnUiTraWindowFullScreenCallback();
+
         elseif isMip
             btnUiMipWindowFullScreenCallback();
         end
@@ -87,28 +90,32 @@ function clickDown(~, ~)
     
             windowButton('set', 'down');                      
 
-            gca = getAxeFromMousePosition(dSeriesOffset);
+            pAxe = getAxeFromMousePosition(dSeriesOffset);
     
-            isAxe      = gca == axePtr  ('get', [], dSeriesOffset); 
-            isCoronal  = gca == axes1Ptr('get', [], dSeriesOffset); 
-            isSagittal = gca == axes2Ptr('get', [], dSeriesOffset);
-            isAxial    = gca == axes3Ptr('get', [], dSeriesOffset);
+            isAxe      = pAxe == axePtr  ('get', [], dSeriesOffset); 
+            isCoronal  = pAxe == axes1Ptr('get', [], dSeriesOffset); 
+            isSagittal = pAxe == axes2Ptr('get', [], dSeriesOffset);
+%             isAxial    = pAxe == axes3Ptr('get', [], dSeriesOffset);
     
             if isAxe
                 set(uiOneWindowPtr('get'), 'HighlightColor', [1 0 0]);
+
             elseif isCoronal
                 set(uiCorWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
+
             elseif isSagittal 
                 set(uiSagWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
-            elseif isAxial
-                set(uiTraWindowPtr('get'), 'HighlightColor', [1 0 0]); 
+
             else
-                set(uiMipWindowPtr('get'), 'HighlightColor', [1 0 0]); 
+                set(uiTraWindowPtr('get'), 'HighlightColor', [1 0 0]); 
+%             else
+%                 set(uiMipWindowPtr('get'), 'HighlightColor', [1 0 0]); 
             end  
     
             if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
     
                 pRoiPtr = brush2Dptr('get'); % Adjust brush size
+
                 if ~isempty(pRoiPtr)    
                    adjBrush2D(pRoiPtr, get(0, 'PointerLocation'));
                 end            
@@ -124,13 +131,14 @@ function clickDown(~, ~)
 %                     aImageSize = size(dicomBuffer('get', [], dSeriesOffset));
               
                     if size(dicomBuffer('get', [], dSeriesOffset), 3) ==1
+
                          for jj=1:numel(atRoiInput)
     
                             currentRoi = atRoiInput{jj};
                             
                             if isvalid(currentRoi.Object)
     
-                                isAxe = strcmpi(currentRoi.Axe, 'Axe') && gca == axePtr('get', [], dSeriesOffset); 
+                                isAxe = strcmpi(currentRoi.Axe, 'Axe') && pAxe == axePtr('get', [], dSeriesOffset); 
                                 
                                 if isAxe
                                    if strcmpi(currentRoi.Object.Type, 'images.roi.freehand') || ...
@@ -142,8 +150,11 @@ function clickDown(~, ~)
                                         if strcmpi(currentRoi.ObjectType, 'voi-roi')
     
                                             for vo=1:numel(atVoiInput)
-                                                dTagOffset = find(contains(atVoiInput{vo}.RoisTag,{currentRoi.Tag}), 1);
-                                                if ~isempty(dTagOffset) % tag exist
+
+%                                                 dTagOffset = find(contains(atVoiInput{vo}.RoisTag,{currentRoi.Tag}), 1);
+
+                                                if ~isempty(find(contains(atVoiInput{vo}.RoisTag,{currentRoi.Tag}), 1)) % tag exist
+
                                                     dVoiOffset=vo;
                                                     sLesionType = atVoiInput{vo}.LesionType;
                                                     break;
@@ -181,11 +192,12 @@ function clickDown(~, ~)
                                 iSagittal = sliceNumber('get', 'sagittal');
                                 iAxial    = sliceNumber('get', 'axial'   );
         
-                                isCoronal  = strcmpi(currentRoi.Axe, 'Axes1') && iCoronal  == currentRoi.SliceNb && gca == axes1Ptr('get', [], dSeriesOffset); 
-                                isSagittal = strcmpi(currentRoi.Axe, 'Axes2') && iSagittal == currentRoi.SliceNb && gca == axes2Ptr('get', [], dSeriesOffset);
-                                isAxial    = strcmpi(currentRoi.Axe, 'Axes3') && iAxial    == currentRoi.SliceNb && gca == axes3Ptr('get', [], dSeriesOffset);
+                                isCoronal  = strcmpi(currentRoi.Axe, 'Axes1') && iCoronal  == currentRoi.SliceNb && pAxe == axes1Ptr('get', [], dSeriesOffset); 
+                                isSagittal = strcmpi(currentRoi.Axe, 'Axes2') && iSagittal == currentRoi.SliceNb && pAxe == axes2Ptr('get', [], dSeriesOffset);
+                                isAxial    = strcmpi(currentRoi.Axe, 'Axes3') && iAxial    == currentRoi.SliceNb && pAxe == axes3Ptr('get', [], dSeriesOffset);
         
                                 if isCoronal || isSagittal || isAxial
+
                                     if strcmpi(currentRoi.Object.Type, 'images.roi.freehand') || ...
                                        strcmpi(currentRoi.Object.Type, 'images.roi.polygon')  
     
@@ -195,8 +207,11 @@ function clickDown(~, ~)
                                         if strcmpi(currentRoi.ObjectType, 'voi-roi')
     
                                             for vo=1:numel(atVoiInput)
-                                                dTagOffset = find(contains(atVoiInput{vo}.RoisTag,{ currentRoi.Tag}), 1);
-                                                if ~isempty(dTagOffset) % tag exist
+
+%                                                 dTagOffset = find(contains(atVoiInput{vo}.RoisTag,{ currentRoi.Tag}), 1);
+
+                                                if ~isempty(find(contains(atVoiInput{vo}.RoisTag,{ currentRoi.Tag}), 1)) % tag exist
+
                                                     dVoiOffset=vo;
                                                     sLesionType = atVoiInput{vo}.LesionType;
                                                     break;
@@ -216,12 +231,12 @@ function clickDown(~, ~)
                                             imPrt = imSagittalPtr('get', [], dSeriesOffset);
 %                                             t.xSize = aImageSize(2);
 %                                             t.ySize = aImageSize(3);                                        
-                                        elseif isAxial
+                                        else
                                             imPrt = imAxialPtr('get', [], dSeriesOffset);
 %                                             t.xSize = aImageSize(1);
 %                                             t.ySize = aImageSize(2);   
-                                        else
-                                            imPrt = imMipPtr('get', [], dSeriesOffset);                                            
+%                                         else
+%                                             imPrt = imMipPtr('get', [], dSeriesOffset);                                            
                                         end
 
                                         aImageSize = size(imPrt.CData);
@@ -238,10 +253,12 @@ function clickDown(~, ~)
                             end                    
                         end
                     end
+
                     currentRoiPointer('set', acPtrList);
+
                 end
     
-                triangulateImages();  
+                uiresume(fiMainWindowPtr('get'));
             end
             
         else
@@ -276,6 +293,7 @@ function clickDown(~, ~)
                        switchToMIPMode('get')    == false
         
                         windowButton('set', 'down');
+
                         if isMoveImageActivated('get') == true
                             
                             set(fiMainWindowPtr('get'), 'Pointer', 'fleur');
@@ -302,16 +320,16 @@ function clickDown(~, ~)
                             triangulateImages();
                         end
                         
-                        gca = getAxeFromMousePosition(dSeriesOffset);
+                        pAxe = getAxeFromMousePosition(dSeriesOffset);
                    
-                        clickedPt = get(gca, 'CurrentPoint');
+                        clickedPt = get(pAxe, 'CurrentPoint');
         
                         clickedPtX = round(clickedPt(1  ));
                         clickedPtY = round(clickedPt(1,2));
         
                         if clickedPtX > 0 && ...
                            clickedPtY > 0 && ...
-                           gca == axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                           pAxe == axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
 
                             axeClicked('set', true);
                             uiresume(fiMainWindowPtr('get'));                      

@@ -35,8 +35,8 @@ function generate3DLungShuntReport(bInitReport)
 
     atInput = inputTemplate('get');
 
-    dOffset = get(uiSeriesPtr('get'), 'Value');
-    if dOffset > numel(atInput)
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+    if dSeriesOffset > numel(atInput)
         return;
     end
 
@@ -261,19 +261,30 @@ function generate3DLungShuntReport(bInitReport)
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+115 FIG_REPORT_Y-130 90 20]...
                   ); 
               
-        uiReportLesionMax = ...       
+        uiReportLesionTotal = ...       
         uicontrol(ui3DLungShuntReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
                   'FontSize'  , 10,...
                   'FontName'  , 'MS Sans Serif', ...
-                  'string'    , getLungLiverReportMeanInformation('init'),...
+                  'string'    , getLungLiverReportTotalInformation('init'),...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+115 FIG_REPORT_Y-240 90 100]...
                   ); 
-              
+
+%         axe3DLungShuntLungsTotalRectangle = ...
+%         axes(ui3DLungShuntReport, ...
+%              'Units'   , 'pixels', ...
+%              'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)+115 FIG_REPORT_Y-240 60 40], ...
+%              'Color'   , 'white',...          
+%              'Visible' , 'off'...             
+%              );  
+%         axe3DLungShuntLungsTotalRectangle.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+%         axe3DLungShuntLungsTotalRectangle.Toolbar = [];  
+%         rectangle(axe3DLungShuntLungsTotalRectangle, 'position', [0 0 1 1], 'EdgeColor', [1 0.33 0.16]);
+
           % Contour Volume
               
           uicontrol(ui3DLungShuntReport,...
@@ -313,13 +324,13 @@ function generate3DLungShuntReport(bInitReport)
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
-                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 560 300 20]...
+                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 550 300 20]...
                   ); 
 
     axe3DLungShuntRectangle = ...
        axes(ui3DLungShuntReport, ...
              'Units'   , 'pixels', ...
-             'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 550 FIG_REPORT_X/3+60 40], ...
+             'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 540 FIG_REPORT_X/3+60 40], ...
              'Color'   , 'white',...          
              'Visible' , 'off'...             
              );  
@@ -806,9 +817,9 @@ function generate3DLungShuntReport(bInitReport)
     mReportOptions = uimenu(fig3DLungShuntReport,'Label','Options', 'Callback', @figLungLiverRatioReportRefreshOption);    
     
      if suvMenuUnitOption('get') == true && ...
-       atInput(dOffset).bDoseKernel == false    
+       atInput(dSeriesOffset).bDoseKernel == false    
 
-        sUnitDisplay = getSerieUnitValue(dOffset);  
+        sUnitDisplay = getSerieUnitValue(dSeriesOffset);  
         if strcmpi(sUnitDisplay, 'SUV')
             sSuvChecked = 'on';
         else
@@ -824,10 +835,10 @@ function generate3DLungShuntReport(bInitReport)
         sSuvChecked = 'off';
     end
     
-    if atInput(dOffset).bDoseKernel == true
+    if atInput(dSeriesOffset).bDoseKernel == true
         sSuvEnable = 'off';
     else
-        sUnitDisplay = getSerieUnitValue(dOffset);  
+        sUnitDisplay = getSerieUnitValue(dSeriesOffset);  
         if strcmpi(sUnitDisplay, 'SUV')        
             sSuvEnable = 'on';
         else
@@ -870,8 +881,10 @@ function generate3DLungShuntReport(bInitReport)
                 set(uiReportLesionMean, 'String', getLungLiverReportMeanInformation('get', gtReport));
             end        
             
-            if isvalid(uiReportLesionMax) % Make sure the figure is still open        
-                set(uiReportLesionMax, 'String', getLungLiverReportTotalInformation('get', gtReport));
+            if isvalid(uiReportLesionTotal) % Make sure the figure is still open        
+
+                set(uiReportLesionTotal, 'String', getLungLiverReportTotalInformation('get', gtReport));
+%                 set(uiReportLesionTotal, 'FontWeight', 'Bold');
             end    
             
             if isvalid(uiReportLesionVolume) % Make sure the figure is still open        
@@ -920,16 +933,20 @@ function generate3DLungShuntReport(bInitReport)
         atMetaData = dicomMetaData('get');
        
         atInput = inputTemplate('get');
-        dOffset = get(uiSeriesPtr('get'), 'Value');
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
     
-        if atInput(dOffset).bDoseKernel == true
+        if atInput(dSeriesOffset).bDoseKernel == true
+
             sUnit =  'Dose';
         else
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
-                sUnit = getSerieUnitValue(dOffset);
+
+                sUnit = getSerieUnitValue(dSeriesOffset);
+
                 if (strcmpi(atMetaData{1}.Modality, 'pt') || ...
                     strcmpi(atMetaData{1}.Modality, 'nm'))&& ...
                     strcmpi(sUnit, 'SUV' )
+
                     sSUVtype = viewerSUVtype('get');
                     sUnit =  sprintf('SUV/%s', sSUVtype);
                 else
@@ -943,10 +960,12 @@ function generate3DLungShuntReport(bInitReport)
                  if (strcmpi(atMetaData{1}.Modality, 'ct'))
                     sUnit =  'HU';
                  else
-                    sUnit = getSerieUnitValue(dOffset);
+                    sUnit = getSerieUnitValue(dSeriesOffset);
+
                     if (strcmpi(atMetaData{1}.Modality, 'pt') || ...
                         strcmpi(atMetaData{1}.Modality, 'nm'))&& ...
                         strcmpi(sUnit, 'SUV' )
+
                         sUnit =  'BQML';
                     else
 
@@ -960,6 +979,7 @@ function generate3DLungShuntReport(bInitReport)
     function lungLiverReportSUVUnitCallback(hObject, ~)
    
         if strcmpi(hObject.Checked, 'on')
+
             hObject.Checked = 'off';
             suvMenuUnitOption('set', false);
             
@@ -981,12 +1001,17 @@ function generate3DLungShuntReport(bInitReport)
   %      [~, gasOrganList] = getLesionType('');
         
         for ll=1:numel(gasOrganList)
+
             if  ll==1          
-                sReport = sprintf('%s%s', sReport, char(gasOrganList{ll}));
+
+                sReport = sprintf( '%s%s', sReport, ['NM ' char(gasOrganList{ll})] );
             else
-                sReport = sprintf('%s\n\n%s', sReport, char(gasOrganList{ll}));
+                sReport = sprintf( '%s\n\n%s', sReport, ['NM ' char(gasOrganList{ll})] );
             end
         end       
+      
+        sReport = sprintf( '%s\n\n%s', sReport, 'CT Lungs' );
+
     end
 
     function sReport = getLungLiverReportMeanInformation(sAction, tReport)
@@ -996,12 +1021,17 @@ function generate3DLungShuntReport(bInitReport)
         if strcmpi(sAction, 'init')
             sReport = '';    
             for ll=1:numel(gasOrganList)
+
                 if isempty(sReport)
+
                     sReport = '-';
                 else
                     sReport = sprintf('%s\n\n%s', sReport, '-');
                 end
-            end       
+            end    
+
+            sReport = sprintf('%s\n\n%s', sReport, '-');
+            
         else
             
   %          if ~isempty(tReport.All.Mean)
@@ -1016,10 +1046,13 @@ function generate3DLungShuntReport(bInitReport)
                 switch lower(gasOrganList{ll})
                                             
                     case 'lungs'
-                        if ~isempty(tReport.Lungs.Mean)
-                            sReport = sprintf('%s%-.2f', sReport, tReport.Lungs.Mean);
+
+                        if ~isempty(tReport.NM.Lungs.Mean)
+
+                            sReport = sprintf('%s%-.2f', sReport, tReport.NM.Lungs.Mean);
                         else
                             if isempty(sReport)
+
                                 sReport = '-';
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
@@ -1027,10 +1060,13 @@ function generate3DLungShuntReport(bInitReport)
                         end  
                         
                     case 'liver'
-                        if ~isempty(tReport.Liver.Mean)
-                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.Liver.Mean);
+
+                        if ~isempty(tReport.NM.Liver.Mean)
+
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.NM.Liver.Mean);
                         else
                             if isempty(sReport)
+
                                 sReport = '-';
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
@@ -1040,7 +1076,15 @@ function generate3DLungShuntReport(bInitReport)
                     otherwise                        
                         sReport = sprintf('%s\n\n%s', sReport, '-');
                 end
-            end             
+            end  
+
+            if ~isempty(tReport.CT.Lungs.Volume)
+       
+                sReport = sprintf('%s\n\n%s', sReport, 'NaN');
+            else
+                sReport = sprintf('%s\n\n%s', sReport, '-');
+            end
+           
         end      
     end
 
@@ -1049,14 +1093,21 @@ function generate3DLungShuntReport(bInitReport)
 %        [~, gasOrganList] = getLesionType('');
         
         if strcmpi(sAction, 'init')
+
             sReport = '';      
+
             for ll=1:numel(gasOrganList)
+
                 if isempty(sReport)
+
                     sReport = '-';
                 else
                     sReport = sprintf('%s\n\n%s', sReport, '-');
                 end
-            end       
+            end 
+
+            sReport = sprintf('%s\n\n%s', sReport, '-');
+        
         else
             
  %           if ~isempty(tReport.All.Total)
@@ -1071,8 +1122,10 @@ function generate3DLungShuntReport(bInitReport)
                 switch lower(gasOrganList{ll})
                                              
                     case 'lungs'
-                        if ~isempty(tReport.Lungs.Total)
-                            sReport = sprintf('%s%-.2f', sReport, tReport.Lungs.Total);
+
+                        if ~isempty(tReport.NM.Lungs.Total)
+
+                            sReport = sprintf('%s%-.2f', sReport, tReport.NM.Lungs.Total);
                         else
                             if isempty(sReport)
                                 sReport = '-';
@@ -1082,10 +1135,13 @@ function generate3DLungShuntReport(bInitReport)
                         end  
                         
                     case 'liver'
-                        if ~isempty(tReport.Liver.Total)
-                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.Liver.Total);
+
+                        if ~isempty(tReport.NM.Liver.Total)
+
+                            sReport = sprintf('%s\n\n%-.2f', sReport, tReport.NM.Liver.Total);
                         else
                             if isempty(sReport)
+
                                 sReport = '-';
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
@@ -1096,6 +1152,13 @@ function generate3DLungShuntReport(bInitReport)
                         sReport = sprintf('%s\n\n%s', sReport, '-');
                 end
             end             
+
+            if ~isempty(tReport.CT.Lungs.Volume)
+       
+                sReport = sprintf('%s\n\n%s', sReport, 'NaN');
+            else
+                sReport = sprintf('%s\n\n%s', sReport, '-');
+            end            
         end      
     end
 
@@ -1104,14 +1167,21 @@ function generate3DLungShuntReport(bInitReport)
  %       [~, gasOrganList] = getLesionType('');
         
         if strcmpi(sAction, 'init')
-            sReport = '';      
+
+            sReport = '';    
+
             for ll=1:numel(gasOrganList)
+
                 if isempty(sReport)
+
                     sReport = '-';
                 else
                     sReport = sprintf('%s\n\n%s', sReport, '-');
                 end
-            end       
+            end 
+
+            sReport = sprintf('%s\n\n%s', sReport, '-');
+        
         else
             
    %         if ~isempty(tReport.All.Volume)
@@ -1126,8 +1196,10 @@ function generate3DLungShuntReport(bInitReport)
                 switch lower(gasOrganList{ll})
                         
                     case 'lungs'
-                        if ~isempty(tReport.Lungs.Volume)
-                            sReport = sprintf('%s%-.3f', sReport, tReport.Lungs.Volume);
+
+                        if ~isempty(tReport.NM.Lungs.Volume)
+
+                            sReport = sprintf('%s%-.3f', sReport, tReport.NM.Lungs.Volume);
                         else
                             if isempty(sReport)
                                 sReport = '-';
@@ -1137,8 +1209,10 @@ function generate3DLungShuntReport(bInitReport)
                         end  
                         
                     case 'liver'
-                        if ~isempty(tReport.Liver.Volume)
-                            sReport = sprintf('%s\n\n%-.3f', sReport, tReport.Liver.Volume);
+
+                        if ~isempty(tReport.NM.Liver.Volume)
+
+                            sReport = sprintf('%s\n\n%-.3f', sReport, tReport.NM.Liver.Volume);
                         else
                             if isempty(sReport)
                                 sReport = '-';
@@ -1151,14 +1225,27 @@ function generate3DLungShuntReport(bInitReport)
                     otherwise    
                         sReport = sprintf('%s\n\n%s', sReport, '-');
                 end
-            end             
+            end    
+
+            if ~isempty(tReport.CT.Lungs.Volume)
+
+                sReport = sprintf('%s\n\n%-.3f', sReport, tReport.CT.Lungs.Volume);
+            else
+                if isempty(sReport)
+
+                    sReport = '-';
+                else
+                    sReport = sprintf('%s\n\n%s', sReport, 'NaN');
+                end                
+            end
+
         end         
     end
 
     function sLungShuntFraction = getLungLiverReportRatioInformation(tReport)
 
-            dLungsTotal = tReport.Lungs.Total*100;
-            dLiverTotal = tReport.Liver.Total*100;
+            dLungsTotal = tReport.NM.Lungs.Total*100;
+            dLiverTotal = tReport.NM.Liver.Total*100;
 
             %                    ( 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
             % Lung 𝑆ℎ𝑢𝑛𝑡 = ____________________________ × 100
@@ -1177,7 +1264,7 @@ function generate3DLungShuntReport(bInitReport)
                 % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF 
                 %                                   Lung mass (Kg)
  
-                dLungsVolume = gtReport.Lungs.Volume;
+                dLungsVolume = gtReport.NM.Lungs.Volume;
 
                 dInjectedActivity = dInjectedActivity/1000; % In GBq
 
@@ -1195,9 +1282,9 @@ function generate3DLungShuntReport(bInitReport)
         tReport = [];
         
         atInput = inputTemplate('get');
-        dOffset = get(uiSeriesPtr('get'), 'Value');
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
         
-        bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;
+        bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
                
         sUnitDisplay = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
         tQuantification = quantificationTemplate('get');
@@ -1212,47 +1299,55 @@ function generate3DLungShuntReport(bInitReport)
         if bModifiedMatrix == false && ... 
            bMovementApplied == false        % Can't use input buffer if movement have been applied
         
-            atDicomMeta = dicomMetaData('get');                              
-            atMetaData  = atInput(dOffset).atDicomInfo;
+            atDicomMeta = dicomMetaData('get', [], dSeriesOffset);                              
+            atMetaData  = atInput(dSeriesOffset).atDicomInfo;
             aImage      = inputBuffer('get');
             
 %            if     strcmpi(imageOrientation('get'), 'axial')
-%                aImage = permute(aImage{dOffset}, [1 2 3]);
+%                aImage = permute(aImage{dSeriesOffset}, [1 2 3]);
 %            elseif strcmpi(imageOrientation('get'), 'coronal')
-%                aImage = permute(aImage{dOffset}, [3 2 1]);
+%                aImage = permute(aImage{dSeriesOffset}, [3 2 1]);
 %            elseif strcmpi(imageOrientation('get'), 'sagittal')
-%                aImage = permute(aImage{dOffset}, [3 1 2]);
+%                aImage = permute(aImage{dSeriesOffset}, [3 1 2]);
 %            end
 
-            aImage = aImage{dOffset};
+            aImage = aImage{dSeriesOffset};
 
             if     strcmpi(imageOrientation('get'), 'axial')
 %                 aImage = aImage;
             elseif strcmpi(imageOrientation('get'), 'coronal')
+
                 aImage = reorientBuffer(aImage, 'coronal');
+
             elseif strcmpi(imageOrientation('get'), 'sagittal')
+
                 aImage = reorientBuffer(aImage, 'sagittal');
             end
 
             if size(aImage, 3) ==1
 
-                if atInput(dOffset).bFlipLeftRight == true
+                if atInput(dSeriesOffset).bFlipLeftRight == true
+
                     aImage=aImage(:,end:-1:1);
                 end
 
-                if atInput(dOffset).bFlipAntPost == true
+                if atInput(dSeriesOffset).bFlipAntPost == true
+
                     aImage=aImage(end:-1:1,:);
                 end            
             else
-                if atInput(dOffset).bFlipLeftRight == true
+                if atInput(dSeriesOffset).bFlipLeftRight == true
+
                     aImage=aImage(:,end:-1:1,:);
                 end
 
-                if atInput(dOffset).bFlipAntPost == true
+                if atInput(dSeriesOffset).bFlipAntPost == true
+
                     aImage=aImage(end:-1:1,:,:);
                 end
 
-                if atInput(dOffset).bFlipHeadFeet == true
+                if atInput(dSeriesOffset).bFlipHeadFeet == true
+
                     aImage=aImage(:,:,end:-1:1);
                 end 
             end              
@@ -1266,12 +1361,15 @@ function generate3DLungShuntReport(bInitReport)
         
         xPixel = atMetaData{1}.PixelSpacing(1)/10;
         yPixel = atMetaData{1}.PixelSpacing(2)/10; 
+
         if size(aImage, 3) == 1 
+
             zPixel = 1;
         else
             zPixel = computeSliceSpacing(atMetaData)/10; 
 
             if zPixel == 0 % We can't determine the z size of a pixel, we will presume the pixel is square.
+
                 zPixel = xPixel;
             end           
         end
@@ -1293,10 +1391,12 @@ function generate3DLungShuntReport(bInitReport)
             switch lower(atVoiInput{vv}.Label)
                                     
                 case 'lungs-lun'
+
                     dLungsCount  = dLungsCount+1;                    
                     dNbLungsRois = dNbLungsRois+dNbRois;
                     
                 case 'liver-liv'
+
                     dLiverCount  = dLiverCount+1;                    
                     dNbLiverRois = dNbLiverRois+dNbRois;
             end
@@ -1305,21 +1405,23 @@ function generate3DLungShuntReport(bInitReport)
         % Set report type count
                         
         if dLungsCount == 0
-            tReport.Lungs.Count = [];
+
+            tReport.NM.Lungs.Count = [];
         else
-            tReport.Lungs.Count = dLungsCount;
+            tReport.NM.Lungs.Count = dLungsCount;
         end
         
         if dLiverCount == 0
-            tReport.Liver.Count = [];
+
+            tReport.NM.Liver.Count = [];
         else
-            tReport.Liver.Count = dLiverCount;
+            tReport.NM.Liver.Count = dLiverCount;
         end
                                     
         % Clasify ROIs by lession type      
   
-        tReport.Lungs.RoisTag = cell(1, dNbLungsRois);
-        tReport.Liver.RoisTag = cell(1, dNbLiverRois);    
+        tReport.NM.Lungs.RoisTag = cell(1, dNbLungsRois);
+        tReport.NM.Liver.RoisTag = cell(1, dNbLiverRois);    
            
         dLungsRoisOffset = 1;
         dLiverRoisOffset = 1;
@@ -1332,24 +1434,26 @@ function generate3DLungShuntReport(bInitReport)
             switch lower(atVoiInput{vv}.Label)
                                     
                 case 'lungs-lun'
+
                     dFrom = dLungsRoisOffset;
                     dTo   = dLungsRoisOffset+dNbRois-1;
                     
-                    tReport.Lungs.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
+                    tReport.NM.Lungs.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
                     
                     dLungsRoisOffset = dLungsRoisOffset+dNbRois;
 
-                    tReport.Lungs.Color = atVoiInput{vv}.Color;
+                    tReport.NM.Lungs.Color = atVoiInput{vv}.Color;
                 
                 case 'liver-liv'
+
                     dFrom = dLiverRoisOffset;
                     dTo   = dLiverRoisOffset+dNbRois-1;
                     
-                    tReport.Liver.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
+                    tReport.NM.Liver.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
                     
                     dLiverRoisOffset = dLiverRoisOffset+dNbRois;               
 
-                    tReport.Liver.Color = atVoiInput{vv}.Color;
+                    tReport.NM.Liver.Color = atVoiInput{vv}.Color;
            end
         end    
 
@@ -1357,25 +1461,25 @@ function generate3DLungShuntReport(bInitReport)
         
         progressBar( 1/3, 'Computing liver segmentation, please wait' );
 
-        if numel(tReport.Liver.RoisTag) ~= 0  
+        if numel(tReport.NM.Liver.RoisTag) ~= 0  
 
-            voiMask = cell(1, numel(tReport.Liver.RoisTag));
-            voiData = cell(1, numel(tReport.Liver.RoisTag));
+            voiMask = cell(1, numel(tReport.NM.Liver.RoisTag));
+            voiData = cell(1, numel(tReport.NM.Liver.RoisTag));
             
             dNbCells = 0;
 
             liverMask = logical(false(size(aImage)));
          
-            for uu=1:numel(tReport.Liver.RoisTag)
+            for uu=1:numel(tReport.NM.Liver.RoisTag)
 
-                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.Liver.RoisTag{uu}]} );                
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.NM.Liver.RoisTag{uu}]} );                
                 
                 tRoi = atRoiInput{find(aTagOffset, 1)};
                 
-                if bModifiedMatrix  == false && ... 
-                   bMovementApplied == false        % Can't use input buffer if movement have been applied
-
+                if bModifiedMatrix  == false && bMovementApplied == false % Can't use input buffer if movement have been applied 
+                   
                     if numel(aImage) ~= numel(dicomBuffer('get'))
+
                         pTemp{1} = tRoi;
                         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
@@ -1385,6 +1489,7 @@ function generate3DLungShuntReport(bInitReport)
                 switch lower(tRoi.Axe)  
 
                     case 'axe'
+
                         voiData{uu} = aImage(:,:);
                         voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
 
@@ -1393,6 +1498,7 @@ function generate3DLungShuntReport(bInitReport)
 %                         end
 
                     case 'axes1'
+
                         aSlice = permute(aImage(tRoi.SliceNb,:,:), [3 2 1]);
                         voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
@@ -1402,6 +1508,7 @@ function generate3DLungShuntReport(bInitReport)
 %                         end
 
                     case 'axes2'
+
                         aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
                         voiData{uu} = aSlice;                        
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
@@ -1411,6 +1518,7 @@ function generate3DLungShuntReport(bInitReport)
 %                         end
 
                    case 'axes3'
+
                         aSlice = aImage(:,:,tRoi.SliceNb);
                         voiData{uu} = aSlice;                        
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
@@ -1421,9 +1529,8 @@ function generate3DLungShuntReport(bInitReport)
 
                 end              
                 
-                if bSegmented  == true && ...      
-                   bModifiedMatrix == true % Can't use original buffer   
-
+                if bSegmented  == true && bModifiedMatrix == true % Can't use original buffer       
+                     
                     voiDataTemp = voiData{uu}(voiMask{uu}); 
                     voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
                     dNbCells = dNbCells+numel(voiDataTemp);
@@ -1443,17 +1550,16 @@ function generate3DLungShuntReport(bInitReport)
                 voiData = voiData(voiData>cropValue('get'));                            
             end
             
-            tReport.Liver.Cells  = dNbCells;
-            tReport.Liver.Volume = dNbCells*dVoxVolume;
+            tReport.NM.Liver.Cells  = dNbCells;
+            tReport.NM.Liver.Volume = dNbCells*dVoxVolume;
 
             if bUpdateMasks == true 
-                tReport.Liver.Mask = liverMask;
+
+                tReport.NM.Liver.Mask = liverMask;
 
                 lungShuntMasks('set', 'Liver', liverMask);
-
             else
-
-                tReport.Liver.Mask = lungShuntMasks('get', 'Liver');                               
+                tReport.NM.Liver.Mask = lungShuntMasks('get', 'Liver');                               
             end
 
             aImage(liverMask) = min(aImage, [], 'all');
@@ -1463,53 +1569,53 @@ function generate3DLungShuntReport(bInitReport)
             if strcmpi(sUnitDisplay, 'SUV')
                 
                 if bSUVUnit == true
-                    tReport.Liver.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-                    tReport.Liver.Total = sum (voiData, 'all')*tQuantification.tSUV.dScale;             
-%                    tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume*tQuantification.tSUV.dScale;             
+                    tReport.NM.Liver.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.NM.Liver.Total = sum (voiData, 'all')*tQuantification.tSUV.dScale;             
+%                    tReport.NM.Liver.Total = tReport.NM.Liver.Mean*tReport.NM.Liver.Volume*tQuantification.tSUV.dScale;             
                 else
-                    tReport.Liver.Mean  = mean(voiData, 'all');
-                    tReport.Liver.Total = sum (voiData, 'all');
-%                    tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume;
+                    tReport.NM.Liver.Mean  = mean(voiData, 'all');
+                    tReport.NM.Liver.Total = sum (voiData, 'all');
+%                    tReport.NM.Liver.Total = tReport.NM.Liver.Mean*tReport.NM.Liver.Volume;
                 end
             else
-                tReport.Liver.Mean  = mean(voiData, 'all');             
-                tReport.Liver.Total = sum (voiData, 'all');             
-%                tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume;             
+                tReport.NM.Liver.Mean  = mean(voiData, 'all');             
+                tReport.NM.Liver.Total = sum (voiData, 'all');             
+%                tReport.NM.Liver.Total = tReport.NM.Liver.Mean*tReport.NM.Liver.Volume;             
             end
          
             clear voiMask;
             clear voiData;  
 
         else
-            tReport.Liver.Cells  = [];
-            tReport.Liver.Volume = [];
-            tReport.Liver.Mean   = [];            
-            tReport.Liver.Total  = [];            
+            tReport.NM.Liver.Cells  = [];
+            tReport.NM.Liver.Volume = [];
+            tReport.NM.Liver.Mean   = [];            
+            tReport.NM.Liver.Total  = [];            
         end        
                 
         % Compute Lungs segmentation
         
         progressBar( 1/3, 'Computing lungs segmentation, please wait' );
        
-        if numel(tReport.Lungs.RoisTag) ~= 0  
+        if numel(tReport.NM.Lungs.RoisTag) ~= 0  
        
-            voiMask = cell(1, numel(tReport.Lungs.RoisTag));
-            voiData = cell(1, numel(tReport.Lungs.RoisTag));
+            voiMask = cell(1, numel(tReport.NM.Lungs.RoisTag));
+            voiData = cell(1, numel(tReport.NM.Lungs.RoisTag));
             
             dNbCells = 0;
 
             lungsMask = logical(false(size(aImage)));
          
-            for uu=1:numel(tReport.Lungs.RoisTag)
+            for uu=1:numel(tReport.NM.Lungs.RoisTag)
 
-                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.Lungs.RoisTag{uu}]} );                
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.NM.Lungs.RoisTag{uu}]} );                
                 
                 tRoi = atRoiInput{find(aTagOffset, 1)};
                 
-                if bModifiedMatrix  == false && ... 
-                   bMovementApplied == false        % Can't use input buffer if movement have been applied
-
+                if bModifiedMatrix  == false && bMovementApplied == false % Can't use input buffer if movement have been applied 
+                   
                     if numel(aImage) ~= numel(dicomBuffer('get'))
+
                         pTemp{1} = tRoi;
                         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
@@ -1519,37 +1625,45 @@ function generate3DLungShuntReport(bInitReport)
                 switch lower(tRoi.Axe)  
 
                     case 'axe'
+
                         voiData{uu} = aImage(:,:);
                         voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
 
                         if bUpdateMasks == true
+
                             lungsMask(:,:) = voiMask{uu}|lungsMask(:,:);   
                         end
                      
                     case 'axes1'
+
                         aSlice = permute(aImage(tRoi.SliceNb,:,:), [3 2 1]);
                         voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
+
                             lungsMask(tRoi.SliceNb,:,:) = voiMask{uu}|lungsMask(tRoi.SliceNb,:,:);   
                         end
                         
                     case 'axes2'
+
                         aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
                         voiData{uu} = aSlice;                        
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
+
                             lungsMask(:,tRoi.SliceNb,:) = voiMask{uu}|lungsMask(:,tRoi.SliceNb,:);   
                         end
                          
                    case 'axes3'
+
                         aSlice = aImage(:,:,tRoi.SliceNb);
                         voiData{uu} = aSlice;                        
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
+
                             lungsMask(:,:,tRoi.SliceNb) = voiMask{uu}|lungsMask(:,:,tRoi.SliceNb);   
                         end
                 end              
@@ -1576,16 +1690,16 @@ function generate3DLungShuntReport(bInitReport)
                 voiData = voiData(voiData>cropValue('get'));                            
             end
             
-            tReport.Lungs.Cells  = dNbCells;
-            tReport.Lungs.Volume = dNbCells*dVoxVolume;
+            tReport.NM.Lungs.Cells  = dNbCells;
+            tReport.NM.Lungs.Volume = dNbCells*dVoxVolume;
 
             if bUpdateMasks == true 
-                tReport.Lungs.Mask = lungsMask;
+                tReport.NM.Lungs.Mask = lungsMask;
 
                 lungShuntMasks('set', 'Lungs', lungsMask);
 
             else
-                tReport.Lungs.Mask = lungShuntMasks('get', 'Lungs');
+                tReport.NM.Lungs.Mask = lungShuntMasks('get', 'Lungs');
             end
 
             clear lungsMask;
@@ -1593,29 +1707,38 @@ function generate3DLungShuntReport(bInitReport)
             if strcmpi(sUnitDisplay, 'SUV')
                 
                 if bSUVUnit == true
-                    tReport.Lungs.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-                    tReport.Lungs.Total = sum (voiData, 'all')*tQuantification.tSUV.dScale;             
-%                    tReport.Lungs.Total = tReport.Lungs.Mean*tReport.Lungs.Volume*tQuantification.tSUV.dScale;             
+                    tReport.NM.Lungs.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.NM.Lungs.Total = sum (voiData, 'all')*tQuantification.tSUV.dScale;             
+%                    tReport.NM.Lungs.Total = tReport.NM.Lungs.Mean*tReport.NM.Lungs.Volume*tQuantification.tSUV.dScale;             
                 else
-                    tReport.Lungs.Mean  = mean(voiData, 'all');
-                    tReport.Lungs.Total = sum (voiData, 'all');
-%                    tReport.Lungs.Total = tReport.Lungs.Mean*tReport.Lungs.Volume;
+                    tReport.NM.Lungs.Mean  = mean(voiData, 'all');
+                    tReport.NM.Lungs.Total = sum (voiData, 'all');
+%                    tReport.NM.Lungs.Total = tReport.NM.Lungs.Mean*tReport.NM.Lungs.Volume;
                 end
             else
-                tReport.Lungs.Mean  = mean(voiData, 'all');             
-                tReport.Lungs.Total = sum (voiData, 'all');             
-%                tReport.Lungs.Total = tReport.Lungs.Mean*tReport.Lungs.Volume;             
+                tReport.NM.Lungs.Mean  = mean(voiData, 'all');             
+                tReport.NM.Lungs.Total = sum (voiData, 'all');             
+%                tReport.NM.Lungs.Total = tReport.NM.Lungs.Mean*tReport.NM.Lungs.Volume;             
             end
          
             clear voiMask;
             clear voiData;    
         else
-            tReport.Lungs.Cells  = [];
-            tReport.Lungs.Volume = [];
-            tReport.Lungs.Mean   = [];            
-            tReport.Lungs.Total  = [];            
+            tReport.NM.Lungs.Cells  = [];
+            tReport.NM.Lungs.Volume = [];
+            tReport.NM.Lungs.Mean   = [];            
+            tReport.NM.Lungs.Total  = [];            
         end
                          
+        [~, ~, dCTVolume] = machineLearning3DMask('get', 'Lungs');
+
+        if isempty(dCTVolume) % Acquire CT volume
+
+            tReport.CT.Lungs.Volume  = [];            
+        else
+            tReport.CT.Lungs.Volume  = dCTVolume;            
+        end
+
         clear aImage;
         
         progressBar( 1 , 'Ready' );
@@ -1637,10 +1760,12 @@ function generate3DLungShuntReport(bInitReport)
         % load last data directory
         if exist(sMatFile, 'file')
                         % lastDirMat mat file exists, load it
-            load('-mat', sMatFile);
+            load(sMatFile, 'saveReportLastUsedDir');
+
             if exist('saveReportLastUsedDir', 'var')
                sCurrentDir = saveReportLastUsedDir;
             end
+
             if sCurrentDir == 0
                 sCurrentDir = pwd;
             end
@@ -1740,7 +1865,9 @@ function generate3DLungShuntReport(bInitReport)
            
         dCTSerieOffset = [];
         for tt=1:numel(atInput)
+
             if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'ct')
+
                 dCTSerieOffset = tt;
                 break;
             end
@@ -1748,25 +1875,29 @@ function generate3DLungShuntReport(bInitReport)
     
         dNMSerieOffset = [];
         for tt=1:numel(atInput)
+
             if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'nm')
+
                 dNMSerieOffset = tt;
                 break;
             end
         end
     
-        if isempty(dCTSerieOffset) || ...
-           isempty(dNMSerieOffset)  
+        if isempty(dCTSerieOffset) || isempty(dNMSerieOffset)
+             
             progressBar(1, 'Error: display3DLungLiver() require a CT and NM image!');
             return;               
         end
 
         atCTMetaData = dicomMetaData('get', [], dCTSerieOffset);
         if isempty(atCTMetaData)
+
             atCTMetaData = atInput(dCTSerieOffset).atDicomInfo;
         end
         
         aCTBuffer = dicomBuffer('get', [], dCTSerieOffset);
         if isempty(aCTBuffer)
+
             aInputBuffer = inputBuffer('get');
             aCTBuffer = aInputBuffer{dCTSerieOffset};
 
@@ -1779,6 +1910,11 @@ function generate3DLungShuntReport(bInitReport)
 
         aScaleFactor = [y x z];  
         dScaleMax = max(aScaleFactor);
+        
+        if size(aCTBuffer, 3) > 200 % Two beds position
+
+            dScaleMax = dScaleMax*1.5;
+        end
     
         vec = linspace(0,2*pi(),120)';
     
@@ -1788,12 +1924,14 @@ function generate3DLungShuntReport(bInitReport)
         aCameraUpVector =  [0 0 1];
     
         for cc=1:numel(aCameraPosition) % Normalize to 1
+
             aCameraPosition(cc) = aCameraPosition(cc) / dScaleMax;
         end            
     
         [aCameraPosition, aCameraUpVector] = compute3Dflip(aCameraPosition, aCameraUpVector, 'right');
     
         for cc=1:numel(aCameraPosition) % Add the zoom
+
             aCameraPosition(cc) = aCameraPosition(cc) *dScaleMax;
         end 
 
@@ -1804,9 +1942,12 @@ function generate3DLungShuntReport(bInitReport)
             aCTBuffer = aCTBuffer(:,:,end:-1:1);
    
             if strcmpi(atCTMetaData{1}.Modality, 'CT')
+
                 aColormap = gray(256);
                 aAlphamap = defaultMipAlphaMap(aCTBuffer, 'CT');
+
             elseif strcmpi(atCTMetaData{1}.Modality, 'MR')
+
                 aAlphamap   = defaultMipAlphaMap(aCTBuffer, 'MR');
                 aColormap = getAngioColorMap();
             else
@@ -1873,6 +2014,7 @@ function generate3DLungShuntReport(bInitReport)
                 aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
           
                 if verLessThan('matlab','9.13')
+
                     gp3DObject{jj} = volshow(squeeze(aMask),  aInputArguments{:});
                 else
                     gp3DObject{jj} = images.compatibility.volshow.R2022a.volshow(squeeze(aMask), aInputArguments{:});                   
@@ -1893,6 +2035,7 @@ function generate3DLungShuntReport(bInitReport)
         aAlphamap = linspace(0, dSliderValue, 256)';
 
         for jj=1:numel(gasMask)
+
             gp3DObject{jj}.Alphamap = aAlphamap;
         end
         
@@ -1923,13 +2066,16 @@ function generate3DLungShuntReport(bInitReport)
           
         dNMSerieOffset = [];
         for tt=1:numel(atInput)
+
             if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'nm')
+
                 dNMSerieOffset = tt;
                 break;
             end
         end
 
         if ~isempty(dNMSerieOffset)  
+
             dVolumeOversizedSize = atInput(dNMSerieOffset).atDicomInfo{1}.PixelSpacing(1)*dNbPixels;
         else
             dVolumeOversizedSize =0;
@@ -1945,7 +2091,9 @@ function generate3DLungShuntReport(bInitReport)
           
         dNMSerieOffset = [];
         for tt=1:numel(atInput)
+
             if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'nm')
+
                 dNMSerieOffset = tt;
                 break;
             end
@@ -2049,7 +2197,9 @@ function generate3DLungShuntReport(bInitReport)
           
         dNMSerieOffset = [];
         for tt=1:numel(atInput)
+
             if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'nm')
+
                 dNMSerieOffset = tt;
                 break;
             end
@@ -2057,7 +2207,9 @@ function generate3DLungShuntReport(bInitReport)
 
         dCTSerieOffset = [];
         for tt=1:numel(atInput)
+
             if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'ct')
+
                 dCTSerieOffset = tt;
                 break;
             end
@@ -2067,6 +2219,7 @@ function generate3DLungShuntReport(bInitReport)
 
         aCTImage = dicomBuffer('get', [], dCTSerieOffset);
         if isempty(aCTImage)
+
             aInputBuffer = inputBuffer('get');
             aCTImage = aInputBuffer{dCTSerieOffset};
 
@@ -2076,8 +2229,8 @@ function generate3DLungShuntReport(bInitReport)
         atNMMetaData = atInput(dNMSerieOffset).atDicomInfo;
         atCTMetaData = atInput(dCTSerieOffset).atDicomInfo;
 
-        if isempty(dCTSerieOffset) || ...
-           isempty(dNMSerieOffset)  
+        if isempty(dCTSerieOffset) || isempty(dNMSerieOffset)  
+           
             progressBar(1, 'Error: proceedLiverVolumeOversize() 3D Lung Liver Ratio require a CT and NM image!');
             errordlg('Error: proceedLiverVolumeOversize() 3D Lung Liver Ratio require a CT and NM image!', 'Modality Validation');  
             return;               
@@ -2130,38 +2283,42 @@ function generate3DLungShuntReport(bInitReport)
                 dFirstSlice = [];
                 dLastSlice = [];
     
-                aLiverMask = gtReport.Liver.Mask;
+                aLiverMask = gtReport.NM.Liver.Mask;
     
                 for jj=1:size(aLiverMask, 3)
+
                     dOffset = find(aLiverMask(:,:,jj), 1);
                     if ~isempty(dOffset)
+
                         if isempty(dFirstSlice)
+
                             dFirstSlice = jj;
                         end
+
                         dLastSlice = jj;
                     end
                 end
     
                 if dLiverMaskOffset ~= 0
     
-                    if dNbExtraSlicesAtTop < 0 || ...
-                       dNbExtraSlicesAtBottom < 0
-    
+                    if dNbExtraSlicesAtTop < 0 || dNbExtraSlicesAtBottom < 0
+                           
                         aLiverMaskTemp = imdilate(aLiverMask, strel('sphere', dLiverMaskOffset)); % Increse mask by x pixels
         
                         aLiverMaskTemp(:,:,1:dFirstSlice-1-dNbExtraSlicesAtTop) = 0;
                         aLiverMaskTemp(:,:,dLastSlice+1+dNbExtraSlicesAtBottom:end) = 0;
     
                         if dNbExtraSlicesAtTop < 0
+
                             aLiverMaskTemp(:,:,dFirstSlice:dFirstSlice-1-dNbExtraSlicesAtTop) = ...
                                 aLiverMask(:,:,dFirstSlice:dFirstSlice-1-dNbExtraSlicesAtTop);
                         end
     
                         if dNbExtraSlicesAtBottom < 0
+
                             aLiverMaskTemp(:,:,dLastSlice+1+dNbExtraSlicesAtBottom:dLastSlice) = ...
                                 aLiverMask(:,:,dLastSlice+1+dNbExtraSlicesAtBottom:dLastSlice);
                         end
-    
     
                         aLiverMask = aLiverMaskTemp;
     
@@ -2191,15 +2348,16 @@ function generate3DLungShuntReport(bInitReport)
 %                     aLiverMask = smooth3(aLiverMask, 'box', 3);
 %                 end
 
-                maskToVoi(aLiverMask, 'Liver', 'Liver', gtReport.Liver.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
+                maskToVoi(aLiverMask, 'Liver', 'Liver', gtReport.NM.Liver.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
                 
                 % Clean Lungs Mask
     
                 progressBar(2/4, 'Computing oversized lungs mask, please wait.');
     
-                aLungsMask = gtReport.Lungs.Mask;
+                aLungsMask = gtReport.NM.Lungs.Mask;
     
                 if dLungsMaskOffset ~= 0
+
                     aLungsMask = imdilate(aLungsMask, strel('sphere', dLungsMaskOffset)); % Increse mask by x pixels
                 end
 
@@ -2219,12 +2377,13 @@ function generate3DLungShuntReport(bInitReport)
 %                 end
 
                 if bLungsCanOverlapTheLiver == false
+
                     aLungsMask(aLiverMask~=0)=0;
                 end
         
                 deleteLungShuntVoiContours('Lungs-LUN', dNMSerieOffset);
 
-                maskToVoi(aLungsMask, 'Lungs', 'Lung', gtReport.Lungs.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
+                maskToVoi(aLungsMask, 'Lungs', 'Lung', gtReport.NM.Lungs.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
     
                 lungShuntLiverTopOfVolumeExtraSlices   ('set', dNbExtraSlicesAtTop);
                 lungShuntLiverBottomOfVolumeExtraSlices('set', dNbExtraSlicesAtBottom);
@@ -2253,22 +2412,27 @@ function generate3DLungShuntReport(bInitReport)
             gtReport = computeLungLiverReportContoursInformation(suvMenuUnitOption('get'), false, false, false);
 
             if isvalid(uiReport3DLungShuntInformation) % Make sure the figure is still open     
+
                 set(uiReport3DLungShuntInformation, 'String', sprintf('Contours Information (%s)', getLungLiverReportUnitValue()));                                             
             end
            
-            if isvalid(uiReportLesionMean) % Make sure the figure is still open        
+            if isvalid(uiReportLesionMean) % Make sure the figure is still open       
+
                 set(uiReportLesionMean, 'String', getLungLiverReportMeanInformation('get', gtReport));
             end        
             
-            if isvalid(uiReportLesionMax) % Make sure the figure is still open        
-                set(uiReportLesionMax, 'String', getLungLiverReportTotalInformation('get', gtReport));
+            if isvalid(uiReportLesionTotal) % Make sure the figure is still open        
+
+                set(uiReportLesionTotal, 'String', getLungLiverReportTotalInformation('get', gtReport));
             end    
             
             if isvalid(uiReportLesionVolume) % Make sure the figure is still open        
+
                 set(uiReportLesionVolume, 'String', getLungLiverReportVolumeInformation('get', gtReport));
             end  
 
             if isvalid(uiReport3DLungShuntLungRatio)
+
                 set(uiReport3DLungShuntLungRatio, 'String', getLungLiverReportRatioInformation(gtReport));
             end
             
@@ -2280,10 +2444,15 @@ function generate3DLungShuntReport(bInitReport)
     
                 if ~isempty(gtReport)
         
-                    dLungsTotal = gtReport.Lungs.Total*100/dLungsPercent;
-                    dLiverTotal = gtReport.Liver.Total*100/dLiverPercent;
+                    dLungsTotal = gtReport.NM.Lungs.Total*100/dLungsPercent;
+                    dLiverTotal = gtReport.NM.Liver.Total*100/dLiverPercent;
 
-                    dLungsVolume = gtReport.Lungs.Volume*100/dLungsPercent;
+                    if ~isempty(gtReport.CT.Lungs.Volume)
+                        
+                        dLungsVolume = gtReport.CT.Lungs.Volume*100/dLungsPercent;
+                    else
+                        dLungsVolume = [];
+                    end
        
                     %                    ( 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
                     % Lung 𝑆ℎ𝑢𝑛𝑡 = ____________________________ × 100
@@ -2296,29 +2465,57 @@ function generate3DLungShuntReport(bInitReport)
                     set(uiReport3DLungShuntLungRatio , 'string', sLungShuntFraction);
         
                     if dLiverPercent == 100 && dLungsPercent == 100
+
                         set(uiEditWindow, 'string', '');
                     else
-                        sUpdatedValues = sprintf('Updated lungs counts: %.2f\nUpdated liver counts  : %.2f', dLungsTotal, dLiverTotal);
-                        sUpdatedValues = sprintf('%s\n\nUpdated lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
+                       
+                        if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+
+                            sUpdatedValues = sprintf('Updated NM lungs counts: %.2f\n', dLungsTotal);
+                        else
+                            sUpdatedValues = '';
+                        end
+
+
+                        if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
+
+                            sUpdatedValues = sprintf('%sUpdated NM liver counts  : %.2f', sUpdatedValues, dLiverTotal);
+                        end
+
+                        if ~isempty(dLungsVolume)
+
+                            if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+
+                                if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
+        
+                                    sUpdatedValues = sprintf('%s\n\nUpdated CT lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
+                                else
+                                    sUpdatedValues = sprintf('%s\nUpdated CT lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
+                                end
+                            end
+                        end
+
                         set(uiEditWindow, 'string', sUpdatedValues);  
                     end 
 
                     %                          Total amount of injected activity (GBq)
                     % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF 
                     %                                   Lung mass (Kg)
-        
-                    dInjectedActivity = str2double(get(uiEditInjectedActivity, 'String')); % In MBq
-            
-                    if dInjectedActivity > 0 && ~isnan(dInjectedActivity)
-        
-                        dInjectedActivity = dInjectedActivity/1000; % In GBq
-  
-                        dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
-                   
-                        sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
-                        set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
-                    end  
 
+                    if ~isempty(dLungsVolume)
+
+                        dInjectedActivity = str2double(get(uiEditInjectedActivity, 'String')); % In MBq
+                
+                        if dInjectedActivity > 0 && ~isnan(dInjectedActivity)
+            
+                            dInjectedActivity = dInjectedActivity/1000; % In GBq
+      
+                            dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
+                       
+                            sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
+                            set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
+                        end  
+                    end
                 end
             end
 
@@ -2378,6 +2575,7 @@ function generate3DLungShuntReport(bInitReport)
                     if ~isempty(atRoiInput)
 
                         for ro=1:numel(atVoiInput{dTagOffset}.RoisTag)
+
                             aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[atVoiInput{dTagOffset}.RoisTag{ro}]} );
                             aRoisTagOffset(ro) = find(aTagOffset, 1);    
                         end
@@ -2394,6 +2592,7 @@ function generate3DLungShuntReport(bInitReport)
 
                                     dConstraintOffset = find(contains(asConstraintTagList, atVoiInput{dTagOffset}.RoisTag(ro)));
                                     if ~isempty(dConstraintOffset) % tag exist
+
                                          roiConstraintList('set', dSerieOffset,  asConstraintTagList{dConstraintOffset}, asConstraintTypeList{dConstraintOffset});
                                     end
                                 end
@@ -2401,6 +2600,7 @@ function generate3DLungShuntReport(bInitReport)
                                 % Delete ROI object
 
                                 if isvalid(atRoiInput{aRoisTagOffset(ro)}.Object)
+
                                     delete(atRoiInput{aRoisTagOffset(ro)}.Object);
                                 end
 
@@ -2409,18 +2609,22 @@ function generate3DLungShuntReport(bInitReport)
                                 if ~isempty(atRoiInput{aRoisTagOffset(ro)}.MaxDistances)
 
                                     if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Line)
+
                                         delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Line);
                                     end
 
                                     if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Line)
+
                                         delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Line);
                                     end
 
                                     if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Text)
+
                                         delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Text);
                                     end
 
                                     if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Text)
+
                                         delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Text);
                                     end
                                 end
@@ -2451,15 +2655,19 @@ function generate3DLungShuntReport(bInitReport)
         dLiverPercent = get(uiSliderLiverVolumeRatio, 'Value')*100;
         dLungsPercent = str2double(get(uiEditLungsVolumeRatio, 'String'));
 
-        set(uiEditLiverVolumeRatio, 'string',  ...
-            sprintf('%2.2f', dLiverPercent));
-        
+        set(uiEditLiverVolumeRatio, 'string',  sprintf('%2.2f', dLiverPercent));
+                    
         if ~isempty(gtReport)
 
-            dLungsTotal = gtReport.Lungs.Total*100/dLungsPercent;
-            dLiverTotal = gtReport.Liver.Total*100/dLiverPercent;
+            dLungsTotal = gtReport.NM.Lungs.Total*100/dLungsPercent;
+            dLiverTotal = gtReport.NM.Liver.Total*100/dLiverPercent;
 
-            dLungsVolume = gtReport.Lungs.Volume*100/dLungsPercent;
+            if ~isempty(gtReport.CT.Lungs.Volume)
+
+                dLungsVolume = gtReport.CT.Lungs.Volume*100/dLungsPercent;
+            else
+                dLungsVolume = [];
+            end
 
             %                    ( 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
             % Lung 𝑆ℎ𝑢𝑛𝑡 = ____________________________ × 100
@@ -2472,10 +2680,36 @@ function generate3DLungShuntReport(bInitReport)
             set(uiReport3DLungShuntLungRatio , 'string', sLungShuntFraction);      
 
             if dLiverPercent == 100 && dLungsPercent == 100
+
                 set(uiEditWindow, 'string', '');
             else
-                sUpdatedValues = sprintf('Updated lungs counts: %.2f\nUpdated liver counts  : %.2f', dLungsTotal, dLiverTotal);
-                sUpdatedValues = sprintf('%s\n\nUpdated lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
+
+                if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+    
+                    sUpdatedValues = sprintf('Updated NM lungs counts: %.2f\n', dLungsTotal);
+                else
+                    sUpdatedValues = '';
+                end
+    
+    
+                if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
+    
+                    sUpdatedValues = sprintf('%sUpdated NM liver counts  : %.2f', sUpdatedValues, dLiverTotal);
+                end
+
+                if ~isempty(dLungsVolume)
+
+                    if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+
+                        if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
+
+                            sUpdatedValues = sprintf('%s\n\nUpdated CT lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
+                        else
+                            sUpdatedValues = sprintf('%s\nUpdated CT lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
+                        end
+                    end
+                end
+
                 set(uiEditWindow, 'string', sUpdatedValues);  
             end 
 
@@ -2483,17 +2717,20 @@ function generate3DLungShuntReport(bInitReport)
             % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF 
             %                                   Lung mass (Kg)
 
-            dInjectedActivity = str2double(get(uiEditInjectedActivity, 'String')); % In MBq
-    
-            if dInjectedActivity > 0 && ~isnan(dInjectedActivity)
+            if ~isempty(dLungsVolume)
 
-                dInjectedActivity = dInjectedActivity/1000; % In GBq
+                dInjectedActivity = str2double(get(uiEditInjectedActivity, 'String')); % In MBq
+        
+                if dInjectedActivity > 0 && ~isnan(dInjectedActivity)
     
-                dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
-           
-                sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
-                set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
-            end             
+                    dInjectedActivity = dInjectedActivity/1000; % In GBq
+        
+                    dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
+               
+                    sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
+                    set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
+                end             
+            end
         end
 
     end
@@ -2515,10 +2752,15 @@ function generate3DLungShuntReport(bInitReport)
 
         if ~isempty(gtReport)
 
-            dLungsTotal = gtReport.Lungs.Total*100/dLungsPercent;
-            dLiverTotal = gtReport.Liver.Total*100/dLiverPercent;
+            dLungsTotal = gtReport.NM.Lungs.Total*100/dLungsPercent;
+            dLiverTotal = gtReport.NM.Liver.Total*100/dLiverPercent;
 
-            dLungsVolume = gtReport.Lungs.Volume*100/dLungsPercent;
+            if ~isempty(gtReport.CT.Lungs.Volume)
+
+                dLungsVolume = gtReport.CT.Lungs.Volume*100/dLungsPercent;
+            else
+                dLungsVolume = [];
+            end
 
             %                    ( 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
             % Lung 𝑆ℎ𝑢𝑛𝑡 = ____________________________ × 100
@@ -2531,10 +2773,36 @@ function generate3DLungShuntReport(bInitReport)
             set(uiReport3DLungShuntLungRatio , 'string', sLungShuntFraction);
 
             if dLiverPercent == 100 && dLungsPercent == 100
+
                 set(uiEditWindow, 'string', '');
             else
-                sUpdatedValues = sprintf('Updated lungs counts: %.2f\nUpdated liver counts  : %.2f', dLungsTotal, dLiverTotal);
-                sUpdatedValues = sprintf('%s\n\nUpdated lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
+
+                if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+
+                    sUpdatedValues = sprintf('Updated NM lungs counts: %.2f\n', dLungsTotal);
+                else
+                    sUpdatedValues = '';
+                end
+
+
+                if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
+
+                    sUpdatedValues = sprintf('%sUpdated NM liver counts  : %.2f', sUpdatedValues, dLiverTotal);
+                end
+
+                if ~isempty(dLungsVolume)
+
+                    if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+
+                        if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
+
+                            sUpdatedValues = sprintf('%s\n\nUpdated CT lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
+                        else
+                            sUpdatedValues = sprintf('%s\nUpdated CT lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
+                        end
+                    end
+                end
+
                 set(uiEditWindow, 'string', sUpdatedValues);   
             end
 
@@ -2542,17 +2810,20 @@ function generate3DLungShuntReport(bInitReport)
             % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF 
             %                                   Lung mass (Kg)
 
-            dInjectedActivity = str2double(get(uiEditInjectedActivity, 'String')); % In MBq
-    
-            if dInjectedActivity > 0 && ~isnan(dInjectedActivity)
+            if ~isempty(dLungsVolume)
 
-                dInjectedActivity = dInjectedActivity/1000; % In GBq
+                dInjectedActivity = str2double(get(uiEditInjectedActivity, 'String')); % In MBq
+        
+                if dInjectedActivity > 0 && ~isnan(dInjectedActivity)
     
-                dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
-           
-                sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
-                set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
-            end              
+                    dInjectedActivity = dInjectedActivity/1000; % In GBq
+        
+                    dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
+               
+                    sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
+                    set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
+                end              
+            end
         end
 
         set(uiSliderLungsVolumeRatio, 'Value', dLungsPercent/100);
@@ -2566,15 +2837,19 @@ function generate3DLungShuntReport(bInitReport)
         dLiverPercent = str2double(get(uiEditLiverVolumeRatio, 'String'));
         dLungsPercent = get(uiSliderLungsVolumeRatio, 'Value')*100;
 
-        set(uiEditLungsVolumeRatio, 'string',  ...
-            sprintf('%2.2f', dLungsPercent));
-
+        set(uiEditLungsVolumeRatio, 'string',  sprintf('%2.2f', dLungsPercent));
+            
         if ~isempty(gtReport)
 
-            dLungsTotal = gtReport.Lungs.Total*100/dLungsPercent;
-            dLiverTotal = gtReport.Liver.Total*100/dLiverPercent;
+            dLungsTotal = gtReport.NM.Lungs.Total*100/dLungsPercent;
+            dLiverTotal = gtReport.NM.Liver.Total*100/dLiverPercent;
 
-            dLungsVolume = gtReport.Lungs.Volume*100/dLungsPercent;
+            if ~isempty(gtReport.CT.Lungs.Volume)
+
+                dLungsVolume = gtReport.CT.Lungs.Volume*100/dLungsPercent;
+            else
+                dLungsVolume = [];
+            end
 
             %                    ( 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
             % Lung 𝑆ℎ𝑢𝑛𝑡 = ____________________________ × 100
@@ -2587,10 +2862,36 @@ function generate3DLungShuntReport(bInitReport)
             set(uiReport3DLungShuntLungRatio , 'string', sLungShuntFraction);
 
             if dLiverPercent == 100 && dLungsPercent == 100
+
                 set(uiEditWindow, 'string', '');
             else
-                sUpdatedValues = sprintf('Updated lungs counts: %.2f\nUpdated liver counts  : %.2f', dLungsTotal, dLiverTotal);
-                sUpdatedValues = sprintf('%s\n\nUpdated lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
+
+                if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+
+                    sUpdatedValues = sprintf('Updated NM lungs counts: %.2f\n', dLungsTotal);
+                else
+                    sUpdatedValues = '';
+                end
+
+
+                if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
+
+                    sUpdatedValues = sprintf('%sUpdated NM liver counts  : %.2f', sUpdatedValues, dLiverTotal);
+                end
+
+                if ~isempty(dLungsVolume)
+
+                    if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+
+                        if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
+
+                            sUpdatedValues = sprintf('%s\n\nUpdated CT lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
+                        else
+                            sUpdatedValues = sprintf('%s\nUpdated CT lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
+                        end
+                    end
+                end
+
                 set(uiEditWindow, 'string', sUpdatedValues);            
             end
 
@@ -2598,17 +2899,20 @@ function generate3DLungShuntReport(bInitReport)
             % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF 
             %                                   Lung mass (Kg)
 
-            dInjectedActivity = str2double(get(uiEditInjectedActivity, 'String')); % In MBq
-    
-            if dInjectedActivity > 0 && ~isnan(dInjectedActivity)
+            if ~isempty(dLungsVolume)
 
-                dInjectedActivity = dInjectedActivity/1000; % In GBq
-   
-                dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
-           
-                sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
-                set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
-            end            
+                dInjectedActivity = str2double(get(uiEditInjectedActivity, 'String')); % In MBq
+        
+                if dInjectedActivity > 0 && ~isnan(dInjectedActivity)
+    
+                    dInjectedActivity = dInjectedActivity/1000; % In GBq
+       
+                    dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
+               
+                    sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
+                    set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
+                end            
+            end
         end
     end
 
@@ -2629,10 +2933,15 @@ function generate3DLungShuntReport(bInitReport)
 
         if ~isempty(gtReport)
 
-            dLungsTotal = gtReport.Lungs.Total*100/dLungsPercent;
-            dLiverTotal = gtReport.Liver.Total*100/dLiverPercent;
+            dLungsTotal = gtReport.NM.Lungs.Total*100/dLungsPercent;
+            dLiverTotal = gtReport.NM.Liver.Total*100/dLiverPercent;
 
-            dLungsVolume = gtReport.Lungs.Volume*100/dLungsPercent;
+            if ~isempty(gtReport.CT.Lungs.Volume)
+
+                dLungsVolume = gtReport.CT.Lungs.Volume*100/dLungsPercent;
+            else
+                dLungsVolume = [];
+            end
 
             %                    ( 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
             % Lung 𝑆h𝑢𝑛𝑡 = ____________________________ × 100
@@ -2645,10 +2954,36 @@ function generate3DLungShuntReport(bInitReport)
             set(uiReport3DLungShuntLungRatio , 'string', sLungShuntFraction);
 
             if dLiverPercent == 100 && dLungsPercent == 100
+
                 set(uiEditWindow, 'string', '');
             else
-                sUpdatedValues = sprintf('Updated lungs counts: %.2f\nUpdated liver counts  : %.2f', dLungsTotal, dLiverTotal);
-                sUpdatedValues = sprintf('%s\n\nUpdated lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
+
+                if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+
+                    sUpdatedValues = sprintf('Updated NM lungs counts: %.2f\n', dLungsTotal);
+                else
+                    sUpdatedValues = '';
+                end
+
+
+                if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
+
+                    sUpdatedValues = sprintf('%sUpdated NM liver counts  : %.2f', sUpdatedValues, dLiverTotal);
+                end
+
+                if ~isempty(dLungsVolume)
+
+                    if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+
+                        if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
+
+                            sUpdatedValues = sprintf('%s\n\nUpdated CT lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
+                        else
+                            sUpdatedValues = sprintf('%s\nUpdated CT lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
+                        end
+                    end
+                end
+
                 set(uiEditWindow, 'string', sUpdatedValues);
             end        
 
@@ -2656,16 +2991,19 @@ function generate3DLungShuntReport(bInitReport)
             % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF 
             %                                   Lung mass (Kg)
 
-            dInjectedActivity = str2double(get(uiEditInjectedActivity, 'String')); % In MBq
+            if ~isempty(dLungsVolume)
     
-            if dInjectedActivity > 0 && ~isnan(dInjectedActivity)
-
-                dInjectedActivity = dInjectedActivity/1000; % In GBq
+                dInjectedActivity = str2double(get(uiEditInjectedActivity, 'String')); % In MBq
+        
+                if dInjectedActivity > 0 && ~isnan(dInjectedActivity)
     
-                dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
-           
-                sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
-                set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
+                    dInjectedActivity = dInjectedActivity/1000; % In GBq
+        
+                    dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
+               
+                    sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
+                    set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
+                end
             end
 
         end
@@ -2682,28 +3020,36 @@ function generate3DLungShuntReport(bInitReport)
         dLungsPercent = str2double(get(uiEditLungsVolumeRatio, 'String'));
 
         if dLiverPercent < 0 || dLiverPercent > 100
+
             set(uiReport3DLungShuntCalculatedDose, 'String', ' ');
             return;
         end
 
         if dLungsPercent < 0 || dLungsPercent > 100
+
             set(uiReport3DLungShuntCalculatedDose, 'String', ' ');
-           return;
+            return;
         end
 
         dInjectedActivity = str2double(get(uiEditInjectedActivity, 'String')); % In MBq
 
         if dInjectedActivity <= 0 || isnan(dInjectedActivity)
+
             set(uiReport3DLungShuntCalculatedDose, 'String', ' ');
             return;
         end
 
         if ~isempty(gtReport)
 
-            dLungsTotal = gtReport.Lungs.Total*100/dLungsPercent;
-            dLiverTotal = gtReport.Liver.Total*100/dLiverPercent;
+            dLungsTotal = gtReport.NM.Lungs.Total*100/dLungsPercent;
+            dLiverTotal = gtReport.NM.Liver.Total*100/dLiverPercent;
 
-            dLungsVolume = gtReport.Lungs.Volume*100/dLungsPercent; % in ml
+            if ~isempty(gtReport.CT.Lungs.Volume)
+
+                dLungsVolume = gtReport.CT.Lungs.Volume*100/dLungsPercent; % in ml
+            else
+                dLungsVolume = [];
+            end
 
             %                    ( 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
             % Lung 𝑆ℎ𝑢𝑛𝑡 = ____________________________ × 100
@@ -2711,17 +3057,19 @@ function generate3DLungShuntReport(bInitReport)
 
             dLungShuntFraction = dLungsTotal/(dLiverTotal+dLungsTotal)*100;
 
-
             %                          Total amount of injected activity (GBq)
             % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF 
             %                                   Lung mass (Kg)
 
-            dInjectedActivity = dInjectedActivity/1000; % In GBq
-           
-            dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
+            if ~isempty(dLungsVolume)
 
-            sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
-            set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);
+                dInjectedActivity = dInjectedActivity/1000; % In GBq
+               
+                dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
+    
+                sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
+                set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);
+            end
         end
 
     end

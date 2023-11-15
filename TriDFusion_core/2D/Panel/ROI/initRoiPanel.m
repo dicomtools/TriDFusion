@@ -2142,9 +2142,9 @@ function initRoiPanel()
             end
 
             if bHoles == true
-                originalMaskAxe = bwboundaries(bwimage(aBuffer, dImageMin), 'holes', 8);
+                originalMaskAxe = bwboundaries(bwimage(aBuffer, dImageMin), 8, 'holes');
             else
-                originalMaskAxe = bwboundaries(bwimage(aBuffer, dImageMin), 'noholes', 8);
+                originalMaskAxe = bwboundaries(bwimage(aBuffer, dImageMin), 8, 'noholes');
             end
 
             if bPixelEdge == true
@@ -2152,9 +2152,9 @@ function initRoiPanel()
             end
 
             if bHoles == true
-                maskAxe = bwboundaries(bwimage(aBuffer, dImageMin), 'holes', 8);
+                maskAxe = bwboundaries(bwimage(aBuffer, dImageMin), 8, 'holes');
             else
-                maskAxe = bwboundaries(bwimage(aBuffer, dImageMin), 'noholes', 8);
+                maskAxe = bwboundaries(bwimage(aBuffer, dImageMin), 8, 'noholes');
             end
 
             if bPixelEdge == true
@@ -2278,13 +2278,13 @@ function initRoiPanel()
             end
             
             if bHoles == true
-                originalMaskCoronal  = bwboundaries(bwimage(aCoronal , dImageMin), 'holes', 8);
-                originalMaskSagittal = bwboundaries(bwimage(aSagittal, dImageMin), 'holes', 8);
-                originalMaskAxial    = bwboundaries(bwimage(aAxial   , dImageMin), 'holes', 8);
+                originalMaskCoronal  = bwboundaries(bwimage(aCoronal , dImageMin), 8, 'holes');
+                originalMaskSagittal = bwboundaries(bwimage(aSagittal, dImageMin), 8, 'holes');
+                originalMaskAxial    = bwboundaries(bwimage(aAxial   , dImageMin), 8, 'holes');
             else
-                originalMaskCoronal  = bwboundaries(bwimage(aCoronal , dImageMin), 'noholes', 8);
-                originalMaskSagittal = bwboundaries(bwimage(aSagittal, dImageMin), 'noholes', 8);
-                originalMaskAxial    = bwboundaries(bwimage(aAxial   , dImageMin), 'noholes', 8);
+                originalMaskCoronal  = bwboundaries(bwimage(aCoronal , dImageMin), 8, 'noholes');
+                originalMaskSagittal = bwboundaries(bwimage(aSagittal, dImageMin), 8, 'noholes');
+                originalMaskAxial    = bwboundaries(bwimage(aAxial   , dImageMin), 8, 'noholes');
             end
             
             if bPixelEdge == true
@@ -2294,13 +2294,13 @@ function initRoiPanel()
             end
             
             if bHoles == true
-                maskCoronal  = bwboundaries(bwimage(aCoronal , dImageMin), 'holes', 8);
-                maskSagittal = bwboundaries(bwimage(aSagittal, dImageMin), 'holes', 8);
-                maskAxial    = bwboundaries(bwimage(aAxial   , dImageMin), 'holes', 8);
+                maskCoronal  = bwboundaries(bwimage(aCoronal , dImageMin), 8, 'holes');
+                maskSagittal = bwboundaries(bwimage(aSagittal, dImageMin), 8, 'holes');
+                maskAxial    = bwboundaries(bwimage(aAxial   , dImageMin), 8, 'holes');
             else
-                maskCoronal  = bwboundaries(bwimage(aCoronal , dImageMin), 'noholes', 8);
-                maskSagittal = bwboundaries(bwimage(aSagittal, dImageMin), 'noholes', 8);
-                maskAxial    = bwboundaries(bwimage(aAxial   , dImageMin), 'noholes', 8);
+                maskCoronal  = bwboundaries(bwimage(aCoronal , dImageMin), 8, 'noholes');
+                maskSagittal = bwboundaries(bwimage(aSagittal, dImageMin), 8, 'noholes');
+                maskAxial    = bwboundaries(bwimage(aAxial   , dImageMin), 8, 'noholes');
             end
             
             if bPixelEdge == true
@@ -2501,9 +2501,9 @@ function initRoiPanel()
             end
 
             if bHoles == true
-                [originalMaskAxe ,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 'holes', 8);
+                [originalMaskAxe ,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 8, 'holes');
             else
-                [originalMaskAxe ,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 'noholes', 8);
+                [originalMaskAxe ,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 8, 'noholes');
             end
 
             if bPixelEdge == true
@@ -2511,9 +2511,9 @@ function initRoiPanel()
             end
 
             if bHoles == true
-                [maskAxe ,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 'holes', 8);
+                [maskAxe ,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 8, 'holes');
             else
-                [maskAxe ,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 'noholes', 8);
+                [maskAxe ,~,~,~] = bwboundaries(bwimage(aBuffer, dImageMin), 8, 'noholes');
             end
 
             if bPixelEdge == true
@@ -2807,9 +2807,9 @@ function initRoiPanel()
                     if aAxial(aAxial==1)
 
                         if bHoles == true
-                            [originalMaskAxial,~,~,~] = bwboundaries(aAxial, 'holes', 8);
+                            [originalMaskAxial,~,~,~] = bwboundaries(aAxial, 8, 'holes');
                         else
-                            [originalMaskAxial,~,~,~] = bwboundaries(aAxial, 'noholes', 8);
+                            [originalMaskAxial,~,~,~] = bwboundaries(aAxial, 8, 'noholes');
                         end
 
                         if bPixelEdge == true
@@ -2817,9 +2817,9 @@ function initRoiPanel()
                         end
 
                         if bHoles == true
-                            [maskAxial,~,~,~] = bwboundaries(aAxial, 'holes', 8);
+                            [maskAxial,~,~,~] = bwboundaries(aAxial, 8, 'holes');
                         else
-                            [maskAxial,~,~,~] = bwboundaries(aAxial, 'noholes', 8);
+                            [maskAxial,~,~,~] = bwboundaries(aAxial, 8, 'noholes');
                         end
 
                         if ~isempty(maskAxial)

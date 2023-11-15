@@ -67,7 +67,7 @@ function tMaxDistances = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlot
                 x = atRoi.Position(:, 1); % x = columns.
                 y = atRoi.Position(:, 2); % y = rows.
             else
-                boundaries = bwboundaries(aBinaryImage, 'noholes', 8);
+                boundaries = bwboundaries(aBinaryImage, 8, 'noholes');
                 if ~isempty(boundaries)
                     thisBoundary = boundaries{1};
 

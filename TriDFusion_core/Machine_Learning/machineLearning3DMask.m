@@ -1,5 +1,5 @@
-function [aMask, aColor] = machineLearning3DMask(sAction, sOrgan, aNiiImage, aMaskColor)  
-%function  aMask = machineLearning3DMask(sAction, sOrgan, aNiiImage, aMaskColor)  
+function [aMask, aColor, dVolume] = machineLearning3DMask(sAction, sOrgan, aNiiImage, aMaskColor, dMaskVolume)  
+%function  [aMask, aColor, dVolume] = machineLearning3DMask(sAction, sOrgan, aNiiImage, aMaskColor)  
 %Get\set 3D machine learning mask.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -45,35 +45,60 @@ function [aMask, aColor] = machineLearning3DMask(sAction, sOrgan, aNiiImage, aMa
     persistent paLungUpperLobeRightColor;
     persistent paLungUpperLobeLeftColor;
 
+    persistent paLiverVolume;
+    persistent paLungsVolume;
+
+    persistent paLungLowerLobeRightVolume;
+    persistent paLungLowerLobeLeftVolume;
+    persistent paLungMiddleLobeRightVolume;
+    persistent paLungUpperLobeRightVolume;
+    persistent paLungUpperLobeLeftVolume;
+
     if strcmpi(sAction, 'set')
+
         switch lower(sOrgan)
+
             case 'liver'
-                paLiverMask  = aNiiImage;
-                paLiverColor = aMaskColor;
+
+                paLiverMask   = aNiiImage;
+                paLiverColor  = aMaskColor;
+                paLiverVolume = dMaskVolume;
 
             case 'lungs'
-                paLungsMask  = aNiiImage;
-                paLungsColor = aMaskColor;
+
+                paLungsMask   = aNiiImage;
+                paLungsColor  = aMaskColor;
+                paLungsVolume = dMaskVolume;
 
             case 'lung_lower_lobe_right'
-                paLungLowerLobeRightMask  = aNiiImage;
-                paLungLowerLobeRightColor = aMaskColor;                
+
+                paLungLowerLobeRightMask   = aNiiImage;
+                paLungLowerLobeRightColor  = aMaskColor;                
+                paLungLowerLobeRightVolume = dMaskVolume;
 
             case 'lung_lower_lobe_left'
-                paLungLowerLobeLeftMask  = aNiiImage;
-                paLungLowerLobeLeftColor = aMaskColor;                
+
+                paLungLowerLobeLeftMask   = aNiiImage;
+                paLungLowerLobeLeftColor  = aMaskColor;                
+                paLungLowerLobeLeftVolume = dMaskVolume;
 
             case 'lung_middle_lobe_right'
-                paLungMiddleLobeRightMask  = aNiiImage;
-                paLungMiddleLobeRightColor = aMaskColor;
+
+                paLungMiddleLobeRightMask   = aNiiImage;
+                paLungMiddleLobeRightColor  = aMaskColor;
+                paLungMiddleLobeRightVolume = dMaskVolume;
 
             case 'lung_upper_lobe_right'
-                paLungUpperLobeRightMask  = aNiiImage;
-                paLungUpperLobeRightColor = aMaskColor;
+
+                paLungUpperLobeRightMask   = aNiiImage;
+                paLungUpperLobeRightColor  = aMaskColor;
+                paLungUpperLobeRightVolume = dMaskVolume;
 
             case 'lung_upper_lobe_left'
-                paLungUpperLobeLeftMask  = aNiiImage;
-                paLungUpperLobeLeftColor = aMaskColor;                
+
+                paLungUpperLobeLeftMask   = aNiiImage;
+                paLungUpperLobeLeftColor  = aMaskColor;                
+                paLungUpperLobeLeftVolume = dMaskVolume;
         end
 
     elseif strcmpi(sAction, 'init')
@@ -96,35 +121,59 @@ function [aMask, aColor] = machineLearning3DMask(sAction, sOrgan, aNiiImage, aMa
         paLungUpperLobeRightColor  = [];
         paLungUpperLobeLeftColor   = [];        
 
+        paLiverVolume = [];
+        paLungsVolume = [];
+
+        paLungLowerLobeRightVolume  = [];
+        paLungLowerLobeLeftVolume   = [];
+        paLungMiddleLobeRightVolume = [];
+        paLungUpperLobeRightVolume  = [];
+        paLungUpperLobeLeftVolume   = [];
+
     else
         switch lower(sOrgan)
+
             case 'liver'
-                aMask  = paLiverMask;
-                aColor = paLiverColor;
+
+                aMask   = paLiverMask;
+                aColor  = paLiverColor;
+                dVolume = paLiverVolume;
 
             case 'lungs'
-                aMask  = paLungsMask;
-                aColor = paLungsColor;
+
+                aMask   = paLungsMask;
+                aColor  = paLungsColor;
+                dVolume = paLungsVolume;
 
             case 'lung_lower_lobe_right'
-                aMask  = paLungLowerLobeRightMask ;
-                aColor = paLungLowerLobeRightColor;                
+
+                aMask   = paLungLowerLobeRightMask ;
+                aColor  = paLungLowerLobeRightColor;                
+                dVolume = paLungLowerLobeRightVolume;
 
             case 'lung_lower_lobe_left'
-                aMask  = paLungLowerLobeLeftMask;
-                aColor = paLungLowerLobeLeftColor;                
+
+                aMask   = paLungLowerLobeLeftMask;
+                aColor  = paLungLowerLobeLeftColor;                
+                dVolume = paLungLowerLobeLeftVolume;
 
             case 'lung_middle_lobe_right'
-                aMask  = paLungMiddleLobeRightMask;
-                aColor = paLungMiddleLobeRightColor;
+
+                aMask   = paLungMiddleLobeRightMask;
+                aColor  = paLungMiddleLobeRightColor;
+                dVolume = paLungMiddleLobeRightVolume;
 
             case 'lung_upper_lobe_right'
-                aMask  = paLungUpperLobeRightMask;
-                aColor = paLungUpperLobeRightColor;
+
+                aMask   = paLungUpperLobeRightMask;
+                aColor  = paLungUpperLobeRightColor;
+                dVolume = paLungUpperLobeRightVolume;
 
             case 'lung_upper_lobe_left'
-                aMask  = paLungUpperLobeLeftMask;
-                aColor = paLungUpperLobeLeftColor;                     
+                
+                aMask   = paLungUpperLobeLeftMask;
+                aColor  = paLungUpperLobeLeftColor;                     
+                dVolume = paLungUpperLobeLeftVolume;
         end        
     end
    

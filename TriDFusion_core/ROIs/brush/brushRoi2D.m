@@ -54,7 +54,7 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
             newMask = kron(newMask, ones(3));
         end
 
-        [B,~,n,~] = bwboundaries(newMask, 'noholes', 4);
+        [B,~,n,~] = bwboundaries(newMask, 4, 'noholes');
 
         bDeleteRoi = false;
         if n == 1
@@ -64,7 +64,9 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
         end
 
         if isempty(B) || bDeleteRoi == true
+        
             deleteRoiEvents(hf);
+            
         else
             if ~isempty(dVoiOffset)
 
@@ -89,6 +91,7 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
 
 
                 if pixelEdge('get')
+
                     B2{dSecondBoundaryOffset} = (B2{dSecondBoundaryOffset} + 1) / 3;
                     B2{dSecondBoundaryOffset} = reducepoly(B2{dSecondBoundaryOffset});
                 else                                      
@@ -96,7 +99,7 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
                 end
 
                  if size(B2{dSecondBoundaryOffset}, 1) > 2
-                     addFreehandRoi([B2{dSecondBoundaryOffset}(:, 2), B2{dSecondBoundaryOffset}(:, 1)], dVoiOffset, hf.Color, sLesionType, dSerieOffset);
+                      addFreehandRoi([B2{dSecondBoundaryOffset}(:, 2), B2{dSecondBoundaryOffset}(:, 1)], dVoiOffset, hf.Color, sLesionType, dSerieOffset);
                  end
             else
                 dBoundaryOffset = 1;
@@ -184,9 +187,9 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
                 if ~isempty(dTagOffset)
         
                     voiDefaultMenu(atRoiInput{dTagOffset}.Object, atVoiInput{dVoiOffset}.Tag);
+if 0 % Need to improve the operation speed    
 
                     dNbTags = numel(atVoiInput{dVoiOffset}.RoisTag);
-    
                     for dRoiNb=1:dNbTags
     
                         aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), atVoiInput{dVoiOffset}.RoisTag{dRoiNb} );
@@ -205,7 +208,9 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
                            end
                         end                 
                     end
+end
                 end
+
             end
             
             roiTemplate('set', dSerieOffset, atRoiInput);

@@ -25,7 +25,7 @@ else
 end
 
 % Update the freehand ROI
-perimPos = bwboundaries(newMask, 'noholes');
+perimPos = bwboundaries(newMask, 4, 'noholes');
 hf.Position = [perimPos{1}(:,2), perimPos{1}(:,1)];
 
 end

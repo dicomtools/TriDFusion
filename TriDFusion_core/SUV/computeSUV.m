@@ -95,9 +95,13 @@ function dSUVconv = computeSUV(atMetaData, suvType)
             if numel(injDateTime) == 14
                 injDateTime = sprintf('%s.00', injDateTime);
             end
-
-            datetimeInjDate = datetime(injDateTime,'InputFormat','yyyyMMddHHmmss.SS');
-            dateInjDate = datenum(datetimeInjDate);
+            
+            try
+                datetimeInjDate = datetime(injDateTime,'InputFormat','yyyyMMddHHmmss.SS');
+                dateInjDate = datenum(datetimeInjDate);
+            catch
+                dateInjDate = [];
+            end
             
             % Series Date Time
             

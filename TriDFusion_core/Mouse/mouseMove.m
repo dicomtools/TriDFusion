@@ -135,10 +135,14 @@ function mouseMove(~, ~)
                 pRoiPtr.Position = newPosition;
         
                 if strcmpi(windowButton('get'), 'down') 
+                    
                     if ~isempty(roiTemplate('get', dSeriesOffset))
+
                         acPtrList = currentRoiPointer('get');
+
                         for jj=1:numel(acPtrList)
                             if isvalid(acPtrList{jj}.Object)
+
                                 brushRoi2D(pRoiPtr, acPtrList{jj}.Object, acPtrList{jj}.xSize, acPtrList{jj}.ySize, acPtrList{jj}.VoiOffset, acPtrList{jj}.LesionType, dSeriesOffset);
                             end
                         end

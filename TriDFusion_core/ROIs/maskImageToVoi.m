@@ -125,7 +125,7 @@ function maskImageToVoi(aMask, dSeriesOffset, aClassificationMask, bLesionClassi
                 aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
             end
             
-            maskAxial = bwboundaries(aAxial, 'noholes', 8);                    
+            maskAxial = bwboundaries(aAxial, 8, 'noholes');                    
              
             dSlicesNbElements = numel(maskAxial);
             

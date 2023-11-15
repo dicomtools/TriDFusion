@@ -117,7 +117,11 @@ function sReport = getReportSeriesInformation()
                     sInjDateTime = sprintf('%s.00', sInjDateTime);
                 end
 
-                sInjDateTime = datetime(sInjDateTime,'InputFormat','yyyyMMddHHmmss.SS');
+                try
+                    sInjDateTime = datetime(sInjDateTime,'InputFormat','yyyyMMddHHmmss.SS');
+                catch
+                    sInjDateTime = [];
+                end
             end
             
             % Radionuclide Total Dose

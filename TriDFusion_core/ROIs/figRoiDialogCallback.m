@@ -3065,7 +3065,7 @@ end
                 adQueryPoints = linspace(1, 2, dNbSlices); % Assuming you're interpolating between masks 1 and 2
                 aInterpolatedMask = interpmask([1, 2], cat(3, aMask1, aMask2), adQueryPoints(i));
 
-                [B,~,n,~] = bwboundaries(aInterpolatedMask, 'noholes', 8);
+                [B,~,n,~] = bwboundaries(aInterpolatedMask, 8, 'noholes');
 %                 dBoundaryOffset = getLargestboundary(B);
 
                 bEditRoisLabel = false;

@@ -1312,7 +1312,7 @@ function setRoiToolbar(sVisible)
     
                         isRoiValid = false;
     
-                        boundaries = bwboundaries(aSlice, 'noholes', 8);
+                        boundaries = bwboundaries(aSlice, 8, 'noholes');
                         if ~isempty(boundaries)
                             isRoiValid = true;
                             thisBoundary = boundaries{1};
