@@ -66,6 +66,20 @@ function importNrrdCallback(~, ~)
         
 %        mainDir('set', sPathName);
 
+        if isVsplash('get') == true
+
+            setVsplashCallback();
+        end
+
+        if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
+            
+            link2DMip('set', true);
+
+            set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+            set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get')); 
+            set(btnLinkMipPtr('get'), 'FontWeight', 'bold');            
+        end
+
         loadNrrdFile(sPath, sFileName);    
 
      end

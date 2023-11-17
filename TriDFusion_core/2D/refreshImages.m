@@ -595,9 +595,15 @@ function refreshImages()
             end
 
             [lFirst, ~] = computeVsplashLayout(im, 'coronal', iCoronal);
+            
+            if is3DEngine('get') == true
 
-            xOffset = imCoronal.XData(2)/dVsplashLayoutX;
-            yOffset = imCoronal.YData(2)/dVsplashLayoutY;
+                xOffset = size(imCoronal.CData,2)/dVsplashLayoutX;
+                yOffset = size(imCoronal.CData,1)/dVsplashLayoutY;
+            else
+                xOffset = imCoronal.XData(2)/dVsplashLayoutX;
+                yOffset = imCoronal.YData(2)/dVsplashLayoutY;
+            end
 
             iPointerOffset=1;
             for hh=1:dVsplashLayoutY
@@ -619,8 +625,14 @@ function refreshImages()
 
             [lFirst, ~] = computeVsplashLayout(im, 'sagittal', iSagittal);
 
-            xOffset = imSagittal.XData(2)/dVsplashLayoutX;
-            yOffset = imSagittal.YData(2)/dVsplashLayoutY;
+            if is3DEngine('get') == true
+
+                xOffset = size(imSagittal.CData,2)/dVsplashLayoutX;
+                yOffset = size(imSagittal.CData,1)/dVsplashLayoutY;
+            else
+                xOffset = imSagittal.XData(2)/dVsplashLayoutX;
+                yOffset = imSagittal.YData(2)/dVsplashLayoutY;
+            end
 
             iPointerOffset=1;
             for hh=1:dVsplashLayoutY
@@ -642,8 +654,14 @@ function refreshImages()
 
             [lFirst, ~] = computeVsplashLayout(im, 'axial', aBufferSize(3)-iAxial+1);
 
-            xOffset = imAxial.XData(2)/dVsplashLayoutX;
-            yOffset = imAxial.YData(2)/dVsplashLayoutY;
+            if is3DEngine('get') == true
+
+                xOffset = size(imAxial.CData,2)/dVsplashLayoutX;
+                yOffset = size(imAxial.CData,1)/dVsplashLayoutY;
+            else
+                xOffset = imAxial.XData(2)/dVsplashLayoutX;
+                yOffset = imAxial.YData(2)/dVsplashLayoutY;
+            end
 
             iPointerOffset=1;
             for hh=1:dVsplashLayoutY

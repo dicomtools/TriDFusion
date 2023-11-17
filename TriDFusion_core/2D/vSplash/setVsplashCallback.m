@@ -27,12 +27,40 @@ function setVsplashCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    im = dicomBuffer('get');
+    if isempty(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')))
 
-    if isempty(im)
         return;
     end
+
+    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
+
+        return;
+    end
+
+    if switchTo3DMode('get')     == true || ...
+       switchToIsoSurface('get') == true || ...
+       switchToMIPMode('get')    == true
+
+        return;
+    end
+
+    dWindowLevelMax = windowLevel('get', 'max');
+    dWindowLevelMin = windowLevel('get', 'min');
     
+    dOverlayColor = overlayColor('get');
+
+    dBackgroundColor = backgroundColor('get');
+
+    dColorMapOffset = colorMapOffset('get');
+
+    if isFusion('get')
+
+        dFusionWindowLevelMax = fusionWindowLevel('get', 'max');
+        dFusionWindowLevelMin = fusionWindowLevel('get', 'min');
+
+        dFusionColorMapOffset = fusionColorMapOffset('get');
+    end
+
     % Deactivate main tool bar 
     set(uiSeriesPtr('get'), 'Enable', 'off');                        
     mainToolBarEnable('off');   
@@ -67,9 +95,9 @@ function setVsplashCallback(~, ~)
     dataCursorTool('set', false);              
     datacursormode('off'); 
     
-    iCoronalSize  = size(im,1);
-    iSagittalSize = size(im,2);
-    iAxialSize    = size(im,3);
+    iCoronalSize  = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1);
+    iSagittalSize = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 2);
+    iAxialSize    = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3);
 
     iCoronal  = sliceNumber('get', 'coronal');
     iSagittal = sliceNumber('get', 'sagittal');
@@ -119,6 +147,12 @@ function setVsplashCallback(~, ~)
     else
         isVsplash('set', false);
 
+        link2DMip('set', true);
+
+        set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+        set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get')); 
+        set(btnLinkMipPtr('get'), 'FontWeight', 'bold');
+
         set(btnVsplashPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
         set(btnVsplashPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
         set(btnVsplashPtr('get'), 'FontWeight', 'normal');
@@ -140,7 +174,163 @@ function setVsplashCallback(~, ~)
 %        set(uiFusedSeriesPtr('get'), 'Enable', 'on');
     end
 
-    % restore position
+    % Restore color
+
+    set(uiCorWindowPtr('get'), 'BackgroundColor', dBackgroundColor);
+    set(uiSagWindowPtr('get'), 'BackgroundColor', dBackgroundColor);
+    set(uiTraWindowPtr('get'), 'BackgroundColor', dBackgroundColor);
+
+    if link2DMip('get') == true && isVsplash('get') == false
+        set(uiMipWindowPtr('get'), 'BackgroundColor', dBackgroundColor);
+    end
+
+    ptrColorbar = uiColorbarPtr('get');
+    if ~isempty(ptrColorbar)
+        set(ptrColorbar, 'Color',  dOverlayColor);
+    end
+
+    if isFusion('get')
+
+        uiAlphaSlider = uiAlphaSliderPtr('get');
+        if ~isempty(uiAlphaSlider)
+
+            set(uiAlphaSlider, 'BackgroundColor',  dBackgroundColor);
+        end
+
+        ptrFusionColorbar = uiFusionColorbarPtr('get');
+        if ~isempty(ptrFusionColorbar)
+
+            set(ptrFusionColorbar   , 'Color', dOverlayColor);
+        end        
+    end
+
+    set(fiMainWindowPtr('get'), 'Color', dBackgroundColor);
+
+    colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', dColorMapOffset));
+    colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', dColorMapOffset));
+    colormap(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', dColorMapOffset));
+
+    if link2DMip('get') == true && isVsplash('get') == false
+        colormap(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', dColorMapOffset));
+    end
+
+    if isFusion('get') == true
+
+        colormap(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),  getColorMap('one', dFusionColorMapOffset));
+        colormap(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),  getColorMap('one', dFusionColorMapOffset));
+        colormap(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),  getColorMap('one', dFusionColorMapOffset));
+
+        if link2DMip('get') == true && isVsplash('get') == false
+
+            colormap(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),  getColorMap('one', dFusionColorMapOffset));
+        end
+    end
+
+    overlayColor('set', dOverlayColor);
+
+    backgroundColor('set', dBackgroundColor);
+
+    colorMapOffset('set', dColorMapOffset);
+
+    if isFusion('get')
+
+        fusionColorMapOffset('set', dFusionColorMapOffset);
+    end
+
+    if isVsplash('get') == false
+
+        btnUiTraWindowFullScreen = btnUiTraWindowFullScreenPtr('get');
+        btnUiCorWindowFullScreen = btnUiCorWindowFullScreenPtr('get');
+        btnUiSagWindowFullScreen = btnUiSagWindowFullScreenPtr('get');
+        btnUiMipWindowFullScreen = btnUiMipWindowFullScreenPtr('get');
+
+        if ~isempty(btnUiTraWindowFullScreen)&& ...
+           ~isempty(btnUiCorWindowFullScreen)&& ...
+           ~isempty(btnUiSagWindowFullScreen)&& ...
+           ~isempty(btnUiMipWindowFullScreen)
+
+            bIsTraFullScreen = isPanelFullScreen(btnUiTraWindowFullScreen);
+            bIsCorFullScreen = isPanelFullScreen(btnUiCorWindowFullScreen);
+            bIsSagFullScreen = isPanelFullScreen(btnUiSagWindowFullScreen);
+            bIsMipFullScreen = isPanelFullScreen(btnUiMipWindowFullScreen);
+
+            set(btnUiTraWindowFullScreen, 'CData', getFullScreenIconImage(uiTraWindowPtr('get'), ~bIsTraFullScreen));
+            set(btnUiCorWindowFullScreen, 'CData', getFullScreenIconImage(uiCorWindowPtr('get'), ~bIsCorFullScreen));
+            set(btnUiSagWindowFullScreen, 'CData', getFullScreenIconImage(uiSagWindowPtr('get'), ~bIsSagFullScreen));
+            set(btnUiMipWindowFullScreen, 'CData', getFullScreenIconImage(uiMipWindowPtr('get'), ~bIsMipFullScreen));
+
+            set(btnUiTraWindowFullScreen, 'BackgroundColor', get(uiTraWindowPtr('get'), 'BackgroundColor'));
+            set(btnUiCorWindowFullScreen, 'BackgroundColor', get(uiCorWindowPtr('get'), 'BackgroundColor'));
+            set(btnUiSagWindowFullScreen, 'BackgroundColor', get(uiSagWindowPtr('get'), 'BackgroundColor'));
+            set(btnUiMipWindowFullScreen, 'BackgroundColor', get(uiMipWindowPtr('get'), 'BackgroundColor'));
+        end
+    end
+    
+    % Restore intensity
+
+   windowLevel('set', 'max', dWindowLevelMax);
+   windowLevel('set', 'min', dWindowLevelMin);
+
+    % Compute colorbar line y offset
+
+    dYOffsetMax = computeLineColorbarIntensityMaxYOffset(get(uiSeriesPtr('get'), 'Value'));
+    dYOffsetMin = computeLineColorbarIntensityMinYOffset(get(uiSeriesPtr('get'), 'Value'));
+
+    % Ajust the intensity 
+
+    setColorbarIntensityMaxScaleValue(dYOffsetMax, ...
+                                      colorbarScale('get'), ...
+                                      isColorbarDefaultUnit('get'), ...
+                                      get(uiSeriesPtr('get'), 'Value')...
+                                      );
+
+    setColorbarIntensityMinScaleValue(dYOffsetMin, ...
+                                      colorbarScale('get'), ...
+                                      isColorbarDefaultUnit('get'), ...
+                                      get(uiSeriesPtr('get'), 'Value')...
+                                      );
+
+    setAxesIntensity(get(uiSeriesPtr('get'), 'Value'));
+
+    if link2DMip('get') == true && isVsplash('get') == false
+
+        set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dWindowLevelMin dWindowLevelMax]);
+    end  
+
+    if isFusion('get')
+
+        fusionWindowLevel('set', 'max', dFusionWindowLevelMax);
+        fusionWindowLevel('set', 'min', dFusionWindowLevelMin);
+    
+        % Compute colorbar line y offset
+    
+        dFusionYOffsetMax = computeLineFusionColorbarIntensityMaxYOffset(get(uiFusedSeriesPtr('get'), 'Value'));
+        dFusionYOffsetMin = computeLineFusionColorbarIntensityMinYOffset(get(uiFusedSeriesPtr('get'), 'Value'));
+    
+        % Ajust the intensity 
+    
+        setFusionColorbarIntensityMaxScaleValue(dFusionYOffsetMax, ...
+                                                fusionColorbarScale('get'), ...
+                                                isFusionColorbarDefaultUnit('get'),...
+                                                get(uiFusedSeriesPtr('get'), 'Value')...
+                                               );
+                                            
+        setFusionColorbarIntensityMinScaleValue(dFusionYOffsetMin, ...
+                                                fusionColorbarScale('get'), ...
+                                                isFusionColorbarDefaultUnit('get'),...
+                                                get(uiFusedSeriesPtr('get'), 'Value')...
+                                                );
+    
+        setFusionAxesIntensity(get(uiFusedSeriesPtr('get'), 'Value'));
+
+        if link2DMip('get') == true && isVsplash('get') == false
+
+            set(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [dFusionWindowLevelMin dFusionWindowLevelMax]);
+        end           
+    end
+
+    % restore slider position
+
     set(uiSliderCorPtr('get'), 'Value', iCoronal / iCoronalSize);
     sliceNumber('set', 'coronal', iCoronal);
 

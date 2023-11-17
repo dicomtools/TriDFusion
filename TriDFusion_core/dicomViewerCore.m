@@ -565,30 +565,62 @@ function dicomViewerCore()
 
             [lFirst, lLast] = computeVsplashLayout(im, 'coronal', iCoronal);
 
-            if gaussFilter('get') == true
+            imComputed = computeMontage(im, 'coronal', iCoronal);
 
-                imCoronal  = imshow(permute(imgaussfilt(im (iCoronal,:,:)), [3 2 1]), ...
-                                     'Parent', axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
-                                     );
+            if is3DEngine('get') == true
+                if gaussFilter('get') == true
+
+                    imCoronal  = surface(imgaussfilt(imComputed, 1), ...
+                                         'linestyle', 'none', ...
+                                         'Parent'   , axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
+                                         );
+                else
+
+                    imCoronal  = surface(imComputed, ...
+                                         'linestyle', 'none', ...
+                                         'Parent'   , axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
+                                         );
+                end
+
+                if isShading('get')
+                    shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'interp');
+                else
+                    shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'flat');
+                end
             else
-
-                imCoronal  = imshow(permute(im (iCoronal,:,:), [3 2 1]), ...
-                                     'Parent', axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
-                                     );
+                if gaussFilter('get') == true
+    
+                    imCoronal  = imshow(imgaussfilt(permute(im (iCoronal,:,:), [3 2 1]), 1), ...
+                                         'Parent', axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
+                                         );
+                else
+    
+                    imCoronal  = imshow(permute(im (iCoronal,:,:), [3 2 1]), ...
+                                         'Parent', axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
+                                         );
+                end
             end
 
             imCoronalPtr ('set', imCoronal , get(uiSeriesPtr('get'), 'Value'));
 
-            imComputed = computeMontage(im, 'coronal', iCoronal);
+%             imComputed = computeMontage(im, 'coronal', iCoronal);
 
 %            imAxSize = size(imCoronal.CData);
 %            imComputed = imresize(imComputed, [imAxSize(1) imAxSize(2)]);
 
             imCoronal.CData = imComputed;
 
+            if is3DEngine('get') == true
 
-            xOffset = imCoronal.XData(2)/dVsplashLayoutX;
-            yOffset = imCoronal.YData(2)/dVsplashLayoutY;
+                xOffset = size(imCoronal.CData,2)/dVsplashLayoutX;
+                yOffset = size(imCoronal.CData,1)/dVsplashLayoutY;
+
+                imCoronal.Parent.XLim = [1 size(imCoronal.CData,2)];
+                imCoronal.Parent.YLim = [1 size(imCoronal.CData,1)];
+            else
+                xOffset = imCoronal.XData(2)/dVsplashLayoutX;
+                yOffset = imCoronal.YData(2)/dVsplashLayoutY;                
+            end
 
             iPointerOffset=1;
             for hh=1:dVsplashLayoutY
@@ -646,7 +678,7 @@ function dicomViewerCore()
                     shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'interp');
                 else
                     shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'flat');
-               end
+                end
             else
                  if gaussFilter('get') == true
 
@@ -873,28 +905,66 @@ function dicomViewerCore()
 
             [lFirst, lLast] = computeVsplashLayout(im, 'sagittal', iSagittal);
 
-            if gaussFilter('get') == true
+            imComputed = computeMontage(im, 'sagittal', iSagittal);
 
-                imSagittal   = imshow(permute(imgaussfilt(im (:,iSagittal,:)), [3 1 2]), ...
-                                       'Parent', axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
-                                       );
+            if is3DEngine('get') == true
+
+                if gaussFilter('get') == true
+
+                    imSagittal  = surface(imgaussfilt(imComputed, 1), ...
+                                          'linestyle', 'none', ...
+                                          'Parent'   , axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
+                                          );
+                else
+
+                    imSagittal  = surface(imComputed, ...
+                                          'linestyle', 'none', ...
+                                          'Parent', axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
+                                          );
+                end
+
+                if isShading('get')
+
+                    shading(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'interp');
+                else
+                    shading(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'flat');
+                end
+
             else
-
-                imSagittal   = imshow(permute(im (:,iSagittal,:), [3 1 2]), ...
-                                       'Parent', axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
-                                       );
+                if gaussFilter('get') == true
+    
+                    imSagittal   = imshow(imgaussfilt(permute(im (:,iSagittal,:), [3 1 2]),1), ...
+                                           'Parent', axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
+                                           );
+                else
+    
+                    imSagittal   = imshow(permute(im (:,iSagittal,:), [3 1 2]), ...
+                                           'Parent', axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
+                                           );
+                end
             end
 
             imSagittalPtr ('set', imSagittal , get(uiSeriesPtr('get'), 'Value'));
 
-            imComputed = computeMontage(im, 'sagittal', iSagittal);
+%             imComputed = computeMontage(im, 'sagittal', iSagittal);
 
 %            imAxSize = size(imSagittal.CData);
 %            imComputed = imresize(imComputed, [imAxSize(1) imAxSize(2)]);
 
             imSagittal.CData = imComputed;
-            xOffset = imSagittal.XData(2)/dVsplashLayoutX;
-            yOffset = imSagittal.YData(2)/dVsplashLayoutY;
+
+            if is3DEngine('get') == true
+
+                xOffset = size(imSagittal.CData,2)/dVsplashLayoutX;
+                yOffset = size(imSagittal.CData,1)/dVsplashLayoutY;
+
+                imSagittal.Parent.XLim = [1 size(imSagittal.CData,2)];
+                imSagittal.Parent.YLim = [1 size(imSagittal.CData,1)];
+            else            
+                xOffset = imSagittal.XData(2)/dVsplashLayoutX;
+                yOffset = imSagittal.YData(2)/dVsplashLayoutY;
+            end
+
 
             iPointerOffset=1;
             for hh=1:dVsplashLayoutY
@@ -936,6 +1006,7 @@ function dicomViewerCore()
                  );
 
             if is3DEngine('get') == true
+
                 if gaussFilter('get') == true
 
                     imSagittal  = surface(imgaussfilt(permute(im (:,iSagittal,:), [3 1 2]),1), ...
@@ -1159,24 +1230,53 @@ function dicomViewerCore()
             dVsplashLayoutX = vSplashLayout('get', 'x');
             dVsplashLayoutY = vSplashLayout('get', 'y');
 
-            if gaussFilter('get') == true
-
-               imAxial  = imshow(imgaussfilt(im (:,:,iAxial)),  ...
-                                  'Parent', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
-                                  );
-
-            else
-               imAxial  = imshow(im (:,:,iAxial),  ...
-                                  'Parent', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
-                                  );
-            end
-
-            imAxialPtr ('set', imAxial , get(uiSeriesPtr('get'), 'Value'));
-
             imComputed = computeMontage(im(:,:,end:-1:1), ...
                                         'axial', ...
                                         size(dicomBuffer('get'), 3)-sliceNumber('get', 'axial')+1 ...
                                         );
+
+            if is3DEngine('get') == true
+
+                if gaussFilter('get') == true
+
+                    imAxial  = surface(imgaussfilt(imComputed,1), ...
+                                       'linestyle', 'none', ...
+                                       'Parent'   , axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
+                                       );
+                else
+
+                   imAxial  = surface(imComputed, ...
+                                      'linestyle', 'none', ...
+                                      'Parent'   , axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
+                                      );
+                end
+
+                if isShading('get')
+                    shading(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'interp');
+                else
+                    shading(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'flat');
+                end                
+                
+            else
+                if gaussFilter('get') == true
+    
+                   imAxial  = imshow(imgaussfilt(im (:,:,iAxial), 1),  ...
+                                      'Parent', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
+                                      );
+    
+                else
+                   imAxial  = imshow(im (:,:,iAxial),  ...
+                                      'Parent', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ...
+                                      );
+                end
+            end
+
+            imAxialPtr ('set', imAxial , get(uiSeriesPtr('get'), 'Value'));
+
+%             imComputed = computeMontage(im(:,:,end:-1:1), ...
+%                                         'axial', ...
+%                                         size(dicomBuffer('get'), 3)-sliceNumber('get', 'axial')+1 ...
+%                                         );
 
 %            imAxSize = size(imAxial.CData);
 %            imComputed = imresize(imComputed, [imAxSize(1) imAxSize(2)]);
@@ -1187,9 +1287,17 @@ function dicomViewerCore()
                                                'axial', ...
                                                size(dicomBuffer('get'), 3)-iAxial+1 ...
                                                );
+            if is3DEngine('get') == true
 
-            xOffset = imAxial.XData(2)/dVsplashLayoutX;
-            yOffset = imAxial.YData(2)/dVsplashLayoutY;
+                xOffset = size(imAxial.CData,2)/dVsplashLayoutX;
+                yOffset = size(imAxial.CData,1)/dVsplashLayoutY;
+
+                imAxial.Parent.XLim = [1 size(imAxial.CData,2)];
+                imAxial.Parent.YLim = [1 size(imAxial.CData,1)];
+            else 
+                xOffset = imAxial.XData(2)/dVsplashLayoutX;
+                yOffset = imAxial.YData(2)/dVsplashLayoutY;
+            end
 
             iPointerOffset=1;
             for hh=1:dVsplashLayoutY
@@ -1213,6 +1321,7 @@ function dicomViewerCore()
 
         else
             if is3DEngine('get') == true
+
                 if gaussFilter('get') == true
 
                     imAxial  = surface(imgaussfilt(im (:,:,iAxial),1), ...
@@ -1562,20 +1671,24 @@ function dicomViewerCore()
         end
 
         if isVsplash('get') == true
-            aAxeXLim = get(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim');
-            aAxeYLim = get(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim');
-            set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim', [aAxeXLim(1) aAxeXLim(2)*dVsplashLayoutX]);
-            set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim', [aAxeYLim(1) aAxeYLim(2)*dVsplashLayoutY]);
 
-            aAxeXLim = get(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim');
-            aAxeYLim = get(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim');
-            set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim', [aAxeXLim(1) aAxeXLim(2)*dVsplashLayoutX]);
-            set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim', [aAxeYLim(1) aAxeYLim(2)*dVsplashLayoutY]);
+            if is3DEngine('get') == false
 
-            aAxeXLim = get(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim');
-            aAxeYLim = get(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim');
-            set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim', [aAxeXLim(1) aAxeXLim(2)*dVsplashLayoutX]);
-            set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim', [aAxeYLim(1) aAxeYLim(2)*dVsplashLayoutY]);
+                aAxeXLim = get(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim');
+                aAxeYLim = get(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim');
+                set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim', [aAxeXLim(1) aAxeXLim(2)*dVsplashLayoutX]);
+                set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim', [aAxeYLim(1) aAxeYLim(2)*dVsplashLayoutY]);
+
+                aAxeXLim = get(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim');
+                aAxeYLim = get(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim');
+                set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim', [aAxeXLim(1) aAxeXLim(2)*dVsplashLayoutX]);
+                set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim', [aAxeYLim(1) aAxeYLim(2)*dVsplashLayoutY]);
+    
+                aAxeXLim = get(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim');
+                aAxeYLim = get(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim');
+                set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim', [aAxeXLim(1) aAxeXLim(2)*dVsplashLayoutX]);
+                set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim', [aAxeYLim(1) aAxeYLim(2)*dVsplashLayoutY]);
+            end
         end
 
         if aspectRatio('get') == true

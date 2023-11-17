@@ -236,6 +236,7 @@ function setFusionCallback(~, ~)
                               'Value'   , sliderAlphaValue('get'), ...
                               'Enable'  , 'on', ...
                               'BackgroundColor', backgroundColor('get'), ...
+                              'String'  , 'Alpha',...
                               'ToolTip', 'Fusion Alpha', ...
                               'CallBack', @sliderAlphaCallback ...
                               );    
@@ -243,7 +244,8 @@ function setFusionCallback(~, ~)
 
                 addlistener(uiAlphaSlider,'Value','PreSet',@sliderAlphaCallback);                        
 
-                set(uiAlphaSlider, 'Visible', 'off');                
+                set(uiAlphaSlider, 'Visible', 'off');   
+         
             end
             
             % Set buffer
@@ -814,26 +816,55 @@ end
                 
                     imComputed = computeMontage(imf, 'coronal', iCoronal);    
 
-                    if gaussFilter('get') == true   
-                        imCoronalF = imshow(imgaussfilt(imComputed),  ...
-                                            'Parent', axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                            );                                        
+                    if is3DEngine('get') == true
+
+                        if gaussFilter('get') == true
+
+                            imCoronalF = surface(imgaussfilt(imComputed, 1), ...
+                                                 'linestyle', 'none', ...
+                                                 'Parent'   , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
+                                                 );                                      
+                        else      
+                            imCoronalF = surface(imComputed, ...
+                                                 'linestyle','none', ...
+                                                 'Parent'   , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
+                                                 ); 
+                        end
+                        
+                        if isShading('get')
+
+                            shading(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'interp');
+                            shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'interp');
+                        else
+                            shading(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'flat');
+                            shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'flat');
+                        end
+                        
+                        set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'ydir', 'reverse'); % Patch
+
                     else
-                        imCoronalF = imshow(imComputed,  ...
-                                            'Parent', axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                            );                         
+                        if gaussFilter('get') == true   
+                            imCoronalF = imshow(imgaussfilt(imComputed, 1),  ...
+                                                'Parent', axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
+                                                );                                        
+                        else
+                            imCoronalF = imshow(imComputed,  ...
+                                                'Parent', axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
+                                                );                         
+                        end
                     end
 
                     imCoronalFPtr('set', imCoronalF, get(uiFusedSeriesPtr('get'), 'Value')); 
 
 
-                    imCoronalF.CData = imComputed;                         
+%                     imCoronalF.CData = imComputed;                         
 
                 else                       
 
                     if is3DEngine('get') == true
                         
                         if gaussFilter('get') == true
+
                             imCoronalF = surface(imgaussfilt(permute(imf(iCoronal,:,:), [3 2 1]), 1), ...
                                                  'linestyle', 'none', ...
                                                  'Parent'   , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
@@ -846,6 +877,7 @@ end
                         end
                         
                         if isShading('get')
+
                             shading(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'interp');
                             shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'interp');
                         else
@@ -884,14 +916,41 @@ end
                 
                     imComputed = computeMontage(imf, 'sagittal', iSagittal);  
 
-                    if gaussFilter('get') == true
-                        imSagittalF  = imshow(imgaussfilt(imComputed), ...
-                                               'Parent', axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                               );                                                                                                  
-                    else                    
-                        imSagittalF  = imshow(imComputed, ...
-                                               'Parent', axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                               );                                                                                                
+                    if is3DEngine('get') == true
+
+                         if gaussFilter('get') == true
+
+                            imSagittalF = surface(imgaussfilt(imComputed, 1), ...
+                                                  'linestyle', 'none', ...
+                                                  'Parent'   , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
+                                                  );
+                        else    
+                            imSagittalF = surface(imComputed, ...
+                                                  'linestyle', 'none', ...
+                                                  'Parent'   , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
+                                                  );
+                        end
+
+                        if isShading('get')
+
+                            shading(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'interp');
+                        else
+                            shading(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'flat');
+                        end
+                        
+                        set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'ydir', 'reverse'); % Patch                       
+                    else
+
+                        if gaussFilter('get') == true
+
+                            imSagittalF  = imshow(imgaussfilt(imComputed, 1), ...
+                                                   'Parent', axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
+                                                   );                                                                                                  
+                        else                    
+                            imSagittalF  = imshow(imComputed, ...
+                                                   'Parent', axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
+                                                   );                                                                                                
+                        end
                     end
 
                     imSagittalFPtr('set', imSagittalF, get(uiFusedSeriesPtr('get'), 'Value'));
@@ -903,6 +962,7 @@ end
                     if is3DEngine('get') == true
                         
                         if gaussFilter('get') == true
+
                             imSagittalF = surface(imgaussfilt(permute(imf(:,iSagittal,:), [3 1 2]),1), ...
                                                   'linestyle', 'none', ...
                                                   'Parent'   , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
@@ -915,6 +975,7 @@ end
                         end
 
                         if isShading('get')
+
                             shading(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'interp');
                         else
                             shading(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'flat');
@@ -924,6 +985,7 @@ end
 
                     else                    
                          if gaussFilter('get') == true
+
                             imSagittalF  = imshow(imgaussfilt(permute(imf(:,iSagittal,:), [3 1 2])), ...
                                                    'Parent', axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
                                                    );                                                                                                                               
@@ -952,19 +1014,46 @@ end
                 if isVsplash('get') == true && ...
                    (strcmpi(vSplahView('get'), 'axial') || ...
                     strcmpi(vSplahView('get'), 'all'))
-                
+
                      imComputed = computeMontage(imf(:,:,end:-1:1), ...
                                                 'axial', size(dicomBuffer('get'), 3)-sliceNumber('get', 'axial')+1 ...
                                                 ); 
-                                            
-                    if gaussFilter('get') == true                    
-                       imAxialF = imshow(imgaussfilt(imComputed),  ...
-                                          'Parent', axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                          );                                                                                                                    
-                    else     
-                       imAxialF = imshow(imComputed,  ...
-                                          'Parent', axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                          );                                                                                    
+
+                    if is3DEngine('get') == true
+
+                        if gaussFilter('get') == true
+                            
+                            imAxialF = surface(imgaussfilt(imComputed,1), ...
+                                               'linestyle', 'none', ...
+                                               'Parent'   , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
+                                               ); 
+                        else
+                           imAxialF = surface(imComputed, ...
+                                              'linestyle', 'none', ...
+                                              'Parent'   , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
+                                              );                                   
+                        end
+
+                        if isShading('get')
+
+                            shading(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'interp');
+                        else
+                            shading(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'flat');
+                        end        
+                        
+                        set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'ydir', 'reverse'); % Patch
+
+                    else                        
+                        if gaussFilter('get') == true    
+
+                           imAxialF = imshow(imgaussfilt(imComputed, 1),  ...
+                                              'Parent', axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
+                                              );                                                                                                                    
+                        else     
+                           imAxialF = imshow(imComputed,  ...
+                                              'Parent', axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
+                                              );                                                                                    
+                        end
                     end
 
                     imAxialFPtr('set', imAxialF, get(uiFusedSeriesPtr('get'), 'Value'));
@@ -974,7 +1063,9 @@ end
 
                 else
                     if is3DEngine('get') == true
+
                         if gaussFilter('get') == true
+
                             imAxialF = surface(imgaussfilt(imf(:,:,iAxial),1), ...
                                                'linestyle', 'none', ...
                                                'Parent'   , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
@@ -2148,10 +2239,18 @@ end
                 end                 
             end      
 
-            setColorbarLabel();
+            if isVsplash('get') == false 
+            
+                setColorbarLabel();
+                setColorbarVisible('on');
+            else
+                if strcmpi(vSplahView('get'), 'axial') || ...
+                   strcmpi(vSplahView('get'), 'all')
 
-            setColorbarVisible('on');
-       
+                    setColorbarLabel();
+                    setColorbarVisible('on');              
+                end
+            end
         end
         
         uiLogo = logoObject('get');

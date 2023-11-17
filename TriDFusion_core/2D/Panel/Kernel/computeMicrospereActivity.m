@@ -117,7 +117,7 @@ function [aImage, acReport] = computeMicrospereActivity(aImage, atMetaData, sTre
         acReport{vv,5} = sprintf('Preset (cm3): %s' , num2str(dMicrosphereVolume));
         acReport{vv,6} = sprintf('Nb Sphere: %s'    , num2str(dNbSphere));
         acReport{vv,7} = sprintf('Multiplicator: %s', num2str(dSphereMultiplicator));
-        acReport{vv,8} = sprintf('BQML: %s'         , num2str(dActivity));
+        acReport{vv,8} = sprintf('Activity Concentration: %s', num2str(dActivity));
     end
     
     progressBar(1, 'Ready');

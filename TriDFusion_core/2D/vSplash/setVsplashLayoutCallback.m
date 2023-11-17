@@ -27,6 +27,23 @@ function setVsplashLayoutCallback(hObject, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
+    if isempty(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')))
+
+        return;
+    end
+
+    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
+
+        return;
+    end
+
+    if switchTo3DMode('get')     == true || ...
+       switchToIsoSurface('get') == true || ...
+       switchToMIPMode('get')    == true
+
+        return;
+    end
+
     if hObject == uiEditVsplahXPtr('get')
         vSplashLayout('set', 'x', str2double(get(hObject, 'String')));
     else    
@@ -34,7 +51,24 @@ function setVsplashLayoutCallback(hObject, ~)
     end
 
     if isVsplash('get') == true
-        
+
+        dWindowLevelMax = windowLevel('get', 'max');
+        dWindowLevelMin = windowLevel('get', 'min');
+
+        dOverlayColor = overlayColor('get');
+    
+        dBackgroundColor = backgroundColor('get');
+    
+        dColorMapOffset = colorMapOffset('get');
+    
+        if isFusion('get')
+
+            dFusionWindowLevelMax = fusionWindowLevel('get', 'max');
+            dFusionWindowLevelMin = fusionWindowLevel('get', 'min');
+
+            dFusionColorMapOffset = fusionColorMapOffset('get');
+        end
+
         % Deactivate main tool bar 
         set(uiSeriesPtr('get'), 'Enable', 'off');                        
         mainToolBarEnable('off');  
@@ -50,9 +84,113 @@ function setVsplashLayoutCallback(hObject, ~)
         initDisplay(3);  
 
         dicomViewerCore(); 
+
+        % restore color
+    
+        set(uiCorWindowPtr('get'), 'BackgroundColor', dBackgroundColor);
+        set(uiSagWindowPtr('get'), 'BackgroundColor', dBackgroundColor);
+        set(uiTraWindowPtr('get'), 'BackgroundColor', dBackgroundColor);
+                
+        ptrColorbar = uiColorbarPtr('get');
+        if ~isempty(ptrColorbar)
+            set(ptrColorbar, 'Color',  dOverlayColor);
+        end
+    
+        if isFusion('get')
+    
+            uiAlphaSlider = uiAlphaSliderPtr('get');
+            if ~isempty(uiAlphaSlider)
+    
+                set(uiAlphaSlider, 'BackgroundColor',  dBackgroundColor);
+            end
+    
+            ptrFusionColorbar = uiFusionColorbarPtr('get');
+            if ~isempty(ptrFusionColorbar)
+    
+                set(ptrFusionColorbar   , 'Color', dOverlayColor);
+            end        
+        end
+    
+        set(fiMainWindowPtr('get'), 'Color', dBackgroundColor);
+    
+        colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', dColorMapOffset));
+        colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', dColorMapOffset));
+        colormap(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', dColorMapOffset));          
+    
+        if isFusion('get') == true
+    
+            colormap(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),  getColorMap('one', dFusionColorMapOffset));
+            colormap(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),  getColorMap('one', dFusionColorMapOffset));
+            colormap(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),  getColorMap('one', dFusionColorMapOffset));
+        end
+
+        overlayColor('set', dOverlayColor);
+    
+        backgroundColor('set', dBackgroundColor);
+    
+        colorMapOffset('set', dColorMapOffset);
+    
+        if isFusion('get')
+            fusionColorMapOffset('set', dFusionColorMapOffset);
+        end
+
+        % Restore intensity
+    
+        windowLevel('set', 'max', dWindowLevelMax);
+        windowLevel('set', 'min', dWindowLevelMin);
+    
+        % Compute colorbar line y offset
+    
+        dYOffsetMax = computeLineColorbarIntensityMaxYOffset(get(uiSeriesPtr('get'), 'Value'));
+        dYOffsetMin = computeLineColorbarIntensityMinYOffset(get(uiSeriesPtr('get'), 'Value'));
+    
+        % Ajust the intensity 
+    
+        setColorbarIntensityMaxScaleValue(dYOffsetMax, ...
+                                          colorbarScale('get'), ...
+                                          isColorbarDefaultUnit('get'), ...
+                                          get(uiSeriesPtr('get'), 'Value')...
+                                          );
+    
+        setColorbarIntensityMinScaleValue(dYOffsetMin, ...
+                                          colorbarScale('get'), ...
+                                          isColorbarDefaultUnit('get'), ...
+                                          get(uiSeriesPtr('get'), 'Value')...
+                                          );
+    
+        setAxesIntensity(get(uiSeriesPtr('get'), 'Value'));
+                
+        if isFusion('get')
+    
+            fusionWindowLevel('set', 'max', dFusionWindowLevelMax);
+            fusionWindowLevel('set', 'min', dFusionWindowLevelMin);
         
+            % Compute colorbar line y offset
+        
+            dFusionYOffsetMax = computeLineFusionColorbarIntensityMaxYOffset(get(uiFusedSeriesPtr('get'), 'Value'));
+            dFusionYOffsetMin = computeLineFusionColorbarIntensityMinYOffset(get(uiFusedSeriesPtr('get'), 'Value'));
+        
+            % Ajust the intensity 
+        
+            setFusionColorbarIntensityMaxScaleValue(dFusionYOffsetMax, ...
+                                                    fusionColorbarScale('get'), ...
+                                                    isFusionColorbarDefaultUnit('get'),...
+                                                    get(uiFusedSeriesPtr('get'), 'Value')...
+                                                   );
+                                                
+            setFusionColorbarIntensityMinScaleValue(dFusionYOffsetMin, ...
+                                                    fusionColorbarScale('get'), ...
+                                                    isFusionColorbarDefaultUnit('get'),...
+                                                    get(uiFusedSeriesPtr('get'), 'Value')...
+                                                    );
+        
+            setFusionAxesIntensity(get(uiFusedSeriesPtr('get'), 'Value'));       
+        end
+
         % Reactivate main tool bar 
+
         set(uiSeriesPtr('get'), 'Enable', 'on');                        
+        
         mainToolBarEnable('on');          
     end
 
