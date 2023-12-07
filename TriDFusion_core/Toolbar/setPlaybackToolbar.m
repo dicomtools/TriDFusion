@@ -329,9 +329,9 @@ function setPlaybackToolbar(sVisible)
                             if strcmpi(get(mGate, 'State'), 'on')
 
                                 set(uiSeriesPtr('get'), 'Enable', 'off');
-                                multiGate(mPlay);
+                                multiGate(mPlay, gca);
                             else
-                                multiFrame(mPlay);
+                                multiFrame(mPlay, gca);
                             end
                         else
                             set(uiSeriesPtr('get'), 'Enable', 'on');
@@ -415,9 +415,9 @@ function setPlaybackToolbar(sVisible)
 
                                 if strcmpi(get(mGate, 'State'), 'on')
                                     set(uiSeriesPtr('get'), 'Enable', 'off');
-                                    recordMultiGate(mRecord, path, file, filter{indx});
+                                    recordMultiGate(mRecord, path, file, filter{indx}, gca);
                                 else
-                                    recordMultiFrame(mRecord, path, file, filter{indx});
+                                    recordMultiFrame(mRecord, path, file, filter{indx}, gca);
                                 end
 
                                 set(uiSeriesPtr('get'), 'Enable', 'on');
@@ -449,6 +449,7 @@ function setPlaybackToolbar(sVisible)
                     end
 
                 case 'Speed Down'
+                    
                     set(mSpeedDown, 'State', 'off');
 
                     if multiFrameSpeed('get') < 2
@@ -456,6 +457,7 @@ function setPlaybackToolbar(sVisible)
                     end
 
                 case 'Speed Up'
+
                     set(mSpeedUp, 'State', 'off');
 
                     if size(dicomBuffer('get'), 3) ~=1

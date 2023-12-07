@@ -1,13 +1,14 @@
-function [bLesionOffset, asLesionList, asLesionShortName] = getLesionType(sLesionType)
-%function [bLesionOffset, asLesionList, asLesionShortName] = getLesionType(sLesionType)
-%Return the lesion type, type list offset and short name.
+function Img8 = snakeSegmentation(ImgX,seedLevel,level,it,penalty)
+%function Img8 = snakeSegmentation(ImgX,seedLevel,level,it,penalty)
+%Chan-Vese image segmentation.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
-%Author: Daniel Lafontaine, lafontad@mskcc.org
+%Author: Alexandre Velo, francaa@mskcc.org
+%          
 %
 %Last specifications modified:
 %
-% Copyright 2022, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2023, Daniel Lafontaine, on behalf of the TriDFusion development team.
 %
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 %
@@ -27,15 +28,12 @@ function [bLesionOffset, asLesionList, asLesionShortName] = getLesionType(sLesio
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    asLesionList      = {'Unspecified', 'Bone', 'Soft Tissue', 'Lung', 'Liver', 'Parotid', 'Blood Pool', 'Lymph Nodes', 'Primary Disease', 'Cervical', 'Supraclavicular', 'Mediastinal', 'Paraspinal', 'Axillary', 'Abdominal'};  
-    asLesionShortName = {'UDF', 'BON', 'SOF', 'LUN', 'LIV', 'PAR', 'BPL', 'LNO','PRD', 'CER', 'SUP', 'MDI', 'PSL', 'AXI', 'ABD'};
-    bLesionOffset = 1;
-    
-    for ll=1:numel(asLesionList)
-        if strcmpi(sLesionType, asLesionList{ll})
-            bLesionOffset = ll;
-            break;
-        end
-    end
+% seedLevel = 100;
+seed = ImgX(:,:,seedLevel) > level;
+% figure
+% imshow(seed)
 
-end
+mask = zeros(size(ImgX));
+mask(:,:,seedLevel) = seed;
+
+Img8 = activecontour(ImgX,mask,it,'Chan-Vese','ContractionBias',penalty);

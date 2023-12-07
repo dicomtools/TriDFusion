@@ -1,6 +1,6 @@
-function dSUVValue = FDGSegmentationSUVThresholdValue(sAction, dValue)
-%function dSUVValue = FDGSegmentationSUVThresholdValue(sAction, dValue)
-%Get/Set segmentation FDG SUV value.
+function dSmallestSize = FDGBrownFatSmalestVoiValue(sAction, dValue)
+%function dSmallestSize = FDGBrownFatSmalestVoiValue(sAction, dValue)
+%Get/Set brown fat segmentation FDG smallest voi value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -27,11 +27,11 @@ function dSUVValue = FDGSegmentationSUVThresholdValue(sAction, dValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    persistent pdSUVValue; 
+    persistent pdSmallestSize; 
 
     if strcmpi('set', sAction)
-        pdSUVValue = dValue;            
+        pdSmallestSize = dValue;            
     end
     
-    dSUVValue = pdSUVValue;
+    dSmallestSize = pdSmallestSize;
 end

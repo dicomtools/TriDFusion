@@ -1,6 +1,6 @@
-function dSUVValue = FDGSegmentationSUVThresholdValue(sAction, dValue)
-%function dSUVValue = FDGSegmentationSUVThresholdValue(sAction, dValue)
-%Get/Set segmentation FDG SUV value.
+function dSUVValue = FDGBrownFatSUVThresholdValue(sAction, dValue)
+%function dSUVValue = FDGBrownFatSUVThresholdValue(sAction, dValue)
+%Get/Set brown fat segmentation FDG SUV value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org

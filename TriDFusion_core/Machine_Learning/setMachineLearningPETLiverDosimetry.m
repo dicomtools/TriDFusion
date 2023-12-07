@@ -169,7 +169,7 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript)
 
                     nii = nii_tool('load', sNiiFileName);
 
-                    machineLearning3DMask('set', 'liver', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor);
+                    machineLearning3DMask('set', 'liver', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
 
                     aMask = transformNiiMask(nii.img, atCTMetaData, aPTImage, atPTMetaData);
 

@@ -1,6 +1,6 @@
-function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
-%function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
-%Run FDG Lymph Node Segmentation base on a SUV treshold.
+function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombineMasks, tBrownFatSUV)
+%function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombineMasks, tBrownFatSUV)
+%Run FDG brown Fat Segmentation base on a SUV treshold.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -125,7 +125,7 @@ function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
     
     % Convert dicom to .nii     
     
-    progressBar(1/10, 'DICOM to NII conversion, please wait.');
+    progressBar(1/12, 'DICOM to NII conversion, please wait.');
 
     dicm2nii(sFilePath, sNiiTmpDir, 1);
     
@@ -148,7 +148,7 @@ function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
         errordlg('nii file mot found!!', '.nii file Validation'); 
     else
 
-        progressBar(2/10, 'Machine learning in progress, this might take several minutes, please be patient.');
+        progressBar(2/12, 'Machine learning in progress, this might take several minutes, please be patient.');
        
         sSegmentationFolderName = sprintf('%stemp_seg_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
         if exist(char(sSegmentationFolderName), 'dir')
@@ -171,19 +171,60 @@ function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
                 errordlg(sprintf('An error occur during machine learning segmentation: %s', sCmdout), 'Segmentation Error');  
             else % Process succeed
 
-                progressBar(3/10, 'Importing exclusion masks, please wait.');
+                progressBar(3/12, 'Importing organ exclusion mask, please wait.');
 
-                aExcludeMask = getLymphNodeSUVExcludeMask(tLymphNodeSUV, sSegmentationFolderName, zeros(size(aCTImage)));
-                aExcludeMask = imdilate(aExcludeMask, strel('sphere', 2)); % Increse mask by 2 pixels
+                aExcludeMask = getBrownFatSUVExcludeMask(tBrownFatSUV, sSegmentationFolderName, sSegmentatorCombineMasks, zeros(size(aCTImage)));
+                aExcludeMask = imdilate(aExcludeMask, strel('sphere', 4)); % Increse mask by 4 pixels
 
-                progressBar(4/10, 'Resampling series, please wait.');
+                if tBrownFatSUV.exclude.organ.skeleton == true
+
+                    progressBar(4/12, 'Importing bone exclusion mask, please wait.');
+
+                    aBoneExcludeMask = getTotalSegmentorWholeBodyMask(sSegmentationFolderName, zeros(size(aCTImage)));
+%                     aBoneExcludeMask = imfill(aBoneExcludeMask, 4, 'holes');   
+
+%                     aBoneExcludeMask = imdilate(aBoneExcludeMask, strel('sphere', 2)); % Increse mask by 2 pixels
+
+                    aExcludeMask(aBoneExcludeMask~=0) = 1;
+
+                    clear aBoneExcludeMask;
+                end
+
+                dLowerSlice = getTotalSegmentorObjectSliceNumber(sSegmentationFolderName, 'sacrum', 'upper');
+
+                if dLowerSlice > 1 && dLowerSlice < size(aExcludeMask, 3)
+                    aExcludeMask(:,:,dLowerSlice:end) = 1;
+                end
+
+                dUpperSlice = getTotalSegmentorObjectSliceNumber(sSegmentationFolderName, 'skull' , 'lower')-5;
+
+                if dUpperSlice > 1 && dUpperSlice < size(aExcludeMask, 3)
+                    aExcludeMask(:,:,1:dUpperSlice)   = 1;
+                end
+
+if 0
+                progressBar(5/12, 'Computing fuzzy c-means clustering, please wait.');
+
+                aFuzzImage = fuzzy3DSegmentation(aPTImage);
+%                 aFuzzImage = aFuzzImage >= tBrownFatSUV.options.fuzzyClusterSelection;
+                aFuzzImage = aFuzzImage >= 2;
+
+%                 aFuzzImage(aFuzzImage<4)= min(aFuzzImage, [], 'all');
+%                 aFuzzImage = imbinarize(aFuzzImage);
+
+                aPTImageTemp(aFuzzImage==0) = min(aPTImageTemp, [], 'all');   
+
+                clear aFuzzImage;
+end
+
+                progressBar(6/12, 'Resampling series, please wait.');
 
                 [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
                 [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
 
                 dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
                 dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
-            
+    
                 aResampledPTImage = aResampledPTImageTemp;
 
                 if ~isequal(size(aExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view 
@@ -200,11 +241,49 @@ function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
 
                 aResampledPTImage(aExcludeMask) = min(aResampledPTImage, [], 'all');
 
+if 1                    
+                progressBar(7/12, 'Computing CT HU exclusion mask, please wait.');
+
+                aHUExcludeMask = ones(size(aCTImage));
+
+                aHUExcludeMask(aCTImage < tBrownFatSUV.options.HUThreshold.min) = 0;
+                aHUExcludeMask(aCTImage > tBrownFatSUV.options.HUThreshold.max) = 0;
+
+                aHUExcludeMask = imdilate(aHUExcludeMask, strel('sphere', 4)); % Increse mask by 4 pixels
+
+                if ~isequal(size(aHUExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+            
+                     aHUExcludeMask = resample3DImage(aHUExcludeMask, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
+                     aHUExcludeMask = imbinarize(aHUExcludeMask);
+            
+                    if ~isequal(size(aHUExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view     
+                        aHUExcludeMask = resizeMaskToImageSize(aHUExcludeMask, aResampledPTImage); 
+                    end
+                else
+                    aHUExcludeMask = imbinarize(aHUExcludeMask);
+                end
+
+                aResampledPTImage(aHUExcludeMask==0) = min(aResampledPTImage, [], 'all');
+
+                clear aHUExcludeMask;
+
+end
+                progressBar(8/12, 'Computing CT BW mask, please wait.');
+
+                BWCT = imbinarize(aCTImage);
+
+%                 dCTMin = min(aCTImage, [], 'all');
+% 
+%                 aCTImage(aCTImage < tBrownFatSUV.options.HUThreshold.min) = dCTMin;
+%                 aCTImage(aCTImage > tBrownFatSUV.options.HUThreshold.max) = dCTMin;
+%                  
+%                 aResampledPTImage(aCTImage==dCTMin) = min(aResampledPTImage, [], 'all');
+
                 clear aPTImageTemp;
                 clear aResampledPTImageTemp;
                 clear aExcludeMask;
             
-                progressBar(5/10, 'Resampling mip, please wait.');
+                progressBar(9/12, 'Resampling mip, please wait.');
                         
                 refMip = mipBuffer('get', [], dCTSerieOffset);                        
                 aMip   = mipBuffer('get', [], dPTSerieOffset);
@@ -216,76 +295,32 @@ function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
                 setQuantification(dPTSerieOffset);    
             
             
-                progressBar(6/10, 'Computing mask, please wait.');
+                progressBar(10/12, 'Computing SUV mask, please wait.');
             
 
                 aBWMask = aResampledPTImage;
             
-                dMin = min(aBWMask, [], 'all');
+                dMin = min(aResampledPTImage, [], 'all');
 
-                dTreshold = tLymphNodeSUV.options.SUVThreshold;
-
-                aBWMask(aBWMask*dSUVScale<dTreshold)=dMin;
-            
+                dTreshold = tBrownFatSUV.options.SUVThreshold;
+                aBWMask(aBWMask*dSUVScale<dTreshold) = dMin;
+     
                 aBWMask = imbinarize(aBWMask);
-            
-                progressBar(7/10, 'Computing ct map, please wait.');
-            
-                BWCT = getTotalSegmentorWholeBodyMask(sSegmentationFolderName, zeros(size(aCTImage)));
-                BWCT = imfill(BWCT, 4, 'holes');          
+         
 
-                if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view 
-            
-                     BWCT = resample3DImage(BWCT, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
-                     BWCT = imbinarize(BWCT);
-            
-                    if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view     
-                        BWCT = resizeMaskToImageSize(BWCT, aResampledPTImage); 
-                    end
-                else
-                    BWCT = imbinarize(BWCT);
-                end
+                progressBar(11/12, 'Creating contours, please wait.');
 
-                progressBar(9/10, 'Creating contours, please wait.');
-            
                 imMask = aResampledPTImage;
                 imMask(aBWMask == 0) = dMin;
             
                 setSeriesCallback();
             
-                sFormula = 'Lymph Nodes';
+                sFormula = [];
 
-                dSmalestVoiValue = tLymphNodeSUV.options.smalestVoiValue;
-                bPixelEdge = tLymphNodeSUV.options.pixelEdge;
+                dSmalestVoiValue = tBrownFatSUV.options.smalestVoiValue;
+                bPixelEdge = tBrownFatSUV.options.pixelEdge;
 
                 maskAddVoiToSeries(imMask, aBWMask, bPixelEdge, false, dTreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue); 
-
-                % Segment
-
-                if tLymphNodeSUV.segment.organ.spleen == true
-
-                    aIncludeMask = false(size(aCTImage));
-        
-                    sNiiFileName = sprintf('%s%s', sSegmentationFolderName, 'spleen.nii.gz');
-                
-                    if exist(sNiiFileName, 'file')
-            
-                        nii = nii_tool('load', sNiiFileName);
-                        aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
-            
-                        aIncludeMask(aObjectMask~=0)=1;
-            
-                        clear aObjectMask;
-                        clear nii;
-                    end
-
-                    aIncludeMask = aIncludeMask(:,:,end:-1:1);
-%                     aIncludeMask = smooth3(aIncludeMask, 'box', 3);
-
-                    maskToVoi(aIncludeMask, 'Spleen', 'Soft Tissue', [1 1 0], 'axial', dPTSerieOffset, false);
-
-                    clear aIncludeMask;
-                end  
 
                 clear aResampledPTImage;
                 clear aBWMask;
@@ -363,7 +398,7 @@ function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
 
     catch 
         resetSeries(dPTSerieOffset, true);       
-        progressBar( 1 , 'Error: setSegmentationFDGLymphNodeSUV()' );
+        progressBar( 1 , 'Error: setSegmentationFDGBrownFatSUV()' );
     end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');

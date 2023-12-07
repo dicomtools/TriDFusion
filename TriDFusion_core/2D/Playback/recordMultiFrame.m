@@ -1,5 +1,5 @@
-function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
-%function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
+function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
+%function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
 %Record 2D Frames.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -60,21 +60,21 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention)
         end
     end
 
-    if (gca == axes1Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
+    if (pAxe == axes1Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
        (isVsplash('get') == true && strcmpi(vSplahView('get'), 'coronal'))
         
         dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 1);
         dCurrentSlice = sliceNumber('get', 'coronal');
         aAxe = axes1Ptr('get', [], dSeriesOffset);
 
-    elseif (gca == axes2Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
+    elseif (pAxe == axes2Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
            (isVsplash('get') == true && strcmpi(vSplahView('get'), 'sagittal'))
             
         dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 2);
         dCurrentSlice = sliceNumber('get', 'sagittal');
         aAxe = axes2Ptr('get', [], dSeriesOffset);
 
-    elseif (gca == axes3Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
+    elseif (pAxe == axes3Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
            (isVsplash('get') == true && strcmpi(vSplahView('get'), 'axial'))
         
         dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 3);

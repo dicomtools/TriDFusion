@@ -154,47 +154,71 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
             % Initialize contour type mask           
 
-            aUnspecifiedMask    = [];          
-            aBoneMask           = [];                         
-            aSoftTissueMask     = [];                         
-            aLungMask           = [];                         
-            aLiverMask          = [];                         
-            aParotidMask        = [];                         
-            aBloodPoolMask      = [];                      
-            aLymphNodesMask     = [];
-            aPrimaryDiseaseMask = [];
-            aUnknowMask         = []; 
+            aUnspecifiedMask     = [];          
+            aBoneMask            = [];                         
+            aSoftTissueMask      = [];                         
+            aLungMask            = [];                         
+            aLiverMask           = [];                         
+            aParotidMask         = [];                         
+            aBloodPoolMask       = [];                      
+            aLymphNodesMask      = [];
+            aPrimaryDiseaseMask  = [];
+            aCervicalMask        = [];
+            aSupraclavicularMask = []; 
+            aMediastinalMask     = []; 
+            aParaspinalMask      = []; 
+            aAxillaryMask        = [];
+            aAbdominalMask       = [];
+            aUnknowMask          = []; 
 
             for vv=1:numel(atVoiInput)
                                 
                 switch lower(atVoiInput{vv}.LesionType)
                     
                     case 'unspecified'
-                        aUnspecifiedMask    = zeros(size(aImages));
+                        aUnspecifiedMask     = zeros(size(aImages));
                         
                     case 'bone'
-                        aBoneMask           = zeros(size(aImages));
+                        aBoneMask            = zeros(size(aImages));
                          
                     case 'soft tissue'
-                        aSoftTissueMask     = zeros(size(aImages));
+                        aSoftTissueMask      = zeros(size(aImages));
                         
                     case 'lung'
-                        aLungMask           = zeros(size(aImages));
+                        aLungMask            = zeros(size(aImages));
                         
                     case 'liver'
-                        aLiverMask          = zeros(size(aImages));
+                        aLiverMask           = zeros(size(aImages));
                         
                     case 'parotid'
-                        aParotidMask        = zeros(size(aImages));
+                        aParotidMask         = zeros(size(aImages));
                         
                     case 'blood pool'
-                        aBloodPoolMask      = zeros(size(aImages));
+                        aBloodPoolMask       = zeros(size(aImages));
 
                     case 'lymph nodes'
-                        aLymphNodesMask     = zeros(size(aImages));
+                        aLymphNodesMask      = zeros(size(aImages));
 
                     case 'primary disease'
-                        aPrimaryDiseaseMask = zeros(size(aImages));                        
+                        aPrimaryDiseaseMask  = zeros(size(aImages));                        
+
+                    case 'cervical' 
+                        aCervicalMask        = zeros(size(aImages));  
+
+                    case 'supraclavicular' 
+                        aSupraclavicularMask = zeros(size(aImages));                        
+
+                    case 'mediastinal'
+                        aMediastinalMask     = zeros(size(aImages));                        
+
+                    case 'paraspinal'
+                        aParaspinalMask      = zeros(size(aImages));                        
+
+                    case 'axillary'
+                        aAxillaryMask        = zeros(size(aImages));                        
+
+                    case 'abdominal'
+                        aAbdominalMask       = zeros(size(aImages));                        
 
                     otherwise
                         aUnknowMask         = zeros(size(aImages));
@@ -527,6 +551,173 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                                     aPrimaryDiseaseMask(:,:,tRoi.SliceNb) = aMaskSlice;              
                             end  
 
+                        case 'cervical'
+
+                            switch lower(tRoi.Axe)                    
+                                case 'axe'
+                                    aMaskSlice   = aCervicalMask(:,:);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                    
+                                    aCervicalMask(:,:) = aMaskSlice;
+                                    
+                                case 'axes1'
+                                    aMaskSlice = permute(aCervicalMask(tRoi.SliceNb,:,:), [3 2 1]);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                    
+                                    aCervicalMask(tRoi.SliceNb,:,:) = permute(aMaskSlice, [3 2 1]);
+                
+                                case 'axes2'
+                                    aMaskSlice   = permute(aCervicalMask(:,tRoi.SliceNb,:), [3 1 2]);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                   
+                                    aCervicalMask(:,tRoi.SliceNb,:) = permute(aMaskSlice, [2 3 1]);
+                                  
+                                case 'axes3'
+                                    aMaskSlice   = aCervicalMask(:,:,tRoi.SliceNb);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+
+                                    aCervicalMask(:,:,tRoi.SliceNb) = aMaskSlice;              
+                            end  
+
+                        case 'supraclavicular'
+
+                            switch lower(tRoi.Axe)                    
+                                case 'axe'
+                                    aMaskSlice   = aSupraclavicularMask(:,:);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                    
+                                    aSupraclavicularMask(:,:) = aMaskSlice;
+                                    
+                                case 'axes1'
+                                    aMaskSlice = permute(aSupraclavicularMask(tRoi.SliceNb,:,:), [3 2 1]);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                    
+                                    aSupraclavicularMask(tRoi.SliceNb,:,:) = permute(aMaskSlice, [3 2 1]);
+                
+                                case 'axes2'
+                                    aMaskSlice   = permute(aSupraclavicularMask(:,tRoi.SliceNb,:), [3 1 2]);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                   
+                                    aSupraclavicularMask(:,tRoi.SliceNb,:) = permute(aMaskSlice, [2 3 1]);
+                                  
+                                case 'axes3'
+                                    aMaskSlice   = aSupraclavicularMask(:,:,tRoi.SliceNb);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+
+                                    aSupraclavicularMask(:,:,tRoi.SliceNb) = aMaskSlice;              
+                            end  
+
+                         case 'mediastinal'
+
+                            switch lower(tRoi.Axe)                    
+                                case 'axe'
+                                    aMaskSlice   = aMediastinalMask(:,:);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                    
+                                    aMediastinalMask(:,:) = aMaskSlice;
+                                    
+                                case 'axes1'
+                                    aMaskSlice = permute(aMediastinalMask(tRoi.SliceNb,:,:), [3 2 1]);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                    
+                                    aMediastinalMask(tRoi.SliceNb,:,:) = permute(aMaskSlice, [3 2 1]);
+                
+                                case 'axes2'
+                                    aMaskSlice   = permute(aMediastinalMask(:,tRoi.SliceNb,:), [3 1 2]);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                   
+                                    aMediastinalMask(:,tRoi.SliceNb,:) = permute(aMaskSlice, [2 3 1]);
+                                  
+                                case 'axes3'
+                                    aMaskSlice   = aMediastinalMask(:,:,tRoi.SliceNb);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+
+                                    aMediastinalMask(:,:,tRoi.SliceNb) = aMaskSlice;              
+                            end  
+
+                         case 'paraspinal'
+
+                            switch lower(tRoi.Axe)                    
+                                case 'axe'
+                                    aMaskSlice   = aParaspinalMask(:,:);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                    
+                                    aParaspinalMask(:,:) = aMaskSlice;
+                                    
+                                case 'axes1'
+                                    aMaskSlice = permute(aParaspinalMask(tRoi.SliceNb,:,:), [3 2 1]);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                    
+                                    aParaspinalMask(tRoi.SliceNb,:,:) = permute(aMaskSlice, [3 2 1]);
+                
+                                case 'axes2'
+                                    aMaskSlice   = permute(aParaspinalMask(:,tRoi.SliceNb,:), [3 1 2]);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                   
+                                    aParaspinalMask(:,tRoi.SliceNb,:) = permute(aMaskSlice, [2 3 1]);
+                                  
+                                case 'axes3'
+                                    aMaskSlice   = aParaspinalMask(:,:,tRoi.SliceNb);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+
+                                    aParaspinalMask(:,:,tRoi.SliceNb) = aMaskSlice;              
+                            end  
+
+                         case 'axillary'
+
+                            switch lower(tRoi.Axe)                    
+                                case 'axe'
+                                    aMaskSlice   = aAxillaryMask(:,:);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                    
+                                    aAxillaryMask(:,:) = aMaskSlice;
+                                    
+                                case 'axes1'
+                                    aMaskSlice = permute(aAxillaryMask(tRoi.SliceNb,:,:), [3 2 1]);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                    
+                                    aAxillaryMask(tRoi.SliceNb,:,:) = permute(aMaskSlice, [3 2 1]);
+                
+                                case 'axes2'
+                                    aMaskSlice   = permute(aAxillaryMask(:,tRoi.SliceNb,:), [3 1 2]);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                   
+                                    aAxillaryMask(:,tRoi.SliceNb,:) = permute(aMaskSlice, [2 3 1]);
+                                  
+                                case 'axes3'
+                                    aMaskSlice   = aAxillaryMask(:,:,tRoi.SliceNb);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+
+                                    aAxillaryMask(:,:,tRoi.SliceNb) = aMaskSlice;              
+                            end  
+
+                        case 'abdominal'
+
+                            switch lower(tRoi.Axe)                    
+                                case 'axe'
+                                    aMaskSlice   = aAbdominalMask(:,:);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                    
+                                    aAbdominalMask(:,:) = aMaskSlice;
+                                    
+                                case 'axes1'
+                                    aMaskSlice = permute(aAbdominalMask(tRoi.SliceNb,:,:), [3 2 1]);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                    
+                                    aAbdominalMask(tRoi.SliceNb,:,:) = permute(aMaskSlice, [3 2 1]);
+                
+                                case 'axes2'
+                                    aMaskSlice   = permute(aAbdominalMask(:,tRoi.SliceNb,:), [3 1 2]);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+                                   
+                                    aAbdominalMask(:,tRoi.SliceNb,:) = permute(aMaskSlice, [2 3 1]);
+                                  
+                                case 'axes3'
+                                    aMaskSlice   = aAbdominalMask(:,:,tRoi.SliceNb);
+                                    aMaskSlice(aCurrentMask==1) = 1;
+
+                                    aAbdominalMask(:,:,tRoi.SliceNb) = aMaskSlice;              
+                            end 
                             
                         otherwise
 
@@ -608,16 +799,22 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
         if bContourType == true
 
-            sNrrdUnspecifiedMaskName    = '';
-            sNrrdBoneMaskName           = '';
-            sNrrdSoftTissueMaskName     = '';
-            sNrrdLungMaskName           = '';
-            sNrrdLiverMaskName          = '';
-            sNrrdParotidMaskName        = '';
-            sNrrdBloodPoolMaskName      = '';
-            sNrrdLymphNodesMaskName     = '';
-            sNrrdPrimaryDiseaseMaskName = '';            
-            sNrrdUnknowMaskName         = '';
+            sNrrdUnspecifiedMaskName     = '';
+            sNrrdBoneMaskName            = '';
+            sNrrdSoftTissueMaskName      = '';
+            sNrrdLungMaskName            = '';
+            sNrrdLiverMaskName           = '';
+            sNrrdParotidMaskName         = '';
+            sNrrdBloodPoolMaskName       = '';
+            sNrrdLymphNodesMaskName      = '';
+            sNrrdPrimaryDiseaseMaskName  = '';      
+            sNrrdCervicalMaskName        = '';
+            sNrrdSupraclavicularMaskName = ''; 
+            sNrrdMediastinalMaskName     = ''; 
+            sNrrdParaspinalMaskName      = ''; 
+            sNrrdAxillaryMaskName        = '';
+            sNrrdAbdominalMaskName       = '';            
+            sNrrdUnknowMaskName          = '';
 
             % Unspecified mask 
 
@@ -715,7 +912,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                 clear aLymphNodesMask;
             end
 
-            % primary disease mask
+            % Primary disease mask
 
             if ~isempty(aPrimaryDiseaseMask)
 
@@ -726,6 +923,80 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
                 clear aPrimaryDiseaseMask;
             end           
+
+            % Cervical mask
+
+            if ~isempty(aCervicalMask)
+
+                aCervicalMask = rotateNrrdImage(aCervicalMask);
+
+                sNrrdCervicalMaskName = sprintf('%scervical_mask.nrrd' , sNrrdTmpDir);
+                nrrdWriter(sNrrdCervicalMaskName, squeeze(aCervicalMask), pixelspacing, origin, 'raw'); % Write .nrrd mask 
+
+                clear aCervicalMask;
+            end    
+
+            % Supraclavicular mask
+
+            if ~isempty(aSupraclavicularMask)
+
+                aSupraclavicularMask = rotateNrrdImage(aSupraclavicularMask);
+
+                sNrrdSupraclavicularMaskName = sprintf('%ssupraclavicular_mask.nrrd' , sNrrdTmpDir);
+                nrrdWriter(sNrrdSupraclavicularMaskName, squeeze(aSupraclavicularMask), pixelspacing, origin, 'raw'); % Write .nrrd mask 
+
+                clear aSupraclavicularMask;
+            end  
+
+            % Mediastinal mask
+
+            if ~isempty(aMediastinalMask)
+
+                aMediastinalMask = rotateNrrdImage(aMediastinalMask);
+
+                sNrrdMediastinalMaskName = sprintf('%smediastinal_mask.nrrd' , sNrrdTmpDir);
+                nrrdWriter(sNrrdMediastinalMaskName, squeeze(aMediastinalMask), pixelspacing, origin, 'raw'); % Write .nrrd mask 
+
+                clear aMediastinalMask;
+            end  
+            
+            % Paraspinal mask
+
+            if ~isempty(aParaspinalMask)
+
+                aParaspinalMask = rotateNrrdImage(aParaspinalMask);
+
+                sNrrdParaspinalMaskName = sprintf('%sparaspinal_mask.nrrd' , sNrrdTmpDir);
+                nrrdWriter(sNrrdParaspinalMaskName, squeeze(aParaspinalMask), pixelspacing, origin, 'raw'); % Write .nrrd mask 
+
+                clear aParaspinalMask;
+            end 
+
+            % Axillary mask
+
+            if ~isempty(aAxillaryMask)
+
+                aAxillaryMask = rotateNrrdImage(aAxillaryMask);
+
+                sNrrdAxillaryMaskName = sprintf('%saxillary_mask.nrrd' , sNrrdTmpDir);
+                nrrdWriter(sNrrdAxillaryMaskName, squeeze(aAxillaryMask), pixelspacing, origin, 'raw'); % Write .nrrd mask 
+
+                clear aAxillaryMask;
+            end 
+
+            % Abdominal mask
+
+            if ~isempty(aAbdominalMask)
+
+                aAbdominalMask = rotateNrrdImage(aAbdominalMask);
+
+                sNrrdAbdominalMaskName = sprintf('%sabdominal_mask.nrrd' , sNrrdTmpDir);
+                nrrdWriter(sNrrdAbdominalMaskName, squeeze(aAbdominalMask), pixelspacing, origin, 'raw'); % Write .nrrd mask 
+
+                clear aAbdominalMask;
+            end 
+
+            % Unknow mask
 
             if ~isempty(aUnknowMask)
 
@@ -781,7 +1052,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                     bProgressBarOffset = 1/2;
                 end
                 
-                bProgressBarTypeOffset = bProgressBarOffset/8;
+                bProgressBarTypeOffset = bProgressBarOffset/16;
 
                 sUnspecifiedMaskResultFile = '';
                 sBoneMaskResultFile        = '';
@@ -792,6 +1063,12 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                 sBloodPoolResultFile       = '';
                 sLymphNodesResultFile      = '';
                 sPrimaryDiseaseResultFile  = '';
+                sCervicalResultFile        = '';
+                sSupraclavicularResultFile = ''; 
+                sMediastinalResultFile     = ''; 
+                sParaspinalResultFile      = ''; 
+                sAxillaryResultFile        = '';
+                sAbdominalResultFile       = '';                   
                 sUnknowResultFile          = '';
 
                 % Unspecified
@@ -946,7 +1223,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
                 if ~isempty(sNrrdLymphNodesMaskName)
 
-                    progressBar(bProgressBarOffset+7*bProgressBarTypeOffset, sprintf('Computing radiomics blood pool, it can take several minutes, please be patient.'));
+                    progressBar(bProgressBarOffset+8*bProgressBarTypeOffset, sprintf('Computing radiomics lymph nodes, it can take several minutes, please be patient.'));
     
                     sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
                     writeYamlFile(sParametersFile, tReadiomics, 1);
@@ -963,11 +1240,11 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                     end                      
                 end  
 
-                % primary disease
+                % Primary disease
 
                 if ~isempty(sNrrdPrimaryDiseaseMaskName)
 
-                    progressBar(bProgressBarOffset+7*bProgressBarTypeOffset, sprintf('Computing radiomics blood pool, it can take several minutes, please be patient.'));
+                    progressBar(bProgressBarOffset+9*bProgressBarTypeOffset, sprintf('Computing radiomics primary disease, it can take several minutes, please be patient.'));
     
                     sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
                     writeYamlFile(sParametersFile, tReadiomics, 1);
@@ -983,12 +1260,138 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                         errordlg(sprintf('An error occur during radiomics primary disease extraction: %s', sCmdout), 'Extraction Error');  
                     end                      
                 end  
-                
+
+                % Cervical
+
+                if ~isempty(sNrrdCervicalMaskName)
+
+                    progressBar(bProgressBarOffset+10*bProgressBarTypeOffset, sprintf('Computing radiomics cervical, it can take several minutes, please be patient.'));
+    
+                    sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
+                    writeYamlFile(sParametersFile, tReadiomics, 1);
+    
+                    sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdCervicalMaskName);    
+    
+                    sCervicalResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'CERVICAL_MASK');
+    
+                    [bStatus, sCmdout] = system([sCommandLine ' -o ' sCervicalResultFile ' -p ' sParametersFile]);
+
+                    if bStatus 
+                        progressBar( 1, 'Error: An error occur during radiomics primary disease extraction!');
+                        errordlg(sprintf('An error occur during radiomics primary disease extraction: %s', sCmdout), 'Extraction Error');  
+                    end                      
+                end  
+
+                % Supraclavicular
+
+                if ~isempty(sNrrdSupraclavicularMaskName)
+
+                    progressBar(bProgressBarOffset+11*bProgressBarTypeOffset, sprintf('Computing radiomics supraclavicular, it can take several minutes, please be patient.'));
+    
+                    sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
+                    writeYamlFile(sParametersFile, tReadiomics, 1);
+    
+                    sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdSupraclavicularMaskName);    
+    
+                    sSupraclavicularResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'SUPRACLAVICULAR_MASK');
+    
+                    [bStatus, sCmdout] = system([sCommandLine ' -o ' sSupraclavicularResultFile ' -p ' sParametersFile]);
+
+                    if bStatus 
+                        progressBar( 1, 'Error: An error occur during radiomics primary disease extraction!');
+                        errordlg(sprintf('An error occur during radiomics primary disease extraction: %s', sCmdout), 'Extraction Error');  
+                    end                      
+                end  
+
+                % Mediastinal
+
+                if ~isempty(sNrrdMediastinalMaskName)
+
+                    progressBar(bProgressBarOffset+12*bProgressBarTypeOffset, sprintf('Computing radiomics mediastinal, it can take several minutes, please be patient.'));
+    
+                    sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
+                    writeYamlFile(sParametersFile, tReadiomics, 1);
+    
+                    sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdMediastinalMaskName);    
+    
+                    sMediastinalResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'MEDIASTINAL_MASK');
+    
+                    [bStatus, sCmdout] = system([sCommandLine ' -o ' sMediastinalResultFile ' -p ' sParametersFile]);
+
+                    if bStatus 
+                        progressBar( 1, 'Error: An error occur during radiomics primary disease extraction!');
+                        errordlg(sprintf('An error occur during radiomics primary disease extraction: %s', sCmdout), 'Extraction Error');  
+                    end                      
+                end 
+
+                % Paraspinal
+
+                if ~isempty(sNrrdParaspinalMaskName)
+
+                    progressBar(bProgressBarOffset+13*bProgressBarTypeOffset, sprintf('Computing radiomics paraspinal, it can take several minutes, please be patient.'));
+    
+                    sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
+                    writeYamlFile(sParametersFile, tReadiomics, 1);
+    
+                    sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdParaspinalMaskName);    
+    
+                    sParaspinalResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'PARASPINAL_MASK');
+    
+                    [bStatus, sCmdout] = system([sCommandLine ' -o ' sParaspinalResultFile ' -p ' sParametersFile]);
+
+                    if bStatus 
+                        progressBar( 1, 'Error: An error occur during radiomics primary disease extraction!');
+                        errordlg(sprintf('An error occur during radiomics primary disease extraction: %s', sCmdout), 'Extraction Error');  
+                    end                      
+                end 
+
+                % Axillary
+
+                if ~isempty(sNrrdAxillaryMaskName)
+
+                    progressBar(bProgressBarOffset+14*bProgressBarTypeOffset, sprintf('Computing radiomics axillary, it can take several minutes, please be patient.'));
+    
+                    sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
+                    writeYamlFile(sParametersFile, tReadiomics, 1);
+    
+                    sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdAxillaryMaskName);    
+    
+                    sAxillaryResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'AXILLARY_MASK');
+    
+                    [bStatus, sCmdout] = system([sCommandLine ' -o ' sAxillaryResultFile ' -p ' sParametersFile]);
+
+                    if bStatus 
+                        progressBar( 1, 'Error: An error occur during radiomics primary disease extraction!');
+                        errordlg(sprintf('An error occur during radiomics primary disease extraction: %s', sCmdout), 'Extraction Error');  
+                    end                      
+                end 
+
+                % Abdominal
+
+                if ~isempty(sNrrdAbdominalMaskName)
+
+                    progressBar(bProgressBarOffset+15*bProgressBarTypeOffset, sprintf('Computing radiomics abdominal, it can take several minutes, please be patient.'));
+    
+                    sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
+                    writeYamlFile(sParametersFile, tReadiomics, 1);
+    
+                    sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdAbdominalMaskName);    
+    
+                    sAbdominalResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'ABDOMINAL_MASK');
+    
+                    [bStatus, sCmdout] = system([sCommandLine ' -o ' sAbdominalResultFile ' -p ' sParametersFile]);
+
+                    if bStatus 
+                        progressBar( 1, 'Error: An error occur during radiomics primary disease extraction!');
+                        errordlg(sprintf('An error occur during radiomics primary disease extraction: %s', sCmdout), 'Extraction Error');  
+                    end                      
+                end  
+
                 % Unknow
 
                 if ~isempty(sNrrdUnknowMaskName)
 
-                    progressBar(bProgressBarOffset+7*bProgressBarTypeOffset, sprintf('Computing radiomics unknow, it can take several minutes, please be patient.'));
+                    progressBar(bProgressBarOffset+16*bProgressBarTypeOffset, sprintf('Computing radiomics unknow, it can take several minutes, please be patient.'));
     
                     sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
                     writeYamlFile(sParametersFile, tReadiomics, 1);
@@ -1387,7 +1790,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                     writetable(cCombineTable, sXlsFileName, 'Sheet', 'LYMPH_NODES-LESIONS', 'WriteVariableNames', false);                      
                 end
 
-                % primary disease lesions
+                % Primary disease lesions
 
                 if ~isempty(sPrimaryDiseaseResultFile)
 
@@ -1423,6 +1826,234 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                     cCombineTable = cell2table([cTempTable; cCurrenTable]);
     
                     writetable(cCombineTable, sXlsFileName, 'Sheet', 'PRIMARY_DISEASE-LESIONS', 'WriteVariableNames', false);                      
+                end
+
+                % Cervical lesions
+
+                if ~isempty(sCervicalResultFile)
+
+                    current_table = readtable(sCervicalResultFile); 
+    
+                    current_table.(1) = [];
+        
+                    aCurrentTableSize = size(current_table);
+                    aPatientHeaderSize = size(asPatientInfoHeader);
+    
+                    cCurrenTable = table2cell(current_table);
+    
+                    if aCurrentTableSize(2) == 3
+                        cTempTable = cell(aCurrentTableSize(1), 4);
+                        for spl=1:aCurrentTableSize(1)
+                            cTempTable(spl,1:3) = cCurrenTable(spl,1:3);
+                            asSpLit = strsplit(cCurrenTable{spl,3},':');
+                            
+                            if numel(asSpLit) == 2
+                                cTempTable{spl,3}=asSpLit{1};
+                                cTempTable{spl,4}=asSpLit{2};
+                            end
+                        end
+                        cCurrenTable = cTempTable;
+                        aCurrentTableSize = size(cTempTable);
+                    end
+    
+                    cTempTable = cell(aPatientHeaderSize(1), aCurrentTableSize(2));
+    
+                    cTempTable(1:aPatientHeaderSize(1),1)=asPatientInfoHeader(1:aPatientHeaderSize(1),1);
+                    cTempTable(1:aPatientHeaderSize(1),2)=asPatientInfoHeader(1:aPatientHeaderSize(1),2);
+    
+                    cCombineTable = cell2table([cTempTable; cCurrenTable]);
+    
+                    writetable(cCombineTable, sXlsFileName, 'Sheet', 'CERVICAL-LESIONS', 'WriteVariableNames', false);                      
+                end
+
+                % Supraclavicular lesions
+
+                if ~isempty(sSupraclavicularResultFile)
+
+                    current_table = readtable(sSupraclavicularResultFile); 
+    
+                    current_table.(1) = [];
+        
+                    aCurrentTableSize = size(current_table);
+                    aPatientHeaderSize = size(asPatientInfoHeader);
+    
+                    cCurrenTable = table2cell(current_table);
+    
+                    if aCurrentTableSize(2) == 3
+                        cTempTable = cell(aCurrentTableSize(1), 4);
+                        for spl=1:aCurrentTableSize(1)
+                            cTempTable(spl,1:3) = cCurrenTable(spl,1:3);
+                            asSpLit = strsplit(cCurrenTable{spl,3},':');
+                            
+                            if numel(asSpLit) == 2
+                                cTempTable{spl,3}=asSpLit{1};
+                                cTempTable{spl,4}=asSpLit{2};
+                            end
+                        end
+                        cCurrenTable = cTempTable;
+                        aCurrentTableSize = size(cTempTable);
+                    end
+    
+                    cTempTable = cell(aPatientHeaderSize(1), aCurrentTableSize(2));
+    
+                    cTempTable(1:aPatientHeaderSize(1),1)=asPatientInfoHeader(1:aPatientHeaderSize(1),1);
+                    cTempTable(1:aPatientHeaderSize(1),2)=asPatientInfoHeader(1:aPatientHeaderSize(1),2);
+    
+                    cCombineTable = cell2table([cTempTable; cCurrenTable]);
+    
+                    writetable(cCombineTable, sXlsFileName, 'Sheet', 'SUPRACLAVICULAR-LESIONS', 'WriteVariableNames', false);                      
+                end
+
+                % Mediastinal lesions
+
+                if ~isempty(sMediastinalResultFile)
+
+                    current_table = readtable(sMediastinalResultFile); 
+    
+                    current_table.(1) = [];
+        
+                    aCurrentTableSize = size(current_table);
+                    aPatientHeaderSize = size(asPatientInfoHeader);
+    
+                    cCurrenTable = table2cell(current_table);
+    
+                    if aCurrentTableSize(2) == 3
+                        cTempTable = cell(aCurrentTableSize(1), 4);
+                        for spl=1:aCurrentTableSize(1)
+                            cTempTable(spl,1:3) = cCurrenTable(spl,1:3);
+                            asSpLit = strsplit(cCurrenTable{spl,3},':');
+                            
+                            if numel(asSpLit) == 2
+                                cTempTable{spl,3}=asSpLit{1};
+                                cTempTable{spl,4}=asSpLit{2};
+                            end
+                        end
+                        cCurrenTable = cTempTable;
+                        aCurrentTableSize = size(cTempTable);
+                    end
+    
+                    cTempTable = cell(aPatientHeaderSize(1), aCurrentTableSize(2));
+    
+                    cTempTable(1:aPatientHeaderSize(1),1)=asPatientInfoHeader(1:aPatientHeaderSize(1),1);
+                    cTempTable(1:aPatientHeaderSize(1),2)=asPatientInfoHeader(1:aPatientHeaderSize(1),2);
+    
+                    cCombineTable = cell2table([cTempTable; cCurrenTable]);
+    
+                    writetable(cCombineTable, sXlsFileName, 'Sheet', 'MEDIASTINAL-LESIONS', 'WriteVariableNames', false);                      
+                end
+
+                % Paraspinal lesions
+
+                if ~isempty(sParaspinalResultFile)
+
+                    current_table = readtable(sParaspinalResultFile); 
+    
+                    current_table.(1) = [];
+        
+                    aCurrentTableSize = size(current_table);
+                    aPatientHeaderSize = size(asPatientInfoHeader);
+    
+                    cCurrenTable = table2cell(current_table);
+    
+                    if aCurrentTableSize(2) == 3
+                        cTempTable = cell(aCurrentTableSize(1), 4);
+                        for spl=1:aCurrentTableSize(1)
+                            cTempTable(spl,1:3) = cCurrenTable(spl,1:3);
+                            asSpLit = strsplit(cCurrenTable{spl,3},':');
+                            
+                            if numel(asSpLit) == 2
+                                cTempTable{spl,3}=asSpLit{1};
+                                cTempTable{spl,4}=asSpLit{2};
+                            end
+                        end
+                        cCurrenTable = cTempTable;
+                        aCurrentTableSize = size(cTempTable);
+                    end
+    
+                    cTempTable = cell(aPatientHeaderSize(1), aCurrentTableSize(2));
+    
+                    cTempTable(1:aPatientHeaderSize(1),1)=asPatientInfoHeader(1:aPatientHeaderSize(1),1);
+                    cTempTable(1:aPatientHeaderSize(1),2)=asPatientInfoHeader(1:aPatientHeaderSize(1),2);
+    
+                    cCombineTable = cell2table([cTempTable; cCurrenTable]);
+    
+                    writetable(cCombineTable, sXlsFileName, 'Sheet', 'PARASPINAL-LESIONS', 'WriteVariableNames', false);                      
+                end
+
+                % Axillary lesions
+
+                if ~isempty(sAxillaryResultFile)
+
+                    current_table = readtable(sAxillaryResultFile); 
+    
+                    current_table.(1) = [];
+        
+                    aCurrentTableSize = size(current_table);
+                    aPatientHeaderSize = size(asPatientInfoHeader);
+    
+                    cCurrenTable = table2cell(current_table);
+    
+                    if aCurrentTableSize(2) == 3
+                        cTempTable = cell(aCurrentTableSize(1), 4);
+                        for spl=1:aCurrentTableSize(1)
+                            cTempTable(spl,1:3) = cCurrenTable(spl,1:3);
+                            asSpLit = strsplit(cCurrenTable{spl,3},':');
+                            
+                            if numel(asSpLit) == 2
+                                cTempTable{spl,3}=asSpLit{1};
+                                cTempTable{spl,4}=asSpLit{2};
+                            end
+                        end
+                        cCurrenTable = cTempTable;
+                        aCurrentTableSize = size(cTempTable);
+                    end
+    
+                    cTempTable = cell(aPatientHeaderSize(1), aCurrentTableSize(2));
+    
+                    cTempTable(1:aPatientHeaderSize(1),1)=asPatientInfoHeader(1:aPatientHeaderSize(1),1);
+                    cTempTable(1:aPatientHeaderSize(1),2)=asPatientInfoHeader(1:aPatientHeaderSize(1),2);
+    
+                    cCombineTable = cell2table([cTempTable; cCurrenTable]);
+    
+                    writetable(cCombineTable, sXlsFileName, 'Sheet', 'AXILLARY-LESIONS', 'WriteVariableNames', false);                      
+                end
+
+                % Abdominal lesions
+
+                if ~isempty(sAbdominalResultFile)
+
+                    current_table = readtable(sAbdominalResultFile); 
+    
+                    current_table.(1) = [];
+        
+                    aCurrentTableSize = size(current_table);
+                    aPatientHeaderSize = size(asPatientInfoHeader);
+    
+                    cCurrenTable = table2cell(current_table);
+    
+                    if aCurrentTableSize(2) == 3
+                        cTempTable = cell(aCurrentTableSize(1), 4);
+                        for spl=1:aCurrentTableSize(1)
+                            cTempTable(spl,1:3) = cCurrenTable(spl,1:3);
+                            asSpLit = strsplit(cCurrenTable{spl,3},':');
+                            
+                            if numel(asSpLit) == 2
+                                cTempTable{spl,3}=asSpLit{1};
+                                cTempTable{spl,4}=asSpLit{2};
+                            end
+                        end
+                        cCurrenTable = cTempTable;
+                        aCurrentTableSize = size(cTempTable);
+                    end
+    
+                    cTempTable = cell(aPatientHeaderSize(1), aCurrentTableSize(2));
+    
+                    cTempTable(1:aPatientHeaderSize(1),1)=asPatientInfoHeader(1:aPatientHeaderSize(1),1);
+                    cTempTable(1:aPatientHeaderSize(1),2)=asPatientInfoHeader(1:aPatientHeaderSize(1),2);
+    
+                    cCombineTable = cell2table([cTempTable; cCurrenTable]);
+    
+                    writetable(cCombineTable, sXlsFileName, 'Sheet', 'ABDOMINAL-LESIONS', 'WriteVariableNames', false);                      
                 end
 
                 % Unknow lesions
@@ -1463,8 +2094,6 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                     writetable(cCombineTable, sXlsFileName, 'Sheet', 'UNKNOW-LESIONS', 'WriteVariableNames', false);                          
                 end
             end
-
-
 
             bFirstLoop = true;
             for vv=dVoiOffset:dNbVois        

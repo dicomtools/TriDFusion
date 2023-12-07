@@ -104,6 +104,26 @@ function aMask = getTotalSegmentorWholeBodyMask(sSegmentationFolderName, aMask)
         end
     end
 
+    % New classes in V2
+    
+    asV2BoneList = {
+    'skull.nii.gz',... 
+    'sternum.nii.gz',...
+    'costal_cartilages.nii.gz'};
+
+    for bb=1:numel(asV2BoneList)
+
+        sNiiFileName = sprintf('%s%s', sSegmentationFolderName, asV2BoneList{bb});  
+
+        if exist(sNiiFileName, 'file')
+
+            nii = nii_tool('load', sNiiFileName);
+            aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
+
+            aMask(aObjectMask~=0)=1;
+        end
+    end
+
     clear aObjectMask;
     clear nii;
 

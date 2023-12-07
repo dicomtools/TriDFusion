@@ -2119,35 +2119,48 @@ function machineLearningSegmentationDialog(sSegmentatorScript, sSegmentatorCombi
 
                     switch lower(sObjectName)
 
-                        case 'heart' % heart need to be combined
+                        case 'heart' % heart exist
 
                             xmin=0.5;
                             xmax=1;
                             aColor=xmin+rand(1,3)*(xmax-xmin);
 
-                            sNiiFileName = 'combined_heart.nii.gz';
+                            sNiiFileName = 'heart.nii.gz';
+                            sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
+
+                            if exist(sNiiFileName, 'file')
+
+                                nii = nii_tool('load', sNiiFileName);
+                                aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
+                                aMask = aMask(:,:,end:-1:1);
+
+                                maskToVoi(aMask, asCardiovascularName{bb}, 'Unspecified', aColor, 'axial', dSerieOffset, pixelEdge('get'));                               
+
+                            else % heart need to be combined
     
-                            sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m heart', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
+                                sNiiFileName = 'combined_heart.nii.gz';
+        
+                                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m heart', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
+                    
+                                [bStatus, sCmdout] = system(sCommandLine);
+        
+                                if bStatus 
+                                    progressBar( 1, 'Error: An error occur during heart combine mask!');
+                                    errordlg(sprintf('An error occur during heart combine mask: %s', sCmdout), 'Segmentation Error');  
+                                else % Process succeed
+        
+                                    sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
+                                    
+                                    if exist(sNiiFileName, 'file')
+                                        nii = nii_tool('load', sNiiFileName);
+                                        aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
+                                        aMask = aMask(:,:,end:-1:1);
+    
+                                        maskToVoi(aMask, asCardiovascularName{bb}, 'Unspecified', aColor, 'axial', dSerieOffset, pixelEdge('get'));
+                                   end
                 
-                            [bStatus, sCmdout] = system(sCommandLine);
-    
-                            if bStatus 
-                                progressBar( 1, 'Error: An error occur during heart combine mask!');
-                                errordlg(sprintf('An error occur during heart combine mask: %s', sCmdout), 'Segmentation Error');  
-                            else % Process succeed
-    
-                                sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                                
-                                if exist(sNiiFileName, 'file')
-                                    nii = nii_tool('load', sNiiFileName);
-                                    aMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
-                                    aMask = aMask(:,:,end:-1:1);
-
-                                    maskToVoi(aMask, asCardiovascularName{bb}, 'Unspecified', aColor, 'axial', dSerieOffset, pixelEdge('get'));
-                               end
-            
+                                end
                             end
-
                         otherwise
 
                             xmin=0.5;

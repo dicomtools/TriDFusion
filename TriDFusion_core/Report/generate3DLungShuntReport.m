@@ -807,8 +807,10 @@ function generate3DLungShuntReport(bInitReport)
     rectangle(axeProceedLiverVolumeOversize, 'position', [0 0 1 1], 'EdgeColor', [0.75 0.75 0.75]);
 
     mReportFile = uimenu(fig3DLungShuntReport,'Label','File');
-    uimenu(mReportFile,'Label', 'Export to .pdf...','Callback', @exportCurrentLungLiverReportToPdfCallback);
-    uimenu(mReportFile,'Label', 'Export to DICOM print...','Callback', @exportCurrentLungLiverReportToDicomCallback);
+    uimenu(mReportFile,'Label', 'Export report to .pdf...'             ,'Callback', @exportCurrentLungLiverReportToPdfCallback);
+    uimenu(mReportFile,'Label', 'Export report to DICOM print...'      ,'Callback', @exportCurrentLungLiverReportToDicomCallback);
+    uimenu(mReportFile,'Label', 'Export axial slices to .avi...'       ,'Callback', @exportCurrentLungLiverAxialSlicesToAviCallback, 'Separator','on');
+    uimenu(mReportFile,'Label', 'Export axial slices to DICOM movie...','Callback', @exportCurrentLungLiverAxialSlicesToDicomMovieCallback);
     uimenu(mReportFile,'Label', 'Close' ,'Callback', 'close', 'Separator','on');
 
     mReportEdit = uimenu(fig3DLungShuntReport,'Label','Edit');
@@ -1746,11 +1748,15 @@ function generate3DLungShuntReport(bInitReport)
     end
 
     function exportCurrentLungLiverReportToPdfCallback(~, ~)
-        
-        atMetaData = dicomMetaData('get');
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+   
+        atMetaData = dicomMetaData('get', [], dSeriesOffset);
        
         try
-       
+
+ %         fig3DLungShuntReport = fig3DLungShuntReportPtr('get');
+      
         filter = {'*.pdf'};
 
         sCurrentDir  = viewerRootPath('get');
@@ -1836,6 +1842,191 @@ function generate3DLungShuntReport(bInitReport)
         drawnow;        
     end
     
+    function exportCurrentLungLiverAxialSlicesToAviCallback(~, ~)
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        atMetaData = dicomMetaData('get', [], dSeriesOffset);
+
+        bMipPlayback = playback2DMipOnly('get');
+
+        dAxialSliceNumber = sliceNumber('get', 'axial');
+
+        try
+
+ %         fig3DLungShuntReport = fig3DLungShuntReportPtr('get');
+      
+        filter = {'*.avi'};
+
+        sCurrentDir  = viewerRootPath('get');
+
+        sMatFile = [sCurrentDir '/' 'lastReportDir.mat'];
+        
+        % load last data directory
+        if exist(sMatFile, 'file')
+                        % lastDirMat mat file exists, load it
+            load(sMatFile, 'saveReportLastUsedDir');
+
+            if exist('saveReportLastUsedDir', 'var')
+               sCurrentDir = saveReportLastUsedDir;
+            end
+
+            if sCurrentDir == 0
+                sCurrentDir = pwd;
+            end
+        end
+            
+     %   sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
+
+        % Series Date 
+        
+        sSeriesDate = atMetaData{1}.SeriesDate;
+        
+        if isempty(sSeriesDate)
+            sSeriesDate = '-';
+        else
+            sSeriesDate = datetime(sSeriesDate,'InputFormat','yyyyMMdd');
+        end
+
+        [file, path] = uiputfile(filter, 'Save 3D SPECT lung shunt axial slices', sprintf('%s/3D LSF %s_%s_%s_%s_LUNG_SHUNT_AXIAL_SLICES_TriDFusion.avi' , ...
+            sCurrentDir, cleanString(atMetaData{1}.PatientName), cleanString(atMetaData{1}.PatientID), cleanString(atMetaData{1}.SeriesDescription), sSeriesDate) );
+
+        set(fig3DLungShuntReport, 'Pointer', 'watch');
+        drawnow;
+
+        if file ~= 0
+
+            try
+                saveReportLastUsedDir = path;
+                save(sMatFile, 'saveReportLastUsedDir');
+            catch
+                progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
+            end 
+
+            sFileName = sprintf('%s%s', path, file);
+            
+            if exist(sFileName, 'file')
+                delete(sFileName);
+            end
+                
+            if ~contains(file, '.avi')
+                file = [file, '.avi'];
+            end
+
+            playback2DMipOnly('set', false);
+
+            sliceNumber('set', 'axial', size(dicomBuffer('get', [], dSeriesOffset), 3));
+
+            multiFrameRecord('set', true);
+
+            set(recordIconMenuObject('get'), 'State', 'on');
+
+            recordMultiFrame(recordIconMenuObject('get'), path, file, 'avi', axes3Ptr('get', [], dSeriesOffset));
+
+        end
+        
+        catch
+            progressBar( 1 , 'Error: exportCurrentLungLiverAxialSlicesToAviCallback() cant export report' );
+        end
+
+        playback2DMipOnly('set', bMipPlayback);
+        
+        multiFrameRecord('set', false);
+
+        set(recordIconMenuObject('get'), 'State', 'off');
+
+        sliceNumber('set', 'axial', dAxialSliceNumber);
+
+        sliderTraCallback();  
+
+        set(fig3DLungShuntReport, 'Pointer', 'default');
+        drawnow;          
+    end
+
+    function exportCurrentLungLiverAxialSlicesToDicomMovieCallback(~, ~)
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        bMipPlayback = playback2DMipOnly('get');
+
+        dAxialSliceNumber = sliceNumber('get', 'axial');
+
+        try
+
+%         fig3DLungShuntReport = fig3DLungShuntReportPtr('get');
+    
+        sOutDir = outputDir('get');
+    
+        if isempty(sOutDir)
+            
+            sCurrentDir  = viewerRootPath('get');
+    
+            sMatFile = [sCurrentDir '/' 'lastWriteDicomDir.mat'];
+            % load last data directory
+            if exist(sMatFile, 'file')
+                                        % lastDirMat mat file exists, load it
+               load('-mat', sMatFile);
+               if exist('exportDicomLastUsedDir', 'var')
+                   sCurrentDir = exportDicomLastUsedDir;
+               end
+               if sCurrentDir == 0
+                   sCurrentDir = pwd;
+               end
+            end
+    
+            sOutDir = uigetdir(sCurrentDir);
+            if sOutDir == 0
+                return;
+            end
+            sOutDir = [sOutDir '/'];
+    
+            sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                
+            sWriteDir = char(sOutDir) + "TriDFusion_MFSC_" + char(sDate) + '/';              
+            if ~(exist(char(sWriteDir), 'dir'))
+                mkdir(char(sWriteDir));
+            end
+            
+            try
+                exportDicomLastUsedDir = sOutDir;
+                save(sMatFile, 'exportDicomLastUsedDir');
+            catch
+                progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
+            end   
+        end    
+    
+        set(fig3DLungShuntReport, 'Pointer', 'watch');
+        drawnow;
+
+        playback2DMipOnly('set', false);
+
+        sliceNumber('set', 'axial', size(dicomBuffer('get', [], dSeriesOffset), 3));
+
+        multiFrameRecord('set', true);
+
+        set(recordIconMenuObject('get'), 'State', 'on');
+
+        recordMultiFrame(recordIconMenuObject('get'), sOutDir, [], 'dcm', axes3Ptr('get', [], dSeriesOffset));
+
+%         objectToDicomJpg(sWriteDir, fig3DLungShuntReport, '3DF MFSC', get(uiSeriesPtr('get'), 'Value'))
+    
+        catch
+            progressBar( 1 , 'Error: exportCurrentLungLiverAxialSlicesToDicomMovieCallback() cant export report' );
+        end
+
+        playback2DMipOnly('set', bMipPlayback);
+        
+        multiFrameRecord('set', false);
+
+        set(recordIconMenuObject('get'), 'State', 'off');
+
+        sliceNumber('set', 'axial', dAxialSliceNumber);
+
+        sliderTraCallback();      
+
+        set(fig3DLungShuntReport, 'Pointer', 'default');
+        drawnow;     
+    end
+
     function copyLungLiverReportDisplayCallback(~, ~)
 
         try

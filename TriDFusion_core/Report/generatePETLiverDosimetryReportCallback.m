@@ -201,7 +201,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                  'Units'   , 'pixels',...
                  'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-70 ...
                               FIG_REPORT_Y-460 ...
-                              445 ...
+                              450 ...
                               320 ...
                               ],...
                 'Visible', 'on', ...
@@ -445,8 +445,10 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                   );
 
     mReportFile = uimenu(figPETLiverDosimetryReport,'Label','File');
-    uimenu(mReportFile,'Label', 'Export to .pdf...','Callback', @exportCurrentPETLiverDosimetryReportToPdfCallback);
-    uimenu(mReportFile,'Label', 'Export to DICOM print...','Callback', @exportCurrentPETLiverDosimetryReportToDicomCallback);
+    uimenu(mReportFile,'Label', 'Export report to .pdf...'             , 'Callback', @exportCurrentPETLiverDosimetryReportToPdfCallback);
+    uimenu(mReportFile,'Label', 'Export report to DICOM print...'      , 'Callback', @exportCurrentPETLiverDosimetryReportToDicomCallback);
+    uimenu(mReportFile,'Label', 'Export axial slices to .avi...'       , 'Callback', @exportCurrentPETLiverDosimetryAxialSlicesToAviCallback, 'Separator','on');
+    uimenu(mReportFile,'Label', 'Export axial slices to DICOM movie...', 'Callback', @exportCurrentPETLiverDosimetryAxialSlicesToDicomMovieCallback);
     uimenu(mReportFile,'Label', 'Close' ,'Callback', 'close', 'Separator','on');
 
     mReportEdit = uimenu(figPETLiverDosimetryReport,'Label','Edit');
@@ -664,7 +666,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
         if atInput(dSeriesOffset).bDoseKernel == true
             sUnit =  'Dose';
         else
-            sUnit =  '';
+            sUnit =  'NaN';
         end 
     end
 
@@ -673,11 +675,14 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 %        sReport = sprintf('%s\n___________', char('Summary'));      
         sReport = ''; 
         for ll=1:numel(gasOrganList)
+
             if numel(gasOrganList{ll}) > 18
+
                 sName = gasOrganList{ll}(1:18);
             else
                 sName = gasOrganList{ll};                
             end
+
             sReport = sprintf('%s%s\n\n', sReport, sName);
         end       
     end
@@ -687,9 +692,9 @@ function generatePETLiverDosimetryReportCallback(~, ~)
         if strcmpi(sAction, 'init')
 %            sReport = sprintf('%s\n___________', '-');      
             sReport = ''; 
-            for ll=1:numel(gasOrganList)
-                sReport = sprintf('%s%s\n\n', sReport, '-');
-            end       
+%             for ll=1:numel(gasOrganList)
+%                 sReport = sprintf('%s%s\n\n', sReport, '-');
+%             end       
         else
             
 %            if ~isempty(tReport.All.Mean)
@@ -703,14 +708,16 @@ function generatePETLiverDosimetryReportCallback(~, ~)
             if ~isempty(tReport.Liver.Mean)
                 sReport = sprintf('%s%-12s\n\n', sReport, num2str(tReport.Liver.Mean));
             else
-                sReport = sprintf('%s\n\n%s', sReport, '-');
+                sReport = sprintf('%s\n\n%s', sReport, ' ');
             end     
 
             for jj=1:numel(tReport.Other)
+
                 if ~isempty(tReport.Other{jj}.Mean)
-                    sReport = sprintf('%s%-12s\n\n', sReport, num2str(tReport.Other{jj}.Mean));
+
+                    sReport = sprintf('%s%12s\n\n', sReport, num2str(tReport.Other{jj}.Mean));
                 else
-                    sReport = sprintf('%s\n\n%s', sReport, '-');
+                    sReport = sprintf('%s\n\n%s', sReport, ' ');
                 end                             
             end
             
@@ -722,9 +729,9 @@ function generatePETLiverDosimetryReportCallback(~, ~)
         if strcmpi(sAction, 'init')
           %  sReport = sprintf('%s\n___________', '-');      
            sReport = ''; 
-           for ll=1:numel(gasOrganList)
-                sReport = sprintf('%s%s\n\n', sReport, '-');
-            end       
+%            for ll=1:numel(gasOrganList)
+%                 sReport = sprintf('%s%s\n\n', sReport, '-');
+%             end       
         else
             
 %            if ~isempty(tReport.All.Max)
@@ -736,16 +743,19 @@ function generatePETLiverDosimetryReportCallback(~, ~)
             sReport = ''; 
 
             if ~isempty(tReport.Liver.Max)
+
                 sReport = sprintf('%s%-12s\n\n', sReport, num2str(tReport.Liver.Max));
             else
-                sReport = sprintf('%s\n\n%s', sReport, '-');
+                sReport = sprintf('%s\n\n%s', sReport, ' ');
             end     
 
             for jj=1:numel(tReport.Other)
+
                 if ~isempty(tReport.Other{jj}.Max)
-                    sReport = sprintf('%s%-12s\n\n', sReport, num2str(tReport.Other{jj}.Max));
+
+                    sReport = sprintf('%s%12s\n\n', sReport, num2str(tReport.Other{jj}.Max));
                 else
-                    sReport = sprintf('%s\n\n%s', sReport, '-');
+                    sReport = sprintf('%s\n\n%s', sReport, ' ');
                 end                             
             end
             
@@ -757,9 +767,9 @@ function generatePETLiverDosimetryReportCallback(~, ~)
         if strcmpi(sAction, 'init')
 %            sReport = sprintf('%s\n___________', '-');      
             sReport = ''; 
-            for ll=1:numel(gasOrganList)
-                sReport = sprintf('%s%s\n\n', sReport, '-');
-            end       
+%             for ll=1:numel(gasOrganList)
+%                 sReport = sprintf('%s%s\n\n', sReport, '-');
+%             end       
         else
             
 %            if ~isempty(tReport.All.Volume)
@@ -771,16 +781,19 @@ function generatePETLiverDosimetryReportCallback(~, ~)
             sReport = ''; 
 
             if ~isempty(tReport.Liver.Volume)
-                sReport = sprintf('%s%-12s\n\n', sReport, num2str(tReport.Liver.Volume));
-            else
-                sReport = sprintf('%s\n\n%s', sReport, '-');
+
+                sReport = sprintf('%s%12s\n\n', sReport, num2str(tReport.Liver.Volume));
+             else
+                 sReport = sprintf('%s\n\n%s', sReport, ' ');
             end     
 
             for jj=1:numel(tReport.Other)
+
                 if ~isempty(tReport.Other{jj}.Volume)
-                    sReport = sprintf('%s%-12s\n\n', sReport, num2str(tReport.Other{jj}.Volume));
-                else
-                    sReport = sprintf('%s\n\n%s', sReport, '-');
+
+                    sReport = sprintf('%s%12s\n\n', sReport, num2str(tReport.Other{jj}.Volume));
+                 else
+                     sReport = sprintf('%s\n\n%s', sReport, ' ');
                 end                             
             end
            
@@ -1206,8 +1219,10 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 
     function exportCurrentPETLiverDosimetryReportToPdfCallback(~, ~)
         
-        atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
-       
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+        
+        atMetaData = dicomMetaData('get', [], dSeriesOffset);    
+
         try
        
         filter = {'*.pdf'};
@@ -1240,7 +1255,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
             sSeriesDate = datetime(sSeriesDate,'InputFormat','yyyyMMdd');
         end
 
-        [file, path] = uiputfile(filter, 'Save PET Y90 liver dosimetry report', sprintf('%s/%s_%s_%s_%s_Y90_LIVER_REPORT_TriDFusion.pdf' , ...
+        [file, path] = uiputfile(filter, 'Save PET Y90 liver dosimetry report', sprintf('%s/%s_%s_%s_%s_Y90_LIVER_DOSIMETRY_REPORT_TriDFusion.pdf' , ...
             sCurrentDir, cleanString(atMetaData{1}.PatientName), cleanString(atMetaData{1}.PatientID), cleanString(atMetaData{1}.SeriesDescription), sSeriesDate) );
 
         set(figPETLiverDosimetryReport, 'Pointer', 'watch');
@@ -1293,7 +1308,192 @@ function generatePETLiverDosimetryReportCallback(~, ~)
         set(figPETLiverDosimetryReport, 'Pointer', 'default');
         drawnow;        
     end
+
+    function exportCurrentPETLiverDosimetryAxialSlicesToAviCallback(~, ~)
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        atMetaData = dicomMetaData('get', [], dSeriesOffset);
+
+        bMipPlayback = playback2DMipOnly('get');
+
+        dAxialSliceNumber = sliceNumber('get', 'axial');
+
+        try
+
+    %         figPETLiverDosimetryReport = figPETLiverDosimetryReportPtr('get');
+   
+        filter = {'*.avi'};
+
+        sCurrentDir  = viewerRootPath('get');
+
+        sMatFile = [sCurrentDir '/' 'lastReportDir.mat'];
+        
+        % load last data directory
+        if exist(sMatFile, 'file')
+                        % lastDirMat mat file exists, load it
+            load(sMatFile, 'saveReportLastUsedDir');
+
+            if exist('saveReportLastUsedDir', 'var')
+               sCurrentDir = saveReportLastUsedDir;
+            end
+
+            if sCurrentDir == 0
+                sCurrentDir = pwd;
+            end
+        end
+            
+     %   sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
+
+        % Series Date 
+        
+        sSeriesDate = atMetaData{1}.SeriesDate;
+        
+        if isempty(sSeriesDate)
+            sSeriesDate = '-';
+        else
+            sSeriesDate = datetime(sSeriesDate,'InputFormat','yyyyMMdd');
+        end
+
+        [file, path] = uiputfile(filter, 'Save PET Y90 liver dosimetry axial slices', sprintf('%s/%s_%s_%s_%s_LIVER_DOSIMETRY_AXIAL_SLICES_TriDFusion.avi' , ...
+            sCurrentDir, cleanString(atMetaData{1}.PatientName), cleanString(atMetaData{1}.PatientID), cleanString(atMetaData{1}.SeriesDescription), sSeriesDate) );
+
+        set(figPETLiverDosimetryReport, 'Pointer', 'watch');
+        drawnow;
+
+        if file ~= 0
+
+            try
+                saveReportLastUsedDir = path;
+                save(sMatFile, 'saveReportLastUsedDir');
+            catch
+                progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
+            end 
+
+            sFileName = sprintf('%s%s', path, file);
+            
+            if exist(sFileName, 'file')
+                delete(sFileName);
+            end
+                
+            if ~contains(file, '.avi')
+                file = [file, '.avi'];
+            end
+
+            playback2DMipOnly('set', false);
+
+            sliceNumber('set', 'axial', size(dicomBuffer('get', [], dSeriesOffset), 3));
+
+            multiFrameRecord('set', true);
+
+            set(recordIconMenuObject('get'), 'State', 'on');
+
+            recordMultiFrame(recordIconMenuObject('get'), path, file, 'avi', axes3Ptr('get', [], dSeriesOffset));
+
+        end
+        
+        catch
+            progressBar( 1 , 'Error: exportCurrentPETLiverDosimetryAxialSlicesToAviCallback() cant export report' );
+        end
+
+        playback2DMipOnly('set', bMipPlayback);
+        
+        multiFrameRecord('set', false);
+
+        set(recordIconMenuObject('get'), 'State', 'off');
+
+        sliceNumber('set', 'axial', dAxialSliceNumber);
+
+        sliderTraCallback();
+
+        set(figPETLiverDosimetryReport, 'Pointer', 'default');
+        drawnow;          
+    end
+
+    function exportCurrentPETLiverDosimetryAxialSlicesToDicomMovieCallback(~, ~)
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        bMipPlayback = playback2DMipOnly('get');
+
+        dAxialSliceNumber = sliceNumber('get', 'axial');
+
+        try
     
+%         figPETLiverDosimetryReport = figPETLiverDosimetryReportPtr('get');
+    
+        sOutDir = outputDir('get');
+    
+        if isempty(sOutDir)
+            
+            sCurrentDir  = viewerRootPath('get');
+    
+            sMatFile = [sCurrentDir '/' 'lastWriteDicomDir.mat'];
+            % load last data directory
+            if exist(sMatFile, 'file')
+                                        % lastDirMat mat file exists, load it
+               load('-mat', sMatFile);
+               if exist('exportDicomLastUsedDir', 'var')
+                   sCurrentDir = exportDicomLastUsedDir;
+               end
+               if sCurrentDir == 0
+                   sCurrentDir = pwd;
+               end
+            end
+    
+            sOutDir = uigetdir(sCurrentDir);
+            if sOutDir == 0
+                return;
+            end
+            sOutDir = [sOutDir '/'];
+    
+            sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                
+            sWriteDir = char(sOutDir) + "TriDFusion_MFSC_" + char(sDate) + '/';              
+            if ~(exist(char(sWriteDir), 'dir'))
+                mkdir(char(sWriteDir));
+            end
+            
+            try
+                exportDicomLastUsedDir = sOutDir;
+                save(sMatFile, 'exportDicomLastUsedDir');
+            catch
+                progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
+            end   
+        end    
+    
+        set(figPETLiverDosimetryReport, 'Pointer', 'watch');
+        drawnow;
+
+        playback2DMipOnly('set', false);
+
+        sliceNumber('set', 'axial', size(dicomBuffer('get', [], dSeriesOffset), 3));
+
+        multiFrameRecord('set', true);
+
+        set(recordIconMenuObject('get'), 'State', 'on');
+
+        recordMultiFrame(recordIconMenuObject('get'), sOutDir, [], 'dcm', axes3Ptr('get', [], dSeriesOffset));
+
+%         objectToDicomJpg(sWriteDir, figPETLiverDosimetryReport, '3DF MFSC', get(uiSeriesPtr('get'), 'Value'))
+    
+        catch
+            progressBar( 1 , 'Error: exportCurrentPETLiverDosimetryAxialSlicesToDicomMovieCallback() cant export report' );
+        end
+
+        playback2DMipOnly('set', bMipPlayback);
+        
+        multiFrameRecord('set', false);
+
+        set(recordIconMenuObject('get'), 'State', 'off');
+
+        sliceNumber('set', 'axial', dAxialSliceNumber);
+
+        sliderTraCallback();
+
+        set(figPETLiverDosimetryReport, 'Pointer', 'default');
+        drawnow;     
+    end
+
     function copyPETLiverDosimetryReportDisplayCallback(~, ~)
 
         try

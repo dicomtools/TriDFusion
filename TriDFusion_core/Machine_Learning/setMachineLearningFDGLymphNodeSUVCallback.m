@@ -447,13 +447,9 @@ function setMachineLearningFDGLymphNodeSUVCallback(~, ~)
 
         if dLymphNodeThreshold <= 0
 
-            dLymphNodeThreshold = 10;
-            set(edtFDGLymphNodeSUVThresholdOfMaxValue, 'String', num2str(dLymphNodeThreshold));
+            dLymphNodeThreshold = 4;
 
-        elseif dLymphNodeThreshold >= 100
-            
-            dLymphNodeThreshold = 10;
-            set(edtFDGLymphNodeSUVThresholdOfMaxValue, 'String', num2str(dLymphNodeThreshold));           
+            set(edtFDGLymphNodeSUVThresholdOfMaxValue, 'String', num2str(dLymphNodeThreshold));
         end
 
         FDGSegmentationSUVThresholdValue('set', dLymphNodeThreshold);

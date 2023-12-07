@@ -145,11 +145,14 @@ function setMachineLearning3DLungShunt(sSegmentatorScript, sSegmentatorCombineMa
 %            if fastMachineLearningDialog('get') == true
 %                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s --fast', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName);    
 %            else
+                
+%                sRoiSubset = 'liver lung_lower_lobe_left lung_lower_lobe_right lung_middle_lobe_right lung_upper_lobe_left lung_upper_lobe_right';
+%                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s --roi_subset %s --fast', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName, sRoiSubset);    
                 sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s --fast', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName);    
 %            end
         
             [bStatus, sCmdout] = system(sCommandLine);
-            
+
             if bStatus 
                 progressBar( 1, 'Error: An error occur during machine learning segmentation!');
                 errordlg(sprintf('An error occur during machine learning segmentation: %s', sCmdout), 'Segmentation Error');  

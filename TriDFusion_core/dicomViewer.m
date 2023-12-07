@@ -281,19 +281,40 @@ function resize = dicomViewer()
 
     % FDG segmentation
 
-    FDGSegmentationSUVThresholdValue('set', 4); % SUV
-    FDGSegmentationPercentOfPeakValue('set', 41); % Percent
-    FDGSegmentationMultiplePeaksValue('set', 65); % Percent
+    FDGSegmentationSUVThresholdValue     ('set', 4); % SUV
+    FDGSegmentationPercentOfPeakValue    ('set', 41); % Percent
+    FDGSegmentationMultiplePeaksValue    ('set', 65); % Percent
     FDGSegmentationBoneMaskThresholdValue('set', 100); % HU
-    FDGSegmentationBoundaryPercentValue('set', 10);
+    FDGSegmentationBoundaryPercentValue  ('set', 10);
     FDGSmalestVoiValue('set', 0.3);
 
-    excludeLymphNodeSUVBrain('set', true);
+    excludeLymphNodeSUVBrain         ('set', true);
     excludeLymphNodeSUVUrinaryBladder('set', true);
-    excludeLymphNodeSUVKidneyLeft('set', false);
-    excludeLymphNodeSUVKidneyRight('set', false);
-    excludeLymphNodeSUVSmallBowel('set', false);
-    segmentLymphNodeSUVSpleen('set', true);
+    excludeLymphNodeSUVKidneyLeft    ('set', false);
+    excludeLymphNodeSUVKidneyRight   ('set', false);
+    excludeLymphNodeSUVSmallBowel    ('set', false);
+    segmentLymphNodeSUVSpleen        ('set', true);
+
+    % Brown fat
+
+    FDGBrownFatSUVThresholdValue       ('set', 2.5); % SUV
+    FDGBrownFatHUThresholdValue        ('set', -500, 500); % HU
+    FDGBrownFatSmalestVoiValue         ('set', 0);
+
+    excludeBrownFatSUVBrain            ('set', true);
+    excludeBrownFatSUVHeart            ('set', true);
+    excludeBrownFatSUVLungs            ('set', true);
+    excludeBrownFatSUVKidneyLeft       ('set', true);
+    excludeBrownFatSUVKidneyRight      ('set', true);
+    excludeBrownFatSUVLiver            ('set', true);
+    excludeGa68DOTATATETrachea         ('set', true);
+    excludeBrownFatSUVAdrenalGlandLeft ('set', true);
+    excludeBrownFatSUVAdrenalGlandRight('set', true);
+    excludeBrownFatSUVSpleen           ('set', true);
+    excludeBrownFatSUVGallbladder      ('set', true);
+    excludeBrownFatSUVPancreas         ('set', true);
+    excludeBrownFatSUVSkeleton         ('set', false);
+
 
     % FDHT segmentation
 
@@ -318,35 +339,35 @@ function resize = dicomViewer()
     Lu177NormalLiverMeanValue('set', 4);
     Lu177SmalestVoiValue('set', 0.3);
 
-    excludeLu177Brain('set', true);
+    excludeLu177Brain         ('set', true);
     excludeLu177UrinaryBladder('set', true);
-    excludeLu177KidneyLeft('set', true);
-    excludeLu177KidneyRight('set', true);
-    excludeLu177SmallBowel('set', false);
-    excludeLu177Spleen('set', true);
+    excludeLu177KidneyLeft    ('set', true);
+    excludeLu177KidneyRight   ('set', true);
+    excludeLu177SmallBowel    ('set', false);
+    excludeLu177Spleen        ('set', true);
 
     % PSMA segmentation
 
     PSMASegmentationBoneMaskThresholdValue('set', 150); % HU
 %     PSMASegmentationBoundaryPercentValue('set', 10);
-    PSMANormalLiverSDValue('set', 0.4);
+    PSMANormalLiverSDValue  ('set', 0.4);
     PSMANormalLiverMeanValue('set', 4);
-    PSMASmalestVoiValue('set', 0.3);
+    PSMASmalestVoiValue     ('set', 0.3);
 
-    excludePSMABrain('set', true);
+    excludePSMABrain         ('set', true);
     excludePSMAUrinaryBladder('set', true);
-    excludePSMAKidneyLeft('set', true);
-    excludePSMAKidneyRight('set', true);
-    excludePSMASmallBowel('set', true);
-    excludePSMASpleen('set', true);
+    excludePSMAKidneyLeft    ('set', true);
+    excludePSMAKidneyRight   ('set', true);
+    excludePSMASmallBowel    ('set', true);
+    excludePSMASpleen        ('set', true);
 
     % Ga68DOTATATE segmentation
 
     Ga68DOTATATESegmentationBoneMaskThresholdValue('set', 200); % HU
 %     Ga68DOTATATESegmentationBoundaryPercentValue('set', 10);
-    Ga68DOTATATENormalLiverSDValue('set', 0.4);
+    Ga68DOTATATENormalLiverSDValue  ('set', 0.4);
     Ga68DOTATATENormalLiverMeanValue('set', 4);
-    Ga68DOTATATESmalestVoiValue('set', 0.3);
+    Ga68DOTATATESmalestVoiValue     ('set', 0.3);
 
 
     % Machine Learning Ga68 DOTATATE segmentation Other Organ
@@ -381,10 +402,10 @@ function resize = dicomViewer()
 
     % Machine Learning Full AI Ga68 DOTATATE Options
 
-    Ga68DOTATATEFullAITrainedModel('set', 2);
-    Ga68DOTATATEFullAISmalestVoiValue('set', 0.3);
-    Ga68DOTATATEFullAILesionClassification('set', true);
-    Ga68DOTATATEFullAISmoothMask('set', true);
+    Ga68DOTATATEFullAITrainedModel          ('set', 2);
+    Ga68DOTATATEFullAISmalestVoiValue       ('set', 0.3);
+    Ga68DOTATATEFullAILesionClassification  ('set', true);
+    Ga68DOTATATEFullAISmoothMask            ('set', true);
     Ga68DOTATATEFullAIEnhancedBoneMaskLesion('set', false);
 
     clearDisplay();

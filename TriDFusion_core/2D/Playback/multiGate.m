@@ -1,5 +1,5 @@
-function multiGate(mPlay)
-%function multiGate(mPlay)
+function multiGate(mPlay, pAxe)
+%function multiGate(mPlay, pAxe)
 %Play 2D DICOM 4D Images.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -461,7 +461,7 @@ end
                     num2str(size(aBuffer, 3)));
             end
 
-            if gca == axes3Ptr('get', [], dOffset) && ...
+            if pAxe == axes3Ptr('get', [], dOffset) && ...
                strcmp(windowButton('get'), 'down') && ...
                isVsplash('get') == false
 

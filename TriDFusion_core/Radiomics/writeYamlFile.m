@@ -316,6 +316,17 @@ function writeYamlFile(sFileName, tReadiomics, dLabel)
         end    
     end
 
+    % gldm
+    
+    if ~isempty(tReadiomics.featureClass.gldm)
+        caXamlParam{numel(caXamlParam)+1} = sprintf('  %s:', tReadiomics.featureClass.gldm.name);
+        if tReadiomics.featureClass.gldm.all == false
+            for aa=1:numel(tReadiomics.featureClass.gldm.feature)
+                caXamlParam{numel(caXamlParam)+1} = sprintf('    - %s', tReadiomics.featureClass.gldm.feature{aa});
+            end
+        end    
+    end
+
     % glrlm
     
     if ~isempty(tReadiomics.featureClass.glrlm)

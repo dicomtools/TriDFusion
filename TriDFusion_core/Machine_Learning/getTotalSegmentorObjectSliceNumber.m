@@ -1,5 +1,5 @@
-function dSUVValue = FDGSegmentationSUVThresholdValue(sAction, dValue)
-%function dSUVValue = FDGSegmentationSUVThresholdValue(sAction, dValue)
+function dSliceNumber = getTotalSegmentorObjectSliceNumber(sSegmentationFolderName, sObject, sDirection)
+%function dSliceNumber = getTotalSegmentorObjectSliceNumber(sSegmentationFolderName, sObject, sDirection)
 %Get/Set segmentation FDG SUV value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -25,13 +25,30 @@ function dSUVValue = FDGSegmentationSUVThresholdValue(sAction, dValue)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    persistent pdSUVValue; 
+    dSliceNumber = [];
 
-    if strcmpi('set', sAction)
-        pdSUVValue = dValue;            
+    sNiiFileName = sprintf('%s%s.nii.gz', sSegmentationFolderName, sObject);  
+
+    if exist(sNiiFileName, 'file')
+
+        nii = nii_tool('load', sNiiFileName);
+        aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');    
+
+        aObjectMask=aObjectMask(:,:,end:-1:1);
+
+        aSlicesNumber = find(any(any(aObjectMask, 1), 2));
+
+        if ~isempty(aSlicesNumber)
+
+            if strcmpi(sDirection, 'upper')
+                
+                dSliceNumber = min(aSlicesNumber, [], 'all');
+            else
+                dSliceNumber = max(aSlicesNumber, [], 'all');
+            end
+        end
+
     end
-    
-    dSUVValue = pdSUVValue;
 end

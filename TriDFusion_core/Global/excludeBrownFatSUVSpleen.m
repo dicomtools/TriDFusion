@@ -1,6 +1,6 @@
-function dSUVValue = FDGSegmentationSUVThresholdValue(sAction, dValue)
-%function dSUVValue = FDGSegmentationSUVThresholdValue(sAction, dValue)
-%Get/Set segmentation FDG SUV value.
+function bRemove = excludeBrownFatSUVSpleen(sAction, bValue)
+%function bRemove = excludeBrownFatSUVSpleen(sAction, bValue)
+%Get/Set brown fat segmentation exclude spleen.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -27,11 +27,11 @@ function dSUVValue = FDGSegmentationSUVThresholdValue(sAction, dValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    persistent pdSUVValue; 
+    persistent pbRemove; 
 
     if strcmpi('set', sAction)
-        pdSUVValue = dValue;            
+        pbRemove = bValue;            
     end
     
-    dSUVValue = pdSUVValue;
+    bRemove = pbRemove;
 end

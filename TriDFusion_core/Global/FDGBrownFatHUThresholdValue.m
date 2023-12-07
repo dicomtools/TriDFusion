@@ -1,6 +1,6 @@
-function dSUVValue = FDGSegmentationSUVThresholdValue(sAction, dValue)
-%function dSUVValue = FDGSegmentationSUVThresholdValue(sAction, dValue)
-%Get/Set segmentation FDG SUV value.
+function [dHUMinValue, dHUMaxValue] = FDGBrownFatHUThresholdValue(sAction, dMinValue, dMaxValue)
+%function [dHUMinValue, dHUMaxValue] = FDGBrownFatHUThresholdValue(sAction, dMinValue, dMaxValue)
+%Get/Set brown fat segmentation FDG CT min/max HU value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -27,11 +27,14 @@ function dSUVValue = FDGSegmentationSUVThresholdValue(sAction, dValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    persistent pdSUVValue; 
+    persistent pdHUMinValue; 
+    persistent pdHUMaxValue; 
 
     if strcmpi('set', sAction)
-        pdSUVValue = dValue;            
+        pdHUMinValue = dMinValue;            
+        pdHUMaxValue = dMaxValue;            
     end
     
-    dSUVValue = pdSUVValue;
+    dHUMinValue = pdHUMinValue;
+    dHUMaxValue = pdHUMaxValue;
 end

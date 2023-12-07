@@ -1,5 +1,5 @@
-function recordMultiGate(mRecord, sPath, sFileName, sExtention)
-%function oneFrame(sDirection)
+function recordMultiGate(mRecord, sPath, sFileName, sExtention, pAxe)
+%function oneFrame(mRecord, sPath, sFileName, sExtention, pAxe)
 %Record 2D DICOM 4D Images.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -93,19 +93,19 @@ function recordMultiGate(mRecord, sPath, sFileName, sExtention)
 
     set(uiSeriesPtr('get'), 'Enable', 'off');
 
-    if gca ==  axes1Ptr('get', [], dSeriesOffset) && playback2DMipOnly('get') == false 
+    if pAxe ==  axes1Ptr('get', [], dSeriesOffset) && playback2DMipOnly('get') == false 
 
         iLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 1);
         iCurrentSlice = sliceNumber('get', 'coronal');
         aAxe = axes1Ptr('get', [], dSeriesOffset);
 
-    elseif gca == axes2Ptr('get', [], dSeriesOffset) && playback2DMipOnly('get') == false
+    elseif pAxe == axes2Ptr('get', [], dSeriesOffset) && playback2DMipOnly('get') == false
 
         iLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 2);
         iCurrentSlice = sliceNumber('get', 'sagittal');
         aAxe = axes2Ptr('get', [], dSeriesOffset);
 
-    elseif gca == axes3Ptr('get', [], dSeriesOffset) && playback2DMipOnly('get') == false
+    elseif pAxe == axes3Ptr('get', [], dSeriesOffset) && playback2DMipOnly('get') == false
 
         iLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 3);
         iCurrentSlice = sliceNumber('get', 'axial');
