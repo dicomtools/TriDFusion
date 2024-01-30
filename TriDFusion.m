@@ -255,8 +255,9 @@ function TriDFusion(varargin)
     end    
 
   %  imshow(imSplash, 'border', 'tight', 'Parent', uiSplashWindow);
-    image(imSplash, 'Parent', uiSplashWindow);
-                        
+%     image(imSplash, 'Parent', uiSplashWindow);
+    imshow(imSplash,'border','tight','Parent', uiSplashWindow);
+                     
     initTemplates();
       
     delete(uiSplashWindow);

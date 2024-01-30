@@ -1,5 +1,5 @@
 function sInterpolation = kernelInterpolation(sAction, sValue)
-%function  sInterpolation = edgeSegMethod(sAction, sValue)
+%function  sInterpolation = kernelInterpolation(sAction, sValue)
 %Get\Set Kernel Interpolation Method Value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %

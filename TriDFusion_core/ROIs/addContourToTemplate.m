@@ -82,6 +82,7 @@ function addContourToTemplate(dSeriesOffset, sAxe, dSliceNb, sType, aPosition, s
     tRoi.LesionType          = sLesionType;
     tRoi.StripeColor         = 'none';
     tRoi.InteractionsAllowed = 'all';    
+    tRoi.Deletable           = 1;
     tRoi.UserData            = [];
     
     tMaxDistances     = computeRoiFarthestPoint(imRoi, atDicomInfo, tRoi, false, false);

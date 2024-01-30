@@ -1,5 +1,5 @@
 function sCleanString = cleanString(sInputString, sDelimiter)
-%function sCleanString = cleanString(sInputString)
+%function sCleanString = cleanString(sInputString, sDelimiter)
 %Remove illegal character from string.
 %See TriDFuison.doc (or pdf) for more information about options.
 %

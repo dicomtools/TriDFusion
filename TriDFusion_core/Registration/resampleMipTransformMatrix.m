@@ -1,5 +1,5 @@
-function [resampImage, atDcmMetaData] = resampleMipTransformMatrix(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, bSameOutput)
-%function [resampImage, atDcmMetaData] = resampleMipTransformMatrix(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, bSameOutput)
+function [resampImage, atDcmMetaData, zMoveOffsetRemaining] = resampleMipTransformMatrix(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, bSameOutput)
+%function [resampImage, atDcmMetaData, zMoveOffsetRemaining] = resampleMipTransformMatrix(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, bSameOutput)
 %Resample any modalities using a transfer matrix.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -29,7 +29,9 @@ function [resampImage, atDcmMetaData] = resampleMipTransformMatrix(dcmImage, atD
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-        
+
+    zMoveOffsetRemaining = [];   
+
     dimsRef = size(refImage);        
     dimsDcm = size(dcmImage);
 
@@ -78,7 +80,65 @@ function [resampImage, atDcmMetaData] = resampleMipTransformMatrix(dcmImage, atD
     else
         [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
     end
-    
+
+    aRspSize = size(resampImage);
+
+    if aRspSize(3) ~= dimsRef(3) % Fix for z offset
+
+        if aRspSize(3) > dimsRef(3)
+
+            [dDcmFirstZ, dDcmLastZ] = getImageZPosition(atDcmMetaData, dcmImage);
+            [dRefFirstZ, dRefLastZ] = getImageZPosition(atRefMetaData, refImage);
+
+            dFirstOffset = abs(dRefFirstZ - dDcmFirstZ)/refSliceThickness;
+%                 dLastOffset = abs(dRefLastZ - dDcmLastZ)/refSliceThickness;
+
+
+            dImageOffset = round(dFirstOffset);
+            zMoveOffsetRemaining = dFirstOffset-dImageOffset;
+
+
+
+             resampImage = resampImage(:,:,1:end);
+            
+%                 dOffset = (dRefPosition - dDcmPosition)
+%%%%%%% TEMP PATH, NEED TO REVISIT
+%                 if dFirstOffset > dLastOffset
+%              
+%                     resampImage = resampImage(:,:,1+aRspSize(3)-dimsRef(3):end);
+%                 else
+%            %       resampImage = resampImage(:,:,round(dFirstOffset):aRspSize(3)-(aRspSize(3)-dimsRef(3)) );
+%                     resampImage = resampImage(:,:,1:aRspSize(3)-(aRspSize(3)-dimsRef(3)));
+%                 end
+       else
+            aResample = zeros(aRspSize(1), aRspSize(2), dimsRef(3));
+
+            [dDcmFirstZ, dDcmLastZ] = getImageZPosition(atDcmMetaData, dcmImage);
+            [dRefFirstZ, dRefLastZ] = getImageZPosition(atRefMetaData, refImage);
+
+            dFirstOffset = abs(dRefFirstZ - dDcmFirstZ)/refSliceThickness;
+%                 dLastOffset = abs(dRefLastZ - dDcmLastZ)/refSliceThickness;
+%                 dOffset = (dRefPosition - dDcmPosition)
+
+            dImageOffset = round(dFirstOffset);
+            zMoveOffsetRemaining = dFirstOffset-dImageOffset;
+
+
+
+            aResample(:,:,1+dImageOffset:aRspSize(3)+dImageOffset)=resampImage;
+        
+%%%%%%% TEMP PATH, NEED TO REVISIT
+%                 if dFirstOffset > dLastOffset
+%                     aResample(:,:,1+dimsRef(3)-aRspSize(3):end)=resampImage;
+%                 else
+%                     aResample(:,:,1:dimsRef(3)-(dimsRef(3)-aRspSize(3)))=resampImage;
+%                 end
+
+            resampImage = aResample;
+            clear aResample;
+        end
+    end
+
 %        if dimsRef(3)==dimsDcm(3)
 %            aResampledImageSize = size(resampImage);
 %            resampImage=imresize3(resampImage, [aResampledImageSize(1) aResampledImageSize(2) dimsRef(3)]);

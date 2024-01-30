@@ -78,6 +78,17 @@ function setDisplayBuffer()
                                 end                        
                             end
                         end
+
+                        if strcmpi(tInput(i).atDicomInfo{ii}.Modality, 'RTDOSE')
+            
+                            if isfield(tInput(i).atDicomInfo{ii}, 'DoseGridScaling')
+            
+                                if tInput(i).atDicomInfo{ii}.DoseGridScaling ~= 0
+                                     aInput{i} = aInput{i} * tInput(i).atDicomInfo{ii}.DoseGridScaling;
+                                end
+            
+                            end
+                        end                        
                     end
                  end
             end
@@ -94,7 +105,7 @@ function setDisplayBuffer()
                isfield(tInput(i).atDicomInfo{1}, 'RescaleSlope')
                       
                 if tInput(i).atDicomInfo{1}.RescaleSlope ~= 0
-                    aInput{i} = tInput(1).atDicomInfo{1}.RescaleIntercept + (aInput{i} * tInput(1).atDicomInfo{1}.RescaleSlope);
+                    aInput{i} = tInput(i).atDicomInfo{1}.RescaleIntercept + (aInput{i} * tInput(i).atDicomInfo{1}.RescaleSlope);
                 else
                     if isfield(tInput(i).atDicomInfo{1}, 'RealWorldValueMappingSequence') % SUV Spect
                         if tInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
@@ -105,6 +116,18 @@ function setDisplayBuffer()
                     end
                 end
             end  
+            
+            if strcmpi(tInput(i).atDicomInfo{1}.Modality, 'RTDOSE')
+
+                if isfield(tInput(i).atDicomInfo{1}, 'DoseGridScaling')
+
+                    if tInput(i).atDicomInfo{1}.DoseGridScaling ~= 0
+                        aInput{i} = aInput{i} * tInput(i).atDicomInfo{1}.DoseGridScaling;
+                    end
+
+                end
+            end
+
         end
         
 % To reduce memory usage                

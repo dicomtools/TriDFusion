@@ -149,7 +149,8 @@ function info = dicominfo4che3(fileInput)
     info.SOPInstanceUID          = char(dataset.getString(org.dcm4che3.data.Tag.SOPInstanceUID, 0));
     info.FrameOfReferenceUID     = char(dataset.getString(org.dcm4che3.data.Tag.FrameOfReferenceUID, 0));    
     
-    info.AccessionNumber   = char(dataset.getString(org.dcm4che3.data.Tag.AccessionNumber, 0));
+    info.AccessionNumber = char(dataset.getString(org.dcm4che3.data.Tag.AccessionNumber, 0));
+    info.StudyID         = char(dataset.getString(org.dcm4che3.data.Tag.StudyID, 0));
 
     info.ActualFrameDuration = dataset.getInt(org.dcm4che3.data.Tag.ActualFrameDuration,0);
 
@@ -176,9 +177,13 @@ function info = dicominfo4che3(fileInput)
     
     % Manifacturer & protocol information
 
-    info.ManufacturerModelName = char(dataset.getString(org.dcm4che3.data.Tag.ManufacturerModelName, 0));
-    info.ProtocolName          = char(dataset.getString(org.dcm4che3.data.Tag.ProtocolName, 0)); 
-    
+    info.Manufacturer           = char(dataset.getString(org.dcm4che3.data.Tag.Manufacturer, 0));
+    info.ManufacturerModelName  = char(dataset.getString(org.dcm4che3.data.Tag.ManufacturerModelName, 0));
+    info.ProtocolName           = char(dataset.getString(org.dcm4che3.data.Tag.ProtocolName, 0)); 
+    info.InstitutionName        = char(dataset.getString(org.dcm4che3.data.Tag.InstitutionName, 0)); 
+    info.StationName            = char(dataset.getString(org.dcm4che3.data.Tag.StationName, 0)); 
+    info.ReferringPhysicianName = char(dataset.getString(org.dcm4che3.data.Tag.ReferringPhysicianName, 0));
+   
     info.NumberOfEnergyWindows = str2double(dataset.getString(org.dcm4che3.data.Tag.NumberOfEnergyWindows,0));
     info.NumberOfDetectors     = str2double(dataset.getString(org.dcm4che3.data.Tag.NumberOfDetectors,0));
     
@@ -354,6 +359,15 @@ function info = dicominfo4che3(fileInput)
 
     info.NumberOfSlices = dataset.getInt(org.dcm4che3.data.Tag.NumberOfSlices,0);
     info.NumberOfTemporalPositions = dataset.getInt(org.dcm4che3.data.Tag.NumberOfTemporalPositions,0);
+
+    % Dose
+
+    info.DoseUnits                     = char(dataset.getString(org.dcm4che3.data.Tag.DoseUnits, 0));
+    info.DoseType                      = char(dataset.getString(org.dcm4che3.data.Tag.DoseType, 0));
+    info.DoseSummationType             = char(dataset.getString(org.dcm4che3.data.Tag.DoseSummationType, 0));
+    info.GridFrameOffsetVector         = dataset.getDoubles(org.dcm4che3.data.Tag.GridFrameOffsetVector);
+    info.DoseGridScaling               = dataset.getDoubles(org.dcm4che3.data.Tag.DoseGridScaling);
+    info.TissueHeterogeneityCorrection = char(dataset.getString(org.dcm4che3.data.Tag.TissueHeterogeneityCorrection, 0));
 
     din.close();
 

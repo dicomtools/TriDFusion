@@ -268,12 +268,18 @@ function loadCerrDoseVolume(planC, structNamC)
         atNewInput(ii).asFilesList{1} = '';
        
         atNewInput(ii).sOrientationView    = 'Axial';
-        
+
+        if strcmpi(atNewInput(ii).atDicomInfo{1}.Modality, 'RTDOSE')
+            bDoseKernel = true;
+        else
+            bDoseKernel = false;
+        end
+
         atNewInput(ii).bEdgeDetection      = false;
         atNewInput(ii).bFlipLeftRight      = false;
         atNewInput(ii).bFlipAntPost        = false;
         atNewInput(ii).bFlipHeadFeet       = false;
-        atNewInput(ii).bDoseKernel         = false;
+        atNewInput(ii).bDoseKernel         = bDoseKernel;
         atNewInput(ii).bMathApplied        = false;
         atNewInput(ii).bFusedDoseKernel    = false;
         atNewInput(ii).bFusedEdgeDetection = false;

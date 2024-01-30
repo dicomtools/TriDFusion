@@ -100,6 +100,6 @@ function objectToDicomJpg(sOutDir, pObject, sSeriesDescription, dSeriesOffset)
                'WritePrivate'     , true ...
                ); 
 
-    progressBar( 1, sprintf('Export %s completed %s', sOutFile) );
+    progressBar( 1, sprintf('Export %s completed.', sOutFile) );
     
 end

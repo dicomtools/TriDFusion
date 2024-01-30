@@ -43,7 +43,9 @@ function mainWindowMenu()
     uimenu(mFile,'Label', 'Import CERR planC...'            ,'Callback', @importCerrPlanCCallback, 'Separator','on');
     uimenu(mFile,'Label', 'Import CERR Dose Volume...'      ,'Callback', @importCerrDoseVolumeCallback);
     uimenu(mFile,'Label', 'Import CERR Dose Constraint...'  ,'Callback', @importCerrDoseConstraintCallback);
-    uimenu(mFile,'Label', 'Import Dose Kernel...'           ,'Callback', @importDoseKernelCallback);
+    uimenu(mFile,'Label', 'Import Dose Kernel...'           ,'Callback', @importDoseKernelCallback, 'Separator','on');
+    uimenu(mFile,'Label', 'Import Dose Radionuclide...'     ,'Callback', @importDoseRadionuclideCallback);
+    uimenu(mFile,'Label', 'Import Dose Material...'         ,'Callback', @importDoseMaterialCallback);
 
     uimenu(mFile,'Label', 'Export to DICOM...'              ,'Callback', @writeDICOMCallback, 'Separator','on');
     uimenu(mFile,'Label', 'Export to DICOM all series...'   ,'Callback', @writeDICOMAllSeriesCallback);
@@ -246,7 +248,7 @@ function mainWindowMenu()
 
     mMachineReport = uimenu(mMachineProcessing, 'Label','Report');
     uimenu(mMachineReport, 'Label','3D SPECT Lung Shunt Report'      , 'Callback', @generate3DLungShuntReportCallback);
-    uimenu(mMachineReport, 'Label','3D SPECT Lung Lobe Ration Report', 'Callback', @generate3DLungLobeReportCallback);
+    uimenu(mMachineReport, 'Label','3D SPECT Lung Lobe Ratio Report', 'Callback', @generate3DLungLobeReportCallback);
     uimenu(mMachineReport, 'Label','PET Y90 Liver Dosimetry Report'  , 'Callback', @generatePETLiverDosimetryReportCallback);
 
     uimenu(mMachineProcessing, 'Label','3D SPECT Lung Shunt'     , 'Callback', @setMachineLearning3DLungShuntCallback, 'Separator','on');
@@ -292,6 +294,9 @@ function mainWindowMenu()
 
     mRadiomics = uimenu(mModules, 'Label','Radiomics');
     uimenu(mRadiomics, 'Label','Compute Radiomics', 'Callback', @extractRadiomicsFromContoursCallback);
+
+    mDosimetry = uimenu(mModules, 'Label','Dosimetry');
+    uimenu(mDosimetry, 'Label','Compute Voxel Dosimetry', 'Callback', @computeVoxelDosimetryCallback);
 
     mHelp = uimenu(fiMainWindowPtr('get'),'Label','Help');
     uimenu(mHelp,'Label', 'Shortcuts', 'Callback'  , @shortcutsViewerCallback);

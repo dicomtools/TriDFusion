@@ -120,7 +120,7 @@ function aMask = getTotalSegmentorWholeBodyMask(sSegmentationFolderName, aMask)
             nii = nii_tool('load', sNiiFileName);
             aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
 
-            aMask(aObjectMask~=0)=1;
+            aMask(aObjectMask~=0) = 1;
         end
     end
 

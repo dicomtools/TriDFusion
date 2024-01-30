@@ -41,6 +41,11 @@ function loadNrrdMaskFile(sPath, sFileName)
 
     [aMask, ~] = nrrdread( sprintf('%s%s',sPath, sFileName));
 
+    if size(aMask, 3) ~=1
+
+        aMask = aMask(:,:,end:-1:1);
+    end
+
 %     aMask = imrotate3(double(aMask), 90, [0 0 1], 'nearest');
 %     aMask = aMask(end:-1:1,:,:);
 

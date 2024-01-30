@@ -63,7 +63,13 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, 
                                 end                        
                             end                           
                         end
-                    end                            
+                    end 
+
+                    if strcmpi(atMetaData{1}.Modality, 'RTDOSE')
+                        if atMetaData{1}.DoseGridScaling ~= 0
+                            aBuffer(:,:,slice) = aBuffer(:,:,slice) / atMetaData{1}.DoseGridScaling;
+                        end
+                    end                     
                 else
                     if isfield(atMetaData{1}, 'RescaleIntercept') && ...
                        isfield(atMetaData{1}, 'RescaleSlope')     
@@ -78,7 +84,13 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, 
                                 end                        
                             end                                                 
                         end
-                    end                  
+                    end  
+
+                    if strcmpi(atMetaData{1}.Modality, 'RTDOSE')
+                        if atMetaData{1}.DoseGridScaling ~= 0
+                            aBuffer(:,:,slice) = aBuffer(:,:,slice) / atMetaData{1}.DoseGridScaling;
+                        end
+                    end                     
                 end
             end
             
@@ -104,7 +116,13 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, 
                         end                        
                     end                
                 end
-            end               
+            end   
+
+            if strcmpi(atMetaData{1}.Modality, 'RTDOSE')
+                if atMetaData{1}.DoseGridScaling ~= 0
+                    aBuffer = aBuffer / atMetaData{1}.DoseGridScaling;
+                end
+            end          
         end
 
         array4d = aBuffer;
@@ -141,19 +159,22 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, 
 %        atWriteMetaData{ww}.TransferSyntaxUID          = '1.2.840.10008.1.2';
 %        atWriteMetaData{ww}.ImplementationClassUID     = '1.3.6.1.4.1.9590.100.1.3.100.9.4';
 %        atWriteMetaData{ww}.ImplementationVersionName  = 'MATLAB IPT 9.4';
+
         if isempty(atWriteMetaData{ww}.SOPClassUID)
-            atWriteMetaData{ww}.SOPClassUID                = '1.2.840.10008.5.1.4.1.1.20';
+
+            atWriteMetaData{ww}.SOPClassUID  = '1.2.840.10008.5.1.4.1.1.20';
         end
 
         if isempty(atWriteMetaData{ww}.SOPInstanceUID)       
-            atWriteMetaData{ww}.SOPInstanceUID             = '1.2.752.37.54.2572.122881719510441496582642976905549489909';
+
+            atWriteMetaData{ww}.SOPInstanceUID  = '1.2.752.37.54.2572.122881719510441496582642976905549489909';
         end
         
         atWriteMetaData{ww}.SeriesInstanceUID = dSeriesInstanceUID;
 
-        atWriteMetaData{ww}.BitsAllocated = 16;
-        atWriteMetaData{ww}.BitsStored    = 16;
-        atWriteMetaData{ww}.HighBit       = 15;
+        atWriteMetaData{ww}.BitsAllocated = 32;
+        atWriteMetaData{ww}.BitsStored    = 32;
+        atWriteMetaData{ww}.HighBit       = 31;
 
         % Date Time
    

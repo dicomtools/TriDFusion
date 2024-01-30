@@ -73,7 +73,7 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
             imCData = permute(imRoi(ptrRoi.SliceNb,:,:), [3 2 1]);
             
         case 'axes2'
-            imCData = permute(imRoi(:,ptrRoi.SliceNb,:), [3 1 2]) ;
+            imCData = permute(imRoi(:,ptrRoi.SliceNb,:), [3 1 2]);
             
         case 'axes3'
             imCData  = imRoi(:,:,ptrRoi.SliceNb);  

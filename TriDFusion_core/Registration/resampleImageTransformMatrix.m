@@ -1,5 +1,5 @@
-function [resampImage, atDcmMetaData, xMoveOffset, yMoveOffset] = resampleImageTransformMatrix(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, bSameOutput)
-%function [resampImage, atDcmMetaData] = resampleImageTransformMatrix(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, bSameOutput)
+function [resampImage, atDcmMetaData, xMoveOffset, yMoveOffset, zMoveOffsetRemaining] = resampleImageTransformMatrix(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, bSameOutput)
+%function [resampImage, atDcmMetaData, xMoveOffset, yMoveOffset, zMoveOffsetRemaining] = resampleImageTransformMatrix(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, bSameOutput)
 %Resample any modalities using a transfer matrix.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -29,9 +29,14 @@ function [resampImage, atDcmMetaData, xMoveOffset, yMoveOffset] = resampleImageT
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+    
+    xMoveOffset = [];
+    yMoveOffset = [];
+    zMoveOffsetRemaining = [];
 
     dimsRef = size(refImage);        
     dimsDcm = size(dcmImage);
+
 
     dcmSliceThickness = computeSliceSpacing(atDcmMetaData);
     refSliceThickness = computeSliceSpacing(atRefMetaData);       
@@ -50,7 +55,15 @@ function [resampImage, atDcmMetaData, xMoveOffset, yMoveOffset] = resampleImageT
     TF = affine3d(M);
 
     Rdcm = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
-%    Rref = imref3d(size(refImage), atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), refSliceThickness);
+%     Rref = imref3d(dimsRef, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), refSliceThickness);
+
+%     dRefImageExtentInWorldZ = round(Rref.ImageExtentInWorldZ);
+%     dDcmImageExtentInWorldZ = round(Rdcm.ImageExtentInWorldZ);
+%   
+%     dOffset = round ((dRefImageExtentInWorldZ - dDcmImageExtentInWorldZ)/refSliceThickness);
+%     refImage = refImage(:,:,1:end-dOffset);
+%     dimsRef = size(refImage);        
+
 %test    [resampImage, ~] = imwarp(dcmImage, Rdcm, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')));  
 %    [resampImage, ~] = imwarp(dcmImage, TF,'Interp', sMode, 'FillValues', double(min(dcmImage,[],'all')), 'OutputView', imref3d(dimsRef));  
 
@@ -65,10 +78,62 @@ function [resampImage, atDcmMetaData, xMoveOffset, yMoveOffset] = resampleImageT
 %            aResampledImageSize = size(resampImage);
 %            resampImage=imresize3(resampImage, [dimsRef(1) dimsRef(2) dimsRef(3)]);
 %        end
-        
 
-        
 
+        aRspSize = size(resampImage);
+
+        if aRspSize(3) ~= dimsRef(3) % Fix for z offset
+
+            if aRspSize(3) > dimsRef(3)
+
+                [dDcmFirstZ, dDcmLastZ] = getImageZPosition(atDcmMetaData, dcmImage);
+                [dRefFirstZ, dRefLastZ] = getImageZPosition(atRefMetaData, refImage);
+
+                dFirstOffset = abs(dRefFirstZ - dDcmFirstZ)/refSliceThickness;
+%                 dLastOffset = abs(dRefLastZ - dDcmLastZ)/refSliceThickness;
+
+
+                dImageOffset = round(dFirstOffset);
+                zMoveOffsetRemaining = dFirstOffset-dImageOffset;
+
+
+                resampImage = resampImage(:,:,1+dImageOffset:aRspSize(3));
+                
+%                 dOffset = (dRefPosition - dDcmPosition)
+%%%%%%% TEMP PATH, NEED TO REVISIT
+%                 if dFirstOffset > dLastOffset
+%              
+%                     resampImage = resampImage(:,:,1+aRspSize(3)-dimsRef(3):end);
+%                 else
+%            %       resampImage = resampImage(:,:,round(dFirstOffset):aRspSize(3)-(aRspSize(3)-dimsRef(3)) );
+%                     resampImage = resampImage(:,:,1:aRspSize(3)-(aRspSize(3)-dimsRef(3)));
+%                 end
+           else
+                aResample = single(zeros(aRspSize(1), aRspSize(2), dimsRef(3)));
+
+                [dDcmFirstZ, dDcmLastZ] = getImageZPosition(atDcmMetaData, dcmImage);
+                [dRefFirstZ, dRefLastZ] = getImageZPosition(atRefMetaData, refImage);
+
+                dFirstOffset = abs(dRefFirstZ - dDcmFirstZ)/refSliceThickness;
+%                 dLastOffset = abs(dRefLastZ - dDcmLastZ)/refSliceThickness;
+%                 dOffset = (dRefPosition - dDcmPosition)
+ 
+                dImageOffset = round(dFirstOffset);
+                zMoveOffsetRemaining = dFirstOffset-dImageOffset;
+
+                aResample(:,:,1+dImageOffset:aRspSize(3)+dImageOffset)=resampImage;
+          
+%%%%%%% TEMP PATH, NEED TO REVISIT
+%                 if dFirstOffset > dLastOffset
+%                     aResample(:,:,1+dimsRef(3)-aRspSize(3):end)=resampImage;
+%                 else
+%                     aResample(:,:,1:dimsRef(3)-(dimsRef(3)-aRspSize(3)))=resampImage;
+%                 end
+
+                resampImage = aResample;
+                clear aResample;
+            end
+        end
 
  %test   end
 
@@ -94,9 +159,19 @@ function [resampImage, atDcmMetaData, xMoveOffset, yMoveOffset] = resampleImageT
 %        atDcmMetaData{jj}.PixelSpacing(1) = atRefMetaData{1}.PixelSpacing(1);
 %        atDcmMetaData{jj}.PixelSpacing(2) = atRefMetaData{1}.PixelSpacing(2);
         atDcmMetaData{jj}.PixelSpacing(1) = dimsDcm(1)/aResampledImageSize(1)*atDcmMetaData{1}.PixelSpacing(1);
-        atDcmMetaData{jj}.PixelSpacing(2) = dimsDcm(2)/aResampledImageSize(2)*atDcmMetaData{1}.PixelSpacing(2);        
-        atDcmMetaData{jj}.SliceThickness  = atRefMetaData{1}.SliceThickness;
-        atDcmMetaData{jj}.SpacingBetweenSlices  = computedSliceThikness;
+        atDcmMetaData{jj}.PixelSpacing(2) = dimsDcm(2)/aResampledImageSize(2)*atDcmMetaData{1}.PixelSpacing(2); 
+
+        if isfield(atDcmMetaData{jj}, 'SliceThickness') && ...
+           isfield(atRefMetaData{1} , 'SliceThickness')
+            
+            atDcmMetaData{jj}.SliceThickness  = atRefMetaData{1}.SliceThickness;
+        end
+
+        if isfield(atDcmMetaData{jj}, 'SpacingBetweenSlices') && ...    
+           isfield(atRefMetaData{1} , 'SpacingBetweenSlices')
+
+            atDcmMetaData{jj}.SpacingBetweenSlices  = computedSliceThikness;
+        end
 
         atDcmMetaData{jj}.Rows    = aResampledImageSize(1);
         atDcmMetaData{jj}.Columns = aResampledImageSize(2);

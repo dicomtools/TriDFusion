@@ -56,6 +56,48 @@ function aExcludeMask = getBrownFatSUVExcludeMask(tBrownFatSUV, sSegmentationFol
             nii = nii_tool('load', sNiiFileName);
             aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
 
+
+            % INCLUDE 15 slices beneath the heart, based on the heart's largest area.
+
+            slicesWithMask = any(any(aObjectMask, 1), 2);
+
+            aSliceNumber = find(slicesWithMask);
+
+            areas = zeros(1,numel(aSliceNumber));
+            for jj = 1:numel(aSliceNumber)
+                areas(jj) = sum(aObjectMask(:, :, aSliceNumber(jj)), 'all');
+            end     
+            
+            % Find the slice with the maximum area
+            [~, maxIndex] = max(areas);
+
+            aArea = aObjectMask(:, :, aSliceNumber(maxIndex));
+            aArea = imfill(aArea);
+
+            for jj=1:15
+                aObjectMask(:,:,aSliceNumber(1)-jj) = aArea;
+            end
+
+            % /INCLUDE 15 slices beneath the heart, based on the heart's largest area.
+     
+            % EXTEND XY SIZE
+
+            seXY = strel('disk', 3); % Increase Mask in XY
+
+            % Initialize the extended mask
+            aExtendedMask = zeros(size(aObjectMask));
+            
+            % Apply dilation to each XY slice separately
+            for z = 1:size(aExtendedMask, 3)
+                aExtendedMask(:,:,z) = imdilate(aObjectMask(:,:,z), seXY);
+            end
+
+            aObjectMask = aExtendedMask;
+
+            clear aExtendedMask;
+
+            % /EXTEND XY SIZE
+
             aExcludeMask(aObjectMask~=0)=1;
 
             clear aObjectMask;
@@ -133,6 +175,24 @@ function aExcludeMask = getBrownFatSUVExcludeMask(tBrownFatSUV, sSegmentationFol
             nii = nii_tool('load', sNiiFileName);
             aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
 
+            % EXTEND XY SIZE
+
+            seXY = strel('disk', 5); % Increase Mask in XY
+
+            % Initialize the extended mask
+            aExtendedMask = zeros(size(aObjectMask));
+            
+            % Apply dilation to each XY slice separately
+            for z = 1:size(aExtendedMask, 3)
+                aExtendedMask(:,:,z) = imdilate(aObjectMask(:,:,z), seXY);
+            end
+
+            aObjectMask = aExtendedMask;
+
+            clear aExtendedMask;
+
+            % /EXTEND XY SIZE
+
             aExcludeMask(aObjectMask~=0)=1;
 
             clear aObjectMask;
@@ -150,6 +210,24 @@ function aExcludeMask = getBrownFatSUVExcludeMask(tBrownFatSUV, sSegmentationFol
 
             nii = nii_tool('load', sNiiFileName);
             aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
+
+            % EXTEND XY SIZE
+
+            seXY = strel('disk', 5); % Increase Mask in XY
+
+            % Initialize the extended mask
+            aExtendedMask = zeros(size(aObjectMask));
+            
+            % Apply dilation to each XY slice separately
+            for z = 1:size(aExtendedMask, 3)
+                aExtendedMask(:,:,z) = imdilate(aObjectMask(:,:,z), seXY);
+            end
+
+            aObjectMask = aExtendedMask;
+
+            clear aExtendedMask;
+
+            % /EXTEND XY SIZE
 
             aExcludeMask(aObjectMask~=0)=1;
 

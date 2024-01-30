@@ -191,7 +191,18 @@ end
             bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;
             
             if bDoseKernel == true
-                sUnits = 'Dose';
+
+                if isfield(atMetaData{1}, 'DoseUnits')
+    
+                    if ~isempty(atMetaData{1}.DoseUnits)
+                        
+                        sUnits = char(atMetaData{1}.DoseUnits);
+                    else
+                        sUnits = 'dose';
+                    end
+                else
+                    sUnits = 'dose';
+                end   
             else
 
                 if bSUVUnit == true
@@ -231,7 +242,7 @@ end
             asVoiRoiHeader{4} = sprintf('Accession Number, %s'  , atMetaData{1}.AccessionNumber);
             asVoiRoiHeader{5} = sprintf('Series Date, %s'       , atMetaData{1}.SeriesDate);
             asVoiRoiHeader{6} = sprintf('Series Time, %s'       , atMetaData{1}.SeriesTime);
-            asVoiRoiHeader{7} = sprintf('Units, %s'             , sUnits);
+            asVoiRoiHeader{7} = sprintf('Unit, %s'              , sUnits);
             asVoiRoiHeader{8} = (' ');
             asVoiRoiHeader{9} = ('MTV');
             asVoiRoiHeader{10} = ('TLG');

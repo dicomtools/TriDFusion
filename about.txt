@@ -1,4 +1,4 @@
-TriDFusion (3DF) Image Viewer Version 1.11
+TriDFusion (3DF) Image Viewer Version 1.12
 
 Disclaimer Notice:
 
@@ -23,7 +23,9 @@ Contributors:
    Aditya Apte
    Adam Kesner	
    Joseph O'Donoghue
+   Alexandre Franca Velo
    Simone Krebs
+   Lukas Carter
 
 Memorial Sloan Kettering 
 Department of Medical Physics

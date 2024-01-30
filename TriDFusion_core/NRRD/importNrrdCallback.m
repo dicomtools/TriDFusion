@@ -80,7 +80,7 @@ function importNrrdCallback(~, ~)
             set(btnLinkMipPtr('get'), 'FontWeight', 'bold');            
         end
 
-        loadNrrdFile(sPath, sFileName);    
+        loadNrrdFile(sPath, sFileName, true, []);    
 
      end
 

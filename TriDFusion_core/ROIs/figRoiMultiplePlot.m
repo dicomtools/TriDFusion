@@ -89,8 +89,23 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
     axeMultiplePlot.Title.Color  = viewerForegroundColor('get');
 
     if contains(lower(sType), 'cumulative')
+
         if bDoseKernel == true
-            axeMultiplePlot.XLabel.String = 'Intensity (Gy)';          
+
+            if isfield(atRoiVoiMetaData{1}, 'DoseUnits')
+
+                if ~isempty(atRoiVoiMetaData{1}.DoseUnits)
+                    
+                    sUnit = char(atRoiVoiMetaData{1}.DoseUnits);
+                else
+                    sUnit = 'dose';
+                end
+            else
+                sUnit = 'dose';
+            end      
+
+            axeMultiplePlot.XLabel.String = sprintf('Intensity (%s)', sUnit);
+
         else
             if  (strcmpi(atRoiVoiMetaData{1}.Modality, 'pt') || ...
                  strcmpi(atRoiVoiMetaData{1}.Modality, 'nm'))&& ...
@@ -271,7 +286,19 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
         
 
         if bDoseKernel == true
-            sUnits = 'Unit: Dose';
+
+             if isfield(atRoiVoiMetaData{1}, 'DoseUnits')
+
+                if ~isempty(atRoiVoiMetaData{1}.DoseUnits)
+                    
+                    sUnits = sprintf('Unit: %s', char(atRoiVoiMetaData{1}.DoseUnits));
+                else
+                    sUnits = 'Unit: dose';
+                end
+            else
+                sUnits = 'Unit: dose';
+            end  
+
         else
 
             if bSUVUnit == true
@@ -708,7 +735,18 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
             end
 
             if bDoseKernel == true
-                sUnits = 'Dose';
+
+                if isfield(atMetaData{1}, 'DoseUnits')
+    
+                    if ~isempty(atMetaData{1}.DoseUnits)
+                        
+                        sUnits = char(atMetaData{1}.DoseUnits);
+                    else
+                        sUnits = 'dose';
+                    end
+                else
+                    sUnits = 'dose';
+                end     
             else
 
                 if bSUVUnit == true
@@ -748,7 +786,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
             asVoiRoiHeader{4} = sprintf('Accession Number, %s'  , atMetaData{1}.AccessionNumber);
             asVoiRoiHeader{5} = sprintf('Series Date, %s'       , atMetaData{1}.SeriesDate);
             asVoiRoiHeader{6} = sprintf('Series Time, %s'       , atMetaData{1}.SeriesTime);
-            asVoiRoiHeader{7} = sprintf('Units, %s'             , sUnits);
+            asVoiRoiHeader{7} = sprintf('Unit, %s'              , sUnits);
             asVoiRoiHeader{8} = (' ');
 
             dNumberOfLines = dNumberOfLines + numel(asVoiRoiHeader)+(3*numel(gtxtRoiList)+(1*numel(gtxtRoiList))+3); % Add header and cell description and footer to number of needed lines

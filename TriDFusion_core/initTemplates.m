@@ -240,14 +240,21 @@ function initTemplates()
            exist('aDicomBuffer', 'var')
 
             for dSeriesLoop=1: numel(asFilesList)
+
                 tSetInputTemplate(dSeriesLoop).asFilesList  = asFilesList{dSeriesLoop};
                 tSetInputTemplate(dSeriesLoop).atDicomInfo  = atDicomInfo{dSeriesLoop};
                 tSetInputTemplate(dSeriesLoop).aDicomBuffer = aDicomBuffer{dSeriesLoop};
                 
                 tSetInputTemplate(dSeriesLoop).sOrientationView    = 'Axial';
-                
+
+                if strcmpi(atDicomInfo{dSeriesLoop}{1}.Modality, 'RTDOSE')
+                    bDoseKernel = true;
+                else
+                    bDoseKernel = false;
+                end
+
                 tSetInputTemplate(dSeriesLoop).bEdgeDetection      = false;
-                tSetInputTemplate(dSeriesLoop).bDoseKernel         = false;    
+                tSetInputTemplate(dSeriesLoop).bDoseKernel         = bDoseKernel;    
                 tSetInputTemplate(dSeriesLoop).bFlipLeftRight      = false;
                 tSetInputTemplate(dSeriesLoop).bFlipAntPost        = false;
                 tSetInputTemplate(dSeriesLoop).bFlipHeadFeet       = false;

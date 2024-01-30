@@ -99,8 +99,10 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 
     for bb=1:dNbElements  % Nb VOI
 
-        progressBar( bb/dNbElements-0.0001, sprintf('Computing contour %d/%d, please wait', bb, dNbElements) );
+        if mod(bb,5)==1 || bb == 1 || bb == dNbElements
 
+            progressBar( bb/dNbElements-0.0001, sprintf('Computing contour %d/%d, please wait.', bb, dNbElements) );
+        end
 %                if numel(CC.PixelIdxList{bb}) 
 
         if cancelCreateVoiRoiPanel('get') == true
@@ -174,7 +176,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
             if bUseFormula == false
 
                 if isempty(sMinSUVformula)
-                    sLesionType = 'Unknow';
+                    sLesionType = 'Unspecified';
                 else
                     if  contains(sMinSUVformula, 'CT Bone Map') || ...
                         contains(sMinSUVformula, 'CT ISO Map')  || ... 

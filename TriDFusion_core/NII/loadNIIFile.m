@@ -216,6 +216,13 @@ function loadNIIFile(sPath, sFileName)
 
         atInput(numel(atInput)).atDicomInfo{1}.din = [];
 
+        % Dose
+
+        atInput(numel(atInput)).atDicomInfo{1}.DoseUnits = [];
+        atInput(numel(atInput)).atDicomInfo{1}.DoseType = [];
+        atInput(numel(atInput)).atDicomInfo{1}.Units = [];
+
+
         % Series default
         
         atInput(numel(atInput)).asFilesList    = [];
@@ -301,6 +308,12 @@ function loadNIIFile(sPath, sFileName)
         atInput(1).atDicomInfo{1}.AcquisitionTime = '';
         atInput(1).atDicomInfo{1}.AcquisitionDate = '';   
 
+        % Dose
+
+        atInput(1).atDicomInfo{1}.DoseUnits = [];
+        atInput(1).atDicomInfo{1}.DoseType = [];
+        atInput(1).atDicomInfo{1}.Units = [];
+
         atInput(1).atDicomInfo{1}.din = [];
         
         % Series default
@@ -333,9 +346,12 @@ function loadNIIFile(sPath, sFileName)
     sOrientation = getImageOrientation(aImageOrientationPatient);
 
     if      strcmpi(sOrientation, 'Sagittal')
+
         dCurrentLocation = aImageOrientationPatient(1);
         dNextLocation = dCurrentLocation-voxelZ;
+
     elseif  strcmpi(sOrientation, 'Coronal')
+        
         dCurrentLocation = aImageOrientationPatient(2);
         dNextLocation = dCurrentLocation-voxelZ;
     else    % Axial

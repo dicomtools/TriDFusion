@@ -30,12 +30,29 @@ function dSpacing = computeSliceSpacing(atDicomInfo)
 
     if numel(atDicomInfo) == 1
         
-        dSpacing = abs(atDicomInfo{1}.SpacingBetweenSlices);
-        
-        if dSpacing == 0
-            dSpacing = 1;
+        if strcmpi(atDicomInfo{1}.Modality, 'RTDOSE')
+
+            if ~isempty(atDicomInfo{1}.GridFrameOffsetVector)
+
+                dNbFrames = numel(atDicomInfo{1}.GridFrameOffsetVector);
+                
+                if dNbFrames >1
+                    dSpacing = abs(atDicomInfo{1}.GridFrameOffsetVector(2)-atDicomInfo{1}.GridFrameOffsetVector(1));
+                else
+                    dSpacing = 1;
+                end
+            else
+                dSpacing =1;
+            end
+        else
+
+            dSpacing = abs(atDicomInfo{1}.SpacingBetweenSlices);
+            
+            if dSpacing == 0
+                dSpacing = 1;
+            end
         end
-        
+
         return;
     end
 

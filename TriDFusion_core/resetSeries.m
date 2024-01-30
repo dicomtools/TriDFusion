@@ -157,13 +157,19 @@ function resetSeries(dOffset, bInitDisplay)
     
     % Reset Template
 
+    if strcmpi(atInitInput(dOffset).atDicomInfo{1}.Modality, 'RTDOSE')
+        bDoseKernel = true;
+    else
+        bDoseKernel = false;
+    end
+
     atInitInput(dOffset).sOrientationView    = 'Axial';
     
     atInitInput(dOffset).bEdgeDetection      = false;
     atInitInput(dOffset).bFlipLeftRight      = false;
     atInitInput(dOffset).bFlipAntPost        = false;
     atInitInput(dOffset).bFlipHeadFeet       = false;
-    atInitInput(dOffset).bDoseKernel         = false;
+    atInitInput(dOffset).bDoseKernel         = bDoseKernel;
     atInitInput(dOffset).bMathApplied        = false;
     atInitInput(dOffset).bFusedDoseKernel    = false;
     atInitInput(dOffset).bFusedEdgeDetection = false;

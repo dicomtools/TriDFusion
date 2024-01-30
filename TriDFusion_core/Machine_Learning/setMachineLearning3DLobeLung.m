@@ -157,23 +157,51 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
                 errordlg(sprintf('An error occur during machine learning segmentation: %s', sCmdout), 'Segmentation Error');  
             else % Process succeed
 
-                if bResampleSeries == false
                     
-                    % Lungs
+                % Lungs
+
+                progressBar(3/14, 'Importing Lungs mask, please wait.');
+
+                aColor=[1 0.5 1]; % pink
+
+                sNiiFileName = 'combined_lungs.nii.gz';
+
+                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m lung', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
     
-                    progressBar(3/14, 'Importing Lungs mask, please wait.');
+                [bStatus, sCmdout] = system(sCommandLine);
+
+                if bStatus 
+                    progressBar( 1, 'Error: An error occur during lungs combine mask!');
+                    errordlg(sprintf('An error occur during lungs combine mask: %s', sCmdout), 'Segmentation Error');  
+                else % Process succeed
+
+                    sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
+                    
+                    if exist(sNiiFileName, 'file')
+
+                        nii = nii_tool('load', sNiiFileName);
+
+                        aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
+
+                        maskToVoi(aMask, 'Lungs', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
+
+                    end
+
+                    progressBar(4/14, 'Importing Lung Left mask, please wait.');
     
-                    aColor=[1 0.5 1]; % pink
+                    % Lung Left
     
-                    sNiiFileName = 'combined_lungs.nii.gz';
+                    aColor=[0.7 1 0.7]; % Light green
     
-                    sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m lung', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
+                    sNiiFileName = 'combined_lung_left.nii.gz';
+    
+                    sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m lung_left', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
         
                     [bStatus, sCmdout] = system(sCommandLine);
     
                     if bStatus 
-                        progressBar( 1, 'Error: An error occur during lungs combine mask!');
-                        errordlg(sprintf('An error occur during lungs combine mask: %s', sCmdout), 'Segmentation Error');  
+                        progressBar( 1, 'Error: An error occur during left lung combine mask!');
+                        errordlg(sprintf('An error occur during left lung combine mask: %s', sCmdout), 'Segmentation Error');  
                     else % Process succeed
     
                         sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
@@ -184,215 +212,186 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
     
                             aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
     
-                            maskToVoi(aMask, 'Lungs', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
+                            maskToVoi(aMask, 'Lung Left', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
     
-                        end
+                       end
     
-                        progressBar(4/14, 'Importing Lung Left mask, please wait.');
-        
-                        % Lung Left
-        
-                        aColor=[0.7 1 0.7]; % Light green
-        
-                        sNiiFileName = 'combined_lung_left.nii.gz';
-        
-                        sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m lung_left', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
-            
-                        [bStatus, sCmdout] = system(sCommandLine);
-        
-                        if bStatus 
-                            progressBar( 1, 'Error: An error occur during left lung combine mask!');
-                            errordlg(sprintf('An error occur during left lung combine mask: %s', sCmdout), 'Segmentation Error');  
-                        else % Process succeed
-        
-                            sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                            
-                            if exist(sNiiFileName, 'file')
-        
-                                nii = nii_tool('load', sNiiFileName);
-        
-                                aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
-        
-                                maskToVoi(aMask, 'Lung Left', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-        
-                           end
-        
-                        end
-        
-                        progressBar(5/14, 'Importing Lung Right mask, please wait.');
-        
-                        % Lung Right
-        
-                        aColor=[0.67 0 1]; % Violet
-        
-                        sNiiFileName = 'combined_lung_right.nii.gz';
-        
-                        sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m lung_right', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
-            
-                        [bStatus, sCmdout] = system(sCommandLine);
-        
-                        if bStatus 
-                            progressBar( 1, 'Error: An error occur during lung right combine mask!');
-                            errordlg(sprintf('An error occur during lung right combine mask: %s', sCmdout), 'Segmentation Error');  
-                        else % Process succeed
-        
-                            sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                            
-                            if exist(sNiiFileName, 'file')
-        
-                                nii = nii_tool('load', sNiiFileName);
-        
-                                aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
-        
-                                maskToVoi(aMask, 'Lung Right', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-                                
-                                clear aMask;
-                           end
-        
-                        end
-        
-                        progressBar(6/14, 'Importing Lung Upper Lobe Left mask, please wait.');
-        
-                        % Lung Upper Lobe Left
-        
-                        aColor=[0 1 1]; % Cyan
-        
-                        sNiiFileName = 'lung_upper_lobe_left.nii.gz';
-        
-                        sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                        
-                        if exist(sNiiFileName, 'file')
-        
-                            nii = nii_tool('load', sNiiFileName);
-        
-                            machineLearning3DMask('set', 'lung_upper_lobe_left', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
-        
-                            aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
-        
-                            maskToVoi(aMask, 'Lung Upper Lobe Left', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-        
-                            clear aMask;
-                        end
-        
-                        progressBar(7/14, 'Importing Lung Upper Lobe Right mask, please wait.');
-        
-                        % Lung Upper Lobe Right
-        
-                        aColor=[0 1 0]; % Green
-        
-                        sNiiFileName = 'lung_upper_lobe_right.nii.gz';
-        
-                        sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                        
-                        if exist(sNiiFileName, 'file')
-        
-                            nii = nii_tool('load', sNiiFileName);
-        
-                            machineLearning3DMask('set', 'lung_upper_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
-        
-                            aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
-        
-                            maskToVoi(aMask, 'Lung Upper Lobe Right', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-        
-                            clear aMask;
-                        end         
-        
-                        progressBar(8/14, 'Importing Lung Middle Lobe mask, please wait.');
-        
-                        % Lung Middle Lobe
-        
-                        aColor=[1 1 0]; % Yellow
-        
-                        sNiiFileName = 'lung_middle_lobe_right.nii.gz';
-        
-                        sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                        
-                        if exist(sNiiFileName, 'file')
-        
-                            nii = nii_tool('load', sNiiFileName);
-        
-                            machineLearning3DMask('set', 'lung_middle_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
-        
-                            aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
-        
-                            maskToVoi(aMask, 'Lung Middle Lobe Right', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-        
-                            clear aMask;
-                        end      
-        
-                        progressBar(9/14, 'Importing Lung Lower Lobe Left mask, please wait.');
-        
-                        % Lung Lower Lobe Left
-        
-                        aColor=[1 0 0]; % Red
-        
-                        sNiiFileName = 'lung_lower_lobe_left.nii.gz';
-        
-                        sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                        
-                        if exist(sNiiFileName, 'file')
-        
-                            nii = nii_tool('load', sNiiFileName);
-        
-                            machineLearning3DMask('set', 'lung_lower_lobe_left', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
-        
-                            aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
-        
-                            maskToVoi(aMask, 'Lung Lower Lobe Left', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-        
-                            clear aMask;
-                        end   
-        
-                        progressBar(10/14, 'Importing Lung Lower Lobe Right mask, please wait.');
-        
-                        % Lung Lower Lobe Right
-        
-                        aColor=[0 0.5 1]; % Blue
-        
-                        sNiiFileName = 'lung_lower_lobe_right.nii.gz';
-        
-                        sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                        
-                        if exist(sNiiFileName, 'file')
-        
-                            nii = nii_tool('load', sNiiFileName);
-        
-                            machineLearning3DMask('set', 'lung_lower_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
-        
-                            aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
-        
-                            maskToVoi(aMask, 'Lung Lower Lobe Right', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-        
-                            clear aMask;
-                        end   
-    
-                        % Liver
-                        
-                        progressBar(11/14, 'Importing Liver mask, please wait.');
-    
-                        aColor=[1 0.41 0.16]; % Orange
-        
-                        sNiiFileName = 'liver.nii.gz';
-        
-                        sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                        
-                        if exist(sNiiFileName, 'file')
-        
-                            nii = nii_tool('load', sNiiFileName);
-        
-                            machineLearning3DMask('set', 'liver', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
-        
-                            aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
-        
-                            maskToVoi(aMask, 'Liver', 'Liver', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-                         
-                        end
                     end
+    
+                    progressBar(5/14, 'Importing Lung Right mask, please wait.');
+    
+                    % Lung Right
+    
+                    aColor=[0.67 0 1]; % Violet
+    
+                    sNiiFileName = 'combined_lung_right.nii.gz';
+    
+                    sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m lung_right', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
+        
+                    [bStatus, sCmdout] = system(sCommandLine);
+    
+                    if bStatus 
+                        progressBar( 1, 'Error: An error occur during lung right combine mask!');
+                        errordlg(sprintf('An error occur during lung right combine mask: %s', sCmdout), 'Segmentation Error');  
+                    else % Process succeed
+    
+                        sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
+                        
+                        if exist(sNiiFileName, 'file')
+    
+                            nii = nii_tool('load', sNiiFileName);
+    
+                            aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
+    
+                            maskToVoi(aMask, 'Lung Right', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
+                            
+                            clear aMask;
+                       end
+    
+                    end
+    
+                    progressBar(6/14, 'Importing Lung Upper Lobe Left mask, please wait.');
+    
+                    % Lung Upper Lobe Left
+    
+                    aColor=[0 1 1]; % Cyan
+    
+                    sNiiFileName = 'lung_upper_lobe_left.nii.gz';
+    
+                    sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
+                    
+                    if exist(sNiiFileName, 'file')
+    
+                        nii = nii_tool('load', sNiiFileName);
+    
+                        machineLearning3DMask('set', 'lung_upper_lobe_left', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
+    
+                        aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
+    
+                        maskToVoi(aMask, 'Lung Upper Lobe Left', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
+    
+                        clear aMask;
+                    end
+    
+                    progressBar(7/14, 'Importing Lung Upper Lobe Right mask, please wait.');
+    
+                    % Lung Upper Lobe Right
+    
+                    aColor=[0 1 0]; % Green
+    
+                    sNiiFileName = 'lung_upper_lobe_right.nii.gz';
+    
+                    sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
+                    
+                    if exist(sNiiFileName, 'file')
+    
+                        nii = nii_tool('load', sNiiFileName);
+    
+                        machineLearning3DMask('set', 'lung_upper_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
+    
+                        aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
+    
+                        maskToVoi(aMask, 'Lung Upper Lobe Right', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
+    
+                        clear aMask;
+                    end         
+    
+                    progressBar(8/14, 'Importing Lung Middle Lobe mask, please wait.');
+    
+                    % Lung Middle Lobe
+    
+                    aColor=[1 1 0]; % Yellow
+    
+                    sNiiFileName = 'lung_middle_lobe_right.nii.gz';
+    
+                    sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
+                    
+                    if exist(sNiiFileName, 'file')
+    
+                        nii = nii_tool('load', sNiiFileName);
+    
+                        machineLearning3DMask('set', 'lung_middle_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
+    
+                        aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
+    
+                        maskToVoi(aMask, 'Lung Middle Lobe Right', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
+    
+                        clear aMask;
+                    end      
+    
+                    progressBar(9/14, 'Importing Lung Lower Lobe Left mask, please wait.');
+    
+                    % Lung Lower Lobe Left
+    
+                    aColor=[1 0 0]; % Red
+    
+                    sNiiFileName = 'lung_lower_lobe_left.nii.gz';
+    
+                    sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
+                    
+                    if exist(sNiiFileName, 'file')
+    
+                        nii = nii_tool('load', sNiiFileName);
+    
+                        machineLearning3DMask('set', 'lung_lower_lobe_left', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
+    
+                        aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
+    
+                        maskToVoi(aMask, 'Lung Lower Lobe Left', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
+    
+                        clear aMask;
+                    end   
+    
+                    progressBar(10/14, 'Importing Lung Lower Lobe Right mask, please wait.');
+    
+                    % Lung Lower Lobe Right
+    
+                    aColor=[0 0.5 1]; % Blue
+    
+                    sNiiFileName = 'lung_lower_lobe_right.nii.gz';
+    
+                    sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
+                    
+                    if exist(sNiiFileName, 'file')
+    
+                        nii = nii_tool('load', sNiiFileName);
+    
+                        machineLearning3DMask('set', 'lung_lower_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
+    
+                        aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
+    
+                        maskToVoi(aMask, 'Lung Lower Lobe Right', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
+    
+                        clear aMask;
+                    end   
 
-                else
+                    % Liver
+                    
+                    progressBar(11/14, 'Importing Liver mask, please wait.');
 
-                    progressBar(3/7, 'Resampling image, please wait.');
-                   
+                    aColor=[1 0.41 0.16]; % Orange
+    
+                    sNiiFileName = 'liver.nii.gz';
+    
+                    sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
+                    
+                    if exist(sNiiFileName, 'file')
+    
+                        nii = nii_tool('load', sNiiFileName);
+    
+                        machineLearning3DMask('set', 'liver', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
+    
+                        aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
+    
+                        maskToVoi(aMask, 'Liver', 'Liver', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
+                     
+                    end
+                end
+
+                if bResampleSeries == true
+
+                    progressBar(12/14, 'Resamplig series, please wait.');
+
                     aCTImage = dicomBuffer('get', [], dCTSerieOffset);
                     if isempty(aCTImage)
                         aInputBuffer = inputBuffer('get');
@@ -400,11 +399,9 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
             
                         clear aInputBuffer;
                     end
-            
-                    % Resample NM to CT dimension
-            
+
                     [aResampledNMImage, atResampledNMMeta] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);   
-                
+
                     dicomMetaData('set', atResampledNMMeta, dNMSerieOffset);
                     dicomBuffer  ('set', aResampledNMImage, dNMSerieOffset);
             
@@ -415,241 +412,12 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
                     aMip = resampleMip(aMip, atNMMetaData, refMip, atCTMetaData, 'Linear', false);
                 
                     mipBuffer('set', aMip, dNMSerieOffset);
+
+                    atRoi = roiTemplate('get', dNMSerieOffset);
                     
-                    progressBar(4/7, 'Importing Lungs mask, please wait.');
-                        
-                    % Lung
-            
-                    aColor= [1 0.5 1]; % Pink
-            
-                    sNiiFileName = 'combined_lungs.nii.gz';
-            
-                    sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m lung', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
-            
-                    [bStatus, sCmdout] = system(sCommandLine);
-            
-                    if bStatus 
-                        progressBar( 1, 'Error: An error occur during lungs combine mask!');
-                        errordlg(sprintf('An error occur during lungs combine mask: %s', sCmdout), 'Segmentation Error');  
-                    else % Process succeed
-            
-                        sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                        
-                        if exist(sNiiFileName, 'file')
-            
-                            nii = nii_tool('load', sNiiFileName);
-
-                            machineLearning3DMask('set', 'lungs', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
-      
-                            aMask = transformNiiMask(nii.img, atCTMetaData, aResampledNMImage, atResampledNMMeta);
-     
-                            maskToVoi(aMask, 'Lungs', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-                            
-                            clear aMask;
-            
-    
-                            % Lung Left
-            
-                            aColor=[0.7 1 0.7]; % Light green
-            
-                            sNiiFileName = 'combined_lung_left.nii.gz';
-            
-                            sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m lung_left', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
-                
-                            [bStatus, sCmdout] = system(sCommandLine);
-            
-                            if bStatus 
-                                progressBar( 1, 'Error: An error occur during left lung combine mask!');
-                                errordlg(sprintf('An error occur during left lung combine mask: %s', sCmdout), 'Segmentation Error');  
-                            else % Process succeed
-            
-                                sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                                
-                                if exist(sNiiFileName, 'file')
-            
-                                    nii = nii_tool('load', sNiiFileName);
-            
-                                    aMask = transformNiiMask(nii.img, atCTMetaData, aResampledNMImage, atResampledNMMeta);
-            
-                                    maskToVoi(aMask, 'Lung Left', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-            
-                               end
-            
-                            end
-            
-                            progressBar(5/14, 'Importing Lung Right mask, please wait.');
-            
-                            % Lung Right
-            
-                            aColor=[0.67 0 1]; % Violet
-            
-                            sNiiFileName = 'combined_lung_right.nii.gz';
-            
-                            sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m lung_right', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
-                
-                            [bStatus, sCmdout] = system(sCommandLine);
-            
-                            if bStatus 
-                                progressBar( 1, 'Error: An error occur during lung right combine mask!');
-                                errordlg(sprintf('An error occur during lung right combine mask: %s', sCmdout), 'Segmentation Error');  
-                            else % Process succeed
-            
-                                sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                                
-                                if exist(sNiiFileName, 'file')
-            
-                                    nii = nii_tool('load', sNiiFileName);
-            
-                                    aMask = transformNiiMask(nii.img, atCTMetaData, aResampledNMImage, atResampledNMMeta);
-            
-                                    maskToVoi(aMask, 'Lung Right', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-                                    
-                                    clear aMask;
-                               end
-            
-                            end
-            
-                            progressBar(6/14, 'Importing Lung Upper Lobe Left mask, please wait.');
-            
-                            % Lung Upper Lobe Left
-            
-                            aColor=[0 1 1]; % Cyan
-            
-                            sNiiFileName = 'lung_upper_lobe_left.nii.gz';
-            
-                            sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                            
-                            if exist(sNiiFileName, 'file')
-            
-                                nii = nii_tool('load', sNiiFileName);
-            
-                                machineLearning3DMask('set', 'lung_upper_lobe_left', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
-            
-                                aMask = transformNiiMask(nii.img, atCTMetaData, aResampledNMImage, atResampledNMMeta);
-            
-                                maskToVoi(aMask, 'Lung Upper Lobe Left', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-            
-                                clear aMask;
-                            end
-            
-                            progressBar(7/14, 'Importing Lung Upper Lobe Right mask, please wait.');
-            
-                            % Lung Upper Lobe Right
-            
-                            aColor=[0 1 0]; % Green
-            
-                            sNiiFileName = 'lung_upper_lobe_right.nii.gz';
-            
-                            sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                            
-                            if exist(sNiiFileName, 'file')
-            
-                                nii = nii_tool('load', sNiiFileName);
-            
-                                machineLearning3DMask('set', 'lung_upper_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
-            
-                                aMask = transformNiiMask(nii.img, atCTMetaData, aResampledNMImage, atResampledNMMeta);
-            
-                                maskToVoi(aMask, 'Lung Upper Lobe Right', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-            
-                                clear aMask;
-                            end         
-            
-                            progressBar(8/14, 'Importing Lung Middle Lobe mask, please wait.');
-            
-                            % Lung Middle Lobe
-            
-                            aColor=[1 1 0]; % Yellow
-            
-                            sNiiFileName = 'lung_middle_lobe_right.nii.gz';
-            
-                            sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                            
-                            if exist(sNiiFileName, 'file')
-            
-                                nii = nii_tool('load', sNiiFileName);
-            
-                                machineLearning3DMask('set', 'lung_middle_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
-            
-                                aMask = transformNiiMask(nii.img, atCTMetaData, aResampledNMImage, atResampledNMMeta);
-            
-                                maskToVoi(aMask, 'Lung Middle Lobe Right', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-            
-                                clear aMask;
-                            end      
-            
-                            progressBar(9/14, 'Importing Lung Lower Lobe Left mask, please wait.');
-            
-                            % Lung Lower Lobe Left
-            
-                            aColor=[1 0 0]; % Red
-            
-                            sNiiFileName = 'lung_lower_lobe_left.nii.gz';
-            
-                            sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                            
-                            if exist(sNiiFileName, 'file')
-            
-                                nii = nii_tool('load', sNiiFileName);
-            
-                                machineLearning3DMask('set', 'lung_lower_lobe_left', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
-            
-                                aMask = transformNiiMask(nii.img, atCTMetaData, aResampledNMImage, atResampledNMMeta);
-            
-                                maskToVoi(aMask, 'Lung Lower Lobe Left', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-            
-                                clear aMask;
-                            end   
-            
-                            progressBar(10/14, 'Importing Lung Lower Lobe Right mask, please wait.');
-            
-                            % Lung Lower Lobe Right
-            
-                            aColor=[0 0.5 1]; % Blue
-            
-                            sNiiFileName = 'lung_lower_lobe_right.nii.gz';
-            
-                            sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                            
-                            if exist(sNiiFileName, 'file')
-            
-                                nii = nii_tool('load', sNiiFileName);
-            
-                                machineLearning3DMask('set', 'lung_lower_lobe_right', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
-            
-                                aMask = transformNiiMask(nii.img, atCTMetaData, aResampledNMImage, atResampledNMMeta);
-            
-                                maskToVoi(aMask, 'Lung Lower Lobe Right', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-            
-                                clear aMask;
-                            end   
-
-
-                            progressBar(11/14, 'Importing Liver mask, please wait.');
-            
-                            % Liver
-            
-                            aColor=[1 0.41 0.16]; % Orange
-            
-                            sNiiFileName = 'liver.nii.gz';
-            
-                            sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                            
-                            if exist(sNiiFileName, 'file')
-            
-                                nii = nii_tool('load', sNiiFileName);
-
-                                machineLearning3DMask('set', 'liver', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
-            
-                                aMask = transformNiiMask(nii.img, atCTMetaData, aResampledNMImage, atResampledNMMeta);
-
-                                maskToVoi(aMask, 'Liver', 'Liver', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-            
-                                clear aMask;
-                            end                
-                       end
-            
-                    end
+                    atResampledRoi = resampleROIs(aNMImage, atNMMetaData, aResampledNMImage, atResampledNMMeta, atRoi, true);
+                                            
+                    roiTemplate('set', dNMSerieOffset, atResampledRoi);
 
                     setQuantification(dNMSerieOffset);    
               
@@ -705,8 +473,10 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
                     clear aMip;
                     clear refMip;
                     clear aCTImage;
-                    clear aResampledNMImage;                     
+                    clear aResampledNMImage;   
+
                 end
+
             end
 
 

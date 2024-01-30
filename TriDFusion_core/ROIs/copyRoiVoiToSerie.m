@@ -34,8 +34,8 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
 
 %    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-    atInput    = inputTemplate('get');
-    atRoiInput = roiTemplate('get', dSeriesToOffset);
+    atInput       = inputTemplate('get');
+    atRoiInput    = roiTemplate('get', dSeriesToOffset);
     atRefRoiInput = roiTemplate('get', dSeriesOffset);
     
     aBuffer = inputBuffer('get');
@@ -43,16 +43,19 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
 %    set(uiSeriesPtr('get'), 'Value', dSeriesToOffset); 
     
     aRefBuffer = dicomBuffer('get', [], dSeriesOffset);
-    if isempty(aRefBuffer)        
+    if isempty(aRefBuffer) 
+
         aRefBuffer = aBuffer{dSeriesOffset};            
     end
     
     if isempty(imRoi)        
+
         imRoi = aBuffer{dSeriesToOffset};         
     end
         
     atRefInfo = dicomMetaData('get', [], dSeriesOffset);
     if isempty(atRefInfo)
+
          atRefInfo = atInput(dSeriesOffset).atDicomInfo;
     end
     
@@ -155,6 +158,36 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
 
                         end
 
+                        if size(aRefBuffer, 3) ~= 1 
+                    
+                            switch lower(tRoi.Axe)
+                                
+                                case 'axes1'                  
+                                                    
+                                case 'axes2'                  
+       
+                                otherwise
+
+                                    if numel(atDicomInfo) >= tRoi.SliceNb
+                                        sSOPClassUID         = atDicomInfo{tRoi.SliceNb}.SOPClassUID;
+                                        sSOPInstanceUID      = atDicomInfo{tRoi.SliceNb}.SOPInstanceUID;
+                                        sFrameOfReferenceUID = atDicomInfo{tRoi.SliceNb}.FrameOfReferenceUID;
+                                    else
+                                        sSOPClassUID         = atDicomInfo{1}.SOPClassUID;
+                                        sSOPInstanceUID      = atDicomInfo{1}.SOPInstanceUID;
+                                        sFrameOfReferenceUID = atDicomInfo{1}.FrameOfReferenceUID;
+                                    end
+                    
+                            end
+                        else
+                            sSOPClassUID         = atDicomInfo{1}.SOPClassUID;
+                            sSOPInstanceUID      = atDicomInfo{1}.SOPInstanceUID;
+                            sFrameOfReferenceUID = atDicomInfo{1}.FrameOfReferenceUID;
+                        end
+
+                        tRoi.SOPClassUID         = sSOPClassUID;
+                        tRoi.SOPInstanceUID      = sSOPInstanceUID;
+                        tRoi.FrameOfReferenceUID = sFrameOfReferenceUID;                        
                     end
 
                     if ~isempty(tRoi.Position)
@@ -178,7 +211,8 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
         end
 
         if ~isempty(asTag)
-            createVoiFromRois(dSeriesToOffset, asTag, tRoiVoiObject.Label, tRoiVoiObject.Color, 'Unspecified');
+
+            createVoiFromRois(dSeriesToOffset, asTag, tRoiVoiObject.Label, tRoiVoiObject.Color, tRoiVoiObject.LesionType);
         end
 
     else
@@ -269,6 +303,36 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
 
             end
 
+            if size(aRefBuffer, 3) ~= 1 
+        
+                switch lower(tRoi.Axe)
+                    
+                    case 'axes1'                  
+                                        
+                    case 'axes2'                  
+
+                    otherwise
+
+                        if numel(atDicomInfo) >= tRoi.SliceNb
+                            sSOPClassUID         = atDicomInfo{tRoi.SliceNb}.SOPClassUID;
+                            sSOPInstanceUID      = atDicomInfo{tRoi.SliceNb}.SOPInstanceUID;
+                            sFrameOfReferenceUID = atDicomInfo{tRoi.SliceNb}.FrameOfReferenceUID;
+                        else
+                            sSOPClassUID         = atDicomInfo{1}.SOPClassUID;
+                            sSOPInstanceUID      = atDicomInfo{1}.SOPInstanceUID;
+                            sFrameOfReferenceUID = atDicomInfo{1}.FrameOfReferenceUID;
+                        end
+        
+                end
+            else
+                sSOPClassUID         = atDicomInfo{1}.SOPClassUID;
+                sSOPInstanceUID      = atDicomInfo{1}.SOPInstanceUID;
+                sFrameOfReferenceUID = atDicomInfo{1}.FrameOfReferenceUID;
+            end
+
+            tRoi.SOPClassUID         = sSOPClassUID;
+            tRoi.SOPInstanceUID      = sSOPInstanceUID;
+            tRoi.FrameOfReferenceUID = sFrameOfReferenceUID;  
         end
 
         if ~isempty(tRoi.Position)
@@ -529,12 +593,12 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
                 
                 voiMenu(roiPtr);
 
-                uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData', roiPtr, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
 
         end
 
-        addlistener(roiPtr, 'DeletingROI', @deleteRoiEvents );
-        addlistener(roiPtr, 'ROIMoved'   , @movedRoiEvents  );
+        addlistener(roiPtr, 'DeletingROI', @deleteRoiEvents);
+        addlistener(roiPtr, 'ROIMoved'   , @movedRoiEvents );
 
         tRoi.Object = roiPtr;
     end

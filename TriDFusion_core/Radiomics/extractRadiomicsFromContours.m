@@ -778,19 +778,19 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
             aImages = aImages*dSUVScale;
         end
 
-        aImages = rotateNrrdImage(aImages);
+        aImages = transformNrrdImage(aImages);
 
         nrrdWriter(sNrrdImagesName, squeeze(aImages), pixelspacing, origin, 'raw'); % Write .nrrd images 
         clear aImages;
 
-        aImagesMask = rotateNrrdImage(aImagesMask);
+        aImagesMask = transformNrrdImage(aImagesMask);
 
         nrrdWriter(sNrrdMaskName, squeeze(aImagesMask), pixelspacing, origin, 'raw'); % Write .nrrd mask
         clear aImagesMask;
 
         if bEntireVolume == true   
 
-            aEntireImagesMask = rotateNrrdImage(aEntireImagesMask);
+            aEntireImagesMask = transformNrrdImage(aEntireImagesMask);
 
             sNrrdEntireMaskName = sprintf('%sentire_mask.nrrd' , sNrrdTmpDir);
             nrrdWriter(sNrrdEntireMaskName, squeeze(aEntireImagesMask), pixelspacing, origin, 'raw'); % Write .nrrd mask
@@ -820,7 +820,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
             if ~isempty(aUnspecifiedMask)
 
-                aUnspecifiedMask = rotateNrrdImage(aUnspecifiedMask);
+                aUnspecifiedMask = transformNrrdImage(aUnspecifiedMask);
  
                 sNrrdUnspecifiedMaskName = sprintf('%sunspecified_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdUnspecifiedMaskName, squeeze(aUnspecifiedMask), pixelspacing, origin, 'raw'); % Write .nrrd mask
@@ -832,7 +832,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
             if ~isempty(aBoneMask)
 
-                aBoneMask = rotateNrrdImage(aBoneMask);
+                aBoneMask = transformNrrdImage(aBoneMask);
 
                 sNrrdBoneMaskName = sprintf('%sbone_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdBoneMaskName, squeeze(aBoneMask), pixelspacing, origin, 'raw'); % Write .nrrd mask    
@@ -844,7 +844,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
             if ~isempty(aSoftTissueMask)
 
-                aSoftTissueMask = rotateNrrdImage(aSoftTissueMask);
+                aSoftTissueMask = transformNrrdImage(aSoftTissueMask);
 
                 sNrrdSoftTissueMaskName = sprintf('%ssoft_tissue_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdSoftTissueMaskName, squeeze(aSoftTissueMask), pixelspacing, origin, 'raw'); % Write .nrrd mask
@@ -856,7 +856,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
             if ~isempty(aLungMask)
 
-                aLungMask = rotateNrrdImage(aLungMask);
+                aLungMask = transformNrrdImage(aLungMask);
 
                 sNrrdLungMaskName = sprintf('%slung_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdLungMaskName, squeeze(aLungMask), pixelspacing, origin, 'raw'); % Write .nrrd mask      
@@ -868,7 +868,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
             if ~isempty(aLiverMask)
 
-                aLiverMask = rotateNrrdImage(aLiverMask);
+                aLiverMask = transformNrrdImage(aLiverMask);
 
                 sNrrdLiverMaskName = sprintf('%sliver_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdLiverMaskName, squeeze(aLiverMask), pixelspacing, origin, 'raw'); % Write .nrrd mask 
@@ -880,7 +880,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
             if ~isempty(aParotidMask)
 
-                aParotidMask = rotateNrrdImage(aParotidMask);
+                aParotidMask = transformNrrdImage(aParotidMask);
 
                 sNrrdParotidMaskName = sprintf('%sparotid_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdParotidMaskName, squeeze(aParotidMask), pixelspacing, origin, 'raw'); % Write .nrrd mask     
@@ -892,7 +892,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
             if ~isempty(aBloodPoolMask)
 
-                aBloodPoolMask = rotateNrrdImage(aBloodPoolMask);
+                aBloodPoolMask = transformNrrdImage(aBloodPoolMask);
 
                 sNrrdBloodPoolMaskName = sprintf('%sblood_pool_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdBloodPoolMaskName, squeeze(aBloodPoolMask), pixelspacing, origin, 'raw'); % Write .nrrd mask                      
@@ -904,7 +904,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
             if ~isempty(aLymphNodesMask)
 
-                aLymphNodesMask = rotateNrrdImage(aLymphNodesMask);
+                aLymphNodesMask = transformNrrdImage(aLymphNodesMask);
 
                 sNrrdLymphNodesMaskName = sprintf('%slymph_nodes_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdLymphNodesMaskName, squeeze(aLymphNodesMask), pixelspacing, origin, 'raw'); % Write .nrrd mask
@@ -916,7 +916,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
             if ~isempty(aPrimaryDiseaseMask)
 
-                aPrimaryDiseaseMask = rotateNrrdImage(aPrimaryDiseaseMask);
+                aPrimaryDiseaseMask = transformNrrdImage(aPrimaryDiseaseMask);
 
                 sNrrdPrimaryDiseaseMaskName = sprintf('%sprimary_disease_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdPrimaryDiseaseMaskName, squeeze(aPrimaryDiseaseMask), pixelspacing, origin, 'raw'); % Write .nrrd mask 
@@ -928,7 +928,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
             if ~isempty(aCervicalMask)
 
-                aCervicalMask = rotateNrrdImage(aCervicalMask);
+                aCervicalMask = transformNrrdImage(aCervicalMask);
 
                 sNrrdCervicalMaskName = sprintf('%scervical_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdCervicalMaskName, squeeze(aCervicalMask), pixelspacing, origin, 'raw'); % Write .nrrd mask 
@@ -940,7 +940,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
             if ~isempty(aSupraclavicularMask)
 
-                aSupraclavicularMask = rotateNrrdImage(aSupraclavicularMask);
+                aSupraclavicularMask = transformNrrdImage(aSupraclavicularMask);
 
                 sNrrdSupraclavicularMaskName = sprintf('%ssupraclavicular_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdSupraclavicularMaskName, squeeze(aSupraclavicularMask), pixelspacing, origin, 'raw'); % Write .nrrd mask 
@@ -952,7 +952,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
             if ~isempty(aMediastinalMask)
 
-                aMediastinalMask = rotateNrrdImage(aMediastinalMask);
+                aMediastinalMask = transformNrrdImage(aMediastinalMask);
 
                 sNrrdMediastinalMaskName = sprintf('%smediastinal_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdMediastinalMaskName, squeeze(aMediastinalMask), pixelspacing, origin, 'raw'); % Write .nrrd mask 
@@ -964,7 +964,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
             if ~isempty(aParaspinalMask)
 
-                aParaspinalMask = rotateNrrdImage(aParaspinalMask);
+                aParaspinalMask = transformNrrdImage(aParaspinalMask);
 
                 sNrrdParaspinalMaskName = sprintf('%sparaspinal_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdParaspinalMaskName, squeeze(aParaspinalMask), pixelspacing, origin, 'raw'); % Write .nrrd mask 
@@ -976,7 +976,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
             if ~isempty(aAxillaryMask)
 
-                aAxillaryMask = rotateNrrdImage(aAxillaryMask);
+                aAxillaryMask = transformNrrdImage(aAxillaryMask);
 
                 sNrrdAxillaryMaskName = sprintf('%saxillary_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdAxillaryMaskName, squeeze(aAxillaryMask), pixelspacing, origin, 'raw'); % Write .nrrd mask 
@@ -988,7 +988,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
             if ~isempty(aAbdominalMask)
 
-                aAbdominalMask = rotateNrrdImage(aAbdominalMask);
+                aAbdominalMask = transformNrrdImage(aAbdominalMask);
 
                 sNrrdAbdominalMaskName = sprintf('%sabdominal_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdAbdominalMaskName, squeeze(aAbdominalMask), pixelspacing, origin, 'raw'); % Write .nrrd mask 
@@ -1000,7 +1000,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
             if ~isempty(aUnknowMask)
 
-                aUnknowMask = rotateNrrdImage(aUnknowMask);
+                aUnknowMask = transformNrrdImage(aUnknowMask);
 
                 sNrrdUnknowMaskName = sprintf('%sunknow_mask.nrrd' , sNrrdTmpDir);
                 nrrdWriter(sNrrdUnknowMaskName, squeeze(aUnknowMask), pixelspacing, origin, 'raw'); % Write .nrrd mask   
@@ -2176,14 +2176,20 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
 %    progressBar(1, 'Ready');
 
-    function aImages = rotateNrrdImage(aImages)
+    function aImages = transformNrrdImage(aImages)
 
-        if size(aImages, 3) ~=1    
-            aImages = imrotate3(aImages, 90, [0 0 1], 'nearest');
-            aImages = aImages(end:-1:1,:,:);
-        else
-            aImages = imrotate(aImages, 90, 'nearest');
-            aImages = aImages(end:-1:1,:);        
+        if size(aImages, 3) ~=1
+    
+            aImages = aImages(:,:,end:-1:1);
         end
+
+
+%         if size(aImages, 3) ~=1    
+%             aImages = imrotate3(aImages, 90, [0 0 1], 'nearest');
+%             aImages = aImages(end:-1:1,:,:);
+%         else
+%             aImages = imrotate(aImages, 90, 'nearest');
+%             aImages = aImages(end:-1:1,:);        
+%         end
     end
 end

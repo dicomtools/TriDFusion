@@ -519,9 +519,11 @@ end
                     for dd=1:numel(atRoiInput)
                         if isvalid(atRoiInput{dd}.Object)
                             if strcmpi(atRoiInput{dd}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
-                                if strcmpi(atRoiInput{dd}.Type, 'images.roi.line')
+                                 if strcmpi(atRoiInput{dd}.Type, 'images.roi.line') || ...
+                                     strcmpi(atRoiInput{dd}.Type, 'images.roi.rectangle')     
+                                     
                                     uimenu(c,'Label', 'Profile', 'Separator', 'off', 'Callback',@figRoiHistogramCallback);
-                                end
+                                 end
                             end
                         end
                     end
@@ -1582,7 +1584,19 @@ end
         end       
         
         if atInput(dSeriesOffset).bDoseKernel == true
-            sUnits =  'Unit: Dose';
+
+            if isfield(tRoiMetaData{1}, 'DoseUnits')
+
+                if ~isempty(tRoiMetaData{1}.DoseUnits)
+                    
+                    sUnits = sprintf('Unit: %s', char(tRoiMetaData{1}.DoseUnits));
+                else
+                    sUnits = 'Unit: dose';
+                end
+            else
+                sUnits = 'Unit: dose';
+            end  
+
         else
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                 sUnits = getSerieUnitValue(dSeriesOffset);
@@ -1698,7 +1712,7 @@ end
 
                     if dNbVois > 10
                         if mod(aa, 5)==1 || aa == dNbVois
-                            progressBar(aa/dNbVois-0.0001, sprintf('Computing VOI %d/%d', aa, dNbVois ) );
+                            progressBar(aa/dNbVois-0.0001, sprintf('Computing voi %d/%d', aa, dNbVois ) );
                         end
                     end
 
@@ -1769,7 +1783,7 @@ end
 
                                 if dNbTags > 100
                                     if mod(bb, 10)==1 || bb == dNbTags
-                                        progressBar( bb/dNbTags-0.0001, sprintf('Computing ROI %d/%d, please wait', bb, dNbTags) );
+                                        progressBar( bb/dNbTags-0.0001, sprintf('Computing roi %d/%d, please wait.', bb, dNbTags) );
                                     end
                                 end
 
@@ -1850,7 +1864,7 @@ end
 
                if dNbTags > 100
                    if mod(bb, 10)==1 || bb == dNbTags
-                       progressBar( bb/dNbTags-0.0001, sprintf('Computing ROI %d/%d, please wait', bb, dNbTags) );
+                       progressBar( bb/dNbTags-0.0001, sprintf('Computing roi %d/%d, please wait.', bb, dNbTags) );
                    end
                end
 
@@ -2157,7 +2171,19 @@ end
                 bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
                 
                 if bDoseKernel == true
-                    sUnits = 'Dose';
+
+                    if isfield(atMetaData{1}, 'DoseUnits')
+        
+                        if ~isempty(atMetaData{1}.DoseUnits)
+                            
+                            sUnits = char(atMetaData{1}.DoseUnits);
+                        else
+                            sUnits = 'dose';
+                        end
+                    else
+                        sUnits = 'dose';
+                    end  
+                    
                 else
 
                     if bSUVUnit == true
@@ -2197,7 +2223,7 @@ end
                 asVoiRoiHeader{4} = sprintf('Accession Number, %s'  , atMetaData{1}.AccessionNumber);
                 asVoiRoiHeader{5} = sprintf('Series Date, %s'       , atMetaData{1}.SeriesDate);
                 asVoiRoiHeader{6} = sprintf('Series Time, %s'       , atMetaData{1}.SeriesTime);
-                asVoiRoiHeader{7} = sprintf('Units, %s'             , sUnits);
+                asVoiRoiHeader{7} = sprintf('Unit, %s'              , sUnits);
                 asVoiRoiHeader{8} = (' ');
 
                 dNumberOfLines = dNumberOfLines + numel(asVoiRoiHeader); % Add header and cell description to number of needed lines
@@ -2243,7 +2269,7 @@ end
 
                             if dNbVois > 10
                                 if mod(aa, 5)==1 || aa == dNbVois
-                                    progressBar(aa/dNbVois-0.0001, sprintf('Computing VOI %d/%d', aa, dNbVois ) );
+                                    progressBar(aa/dNbVois-0.0001, sprintf('Computing voi %d/%d', aa, dNbVois ) );
                                 end
                             end
 
@@ -2297,7 +2323,7 @@ end
 
                                         if dNbTags > 100
                                              if mod(bb, 10)==1 || bb == dNbTags
-                                                progressBar( bb/dNbTags-0.0001, sprintf('Computing ROI %d/%d, please wait', bb, dNbTags) );
+                                                progressBar( bb/dNbTags-0.0001, sprintf('Computing roi %d/%d, please wait.', bb, dNbTags) );
                                              end
                                         end
 
@@ -2360,7 +2386,7 @@ end
 
                             if dNbRois > 100
                                 if mod(bb, 10)==1 || bb == dNbRois
-                                    progressBar( bb/dNbRois-0.0001, sprintf('Computing ROI %d/%d, please wait', bb, dNbRois) );
+                                    progressBar( bb/dNbRois-0.0001, sprintf('Computing roi %d/%d, please wait.', bb, dNbRois) );
                                 end
                             end
 
@@ -2429,7 +2455,7 @@ end
                     end
                 end
                 
-                progressBar( 0.99, sprintf('Writing file %s, please wait', file) );
+                progressBar( 0.99, sprintf('Writing file %s, please wait.', file) );
 
                 cell2csv(sprintf('%s%s', path, file), asCell, ',');
 
@@ -2793,7 +2819,7 @@ end
 
         asSeriesDescription = seriesDescription('get');
         for sd=1:numel(asSeriesDescription)
-            if strcmpi(sCopyTo, asSeriesDescription{sd})
+            if strcmpi(sCopyTo, asSeriesDescription{sd}) && dSeriesOffset ~= sd
                 dToSeriesOffset = sd;
                 break;
             end
@@ -2815,8 +2841,12 @@ end
 
         if ~isempty(atVoiInput) 
 
-            for aa=1:numel(atVoiInput)
-                
+            dNbVois = numel(atVoiInput);
+
+            for aa=1:dNbVois
+
+                progressBar(aa/dNbVois-0.01, sprintf('Processing voi %d/%d, please wait.', aa, dNbVois));
+
                 copyRoiVoiToSerie(dSeriesOffset, dToSeriesOffset, atVoiInput{aa}, false);
             end
         end
@@ -2825,16 +2855,27 @@ end
 
         if ~isempty(atRoiInput)
 
+            dNbRois = numel(atRoiInput);
+
             for cc=1:numel(atRoiInput)
 
                 if isvalid(atRoiInput{cc}.Object)
+
                     if ~strcmpi(atRoiInput{cc}.ObjectType, 'voi-roi')
+
+                        if mod(cc, 5)==1 || cc == dNbRois
+
+                            progressBar(cc/dNbRois-0.01, sprintf('Processing voi-roi %d/%d, please wait.', cc, dNbRois));
+                        end
+
                         copyRoiVoiToSerie(dSeriesOffset, dToSeriesOffset, atRoiInput{cc}, false);
                     end
                 end
             end
         end
-        
+
+        progressBar(1, 'Ready');
+
         catch
             progressBar(1, 'Error: figRoiCopyObjectCallback()' );                
         end       
@@ -2863,7 +2904,7 @@ end
 
         asSeriesDescription = seriesDescription('get');
         for sd=1:numel(asSeriesDescription)
-            if strcmpi(sCopyTo, asSeriesDescription{sd})
+            if strcmpi(sCopyTo, asSeriesDescription{sd}) && dSeriesOffset ~= sd
                 dToSeriesOffset = sd;
                 break;
             end
@@ -2885,10 +2926,15 @@ end
 
         if ~isempty(atVoiInput) 
 
+            dNbVois = numel(atVoiInput);
+
             for aa=1:numel(atVoiInput)
+
                 if strcmpi(atVoiInput{aa}.Tag, pVoiRoiTag)
                     
                     % Object is a VOI
+
+                    progressBar(aa/dNbVois-0.01, sprintf('Processing voi %d/%d, please wait.', aa, dNbVois));
 
                     copyRoiVoiToSerie(dSeriesOffset, dToSeriesOffset, atVoiInput{aa}, false);
                     bObjectIsVoi = true;
@@ -2903,12 +2949,19 @@ end
 
             if ~isempty(atRoiInput)
 
+                dNbRois = numel(atRoiInput);
+
                 for cc=1:numel(atRoiInput)
                     if isvalid(atRoiInput{cc}.Object)
                         if strcmpi(atRoiInput{cc}.Tag, pVoiRoiTag)
 
                             if strcmpi(atRoiInput{cc}.ObjectType, 'voi-roi')
                                 atRoiInput{cc}.ObjectType = 'roi';
+                            end
+
+                            if mod(cc, 5)==1 || cc == dNbRois
+    
+                                progressBar(cc/dNbRois-0.01, sprintf('Processing roi %d/%d, please wait.', cc, dNbRois));
                             end
 
                             % Object is a ROI
@@ -2920,6 +2973,8 @@ end
             end
         end
 
+        progressBar(1, 'Ready');
+        
         catch
             progressBar(1, 'Error: figRoiCopyObjectCallback()' );                
         end       

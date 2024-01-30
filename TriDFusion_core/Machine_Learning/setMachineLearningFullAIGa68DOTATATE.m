@@ -35,7 +35,7 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorScript, sOnnxPath, dMo
     for tt=1:numel(atInput)
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'ct')
             dCTSerieOffset = tt;
-            break
+            break;
         end
     end
 
@@ -44,7 +44,7 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorScript, sOnnxPath, dMo
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'pt') || ...
            strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'nm')     
             dPTSerieOffset = tt;
-            break
+            break;
         end
     end
 

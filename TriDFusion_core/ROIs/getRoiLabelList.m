@@ -47,4 +47,9 @@ function aList = getRoiLabelList()
     aList{numel(aList)+1}='Tumor 3';
     aList{numel(aList)+1}='Tumor 4';
     aList{numel(aList)+1}='Tumor 5';            
+    aList{numel(aList)+1}='Lymph Node Mesorectal';            
+    aList{numel(aList)+1}='Lymph Node Inguinal';            
+    aList{numel(aList)+1}='Lymph Node Internal Iliac';            
+    aList{numel(aList)+1}='Lymph Node External Iliac';            
+    aList{numel(aList)+1}='Lymph Node Superior Rectal';            
 end

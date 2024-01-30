@@ -226,7 +226,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
         info.ROIContourSequence.(sVOIitemName).ReferencedROINumber = cc;
 
         if mod(cc,5)==1 || cc == 1 || cc == nbContours
-            progressBar( cc / nbContours - 0.000001, sprintf('Processing contour %d/%d, please wait', cc, nbContours) );
+            progressBar( cc / nbContours - 0.000001, sprintf('Processing voi %d/%d, please wait.', cc, nbContours) );
         end
 
         nbRois = numel(atVoiInput{cc}.RoisTag);
@@ -298,12 +298,12 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 %                                aZ(:) = a3DOffset(:,3);                                
                                 aZ = outZ(:);                                
                             else
-                                if atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation == 0
-                                    aZ(:) = outZ(:);
-                                else
-                        %            aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
+%                                 if atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation == 0
+%                                     aZ(:) = outZ(:);
+%                                 else
+%                         %            aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
                                     aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.ImagePositionPatient(3);
-                               end
+%                                end
                             end
                             
 
@@ -326,7 +326,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                             
                             dZOffset=1;
                             for zz=3:3:numel(aXYZ)
-                                aXYZ(zz)=aZ(dZOffset);
+                                aXYZ(zz) = aZ(dZOffset);
                                 dZOffset = dZOffset+1;                               
                             end
                             
@@ -383,12 +383,12 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 %                                aZ(:) = a3DOffset(:,3);                                
                                 aZ = outZ(:);                                
                             else
-                                if atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation == 0
-                                    aZ(:) = outZ(:);
-                                else
-                        %            aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
+%                                 if atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation == 0
+%                                     aZ(:) = outZ(:);
+%                                 else
+%                         %            aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
                                     aZ(:) = atDicomMeta{atRoiInput{tt}.SliceNb}.ImagePositionPatient(3);
-                               end
+%                                end
                             end
                             
 

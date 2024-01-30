@@ -55,8 +55,10 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale)
             if bRescale == true
 
                 if numel(atMetaData) ~= 1
+
                     if isfield(atMetaData{slice}, 'RescaleIntercept') && ...
                        isfield(atMetaData{slice}, 'RescaleSlope')     
+
                         if atMetaData{slice}.RescaleSlope ~= 0
                             aBuffer(:,:,slice) = (aBuffer(:,:,slice) - atMetaData{slice}.RescaleIntercept) / atMetaData{slice}.RescaleSlope;
                         else
@@ -68,7 +70,14 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale)
                                 end                        
                             end                           
                         end
-                    end                            
+                    end
+
+                    if strcmpi(atMetaData{1}.Modality, 'RTDOSE')
+                        if atMetaData{1}.DoseGridScaling ~= 0
+                            aBuffer(:,:,slice) = aBuffer(:,:,slice) / atMetaData{1}.DoseGridScaling;
+                        end
+                    end 
+
                 else
                     if isfield(atMetaData{1}, 'RescaleIntercept') && ...
                        isfield(atMetaData{1}, 'RescaleSlope')     
@@ -83,7 +92,13 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale)
                                 end                        
                             end                                                 
                         end
-                    end                  
+                    end   
+
+                    if strcmpi(atMetaData{1}.Modality, 'RTDOSE')
+                        if atMetaData{1}.DoseGridScaling ~= 0
+                            aBuffer(:,:,slice) = aBuffer(:,:,slice) / atMetaData{1}.DoseGridScaling;
+                        end
+                    end
                 end
             end
 
@@ -94,6 +109,7 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale)
         if bRescale == true       
             if isfield(atMetaData{1}, 'RescaleIntercept') && ...
                isfield(atMetaData{1}, 'RescaleSlope') 
+                
                 if atMetaData{1}.RescaleSlope ~= 0
                     aBuffer = (aBuffer - atMetaData{1}.RescaleIntercept) / atMetaData{1}.RescaleSlope;
                 else
@@ -105,11 +121,18 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale)
                         end                        
                     end                
                 end
-            end               
+            end 
+
+            if strcmpi(atMetaData{1}.Modality, 'RTDOSE')
+                if atMetaData{1}.DoseGridScaling ~= 0
+                    aBuffer = aBuffer / atMetaData{1}.DoseGridScaling;
+                end
+            end           
         end
         array4d = aBuffer;
     end
-    
+
+
     if numel(atInputTemplate(dSeriesOffset).asFilesList)
  %       for ww=1: numel(atInputTemplate(dSeriesOffset).asFilesList)
         dReadEndLoop = numel(atInputTemplate(dSeriesOffset).asFilesList);
@@ -152,17 +175,27 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale)
             end
         end
     else
-        if isfield(atWriteMetaData{1}, 'PatientPosition')
-            if strcmpi(atWriteMetaData{1}.PatientPosition, 'FFS')
-                 array4d = array4d(:,:,:,end:-1:1);    
-                 atWriteMetaData = flip(atWriteMetaData);
-            end         
-            
-            if strcmpi(atWriteMetaData{1}.PatientPosition, 'FFP')
-                 array4d = array4d(end:-1:1,:,:,:);    
-            end               
+        if strcmpi(atWriteMetaData{1}.Modality, 'RTDOSE')
+
+%             bFlip = getImagePosition(dSeriesOffset);
+%             if bFlip == true
+                array4d = array4d(:,:,:,end:-1:1);    
+%             end
+        
+        else
+            if isfield(atWriteMetaData{1}, 'PatientPosition')
+                if strcmpi(atWriteMetaData{1}.PatientPosition, 'FFS')
+                     array4d = array4d(:,:,:,end:-1:1);    
+                     atWriteMetaData = flip(atWriteMetaData);
+                end         
+                
+                if strcmpi(atWriteMetaData{1}.PatientPosition, 'FFP')
+                     array4d = array4d(end:-1:1,:,:,:);    
+                end               
+            end
         end
     end  
+
 
     dSeriesInstanceUID = dicomuid;
     
@@ -445,9 +478,6 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale)
 
         try   
             
-            atWriteMetaData{ww}.BitsAllocated = 16;
-            atWriteMetaData{ww}.BitsStored    = 16;
-            atWriteMetaData{ww}.HighBit       = 15;
 
             if 0
 %            if atInputTemplate(dSeriesOffset).bMathApplied == true
@@ -482,16 +512,41 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale)
             end
 
             if numel(atWriteMetaData) == 1    
-                
-                dicomwrite(uint16(array4d)    , ...
-                           sOutFile           , ...
-                           atWriteMetaData{ww}, ...
-                           'CreateMode'       , ...
-                           'Copy'             , ...
-                           'WritePrivate'     , true ...
-                           ); 
+
+                if strcmpi(atWriteMetaData{1}.Modality, 'RTDOSE')
+
+                    atWriteMetaData{ww}.BitsAllocated = 32;
+                    atWriteMetaData{ww}.BitsStored    = 32;
+                    atWriteMetaData{ww}.HighBit       = 31;
+
+                    dicomwrite(uint32(array4d)    , ...
+                               sOutFile           , ...
+                               atWriteMetaData{ww}, ...
+                               'CreateMode'       , ...
+                               'Copy'             , ...
+                               'WritePrivate'     , true ...
+                               );                     
+                else
+
+                    atWriteMetaData{ww}.BitsAllocated = 16;
+                    atWriteMetaData{ww}.BitsStored    = 16;
+                    atWriteMetaData{ww}.HighBit       = 15;
+
+                    dicomwrite(uint16(array4d)    , ...
+                               sOutFile           , ...
+                               atWriteMetaData{ww}, ...
+                               'CreateMode'       , ...
+                               'Copy'             , ...
+                               'WritePrivate'     , true ...
+                               ); 
+                end
             else       
    %             array4d = dicomread(char(atInputTemplate(dSeriesOffset).asFilesList{ww}));
+
+                atWriteMetaData{ww}.BitsAllocated = 32;
+                atWriteMetaData{ww}.BitsStored    = 32;
+                atWriteMetaData{ww}.HighBit       = 31;
+
                 dicomwrite(uint32(array4d(:,:,:,ww)) , ...
                            sOutFile           , ...
                            atWriteMetaData{ww}, ...

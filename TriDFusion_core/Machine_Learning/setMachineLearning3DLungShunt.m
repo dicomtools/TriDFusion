@@ -27,7 +27,6 @@ function setMachineLearning3DLungShunt(sSegmentatorScript, sSegmentatorCombineMa
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-            
     atInput = inputTemplate('get');
     
     % Modality validation    
@@ -158,70 +157,69 @@ function setMachineLearning3DLungShunt(sSegmentatorScript, sSegmentatorCombineMa
                 errordlg(sprintf('An error occur during machine learning segmentation: %s', sCmdout), 'Segmentation Error');  
             else % Process succeed
 
-                if bResampleSeries == false
+                progressBar(3/7, 'Importing Lungs mask, please wait.');
+                
+                % Lung
 
-                    progressBar(3/7, 'Importing Lungs mask, please wait.');
-                    
-                    % Lung
+                aColor= [1 0.5 1]; % Pink
+
+                sNiiFileName = 'combined_lungs.nii.gz';
+
+                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m lung', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
     
-                    aColor= [1 0.5 1]; % Pink
-    
-                    sNiiFileName = 'combined_lungs.nii.gz';
-    
-                    sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m lung', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
-        
-                    [bStatus, sCmdout] = system(sCommandLine);
-    
-                    if bStatus 
-                        progressBar( 1, 'Error: An error occur during lungs combine mask!');
-                        errordlg(sprintf('An error occur during lungs combine mask: %s', sCmdout), 'Segmentation Error');  
-                    else % Process succeed
-    
-    
-                        sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                        
-                        if exist(sNiiFileName, 'file')
-    
-                            nii = nii_tool('load', sNiiFileName);
-    
-                            machineLearning3DMask('set', 'lungs', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
-    
-                            aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
-    
-                            maskToVoi(aMask, 'Lungs', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-                            
-                            clear aMask;
-                       end
-    
-                    end
-    
-    
-                    progressBar(4/7, 'Importing Liver mask, please wait.');
-    
-                    % Liver
-    
-                    aColor=[1 0.41 0.16]; % Orange
-    
-                    sNiiFileName = 'liver.nii.gz';
-    
+                [bStatus, sCmdout] = system(sCommandLine);
+
+                if bStatus 
+                    progressBar( 1, 'Error: An error occur during lungs combine mask!');
+                    errordlg(sprintf('An error occur during lungs combine mask: %s', sCmdout), 'Segmentation Error');  
+                else % Process succeed
+
+
                     sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
                     
                     if exist(sNiiFileName, 'file')
-    
-                        nii = nii_tool('load', sNiiFileName);
-    
-                        machineLearning3DMask('set', 'liver', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
-    
-                        aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
-    
-                        maskToVoi(aMask, 'Liver', 'Liver', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-    
-                        clear aMask;
-                    end
-                else
 
-                    progressBar(3/7, 'Resampling image, please wait.');
-                   
+                        nii = nii_tool('load', sNiiFileName);
+
+                        machineLearning3DMask('set', 'lungs', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
+
+                        aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
+
+                        maskToVoi(aMask, 'Lungs', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
+                        
+                        clear aMask;
+                   end
+
+                end
+
+
+                progressBar(4/7, 'Importing Liver mask, please wait.');
+
+                % Liver
+
+                aColor=[1 0.41 0.16]; % Orange
+
+                sNiiFileName = 'liver.nii.gz';
+
+                sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
+                
+                if exist(sNiiFileName, 'file')
+
+                    nii = nii_tool('load', sNiiFileName);
+
+                    machineLearning3DMask('set', 'liver', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
+
+                    aMask = transformNiiMask(nii.img, atCTMetaData, aNMImage, atNMMetaData);
+
+                    maskToVoi(aMask, 'Liver', 'Liver', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
+
+                    clear aMask;
+                end
+                
+                if bResampleSeries == true
+
+                    progressBar(5/7, 'Resamplig series, please wait.');
+
                     aCTImage = dicomBuffer('get', [], dCTSerieOffset);
                     if isempty(aCTImage)
                         aInputBuffer = inputBuffer('get');
@@ -229,11 +227,9 @@ function setMachineLearning3DLungShunt(sSegmentatorScript, sSegmentatorCombineMa
             
                         clear aInputBuffer;
                     end
-            
-                    % Resample NM to CT dimension
-            
+
                     [aResampledNMImage, atResampledNMMeta] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);   
-                
+
                     dicomMetaData('set', atResampledNMMeta, dNMSerieOffset);
                     dicomBuffer  ('set', aResampledNMImage, dNMSerieOffset);
             
@@ -244,64 +240,12 @@ function setMachineLearning3DLungShunt(sSegmentatorScript, sSegmentatorCombineMa
                     aMip = resampleMip(aMip, atNMMetaData, refMip, atCTMetaData, 'Linear', false);
                 
                     mipBuffer('set', aMip, dNMSerieOffset);
+
+                    atRoi = roiTemplate('get', dNMSerieOffset);
                     
-                    progressBar(4/7, 'Importing Lungs mask, please wait.');
-                        
-                    % Lung
-            
-                    aColor= [1 0.5 1]; % Pink
-            
-                    sNiiFileName = 'combined_lungs.nii.gz';
-            
-                    sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s%s -m lung', sSegmentatorCombineMasks, sSegmentationFolderName, sSegmentationFolderName, sNiiFileName);    
-            
-                    [bStatus, sCmdout] = system(sCommandLine);
-            
-                    if bStatus 
-                        progressBar( 1, 'Error: An error occur during lungs combine mask!');
-                        errordlg(sprintf('An error occur during lungs combine mask: %s', sCmdout), 'Segmentation Error');  
-                    else % Process succeed
-            
-                        sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                        
-                        if exist(sNiiFileName, 'file')
-            
-                            nii = nii_tool('load', sNiiFileName);
-
-                            machineLearning3DMask('set', 'lungs', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
-
-                            aMask = transformNiiMask(nii.img, atCTMetaData, aResampledNMImage, atResampledNMMeta);
-     
-                            maskToVoi(aMask, 'Lungs', 'Lung', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-                            
-                            clear aMask;
-            
-                            
-                            progressBar(5/7, 'Importing Liver mask, please wait.');
-            
-                            % Liver
-            
-                            aColor=[1 0.41 0.16]; % Orange
-            
-                            sNiiFileName = 'liver.nii.gz';
-            
-                            sNiiFileName = sprintf('%s%s', sSegmentationFolderName, sNiiFileName);
-                            
-                            if exist(sNiiFileName, 'file')
-            
-                                nii = nii_tool('load', sNiiFileName);
-
-                                machineLearning3DMask('set', 'liver', imrotate3(nii.img, 90, [0 0 1], 'nearest'), aColor, computeMaskVolume(nii.img, atCTMetaData));
-            
-                                aMask = transformNiiMask(nii.img, atCTMetaData, aResampledNMImage, atResampledNMMeta);
-
-                                maskToVoi(aMask, 'Liver', 'Liver', aColor, 'axial', dNMSerieOffset, pixelEdge('get'));
-            
-                                clear aMask;
-                            end                
-                       end
-            
-                    end
+                    atResampledRoi = resampleROIs(aNMImage, atNMMetaData, aResampledNMImage, atResampledNMMeta, atRoi, true);
+                                            
+                    roiTemplate('set', dNMSerieOffset, atResampledRoi);
 
                     setQuantification(dNMSerieOffset);    
               
@@ -357,8 +301,10 @@ function setMachineLearning3DLungShunt(sSegmentatorScript, sSegmentatorCombineMa
                     clear aMip;
                     clear refMip;
                     clear aCTImage;
-                    clear aResampledNMImage;                     
+                    clear aResampledNMImage;   
+
                 end
+
             end
 
         elseif isunix % Linux is not yet supported

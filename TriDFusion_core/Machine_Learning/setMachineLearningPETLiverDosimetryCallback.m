@@ -31,7 +31,7 @@ function setMachineLearningPETLiverDosimetryCallback(~, ~)
     
     if ~isempty(sSegmentatorScript) % External Segmentor is installed
 
-        setMachineLearningPETLiverDosimetry(sSegmentatorScript);
+        setMachineLearningPETLiverDosimetry(sSegmentatorScript, true);
         
     end
 

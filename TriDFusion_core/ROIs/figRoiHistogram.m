@@ -355,9 +355,18 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 %            imCData = imCData(imCData>cropValue('get'));                            
 %        end 
     
-        xValues = ptrObject.Position(:,1);
-        yValues = ptrObject.Position(:,2);                    
-        
+                
+        if strcmpi(ptrObject.Type, 'images.roi.rectangle')
+
+            % Define the coordinates of the rectangle corners
+            xValues = [ptrObject.Position(1), ptrObject.Position(3), ptrObject.Position(3), ptrObject.Position(1), ptrObject.Position(1)];
+            yValues = [ptrObject.Position(2), ptrObject.Position(2), ptrObject.Position(4), ptrObject.Position(4), ptrObject.Position(2)];
+
+        else
+            xValues = ptrObject.Position(:,1);
+            yValues = ptrObject.Position(:,2);               
+        end
+
         switch lower(ptrObject.Axe)    
 
             case 'axe'
@@ -470,7 +479,18 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
         end
 
         if bDoseKernel == true
-            sUnits = 'Unit: Dose';
+
+             if isfield(atRoiVoiMetaData{1}, 'DoseUnits')
+
+                if ~isempty(atRoiVoiMetaData{1}.DoseUnits)
+                    
+                    sUnits = sprintf('Unit: %s', char(atRoiVoiMetaData{1}.DoseUnits));
+                else
+                    sUnits = 'Unit: dose';
+                end
+            else
+                sUnits = 'Unit: dose';
+            end  
         else
 
             if bSUVUnit == true
@@ -591,7 +611,20 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
             axeHistogram.ZColor = viewerForegroundColor('get');
 
             if bDoseKernel == true
-                axeHistogram.XLabel.String = 'Intensity (Gy)';
+
+                if isfield(atRoiVoiMetaData{1}, 'DoseUnits')
+    
+                    if ~isempty(atRoiVoiMetaData{1}.DoseUnits)
+                        
+                        sUnit = char(atRoiVoiMetaData{1}.DoseUnits);
+                    else
+                        sUnit = 'dose';
+                    end
+                else
+                    sUnit = 'dose';
+                end      
+
+                axeHistogram.XLabel.String = sprintf('Intensity (%s)', sUnit);
             else
                 if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct') 
                     axeHistogram.XLabel.String = 'Intensity (HU)';
@@ -660,7 +693,21 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
             axeHistogram.ZColor = viewerForegroundColor('get');
 
             if bDoseKernel == true
-                axeHistogram.XLabel.String = 'Intensity (Gy)';
+
+                if isfield(atRoiVoiMetaData{1}, 'DoseUnits')
+    
+                    if ~isempty(atRoiVoiMetaData{1}.DoseUnits)
+                        
+                        sUnit = char(atRoiVoiMetaData{1}.DoseUnits);
+                    else
+                        sUnit = 'dose';
+                    end
+                else
+                    sUnit = 'dose';
+                end      
+
+                axeHistogram.XLabel.String = sprintf('Intensity (%s)', sUnit);
+
             else
                 if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct') 
                     axeHistogram.XLabel.String = 'Intensity (HU)';
@@ -732,7 +779,21 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
             axeHistogram.XLabel.String = 'Cells';
 
             if bDoseKernel == true
-                axeHistogram.YLabel.String = 'Intensity (Gy)';
+
+                if isfield(atRoiVoiMetaData{1}, 'DoseUnits')
+    
+                    if ~isempty(atRoiVoiMetaData{1}.DoseUnits)
+                        
+                        sUnit = char(atRoiVoiMetaData{1}.DoseUnits);
+                    else
+                        sUnit = 'dose';
+                    end
+                else
+                    sUnit = 'dose';
+                end      
+
+                axeHistogram.YLabel.String = sprintf('Intensity (%s)', sUnit);
+
             else
                 if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct') 
                     axeHistogram.YLabel.String = 'Intensity (HU)';
@@ -997,7 +1058,18 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                 end
 
                 if bDoseKernel == true
-                    sUnits = 'Dose';                    
+
+                    if isfield(atMetaData{1}, 'DoseUnits')
+        
+                        if ~isempty(atMetaData{1}.DoseUnits)
+                            
+                            sUnits = char(atMetaData{1}.DoseUnits);
+                        else
+                            sUnits = 'dose';
+                        end
+                    else
+                        sUnits = 'dose';
+                    end                    
                 else
 
                     if bSUVUnit == true
@@ -1037,7 +1109,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                 asVoiRoiHeader{4} = sprintf('Accession Number, %s'  , atMetaData{1}.AccessionNumber);
                 asVoiRoiHeader{5} = sprintf('Series Date, %s'       , atMetaData{1}.SeriesDate);
                 asVoiRoiHeader{6} = sprintf('Series Time, %s'       , atMetaData{1}.SeriesTime);
-                asVoiRoiHeader{7} = sprintf('Units, %s'             , sUnits);
+                asVoiRoiHeader{7} = sprintf('Unit, %s'              , sUnits);
                 asVoiRoiHeader{8} = (' ');
 
                 dNumberOfLines = dNumberOfLines + numel(asVoiRoiHeader)+6; % Add header and cell description and footer to number of needed lines

@@ -216,7 +216,13 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
         atInput(numel(atInput)).atDicomInfo{1}.AcquisitionTime = '';
         atInput(numel(atInput)).atDicomInfo{1}.AcquisitionDate = '';   
 
-         atInput(numel(atInput)).atDicomInfo{1}.din = [];
+        % Dose
+
+        atInput(numel(atInput)).atDicomInfo{1}.DoseUnits = [];
+        atInput(numel(atInput)).atDicomInfo{1}.DoseType = [];
+        atInput(numel(atInput)).atDicomInfo{1}.Units = [];
+
+        atInput(numel(atInput)).atDicomInfo{1}.din = [];
      
         % Series default
         
@@ -300,6 +306,12 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
         atInput(1).atDicomInfo{1}.AcquisitionTime = '';
         atInput(1).atDicomInfo{1}.AcquisitionDate = '';           
 
+        % Dose
+
+        atInput(1).atDicomInfo{1}.DoseUnits = [];
+        atInput(1).atDicomInfo{1}.DoseType = [];
+        atInput(1).atDicomInfo{1}.Units = [];
+
         atInput(1).atDicomInfo{1}.din = [];
        
         % Series default
@@ -357,6 +369,7 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
 
     tQuant = quantificationTemplate('get');
     atInput(numel(atInput)).tQuant = tQuant;
+    
     inputTemplate('set', atInput);  
 
     clearDisplay();                       

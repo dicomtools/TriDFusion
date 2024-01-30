@@ -970,7 +970,18 @@ function generateContourReportCallback(~, ~)
         atMetaData = dicomMetaData('get', [], dSeriesOffset);
     
         if atInput(dSeriesOffset).bDoseKernel == true
-            sUnit =  'Dose';
+
+            if isfield(atMetaData{1}, 'DoseUnits')
+
+                if ~isempty(atMetaData{1}.DoseUnits)
+                    
+                    sUnit = char(atMetaData{1}.DoseUnits);
+                else
+                    sUnit = 'dose';
+                end
+            else
+                sUnit = 'dose';
+            end            
         else
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                 sUnit = getSerieUnitValue(dSeriesOffset);
@@ -1327,13 +1338,13 @@ function generateContourReportCallback(~, ~)
         
         if strcmpi(sAction, 'init')
 
-            sReport = sprintf('%s\n________', '-');            
+            sReport = sprintf('%s\n_______', '-');            
         else
             
             if ~isempty(tReport.All.Count)
-                sReport = sprintf('%-8s\n________', num2str(tReport.All.Count));      
+                sReport = sprintf('%-8s\n_______', num2str(tReport.All.Count));      
             else
-                sReport = sprintf('%s\n________', '-');      
+                sReport = sprintf('%s\n_______', '-');      
             end
                 
             for ll=1:numel(asLesionList)      
@@ -4231,11 +4242,12 @@ function generateContourReportCallback(~, ~)
 
             print(figContourReport, sFileName, '-image', '-dpdf', '-r0');
          
-            set(figContourReport,'Units',unit);
-  
+            set(figContourReport,'Units', unit);
+
+            progressBar( 1 , sprintf('Export %s completed.', sFileName)); 
         
             try
-                open(sFileName);
+                winopen(sFileName);
             catch
             end
         end
@@ -4328,7 +4340,7 @@ function generateContourReportCallback(~, ~)
             set(recordIconMenuObject('get'), 'State', 'on');
 
             recordMultiFrame(recordIconMenuObject('get'), path, file, 'avi', axes3Ptr('get', [], dSeriesOffset));
-
+            
         end
         
         catch
@@ -4368,29 +4380,37 @@ function generateContourReportCallback(~, ~)
             sCurrentDir  = viewerRootPath('get');
     
             sMatFile = [sCurrentDir '/' 'lastWriteDicomDir.mat'];
+
             % load last data directory
-            if exist(sMatFile, 'file')
-                                        % lastDirMat mat file exists, load it
-               load('-mat', sMatFile);
+
+            if exist(sMatFile, 'file') % lastDirMat mat file exists, load it
+                                       
+               load(sMatFile, 'exportDicomLastUsedDir');
+
                if exist('exportDicomLastUsedDir', 'var')
+
                    sCurrentDir = exportDicomLastUsedDir;
                end
+
                if sCurrentDir == 0
+
                    sCurrentDir = pwd;
                end
             end
     
             sOutDir = uigetdir(sCurrentDir);
+
             if sOutDir == 0
+                
                 return;
             end
             sOutDir = [sOutDir '/'];
     
-            sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                
-            sWriteDir = char(sOutDir) + "TriDFusion_MFSC_" + char(sDate) + '/';              
-            if ~(exist(char(sWriteDir), 'dir'))
-                mkdir(char(sWriteDir));
-            end
+%             sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                
+%             sWriteDir = char(sOutDir) + "TriDFusion_MFSC_" + char(sDate) + '/';              
+%             if ~(exist(char(sWriteDir), 'dir'))
+%                 mkdir(char(sWriteDir));
+%             end
             
             try
                 exportDicomLastUsedDir = sOutDir;
@@ -4414,7 +4434,7 @@ function generateContourReportCallback(~, ~)
         recordMultiFrame(recordIconMenuObject('get'), sOutDir, [], 'dcm', axes3Ptr('get', [], dSeriesOffset));
 
 %         objectToDicomJpg(sWriteDir, figContourReport, '3DF MFSC', get(uiSeriesPtr('get'), 'Value'))
-    
+   
         catch
             progressBar( 1 , 'Error: exportCurrentReportAxialSlicesToDicomMovieCallback() cant export report' );
         end

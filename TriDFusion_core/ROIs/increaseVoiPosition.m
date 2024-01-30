@@ -70,6 +70,7 @@ function increaseVoiPosition(sRoiTag, dNbPixels)
                         % Iterate through each vertex and move it closer to the center
 
                         for i = 1:size(atRoi{dRoiTagOffset}.Position, 1)
+                            
                             x = atRoi{dRoiTagOffset}.Position(i, 1);
                             y = atRoi{dRoiTagOffset}.Position(i, 2);
                             
@@ -83,7 +84,8 @@ function increaseVoiPosition(sRoiTag, dNbPixels)
                             
                         end
     
-                        if isvalid(atRoi{dRoiTagOffset}.Object)                                   
+                        if isvalid(atRoi{dRoiTagOffset}.Object) 
+
                             atRoi{dRoiTagOffset}.Object.Position = atRoi{dRoiTagOffset}.Position;
                         end
                     end

@@ -198,11 +198,22 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
             end
         end
 
+%         if (round(Rdcm.ImageExtentInWorldZ) ~= round(Rref.ImageExtentInWorldZ)) 
+% 
+%             if dRefOutputView == false
+%                 if round(Rref.ImageExtentInWorldZ) > round(Rdcm.ImageExtentInWorldZ)
+%                     dOffset = round(Rref.ImageExtentInWorldZ) - round(Rdcm.ImageExtentInWorldZ);
+%                     dNbSlices = round(dOffset/refSliceThickness);
+%                 end
+%             end
+% 
+%         end
+
         [M, ~] = getTransformMatrix(atDcmMetaData{1}, dcmSliceThickness, atRefMetaData{1}, refSliceThickness);
 
-        if dRefOutputView == false % Keep source z
-            M(3,3) = 1;
-        end
+         if dRefOutputView == false % Keep source z
+             M(3,3) = 1;
+         end
 
         TF = affine3d(M);
 

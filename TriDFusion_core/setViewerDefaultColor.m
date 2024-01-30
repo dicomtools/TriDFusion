@@ -94,9 +94,17 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
 
             if dNbFusedAxes < 2
 
-                sModality = atMetaData{1}.Modality;
-                if exist('atFuseMetaData', 'var')
+
+               sModality = atMetaData{1}.Modality;
+               if strcmpi(sModality, 'RTDOSE') 
+                   sModality = 'pt';
+               end
+
+               if exist('atFuseMetaData', 'var')
                     sFuseModality = atFuseMetaData{1}.Modality;
+                    if strcmpi(sFuseModality, 'RTDOSE') 
+                       sFuseModality = 'pt';
+                    end                    
                 else
                     sFuseModality = 'null';
                 end
@@ -197,7 +205,8 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
 
                     if strcmpi(sModality, 'nm') || ...
                        strcmpi(sModality, 'pt') || ...
-                       strcmpi(sModality, 'ot')
+                       strcmpi(sModality, 'ot') 
+ 
 
                         if isFusion('get') == true && keyPressFusionStatus('get')
                             if strcmpi(sFuseModality, 'mr') || ...

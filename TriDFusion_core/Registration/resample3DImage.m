@@ -26,10 +26,11 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+ 
 
     xPixelSizeRatio = 0;
     yPixelSizeRatio = 0;
-    zMoveOffset =0;
+    zPixelSizeRatio = 0;
     
     dMinValue = min(aRspImage, [], 'all');                       
     
@@ -44,7 +45,7 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
             dRatio = dimsRef/dimsRsp*100;
         end
     
-        if dRatio < 65  % The z is to far, need to change the method 
+         if dRatio < 70  % The z is to far, need to change the method 
             [aRspImage, atRspMetaData] = ...
                 resampleImageTransformMatrix(aRspImage, ...
                                              atRspMetaData, ...
@@ -52,8 +53,12 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
                                              atRefMetaData, ...
                                              sInterpolation, ...
                                              false ...
-                                             );                              
-        else
+                                             );       
+
+
+%                   zPixelSizeRatio = computeSliceSpacing(atRefMetaData);
+
+       else
             Btemp = aRspImage;
             atRspMetaDataTemp = atRspMetaData;
             
@@ -65,8 +70,16 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
                                              sInterpolation, ...
                                              true ...
                                              ); 
-    
-            if isempty(aRspImage(aRspImage~=dMinValue)) % The z is to far, need to change the method
+
+            
+            % Step 2: Count the number of pixels with value min
+            zeroPixels = sum(aRspImage(:) == dMinValue);
+            
+            % Step 3: Calculate the percentage of pixels with value 0
+            totalPixels = numel(aRspImage);
+            percentageZero = (zeroPixels / totalPixels) * 100;
+
+            if percentageZero >95 % The z is to far, need to change the method
     
                 [aRspImage, atRspMetaData] = ...
                     resampleImageTransformMatrix(Btemp, ...
@@ -77,7 +90,7 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
                                                  false ...
                                                  ); 
             else
-                zMoveOffset = (dimsRef-dimsRsp)/2;
+%                 zMoveOffset = (dimsRef-dimsRsp)/2;
             end
     
             dimsRef = size(aRefImage);         
@@ -89,11 +102,13 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
     
                 xPixelSizeRatio = atRspMetaDataTemp{1}.PixelSpacing(1);
                 yPixelSizeRatio = atRspMetaDataTemp{1}.PixelSpacing(2);
-            else                              
+%                 zPixelSizeRatio = computeSliceSpacing(atRspMetaDataTemp);
+           else                              
     
                 xPixelSizeRatio = atRefMetaData{1}.PixelSpacing(1);
                 yPixelSizeRatio = atRefMetaData{1}.PixelSpacing(2);                                    
-            end
+%                 zPixelSizeRatio = computeSliceSpacing(atRefMetaData);
+           end
     
             clear Btemp;
             clear atRspMetaDataTemp;                                 
@@ -115,6 +130,9 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
                                              false ...
                                              );             
         else
+            Btemp = aRspImage;
+            atRspMetaDataTemp = atRspMetaData;
+
             [aRspImage, atRspMetaData] = ...
                 resampleImageTransformMatrix(aRspImage, ...
                                              atRspMetaData, ...
@@ -122,13 +140,37 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
                                              atRefMetaData, ...
                                              sInterpolation, ...
                                              true ...
-                                             );     
+                                             );   
+
+            % Step 2: Count the number of pixels with value min
+            zeroPixels = sum(aRspImage(:) == dMinValue);
+            
+            % Step 3: Calculate the percentage of pixels with value 0
+            totalPixels = numel(aRspImage);
+            percentageZero = (zeroPixels / totalPixels) * 100;
+
+            if percentageZero >95 % The z is to far, need to change the method
+
+            [aRspImage, atRspMetaData] = ...
+                resampleImageTransformMatrix(Btemp, ...
+                                             atRspMetaDataTemp, ...
+                                             aRefImage, ...
+                                             atRefMetaData, ...
+                                             sInterpolation, ...
+                                             false ...
+                                             ); 
+
+            end        
+            
+            clear Btemp;
+            clear atRspMetaDataTemp;              
         end
 
         dimsRsp = size(aRspImage); 
        
         xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
         yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
+%         zMoveOffset = (dimsRsp(3)-dimsRef(3))/2;
 
   %      xMoveOffset = -startIndex(1);
   %      yMoveOffset = -startIndex(2);
@@ -141,7 +183,8 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
             else
                 xPixelSizeRatio = atRefMetaData{1}.PixelSpacing(1);
                 yPixelSizeRatio = atRefMetaData{1}.PixelSpacing(2);
-            end
+%                 zPixelSizeRatio = computeSliceSpacing(atRefMetaData);
+           end
         end
     end
     
@@ -149,14 +192,17 @@ function [aRspImage, atRspMetaData] = resample3DImage(aRspImage, atRspMetaData, 
     dimsRsp = size(aRspImage);         
     xMoveOffset = (dimsRsp(1)-dimsRef(1))/2;
     yMoveOffset = (dimsRsp(2)-dimsRef(2))/2;
-    
+%     zMoveOffset = (dimsRsp(3)-dimsRef(3));
+    zMoveOffset = 0;
+  
     if xMoveOffset ~= 0 || yMoveOffset ~= 0 || zMoveOffset ~= 0
-        if xMoveOffset < 0 || yMoveOffset < 0 
-            aRspImage = imtranslate(aRspImage,[-xMoveOffset-xPixelSizeRatio, -yMoveOffset-xPixelSizeRatio, zMoveOffset], 'nearest', 'OutputView', 'full', 'FillValues', min(aRspImage, [], 'all') ); 
+        if xMoveOffset < 0 || yMoveOffset < 0 || zMoveOffset < 0 
+            aRspImage = imtranslate(aRspImage,[-xMoveOffset-xPixelSizeRatio, -yMoveOffset-xPixelSizeRatio, -zMoveOffset-zPixelSizeRatio], 'nearest', 'OutputView', 'full', 'FillValues', min(aRspImage, [], 'all') ); 
         else                              
-            aRspImage = imtranslate(aRspImage,[-xMoveOffset+xPixelSizeRatio, -yMoveOffset+yPixelSizeRatio, zMoveOffset], 'nearest', 'OutputView', 'same', 'FillValues', min(aRspImage, [], 'all') ); 
+            aRspImage = imtranslate(aRspImage,[-xMoveOffset+xPixelSizeRatio, -yMoveOffset+yPixelSizeRatio, -zMoveOffset+zPixelSizeRatio], 'nearest', 'OutputView', 'same', 'FillValues', min(aRspImage, [], 'all') ); 
         end
     end
-     
+
 end
+
                     

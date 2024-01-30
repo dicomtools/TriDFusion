@@ -41,7 +41,7 @@ function aRspMip = resample3DMIP(aRspMip, atRspMetaData, aRefMip, atRefMetaData,
             dRatio = dimsRef/dimsRsp*100;
         end
 
-        if dRatio < 65  % The z is to far, need to change the method 
+        if dRatio < 70  % The z is to far, need to change the method 
             aResampledMip = resampleMipTransformMatrix(aRspMip, atRspMetaData, aRefMip, atRefMetaData, sInterpolation, false);  
         else
             aResampledMip = resampleMipTransformMatrix(aRspMip, atRspMetaData, aRefMip, atRefMetaData, sInterpolation, true);  
@@ -62,7 +62,13 @@ function aRspMip = resample3DMIP(aRspMip, atRspMetaData, aRefMip, atRefMetaData,
         if remainder == 0
             aResampledMip = resampleMipTransformMatrix(aRspMip, atRspMetaData, aRefMip, atRefMetaData, sInterpolation, false);   
         else
-            aResampledMip = resampleMipTransformMatrix(aRspMip, atRspMetaData, aRefMip, atRefMetaData, sInterpolation, true);   
+            dMinMipFusion = min(aRspMip, [], 'all');
+
+            aResampledMip = resampleMipTransformMatrix(aRspMip, atRspMetaData, aRefMip, atRefMetaData, sInterpolation, true);  
+            if isempty(aResampledMip(aResampledMip~=dMinMipFusion)) % The z is to far, need to change the method
+                
+                aResampledMip = resampleMipTransformMatrix(aRspMip, atRspMetaData, aRefMip, atRefMetaData, sInterpolation, false);  
+            end           
         end
      end
 

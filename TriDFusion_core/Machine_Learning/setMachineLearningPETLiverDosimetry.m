@@ -1,5 +1,5 @@
-function setMachineLearningPETLiverDosimetry(sSegmentatorScript)
-%function setMachineLearningPETLiverDosimetry(sSegmentatorScript)
+function setMachineLearningPETLiverDosimetry(sSegmentatorScript, bResampleSeries)
+%function setMachineLearningPETLiverDosimetry(sSegmentatorScript, bResampleSeries)
 %Run machine learning PET Y90 Dosimetry.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -107,7 +107,7 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript)
     
     % Convert dicom to .nii     
     
-    progressBar(1/6, 'DICOM to NII conversion, please wait.');
+    progressBar(1/7, 'DICOM to NII conversion, please wait.');
 
     dicm2nii(sFilePath, sNiiTmpDir, 1);
     
@@ -124,12 +124,19 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript)
         end
     end 
 
+    progressBar(2/7, 'Applying Y90 dose kernel, please wait.');
+
+    setDoseKernel('Local Deposition', 1, 'SoftTissue', 'Y90', getKernelDefaultCutoffValue('SoftTissue', 'Y90'), 'Linear', false, dCTSerieOffset, true);
+
+    dDoseSerieOffset = get(uiSeriesPtr('get'), 'Value');
+  
+
     if isempty(sNiiFullFileName)
         
         progressBar(1, 'Error: nii file mot found!');
         errordlg('nii file mot found!!', '.nii file Validation'); 
     else
-        progressBar(2/6, 'Segmentation in progress, this might take several minutes, please be patient.');
+        progressBar(3/7, 'Segmentation in progress, this might take several minutes, please be patient.');
        
         sSegmentationFolderName = sprintf('%stemp_seg_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
         if exist(char(sSegmentationFolderName), 'dir')
@@ -153,7 +160,7 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript)
             else % Process succeed
 
 
-                progressBar(3/6, 'Importing Liver mask, please wait.');
+                progressBar(4/7, 'Importing Liver mask, please wait.');
 
                 % Liver
 
@@ -173,7 +180,7 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript)
 
                     aMask = transformNiiMask(nii.img, atCTMetaData, aPTImage, atPTMetaData);
 
-                    maskToVoi(aMask, 'Liver', 'Liver', aColor, 'axial', dPTSerieOffset, pixelEdge('get'));
+                    maskToVoi(aMask, 'Liver', 'Liver', aColor, 'axial', dDoseSerieOffset, pixelEdge('get'));
                  
                     % Import all other contours  
 
@@ -188,13 +195,106 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript)
 
                             if ~contains(atVoiInput{jj}.Label, 'Liver')
 
-                                copyRoiVoiToSerie(dCTSerieOffset, dPTSerieOffset, atVoiInput{jj}, false); 
+                                copyRoiVoiToSerie(dCTSerieOffset, dDoseSerieOffset, atVoiInput{jj}, false); 
                             
                             end
                         end
 
                         clear aCTImage;
                     end
+
+                end
+
+                if bResampleSeries == true
+
+                    progressBar(5/7, 'Resamplig series, please wait.');
+
+                    aCTImage = dicomBuffer('get', [], dCTSerieOffset);
+                    if isempty(aCTImage)
+                        aInputBuffer = inputBuffer('get');
+                        aCTImage = aInputBuffer{dCTSerieOffset};
+            
+                        clear aInputBuffer;
+                    end
+
+                    aDoseImage = dicomBuffer('get', [], dDoseSerieOffset);
+                    atDoseMetaData = dicomMetaData('get', [], dDoseSerieOffset);
+               
+                    [aResampledDoseImage, atResampledDoseMeta] = resampleImage(aDoseImage, atDoseMetaData, aCTImage, atCTMetaData, 'Nearest', false, false);   
+
+                    dicomMetaData('set', atResampledDoseMeta, dDoseSerieOffset);
+                    dicomBuffer  ('set', aResampledDoseImage, dDoseSerieOffset);
+            
+                    % Resample NM to CT dimension
+                    refMip = mipBuffer('get', [], dCTSerieOffset);                        
+                    aMip   = mipBuffer('get', [], dDoseSerieOffset);
+              
+                    aMip = resampleMip(aMip, atDoseMetaData, refMip, atCTMetaData, 'Nearest', false);
+                
+                    mipBuffer('set', aMip, dDoseSerieOffset);
+
+                    atRoi = roiTemplate('get', dDoseSerieOffset);
+                    
+                    atResampledRoi = resampleROIs(aDoseImage, atDoseMetaData, aResampledDoseImage, atResampledDoseMeta, atRoi, true);
+                                            
+                    roiTemplate('set', dDoseSerieOffset, atResampledRoi);
+
+                    setQuantification(dDoseSerieOffset);    
+              
+                    resampleAxes(aResampledDoseImage, atResampledDoseMeta);
+                
+                    setImagesAspectRatio();
+            
+                    refreshImages();
+                    drawnow;
+
+                    % Increase image intensity
+            
+                    dMax = max(aResampledDoseImage, [], 'all')/5;
+                    dMin = min(aResampledDoseImage, [], 'all');
+            
+                    windowLevel('set', 'max', dMax);
+                    windowLevel('set', 'min' ,dMin);
+            
+                    setWindowMinMax(dMax, dMin);  
+                  
+                    % Set fusion
+                
+                    if isFusion('get') == false
+                
+                        set(uiFusedSeriesPtr('get'), 'Value', dCTSerieOffset);
+                
+                        setFusionCallback();
+                    end
+                
+                    % Set CT Window to Soft Tissue
+                
+                    [dMax, dMin] = computeWindowLevel(500, 50);
+                
+                    fusionWindowLevel('set', 'max', dMax);
+                    fusionWindowLevel('set', 'min' ,dMin);
+                
+                    setFusionWindowMinMax(dMax, dMin);  
+            
+                    % Set MIP CT Window to Temporal Bone
+            
+                    [dMax, dMin] = computeWindowLevel(1000, 350);
+                   
+                    if link2DMip('get') == true && isVsplash('get') == false
+                        set(axesMipfPtr('get', [], dCTSerieOffset), 'CLim', [dMin dMax]);
+                    end
+            
+                    sliderCorCallback();
+                    sliderSagCallback();
+                    sliderTraCallback();
+            
+                    % Clear buffer
+            
+                    clear aMip;
+                    clear refMip;
+                    clear aCTImage;
+                    clear aDoseImage;
+                    clear aResampledDoseImage;   
 
                 end
 
@@ -218,19 +318,15 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript)
 
     setVoiRoiSegPopup();
 
-    progressBar(4/6, 'Applying Y90 dose kernel, please wait.');
+%     refreshImages();
 
-    setDoseKernel(1, 'SoftTissue', 'Y90', getKernelDefaultCutoffValue('SoftTissue', 'Y90'), 'Linear', false, dCTSerieOffset)
+    set(uiFusedSeriesPtr('get'), 'Value', dDoseSerieOffset);
 
-    refreshImages();
-
-    set(uiFusedSeriesPtr('get'), 'Value', dPTSerieOffset);
-
-    setFusionCallback();
+    setFusionSeriesCallback();
 
     setPlotContoursCallback();
     
-    progressBar(5/6, 'Computing Y90 dosimetry, please wait.');
+    progressBar(6/7, 'Computing Y90 dosimetry, please wait.');
    
     generatePETLiverDosimetryReportCallback();
       

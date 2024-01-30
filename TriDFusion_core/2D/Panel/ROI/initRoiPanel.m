@@ -549,6 +549,11 @@ function initRoiPanel()
                 end
             end
 
+            if isempty(sLesionShortName)
+                sLesionShortName = asLesionShortName{bLesionOffset};
+                atVoiInput{dVoiOffset}.Label = sprintf('%s-%s', atVoiInput{dVoiOffset}.Label, sLesionShortName);
+            end
+
             voiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atVoiInput);
                         
             for rr=1:numel(atVoiInput{dVoiOffset}.RoisTag) % Set ROIs template
@@ -557,6 +562,9 @@ function initRoiPanel()
                         if contains(atRoiInput{tt}.Label, sLesionShortName)
                             atRoiInput{tt}.Label = replace(atRoiInput{tt}.Label, sLesionShortName, asLesionShortName{bLesionOffset});
                             atRoiInput{tt}.Object.Label = atRoiInput{tt}.Label;
+%                         else
+%                             atRoiInput{tt}.Label = sprintf('%s-%s', atRoiInput{tt}.Label, sLesionShortName);
+%                             atRoiInput{tt}.Object.Label = atRoiInput{tt}.Label;  
                         end                      
                         atRoiInput{tt}.LesionType = sLesionType;
                         break;

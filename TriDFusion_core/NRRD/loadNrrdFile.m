@@ -1,5 +1,5 @@
-function loadNrrdFile(sPath, sFileName)
-%function loadNrrdFile(sPath, sFileName)
+function aBuffer = loadNrrdFile(sPath, sFileName, bInitDisplay, dFactor)
+%function aBuffer = loadNrrdFile(sPath, sFileName, bInitDisplay, dFactor)
 %Load .nrrd file to TriDFusion.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -31,8 +31,7 @@ function loadNrrdFile(sPath, sFileName)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     % Deactivate main tool bar 
-    set(uiSeriesPtr('get'), 'Enable', 'off');                
-    mainToolBarEnable('off');
+
     
     atInput = inputTemplate('get');
 
@@ -41,61 +40,78 @@ function loadNrrdFile(sPath, sFileName)
 %    end 
     
     try
-                
-    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-    drawnow; 
+
+    if bInitDisplay == true    
+
+        set(uiSeriesPtr('get'), 'Enable', 'off');       
+
+        mainToolBarEnable('off');
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow; 
+        
+        releaseRoiWait();
     
-    releaseRoiWait();
-
-    set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
-    set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-    set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
-
-    set(zoomMenu('get'), 'Checked', 'off');
-    set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnZoomPtr('get'), 'FontWeight', 'normal');
-    zoomTool('set', false);
-    zoom('off');           
-
-    set(panMenu('get'), 'Checked', 'off');
-    set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
-    set(btnPanPtr('get'), 'FontWeight', 'normal');
-    panTool('set', false);
-    pan('off');     
-
-    set(rotate3DMenu('get'), 'Checked', 'off');         
-    rotate3DTool('set', false);
-    rotate3d off;
-
-    set(dataCursorMenu('get'), 'Checked', 'off');
-    dataCursorTool('set', false);              
-    datacursormode('off');  
+        set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+        set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+        set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
     
-    switchTo3DMode    ('set', false);
-    switchToIsoSurface('set', false);
-    switchToMIPMode   ('set', false);
-
-    set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnFusionPtr('get'), 'FontWeight', 'normal');
-
-    set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btn3DPtr('get'), 'FontWeight', 'normal');
-
-    set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
-
-    set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnMIPPtr('get'), 'FontWeight', 'normal');
+        set(zoomMenu('get'), 'Checked', 'off');
+        set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnZoomPtr('get'), 'FontWeight', 'normal');
+        zoomTool('set', false);
+        zoom('off');           
     
-    progressBar(0.5, 'Reading nrrd, please wait.');
+        set(panMenu('get'), 'Checked', 'off');
+        set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
+        set(btnPanPtr('get'), 'FontWeight', 'normal');
+        panTool('set', false);
+        pan('off');     
+    
+        set(rotate3DMenu('get'), 'Checked', 'off');         
+        rotate3DTool('set', false);
+        rotate3d off;
+    
+        set(dataCursorMenu('get'), 'Checked', 'off');
+        dataCursorTool('set', false);              
+        datacursormode('off');  
+        
+        switchTo3DMode    ('set', false);
+        switchToIsoSurface('set', false);
+        switchToMIPMode   ('set', false);
+    
+        set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnFusionPtr('get'), 'FontWeight', 'normal');
+    
+        set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btn3DPtr('get'), 'FontWeight', 'normal');
+    
+        set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
+    
+        set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnMIPPtr('get'), 'FontWeight', 'normal');
+        
+        progressBar(0.5, 'Reading nrrd, please wait.');
+    end
 
     [aBuffer, meta] = nrrdread( sprintf('%s%s',sPath, sFileName));
+
+    if size(aBuffer, 3) ~=1
+
+        aBuffer = aBuffer(:,:,end:-1:1);
+    end
+
+    if ~isempty(dFactor)
+        
+        aBuffer = aBuffer * dFactor;
+    end
 
     if isfield(meta, 'sizes')
         acSizes = split(meta.sizes);
@@ -225,6 +241,12 @@ function loadNrrdFile(sPath, sFileName)
         atInput(numel(atInput)).atDicomInfo{1}.AcquisitionTime = '';
         atInput(numel(atInput)).atDicomInfo{1}.AcquisitionDate = '';   
 
+        % Dose
+
+        atInput(numel(atInput)).atDicomInfo{1}.DoseUnits = [];
+        atInput(numel(atInput)).atDicomInfo{1}.DoseType = [];
+        atInput(numel(atInput)).atDicomInfo{1}.Units = [];
+
         atInput(numel(atInput)).atDicomInfo{1}.din = [];
 
         % Series default
@@ -233,7 +255,7 @@ function loadNrrdFile(sPath, sFileName)
         atInput(numel(atInput)).asFilesList{1} = sprintf('%s%s', sPath, sFileName);
         
         atInput(numel(atInput)).sOrientationView    = 'Axial';
-       
+
         atInput(numel(atInput)).bEdgeDetection      = false;
         atInput(numel(atInput)).bFlipLeftRight      = false;
         atInput(numel(atInput)).bFlipAntPost        = false;
@@ -312,9 +334,16 @@ function loadNrrdFile(sPath, sFileName)
         atInput(1).atDicomInfo{1}.AcquisitionTime = '';
         atInput(1).atDicomInfo{1}.AcquisitionDate = '';   
 
+        % Dose
+
+        atInput(1).atDicomInfo{1}.DoseUnits = [];
+        atInput(1).atDicomInfo{1}.DoseType = [];
+        atInput(1).atDicomInfo{1}.Units = [];
+
         atInput(1).atDicomInfo{1}.din = [];
         
         % Series default
+
         atInput(1).asFilesList    = [];
         atInput(1).asFilesList{1} = sprintf('%s%s', sPath, sFileName);
         
@@ -354,9 +383,18 @@ function loadNrrdFile(sPath, sFileName)
     set(uiSeriesPtr('get'), 'String', asSeries);
     set(uiFusedSeriesPtr('get'), 'String', asSeries);
     
-    set(uiSeriesPtr('get'), 'Value', numel(atInput));
-    dicomMetaData('set', atInput(numel(atInput)).atDicomInfo);
-    dicomBuffer('set', aBuffer);
+    dicomMetaData('set', atInput(numel(atInput)).atDicomInfo, numel(atInput));
+    dicomBuffer('set', aBuffer, numel(atInput));
+
+    if bInitDisplay == true    
+
+        set(uiSeriesPtr('get'), 'Value', numel(atInput));
+    end
+
+    setQuantification(numel(atInput));
+    
+    tQuant = quantificationTemplate('get');
+    atInput(numel(atInput)).tQuant = tQuant;
 
     if str2double(meta.dimension) == 3
     
@@ -364,47 +402,50 @@ function loadNrrdFile(sPath, sFileName)
         mipBuffer('set', aMip, numel(atInput)) ;
         atInput(numel(atInput)).aMip = aMip;   
     end
-
-    setQuantification(numel(atInput));
     
-    cropValue('set', min(dicomBuffer('get'), [], 'all'));
-
-    tQuant = quantificationTemplate('get');
-    atInput(numel(atInput)).tQuant = tQuant;
     inputTemplate('set', atInput);  
 
-    clearDisplay();                       
-    initDisplay(3); 
+    if bInitDisplay == true    
 
-    initWindowLevel('set', true);
+        cropValue('set', min(dicomBuffer('get'), [], 'all'));
 
-    dicomViewerCore();  
+        clearDisplay();                       
+        initDisplay(3); 
     
-    setViewerDefaultColor(1, atInput(numel(atInput)).atDicomInfo);
+        initWindowLevel('set', true);
+    
+        dicomViewerCore();  
+        
+        setViewerDefaultColor(1, atInput(numel(atInput)).atDicomInfo);
+           
+        refreshImages();
+        
+        % Activate playback
        
-    refreshImages();
-    
-    % Activate playback
-   
-    if size(dicomBuffer('get'), 3) ~= 1
-        setPlaybackToolbar('on');
+        if size(dicomBuffer('get'), 3) ~= 1
+            setPlaybackToolbar('on');
+        end
+        
+        setRoiToolbar('on');
+        
     end
-    
-    setRoiToolbar('on');
-    
+
     progressBar(1, sprintf('Import %s completed.', sFileName));
-    
+
     catch
         progressBar(1, 'Error:loadNrrdFile()');                        
     end
 
-    clear aBuffer;
+    if bInitDisplay == true    
 
-    % Reactivate main tool bar 
-    set(uiSeriesPtr('get'), 'Enable', 'on');        
-    mainToolBarEnable('on');
+        clear aBuffer;
     
-    set(fiMainWindowPtr('get'), 'Pointer', 'default');
-    drawnow; 
-
+        % Reactivate main tool bar 
+        set(uiSeriesPtr('get'), 'Enable', 'on');        
+        mainToolBarEnable('on');
+        
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow; 
+ 
+    end
 end

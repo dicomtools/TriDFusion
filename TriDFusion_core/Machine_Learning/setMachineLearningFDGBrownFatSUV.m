@@ -199,6 +199,7 @@ function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombin
                 dUpperSlice = getTotalSegmentorObjectSliceNumber(sSegmentationFolderName, 'skull' , 'lower')-5;
 
                 if dUpperSlice > 1 && dUpperSlice < size(aExcludeMask, 3)
+
                     aExcludeMask(:,:,1:dUpperSlice)   = 1;
                 end
 
@@ -322,6 +323,29 @@ end
 
                 maskAddVoiToSeries(imMask, aBWMask, bPixelEdge, false, dTreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue); 
 
+                set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+                drawnow;    
+
+                aBrownFatMask = getBrownFatTotalSegmentorAnnotationMask(sSegmentationFolderName, zeros(size(aCTImage)));
+
+                atVoiInput = voiTemplate('get', dPTSerieOffset);
+                atRoiInput = roiTemplate('get', dPTSerieOffset);
+
+                if ~isequal(size(aBrownFatMask), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+            
+                     aBrownFatMask = resample3DImage(aBrownFatMask, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
+            
+                    if ~isequal(size(aBrownFatMask), size(aResampledPTImage)) % Verify if both images are in the same field of view     
+                        aBrownFatMask = resizeMaskToImageSize(aBrownFatMask, aResampledPTImage); 
+                    end
+
+                end
+
+                [atVoiInput, atRoiInput] = setBrownFatVoiTypeMask(aBrownFatMask, atVoiInput, atRoiInput);
+
+                voiTemplate('set', dPTSerieOffset, atVoiInput);
+                roiTemplate('set', dPTSerieOffset, atRoiInput);
+
                 clear aResampledPTImage;
                 clear aBWMask;
                 clear refMip;                        
@@ -391,6 +415,7 @@ end
     % Delete .nii folder    
     
     if exist(char(sNiiTmpDir), 'dir')
+
         rmdir(char(sNiiTmpDir), 's');
     end       
     
@@ -403,5 +428,296 @@ end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;
+   
+    function aMask = getBrownFatTotalSegmentorAnnotationMask(sSegmentationFolderName, aMask)
+
+        asSegmentList = {
+        'rib_left_1.nii.gz',...
+        'rib_left_2.nii.gz',...
+        'rib_left_3.nii.gz',...
+        'rib_left_4.nii.gz',...
+        'rib_left_5.nii.gz',...
+        'rib_left_6.nii.gz',...
+        'rib_left_7.nii.gz',...
+        'rib_left_8.nii.gz',...
+        'rib_left_9.nii.gz',...
+        'rib_left_10.nii.gz',...
+        'rib_left_11.nii.gz',...
+        'rib_left_12.nii.gz',...
+        'rib_right_1.nii.gz',...
+        'rib_right_2.nii.gz',...
+        'rib_right_3.nii.gz',...
+        'rib_right_4.nii.gz',...
+        'rib_right_5.nii.gz',...
+        'rib_right_6.nii.gz',...
+        'rib_right_7.nii.gz',...
+        'rib_right_8.nii.gz',...
+        'rib_right_9.nii.gz',...
+        'rib_right_10.nii.gz',...
+        'rib_right_11.nii.gz',...
+        'rib_right_12.nii.gz',...              
+        'vertebrae_C1.nii.gz',...
+        'vertebrae_C2.nii.gz',...
+        'vertebrae_C3.nii.gz',...
+        'vertebrae_C4.nii.gz',...
+        'vertebrae_C5.nii.gz',...
+        'vertebrae_C6.nii.gz',...
+        'vertebrae_C7.nii.gz',...    
+        'vertebrae_T1.nii.gz',...
+        'vertebrae_T2.nii.gz',...
+        'vertebrae_T3.nii.gz',...
+        'vertebrae_T4.nii.gz',...
+        'vertebrae_T5.nii.gz',...
+        'vertebrae_T6.nii.gz',...
+        'vertebrae_T7.nii.gz',...
+        'vertebrae_T8.nii.gz',...
+        'vertebrae_T9.nii.gz',...   
+        'vertebrae_T10.nii.gz',...
+        'vertebrae_T11.nii.gz',...
+        'vertebrae_T12.nii.gz',...        
+        'clavicula_right.nii.gz', ...
+        'clavicula_left.nii.gz', ...
+        'kidney_right.nii.gz', ...
+        'kidney_left.nii.gz', ...  
+        'scapula_right.nii.gz',...
+        'scapula_left.nii.gz', ...
+        'scapula.nii.gz', ...
+        'sternum.nii.gz'};
+     
+        dNbElements = numel(asSegmentList);
+
+        for bb=1:dNbElements
+
+            if mod(bb,5)==1 || bb == 1 || bb == dNbElements
+                
+                progressBar( bb/dNbElements-0.0001, sprintf('Computing association item %d/%d, please wait.', bb, dNbElements) );
+            end
+
+            sNiiFileName = sprintf('%s%s', sSegmentationFolderName, asSegmentList{bb});  
+    
+            if exist(sNiiFileName, 'file')
+    
+                nii = nii_tool('load', sNiiFileName);
+                aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
+   
+                if contains(asSegmentList{bb}, 'vertebrae_C') 
+                    dMaskValue =1;
+
+                elseif contains(asSegmentList{bb}, 'vertebrae_T') 
+                    dMaskValue =2;               
+
+                elseif contains(asSegmentList{bb}, 'clavicula')
+                    dMaskValue =3;
+
+                elseif contains(asSegmentList{bb}, 'kidney')
+                    dMaskValue =4;
+
+                elseif contains(asSegmentList{bb}, 'scapula')
+                    dMaskValue =5;
+
+                elseif contains(asSegmentList{bb}, 'sternum')
+                    dMaskValue =6;     
+
+                elseif contains(asSegmentList{bb}, 'rib')
+                    dMaskValue =7;                     
+                else
+                    dMaskValue =0;                     
+               end
+                    
+                aMask(aObjectMask~=0)=dMaskValue;
+            end
+        end
+
+        aMask=aMask(:,:,end:-1:1);
+
+        progressBar( 1, 'Ready' );
+
+    end
+
+    function [atVoiInput, atRoiInput] = setBrownFatVoiTypeMask(aAnnotatedMask, atVoiInput, atRoiInput)
+
+        dNbElements = numel(atVoiInput);
+
+        for cc=1:dNbElements
+
+            if mod(cc,5)==1 || cc == 1 || cc == dNbElements
+                
+                progressBar( cc/dNbElements-0.0001, sprintf('Associating contour %d/%d, please wait.', cc, dNbElements) );
+            end
+
+            ptrVoiInput = atVoiInput{cc};
+
+            imVoiMask = zeros(size(aAnnotatedMask));
+
+            adRoiTags = zeros(1, numel(ptrVoiInput.RoisTag));
+            dNbTags = numel(ptrVoiInput.RoisTag);
+
+            for uu=1:dNbTags
+        
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[ptrVoiInput.RoisTag{uu}]} );
+
+                dOffset = find(aTagOffset, 1);
+
+                ptrRoi = atRoiInput{dOffset};
+
+                adRoiTags(uu) = dOffset;
+
+                switch lower(ptrRoi.Axe)    
+
+                    case 'axe'
+
+                    imVoiMask(:, :) = imVoiMask(:, :)| aRoiLogicalMask;
+        
+                    case 'axes1'
+
+                    aSlice = permute(aAnnotatedMask(ptrRoi.SliceNb,:,:), [3 2 1]);
+                    
+                    aRoiLogicalMask = roiTemplateToMask(ptrRoi, aSlice);
+
+                    imVoiMask(ptrRoi.SliceNb, :, :) = imVoiMask(ptrRoi.SliceNb, :, :)|permuteBuffer(aRoiLogicalMask, 'coronal');
+                    
+                    case 'axes2'
+
+                    aSlice = permute(aAnnotatedMask(:,ptrRoi.SliceNb,:), [3 1 2]) ;
+
+                    aRoiLogicalMask = roiTemplateToMask(ptrRoi, aSlice);
+             
+                    imVoiMask(:, ptrRoi.SliceNb, :) = imVoiMask(:, ptrRoi.SliceNb, :)|permuteBuffer(aRoiLogicalMask, 'sagittal');
+                    
+                    case 'axes3'
+                    
+                    aSlice  = aAnnotatedMask(:,:,ptrRoi.SliceNb);  
+                    
+                    aRoiLogicalMask = roiTemplateToMask(ptrRoi, aSlice);
+
+                    imVoiMask(:, :, ptrRoi.SliceNb) = imVoiMask(:, :, ptrRoi.SliceNb)|aRoiLogicalMask;
+                end 
+
+            end
+
+            dClosestMaskIndex = findClosestAnnotatedMask(aAnnotatedMask, imVoiMask);
+
+            switch dClosestMaskIndex
+
+                case 1 % vertebrae_C
+                    sLesionType = 'Cervical';
+
+                case 2 % vertebrae_T
+                    sLesionType = 'Paraspinal';
+
+                case 3 % clavicula
+                    sLesionType = 'Supraclavicular';
+
+                case 4 % Kidneys
+                    sLesionType = 'Abdominal';
+
+                case 5 % scapula
+                    sLesionType = 'Axillary';
+
+                case 6 % sternum
+                    sLesionType = 'Mediastinal';
+
+                case 7 % ribs
+                    sLesionType = 'Mediastinal';
+            end
+
+            sLesionShortName = '';
+            [bLesionOffset, ~, asLesionShortName] = getLesionType(sLesionType);   
+            for jj=1:numel(asLesionShortName)
+                if contains(atVoiInput{cc}.Label, asLesionShortName{jj})
+                    sLesionShortName = asLesionShortName{jj};
+                    break;
+                end
+            end  
+
+            for uu=1:dNbTags
+       
+                atRoiInput{adRoiTags(uu)}.LesionType = sLesionType;
+                atRoiInput{adRoiTags(uu)}.Label = replace(atRoiInput{adRoiTags(uu)}.Label, sLesionShortName, asLesionShortName{bLesionOffset});      
+            end
+
+            atVoiInput{cc}.LesionType = sLesionType;
+            atVoiInput{cc}.Label = replace(atVoiInput{cc}.Label, sLesionShortName, asLesionShortName{bLesionOffset});
+
+        end
+
+        progressBar( 1, 'Ready' );
+
+    
+    end
+
+%     function closestMaskIndex = findClosestAnnotatedMask(aAnnotatedMask, imVoiMask)
+%         
+%         % Get the unique values in the annotated mask
+%         uniqueValues = unique(aAnnotatedMask(:));
+%     
+%         % Remove 0 if it exists (assuming 0 is not a valid zone)
+%         uniqueValues(uniqueValues == 0) = [];
+%     
+%         % Initialize the closest distance and index
+%         closestDistance = inf;
+%         closestMaskIndex = -1;
+%     
+%         % Iterate over each unique zone in the annotated mask
+%         for i = 1:length(uniqueValues)
+%             % Create a binary mask for the current zone
+%             zoneMask = aAnnotatedMask == uniqueValues(i);
+%     
+%             % Calculate the distance to the voxel with value 1 in imVoiMask
+%             distance = bwdist(zoneMask, 'euclidean');
+%     
+%             % Consider only the distances within the masked region
+%             distanceInMask = distance(imVoiMask > 0);
+%     
+%             % Find the minimum distance within the masked region
+%             minDistanceInMask = min(distanceInMask);
+%     
+%             % Update the closest distance and index if needed
+%             if minDistanceInMask < closestDistance
+%                 closestDistance = minDistanceInMask;
+%                 closestMaskIndex = uniqueValues(i);
+%             end
+%         end
+%     end
+
+    function closestMaskIndex = findClosestAnnotatedMask(aAnnotatedMask, imVoiMask)
+
+        % Get the unique values in the annotated mask excluding 0
+        uniqueValues = unique(aAnnotatedMask(aAnnotatedMask > 0));
+    
+        % Find non-zero indices in imVoiMask
+        [rows, cols, slices] = ind2sub(size(imVoiMask), find(imVoiMask > 0));
+    
+        % Initialize the closest distance and index
+
+        closestDistance  = inf;
+        closestMaskIndex = -1;
+    
+        % Iterate over each unique zone in the annotated mask
+
+        for i = 1:length(uniqueValues)
             
+            % Find indices of the current zone in aAnnotatedMask
+            zoneIndices = find(aAnnotatedMask == uniqueValues(i));
+    
+            % Get coordinates of the points in the current zone
+            [zoneRows, zoneCols, zoneSlices] = ind2sub(size(aAnnotatedMask), zoneIndices);
+    
+            % Create matrices of coordinates for pdist2
+            maskPoints = [zoneRows, zoneCols, zoneSlices];
+            voiPoints = [rows, cols, slices];
+    
+            % Compute pairwise distances between points
+            distances = pdist2(maskPoints, voiPoints, 'euclidean');
+    
+            % Find the minimum distance within the masked region
+            minDistanceInMask = min(distances(:));
+    
+            % Update the closest distance and index if needed
+            if minDistanceInMask < closestDistance
+                closestDistance = minDistanceInMask;
+                closestMaskIndex = uniqueValues(i);
+            end
+        end
+    end
 end

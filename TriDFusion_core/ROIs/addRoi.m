@@ -35,8 +35,9 @@ function addRoi(ptrRoi, dOffset, sLesionType)
     end
 
     if iCurrentOffset == dOffset
-        atDicomInfo = dicomMetaData('get');
-        imRoi = dicomBuffer('get');
+
+        atDicomInfo = dicomMetaData('get', [], dOffset);
+        imRoi = dicomBuffer('get', [], dOffset);
     else
         atDicomInfo = tAddInput(dOffset).atDicomInfo;
 
@@ -44,31 +45,34 @@ function addRoi(ptrRoi, dOffset, sLesionType)
         imRoi  = aInput{dOffset};
     end
 
-    atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    atRoiInput = roiTemplate('get', dOffset);
 
-    addlistener(ptrRoi, 'DeletingROI', @deleteRoiEvents );
-    addlistener(ptrRoi, 'ROIMoved'   , @movedRoiEvents  );
+    addlistener(ptrRoi, 'DeletingROI', @deleteRoiEvents);
+    addlistener(ptrRoi, 'ROIMoved'   , @movedRoiEvents );
 
     sSOPClassUID    = '';
     sSOPInstanceUID = '';
     sFrameOfReferenceUID = '';
 
-    if size(dicomBuffer('get'), 3) ~= 1 && ...
+    if size(dicomBuffer('get', [], dOffset), 3) ~= 1 && ...
        switchTo3DMode('get')     == false && ...
        switchToIsoSurface('get') == false && ...
        switchToMIPMode('get')    == false
 
         switch get(ptrRoi, 'Parent')
             
-            case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))                   
+            case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))     
+
                 dSliceNb = sliceNumber('get', 'coronal' );
                 sAxe = 'Axes1';
                                 
             case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
                 dSliceNb = sliceNumber('get', 'sagittal');
                 sAxe = 'Axes2';
                               
             otherwise
+                
                 dSliceNb = sliceNumber('get', 'axial');
                 sAxe = 'Axes3';
 
@@ -109,12 +113,15 @@ function addRoi(ptrRoi, dOffset, sLesionType)
     tRoi.StripeColor         = ptrRoi.StripeColor;
     tRoi.InteractionsAllowed = ptrRoi.InteractionsAllowed;    
     tRoi.UserData            = ptrRoi.UserData;
+    tRoi.Deletable           = true;
 
     switch lower(tRoi.Type)
+
         case lower('images.roi.line')
 
         case { lower('images.roi.freehand'), ...
                lower('images.roi.assistedfreehand') }
+
             tRoi.FaceAlpha      = ptrRoi.FaceAlpha;
             tRoi.Waypoints      = ptrRoi.Waypoints;
             tRoi.FaceSelectable = ptrRoi.FaceSelectable;
@@ -124,16 +131,19 @@ function addRoi(ptrRoi, dOffset, sLesionType)
             addlistener(ptrRoi, 'WaypointRemoved', @waypointEvents);
 
         case lower('images.roi.polygon')
+
             tRoi.FaceAlpha      = ptrRoi.FaceAlpha;
             tRoi.FaceSelectable = ptrRoi.FaceSelectable;
 
         case lower('images.roi.circle')
+
             tRoi.FaceAlpha      = ptrRoi.FaceAlpha;
             tRoi.Radius         = ptrRoi.Radius;
             tRoi.FaceSelectable = ptrRoi.FaceSelectable;
             tRoi.Vertices       = ptrRoi.Vertices;
 
         case lower('images.roi.ellipse')
+
             tRoi.FaceAlpha        = ptrRoi.FaceAlpha;
             tRoi.SemiAxes         = ptrRoi.SemiAxes;
             tRoi.RotationAngle    = ptrRoi.RotationAngle;
@@ -142,6 +152,7 @@ function addRoi(ptrRoi, dOffset, sLesionType)
             tRoi.FixedAspectRatio = ptrRoi.FixedAspectRatio;
            
         case lower('images.roi.rectangle')
+
             tRoi.FaceAlpha        = ptrRoi.FaceAlpha;
             tRoi.FaceSelectable   = ptrRoi.FaceSelectable;
             tRoi.Rotatable        = ptrRoi.Rotatable;
@@ -161,6 +172,6 @@ function addRoi(ptrRoi, dOffset, sLesionType)
         atRoiInput{numel(atRoiInput)+1} = tRoi;
     end
 
-    roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+    roiTemplate('set', dOffset, atRoiInput);
 
 end

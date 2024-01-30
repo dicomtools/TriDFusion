@@ -66,7 +66,7 @@ function importDoseKernelCallback(~, ~)
 %        javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
     end
 
-    [tDoseKernel, sConvertedMatFile] = xlsxToMat([sKernelPath sFileName]);
+    [tDoseKernel, sConvertedMatFile] = xlsxToKernelMat([sKernelPath sFileName]);
 
     if isempty(tDoseKernel)
         progressBar(1, sprintf('Error: Cant import %s%s!', sKernelPath, sFileName) );

@@ -60,6 +60,7 @@ function resize = dicomViewer()
     kernelUnitTypeWindow       ('set', false);
     kernelSegTreshValue        ('set', 'lower', 0);
     kernelSegTreshValue        ('set', 'upper', 1);    
+    kernelMethod               ('set', 1); % Local Deposition
     kernelInterpolation        ('set', 'Linear');    
     kernelCutoff               ('set', 99.9305); % mm
     kernelMicrosphereInSpecimen('set', false);
@@ -126,7 +127,7 @@ function resize = dicomViewer()
     isoSurfaceFusionValue ('set', 0.1);    
     addVoiIsoMask         ('set', true);
     percentOfPeakIsoMask  ('set', true); % In percent or SUV  
-    multiplePeaksIsoMask  ('set', true);
+    multiplePeaksIsoMask  ('set', false);
     peakSUVMaxIsoMask     ('set', 4);  % In SUV
     peakPercentIsoMask    ('set', 65); % In percent
     voiIsoMaskMax         ('set', 41); % In percent
@@ -402,11 +403,48 @@ function resize = dicomViewer()
 
     % Machine Learning Full AI Ga68 DOTATATE Options
 
-    Ga68DOTATATEFullAITrainedModel          ('set', 2);
-    Ga68DOTATATEFullAISmalestVoiValue       ('set', 0.3);
+    Ga68DOTATATEFullAITrainedModel          ('set', 1);
+    Ga68DOTATATEFullAISmalestVoiValue       ('set', 0);
     Ga68DOTATATEFullAILesionClassification  ('set', true);
     Ga68DOTATATEFullAISmoothMask            ('set', true);
     Ga68DOTATATEFullAIEnhancedBoneMaskLesion('set', false);
+
+    % Voxel Dosimetry
+
+    voxelDosimetryRadionuclide('set', 'Y-90');
+
+    voxelDosimetryAlphaPhysicalModel                ('set', 3); % Monte Carlo
+    voxelDosimetryBetaPhysicalModel                 ('set', 3); % Monte Carlo
+    voxelDosimetryGammaPhysicalModel                ('set', 3); % Monte Carlo
+    voxelDosimetryMonoenergeticElectronPhysicalModel('set', 3); % Monte Carlo
+    voxelDosimetryPositronPhysicalModel             ('set', 3); % Monte Carlo
+    voxelDosimetryXrayPhysicalModel                 ('set', 3); % Monte Carlo
+
+    voxelDosimetryAlphaSourceParticles                ('set', 500000);
+    voxelDosimetryBetaSourceParticles                 ('set', 500000);
+    voxelDosimetryGammaSourceParticles                ('set', 500000);
+    voxelDosimetryMonoenergeticElectronSourceParticles('set', 500000);
+    voxelDosimetryPositronSourceParticles             ('set', 500000);
+    voxelDosimetryXraySourceParticles                 ('set', 500000);
+
+    voxelDosimetryAlphaSourceParticlesBatches                ('set', 10);
+    voxelDosimetryBetaSourceParticlesBatches                 ('set', 10);
+    voxelDosimetryGammaSourceParticlesBatches                ('set', 10);
+    voxelDosimetryMonoenergeticElectronSourceParticlesBatches('set', 10);
+    voxelDosimetryPositronSourceParticlesBatches             ('set', 10);
+    voxelDosimetryXraySourceParticlesBatches                 ('set', 10);
+
+    voxelDosimetryAlphaCutoff                ('set', 10); % In mm
+    voxelDosimetryBetaCutoff                 ('set', 10); % In mm
+    voxelDosimetryGammaCutoff                ('set', 10); % In mm
+    voxelDosimetryMonoenergeticElectronCutoff('set', 10); % In mm
+    voxelDosimetryPositronCutoff             ('set', 10); % In mm
+    voxelDosimetryXrayCutoff                 ('set', 10); % In mm
+
+    voxelDosimetryMachineLearningTissueDependant('set', true);
+    voxelDosimetryTissueDependantBackground('set', 1); % Water
+    voxelDosimetryPHITSDebugWindow('set', false); 
+    voxelDosimetryAllContours('set', false); 
 
     clearDisplay();
 

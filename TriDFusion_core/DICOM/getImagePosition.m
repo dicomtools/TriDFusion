@@ -59,14 +59,18 @@ function bFlip = getImagePosition(dInputOffset)
         sOrientation = getImageOrientation(tDicomInfo1.ImageOrientationPatient);
 
         if      strcmpi(sOrientation, 'Sagittal')
-            dSpacing = (pxyzLast(1) - pxyzFirst(1));
+            dSpacingBetweenSlices = (pxyzLast(1) - pxyzFirst(1));
+
         elseif  strcmpi(sOrientation, 'Coronal')
-            dSpacing = (pxyzLast(2) - pxyzFirst(2));
+
+            dSpacingBetweenSlices = (pxyzLast(2) - pxyzFirst(2));
         else    % Axial
-            dSpacing = (pxyzLast(3) - pxyzFirst(3));
+
+            dSpacingBetweenSlices = (pxyzLast(3) - pxyzFirst(3));
         end
 
-        if dSpacing > 0
+        if dSpacingBetweenSlices > 0
+
             bFlip = true;
         end
     else
@@ -75,18 +79,42 @@ function bFlip = getImagePosition(dInputOffset)
 
         sOrientation = getImageOrientation(tDicomInfo1.ImageOrientationPatient);
 
-        if      strcmpi(sOrientation, 'Sagittal')
-            dCurrentLocation = tDicomInfo1.ImagePositionPatient(1);
-            dNextLocation = dCurrentLocation-tDicomInfo1.SpacingBetweenSlices;
-        elseif  strcmpi(sOrientation, 'Coronal')
-            dCurrentLocation = tDicomInfo1.ImagePositionPatient(2);
-            dNextLocation = dCurrentLocation-tDicomInfo1.SpacingBetweenSlices;
-        else    % Axial
-            dCurrentLocation = tDicomInfo1.ImagePositionPatient(3);
-            dNextLocation = dCurrentLocation-tDicomInfo1.SpacingBetweenSlices;
+        if strcmpi(tDicomInfo1.Modality, 'RTDOSE')
+
+            if ~isempty(tDicomInfo1.GridFrameOffsetVector)
+
+                dNbFrames = numel(tDicomInfo1.GridFrameOffsetVector);
+                
+                if dNbFrames >1            
+                    dSpacingBetweenSlices = tDicomInfo1.GridFrameOffsetVector(2)-tDicomInfo1.GridFrameOffsetVector(1);
+                else
+                    dSpacingBetweenSlices = 0;
+                end
+            else
+                dSpacingBetweenSlices =0;
+            end
+        else
+            dSpacingBetweenSlices = tDicomInfo1.SpacingBetweenSlices;
         end
 
-        if dCurrentLocation > dNextLocation                    
+
+        if      strcmpi(sOrientation, 'Sagittal')
+
+            dCurrentLocation = tDicomInfo1.ImagePositionPatient(1);
+            dNextLocation = dCurrentLocation-dSpacingBetweenSlices;
+
+        elseif  strcmpi(sOrientation, 'Coronal')
+
+            dCurrentLocation = tDicomInfo1.ImagePositionPatient(2);
+            dNextLocation = dCurrentLocation-dSpacingBetweenSlices;
+
+        else    % Axial
+            dCurrentLocation = tDicomInfo1.ImagePositionPatient(3);
+            dNextLocation = dCurrentLocation-dSpacingBetweenSlices;
+        end
+
+        if dCurrentLocation > dNextLocation  
+            
             bFlip = true;
         end
 

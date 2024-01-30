@@ -35,6 +35,7 @@ function sUnit = getSerieUnitValue(dOffset)
     tInput = inputTemplate('get');                
 
     switch lower(tInput(dOffset).atDicomInfo{1}.Modality)
+        
         case {'pt', 'nm'}
 
             if strcmpi(tInput(dOffset).atDicomInfo{1}.Units, 'BQML') && ...
@@ -42,10 +43,21 @@ function sUnit = getSerieUnitValue(dOffset)
                isfield(tInput(dOffset).tQuant, 'tSUV') 
            
                 sUnit = 'SUV';
-            elseif strcmpi(tInput(dOffset).atDicomInfo{1}.Units, 'BQML') && ...
-               tInput(dOffset).bDoseKernel == true && ...                   
-               isfield(tInput(dOffset).tQuant, 'tSUV')   
-                sUnit = 'Dose';
+
+            elseif tInput(dOffset).bDoseKernel == true
+               
+                if isfield(tInput(dOffset).atDicomInfo{1}, 'DoseUnits')
+    
+                    if ~isempty(tInput(dOffset).atDicomInfo{1}.DoseUnits)
+                        
+                        sUnit = char(tInput(dOffset).atDicomInfo{1}.DoseUnits);
+                    else
+                        sUnit = 'dose';
+                    end
+                else
+                    sUnit = 'dose';
+                end   
+
             else
                 if isfield(tInput(dOffset).atDicomInfo{1}, 'RealWorldValueMappingSequence') % SUV SPECT
                     if isfield(tInput(dOffset).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1, 'MeasurementUnitsCodeSequence')
