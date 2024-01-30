@@ -99,7 +99,7 @@ DICOM directory structure:
     |      |-- parent folder (series folder 1)  <-- Individual series folder 1
     |      |-- parent folder (series folder N)  <-- Individual series folder N
 	
-## Optional
+## Optional Modules
 
 CERR 
 https://github.com/cerr/CERR
@@ -111,6 +111,10 @@ https://github.com/wasserth/TotalSegmentator
 ### Radiomics
 PY-Radiomics 
 https://pyradiomics.readthedocs.io/en/latest/installation.html
+
+### Monte Carlo particle transport engines 
+PHITS
+https://phits.jaea.go.jp/rirekie.html
 
 ## References 
 

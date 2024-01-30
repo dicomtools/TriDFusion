@@ -1,5 +1,5 @@
-function [tKernel, sMatFile] = xlsxToMat(sFileName)
-%function [tKernel, sMatFile] = xlsxToMat(sFileName)
+function [tKernel, sMatFile] = xlsxToKernelMat(sFileName)
+%function [tKernel, sMatFile] = xlsxToKernelMat(sFileName)
 %Convert .xlsx Kernel to .mat Format. 
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -75,7 +75,7 @@ function [tKernel, sMatFile] = xlsxToMat(sFileName)
         sRootPath   = viewerRootPath('get');
         sKernelPath = sprintf('%s/kernel', sRootPath);
          
-        sMatFile = sprintf('%s%s.mat', sKernelPath, sKernelName);
+        sMatFile = sprintf('%s/%s.mat', sKernelPath, sKernelName);
 
         if exist(sMatFile, 'file')                                       
             delete(sMatFile);

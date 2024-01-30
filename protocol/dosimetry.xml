@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dosimetry version="1.0">
+   <guiName>dosimetry</guiName>
+   <defaultProtocol>1</defaultProtocol>
+</dosimetry>
