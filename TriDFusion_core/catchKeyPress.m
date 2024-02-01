@@ -149,7 +149,7 @@ function catchKeyPress(~,evnt)
                         zoom(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
                         multiFrameZoom('set', 'axe', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
                         
-                    case axesMIpPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
 
                         zoom(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
                         multiFrameZoom('set', 'axe', axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')));

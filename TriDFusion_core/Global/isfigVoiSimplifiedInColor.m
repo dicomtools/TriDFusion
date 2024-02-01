@@ -1,5 +1,5 @@
-function bIsColor = isFigRoiInColor(sAction, bValue)
-%function bIsColor = isFigRoiInColor(sAction, bValue)
+function bIsColor = isfigVoiSimplifiedInColor(sAction, bValue)
+%function bIsColor = isfigVoiSimplifiedInColor(sAction, bValue)
 %Get/SetFigure ROI in color or black and white.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -10,7 +10,7 @@ function bIsColor = isFigRoiInColor(sAction, bValue)
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2024, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -36,6 +36,6 @@ function bIsColor = isFigRoiInColor(sAction, bValue)
         pbIsColor = bValue;            
     end
 
-    bIsColor = pbIsColor;         
-    
+    bIsColor = pbIsColor;     
+
 end

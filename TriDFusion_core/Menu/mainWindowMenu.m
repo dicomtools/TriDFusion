@@ -182,6 +182,8 @@ function mainWindowMenu()
     mWorkflows = uimenu(fiMainWindowPtr('get'),'Label','Workflows');  
 
     mAnalCancer = uimenu(mWorkflows,'Label','Anal Cancer');  
+
+    uimenu(mAnalCancer, 'Label','Display Result', 'Callback', @figVoiSimplifiedDialogCallback);
     uimenu(mAnalCancer, 'Label','Export Report', 'Callback', @setAnalCancerReportCallback);
     uimenu(mAnalCancer, 'Label','PET/CT Fusion', 'Callback', @setPETCTAnalCancerFusionCallback, 'Separator','on');
 

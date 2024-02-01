@@ -1,6 +1,6 @@
-function bIsColor = isFigRoiInColor(sAction, bValue)
-%function bIsColor = isFigRoiInColor(sAction, bValue)
-%Get/SetFigure ROI in color or black and white.
+function aTag = voiTag(sAction, aValue)
+%function aTag = voiTag(sAction, aValue)
+%Get\Set VOI tag.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.
@@ -10,7 +10,7 @@ function bIsColor = isFigRoiInColor(sAction, bValue)
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2024, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -30,12 +30,11 @@ function bIsColor = isFigRoiInColor(sAction, bValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent pbIsColor; 
+    persistent paTag; 
 
     if strcmpi('set', sAction)
-        pbIsColor = bValue;            
+        paTag = aValue;            
     end
 
-    bIsColor = pbIsColor;         
-    
-end
+    aTag = paTag;    
+end 

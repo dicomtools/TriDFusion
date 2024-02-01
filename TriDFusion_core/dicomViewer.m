@@ -210,6 +210,8 @@ function resize = dicomViewer()
     isFigRoiInColor              ('set', true);
     centroidMenuOption           ('set', false);
 
+    isfigVoiSimplifiedInColor('set', true);
+
     registrationTemplate('init');
     registrationReport  ('set', '');
 

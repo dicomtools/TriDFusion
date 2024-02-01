@@ -240,7 +240,9 @@ function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMet
     
     end
 
-    tVoiComputed.maxDistance = computeVoiFarthestPoint(imMask, atMetaData);
+%     tVoiComputed.maxDistance = computeVoiFarthestPoint(imMask, atMetaData);
+
+%     tVoiComputedPlanes = computeVoiPlanesFarthestPoint(imMask, atMetaData);
 
     clear imMask;
     clear imCDataVoi;

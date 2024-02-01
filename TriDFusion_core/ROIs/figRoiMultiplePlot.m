@@ -806,7 +806,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
             asCell{dLineOffset,1}  = 'Name';
             asCell{dLineOffset,2}  = 'Image number';
-            asCell{dLineOffset,3}  = 'NB Pixels';
+            asCell{dLineOffset,3}  = 'Nb Cells';
             asCell{dLineOffset,4}  = 'Total';
             asCell{dLineOffset,5}  = 'Mean';
             asCell{dLineOffset,6}  = 'Min';
@@ -814,12 +814,12 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
             asCell{dLineOffset,8}  = 'Median';
             asCell{dLineOffset,9}  = 'Deviation';
             asCell{dLineOffset,10} = 'Peak';
-            asCell{dLineOffset,11} = 'Max XY cm';
-            asCell{dLineOffset,12} = 'Max CY cm';
-            asCell{dLineOffset,13} = 'Area cm2';
-            asCell{dLineOffset,14} = 'Max distance cm';
-            asCell{dLineOffset,15} = 'Volume cm3';
-            for tt=16:21
+            asCell{dLineOffset,11} = 'Max XY (mm)';
+            asCell{dLineOffset,12} = 'Max CY (mm)';
+            asCell{dLineOffset,13} = 'Area (cm2)';
+%             asCell{dLineOffset,14} = 'Max distance cm';
+            asCell{dLineOffset,14} = 'Volume (cm3)';
+            for tt=15:21
                 asCell{dLineOffset,tt}  = (' ');
             end
             
@@ -872,13 +872,13 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                     asCell{dLineOffset,11} = (' ');
                                     asCell{dLineOffset,12} = (' ');
                                     asCell{dLineOffset,13} = (' ');
-                                    if tVoiComputed.maxDistance == 0
-                                        asCell{dLineOffset,14} = ('NaN');
-                                    else
-                                        asCell{dLineOffset,14} = [tVoiComputed.maxDistance];
-                                    end                                   
-                                    asCell{dLineOffset,15} = [tVoiComputed.volume];
-                                    for tt=16:21
+%                                     if tVoiComputed.maxDistance == 0
+%                                         asCell{dLineOffset,14} = ('NaN');
+%                                     else
+%                                         asCell{dLineOffset,14} = [tVoiComputed.maxDistance];
+%                                     end                                   
+                                    asCell{dLineOffset,14} = [tVoiComputed.volume];
+                                    for tt=15:21
                                         asCell{dLineOffset,tt}  = (' ');
                                     end
 
@@ -933,9 +933,8 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                             end
                                             asCell{dLineOffset,13} = [atRoiComputed{bb}.area];
                                             asCell{dLineOffset,14} = (' ');
-                                            asCell{dLineOffset,15} = (' ');
                                             
-                                            for tt=16:21
+                                            for tt=15:21
                                                 asCell{dLineOffset,tt}  = (' ');
                                             end
 
@@ -1015,9 +1014,8 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                 end
                                 asCell{dLineOffset, 13} = tRoiComputed.area;
                                 asCell{dLineOffset, 14} = (' ');
-                                asCell{dLineOffset, 15} = (' ');
                                 
-                                for tt=16:21
+                                for tt=15:21
                                     asCell{dLineOffset,tt}  = (' ');
                                 end
 
