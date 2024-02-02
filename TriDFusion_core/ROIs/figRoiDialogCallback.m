@@ -27,12 +27,23 @@ function figRoiDialogCallback(hObject, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    gUicontrolFigRoi = [];
+
     dScreenSize  = get(groot, 'Screensize');
 
     ySize = dScreenSize(4);
 
-    FIG_ROI_X = 1500;
-    FIG_ROI_Y =  ySize*0.75;
+    FIG_ROI_DEFAULT_X = 1500;
+    FIG_ROI_SIMPLIFIED_X = 1400;
+
+    if isfigVoiSimplified('get') == true
+
+        FIG_ROI_X = FIG_ROI_SIMPLIFIED_X;
+        FIG_ROI_Y =  ySize*0.75;        
+    else
+        FIG_ROI_X = FIG_ROI_DEFAULT_X;
+        FIG_ROI_Y =  ySize*0.75;
+    end
 
     atInput = inputTemplate('get');
 
@@ -43,8 +54,10 @@ function figRoiDialogCallback(hObject, ~)
             
     releaseRoiWait();
 
-    if strcmpi(get(hObject, 'Tag'), 'toolbar')
-       set(hObject, 'State', 'off');
+    if exist('hObject', 'var')
+        if strcmpi(get(hObject, 'Tag'), 'toolbar')
+           set(hObject, 'State', 'off');
+        end
     end
 
     cummulativeMenuOption('set', false);
@@ -149,8 +162,20 @@ function figRoiDialogCallback(hObject, ~)
         sInvConstChecked = 'off';
     end
 
+    if isfigVoiSimplified('get') == true
+        sSimplifiedChecked = 'on';
+    else
+        sSimplifiedChecked = 'off';
+    end
+
+    mSimplified          = ...
+        uimenu(mRoiOptions,'Label', 'Simplified Display', 'Checked', sSimplifiedChecked, 'Enable', 'on', 'Callback', @simplifiedDisplayCallback);
+
+    mColorBackground  = ...
+        uimenu(mRoiOptions,'Label', 'Display in Color' , 'Checked', sFigRoiInColorChecked, 'Callback', @figRoiColorCallback);
+
     mSUVUnit          = ...
-        uimenu(mRoiOptions,'Label', 'SUV Unit', 'Checked', sSuvChecked , 'Enable', sSuvEnable, 'Callback', @SUVUnitCallback);
+        uimenu(mRoiOptions,'Label', 'SUV Unit', 'Checked', sSuvChecked , 'Enable', sSuvEnable, 'Callback', @SUVUnitCallback, 'Separator','on');
     
     mModifiedMatrix   = ...
         uimenu(mRoiOptions,'Label', 'Display Image Cells Value' , 'Checked', sModifiedMatrixChecked, 'Callback', @modifiedMatrixCallback);
@@ -158,11 +183,9 @@ function figRoiDialogCallback(hObject, ~)
     mSegmented        = ...
         uimenu(mRoiOptions,'Label', 'Subtract Masked Cells' , 'Checked', sSegChecked, 'Callback', @segmentedCallback);
 
-    mColorBackground  = ...
-        uimenu(mRoiOptions,'Label', 'Display in Color' , 'Checked', sFigRoiInColorChecked, 'Callback', @figRoiColorCallback);
 
     mInvertConstraint = ...
-        uimenu(mRoiOptions,'Label', 'Invert Constraint', 'Checked', sInvConstChecked, 'Callback', @figRoiInverConstraintCallback);
+        uimenu(mRoiOptions,'Label', 'Invert Constraint', 'Checked', sInvConstChecked, 'Callback', @figRoiInverConstraintCallback, 'Separator','on');
 
     mRoiReset = uimenu(figRoiWindow,'Label','Clear');
                 uimenu(mRoiReset,'Label', 'Series Contours'   , 'Checked', 'off', 'Callback', @clearAllContoursCallback);
@@ -212,112 +235,9 @@ function figRoiDialogCallback(hObject, ~)
                   'Callback', @lbMainWindowCallback...
                   );
 
-     set(lbVoiRoiWindow, 'Max',2, 'Min',0);
+    set(lbVoiRoiWindow, 'Max',2, 'Min',0);
 
-     uicontrol(uiVoiRoiWindow,...
-               'Position', [0 uiVoiRoiWindow.Position(4)-20 150 20],...
-               'BackgroundColor', viewerBackgroundColor('get'), ...
-               'ForegroundColor', viewerForegroundColor('get'), ...
-               'String'  , 'Name'...
-               );
-
-     uicontrol(uiVoiRoiWindow,...
-               'Position', [150 uiVoiRoiWindow.Position(4)-20 100 20],...
-               'BackgroundColor', viewerBackgroundColor('get'), ...
-               'ForegroundColor', viewerForegroundColor('get'), ...
-               'String'  , 'Image Number'...
-               );
-
-     uicontrol(uiVoiRoiWindow,...
-               'Position', [250 uiVoiRoiWindow.Position(4)-20 100 20],...
-               'BackgroundColor', viewerBackgroundColor('get'), ...
-               'ForegroundColor', viewerForegroundColor('get'), ...
-               'String'  , 'Nb Cells'...
-               );
-
-     uicontrol(uiVoiRoiWindow,...
-               'Position', [350 uiVoiRoiWindow.Position(4)-20 100 20],...
-               'BackgroundColor', viewerBackgroundColor('get'), ...
-               'ForegroundColor', viewerForegroundColor('get'), ...
-               'String'  , 'Total'...
-               );
-
-     uicontrol(uiVoiRoiWindow,...
-               'Position', [450 uiVoiRoiWindow.Position(4)-20 100 20],...
-               'BackgroundColor', viewerBackgroundColor('get'), ...
-               'ForegroundColor', viewerForegroundColor('get'), ...
-               'String'  , 'Mean'...
-               );
-
-     uicontrol(uiVoiRoiWindow,...
-               'Position', [550 uiVoiRoiWindow.Position(4)-20 100 20],...
-               'BackgroundColor', viewerBackgroundColor('get'), ...
-               'ForegroundColor', viewerForegroundColor('get'), ...
-               'String'  , 'Min'...
-               );
-
-     uicontrol(uiVoiRoiWindow,...
-               'Position', [650 uiVoiRoiWindow.Position(4)-20 100 20],...
-               'BackgroundColor', viewerBackgroundColor('get'), ...
-               'ForegroundColor', viewerForegroundColor('get'), ...
-               'String'  , 'Max'...
-               );
-
-     uicontrol(uiVoiRoiWindow,...
-               'Position', [750 uiVoiRoiWindow.Position(4)-20 100 20],...
-               'BackgroundColor', viewerBackgroundColor('get'), ...
-               'ForegroundColor', viewerForegroundColor('get'), ...
-               'String'  , 'Median'...
-               );
-
-     uicontrol(uiVoiRoiWindow,...
-               'Position', [850 uiVoiRoiWindow.Position(4)-20 100 20],...
-               'BackgroundColor', viewerBackgroundColor('get'), ...
-               'ForegroundColor', viewerForegroundColor('get'), ...
-               'String'  , 'Deviation'...
-               );
-
-     uicontrol(uiVoiRoiWindow,...
-               'Position', [950 uiVoiRoiWindow.Position(4)-20 100 20],...
-               'BackgroundColor', viewerBackgroundColor('get'), ...
-               'ForegroundColor', viewerForegroundColor('get'), ...
-               'String'  , 'Peak'...
-               );
-
-     uicontrol(uiVoiRoiWindow,...
-               'Position', [1050 uiVoiRoiWindow.Position(4)-20 100 20],...
-               'BackgroundColor', viewerBackgroundColor('get'), ...
-               'ForegroundColor', viewerForegroundColor('get'), ...
-               'String'  , 'Max Diameter (mm)'...
-               );
-
-     uicontrol(uiVoiRoiWindow,...
-               'Position', [1150 uiVoiRoiWindow.Position(4)-20 100 20],...
-               'BackgroundColor', viewerBackgroundColor('get'), ...
-               'ForegroundColor', viewerForegroundColor('get'), ...
-               'String'  , 'Max SAD (mm)'...
-               );
-
-     uicontrol(uiVoiRoiWindow,...
-               'Position', [1250 uiVoiRoiWindow.Position(4)-20 100 20],...
-               'BackgroundColor', viewerBackgroundColor('get'), ...
-               'ForegroundColor', viewerForegroundColor('get'), ...
-               'String'  , 'Area (cm2)'...
-               );
-
-%      uicontrol(uiVoiRoiWindow,...
-%                'Position', [1350 uiVoiRoiWindow.Position(4)-20 100 20],...
-%                'BackgroundColor', viewerBackgroundColor('get'), ...
-%                'ForegroundColor', viewerForegroundColor('get'), ...
-%                'String'  , 'Max distance cm'...
-%                );
-
-     uicontrol(uiVoiRoiWindow,...
-               'Position', [1350 uiVoiRoiWindow.Position(4)-20 150 20],...
-               'BackgroundColor', viewerBackgroundColor('get'), ...
-               'ForegroundColor', viewerForegroundColor('get'), ...
-               'String'  , 'Volume (cm3)'...
-               );
+    setRoiFigureUiContorl();
 
     tRoiMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
 
@@ -338,10 +258,260 @@ function figRoiDialogCallback(hObject, ~)
     else
         bModifiedMatrix = false;
     end
-                
-    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+    
+    if strcmpi(get(mSimplified, 'Checked'), 'on')
+        setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
+    else               
+        setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+    end
 
     setRoiFigureName();
+
+    function setRoiFigureUiContorl()
+
+        if ~isempty(gUicontrolFigRoi)
+            for uu=1:numel(gUicontrolFigRoi)
+                delete(gUicontrolFigRoi{uu});
+            end
+            gUicontrolFigRoi = [];
+        end
+
+        aFigRoiPosition = get(figRoiWindow, 'Position');
+
+        if strcmpi(get(mSimplified, 'Checked'), 'on')      
+
+             aFigRoiPosition(3) = FIG_ROI_SIMPLIFIED_X;
+
+             set(figRoiWindow, 'Position', aFigRoiPosition);
+
+             set(uiVoiRoiWindow, 'Position', [0 0 FIG_ROI_SIMPLIFIED_X FIG_ROI_Y]);
+             set(lbVoiRoiWindow, 'Position', [0 0 uiVoiRoiWindow.Position(3) uiVoiRoiWindow.Position(4)-20]);       
+
+             gUicontrolFigRoi{1}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [0 uiVoiRoiWindow.Position(4)-20 150 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Name'...
+                       );
+        
+             gUicontrolFigRoi{2}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [150 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Nb Cells'...
+                       );
+        
+             gUicontrolFigRoi{3}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [250 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Total'...
+                       );
+        
+             gUicontrolFigRoi{4}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [350 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Mean'...
+                       );
+        
+             gUicontrolFigRoi{5}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [450 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Min'...
+                       );
+        
+             gUicontrolFigRoi{6}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [550 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Max'...
+                       );
+
+             gUicontrolFigRoi{7}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [650 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Median'...
+                       );
+        
+             gUicontrolFigRoi{8}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [750 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Deviation'...
+                       );
+        
+             gUicontrolFigRoi{9}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [850 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Peak'...
+                       );
+        
+             gUicontrolFigRoi{10}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [950 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Max Coronal (mm)'...
+                       );
+        
+              gUicontrolFigRoi{11}= ...
+              uicontrol(uiVoiRoiWindow,...
+                       'Position', [1050 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Max Sagittal (mm)'...
+                       );
+        
+              gUicontrolFigRoi{12}= ...
+              uicontrol(uiVoiRoiWindow,...
+                       'Position', [1150 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Max Axial (mm)'...
+                       );
+
+             gUicontrolFigRoi{13}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [1250 uiVoiRoiWindow.Position(4)-20 150 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Volume (cm3)'...
+                       );
+                
+        else
+            aFigRoiPosition(3)=FIG_ROI_DEFAULT_X;
+
+            set(figRoiWindow, 'Position', aFigRoiPosition);
+
+            set(uiVoiRoiWindow, 'Position', [0 0 FIG_ROI_DEFAULT_X FIG_ROI_Y]);
+            set(lbVoiRoiWindow, 'Position', [0 0 uiVoiRoiWindow.Position(3) uiVoiRoiWindow.Position(4)-20]);
+
+            gUicontrolFigRoi{1}= ...
+            uicontrol(uiVoiRoiWindow,...
+                       'Position', [0 uiVoiRoiWindow.Position(4)-20 150 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Name'...
+                       );
+        
+            gUicontrolFigRoi{2}= ...
+            uicontrol(uiVoiRoiWindow,...
+                       'Position', [150 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Image Number'...
+                       );
+        
+             gUicontrolFigRoi{3}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [250 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Nb Cells'...
+                       );
+        
+             gUicontrolFigRoi{4}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [350 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Total'...
+                       );
+        
+             gUicontrolFigRoi{5}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [450 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Mean'...
+                       );
+        
+             gUicontrolFigRoi{6}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [550 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Min'...
+                       );
+        
+             gUicontrolFigRoi{7}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [650 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Max'...
+                       );
+        
+             gUicontrolFigRoi{8}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [750 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Median'...
+                       );
+        
+             gUicontrolFigRoi{9}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [850 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Deviation'...
+                       );
+        
+             gUicontrolFigRoi{10}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [950 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Peak'...
+                       );
+        
+             gUicontrolFigRoi{11}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [1050 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Max Diameter (mm)'...
+                       );
+        
+             gUicontrolFigRoi{12}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [1150 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Max SAD (mm)'...
+                       );
+        
+             gUicontrolFigRoi{13}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [1250 uiVoiRoiWindow.Position(4)-20 100 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Area (cm2)'...
+                       );
+        
+             gUicontrolFigRoi{14}= ...
+             uicontrol(uiVoiRoiWindow,...
+                       'Position', [1350 uiVoiRoiWindow.Position(4)-20 150 20],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...
+                       'String'  , 'Volume (cm3)'...
+                       );
+        end
+    end
 
     function figRoiRefreshOption(~, ~)
 
@@ -715,7 +885,13 @@ end
                         else
                             bModifiedMatrix = false;
                         end
-                        
+
+                        if strcmpi(get(mSimplified, 'Checked'), 'on') 
+                            bSimplified = true;
+                        else
+                            bSimplified = false;
+                        end
+
                         bDoseKernel      = atInput(dSeriesOffset).bDoseKernel;
                         bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
         
@@ -726,7 +902,8 @@ end
                                         bModifiedMatrix, ...
                                         bSegmented, ...
                                         bDoseKernel, ...
-                                        bMovementApplied);
+                                        bMovementApplied, ...
+                                        bSimplified);
                         return;
                     end
 
@@ -758,7 +935,13 @@ end
                             else
                                 bModifiedMatrix = false;
                             end
-                            
+
+                            if strcmpi(get(mSimplified, 'Checked'), 'on') 
+                                bSimplified = true;
+                            else
+                                bSimplified = false;
+                            end
+
                             bDoseKernel      = atInput(dSeriesOffset).bDoseKernel;
                             bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
                         
@@ -769,16 +952,17 @@ end
                                             bModifiedMatrix, ...
                                             bSegmented, ...
                                             bDoseKernel, ...
-                                            bMovementApplied);
+                                            bMovementApplied, ...
+                                            bSimplified);
                             return;
                        end
                     end
                 end
             end
             
-        clear aInputBuffer
-        clear aInput;
-    end
+            clear aInputBuffer
+            clear aInput;
+        end
 
         function figRoiCreateVolumeCallback(~, ~)
 
@@ -818,8 +1002,12 @@ end
             else
                 bModifiedMatrix = false;
             end
-    
-            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+            
+            if strcmpi(get(mSimplified, 'Checked'), 'on')
+                setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
+            else 
+                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+            end
 
             setVoiRoiSegPopup();
 
@@ -891,7 +1079,13 @@ end
             else
                 bModifiedMatrix = false;
             end
-            
+
+            if strcmpi(get(mSimplified, 'Checked'), 'on')
+                bSimplified = true; 
+            else 
+                bSimplified = false; 
+            end
+
             bDoseKernel      = atInput(dSeriesOffset).bDoseKernel;
             bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;  
             
@@ -906,8 +1100,8 @@ end
                                bModifiedMatrix, ...
                                bSegmented, ...
                                bDoseKernel, ...
-                               bMovementApplied ...
-                               );
+                               bMovementApplied, ...
+                               bSimplified);
 
             clear aInputBuffer;
             clear aInput;
@@ -972,7 +1166,11 @@ end
                             bModifiedMatrix = false;
                         end
 
-                        setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                        if strcmpi(get(mSimplified, 'Checked'), 'on')
+                            setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
+                        else
+                            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                        end
                     end
 
                 else % Tag is a ROI
@@ -1015,7 +1213,11 @@ end
                                     bModifiedMatrix = false;
                                 end
 
-                                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                                if strcmpi(get(mSimplified, 'Checked'), 'on')
+                                    setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
+                                else                          
+                                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                                end
 
                             end
                         end                       
@@ -1171,8 +1373,12 @@ end
                     else
                         bModifiedMatrix = false;
                     end
-                            
-                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                    
+                    if strcmpi(get(mSimplified, 'Checked'), 'on')
+                        setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
+                    else                          
+                        setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                    end
                     
                     delete(figRoiEditLabelWindow);
 
@@ -1301,7 +1507,11 @@ end
                             bModifiedMatrix = false;
                         end
 
-                        setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                        if strcmpi(get(mSimplified, 'Checked'), 'on')
+                            setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
+                        else
+                            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                        end
                     end
 
                 else % Tag is a ROI
@@ -1344,7 +1554,11 @@ end
                                     bModifiedMatrix = false;
                                 end
 
-                                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                                if strcmpi(get(mSimplified, 'Checked'), 'on')
+                                    setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
+                                else
+                                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                                end
 
                             end
                         end
@@ -1629,11 +1843,16 @@ end
             end
         end
 
-        figRoiWindow.Name = ['TriDFusion (3DF) ROI/VOI Result - ' tRoiMetaData{1}.SeriesDescription ' - ' sUnits sModified sSegmented];
+        if strcmpi(get(mSimplified, 'Checked'), 'on')
+            set(figRoiWindow, 'Name', ['TriDFusion (3DF) VOI Simplified Result - ' tRoiMetaData{1}.SeriesDescription ' - ' sUnits sModified sSegmented]);
+        else
+            set(figRoiWindow, 'Name', ['TriDFusion (3DF) ROI/VOI Result - ' tRoiMetaData{1}.SeriesDescription ' - ' sUnits sModified sSegmented]);
+        end
 
     end
 
     function setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented)
+
 
         sLbWindow = '';
         aVoiRoiTag = [];
@@ -1765,7 +1984,7 @@ end
 
                         sLbWindow = sprintf('%s%s\n', sLbWindow, sLine);
 
-                        if exist('aVoiRoiTag', 'var')
+                        if ~isempty(aVoiRoiTag)
 
                             dResizeArray = numel(aVoiRoiTag)+1;
 
@@ -1969,11 +2188,7 @@ end
             end
         end
 
-        if exist('aVoiRoiTag', 'var')
-            voiRoiTag('set', aVoiRoiTag);
-        else
-            voiRoiTag('set', '');
-        end
+        voiRoiTag('set', aVoiRoiTag);
 
         progressBar(1, 'Ready');
 
@@ -1990,39 +2205,46 @@ end
 
     end
 
-    function exportCurrentSeriesResultCallback(~, ~)
+    function setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented)
+
+        aVoiTag = [];
+
+        sLbWindow = '';
+
+        sFontName = get(lbVoiRoiWindow, 'FontName');
+
+        atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
 
         atInput = inputTemplate('get');
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-        if dSeriesOffset > numel(atInput)
-            return;
-        end
 
         try
-            matlab.io.internal.getExcelInstance;
-            bExcelInstance = true;
-        catch exception %#ok<NASGU>
-%            warning(message('MATLAB:xlswrite:NoCOMServer'));
-            bExcelInstance = false;
-        end
 
-        atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
+        set(figRoiWindow, 'Pointer', 'watch');
+        drawnow;
 
         atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
         atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
-        aDisplayBuffer = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
+        tQuant = quantificationTemplate('get');
+
+        if isfield(tQuant, 'tSUV')
+            dSUVScale = tQuant.tSUV.dScale;
+        else
+            dSUVScale = 0;
+        end
 
         aInput = inputBuffer('get');
+
         if     strcmpi(imageOrientation('get'), 'axial')
-            aInputBuffer = permute(aInput{dSeriesOffset}, [1 2 3]);
+            aInputBuffer = aInput{dSeriesOffset};
         elseif strcmpi(imageOrientation('get'), 'coronal')
-            aInputBuffer = permute(aInput{dSeriesOffset}, [3 2 1]);
+            aInputBuffer = reorientBuffer(aInput{dSeriesOffset}, 'coronal');
         elseif strcmpi(imageOrientation('get'), 'sagittal')
-            aInputBuffer = permute(aInput{dSeriesOffset}, [3 1 2]);
+            aInputBuffer = reorientBuffer(aInput{dSeriesOffset}, 'sagittal');
         end
-  
-        if size(aDisplayBuffer, 3) ==1
+        
+        if size(aInputBuffer, 3) ==1
             
             if atInput(dSeriesOffset).bFlipLeftRight == true
                 aInputBuffer=aInputBuffer(:,end:-1:1);
@@ -2043,449 +2265,180 @@ end
             if atInput(dSeriesOffset).bFlipHeadFeet == true
                 aInputBuffer=aInputBuffer(:,:,end:-1:1);
             end 
-        end
+        end   
         
         atInputMetaData = atInput(dSeriesOffset).atDicomInfo;
 
-        if ~isempty(atRoiInput) || ...
-           ~isempty(atVoiInput)
-
-            filter = {'*.csv'};
-     %       info = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
-
-            sCurrentDir  = viewerRootPath('get');
-
-            sMatFile = [sCurrentDir '/' 'lastRoiDir.mat'];
-            % load last data directory
-            if exist(sMatFile, 'file')
-                            % lastDirMat mat file exists, load it
-                load('-mat', sMatFile);
-                if exist('saveRoiLastUsedDir', 'var')
-                   sCurrentDir = saveRoiLastUsedDir;
-                end
-                if sCurrentDir == 0
-                    sCurrentDir = pwd;
-                end
-            end
-            
-%            sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
-
-            sSeriesDate = atMetaData{1}.SeriesDate;
-            
-            if isempty(sSeriesDate)
-                sSeriesDate = '-';
-            else
-                sSeriesDate = datetime(sSeriesDate,'InputFormat','yyyyMMdd');
-            end
-
-            [file, path] = uiputfile(filter, 'Save ROI/VOI result', sprintf('%s/%s_%s_%s_%s_CONTOURS_TriDFusion.csv' , ...
-                sCurrentDir, cleanString(atMetaData{1}.PatientName), cleanString(atMetaData{1}.PatientID), cleanString(atMetaData{1}.SeriesDescription), sSeriesDate) );
-            if file ~= 0
-
-                try
-
-                set(figRoiWindow, 'Pointer', 'watch');
-                drawnow;
-
-                try
-                    saveRoiLastUsedDir = [path '/'];
-                    save(sMatFile, 'saveRoiLastUsedDir');
-                catch
-                    progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-%                    h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
-%                    if integrateToBrowser('get') == true
-%                        sLogo = './TriDFusion/logo.png';
-%                    else
-%                        sLogo = './logo.png';
-%                    end
-
-%                    javaFrame = get(h, 'JavaFrame');
-%                    javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
-                end
-
-                if exist(sprintf('%s%s', path, file), 'file')
-                    delete(sprintf('%s%s', path, file));
-                end
-
-                tRoiQuant = quantificationTemplate('get');
-
-                if isfield(tRoiQuant, 'tSUV')
-                    dSUVScale = tRoiQuant.tSUV.dScale;
-                else
-                    dSUVScale = 0;
-                end
-
-                if strcmpi(mSUVUnit.Checked, 'on')
-                    bSUVUnit = true;
-                else
-                    bSUVUnit = false;
-                end
-
-                if strcmpi(get(mSegmented, 'Checked'), 'on')
-                    bSegmented = true;
-                else
-                    bSegmented = false;
-                end
-
-                if strcmpi(get(mModifiedMatrix, 'Checked'), 'on')
-                    bModifiedMatrix = true;
-                else
-                    bModifiedMatrix = false;
-                end
-            
-                % Count number of elements
-
-                dNumberOfLines = 1;
-                if ~isempty(atVoiInput) % Scan VOI
-                    for aa=1:numel(atVoiInput)
-                        if ~isempty(atVoiInput{aa}.RoisTag) % Found a VOI
-
-                            dNumberOfLines = dNumberOfLines+1;
-
-                            for cc=1:numel(atVoiInput{aa}.RoisTag)
-                                for bb=1:numel(atRoiInput)
-                                   if isvalid(atRoiInput{bb}.Object)
-                                        if strcmpi(atVoiInput{aa}.RoisTag{cc}, atRoiInput{bb}.Tag) % Found a VOI/ROI
-
-                                            dNumberOfLines = dNumberOfLines+1;
-
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-
-                for bb=1:numel(atRoiInput) % Scan ROI
-                    if isvalid(atRoiInput{bb}.Object)
-                        if strcmpi(atRoiInput{bb}.ObjectType, 'roi') % Found a ROI
-
-                            dNumberOfLines = dNumberOfLines+1;
-                        end
-                    end
-                end
-
-                bDoseKernel      = atInput(dSeriesOffset).bDoseKernel;
-                bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
-                
-                if bDoseKernel == true
-
-                    if isfield(atMetaData{1}, 'DoseUnits')
+        aDisplayBuffer = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
         
-                        if ~isempty(atMetaData{1}.DoseUnits)
-                            
-                            sUnits = char(atMetaData{1}.DoseUnits);
+        bDoseKernel      = atInput(dSeriesOffset).bDoseKernel;
+        bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
+
+        dNbVois = numel(atVoiInput);
+        if ~isempty(atVoiInput)
+            for aa=1:dNbVois
+
+                if ~isempty(atVoiInput{aa}.RoisTag)
+
+                    if dNbVois > 10
+                        if mod(aa, 5)==1 || aa == dNbVois
+                            progressBar(aa/dNbVois-0.0001, sprintf('Computing voi %d/%d', aa, dNbVois ) );
+                        end
+                    end
+
+                    tMaxDistances = computeVoiPlanesFarthestPoint( atVoiInput{aa}, atRoiInput, atMetaData, aDisplayBuffer, false);
+
+                    [tVoiComputed, ~] = ...
+                        computeVoi(aInputBuffer, ...
+                                   atInputMetaData, ...
+                                   aDisplayBuffer, ...
+                                   atMetaData, ...
+                                   atVoiInput{aa}, ...
+                                   atRoiInput, ...
+                                   dSUVScale, ...
+                                   bSUVUnit, ...
+                                   bModifiedMatrix, ...
+                                   bSegmented, ...
+                                   bDoseKernel, ...
+                                   bMovementApplied);
+                   
+                    if ~isempty(tVoiComputed)
+
+                        sVoiName = atVoiInput{aa}.Label;
+
+                        if isempty(tMaxDistances.Coronal)
+                            sMaxCoronal = 'NaN';
                         else
-                            sUnits = 'dose';
+                            sMaxCoronal = num2str(tMaxDistances.Coronal.MaxLength);
                         end
-                    else
-                        sUnits = 'dose';
-                    end  
-                    
-                else
 
-                    if bSUVUnit == true
-
-                        if (strcmpi(atMetaData{1}.Modality, 'pt') || ...
-                            strcmpi(atMetaData{1}.Modality, 'nm'))&& ...
-                            strcmpi(atMetaData{1}.Units, 'BQML' )
-
-                            sSUVtype = viewerSUVtype('get');
-                            sUnits   = sprintf('SUV/%s', sSUVtype);
+                        if isempty(tMaxDistances.Sagittal)
+                            sMaxSagittal = 'NaN';
                         else
+                            sMaxSagittal = num2str(tMaxDistances.Sagittal.MaxLength);
+                        end
 
-                            if (strcmpi(atMetaData{1}.Modality, 'ct'))
-                               sUnits = 'HU';
-                            else
-                               sUnits = 'Counts';
-                            end
+                        if isempty(tMaxDistances.Axial)
+                            sMaxAxial = 'NaN';
+                        else
+                            sMaxAxial = num2str(tMaxDistances.Axial.MaxLength);
                         end
-                    else
-                         if (strcmpi(atMetaData{1}.Modality, 'ct'))
-                            sUnits = 'HU';
-                         else
-                            if (strcmpi(atMetaData{1}.Modality, 'pt') || ...
-                                strcmpi(atMetaData{1}.Modality, 'nm'))&& ...
-                                strcmpi(atMetaData{1}.Units, 'BQML' )
-                                sUnits = 'BQML';
-                            else
-                                sUnits = 'Counts';
-                            end
+
+                        sLine = sprintf('%-18s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s', ...
+                            maxLength(sVoiName, 17), ...
+                            num2str(tVoiComputed.cells), ...
+                            num2str(tVoiComputed.sum), ...
+                            num2str(tVoiComputed.mean), ...
+                            num2str(tVoiComputed.min), ...
+                            num2str(tVoiComputed.max), ...
+                            num2str(tVoiComputed.median), ...
+                            num2str(tVoiComputed.std), ...
+                            num2str(tVoiComputed.peak), ...
+                            sMaxCoronal, ...
+                            sMaxSagittal, ...
+                            sMaxAxial, ...
+                            num2str(tVoiComputed.volume));
+
+                        if isFigRoiInColor('get') == true
+                            sLine = strrep(sLine, ' ', '&nbsp;');
+
+                            aColor = atVoiInput{aa}.Color;
+                            sColor = reshape(dec2hex([int32(aColor(1)*255) int32(aColor(2)*255) int32(aColor(3)*255)], 2)',1, 6);
+                            sLine  = sprintf('<HTML><FONT color="%s" face="%s"><b>%s</b>', sColor, sFontName, sLine);
                         end
+
+                        sLbWindow = sprintf('%s%s\n', sLbWindow, sLine);
+
+                        if ~isempty(aVoiTag)
+
+                            aVoiTag{numel(aVoiTag)+1}.Tag = atVoiInput{aa}.Tag;
+
+                        else
+                            aVoiTag{1}.Tag = atVoiInput{aa}.Tag;
+                        end
+
                     end
                 end
-
-                asVoiRoiHeader{1} = sprintf('Patient Name, %s'      , cleanString(atMetaData{1}.PatientName, '_'));
-                asVoiRoiHeader{2} = sprintf('Patient ID, %s'        , atMetaData{1}.PatientID);
-                asVoiRoiHeader{3} = sprintf('Series Description, %s', cleanString(atMetaData{1}.SeriesDescription, '_'));
-                asVoiRoiHeader{4} = sprintf('Accession Number, %s'  , atMetaData{1}.AccessionNumber);
-                asVoiRoiHeader{5} = sprintf('Series Date, %s'       , atMetaData{1}.SeriesDate);
-                asVoiRoiHeader{6} = sprintf('Series Time, %s'       , atMetaData{1}.SeriesTime);
-                asVoiRoiHeader{7} = sprintf('Unit, %s'              , sUnits);
-                asVoiRoiHeader{8} = (' ');
-
-                dNumberOfLines = dNumberOfLines + numel(asVoiRoiHeader); % Add header and cell description to number of needed lines
-
-                asCell = cell(dNumberOfLines, 15); % Create an empty cell array
-
-                dLineOffset = 1;
-                for ll=1:numel(asVoiRoiHeader)
-
-                    asCell{dLineOffset,1}  = asVoiRoiHeader{ll};
-                    for tt=2:21
-                        asCell{dLineOffset,tt}  = (' ');
-                    end
-
-                    dLineOffset = dLineOffset+1;
-                end
-
-                asCell{dLineOffset,1}  = 'Name';
-                asCell{dLineOffset,2}  = 'Image number';
-                asCell{dLineOffset,3}  = 'Nb Cells';
-                asCell{dLineOffset,4}  = 'Total';
-                asCell{dLineOffset,5}  = 'Mean';
-                asCell{dLineOffset,6}  = 'Min';
-                asCell{dLineOffset,7}  = 'Max';
-                asCell{dLineOffset,8}  = 'Median';
-                asCell{dLineOffset,9}  = 'Deviation';
-                asCell{dLineOffset,10} = 'Peak';
-                asCell{dLineOffset,11} = 'Max Diameter (mm)';
-                asCell{dLineOffset,12} = 'Max SAD (mm)';
-                asCell{dLineOffset,13} = 'Area (cm2)';
-%                 asCell{dLineOffset,14} = 'Max distance cm';
-                asCell{dLineOffset,14} = 'Volume (cm3)';
-                for tt=15:21
-                    asCell{dLineOffset,tt}  = (' ');
-                end
-
-                dLineOffset = dLineOffset+1;
-
-                dNbVois = numel(atVoiInput);
-                if ~isempty(atVoiInput) % Scan VOIs
-                    for aa=1:dNbVois
-                        if ~isempty(atVoiInput{aa}.RoisTag) % Found a valid VOI
-
-                            if dNbVois > 10
-                                if mod(aa, 5)==1 || aa == dNbVois
-                                    progressBar(aa/dNbVois-0.0001, sprintf('Computing voi %d/%d', aa, dNbVois ) );
-                                end
-                            end
-
-                            [tVoiComputed, atRoiComputed] = ...
-                                computeVoi(aInputBuffer, ...
-                                           atInputMetaData, ...
-                                           aDisplayBuffer, ...
-                                           atMetaData, ...
-                                           atVoiInput{aa}, ...
-                                           atRoiInput, ...
-                                           dSUVScale, ...
-                                           bSUVUnit, ...
-                                           bModifiedMatrix, ...
-                                           bSegmented, ...
-                                           bDoseKernel, ...
-                                           bMovementApplied);
-                            
-                            if ~isempty(tVoiComputed)
-
-                                sVoiName = atVoiInput{aa}.Label;
-
-                                asCell{dLineOffset,1}  = (sVoiName);
-                                asCell{dLineOffset,2}  = (' ');
-                                asCell{dLineOffset,3}  = [tVoiComputed.cells];
-                                asCell{dLineOffset,4}  = [tVoiComputed.sum];
-                                asCell{dLineOffset,5}  = [tVoiComputed.mean];
-                                asCell{dLineOffset,6}  = [tVoiComputed.min];
-                                asCell{dLineOffset,7}  = [tVoiComputed.max];
-                                asCell{dLineOffset,8}  = [tVoiComputed.median];
-                                asCell{dLineOffset,9}  = [tVoiComputed.std];
-                                asCell{dLineOffset,10} = [tVoiComputed.peak];
-                                asCell{dLineOffset,11} = (' ');
-                                asCell{dLineOffset,12} = (' ');
-                                asCell{dLineOffset,13} = (' ');
-%                                 if tVoiComputed.maxDistance == 0
-%                                     asCell{dLineOffset,14} = ('NaN');
-%                                 else
-%                                     asCell{dLineOffset,14} = [tVoiComputed.maxDistance];
-%                                 end
-                                asCell{dLineOffset,14} = [tVoiComputed.volume];
-                                for tt=15:21
-                                    asCell{dLineOffset,tt}  = (' ');
-                                end
-
-                                dLineOffset = dLineOffset+1;
-
-                                dNbTags = numel(atRoiComputed);
-                                for bb=1:dNbTags % Scan VOI/ROIs
-                                    
-                                    if ~isempty(atRoiComputed{bb})
-
-                                        if dNbTags > 100
-                                             if mod(bb, 10)==1 || bb == dNbTags
-                                                progressBar( bb/dNbTags-0.0001, sprintf('Computing roi %d/%d, please wait.', bb, dNbTags) );
-                                             end
-                                        end
-
-                                        if strcmpi(atRoiComputed{bb}.Axe, 'Axe')
-                                            sSliceNb = num2str(atRoiComputed{bb}.SliceNb);
-                                        elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes1')
-                                            sSliceNb = ['C:' num2str(atRoiComputed{bb}.SliceNb)];
-                                        elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes2')
-                                            sSliceNb = ['S:' num2str(atRoiComputed{bb}.SliceNb)];
-                                        elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes3')
-                                            sSliceNb = ['A:' num2str(size(aDisplayBuffer, 3)-atRoiComputed{bb}.SliceNb+1)];
-                                        end
-
-                                        asCell{dLineOffset,1}  = (' ');
-                                        asCell{dLineOffset,2}  = (sSliceNb);
-                                        asCell{dLineOffset,3}  = [atRoiComputed{bb}.cells];
-                                        asCell{dLineOffset,4}  = [atRoiComputed{bb}.sum];
-                                        asCell{dLineOffset,5}  = [atRoiComputed{bb}.mean];
-                                        asCell{dLineOffset,6}  = [atRoiComputed{bb}.min];
-                                        asCell{dLineOffset,7}  = [atRoiComputed{bb}.max];
-                                        asCell{dLineOffset,8}  = [atRoiComputed{bb}.median];
-                                        asCell{dLineOffset,9}  = [atRoiComputed{bb}.std];
-                                        asCell{dLineOffset,10} = [atRoiComputed{bb}.peak];
-                                        if ~isempty(atRoiComputed{bb}.MaxDistances)
-                                            if atRoiComputed{bb}.MaxDistances.MaxXY.Length == 0
-                                                asCell{dLineOffset, 11} = ('NaN');
-                                            else
-                                                asCell{dLineOffset, 11} = [atRoiComputed{bb}.MaxDistances.MaxXY.Length];
-                                            end
-            
-                                            if atRoiComputed{bb}.MaxDistances.MaxCY.Length == 0
-                                                asCell{dLineOffset, 12} = ('NaN');
-                                            else
-                                                asCell{dLineOffset, 12} = [atRoiComputed{bb}.MaxDistances.MaxCY.Length];
-                                            end
-                                        else
-                                            asCell{dLineOffset,11} = (' ');
-                                            asCell{dLineOffset,12} = (' ');
-                                        end
-                                        asCell{dLineOffset,13} = [atRoiComputed{bb}.area];
-                                        asCell{dLineOffset,14} = (' ');
-                                        
-                                        for tt=15:21
-                                            asCell{dLineOffset,tt}  = (' ');
-                                        end
-
-                                        dLineOffset = dLineOffset+1;
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-
-                dNbRois = numel(atRoiInput);
-                for bb=1:dNbRois % Scan ROIs
-                    if isvalid(atRoiInput{bb}.Object)
-                        if strcmpi(atRoiInput{bb}.ObjectType, 'roi')
-
-                            if dNbRois > 100
-                                if mod(bb, 10)==1 || bb == dNbRois
-                                    progressBar( bb/dNbRois-0.0001, sprintf('Computing roi %d/%d, please wait.', bb, dNbRois) );
-                                end
-                            end
-
-                            tRoiComputed = ...
-                                computeRoi(aInputBuffer, ...
-                                           atInputMetaData, ...
-                                           aDisplayBuffer, ...
-                                           atMetaData, ...
-                                           atRoiInput{bb}, ...
-                                           dSUVScale, ...
-                                           bSUVUnit, ...
-                                           bModifiedMatrix, ...
-                                           bSegmented, ...
-                                           bDoseKernel, ...
-                                           bMovementApplied);
-
-                            sRoiName = atRoiInput{bb}.Label;
-
-                            if strcmpi(atRoiInput{bb}.Axe, 'Axe')
-                                sSliceNb = num2str(atRoiInput{bb}.SliceNb);
-                            elseif strcmpi(atRoiInput{bb}.Axe, 'Axes1')
-                                sSliceNb = ['C:' num2str(atRoiInput{bb}.SliceNb)];
-                            elseif strcmpi(atRoiInput{bb}.Axe, 'Axes2')
-                                sSliceNb = ['S:' num2str(atRoiInput{bb}.SliceNb)];
-                            elseif strcmpi(atRoiInput{bb}.Axe, 'Axes3')
-                                sSliceNb = ['A:' num2str(size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3)-atRoiInput{bb}.SliceNb+1)];
-                            end
-
-                            asCell{dLineOffset, 1}  = (sRoiName);
-                            asCell{dLineOffset, 2}  = (sSliceNb);
-                            asCell{dLineOffset, 3}  = [tRoiComputed.cells];
-                            asCell{dLineOffset, 4}  = [tRoiComputed.sum];
-                            asCell{dLineOffset, 5}  = [tRoiComputed.mean];
-                            asCell{dLineOffset, 6}  = [tRoiComputed.min];
-                            asCell{dLineOffset, 7}  = [tRoiComputed.max];
-                            asCell{dLineOffset, 8}  = [tRoiComputed.median];
-                            asCell{dLineOffset, 9}  = [tRoiComputed.std];
-                            asCell{dLineOffset, 10} = [tRoiComputed.peak];
-                            if ~isempty(tRoiComputed.MaxDistances)
-                                if tRoiComputed.MaxDistances.MaxXY.Length == 0
-                                    asCell{dLineOffset, 11} = ('NaN');
-                                else
-                                    asCell{dLineOffset, 11} = [tRoiComputed.MaxDistances.MaxXY.Length];
-                                end
-
-                                if tRoiComputed.MaxDistances.MaxCY.Length == 0
-                                    asCell{dLineOffset, 12} = ('NaN');
-                                else
-                                    asCell{dLineOffset, 12} = [tRoiComputed.MaxDistances.MaxCY.Length];
-                                end
-                            else
-                                asCell{dLineOffset, 11} = (' ');
-                                asCell{dLineOffset, 12} = (' ');
-                            end
-                            asCell{dLineOffset, 13} = tRoiComputed.area;
-                            asCell{dLineOffset, 14} = (' ');
-                            
-                            for tt=15:21
-                                asCell{dLineOffset,tt}  = (' ');
-                            end
-
-                            dLineOffset = dLineOffset+1;
-
-                        end
-                    end
-                end
-                
-                progressBar( 0.99, sprintf('Writing file %s, please wait.', file) );
-
-                cell2csv(sprintf('%s%s', path, file), asCell, ',');
-
-                if bExcelInstance == true
-                    winopen(sprintf('%s%s', path, file));
-                end
-
-                try
-                    saveRoiLastUsedDir = path;
-                    save(sMatFile, 'saveRoiLastUsedDir');
-                catch
-                        progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-%                        h = msgbox(sprintf('Warning: Cant save file %s', sMatFile), 'Warning');
-%                        if integrateToBrowser('get') == true
-%                            sLogo = './TriDFusion/logo.png';
-%                        else
-%                            sLogo = './logo.png';
-%                        end
-
-%                        javaFrame = get(h, 'JavaFrame');
-%                        javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
-                end
-
-                progressBar(1, sprintf('Write %s%s completed', path, file));
-% 
-                catch
-                    progressBar(1, 'Error: exportCurrentSeriesResultCallback()');
-                end
-
-                set(figRoiWindow, 'Pointer', 'default');
-                drawnow;
             end
         end
+
+        if isvalid(lbVoiRoiWindow)
+
+            dListboxTop   = get(lbVoiRoiWindow, 'ListboxTop');
+            dListboxValue = get(lbVoiRoiWindow, 'Value');
+
+            set(lbVoiRoiWindow, 'Value', 1);
+            set(lbVoiRoiWindow, 'String', sLbWindow);
+            if size(lbVoiRoiWindow.String, 1) > 0
+                lbVoiRoiWindow.String(end,:) = [];
+            end
+            set(lbVoiRoiWindow, 'ListboxTop', dListboxTop);
+
+            if dListboxValue < size(lbVoiRoiWindow.String, 1)
+                set(lbVoiRoiWindow, 'Value', dListboxValue);
+            else
+                set(lbVoiRoiWindow, 'Value', size(lbVoiRoiWindow.String, 1));
+            end
+        end
+
+        
+        voiRoiTag('set', aVoiTag);
+
+        progressBar(1, 'Ready');
+
+        catch
+            progressBar(1, 'Error:setVoiSimplifiedListbox()');
+        end
+
+        clear aInput;
+        clear aInputBuffer;
+        clear aDisplayBuffer;
+
+        set(figRoiWindow, 'Pointer', 'default');
+        drawnow;
+
+    end
+
+    function exportCurrentSeriesResultCallback(~, ~)
+
+        try
+
+        set(figRoiWindow, 'Pointer', 'watch');
+        drawnow;
+
+        if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+            bSUVUnit = true;
+        else
+            bSUVUnit = false;
+        end
+        
+        if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+            bModifiedMatrix = true;
+        else
+            bModifiedMatrix = false;
+        end
+
+        if strcmpi(get(mSegmented, 'Checked'), 'on')
+            bSegmented = true;
+        else
+            bSegmented = false;
+        end
+
+        if strcmpi(get(mSimplified, 'Checked'), 'on')
+     
+            exportSimplifiedContoursReport(bSUVUnit, bSegmented, bModifiedMatrix);
+        else
+
+            exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix);
+        end
+
+        catch
+            progressBar(1, 'Error: exportCurrentSeriesResultCallback()');
+        end
+
+        set(figRoiWindow, 'Pointer', 'default');
+        drawnow;
+
     end
 
     function copyRoiDialogDisplayCallback(~, ~)
@@ -2512,6 +2465,51 @@ end
         set(figRoiWindow, 'Pointer', 'default');
     end
 
+    function simplifiedDisplayCallback(hObject, ~)
+
+        if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+            bSUVUnit = true;
+        else
+            bSUVUnit = false;
+        end
+        
+        if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+            bModifiedMatrix = true;
+        else
+            bModifiedMatrix = false;
+        end
+
+        if strcmpi(get(mSegmented, 'Checked'), 'on')
+            bSegmented = true;
+        else
+            bSegmented = false;
+        end
+
+        if strcmpi(get(hObject, 'Checked'), 'on')
+
+            set(hObject, 'Checked', 'off');
+
+            isfigVoiSimplified('set', false);          
+
+            setRoiFigureUiContorl();
+
+            setRoiFigureName();
+
+            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+       else
+            set(hObject, 'Checked', 'on');
+           
+            isfigVoiSimplified('set', true); 
+
+            setRoiFigureUiContorl();
+
+            setRoiFigureName();
+
+            setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented);          
+        end
+     
+    end
+
     function SUVUnitCallback(hObject, ~)
 
         if strcmpi(get(mSegmented, 'Checked'), 'on')
@@ -2529,13 +2527,22 @@ end
         if strcmpi(hObject.Checked, 'on')
             hObject.Checked = 'off';
             suvMenuUnitOption('set', false);
-            
-            setVoiRoiListbox(false, bModifiedMatrix, bSegmented);           
+
+            if strcmpi(get(mSimplified, 'Checked'), 'on')
+                setVoiSimplifiedListbox(false, bModifiedMatrix, bSegmented); 
+            else    
+                setVoiRoiListbox(false, bModifiedMatrix, bSegmented);    
+            end
+
         else
             hObject.Checked = 'on';
             suvMenuUnitOption('set', true);
-            
-            setVoiRoiListbox(true, bModifiedMatrix, bSegmented);
+
+            if strcmpi(get(mSimplified, 'Checked'), 'on')
+                 setVoiSimplifiedListbox(true, bModifiedMatrix, bSegmented);          
+            else
+                setVoiRoiListbox(true, bModifiedMatrix, bSegmented);
+            end
         end
 
         setRoiFigureName();
@@ -2563,22 +2570,34 @@ end
             if atInput(dSeriesOffset).tMovement.bMovementApplied == true
                 modifiedMatrixValueMenuOption('set', true);                         
                 hObject.Checked = 'on';
-                
-                setVoiRoiListbox(bSUVUnit, true, bSegmented);           
+
+                if strcmpi(get(mSimplified, 'Checked'), 'on')
+                    setVoiSimplifiedListbox(bSUVUnit, true, bSegmented); 
+                else
+                    setVoiRoiListbox(bSUVUnit, true, bSegmented);           
+                end
             else
                 modifiedMatrixValueMenuOption('set', false);                         
                 hObject.Checked = 'off';      
                 
                 segMenuOption('set', false);
                 set(mSegmented, 'Checked', 'off');                
-                
-                setVoiRoiListbox(bSUVUnit, false, false);           
+
+                if strcmpi(get(mSimplified, 'Checked'), 'on')
+                    setVoiSimplifiedListbox(bSUVUnit, false, false); 
+                else           
+                    setVoiRoiListbox(bSUVUnit, false, false);           
+                end
             end
         else
             modifiedMatrixValueMenuOption('set', true);                               
             hObject.Checked = 'on';
-            
-            setVoiRoiListbox(bSUVUnit, true, bSegmented);
+
+            if strcmpi(get(mSimplified, 'Checked'), 'on')
+                setVoiSimplifiedListbox(bSUVUnit, true, bSegmented); 
+            else            
+                setVoiRoiListbox(bSUVUnit, true, bSegmented);
+            end
        end
 
         setRoiFigureName();
@@ -2601,14 +2620,22 @@ end
         if strcmpi(hObject.Checked, 'on')
             hObject.Checked = 'off';
             segMenuOption('set', false);
-            
-            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, false);
+
+            if strcmpi(get(mSimplified, 'Checked'), 'on')
+                setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, false); 
+            else              
+                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, false);
+            end
         else
             if bModifiedMatrix == true
                 hObject.Checked = 'on';
                 segMenuOption('set', true);
-                
-                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, true);
+
+                if strcmpi(get(mSimplified, 'Checked'), 'on')
+                    setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, true); 
+                else                 
+                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, true);
+                end
             else
                 hObject.Checked = 'off';
                 segMenuOption('set', false);                
@@ -2740,8 +2767,11 @@ end
             else
                 bModifiedMatrix = false;
             end
-        
-            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                if strcmpi(get(mSimplified, 'Checked'), 'on')
+                    setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
+                else          
+                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                end
                         
             catch
                 progressBar(1, 'Error: clearAllContoursCallback()' );                
@@ -2801,8 +2831,12 @@ end
         else
             bModifiedMatrix = false;
         end
-            
-        setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+        
+        if strcmpi(get(mSimplified, 'Checked'), 'on')
+            setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
+        else              
+            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+        end
 
     end
 
@@ -3259,7 +3293,11 @@ end
                 bModifiedMatrix = false;
             end
 
-            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);            
+            if strcmpi(get(mSimplified, 'Checked'), 'on')
+                setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
+            else
+                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);            
+            end
 
             catch
                 progressBar(1, 'Error:figRoiInsertBetweenRoisCallback()');
@@ -3379,7 +3417,11 @@ end
                             bModifiedMatrix = false;
                         end
 
-                        setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                        if strcmpi(get(mSimplified, 'Checked'), 'on')
+                            setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
+                        else
+                            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                        end
                     end
                 end 
 
@@ -3505,7 +3547,11 @@ end
                                 bModifiedMatrix = false;
                             end
 
-                            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                            if strcmpi(get(mSimplified, 'Checked'), 'on')
+                                setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
+                            else
+                                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                            end
                         end
                     end
                 end
@@ -3580,7 +3626,11 @@ end
             bModifiedMatrix = false;
         end
 
-        setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+        if strcmpi(get(mSimplified, 'Checked'), 'on')
+            setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
+        else
+            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+        end
     end
 
     function figRoiCopyMultipleObjectsCallback(hObject, ~)
@@ -3727,8 +3777,12 @@ end
                 else
                     bModifiedMatrix = false;
                 end
-                
-                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+               
+                if strcmpi(get(mSimplified, 'Checked'), 'on')
+                    setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
+                else             
+                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                end
             end
         end
 

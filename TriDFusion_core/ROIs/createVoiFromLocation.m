@@ -43,6 +43,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
             return;
     end
 
+
     pMousePointer = get(fiMainWindowPtr('get'), 'Pointer');
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');            

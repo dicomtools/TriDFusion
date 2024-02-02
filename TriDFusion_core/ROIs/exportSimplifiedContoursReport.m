@@ -7,7 +7,7 @@ function exportSimplifiedContoursReport(bSUVUnit, bSegmented, bModifiedMatrix)
 %
 %Last specifications modified:
 %
-% Copyright 2023, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2024, Daniel Lafontaine, on behalf of the TriDFusion development team.
 %
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 %
@@ -28,10 +28,8 @@ function exportSimplifiedContoursReport(bSUVUnit, bSegmented, bModifiedMatrix)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     atInput = inputTemplate('get');
+
     dOffset = get(uiSeriesPtr('get'), 'Value');
-    if dOffset > numel(atInput)
-        return;
-    end
 
     try
         matlab.io.internal.getExcelInstance;
@@ -273,14 +271,12 @@ end
             asCell{dLineOffset,7} = 'Median';
             asCell{dLineOffset,8} = 'Deviation';
             asCell{dLineOffset,9} = 'Peak';
- %           asCell{dLineOffset,11} = 'Max Diameter cm';
- %           asCell{dLineOffset,12} = 'Max SAD cm';
- %           asCell{dLineOffset,13} = 'Area cm2';
-            asCell{dLineOffset,10} = 'Max distance Coronal (mm)';
-            asCell{dLineOffset,11} = 'Max distance Sagittal (mm)';
-            asCell{dLineOffset,12} = 'Max distance Axial (mm)';
+            asCell{dLineOffset,10} = 'Max Diagomal Coronal (mm)';
+            asCell{dLineOffset,11} = 'Max Diagomal Sagittal (mm)';
+            asCell{dLineOffset,12} = 'Max Diagomal Axial (mm)';
             asCell{dLineOffset,13} = 'Volume (ml)';
-           for tt=14:21
+            
+            for tt=14:21
                 asCell{dLineOffset,tt}  = (' ');
             end
 
@@ -324,7 +320,6 @@ end
                             sVoiName = atVoiInput{aa}.Label;
 
                             asCell{dLineOffset,1}  = (sVoiName);
- %                           asCell{dLineOffset,2}  = (' ');
                             asCell{dLineOffset,2} = [tVoiComputed.cells];
                             asCell{dLineOffset,3} = [tVoiComputed.sum];
                             asCell{dLineOffset,4} = [tVoiComputed.mean];
@@ -333,9 +328,6 @@ end
                             asCell{dLineOffset,7} = [tVoiComputed.median];
                             asCell{dLineOffset,8} = [tVoiComputed.std];
                             asCell{dLineOffset,9} = [tVoiComputed.peak];
-  %                          asCell{dLineOffset,11} = (' ');
-  %                          asCell{dLineOffset,12} = (' ');
-  %                          asCell{dLineOffset,13} = (' ');
 
                             if isempty(tMaxDistances.Coronal)
                                 asCell{dLineOffset,10} = ('NaN');
@@ -374,7 +366,6 @@ end
             if dMTV ~= 0
                 asCell{9,2} = sprintf('%.3f', dMTV);
             end
-
 
             if ~isempty(imCMask)
 
@@ -425,8 +416,8 @@ end
 %                progressBar(1, 'Error: exportSimplifiedContoursReport()');
 %            end
 
-            set(fiMainWindowPtr('get'), 'Pointer', 'default');
-            drawnow;
+%             set(fiMainWindowPtr('get'), 'Pointer', 'default');
+%             drawnow;
         end
     end
 

@@ -203,14 +203,13 @@ function resize = dicomViewer()
     initFusionWindowLevel('set', true);
     
     getRGBColormapImage('set', 'rgb-plus.png');
-        
+
+    isfigVoiSimplified           ('set', false);      
     suvMenuUnitOption            ('set', true);
     segMenuOption                ('set', false);
     modifiedMatrixValueMenuOption('set', false);
     isFigRoiInColor              ('set', true);
     centroidMenuOption           ('set', false);
-
-    isfigVoiSimplifiedInColor('set', true);
 
     registrationTemplate('init');
     registrationReport  ('set', '');

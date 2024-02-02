@@ -27,6 +27,18 @@ function setAnalCancerReportCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    try
+
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    drawnow;
+
     exportSimplifiedContoursReport(true, false, false);
+
+    catch
+       progressBar(1, 'Error: exportSimplifiedContoursReport()');
+    end
+
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    drawnow;   
 
 end

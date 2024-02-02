@@ -183,9 +183,10 @@ function mainWindowMenu()
 
     mAnalCancer = uimenu(mWorkflows,'Label','Anal Cancer');  
 
-    uimenu(mAnalCancer, 'Label','Display Result', 'Callback', @figVoiSimplifiedDialogCallback);
-    uimenu(mAnalCancer, 'Label','Export Report', 'Callback', @setAnalCancerReportCallback);
-    uimenu(mAnalCancer, 'Label','PET/CT Fusion', 'Callback', @setPETCTAnalCancerFusionCallback, 'Separator','on');
+    uimenu(mAnalCancer, 'Label','Display Result', 'Callback'        , @figVoiSimplifiedDialogCallback);
+    uimenu(mAnalCancer, 'Label','Export Report...', 'Callback'      , @setAnalCancerReportCallback, 'Separator','on');
+    uimenu(mAnalCancer, 'Label','Export Contours to RT-structure...','Callback', @writeRTStructCallback);
+    uimenu(mAnalCancer, 'Label','PET/CT Fusion', 'Callback'         , @setPETCTAnalCancerFusionCallback, 'Separator','on');
 
     % PSMA Lu177
 

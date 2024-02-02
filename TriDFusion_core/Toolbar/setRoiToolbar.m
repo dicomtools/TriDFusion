@@ -101,13 +101,13 @@ function setRoiToolbar(sVisible)
         [img,~] = imread(sprintf('%s//sphere.png', sIconsPath));
         img = double(img)/255;
 
-        t11 = uitoggletool(tbRoi,'CData',img,'TooltipString','Draw Sphere', 'Separator', 'on');
+        t11 = uitoggletool(tbRoi,'CData',img,'TooltipString','<html>Draw Sphere<br>Activate the View/Contour Panel to modify the diameter</html>', 'Separator', 'on');
         t11.ClickedCallback = @drawsphereCallback;
 
         [img,~] = imread(sprintf('%s//voi-click.png', sIconsPath));
         img = double(img)/255;
-
-        t12 = uitoggletool(tbRoi,'CData',img,'TooltipString','Click VOI');
+             
+        t12 = uitoggletool(tbRoi,'CData',img,'TooltipString','<html>Click VOI<br>Activate the View/Contour Panel to fine-tune the threshold</html>');
         t12.ClickedCallback = @drawClickVoiCallback;
 
         [img,~] = imread(sprintf('%s//continuous.png', sIconsPath));
@@ -1496,6 +1496,8 @@ function setRoiToolbar(sVisible)
 
      %       if w == 0
             if  strcmpi(windowButton('get'), 'down')
+% 
+
 
  %               robotClick();
 
@@ -1530,6 +1532,48 @@ function setRoiToolbar(sVisible)
         
                 dSliderMin = minTresholdSliderRoiPanelValue('get');
                 dSliderMax = maxTresholdSliderRoiPanelValue('get');
+
+                % Patch for when the user don't press enter on the edit box
+
+                if bInPercent == true 
+
+                    pUiRoiPanelPtr = uiRoiPanelPtr('get');
+
+                    apChildren = pUiRoiPanelPtr.Children;
+
+                    % uiEditMaxTresholdRoiPanel
+
+                    uiEditMaxTresholdRoiPanel = apChildren(strcmp({apChildren.UserData}, 'uiEditMaxTresholdRoiPanel'));
+
+                    if ~isempty(uiEditMaxTresholdRoiPanel)
+    
+                        sPercent = get(uiEditMaxTresholdRoiPanel, 'String');
+                        
+                        dSliderValue = str2double(sPercent)/100;
+                        
+                        if dSliderValue > 0 && dSliderValue <=1
+                            dSliderMax = str2double(sPercent)/100;
+                        end
+                    end
+
+                    if bRelativeToMax == false
+
+                        % uiEditMinTresholdRoiPanel
+    
+                        uiEditMinTresholdRoiPanel = apChildren(strcmp({apChildren.UserData}, 'uiEditMinTresholdRoiPanel'));
+    
+                        if ~isempty(uiEditMinTresholdRoiPanel)
+    
+                            sPercent = get(uiEditMinTresholdRoiPanel, 'String');
+                            
+                            dSliderValue = str2double(sPercent)/100;
+                            
+                            if dSliderValue > 0 && dSliderValue <=1
+                                dSliderMin = str2double(sPercent)/100;
+                            end                  
+                        end
+                    end
+                end
 
                 createVoiFromLocation(gca, clickedPtX, clickedPtY, aBuffer, dSliderMin, dSliderMax, bRelativeToMax, bInPercent, dSeriesOffset,  pixelEdge('get'));    
 

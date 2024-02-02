@@ -1,6 +1,6 @@
-function aTag = voiTag(sAction, aValue)
-%function aTag = voiTag(sAction, aValue)
-%Get\Set VOI tag.
+function bIsSimplified = isfigVoiSimplified(sAction, bValue)
+%function bIsSimplified = isfigVoiSimplified(sAction, bValue)
+%Get/Set Figure ROI result simplified.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.
@@ -30,11 +30,12 @@ function aTag = voiTag(sAction, aValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent paTag; 
+    persistent pbIsSimplified; 
 
     if strcmpi('set', sAction)
-        paTag = aValue;            
+        pbIsSimplified = bValue;            
     end
 
-    aTag = paTag;    
-end 
+    bIsSimplified = pbIsSimplified;     
+
+end
