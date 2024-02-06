@@ -29,57 +29,77 @@ function setImagesAspectRatio()
 
     if size(dicomBuffer('get'), 3) == 1 
 
+        atMetaData = dicomMetaData('get');         
+
         if aspectRatio('get') == true      
 
             x = computeAspectRatio('x', atMetaData);
-            y = computeAspectRatio('y',atMetaData);
+            y = computeAspectRatio('y', atMetaData);
             z = 1;
 
-            daspect(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [x y z]); 
             daspect(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , [x y z]); 
+
+            if isFusion('get') == true
+
+                xf = fusionAspectRatioValue('get', 'x');
+                yf = fusionAspectRatioValue('get', 'y');
+                zf = fusionAspectRatioValue('get', 'z');
+
+                daspect(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
+            end
+
+            if isPlotContours('get') == true
+
+               xf = fusionAspectRatioValue('get', 'x');
+               yf = fusionAspectRatioValue('get', 'y');
+               zf = fusionAspectRatioValue('get', 'z');
+               
+               daspect(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
+            end            
+
         else
             x =1;
             y =1;
             z =1;
 
-            daspect(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [x y z]);  
             daspect(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , [x y z]);  
-
-            axis(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');                    
             axis(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'normal');                    
+
+            if isFusion('get') == true
+
+                xf = 1;
+                yf = 1;
+                zf = 1;
+
+                daspect(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
+                axis(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , 'normal');                    
+            end
+
+            if isPlotContours('get') == true
+
+               xf = 1;
+               yf = 1;
+               zf = 1;
+               
+               daspect(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
+               axis(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , 'normal');                    
+           end              
         end
 
         aspectRatioValue('set', 'x', x);
         aspectRatioValue('set', 'y', y);
         aspectRatioValue('set', 'z', z);
 
-        set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-        
-        if isFusion('get') == true
-
-            lFusionMin = fusionWindowLevel('get', 'min');   
-            lFusionMax = fusionWindowLevel('get', 'max'); 
-
-            set(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lFusionMin lFusionMax]);
-        end  
-        
-        if isPlotContours('get') == true
-
-            lFusionMin = fusionWindowLevel('get', 'min');   
-            lFusionMax = fusionWindowLevel('get', 'max'); 
-
-            set(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'CLim', [lFusionMin lFusionMax]);
-        end  
     else
         if aspectRatio('get') == true
 
-            atCoreMetaData = dicomMetaData('get');         
+            atMetaData = dicomMetaData('get');         
 
-            if ~isempty(atCoreMetaData{1}.PixelSpacing)
+            if ~isempty(atMetaData{1}.PixelSpacing)
                 
-                x = atCoreMetaData{1}.PixelSpacing(1);
-                y = atCoreMetaData{1}.PixelSpacing(2);                                                   
-                z = computeSliceSpacing(atCoreMetaData);                   
+                x = atMetaData{1}.PixelSpacing(1);
+                y = atMetaData{1}.PixelSpacing(2);                                                   
+                z = computeSliceSpacing(atMetaData);                   
 
                 if x == 0
                     x = 1;
@@ -94,8 +114,8 @@ function setImagesAspectRatio()
                 end
             else
 
-                x = computeAspectRatio('x', atCoreMetaData);
-                y = computeAspectRatio('y', atCoreMetaData);
+                x = computeAspectRatio('x', atMetaData);
+                y = computeAspectRatio('y', atMetaData);
                 z = 1;                      
             end
             

@@ -1,5 +1,5 @@
-function setMachineLearningPSMA(sSegmentatorScript, tPSMA)
-%function setMachineLearningPSMA(sSegmentatorScript, tPSMA)
+function setMachineLearningPSMA(sSegmentatorScript, tPSMA, bUseDefault)
+%function setMachineLearningPSMA(sSegmentatorScript, tPSMA, bUseDefault)
 %Run PSMA threshold base segmentation with machine learning organ exclusion.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -131,21 +131,32 @@ function setMachineLearningPSMA(sSegmentatorScript, tPSMA)
             
             clear aSlice;
         else
-            waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
+            if bUseDefault == false
 
-            PSMANormalLiverMeanSDDialog();
-
-            if gbProceedWithSegmentation == false
-                return;
-            end           
+                waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
+    
+                PSMANormalLiverMeanSDDialog();
+    
+                if gbProceedWithSegmentation == false
+                    return;
+                end           
+            else
+                gdNormalLiverMean = PSMANormalLiverMeanValue('get');
+                gdNormalLiverSTD  = PSMANormalLiverSDValue('get');               
+            end
         end   
     else
-        waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
-
-        PSMANormalLiverMeanSDDialog();
-
-        if gbProceedWithSegmentation == false
-            return;
+        if bUseDefault == false
+            waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
+    
+            PSMANormalLiverMeanSDDialog();
+    
+            if gbProceedWithSegmentation == false
+                return;
+            end
+        else
+            gdNormalLiverMean = PSMANormalLiverMeanValue('get');
+            gdNormalLiverSTD  = PSMANormalLiverSDValue('get');       
         end
     end
 

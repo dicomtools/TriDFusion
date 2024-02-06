@@ -173,7 +173,8 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
             
                 end                
             end
-            
+        else
+            resampImage = dcmImage;
         end
 
         for cc=1:numel(atDcmMetaData)-1

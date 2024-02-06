@@ -1,5 +1,5 @@
-function setMachineLearningLu177(sSegmentatorScript, tLu177)
-%function setMachineLearningLu177(sSegmentatorScript, tLu177)
+function setMachineLearningLu177(sSegmentatorScript, tLu177, bUseDefault)
+%function setMachineLearningLu177(sSegmentatorScript, tLu177, bUseDefault)
 %Run Lu177 threshold base segmentation with machine learning organ exclusion.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -39,7 +39,7 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177)
     for tt=1:numel(atInput)
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'ct')
             dCTSerieOffset = tt;
-            break
+            break;
         end
     end
 
@@ -47,7 +47,7 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177)
     for tt=1:numel(atInput)
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'nm')
             dNMSerieOffset = tt;
-            break
+            break;
         end
     end
 
@@ -131,21 +131,33 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177)
             
             clear aSlice;
         else
-            waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
+            if bUseDefault == false
 
-            Lu177NormalLiverMeanSDDialog();
-
-            if gbProceedWithSegmentation == false
-                return;
-            end           
+                waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
+    
+                Lu177NormalLiverMeanSDDialog();
+    
+                if gbProceedWithSegmentation == false
+                    return;
+                end           
+            else
+                gdNormalLiverMean = Lu177NormalLiverMeanValue('get');
+                gdNormalLiverSTD  = Lu177NormalLiverSDValue('get');
+            end
         end   
     else
-        waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
+        if bUseDefault == false
 
-        Lu177NormalLiverMeanSDDialog();
-
-        if gbProceedWithSegmentation == false
-            return;
+            waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
+    
+            Lu177NormalLiverMeanSDDialog();
+    
+            if gbProceedWithSegmentation == false
+                return;
+            end
+        else
+            gdNormalLiverMean = Lu177NormalLiverMeanValue('get');
+            gdNormalLiverSTD  = Lu177NormalLiverSDValue('get');
         end
     end
 

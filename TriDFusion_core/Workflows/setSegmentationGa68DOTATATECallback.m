@@ -27,6 +27,8 @@ function setSegmentationGa68DOTATATECallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    if exist('hObject', 'var')
+
     DLG_Ga68DOTATATE_PERCENT_X = 380;
     DLG_Ga68DOTATATE_PERCENT_Y = 185;
 
@@ -177,6 +179,15 @@ function setSegmentationGa68DOTATATECallback(~, ~)
               'ForegroundColor', viewerForegroundColor('get'), ...               
               'Callback', @proceedGa68DOTATATESegmentationCallback...
               );    
+    else % Execute the segmentation using the default values
+
+         setSegmentationGa68DOTATATE(Ga68DOTATATESegmentationBoneMaskThresholdValue('get'), ...
+                                     Ga68DOTATATESmalestVoiValue('get'), ...
+                                     pixelEdge('get'), ...
+                                     Ga68DOTATATENormalLiverTresholdMultiplierValue('get'), ...
+                                     true); 
+    
+    end
 
     function edtGa68DOTATATESmalestVoiValueCallback(~, ~)
 
@@ -273,7 +284,7 @@ function setSegmentationGa68DOTATATECallback(~, ~)
 
         delete(dlgGa68DOTATATESegmentation);
 
-        setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, dNormalLiverTresholdMultiplier); 
+        setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, dNormalLiverTresholdMultiplier, false); 
     end
 
 end

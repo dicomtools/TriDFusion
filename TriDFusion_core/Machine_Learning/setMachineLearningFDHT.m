@@ -39,7 +39,7 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
     for tt=1:numel(atInput)
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'ct')
             dCTSerieOffset = tt;
-            break
+            break;
         end
     end
 
@@ -47,7 +47,7 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
     for tt=1:numel(atInput)
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'pt')
             dPTSerieOffset = tt;
-            break
+            break;
         end
     end
 

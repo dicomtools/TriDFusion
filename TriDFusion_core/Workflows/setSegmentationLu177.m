@@ -1,5 +1,5 @@
-function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
-%function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
+function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, bUseDefault)
+%function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, bUseDefault)
 %Run Lu177 Segmentation base on normal liver treshold.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -131,21 +131,32 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge)
             
             clear aSlice;
         else
-            waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
-
-            Lu177NormalLiverMeanSDDialog();
-
-            if gbProceedWithSegmentation == false
-                return;
-            end           
+            if bUseDefault == false
+         
+                waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
+    
+                Lu177NormalLiverMeanSDDialog();
+    
+                if gbProceedWithSegmentation == false
+                    return;
+                end           
+            else
+                gdNormalLiverMean = Lu177NormalLiverMeanValue('get');        
+                gdNormalLiverSTD  = Lu177NormalLiverSDValue('get');
+            end
         end   
     else
-        waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
-
-        Lu177NormalLiverMeanSDDialog();
-
-        if gbProceedWithSegmentation == false
-            return;
+        if bUseDefault == false
+            waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
+    
+            Lu177NormalLiverMeanSDDialog();
+    
+            if gbProceedWithSegmentation == false
+                return;
+            end
+        else
+            gdNormalLiverMean = Lu177NormalLiverMeanValue('get');        
+            gdNormalLiverSTD  = Lu177NormalLiverSDValue('get');            
         end
     end
 

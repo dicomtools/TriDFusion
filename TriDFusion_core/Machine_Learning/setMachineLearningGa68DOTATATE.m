@@ -1,5 +1,5 @@
-function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE)
-%function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE)
+function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE, bUseDefault)
+%function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE, bUseDefault)
 %Run machine learning Ga68 DOTATATE Segmentation.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -39,7 +39,7 @@ function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE)
     for tt=1:numel(atInput)
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'ct')
             dCTSerieOffset = tt;
-            break
+            break;
         end
     end
 
@@ -47,7 +47,7 @@ function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE)
     for tt=1:numel(atInput)
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'pt')
             dPTSerieOffset = tt;
-            break
+            break;
         end
     end
 
@@ -131,22 +131,34 @@ function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE)
             
             clear aSlice;
         else
-            waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
+            if bUseDefault == false
 
-            Ga68DOTATATENormalLiverMeanSDDialog();
-
-            if gbProceedWithSegmentation == false
-                return;
-            end           
+                waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
+    
+                Ga68DOTATATENormalLiverMeanSDDialog();
+    
+                if gbProceedWithSegmentation == false
+                    return;
+                end  
+            else
+                gdNormalLiverMean = Ga68DOTATATENormalLiverMeanValue('get');        
+                gdNormalLiverSTD  = Ga68DOTATATENormalLiverSDValue('get');
+            end            
         end   
     else
-        waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
-
-        Ga68DOTATATENormalLiverMeanSDDialog();
-
-        if gbProceedWithSegmentation == false
-            return;
-        end
+        if bUseDefault == false
+            
+            waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
+    
+            Ga68DOTATATENormalLiverMeanSDDialog();
+    
+            if gbProceedWithSegmentation == false
+                return;
+            end
+        else
+            gdNormalLiverMean = Ga68DOTATATENormalLiverMeanValue('get');        
+            gdNormalLiverSTD  = Ga68DOTATATENormalLiverSDValue('get');
+        end 
     end
 
     % Apply ROI constraint 

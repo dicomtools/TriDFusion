@@ -57,7 +57,17 @@ function setContours(tContours, bInitDisplay)
     drawnow; 
     
     for bb=1:numel(atInput)
-        
+
+        if isempty(dicomBuffer('get', [], bb))
+            aInputBuffer = inputBuffer('get');
+
+            aImageSize = size(aInputBuffer{bb});
+
+            clear aInputBuffer;
+        else                                            
+            aImageSize = size(dicomBuffer('get', [], bb));
+        end
+
         for cc=1:numel(atContours)
             
             for dd=1:numel(atContours{cc})
@@ -139,7 +149,7 @@ function setContours(tContours, bInitDisplay)
 
                                     bFlip = getImagePosition(bb);
                                     if bFlip == true
-                                        aImageSize = size(dicomBuffer('get'));
+
                                         try
                                             dSliceNb =  aImageSize(3)-z(1);
                                         catch

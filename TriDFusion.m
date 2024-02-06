@@ -1,26 +1,29 @@
 function TriDFusion(varargin)
 %function TriDFusion(varargin)
-%Triple Dimention Fusion Image Viewer Main.
+%Triple Dimention Fusion (3DF) Image Viewer main function.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
-%Note: option settings must fit on one line and can contain one semicolon at most.
-% -3d    : Display 2D View using 3D engine
-% -b     : Display 2D Border
-% -i     : TriDFusion is integrated with DIDOM Database Browser
-% -fusion: Activate the fusion. *Require 2 volumes 
-% -mip   : Activate the 3D mip. *The order of activation of the mip, vol and iso dictates the emphasis of each feature of the 3D resulting image
-% -vol   : Activate the 3D volume rendering. *The order of activation of the mip, vol and iso dictates the emphasis of each feature of the 3D resulting image
-% -iso   : Activate the 3D iso surface. *The order of activation of the mip, vol and iso dictates the emphasis of each feature of the 3D resulting image
+% Note: Option settings must fit on one line and can contain at most one semicolon.
+% -3d    : Display 2D View using 3D engine.
+% -b     : Display 2D Border.
+% -i     : TriDFusion is integrated with DIDOM Database Browser.
+% -fusion: Activate the fusion. *Requires 2 volumes.
+% -mip   : Activate the 3D MIP. *The order of activation of the MIP, vol, and iso dictates the emphasis of each feature of the 3D resulting image.
+% -vol   : Activate the 3D volume rendering. *The order of activation of the MIP, vol, and iso dictates the emphasis of each feature of the 3D resulting image.
+% -iso   : Activate the 3D iso surface. *The order of activation of the MIP, vol, and iso dictates the emphasis of each feature of the 3D resulting image.
+% -w name: Execute a workflow.
+% -r path: Set a destination path. 
 %
-%Example:
-%TriDFusion(); Open the graphical user interface
-%TriDFusion('path_to_dicom_folder'); Open the graphical user interface with a dicom image
-%TriDFusion('path_to_dicom_folder','path_to_dicom_folder');  Open the graphical user interface with 2 dicom image
-%TriDFusion('path_to_dicom_folder','path_to_dicom_folder', '-fusion'); Open the graphical user interface with 2 dicom image and fused them
-%TriDFusion('path_to_dicom_folder', '-mip'); Open the graphical user interface with a dicom image and create a 3D mip.
-%TriDFusion('path_to_dicom_folder', '-iso'); Open the graphical user interface with a dicom image and create a 3D iso surface model.
-%TriDFusion('path_to_dicom_folder', '-vol'); Open the graphical user interface with a dicom image and create a 3D volume rendering.
-%TriDFusion('path_to_dicom_folder', '-mip', '-iso', '-vol'); Open the graphical user interface with a dicom image and create a fusion of a 3D mip, iso surface and volume rendering. Any combinaison can be use. 
+% Example:
+% TriDFusion(); Open the graphical user interface.
+% TriDFusion('path_to_dicom_series_folder'); Open the graphical user interface with a DICOM image.
+% TriDFusion('path_to_dicom_series_folder_1', 'path_to_dicom_series_folder_2');  Open the graphical user interface with 2 DICOM images.
+% TriDFusion('path_to_dicom_series_folder_1', 'path_to_dicom_series_folder_2', '-fusion'); Open the graphical user interface with 2 DICOM images and fuse them.
+% TriDFusion('path_to_dicom_series_folder', '-mip'); Open the graphical user interface with a DICOM image and create a 3D MIP.
+% TriDFusion('path_to_dicom_series_folder', '-iso'); Open the graphical user interface with a DICOM image and create a 3D iso surface model.
+% TriDFusion('path_to_dicom_series_folder', '-vol'); Open the graphical user interface with a DICOM image and create a 3D volume rendering.
+% TriDFusion('path_to_dicom_series_folder', '-mip', '-iso', '-vol'); Open the graphical user interface with a DICOM image and create a fusion of a 3D MIP, iso surface, and volume rendering. Any combination can be used. 
+% TriDFusion('path_to_dicom_series_folder', '-w', 'workflow_name'); Open the graphical user interface with a DICOM image and execute a workflow. Refer to processWorkflow.m for a list of available options. Refer to dicomViewer.m for workflows the default values. 
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
@@ -83,7 +86,8 @@ function TriDFusion(varargin)
     dOutputDirOffset = 0;
  
     asRendererPriority = [];
-    
+    sWorkflowName = [];
+
 %    varargin = replace(varargin, '"', '');
 %    varargin = replace(varargin, ']', '');
 %    varargin = replace(varargin, '[', '');
@@ -101,6 +105,7 @@ function TriDFusion(varargin)
             
             case '-r' % Output directory
                 if k+1 <= length(varargin)
+
                     if dOutputDirOffset == 0
 
                         sOutputPath = char(varargin{k+1});
@@ -109,14 +114,29 @@ function TriDFusion(varargin)
                         sOutputPath = replace(sOutputPath, ']', '');
                         sOutputPath = replace(sOutputPath, '[', '');
 
-                        if sOutputPath(end) ~= '/'
+                        if sOutputPath(end) ~= '/' && ...
+                           sOutputPath(end) ~= '\'
+
                             sOutputPath = [sOutputPath '/'];   
-                            dOutputDirOffset = k+1;
-                            outputDir('set', sOutputPath);                                                         
-                        end               
+                        end
+
+                        dOutputDirOffset = k+1;
+                        outputDir('set', sOutputPath);                                                         
                     end
                 end
-                
+
+            case '-w' % Output directory
+
+                if k+1 <= length(varargin)
+
+                    sWorkflowName = char(varargin{k+1});
+
+                    sWorkflowName = replace(sWorkflowName, '"', '');
+                    sWorkflowName = replace(sWorkflowName, ']', '');
+                    sWorkflowName = replace(sWorkflowName, '[', '');
+                                  
+                end
+
             case '-3d' % 2D display using 3D engine
                 arg3DEngine = true;
 
@@ -150,7 +170,7 @@ function TriDFusion(varargin)
                 end
         end
     end            
-    
+       
     viewerTempDirectory('set', char([tempname '/']));
     if exist(viewerTempDirectory('get'), 'dir')
         rmdir(viewerTempDirectory('get'), 's');
@@ -305,6 +325,13 @@ function TriDFusion(varargin)
         end        
     end                    
         
+
+    if ~isempty(sWorkflowName)
+
+         processWorkflow(sWorkflowName);
+
+    end
+
     function resizeFigureCallback(~,~)
         
         if exist('resizeViewer', 'var')

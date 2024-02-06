@@ -1,5 +1,5 @@
-function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1IntensityMax, dModality1MIPIntensityMin, dModality1MIPIntensityMax, sModality2, dModality2IntensityMin, dModality2IntensityMax, dModality2MIPIntensityMin, dModality2MIPIntensityMax, bLink2DMip, bViewContourPanel)
-%function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1IntensityMax, dModality1MIPIntensityMin, dModality1MIPIntensityMax, sModality2, dModality2IntensityMin, dModality2IntensityMax, dModality2MIPIntensityMin, dModality2MIPIntensityMax, bLink2DMip, bViewContourPanel)
+function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1IntensityMax, dModality1MIPIntensityMin, dModality1MIPIntensityMax, sModality2, dModality2IntensityMin, dModality2IntensityMax, dModality2MIPIntensityMin, dModality2MIPIntensityMax, bLink2DMip, bViewContourPanel, dSeries1Offset, dSeries2Offset)
+%function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1IntensityMax, dModality1MIPIntensityMin, dModality1MIPIntensityMax, sModality2, dModality2IntensityMin, dModality2IntensityMax, dModality2MIPIntensityMin, dModality2MIPIntensityMax, bLink2DMip, bViewContourPanel, dSeries1Offset, dSeries2Offset)
 %Run fusion between 2 modalities. The second modality is use as resample source.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -30,57 +30,63 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
     atInput = inputTemplate('get');
     
     % Modality validation    
-       
-    dSerie1Offset = [];
-    for tt=1:numel(atInput)
-        if strcmpi(atInput(tt).atDicomInfo{1}.Modality, sModality1)
-            dSerie1Offset = tt;
-            break
+    
+    if ~exist('dSeries1Offset', 'var')
+        dSeries1Offset = [];
+        for tt=1:numel(atInput)
+            if strcmpi(atInput(tt).atDicomInfo{1}.Modality, sModality1)
+                dSeries1Offset = tt;
+                break;
+            end
         end
     end
 
-    dSerie2Offset = [];
-    for tt=1:numel(atInput)
-        if strcmpi(atInput(tt).atDicomInfo{1}.Modality, sModality2)
-            dSerie2Offset = tt;
-            break
+    if ~exist('dSeries2Offset', 'var')
+        dSeries2Offset = [];
+        for tt=1:numel(atInput)
+            if strcmpi(atInput(tt).atDicomInfo{1}.Modality, sModality2)
+                dSeries2Offset = tt;
+                break;
+            end
         end
     end
 
-    if isempty(dSerie1Offset) || ...
-       isempty(dSerie2Offset)  
+    if isempty(dSeries1Offset) || ...
+       isempty(dSeries2Offset)  
         progressBar(1, sprintf('Error: Fusion of %s %s not detected!', sModality1, sModality2));
         errordlg(sprintf('Fusion of %s %s not detected!', sModality1, sModality2), 'Modality Validation');  
         return;               
     end
 
 
-    atSerie1MetaData = dicomMetaData('get', [], dSerie1Offset);
-    atSerie2MetaData = dicomMetaData('get', [], dSerie2Offset);
+    atSerie1MetaData = dicomMetaData('get', [], dSeries1Offset);
+    atSerie2MetaData = dicomMetaData('get', [], dSeries2Offset);
 
-    aSerie1Image = dicomBuffer('get', [], dSerie1Offset);
+    aSerie1Image = dicomBuffer('get', [], dSeries1Offset);
     if isempty(aSerie1Image)
         aInputBuffer = inputBuffer('get');
-        aSerie1Image = aInputBuffer{dSerie1Offset};
+        aSerie1Image = aInputBuffer{dSeries1Offset};
+        clear aInputBuffer;
     end
 
-    aSerie2Image = dicomBuffer('get', [], dSerie2Offset);
+    aSerie2Image = dicomBuffer('get', [], dSeries2Offset);
     if isempty(aSerie2Image)
         aInputBuffer = inputBuffer('get');
-        aSerie2Image = aInputBuffer{dSerie2Offset};
+        aSerie2Image = aInputBuffer{dSeries2Offset};
+        clear aInputBuffer;
     end
 
     if isempty(atSerie1MetaData)
-        atSerie1MetaData = atInput(dSerie1Offset).atDicomInfo;
+        atSerie1MetaData = atInput(dSeries1Offset).atDicomInfo;
     end
 
     if isempty(atSerie2MetaData)
-        atSerie2MetaData = atInput(dSerie2Offset).atDicomInfo;
+        atSerie2MetaData = atInput(dSeries2Offset).atDicomInfo;
     end
 
-    if get(uiSeriesPtr('get'), 'Value') ~= dSerie1Offset
+    if get(uiSeriesPtr('get'), 'Value') ~= dSeries1Offset
 
-        set(uiSeriesPtr('get'), 'Value', dSerie1Offset);
+        set(uiSeriesPtr('get'), 'Value', dSeries1Offset);
 
         setSeriesCallback();
     end
@@ -98,24 +104,25 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
         [aResampledImage, atResampledMetaData] = resampleImage(aSerie1Image, atSerie1MetaData, aSerie2Image, atSerie2MetaData, 'Linear', true, true);   
     end
     
-    dicomMetaData('set', atResampledMetaData, dSerie1Offset);
-    dicomBuffer  ('set', aResampledImage, dSerie1Offset);
+    dicomMetaData('set', atResampledMetaData, dSeries1Offset);
+    dicomBuffer  ('set', aResampledImage, dSeries1Offset);
 
-
-    progressBar(6/10, 'Resampling mip, please wait.');
-            
-    refMip = mipBuffer('get', [], dSerie2Offset);                        
-    aMip   = mipBuffer('get', [], dSerie1Offset);
-
-    if strcmpi(sModality1, 'nm')
-        aMip = resampleMip(aMip, atSerie1MetaData, refMip, atSerie2MetaData, 'Linear', false);
-    else
-        aMip = resampleMip(aMip, atSerie1MetaData, refMip, atSerie2MetaData, 'Linear', true);
+    if size(aSerie1Image, 3) ~= 1
+        progressBar(6/10, 'Resampling mip, please wait.');
+                
+        refMip = mipBuffer('get', [], dSeries2Offset);                        
+        aMip   = mipBuffer('get', [], dSeries1Offset);
+    
+        if strcmpi(sModality1, 'nm')
+            aMip = resampleMip(aMip, atSerie1MetaData, refMip, atSerie2MetaData, 'Linear', false);
+        else
+            aMip = resampleMip(aMip, atSerie1MetaData, refMip, atSerie2MetaData, 'Linear', true);
+        end
+                       
+        mipBuffer('set', aMip, dSeries1Offset);
     end
-                   
-    mipBuffer('set', aMip, dSerie1Offset);
 
-    setQuantification(dSerie1Offset);    
+    setQuantification(dSeries1Offset);    
 
     resampleAxes(aResampledImage, atResampledMetaData);
 
@@ -126,16 +133,16 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
     progressBar(2/4, 'Resampling roi, please wait.');
     
-    atRoi = roiTemplate('get', dSerie1Offset);
+    atRoi = roiTemplate('get', dSeries1Offset);
     
     if ~isempty(atRoi)
         atResampledRois = resampleROIs(aSerie1Image, atSerie1MetaData, aResampledImage, atResampledMetaData, atRoi, true);
 
-        roiTemplate('set', dSerie1Offset, atResampledRois);                   
+        roiTemplate('set', dSeries1Offset, atResampledRois);                   
 
          % Triangulate og 1st VOI
     
-        atVoiInput = voiTemplate('get', dSerie1Offset);
+        atVoiInput = voiTemplate('get', dSeries1Offset);
     
         if ~isempty(atVoiInput)
     
@@ -150,8 +157,10 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
     % Activate ROI Panel
     if bViewContourPanel == true
+
         if viewRoiPanel('get') == false
-            if ~isempty(voiTemplate('get', dSerie1Offset))
+            
+            if ~isempty(voiTemplate('get', dSeries1Offset))
                 setViewRoiPanel();
             end
         end
@@ -162,13 +171,13 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
     % Set TCS Axes intensity
 
-    sUnitDisplay = getSerieUnitValue(dSerie1Offset);                        
+    sUnitDisplay = getSerieUnitValue(dSeries1Offset);                        
 
     switch lower(sUnitDisplay)
        
         case 'suv'
 
-            tQuant = atInput(dSerie1Offset).tQuant;
+            tQuant = atInput(dSeries1Offset).tQuant;
 
             if isfield(tQuant, 'tSUV')
                 dSUVScale = tQuant.tSUV.dScale;
@@ -179,21 +188,30 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
             dSeries1Min    = dModality1IntensityMin/dSUVScale;
             dSeries1Max    = dModality1IntensityMax/dSUVScale;
 
-            dSeries1MIPMin = dModality1MIPIntensityMin/dSUVScale;
-            dSeries1MIPMax = dModality1MIPIntensityMax/dSUVScale;
+            if size(aSerie1Image, 3) ~= 1
+
+                dSeries1MIPMin = dModality1MIPIntensityMin/dSUVScale;
+                dSeries1MIPMax = dModality1MIPIntensityMax/dSUVScale;
+            end
 
         case 'hu'
 
             [dSeries1Max   , dSeries1Min   ] = computeWindowLevel(dModality1IntensityMax   , dModality1IntensityMin   );
-            [dSeries1MIPMax, dSeries1MIPMin] = computeWindowLevel(dModality1MIPIntensityMax, dModality1MIPIntensityMin);
+
+            if size(aSerie1Image, 3) ~= 1
+                [dSeries1MIPMax, dSeries1MIPMin] = computeWindowLevel(dModality1MIPIntensityMax, dModality1MIPIntensityMin);
+            end
 
         otherwise
 
             dSeries1Min    = min(aSerie1Image, [], 'all');
             dSeries1Max    = max(aSerie1Image, [], 'all');
 
-            dSeries1MIPMin = min(aMip, [], 'all');
-            dSeries1MIPMax = max(aMip, [], 'all');
+            if size(aSerie1Image, 3) ~= 1
+
+                dSeries1MIPMin = min(aMip, [], 'all');
+                dSeries1MIPMax = max(aMip, [], 'all');
+            end
     end
 
     % Set TCS Axes intensity
@@ -208,34 +226,37 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
     windowLevel('set', 'max', dSeries1Max);
     windowLevel('set', 'min' ,dSeries1Min);
 
-    setWindowMinMax(dSeries1Max, dSeries1Min);                    
+    setWindowMinMax(dSeries1Max, dSeries1Min);                   
 
+    if size(aSerie1Image, 3) ~= 1
 
-    % Set MIP Axe intensity
-
-    set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1MIPMin dSeries1MIPMax]);   
-
-    % Deactivate MIP Fusion
-
-    if bLink2DMip == true
-        link2DMip('set', true);
     
-        set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
-        set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-        set(btnLinkMipPtr('get'), 'FontWeight', 'bold'); 
-    else
-        link2DMip('set', false);
+        % Set MIP Axe intensity
     
-        set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-        set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
-        set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+        set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1MIPMin dSeries1MIPMax]);   
+    
+        % Deactivate MIP Fusion
+    
+        if bLink2DMip == true
+            link2DMip('set', true);
+        
+            set(btnLinkMipPtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+            set(btnLinkMipPtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+            set(btnLinkMipPtr('get'), 'FontWeight', 'bold'); 
+        else
+            link2DMip('set', false);
+        
+            set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+            set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
+            set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
+        end
     end
 
     % Set fusion 
 
     if isFusion('get') == false
 
-        set(uiFusedSeriesPtr('get'), 'Value', dSerie2Offset);
+        set(uiFusedSeriesPtr('get'), 'Value', dSeries2Offset);
 
         setFusionCallback();
     end
@@ -244,13 +265,13 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
     % Set TCS Axes intensity
 
-    sUnitDisplay = getSerieUnitValue(dSerie2Offset);                        
+    sUnitDisplay = getSerieUnitValue(dSeries2Offset);                        
 
     switch lower(sUnitDisplay)
        
         case 'suv'
 
-            tQuant = atInput(dSerie2Offset).tQuant;
+            tQuant = atInput(dSeries2Offset).tQuant;
 
             if isfield(tQuant, 'tSUV')
                 dSUVScale = tQuant.tSUV.dScale;
@@ -261,21 +282,30 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
             dSeries2Min    = dModality2IntensityMin/dSUVScale;
             dSeries2Max    = dModality2IntensityMax/dSUVScale;
 
-            dSeries2MIPMin = dModality2MIPIntensityMin/dSUVScale;
-            dSeries2MIPMax = dModality2MIPIntensityMax/dSUVScale;
+            if size(aSerie2Image, 3) ~= 1
+
+                dSeries2MIPMin = dModality2MIPIntensityMin/dSUVScale;
+                dSeries2MIPMax = dModality2MIPIntensityMax/dSUVScale;
+            end
 
         case 'hu'
 
             [dSeries2Max   , dSeries2Min   ] = computeWindowLevel(dModality2IntensityMax   , dModality2IntensityMin   );
-            [dSeries2MIPMax, dSeries2MIPMin] = computeWindowLevel(dModality2MIPIntensityMax, dModality2MIPIntensityMin);
+
+            if size(aSerie2Image, 3) ~= 1
+                [dSeries2MIPMax, dSeries2MIPMin] = computeWindowLevel(dModality2MIPIntensityMax, dModality2MIPIntensityMin);
+            end
 
         otherwise
 
             dSeries2Min    = min(aSerie2Image, [], 'all');
             dSeries2Max    = max(aSerie2Image, [], 'all');
 
-            dSeries2MIPMin = min(refMip, [], 'all');
-            dSeries2MIPMax = max(refMip, [], 'all');
+            if size(aSerie2Image, 3) ~= 1
+    
+                dSeries2MIPMin = min(refMip, [], 'all');
+                dSeries2MIPMax = max(refMip, [], 'all');
+            end
     end
 
     % Set Fusion TCS Axes intensity
@@ -293,15 +323,21 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
     setFusionWindowMinMax(dSeries2Max, dSeries2Min);                    
 
-    % Set Fusion MIP Axe intensity
+    if size(aSerie2Image, 3) ~= 1
+    
+        % Set Fusion MIP Axe intensity
+    
+        set(axesMipfPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries2MIPMin dSeries2MIPMax]); 
+    end
 
-    set(axesMipfPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries2MIPMin dSeries2MIPMax]); 
+    if size(aSerie1Image, 3) ~= 1
 
-    progressBar(3/4, 'Set fusion, please wait.');
-
-    sliderCorCallback();
-    sliderSagCallback();
-    sliderTraCallback();
+        progressBar(3/4, 'Set fusion, please wait.');
+    
+        sliderCorCallback();
+        sliderSagCallback();
+        sliderTraCallback();        
+    end
 
 %    refreshImages();
 
@@ -312,7 +348,7 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
     progressBar(1, 'Ready');
 
     catch 
-        resetSeries(dSerie2Offset, true);       
+        resetSeries(dSeries2Offset, true);       
         progressBar( 1 , 'Error: setModalitiesFusion()' );
     end
 
