@@ -28,7 +28,7 @@ function mainWindowMenu()
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     Ga68_DOTATATE = true;
-    SPECT_RECON = true;
+    SPECT_RECON = false;
 
     mFile = uimenu(fiMainWindowPtr('get'),'Label','File');
     uimenu(mFile,'Label', 'Open...'                         ,'Callback', @setSourceCallback);
