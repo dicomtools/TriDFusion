@@ -147,13 +147,15 @@ function initTemplates()
                         end
                         
                         bScreenCapture = false;
+                        if strcmpi(tDatasets.DicomInfos{1}.SOPClassUID, '1.2.840.10008.5.1.4.1.1.7')
+                            bScreenCapture = true;
+                        end
                    %     if find(contains(asImageType, 'secondary')) 
                    %         bScreenCapture = true;
                    %     end
                             
                         if bStatic    == true || ...
-                           bWholeBody == true || ...      
-                           bScreenCapture == true
+                           bWholeBody == true 
 
                             sSeriesDescription = tDatasets.DicomInfos{1}.SeriesDescription;
                            
@@ -171,8 +173,6 @@ function initTemplates()
                                         tDatasets.DicomInfos{ll}.SeriesDescription = sprintf('%s (Static %d)', sSeriesDescription, ll);
                                     elseif bWholeBody == true
                                         tDatasets.DicomInfos{ll}.SeriesDescription = sprintf('%s (Whole Body %d)', sSeriesDescription, ll);
-                                    else
-                                        tDatasets.DicomInfos{ll}.SeriesDescription = sprintf('%s (Secondary %d)', sSeriesDescription, ll);
                                     end
                                     
                                     asFilesList{dNbEntry}  = tDatasets.FileNames(ll);
@@ -202,8 +202,6 @@ function initTemplates()
                                         tDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Static %d)', sSeriesDescription, ll);
                                     elseif bWholeBody == true 
                                         tDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Whole Body %d)', sSeriesDescription, ll);
-                                    else
-                                        tDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Secondary %d)', sSeriesDescription, ll);
                                     end
                                     
                                     asFilesList{dNbEntry}  = tDatasets.FileNames;
@@ -212,6 +210,24 @@ function initTemplates()
                                     dNbEntry = dNbEntry+1;                                      
                                 end
                             end
+                        elseif bScreenCapture == true
+
+                            sSeriesDescription = tDatasets.DicomInfos{1}.SeriesDescription;
+
+                            dNbSc = numel(tDatasets.DicomBuffers);
+                            for sc=1:dNbSc
+
+                                if dNbSc > 1
+                                    tDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Frame %d)', sSeriesDescription,sc);
+                                end
+
+                                asFilesList{dNbEntry}  = tDatasets.FileNames;
+                                atDicomInfo{dNbEntry}  = tDatasets.DicomInfos;
+                                aDicomBuffer{dNbEntry}{1} = reshape(tDatasets.DicomBuffers{sc}, [size(tDatasets.DicomBuffers{sc}, 1), size(tDatasets.DicomBuffers{sc}, 2), 1, 3]);
+
+                                dNbEntry = dNbEntry+1;  
+                            end
+
                         else
                             asFilesList{dNbEntry}  = tDatasets.FileNames;
                             atDicomInfo{dNbEntry}  = tDatasets.DicomInfos;

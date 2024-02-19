@@ -28,7 +28,7 @@ function mainWindowMenu()
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     Ga68_DOTATATE = true;
-    SPECT_RECON = false;
+    SPECT_RECON = true;
 
     mFile = uimenu(fiMainWindowPtr('get'),'Label','File');
     uimenu(mFile,'Label', 'Open...'                         ,'Callback', @setSourceCallback);
@@ -213,6 +213,7 @@ function mainWindowMenu()
 
     mFDGBrownFat = uimenu(mFDG,'Label','Brown Fat Segmentation');  
     uimenu(mFDGBrownFat, 'Label','FDG Brown Fat Segmentation (Threshold + AI)', 'Callback', @setMachineLearningFDGBrownFatSUVCallback);
+    uimenu(mFDGBrownFat, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure (Threshold + AI)', 'Callback', @setMachineLearningFDGBrownFatSUVRT_structureCallback);
     uimenu(mFDGBrownFat, 'Label','PET/CT Fusion'                              , 'Callback', @setPETCTFDGFusionCallback, 'Separator','on');
 
     % FDHT
@@ -275,6 +276,7 @@ function mainWindowMenu()
     mFDG = uimenu(mMachineSegmentation,'Label','FDG - fluorodeoxyglucose');  
     uimenu(mFDG, 'Label','FDG Tumor Segmentation Lymph Node (Threshold + AI)', 'Callback', @setMachineLearningFDGLymphNodeSUVCallback);
     uimenu(mFDG, 'Label','FDG Brown Fat Segmentation (Threshold + AI)', 'Callback'       , @setMachineLearningFDGBrownFatSUVCallback);
+    uimenu(mFDG, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure (Threshold + AI)', 'Callback', @setMachineLearningFDGBrownFatSUVRT_structureCallback);
 
     % FDHT
     

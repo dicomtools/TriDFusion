@@ -42,7 +42,7 @@ function dicomViewerCore()
 %    imf  = gpuArray(fusionBuffer('get'));
 %    dicomBuffer('set', imf);
 
-    im  = squeeze(dicomBuffer('get'));
+    im  = dicomBuffer('get');
 
     atMetaData = dicomMetaData('get');
 
@@ -62,7 +62,7 @@ function dicomViewerCore()
 
     if initWindowLevel('get') == true
 
-        [lMin, lMax] = setWindowLevel(gather(im), atMetaData);
+        [lMin, lMax] = setWindowLevel(im, atMetaData);
 
     else
         lMin = windowLevel('get', 'min');
@@ -292,8 +292,8 @@ function dicomViewerCore()
         set(btnIsoSurfacePtr('get'), 'Enable', 'off');
         set(btnMIPPtr('get')       , 'Enable', 'off');
 
-        im  = im(:,:);
-
+%         im  = im(:,:);
+        im = squeeze(im);
         axesText('set', 'axe', '');
 
         cla(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')),'reset');
@@ -490,7 +490,7 @@ function dicomViewerCore()
 %        set(btnIsoSurfacePtr('get'), 'Enable', 'on');
 %        set(btnMIPPtr('get')       , 'Enable', 'on');
 
-        im  = im(:,:,:);
+        im = squeeze(im);
 
         sliceNumber('set', 'coronal' , floor(size(im,1)/2));
         sliceNumber('set', 'sagittal', floor(size(im,2)/2));
@@ -2099,7 +2099,7 @@ function dicomViewerCore()
 %         end
 %     end
 
-    if size(im, 3) == 1
+    if size(dicomBuffer('get'), 3) == 1
         set(uiOneWindowPtr('get'), 'Visible', 'on');
     else
 

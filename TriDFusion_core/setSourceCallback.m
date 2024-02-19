@@ -369,7 +369,7 @@ function setSourceCallback(~, ~)
                     if find(contains(asSeriesType, 'dynamic'))
                         bDynamic = true;
                     end
-                
+
            %         sFileList = datasets.FileNames;
                     if bGated   == true || ...
                        bDynamic == true || ...
@@ -453,13 +453,16 @@ function setSourceCallback(~, ~)
                             end
                             
                             bScreenCapture = false;
+                            if strcmpi(tNewDatasets.DicomInfos{1}.SOPClassUID, '1.2.840.10008.5.1.4.1.1.7')
+                                bScreenCapture = true;
+                            end
+
                     %        if find(contains(asImageType, 'secondary')) 
                     %            bScreenCapture = true;
                     %        end
                             
                             if bStatic    == true || ...
-                               bWholeBody == true || ...
-                               bScreenCapture == true
+                               bWholeBody == true 
                            
                                 sSeriesDescription = tNewDatasets.DicomInfos{1}.SeriesDescription;
                                 
@@ -477,8 +480,6 @@ function setSourceCallback(~, ~)
                                             tNewDatasets.DicomInfos{ll}.SeriesDescription = sprintf('%s (Static %d)', sSeriesDescription, ll);
                                         elseif bWholeBody == true
                                             tNewDatasets.DicomInfos{ll}.SeriesDescription = sprintf('%s (Whole Body %d)', sSeriesDescription, ll);
-                                        else
-                                            tNewDatasets.DicomInfos{ll}.SeriesDescription = sprintf('%s (Secondary %d)', sSeriesDescription, ll);
                                         end
                                         
                                         asNewFilesList{dNewNbEntry}  = tNewDatasets.FileNames(ll);
@@ -508,8 +509,6 @@ function setSourceCallback(~, ~)
                                             tNewDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Static %d)', sSeriesDescription, ll);
                                         elseif bWholeBody == true
                                             tNewDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Whole Body %d)', sSeriesDescription, ll);
-                                        else
-                                            tNewDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Secondary %d)', sSeriesDescription, ll);
                                         end
                                         
                                         asNewFilesList{dNewNbEntry}  = tNewDatasets.FileNames;
@@ -519,6 +518,23 @@ function setSourceCallback(~, ~)
                                     end
                                 end
                                 
+                            elseif bScreenCapture == true
+
+                                sSeriesDescription = tNewDatasets.DicomInfos{1}.SeriesDescription;
+
+                                dNbSc = numel(tNewDatasets.DicomBuffers);
+                                for sc=1:dNbSc
+
+                                    if dNbSc > 1
+                                        tNewDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Frame %d)', sSeriesDescription, sc);
+                                    end
+
+                                    asNewFilesList{dNewNbEntry}  = tNewDatasets.FileNames;
+                                    atNewDicomInfo{dNewNbEntry}  = tNewDatasets.DicomInfos;
+                                    aNewDicomBuffer{dNewNbEntry}{1} = reshape(tNewDatasets.DicomBuffers{sc}, [size(tNewDatasets.DicomBuffers{sc}, 1), size(tNewDatasets.DicomBuffers{sc}, 2), 1, 3]);
+    
+                                    dNewNbEntry = dNewNbEntry+1;  
+                                end
                             else
                                 asNewFilesList{dNewNbEntry}  = tNewDatasets.FileNames;
                                 atNewDicomInfo{dNewNbEntry}  = tNewDatasets.DicomInfos;
@@ -687,7 +703,8 @@ function setSourceCallback(~, ~)
 %                end    
 
         
-                if size(dicomBuffer('get'), 3) ~= 1
+                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 || ... % 3D image
+                   size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 4) ~= 1        % Multi-frame screen capture 
                     setPlaybackToolbar('on');
                 end
 

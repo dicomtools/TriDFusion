@@ -36,7 +36,7 @@ function refreshImages()
 %         return;
 %     end
 
-    im = squeeze(dicomBuffer('get', [], dSeriesOffset));
+    im = dicomBuffer('get', [], dSeriesOffset);
 
 
     aBufferSize = size(im);
@@ -117,7 +117,7 @@ function refreshImages()
 %             lMin  = windowLevel('get', 'min');
 %             lMax = windowLevel('get', 'max');
 
-        im=im(:,:);
+        im = squeeze(im);
 
 %               imshow(im, [lMin lMax], 'Parent', axe);
 %           if exist('axe')
@@ -344,6 +344,7 @@ function refreshImages()
 %         colorbar(axe, 'EdgeColor', overlayColor('get'), 'ButtonDownFcn', @colorbarCallback);
 
     else
+        im = squeeze(im);
 
         imCoronalR  = [];
         imSagittalR = [];

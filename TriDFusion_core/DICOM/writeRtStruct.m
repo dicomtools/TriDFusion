@@ -1,5 +1,5 @@
-function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dSeriesOffset)
-%function writeRtStruct(sOutDir, tMetaData)
+function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dSeriesOffset, bShowSeriesDescriptionDialog)
+%function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dSeriesOffset, bShowSeriesDescriptionDialog)
 %Export ROIs To DICOM RT-Structure.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -50,12 +50,15 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
     else
         sSeriesDescription = '';
     end
-        
-    sSeriesDescription = getViewerSeriesDescriptionDialog(sprintf('RT-%s', sSeriesDescription));
-    if isempty(sSeriesDescription)
-        return;
+     
+    if bShowSeriesDescriptionDialog == true
+
+        sSeriesDescription = getViewerSeriesDescriptionDialog(sprintf('RT-%s', sSeriesDescription));
+        if isempty(sSeriesDescription)
+            return;
+        end
     end
-    
+
     % Resample contours (if needed)
     
     atRoiInput = roiTemplate('get', dSeriesOffset);

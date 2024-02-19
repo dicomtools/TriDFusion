@@ -1,6 +1,6 @@
-function dSliceNumber = getTotalSegmentorObjectSliceNumber(sSegmentationFolderName, sObject, sDirection)
-%function dSliceNumber = getTotalSegmentorObjectSliceNumber(sSegmentationFolderName, sObject, sDirection)
-%Get Total Segmentor Object upper or lower sliceNumber.
+function dColumnNumber = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, sObject, sDirection)
+%function dSliceNumber = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, sObject, sDirection)
+%Get/Set segmentation FDG SUV value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -27,7 +27,7 @@ function dSliceNumber = getTotalSegmentorObjectSliceNumber(sSegmentationFolderNa
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    dSliceNumber = [];
+    dColumnNumber = [];
 
     sNiiFileName = sprintf('%s%s.nii.gz', sSegmentationFolderName, sObject);  
 
@@ -38,18 +38,26 @@ function dSliceNumber = getTotalSegmentorObjectSliceNumber(sSegmentationFolderNa
 
         aObjectMask = aObjectMask(:,:,end:-1:1);
 
-        aSlicesNumber = find(any(any(aObjectMask, 1), 2));
-
+        aSlicesNumber = any(any(aObjectMask, 1), 2);
+        
         if ~isempty(aSlicesNumber)
 
-            if strcmpi(sDirection, 'upper')
-                
-                dSliceNumber = min(aSlicesNumber, [], 'all');
-            else
-                dSliceNumber = max(aSlicesNumber, [], 'all');
+            if numel(aSlicesNumber) > 1
+    
+                aObjectMask = aObjectMask(:,:,aSlicesNumber);
+        
+                % Find columns where the mask is present
+                maskColumns = any(any(aObjectMask, 1), 3);
+                        
+                % Calculate the column coordinates of the neighboring pixels
+                if strcmpi(sDirection, 'Left')
+                    dColumnNumber = find(maskColumns, 1, 'first');
+                else
+                    dColumnNumber = find(maskColumns, 1, 'last');
+                end
             end
         end
-        
+
         clear aObjectMask;
 
     end

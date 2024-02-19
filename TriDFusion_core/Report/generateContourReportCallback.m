@@ -386,7 +386,7 @@ function generateContourReportCallback(~, ~)
                   'FontWeight', 'bold',...
                   'FontSize'  , 10,...
                   'FontName'  , 'MS Sans Serif', ...
-                  'string'    , 'Count',...
+                  'string'    , 'Nb VOI',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
@@ -1211,10 +1211,10 @@ function generateContourReportCallback(~, ~)
 
         if strcmpi(sAction, 'init')
             
-            sReport = sprintf('%s\n___________', char('Summary'));        
+            sReport = sprintf('%s\n_________', char('Summary'));        
         else
 
-            sReport = sprintf('%s\n___________', char('Summary'));      
+            sReport = sprintf('%s\n_________', char('Summary'));      
           
             [~, asLesionList, ~] = getLesionType('');
             
@@ -1469,14 +1469,14 @@ function generateContourReportCallback(~, ~)
         
         if strcmpi(sAction, 'init')
 
-            sReport = sprintf('%s\n__________', '-');           
+            sReport = sprintf('%s\n________', '-');           
         else
             
             if ~isempty(tReport.All.Mean)
 
-                sReport = sprintf('%-.2f\n__________', tReport.All.Mean);      
+                sReport = sprintf('%-.2f\n________', tReport.All.Mean);      
             else
-                sReport = sprintf('%s\n__________', '-');      
+                sReport = sprintf('%s\n________', '-');      
             end
                 
             for ll=1:numel(asLesionList)      
@@ -1600,14 +1600,14 @@ function generateContourReportCallback(~, ~)
         
         if strcmpi(sAction, 'init')
 
-            sReport = sprintf('%s\n__________', '-');         
+            sReport = sprintf('%s\n________', '-');         
         else
             
             if ~isempty(tReport.All.Max)
 
-                sReport = sprintf('%-.2f\n__________', tReport.All.Max);      
+                sReport = sprintf('%-.2f\n________', tReport.All.Max);      
             else
-                sReport = sprintf('%s\n__________', '-');      
+                sReport = sprintf('%s\n________', '-');      
             end
                 
             for ll=1:numel(asLesionList)      
@@ -1732,14 +1732,14 @@ function generateContourReportCallback(~, ~)
         
         if strcmpi(sAction, 'init')
 
-            sReport = sprintf('%s\n__________', '-');            
+            sReport = sprintf('%s\n________', '-');            
         else
             
             if ~isempty(tReport.All.Peak)
 
-                sReport = sprintf('%-.2f\n__________', tReport.All.Peak);      
+                sReport = sprintf('%-.2f\n________', tReport.All.Peak);      
             else
-                sReport = sprintf('%s\n__________', '-');      
+                sReport = sprintf('%s\n________', '-');      
             end
                 
             for ll=1:numel(asLesionList)      
@@ -1864,14 +1864,14 @@ function generateContourReportCallback(~, ~)
         
         if strcmpi(sAction, 'init')
 
-            sReport = sprintf('%s\n__________', '-');         
+            sReport = sprintf('%s\n________', '-');         
         else
             
             if ~isempty(tReport.All.Volume)
 
-                sReport = sprintf('%-.3f\n__________', tReport.All.Volume);      
+                sReport = sprintf('%-.3f\n________', tReport.All.Volume);      
             else
-                sReport = sprintf('%s\n__________', '-');      
+                sReport = sprintf('%s\n________', '-');      
             end
                 
             for ll=1:numel(asLesionList)      
@@ -2588,7 +2588,19 @@ function generateContourReportCallback(~, ~)
                 tReport.Unspecified.Max  = max (voiData, [], 'all');             
                 tReport.Unspecified.Peak = computePeak(voiData);
             end
-         
+
+            if isempty(tReport.Unspecified.Mean)
+                tReport.Unspecified.Mean = nan;
+            end
+
+            if isempty(tReport.Unspecified.Max)
+                tReport.Unspecified.Max = nan;
+            end
+
+            if isempty(tReport.Unspecified.Peak)
+                tReport.Unspecified.Peak = nan;
+            end
+
             clear voiMask;
             clear voiData;    
         else
@@ -2690,7 +2702,19 @@ function generateContourReportCallback(~, ~)
                 tReport.Bone.Max  = max (voiData, [], 'all');             
                 tReport.Bone.Peak = computePeak(voiData);
             end
-         
+
+            if isempty(tReport.Bone.Mean)
+                tReport.Bone.Mean = nan;
+            end
+
+            if isempty(tReport.Bone.Max)
+                tReport.Bone.Max = nan;
+            end
+
+            if isempty(tReport.Bone.Peak)
+                tReport.Bone.Peak = nan;
+            end
+
             clear voiMask;
             clear voiData;  
         else
@@ -2792,7 +2816,19 @@ function generateContourReportCallback(~, ~)
                 tReport.SoftTissue.Max  = max (voiData, [], 'all');             
                 tReport.SoftTissue.Peak = computePeak(voiData);
             end
-         
+
+            if isempty(tReport.SoftTissue.Mean)
+                tReport.SoftTissue.Mean = nan;
+            end
+
+            if isempty(tReport.SoftTissue.Max)
+                tReport.SoftTissue.Max = nan;
+            end
+
+            if isempty(tReport.SoftTissue.Peak)
+                tReport.SoftTissue.Peak = nan;
+            end
+
             clear voiMask;
             clear voiData;     
         else
@@ -2894,7 +2930,19 @@ function generateContourReportCallback(~, ~)
                 tReport.Lung.Max  = max (voiData, [], 'all');             
                 tReport.Lung.Peak = computePeak(voiData);
             end
-         
+
+            if isempty(tReport.Lung.Mean)
+                tReport.Lung.Mean = nan;
+            end
+
+            if isempty(tReport.Lung.Max)
+                tReport.Lung.Max = nan;
+            end
+
+            if isempty(tReport.Lung.Peak)
+                tReport.Lung.Peak = nan;
+            end
+
             clear voiMask;
             clear voiData;     
         else
@@ -2996,7 +3044,19 @@ function generateContourReportCallback(~, ~)
                 tReport.Liver.Max  = max (voiData, [], 'all');             
                 tReport.Liver.Peak = computePeak(voiData);
             end
-         
+
+            if isempty(tReport.Liver.Mean)
+                tReport.Liver.Mean = nan;
+            end
+
+            if isempty(tReport.Liver.Max)
+                tReport.Liver.Max = nan;
+            end
+
+            if isempty(tReport.Liver.Peak)
+                tReport.Liver.Peak = nan;
+            end
+
             clear voiMask;
             clear voiData;     
         else
@@ -3098,7 +3158,19 @@ function generateContourReportCallback(~, ~)
                 tReport.Parotid.Max  = max (voiData, [], 'all');             
                 tReport.Parotid.Peak = computePeak(voiData);
             end
-         
+
+            if isempty(tReport.Parotid.Mean)
+                tReport.Parotid.Mean = nan;
+            end
+
+            if isempty(tReport.Parotid.Max)
+                tReport.Parotid.Max = nan;
+            end
+
+            if isempty(tReport.Parotid.Peak)
+                tReport.Parotid.Peak = nan;
+            end
+
             clear voiMask;
             clear voiData;     
         else
@@ -3199,7 +3271,19 @@ function generateContourReportCallback(~, ~)
                 tReport.BloodPool.Mean = mean(voiData, 'all');             
                 tReport.BloodPool.Max  = max (voiData, [], 'all');             
                 tReport.BloodPool.Peak = computePeak(voiData);
-           end
+            end
+
+            if isempty(tReport.BloodPool.Mean)
+                tReport.BloodPool.Mean = nan;
+            end
+
+            if isempty(tReport.BloodPool.Max)
+                tReport.BloodPool.Max = nan;
+            end
+
+            if isempty(tReport.BloodPool.Peak)
+                tReport.BloodPool.Peak = nan;
+            end
          
             clear voiMask;
             clear voiData;     
@@ -3301,8 +3385,20 @@ function generateContourReportCallback(~, ~)
                 tReport.LymphNodes.Mean = mean(voiData, 'all');             
                 tReport.LymphNodes.Max  = max (voiData, [], 'all');             
                 tReport.LymphNodes.Peak = computePeak(voiData);
-           end
-         
+            end
+
+            if isempty(tReport.LymphNodes.Mean)
+                tReport.LymphNodes.Mean = nan;
+            end
+
+            if isempty(tReport.LymphNodes.Max)
+                tReport.LymphNodes.Max = nan;
+            end
+
+            if isempty(tReport.LymphNodes.Peak)
+                tReport.LymphNodes.Peak = nan;
+            end
+
             clear voiMask;
             clear voiData;     
         else
@@ -3404,7 +3500,19 @@ function generateContourReportCallback(~, ~)
                 tReport.PrimaryDisease.Max  = max (voiData, [], 'all');             
                 tReport.PrimaryDisease.Peak = computePeak(voiData);
             end
-         
+
+            if isempty(tReport.PrimaryDisease.Mean)
+                tReport.PrimaryDisease.Mean = nan;
+            end
+
+            if isempty(tReport.PrimaryDisease.Max)
+                tReport.PrimaryDisease.Max = nan;
+            end
+
+            if isempty(tReport.PrimaryDisease.Peak)
+                tReport.PrimaryDisease.Peak = nan;
+            end
+
             clear voiMask;
             clear voiData;     
         else
@@ -3506,7 +3614,19 @@ function generateContourReportCallback(~, ~)
                 tReport.Cervical.Max  = max (voiData, [], 'all');             
                 tReport.Cervical.Peak = computePeak(voiData);
             end
-         
+
+            if isempty(tReport.Cervical.Mean)
+                tReport.Cervical.Mean = nan;
+            end
+
+            if isempty(tReport.Cervical.Max)
+                tReport.Cervical.Max = nan;
+            end
+
+            if isempty(tReport.Cervical.Peak)
+                tReport.Cervical.Peak = nan;
+            end
+
             clear voiMask;
             clear voiData;     
         else
@@ -3608,7 +3728,19 @@ function generateContourReportCallback(~, ~)
                 tReport.Supraclavicular.Max  = max (voiData, [], 'all');             
                 tReport.Supraclavicular.Peak = computePeak(voiData);
             end
-         
+
+            if isempty(tReport.Supraclavicular.Mean)
+                tReport.Supraclavicular.Mean = nan;
+            end
+
+            if isempty(tReport.Supraclavicular.Max)
+                tReport.Supraclavicular.Max = nan;
+            end
+
+            if isempty(tReport.Supraclavicular.Peak)
+                tReport.Supraclavicular.Peak = nan;
+            end
+
             clear voiMask;
             clear voiData;     
         else
@@ -3710,7 +3842,19 @@ function generateContourReportCallback(~, ~)
                 tReport.Mediastinal.Max  = max (voiData, [], 'all');             
                 tReport.Mediastinal.Peak = computePeak(voiData);
             end
-         
+
+            if isempty(tReport.Mediastinal.Mean)
+                tReport.Mediastinal.Mean = nan;
+            end
+
+            if isempty(tReport.Mediastinal.Max)
+                tReport.Mediastinal.Max = nan;
+            end
+
+            if isempty(tReport.Mediastinal.Peak)
+                tReport.Mediastinal.Peak = nan;
+            end
+
             clear voiMask;
             clear voiData;     
         else
@@ -3812,7 +3956,19 @@ function generateContourReportCallback(~, ~)
                 tReport.Paraspinal.Max  = max (voiData, [], 'all');             
                 tReport.Paraspinal.Peak = computePeak(voiData);
             end
-         
+
+            if isempty(tReport.Paraspinal.Mean)
+                tReport.Paraspinal.Mean = nan;
+            end
+
+            if isempty(tReport.Paraspinal.Max)
+                tReport.Paraspinal.Max = nan;
+            end
+
+            if isempty(tReport.Paraspinal.Peak)
+                tReport.Paraspinal.Peak = nan;
+            end
+            
             clear voiMask;
             clear voiData;     
         else
@@ -3914,7 +4070,19 @@ function generateContourReportCallback(~, ~)
                 tReport.Axillary.Max  = max (voiData, [], 'all');             
                 tReport.Axillary.Peak = computePeak(voiData);
             end
-         
+            
+            if isempty(tReport.Axillary.Mean)
+                tReport.Axillary.Mean = nan;
+            end
+
+            if isempty(tReport.Axillary.Max)
+                tReport.Axillary.Max = nan;
+            end
+
+            if isempty(tReport.Axillary.Peak)
+                tReport.Axillary.Peak = nan;
+            end
+
             clear voiMask;
             clear voiData;     
         else
@@ -4016,7 +4184,19 @@ function generateContourReportCallback(~, ~)
                 tReport.Abdominal.Max  = max (voiData, [], 'all');             
                 tReport.Abdominal.Peak = computePeak(voiData);
             end
-         
+            
+            if isempty(tReport.Abdominal.Mean)
+                tReport.Abdominal.Mean = nan;
+            end
+
+            if isempty(tReport.Abdominal.Max)
+                tReport.Abdominal.Max = nan;
+            end
+
+            if isempty(tReport.Abdominal.Peak)
+                tReport.Abdominal.Peak = nan;
+            end
+
             clear voiMask;
             clear voiData;     
         else
@@ -4142,7 +4322,19 @@ function generateContourReportCallback(~, ~)
                 tReport.All.Max  = max (voiData, [], 'all');             
                 tReport.All.Peak = computePeak(voiData);
             end
-         
+
+            if isempty(tReport.All.Mean)
+                tReport.All.Mean = nan;
+            end
+
+            if isempty(tReport.All.Max)
+                tReport.All.Max = nan;
+            end
+
+            if isempty(tReport.All.Peak)
+                tReport.All.Peak = nan;
+            end
+
             clear voiMask;
             clear voiData;
         else

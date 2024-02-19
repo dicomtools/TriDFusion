@@ -1325,8 +1325,12 @@ end
         
         im = dicomBuffer('get', [], dSeriesOffset);                   
 
-        if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1                              
-            im=im(:,end:-1:1);     
+        if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1     
+            if size(dicomBuffer('get', [], dSeriesOffset), 4) ~= 1     
+                im=im(:,end:-1:1,:,:);     
+            else               
+                im=im(:,end:-1:1);     
+            end
         else
             im=im(:,end:-1:1,:);     
             if isVsplash('get') == false           
@@ -1405,8 +1409,12 @@ end
         
         im = dicomBuffer('get', [], dSeriesOffset);  
 
-        if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1                              
-            im=im(end:-1:1,:);
+        if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1  
+            if size(dicomBuffer('get', [], dSeriesOffset), 4) ~= 1     
+                im=im(end:-1:1,:,:,:);
+            else
+                im=im(end:-1:1,:);
+            end
         else
             im=im(end:-1:1,:,:);
             if isVsplash('get') == false           

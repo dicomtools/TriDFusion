@@ -1773,7 +1773,143 @@ function generate3DLungShuntReport(bInitReport)
 
         if isempty(dCTVolume) % Acquire CT volume
 
-            tReport.CT.Lungs.Volume  = [];            
+            if numel(atInput) > 1 % Look for a CT
+
+                aInputBuffer = inputBuffer('get');
+
+                for tt=1:numel(atInput)
+
+                    if tt == dSeriesOffset
+                        continue;
+                    end
+
+                    if tt > numel(atInput)+1
+                        break;
+                    end
+
+                    if strcmpi(atInput(tt).atDicomInfo{1}.StudyInstanceUID, ... % Try to find the first series
+                        atInput(dSeriesOffset).atDicomInfo{1}.StudyInstanceUID)
+        
+                        % Found an associated CT
+                        
+                        atCTVoi = voiTemplate('get', tt);
+                        atCTRoi = roiTemplate('get', tt);
+
+                        if ~isempty(atCTVoi) && ~isempty(atCTRoi)
+
+                            for vv=1:numel(atCTVoi)
+
+                                if strcmpi(atCTVoi{vv}.Label, 'Liver-LIV') % Found the Liver VOI on the CT
+
+                                    aLiverCTMask = zeros(size(aInputBuffer{tt}));
+
+                                    for rr=1:numel(atCTVoi{vv}.RoisTag)
+
+                                        aTagOffset = strcmp( cellfun( @(atCTRoi) atCTRoi.Tag, atCTRoi, 'uni', false ), atCTVoi{vv}.RoisTag{rr} );
+                                        dTagOffset = find(aTagOffset, 1);  
+                                        
+                                        if ~isempty(dTagOffset)
+
+                                            tRoi = atCTRoi{dTagOffset};
+
+                                            switch lower(tRoi.Axe)  
+                                                                            
+                                                case 'axes1'
+                            
+                                                    aSlice = permute(aInputBuffer{tt}(tRoi.SliceNb,:,:), [3 2 1]);
+                                                    voiMask = roiTemplateToMask(tRoi, aSlice);
+                            
+                                                    aLiverCTMask(tRoi.SliceNb,:,:) = voiMask|aLiverCTMask(tRoi.SliceNb,:,:);   
+                
+                            
+                                                case 'axes2'
+                            
+                                                    aSlice = permute(aInputBuffer{tt}(:,tRoi.SliceNb,:), [3 1 2]);
+                                                    voiMask = roiTemplateToMask(tRoi, aSlice);
+                            
+                                                    aLiverCTMask(:,tRoi.SliceNb,:) = voiMask|aLiverCTMask(:,tRoi.SliceNb,:);   
+                            
+                                               case 'axes3'
+                            
+                                                    aSlice = aInputBuffer{tt}(:,:,tRoi.SliceNb);
+                                                    voiMask = roiTemplateToMask(tRoi, aSlice);
+                            
+                                                    aLiverCTMask(:,:,tRoi.SliceNb) = voiMask|aLiverCTMask(:,:,tRoi.SliceNb);  
+                            
+                                            end    
+                                        end
+                                    end
+                                  
+                                    aLiverCTMask = aLiverCTMask(:,:,end:-1:1);
+
+                                    machineLearning3DMask('set', 'Liver', aLiverCTMask, atCTVoi{vv}.Color, computeMaskVolume(aLiverCTMask, atInput(tt).atDicomInfo));
+                                    clear aLiverCTMask;
+                                end
+
+                                if strcmpi(atCTVoi{vv}.Label, 'Lungs-LUN') % Found the Lungs VOI on the CT
+
+                                    aLungsCTMask = zeros(size(aInputBuffer{tt}));
+
+                                    for rr=1:numel(atCTVoi{vv}.RoisTag)
+
+                                        aTagOffset = strcmp( cellfun( @(atCTRoi) atCTRoi.Tag, atCTRoi, 'uni', false ), atCTVoi{vv}.RoisTag{rr} );
+                                        dTagOffset = find(aTagOffset, 1);  
+
+                                        if ~isempty(dTagOffset)
+
+                                            tRoi = atCTRoi{dTagOffset};
+
+                                            switch lower(tRoi.Axe)  
+                                                                            
+                                                case 'axes1'
+                            
+                                                    aSlice = permute(aInputBuffer{tt}(tRoi.SliceNb,:,:), [3 2 1]);
+                                                    voiMask = roiTemplateToMask(tRoi, aSlice);
+                            
+                                                    aLungsCTMask(tRoi.SliceNb,:,:) = voiMask|aLungsCTMask(tRoi.SliceNb,:,:);   
+                
+                            
+                                                case 'axes2'
+                            
+                                                    aSlice = permute(aInputBuffer{tt}(:,tRoi.SliceNb,:), [3 1 2]);
+                                                    voiMask = roiTemplateToMask(tRoi, aSlice);
+                            
+                                                    aLungsCTMask(:,tRoi.SliceNb,:) = voiMask|aLungsCTMask(:,tRoi.SliceNb,:);   
+                            
+                                               case 'axes3'
+                            
+                                                    aSlice = aInputBuffer{tt}(:,:,tRoi.SliceNb);
+                                                    voiMask = roiTemplateToMask(tRoi, aSlice);
+                            
+                                                    aLungsCTMask(:,:,tRoi.SliceNb) = voiMask|aLungsCTMask(:,:,tRoi.SliceNb);  
+                                            end
+                                        end
+                                    end     
+                                    
+                                    aLungsCTMask = aLungsCTMask(:,:,end:-1:1);
+                            
+                                    machineLearning3DMask('set', 'Lungs', aLungsCTMask, atCTVoi{vv}.Color, computeMaskVolume(aLungsCTMask, atInput(tt).atDicomInfo));
+                                    clear aLungsCTMask;
+                                end
+                            end
+                        end
+
+                        break;
+
+                    end
+                end
+
+                clear aInputBuffer;
+            end
+
+            [~, ~, dCTVolume] = machineLearning3DMask('get', 'Lungs');
+
+            if isempty(dCTVolume) % Acquire CT volume
+
+                tReport.CT.Lungs.Volume  = [];            
+            else
+                tReport.CT.Lungs.Volume  = dCTVolume;            
+            end
         else
             tReport.CT.Lungs.Volume  = dCTVolume;            
         end

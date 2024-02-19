@@ -50,6 +50,7 @@ if 0
     end
 else
     aImage = dicomread(char(fileInput));
+%     aImage = rgb2gray(aImage);
 end
 
 

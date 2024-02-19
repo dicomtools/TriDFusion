@@ -1,6 +1,6 @@
 function multiGate(mPlay, pAxe)
 %function multiGate(mPlay, pAxe)
-%Play 2D DICOM 4D Images.
+%Play 3D DICOM 4D Images.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -31,6 +31,7 @@ function multiGate(mPlay, pAxe)
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
     aCurrentBuffer = dicomBuffer('get', [], dSeriesOffset);
+
     if size(aCurrentBuffer, 3) == 1
 
         progressBar(1, 'Error: Require a 3D Volume!');

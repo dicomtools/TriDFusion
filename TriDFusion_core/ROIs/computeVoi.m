@@ -168,8 +168,9 @@ function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMet
         tVoiComputed.max    = max   (imCData, [], 'all') * dSUVScale;
         tVoiComputed.median = median(imCData ,    'all') * dSUVScale;
 
-        tVoiComputed.sum  = dVoxVolume * dNbCells * dMean * dSUVScale;
+        tVoiComputed.total  = dVoxVolume * dNbCells * dMean * dSUVScale;
         tVoiComputed.std  = std(imCData,[],'all') * dSUVScale;  
+        tVoiComputed.sum  = sum(imCData, 'all') * dSUVScale;
 
         if ~isempty(tVoiComputed.max)
 % 
@@ -234,8 +235,10 @@ function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMet
             tVoiComputed.peak = [];                   
         end
 
-        tVoiComputed.sum  = dVoxVolume * dNbCells * dMean;
-        
+        tVoiComputed.total  = dVoxVolume * dNbCells * dMean;
+
+        tVoiComputed.sum  = sum(imCData, 'all');
+    
         tVoiComputed.volume = dNbCells * dVoxVolume;
     
     end

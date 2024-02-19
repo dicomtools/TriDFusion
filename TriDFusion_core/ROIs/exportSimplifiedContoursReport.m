@@ -265,18 +265,19 @@ end
 %            asCell{dLineOffset,2}  = 'Image number';
             asCell{dLineOffset,2} = 'Nb Cells';
             asCell{dLineOffset,3} = 'Total';
-            asCell{dLineOffset,4} = 'Mean';
-            asCell{dLineOffset,5} = 'Min';
-            asCell{dLineOffset,6} = 'Max';
-            asCell{dLineOffset,7} = 'Median';
-            asCell{dLineOffset,8} = 'Deviation';
-            asCell{dLineOffset,9} = 'Peak';
-            asCell{dLineOffset,10} = 'Max Diagomal Coronal (mm)';
-            asCell{dLineOffset,11} = 'Max Diagomal Sagittal (mm)';
-            asCell{dLineOffset,12} = 'Max Diagomal Axial (mm)';
-            asCell{dLineOffset,13} = 'Volume (ml)';
+            asCell{dLineOffset,4} = 'Sum';
+            asCell{dLineOffset,5} = 'Mean';
+            asCell{dLineOffset,6} = 'Min';
+            asCell{dLineOffset,7} = 'Max';
+            asCell{dLineOffset,8} = 'Median';
+            asCell{dLineOffset,9} = 'Deviation';
+            asCell{dLineOffset,10} = 'Peak';
+            asCell{dLineOffset,11} = 'Max Diagomal Coronal (mm)';
+            asCell{dLineOffset,12} = 'Max Diagomal Sagittal (mm)';
+            asCell{dLineOffset,13} = 'Max Diagomal Axial (mm)';
+            asCell{dLineOffset,14} = 'Volume (ml)';
             
-            for tt=14:21
+            for tt=15:21
                 asCell{dLineOffset,tt}  = (' ');
             end
 
@@ -321,35 +322,36 @@ end
 
                             asCell{dLineOffset,1}  = (sVoiName);
                             asCell{dLineOffset,2} = [tVoiComputed.cells];
-                            asCell{dLineOffset,3} = [tVoiComputed.sum];
-                            asCell{dLineOffset,4} = [tVoiComputed.mean];
-                            asCell{dLineOffset,5} = [tVoiComputed.min];
-                            asCell{dLineOffset,6} = [tVoiComputed.max];
-                            asCell{dLineOffset,7} = [tVoiComputed.median];
-                            asCell{dLineOffset,8} = [tVoiComputed.std];
-                            asCell{dLineOffset,9} = [tVoiComputed.peak];
+                            asCell{dLineOffset,3} = [tVoiComputed.total];
+                            asCell{dLineOffset,4} = [tVoiComputed.sum];
+                            asCell{dLineOffset,5} = [tVoiComputed.mean];
+                            asCell{dLineOffset,6} = [tVoiComputed.min];
+                            asCell{dLineOffset,7} = [tVoiComputed.max];
+                            asCell{dLineOffset,8} = [tVoiComputed.median];
+                            asCell{dLineOffset,9} = [tVoiComputed.std];
+                            asCell{dLineOffset,10} = [tVoiComputed.peak];
 
                             if isempty(tMaxDistances.Coronal)
-                                asCell{dLineOffset,10} = ('NaN');
+                                asCell{dLineOffset,11} = ('NaN');
                             else
-                                asCell{dLineOffset,10} = [tMaxDistances.Coronal.MaxLength];
+                                asCell{dLineOffset,11} = [tMaxDistances.Coronal.MaxLength];
                             end
 
                             if isempty(tMaxDistances.Sagittal)
-                                asCell{dLineOffset,11} = ('NaN');
+                                asCell{dLineOffset,12} = ('NaN');
                             else
-                                asCell{dLineOffset,11} = [tMaxDistances.Sagittal.MaxLength];
+                                asCell{dLineOffset,12} = [tMaxDistances.Sagittal.MaxLength];
                             end
 
                             if isempty(tMaxDistances.Axial)
-                                asCell{dLineOffset,12} = ('NaN');
+                                asCell{dLineOffset,13} = ('NaN');
                             else
-                                asCell{dLineOffset,12} = [tMaxDistances.Axial.MaxLength];
+                                asCell{dLineOffset,13} = [tMaxDistances.Axial.MaxLength];
                             end
 
-                            asCell{dLineOffset,13} = [tVoiComputed.volume];
+                            asCell{dLineOffset,14} = [tVoiComputed.volume];
 
-                            for tt=14:21
+                            for tt=15:21
                                 asCell{dLineOffset,tt}  = (' ');
                             end
 

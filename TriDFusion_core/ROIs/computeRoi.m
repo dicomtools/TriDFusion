@@ -166,8 +166,10 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
         tRoiComputed.median = median(imCData, 'all') * dSUVScale;
 
         volMean = mean(imCData, 'all'); % To verify              
-        tRoiComputed.sum    = voxVolume * nbVoxels * volMean * dSUVScale;
+        tRoiComputed.total    = voxVolume * nbVoxels * volMean * dSUVScale;
         tRoiComputed.std    = std(imCData,[],'all') * dSUVScale;           
+
+        tRoiComputed.sum = sum(imCData, 'all') * dSUVScale;
 
         if ~isempty(tRoiComputed.max)
 %             % Initialization 
@@ -247,7 +249,9 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
 
         nbVoxels  = tRoiComputed.cells;
         volMean   = tRoiComputed.mean;                    
-        tRoiComputed.sum = voxVolume * nbVoxels * volMean;
+        tRoiComputed.total = voxVolume * nbVoxels * volMean;
+
+        tRoiComputed.sum = sum(imCData, 'all');
 
         switch lower(ptrRoi.Axe)    
 

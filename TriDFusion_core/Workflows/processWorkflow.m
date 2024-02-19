@@ -104,6 +104,10 @@ function processWorkflow(sWorkflowName)
         case 'setmachinelearningfdgbrownfatsuvcallback' % setMachineLearningFDGBrownFatSUVCallback.m
 
             setMachineLearningFDGBrownFatSUVCallback();
+            
+        case 'setmachinelearningfdgbrownfatsuvrt_structurecallback' % setMachineLearningFDGBrownFatSUVRT_structureCallback.m
+
+            setMachineLearningFDGBrownFatSUVRT_structureCallback();
 
 
         case 'setmachinelearningfdglymphnodesuvcallback' % setMachineLearningFDGLymphNodeSUVCallback.m
@@ -134,6 +138,8 @@ function processWorkflow(sWorkflowName)
         case 'setmachinelearningpetliverdosimetrycallback' % setMachineLearningPETLiverDosimetryCallback.m
 
             setMachineLearningPETLiverDosimetryCallback();
+
+
 
     end
 

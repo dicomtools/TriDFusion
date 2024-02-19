@@ -1,5 +1,5 @@
 function [aMask, aColor, dVolume] = machineLearning3DMask(sAction, sOrgan, aNiiImage, aMaskColor, dMaskVolume)  
-%function  [aMask, aColor, dVolume] = machineLearning3DMask(sAction, sOrgan, aNiiImage, aMaskColor)  
+%function  [aMask, aColor, dVolume] = machineLearning3DMask(sAction, sOrgan, aNiiImage, aMaskColor, dMaskVolume)  
 %Get\set 3D machine learning mask.
 %See TriDFuison.doc (or pdf) for more information about options.
 %

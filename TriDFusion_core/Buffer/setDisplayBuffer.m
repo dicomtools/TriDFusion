@@ -96,35 +96,39 @@ function setDisplayBuffer()
 %        X = tInput(1).aDicomBuffer{1};
 %        aInput = tInput(1).aDicomBuffer{1};
 
-            aSize = size(tInput(i).aDicomBuffer{1});
-          %  X(aSize(1), aSize(2), aSize(4))=0;
-            aInput{i}(aSize(1), aSize(2), aSize(4))=0;
-            aInput{i} = single(tInput(i).aDicomBuffer{1}(:,:,:));
-
-            if isfield(tInput(i).atDicomInfo{1}, 'RescaleIntercept') && ...
-               isfield(tInput(i).atDicomInfo{1}, 'RescaleSlope')
-                      
-                if tInput(i).atDicomInfo{1}.RescaleSlope ~= 0
-                    aInput{i} = tInput(i).atDicomInfo{1}.RescaleIntercept + (aInput{i} * tInput(i).atDicomInfo{1}.RescaleSlope);
-                else
-                    if isfield(tInput(i).atDicomInfo{1}, 'RealWorldValueMappingSequence') % SUV Spect
-                        if tInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
-                            fSlope     = tInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
-                            fIntercept = tInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
-                            aInput{i} = fIntercept + (aInput{i} * fSlope);                            
-                        end                        
+            if strcmpi(tInput(i).atDicomInfo{1}.SOPClassUID, '1.2.840.10008.5.1.4.1.1.7') % Secondary Capture Image IOD
+                aInput{i} = tInput(i).aDicomBuffer{1};
+            else
+                aSize = size(tInput(i).aDicomBuffer{1});
+              %  X(aSize(1), aSize(2), aSize(4))=0;
+                aInput{i}(aSize(1), aSize(2), aSize(4))=0;
+                aInput{i} = single(tInput(i).aDicomBuffer{1}(:,:,:));
+    
+                if isfield(tInput(i).atDicomInfo{1}, 'RescaleIntercept') && ...
+                   isfield(tInput(i).atDicomInfo{1}, 'RescaleSlope')
+                          
+                    if tInput(i).atDicomInfo{1}.RescaleSlope ~= 0
+                        aInput{i} = tInput(i).atDicomInfo{1}.RescaleIntercept + (aInput{i} * tInput(i).atDicomInfo{1}.RescaleSlope);
+                    else
+                        if isfield(tInput(i).atDicomInfo{1}, 'RealWorldValueMappingSequence') % SUV Spect
+                            if tInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
+                                fSlope     = tInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
+                                fIntercept = tInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
+                                aInput{i} = fIntercept + (aInput{i} * fSlope);                            
+                            end                        
+                        end
                     end
-                end
-            end  
-            
-            if strcmpi(tInput(i).atDicomInfo{1}.Modality, 'RTDOSE')
-
-                if isfield(tInput(i).atDicomInfo{1}, 'DoseGridScaling')
-
-                    if tInput(i).atDicomInfo{1}.DoseGridScaling ~= 0
-                        aInput{i} = aInput{i} * tInput(i).atDicomInfo{1}.DoseGridScaling;
+                end  
+                
+                if strcmpi(tInput(i).atDicomInfo{1}.Modality, 'RTDOSE')
+    
+                    if isfield(tInput(i).atDicomInfo{1}, 'DoseGridScaling')
+    
+                        if tInput(i).atDicomInfo{1}.DoseGridScaling ~= 0
+                            aInput{i} = aInput{i} * tInput(i).atDicomInfo{1}.DoseGridScaling;
+                        end
+    
                     end
-
                 end
             end
 

@@ -321,6 +321,7 @@ function setPlaybackToolbar(sVisible)
                 case 'Play'
 
                     if  multiFrameRecord('get') == false
+
                         if multiFramePlayback('get') == false
 
                             mPlay.State = 'on';
@@ -331,12 +332,17 @@ function setPlaybackToolbar(sVisible)
                                 set(uiSeriesPtr('get'), 'Enable', 'off');
                                 multiGate(mPlay, gca);
                             else
-                                multiFrame(mPlay, gca);
+                                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 4) ~= 1
+                                    multiFrameScreenCapture(mPlay);
+                                else
+                                    multiFrame(mPlay, gca);
+                                end
+
                             end
                         else
                             set(uiSeriesPtr('get'), 'Enable', 'on');
                             mPlay.State = 'off';
-                            multiFramePlayback('set', false);                       
+                            multiFramePlayback('set', false);   
                         end
                     end
 
@@ -344,41 +350,59 @@ function setPlaybackToolbar(sVisible)
 
                      set(mFoward, 'State', 'off');
 
-                     if size(dicomBuffer('get'), 3) ~=1
+                     if multiFramePlayback('get') == false && ...
+                        multiFrameRecord('get')   == false
 
-                         if multiFramePlayback('get') == false && ...
-                            multiFrameRecord('get')   == false
+                        set(mFoward, 'Enable', 'off');
 
-                            set(mFoward, 'Enable', 'off');
-                            if strcmpi(get(mGate, 'State'), 'on')
+                        if strcmpi(get(mGate, 'State'), 'on')
+
+                            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'))), 3) ~=1
+
                                 oneGate(hObject.TooltipString);
-                            else
-                                oneFrame(hObject.TooltipString);
                             end
-                            set(mFoward, 'Enable', 'on');
+                               
+                        else
+                            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 4) ~= 1
+                                screenCaptureFrame('Next');
+                            else
+                                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'))), 3) ~=1
+                                    oneFrame(hObject.TooltipString);
+                                end
+                            end
+                        end
 
-                         end
-                     end
+                        set(mFoward, 'Enable', 'on');
+                     end           
+
 
                  case 'Backward'
 
                      set(mBackward, 'State', 'off');
 
-                     if size(dicomBuffer('get'), 3) ~=1
-
                          if multiFrame3DPlayback('get') == false && ...
                             multiFrame3DRecord('get')   == false
 
                             set(mBackward, 'Enable', 'off');
-                            if strcmpi(get(mGate, 'State'), 'on')
-                                oneGate(hObject.TooltipString);
-                            else
-                                oneFrame(hObject.TooltipString);
-                            end
-                            set(mBackward, 'Enable', 'on');
 
-                         end
-                     end
+                            if strcmpi(get(mGate, 'State'), 'on')
+                               
+                                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'))), 3) ~=1
+
+                                    oneGate(hObject.TooltipString);
+                                end
+                            else
+                                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 4) ~= 1
+                                    screenCaptureFrame('Previous');
+                                else
+                                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'))), 3) ~=1
+                                        oneFrame(hObject.TooltipString);
+                                    end
+                                end
+                            end
+
+                            set(mBackward, 'Enable', 'on');
+                         end                     
 
                  case 'Record'
 
@@ -468,6 +492,7 @@ function setPlaybackToolbar(sVisible)
                     end
 
                 case 'Zoom In'
+                    
                     set(mZoomIn, 'State', 'off');
 
                     if size(dicomBuffer('get'), 3) ~=1

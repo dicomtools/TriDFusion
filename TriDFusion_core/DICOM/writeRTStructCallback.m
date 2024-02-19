@@ -1,5 +1,5 @@
-function writeRTStructCallback(~, ~)
-%function writeRTStructCallback(~, ~)
+function writeRTStructCallback(hObject, ~)
+%function writeRTStructCallback(hObject, ~)
 %Export ROIs To DICOM RT-Structure, called from main menu.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -76,7 +76,13 @@ function writeRTStructCallback(~, ~)
     
     tInput = inputTemplate('get');    
     aInputBuffer = inputBuffer('get');
-  
-    writeRtStruct(sOutDir, bSubDir, aInputBuffer{dSeriesOffset}, tInput(dSeriesOffset).atDicomInfo, dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), dSeriesOffset);
+
+    if exist('hObject', 'var')
+        bShowSeriesDescriptionDialog = true;
+    else
+        bShowSeriesDescriptionDialog = false;
+    end
+
+    writeRtStruct(sOutDir, bSubDir, aInputBuffer{dSeriesOffset}, tInput(dSeriesOffset).atDicomInfo, dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), dSeriesOffset, bShowSeriesDescriptionDialog);
 
 end

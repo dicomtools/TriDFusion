@@ -174,14 +174,13 @@ function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombin
                 progressBar(3/12, 'Importing organ exclusion mask, please wait.');
 
                 aExcludeMask = getBrownFatSUVExcludeMask(tBrownFatSUV, sSegmentationFolderName, sSegmentatorCombineMasks, zeros(size(aCTImage)));
-                aExcludeMask = imdilate(aExcludeMask, strel('sphere', 4)); % Increse mask by 4 pixels
 
                 if tBrownFatSUV.exclude.organ.skeleton == true
 
                     progressBar(4/12, 'Importing bone exclusion mask, please wait.');
 
                     aBoneExcludeMask = getTotalSegmentorWholeBodyMask(sSegmentationFolderName, zeros(size(aCTImage)));
-%                     aBoneExcludeMask = imfill(aBoneExcludeMask, 4, 'holes');   
+                    aBoneExcludeMask = imfill(aBoneExcludeMask, 4, 'holes');   
 
 %                     aBoneExcludeMask = imdilate(aBoneExcludeMask, strel('sphere', 2)); % Increse mask by 2 pixels
 
@@ -190,35 +189,160 @@ function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombin
                     clear aBoneExcludeMask;
                 end
 
+                progressBar(5/12, 'Processing image constraints, please wait.');
+
+                % Top bottom image constraint
+
+%                dLowerSlice = getTotalSegmentorObjectSliceNumber(sSegmentationFolderName, 'liver', 'lower');
                 dLowerSlice = getTotalSegmentorObjectSliceNumber(sSegmentationFolderName, 'sacrum', 'upper');
 
-                if dLowerSlice > 1 && dLowerSlice < size(aExcludeMask, 3)
-                    aExcludeMask(:,:,dLowerSlice:end) = 1;
+                if ~isempty(dLowerSlice)
+                    if dLowerSlice > 1 && dLowerSlice < size(aExcludeMask, 3)
+                        aExcludeMask(:,:,dLowerSlice:end) = 1;
+                    end
                 end
 
                 dUpperSlice = getTotalSegmentorObjectSliceNumber(sSegmentationFolderName, 'skull' , 'lower')-5;
 
-                if dUpperSlice > 1 && dUpperSlice < size(aExcludeMask, 3)
-
-                    aExcludeMask(:,:,1:dUpperSlice)   = 1;
+                if ~isempty(dUpperSlice)
+                    if dUpperSlice > 1 && dUpperSlice < size(aExcludeMask, 3)
+    
+                        aExcludeMask(:,:,1:dUpperSlice) = 1;
+                    end
                 end
 
-if 0
-                progressBar(5/12, 'Computing fuzzy c-means clustering, please wait.');
+                % Left right image constraint
 
-                aFuzzImage = fuzzy3DSegmentation(aPTImage);
-%                 aFuzzImage = aFuzzImage >= tBrownFatSUV.options.fuzzyClusterSelection;
-                aFuzzImage = aFuzzImage >= 2;
+                 dLeftColumn  = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'humerus_left' , 'left' )+25;
+                 dRightColumn = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'humerus_right', 'right')-25;
+%                 dLeftColumn = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'spleen', 'right');
+%                 dRightColumn = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'liver', 'left');
 
-%                 aFuzzImage(aFuzzImage<4)= min(aFuzzImage, [], 'all');
-%                 aFuzzImage = imbinarize(aFuzzImage);
+                if ~isempty(dLeftColumn)
 
-                aPTImageTemp(aFuzzImage==0) = min(aPTImageTemp, [], 'all');   
+                    if dLeftColumn > 1 && dLeftColumn < size(aExcludeMask, 2)
+                        aExcludeMask(:,dLeftColumn:end,:) = 1;
+                    end
+%                 else
+%                     dLeftColumn  = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'humerus_left' , 'left' );
+%                     
+%                     if ~isempty(dLeftColumn)
+%     
+%                         if dLeftColumn > 1 && dLeftColumn < size(aExcludeMask, 2)
+%                             aExcludeMask(:,dLeftColumn:end,:) = 1;
+%                         end
+%                     end
+                end
 
-                clear aFuzzImage;
-end
+                if ~isempty(dRightColumn)
 
-                progressBar(6/12, 'Resampling series, please wait.');
+                    if dRightColumn > 1 && dRightColumn < size(aExcludeMask, 2)
+                        aExcludeMask(:,1:dRightColumn,:) = 1;   
+                    end
+%                 else
+%                     dRightColumn = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'humerus_right', 'right');
+% 
+%                     if ~isempty(dRightColumn)
+%     
+%                         if dRightColumn > 1 && dRightColumn < size(aExcludeMask, 2)
+%                             aExcludeMask(:,1:dRightColumn,:) = 1;   
+%                         end
+%                     end
+                end                
+
+                % C Vertebrae constraint
+
+                dC4LeftColumn  = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'vertebrae_C4', 'right');
+                dC4RightColumn = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'vertebrae_C4', 'left' );
+
+                dLowerSliceC7 = getTotalSegmentorObjectSliceNumber(sSegmentationFolderName, 'vertebrae_C7' , 'lower');
+
+                if ~isempty(dC4LeftColumn)  && ...
+                   ~isempty(dC4RightColumn) && ...    
+                   ~isempty(dLowerSliceC7)
+     
+                    for ll=1:dLowerSliceC7
+                        
+                        aExcludeMask(:,dC4RightColumn:dC4LeftColumn,ll) = 1;
+                    end
+                end
+
+                % Heart constraint
+
+                dHeartLeftColumn  = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'heart', 'right');
+                dHeartRightColumn = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'heart', 'left' );
+
+                dHeartSlice = getTotalSegmentorObjectSliceNumber(sSegmentationFolderName, 'heart' , 'lower');
+
+                if ~isempty(dHeartLeftColumn) && ...
+                   ~isempty(dHeartRightColumn)  && ...    
+                   ~isempty(dHeartSlice)
+     
+                    aMaskSize = size(aExcludeMask);         
+                    
+                    if dHeartLeftColumn  < aMaskSize(2) && ...
+                       dHeartRightColumn < aMaskSize(2)
+
+                        % Removed 15 slices beneith the heart
+
+                        if dHeartSlice + 15 < aMaskSize(3)
+
+                            for ll=1:15
+                                
+                                aExcludeMask(:,dHeartRightColumn:dHeartLeftColumn , dHeartSlice+ll) = 1;
+    
+                            end
+                        end
+                    end
+                end
+                
+                % Under the liver, kidneys constraint
+
+                dKidneyRight = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'kidney_right', 'left');
+                dKidneyLeft  = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'kidney_left' , 'right');
+
+                dLiverSlice = getTotalSegmentorObjectSliceNumber(sSegmentationFolderName, 'liver' , 'lower');
+
+                if ~isempty(dKidneyRight) && ...
+                   ~isempty(dKidneyLeft)  && ...    
+                   ~isempty(dLiverSlice)
+     
+                    aMaskSize = size(aExcludeMask);         
+                    
+                    if dKidneyRight < aMaskSize(2) && ...
+                       dKidneyLeft  < aMaskSize(2)
+
+                        if dLiverSlice < aMaskSize(3)
+                            for ll=1:dLiverSlice
+                                
+        %                         aExcludeMask(:,dKidneyRight:dKidneyLeft,aMaskZsize-ll) = 1;
+                                aExcludeMask(:,1:dKidneyRight ,aMaskSize(3)-ll) = 1;
+                                aExcludeMask(:,dKidneyLeft:end,aMaskSize(3)-ll) = 1;
+                            end
+                        end
+                    end
+                end
+% if 0
+%                 progressBar(5/12, 'Computing fuzzy c-means clustering, please wait.');
+% 
+%                 aFuzzImage = fuzzy3DSegmentation(aPTImage);
+% %                 aFuzzImage = aFuzzImage >= tBrownFatSUV.options.fuzzyClusterSelection;
+%                 aFuzzImage = aFuzzImage >= 2;
+% 
+% %                 aFuzzImage(aFuzzImage<4)= min(aFuzzImage, [], 'all');
+% %                 aFuzzImage = imbinarize(aFuzzImage);
+% 
+%                 aPTImageTemp(aFuzzImage==0) = min(aPTImageTemp, [], 'all');   
+% 
+%                 clear aFuzzImage;
+% end
+                progressBar(6/12, 'Processing CT HU constraint, please wait.');
+
+                aExcludeMask(aCTImage < tBrownFatSUV.options.HUThreshold.min) = 1;
+                aExcludeMask(aCTImage > tBrownFatSUV.options.HUThreshold.max) = 1;
+
+
+                progressBar(7/12, 'Resampling series, please wait.');
 
                 [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
                 [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
@@ -234,6 +358,7 @@ end
                      aExcludeMask = imbinarize(aExcludeMask);
             
                     if ~isequal(size(aExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view     
+                        
                         aExcludeMask = resizeMaskToImageSize(aExcludeMask, aResampledPTImage); 
                     end
                 else
@@ -242,33 +367,34 @@ end
 
                 aResampledPTImage(aExcludeMask) = min(aResampledPTImage, [], 'all');
 
-if 1                    
-                progressBar(7/12, 'Computing CT HU exclusion mask, please wait.');
-
-                aHUExcludeMask = ones(size(aCTImage));
-
-                aHUExcludeMask(aCTImage < tBrownFatSUV.options.HUThreshold.min) = 0;
-                aHUExcludeMask(aCTImage > tBrownFatSUV.options.HUThreshold.max) = 0;
-
-                aHUExcludeMask = imdilate(aHUExcludeMask, strel('sphere', 4)); % Increse mask by 4 pixels
-
-                if ~isequal(size(aHUExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view 
-            
-                     aHUExcludeMask = resample3DImage(aHUExcludeMask, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
-                     aHUExcludeMask = imbinarize(aHUExcludeMask);
-            
-                    if ~isequal(size(aHUExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view     
-                        aHUExcludeMask = resizeMaskToImageSize(aHUExcludeMask, aResampledPTImage); 
-                    end
-                else
-                    aHUExcludeMask = imbinarize(aHUExcludeMask);
-                end
-
-                aResampledPTImage(aHUExcludeMask==0) = min(aResampledPTImage, [], 'all');
-
-                clear aHUExcludeMask;
-
-end
+% if 1                    
+%                 progressBar(7/12, 'Computing CT HU exclusion mask, please wait.');
+% 
+%                 aHUExcludeMask = zeros(size(aCTImage));
+% 
+%                 aHUExcludeMask(aCTImage < tBrownFatSUV.options.HUThreshold.min) = 1;
+%                 aHUExcludeMask(aCTImage > tBrownFatSUV.options.HUThreshold.max) = 1;
+% 
+% %                 aHUExcludeMask = imdilate(aHUExcludeMask, strel('sphere', 4)); % Increse mask by 4 pixels
+% 
+%                 if ~isequal(size(aHUExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+%             
+%                      aHUExcludeMask = resample3DImage(aHUExcludeMask, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
+%                      aHUExcludeMask = imbinarize(aHUExcludeMask);
+%             
+%                     if ~isequal(size(aHUExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+% 
+%                         aHUExcludeMask = resizeMaskToImageSize(aHUExcludeMask, aResampledPTImage); 
+%                     end
+%                 else
+%                     aHUExcludeMask = imbinarize(aHUExcludeMask);
+%                 end
+% 
+%                 aResampledPTImage(aHUExcludeMask) = min(aResampledPTImage, [], 'all');
+% 
+%                 clear aHUExcludeMask;
+% 
+% end
                 progressBar(8/12, 'Computing CT BW mask, please wait.');
 
                 BWCT = imbinarize(aCTImage);
@@ -298,22 +424,25 @@ end
             
                 progressBar(10/12, 'Computing SUV mask, please wait.');
             
-
-                aBWMask = aResampledPTImage;
-            
-                dMin = min(aResampledPTImage, [], 'all');
-
-                dTreshold = tBrownFatSUV.options.SUVThreshold;
-                aBWMask(aBWMask*dSUVScale<dTreshold) = dMin;
-     
-                aBWMask = imbinarize(aBWMask);
+% 
+%                 aBWMask = aResampledPTImage;
+%             
+%                 dMin = min(aResampledPTImage, [], 'all');
+% 
+%                 aBWMask(aBWMask*dSUVScale<dTreshold) = dMin;
+%      
+%                 aBWMask = imbinarize(aBWMask);
          
+                dMin = min(aResampledPTImage, [], 'all');
+                dTreshold = tBrownFatSUV.options.SUVThreshold;
+
+                imMask = aResampledPTImage;
+                imMask(imMask*dSUVScale<dTreshold) = dMin;
+
+                aBWMask = imbinarize(imMask);
 
                 progressBar(11/12, 'Creating contours, please wait.');
 
-                imMask = aResampledPTImage;
-                imMask(aBWMask == 0) = dMin;
-            
                 setSeriesCallback();
             
                 sFormula = [];

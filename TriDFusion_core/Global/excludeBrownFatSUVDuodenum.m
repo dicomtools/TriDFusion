@@ -1,6 +1,6 @@
-function dSliceNumber = getTotalSegmentorObjectSliceNumber(sSegmentationFolderName, sObject, sDirection)
-%function dSliceNumber = getTotalSegmentorObjectSliceNumber(sSegmentationFolderName, sObject, sDirection)
-%Get Total Segmentor Object upper or lower sliceNumber.
+function bRemove = excludeBrownFatSUVDuodenum(sAction, bValue)
+%function bRemove = excludeBrownFatSUVDuodenum(sAction, bValue)
+%Get/Set brown fat segmentation exclude duodenum.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -25,32 +25,13 @@ function dSliceNumber = getTotalSegmentorObjectSliceNumber(sSegmentationFolderNa
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    dSliceNumber = [];
+    persistent pbRemove; 
 
-    sNiiFileName = sprintf('%s%s.nii.gz', sSegmentationFolderName, sObject);  
-
-    if exist(sNiiFileName, 'file')
-
-        nii = nii_tool('load', sNiiFileName);
-        aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');    
-
-        aObjectMask = aObjectMask(:,:,end:-1:1);
-
-        aSlicesNumber = find(any(any(aObjectMask, 1), 2));
-
-        if ~isempty(aSlicesNumber)
-
-            if strcmpi(sDirection, 'upper')
-                
-                dSliceNumber = min(aSlicesNumber, [], 'all');
-            else
-                dSliceNumber = max(aSlicesNumber, [], 'all');
-            end
-        end
-        
-        clear aObjectMask;
-
+    if strcmpi('set', sAction)
+        pbRemove = bValue;            
     end
+    
+    bRemove = pbRemove;
 end

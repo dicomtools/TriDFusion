@@ -1112,7 +1112,15 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                 tReport.Liver.Mean = mean(voiData, 'all');             
                 tReport.Liver.Max  = max (voiData, [], 'all');             
             end
-         
+
+            if isempty(tReport.Liver.Mean)
+                tReport.Liver.Mean = nan;
+            end
+
+            if isempty(tReport.Liver.Max)
+                tReport.Liver.Max = nan;
+            end
+
             clear voiMask;
             clear voiData;     
         else
@@ -1211,7 +1219,15 @@ function generatePETLiverDosimetryReportCallback(~, ~)
                     tReport.Other{jj}.Mean = mean(voiData, 'all');             
                     tReport.Other{jj}.Max  = max (voiData, [], 'all');             
                 end
-             
+
+                if isempty(tReport.Other{jj}.Mean)
+                    tReport.Other{jj}.Mean = nan;
+                end
+    
+                if isempty(tReport.Other{jj}.Max)
+                    tReport.Other{jj}.Max = nan;
+                end
+
                 clear voiMask;
                 clear voiData;     
             else

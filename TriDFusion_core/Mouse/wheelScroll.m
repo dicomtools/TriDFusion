@@ -141,8 +141,17 @@ function wheelScroll(~, evnt)
         end
         
         refreshImages();       
-        
-    else
+
+    elseif size(dicomBuffer('get'), 3) == 1 && size(dicomBuffer('get'), 4) ~=1 % Screen capture
+
+        if evnt.VerticalScrollCount > 0 
+            screenCaptureFrame('Previous');
+        else
+            screenCaptureFrame('Next');
+        end
+
+    else      
+
         updateObjet3DPosition();              
     end
 

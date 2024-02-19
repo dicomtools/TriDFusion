@@ -56,47 +56,7 @@ function aExcludeMask = getBrownFatSUVExcludeMask(tBrownFatSUV, sSegmentationFol
             nii = nii_tool('load', sNiiFileName);
             aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
 
-
-            % INCLUDE 15 slices beneath the heart, based on the heart's largest area.
-
-            slicesWithMask = any(any(aObjectMask, 1), 2);
-
-            aSliceNumber = find(slicesWithMask);
-
-            areas = zeros(1,numel(aSliceNumber));
-            for jj = 1:numel(aSliceNumber)
-                areas(jj) = sum(aObjectMask(:, :, aSliceNumber(jj)), 'all');
-            end     
-            
-            % Find the slice with the maximum area
-            [~, maxIndex] = max(areas);
-
-            aArea = aObjectMask(:, :, aSliceNumber(maxIndex));
-            aArea = imfill(aArea);
-
-            for jj=1:15
-                aObjectMask(:,:,aSliceNumber(1)-jj) = aArea;
-            end
-
-            % /INCLUDE 15 slices beneath the heart, based on the heart's largest area.
-     
-            % EXTEND XY SIZE
-
-            seXY = strel('disk', 3); % Increase Mask in XY
-
-            % Initialize the extended mask
-            aExtendedMask = zeros(size(aObjectMask));
-            
-            % Apply dilation to each XY slice separately
-            for z = 1:size(aExtendedMask, 3)
-                aExtendedMask(:,:,z) = imdilate(aObjectMask(:,:,z), seXY);
-            end
-
-            aObjectMask = aExtendedMask;
-
-            clear aExtendedMask;
-
-            % /EXTEND XY SIZE
+            aObjectMask = imdilate(aObjectMask, strel('sphere', 8)); % Increse mask by 8 pixels
 
             aExcludeMask(aObjectMask~=0)=1;
 
@@ -121,6 +81,8 @@ function aExcludeMask = getBrownFatSUVExcludeMask(tBrownFatSUV, sSegmentationFol
                 if exist(sNiiFileName, 'file')
                     nii = nii_tool('load', sNiiFileName);
                     aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
+
+                    aObjectMask = imdilate(aObjectMask, strel('sphere', 8)); % Increse mask by 8 pixels
 
                     aExcludeMask(aObjectMask~=0)=1;
         
@@ -156,7 +118,7 @@ function aExcludeMask = getBrownFatSUVExcludeMask(tBrownFatSUV, sSegmentationFol
                 aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
 
                 aExcludeMask(aObjectMask~=0)=1;
-    
+  
                 clear aObjectMask;
                 clear nii;
            end
@@ -177,7 +139,7 @@ function aExcludeMask = getBrownFatSUVExcludeMask(tBrownFatSUV, sSegmentationFol
 
             % EXTEND XY SIZE
 
-            seXY = strel('disk', 5); % Increase Mask in XY
+            seXY = strel('disk', 7); % Increase Mask in XY
 
             % Initialize the extended mask
             aExtendedMask = zeros(size(aObjectMask));
@@ -213,7 +175,7 @@ function aExcludeMask = getBrownFatSUVExcludeMask(tBrownFatSUV, sSegmentationFol
 
             % EXTEND XY SIZE
 
-            seXY = strel('disk', 5); % Increase Mask in XY
+            seXY = strel('disk', 7); % Increase Mask in XY
 
             % Initialize the extended mask
             aExtendedMask = zeros(size(aObjectMask));
@@ -246,6 +208,8 @@ function aExcludeMask = getBrownFatSUVExcludeMask(tBrownFatSUV, sSegmentationFol
 
             nii = nii_tool('load', sNiiFileName);
             aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
+
+            aObjectMask = imdilate(aObjectMask, strel('sphere', 2)); % Increse mask by 2 pixels
 
             aExcludeMask(aObjectMask~=0)=1;
 
@@ -338,6 +302,8 @@ function aExcludeMask = getBrownFatSUVExcludeMask(tBrownFatSUV, sSegmentationFol
             nii = nii_tool('load', sNiiFileName);
             aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
 
+            aObjectMask = imdilate(aObjectMask, strel('sphere', 4)); % Increse mask by 4 pixels
+
             aExcludeMask(aObjectMask~=0)=1;
 
             clear aObjectMask;
@@ -356,13 +322,111 @@ function aExcludeMask = getBrownFatSUVExcludeMask(tBrownFatSUV, sSegmentationFol
             nii = nii_tool('load', sNiiFileName);
             aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
 
+            aObjectMask = imdilate(aObjectMask, strel('sphere', 4)); % Increse mask by 4 pixels
+
             aExcludeMask(aObjectMask~=0)=1;
 
             clear aObjectMask;
             clear nii;
         end
     end 
-                    
+                 
+    % Esophagus
+
+    if tBrownFatSUV.exclude.organ.esophagus == true
+
+        sNiiFileName = sprintf('%s%s', sSegmentationFolderName, 'esophagus.nii.gz');
+    
+        if exist(sNiiFileName, 'file')
+
+            nii = nii_tool('load', sNiiFileName);
+            aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
+
+            aExcludeMask(aObjectMask~=0)=1;
+
+            clear aObjectMask;
+            clear nii;
+        end
+    end 
+
+    % Stomach
+
+    if tBrownFatSUV.exclude.organ.stomach == true
+
+        sNiiFileName = sprintf('%s%s', sSegmentationFolderName, 'stomach.nii.gz');
+    
+        if exist(sNiiFileName, 'file')
+
+            nii = nii_tool('load', sNiiFileName);
+            aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
+
+            aObjectMask = imdilate(aObjectMask, strel('sphere', 4)); % Increse mask by 4 pixels
+
+            aExcludeMask(aObjectMask~=0)=1;
+
+            clear aObjectMask;
+            clear nii;
+        end
+    end 
+
+    % Duodenum
+
+    if tBrownFatSUV.exclude.organ.duodenum == true
+
+        sNiiFileName = sprintf('%s%s', sSegmentationFolderName, 'duodenum.nii.gz');
+    
+        if exist(sNiiFileName, 'file')
+
+            nii = nii_tool('load', sNiiFileName);
+            aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
+
+            aObjectMask = imdilate(aObjectMask, strel('sphere', 4)); % Increse mask by 4 pixels
+
+            aExcludeMask(aObjectMask~=0)=1;
+
+            clear aObjectMask;
+            clear nii;
+        end
+    end 
+
+    % Small Bowel
+
+    if tBrownFatSUV.exclude.organ.smallBowel == true
+
+        sNiiFileName = sprintf('%s%s', sSegmentationFolderName, 'small_bowel.nii.gz');
+    
+        if exist(sNiiFileName, 'file')
+
+            nii = nii_tool('load', sNiiFileName);
+            aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
+
+            aExcludeMask(aObjectMask~=0)=1;
+
+            clear aObjectMask;
+            clear nii;
+        end
+    end 
+
+    % Colon
+
+    if tBrownFatSUV.exclude.organ.colon == true
+
+        sNiiFileName = sprintf('%s%s', sSegmentationFolderName, 'colon.nii.gz');
+    
+        if exist(sNiiFileName, 'file')
+
+            nii = nii_tool('load', sNiiFileName);
+            aObjectMask = imrotate3(nii.img, 90, [0 0 1], 'nearest');
+
+            aObjectMask = imdilate(aObjectMask, strel('sphere', 4)); % Increse mask by 4 pixels
+
+            aExcludeMask(aObjectMask~=0)=1;
+
+            clear aObjectMask;
+            clear nii;
+        end
+    end 
+
     aExcludeMask = aExcludeMask(:,:,end:-1:1);
 
 end

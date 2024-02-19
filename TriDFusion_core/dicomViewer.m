@@ -300,8 +300,8 @@ function resize = dicomViewer()
     % Brown fat
 
     FDGBrownFatSUVThresholdValue       ('set', 2.5); % SUV
-    FDGBrownFatHUThresholdValue        ('set', -500, 500); % HU
-    FDGBrownFatSmalestVoiValue         ('set', 0);
+    FDGBrownFatHUThresholdValue        ('set', -500, 50); % HU
+    FDGBrownFatSmalestVoiValue         ('set', 0.1);
 
     excludeBrownFatSUVBrain            ('set', true);
     excludeBrownFatSUVHeart            ('set', true);
@@ -315,8 +315,14 @@ function resize = dicomViewer()
     excludeBrownFatSUVSpleen           ('set', true);
     excludeBrownFatSUVGallbladder      ('set', true);
     excludeBrownFatSUVPancreas         ('set', true);
-    excludeBrownFatSUVSkeleton         ('set', false);
 
+    excludeBrownFatSUVEsophagus        ('set', true);
+    excludeBrownFatSUVStomach          ('set', true);
+    excludeBrownFatSUVDuodenum         ('set', true);
+    excludeBrownFatSUVSmallBowel       ('set', true);
+    excludeBrownFatSUVColon            ('set', true);
+
+    excludeBrownFatSUVSkeleton         ('set', true);
 
     % FDHT segmentation
 
@@ -1492,7 +1498,9 @@ function resize = dicomViewer()
 %            set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));        
 %        end
         
-        if size(dicomBuffer('get'), 3) ~= 1
+        if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 || ... % 3D image
+           size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 4) ~= 1        % Multi-frame screen capture 
+
             setPlaybackToolbar('on');
         end
 

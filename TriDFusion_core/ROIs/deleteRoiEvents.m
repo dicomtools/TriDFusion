@@ -77,6 +77,8 @@ function deleteRoiEvents(hObject, ~)
             end
 
             atRoiInput(dTagOffset) = [];
+           
+            roiTemplate('set', dSerieOffset, atRoiInput);  
 
   %          atRoiInput(cellfun(@isempty, atRoiInput)) = [];
 

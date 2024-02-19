@@ -300,7 +300,7 @@ end
             set(uiFusedSeriesPtr('get'), 'Enable', 'off');
 
             if size(B, 3) == 1
-
+                
                 progressBar(0.999, 'Processing fusion, please wait');
                 
                 % Init axes                
@@ -399,10 +399,13 @@ end
 
                 axesText('set', 'axef', tAxefText);
         
-                [x1,y1,~] = size(A);
-                [x2,y2,~] = size(B);
+                if size(A)~=size(B) 
 
-                B = imresize(B, [x1 y1]);
+                    [x1,y1,~] = size(A);
+                    [x2,y2,~] = size(B);
+    
+                    B = imresize(B, [x1 y1]);
+                end
 if 0
                 if dSeriesOffset ~= dFusionSeriesOffset
                     if atInputTemplate(dSeriesOffset).bFlipLeftRight == true
@@ -474,6 +477,15 @@ end
                         xf = computeAspectRatio('x', atFusionMetaData);
                         yf = computeAspectRatio('y', atFusionMetaData);
                     end
+                    
+                    if xf == 0
+                       xf = 1;
+                    end
+                            
+                    if yf == 0
+                       yf = 1;
+                    end
+
                     daspect(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf 1]);
 
                 else
@@ -816,6 +828,10 @@ end
                 
                 % Set Coronal
 
+                if size(imf, 1) < iCoronal
+                    iCoronal = size(imf, 1);
+                end
+
                 if isVsplash('get') == true && ...
                    (strcmpi(vSplahView('get'), 'coronal') || ...
                     strcmpi(vSplahView('get'), 'all'))
@@ -915,7 +931,11 @@ end
                 set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
  
                 % Set Sagittal
-                                                
+
+                if size(imf, 2) < iSagittal
+                    iSagittal = size(imf, 2);
+                end
+
                 if isVsplash('get') == true && ...
                    (strcmpi(vSplahView('get'), 'sagittal') || ...
                     strcmpi(vSplahView('get'), 'all'))
@@ -1016,7 +1036,11 @@ end
 %                imSagittalF.YData = [imSagittalF.YData(1)-yMoveOffset imSagittalF.YData(2)-yMoveOffset];
                                           
                 % Set Axial
-                                                
+
+                if size(imf, 3) < iAxial
+                    iAxial = size(imf, 3);
+                end
+
                 if isVsplash('get') == true && ...
                    (strcmpi(vSplahView('get'), 'axial') || ...
                     strcmpi(vSplahView('get'), 'all'))

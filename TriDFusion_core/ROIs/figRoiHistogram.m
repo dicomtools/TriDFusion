@@ -1134,18 +1134,19 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                     asCell{dLineOffset,1}  = 'Name';
                     asCell{dLineOffset,2}  = 'Nb Cells';
                     asCell{dLineOffset,3}  = 'Total';
-                    asCell{dLineOffset,4}  = 'Mean';
-                    asCell{dLineOffset,5}  = 'Min';
-                    asCell{dLineOffset,6}  = 'Max';
-                    asCell{dLineOffset,7}  = 'Median';
-                    asCell{dLineOffset,8}  = 'Deviation';
-                    asCell{dLineOffset,9} = 'Peak';
-                    asCell{dLineOffset,10} = 'Max Diagomal Coronal (mm)';
-                    asCell{dLineOffset,11} = 'Max Diagomal Sagittal (mm)';
-                    asCell{dLineOffset,12} = 'Max Diagomal Axial (mm)';
-                    asCell{dLineOffset,13} = 'Volume (cm3)';
+                    asCell{dLineOffset,4}  = 'Sum';
+                    asCell{dLineOffset,5}  = 'Mean';
+                    asCell{dLineOffset,6}  = 'Min';
+                    asCell{dLineOffset,7}  = 'Max';
+                    asCell{dLineOffset,8}  = 'Median';
+                    asCell{dLineOffset,9}  = 'Deviation';
+                    asCell{dLineOffset,10} = 'Peak';
+                    asCell{dLineOffset,11} = 'Max Diagomal Coronal (mm)';
+                    asCell{dLineOffset,12} = 'Max Diagomal Sagittal (mm)';
+                    asCell{dLineOffset,13} = 'Max Diagomal Axial (mm)';
+                    asCell{dLineOffset,14} = 'Volume (cm3)';
 
-                    for tt=14:21
+                    for tt=15:21
                         asCell{dLineOffset,tt}  = (' ');
                     end
     
@@ -1189,35 +1190,36 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
         
                                     asCell{dLineOffset,1}  = (sVoiName);
                                     asCell{dLineOffset,2} = [tVoiComputed.cells];
-                                    asCell{dLineOffset,3} = [tVoiComputed.sum];
-                                    asCell{dLineOffset,4} = [tVoiComputed.mean];
-                                    asCell{dLineOffset,5} = [tVoiComputed.min];
-                                    asCell{dLineOffset,6} = [tVoiComputed.max];
-                                    asCell{dLineOffset,7} = [tVoiComputed.median];
-                                    asCell{dLineOffset,8} = [tVoiComputed.std];
-                                    asCell{dLineOffset,9} = [tVoiComputed.peak];
+                                    asCell{dLineOffset,3} = [tVoiComputed.total];
+                                    asCell{dLineOffset,4} = [tVoiComputed.sum];
+                                    asCell{dLineOffset,5} = [tVoiComputed.mean];
+                                    asCell{dLineOffset,6} = [tVoiComputed.min];
+                                    asCell{dLineOffset,7} = [tVoiComputed.max];
+                                    asCell{dLineOffset,8} = [tVoiComputed.median];
+                                    asCell{dLineOffset,9} = [tVoiComputed.std];
+                                    asCell{dLineOffset,10} = [tVoiComputed.peak];
         
                                     if isempty(tMaxDistances.Coronal)
-                                        asCell{dLineOffset,10} = ('NaN');
+                                        asCell{dLineOffset,11} = ('NaN');
                                     else
-                                        asCell{dLineOffset,10} = [tMaxDistances.Coronal.MaxLength];
+                                        asCell{dLineOffset,11} = [tMaxDistances.Coronal.MaxLength];
                                     end
         
                                     if isempty(tMaxDistances.Sagittal)
-                                        asCell{dLineOffset,11} = ('NaN');
+                                        asCell{dLineOffset,12} = ('NaN');
                                     else
-                                        asCell{dLineOffset,11} = [tMaxDistances.Sagittal.MaxLength];
+                                        asCell{dLineOffset,12} = [tMaxDistances.Sagittal.MaxLength];
                                     end
         
                                     if isempty(tMaxDistances.Axial)
-                                        asCell{dLineOffset,12} = ('NaN');
+                                        asCell{dLineOffset,13} = ('NaN');
                                     else
-                                        asCell{dLineOffset,12} = [tMaxDistances.Axial.MaxLength];
+                                        asCell{dLineOffset,13} = [tMaxDistances.Axial.MaxLength];
                                     end
         
-                                    asCell{dLineOffset,13} = [tVoiComputed.volume];
+                                    asCell{dLineOffset,14} = [tVoiComputed.volume];
         
-                                    for tt=14:21
+                                    for tt=15:21
                                         asCell{dLineOffset,tt}  = (' ');
                                     end
 
@@ -1248,18 +1250,19 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                     asCell{dLineOffset,2}  = 'Image number';
                     asCell{dLineOffset,3}  = 'Nb Cells';
                     asCell{dLineOffset,4}  = 'Total';
-                    asCell{dLineOffset,5}  = 'Mean';
-                    asCell{dLineOffset,6}  = 'Min';
-                    asCell{dLineOffset,7}  = 'Max';
-                    asCell{dLineOffset,8}  = 'Median';
-                    asCell{dLineOffset,9}  = 'Deviation';
-                    asCell{dLineOffset,10} = 'Peak';
-                    asCell{dLineOffset,11} = 'Max XY (mm)';
-                    asCell{dLineOffset,12} = 'Max CY (mm)';
-                    asCell{dLineOffset,13} = 'Area cm2';
-                    asCell{dLineOffset,14} = 'Volume (cm3)';
+                    asCell{dLineOffset,5}  = 'Sum';
+                    asCell{dLineOffset,6}  = 'Mean';
+                    asCell{dLineOffset,7}  = 'Min';
+                    asCell{dLineOffset,8}  = 'Max';
+                    asCell{dLineOffset,9}  = 'Median';
+                    asCell{dLineOffset,10} = 'Deviation';
+                    asCell{dLineOffset,11} = 'Peak';
+                    asCell{dLineOffset,12} = 'Max XY (mm)';
+                    asCell{dLineOffset,13} = 'Max CY (mm)';
+                    asCell{dLineOffset,14} = 'Area cm2';
+                    asCell{dLineOffset,15} = 'Volume (cm3)';
 
-                    for tt=15:21
+                    for tt=16:21
                         asCell{dLineOffset,tt}  = (' ');
                     end
     
@@ -1302,23 +1305,24 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                         asCell{dLineOffset,1}  = (sVoiName);
                                         asCell{dLineOffset,2}  = (' ');
                                         asCell{dLineOffset,3}  = [tVoiComputed.cells];
-                                        asCell{dLineOffset,4}  = [tVoiComputed.sum];
-                                        asCell{dLineOffset,5}  = [tVoiComputed.mean];
-                                        asCell{dLineOffset,6}  = [tVoiComputed.min];
-                                        asCell{dLineOffset,7}  = [tVoiComputed.max];
-                                        asCell{dLineOffset,8}  = [tVoiComputed.median];
-                                        asCell{dLineOffset,9}  = [tVoiComputed.std];
-                                        asCell{dLineOffset,10} = [tVoiComputed.peak];
-                                        asCell{dLineOffset,11} = (' ');
+                                        asCell{dLineOffset,4}  = [tVoiComputed.total];
+                                        asCell{dLineOffset,5}  = [tVoiComputed.sum];
+                                        asCell{dLineOffset,6}  = [tVoiComputed.mean];
+                                        asCell{dLineOffset,7}  = [tVoiComputed.min];
+                                        asCell{dLineOffset,8}  = [tVoiComputed.max];
+                                        asCell{dLineOffset,9}  = [tVoiComputed.median];
+                                        asCell{dLineOffset,10} = [tVoiComputed.std];
+                                        asCell{dLineOffset,11} = [tVoiComputed.peak];
                                         asCell{dLineOffset,12} = (' ');
                                         asCell{dLineOffset,13} = (' ');
+                                        asCell{dLineOffset,14} = (' ');
     %                                     if tVoiComputed.maxDistance == 0
     %                                         asCell{dLineOffset,14} = ('NaN');
     %                                     else
     %                                         asCell{dLineOffset,14} = [tVoiComputed.maxDistance];
     %                                     end                                  
-                                        asCell{dLineOffset,14} = [tVoiComputed.volume];
-                                        for tt=15:21
+                                        asCell{dLineOffset,15} = [tVoiComputed.volume];
+                                        for tt=16:21
                                             asCell{dLineOffset,tt}  = (' ');
                                         end
     
@@ -1348,33 +1352,34 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                                 asCell{dLineOffset,1}  = (' ');
                                                 asCell{dLineOffset,2}  = (sSliceNb);
                                                 asCell{dLineOffset,3}  = [atRoiComputed{bb}.cells];
-                                                asCell{dLineOffset,4}  = [atRoiComputed{bb}.sum];
-                                                asCell{dLineOffset,5}  = [atRoiComputed{bb}.mean];
-                                                asCell{dLineOffset,6}  = [atRoiComputed{bb}.min];
-                                                asCell{dLineOffset,7}  = [atRoiComputed{bb}.max];
-                                                asCell{dLineOffset,8}  = [atRoiComputed{bb}.median];
-                                                asCell{dLineOffset,9}  = [atRoiComputed{bb}.std];
-                                                asCell{dLineOffset,10} = [atRoiComputed{bb}.peak];
+                                                asCell{dLineOffset,4}  = [atRoiComputed{bb}.total];
+                                                asCell{dLineOffset,5}  = [atRoiComputed{bb}.sum];
+                                                asCell{dLineOffset,6}  = [atRoiComputed{bb}.mean];
+                                                asCell{dLineOffset,7}  = [atRoiComputed{bb}.min];
+                                                asCell{dLineOffset,8}  = [atRoiComputed{bb}.max];
+                                                asCell{dLineOffset,9}  = [atRoiComputed{bb}.median];
+                                                asCell{dLineOffset,10}  = [atRoiComputed{bb}.std];
+                                                asCell{dLineOffset,11} = [atRoiComputed{bb}.peak];
                                                 if ~isempty(atRoiComputed{bb}.MaxDistances)
                                                     if atRoiComputed{bb}.MaxDistances.MaxXY.Length == 0
-                                                        asCell{dLineOffset, 11} = ('NaN');
+                                                        asCell{dLineOffset, 12} = ('NaN');
                                                     else
-                                                        asCell{dLineOffset, 11} = [atRoiComputed{bb}.MaxDistances.MaxXY.Length];
+                                                        asCell{dLineOffset, 12} = [atRoiComputed{bb}.MaxDistances.MaxXY.Length];
                                                     end
                     
                                                     if atRoiComputed{bb}.MaxDistances.MaxCY.Length == 0
-                                                        asCell{dLineOffset, 12} = ('NaN');
+                                                        asCell{dLineOffset, 13} = ('NaN');
                                                     else
-                                                        asCell{dLineOffset, 12} = [atRoiComputed{bb}.MaxDistances.MaxCY.Length];
+                                                        asCell{dLineOffset, 13} = [atRoiComputed{bb}.MaxDistances.MaxCY.Length];
                                                     end
                                                 else
-                                                    asCell{dLineOffset,11} = (' ');
                                                     asCell{dLineOffset,12} = (' ');
+                                                    asCell{dLineOffset,13} = (' ');
                                                 end
-                                                asCell{dLineOffset,13} = [atRoiComputed{bb}.area];
-                                                asCell{dLineOffset,14} = (' ');
+                                                asCell{dLineOffset,14} = [atRoiComputed{bb}.area];
+                                                asCell{dLineOffset,15} = (' ');
                                                 
-                                                for tt=15:21
+                                                for tt=16:21
                                                     asCell{dLineOffset,tt}  = (' ');
                                                 end
     
@@ -1432,33 +1437,34 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                     asCell{dLineOffset, 1}  = (sRoiName);
                                     asCell{dLineOffset, 2}  = (sSliceNb);
                                     asCell{dLineOffset, 3}  = [tRoiComputed.cells];
-                                    asCell{dLineOffset, 4}  = [tRoiComputed.sum];
-                                    asCell{dLineOffset, 5}  = [tRoiComputed.mean];
-                                    asCell{dLineOffset, 6}  = [tRoiComputed.min];
-                                    asCell{dLineOffset, 7}  = [tRoiComputed.max];
-                                    asCell{dLineOffset, 8}  = [tRoiComputed.median];
-                                    asCell{dLineOffset, 9}  = [tRoiComputed.std];
-                                    asCell{dLineOffset, 10} = [tRoiComputed.peak];
+                                    asCell{dLineOffset, 4}  = [tRoiComputed.total];
+                                    asCell{dLineOffset, 5}  = [tRoiComputed.sum];
+                                    asCell{dLineOffset, 6}  = [tRoiComputed.mean];
+                                    asCell{dLineOffset, 7}  = [tRoiComputed.min];
+                                    asCell{dLineOffset, 8}  = [tRoiComputed.max];
+                                    asCell{dLineOffset, 9}  = [tRoiComputed.median];
+                                    asCell{dLineOffset, 10}  = [tRoiComputed.std];
+                                    asCell{dLineOffset, 11} = [tRoiComputed.peak];
                                     if ~isempty(tRoiComputed.MaxDistances)
                                         if tRoiComputed.MaxDistances.MaxXY.Length == 0
-                                            asCell{dLineOffset, 11} = ('NaN');
+                                            asCell{dLineOffset, 12} = ('NaN');
                                         else
-                                            asCell{dLineOffset, 11} = [tRoiComputed.MaxDistances.MaxXY.Length];
+                                            asCell{dLineOffset, 12} = [tRoiComputed.MaxDistances.MaxXY.Length];
                                         end
         
                                         if tRoiComputed.MaxDistances.MaxCY.Length == 0
-                                            asCell{dLineOffset, 12} = ('NaN');
+                                            asCell{dLineOffset, 13} = ('NaN');
                                         else
-                                            asCell{dLineOffset, 12} = [tRoiComputed.MaxDistances.MaxCY.Length];
+                                            asCell{dLineOffset, 13} = [tRoiComputed.MaxDistances.MaxCY.Length];
                                         end
                                     else
-                                        asCell{dLineOffset, 11} = (' ');
                                         asCell{dLineOffset, 12} = (' ');
+                                        asCell{dLineOffset, 13} = (' ');
                                     end
-                                    asCell{dLineOffset, 13} = tRoiComputed.area;
-                                    asCell{dLineOffset, 14} = (' ');
+                                    asCell{dLineOffset, 14} = tRoiComputed.area;
+                                    asCell{dLineOffset, 15} = (' ');
                             
-                                    for tt=15:21
+                                    for tt=16:21
                                         asCell{dLineOffset,tt}  = (' ');
                                     end
     

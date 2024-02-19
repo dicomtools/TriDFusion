@@ -306,21 +306,25 @@ function TriDFusion(varargin)
     
  %   refreshImages();
        
-    if argFusion == true % Init 2D Fusion   
+    if argFusion == true % Init 2D Fusion  
+
         setFusionCallback();        
     end
     
     for rr=1:numel(asRendererPriority) 
         
         if strcmpi(asRendererPriority{rr}, 'vol') % Init 3D Volume
+
             set3DCallback(); 
         end
         
         if strcmpi(asRendererPriority{rr}, 'iso') % Init 3D ISO 
+
             setIsoSurfaceCallback();
         end
         
         if strcmpi(asRendererPriority{rr}, 'mip') % Init 3D MIP
+
             setMIPCallback();
         end        
     end                    
@@ -335,6 +339,7 @@ function TriDFusion(varargin)
     function resizeFigureCallback(~,~)
         
         if exist('resizeViewer', 'var')
+            
             resizeViewer();
         end
     end
