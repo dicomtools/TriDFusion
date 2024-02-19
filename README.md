@@ -88,10 +88,8 @@ MATLAB command:
 
 * Example:
 * TriDFusion(); Open the graphical user interface.
-* TriDFusion('path_to_dicom_series_folder'); 
-  Open the graphical user interface with a DICOM image.
-* TriDFusion('path_to_dicom_series_folder_1', 'path_to_dicom_series_folder_2');  
-  Open the graphical user interface with 2 DICOM images.
+* TriDFusion('path_to_dicom_series_folder'); Open the graphical user interface with a DICOM image.
+* TriDFusion('path_to_dicom_series_folder_1', 'path_to_dicom_series_folder_2');  Open the graphical user interface with 2 DICOM images.
 * TriDFusion('path_to_dicom_series_folder_1', 'path_to_dicom_series_folder_2', '-fusion'); Open the graphical user interface with 2 DICOM images and fuse them.
 * TriDFusion('path_to_dicom_series_folder', '-mip'); Open the graphical user interface with a DICOM image and create a 3D MIP.
 * TriDFusion('path_to_dicom_series_folder', '-iso'); Open the graphical user interface with a DICOM image and create a 3D iso surface model.
