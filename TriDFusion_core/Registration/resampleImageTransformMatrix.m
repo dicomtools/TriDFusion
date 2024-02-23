@@ -51,11 +51,24 @@ function [resampImage, atDcmMetaData, xMoveOffset, yMoveOffset, zMoveOffsetRemai
         return;
     end
 
+    Rdcm = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
+    Rref = imref3d(dimsRef, atRefMetaData{1}.PixelSpacing(2), atRefMetaData{1}.PixelSpacing(1), refSliceThickness);
+
+    if isequal(dimsRef, dimsDcm)
+        
+        if isequal(Rdcm.PixelExtentInWorldX, Rref.PixelExtentInWorldX) && ...
+           isequal(Rdcm.PixelExtentInWorldY, Rref.PixelExtentInWorldY) && ...
+           isequal(Rdcm.PixelExtentInWorldZ, Rref.PixelExtentInWorldZ)
+
+            resampImage = dcmImage;
+            return;           
+        end
+    end
+
     [M, ~] = getTransformMatrix(atDcmMetaData{1}, dcmSliceThickness, atRefMetaData{1}, refSliceThickness);
     TF = affine3d(M);
 
-    Rdcm = imref3d(dimsDcm, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), dcmSliceThickness);
-%     Rref = imref3d(dimsRef, atDcmMetaData{1}.PixelSpacing(2), atDcmMetaData{1}.PixelSpacing(1), refSliceThickness);
+
 
 %     dRefImageExtentInWorldZ = round(Rref.ImageExtentInWorldZ);
 %     dDcmImageExtentInWorldZ = round(Rdcm.ImageExtentInWorldZ);

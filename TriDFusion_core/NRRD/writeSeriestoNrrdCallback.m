@@ -93,13 +93,23 @@ function writeSeriestoNrrdCallback(~, ~)
 
     atMetaData  = dicomMetaData('get', [], dSeriesOffset);
         
-    origin = atMetaData{1}.ImagePositionPatient;
+    origin = atMetaData{end}.ImagePositionPatient;
     
     pixelspacing = zeros(3,1);
 
     pixelspacing(1) = atMetaData{1}.PixelSpacing(1);
     pixelspacing(2) = atMetaData{1}.PixelSpacing(2);
     pixelspacing(3) = computeSliceSpacing(atMetaData);
+
+%     if ~isempty(atMetaData{1}.SliceThickness)
+%         if atMetaData{1}.SliceThickness ~= 0
+%             pixelspacing(3) = atMetaData{1}.SliceThickness;
+%         else
+%             pixelspacing(3) = computeSliceSpacing(atMetaData);
+%         end           
+%     else    
+%         pixelspacing(3) = computeSliceSpacing(atMetaData);
+%     end
 
     sNrrdImagesName = sprintf('%s%s.nrrd', sOutDir, cleanString(atMetaData{1}.SeriesDescription));
 

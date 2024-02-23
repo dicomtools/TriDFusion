@@ -128,7 +128,7 @@ def read_radionuclide_summary_database(filepath=tridfusion_radionuclide_summary_
                     except IndexError:
                         pass
     except FileNotFoundError:
-        print("WARNING:  Radionuclide database not found in <install dir>\\Kernel...  Attempting to pull from 3DF...")
+        print("WARNING:  Radionuclide database not found in <install dir>\\kernel...  Attempting to pull from 3DF...")
         pass
 
     return radionuclide_database
@@ -276,7 +276,8 @@ def create_phits_simulation(desired_path_to_output,
                             emission_types=None,
                             maxcas=None,
                             maxbch=None,
-                            phits_path="c:\\phits\\"):
+                            phits_path="c:\\phits\\",
+                            padding_factor=0.01):
     """
     Create PHITS input files for the simulation.  Assumed space units of millimeters.  Assumed LPS orientation.
     :param desired_path_to_output:  Folder the simulation will be stored in; this will have subfolders for each
@@ -290,6 +291,7 @@ def create_phits_simulation(desired_path_to_output,
     :param maxcas:  Source particles per batch
     :param maxbch:  Number of batches
     :param phits_path:  Path to phits executable
+    :param padding_factor:  Fractional distance to overlap edge source voxels with phantom boundary surface
     :return:  Nothing
     """
 
@@ -311,12 +313,16 @@ def create_phits_simulation(desired_path_to_output,
     dimensions_x = image_header['sizes'][0]
     dimensions_y = image_header['sizes'][1]
     dimensions_z = image_header['sizes'][2]
-    spacing_x = image_header['space directions'][0][0] / 10  # centimeters
-    spacing_y = image_header['space directions'][1][1] / 10  # centimeters
-    spacing_z = image_header['space directions'][2][2] / 10  # centimeters
-    padding_x = spacing_x / 1000
-    padding_y = spacing_y / 1000
-    padding_z = spacing_z / 1000
+    space_directions = np.array(image_header['space directions'])
+    # spacing_x = np.linalg.norm(space_directions[:, 0]) / 10  # centimeters
+    # spacing_y = np.linalg.norm(space_directions[:, 1]) / 10  # centimeters
+    # spacing_z = np.linalg.norm(space_directions[:, 2]) / 10  # centimeters
+    spacing_x = np.linalg.norm(space_directions[0]) / 10  # centimeters
+    spacing_y = np.linalg.norm(space_directions[1]) / 10  # centimeters
+    spacing_z = np.linalg.norm(space_directions[2]) / 10  # centimeters
+    padding_x = spacing_x * padding_factor
+    padding_y = spacing_y * padding_factor
+    padding_z = spacing_z * padding_factor
     origin_x = image_header['space origin'][0] / 10  # centimeters
     origin_y = image_header['space origin'][1] / 10  # centimeters
     origin_z = image_header['space origin'][2] / 10  # centimeters
@@ -453,6 +459,7 @@ def create_phits_simulation(desired_path_to_output,
             "    dmax(14) = 100",
             "    negs     = 1",
             "    nlost    = {0}".format(int(int(maxcas) * int(maxbch) / 1000)),
+            "    igerr    = {0}".format(int(int(maxcas) * int(maxbch) / 1000)),  # Added 2/17/2024
             "\n"
         ])
 
@@ -595,14 +602,14 @@ def create_phits_simulation(desired_path_to_output,
         f.write("\n[end]\n")
 
     # Copy the image (source) and labelmap (geometry) files to the output directory
-    print("Writing PHITS source distribution...")
+    print("Writing PHITS geometry...")
     geometry_output_filename = desired_path_to_output + "\\" + os.path.basename(desired_path_to_output) + "_geometry.txt"
     with open(geometry_output_filename, 'w') as f:
         write_list = labelmap_data.flatten('F').tolist()  # Need Fortran order
         for each in write_list:
-            f.write(f"\t{each}\n")  # For some stupid reason, there needs to be a tab preceding the value.  Wtf.
+            f.write(f"\t{int(each)}\n")  # For some stupid reason, there needs to be a tab preceding the value.  Wtf.  
 
-    print("Writing PHITS geometry...")
+    print("Writing PHITS source distribution...")
     source_output_filename = desired_path_to_output + "\\" + os.path.basename(desired_path_to_output) + "_source.txt"
     with open(source_output_filename, 'w') as f:
         write_list = image_data.flatten('F').tolist()  # Need Fortran order
@@ -713,7 +720,4 @@ if __name__ == "__main__":
 #     input_file = sys.argv[1]
 # except IndexError:
 #     input_file = program_folder + "MIRD3d.config"
-
-
-
 

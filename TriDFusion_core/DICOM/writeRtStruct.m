@@ -37,8 +37,13 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
     dicomdict('factory');    
     
     if ~isempty(atInput(dSeriesOffset).asFilesList)
+        
         sInputFile = atInput(dSeriesOffset).asFilesList{1};
-        tMetaData = dicominfo(string(sInputFile));
+        if ~isempty(sInputFile)
+            tMetaData = dicominfo(string(sInputFile));
+        else
+            tMetaData = atInput(dSeriesOffset).atDicomInfo{1};
+        end
     else % CERR
         tMetaData = atInput(dSeriesOffset).atDicomInfo{1};
     end

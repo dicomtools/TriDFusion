@@ -1,6 +1,6 @@
 % ========================================================================
 % 
-% nrrdwriter_dan
+% nrrdwriter
 % 
 % filename  - 'myimage.ext' - 'veins.nrrd'
 % matrix    - data - Matlab matrix
@@ -71,13 +71,31 @@ if (encodingCond && formatCond)
     fprintf(fid,['sizes: ', num2str(dims), '\n']);
     
     if isequal(ndims, 2)
-        fprintf(fid,['space directions: (', num2str(pixelspacing(1)), ...
-            ',0) (0,', num2str(pixelspacing(2)), ')\n']);
+        precision1 = ceil(abs(log10(eps(max(pixelspacing(1))))));
+        precision2 = ceil(abs(log10(eps(max(pixelspacing(2))))));
+        formatSpec = ['space directions: (%.' num2str(precision1) 'f,0,0) (0,%.' num2str(precision2) 'f,0)\n']; 
+        fprintf(fid, formatSpec, pixelspacing(1), pixelspacing(2));
+        
+%         fprintf(fid, 'space directions: (%.55f,0) (0,%.55f)\n', pixelspacing(1), pixelspacing(2));        
+%         fprintf(fid,['space directions: (', num2str(pixelspacing(1)), ...
+%             ',0) (0,', num2str(pixelspacing(2)), ')\n']);
         fprintf(fid,'kinds: domain domain\n');
+
+
     elseif isequal (ndims, 3)
-        fprintf(fid,['space directions: (', num2str(pixelspacing(1)), ...
-            ',0,0) (0,', num2str(pixelspacing(2)), ',0) (0,0,', ...
-            num2str(pixelspacing(3)), ')\n']);
+
+        precision1 = ceil(abs(log10(eps(max(pixelspacing(1))))));
+        precision2 = ceil(abs(log10(eps(max(pixelspacing(2))))));
+        precision3 = ceil(abs(log10(eps(max(pixelspacing(3))))));
+        formatSpec = ['space directions: (%.' num2str(precision1) 'f,0,0) (0,%.' num2str(precision2) 'f,0) (0,0,%.' num2str(precision3) 'f)\n']; 
+        fprintf(fid, formatSpec, pixelspacing(1), pixelspacing(2), pixelspacing(3));
+
+%         fprintf(fid, 'space directions: (%.55f,0,0) (0,%.55f,0) (0,0,%.55f)\n', pixelspacing(1), pixelspacing(2), pixelspacing(3));
+
+
+%         fprintf(fid,['space directions: (', num2str(pixelspacing(1)), ...
+%             ',0,0) (0,', num2str(pixelspacing(2)), ',0) (0,0,', ...
+%             num2str(pixelspacing(3)), ')\n']);
         fprintf(fid,'kinds: domain domain domain\n');
     end
     
@@ -92,10 +110,24 @@ if (encodingCond && formatCond)
     end
     
     if isequal(ndims, 2)
-        fprintf(fid,['space origin: (', num2str(origin(1)),',', num2str(origin(2)),')\n']);
+        precision1 = ceil(abs(log10(eps(max(origin(1))))));
+        precision2 = ceil(abs(log10(eps(max(origin(2))))));
+        formatSpec = ['space origin: (%.' num2str(precision1) 'f,%.' num2str(precision2) 'f)\n']; 
+        fprintf(fid, formatSpec, origin(1), origin(2));
+        
+%        fprintf(fid, 'space origin: (%.45f,%.45f)\n', origin(1), origin(2));
+     %  fprintf(fid,['space origin: (', num2str(origin(1)),',', num2str(origin(2)),')\n']);
     elseif isequal (ndims, 3)
-        fprintf(fid,['space origin: (', num2str(origin(1)), ...
-            ',',num2str(origin(2)),',', num2str(origin(3)),')\n']);
+        precision1 = ceil(abs(log10(eps(max(origin(1))))));
+        precision2 = ceil(abs(log10(eps(max(origin(2))))));
+        precision3 = ceil(abs(log10(eps(max(origin(3))))));
+        formatSpec = ['space origin: (%.' num2str(precision1) 'f,%.' num2str(precision2) 'f,%.' num2str(precision3) 'f)\n']; 
+        fprintf(fid, formatSpec, origin(1), origin(2), origin(3));
+
+%          fprintf(fid, 'space origin: (%.14f,%.14f,%.13f)\n', origin(1), origin(2), origin(3));
+
+%         fprintf(fid,['space origin: (', num2str(origin(1)), ...
+%             ',',num2str(origin(2)),',', num2str(origin(3)),')\n']);
     end    
     
     if (isequal(format, 'nhdr')) % Si hay que separar

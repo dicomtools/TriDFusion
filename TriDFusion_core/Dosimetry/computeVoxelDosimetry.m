@@ -293,17 +293,25 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
 
         sSegmentationLabelFileName = sprintf('%sSegmentation-label.nrrd',sTempInputDir);
 
-        origin = atMetaData{1}.ImagePositionPatient;
+        origin = atMetaData{end}.ImagePositionPatient;
         
         pixelspacing=zeros(3,1);
         pixelspacing(1) = atMetaData{1}.PixelSpacing(1);
         pixelspacing(2) = atMetaData{1}.PixelSpacing(2);
-        pixelspacing(3) = computeSliceSpacing(atMetaData);
-                    
+        pixelspacing(3) = computeSliceSpacing(atMetaData);   
+%         if ~isempty(atMetaData{1}.SliceThickness)
+%             if atMetaData{1}.SliceThickness ~= 0
+%                 pixelspacing(3) = atMetaData{1}.SliceThickness;
+%             else
+%                 pixelspacing(3) = computeSliceSpacing(atMetaData);
+%             end           
+%         else    
+%             pixelspacing(3) = computeSliceSpacing(atMetaData);
+%         end             
 %         aLabelImage = rotateNrrdImage(aLabelImage);
         aLabelImage=aLabelImage(:,:,end:-1:1);
    
-        nrrdWriter(sSegmentationLabelFileName, squeeze(aLabelImage), pixelspacing, origin, 'raw'); % Write .nrrd images 
+        nrrdWriter(sSegmentationLabelFileName, double(aLabelImage), pixelspacing, origin, 'raw'); % Write .nrrd images 
 
 %         clear aLabelImage;
 
@@ -327,12 +335,21 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
 
     % Write .nrrd files 
     
-    origin = atMetaData{1}.ImagePositionPatient;
+    origin = atMetaData{end}.ImagePositionPatient;
     
     pixelspacing=zeros(3,1);
     pixelspacing(1) = atMetaData{1}.PixelSpacing(1);
     pixelspacing(2) = atMetaData{1}.PixelSpacing(2);
     pixelspacing(3) = computeSliceSpacing(atMetaData);
+%     if ~isempty(atMetaData{1}.SliceThickness)
+%         if atMetaData{1}.SliceThickness ~= 0
+%             pixelspacing(3) = atMetaData{1}.SliceThickness;
+%         else
+%             pixelspacing(3) = computeSliceSpacing(atMetaData);
+%         end           
+%     else    
+%         pixelspacing(3) = computeSliceSpacing(atMetaData);
+%     end
 
     sNrrdImagesName = sprintf('%simage.nrrd', sTempInputDir);
     
@@ -340,7 +357,7 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
 
 %     aImage = rotateNrrdImage(aImage);
 
-    nrrdWriter(sNrrdImagesName, squeeze(aImage), pixelspacing, origin, 'raw'); % Write .nrrd images 
+    nrrdWriter(sNrrdImagesName, double(aImage), pixelspacing, origin, 'raw'); % Write .nrrd images 
 
     progressBar(3/5, 'Dosimetry in progress, this might take several minutes, please be patient.');
 
@@ -855,6 +872,8 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
             if stDosimetry.contours.all == true
 
                 aEmptyMask = false(size(aLabelImage));
+                
+                aLabelImage=aLabelImage(:,:,end:-1:1);
 
                 for jj=1:numel(tCblTemplate)
     

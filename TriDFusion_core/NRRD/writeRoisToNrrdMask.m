@@ -217,13 +217,23 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicom
         sWriteDir = char(sOutDir); 
     end
          
-    origin = atDicomMeta{1}.ImagePositionPatient;
+    origin = atDicomMeta{end}.ImagePositionPatient;
     
     pixelspacing = zeros(3,1);
 
     pixelspacing(1) = atDicomMeta{1}.PixelSpacing(1);
     pixelspacing(2) = atDicomMeta{1}.PixelSpacing(2);
     pixelspacing(3) = computeSliceSpacing(atDicomMeta);
+
+%     if ~isempty(atDicomMeta{1}.SliceThickness)
+%         if atDicomMeta{1}.SliceThickness ~= 0
+%             pixelspacing(3) = atDicomMeta{1}.SliceThickness;
+%         else
+%             pixelspacing(3) = computeSliceSpacing(atDicomMeta);
+%         end           
+%     else    
+%         pixelspacing(3) = computeSliceSpacing(atDicomMeta);
+%     end
 
     sNrrdImagesName = sprintf('%s%s.nrrd', sWriteDir, cleanString(atDicomMeta{1}.SeriesDescription));
 

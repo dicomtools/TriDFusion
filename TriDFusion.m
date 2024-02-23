@@ -225,17 +225,19 @@ function TriDFusion(varargin)
     set(fiMainWindow, 'Renderer'    , 'opengl'); 
 
     iptPointerManager(fiMainWindowPtr('get'));
-
-%    warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');  
     
-%    if argInternal == true
-%        sLogoPath = './TriDFusion/logo.png';
-%    else
-%        sLogoPath = './logo.png';
-%    end
 
-%    javaFrame = get(fiMainWindowPtr('get'), 'JavaFrame');
-%    javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogoPath));
+
+%     warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');  
+%     
+%     if argInternal == true
+%         sLogoPath = './TriDFusion/logo.png';
+%     else
+%         sLogoPath = './logo.png';
+%     end
+% 
+%     javaFrame = get(fiMainWindowPtr('get'), 'JavaFrame');
+%     javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogoPath));
    
 
  %   movegui(fiMainWindowPtr('get'), 'center');                  

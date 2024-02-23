@@ -69,7 +69,7 @@ function loadNrrdMaskFile(sPath, sFileName)
     if bContinue == true
         for jj=1:dVoiMax
     
-            progressBar(jj/dVoiMax-0.009, sprintf('Importing mask %d/%d, please wait.',jj, dVoiMax));
+            progressBar(jj\dVoiMax-0.009, sprintf('Importing mask %d/%d, please wait.',jj, dVoiMax));
     
             xmin=0.5;
             xmax=1;

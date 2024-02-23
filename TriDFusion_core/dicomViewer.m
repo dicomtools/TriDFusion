@@ -450,7 +450,7 @@ function resize = dicomViewer()
 
     voxelDosimetryMachineLearningTissueDependant('set', true);
     voxelDosimetryTissueDependantBackground('set', 1); % Water
-    voxelDosimetryPHITSDebugWindow('set', false); 
+    voxelDosimetryPHITSDebugWindow('set', true); 
     voxelDosimetryAllContours('set', false); 
 
     clearDisplay();

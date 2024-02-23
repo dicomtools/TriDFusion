@@ -207,7 +207,10 @@ function loadNIIFile(sPath, sFileName)
         atInput(numel(atInput)).atDicomInfo{1}.AccessionNumber   = '';
 
         % Date Time
-   
+
+        atInput(numel(atInput)).atDicomInfo{1}.StudyTime = '';
+        atInput(numel(atInput)).atDicomInfo{1}.StudyDate = '';
+
         atInput(numel(atInput)).atDicomInfo{1}.SeriesTime = '';
         atInput(numel(atInput)).atDicomInfo{1}.SeriesDate = '';
 
@@ -301,7 +304,10 @@ function loadNIIFile(sPath, sFileName)
         atInput(1).atDicomInfo{1}.AccessionNumber   = '';
        
         % Date Time
-   
+
+        atInput(1).atDicomInfo{1}.StudyTime = '';
+        atInput(1).atDicomInfo{1}.StudyDate = ''; 
+
         atInput(1).atDicomInfo{1}.SeriesTime = '';
         atInput(1).atDicomInfo{1}.SeriesDate = '';
 

@@ -234,12 +234,23 @@ function aBuffer = loadNrrdFile(sPath, sFileName, bInitDisplay, dFactor)
         atInput(numel(atInput)).atDicomInfo{1}.AccessionNumber   = '';
 
         % Date Time
-   
+        atInput(numel(atInput)).atDicomInfo{1}.StudyTime = '';
+        atInput(numel(atInput)).atDicomInfo{1}.StudyDate = '';
+
         atInput(numel(atInput)).atDicomInfo{1}.SeriesTime = '';
         atInput(numel(atInput)).atDicomInfo{1}.SeriesDate = '';
 
         atInput(numel(atInput)).atDicomInfo{1}.AcquisitionTime = '';
         atInput(numel(atInput)).atDicomInfo{1}.AcquisitionDate = '';   
+
+        % Manufacturer
+
+        atInput(numel(atInput)).atDicomInfo{1}.Manufacturer           = '';
+        atInput(numel(atInput)).atDicomInfo{1}.InstitutionName        = '';
+        atInput(numel(atInput)).atDicomInfo{1}.ReferringPhysicianName = '';
+        atInput(numel(atInput)).atDicomInfo{1}.StationName            = '';
+        atInput(numel(atInput)).atDicomInfo{1}.StudyDescription       = '';
+        atInput(numel(atInput)).atDicomInfo{1}.ManufacturerModelName  = '';
 
         % Dose
 
@@ -327,12 +338,24 @@ function aBuffer = loadNrrdFile(sPath, sFileName, bInitDisplay, dFactor)
         atInput(1).atDicomInfo{1}.AccessionNumber   = '';
        
         % Date Time
-   
+
+        atInput(1).atDicomInfo{1}.StudyTime = '';
+        atInput(1).atDicomInfo{1}.StudyDate = '';
+
         atInput(1).atDicomInfo{1}.SeriesTime = '';
         atInput(1).atDicomInfo{1}.SeriesDate = '';
 
         atInput(1).atDicomInfo{1}.AcquisitionTime = '';
         atInput(1).atDicomInfo{1}.AcquisitionDate = '';   
+
+        % Manufacturer
+
+        atInput(1).atDicomInfo{1}.Manufacturer           = '';
+        atInput(1).atDicomInfo{1}.InstitutionName        = '';
+        atInput(1).atDicomInfo{1}.ReferringPhysicianName = '';
+        atInput(1).atDicomInfo{1}.StationName            = '';
+        atInput(1).atDicomInfo{1}.StudyDescription       = '';
+        atInput(1).atDicomInfo{1}.ManufacturerModelName  = '';
 
         % Dose
 
