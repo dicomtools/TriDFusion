@@ -72,7 +72,7 @@ Fire up Matlab. Go to Home --> Set Path. Set the path to "Default". Add /home/..
 To use TriDFusion (3DF) Graphical User Interface, type TriDFusion() in Matlab command window.
 
 ## Usage
-
+...
 MATLAB command:
 
 * Note: Option settings must fit on one line and can contain at most one semicolon.
@@ -96,7 +96,7 @@ MATLAB command:
 * TriDFusion('path_to_dicom_series_folder', '-vol'); Open the graphical user interface with a DICOM image and create a 3D volume rendering.
 * TriDFusion('path_to_dicom_series_folder', '-mip', '-iso', '-vol'); Open the graphical user interface with a DICOM image and create a fusion of a 3D MIP, iso surface, and volume rendering. Any combination can be used. 
 * TriDFusion('path_to_dicom_series_folder', '-w', 'workflow_name'); Open the graphical user interface with a DICOM image and execute a workflow. Refer to processWorkflow.m for a list of available options. Refer to dicomViewer.m for workflows the default values. 
-
+...
 
 DICOM directory structure:
 
@@ -122,6 +122,22 @@ https://pyradiomics.readthedocs.io/en/latest/installation.html
 ### Monte Carlo particle transport engines 
 PHITS
 https://phits.jaea.go.jp/rirekie.html
+
+Needed Python Module Installation Instructions
+
+Before running the provided Python script, ensure that all required modules are installed. You can install them using the following commands:
+
+    numpy: Execute the command pip install numpy to install the NumPy library, which is essential for numerical computations.
+
+    nrrd: Install the nrrd library, used for reading and writing NRRD files, by running pip install pynrrd.
+
+    Other Dependencies: Make sure you have the following standard Python modules installed:
+        sys: No installation required as it's part of the Python standard library.
+        math: No installation required as it's part of the Python standard library.
+        os: No installation required as it's part of the Python standard library.
+        shutil: No installation required as it's part of the Python standard library.
+        subprocess: No installation required as it's part of the Python standard library.
+        argparse: No installation required as it's part of the Python standard library.
 
 ## References 
 
