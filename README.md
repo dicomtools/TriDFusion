@@ -123,9 +123,9 @@ https://pyradiomics.readthedocs.io/en/latest/installation.html
 PHITS
 https://phits.jaea.go.jp/rirekie.html
 
-Needed Python Module Installation Instructions
+Required Python Module Installation Instructions
 
-Before running the provided Python script, ensure that all required modules are installed. You can install them using the following commands:
+TriDFusion will execute the Python scripts TriDFusion\kernel\PHITS_DoseEngine.py and PHITS_Simulation_Controller.py. Please ensure that all required modules are installed. You can install them using the following commands:
 
     numpy: Execute the command pip install numpy to install the NumPy library, which is essential for numerical computations.
 
