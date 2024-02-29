@@ -433,7 +433,7 @@ function dicomViewerCore()
                  'visible'  , 'off' ...
                  );
         axAxeText.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        axAxeText.Toolbar = [];
+        axAxeText.Toolbar.Visible = 'off';
 
         tAxeText = ...
             text(axAxeText, ...
@@ -779,7 +779,7 @@ function dicomViewerCore()
                  'visible'  , 'off' ...
                  );
         axAxes1Text.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        axAxes1Text.Toolbar = [];
+        axAxes1Text.Toolbar.Visible = 'off';
 
         if isVsplash('get') == true && ...
            strcmpi(vSplahView('get'), 'coronal')
@@ -818,19 +818,19 @@ function dicomViewerCore()
 
              axAxes1View = ...
                 axes(uiCorWindow, ...
-                     'Units'   , 'normalized', ...
-                     'xlimmode', 'manual',...
-                     'ylimmode', 'manual',...
-                     'zlimmode', 'manual',...
-                     'climmode', 'manual',...
-                     'alimmode', 'manual',...
-                     'Position', [0 0 1 1], ...
-                     'Visible' , 'off',...
-                     'Tag'     , 'axAxes1View', ...
-                     'HandleVisibility', 'off' ...
-                     );
+                       'Units'   , 'normalized', ...
+                       'xlimmode', 'manual',...
+                       'ylimmode', 'manual',...
+                       'zlimmode', 'manual',...
+                       'climmode', 'manual',...
+                       'alimmode', 'manual',...
+                       'Position', [0 0 1 1], ...
+                       'Visible' , 'off',...
+                       'Tag'     , 'axAxes1View', ...
+                       'HandleVisibility', 'off' ...
+                       );
             axAxes1View.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-            axAxes1View.Toolbar = [];
+            axAxes1View.Toolbar.Visible = 'off';
 
             tAxes1View = text(axAxes1View, 0.03, 0.46, 'Right', 'Color', overlayColor('get'), 'Rotation', 270);
             if overlayActivate('get') == false
@@ -1114,7 +1114,7 @@ function dicomViewerCore()
                  'visible' , 'off' ...
                  );
         axAxes2Text.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        axAxes2Text.Toolbar = [];
+        axAxes2Text.Toolbar.Visible = 'off';
 
         if isVsplash('get') == true && ...
            strcmpi(vSplahView('get'), 'sagittal')
@@ -1157,7 +1157,7 @@ function dicomViewerCore()
                      'HandleVisibility', 'off' ...
                      );
             axAxes2View.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-            axAxes2View.Toolbar = [];
+            axAxes2View.Toolbar.Visible = 'off';
 
             tAxes2View = text(axAxes2View, 0.03, 0.46, 'Anterior', 'Color', overlayColor('get'), 'Rotation', 270);
             if overlayActivate('get') == false
@@ -1437,7 +1437,7 @@ function dicomViewerCore()
                  'visible' , 'off' ...
                  );
         axAxes3Text.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        axAxes3Text.Toolbar = [];
+        axAxes3Text.Toolbar.Visible = 'off';
 
         if isVsplash('get') == true && ...
            (strcmpi(vSplahView('get'), 'axial') || ...
@@ -1480,7 +1480,7 @@ function dicomViewerCore()
                      'HandleVisibility', 'off' ...
                      );
             axAxes3View.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-            axAxes3View.Toolbar = [];
+            axAxes3View.Toolbar.Visible = 'off';
 
             tAxes3View{1} = text(axAxes3View, 0.46, 0.08, 'Posterior', 'Color', overlayColor('get'));
             tAxes3View{2} = text(axAxes3View, 0.03, 0.46, 'Right', 'Color', overlayColor('get'),'Rotation', 270);
@@ -1624,7 +1624,7 @@ function dicomViewerCore()
                      'visible' , 'off' ...
                      );
             axAxesMipText.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-            axAxesMipText.Toolbar = [];
+            axAxesMipText.Toolbar.Visible = 'off';
 
             sAxeMipText = sprintf('\n%d/32', iMipAngle);
 
@@ -1648,7 +1648,7 @@ function dicomViewerCore()
                      'HandleVisibility', 'off' ...
                      );
             axAxesMipView.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-            axAxesMipView.Toolbar = [];
+            axAxesMipView.Toolbar.Visible = 'off';
 
             if      iMipAngle < 5
                 sMipAngleView = 'Left';
@@ -2002,7 +2002,7 @@ function dicomViewerCore()
                           'Visible' , 'off'...
                           );  
         axeColorbar.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        axeColorbar.Toolbar = [];       
+        axeColorbar.Toolbar.Visible = 'off';       
     else
 
         axeColorbar = axes(uiTraWindowPtr('get'), ...
@@ -2017,7 +2017,7 @@ function dicomViewerCore()
                           'Visible' , 'off'...
                           );
         axeColorbar.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        axeColorbar.Toolbar = [];          
+        axeColorbar.Toolbar.Visible = 'off';          
     end
 
     axeColorbarPtr('set', axeColorbar);
@@ -2101,6 +2101,9 @@ function dicomViewerCore()
 
     if size(dicomBuffer('get'), 3) == 1
         set(uiOneWindowPtr('get'), 'Visible', 'on');
+
+        axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+        axe.Toolbar.Visible = 'off';        
     else
 
         if isVsplash('get') == true && ...
@@ -2141,14 +2144,36 @@ function dicomViewerCore()
                 set(uiSliderMipPtr('get'), 'Visible', 'off');
             end
 
+            axe1 = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+            axe2 = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+            axe3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+            axe1.Toolbar.Visible = 'off';
+            axe2.Toolbar.Visible = 'off';
+            axe3.Toolbar.Visible = 'off';
+
         else
+
             if isVsplash('get') == false
+
                 set(uiMipWindowPtr('get'), 'Visible', 'on');
                 set(uiSliderMipPtr('get'), 'Visible', 'on');
+
+                axeMip = axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                axeMip.Toolbar.Visible = 'off';                
             end
+
             set(uiCorWindowPtr('get'), 'Visible', 'on');
             set(uiSagWindowPtr('get'), 'Visible', 'on');
             set(uiTraWindowPtr('get'), 'Visible', 'on');
+
+            axe1 = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+            axe2 = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+            axe3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+            axe1.Toolbar.Visible = 'off';
+            axe2.Toolbar.Visible = 'off';
+            axe3.Toolbar.Visible = 'off';
 
             set(uiSliderCorPtr('get'), 'Visible', 'on');
             set(uiSliderSagPtr('get'), 'Visible', 'on');

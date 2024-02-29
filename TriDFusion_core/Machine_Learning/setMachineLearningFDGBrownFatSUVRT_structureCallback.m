@@ -34,6 +34,6 @@ function setMachineLearningFDGBrownFatSUVRT_structureCallback(~, ~)
     writeRTStructCallback();
 
     % Exit the compiled executable
-    exit;     
+    close;     
 
 end

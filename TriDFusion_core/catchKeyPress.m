@@ -55,9 +55,9 @@ function catchKeyPress(~,evnt)
 
                 multiFrameZoom('set', 'out', 1);
 
-                gca = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+                pAxe = gca(fiMainWindowPtr('get'));
 
-                if multiFrameZoom('get', 'axe') ~= gca
+                if multiFrameZoom('get', 'axe') ~= pAxe
                     multiFrameZoom('set', 'in', 1);
                 end
 
@@ -66,7 +66,7 @@ function catchKeyPress(~,evnt)
                 multiFrameZoom('set', 'in', dZFactor);
 
 
-                switch gca
+                switch pAxe
 
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
 
@@ -118,9 +118,9 @@ function catchKeyPress(~,evnt)
 
                 multiFrameZoom('set', 'in', 1);
 
-                gca = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+                pAxe = gca(fiMainWindowPtr('get'));
 
-                if multiFrameZoom('get', 'axe') ~= gca
+                if multiFrameZoom('get', 'axe') ~= pAxe
                     multiFrameZoom('set', 'out', 1);
                 end
 
@@ -132,7 +132,7 @@ function catchKeyPress(~,evnt)
                 end
 
 
-                switch gca
+                switch pAxe
 
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
 
@@ -174,9 +174,9 @@ function catchKeyPress(~,evnt)
 
                 windowButton('set', 'down');  
 
-                gca = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+                pAxe = gca(fiMainWindowPtr('get'));
              
-                switch gca
+                switch pAxe
 
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
 
@@ -240,11 +240,13 @@ end
         else
             if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
 
-                windowButton('set', 'down');  
+                windowButton('set', 'down'); 
 
-                gca = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+                pAxe = gca(fiMainWindowPtr('get'));
+
+                % pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
            
-                switch gca
+                switch pAxe
 
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
 

@@ -43,7 +43,7 @@ function setRotate3DCallback(~, ~)
 
         rotate3DTool('set', false);
 
-        rotate3d off;
+        rotate3d(fiMainWindowPtr('get'), 'off');
 
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
@@ -92,7 +92,7 @@ function setRotate3DCallback(~, ~)
 
         rotate3DTool('set', true);
 
-        rotate3d on;
+        rotate3d(fiMainWindowPtr('get'), 'on');
     end
 
 end

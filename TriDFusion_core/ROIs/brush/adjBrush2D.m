@@ -32,6 +32,12 @@ function adjBrush2D(pRoiPtr, dInitCoord)
 
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
+    pAxe = gca(fiMainWindowPtr('get'));
+
+    % if isempty(pAxe)
+    %     return;
+    % end
+
     if exist('dInitCoord', 'var')
         pdInitialCoord = dInitCoord;
         pdInitialDiameter = brush2dDefaultDiameter('get'); % in mm
@@ -42,7 +48,7 @@ function adjBrush2D(pRoiPtr, dInitCoord)
  
     atMetaData = dicomMetaData('get', [], dSeriesOffset);
     
-    switch(gca)
+    switch(pAxe)
         
         case axes1Ptr('get', [], dSeriesOffset) % Coronal                    
             dSliceThickness = computeSliceSpacing(atMetaData);
@@ -80,7 +86,7 @@ function adjBrush2D(pRoiPtr, dInitCoord)
         dSemiAxesX = dSphereDiameter/xPixel/2; % In pixel
         dSemiAxesY = dSphereDiameter/yPixel/2; % In pixel
     
-        mousePos    = get(gca, 'CurrentPoint');
+        mousePos    = get(pAxe, 'CurrentPoint');
         newPosition = mousePos(1, 1:2);
     
         pRoiPtr.Position = newPosition;

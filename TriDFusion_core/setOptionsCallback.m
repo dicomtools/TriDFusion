@@ -592,7 +592,10 @@ function setOptionsCallback(~, ~)
                             axes1f = axes1fPtr('get', [], rr);
                             axes2f = axes2fPtr('get', [], rr);
                             axes3f = axes3fPtr('get', [], rr);
-        
+
+                            dFusionMax = fusionWindowLevel('get', 'max');
+                            dFusionMin = fusionWindowLevel('get', 'min');
+
                             if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
                                 set(axes1f, 'CLim', [dFusionMin dFusionMax]);
                                 set(axes2f, 'CLim', [dFusionMin dFusionMax]);

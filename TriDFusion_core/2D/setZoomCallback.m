@@ -51,7 +51,7 @@ function setZoomCallback(~, ~)
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true
 
-            rotate3d('on');
+            rotate3d(fiMainWindowPtr('get'), 'on');
         else
 
             % Restore the original colorbar limits after zooming     
@@ -100,7 +100,7 @@ function setZoomCallback(~, ~)
       
         zoomTool('set', true);
 
-        hCMZ = uicontextmenu;
+        hCMZ = uicontextmenu(fiMainWindowPtr('get'));
         uimenu('Parent',hCMZ,'Label','Zoom off', 'Callback',@setZoomCallback);
         
         hZoom = zoom(fiMainWindowPtr('get'));

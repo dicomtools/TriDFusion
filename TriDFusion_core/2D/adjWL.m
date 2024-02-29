@@ -56,7 +56,9 @@ function adjWL(dInitCoord)
 
         ptrRoi = copyRoiPtr('get');
 
-        if ~isempty(ptrRoi) && isvalid(ptrRoi) && ptrRoi.Parent == gca
+        pAxe = gca(fiMainWindowPtr('get'));
+
+        if ~isempty(ptrRoi) && isvalid(ptrRoi) && ptrRoi.Parent == pAxe
             
             rightClickMenu('on');
 
@@ -97,8 +99,6 @@ function adjWL(dInitCoord)
     
         end        
     end
-
-
 
     pdInitialCoord = get(0,'PointerLocation');
 

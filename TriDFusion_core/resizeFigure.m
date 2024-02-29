@@ -227,4 +227,15 @@ function resizeFigure(~, ~)
               
     end
 
+%     btnExitViewer = btnExitViewerPtr('get');
+%     if ~isempty(btnExitViewer)
+% 
+%         if ~isempty(uiTopWindowPtr('get'))
+% 
+%             aTopWindowBarPosition = get(uiTopWindowPtr('get'), 'Position');
+% 
+%             set(btnExitViewer, 'Position', [aTopWindowBarPosition(3)-70 6 65 25]);
+%         end
+%     end
+
 end 

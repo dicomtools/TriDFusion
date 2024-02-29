@@ -359,7 +359,7 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
 
     nrrdWriter(sNrrdImagesName, double(aImage), pixelspacing, origin, 'raw'); % Write .nrrd images 
 
-    progressBar(3/5, 'Dosimetry in progress, this might take several minutes, please be patient.');
+    progressBar(3/5, 'Dosimetry in progress, this might take several minutes to hours, please be patient.');
 
 
     if ispc % Windows
@@ -369,7 +369,7 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
         sRootPath   = viewerRootPath('get');
         sKernelPath = sprintf('%s/kernel/', sRootPath);
 
-        sPhitsScript = sprintf('%sPHITS_Simulation_Controller.py', sKernelPath);
+        sPhitsScript = sprintf('%sDose_Simulation_Controller.py', sKernelPath);
 
         sRadionuclide = stDosimetry.radionuclide;
 
@@ -381,7 +381,11 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
             
             if strcmpi(stDosimetry.physicalModel.alpha.dosimetryType, 'Monte Carlo')
 
-                sPhysicalModel = sprintf('%s -a %s %s', sPhysicalModel, stDosimetry.physicalModel.alpha.sourceParticles, stDosimetry.physicalModel.alpha.sourceParticlesBatches);
+                sPhysicalModel = sprintf('%s -a m %s %s', sPhysicalModel, stDosimetry.physicalModel.alpha.sourceParticles, stDosimetry.physicalModel.alpha.sourceParticlesBatches);
+            elseif strcmpi(stDosimetry.physicalModel.alpha.dosimetryType, 'Local Deposition')
+
+                sPhysicalModel = sprintf('%s -a l', sPhysicalModel);
+
             end
         end
 
@@ -391,8 +395,11 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
             
             if strcmpi(stDosimetry.physicalModel.beta.dosimetryType, 'Monte Carlo')
 
-                sPhysicalModel = sprintf('%s -b %s %s', sPhysicalModel, stDosimetry.physicalModel.beta.sourceParticles, stDosimetry.physicalModel.beta.sourceParticlesBatches);
-            end
+                sPhysicalModel = sprintf('%s -b m %s %s', sPhysicalModel, stDosimetry.physicalModel.beta.sourceParticles, stDosimetry.physicalModel.beta.sourceParticlesBatches);
+
+            elseif strcmpi(stDosimetry.physicalModel.beta.dosimetryType, 'Local Deposition')
+                sPhysicalModel = sprintf('%s -b l', sPhysicalModel);
+           end
         end
 
         % Gamma 
@@ -401,8 +408,12 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
             
             if strcmpi(stDosimetry.physicalModel.gamma.dosimetryType, 'Monte Carlo')
 
-                sPhysicalModel = sprintf('%s -g %s %s', sPhysicalModel, stDosimetry.physicalModel.gamma.sourceParticles, stDosimetry.physicalModel.gamma.sourceParticlesBatches);
-            end
+                sPhysicalModel = sprintf('%s -g m %s %s', sPhysicalModel, stDosimetry.physicalModel.gamma.sourceParticles, stDosimetry.physicalModel.gamma.sourceParticlesBatches);
+
+            elseif strcmpi(stDosimetry.physicalModel.gamma.dosimetryType, 'Local Deposition')
+
+                sPhysicalModel = sprintf('%s -g l', sPhysicalModel);
+           end
         end
 
         % Monoenergetic Electron
@@ -411,7 +422,11 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
             
             if strcmpi(stDosimetry.physicalModel.monoenergeticElectron.dosimetryType, 'Monte Carlo')
 
-                sPhysicalModel = sprintf('%s -m %s %s', sPhysicalModel, stDosimetry.physicalModel.monoenergeticElectron.sourceParticles, stDosimetry.physicalModel.monoenergeticElectron.sourceParticlesBatches);
+                sPhysicalModel = sprintf('%s -m m %s %s', sPhysicalModel, stDosimetry.physicalModel.monoenergeticElectron.sourceParticles, stDosimetry.physicalModel.monoenergeticElectron.sourceParticlesBatches);
+
+            elseif strcmpi(stDosimetry.physicalModel.monoenergeticElectron.dosimetryType, 'Local Deposition')
+
+                sPhysicalModel = sprintf('%s -m l', sPhysicalModel);
             end
         end
 
@@ -421,7 +436,11 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
             
             if strcmpi(stDosimetry.physicalModel.positron.dosimetryType, 'Monte Carlo')
 
-                sPhysicalModel = sprintf('%s -p %s %s', sPhysicalModel, stDosimetry.physicalModel.positron.sourceParticles, stDosimetry.physicalModel.positron.sourceParticlesBatches);
+                sPhysicalModel = sprintf('%s -p m %s %s', sPhysicalModel, stDosimetry.physicalModel.positron.sourceParticles, stDosimetry.physicalModel.positron.sourceParticlesBatches);
+
+            elseif strcmpi(stDosimetry.physicalModel.positron.dosimetryType, 'Local Deposition')
+
+                sPhysicalModel = sprintf('%s -p l', sPhysicalModel);
             end
         end
 
@@ -431,7 +450,11 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
             
             if strcmpi(stDosimetry.physicalModel.xRay.dosimetryType, 'Monte Carlo')
 
-                sPhysicalModel = sprintf('%s -x %s %s', sPhysicalModel, stDosimetry.physicalModel.xRay.sourceParticles, stDosimetry.physicalModel.xRay.sourceParticlesBatches);
+                sPhysicalModel = sprintf('%s -x m %s %s', sPhysicalModel, stDosimetry.physicalModel.xRay.sourceParticles, stDosimetry.physicalModel.xRay.sourceParticlesBatches);
+
+            elseif strcmpi(stDosimetry.physicalModel.xRay.dosimetryType, 'Local Deposition')
+
+                sPhysicalModel = sprintf('%s -x l %s %s', sPhysicalModel);
             end
         end
         
@@ -441,10 +464,10 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
         end
 
         if stDosimetry.options.debugWindowMode == true
-            sCommandLine = sprintf('cmd.exe /c start /wait python.exe %s -d %s -o %s -s %s -l %s -c %s -r %s %s', ...
+            sCommandLine = sprintf('cmd.exe /c start /wait python.exe "%s" -d %s -o %s -s %s -l %s -c %s -r %s %s', ...
                 sPhitsScript, sDosimetryScriptPath, sTempInputDir, sNrrdImagesName, sSegmentationLabelFileName, sSegmentationLabelColorTableFileName, sRadionuclide, sPhysicalModel);            
         else
-            sCommandLine = sprintf('cmd.exe /c python.exe %s -d %s -o %s -s %s -l %s -c %s -r %s %s', ...
+            sCommandLine = sprintf('cmd.exe /c python.exe "%s" -d %s -o %s -s %s -l %s -c %s -r %s %s', ...
                 sPhitsScript, sDosimetryScriptPath, sTempInputDir, sNrrdImagesName, sSegmentationLabelFileName, sSegmentationLabelColorTableFileName, sRadionuclide, sPhysicalModel);
         end
 

@@ -27,20 +27,22 @@ function dLength = computeRoiLineLength(roiObject)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    atMetaData = dicomMetaData('get');
+    atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
 
-    if size(dicomBuffer('get'), 3) == 1
-        sAxe = 'Axe';    
-    else
-        switch gca
-            case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))   
-                sAxe = 'Axes1';
-            case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))                   
-                sAxe = 'Axes2';
-            case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))                   
-                sAxe = 'Axes3';
-        end
+    switch roiObject.Parent
+
+        case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+            sAxe = 'Axe';
+        case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+            sAxe = 'Axes1';
+        case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+            sAxe = 'Axes2';
+        case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+            sAxe = 'Axes3';
+        otherwise
+            sAxe = '';
     end
 
-   dLength = computeLineLength(atMetaData, sAxe, roiObject); 
+    dLength = computeLineLength(atMetaData, sAxe, roiObject); 
+    
 end

@@ -330,12 +330,12 @@ function setPlaybackToolbar(sVisible)
                             if strcmpi(get(mGate, 'State'), 'on')
 
                                 set(uiSeriesPtr('get'), 'Enable', 'off');
-                                multiGate(mPlay, gca);
+                                multiGate(mPlay, gca(fiMainWindowPtr('get')));
                             else
                                 if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 4) ~= 1
                                     multiFrameScreenCapture(mPlay);
                                 else
-                                    multiFrame(mPlay, gca);
+                                    multiFrame(mPlay, gca(fiMainWindowPtr('get')));
                                 end
 
                             end
@@ -439,9 +439,9 @@ function setPlaybackToolbar(sVisible)
 
                                 if strcmpi(get(mGate, 'State'), 'on')
                                     set(uiSeriesPtr('get'), 'Enable', 'off');
-                                    recordMultiGate(mRecord, path, file, filter{indx}, gca);
+                                    recordMultiGate(mRecord, path, file, filter{indx}, gca(fiMainWindowPtr('get')));
                                 else
-                                    recordMultiFrame(mRecord, path, file, filter{indx}, gca);
+                                    recordMultiFrame(mRecord, path, file, filter{indx}, gca(fiMainWindowPtr('get')));
                                 end
 
                                 set(uiSeriesPtr('get'), 'Enable', 'on');
@@ -501,7 +501,7 @@ function setPlaybackToolbar(sVisible)
 
                         multiFrameZoom('set', 'out', 1);
 
-                        if multiFrameZoom('get', 'axe') ~= gca
+                        if multiFrameZoom('get', 'axe') ~= gca(fiMainWindowPtr('get'))
                             multiFrameZoom('set', 'in', 1);
                         end
 
@@ -509,7 +509,7 @@ function setPlaybackToolbar(sVisible)
                         dZFactor = dZFactor+0.025;
                         multiFrameZoom('set', 'in', dZFactor);
 
-                        switch gca
+                        switch gca(fiMainWindowPtr('get'))
                             case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                                 zoom(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
                                 multiFrameZoom('set', 'axe', axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
@@ -544,7 +544,7 @@ function setPlaybackToolbar(sVisible)
 
                         multiFrameZoom('set', 'in', 1);
 
-                        if multiFrameZoom('get', 'axe') ~= gca
+                        if multiFrameZoom('get', 'axe') ~= gca(fiMainWindowPtr('get'))
                             multiFrameZoom('set', 'out', 1);
                         end
 
@@ -554,7 +554,7 @@ function setPlaybackToolbar(sVisible)
                             multiFrameZoom('set', 'out', dZFactor);
                         end
 
-                        switch gca
+                        switch gca(fiMainWindowPtr('get'))
                             case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                                 zoom(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
                                 multiFrameZoom('set', 'axe', axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));

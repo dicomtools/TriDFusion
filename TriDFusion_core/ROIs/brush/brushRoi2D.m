@@ -146,9 +146,17 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
 
     function addFreehandRoi(aPosition, dVoiOffset, aColor, sLesionType, dSerieOffset)
 
+        pAxe = gca(fiMainWindowPtr('get'));
+         
+        % pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+        % 
+        % if isempty(pAxe)
+        %     return;
+        % end
+
         sRoiTag = num2str(randi([-(2^52/2),(2^52/2)],1));
         
-        pRoi = drawfreehand(gca, 'Color', aColor,'Position', aPosition, 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', sRoiTag, 'FaceSelectable', 1, 'FaceAlpha', 0);
+        pRoi = drawfreehand(pAxe, 'Color', aColor,'Position', aPosition, 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', sRoiTag, 'FaceSelectable', 1, 'FaceAlpha', 0);
         pRoi.FaceAlpha = roiFaceAlphaValue('get');
 
         pRoi.Waypoints(:) = false;

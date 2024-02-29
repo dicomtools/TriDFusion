@@ -1011,11 +1011,18 @@ function refreshImages()
 
             tAxes1Text = axesText('get', 'axes1');
 
-            clickedPt = get(gca,'CurrentPoint');
+            pAxe = gca(fiMainWindowPtr('get'));
+      
+            clickedPt = get(pAxe,'CurrentPoint');
+
             clickedPtX = num2str(round(clickedPt(1,1)));
             clickedPtY = num2str(round(clickedPt(1,2)));
 
-            if gca == axes1Ptr('get', [], dSeriesOffset) || ...
+            % clickedPt = get(gca,'CurrentPoint');
+            % clickedPtX = num2str(round(clickedPt(1,1)));
+            % clickedPtY = num2str(round(clickedPt(1,2)));
+
+            if pAxe == axes1Ptr('get', [], dSeriesOffset) || ...
                (isVsplash('get') == true && ...
                 strcmpi(vSplahView('get'), 'coronal'))
 
@@ -1086,7 +1093,7 @@ function refreshImages()
 
             tAxes2Text = axesText('get', 'axes2');
 
-            if gca == axes2Ptr('get', [], dSeriesOffset) || ...
+            if pAxe == axes2Ptr('get', [], dSeriesOffset) || ...
                (isVsplash('get') == true && ...
                 strcmpi(vSplahView('get'), 'sagittal'))
 
@@ -1314,7 +1321,7 @@ function refreshImages()
                     end
        %         sAxe3Text = sprintf('%s\n%s\n%s\nCurrent SUV/W:%s -- %d Bq/cc\nA :%s/%s', sPatientName, sPatientID, sSeriesDescription, num2str(suvValue),im(iCoronal,iSagittal,iAxial),num2str(sliceNumber('get', 'axial')),num2str(size(dicomBuffer('get'), 3)));
 
-                    if gca == axes3Ptr('get', [], dSeriesOffset) && strcmp(windowButton('get'), 'down')
+                    if pAxe == axes3Ptr('get', [], dSeriesOffset) && strcmp(windowButton('get'), 'down')
                         sAxe3Text = sprintf('\n%s\n[X,Y] %s,%s', sAxe3Text, clickedPtX, clickedPtY);
                     end
                 end

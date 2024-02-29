@@ -51,7 +51,7 @@ function setPanCallback(~, ~)
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true
 
-            rotate3d on
+            rotate3d(fiMainWindowPtr('get'), 'on');
         else
            % Restore the original colorbar limits after panning     
 
@@ -96,7 +96,7 @@ function setPanCallback(~, ~)
         
         panTool('set', true);
 
-        hCMZ = uicontextmenu;
+        hCMZ = uicontextmenu(fiMainWindowPtr('get'));
         uimenu('Parent',hCMZ,'Label','Pan off', 'Callback',@setPanCallback);
         
         hPan = pan(fiMainWindowPtr('get'));

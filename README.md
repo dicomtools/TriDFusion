@@ -125,7 +125,7 @@ https://phits.jaea.go.jp/rirekie.html
 
 Required Python Module Installation Instructions
 
-	TriDFusion will execute the Python scripts TriDFusion\kernel\PHITS_DoseEngine.py and PHITS_Simulation_Controller.py. Please ensure that all required modules are installed. You can install them using the following commands:
+	TriDFusion will execute the Python scripts TriDFusion\kernel\Dose_Simulation_Controller.py, PHITS_DoseEngine.py, LED_DoseEngine.py and ICRP107_RadionuclideData.py. Please ensure that all required modules are installed. You can install them using the following commands:
 
     numpy: Execute the command pip install numpy to install the NumPy library, which is essential for numerical computations.
 

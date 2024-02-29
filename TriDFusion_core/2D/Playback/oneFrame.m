@@ -34,11 +34,19 @@ function oneFrame(sDirection)
         progressBar(1, 'Error: Require a 3D Volume!');               
         set(uiSeriesPtr('get'), 'Enable', 'on');
        return;
-    end               
-    
+    end        
+
+    pAxe = gca(fiMainWindowPtr('get'));
+
+    % pAxe = getAxeFromMousePosition(dSeriesOffset);
+    % 
+    % if isempty(pAxe)
+    %     return;
+    % end
+
     windowButton('set', 'down');  
 
-    if (gca == axes1Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
+    if (pAxe == axes1Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
        (isVsplash('get') == true && strcmpi(vSplahView('get'), 'coronal'))
         
             dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 1);  
@@ -65,7 +73,7 @@ function oneFrame(sDirection)
             
             set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get'), 1));
 
-    elseif (gca == axes2Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
+    elseif (pAxe == axes2Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
            (isVsplash('get') == true && strcmpi(vSplahView('get'), 'sagittal'))
         
     
@@ -93,7 +101,7 @@ function oneFrame(sDirection)
             
             set(uiSliderSagPtr('get'), 'Value', sliceNumber('get', 'sagittal') / size(dicomBuffer('get'), 2));
 
-    elseif (gca == axes3Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
+    elseif (pAxe == axes3Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
            (isVsplash('get') == true && strcmpi(vSplahView('get'), 'axial'))
          
             dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 3);            

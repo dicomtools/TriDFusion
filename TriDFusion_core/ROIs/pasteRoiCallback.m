@@ -38,14 +38,20 @@ function pasteRoiCallback(~, ~)
     if ~isvalid(ptrRoi)
         return;
     end
+    
+    pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
 
-    if ptrRoi.Parent ~= gca
+    if isempty(pAxe)
+        return;
+    end
+
+    if ptrRoi.Parent ~= pAxe
         return;
     end
 
     sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
     
-    clickedPt = get(gca,'CurrentPoint');
+    clickedPt = get(pAxe,'CurrentPoint');
     
     clickedPtX = clickedPt(1,1);
     clickedPtY = clickedPt(1,2);
@@ -307,7 +313,7 @@ function pasteRoiCallback(~, ~)
 
                                     sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
 
-                                    a = images.roi.Ellipse(gca, ...
+                                    a = images.roi.Ellipse(pAxe, ...
                                                            'Center'             , pRoi.Center, ...
                                                            'SemiAxes'           , atRoi{dVoiRoiTagOffset}.SemiAxes, ...
                                                            'RotationAngle'      , atRoi{dVoiRoiTagOffset}.RotationAngle, ...

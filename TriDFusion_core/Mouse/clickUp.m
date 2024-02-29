@@ -115,7 +115,10 @@ function clickUp(~, ~)
 
                 pRoiPtr = brush2Dptr('get');
                 if ~isempty(pRoiPtr)
-                    mousePos = get(gca, 'CurrentPoint');
+
+                    pAxe = gca(fiMainWindowPtr('get'));
+
+                    mousePos = get(pAxe, 'CurrentPoint');
                     newPosition = mousePos(1, 1:2);
                     
                     pRoiPtr.Position = newPosition;

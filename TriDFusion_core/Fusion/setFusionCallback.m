@@ -329,7 +329,7 @@ end
                         'Visible' , 'off'...
                         );
                 axeF.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axeF.Toolbar = [];                
+                axeF.Toolbar.Visible = 'off';                
                 axis(axeF, 'tight');
                 axefPtr('set', axeF, get(uiFusedSeriesPtr('get'), 'Value'));
 
@@ -351,7 +351,7 @@ end
                          'HandleVisibility', 'off' ...
                          );
                 axAxefText.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axAxefText.Toolbar = []; 
+                axAxefText.Toolbar.Visible = 'off'; 
 
                 if isfield(atFusionMetaData{1}, 'SeriesDescription')
                     sFusedSeriesDescription = atFusionMetaData{1}.SeriesDescription;
@@ -527,7 +527,7 @@ end
                         'Visible' , 'off'...
                         );
                 axes1f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axes1f.Toolbar = [];                 
+                axes1f.Toolbar.Visible = 'off';                 
                 axis(axes1f, 'tight');
                 axes1fPtr('set', axes1f, get(uiFusedSeriesPtr('get'), 'Value'));
                 
@@ -556,7 +556,7 @@ end
                         'Visible' , 'off'...
                         );
                 axes2f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axes2f.Toolbar = [];                  
+                axes2f.Toolbar.Visible = 'off';                  
                 axis(axes2f, 'tight');
                 axes2fPtr('set', axes2f, get(uiFusedSeriesPtr('get'), 'Value'));
 
@@ -585,7 +585,7 @@ end
                         'Visible' , 'off'...
                         );
                 axes3f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axes3f.Toolbar = [];                 
+                axes3f.Toolbar.Visible = 'off';                 
                 axis(axes3f, 'tight');
                 
 %                axes3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')  );
@@ -614,7 +614,7 @@ end
                          'HandleVisibility', 'off' ...
                          );
                 axAxes3fText.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axAxes3fText.Toolbar = [];      
+                axAxes3fText.Toolbar.Visible = 'off';      
 
                 if isfield(atFusionMetaData{1}, 'SeriesDescription')
                     sFusedSeriesDescription = atFusionMetaData{1}.SeriesDescription;
@@ -693,7 +693,7 @@ end
                             'Visible' , 'off'...
                             );
                     axesMipf.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                    axesMipf.Toolbar = [];  
+                    axesMipf.Toolbar.Visible = 'off';  
 
                     axis(axesMipf, 'tight');
                     axesMipfPtr('set', axesMipf, get(uiFusedSeriesPtr('get'), 'Value'));
@@ -1601,6 +1601,8 @@ end
                                          'Position', [get(ptrFusionColorbar, 'Position')], ...
                                          'Visible' , 'off'...
                                          );                
+                axeFusionColorbar.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                axeFusionColorbar.Toolbar.Visible = 'off';                 
             else
                 axeFusionColorbar = axes(uiTraWindowPtr('get'), ...
                                          'Units'   , 'pixel', ...
@@ -1613,7 +1615,11 @@ end
                                          'Position', [get(ptrFusionColorbar, 'Position')], ...
                                          'Visible' , 'off'...
                                          );
+
+                axeFusionColorbar.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                axeFusionColorbar.Toolbar.Visible = 'off';                 
             end
+
 
             axeFusionColorbarPtr('set', axeFusionColorbar);
     
@@ -2136,15 +2142,30 @@ end
                 set( imAxeFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , 'Visible', 'on' );
 
                 alpha( axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
-                alpha( axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 1-get(uiAlphaSliderPtr('get'), 'Value') );                    
+                alpha( axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 1-get(uiAlphaSliderPtr('get'), 'Value') );   
+
+                axef = axefPtr('get', [], get(uiSeriesPtr('get'), 'Value'));    
+                axef.Toolbar.Visible = 'off';
             else
 
                 set( imCoronalFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
                 set( imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
                 set( imAxialFPtr   ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
-                
+
+                axe1f = axes1fPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                axe2f = axes2fPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                axe3f = axes3fPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+    
+                axe1f.Toolbar.Visible = 'off';
+                axe2f.Toolbar.Visible = 'off';
+                axe3f.Toolbar.Visible = 'off';
+
                 if link2DMip('get') == true && isVsplash('get') == false      
+
                     set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
+
+                    axeMipf = axesMipfPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                    axeMipf.Toolbar.Visible = 'off';                    
                 end
 
                 alpha( axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );

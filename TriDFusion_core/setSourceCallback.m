@@ -563,7 +563,7 @@ function setSourceCallback(~, ~)
                exist('atNewDicomInfo' , 'var') && ...
                exist('aNewDicomBuffer', 'var')
 
-               rotate3d off
+               rotate3d(fiMainWindowPtr('get'), 'off');
 
                set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
                set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));

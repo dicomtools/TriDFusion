@@ -44,7 +44,7 @@ function setDataCursorCallback(~, ~)
         dataCursorTool('set', false);
 
 %                toolsmenufcn Datatip;
-        datacursormode('off');
+        datacursormode(fiMainWindowPtr('get'), 'off');
 
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
@@ -80,7 +80,7 @@ function setDataCursorCallback(~, ~)
         dataCursorTool('set', true);
 
 %                toolsmenufcn Datatip;
-         datacursormode('on');
+         datacursormode(fiMainWindowPtr('get'), 'on');
     end
 
 end

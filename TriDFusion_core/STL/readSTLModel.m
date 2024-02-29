@@ -53,22 +53,22 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
     set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
     set(btnZoomPtr('get'), 'FontWeight', 'normal');
     zoomTool('set', false);
-    zoom('off');           
+    zoom(fiMainWindowPtr('get'), 'off');           
 
     set(panMenu('get'), 'Checked', 'off');
     set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
     set(btnPanPtr('get'), 'FontWeight', 'normal');
     panTool('set', false);
-    pan('off');     
+    pan(fiMainWindowPtr('get'), 'off');     
 
     set(rotate3DMenu('get'), 'Checked', 'off');         
     rotate3DTool('set', false);
-    rotate3d off;
+    rotate3d(fiMainWindowPtr('get'), 'off');
 
     set(dataCursorMenu('get'), 'Checked', 'off');
     dataCursorTool('set', false);              
-    datacursormode('off');  
+    datacursormode(fiMainWindowPtr('get'), 'off');  
     
     switchTo3DMode    ('set', false);
     switchToIsoSurface('set', false);
@@ -135,7 +135,7 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         atInput(numel(atInput)).atDicomInfo{1}.PatientSize      = [];
         atInput(numel(atInput)).atDicomInfo{1}.PatientSex       = '';
         atInput(numel(atInput)).atDicomInfo{1}.PatientAge       = '';
-        atInput(numel(atInput)).atDicomInfo{1}.PatientBirthDate = '';   
+        atInput(numel(atInput)).atDicomInfo{1}.PatientBirthDate = ''; 
         
         atInput(numel(atInput)).atDicomInfo{1}.SeriesDescription = asSeriesDescription{1}; 
         
@@ -158,13 +158,32 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         atInput(numel(atInput)).atDicomInfo{1}.StudyInstanceUID  = dicomuid;
         atInput(numel(atInput)).atDicomInfo{1}.AccessionNumber   = '';
         
+
         % Date Time
-   
+
+        atInput(numel(atInput)).atDicomInfo{1}.StudyTime = '';
+        atInput(numel(atInput)).atDicomInfo{1}.StudyDate = '';
+
         atInput(numel(atInput)).atDicomInfo{1}.SeriesTime = '';
         atInput(numel(atInput)).atDicomInfo{1}.SeriesDate = '';
 
         atInput(numel(atInput)).atDicomInfo{1}.AcquisitionTime = '';
         atInput(numel(atInput)).atDicomInfo{1}.AcquisitionDate = '';   
+
+        % Manufacturer
+
+        atInput(numel(atInput)).atDicomInfo{1}.Manufacturer           = '';
+        atInput(numel(atInput)).atDicomInfo{1}.InstitutionName        = '';
+        atInput(numel(atInput)).atDicomInfo{1}.ReferringPhysicianName = '';
+        atInput(numel(atInput)).atDicomInfo{1}.StationName            = '';
+        atInput(numel(atInput)).atDicomInfo{1}.StudyDescription       = '';
+        atInput(numel(atInput)).atDicomInfo{1}.ManufacturerModelName  = '';
+
+        % Dose
+
+        atInput(numel(atInput)).atDicomInfo{1}.DoseUnits = [];
+        atInput(numel(atInput)).atDicomInfo{1}.DoseType = [];
+        atInput(numel(atInput)).atDicomInfo{1}.Units = [];
 
         atInput(numel(atInput)).atDicomInfo{1}.din = [];
  
@@ -219,7 +238,7 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         atInput(1).atDicomInfo{1}.PatientSize      = '';
         atInput(1).atDicomInfo{1}.PatientSex       = '';
         atInput(1).atDicomInfo{1}.PatientAge       = '';
-        atInput(1).atDicomInfo{1}.PatientBirthDate = '';   
+        atInput(1).atDicomInfo{1}.PatientBirthDate = ''; 
         
         atInput(1).atDicomInfo{1}.SeriesDescription = asSeriesDescription{1}; 
         
@@ -243,16 +262,35 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         atInput(1).atDicomInfo{1}.AccessionNumber   = '';
         
         % Date Time
-   
+
+        atInput(1).atDicomInfo{1}.StudyTime = '';
+        atInput(1).atDicomInfo{1}.StudyDate = '';
+
         atInput(1).atDicomInfo{1}.SeriesTime = '';
         atInput(1).atDicomInfo{1}.SeriesDate = '';
 
         atInput(1).atDicomInfo{1}.AcquisitionTime = '';
         atInput(1).atDicomInfo{1}.AcquisitionDate = '';   
 
+        % Manufacturer
+
+        atInput(1).atDicomInfo{1}.Manufacturer           = '';
+        atInput(1).atDicomInfo{1}.InstitutionName        = '';
+        atInput(1).atDicomInfo{1}.ReferringPhysicianName = '';
+        atInput(1).atDicomInfo{1}.StationName            = '';
+        atInput(1).atDicomInfo{1}.StudyDescription       = '';
+        atInput(1).atDicomInfo{1}.ManufacturerModelName  = '';
+
+        % Dose
+
+        atInput(1).atDicomInfo{1}.DoseUnits = [];
+        atInput(1).atDicomInfo{1}.DoseType = [];
+        atInput(1).atDicomInfo{1}.Units = [];
+
         atInput(1).atDicomInfo{1}.din = [];
        
         % Series default
+
         atInput(1).asFilesList    = [];
         atInput(1).asFilesList{1} = sprintf('%s%s', sPath, sFileName);
 

@@ -1649,10 +1649,10 @@ function computeVoxelDosimetryDialog(sDosimetryScriptPath)
     
     function popDosimetryAlphaCallback(hObject, ~)
 
-        if get(hObject, 'Value') == 1 || get(hObject, 'Value') == 2
+        if get(hObject, 'Value') == 2
 
             set(hObject, 'Value', 3);
-            errordlg('Currently, only Monte Carlo is supported!', 'Method Validation');  
+            errordlg('Currently, only Local Deposition and Monte Carlo is supported!', 'Method Validation');  
         end
 
         voxelDosimetryAlphaPhysicalModel('set', get(hObject, 'Value'));
@@ -1710,10 +1710,10 @@ function computeVoxelDosimetryDialog(sDosimetryScriptPath)
     
     function popDosimetryBetaCallback(hObject, ~)
 
-        if get(hObject, 'Value') == 1 || get(hObject, 'Value') == 2
+        if get(hObject, 'Value') == 2
 
             set(hObject, 'Value', 3);
-            errordlg('Currently, only Monte Carlo is supported!', 'Method Validation');  
+            errordlg('Currently, only Local Deposition and Monte Carlo is supported!', 'Method Validation');  
         end
 
         voxelDosimetryBetaPhysicalModel('set', get(hObject, 'Value'));
@@ -1772,10 +1772,10 @@ function computeVoxelDosimetryDialog(sDosimetryScriptPath)
     
     function popDosimetryGammaCallback(hObject, ~)
 
-        if get(hObject, 'Value') == 1 || get(hObject, 'Value') == 2
+        if get(hObject, 'Value') == 2
 
             set(hObject, 'Value', 3);
-            errordlg('Currently, only Monte Carlo is supported!', 'Method Validation');  
+            errordlg('Currently, only Local Deposition and Monte Carlo is supported!', 'Method Validation');  
         end
 
         voxelDosimetryGammaPhysicalModel('set', get(hObject, 'Value'));
@@ -1834,10 +1834,10 @@ function computeVoxelDosimetryDialog(sDosimetryScriptPath)
     
     function popDosimetryMonoenergeticElectronCallback(hObject, ~)
 
-        if get(hObject, 'Value') == 1 || get(hObject, 'Value') == 2
+        if get(hObject, 'Value') == 2
 
             set(hObject, 'Value', 3);
-            errordlg('Currently, only Monte Carlo is supported!', 'Method Validation');  
+            errordlg('Currently, only Local Deposition and Monte Carlo is supported!', 'Method Validation');  
         end
 
         voxelDosimetryMonoenergeticElectronPhysicalModel('set', get(hObject, 'Value'));
@@ -1896,10 +1896,10 @@ function computeVoxelDosimetryDialog(sDosimetryScriptPath)
     
     function popDosimetryPositronCallback(hObject, ~)
 
-        if get(hObject, 'Value') == 1 || get(hObject, 'Value') == 2
+        if get(hObject, 'Value') == 2
 
             set(hObject, 'Value', 3);
-            errordlg('Currently, only Monte Carlo is supported!', 'Method Validation');  
+            errordlg('Currently, only Local Deposition and Monte Carlo is supported!', 'Method Validation');  
         end
 
         voxelDosimetryPositronPhysicalModel('set', get(hObject, 'Value'));
@@ -1958,10 +1958,10 @@ function computeVoxelDosimetryDialog(sDosimetryScriptPath)
     
     function popDosimetryXrayCallback(hObject, ~)
 
-        if get(hObject, 'Value') == 1 || get(hObject, 'Value') == 2
+        if get(hObject, 'Value') == 2
 
             set(hObject, 'Value', 3);
-            errordlg('Currently, only Monte Carlo is supported!', 'Method Validation');  
+            errordlg('Currently, only Local Deposition and Monte Carlo is supported!', 'Method Validation');  
         end
 
         voxelDosimetryXrayPhysicalModel('set', get(hObject, 'Value'));

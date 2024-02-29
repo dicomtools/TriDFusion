@@ -28,6 +28,7 @@ function cropOutsideCallback(hObject,~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     im = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));  
+
     if isempty(im)        
         return;
     end
@@ -39,6 +40,12 @@ function cropOutsideCallback(hObject,~)
         return;
     end
 
+    pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+
+    if isempty(pAxe)
+        return;
+    end
+
     try  
             
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
@@ -47,7 +54,7 @@ function cropOutsideCallback(hObject,~)
     if size(im, 3) == 1
         axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
         if ~isempty(axe)
-            if gca == axe
+            if pAxe == axe
                 
                 aMask = createMask(hObject.UserData, im(:,:));
                 
@@ -68,7 +75,7 @@ function cropOutsideCallback(hObject,~)
            ~isempty(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
            ~isempty(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')))
 
-            if gca == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+            if pAxe == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                 
                 iCoronal = sliceNumber('get', 'coronal');
                 
@@ -87,7 +94,7 @@ function cropOutsideCallback(hObject,~)
 %                                 );   
             end
 
-            if gca == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+            if pAxe == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                 
                 iSagittal = sliceNumber('get', 'sagittal');
                 
@@ -105,7 +112,7 @@ function cropOutsideCallback(hObject,~)
 %                                 );   
             end
 
-            if gca == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+            if pAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                 
                  iAxial = sliceNumber('get', 'axial');
                  

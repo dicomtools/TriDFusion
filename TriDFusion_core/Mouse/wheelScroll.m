@@ -48,9 +48,9 @@ function wheelScroll(~, evnt)
             dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
             aImageSize = size(dicomBuffer('get', [], dSeriesOffset));
 
-            gca = getAxeFromMousePosition(dSeriesOffset);
+            pAxe = getAxeFromMousePosition(dSeriesOffset);
 
-            switch gca
+            switch pAxe
 
                 case axes1Ptr('get', [], dSeriesOffset)
 

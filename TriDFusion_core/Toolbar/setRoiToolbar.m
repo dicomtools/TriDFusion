@@ -225,9 +225,11 @@ function setRoiToolbar(sVisible)
         %            axeClicked('set', false);
                 end
             end
+
             if ~isvalid(t8)
                 return;
             end
+
             if strcmpi(get(t8, 'State'), 'off')
                 return;
             end
@@ -236,14 +238,27 @@ function setRoiToolbar(sVisible)
 
                 robotClick();
 
+                pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+
+                switch pAxe
+            
+                    case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
+                    otherwise
+                        return;
+                end
+
                 mainToolBarEnable('off');
                 mouseFcn('reset');
 
-                roiSetAxeBorder(true, gca);
+                roiSetAxeBorder(true, pAxe);
 
          %       while strcmpi(get(t8, 'State'), 'on')
 
-                    a = drawline(gca, 'Color', 'cyan', 'lineWidth', 1, 'Tag', num2str(randi([-(2^52/2),(2^52/2)],1)), 'LabelVisible', 'on');
+                    a = drawline(pAxe, 'Color', 'cyan', 'lineWidth', 1, 'Tag', num2str(randi([-(2^52/2),(2^52/2)],1)), 'LabelVisible', 'on');
                     a.LabelVisible = 'on';
                     if ~isvalid(t8)
                         return;
@@ -378,14 +393,27 @@ function setRoiToolbar(sVisible)
                 robotClick();
 %                 gca = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
 
+                pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+
+                switch pAxe
+            
+                    case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        
+                    otherwise
+                        return;
+                end
+
                 mainToolBarEnable('off');
                 mouseFcn('reset');
 
-                roiSetAxeBorder(true, gca);
+                roiSetAxeBorder(true, pAxe);
 
    %              while strcmpi(get(t, 'State'), 'on')
 
-                a = drawfreehand(gca, ...
+                a = drawfreehand(pAxe, ...
                                 'Smoothing'     , 1, ...
                                 'Color'         , 'cyan', ...
                                 'LineWidth'     , 1, ...
@@ -520,14 +548,27 @@ function setRoiToolbar(sVisible)
 
                 robotClick();
 
+                pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+
+                switch pAxe
+            
+                    case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        
+                    otherwise
+                        return;
+                end
+
                 mainToolBarEnable('off');
                 mouseFcn('reset');
 
-                roiSetAxeBorder(true, gca);
+                roiSetAxeBorder(true, pAxe);
 
           %      while strcmpi(get(t2, 'State'), 'on')
           
-                a = drawcircle(gca, ...
+                a = drawcircle(pAxe, ...
                                'Color'         , 'cyan', ...
                                'lineWidth'     , 1, ...
                                'Label'         , roiLabelName(), ...
@@ -691,14 +732,27 @@ function setRoiToolbar(sVisible)
 
                 robotClick();
 
+                pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+
+                switch pAxe
+            
+                    case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        
+                    otherwise
+                        return;
+                end
+
                 mainToolBarEnable('off');
                 mouseFcn('reset');
 
-                roiSetAxeBorder(true, gca);
+                roiSetAxeBorder(true, pAxe);
 
          %       while strcmpi(get(t5, 'State'), 'on')
 
-                    a = drawellipse(gca, ...
+                    a = drawellipse(pAxe, ...
                                     'Color'         , 'cyan', ...
                                     'lineWidth'     , 1, ...
                                     'Label'         , roiLabelName(), ...
@@ -826,14 +880,27 @@ function setRoiToolbar(sVisible)
 
                 robotClick();
 
+                pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+
+                switch pAxe
+            
+                    case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        
+                    otherwise
+                        return;
+                end
+
                 mainToolBarEnable('off');
                 mouseFcn('reset');
 
-                roiSetAxeBorder(true, gca);
+                roiSetAxeBorder(true, pAxe);
 
             %    while strcmpi(get(t3, 'State'), 'on')
 
-                a = drawrectangle(gca, ...
+                a = drawrectangle(pAxe, ...
                                   'Rotatable'     , false, ...
                                   'Color'         , 'cyan', ...
                                   'lineWidth'     , 1, ...
@@ -963,14 +1030,27 @@ function setRoiToolbar(sVisible)
 
                 robotClick();
 
+                pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+
+                switch pAxe
+            
+                    case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        
+                    otherwise
+                        return;
+                end
+
                 mainToolBarEnable('off');
                 mouseFcn('reset');
 
-                roiSetAxeBorder(true, gca);
+                roiSetAxeBorder(true, pAxe);
 
             %    while strcmpi(get(t6, 'State'), 'on')
 
-                a = drawpolygon(gca, ...
+                a = drawpolygon(pAxe, ...
                                 'Color'         , 'cyan', ...
                                 'lineWidth'     , 1, ...
                                 'Label'         , roiLabelName(), ...
@@ -1116,15 +1196,29 @@ function setRoiToolbar(sVisible)
         %        robotClick();
                 set(fiMainWindowPtr('get'), 'Pointer', 'watch');            
                 drawnow;
-    
+
+                pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+
+                switch pAxe
+            
+                    case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        
+                    otherwise
+                        return;
+                end
+
                 mainToolBarEnable('off');
                 mouseFcn('reset');
     
-                roiSetAxeBorder(true, gca);
+                roiSetAxeBorder(true, pAxe);
     
             %    while strcmpi(get(t11, 'State'), 'on')
             
-                clickedPt = get(gca,'CurrentPoint');
+                clickedPt = get(pAxe,'CurrentPoint');
+
                 clickedPtX = clickedPt(1,1);
                 clickedPtY = clickedPt(1,2);
                 
@@ -1168,7 +1262,7 @@ function setRoiToolbar(sVisible)
     
                 sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
                 
-                a = images.roi.Ellipse(gca, ...
+                a = images.roi.Ellipse(pAxe, ...
                                        'Center'          , [clickedPtX clickedPtY], ...
                                        'SemiAxes'        , [dSemiAxesX dSemiAxesY], ...
                                        'RotationAngle'   , 0, ...
@@ -1235,7 +1329,7 @@ function setRoiToolbar(sVisible)
                 
                 aDicomBuffer = dicomBuffer('get');
     
-                switch gca
+                switch pAxe
     
                     % Coronal axe 
     
@@ -1342,7 +1436,7 @@ function setRoiToolbar(sVisible)
     
                         sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
                                          
-                        a = images.roi.Ellipse(gca, ...
+                        a = images.roi.Ellipse(pAxe, ...
                                                'Center'             , [clickedPtX clickedPtY], ...
                                                'SemiAxes'           , [dSemiAxesX dSemiAxesY], ...
                                                'RotationAngle'      , 0, ...
@@ -1500,18 +1594,31 @@ function setRoiToolbar(sVisible)
 
 
  %               robotClick();
+                pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+
+                switch pAxe
+            
+                    case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        
+                    otherwise
+                        return;
+                end
 
                 mainToolBarEnable('off');
                 mouseFcn('reset');
 
-                roiSetAxeBorder(true, gca);
+                roiSetAxeBorder(true, pAxe);
 
                 dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
                 aBuffer = dicomBuffer('get', [], dSeriesOffset);
 
    %              while strcmpi(get(t, 'State'), 'on')
-                aClickedPt = get(gca,'CurrentPoint');
+                aClickedPt = get(pAxe,'CurrentPoint');
+
                 clickedPtX = round(aClickedPt(1,1));
                 clickedPtY = round(aClickedPt(1,2));
 
@@ -1575,7 +1682,7 @@ function setRoiToolbar(sVisible)
                     end
                 end
 
-                createVoiFromLocation(gca, clickedPtX, clickedPtY, aBuffer, dSliderMin, dSliderMax, bRelativeToMax, bInPercent, dSeriesOffset,  pixelEdge('get'));    
+                createVoiFromLocation(pAxe, clickedPtX, clickedPtY, aBuffer, dSliderMin, dSliderMax, bRelativeToMax, bInPercent, dSeriesOffset,  pixelEdge('get'));    
 
                 cancelCreateVoiRoiPanel('set', false);
             
@@ -1625,6 +1732,7 @@ function setRoiToolbar(sVisible)
         end
 
         if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
+
             set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on'); 
             set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'on');   
             set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'on'); 
@@ -1727,6 +1835,19 @@ function setRoiToolbar(sVisible)
 
     %        robotClick();
 
+            pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+
+            switch pAxe
+        
+                case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    
+                otherwise
+                    return;
+            end
+
             mainToolBarEnable('off');
             mouseFcn('reset');
 
@@ -1734,14 +1855,14 @@ function setRoiToolbar(sVisible)
 
         %    while strcmpi(get(t11, 'State'), 'on')
         
-            clickedPt = get(gca,'CurrentPoint');
+            clickedPt = get(pAxe,'CurrentPoint');
             clickedPtX = clickedPt(1,1);
             clickedPtY = clickedPt(1,2);
             
             atMetaData = dicomMetaData('get');
             dSliceThickness = computeSliceSpacing(atMetaData);
             
-            switch(gca)
+            switch(pAxe)
                 
                 case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) % Coronal                    
                     xPixel = atMetaData{1}.PixelSpacing(1);
@@ -1787,7 +1908,7 @@ end
                 dSemiAxesY = yPixel/2;                
             end
                         
-            pRoiPtr  = images.roi.Ellipse(gca, ...
+            pRoiPtr  = images.roi.Ellipse(pAxe, ...
                                           'Center'             , [clickedPtX clickedPtY], ...
                                           'SemiAxes'           , [dSemiAxesX dSemiAxesY], ...
                                           'RotationAngle'      , 0, ...
@@ -1946,13 +2067,26 @@ end
             draw2DbrushCallback();
 
             if strcmpi(get(t2Dbrush, 'State'), 'on')
+
+                pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+    
+                switch pAxe
             
-                roiSetAxeBorder(true, gca);
+                    case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        
+                    otherwise
+                        return;
+                end
+
+                roiSetAxeBorder(true, pAxe);
         
-                isAxe      = gca == axePtr  ('get', [], dSeriesOffset); 
-                isCoronal  = gca == axes1Ptr('get', [], dSeriesOffset); 
-                isSagittal = gca == axes2Ptr('get', [], dSeriesOffset);
-                isAxial    = gca == axes3Ptr('get', [], dSeriesOffset);
+                isAxe      = pAxe == axePtr  ('get', [], dSeriesOffset); 
+                isCoronal  = pAxe == axes1Ptr('get', [], dSeriesOffset); 
+                isSagittal = pAxe == axes2Ptr('get', [], dSeriesOffset);
+                isAxial    = pAxe == axes3Ptr('get', [], dSeriesOffset);
     
                 if isAxe
                     set(uiOneWindowPtr('get'), 'HighlightColor', [1 0 0]);

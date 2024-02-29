@@ -73,6 +73,8 @@ function initViewerGlobal()
     uiEditVsplahXPtr ('set', []);
     uiEditVsplahYPtr ('set', []);
     btnFusionPtr     ('set', []);
+    btnLinkMipPtr    ('set', []);
+    btnExitViewerPtr ('set', []);
 
     uiOneWindowPtr('set', []);
     uiCorWindowPtr('set', []);

@@ -50,22 +50,22 @@ function loadCerrDoseVolume(planC, structNamC)
     set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
     set(btnZoomPtr('get'), 'FontWeight', 'normal');
     zoomTool('set', false);
-    zoom('off');           
+    zoom(fiMainWindowPtr('get'), 'off');           
 
     set(panMenu('get'), 'Checked', 'off');
     set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
     set(btnPanPtr('get'), 'FontWeight', 'normal');
     panTool('set', false);
-    pan('off');     
+    pan(fiMainWindowPtr('get'), 'off');     
 
     set(rotate3DMenu('get'), 'Checked', 'off');         
     rotate3DTool('set', false);
-    rotate3d off;
+    rotate3d(fiMainWindowPtr('get'), 'off');
 
     set(dataCursorMenu('get'), 'Checked', 'off');
     dataCursorTool('set', false);              
-    datacursormode('off');  
+    datacursormode(fiMainWindowPtr('get'), 'off');  
     
     if isFusion('get') == true % Deactivate fusion
          setFusionCallback();
@@ -506,8 +506,6 @@ function loadCerrDoseVolume(planC, structNamC)
     switchTo3DMode    ('set', false);
     switchToIsoSurface('set', false);
     switchToMIPMode   ('set', false);
-
-    rotate3d off
 
     set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));

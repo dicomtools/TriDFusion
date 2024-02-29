@@ -198,10 +198,10 @@ function TriDFusion(varargin)
     
     viewerSetFullScreenIcon();
 
-    dScreenSize  = get(groot, 'Screensize');
+    aScreenSize  = get(groot, 'Screensize');
 
-    xPosition = (dScreenSize(3) /2) - (620 /2);
-    yPosition = (dScreenSize(4) /2) - (330 /2);
+    xPosition = (aScreenSize(3) /2) - (620 /2);
+    yPosition = (aScreenSize(4) /2) - (330 /2);
         
     fiMainWindow = ...
         figure('Name', 'TriDFusion (3DF) Image Viewer',...
@@ -247,7 +247,8 @@ function TriDFusion(varargin)
              'Units'   , 'pixels',...
              'position', [0 30 620 300]...
              );   
-                            
+    uiSplashWindow.Toolbar.Visible = 'off';
+
     uiProgressWindow = ...
         uipanel(fiMainWindowPtr('get'),...
                 'Units'          , 'pixels',...
@@ -261,7 +262,9 @@ function TriDFusion(varargin)
     uiBar = uipanel(uiProgressWindow);
     
     set(uiBar, 'BackgroundColor', viewerBackgroundColor('get'));
-    set(uiBar, 'ForegroundColor', viewerForegroundColor('get'));     
+    set(uiBar, 'ForegroundColor', viewerForegroundColor('get'));  
+    set(uiBar, 'Position', [0 0 1 1]);  
+    
     uiBarPtr('set', uiBar);    
         
     sRootPath = viewerRootPath('get');
@@ -284,7 +287,7 @@ function TriDFusion(varargin)
       
     delete(uiSplashWindow);
         
-    aScreenSize  = get(groot, 'Screensize');
+%     aScreenSize  = get(groot, 'Screensize');
 
  %   alPosition = get(fiMainWindowPtr('get'), 'Position');
         

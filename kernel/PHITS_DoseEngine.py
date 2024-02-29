@@ -6,7 +6,7 @@
 #
 #Last modified:
 #
-# Copyright 2023, Lukas Carter, on behalf of the TriDFusion development team.
+# Copyright 2024, Lukas Carter, on behalf of the TriDFusion development team.
 #
 # This file is part of The Triple Dimention Fusion (TriDFusion).
 #

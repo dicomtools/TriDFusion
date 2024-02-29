@@ -39,6 +39,12 @@ function cropOutsideAllSlicesCallback(hObject,~)
         return;
     end
 
+    pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+
+    if isempty(pAxe)
+        return;
+    end
+
     try  
             
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
@@ -49,7 +55,7 @@ function cropOutsideAllSlicesCallback(hObject,~)
     if adBufferSize(3) == 1
         axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
         if ~isempty(axe)
-            if gca == axe  
+            if pAxe == axe  
                 
                 aMask = createMask(hObject.UserData, im(:,:));
                 
@@ -70,7 +76,7 @@ function cropOutsideAllSlicesCallback(hObject,~)
            ~isempty(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
            ~isempty(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')))
 
-            if gca == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))         
+            if pAxe == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))         
                 
                 aMask = createMask(hObject.UserData, permute(im(1,:,:), [3 2 1]));
 
@@ -93,7 +99,7 @@ function cropOutsideAllSlicesCallback(hObject,~)
                 end
             end
 
-            if gca == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))        
+            if pAxe == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))        
                 
                 aMask = createMask(hObject.UserData, permute(im(:,1,:), [3 1 2]));
 
@@ -114,7 +120,7 @@ function cropOutsideAllSlicesCallback(hObject,~)
                 end
             end
 
-            if gca == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))      
+            if pAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))      
                 
                 aMask = createMask(hObject.UserData, im(:,:,1));
 
