@@ -95,7 +95,7 @@ MATLAB command:
 	TriDFusion('path_to_dicom_series_folder', '-iso'); Open the graphical user interface with a DICOM image and create a 3D iso surface model.
 	TriDFusion('path_to_dicom_series_folder', '-vol'); Open the graphical user interface with a DICOM image and create a 3D volume rendering.
 	TriDFusion('path_to_dicom_series_folder', '-mip', '-iso', '-vol'); Open the graphical user interface with a DICOM image and create a fusion of a 3D MIP, iso surface, and volume rendering. Any combination can be used. 
-	TriDFusion('path_to_dicom_series_folder', '-w', 'workflow_name'); Open the graphical user interface with a DICOM image and execute a workflow. Refer to processWorkflow.m for a list of available options. Refer to dicomViewer.m for workflows the default values. 
+	TriDFusion('path_to_dicom_series_folder', '-w', 'workflow_name'); Open the graphical user interface with a DICOM image and execute a workflow. Refer to dicomViewer.m for a list of available options. Refer to processWorkflow.m for workflows the default values. 
 
 DICOM directory structure:
 
