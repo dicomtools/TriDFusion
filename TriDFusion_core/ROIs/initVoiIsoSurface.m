@@ -56,23 +56,43 @@ function voiObj = initVoiIsoSurface(uiWindow, bSmoothVoi)
     else % LabelRendering
         aInputArguments = {'Parent', uiWindow, 'BackgroundColor', surfaceColor('one', background3DOffset('get'))};
     end
+           
 
     if ~isempty(isoObj)
-        aCamera = {'CameraPosition', get(isoObj, 'CameraPosition'), ...
-                   'CameraUpVector', get(isoObj, 'CameraUpVector'), ...
-                   'ScaleFactors'  , get(isoObj, 'ScaleFactors')};
-        aInputArguments = [aInputArguments(:)', aCamera(:)'];
+
+        if isempty(viewer3dObject('get'))           
+       
+            aCamera = {'CameraPosition', get(isoObj, 'CameraPosition'), ...
+                       'CameraUpVector', get(isoObj, 'CameraUpVector'), ...
+                       'ScaleFactors'  , get(isoObj, 'ScaleFactors')};
+            aInputArguments = [aInputArguments(:)', aCamera(:)'];
+        else
+            tform = get(isoObj, 'Transformation');
+        end
+
     elseif ~isempty(mipObj)
-        aCamera = {'CameraPosition', get(mipObj, 'CameraPosition'), ...
-                   'CameraUpVector', get(mipObj, 'CameraUpVector'), ...
-                   'ScaleFactors'  , get(mipObj, 'ScaleFactors')};
-        aInputArguments = [aInputArguments(:)', aCamera(:)'];
+
+        if isempty(viewer3dObject('get'))           
+            aCamera = {'CameraPosition', get(mipObj, 'CameraPosition'), ...
+                       'CameraUpVector', get(mipObj, 'CameraUpVector'), ...
+                       'ScaleFactors'  , get(mipObj, 'ScaleFactors')};
+            aInputArguments = [aInputArguments(:)', aCamera(:)'];
+        else
+            tform = get(mipObj, 'Transformation');
+        end
+
     elseif ~isempty(volObj)
-        aCamera = {'CameraPosition', get(volObj, 'CameraPosition'), ...
-                   'CameraUpVector', get(volObj, 'CameraUpVector'), ...
-                   'ScaleFactors'  , get(volObj, 'ScaleFactors')};
-        aInputArguments = [aInputArguments(:)', aCamera(:)'];
+
+        if isempty(viewer3dObject('get'))  
+            aCamera = {'CameraPosition', get(volObj, 'CameraPosition'), ...
+                       'CameraUpVector', get(volObj, 'CameraUpVector'), ...
+                       'ScaleFactors'  , get(volObj, 'ScaleFactors')};
+            aInputArguments = [aInputArguments(:)', aCamera(:)'];
+        else
+            tform = get(volObj, 'Transformation');
+        end
     end
+    
 
     if ~isempty(atVoiInput)
 
@@ -82,6 +102,7 @@ function voiObj = initVoiIsoSurface(uiWindow, bSmoothVoi)
                 aVoiEnableList{aa} = true;
             end
         end
+        voi3DEnableList('set', aVoiEnableList);
 
         aVoiTransparencyList = voi3DTransparencyList('get');
         if isempty(aVoiTransparencyList)
@@ -89,14 +110,29 @@ function voiObj = initVoiIsoSurface(uiWindow, bSmoothVoi)
                 aVoiTransparencyList{aa} = slider3DVoiTransparencyValue('get');
             end
         end
+        voi3DTransparencyList('set', aVoiTransparencyList);
 
         aColormap = zeros(256,3);
+
+        aBuffer = false(size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'))));
+
+        if ~isempty(viewer3dObject('get'))        
+            aLabelBuffer = zeros((size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')))));
+            aLabelColorMap = zeros(numel(atVoiInput)+1, 3);
+            aLabelAlphaMap = zeros(numel(atVoiInput)+1, 1);
+        else
+            if strcmpi(voi3DRenderer('get'), 'LabelRendering')  
+                aLabelBuffer = zeros((size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')))));
+                aLabelColorMap = zeros(numel(atVoiInput)+1, 3);
+                aLabelAlphaMap = zeros(numel(atVoiInput)+1, 1);                
+            end
+        end
 
         for aa=1:numel(atVoiInput)
 
             progressBar(aa/numel(atVoiInput)-0.0001, sprintf('Processing VOI %d/%d', aa, numel(atVoiInput) ) );
 
-            aBuffer = zeros(size(dicomBuffer('get')));
+            aBuffer(:) = false;
 
             aIsosurfaceColor = atVoiInput{aa}.Color;
 
@@ -165,12 +201,12 @@ function voiObj = initVoiIsoSurface(uiWindow, bSmoothVoi)
                    
                 end
             end
-            
-            if bSmoothVoi == true
-                aBuffer = smooth3(aBuffer(:,:,end:-1:1), 'box', 3);
-            else
-                aBuffer = aBuffer(:,:,end:-1:1);
-            end
+
+            % if bSmoothVoi == true && isempty(viewer3dObject('get'))
+            %     aBuffer = smooth3(aBuffer(:,:,end:-1:1), 'box', 3);
+            % else
+            aBuffer = aBuffer(:,:,end:-1:1);
+            % end
 
 %            Ds = interp3(im);
 %            Ds = smooth3(im, 'gaussian', 15);
@@ -190,30 +226,77 @@ function voiObj = initVoiIsoSurface(uiWindow, bSmoothVoi)
 
 
      %       voiObj{aa} = volshow(aBuffer, aInputArguments{:});
-            if strcmpi(voi3DRenderer('get'), 'LabelRendering')
-                voiObj{aa} = labelvolshow(uint8(squeeze(aBuffer)), squeeze(aBuffer), aInputArguments{:});
-            else 
-                if verLessThan('matlab','9.13')
-                    voiObj{aa} = volshow(squeeze(aBuffer), aInputArguments{:});
-                else
-                    voiObj{aa} = images.compatibility.volshow.R2022a.volshow(squeeze(aBuffer), aInputArguments{:});
+            if isempty(viewer3dObject('get'))           
+
+                if strcmpi(voi3DRenderer('get'), 'LabelRendering')
+                    
+                    aLabelBuffer(aBuffer==1) = aa;
+                    aLabelColorMap(aa+1, :) = atVoiInput{aa}.Color;
+                    aLabelAlphaMap(aa+1, :) = aVoiTransparencyList{aa};
+                else 
+
+                    if bSmoothVoi == true && isempty(viewer3dObject('get'))
+                        
+                        aBuffer = smooth3(aBuffer, 'box', 3);
+                    end
+
+
+                    if verLessThan('matlab','9.13')
+                        voiObj{aa} = volshow(squeeze(aBuffer), aInputArguments{:});
+                    else
+                        voiObj{aa} = images.compatibility.volshow.R2022a.volshow(squeeze(aBuffer), aInputArguments{:});
+                    end
+                           
+                    set(voiObj{aa}, 'InteractionsEnabled', false);
+    
+                    if aVoiEnableList{aa} == false
+                        if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
+                            set(voiObj{aa}, 'Alphamap', zeros(256,1));
+                        else
+                            set(voiObj{aa}, 'Renderer', 'LabelOverlayRendering');
+                        end
+                    end
                 end
+            else
+
+                aLabelBuffer(aBuffer) = aa;
+                aLabelColorMap(aa+1, :) = atVoiInput{aa}.Color;
+                aLabelAlphaMap(aa+1, :) = aVoiTransparencyList{aa};
             end
 
-            set(voiObj{aa}, 'InteractionsEnabled', false);
-
-            if aVoiEnableList{aa} == false
-                if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
-                    set(voiObj{aa}, 'Alphamap', zeros(256,1));
-                else
-                    set(voiObj{aa}, 'Renderer', 'LabelOverlayRendering');
-                end
-            end
 
         %    setVolume(voiObj{aa},im);
 
         end
+   
+        % aLabelBuffer = aLabelBuffer(:,:,end:-1:1);
+        if ~isempty(viewer3dObject('get')) % with viewer3d, we are now using the LabelOverlay for the voi           
 
+            voiObj{1} = volshow(squeeze(false(size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'))))), ...
+                                'Parent'          , viewer3dObject('get'), ...
+                                'RenderingStyle'  , 'VolumeRendering',...
+                                'OverlayColormap' , aLabelColorMap, ...
+                                'OverlayAlphamap' , aLabelAlphaMap, ...
+                                'OverlayData'     , aLabelBuffer, ...
+                                'IsosurfaceValue' , aIsovalue, ...
+                                'OverlayThreshold', 0, ...
+                                'Transformation'  , tform);  
+            
+            clear aLabelBuffer;
+        else
+            if strcmpi(voi3DRenderer('get'), 'LabelRendering')
+
+                voiObj{1} = labelvolshow(squeeze(aLabelBuffer), ...
+                                         'Parent'        , uiWindow, ...
+                                         aCamera{:}, ...
+                                         'BackgroundColor', surfaceColor('one', background3DOffset('get')), ...
+                                         'LabelColor'     , aLabelColorMap, ...
+                                         'LabelOpacity'   , aLabelAlphaMap);          
+                clear aLabelBuffer;
+            end
+        end
+
+        clear aBuffer;
 
 %        aVolSize = size(dicomBuffer('get'));
 %        aDummyBuffer = zeros(size(dicomBuffer('get')));
@@ -223,8 +306,6 @@ function voiObj = initVoiIsoSurface(uiWindow, bSmoothVoi)
 %        voiObj{numel(voiObj)}.InteractionsEnabled = 0;
 
         progressBar(1, 'Ready');
-
-
     end
 
 end

@@ -30,25 +30,18 @@ function aBuffer = loadNrrdFile(sPath, sFileName, bInitDisplay, dFactor)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    % Deactivate main tool bar 
-
-    
     atInput = inputTemplate('get');
-
-%    if iSeriesOffset > numel(inputTemplate('get'))  
-%        return;
-%    end 
     
     try
+
+    set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+    drawnow; 
 
     if bInitDisplay == true    
 
         set(uiSeriesPtr('get'), 'Enable', 'off');       
 
         mainToolBarEnable('off');
-
-        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-        drawnow; 
         
         releaseRoiWait();
     
@@ -393,9 +386,7 @@ function aBuffer = loadNrrdFile(sPath, sFileName, bInitDisplay, dFactor)
         
         asSeries{1} = asSeriesDescription{1};              
     end   
-    
-    imageOrientation('set', 'axial');
-            
+                
     seriesDescription('set', asSeriesDescription);
             
     inputTemplate('set', atInput);
@@ -413,6 +404,8 @@ function aBuffer = loadNrrdFile(sPath, sFileName, bInitDisplay, dFactor)
     if bInitDisplay == true    
 
         set(uiSeriesPtr('get'), 'Value', numel(atInput));
+
+        imageOrientation('set', 'axial');       
     end
 
     setQuantification(numel(atInput));
@@ -433,9 +426,10 @@ function aBuffer = loadNrrdFile(sPath, sFileName, bInitDisplay, dFactor)
 
         cropValue('set', min(dicomBuffer('get'), [], 'all'));
 
-        clearDisplay();                       
+        clearDisplay();  
+
         initDisplay(3); 
-    
+   
         initWindowLevel('set', true);
     
         dicomViewerCore();  
@@ -460,16 +454,16 @@ function aBuffer = loadNrrdFile(sPath, sFileName, bInitDisplay, dFactor)
         progressBar(1, 'Error:loadNrrdFile()');                        
     end
 
+    set(fiMainWindowPtr('get'), 'Pointer', 'default');
+    drawnow; 
+
+    clear aBuffer;
+
     if bInitDisplay == true    
 
-        clear aBuffer;
-    
         % Reactivate main tool bar 
         set(uiSeriesPtr('get'), 'Enable', 'on');        
         mainToolBarEnable('on');
-        
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');
-        drawnow; 
- 
+       
     end
 end

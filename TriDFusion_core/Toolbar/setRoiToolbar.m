@@ -97,7 +97,7 @@ function setRoiToolbar(sVisible)
 
         t3 = uitoggletool(tbRoi,'CData',img,'TooltipString','Draw Rectangle');
         t3.ClickedCallback = @drawrectangleCallback;
-        
+
         [img,~] = imread(sprintf('%s//sphere.png', sIconsPath));
         img = double(img)/255;
 
@@ -106,7 +106,7 @@ function setRoiToolbar(sVisible)
 
         [img,~] = imread(sprintf('%s//voi-click.png', sIconsPath));
         img = double(img)/255;
-             
+
         t12 = uitoggletool(tbRoi,'CData',img,'TooltipString','<html>Click VOI<br>Activate the View/Contour Panel to fine-tune the threshold</html>');
         t12.ClickedCallback = @drawClickVoiCallback;
 
@@ -175,7 +175,7 @@ function setRoiToolbar(sVisible)
     end
 
     function drawlineCallback(~,~)
-        
+
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
@@ -183,7 +183,7 @@ function setRoiToolbar(sVisible)
             set(t8, 'State', 'off');
             return;
         end
-        
+
 %               releaseRoiAxeWait(t8);
         robotReleaseKey();
 
@@ -241,7 +241,7 @@ function setRoiToolbar(sVisible)
                 pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
 
                 switch pAxe
-            
+
                     case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
@@ -295,7 +295,7 @@ function setRoiToolbar(sVisible)
                     constraintMenu(a);
 
                     cropMenu(a);
- 
+
                     uimenu(a.UIContextMenu,'Label', 'Display Result' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
 %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
@@ -323,7 +323,7 @@ function setRoiToolbar(sVisible)
 %test hf=[];
 %test he=[];
     function drawfreehandCallback(~,~)
-        
+
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
@@ -331,7 +331,7 @@ function setRoiToolbar(sVisible)
             set(t, 'State', 'off');
             return;
         end
-        
+
 %               releaseRoiAxeWait(t);
         robotReleaseKey();
 
@@ -362,7 +362,7 @@ function setRoiToolbar(sVisible)
 
      %       w=waitforbuttonpress;
             axeClicked('set', false);
-            
+
             doWhile = true;
             while doWhile == true
                 uiwait(fiMainWindowPtr('get'));
@@ -373,11 +373,11 @@ function setRoiToolbar(sVisible)
                     end
                 end
             end
-            
+
             if ~isvalid(t)
                 return;
             end
-            
+
             if strcmpi(get(t, 'State'), 'off')
                 return;
             end
@@ -396,12 +396,12 @@ function setRoiToolbar(sVisible)
                 pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
 
                 switch pAxe
-            
+
                     case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                        
+
                     otherwise
                         return;
                 end
@@ -424,7 +424,7 @@ function setRoiToolbar(sVisible)
                                 'FaceAlpha'     , 0 ...
                                 );
                 a.FaceAlpha = roiFaceAlphaValue('get');
-       
+
   %                  a.Waypoints(:) = false;
 %test hf=a;
                     if ~isvalid(t)
@@ -455,7 +455,7 @@ function setRoiToolbar(sVisible)
                     constraintMenu(a);
 
                     cropMenu(a);
-                    
+
                     voiMenu(a);
 
                     uimenu(a.UIContextMenu,'Label', 'Display Result' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
@@ -480,11 +480,11 @@ function setRoiToolbar(sVisible)
         set(t, 'State', 'off');
 
         setCrossVisibility(true);
-    
+
     end
 
     function drawcircleCallback(~,~)
-        
+
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
@@ -492,7 +492,7 @@ function setRoiToolbar(sVisible)
             set(t2, 'State', 'off');
             return;
         end
-        
+
 %               releaseRoiAxeWait(t2);
         robotReleaseKey();
 
@@ -523,7 +523,7 @@ function setRoiToolbar(sVisible)
 
    %         w = waitforbuttonpress;
             axeClicked('set', false);
-            
+
             doWhile = true;
             while doWhile == true
                 uiwait(fiMainWindowPtr('get'));
@@ -534,11 +534,11 @@ function setRoiToolbar(sVisible)
                     end
                 end
             end
-            
+
             if ~isvalid(t2)
                 return;
             end
-            
+
             if strcmpi(get(t2, 'State'), 'off')
                 return;
             end
@@ -551,12 +551,12 @@ function setRoiToolbar(sVisible)
                 pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
 
                 switch pAxe
-            
+
                     case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                        
+
                     otherwise
                         return;
                 end
@@ -567,7 +567,7 @@ function setRoiToolbar(sVisible)
                 roiSetAxeBorder(true, pAxe);
 
           %      while strcmpi(get(t2, 'State'), 'on')
-          
+
                 a = drawcircle(pAxe, ...
                                'Color'         , 'cyan', ...
                                'lineWidth'     , 1, ...
@@ -667,7 +667,7 @@ function setRoiToolbar(sVisible)
 
 
     function drawellipseCallback(~,~)
-        
+
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
@@ -675,7 +675,7 @@ function setRoiToolbar(sVisible)
             set(t5, 'State', 'off');
             return;
         end
-        
+
 %             releaseRoiAxeWait(t5);
         robotReleaseKey();
 
@@ -705,7 +705,7 @@ function setRoiToolbar(sVisible)
         while doWhileContinuous == true
 
             axeClicked('set', false);
-            
+
             doWhile = true;
             while doWhile == true
                 uiwait(fiMainWindowPtr('get'));
@@ -716,11 +716,11 @@ function setRoiToolbar(sVisible)
                     end
                 end
             end
-            
+
             if ~isvalid(t5)
                 return;
             end
-            
+
             if strcmpi(get(t5, 'State'), 'off')
                 return;
             end
@@ -735,12 +735,12 @@ function setRoiToolbar(sVisible)
                 pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
 
                 switch pAxe
-            
+
                     case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                        
+
                     otherwise
                         return;
                 end
@@ -762,7 +762,7 @@ function setRoiToolbar(sVisible)
                                     'FaceAlpha'     , 0 ...
                                     );
                     a.FaceAlpha = roiFaceAlphaValue('get');
-                               
+
                     if ~isvalid(t5)
                         return;
                     end
@@ -788,7 +788,7 @@ function setRoiToolbar(sVisible)
                     constraintMenu(a);
 
                     cropMenu(a);
-                    
+
                     voiMenu(a);
 
                     uimenu(a.UIContextMenu,'Label', 'Display Result' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
@@ -808,14 +808,14 @@ function setRoiToolbar(sVisible)
                 mainToolBarEnable('on');
             end
         end
-        
+
         set(t5, 'State', 'off');
 
         setCrossVisibility(true);
     end
 
     function drawrectangleCallback(~,~)
-        
+
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
@@ -823,7 +823,7 @@ function setRoiToolbar(sVisible)
             set(t3, 'State', 'off');
             return;
         end
-        
+
 %             releaseRoiAxeWait(t3);
         robotReleaseKey();
 
@@ -851,9 +851,9 @@ function setRoiToolbar(sVisible)
 
         doWhileContinuous = true;
         while doWhileContinuous == true
-            
+
             axeClicked('set', false);
-            
+
             doWhile = true;
             while doWhile == true
                 uiwait(fiMainWindowPtr('get'));
@@ -864,11 +864,11 @@ function setRoiToolbar(sVisible)
                     end
                 end
             end
-            
+
             if ~isvalid(t3)
                 return;
             end
-            
+
             if strcmpi(get(t3, 'State'), 'off')
                 return;
             end
@@ -883,12 +883,12 @@ function setRoiToolbar(sVisible)
                 pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
 
                 switch pAxe
-            
+
                     case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                        
+
                     otherwise
                         return;
                 end
@@ -966,15 +966,15 @@ function setRoiToolbar(sVisible)
 
 
     function drawpolygonCallback(~,~)
-        
+
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
-           isVsplash('get')          == true       
+           isVsplash('get')          == true
             set(t6, 'State', 'off');
             return;
         end
-        
+
         robotReleaseKey();
 
         if strcmpi(get(t6, 'State'), 'off')
@@ -1003,7 +1003,7 @@ function setRoiToolbar(sVisible)
         while doWhileContinuous == true
 
             axeClicked('set', false);
-            
+
             doWhile = true;
             while doWhile == true
                 uiwait(fiMainWindowPtr('get'));
@@ -1014,11 +1014,11 @@ function setRoiToolbar(sVisible)
                     end
                 end
             end
-            
+
             if ~isvalid(t6)
                 return;
             end
-            
+
             if strcmpi(get(t6, 'State'), 'off')
                 return;
             end
@@ -1033,12 +1033,12 @@ function setRoiToolbar(sVisible)
                 pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
 
                 switch pAxe
-            
+
                     case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                        
+
                     otherwise
                         return;
                 end
@@ -1114,30 +1114,30 @@ function setRoiToolbar(sVisible)
     end
 
     function drawsphereCallback(~, ~)
-        
+
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
-           isVsplash('get')          == true       
+           isVsplash('get')          == true
             set(t11, 'State', 'off');
             return;
         end
-        
+
         robotReleaseKey();
 
         if strcmpi(get(t11, 'State'), 'off')
   %          robotReleaseKey();
             if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
-                set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on'); 
-                set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'on');   
-                set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'on'); 
-                set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'on'); 
-                set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'on'); 
-                set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'on'); 
+                set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on');
+                set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'on');
+                set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'on');
+                set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'on');
+                set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'on');
+                set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'on');
             end
 
-            set(fiMainWindowPtr('get'), 'Pointer', 'default');            
-            drawnow;   
+            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            drawnow;
 
             set(t11, 'State', 'off');
             roiSetAxeBorder(false);
@@ -1160,108 +1160,108 @@ function setRoiToolbar(sVisible)
 
         try
 
-        set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'off'); 
-        set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'off');   
-        set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'off'); 
-        set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'off'); 
-        set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'off'); 
-        set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'off'); 
+        set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'off');
+        set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'off');
+        set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'off');
+        set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'off');
+        set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'off');
+        set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'off');
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'cross');            
+        set(fiMainWindowPtr('get'), 'Pointer', 'cross');
         drawnow;
 
 
         doWhileContinuous = true;
         while doWhileContinuous == true
-    
+
             axeClicked('set', false);
-            
+
             uiwait(fiMainWindowPtr('get'));
-    
+
             if ~isvalid(t11)
                 return;
             end
-    
+
             if strcmpi(get(t11, 'State'), 'off')
                 return;
             end
-    
+
      %       doWhileContinuous = true;
      %       while doWhileContinuous == true
     %               w = waitforbuttonpress;
-    
+
     %            if w == 0
             if  strcmpi(windowButton('get'), 'down')
-    
+
         %        robotClick();
-                set(fiMainWindowPtr('get'), 'Pointer', 'watch');            
+                set(fiMainWindowPtr('get'), 'Pointer', 'watch');
                 drawnow;
 
                 pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
 
                 switch pAxe
-            
+
                     case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                        
+
                     otherwise
                         return;
                 end
 
                 mainToolBarEnable('off');
                 mouseFcn('reset');
-    
+
                 roiSetAxeBorder(true, pAxe);
-    
+
             %    while strcmpi(get(t11, 'State'), 'on')
-            
+
                 clickedPt = get(pAxe,'CurrentPoint');
 
                 clickedPtX = clickedPt(1,1);
                 clickedPtY = clickedPt(1,2);
-                
+
                 atMetaData = dicomMetaData('get');
                 dSliceThickness = computeSliceSpacing(atMetaData);
-                
-                switch(gca)
-                    
-                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) % Coronal                    
+
+                switch(pAxe)
+
+                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) % Coronal
                         xPixel = atMetaData{1}.PixelSpacing(1);
-                        yPixel = dSliceThickness;                                       
-                        
+                        yPixel = dSliceThickness;
+
                     case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) % Sagittal
                         xPixel = atMetaData{1}.PixelSpacing(2);
                         yPixel = dSliceThickness;
-                        
+
                     otherwise % Axial
                         xPixel = atMetaData{1}.PixelSpacing(1);
                         yPixel = atMetaData{1}.PixelSpacing(2);
                 end
-                
+
                 dSphereDiameter = sphereDefaultDiameter('get'); % in mm
-                
+
                 if xPixel == 0
                     xPixel = 1;
                 end
-                
+
                 if yPixel == 0
                     yPixel = 1;
                 end
-                
+
                 if dSphereDiameter > 0
                     dSemiAxesX = dSphereDiameter/xPixel/2; % In pixel
                     dSemiAxesY = dSphereDiameter/yPixel/2; % In pixel
                 else
                     dSemiAxesX = xPixel/2;
-                    dSemiAxesY = yPixel/2;                
+                    dSemiAxesY = yPixel/2;
                 end
-    
-                asTag =[];    
-    
+
+                asTag =[];
+
                 sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
-                
+
                 a = images.roi.Ellipse(pAxe, ...
                                        'Center'          , [clickedPtX clickedPtY], ...
                                        'SemiAxes'        , [dSemiAxesX dSemiAxesY], ...
@@ -1280,143 +1280,143 @@ function setRoiToolbar(sVisible)
                                        'Visible'         , 'on' ...
                                        );
                  a.FaceAlpha = roiFaceAlphaValue('get');
-                                  
+
                  asTag{1} = sTag;
-                            
+
                 if ~isvalid(t11)
                     return;
                 end
-                
+
                 if strcmpi(get(t11, 'State'), 'off')
-                    
+
                     roiSetAxeBorder(false);
-    
+
     %                            windowButton('set', 'up');
     %                            mouseFcn('set');
     %                            mainToolBarEnable('on');
     %                            setCrossVisibility(1);
-    
+
                     return;
                 end
-    
+
                 addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
-    
+
     %                    setVoiRoiSegPopup();
-    
+
                 uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
-    
+
                 roiDefaultMenu(a);
-    
+
                 constraintMenu(a);
-    
+
                 cropMenu(a);
-    
+
                 voiMenu(a);
-    
+
                 uimenu(a.UIContextMenu,'Label', 'Display Result' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
-    
+
     %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
                 refreshImages();
              %   end
-    
+
                 roiSetAxeBorder(false);
-    
+
                 windowButton('set', 'up');
                 mouseFcn('set');
                 mainToolBarEnable('on');
-                
+
                 dRadius = dSphereDiameter/xPixel/2; % In pixel
-                
+
                 aDicomBuffer = dicomBuffer('get');
-    
+
                 switch pAxe
-    
-                    % Coronal axe 
-    
-                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))    
-    
+
+                    % Coronal axe
+
+                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
                         sPlane = 'coronal';
-                         
+
                         dSliceNb = sliceNumber('get', 'coronal' );
-    
+
                         xPixelOffset = clickedPtX;
                         yPixelOffset = dSliceNb;
-                        zPixelOffset = clickedPtY;   
-                        
+                        zPixelOffset = clickedPtY;
+
                         dPixelRatio = xPixel/yPixel;
-                        
-                        dBufferSize = size(aDicomBuffer, 1);                    
-                        
-    
+
+                        dBufferSize = size(aDicomBuffer, 1);
+
+
                     % Sagittal axe
-    
+
                     case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                        
+
                         sPlane = 'sagittal';
-    
+
                         dSliceNb = sliceNumber('get', 'sagittal');
-    
+
                         xPixelOffset = dSliceNb;
                         yPixelOffset = clickedPtX;
                         zPixelOffset = clickedPtY;
-                        
+
                         dPixelRatio = xPixel/yPixel;
-                        
+
                         dBufferSize = size(aDicomBuffer, 2);
-    
+
                      % Axial axe
-    
+
                     otherwise
                         sPlane = 'axial';
-    
+
                         dSliceNb = sliceNumber('get', 'axial');
-    
+
                         xPixelOffset = clickedPtX;
                         yPixelOffset = clickedPtY;
-                        zPixelOffset = dSliceNb;   
-                        
+                        zPixelOffset = dSliceNb;
+
                         dPixelRatio = xPixel/yPixel;
-                        
+
                         dBufferSize = size(aDicomBuffer, 3);
-                        
-                end                  
-                
-                
+
+                end
+
+
                 aSphereMask = getSphereMask(aDicomBuffer, xPixelOffset, yPixelOffset, zPixelOffset, dRadius);
-                
-                for zz=1:dBufferSize    
-    
+
+                for zz=1:dBufferSize
+
                     if zz==dSliceNb
                         continue;
                     end
-                    
+
                     switch sPlane
-                        
+
                         case 'coronal' % Coronal axe
                             aSlice = permute(aSphereMask(zz,:,:), [3 2 1]);
-    
+
                         case 'sagittal' % Sagittal axe
-                            aSlice = permute(aSphereMask(:,zz,:), [3 1 2]);            
-    
-                        otherwise % Axial axe                         
+                            aSlice = permute(aSphereMask(:,zz,:), [3 1 2]);
+
+                        otherwise % Axial axe
                             aSlice = aSphereMask(:,:,zz);
                     end
-                
-                    if aSlice(aSlice==1)   
-    
+
+                    if aSlice(aSlice==1)
+
                         isRoiValid = false;
-    
+
                         boundaries = bwboundaries(aSlice, 8, 'noholes');
                         if ~isempty(boundaries)
                             isRoiValid = true;
                             thisBoundary = boundaries{1};
-    
+
                             x = thisBoundary(:, 2); % x = columns.
                             y = thisBoundary(:, 1); % y = rows.
                         end
-    
+
                         if isRoiValid == true
-    
+
                             % Find which two boundary points are farthest from each other.
                             maxDistance = -inf;
                             for k = 1 : length(x)
@@ -1425,17 +1425,17 @@ function setRoiToolbar(sVisible)
                                 if thisMaxDistance > maxDistance
                                     maxDistance = thisMaxDistance;
                                 end
-                            end                   
-    
-                        end           
-    
+                            end
+
+                        end
+
                         dSemiAxesX = maxDistance/2;
                         dSemiAxesY = maxDistance/2*dPixelRatio;
-                        
-                        sliceNumber('set', sPlane, zz);  
-    
+
+                        sliceNumber('set', sPlane, zz);
+
                         sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
-                                         
+
                         a = images.roi.Ellipse(pAxe, ...
                                                'Center'             , [clickedPtX clickedPtY], ...
                                                'SemiAxes'           , [dSemiAxesX dSemiAxesY], ...
@@ -1455,26 +1455,26 @@ function setRoiToolbar(sVisible)
                                                'UserData'           , 'SphereROI' ...
                                                );
                         a.FaceAlpha = roiFaceAlphaValue('get');
-    
+
                         addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
-    
+
                         asTag{numel(asTag)+1} = sTag;
-                        
+
                     end
                 end
-                
+
                 createVoiFromRois(get(uiSeriesPtr('get'), 'Value'), asTag, sprintf('Sphere %d mm', dSphereDiameter), [0 1 1], 'Unspecified');
-                
+
                 setVoiRoiSegPopup();
-    
+
                 sliceNumber('set', sPlane, dSliceNb);
-                
+
                 if strcmpi(get(tContinuous, 'State'), 'off')
                     doWhileContinuous = false;
                 end
-    
-                set(fiMainWindowPtr('get'), 'Pointer', 'cross');            
-                drawnow;    
+
+                set(fiMainWindowPtr('get'), 'Pointer', 'cross');
+                drawnow;
             end
 
         end
@@ -1484,24 +1484,24 @@ function setRoiToolbar(sVisible)
         end
 
         if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
-            set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on'); 
-            set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'on');   
-            set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'on'); 
-            set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'on'); 
-            set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'on'); 
-            set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'on'); 
+            set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on');
+            set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'on');
+            set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'on');
+            set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'on');
+            set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'on');
+            set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'on');
         end
 
         set(t11, 'State', 'off');
 
         setCrossVisibility(true);
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');            
-        drawnow;    
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;
     end
 
     function drawClickVoiCallback(~,~)
-        
+
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
@@ -1509,23 +1509,23 @@ function setRoiToolbar(sVisible)
             set(t12, 'State', 'off');
             return;
         end
-        
+
 %               releaseRoiAxeWait(t);
         robotReleaseKey();
 
         if strcmpi(get(t12, 'State'), 'off')
 %                   robotReleaseKey();
             if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
-                set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on'); 
-                set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'on');   
-                set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'on'); 
-                set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'on'); 
-                set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'on'); 
-                set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'on'); 
+                set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on');
+                set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'on');
+                set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'on');
+                set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'on');
+                set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'on');
+                set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'on');
             end
 
-            set(fiMainWindowPtr('get'), 'Pointer', 'default');            
-            drawnow;   
+            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            drawnow;
 
             set(t12, 'State', 'off');
             roiSetAxeBorder(false);
@@ -1548,14 +1548,14 @@ function setRoiToolbar(sVisible)
 
         try
 
-        set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'off'); 
-        set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'off');   
-        set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'off'); 
-        set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'off'); 
-        set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'off'); 
-        set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'off'); 
+        set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'off');
+        set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'off');
+        set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'off');
+        set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'off');
+        set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'off');
+        set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'off');
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'cross');            
+        set(fiMainWindowPtr('get'), 'Pointer', 'cross');
         drawnow;
 
         doWhileContinuous = true;
@@ -1563,7 +1563,7 @@ function setRoiToolbar(sVisible)
 
      %       w=waitforbuttonpress;
             axeClicked('set', false);
-            
+
             doWhile = true;
             while doWhile == true
                 uiwait(fiMainWindowPtr('get'));
@@ -1574,11 +1574,11 @@ function setRoiToolbar(sVisible)
                     end
                 end
             end
-            
+
             if ~isvalid(t12)
                 return;
             end
-            
+
             if strcmpi(get(t12, 'State'), 'off')
                 return;
             end
@@ -1590,19 +1590,19 @@ function setRoiToolbar(sVisible)
 
      %       if w == 0
             if  strcmpi(windowButton('get'), 'down')
-% 
+%
 
 
  %               robotClick();
                 pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
 
                 switch pAxe
-            
+
                     case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                        
+
                     otherwise
                         return;
                 end
@@ -1622,27 +1622,27 @@ function setRoiToolbar(sVisible)
                 clickedPtX = round(aClickedPt(1,1));
                 clickedPtY = round(aClickedPt(1,2));
 
-                % Set ROI pael Segment btn to Cancel 
-            
+                % Set ROI pael Segment btn to Cancel
+
                 uiCreateVoiRoiPanel = uiCreateVoiRoiPanelObject('get');
-            
+
                 set(uiCreateVoiRoiPanel, 'String', 'Cancel');
-            
+
                 set(uiCreateVoiRoiPanel, 'Background', [0.2 0.039 0.027]);
 
                 set(uiCreateVoiRoiPanel, 'Foreground', [0.94 0.94 0.94]);
-            
+
                 cancelCreateVoiRoiPanel('set', false);
 
                 bRelativeToMax = relativeToMaxRoiPanelValue('get');
                 bInPercent     = inPercentRoiPanelValue('get');
-        
+
                 dSliderMin = minTresholdSliderRoiPanelValue('get');
                 dSliderMax = maxTresholdSliderRoiPanelValue('get');
 
                 % Patch for when the user don't press enter on the edit box
 
-                if bInPercent == true 
+                if bInPercent == true
 
                     pUiRoiPanelPtr = uiRoiPanelPtr('get');
 
@@ -1653,11 +1653,11 @@ function setRoiToolbar(sVisible)
                     uiEditMaxTresholdRoiPanel = apChildren(strcmp({apChildren.UserData}, 'uiEditMaxTresholdRoiPanel'));
 
                     if ~isempty(uiEditMaxTresholdRoiPanel)
-    
+
                         sPercent = get(uiEditMaxTresholdRoiPanel, 'String');
-                        
+
                         dSliderValue = str2double(sPercent)/100;
-                        
+
                         if dSliderValue > 0 && dSliderValue <=1
                             dSliderMax = str2double(sPercent)/100;
                         end
@@ -1666,31 +1666,31 @@ function setRoiToolbar(sVisible)
                     if bRelativeToMax == false
 
                         % uiEditMinTresholdRoiPanel
-    
+
                         uiEditMinTresholdRoiPanel = apChildren(strcmp({apChildren.UserData}, 'uiEditMinTresholdRoiPanel'));
-    
+
                         if ~isempty(uiEditMinTresholdRoiPanel)
-    
+
                             sPercent = get(uiEditMinTresholdRoiPanel, 'String');
-                            
+
                             dSliderValue = str2double(sPercent)/100;
-                            
+
                             if dSliderValue > 0 && dSliderValue <=1
                                 dSliderMin = str2double(sPercent)/100;
-                            end                  
+                            end
                         end
                     end
                 end
 
-                createVoiFromLocation(pAxe, clickedPtX, clickedPtY, aBuffer, dSliderMin, dSliderMax, bRelativeToMax, bInPercent, dSeriesOffset,  pixelEdge('get'));    
+                createVoiFromLocation(pAxe, clickedPtX, clickedPtY, aBuffer, dSliderMin, dSliderMax, bRelativeToMax, bInPercent, dSeriesOffset,  pixelEdge('get'));
 
                 cancelCreateVoiRoiPanel('set', false);
-            
+
                 set(uiCreateVoiRoiPanel, 'String', 'Segment');
-            
+
                 set(uiCreateVoiRoiPanel, 'Background', [0.6300 0.6300 0.4000]);
-                set(uiCreateVoiRoiPanel, 'Foreground', [0.1 0.1 0.1]); 
-       
+                set(uiCreateVoiRoiPanel, 'Foreground', [0.1 0.1 0.1]);
+
   %                  a.Waypoints(:) = false;
 %test hf=a;
                     if ~isvalid(t12)
@@ -1733,20 +1733,20 @@ function setRoiToolbar(sVisible)
 
         if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
 
-            set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on'); 
-            set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'on');   
-            set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'on'); 
-            set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'on'); 
-            set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'on'); 
-            set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'on'); 
+            set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on');
+            set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'on');
+            set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'on');
+            set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'on');
+            set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'on');
+            set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'on');
         end
 
         set(t12, 'State', 'off');
 
         setCrossVisibility(true);
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');            
-        drawnow;      
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;
     end
 
     function viewFarthestDistancesCallback(hObject, ~)
@@ -1762,27 +1762,27 @@ function setRoiToolbar(sVisible)
             atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
             if ~isempty(atRoiInput) && isVsplash('get') == false
-            
+
                 numRoiInputs = numel(atRoiInput);
-                
+
                 for bb = 1:numRoiInputs
 
                     currentRoi = atRoiInput{bb};
-                    
+
                     if isvalid(currentRoi.Object)
 
                         currentDistances = currentRoi.MaxDistances;
-        
-                         if ~isempty(currentDistances) 
+
+                         if ~isempty(currentDistances)
                             currentDistances.MaxXY.Line.Visible = 'off';
                             currentDistances.MaxCY.Line.Visible = 'off';
                             currentDistances.MaxXY.Text.Visible = 'off';
-                            currentDistances.MaxCY.Text.Visible = 'off';                        
+                            currentDistances.MaxCY.Text.Visible = 'off';
                         end
-       
+
                     end
                 end
-            end            
+            end
         end
 
         if ~isempty(dicomBuffer('get'))
@@ -1791,7 +1791,7 @@ function setRoiToolbar(sVisible)
     end
 
     function draw2DbrushCallback(~,~)
-                
+
         robotReleaseKey();
 
         if strcmpi(get(t2Dbrush, 'State'), 'off')
@@ -1807,7 +1807,7 @@ function setRoiToolbar(sVisible)
 
             return;
         end
-        
+
         aImageSize = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')));
 
 %             robotReleaseKey();
@@ -1817,7 +1817,7 @@ function setRoiToolbar(sVisible)
         triangulateCallback();
 
         axeClicked('set', false);
-        
+
         uiwait(fiMainWindowPtr('get'));
 
         if ~isvalid(t2Dbrush)
@@ -1838,12 +1838,12 @@ function setRoiToolbar(sVisible)
             pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
 
             switch pAxe
-        
+
                 case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
                 case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                 case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                 case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    
+
                 otherwise
                     return;
             end
@@ -1854,23 +1854,23 @@ function setRoiToolbar(sVisible)
      %       roiSetAxeBorder(true, gca);
 
         %    while strcmpi(get(t11, 'State'), 'on')
-        
+
             clickedPt = get(pAxe,'CurrentPoint');
             clickedPtX = clickedPt(1,1);
             clickedPtY = clickedPt(1,2);
-            
+
             atMetaData = dicomMetaData('get');
             dSliceThickness = computeSliceSpacing(atMetaData);
-            
+
             switch(pAxe)
-                
-                case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) % Coronal                    
+
+                case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) % Coronal
                     xPixel = atMetaData{1}.PixelSpacing(1);
-                    yPixel = dSliceThickness;                                       
-                    
+                    yPixel = dSliceThickness;
+
                     xImageSize = aImageSize(1);
 %                     yImageSize = aImageSize(3);
-            
+
                 case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) % Sagittal
                     xPixel = atMetaData{1}.PixelSpacing(2);
                     yPixel = dSliceThickness;
@@ -1883,17 +1883,17 @@ function setRoiToolbar(sVisible)
                     yPixel = atMetaData{1}.PixelSpacing(2);
 
                     xImageSize = aImageSize(1);
-%                     yImageSize = aImageSize(2);                    
+%                     yImageSize = aImageSize(2);
             end
 
             if xPixel == 0
                 xPixel = 1;
             end
-            
+
             if yPixel == 0
                 yPixel = 1;
             end
-if 0            
+if 0
             dSphereDiameter = brush2dDefaultDiameter('get'); % in mm
 else
             dSphereDiameter = (xImageSize/10)*xPixel;
@@ -1905,9 +1905,9 @@ end
                 dSemiAxesY = dSphereDiameter/yPixel/2; % In pixel
             else
                 dSemiAxesX = xPixel/2;
-                dSemiAxesY = yPixel/2;                
+                dSemiAxesY = yPixel/2;
             end
-                        
+
             pRoiPtr  = images.roi.Ellipse(pAxe, ...
                                           'Center'             , [clickedPtX clickedPtY], ...
                                           'SemiAxes'           , [dSemiAxesX dSemiAxesY], ...
@@ -1925,15 +1925,15 @@ end
                                           'UserData'           , '2Dbrush', ...
                                           'Visible'            , 'on' ...
                                           );
-                         
+
             brush2Dptr('set', pRoiPtr);
 
             if ~isvalid(t2Dbrush)
                 return;
             end
-            
+
             if strcmpi(get(t2Dbrush, 'State'), 'off')
-                
+
                 roiSetAxeBorder(false);
 
 %                            windowButton('set', 'up');
@@ -1952,10 +1952,10 @@ end
             windowButton('set', 'up');
             mouseFcn('set');
             mainToolBarEnable('on');
-            
+
 
         end
-              
+
     end
 
     function setContinuousCallback(hObject, ~)
@@ -1978,18 +1978,18 @@ end
             setCrossVisibility(true);
         end
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');            
-        drawnow;    
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;
     end
 
-    function set2DBrushCallback(hObject, ~)   
+    function set2DBrushCallback(hObject, ~)
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
-           isVsplash('get')          == true       
+           isVsplash('get')          == true
            set(hObject, 'State', 'off');
            return;
         end
@@ -2016,28 +2016,28 @@ end
             atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
             if ~isempty(atRoiInput) && isVsplash('get') == false
-            
+
                 numRoiInputs = numel(atRoiInput);
-                
+
                 for bb = 1:numRoiInputs
 
                     currentRoi = atRoiInput{bb};
-                    
+
                     if isvalid(currentRoi.Object)
 
                         currentDistances = currentRoi.MaxDistances;
-        
-                         if ~isempty(currentDistances) 
+
+                         if ~isempty(currentDistances)
                             currentDistances.MaxXY.Line.Visible = 'off';
                             currentDistances.MaxCY.Line.Visible = 'off';
                             currentDistances.MaxXY.Text.Visible = 'off';
-                            currentDistances.MaxCY.Text.Visible = 'off';                        
-                         end       
+                            currentDistances.MaxCY.Text.Visible = 'off';
+                         end
                     end
                 end
 
                 set(tFarthest, 'State', 'off');
-            end 
+            end
         end
 
         if is2DBrush('get') == false
@@ -2052,8 +2052,8 @@ end
             set(t5 , 'Enable', 'off');
             set(t6 , 'Enable', 'off');
             set(t8 , 'Enable', 'off');
-            set(t11, 'Enable', 'off');     
-            set(t12, 'Enable', 'off');     
+            set(t11, 'Enable', 'off');
+            set(t12, 'Enable', 'off');
             set(tFarthest, 'Enable', 'off');
 
             atRoiInput = roiTemplate('get', dSeriesOffset);
@@ -2069,34 +2069,34 @@ end
             if strcmpi(get(t2Dbrush, 'State'), 'on')
 
                 pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
-    
+
                 switch pAxe
-            
+
                     case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
                     case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                        
+
                     otherwise
                         return;
                 end
 
                 roiSetAxeBorder(true, pAxe);
-        
-                isAxe      = pAxe == axePtr  ('get', [], dSeriesOffset); 
-                isCoronal  = pAxe == axes1Ptr('get', [], dSeriesOffset); 
+
+                isAxe      = pAxe == axePtr  ('get', [], dSeriesOffset);
+                isCoronal  = pAxe == axes1Ptr('get', [], dSeriesOffset);
                 isSagittal = pAxe == axes2Ptr('get', [], dSeriesOffset);
                 isAxial    = pAxe == axes3Ptr('get', [], dSeriesOffset);
-    
+
                 if isAxe
                     set(uiOneWindowPtr('get'), 'HighlightColor', [1 0 0]);
                 elseif isCoronal
-                    set(uiCorWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
-                elseif isSagittal 
-                    set(uiSagWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
+                    set(uiCorWindowPtr('get'), 'HighlightColor', [1 0 0]);
+                elseif isSagittal
+                    set(uiSagWindowPtr('get'), 'HighlightColor', [1 0 0]);
                 elseif isAxial
-                    set(uiTraWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
-                end          
+                    set(uiTraWindowPtr('get'), 'HighlightColor', [1 0 0]);
+                end
             end
         else
             is2DBrush('set', false);
@@ -2117,8 +2117,8 @@ end
                         set(atRoiInput{rr}.Object, 'InteractionsAllowed', 'all');
 
                         if strcmpi(atRoiInput{rr}.Object.Type, 'images.roi.freehand') || ...
-                           strcmpi(atRoiInput{rr}.Object.Type, 'images.roi.assistedfreehand') 
-                           
+                           strcmpi(atRoiInput{rr}.Object.Type, 'images.roi.assistedfreehand')
+
                             if isempty(find(atRoiInput{rr}.Waypoints, 1))
                                 atRoiInput{rr}.Object.Waypoints(:) = false;
                                 atRoiInput{rr}.Waypoints = atRoiInput{rr}.Object.Waypoints;
@@ -2141,8 +2141,8 @@ end
             set(t5 , 'Enable', 'on');
             set(t6 , 'Enable', 'on');
             set(t8 , 'Enable', 'on');
-            set(t11, 'Enable', 'on');         
-            set(t12, 'Enable', 'on');         
+            set(t11, 'Enable', 'on');
+            set(t12, 'Enable', 'on');
             set(tFarthest, 'Enable', 'on');
         end
 

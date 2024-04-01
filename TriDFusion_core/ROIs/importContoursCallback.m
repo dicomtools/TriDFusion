@@ -28,6 +28,7 @@ function importContoursCallback(~, ~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     atInput = inputTemplate('get');
+    
     if isempty(atInput)
         return;
     end

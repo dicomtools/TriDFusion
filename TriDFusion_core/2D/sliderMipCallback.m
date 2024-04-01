@@ -27,10 +27,21 @@ function sliderMipCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    if size(dicomBuffer('get'), 3) == 1
+        return;
+    end
+
+    if isVsplash('get') == true
+        return;
+    end
+
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+    dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
+
     if get(uiSliderMipPtr('get'), 'Value') >= 0 && ...
-       get(uiSliderMipPtr('get'), 'Value') <= 1 && ...       
-       strcmpi(windowButton('get'), 'up')         
+       get(uiSliderMipPtr('get'), 'Value') <= 1     
         
+    
         if get(uiSliderMipPtr('get'), 'Value') == 1 
             iMipAngle = 32;
         elseif get(uiSliderMipPtr('get'), 'Value') == 0
@@ -44,25 +55,88 @@ function sliderMipCallback(~, ~)
      
         mipAngle('set', iMipAngle);
         
-        imComputedMip = mipBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
-        imMip = imMipPtr ('get', [], get(uiSeriesPtr('get'), 'Value'));        
+        imComputedMip = mipBuffer('get', [], dSeriesOffset);
+        imMip = imMipPtr ('get', [], dSeriesOffset);        
         imMip.CData = permute(imComputedMip(iMipAngle,:,:), [3 2 1]);
         
         dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+
+        imMipR      = [];
+        imMipG      = [];
+        imMipB      = [];
+
         for rr=1:dNbFusedSeries
 
-           imMf = mipFusionBuffer('get', [], rr);                  
+           imMf = mipFusionBuffer('get', [], rr);
 
            if ~isempty(imMf)
-                imMipF = imMipFPtr('get', [], rr);        
+                imMipF = imMipFPtr('get', [], rr);
                 if ~isempty(imMipF)
 
-                    imMipF.CData = permute(imMf(iMipAngle,:,:), [3 2 1]); 
+                    imMipF.CData = permute(imMf(iMipAngle,:,:), [3 2 1]);
+
+                    if isCombineMultipleFusion('get') == true
+
+                        if invertColor('get')
+                            aRedColorMap   = flipud(getRedColorMap());
+                            aGreenColorMap = flipud(getGreenColorMap());
+                            aBlueColorMap  = flipud(getBlueColorMap());
+                        else
+                            aRedColorMap   = getRedColorMap();
+                            aGreenColorMap = getGreenColorMap();
+                            aBlueColorMap  = getBlueColorMap();
+                        end
+
+                        if colormap(imMipF.Parent) == aRedColorMap
+                            imMipR  = imMipF.CData;
+                        end
+
+                        if colormap(imMipF.Parent) == aGreenColorMap
+                            imMipG  = imMipF.CData;
+                        end
+
+                        if colormap(imMipF.Parent) == aBlueColorMap
+                            imMipB  = imMipF.CData;
+                        end
+                    end
+                end
+            end
+        end
+
+        if isCombineMultipleFusion('get') == true
+
+            cData = combineRGB(imMipR, imMipG, imMipB, 'Mip');
+            if ~isempty(cData)
+                imMipF = imMipFPtr('get', [], dFusionSeriesOffset);
+                if ~isempty(imMipF)
+                    imMipF.CData = cData;
+                end
+            end
+        end
+
+        if isPlotContours('get') == true
+
+           imf = squeeze(fusionBuffer('get', [], dFusionSeriesOffset));
+           if ~isempty(imf)
+
+                sUnitDisplay = getSerieUnitValue(dFusionSeriesOffset);
+                if strcmpi(sUnitDisplay, 'SUV')
+                    tQuantification = quantificationTemplate('get', [], dFusionSeriesOffset);
+                    if atInputTemplate(dFusionSeriesOffset).bDoseKernel == false
+                        if ~isempty(tQuantification)
+                            imMf = imMf*tQuantification.tSUV.dScale;
+                        end
+                    end
                 end
 
-           end
+                imMipFc = imMipFcPtr('get', [], dFusionSeriesOffset);
+ 
+                if ~isempty(imMipFc)
+                    imMipFc.ZData  = permute(imMf(iMipAngle,:,:), [3 2 1]);
+                end
+            end
         end
-        
+
         if overlayActivate('get') == true 
             
             sAxeMipText = sprintf('\n%d/32', iMipAngle);                  

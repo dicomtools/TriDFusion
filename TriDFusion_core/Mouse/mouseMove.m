@@ -93,7 +93,9 @@ function mouseMove(~, ~)
                     if isMoveImageActivated('get') == true
                         rotateFusedImage(false);                    
                     else
-                        adjWL();
+                        if strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow')
+                            adjWL();
+                        end
                     end
                 else
                     if isMoveImageActivated('get') == true

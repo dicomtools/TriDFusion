@@ -60,59 +60,80 @@ function setFusionCallback(~, ~)
             dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
             atFusionMetaData = atInputTemplate(dFusionSeriesOffset).atDicomInfo;
 
-            if ~isempty(volFusionObj) && switchTo3DMode('get') == true
-                [aFusionMap, sFusionType] = getVolFusionAlphaMap('get', fusionBuffer('get', [], dFusionSeriesOffset), atFusionMetaData);
+            if ~isempty(volFusionObj) && ...
+               switchTo3DMode('get') == true
 
-                set(volFusionObj, 'Alphamap', aFusionMap);
-                set(volFusionObj, 'Colormap', get3DColorMap('get', colorMapVolFusionOffset('get') ));
+                if isempty(viewer3dObject('get'))
 
-                volFusionObject('set', volFusionObj);
+                    [aFusionMap, sFusionType] = getVolFusionAlphaMap('get', fusionBuffer('get', [], dFusionSeriesOffset), atFusionMetaData);
+    
+                    set(volFusionObj, 'Alphamap', aFusionMap);
+                    set(volFusionObj, 'Colormap', get3DColorMap('get', colorMapVolFusionOffset('get') ));
+    
+                    volFusionObject('set', volFusionObj);
+    
+                    if get(ui3DVolumePtr('get'), 'Value') == 2
 
-                if get(ui3DVolumePtr('get'), 'Value') == 2
-                    if strcmpi(sFusionType, 'custom')
-                        ic = customAlphaCurve(axe3DPanelVolAlphmapPtr('get'),  volFusionObj, 'volfusion');
-                        ic.surfObj = volFusionObj;
-
-                        volICFusionObject('set', ic);
-
-                        alphaCurveMenu(axe3DPanelVolAlphmapPtr('get'), 'volfusion');
-                    else
-                        displayAlphaCurve(aFusionMap, axe3DPanelMipAlphmapPtr('get'));
+                        if strcmpi(sFusionType, 'custom')
+                            ic = customAlphaCurve(axe3DPanelVolAlphmapPtr('get'),  volFusionObj, 'volfusion');
+                            ic.surfObj = volFusionObj;
+    
+                            volICFusionObject('set', ic);
+    
+                            alphaCurveMenu(axe3DPanelVolAlphmapPtr('get'), 'volfusion');
+                        else
+                            displayAlphaCurve(aFusionMap, axe3DPanelMipAlphmapPtr('get'));
+                        end
                     end
+                else
+                    set(volFusionObj, 'Visible', 'on');
                 end
 
             end
 
-            if ~isempty(mipFusionObj) && switchToMIPMode('get') == true
+            if ~isempty(mipFusionObj) && ...
+               switchToMIPMode('get') == true
 
-                [aFusionMap, sFusionType] = getMipFusionAlphaMap('get', fusionBuffer('get', [], dFusionSeriesOffset), atFusionMetaData);
+                if isempty(viewer3dObject('get'))
 
-                set(mipFusionObj, 'Alphamap', aFusionMap);
-                set(mipFusionObj, 'Colormap', get3DColorMap('get', colorMapMipFusionOffset('get') ));
-
-                mipFusionObject('set', mipFusionObj);
-
-                if get(ui3DVolumePtr('get'), 'Value') == 2
-                    if strcmpi(sFusionType, 'custom')
-                        ic = customAlphaCurve(axe3DPanelMipAlphmapPtr('get'),  mipFusionObj, 'mipfusion');
-                        ic.surfObj = mipFusionObj;
-
-                        mipICFusionObject('set', ic);
-
-                        alphaCurveMenu(axe3DPanelMipAlphmapPtr('get'), 'mipfusion');
-                    else
-                        displayAlphaCurve(aFusionMap, axe3DPanelMipAlphmapPtr('get'));
+                    [aFusionMap, sFusionType] = getMipFusionAlphaMap('get', fusionBuffer('get', [], dFusionSeriesOffset), atFusionMetaData);
+    
+                    set(mipFusionObj, 'Alphamap', aFusionMap);
+                    set(mipFusionObj, 'Colormap', get3DColorMap('get', colorMapMipFusionOffset('get') ));
+    
+                    mipFusionObject('set', mipFusionObj);
+    
+                    if get(ui3DVolumePtr('get'), 'Value') == 2
+                        if strcmpi(sFusionType, 'custom')
+                            ic = customAlphaCurve(axe3DPanelMipAlphmapPtr('get'),  mipFusionObj, 'mipfusion');
+                            ic.surfObj = mipFusionObj;
+    
+                            mipICFusionObject('set', ic);
+    
+                            alphaCurveMenu(axe3DPanelMipAlphmapPtr('get'), 'mipfusion');
+                        else
+                            displayAlphaCurve(aFusionMap, axe3DPanelMipAlphmapPtr('get'));
+                        end
                     end
+                else
+                    set(mipFusionObj, 'Visible', 'on');
                 end
 
             end
 
-            if ~isempty(isoFusionObj) && switchToIsoSurface('get')
+            if ~isempty(isoFusionObj) && ...
+                switchToIsoSurface('get')
 
-                set(isoFusionObj, 'Isovalue', isoSurfaceFusionValue('get'));
-                set(isoFusionObj, 'IsosurfaceColor', surfaceColor('get', isoColorFusionOffset('get')) );
+                if isempty(viewer3dObject('get'))
+    
+                    set(isoFusionObj, 'Isovalue', isoSurfaceFusionValue('get'));
+                    set(isoFusionObj, 'IsosurfaceColor', surfaceColor('get', isoColorFusionOffset('get')) );
+    
+                    isoFusionObject('set', isoFusionObj);
+                else
+                    set(isoFusionObj, 'Visible', 'on');
+                end
 
-                isoFusionObject('set', isoFusionObj);
             end
 
        else
@@ -122,25 +143,43 @@ function setFusionCallback(~, ~)
             set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
             set(btnFusionPtr('get'), 'FontWeight', 'normal');
 
-            if ~isempty(volFusionObj)
-                volFusionObj.Alphamap = zeros(256,1);
-                volFusionObject('set', volFusionObj);
-                if get(ui3DVolumePtr('get'), 'Value') == 2
-                    displayAlphaCurve(zeros(256,1), axe3DPanelVolAlphmapPtr('get'));
-                end
-            end
+            if isempty(viewer3dObject('get'))
 
-            if ~isempty(mipFusionObj)
-                mipFusionObj.Alphamap = zeros(256,1);
-                mipFusionObject('set', mipFusionObj);
-                if get(ui3DVolumePtr('get'), 'Value') == 2
-                    displayAlphaCurve(zeros(256,1), axe3DPanelMipAlphmapPtr('get'));
+                if ~isempty(volFusionObj)
+                    volFusionObj.Alphamap = zeros(256,1);
+                    volFusionObject('set', volFusionObj);
+                    if get(ui3DVolumePtr('get'), 'Value') == 2
+                        displayAlphaCurve(zeros(256,1), axe3DPanelVolAlphmapPtr('get'));
+                    end
                 end
-            end
+    
+                if ~isempty(mipFusionObj)
+                    mipFusionObj.Alphamap = zeros(256,1);
+                    mipFusionObject('set', mipFusionObj);
+                    if get(ui3DVolumePtr('get'), 'Value') == 2
+                        displayAlphaCurve(zeros(256,1), axe3DPanelMipAlphmapPtr('get'));
+                    end
+                end
+    
+                if ~isempty(isoFusionObj)
+                    isoFusionObj.Isovalue = 1;
+                    isoFusionObject('set', isoFusionObj);
+                end
+            else
+                if ~isempty(isoFusionObj)
 
-            if ~isempty(isoFusionObj)
-                isoFusionObj.Isovalue = 1;
-                isoFusionObject('set', isoFusionObj);
+                    set(isoFusionObj, 'Visible', 'off');
+                end
+
+                if ~isempty(mipFusionObj)
+
+                    set(mipFusionObj, 'Visible', 'off');
+                end
+
+                if ~isempty(volFusionObj)
+
+                    set(volFusionObj, 'Visible', 'off');
+                end               
             end
        end
     else
@@ -242,7 +281,8 @@ function setFusionCallback(~, ~)
                               );    
                 uiAlphaSliderPtr('set', uiAlphaSlider);                  
 
-                addlistener(uiAlphaSlider,'Value','PreSet',@sliderAlphaCallback);                        
+                % addlistener(uiAlphaSlider,'Value','PreSet',@sliderAlphaCallback);                        
+                addlistener(uiAlphaSlider, 'ContinuousValueChange', @sliderAlphaCallback);
 
                 set(uiAlphaSlider, 'Visible', 'off');   
          
@@ -317,23 +357,21 @@ end
                 axeF = ...
                    axes(uiOneWindowPtr('get'), ...
                         'Units'   , 'normalized', ...
-                        'Ydir'    , 'reverse', ...
-                        'xlimmode', 'manual',...
-                        'ylimmode', 'manual',...
-                        'zlimmode', 'manual',...
-                        'climmode', 'manual',...
-                        'alimmode', 'manual',...
                         'Position', [0 0 1 1], ...
-                        'color'   , 'none',...
-                        'Tag'     , 'axeF', ...
-                        'Visible' , 'off'...
+                        'Visible' , 'off', ...
+                        'Ydir'    , 'reverse', ...
+                        'Tag'     , 'axeF', ...   
+                        'XLim'    , [0 inf], ...
+                        'YLim'    , [0 inf], ...
+                        'CLim'    , [0 inf] ...
                         );
                 axeF.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
                 axeF.Toolbar.Visible = 'off';                
                 axis(axeF, 'tight');
                 axefPtr('set', axeF, get(uiFusedSeriesPtr('get'), 'Value'));
+                disableDefaultInteractivity(axeF);
 
-%                linkaxes([axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                                
+                linkaxes([axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                                
                 uistack(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
                 
                 axAxefText = ...
@@ -352,6 +390,7 @@ end
                          );
                 axAxefText.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
                 axAxefText.Toolbar.Visible = 'off'; 
+                disableDefaultInteractivity(axAxefText);
 
                 if isfield(atFusionMetaData{1}, 'SeriesDescription')
                     sFusedSeriesDescription = atFusionMetaData{1}.SeriesDescription;
@@ -427,39 +466,34 @@ end
                 
                 imf = squeeze(fusionBuffer('get', [], dFusionSeriesOffset));    
                 
-                if is3DEngine('get') == true
-                    if gaussFilter('get') == true
-                       imAxeF = surface(imgaussfilt(imf)   , ...
-                                        'linestyle', 'none', ...
-                                        'Parent'   , axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                        );                                               
-                    else    
-                       imAxeF = surface(imf, ...
-                                       'linestyle', 'none', ...
-                                       'Parent'   , axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                       ); 
-                    end                
+                if gaussFilter('get') == true
 
                     if isShading('get')
-                        shading(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'interp');
-                   else
-                        shading(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'flat');
-                   end
-                   
-                   set(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'ydir', 'reverse'); % Patch
 
-                else
-                     if gaussFilter('get') == true
-                       imAxeF = imshow(imgaussfilt(imf, 1), ...
-                                        'Parent', axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                        );
+                        imAxeF = imshow(imgaussfilt(imf)   , ...
+                                        'Parent'       , axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                        'Interpolation', 'bilinear'... 
+                                        );    
+                    else
+                        imAxeF = imshow(imgaussfilt(imf)   , ...
+                                        'Parent'       , axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                        'Interpolation', 'nearest'... 
+                                        );                        
+                    end
+                else    
+                    if isShading('get')
+                        imAxeF = imshow(imf, ...
+                                        'Parent'   , axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                        'Interpolation', 'bilinear'... 
+                                        ); 
                     else
                         imAxeF = imshow(imf, ...
-                                         'Parent', axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                         );
+                                       'Parent'   , axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                       'Interpolation', 'nearest'... 
+                                        );                         
                     end
+                end                
 
-                end
                 
                 set(imAxeF, 'Visible', 'off'); 
                 set(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); % Patch
@@ -507,31 +541,29 @@ end
                 
                 if ~isempty(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')))
                     if isvalid(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')))
-%                        cla(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),'reset');
+ %                       cla(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),'reset');
                         delete(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
                     end
                 end
-                    
+
                 axes1f = ...
                    axes(uiCorWindowPtr('get'), ...
                         'Units'   , 'normalized', ...
-                        'Ydir'    , 'reverse', ...
-                        'xlimmode', 'manual',...
-                        'ylimmode', 'manual',...
-                        'zlimmode', 'manual',...
-                        'climmode', 'manual',...
-                        'alimmode', 'manual',...
                         'Position', [0 0 1 1], ...
-                        'color'   , 'none',...
-                        'Tag'     , 'axes1f', ...
-                        'Visible' , 'off'...
+                        'Visible' , 'off', ...
+                        'Ydir'    , 'reverse', ...
+                        'Tag'     , 'axes1f', ...   
+                        'XLim'    , [0 inf], ...
+                        'YLim'    , [0 inf], ...
+                        'CLim'    , [0 inf] ...
                         );
                 axes1f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
                 axes1f.Toolbar.Visible = 'off';                 
                 axis(axes1f, 'tight');
                 axes1fPtr('set', axes1f, get(uiFusedSeriesPtr('get'), 'Value'));
+                disableDefaultInteractivity(axes1f);
                 
-%                linkaxes([axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                
+                linkaxes([axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xyz');                
                 uistack(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
 
                 if ~isempty(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')))
@@ -544,23 +576,21 @@ end
                 axes2f = ...
                    axes(uiSagWindowPtr('get'), ...
                         'Units'   , 'normalized', ...
-                        'Ydir'    , 'reverse', ...
-                        'xlimmode', 'manual',...
-                        'ylimmode', 'manual',...
-                        'zlimmode', 'manual',...
-                        'climmode', 'manual',...
-                        'alimmode', 'manual',...
                         'Position', [0 0 1 1], ...
-                        'color'   , 'none',...
-                        'Tag'     , 'axes2f', ...
-                        'Visible' , 'off'...
+                        'Visible' , 'off', ...
+                        'Ydir'    , 'reverse', ...
+                        'Tag'     , 'axes2f', ...   
+                        'XLim'    , [0 inf], ...
+                        'YLim'    , [0 inf], ...
+                        'CLim'    , [0 inf] ...
                         );
                 axes2f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
                 axes2f.Toolbar.Visible = 'off';                  
                 axis(axes2f, 'tight');
                 axes2fPtr('set', axes2f, get(uiFusedSeriesPtr('get'), 'Value'));
+                disableDefaultInteractivity(axes2f);
 
-%                linkaxes([axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                
+                linkaxes([axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                
                 uistack(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
                 
                 if ~isempty(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')))
@@ -573,32 +603,30 @@ end
                 axes3f = ...
                    axes(uiTraWindowPtr('get'), ...
                         'Units'   , 'normalized', ...
-                        'Ydir'    , 'reverse', ...
-                        'xlimmode', 'manual',...
-                        'ylimmode', 'manual',...
-                        'zlimmode', 'manual',...
-                        'climmode', 'manual',...
-                        'alimmode', 'manual',...
                         'Position', [0 0 1 1], ...
-                        'color'   , 'none',...
-                        'Tag'     , 'axes3f', ...
-                        'Visible' , 'off'...
+                        'Visible' , 'off', ...
+                        'Tag'     , 'axes3f', ...   
+                        'Ydir'    ,'reverse', ...
+                        'XLim'    , [0 inf], ...
+                        'YLim'    , [0 inf], ...
+                        'CLim'    , [0 inf] ...
                         );
                 axes3f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
                 axes3f.Toolbar.Visible = 'off';                 
                 axis(axes3f, 'tight');
-                
+                disableDefaultInteractivity(axes3f);
+               
 %                axes3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')  );
 %                set(axes3f, 'XLim', axes3.XLim);
 %                set(axes3f, 'YLim', axes3.YLim); 
                 
                 axes3fPtr('set', axes3f, get(uiFusedSeriesPtr('get'), 'Value'));
              
-%                linkaxes([axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))], 'xy');                
+                linkaxes([axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))], 'xy');                
                 uistack(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');
                 
                 % Set fusion display text
-                
+               
                 axAxes3fText = ...
                     axes(uiTraWindowPtr('get'), ...
                          'Units'   , 'normalized', ...
@@ -615,6 +643,7 @@ end
                          );
                 axAxes3fText.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
                 axAxes3fText.Toolbar.Visible = 'off';      
+                disableDefaultInteractivity(axAxes3fText);
 
                 if isfield(atFusionMetaData{1}, 'SeriesDescription')
                     sFusedSeriesDescription = atFusionMetaData{1}.SeriesDescription;
@@ -681,24 +710,22 @@ end
                     axesMipf = ...
                        axes(uiMipWindowPtr('get'), ...
                             'Units'   , 'normalized', ...
-                            'Ydir'    , 'reverse', ...
-                            'xlimmode', 'manual',...
-                            'ylimmode', 'manual',...
-                            'zlimmode', 'manual',...
-                            'climmode', 'manual',...
-                            'alimmode', 'manual',...
                             'Position', [0 0 1 1], ...
-                            'color'   , 'none',...
-                            'Tag'     , 'axesMipf',...
-                            'Visible' , 'off'...
+                            'Visible' , 'off', ...
+                            'Ydir'    ,'reverse', ...
+                            'Tag'     , 'axeMipf', ...   
+                            'XLim'    , [0 inf], ...
+                            'YLim'    , [0 inf], ...
+                            'CLim'    , [0 inf] ...
                             );
                     axesMipf.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
                     axesMipf.Toolbar.Visible = 'off';  
+                    disableDefaultInteractivity(axesMipf);
 
                     axis(axesMipf, 'tight');
                     axesMipfPtr('set', axesMipf, get(uiFusedSeriesPtr('get'), 'Value'));
 
-%                    linkaxes([axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                
+                    linkaxes([axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                
                     uistack(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'bottom');                    
                 end                                                             
                 
@@ -811,6 +838,7 @@ end
             
 
                 fusionBuffer('set', B, dFusionSeriesOffset);  
+                fusionMetaData('set', atFusionMetaData, dFusionSeriesOffset);  
                 
                 if isVsplash('get') == false      
                     mipFusionBufferOffset('set', dFusionSeriesOffset);
@@ -838,43 +866,35 @@ end
                 
                     imComputed = computeMontage(imf, 'coronal', iCoronal);    
 
-                    if is3DEngine('get') == true
+                    if gaussFilter('get') == true
 
-                        if gaussFilter('get') == true
-
-                            imCoronalF = surface(imgaussfilt(imComputed, 1), ...
-                                                 'linestyle', 'none', ...
-                                                 'Parent'   , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                 );                                      
-                        else      
-                            imCoronalF = surface(imComputed, ...
-                                                 'linestyle','none', ...
-                                                 'Parent'   , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                 ); 
-                        end
-                        
                         if isShading('get')
 
-                            shading(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'interp');
-                            shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'interp');
+                            imCoronalF = imshow(imgaussfilt(imComputed), ...
+                                                'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                                'Interpolation', 'bilinear'... 
+                                                );        
                         else
-                            shading(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'flat');
-                            shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'flat');
+                            imCoronalF = imshow(imgaussfilt(imComputed), ...
+                                                'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                                'Interpolation', 'nearest'... 
+                                                );                                      
                         end
-                        
-                        set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'ydir', 'reverse'); % Patch
+                    else      
+                        if isShading('get')
 
-                    else
-                        if gaussFilter('get') == true   
-                            imCoronalF = imshow(imgaussfilt(imComputed, 1),  ...
-                                                'Parent', axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                );                                        
+                            imCoronalF = imshow(imComputed, ...
+                                                'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                                'Interpolation', 'bilinear'... 
+                                                );                             
                         else
-                            imCoronalF = imshow(imComputed,  ...
-                                                'Parent', axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                );                         
+                            imCoronalF = imshow(imComputed, ...
+                                                'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                                'Interpolation', 'nearest'... 
+                                                ); 
                         end
                     end
+ 
 
                     imCoronalFPtr('set', imCoronalF, get(uiFusedSeriesPtr('get'), 'Value')); 
 
@@ -882,45 +902,36 @@ end
 %                     imCoronalF.CData = imComputed;                         
 
                 else                       
+               
+                    if gaussFilter('get') == true
 
-                    if is3DEngine('get') == true
-                        
-                        if gaussFilter('get') == true
-
-                            imCoronalF = surface(imgaussfilt(permute(imf(iCoronal,:,:), [3 2 1]), 1), ...
-                                                 'linestyle', 'none', ...
-                                                 'Parent'   , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
+                        if isShading('get')
+             
+                            imCoronalF = imshow(imgaussfilt(permute(imf(iCoronal,:,:), [3 2 1])), ...
+                                                'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                                'Interpolation', 'bilinear'... 
+                                                 );   
+                        else
+                            imCoronalF = imshow(imgaussfilt(permute(imf(iCoronal,:,:), [3 2 1])), ...
+                                                'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                                'Interpolation', 'nearest'... 
                                                  );                                      
-                        else      
-                            imCoronalF = surface(permute(imf(iCoronal,:,:), [3 2 1]), ...
-                                                 'linestyle','none', ...
-                                                 'Parent'   , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                 ); 
                         end
-                        
+                    else      
                         if isShading('get')
 
-                            shading(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'interp');
-                            shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'interp');
+                            imCoronalF = imshow(permute(imf(iCoronal,:,:), [3 2 1]), ...
+                                                'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                                'Interpolation', 'bilinear'... 
+                                                ); 
                         else
-                            shading(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'flat');
-                            shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'flat');
+                            imCoronalF = imshow(permute(imf(iCoronal,:,:), [3 2 1]), ...
+                                                'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                                'Interpolation', 'nearest'... 
+                                                );                             
                         end
                         
-                        set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'ydir', 'reverse'); % Patch
-
-                    else
-                         if gaussFilter('get') == true
-                            imCoronalF = imshow(imgaussfilt(permute(imf(iCoronal,:,:), [3 2 1])), ...
-                                                 'Parent', axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                 );                                                                                                                              
-                        else
-                            imCoronalF = imshow(permute(imf(iCoronal,:,:), [3 2 1]),  ...
-                                                 'Parent', axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                 );               
-                         end
                     end
-                    
 
                     imCoronalFPtr('set', imCoronalF, get(uiFusedSeriesPtr('get'), 'Value')); 
                     rightClickMenu('add', imCoronalF);
@@ -942,85 +953,69 @@ end
                 
                     imComputed = computeMontage(imf, 'sagittal', iSagittal);  
 
-                    if is3DEngine('get') == true
-
-                         if gaussFilter('get') == true
-
-                            imSagittalF = surface(imgaussfilt(imComputed, 1), ...
-                                                  'linestyle', 'none', ...
-                                                  'Parent'   , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                  );
-                        else    
-                            imSagittalF = surface(imComputed, ...
-                                                  'linestyle', 'none', ...
-                                                  'Parent'   , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                  );
-                        end
+                    if gaussFilter('get') == true
 
                         if isShading('get')
 
-                            shading(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'interp');
+                            imSagittalF = imshow(imgaussfilt(imComputed), ...
+                                                 'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                                 'Interpolation', 'bilinear'... 
+                                                 );  
                         else
-                            shading(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'flat');
+                            imSagittalF = imshow(imgaussfilt(imComputed), ...
+                                                 'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                                 'Interpolation', 'nearest'... 
+                                                 );                                                                                                  
                         end
-                        
-                        set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'ydir', 'reverse'); % Patch                       
-                    else
+                    else                    
+                        if isShading('get')
 
-                        if gaussFilter('get') == true
-
-                            imSagittalF  = imshow(imgaussfilt(imComputed, 1), ...
-                                                   'Parent', axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                   );                                                                                                  
-                        else                    
-                            imSagittalF  = imshow(imComputed, ...
-                                                   'Parent', axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                   );                                                                                                
+                            imSagittalF = imshow(imComputed, ...
+                                                 'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                                 'Interpolation', 'bilinear'... 
+                                                 );    
+                        else
+                            imSagittalF = imshow(imComputed, ...
+                                                 'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                                 'Interpolation', 'nearest'... 
+                                                 );                            
                         end
                     end
-
+                    
                     imSagittalFPtr('set', imSagittalF, get(uiFusedSeriesPtr('get'), 'Value'));
 
 %                    imSagittalF.CData = imComputed;                           
 
                 else
-
-                    if is3DEngine('get') == true
-                        
-                        if gaussFilter('get') == true
-
-                            imSagittalF = surface(imgaussfilt(permute(imf(:,iSagittal,:), [3 1 2]),1), ...
-                                                  'linestyle', 'none', ...
-                                                  'Parent'   , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                  );
-                        else    
-                            imSagittalF = surface(permute(imf(:,iSagittal,:), [3 1 2]), ...
-                                                  'linestyle', 'none', ...
-                                                  'Parent'   , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                  );
-                        end
+                  
+                     if gaussFilter('get') == true
 
                         if isShading('get')
 
-                            shading(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'interp');
+                            imSagittalF = imshow(imgaussfilt(permute(imf(:,iSagittal,:), [3 1 2])), ...
+                                                 'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                                 'Interpolation', 'bilinear'... 
+                                                 );    
                         else
-                            shading(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'flat');
+                            imSagittalF = imshow(imgaussfilt(permute(imf(:,iSagittal,:), [3 1 2])), ...
+                                                 'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                                 'Interpolation', 'nearest'... 
+                                                 );                                 
                         end
-                        
-                        set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'ydir', 'reverse'); % Patch
-
-                    else                    
-                         if gaussFilter('get') == true
-
-                            imSagittalF  = imshow(imgaussfilt(permute(imf(:,iSagittal,:), [3 1 2])), ...
-                                                   'Parent', axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                   );                                                                                                                               
+                    else
+                        if isShading('get')
+                            imSagittalF = imshow(permute(imf(:,iSagittal,:), [3 1 2]), ...
+                                                 'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                                 'Interpolation', 'bilinear'... 
+                                                 );    
                         else
-                            imSagittalF  = imshow(permute(imf(:,iSagittal,:), [3 1 2]), ...
-                                                   'Parent', axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                   );                                                                                                                              
-                         end
+                            imSagittalF = imshow(permute(imf(:,iSagittal,:), [3 1 2]), ...
+                                                 'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                                 'Interpolation', 'nearest'... 
+                                                 );                              
+                        end
                     end
+                    
 
                     imSagittalFPtr('set', imSagittalF, get(uiFusedSeriesPtr('get'), 'Value'));
                     rightClickMenu('add', imSagittalF);
@@ -1049,84 +1044,69 @@ end
                                                 'axial', size(dicomBuffer('get'), 3)-sliceNumber('get', 'axial')+1 ...
                                                 ); 
 
-                    if is3DEngine('get') == true
-
-                        if gaussFilter('get') == true
-                            
-                            imAxialF = surface(imgaussfilt(imComputed,1), ...
-                                               'linestyle', 'none', ...
-                                               'Parent'   , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                               ); 
-                        else
-                           imAxialF = surface(imComputed, ...
-                                              'linestyle', 'none', ...
-                                              'Parent'   , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                              );                                   
-                        end
+                    if gaussFilter('get') == true    
 
                         if isShading('get')
-
-                            shading(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'interp');
+                            
+                            imAxialF = imshow(imgaussfilt(imComputed),  ...
+                                              'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                              'Interpolation', 'bilinear'... 
+                                              ); 
                         else
-                            shading(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'flat');
-                        end        
-                        
-                        set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'ydir', 'reverse'); % Patch
-
-                    else                        
-                        if gaussFilter('get') == true    
-
-                           imAxialF = imshow(imgaussfilt(imComputed, 1),  ...
-                                              'Parent', axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
+                            imAxialF = imshow(imgaussfilt(imComputed),  ...
+                                              'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                              'Interpolation', 'nearest'... 
                                               );                                                                                                                    
-                        else     
-                           imAxialF = imshow(imComputed,  ...
-                                              'Parent', axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
+                        end
+                    else     
+                        if isShading('get')
+
+                            imAxialF = imshow(imComputed,  ...
+                                              'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                              'Interpolation', 'bilinear'... 
+                                              );                          
+                        else
+                            imAxialF = imshow(imComputed,  ...
+                                              'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                              'Interpolation', 'nearest'... 
                                               );                                                                                    
                         end
                     end
-
+                    
                     imAxialFPtr('set', imAxialF, get(uiFusedSeriesPtr('get'), 'Value'));
-
-    
+   
                   %  imAxialF.CData = imComputed;
 
                 else
-                    if is3DEngine('get') == true
 
-                        if gaussFilter('get') == true
-
-                            imAxialF = surface(imgaussfilt(imf(:,:,iAxial),1), ...
-                                               'linestyle', 'none', ...
-                                               'Parent'   , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                               ); 
-                        else
-                           imAxialF = surface(imf(:,:,iAxial), ...
-                                              'linestyle', 'none', ...
-                                              'Parent'   , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                              );                                   
-                        end
+                    if gaussFilter('get') == true
 
                         if isShading('get')
-                            shading(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'interp');
-                        else
-                            shading(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'flat');
-                        end        
-                        
-                        set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'ydir', 'reverse'); % Patch
-
-                    else
-                        if gaussFilter('get') == true
+                       
                             imAxialF = imshow(imgaussfilt(imf(:,:,iAxial)), ...
-                                               'Parent', axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                               );                                                                                                                               
+                                              'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                              'Interpolation', 'bilinear'... 
+                                              );    
                         else
-                           imAxialF = imshow(imf(:,:,iAxial),  ...
-                                              'Parent', axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
+                            imAxialF = imshow(imgaussfilt(imf(:,:,iAxial)), ...
+                                              'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                              'Interpolation', 'nearest'... 
+                                              );                                
+                        end
+                    else
+                        if isShading('get')
+
+                            imAxialF = imshow(imf(:,:,iAxial),  ...
+                                              'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                              'Interpolation', 'bilinear'... 
+                                              );                                
+                        else
+                            imAxialF = imshow(imf(:,:,iAxial),  ...
+                                              'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                              'Interpolation', 'nearest'... 
                                               );                                                                                                                               
                         end
-
-                    end
+                    end             
 
                     imAxialFPtr('set', imAxialF, get(uiFusedSeriesPtr('get'), 'Value'));
                     rightClickMenu('add', imAxialF);
@@ -1143,44 +1123,40 @@ end
 %                imAxialF.YData = [imAxialF.YData(1)-yMoveOffset imAxialF.YData(2)-yMoveOffset];
                 
                 % Set Mip
-                
+
                 if isVsplash('get') == false 
 
                     imComputedMipF = mipFusionBuffer('get', [], dFusionSeriesOffset);                                  
 
-                    if is3DEngine('get') == true
-                        if gaussFilter('get') == true
-                            imMipF = surface(imgaussfilt(permute(imComputedMipF(iMipAngle,:,:), [3 2 1]), 1), ...
-                                                 'linestyle', 'none', ...
-                                                 'Parent'   , axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                 ); 
-                        else      
-                            imMipF = surface(permute(imComputedMipF(iMipAngle,:,:), [3 2 1]), ...
-                                                 'linestyle','none', ...
-                                                 'Parent'   , axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                 ); 
-                        end
+                    if gaussFilter('get') == true
 
                         if isShading('get')
-                            shading(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'interp');
-                        else
-                            shading(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'flat');
-                        end
-                        
-                         set(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'ydir', 'reverse'); % Patch
-                       
-                    else
-                         if gaussFilter('get') == true
-                            imMipF = imshow(imgaussfilt(permute(imComputedMipF(iMipAngle,:,:), [3 2 1])), ...
-                                                 'Parent', axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                 );                                                                
 
+                            imMipF = imshow(imgaussfilt(permute(imComputedMipF(iMipAngle,:,:), [3 2 1])), ...
+                                            'Parent', axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                            'Interpolation', 'bilinear'... 
+                                            );                                                                
+                        else
+
+                            imMipF = imshow(imgaussfilt(permute(imComputedMipF(iMipAngle,:,:), [3 2 1])), ...
+                                            'Parent', axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                            'Interpolation', 'nearest'... 
+                                            );                              
+                        end
+
+                    else
+                        if isShading('get')
+                            imMipF = imshow(permute(imComputedMipF(iMipAngle,:,:), [3 2 1]),  ...
+                                            'Parent', axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                            'Interpolation', 'bilinear'... 
+                                            );               
                         else
                             imMipF = imshow(permute(imComputedMipF(iMipAngle,:,:), [3 2 1]),  ...
-                                                 'Parent', axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) ...
-                                                 );               
-                         end
-                    end                                             
+                                            'Parent', axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
+                                            'Interpolation', 'nearest'... 
+                                            );                             
+                        end
+                     end
 
                     imMipFPtr('set', imMipF, get(uiFusedSeriesPtr('get'), 'Value'));
                     set(imMipFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
@@ -1603,7 +1579,8 @@ end
                                          );                
                 axeFusionColorbar.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
                 axeFusionColorbar.Toolbar.Visible = 'off';                 
-            else
+                disableDefaultInteractivity(axeFusionColorbar);
+           else
                 axeFusionColorbar = axes(uiTraWindowPtr('get'), ...
                                          'Units'   , 'pixel', ...
                                          'Ydir'    , 'reverse', ...
@@ -1618,8 +1595,8 @@ end
 
                 axeFusionColorbar.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
                 axeFusionColorbar.Toolbar.Visible = 'off';                 
+                disableDefaultInteractivity(axeFusionColorbar);
             end
-
 
             axeFusionColorbarPtr('set', axeFusionColorbar);
     
@@ -2064,9 +2041,9 @@ end
                 aUiTraPosition = get(uiTraWindowPtr('get'), 'Position');
     
                 if isFusion('get') == true
-                    set(btnUiTraWindowFullScreen, 'Position', [aUiTraPosition(3)-73 25 20 20]);
+                    set(btnUiTraWindowFullScreen, 'Position', [aUiTraPosition(3)-73 30 20 20]);
                 else
-                    set(btnUiTraWindowFullScreen, 'Position', [aUiTraPosition(3)-73 5 20 20]);
+                    set(btnUiTraWindowFullScreen, 'Position', [aUiTraPosition(3)-73 10 20 20]);
                 end
             end          
         end
@@ -2091,58 +2068,73 @@ end
             
             % Set fused axes on same field of view
 
-            if size(fusionBuffer('get', [], dFusionSeriesOffset), 3) == 1
+            aFusionSize = size(fusionBuffer('get', [], dFusionSeriesOffset));
 
-                axe  = axePtr ('get', [], get(uiSeriesPtr('get'), 'Value')  );
-                axef = axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
-
-                set(axef, 'XLim', axe.XLim);
-                set(axef, 'YLim', axe.YLim); 
-
-                linkaxes([axe axef], 'xy');                     
-            else
-                
+             if size(fusionBuffer('get', [], dFusionSeriesOffset), 3) == 1
+            % 
+                 axe  = axePtr ('get', [], get(uiSeriesPtr('get'), 'Value')  );
+                 axef = axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+            % 
+            %     set(axef, 'XLim', axe.XLim);
+            %     set(axef, 'YLim', axe.YLim); 
+            % 
+                 set(axef, 'XLim', [0 aFusionSize(2)]);
+                 set(axef, 'YLim', [0 aFusionSize(1)])
+                 linkaxes([axe axef], 'xy');                     
+             else
                 axes1  = axes1Ptr ('get', [], get(uiSeriesPtr('get'), 'Value')  );
                 axes1f = axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
 
-                set(axes1f, 'XLim', axes1.XLim);
-                set(axes1f, 'YLim', axes1.YLim); 
+                % set(axes1f, 'XLim', axes1.XLim);
+                % set(axes1f, 'YLim', axes1.YLim); 
+
+                set(axes1f, 'XLim', [0 aFusionSize(2)]);
+                set(axes1f, 'YLim', [0 aFusionSize(3)]); 
 
                 linkaxes([axes1 axes1f], 'xy'); 
 
                 axes2  = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')  );
                 axes2f = axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
 
-                set(axes2f, 'XLim', axes2.XLim);
-                set(axes2f, 'YLim', axes2.YLim); 
+                % set(axes2f, 'XLim', axes2.XLim);
+                % set(axes2f, 'YLim', axes2.YLim); 
+
+                set(axes2f, 'XLim', [0 aFusionSize(1)]);
+                set(axes2f, 'YLim', [0 aFusionSize(3)]); 
 
                 linkaxes([axes2 axes2f], 'xy'); 
 
                 axes3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')  );
                 axes3f = axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
-
-                set(axes3f, 'XLim', axes3.XLim);
-                set(axes3f, 'YLim', axes3.YLim); 
+                % 
+                % set(axes3f, 'XLim', axes3.XLim);
+                % set(axes3f, 'YLim', axes3.YLim); 
+                set(axes3f, 'XLim', [0 aFusionSize(2)]);
+                set(axes3f, 'YLim', [0 aFusionSize(1)]); 
 
                 linkaxes([axes3 axes3f], 'xy');                 
-                               
+
                 if isVsplash('get') == false         
-                    
+
                     axesMip  = axesMipPtr ('get', [], get(uiSeriesPtr('get'), 'Value'));
                     axesMipf = axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
-                    
-                    set(axesMipf, 'XLim', axesMip.XLim);
-                    set(axesMipf, 'YLim', axesMip.YLim); 
+
+                    % set(axesMipf, 'XLim', axesMip.XLim);
+                    % set(axesMipf, 'YLim', axesMip.YLim); 
+
+                    set(axesMipf, 'XLim', [0 aFusionSize(2)]);
+                    set(axesMipf, 'YLim', [0 aFusionSize(3)]);
 
                     linkaxes([axesMip axesMipf], 'xy');               
                 end                                
             end
                         
             if size(dicomBuffer('get'), 3) == 1
+
                 set( imAxeFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , 'Visible', 'on' );
 
-                alpha( axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
-                alpha( axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 1-get(uiAlphaSliderPtr('get'), 'Value') );   
+                alpha( imAxeFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
+                alpha( imAxePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 1-get(uiAlphaSliderPtr('get'), 'Value') );   
 
                 axef = axefPtr('get', [], get(uiSeriesPtr('get'), 'Value'));    
                 axef.Toolbar.Visible = 'off';
@@ -2168,20 +2160,20 @@ end
                     axeMipf.Toolbar.Visible = 'off';                    
                 end
 
-                alpha( axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
-                alpha( axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
-                alpha( axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
+                alpha( imCoronalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
+                alpha( imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
+                alpha( imAxialFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
                 
                 if link2DMip('get') == true && isVsplash('get') == false      
-                    alpha( axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );                                
+                    alpha( imMipFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );                                
                 end 
 
-                alpha( axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
-                alpha( axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
-                alpha( axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+                alpha( imCoronalPtr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+                alpha( imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+                alpha( imAxialPtr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
                 
                 if link2DMip('get') == true && isVsplash('get') == false      
-                    alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-get(uiAlphaSliderPtr('get'), 'Value') );                                
+                    alpha( imMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-get(uiAlphaSliderPtr('get'), 'Value') );                                
                 end 
             end
 
@@ -2266,26 +2258,32 @@ end
                     axesMipfPtr ('reset');
                     axesMipfcPtr('reset');
                 end
-                
-                axes1 = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                axes2 = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                axes3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
 
-                if ~isempty(axes1) && ...
-                   ~isempty(axes2) && ...
-                   ~isempty(axes3)
-                    alpha( axes1, 1 );
-                    alpha( axes2, 1 );
-                    alpha( axes3, 1 );
+                imCoronal = imCoronalPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                imSagittal = imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                imAxial = imAxialPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+                % axes1 = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                % axes2 = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                % axes3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+                if ~isempty(imCoronal) && ...
+                   ~isempty(imSagittal) && ...
+                   ~isempty(imAxial)
+                    alpha( imCoronal, 1 );
+                    alpha( imSagittal, 1 );
+                    alpha( imAxial, 1 );
                 end
                 
                 if link2DMip('get') == true && isVsplash('get') == false      
 
                     mipFusionBuffer('reset');               
-                    
-                    axesMip = axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                    if ~isempty(axesMip)
-                        alpha(axesMip, 1 );                                
+
+                    imMip = imMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+                    % axesMip = axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                    if ~isempty(imMip)
+                        alpha(imMip, 1 );                                
                     end
                 end                 
             end      
@@ -2420,6 +2418,7 @@ end
                         daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z y x]);
                     end                                
                 end
+
             end
 
         end

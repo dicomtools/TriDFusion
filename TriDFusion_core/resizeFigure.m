@@ -237,5 +237,5 @@ function resizeFigure(~, ~)
 %             set(btnExitViewer, 'Position', [aTopWindowBarPosition(3)-70 6 65 25]);
 %         end
 %     end
-
+    % drawnow;
 end 

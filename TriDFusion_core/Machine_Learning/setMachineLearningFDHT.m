@@ -32,9 +32,9 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
     gdNormalLiverSTD = [];
 
     atInput = inputTemplate('get');
-    
-    % Modality validation    
-       
+
+    % Modality validation
+
     dCTSerieOffset = [];
     for tt=1:numel(atInput)
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'ct')
@@ -52,10 +52,10 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
     end
 
     if isempty(dCTSerieOffset) || ...
-       isempty(dPTSerieOffset)  
+       isempty(dPTSerieOffset)
         progressBar(1, 'Error: FDHT tumor segmentation require a CT and PT image!');
-        errordlg('FDHT tumor segmentation require a CT and PT image!', 'Modality Validation');  
-        return;               
+        errordlg('FDHT tumor segmentation require a CT and PT image!', 'Modality Validation');
+        return;
     end
 
 
@@ -94,53 +94,53 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
         dSUVScale = tQuant.tSUV.dScale;
     else
         dSUVScale = 0;
-    end 
+    end
 
     atRoiInput = roiTemplate('get', dPTSerieOffset);
-   
+
     if ~isempty(atRoiInput)
-        
-        aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Label, atRoiInput, 'uni', false ), {'Normal Liver'} );            
+
+        aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Label, atRoiInput, 'uni', false ), {'Normal Liver'} );
         dTagOffset = find(aTagOffset, 1);
-        
+
         aSlice = [];
-        
+
         if ~isempty(dTagOffset)
-            
+
             switch lower(atRoiInput{dTagOffset}.Axe)
 
-                case 'axes1'                            
+                case 'axes1'
                     aSlice = permute(aPTImage(atRoiInput{dTagOffset}.SliceNb,:,:), [3 2 1]);
 
                 case 'axes2'
                     aSlice = permute(aPTImage(:,atRoiInput{dTagOffset}.SliceNb,:), [3 1 2]);
 
                 case 'axes3'
-                    aSlice = aPTImage(:,:,atRoiInput{dTagOffset}.SliceNb);       
+                    aSlice = aPTImage(:,:,atRoiInput{dTagOffset}.SliceNb);
             end
-            
+
             aLogicalMask = roiTemplateToMask(atRoiInput{dTagOffset}, aSlice);
-                     
+
             gdNormalLiverMean = mean(aSlice(aLogicalMask), 'all')   * dSUVScale;
 
 
-   %         H = fspecial('average',5); 
-   %         blurred = imfilter(aSlice(aLogicalMask),H,'replicate'); 
+   %         H = fspecial('average',5);
+   %         blurred = imfilter(aSlice(aLogicalMask),H,'replicate');
 
-            gdNormalLiverSTD = std(aSlice(aLogicalMask), [],'all') * dSUVScale;     
-            
+            gdNormalLiverSTD = std(aSlice(aLogicalMask), [],'all') * dSUVScale;
+
             clear aSlice;
         else
-            waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
+            waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));
 
             FDHTNormalLiverMeanSDDialog();
 
             if gbProceedWithSegmentation == false
                 return;
-            end           
-        end   
+            end
+        end
     else
-        waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
+        waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));
 
         FDHTNormalLiverMeanSDDialog();
 
@@ -149,47 +149,47 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
         end
     end
 
-    % Apply ROI constraint 
+    % Apply ROI constraint
 
     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dPTSerieOffset);
 
     bInvertMask = invertConstraint('get');
 
     tRoiInput = roiTemplate('get', dPTSerieOffset);
-    
+
     aPTImageTemp = aPTImage;
-    aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask); 
-    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint 
+    aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
+    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
 
-    resetSeries(dPTSerieOffset, true);       
+    resetSeries(dPTSerieOffset, true);
 
-%     try 
+%     try
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-    drawnow;    
+    drawnow;
 
-    % Get DICOM directory directory    
-    
+    % Get DICOM directory directory
+
     [sFilePath, ~, ~] = fileparts(char(atInput(dCTSerieOffset).asFilesList{1}));
-    
-    % Create an empty directory    
+
+    % Create an empty directory
 
     sNiiTmpDir = sprintf('%stemp_nii_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
     if exist(char(sNiiTmpDir), 'dir')
         rmdir(char(sNiiTmpDir), 's');
     end
-    mkdir(char(sNiiTmpDir));    
-    
-    % Convert dicom to .nii     
-    
+    mkdir(char(sNiiTmpDir));
+
+    % Convert dicom to .nii
+
     progressBar(1/8, 'DICOM to NII conversion, please wait.');
 
     dicm2nii(sFilePath, sNiiTmpDir, 1);
-    
+
     sNiiFullFileName = '';
-    
+
     f = java.io.File(char(sNiiTmpDir)); % Get .nii file name
-    dinfo = f.listFiles();                   
+    dinfo = f.listFiles();
     for K = 1 : 1 : numel(dinfo)
         if ~(dinfo(K).isDirectory)
             if contains(sprintf('%s%s', sNiiTmpDir, dinfo(K).getName()), '.nii.gz')
@@ -197,87 +197,88 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
                 break;
             end
         end
-    end 
+    end
 
     if isempty(sNiiFullFileName)
-        
+
         progressBar(1, 'Error: nii file mot found!');
-        errordlg('nii file mot found!!', '.nii file Validation'); 
+        errordlg('nii file mot found!!', '.nii file Validation');
     else
 
         progressBar(2/8, 'Machine learning in progress, this might take several minutes, please be patient.');
-       
+
         sSegmentationFolderName = sprintf('%stemp_seg_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
         if exist(char(sSegmentationFolderName), 'dir')
             rmdir(char(sSegmentationFolderName), 's');
         end
-        mkdir(char(sSegmentationFolderName)); 
-    
+        mkdir(char(sSegmentationFolderName));
+
         if ispc % Windows
-      
+
 %            if fastMachineLearningDialog('get') == true
-%                sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s --fast', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName);    
+%                sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s --fast', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName);
 %            else
-                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s --fast --force_split --body_seg', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName);    
+                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s --fast --force_split --body_seg', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName);
 %            end
-        
+
             [bStatus, sCmdout] = system(sCommandLine);
-            
-            if bStatus 
+
+            if bStatus
                 progressBar( 1, 'Error: An error occur during machine learning segmentation!');
-                errordlg(sprintf('An error occur during machine learning segmentation: %s', sCmdout), 'Segmentation Error');  
+                errordlg(sprintf('An error occur during machine learning segmentation: %s', sCmdout), 'Segmentation Error');
             else % Process succeed
 
                 progressBar(4/8, 'Resampling series, please wait.');
 
-                [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
-                [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
+                [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
+                [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
 
                 dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
                 dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
-            
+
                 aResampledPTImage = aResampledPTImageTemp;
 
                 clear aPTImageTemp;
                 clear aResampledPTImageTemp;
-            
+
                 progressBar(5/8, 'Resampling mip, please wait.');
-                        
-                refMip = mipBuffer('get', [], dCTSerieOffset);                        
+
+                refMip = mipBuffer('get', [], dCTSerieOffset);
                 aMip   = mipBuffer('get', [], dPTSerieOffset);
-              
+
                 aMip = resampleMip(aMip, atPTMetaData, refMip, atCTMetaData, 'Linear', true);
-                               
+
                 mipBuffer('set', aMip, dPTSerieOffset);
-            
-                setQuantification(dPTSerieOffset);    
-                       
+
+                setQuantification(dPTSerieOffset);
+
                 resampleAxes(aResampledPTImage, atResampledPTMetaData);
-                
+
                 setImagesAspectRatio();
 
                 refreshImages();
+                sliderMipCallback();
                 drawnow;
 
                 progressBar(5/8, 'Computing ct map, please wait.');
-            
+
                 BWCT = getTotalSegmentorWholeBodyMask(sSegmentationFolderName, zeros(size(aCTImage)));
                 BWCT = imfill(BWCT, 4, 'holes');
-             
-                if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+
+                if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view
 
                     BWCT = resample3DImage(BWCT, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
                     BWCT = imbinarize(BWCT);
 
-                    if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view 
-                        BWCT = resizeMaskToImageSize(BWCT, aResampledPTImage); 
+                    if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view
+                        BWCT = resizeMaskToImageSize(BWCT, aResampledPTImage);
                     end
                 else
                     BWCT = imbinarize(BWCT);
                 end
 
-%                 BWCT = resampleImage(BWCT, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Linear', false, false);   
-%                 BWCT = imageFieldOfView(BWCT, aResampledPTImage, atResampledPTMetaData); 
+%                 BWCT = resampleImage(BWCT, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Linear', false, false);
+%                 BWCT = imageFieldOfView(BWCT, aResampledPTImage, atResampledPTMetaData);
 
 
                 progressBar(6/8, 'Importing exclusion masks, please wait.');
@@ -285,18 +286,18 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
                 aExcludeMask = getFDHTExcludeMask(tFDHT, sSegmentationFolderName, zeros(size(aCTImage)));
                 aExcludeMask = imdilate(aExcludeMask, strel('sphere', 2)); % Increse mask by 2 pixels
 
-                if ~isequal(size(aExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+                if ~isequal(size(aExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view
 
                      aExcludeMask = resample3DImage(aExcludeMask, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
                      aExcludeMask = imbinarize(aExcludeMask);
 
-                    if ~isequal(size(aExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view     
-                        aExcludeMask = resizeMaskToImageSize(aExcludeMask, aResampledPTImage); 
+                    if ~isequal(size(aExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view
+                        aExcludeMask = resizeMaskToImageSize(aExcludeMask, aResampledPTImage);
                     end
                 else
-                    aExcludeMask = imbinarize(aExcludeMask);                    
+                    aExcludeMask = imbinarize(aExcludeMask);
                 end
-%                 aExcludeMask = imageFieldOfView(aExcludeMask, aResampledPTImage, atResampledPTMetaData); 
+%                 aExcludeMask = imageFieldOfView(aExcludeMask, aResampledPTImage, atResampledPTMetaData);
 
 
                 aResampledPTImage(aExcludeMask) = min(aResampledPTImage, [], 'all');  % Exclude mask
@@ -305,37 +306,37 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
 
 
                 progressBar(7/8, 'Computing mask, please wait.');
-            
+
                 aBWMask = aResampledPTImage;
-            
+
                 dMin = min(aBWMask, [], 'all');
 
-                dTreshold = (1.5*gdNormalLiverMean) + (2*gdNormalLiverSTD);         
+                dTreshold = (1.5*gdNormalLiverMean) + (2*gdNormalLiverSTD);
                 if dTreshold < 3
                     dTreshold = 3;
                 end
 
                 aBWMask(aBWMask*dSUVScale<dTreshold)=dMin;
-            
-                aBWMask = imbinarize(aBWMask); 
+
+                aBWMask = imbinarize(aBWMask);
 
                 progressBar(8/10, 'Creating contours, please wait.');
-            
+
                 imMask = aResampledPTImage;
                 imMask(aBWMask == 0) = dMin;
-            
+
                 setSeriesCallback();
-            
+
 
                 dSmalestVoiValue = tFDHT.options.smalestVoiValue;
                 bPixelEdge = tFDHT.options.pixelEdge;
 
                 sFormula = '(1.5 x Normal Liver SUVmean)+(2 x Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map';
-                maskAddVoiToSeries(imMask, aBWMask, bPixelEdge, false, 0, false, 0, true, sFormula, BWCT, dSmalestVoiValue,  gdNormalLiverMean, gdNormalLiverSTD, 'TUMOR');    
+                maskAddVoiToSeries(imMask, aBWMask, bPixelEdge, false, 0, false, 0, true, sFormula, BWCT, dSmalestVoiValue,  gdNormalLiverMean, gdNormalLiverSTD, 'TUMOR');
 
                 clear aResampledPTImage;
                 clear aBWMask;
-                clear refMip;                        
+                clear refMip;
                 clear aMip;
                 clear BWCT;
                 clear imMask;
@@ -355,7 +356,7 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
 
         if exist(char(sSegmentationFolderName), 'dir')
             rmdir(char(sSegmentationFolderName), 's');
-        end         
+        end
     end
 
     setVoiRoiSegPopup();
@@ -365,9 +366,9 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
     link2DMip('set', false);
 
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
+    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
     set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
-   
+
     % Set fusion
 
     if isFusion('get') == false
@@ -399,16 +400,16 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
     clear aPTImage;
     clear aCTImage;
 
-    % Delete .nii folder    
-    
+    % Delete .nii folder
+
     if exist(char(sNiiTmpDir), 'dir')
         rmdir(char(sNiiTmpDir), 's');
-    end       
-    
+    end
+
     progressBar(1, 'Ready');
 
-%     catch 
-%         resetSeries(dPTSerieOffset, true);       
+%     catch
+%         resetSeries(dPTSerieOffset, true);
 %         progressBar( 1 , 'Error: setSegmentationFDHT()' );
 %     end
 
@@ -419,34 +420,49 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
 
         DLG_FDHT_MEAN_SD_X = 380;
         DLG_FDHT_MEAN_SD_Y = 150;
-    
-        dlgFDHTmeanSD = ...
-            dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_FDHT_MEAN_SD_X/2) ...
+
+        if viewerUIFigure('get') == true
+
+            dlgFDHTmeanSD = ...
+                uifigure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_FDHT_MEAN_SD_X/2) ...
                                 (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_FDHT_MEAN_SD_Y/2) ...
                                 DLG_FDHT_MEAN_SD_X ...
                                 DLG_FDHT_MEAN_SD_Y ...
                                 ],...
-                   'MenuBar', 'none',...
-                   'Resize', 'off', ...    
-                   'NumberTitle','off',...
-                   'MenuBar', 'none',...
-                   'Color', viewerBackgroundColor('get'), ...
-                   'Name', 'FDHT Segmentation Mean and SD',...
-                   'Toolbar','none'...               
-                   ); 
+                       'Resize', 'off', ...
+                       'Color', viewerBackgroundColor('get'),...
+                       'WindowStyle', 'modal', ...
+                       'Name' , 'Full AI Ga68 DOTATATE Segmentation'...
+                       );
+        else
+            dlgFDHTmeanSD = ...
+                dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_FDHT_MEAN_SD_X/2) ...
+                                    (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_FDHT_MEAN_SD_Y/2) ...
+                                    DLG_FDHT_MEAN_SD_X ...
+                                    DLG_FDHT_MEAN_SD_Y ...
+                                    ],...
+                       'MenuBar', 'none',...
+                       'Resize', 'off', ...
+                       'NumberTitle','off',...
+                       'MenuBar', 'none',...
+                       'Color', viewerBackgroundColor('get'), ...
+                       'Name', 'FDHT Segmentation Mean and SD',...
+                       'Toolbar','none'...
+                       );
+        end
 
-            % Normal Liver Mean
-    
+        % Normal Liver Mean
+
             uicontrol(dlgFDHTmeanSD,...
                       'style'   , 'text',...
                       'Enable'  , 'On',...
                       'string'  , 'Normal Liver Mean',...
                       'horizontalalignment', 'left',...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
-                      'ForegroundColor', viewerForegroundColor('get'), ...                   
+                      'ForegroundColor', viewerForegroundColor('get'), ...
                       'position', [20 87 250 20]...
                       );
-    
+
         edtFDHTNormalLiverMeanValue = ...
             uicontrol(dlgFDHTmeanSD, ...
                       'Style'   , 'Edit', ...
@@ -459,17 +475,17 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
                       );
 
             % Normal Liver Standard Deviation
-    
+
             uicontrol(dlgFDHTmeanSD,...
                       'style'   , 'text',...
                       'Enable'  , 'On',...
                       'string'  , 'Normal Liver Standard Deviation',...
                       'horizontalalignment', 'left',...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
-                      'ForegroundColor', viewerForegroundColor('get'), ...                   
+                      'ForegroundColor', viewerForegroundColor('get'), ...
                       'position', [20 62 250 20]...
                       );
-    
+
         edtFDHTNormalLiverSDValue = ...
             uicontrol(dlgFDHTmeanSD, ...
                       'Style'   , 'Edit', ...
@@ -479,65 +495,65 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
                       'BackgroundColor', viewerBackgroundColor('get'), ...
                       'ForegroundColor', viewerForegroundColor('get'), ...
                       'CallBack', @edtFDHTNormalLiverSDValueCallback ...
-                      ); 
+                      );
 
          % Cancel or Proceed
-    
+
          uicontrol(dlgFDHTmeanSD,...
                    'String','Cancel',...
                    'Position',[285 7 75 25],...
                    'BackgroundColor', viewerBackgroundColor('get'), ...
-                   'ForegroundColor', viewerForegroundColor('get'), ...                
+                   'ForegroundColor', viewerForegroundColor('get'), ...
                    'Callback', @cancelFDHTmeanSDCallback...
                    );
-    
+
          uicontrol(dlgFDHTmeanSD,...
                   'String','Continue',...
                   'Position',[200 7 75 25],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...               
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @proceedFDHTmeanSDCallback...
                   );
 
         waitfor(dlgFDHTmeanSD);
 
         function edtFDHTNormalLiverMeanValueCallback(~, ~)
-    
+
             dMeanValue = str2double(get(edtFDHTNormalLiverMeanValue, 'Value'));
-    
-            if dMeanValue < 0 
+
+            if dMeanValue < 0
                 dMeanValue = 0.1;
                 set(edtFDHTNormalLiverMeanValue, 'Value', num2str(dMeanValue));
             end
-    
+
             FDHTNormalLiverMeanValue('set', dMeanValue);
         end
-    
+
         function edtFDHTNormalLiverSDValueCallback(~, ~)
-    
+
             dSDValue = str2double(get(edtFDHTNormalLiverSDValue, 'Value'));
-    
-            if dSDValue < 0 
+
+            if dSDValue < 0
                 dSDValue = 0.1;
                 set(edtFDHTNormalLiverSDValue, 'Value', num2str(dSDValue));
             end
-    
+
             FDHTNormalLiverSDValue('set', dSDValue);
         end
-    
+
         function proceedFDHTmeanSDCallback(~, ~)
-    
-            gdNormalLiverMean = str2double(get(edtFDHTNormalLiverMeanValue, 'String'));        
+
+            gdNormalLiverMean = str2double(get(edtFDHTNormalLiverMeanValue, 'String'));
             gdNormalLiverSTD  = str2double(get(edtFDHTNormalLiverSDValue, 'String'));
-    
+
             delete(dlgFDHTmeanSD);
-            gbProceedWithSegmentation = true;      
+            gbProceedWithSegmentation = true;
         end
-    
+
         function cancelFDHTmeanSDCallback(~, ~)
-         
+
             delete(dlgFDHTmeanSD);
             gbProceedWithSegmentation = false;
         end
-    end          
+    end
 end

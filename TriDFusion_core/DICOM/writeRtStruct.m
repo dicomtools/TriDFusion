@@ -1,5 +1,5 @@
-function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dSeriesOffset, bShowSeriesDescriptionDialog)
-%function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dSeriesOffset, bShowSeriesDescriptionDialog)
+function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dSeriesOffset, bShowSeriesDescriptionDialog, sOvewriteSeriesDescription)
+%function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dSeriesOffset, bShowSeriesDescriptionDialog, sOvewriteSeriesDescription)
 %Export ROIs To DICOM RT-Structure.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -50,17 +50,25 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
         
     % Set series label
     
-    if isfield(tMetaData, 'SeriesDescription')
-        sSeriesDescription = tMetaData.SeriesDescription;
+    if exist('sOvewriteSeriesDescription', 'var')
+        sSeriesDescription = sOvewriteSeriesDescription;
     else
-        sSeriesDescription = '';
-    end
-     
-    if bShowSeriesDescriptionDialog == true
 
-        sSeriesDescription = getViewerSeriesDescriptionDialog(sprintf('RT-%s', sSeriesDescription));
-        if isempty(sSeriesDescription)
-            return;
+        if isfield(tMetaData, 'SeriesDescription')
+            sSeriesDescription = tMetaData.SeriesDescription;
+        else
+            sSeriesDescription = '';
+        end
+        
+        sSeriesDescription = sprintf('RT-%s', sSeriesDescription);
+    
+    
+        if bShowSeriesDescriptionDialog == true
+    
+            sSeriesDescription = getViewerSeriesDescriptionDialog(sSeriesDescription);
+            if isempty(sSeriesDescription)
+                return;
+            end
         end
     end
 

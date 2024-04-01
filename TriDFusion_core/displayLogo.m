@@ -47,7 +47,8 @@ function uiLogo = displayLogo(uiWindow)
                               'visible', 'off'...
                              );
                 uiLogo.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                uiLogo.Toolbar = [];              
+                uiLogo.Toolbar.Visible = 'off';
+                disableDefaultInteractivity(uiLogo);
             else
                 uiLogo = axes(uiWindow,...
                               'Units'   , 'pixels',...
@@ -56,7 +57,8 @@ function uiLogo = displayLogo(uiWindow)
                               'visible', 'off'...
                              );
                 uiLogo.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                uiLogo.Toolbar = [];                 
+                uiLogo.Toolbar.Visible = 'off';
+                disableDefaultInteractivity(uiLogo);
             end
         else
             uiLogo =  axes(uiWindow,...
@@ -66,8 +68,9 @@ function uiLogo = displayLogo(uiWindow)
                            'visible', 'off'...
                           );
             uiLogo.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-            uiLogo.Toolbar = [];             
-        end
+            uiLogo.Toolbar.Visible = 'off';
+            disableDefaultInteractivity(uiLogo);
+      end
 
    else
         uiLogo =  axes(uiWindow,...
@@ -77,8 +80,9 @@ function uiLogo = displayLogo(uiWindow)
                        'visible', 'off'...
                       );
         uiLogo.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        uiLogo.Toolbar = [];       
-   end
+        uiLogo.Toolbar.Visible = 'off';
+        disableDefaultInteractivity(uiLogo);
+ end
 
    t = text(uiLogo, 0, 0, 'TriDFusion (3DF)');
 

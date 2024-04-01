@@ -49,9 +49,11 @@ function TriDFusion(varargin)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    initViewerGlobal();
-    
+    viewerUIFigure('set', false); % Tested wih Matlab 2023b
+
     viewerSUVtype('set', 'BW'); % Body Weight
+
+    initViewerGlobal();
     
     % Set view default color
 
@@ -202,31 +204,61 @@ function TriDFusion(varargin)
 
     xPosition = (aScreenSize(3) /2) - (620 /2);
     yPosition = (aScreenSize(4) /2) - (330 /2);
-        
-    fiMainWindow = ...
-        figure('Name', 'TriDFusion (3DF) Image Viewer',...
-               'NumberTitle','off',...                           
-               'Position'   ,[xPosition, ...
-                              yPosition, ...
-                              620, ...
-                              330 ...
-                              ],... 
-               'MenuBar'    , 'none',...
-               'AutoResizeChildren', 'off', ...
-               'Toolbar'    , 'none',...
-               'color'      , 'black',...
-               'SizeChangedFcn',@resizeFigureCallback...
-             );
-    fiMainWindowPtr('set', fiMainWindow);
-    
-    set(fiMainWindow, 'DefaultUipanelUnits', 'normalized');
 
-    set(fiMainWindow, 'doublebuffer', 'on'    );   
-    set(fiMainWindow, 'Renderer'    , 'opengl'); 
+    if viewerUIFigure('get') == true
+        
+        fiMainWindow = ...
+            uifigure('Name', 'TriDFusion (3DF) Image Viewer',...
+                     'NumberTitle','off',...                           
+                     'Position'   ,[xPosition, ...
+                                   yPosition, ...
+                                   620, ...
+                                   330 ...
+                                   ],... 
+                    'MenuBar'    , 'none',...
+                    'AutoResizeChildren', 'off', ...
+                    'Toolbar'    , 'none',...
+                    'color'      , 'black',...
+                    'WindowStyle', 'normal',...
+                    'SizeChangedFcn',@resizeFigureCallback...
+                    );
+    else
+        fiMainWindow = ...
+            figure('Name', 'TriDFusion (3DF) Image Viewer',...
+                   'NumberTitle','off',...                           
+                   'Position'   ,[xPosition, ...
+                                  yPosition, ...
+                                  620, ...
+                                  330 ...
+                                  ],... 
+                   'MenuBar'    , 'none',...
+                   'AutoResizeChildren', 'off', ...
+                   'Toolbar'    , 'none',...
+                   'color'      , 'black',...
+                   'SizeChangedFcn',@resizeFigureCallback...
+                 );        
+    end
+
+    if viewerUIFigure('get') == true
+
+        DnD_uifigure(fiMainWindow, @openDnDImagesCallback);
+    end
+
+    fiMainWindowPtr('set', fiMainWindow);
+
+    set(fiMainWindow, 'DefaultUipanelUnits', 'normalized');
+    % set(fiMainWindow, 'AutoResizeChildren', 'off');
+
+    if viewerUIFigure('get') == true
+        set(fiMainWindow, 'Renderer', 'opengl'); 
+        set(fiMainWindow, 'GraphicsSmoothing', 'off'); 
+    else
+        set(fiMainWindow, 'Renderer', 'opengl'); 
+        set(fiMainWindow, 'doublebuffer', 'on');   
+    end
 
     iptPointerManager(fiMainWindowPtr('get'));
     
-
 
 %     warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');  
 %     
@@ -248,6 +280,7 @@ function TriDFusion(varargin)
              'position', [0 30 620 300]...
              );   
     uiSplashWindow.Toolbar.Visible = 'off';
+    disableDefaultInteractivity(uiSplashWindow);
 
     uiProgressWindow = ...
         uipanel(fiMainWindowPtr('get'),...
@@ -259,7 +292,7 @@ function TriDFusion(varargin)
                 );       
     uiProgressWindowPtr('set', uiProgressWindow);
     
-    uiBar = uipanel(uiProgressWindow);
+    uiBar = uipanel(uiProgressWindow, 'Units', 'normalized');
     
     set(uiBar, 'BackgroundColor', viewerBackgroundColor('get'));
     set(uiBar, 'ForegroundColor', viewerForegroundColor('get'));  
@@ -282,7 +315,8 @@ function TriDFusion(varargin)
   %  imshow(imSplash, 'border', 'tight', 'Parent', uiSplashWindow);
 %     image(imSplash, 'Parent', uiSplashWindow);
     imshow(imSplash,'border','tight','Parent', uiSplashWindow);
-                     
+    uiSplashWindow.Toolbar.Visible = 'off';
+                    
     initTemplates();
       
     delete(uiSplashWindow);
@@ -293,22 +327,32 @@ function TriDFusion(varargin)
         
  %   lMiddleX = alPosition(1) + (alPosition(3) /2);
  %   lMiddleY = alPosition(2) + (alPosition(4) /2);        
-        
-    set(fiMainWindowPtr('get'), 'Position', aScreenSize);        
+
+    
+    set(fiMainWindowPtr('get'), 'Position', aScreenSize);   
+    set(uiProgressWindowPtr('get'), 'Position'   , [0, 0, aScreenSize(3), 30]);
+    set(uiBarPtr('get'), 'Position'   , [0, 0,  aScreenSize(3), 1]);
+
+    drawnow update;
+
       %  uiProgressWindow.Position = [0, 0, 1440, 30];
         
      %   movegui(fiMainWindowPtr('get'), 'center');                                                         
       
-    set(uiProgressWindowPtr('get'), 'Position'   , [0, 0, aScreenSize(3), 30]);
     set(fiMainWindowPtr('get')    , 'Resize'     , 'on');
-    set(fiMainWindowPtr('get')    , 'WindowState', 'maximized');
-    
-    waitfor(fiMainWindowPtr('get'), 'WindowState', 'maximized');
+    set(fiMainWindowPtr('get'), 'WindowState', 'maximized');
+
+    drawnow update;
+
+    % set(fiMainWindowPtr('get'), 'WindowState', 'maximized');
     
     resizeViewer = dicomViewer(); 
-            
+
+
     setContours();
     
+    drawnow;
+
  %   refreshImages();
        
     if argFusion == true % Init 2D Fusion  

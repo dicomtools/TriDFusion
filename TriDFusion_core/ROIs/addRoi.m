@@ -163,8 +163,8 @@ function addRoi(ptrRoi, dOffset, sLesionType)
 
     tRoi.Object = ptrRoi;
 
-     tMaxDistances = computeRoiFarthestPoint(imRoi, atDicomInfo, tRoi, false, false);
-     tRoi.MaxDistances = tMaxDistances;
+    tMaxDistances = computeRoiFarthestPoint(imRoi, atDicomInfo, tRoi, false, false);
+    tRoi.MaxDistances = tMaxDistances;
 
     if isempty(atRoiInput)
         atRoiInput{1} = tRoi;

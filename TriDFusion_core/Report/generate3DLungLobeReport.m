@@ -37,43 +37,66 @@ function generate3DLungLobeReport(bInitReport)
     gasOrganList={'Lungs','Lung Left', 'Lung Right', 'Upper Lobe Left', 'Lower Lobe Left', 'Upper Lobe Right', 'Middle Lobe Right', 'Lower Lobe Right'};
 
     gasMask = {'lung_lower_lobe_right', 'lung_lower_lobe_left','lung_middle_lobe_right','lung_upper_lobe_right','lung_upper_lobe_left'};
-   
+
     atInput = inputTemplate('get');
 
     dOffset = get(uiSeriesPtr('get'), 'Value');
     if dOffset > numel(atInput)
         return;
     end
-    
+
     FIG_REPORT_X = 1245;
     FIG_REPORT_Y = 840;
 
-    fig3DLobeLungReport = ...
-        figure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_REPORT_X/2) ...
-               (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_REPORT_Y/2) ...
-               FIG_REPORT_X ...
-               FIG_REPORT_Y],...
-               'Name', 'TriDFusion (3DF) 3D SPECT Lung Lobe Ratio Report',...
-               'NumberTitle','off',...
-               'MenuBar', 'none',...
-               'Resize', 'off', ...
-               'Color', 'white', ...
-               'Toolbar','none'...
-               );
-     fig3DLobeLungReportPtr('set', fig3DLobeLungReport);
+    if viewerUIFigure('get') == true
 
-     axe3DLobeLungReport = ...
+        fig3DLobeLungReport = ...
+            uifigure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_REPORT_X/2) ...
+                    (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_REPORT_Y/2) ...
+                    FIG_REPORT_X ...
+                    FIG_REPORT_Y],...
+                    'Resize', 'off', ...
+                    'Color', 'white',...
+                    'Name' , 'TriDFusion (3DF) 3D SPECT Lung Lobe Ratio Report'...
+                    );
+    else
+        fig3DLobeLungReport = ...
+            figure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_REPORT_X/2) ...
+                   (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_REPORT_Y/2) ...
+                   FIG_REPORT_X ...
+                   FIG_REPORT_Y],...
+                   'Name', 'TriDFusion (3DF) 3D SPECT Lung Lobe Ratio Report',...
+                   'NumberTitle','off',...
+                   'MenuBar', 'none',...
+                   'Resize', 'off', ...
+                   'Color', 'white', ...
+                   'Toolbar','none'...
+                   );
+    end
+
+    if viewerUIFigure('get') == true
+        set(fig3DLobeLungReport, 'Renderer', 'opengl'); 
+        set(fig3DLobeLungReport, 'GraphicsSmoothing', 'off'); 
+    else
+        set(fig3DLobeLungReport, 'Renderer', 'opengl'); 
+        set(fig3DLobeLungReport, 'doublebuffer', 'on');   
+    end
+
+    fig3DLobeLungReportPtr('set', fig3DLobeLungReport);
+
+    axe3DLobeLungReport = ...
        axes(fig3DLobeLungReport, ...
              'Units'   , 'pixels', ...
              'Position', [0 0 FIG_REPORT_X FIG_REPORT_Y], ...
              'Color'   , 'white',...
              'XColor'  , viewerForegroundColor('get'),...
              'YColor'  , viewerForegroundColor('get'),...
-             'ZColor'  , viewerForegroundColor('get'),...             
-             'Visible' , 'off'...             
-             );  
+             'ZColor'  , viewerForegroundColor('get'),...
+             'Visible' , 'off'...
+             );
      axe3DLobeLungReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-     axe3DLobeLungReport.Toolbar = []; 
+     axe3DLobeLungReport.Toolbar.Visible = 'off';
+     disableDefaultInteractivity(axe3DLobeLungReport);
 
      ui3DLobeLungReport = ...
      uipanel(fig3DLobeLungReport,...
@@ -103,7 +126,8 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'white', ...
                   'ForegroundColor', 'black' ...
                   );
-    addlistener(ui3DLobeLungReportSlider, 'Value', 'PreSet', @ui3DLobeLungReportSliderCallback);
+%     addlistener(ui3DLobeLungReportSlider, 'Value', 'PreSet', @ui3DLobeLungReportSliderCallback);
+    addlistener(ui3DLobeLungReportSlider, 'ContinuousValueChange', @ui3DLobeLungReportSliderCallback);
 
         uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
@@ -115,8 +139,8 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [0 FIG_REPORT_Y-30 FIG_REPORT_X 20]...
-                  ); 
-              
+                  );
+
         uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
@@ -127,10 +151,10 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [0 FIG_REPORT_Y-50 FIG_REPORT_X 20]...
-                  ); 
-         
-         % Patient Information     
-         
+                  );
+
+         % Patient Information
+
          uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -141,8 +165,9 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [0 FIG_REPORT_Y-80 FIG_REPORT_X/3-50 20]...
-                  ); 
-              
+                  );
+
+   uiReportPatientInformation = ...
         uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
@@ -153,10 +178,26 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [0 FIG_REPORT_Y-465 FIG_REPORT_X/3-50 375]...
-                  );    
-              
-         % Series Information     
-              
+                  );
+
+    % if viewerUIFigure('get') == true
+    %
+    %     aUiExtent = get(uiReportPatientInformation, 'Extent');
+    %     aUiPosition = get(uiReportPatientInformation, 'Position');
+    %
+    %     % Adjust the position to align the text at the top
+    %     aNewUiPosition = [aUiPosition(1), aUiPosition(2) + aUiPosition(4) - aUiExtent(4) - 20, aUiPosition(3), aUiExtent(4) + 20];
+    %
+    %     set(uiReportPatientInformation, 'Position', aNewUiPosition);
+    % end
+
+    if viewerUIFigure('get') == true
+
+        setUiExtendedPosition(uiReportPatientInformation);
+    end
+
+    % Series Information
+
          uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -167,8 +208,9 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X/3-50 FIG_REPORT_Y-80 FIG_REPORT_X/3-50 20]...
-                  ); 
-              
+                  );
+
+    uiReportSeriesInformation = ...
         uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
@@ -179,11 +221,27 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X/3-50 FIG_REPORT_Y-570 FIG_REPORT_X/3-50 480]...
-                  );    
-              
-         % Contours Information              
-         
-         uiReport3DLobeLungInformation = ...       
+                  );
+
+    % if viewerUIFigure('get') == true
+    %
+    %     aUiExtent = get(uiReportSeriesInformation, 'Extent');
+    %     aUiPosition = get(uiReportSeriesInformation, 'Position');
+    %
+    %     % Adjust the position to align the text at the top
+    %     aNewUiPosition = [aUiPosition(1), aUiPosition(2) + aUiPosition(4) - aUiExtent(4) - 20, aUiPosition(3), aUiExtent(4) + 20];
+    %
+    %     set(uiReportSeriesInformation, 'Position', aNewUiPosition);
+    % end
+
+    if viewerUIFigure('get') == true
+
+        setUiExtendedPosition(uiReportSeriesInformation);
+    end
+
+    % Contours Information
+
+         uiReport3DLobeLungInformation = ...
          uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -194,7 +252,7 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-80 FIG_REPORT_X/3+100 20]...
-                  ); 
+                  );
 
          ui3DLobeContoursInformationReport = ...
          uipanel(ui3DLobeLungReport,...
@@ -238,10 +296,11 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'CallBack', @sliderScrollableContoursInformationCallback ...
                   );
-        addlistener(ui3DLobeScrollableContoursInformation, 'Value', 'PreSet', @sliderScrollableContoursInformationCallback);
+%         addlistener(ui3DLobeScrollableContoursInformation, 'Value', 'PreSet', @sliderScrollableContoursInformationCallback);
+        addlistener(ui3DLobeScrollableContoursInformation, 'ContinuousValueChange', @sliderScrollableContoursInformationCallback);
 
          % Contour Type
-              
+
           uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -252,22 +311,41 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-110 115 20]...
-                  ); 
-              
-        uicontrol(ui3DLobeScrollableContoursInformationReport,...
-                  'style'     , 'text',...
-                  'FontWeight', 'Normal',...
-                  'FontSize'  , 10,...
-                  'FontName'  , 'MS Sans Serif', ...
-                  'string'    , getLobeLungReportLesionTypeInformation(),...
-                  'horizontalalignment', 'left',...
-                  'BackgroundColor', 'White', ...
-                  'ForegroundColor', 'Black', ...
-                  'position', [0 -75 130 gaContourInformationScrollableUiPosition(4)]...
-                  );  
-              
+                  );
+
+         % if viewerUIFigure('get') == true
+         %
+         %    uicontrol(ui3DLobeScrollableContoursInformationReport,...
+         %              'style'     , 'text',...
+         %              'FontWeight', 'Normal',...
+         %              'FontSize'  , 10,...
+         %              'FontName'  , 'MS Sans Serif', ...
+         %              'string'    , getLobeLungReportLesionTypeInformation(),...
+         %              'horizontalalignment', 'left',...
+         %              'BackgroundColor', 'White', ...
+         %              'ForegroundColor', 'Black', ...
+         %              'position', [0 aContourInformationUiPosition(4)+60 130 gaContourInformationScrollableUiPosition(4)]...
+         %              );
+         % else
+            uiReportLesionType = ...
+            uicontrol(ui3DLobeScrollableContoursInformationReport,...
+                      'style'     , 'text',...
+                      'FontWeight', 'Normal',...
+                      'FontSize'  , 10,...
+                      'FontName'  , 'MS Sans Serif', ...
+                      'string'    , getLobeLungReportLesionTypeInformation(),...
+                      'horizontalalignment', 'left',...
+                      'BackgroundColor', 'White', ...
+                      'ForegroundColor', 'Black', ...
+                      'position', [0 -75 130 gaContourInformationScrollableUiPosition(4)]...
+                      );
+         % end
+        if viewerUIFigure('get') == true
+
+            setUiExtendedPosition(uiReportLesionType);
+        end
          % 3D LobeLung Mean
-              
+
           uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -278,23 +356,39 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-70+110 FIG_REPORT_Y-110 90 20]...
-                  ); 
-              
-        uiReportLesionMean = ...       
-        uicontrol(ui3DLobeScrollableContoursInformationReport,...
-                  'style'     , 'text',...
-                  'FontWeight', 'Normal',...
-                  'FontSize'  , 10,...
-                  'FontName'  , 'MS Sans Serif', ...
-                  'string'    , getLobeLungReportMeanInformation('init'),...
-                  'horizontalalignment', 'left',...
-                  'BackgroundColor', 'White', ...
-                  'ForegroundColor', 'Black', ...
-                  'position', [130 -75 130 gaContourInformationScrollableUiPosition(4)]...
-                  );  
-              
-         % 3DLobeLung Total
-              
+                  );
+
+        % if viewerUIFigure('get') == true
+        %
+        %     uiReportLesionMean = ...
+        %     uicontrol(ui3DLobeScrollableContoursInformationReport,...
+        %               'style'     , 'text',...
+        %               'FontWeight', 'Normal',...
+        %               'FontSize'  , 10,...
+        %               'FontName'  , 'MS Sans Serif', ...
+        %               'string'    , getLobeLungReportMeanInformation('init'),...
+        %               'horizontalalignment', 'left',...
+        %               'BackgroundColor', 'White', ...
+        %               'ForegroundColor', 'Black', ...
+        %               'position', [130 aContourInformationUiPosition(4)+60 130 gaContourInformationScrollableUiPosition(4)]...
+        %               );
+        % else
+            uiReportLesionMean = ...
+            uicontrol(ui3DLobeScrollableContoursInformationReport,...
+                      'style'     , 'text',...
+                      'FontWeight', 'Normal',...
+                      'FontSize'  , 10,...
+                      'FontName'  , 'MS Sans Serif', ...
+                      'string'    , getLobeLungReportMeanInformation('init'),...
+                      'horizontalalignment', 'left',...
+                      'BackgroundColor', 'White', ...
+                      'ForegroundColor', 'Black', ...
+                      'position', [130 -75 130 gaContourInformationScrollableUiPosition(4)]...
+                      );
+        % end
+
+        % 3DLobeLung Total
+
           uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -305,23 +399,39 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+15+130 FIG_REPORT_Y-110 90 20]...
-                  ); 
-              
-        uiReportLesionMax = ...       
-        uicontrol(ui3DLobeScrollableContoursInformationReport,...
-                  'style'     , 'text',...
-                  'FontWeight', 'Normal',...
-                  'FontSize'  , 10,...
-                  'FontName'  , 'MS Sans Serif', ...
-                  'string'    , getLobeLungReportMeanInformation('init'),...
-                  'horizontalalignment', 'left',...
-                  'BackgroundColor', 'White', ...
-                  'ForegroundColor', 'Black', ...
-                  'position', [130+105 -75 105 gaContourInformationScrollableUiPosition(4)]...
-                  ); 
-              
-          % Contour Volume
-              
+                  );
+
+        % if viewerUIFigure('get') == true
+        %
+        %     uiReportLesionMax = ...
+        %     uicontrol(ui3DLobeScrollableContoursInformationReport,...
+        %               'style'     , 'text',...
+        %               'FontWeight', 'Normal',...
+        %               'FontSize'  , 10,...
+        %               'FontName'  , 'MS Sans Serif', ...
+        %               'string'    , getLobeLungReportMeanInformation('init'),...
+        %               'horizontalalignment', 'left',...
+        %               'BackgroundColor', 'White', ...
+        %               'ForegroundColor', 'Black', ...
+        %               'position', [130+105 aContourInformationUiPosition(4)+60 105 gaContourInformationScrollableUiPosition(4)]...
+        %               );
+        % else
+            uiReportLesionMax = ...
+            uicontrol(ui3DLobeScrollableContoursInformationReport,...
+                      'style'     , 'text',...
+                      'FontWeight', 'Normal',...
+                      'FontSize'  , 10,...
+                      'FontName'  , 'MS Sans Serif', ...
+                      'string'    , getLobeLungReportMeanInformation('init'),...
+                      'horizontalalignment', 'left',...
+                      'BackgroundColor', 'White', ...
+                      'ForegroundColor', 'Black', ...
+                      'position', [130+105 -75 105 gaContourInformationScrollableUiPosition(4)]...
+                      );
+        % end
+
+        % Contour Volume
+
           uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -332,22 +442,38 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+15+240 FIG_REPORT_Y-110 90 20]...
-                  ); 
-              
-        uiReportLesionVolume = ...       
-        uicontrol(ui3DLobeScrollableContoursInformationReport,...
-                  'style'     , 'text',...
-                  'FontWeight', 'Normal',...
-                  'FontSize'  , 10,...
-                  'FontName'  , 'MS Sans Serif', ...
-                  'string'    , getLobeLungReportVolumeInformation('init'),...
-                  'horizontalalignment', 'left',...
-                  'BackgroundColor', 'White', ...
-                  'ForegroundColor', 'Black', ...
-                  'position', [130+2*105 -75 105 gaContourInformationScrollableUiPosition(4)]...
-                  );               
-              
-         uiReport3DLobeLeftLungRatio = ...       
+                  );
+
+        % if viewerUIFigure('get') == true
+        %
+        %     uiReportLesionVolume = ...
+        %     uicontrol(ui3DLobeScrollableContoursInformationReport,...
+        %               'style'     , 'text',...
+        %               'FontWeight', 'Normal',...
+        %               'FontSize'  , 10,...
+        %               'FontName'  , 'MS Sans Serif', ...
+        %               'string'    , getLobeLungReportVolumeInformation('init'),...
+        %               'horizontalalignment', 'left',...
+        %               'BackgroundColor', 'White', ...
+        %               'ForegroundColor', 'Black', ...
+        %               'position', [130+2*105 aContourInformationUiPosition(4)+60 105 gaContourInformationScrollableUiPosition(4)]...
+        %               );
+        % else
+            uiReportLesionVolume = ...
+            uicontrol(ui3DLobeScrollableContoursInformationReport,...
+                      'style'     , 'text',...
+                      'FontWeight', 'Normal',...
+                      'FontSize'  , 10,...
+                      'FontName'  , 'MS Sans Serif', ...
+                      'string'    , getLobeLungReportVolumeInformation('init'),...
+                      'horizontalalignment', 'left',...
+                      'BackgroundColor', 'White', ...
+                      'ForegroundColor', 'Black', ...
+                      'position', [130+2*105 -75 105 gaContourInformationScrollableUiPosition(4)]...
+                      );
+         % end
+
+         uiReport3DLobeLeftLungRatio = ...
          uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -358,9 +484,9 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 370+55 FIG_REPORT_X/3 20]...
-                  ); 
+                  );
 
-         uiReport3DLobeRightLungRatio = ...       
+         uiReport3DLobeRightLungRatio = ...
          uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -371,21 +497,22 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 340+55 FIG_REPORT_X/3 20]...
-                  ); 
+                  );
 
      axe3DLungRectangle = ...
        axes(ui3DLobeLungReport, ...
              'Units'   , 'pixels', ...
              'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 330+55 FIG_REPORT_X/3+60 70], ...
-             'Color'   , 'white',...          
-             'Visible' , 'off'...             
-             );  
+             'Color'   , 'white',...
+             'Visible' , 'off'...
+             );
      axe3DLungRectangle.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-     axe3DLungRectangle.Toolbar = [];    
+     axe3DLungRectangle.Toolbar.Visible = 'off';
+     disableDefaultInteractivity(axe3DLungRectangle);
 
      rectangle(axe3DLungRectangle, 'position', [0 0 1 1], 'EdgeColor', [1 0.33 0.16]);
 
-         uiReport3DLobeUpperLobeLeftLungRatio = ...       
+         uiReport3DLobeUpperLobeLeftLungRatio = ...
          uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -396,9 +523,9 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 290+55 FIG_REPORT_X/3 20]...
-                  ); 
+                  );
 
-         uiReport3DLobeLowerLobeLeftLungRatio = ...       
+         uiReport3DLobeLowerLobeLeftLungRatio = ...
          uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -409,9 +536,9 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 260+55 FIG_REPORT_X/3 20]...
-                  ); 
+                  );
 
-         uiReport3DLobeUpperLobeRightLungRatio = ...       
+         uiReport3DLobeUpperLobeRightLungRatio = ...
          uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -422,9 +549,9 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 220+55 FIG_REPORT_X/3 20]...
-                  ); 
+                  );
 
-         uiReport3DLobeMiddleLobeRightLungRatio = ...       
+         uiReport3DLobeMiddleLobeRightLungRatio = ...
          uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -435,9 +562,9 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 190+55 FIG_REPORT_X/3 20]...
-                  ); 
+                  );
 
-         uiReport3DLobeLowerLobeRightLungRatio = ...       
+         uiReport3DLobeLowerLobeRightLungRatio = ...
          uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -448,22 +575,23 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 160+55 FIG_REPORT_X/3 20]...
-                  ); 
+                  );
 
      axe3DLobesRectangle = ...
        axes(ui3DLobeLungReport, ...
              'Units'   , 'pixels', ...
              'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 150+55 FIG_REPORT_X/3+60 170], ...
-             'Color'   , 'white',...          
-             'Visible' , 'off'...             
-             ); 
+             'Color'   , 'white',...
+             'Visible' , 'off'...
+             );
      axe3DLobesRectangle.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-     axe3DLobesRectangle.Toolbar = [];       
+     axe3DLobesRectangle.Toolbar.Visible = 'off';
+     disableDefaultInteractivity(axe3DLobesRectangle);
 
-     rectangle(axe3DLobesRectangle, 'position', [0 0 1 1], 'EdgeColor', [1 0.33 0.16]);     
+     rectangle(axe3DLobesRectangle, 'position', [0 0 1 1], 'EdgeColor', [1 0.33 0.16]);
 
     % Liver volume-of-interest oversized
-         
+
         uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -474,7 +602,7 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 155 400 20]...
-                  ); 
+                  );
 
         uiEdit3DLobesLiverVolumeOversized = ...
         uicontrol(ui3DLobeLungReport, ...
@@ -500,10 +628,10 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [aEdit3DLobesLiverVolumeSizePosition(1)+aEdit3DLobesLiverVolumeSizePosition(3)+5 aEdit3DLobesLiverVolumeSizePosition(2)-3 200 20]...
-                  ); 
-    
+                  );
+
     % Cutoff for the extra slices above the top of the liver volume-of-interest
-         
+
         uicontrol(ui3DLobeLungReport,...
                   'style'     , 'text',...
                   'FontWeight', 'normal',...
@@ -514,7 +642,7 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 95 460 20]...
-                  ); 
+                  );
 
         uiEdit3DLobesLiverTopOfVolumeExtraSlices = ...
         uicontrol(ui3DLobeLungReport, ...
@@ -540,7 +668,7 @@ function generate3DLungLobeReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [aEditLiverTopOfVolumeExtraSlicesPosition(1)+aEditLiverTopOfVolumeExtraSlicesPosition(3)+5 aEditLiverTopOfVolumeExtraSlicesPosition(2)-3 200 20]...
-                  ); 
+                  );
 
 
         uiProceed3DLobesLiverVolumeOversize = ...
@@ -558,27 +686,26 @@ function generate3DLungLobeReport(bInitReport)
      axes(ui3DLobeLungReport, ...
           'Units'   , 'pixels', ...
           'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 15 FIG_REPORT_X/3+60 170], ...
-          'Color'   , 'white',...          
-          'Visible' , 'off'...             
-         );  
+          'Color'   , 'white',...
+          'Visible' , 'off'...
+         );
     rectangle(axeProceedLiverVolumeOversize, 'position', [0 0 1 1], 'EdgeColor', [0.75 0.75 0.75]);
 
     % 3D Volume
 
     ui3DWindow = ...
     uipanel(ui3DLobeLungReport,...
-            'Units'   , 'pixels',...
-            'BorderWidth', showBorder('get'),...
-            'HighlightColor', [0 1 1],...
+            'Units'      , 'pixels',...
+            'BorderType', 'none',...
             'BackgroundColor', surfaceColor('get', background3DOffset('get')),...
             'position', [20 15 FIG_REPORT_X/3-75-15 340]...
-            );  
+            );
 
     uiSlider3Dintensity = ...
     uicontrol(ui3DLobeLungReport, ...
               'Style'   , 'Slider', ...
               'Position', [5 15 15 340], ...
-              'Value'   , 0.9, ...
+              'Value'   , 0.75, ...
               'Enable'  , 'on', ...
               'Tooltip' , 'Intensity', ...
               'BackgroundColor', 'White', ...
@@ -600,16 +727,16 @@ function generate3DLungLobeReport(bInitReport)
     % Notes
 
     uiEditWindow = ...
-    uicontrol(ui3DLobeLungReport,...       
+    uicontrol(ui3DLobeLungReport,...
               'style'     , 'edit',...
               'FontWeight', 'Normal',...
               'FontSize'  , 11,...
               'FontName'  , 'MS Sans Serif', ...
               'horizontalalignment', 'left',...
               'BackgroundColor', 'White', ...
-              'ForegroundColor', 'Black', ...              
+              'ForegroundColor', 'Black', ...
               'position', [FIG_REPORT_X/3-50 15 FIG_REPORT_X/3-75 250]...
-             );  
+             );
     set(uiEditWindow, 'Min', 0, 'Max', 2);
 
          uicontrol(ui3DLobeLungReport,...
@@ -634,18 +761,18 @@ function generate3DLungLobeReport(bInitReport)
     mReportEdit = uimenu(fig3DLobeLungReport,'Label','Edit');
     uimenu(mReportEdit,'Label', 'Copy Display', 'Callback', @copyLobeLungReportDisplayCallback);
 
-    mReportOptions = uimenu(fig3DLobeLungReport,'Label','Options', 'Callback', @figLobeLungRatioReportRefreshOption);    
-    
-    if suvMenuUnitOption('get') == true && ...
-       atInput(dOffset).bDoseKernel == false    
+    mReportOptions = uimenu(fig3DLobeLungReport,'Label','Options', 'Callback', @figLobeLungRatioReportRefreshOption);
 
-        sUnitDisplay = getSerieUnitValue(dOffset);  
+    if suvMenuUnitOption('get') == true && ...
+       atInput(dOffset).bDoseKernel == false
+
+        sUnitDisplay = getSerieUnitValue(dOffset);
         if strcmpi(sUnitDisplay, 'SUV')
             sSuvChecked = 'on';
         else
             if suvMenuUnitOption('get') == true
                 suvMenuUnitOption('set', false);
-            end            
+            end
             sSuvChecked = 'off';
         end
     else
@@ -654,86 +781,105 @@ function generate3DLungLobeReport(bInitReport)
         end
         sSuvChecked = 'off';
     end
-    
+
     if atInput(dOffset).bDoseKernel == true
         sSuvEnable = 'off';
     else
-        sUnitDisplay = getSerieUnitValue(dOffset);  
-        if strcmpi(sUnitDisplay, 'SUV')        
+        sUnitDisplay = getSerieUnitValue(dOffset);
+        if strcmpi(sUnitDisplay, 'SUV')
             sSuvEnable = 'on';
         else
             sSuvEnable = 'off';
         end
     end
-    
+
     mSUVUnit = ...
         uimenu(mReportOptions, 'Label', 'SUV Unit', 'Checked', sSuvChecked , 'Enable', sSuvEnable, 'Callback', @lobeLungReportSUVUnitCallback);
-    
+
     setLobeLungRatioReportFigureName();
-    
+
     if bInitReport == false % Reopen the report
         refreshReportLesionInformation(suvMenuUnitOption('get'));
     else % First run
-        gtReport = computeLobeLungReportContoursInformation(suvMenuUnitOption('get'), false, false, true);  
+        gtReport = computeLobeLungReportContoursInformation(suvMenuUnitOption('get'), false, false, true);
 
         proceed3DLobesLiverVolumeOversize();
 
         bInitReport = false;
-   
+
         if isvalid(ui3DWindow)
             display3DLobeLung();
         end
     end
 
     function refreshReportLesionInformation(bSUVUnit)
-      
+
         gtReport = computeLobeLungReportContoursInformation(bSUVUnit, false, false, false);
 
         if ~isempty(gtReport) % Fill information
 
-            if isvalid(uiReport3DLobeLungInformation) % Make sure the figure is still open     
-                set(uiReport3DLobeLungInformation, 'String', sprintf('Contours Information (%s)', getLobeLungReportUnitValue()));                                             
+            if isvalid(uiReport3DLobeLungInformation) % Make sure the figure is still open
+                set(uiReport3DLobeLungInformation, 'String', sprintf('Contours Information (%s)', getLobeLungReportUnitValue()));
             end
-           
-            if isvalid(uiReportLesionMean) % Make sure the figure is still open        
+
+            if isvalid(uiReportLesionMean) % Make sure the figure is still open
+
                 set(uiReportLesionMean, 'String', getLobeLungReportMeanInformation('get', gtReport));
-            end        
-            
-            if isvalid(uiReportLesionMax) % Make sure the figure is still open        
+
+                if viewerUIFigure('get') == true
+
+                    setUiExtendedPosition(uiReportLesionMean);
+                end
+
+            end
+
+            if isvalid(uiReportLesionMax) % Make sure the figure is still open
+
                 set(uiReportLesionMax, 'String', getLobeLungReportTotalInformation('get', gtReport));
-            end    
-            
-            if isvalid(uiReportLesionVolume) % Make sure the figure is still open        
+
+                if viewerUIFigure('get') == true
+
+                    setUiExtendedPosition(uiReportLesionMax);
+                end
+            end
+
+            if isvalid(uiReportLesionVolume) % Make sure the figure is still open
+
                 set(uiReportLesionVolume, 'String', getLobeLungReportVolumeInformation('get', gtReport));
-            end  
+
+                if viewerUIFigure('get') == true
+
+                    setUiExtendedPosition(uiReportLesionVolume);
+                end
+            end
 
             if isvalid(uiReport3DLobeLeftLungRatio)
                 set(uiReport3DLobeLeftLungRatio, 'String', getReportLungLeftRatioInformation(gtReport));
-            end  
+            end
 
             if isvalid(uiReport3DLobeRightLungRatio)
                 set(uiReport3DLobeRightLungRatio, 'String', getReportLungRightRatioInformation(gtReport));
-            end    
+            end
 
             if isvalid(uiReport3DLobeUpperLobeLeftLungRatio)
                 set(uiReport3DLobeUpperLobeLeftLungRatio, 'String', getReportUpperLobeLeftRatioInformation(gtReport));
-            end  
+            end
 
             if isvalid(uiReport3DLobeLowerLobeLeftLungRatio)
                 set(uiReport3DLobeLowerLobeLeftLungRatio, 'String', getReportLowerLobeLeftRatioInformation(gtReport));
-            end  
+            end
 
             if isvalid(uiReport3DLobeUpperLobeRightLungRatio)
                 set(uiReport3DLobeUpperLobeRightLungRatio, 'String', getReportUpperLobeRightRatioInformation(gtReport));
-            end  
+            end
 
             if isvalid(uiReport3DLobeMiddleLobeRightLungRatio)
                 set(uiReport3DLobeMiddleLobeRightLungRatio, 'String', getReportMiddleLobeRightRatioInformation(gtReport));
-            end  
+            end
 
             if isvalid(uiReport3DLobeLowerLobeRightLungRatio)
                 set(uiReport3DLobeLowerLobeRightLungRatio, 'String', getReportLowerLobeRightRatioInformation(gtReport));
-            end  
+            end
 
             if isvalid(ui3DWindow)
                 display3DLobeLung();
@@ -755,7 +901,7 @@ function generate3DLungLobeReport(bInitReport)
         sExtraPixelsSize = sprintf('pixel(s) (%2.2f mm)', getLobesLungVolumeOversizedSize(dNbPixels));
         set(uiText3DLobesLiverVolumeOversized, 'String', sExtraPixelsSize);
 
-%         lungLobesLiverVolumeOversized('set', dNbPixels);        
+%         lungLobesLiverVolumeOversized('set', dNbPixels);
 
     end
 
@@ -779,8 +925,8 @@ function generate3DLungLobeReport(bInitReport)
 
         atInput = inputTemplate('get');
 
-        % Modality validation    
-          
+        % Modality validation
+
         dNMSerieOffset = [];
         for tt=1:numel(atInput)
             if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'nm')
@@ -811,17 +957,17 @@ function generate3DLungLobeReport(bInitReport)
         atCTMetaData = atInput(dCTSerieOffset).atDicomInfo;
 
         if isempty(dCTSerieOffset) || ...
-           isempty(dNMSerieOffset)  
+           isempty(dNMSerieOffset)
             progressBar(1, 'Error: proceed3DLobesLiverVolumeOversize() 3D Lung Liver Ratio require a CT and NM image!');
-            errordlg('Error: proceed3DLobesLiverVolumeOversize() 3D Lung Liver Ratio require a CT and NM image!', 'Modality Validation');  
-            return;               
+            errordlg('Error: proceed3DLobesLiverVolumeOversize() 3D Lung Liver Ratio require a CT and NM image!', 'Modality Validation');
+            return;
         end
 
         dNbExtraSlicesAtTop = round(str2double(get(uiEdit3DLobesLiverTopOfVolumeExtraSlices, 'String')));
 
         dLiverMaskOffset = round(str2double(get(uiEdit3DLobesLiverVolumeOversized, 'String')));
 
-        if ~isempty(gtReport) 
+        if ~isempty(gtReport)
 
             try
 
@@ -837,11 +983,11 @@ function generate3DLungLobeReport(bInitReport)
             if dNbExtraSlicesAtTop ~= lungLobesLiverTopOfVolumeExtraSlices('get')    || ...
                dLiverMaskOffset    ~= lungLobesLiverVolumeOversized('get')           || ...
                bInitReport         == true % First run
-                
+
                 dFirstSlice = [];
-    
+
                 aLiverMask = gtReport.Liver.Mask;
-    
+
                 for jj=1:size(aLiverMask, 3)
                     dOffset = find(aLiverMask(:,:,jj), 1);
                     if ~isempty(dOffset)
@@ -850,82 +996,82 @@ function generate3DLungLobeReport(bInitReport)
                         end
                     end
                 end
-    
+
                 if dLiverMaskOffset ~= 0
-                    if dNbExtraSlicesAtTop < 0 
-    
+                    if dNbExtraSlicesAtTop < 0
+
                         aLiverMaskTemp = imdilate(aLiverMask, strel('sphere', dLiverMaskOffset)); % Increse mask by x pixels
-        
+
                         aLiverMaskTemp(:,:,1:dFirstSlice-1-dNbExtraSlicesAtTop) = 0;
-    
+
                         if dNbExtraSlicesAtTop < 0
                             aLiverMaskTemp(:,:,dFirstSlice:dFirstSlice-1-dNbExtraSlicesAtTop) = ...
                                 aLiverMask(:,:,dFirstSlice:dFirstSlice-1-dNbExtraSlicesAtTop);
                         end
-    
+
                         aLiverMask = aLiverMaskTemp;
-    
+
                         clear aLiverMaskTemp;
                     else
                         aLiverMask = imdilate(aLiverMask, strel('sphere', dLiverMaskOffset)); % Increse mask by x pixels
-        
+
                         aLiverMask(:,:,1:dFirstSlice-1-dNbExtraSlicesAtTop) = 0;
                     end
                 end
-                          
+
                 delete3DLobesVoiContours('Liver-LIV', dNMSerieOffset);
 
                 if numel(aLiverMask) ~= numel(aNMImage)
 
-                    [aLiverMask, ~] = resampleImage(aLiverMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
+                    [aLiverMask, ~] = resampleImage(aLiverMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false);
                 end
 
                 maskToVoi(aLiverMask, 'Liver', 'Liver', gtReport.Liver.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
-                
+
                 % Clean Lungs Mask
-    
+
                 progressBar(2/11, 'Computing oversized liver, lungs mask, please wait.');
-    
+
                 aLungsMask = gtReport.Lungs.Mask;
 
                 % Resample the mask
 
-                if numel(aLungsMask) ~= numel(aNMImage) 
+                if numel(aLungsMask) ~= numel(aNMImage)
 
-                    [aLungsMask, ~] = resampleImage(aLungsMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
+                    [aLungsMask, ~] = resampleImage(aLungsMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false);
                 end
 
                 aLungsMask(aLiverMask~=0)=0;
-                
+
                 delete3DLobesVoiContours('Lungs-LUN', dNMSerieOffset);
-    
+
                 maskToVoi(aLungsMask, 'Lungs', 'Lung', gtReport.Lungs.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
-    
+
                 clear aLungsMask;
-    
+
                 % Clean Lung Left Mask
-    
+
                 progressBar(3/11, 'Computing oversized liver, lung left mask, please wait.');
-    
+
                 aLungLeftMask = gtReport.LungLeft.Mask;
 
                 % Resample the mask
 
                 if numel(aLungLeftMask) ~= numel(aNMImage)
 
-                    [aLungLeftMask, ~] = resampleImage(aLungLeftMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
+                    [aLungLeftMask, ~] = resampleImage(aLungLeftMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false);
                 end
 
                 aLungLeftMask(aLiverMask~=0)=0;
-                
+
                 delete3DLobesVoiContours('Lung Left-LUN', dNMSerieOffset);
-    
+
                 maskToVoi(aLungLeftMask, 'Lung Left', 'Lung', gtReport.LungLeft.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
-    
+
                 clear aLungLeftMask;
-                
+
                 % Clean Lung Right Mask
-    
+
                 progressBar(4/11, 'Computing oversized liver, lung right mask, please wait.');
 
                 aLungRightMask = gtReport.LungRight.Mask;
@@ -934,115 +1080,115 @@ function generate3DLungLobeReport(bInitReport)
 
                 if numel(aLungRightMask) ~= numel(aNMImage)
 
-                    [aLungRightMask, ~] = resampleImage(aLungRightMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
+                    [aLungRightMask, ~] = resampleImage(aLungRightMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false);
                 end
-   
+
                 aLungRightMask(aLiverMask~=0)=0;
-                
+
                 delete3DLobesVoiContours('Lung Right-LUN', dNMSerieOffset);
-    
+
                 maskToVoi(aLungRightMask, 'Lung Right', 'Lung', gtReport.LungRight.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
-    
+
                 clear aLungRightMask;
-    
+
                 % Clean Lung Lower Lobe Left Mask
-    
+
                 progressBar(5/11, 'Computing oversized liver, lung lower left lobe mask, please wait.');
-    
+
                 aLungLowerLobeLeftMask = gtReport.LungLowerLobeLeft.Mask;
 
                 if numel(aLungLowerLobeLeftMask) ~= numel(aNMImage)
 
-                    [aLungLowerLobeLeftMask, ~] = resampleImage(aLungLowerLobeLeftMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
+                    [aLungLowerLobeLeftMask, ~] = resampleImage(aLungLowerLobeLeftMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false);
                 end
 
                 aLungLowerLobeLeftMask(aLiverMask~=0)=0;
-                
+
                 delete3DLobesVoiContours('Lung Lower Lobe Left-LUN', dNMSerieOffset);
-    
+
                 maskToVoi(aLungLowerLobeLeftMask, 'Lung Lower Lobe Left', 'Lung', gtReport.LungLowerLobeLeft.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
-    
+
                 clear aLungLowerLobeLeftMask;
-    
+
                 % Clean Lung Lower Lobe Left Mask
-    
+
                 progressBar(6/11, 'Computing oversized liver, lung lower right lobe mask, please wait.');
-    
+
                 aLungLowerLobeRightMask = gtReport.LungLowerLobeRight.Mask;
 
                 if numel(aLungLowerLobeRightMask) ~= numel(aNMImage)
 
-                    [aLungLowerLobeRightMask, ~] = resampleImage(aLungLowerLobeRightMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
+                    [aLungLowerLobeRightMask, ~] = resampleImage(aLungLowerLobeRightMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false);
                 end
 
                 aLungLowerLobeRightMask(aLiverMask~=0)=0;
-                
+
                 delete3DLobesVoiContours('Lung Lower Lobe Right-LUN', dNMSerieOffset);
-    
+
                 maskToVoi(aLungLowerLobeRightMask, 'Lung Lower Lobe Right', 'Lung', gtReport.LungLowerLobeRight.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
-    
+
                 clear aLungLowerLobeRightMask;
-    
+
                 % Clean Lung Lower Lobe Left Mask
-    
+
                 progressBar(7/11, 'Computing oversized liver, lung middle right lobe mask, please wait.');
-    
+
                 aLungMiddleLobeRightMask = gtReport.LungMiddleLobeRight.Mask;
 
                 if numel(aLungMiddleLobeRightMask) ~= numel(aNMImage)
 
-                    [aLungMiddleLobeRightMask, ~] = resampleImage(aLungMiddleLobeRightMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
+                    [aLungMiddleLobeRightMask, ~] = resampleImage(aLungMiddleLobeRightMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false);
                 end
 
                 aLungMiddleLobeRightMask(aLiverMask~=0)=0;
-                
+
                 delete3DLobesVoiContours('Lung Middle Lobe Right-LUN', dNMSerieOffset);
-    
+
                 maskToVoi(aLungMiddleLobeRightMask, 'Lung Middle Lobe Right', 'Lung', gtReport.LungMiddleLobeRight.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
-    
+
                 clear aLungMiddleLobeRightMask;
 
 %                 progressBar(8/11, 'Computing oversized liver, lung upper left lobe mask, please wait.');
-%     
+%
 %                 aLungUpperLobeLeftMask = gtReport.LungUpperLobeLeft.Mask;
-% 
+%
 %                 if numel(aLungUpperLobeLeftMask) ~= numel(aNMImage)
-% 
-%                     [aLungUpperLobeLeftMask, ~] = resampleImage(aLungUpperLobeLeftMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
+%
+%                     [aLungUpperLobeLeftMask, ~] = resampleImage(aLungUpperLobeLeftMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false);
 %                 end
-% 
+%
 %                 aLungUpperLobeLeftMask(aLiverMask~=0)=0;
-%                 
+%
 %                 delete3DLobesVoiContours('Lung Upper Lobe Left-LUN', dNMSerieOffset);
-%     
+%
 %                 maskToVoi(aLungUpperLobeLeftMask, 'Lung Upper Lobe Left', 'Lung', gtReport.LungUpperLobeLeft.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
-%     
+%
 %                 clear aLungUpperLobeLeftMask;
-% 
+%
 %                 progressBar(9/11, 'Computing oversized liver, lung upper right lobe mask, please wait.');
-%     
+%
 %                 aLungUpperLobeRightMask = gtReport.LungUpperLobeRight.Mask;
-% 
+%
 %                 if numel(aLungUpperLobeRightMask) ~= numel(aNMImage)
-% 
-%                     [aLungUpperLobeRightMask, ~] = resampleImage(aLungUpperLobeRightMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
+%
+%                     [aLungUpperLobeRightMask, ~] = resampleImage(aLungUpperLobeRightMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false);
 %                 end
-% 
+%
 %                 aLungUpperLobeRightMask(aLiverMask~=0)=0;
-%                 
+%
 %                 delete3DLobesVoiContours('Lung Upper Lobe Right-LUN', dNMSerieOffset);
-%     
+%
 %                 maskToVoi(aLungUpperLobeRightMask, 'Lung Upper Lobe Right', 'Lung', gtReport.LungUpperLobeRight.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
-%     
+%
 %                 clear aLungUpperLobeRightMask;
 
                 clear aLiverMask;
 
-                lungLobesLiverTopOfVolumeExtraSlices   ('set', dNbExtraSlicesAtTop);    
+                lungLobesLiverTopOfVolumeExtraSlices   ('set', dNbExtraSlicesAtTop);
                 lungLobesLiverVolumeOversized('set', dLiverMaskOffset);
-                
+
             end
-    
+
             clear aNMImage;
             clear aCTImage;
 
@@ -1050,50 +1196,68 @@ function generate3DLungLobeReport(bInitReport)
 
             gtReport = computeLobeLungReportContoursInformation(suvMenuUnitOption('get'), false, false, false);
 
-            if isvalid(uiReport3DLobeLungInformation) % Make sure the figure is still open     
-                set(uiReport3DLobeLungInformation, 'String', sprintf('Contours Information (%s)', getLobeLungReportUnitValue()));                                             
+            if isvalid(uiReport3DLobeLungInformation) % Make sure the figure is still open
+                set(uiReport3DLobeLungInformation, 'String', sprintf('Contours Information (%s)', getLobeLungReportUnitValue()));
             end
-           
-            if isvalid(uiReportLesionMean) % Make sure the figure is still open        
+
+            if isvalid(uiReportLesionMean) % Make sure the figure is still open
+
                 set(uiReportLesionMean, 'String', getLobeLungReportMeanInformation('get', gtReport));
-            end        
-            
-            if isvalid(uiReportLesionMax) % Make sure the figure is still open        
+
+                if viewerUIFigure('get') == true
+
+                    setUiExtendedPosition(uiReportLesionMean);
+                end
+            end
+
+            if isvalid(uiReportLesionMax) % Make sure the figure is still open
+
                 set(uiReportLesionMax, 'String', getLobeLungReportTotalInformation('get', gtReport));
-            end    
-            
-            if isvalid(uiReportLesionVolume) % Make sure the figure is still open        
+
+                if viewerUIFigure('get') == true
+
+                    setUiExtendedPosition(uiReportLesionMax);
+                end
+            end
+
+            if isvalid(uiReportLesionVolume) % Make sure the figure is still open
+
                 set(uiReportLesionVolume, 'String', getLobeLungReportVolumeInformation('get', gtReport));
-            end  
+
+                if viewerUIFigure('get') == true
+
+                    setUiExtendedPosition(uiReportLesionVolume);
+                end
+            end
 
             if isvalid(uiReport3DLobeLeftLungRatio)
                 set(uiReport3DLobeLeftLungRatio, 'String', getReportLungLeftRatioInformation(gtReport));
-            end  
+            end
 
             if isvalid(uiReport3DLobeRightLungRatio)
                 set(uiReport3DLobeRightLungRatio, 'String', getReportLungRightRatioInformation(gtReport));
-            end    
+            end
 
             if isvalid(uiReport3DLobeUpperLobeLeftLungRatio)
                 set(uiReport3DLobeUpperLobeLeftLungRatio, 'String', getReportUpperLobeLeftRatioInformation(gtReport));
-            end  
+            end
 
             if isvalid(uiReport3DLobeLowerLobeLeftLungRatio)
                 set(uiReport3DLobeLowerLobeLeftLungRatio, 'String', getReportLowerLobeLeftRatioInformation(gtReport));
-            end  
+            end
 
             if isvalid(uiReport3DLobeUpperLobeRightLungRatio)
                 set(uiReport3DLobeUpperLobeRightLungRatio, 'String', getReportUpperLobeRightRatioInformation(gtReport));
-            end  
+            end
 
             if isvalid(uiReport3DLobeMiddleLobeRightLungRatio)
                 set(uiReport3DLobeMiddleLobeRightLungRatio, 'String', getReportMiddleLobeRightRatioInformation(gtReport));
-            end  
+            end
 
             if isvalid(uiReport3DLobeLowerLobeRightLungRatio)
                 set(uiReport3DLobeLowerLobeRightLungRatio, 'String', getReportLowerLobeRightRatioInformation(gtReport));
-            end 
-            
+            end
+
 
             refreshImages();
 
@@ -1115,17 +1279,17 @@ function generate3DLungLobeReport(bInitReport)
 
     function delete3DLobesVoiContours(sVoiLabel, dSerieOffset)
 
-                
+
         atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                        
+        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
         if ~isempty(atVoiInput)
-            
-            % Search for a voi tag, if we don't find one, then the tag is            
+
+            % Search for a voi tag, if we don't find one, then the tag is
             % roi
 
             aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Label, atVoiInput, 'uni', false ), sVoiLabel );
-           
+
             if aTagOffset(aTagOffset==1) % tag is a voi
 
                 dTagOffset = find(aTagOffset, 1);
@@ -1139,7 +1303,7 @@ function generate3DLungLobeReport(bInitReport)
 
                         for ro=1:numel(atVoiInput{dTagOffset}.RoisTag)
                             aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[atVoiInput{dTagOffset}.RoisTag{ro}]} );
-                            aRoisTagOffset(ro) = find(aTagOffset, 1);    
+                            aRoisTagOffset(ro) = find(aTagOffset, 1);
                         end
 
                         if numel(atVoiInput{dTagOffset}.RoisTag)
@@ -1190,18 +1354,18 @@ function generate3DLungLobeReport(bInitReport)
 
                             atRoiInput(cellfun(@isempty, atRoiInput)) = [];
 
-                            roiTemplate('set', dSerieOffset, atRoiInput);  
+                            roiTemplate('set', dSerieOffset, atRoiInput);
                         end
                     end
 
                     % Clear voi from voi input template
 
-                    atVoiInput{dTagOffset} = [];            
+                    atVoiInput{dTagOffset} = [];
                     atVoiInput(cellfun(@isempty, atVoiInput)) = [];
 
                     voiTemplate('set', dSerieOffset, atVoiInput);
 
-                end 
+                end
             end
         end
     end
@@ -1210,8 +1374,8 @@ function generate3DLungLobeReport(bInitReport)
 
         atInput = inputTemplate('get');
 
-        % Modality validation    
-          
+        % Modality validation
+
         dNMSerieOffset = [];
         for tt=1:numel(atInput)
             if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'nm')
@@ -1220,7 +1384,7 @@ function generate3DLungLobeReport(bInitReport)
             end
         end
 
-        if ~isempty(dNMSerieOffset)  
+        if ~isempty(dNMSerieOffset)
             dVolumeOversizedSize = atInput(dNMSerieOffset).atDicomInfo{1}.PixelSpacing(1)*dNbPixels;
         else
             dVolumeOversizedSize =0;
@@ -1232,48 +1396,48 @@ function generate3DLungLobeReport(bInitReport)
 
         if ~isvalid(fig3DLobeLungReport)
             return;
-        end        
-    
+        end
+
         atMetaData = dicomMetaData('get');
-       
+
         sUnit = sprintf('Unit: %s', getLobeLungReportUnitValue());
-        
+
         fig3DLobeLungReport.Name = ['TriDFusion (3DF) 3D SPECT Lung Lobe Ratio Report - ' atMetaData{1}.SeriesDescription ' - ' sUnit];
 
     end
-    
+
     function figLobeLungRatioReportRefreshOption(~, ~)
 
-        if suvMenuUnitOption('get') == true 
+        if suvMenuUnitOption('get') == true
             sSuvChecked = 'on';
         else
             sSuvChecked = 'off';
         end
-              
+
         set(mSUVUnit         , 'Checked', sSuvChecked);
 
     end
 
     function sUnit = getLobeLungReportUnitValue()
-        
+
         atMetaData = dicomMetaData('get');
-       
+
         atInput = inputTemplate('get');
         dOffset = get(uiSeriesPtr('get'), 'Value');
-    
+
         if atInput(dOffset).bDoseKernel == true
-            
+
             if isfield(atMetaData{1}, 'DoseUnits')
 
                 if ~isempty(atMetaData{1}.DoseUnits)
-                    
+
                     sUnit = char(atMetaData{1}.DoseUnits);
                 else
                     sUnit = 'dose';
                 end
             else
                 sUnit = 'dose';
-            end   
+            end
         else
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                 sUnit = getSerieUnitValue(dOffset);
@@ -1304,47 +1468,47 @@ function generate3DLungLobeReport(bInitReport)
                     end
                  end
             end
-         end 
+         end
     end
 
     function lobeLungReportSUVUnitCallback(hObject, ~)
-   
+
         if strcmpi(hObject.Checked, 'on')
             hObject.Checked = 'off';
             suvMenuUnitOption('set', false);
-            
-            refreshReportLesionInformation(false);            
+
+            refreshReportLesionInformation(false);
         else
             hObject.Checked = 'on';
             suvMenuUnitOption('set', true);
-            
-            refreshReportLesionInformation(true);            
+
+            refreshReportLesionInformation(true);
         end
 
         setLobeLungRatioReportFigureName();
     end
 
     function sReport = getLobeLungReportLesionTypeInformation()
-                
-        sReport = '';      
-      
+
+        sReport = '';
+
   %      [~, gasOrganList] = getLesionType('');
-        
+
         for ll=1:numel(gasOrganList)
-            if  ll==1          
+            if  ll==1
                 sReport = sprintf('%s%s', sReport, char(gasOrganList{ll}));
             else
                 sReport = sprintf('%s\n\n%s', sReport, char(gasOrganList{ll}));
             end
-        end       
+        end
     end
 
     function sReport = getLobeLungReportMeanInformation(sAction, tReport)
-                
+
 %        [~, gasOrganList] = getLesionType('');
-        
+
         if strcmpi(sAction, 'init')
-            sReport = '';    
+            sReport = '';
             for ll=1:numel(gasOrganList)
                 if isempty(sReport)
                     sReport = '-';
@@ -1355,20 +1519,20 @@ function generate3DLungLobeReport(bInitReport)
                         sReport = sprintf('%s\n\n%s', sReport, '-');
                     end
                 end
-            end       
+            end
         else
-            
+
   %          if ~isempty(tReport.All.Mean)
-  %              sReport = sprintf('%-12s\n___________', num2str(tReport.All.Mean));      
+  %              sReport = sprintf('%-12s\n___________', num2str(tReport.All.Mean));
   %          else
-  %              sReport = sprintf('%s\n___________', '-');      
+  %              sReport = sprintf('%s\n___________', '-');
   %          end
-            sReport = '';    
-                
-            for ll=1:numel(gasOrganList)      
-                
+            sReport = '';
+
+            for ll=1:numel(gasOrganList)
+
                 switch lower(gasOrganList{ll})
-                                            
+
                     case 'lungs'
                         if ~isempty(tReport.Lungs.Mean)
                             sReport = sprintf('%s%-.2f', sReport, tReport.Lungs.Mean);
@@ -1378,8 +1542,8 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
-                        
+                        end
+
                     case 'lung left'
                         if ~isempty(tReport.LungLeft.Mean)
                             sReport = sprintf('%s\n\n%-.2f', sReport, tReport.LungLeft.Mean);
@@ -1389,7 +1553,7 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
+                        end
 
                     case 'lung right'
                         if ~isempty(tReport.LungRight.Mean)
@@ -1400,7 +1564,7 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end 
+                        end
 
                     case 'upper lobe left'
                         if ~isempty(tReport.LungUpperLobeLeft.Mean)
@@ -1411,7 +1575,7 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end    
+                        end
 
                     case 'lower lobe left'
                         if ~isempty(tReport.LungLowerLobeLeft.Mean)
@@ -1422,7 +1586,7 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
+                        end
 
                     case 'upper lobe right'
                         if ~isempty(tReport.LungUpperLobeRight.Mean)
@@ -1433,7 +1597,7 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end    
+                        end
 
                     case 'middle lobe right'
                         if ~isempty(tReport.LungMiddleLobeRight.Mean)
@@ -1444,7 +1608,7 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
+                        end
 
                     case 'lower lobe right'
                         if ~isempty(tReport.LungLowerLobeRight.Mean)
@@ -1455,21 +1619,21 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
-                        
-                    otherwise                        
+                        end
+
+                    otherwise
                         sReport = sprintf('%s\n\n%s', sReport, '-');
                 end
-            end             
-        end      
+            end
+        end
     end
 
     function sReport = getLobeLungReportTotalInformation(sAction, tReport)
-                
+
 %        [~, gasOrganList] = getLesionType('');
-        
+
         if strcmpi(sAction, 'init')
-            sReport = '';      
+            sReport = '';
             for ll=1:numel(gasOrganList)
                 if isempty(sReport)
                     sReport = '-';
@@ -1480,20 +1644,20 @@ function generate3DLungLobeReport(bInitReport)
                         sReport = sprintf('%s\n\n%s', sReport, '-');
                     end
                 end
-            end       
+            end
         else
-            
+
  %           if ~isempty(tReport.All.Total)
- %               sReport = sprintf('%-12s\n___________', num2str(tReport.All.Total));      
+ %               sReport = sprintf('%-12s\n___________', num2str(tReport.All.Total));
  %           else
- %               sReport = sprintf('%s\n___________', '-');      
+ %               sReport = sprintf('%s\n___________', '-');
  %           end
-            sReport = '';    
-                
-            for ll=1:numel(gasOrganList)      
-                
+            sReport = '';
+
+            for ll=1:numel(gasOrganList)
+
                 switch lower(gasOrganList{ll})
-                                             
+
                     case 'lungs'
                         if ~isempty(tReport.Lungs.Total)
                             sReport = sprintf('%s%-.2f', sReport, tReport.Lungs.Total);
@@ -1503,8 +1667,8 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
-                        
+                        end
+
                     case 'lung left'
                         if ~isempty(tReport.LungLeft.Total)
                             sReport = sprintf('%s\n\n%-.2f', sReport, tReport.LungLeft.Total);
@@ -1514,7 +1678,7 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
+                        end
 
                     case 'lung right'
                         if ~isempty(tReport.LungRight.Total)
@@ -1525,7 +1689,7 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end 
+                        end
 
                     case 'upper lobe left'
                         if ~isempty(tReport.LungUpperLobeLeft.Total)
@@ -1536,7 +1700,7 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end    
+                        end
 
                     case 'lower lobe left'
                         if ~isempty(tReport.LungLowerLobeLeft.Total)
@@ -1547,7 +1711,7 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
+                        end
 
                     case 'upper lobe right'
                         if ~isempty(tReport.LungUpperLobeRight.Total)
@@ -1558,7 +1722,7 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end    
+                        end
 
                     case 'middle lobe right'
                         if ~isempty(tReport.LungMiddleLobeRight.Total)
@@ -1569,7 +1733,7 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
+                        end
 
                     case 'lower lobe right'
                         if ~isempty(tReport.LungLowerLobeRight.Total)
@@ -1580,21 +1744,21 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end   
+                        end
 
-                    otherwise    
+                    otherwise
                         sReport = sprintf('%s\n\n%s', sReport, '-');
                 end
-            end             
-        end      
+            end
+        end
     end
 
     function sReport = getLobeLungReportVolumeInformation(sAction, tReport)
-                
+
  %       [~, gasOrganList] = getLesionType('');
-        
+
         if strcmpi(sAction, 'init')
-            sReport = '';      
+            sReport = '';
             for ll=1:numel(gasOrganList)
                 if isempty(sReport)
                     sReport = '-';
@@ -1605,20 +1769,20 @@ function generate3DLungLobeReport(bInitReport)
                         sReport = sprintf('%s\n\n%s', sReport, '-');
                     end
                 end
-            end       
+            end
         else
-            
+
    %         if ~isempty(tReport.All.Volume)
-   %             sReport = sprintf('%-12s\n___________', num2str(tReport.All.Volume));      
+   %             sReport = sprintf('%-12s\n___________', num2str(tReport.All.Volume));
    %         else
-   %             sReport = sprintf('%s\n___________', '-');      
+   %             sReport = sprintf('%s\n___________', '-');
    %         end
-            sReport = '';    
-                
-            for ll=1:numel(gasOrganList)      
-                
+            sReport = '';
+
+            for ll=1:numel(gasOrganList)
+
                 switch lower(gasOrganList{ll})
-                        
+
                     case 'lungs'
                         if ~isempty(tReport.Lungs.Volume)
                             sReport = sprintf('%s%-.3f', sReport, tReport.Lungs.Volume);
@@ -1628,8 +1792,8 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
-                        
+                        end
+
                     case 'lung left'
                         if ~isempty(tReport.LungLeft.Volume)
                             sReport = sprintf('%s\n\n%-.3f', sReport, tReport.LungLeft.Volume);
@@ -1639,7 +1803,7 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
+                        end
 
                     case 'lung right'
                         if ~isempty(tReport.LungRight.Volume)
@@ -1650,7 +1814,7 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end 
+                        end
 
                     case 'upper lobe left'
                         if ~isempty(tReport.LungUpperLobeLeft.Volume)
@@ -1661,7 +1825,7 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end    
+                        end
 
                     case 'lower lobe left'
                         if ~isempty(tReport.LungLowerLobeLeft.Volume)
@@ -1672,7 +1836,7 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
+                        end
 
                     case 'upper lobe right'
                         if ~isempty(tReport.LungUpperLobeRight.Volume)
@@ -1683,7 +1847,7 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end    
+                        end
 
                     case 'middle lobe right'
                         if ~isempty(tReport.LungMiddleLobeRight.Volume)
@@ -1694,7 +1858,7 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
+                        end
 
                     case 'lower lobe right'
                         if ~isempty(tReport.LungLowerLobeRight.Volume)
@@ -1705,84 +1869,84 @@ function generate3DLungLobeReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end                        
-                        
-                    otherwise    
+                        end
+
+                    otherwise
                         sReport = sprintf('%s\n\n%s', sReport, '-');
                 end
-            end             
-        end         
+            end
+        end
     end
 
 
     function sReport = getReportLungLeftRatioInformation(tReport)
 
          sReport = sprintf('Lung Left Total Ratio   : %2.2f%%', tReport.LungLeft.Total/tReport.Lungs.Total*100);
-                    
+
     end
 
     function sReport = getReportLungRightRatioInformation(tReport)
 
          sReport = sprintf('Lung Right Total Ratio: %2.2f%%', tReport.LungRight.Total/tReport.Lungs.Total*100);
-                    
+
     end
 
     function sReport = getReportUpperLobeLeftRatioInformation(tReport)
 
          sReport = sprintf('Upper Lobe Left Total Ratio    : %2.2f%%', tReport.LungUpperLobeLeft.Total/tReport.Lungs.Total*100);
-                    
+
     end
 
     function sReport = getReportLowerLobeLeftRatioInformation(tReport)
 
          sReport = sprintf('Lower Lobe Left Total Ratio    : %2.2f%%', tReport.LungLowerLobeLeft.Total/tReport.Lungs.Total*100);
-                    
+
     end
 
     function sReport = getReportUpperLobeRightRatioInformation(tReport)
 
          sReport = sprintf('Upper Lobe Right Total Ratio : %2.2f%%', tReport.LungUpperLobeRight.Total/tReport.Lungs.Total*100);
-                    
+
     end
 
     function sReport = getReportMiddleLobeRightRatioInformation(tReport)
 
          sReport = sprintf('Middle Lobe Right Total Ratio: %2.2f%%', tReport.LungMiddleLobeRight.Total/tReport.Lungs.Total*100);
-                    
+
     end
 
     function sReport = getReportLowerLobeRightRatioInformation(tReport)
 
          sReport = sprintf('Lower Lobe Right Total Ratio: %2.2f%%', tReport.LungLowerLobeRight.Total/tReport.Lungs.Total*100);
-                    
+
     end
 
     function tReport = computeLobeLungReportContoursInformation(bSUVUnit, bModifiedMatrix, bSegmented, bUpdateMasks)
-        
+
         tReport = [];
-        
+
         atInput = inputTemplate('get');
         dOffset = get(uiSeriesPtr('get'), 'Value');
-        
+
         bMovementApplied = atInput(dOffset).tMovement.bMovementApplied;
-               
+
         sUnitDisplay = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
         tQuantification = quantificationTemplate('get');
-        
+
         atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));     
-        
+        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
         if isempty(atVoiInput)
             return;
-        end     
-                               
-        if bModifiedMatrix == false && ... 
+        end
+
+        if bModifiedMatrix == false && ...
            bMovementApplied == false        % Can't use input buffer if movement have been applied
-        
-            atDicomMeta = dicomMetaData('get');                              
+
+            atDicomMeta = dicomMetaData('get');
             atMetaData  = atInput(dOffset).atDicomInfo;
             aImage      = inputBuffer('get');
-            
+
 %            if     strcmpi(imageOrientation('get'), 'axial')
 %                aImage = permute(aImage{dOffset}, [1 2 3]);
 %            elseif strcmpi(imageOrientation('get'), 'coronal')
@@ -1809,7 +1973,7 @@ function generate3DLungLobeReport(bInitReport)
 
                 if atInput(dOffset).bFlipAntPost == true
                     aImage=aImage(end:-1:1,:);
-                end            
+                end
             else
                 if atInput(dOffset).bFlipLeftRight == true
                     aImage=aImage(:,end:-1:1,:);
@@ -1821,31 +1985,31 @@ function generate3DLungLobeReport(bInitReport)
 
                 if atInput(dOffset).bFlipHeadFeet == true
                     aImage=aImage(:,:,end:-1:1);
-                end 
-            end              
+                end
+            end
 
         else
-            atMetaData = dicomMetaData('get');                              
-            aImage     = dicomBuffer('get');      
+            atMetaData = dicomMetaData('get');
+            aImage     = dicomBuffer('get');
         end
-        
+
         % Set Voxel Size
-        
+
         xPixel = atMetaData{1}.PixelSpacing(1)/10;
-        yPixel = atMetaData{1}.PixelSpacing(2)/10; 
-        if size(aImage, 3) == 1 
+        yPixel = atMetaData{1}.PixelSpacing(2)/10;
+        if size(aImage, 3) == 1
             zPixel = 1;
         else
-            zPixel = computeSliceSpacing(atMetaData)/10; 
-            
+            zPixel = computeSliceSpacing(atMetaData)/10;
+
             if zPixel == 0 % We can't determine the z size of a pixel, we will presume the pixel is square.
                 zPixel = xPixel;
-            end           
+            end
         end
-        
-        dVoxVolume = xPixel * yPixel * zPixel;            
-        
-        % Count contour Type number 
+
+        dVoxVolume = xPixel * yPixel * zPixel;
+
+        % Count contour Type number
 
         dLiverCount               = 0;
         dLungsCount               = 0;
@@ -1868,49 +2032,49 @@ function generate3DLungLobeReport(bInitReport)
         dNbLungLowerLobeRightRois  = 0;
 
         for vv=1:numel(atVoiInput)
-            
+
             dNbRois = numel(atVoiInput{vv}.RoisTag);
-            
+
             switch lower(atVoiInput{vv}.Label)
 
                 case 'liver-liv'
-                    dLiverCount  = dLiverCount+1;                    
+                    dLiverCount  = dLiverCount+1;
                     dNbLiverRois = dNbLiverRois+dNbRois;
 
                 case 'lungs-lun'
-                    dLungsCount  = dLungsCount+1;                    
+                    dLungsCount  = dLungsCount+1;
                     dNbLungsRois = dNbLungsRois+dNbRois;
-                    
+
                 case 'lung left-lun'
-                    dLungLeftCount  = dLungLeftCount+1;                    
+                    dLungLeftCount  = dLungLeftCount+1;
                     dNbLungLeftRois = dNbLungLeftRois+dNbRois;
 
                 case 'lung right-lun'
-                    dLungRightCount  = dLungRightCount+1;                    
-                    dNbLungRightRois = dNbLungRightRois+dNbRois;   
+                    dLungRightCount  = dLungRightCount+1;
+                    dNbLungRightRois = dNbLungRightRois+dNbRois;
 
                 case 'lung upper lobe left-lun'
-                    dLungUpperLobeLeftCount  = dLungUpperLobeLeftCount+1;                    
-                    dNbLungUpperLobeLeftRois = dNbLungUpperLobeLeftRois+dNbRois;  
+                    dLungUpperLobeLeftCount  = dLungUpperLobeLeftCount+1;
+                    dNbLungUpperLobeLeftRois = dNbLungUpperLobeLeftRois+dNbRois;
 
                 case 'lung lower lobe left-lun'
-                    dLungLowerLobeLeftCount  = dLungLowerLobeLeftCount+1;                    
-                    dNbLungLowerLobeLeftRois = dNbLungLowerLobeLeftRois+dNbRois; 
+                    dLungLowerLobeLeftCount  = dLungLowerLobeLeftCount+1;
+                    dNbLungLowerLobeLeftRois = dNbLungLowerLobeLeftRois+dNbRois;
 
                 case 'lung upper lobe right-lun'
-                    dLungUpperLobeRightCount  = dLungUpperLobeRightCount+1;                    
-                    dNbLungUpperLobeRightRois = dNbLungUpperLobeRightRois+dNbRois;  
+                    dLungUpperLobeRightCount  = dLungUpperLobeRightCount+1;
+                    dNbLungUpperLobeRightRois = dNbLungUpperLobeRightRois+dNbRois;
 
                 case 'lung middle lobe right-lun'
-                    dLungMiddleLobeRightCount  = dLungMiddleLobeRightCount+1;                    
-                    dNbLungMiddleLobeRightRois = dNbLungMiddleLobeRightRois+dNbRois;  
+                    dLungMiddleLobeRightCount  = dLungMiddleLobeRightCount+1;
+                    dNbLungMiddleLobeRightRois = dNbLungMiddleLobeRightRois+dNbRois;
 
                 case 'lung lower lobe right-lun'
-                    dLungLowerLobeRightCount  = dLungLowerLobeRightCount+1;                    
-                    dNbLungLowerLobeRightRois = dNbLungLowerLobeRightRois+dNbRois; 
+                    dLungLowerLobeRightCount  = dLungLowerLobeRightCount+1;
+                    dNbLungLowerLobeRightRois = dNbLungLowerLobeRightRois+dNbRois;
             end
         end
-        
+
         % Set report type count
 
         if dLiverCount == 0
@@ -1924,13 +2088,13 @@ function generate3DLungLobeReport(bInitReport)
         else
             tReport.Lungs.Count = dLungsCount;
         end
-        
+
         if dLungLeftCount == 0
             tReport.LungLeft.Count = [];
         else
             tReport.LungLeft.Count = dLungLeftCount;
         end
-                  
+
         if dLungRightCount == 0
             tReport.LungRight.Count = [];
         else
@@ -1966,18 +2130,18 @@ function generate3DLungLobeReport(bInitReport)
         else
             tReport.LungLowerLobeRight.Count = dLungLowerLobeRightCount;
         end
-        
-        % Clasify ROIs by lession type      
-  
+
+        % Clasify ROIs by lession type
+
         tReport.Liver.RoisTag               = cell(1, dNbLiverRois);
         tReport.Lungs.RoisTag               = cell(1, dNbLungsRois);
-        tReport.LungLeft.RoisTag            = cell(1, dNbLungLeftRois);    
-        tReport.LungRight.RoisTag           = cell(1, dNbLungRightRois);               
-        tReport.LungUpperLobeLeft.RoisTag   = cell(1, dNbLungUpperLobeLeftRois);    
-        tReport.LungLowerLobeLeft.RoisTag   = cell(1, dNbLungLowerLobeLeftRois);    
-        tReport.LungUpperLobeRight.RoisTag  = cell(1, dNbLungUpperLobeRightRois);    
-        tReport.LungMiddleLobeRight.RoisTag = cell(1, dNbLungMiddleLobeRightRois);    
-        tReport.LungLowerLobeRight.RoisTag  = cell(1, dNbLungLowerLobeRightRois);   
+        tReport.LungLeft.RoisTag            = cell(1, dNbLungLeftRois);
+        tReport.LungRight.RoisTag           = cell(1, dNbLungRightRois);
+        tReport.LungUpperLobeLeft.RoisTag   = cell(1, dNbLungUpperLobeLeftRois);
+        tReport.LungLowerLobeLeft.RoisTag   = cell(1, dNbLungLowerLobeLeftRois);
+        tReport.LungUpperLobeRight.RoisTag  = cell(1, dNbLungUpperLobeRightRois);
+        tReport.LungMiddleLobeRight.RoisTag = cell(1, dNbLungMiddleLobeRightRois);
+        tReport.LungLowerLobeRight.RoisTag  = cell(1, dNbLungLowerLobeRightRois);
 
         dLiverRoisOffset               = 1;
         dLungsRoisOffset               = 1;
@@ -1990,17 +2154,17 @@ function generate3DLungLobeReport(bInitReport)
         dLungLowerLobeRightRoisOffset  = 1;
 
         for vv=1:numel(atVoiInput)
-            
+
             dNbRois = numel(atVoiInput{vv}.RoisTag);
-           
+
             switch lower(atVoiInput{vv}.Label)
 
                 case 'liver-liv'
                     dFrom = dLiverRoisOffset;
                     dTo   = dLiverRoisOffset+dNbRois-1;
-                    
+
                     tReport.Liver.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
-                    
+
                     dLiverRoisOffset = dLiverRoisOffset+dNbRois;
 
                     tReport.Liver.Color = atVoiInput{vv}.Color;
@@ -2008,121 +2172,121 @@ function generate3DLungLobeReport(bInitReport)
                 case 'lungs-lun'
                     dFrom = dLungsRoisOffset;
                     dTo   = dLungsRoisOffset+dNbRois-1;
-                    
+
                     tReport.Lungs.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
-                    
+
                     dLungsRoisOffset = dLungsRoisOffset+dNbRois;
 
                     tReport.Lungs.Color = atVoiInput{vv}.Color;
-                   
+
                 case 'lung left-lun'
                     dFrom = dLungLeftRoisOffset;
                     dTo   = dLungLeftRoisOffset+dNbRois-1;
-                    
+
                     tReport.LungLeft.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
-                    
-                    dLungLeftRoisOffset = dLungLeftRoisOffset+dNbRois;      
+
+                    dLungLeftRoisOffset = dLungLeftRoisOffset+dNbRois;
 
                     tReport.LungLeft.Color = atVoiInput{vv}.Color;
 
                 case 'lung right-lun'
                     dFrom = dLungRightRoisOffset;
                     dTo   = dLungRightRoisOffset+dNbRois-1;
-                    
+
                     tReport.LungRight.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
-                    
-                    dLungRightRoisOffset = dLungRightRoisOffset+dNbRois; 
+
+                    dLungRightRoisOffset = dLungRightRoisOffset+dNbRois;
 
                     tReport.LungRight.Color = atVoiInput{vv}.Color;
 
                 case 'lung upper lobe left-lun'
                     dFrom = dLungUpperLobeLeftRoisOffset;
                     dTo   = dLungUpperLobeLeftRoisOffset+dNbRois-1;
-                    
+
                     tReport.LungUpperLobeLeft.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
-                    
-                    dLungUpperLobeLeftRoisOffset = dLungUpperLobeLeftRoisOffset+dNbRois; 
+
+                    dLungUpperLobeLeftRoisOffset = dLungUpperLobeLeftRoisOffset+dNbRois;
 
                     tReport.LungUpperLobeLeft.Color = atVoiInput{vv}.Color;
 
                 case 'lung lower lobe left-lun'
                     dFrom = dLungLowerLobeLeftRoisOffset;
                     dTo   = dLungLowerLobeLeftRoisOffset+dNbRois-1;
-                    
+
                     tReport.LungLowerLobeLeft.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
-                    
-                    dLungLowerLobeLeftRoisOffset = dLungLowerLobeLeftRoisOffset+dNbRois; 
+
+                    dLungLowerLobeLeftRoisOffset = dLungLowerLobeLeftRoisOffset+dNbRois;
 
                     tReport.LungLowerLobeLeft.Color = atVoiInput{vv}.Color;
 
                 case 'lung upper lobe right-lun'
                     dFrom = dLungUpperLobeRightRoisOffset;
                     dTo   = dLungUpperLobeRightRoisOffset+dNbRois-1;
-                    
+
                     tReport.LungUpperLobeRight.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
-                    
-                    dLungUpperLobeRightRoisOffset = dLungUpperLobeRightRoisOffset+dNbRois; 
+
+                    dLungUpperLobeRightRoisOffset = dLungUpperLobeRightRoisOffset+dNbRois;
 
                     tReport.LungUpperLobeRight.Color = atVoiInput{vv}.Color;
 
                 case 'lung middle lobe right-lun'
                     dFrom = dLungMiddleLobeRightRoisOffset;
                     dTo   = dLungMiddleLobeRightRoisOffset+dNbRois-1;
-                    
+
                     tReport.LungMiddleLobeRight.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
-                    
-                    dLungMiddleLobeRightRoisOffset = dLungMiddleLobeRightRoisOffset+dNbRois; 
+
+                    dLungMiddleLobeRightRoisOffset = dLungMiddleLobeRightRoisOffset+dNbRois;
 
                     tReport.LungMiddleLobeRight.Color = atVoiInput{vv}.Color;
 
                 case 'lung lower lobe right-lun'
                     dFrom = dLungLowerLobeRightRoisOffset;
                     dTo   = dLungLowerLobeRightRoisOffset+dNbRois-1;
-                    
+
                     tReport.LungLowerLobeRight.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
-                    
-                    dLungLowerLobeRightRoisOffset = dLungLowerLobeRightRoisOffset+dNbRois; 
+
+                    dLungLowerLobeRightRoisOffset = dLungLowerLobeRightRoisOffset+dNbRois;
 
                     tReport.LungLowerLobeRight.Color = atVoiInput{vv}.Color;
 
             end
-        end    
+        end
 
         progressBar( 1/10, 'Computing Liver segmentation, please wait' );
-       
-        if numel(tReport.LungLowerLobeRight.RoisTag) ~= 0  
-        
+
+        if numel(tReport.LungLowerLobeRight.RoisTag) ~= 0
+
             voiMask = cell(1, numel(tReport.Liver.RoisTag));
             voiData = cell(1, numel(tReport.Liver.RoisTag));
-            
+
             dNbCells = 0;
 
             aMask = logical(false(size(aImage)));
 
             for uu=1:numel(tReport.Liver.RoisTag)
 
-                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.Liver.RoisTag{uu}]} );                
-                
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.Liver.RoisTag{uu}]} );
+
                 tRoi = atRoiInput{find(aTagOffset, 1)};
-                
-                if bModifiedMatrix  == false && ... 
+
+                if bModifiedMatrix  == false && ...
                    bMovementApplied == false        % Can't use input buffer if movement have been applied
 
                     if numel(aImage) ~= numel(dicomBuffer('get'))
                         pTemp{1} = tRoi;
                         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
-                    end   
+                    end
                 end
-                
-                switch lower(tRoi.Axe)         
+
+                switch lower(tRoi.Axe)
 
                     case 'axe'
                         voiData{uu} = aImage(:,:);
                         voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
 
 %                         if bUpdateMasks == true
-                            aMask(:,:) = voiMask{uu}|aMask(:,:);   
+                            aMask(:,:) = voiMask{uu}|aMask(:,:);
 %                         end
 
                     case 'axes1'
@@ -2131,51 +2295,51 @@ function generate3DLungLobeReport(bInitReport)
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
 %                         if bUpdateMasks == true
-                            aMask(tRoi.SliceNb,:,:) = voiMask{uu}|aMask(tRoi.SliceNb,:,:);   
-%                         end                        
-                        
+                            aMask(tRoi.SliceNb,:,:) = voiMask{uu}|aMask(tRoi.SliceNb,:,:);
+%                         end
+
                     case 'axes2'
                         aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
 %                         if bUpdateMasks == true
-                            aMask(:,tRoi.SliceNb,:) = voiMask{uu}|aMask(:,tRoi.SliceNb,:);   
+                            aMask(:,tRoi.SliceNb,:) = voiMask{uu}|aMask(:,tRoi.SliceNb,:);
 %                         end
 
                    case 'axes3'
                         aSlice = aImage(:,:,tRoi.SliceNb);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
 %                         if bUpdateMasks == true
-                            aMask(:,:,tRoi.SliceNb) = voiMask{uu}|aMask(:,:,tRoi.SliceNb);  
+                            aMask(:,:,tRoi.SliceNb) = voiMask{uu}|aMask(:,:,tRoi.SliceNb);
 %                         end
 
-                end              
-                
-                if bSegmented  == true && ...      
-                   bModifiedMatrix == true % Can't use original buffer   
+                end
 
-                    voiDataTemp = voiData{uu}(voiMask{uu}); 
+                if bSegmented  == true && ...
+                   bModifiedMatrix == true % Can't use original buffer
+
+                    voiDataTemp = voiData{uu}(voiMask{uu});
                     voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
                     dNbCells = dNbCells+numel(voiDataTemp);
                 else
                     dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
                 end
             end
-            
+
             voiMask = cat(1, voiMask{:});
             voiData = cat(1, voiData{:});
-            
-            voiData(voiMask~=1) = [];
-            
-            if bSegmented  == true && ...      
-               bModifiedMatrix == true % Can't use original buffer   
 
-                voiData = voiData(voiData>cropValue('get'));                            
+            voiData(voiMask~=1) = [];
+
+            if bSegmented  == true && ...
+               bModifiedMatrix == true % Can't use original buffer
+
+                voiData = voiData(voiData>cropValue('get'));
             end
-            
+
             tReport.Liver.Cells  = dNbCells;
             tReport.Liver.Volume = dNbCells*dVoxVolume;
 
@@ -2184,76 +2348,76 @@ function generate3DLungLobeReport(bInitReport)
 
                 lungLobesMasks('set', 'Liver', aMask);
             else
-                tReport.Liver.Mask = lungLobesMasks('get', 'Liver');                
+                tReport.Liver.Mask = lungLobesMasks('get', 'Liver');
             end
-            
+
             aImage(aMask) = min(aImage, [], 'all'); % Remove the liver
 
             clear aMask;
 
             if strcmpi(sUnitDisplay, 'SUV')
-                
+
                 if bSUVUnit == true
-                    tReport.Liver.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-%                    tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume*tQuantification.tSUV.dScale;             
-                    tReport.Liver.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.Liver.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;
+%                    tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume*tQuantification.tSUV.dScale;
+                    tReport.Liver.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;
                 else
                     tReport.Liver.Mean  = mean(voiData, 'all');
              %       tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume;
                     tReport.Liver.Total = sum(voiData, 'all');
                 end
             else
-                tReport.Liver.Mean  = mean(voiData, 'all');             
-%                tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume;             
-                tReport.Liver.Total =  sum(voiData, 'all');             
+                tReport.Liver.Mean  = mean(voiData, 'all');
+%                tReport.Liver.Total = tReport.Liver.Mean*tReport.Liver.Volume;
+                tReport.Liver.Total =  sum(voiData, 'all');
             end
-         
+
             clear voiMask;
-            clear voiData;     
+            clear voiData;
         else
             tReport.Liver.Cells  = [];
             tReport.Liver.Volume = [];
-            tReport.Liver.Mean   = [];            
-            tReport.Liver.Total  = [];            
-        end        
-                
+            tReport.Liver.Mean   = [];
+            tReport.Liver.Total  = [];
+        end
+
         % Compute Lung segmentation
-        
+
         progressBar( 2/10, 'Computing lungs segmentation, please wait' );
-       
-        if numel(tReport.Lungs.RoisTag) ~= 0  
-        
+
+        if numel(tReport.Lungs.RoisTag) ~= 0
+
             voiMask = cell(1, numel(tReport.Lungs.RoisTag));
             voiData = cell(1, numel(tReport.Lungs.RoisTag));
-            
+
             dNbCells = 0;
 
             aMask = logical(false(size(aImage)));
-            
+
             for uu=1:numel(tReport.Lungs.RoisTag)
 
-                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.Lungs.RoisTag{uu}]} );                
-                
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.Lungs.RoisTag{uu}]} );
+
                 tRoi = atRoiInput{find(aTagOffset, 1)};
-                
-                if bModifiedMatrix  == false && ... 
+
+                if bModifiedMatrix  == false && ...
                    bMovementApplied == false        % Can't use input buffer if movement have been applied
 
                     if numel(aImage) ~= numel(dicomBuffer('get'))
                         pTemp{1} = tRoi;
                         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
-                    end   
+                    end
                 end
-                
-                switch lower(tRoi.Axe)   
+
+                switch lower(tRoi.Axe)
 
                     case 'axe'
                         voiData{uu} = aImage(:,:);
                         voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
 
                         if bUpdateMasks == true
-                            aMask(:,:) = voiMask{uu}|aMask(:,:);   
+                            aMask(:,:) = voiMask{uu}|aMask(:,:);
                         end
 
                     case 'axes1'
@@ -2262,50 +2426,50 @@ function generate3DLungLobeReport(bInitReport)
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
-                            aMask(tRoi.SliceNb,:,:) = voiMask{uu}|aMask(tRoi.SliceNb,:,:);   
-                        end                        
-                        
+                            aMask(tRoi.SliceNb,:,:) = voiMask{uu}|aMask(tRoi.SliceNb,:,:);
+                        end
+
                     case 'axes2'
                         aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
-                            aMask(:,tRoi.SliceNb,:) = voiMask{uu}|aMask(:,tRoi.SliceNb,:);   
+                            aMask(:,tRoi.SliceNb,:) = voiMask{uu}|aMask(:,tRoi.SliceNb,:);
                         end
 
                    case 'axes3'
                         aSlice = aImage(:,:,tRoi.SliceNb);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
-                            aMask(:,:,tRoi.SliceNb) = voiMask{uu}|aMask(:,:,tRoi.SliceNb);  
+                            aMask(:,:,tRoi.SliceNb) = voiMask{uu}|aMask(:,:,tRoi.SliceNb);
                         end
-                end              
-                
-                if bSegmented  == true && ...      
-                   bModifiedMatrix == true % Can't use original buffer   
+                end
 
-                    voiDataTemp = voiData{uu}(voiMask{uu}); 
+                if bSegmented  == true && ...
+                   bModifiedMatrix == true % Can't use original buffer
+
+                    voiDataTemp = voiData{uu}(voiMask{uu});
                     voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
                     dNbCells = dNbCells+numel(voiDataTemp);
                 else
                     dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
                 end
             end
-            
+
             voiMask = cat(1, voiMask{:});
             voiData = cat(1, voiData{:});
-            
-            voiData(voiMask~=1) = [];
-            
-            if bSegmented  == true && ...      
-               bModifiedMatrix == true % Can't use original buffer   
 
-                voiData = voiData(voiData>cropValue('get'));                            
+            voiData(voiMask~=1) = [];
+
+            if bSegmented  == true && ...
+               bModifiedMatrix == true % Can't use original buffer
+
+                voiData = voiData(voiData>cropValue('get'));
             end
-            
+
             tReport.Lungs.Cells  = dNbCells;
             tReport.Lungs.Volume = dNbCells*dVoxVolume;
 
@@ -2314,74 +2478,74 @@ function generate3DLungLobeReport(bInitReport)
 
                 lungLobesMasks('set', 'lungs', aMask);
             else
-                tReport.Lungs.Mask = lungLobesMasks('get', 'lungs');                
+                tReport.Lungs.Mask = lungLobesMasks('get', 'lungs');
             end
 
             clear aMask;
 
             if strcmpi(sUnitDisplay, 'SUV')
-                
+
                 if bSUVUnit == true
-                    tReport.Lungs.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-%                     tReport.Lungs.Total = tReport.Lungs.Mean*tReport.Lungs.Volume*tQuantification.tSUV.dScale;             
-                    tReport.Lungs.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.Lungs.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;
+%                     tReport.Lungs.Total = tReport.Lungs.Mean*tReport.Lungs.Volume*tQuantification.tSUV.dScale;
+                    tReport.Lungs.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;
                else
                     tReport.Lungs.Mean  = mean(voiData, 'all');
 %                     tReport.Lungs.Total = tReport.Lungs.Mean*tReport.Lungs.Volume;
                     tReport.Lungs.Total = sum(voiData, 'all');
                 end
             else
-                tReport.Lungs.Mean  = mean(voiData, 'all');             
-%                 tReport.Lungs.Total = tReport.Lungs.Mean*tReport.Lungs.Volume;             
-                tReport.Lungs.Total = sum(voiData, 'all');             
+                tReport.Lungs.Mean  = mean(voiData, 'all');
+%                 tReport.Lungs.Total = tReport.Lungs.Mean*tReport.Lungs.Volume;
+                tReport.Lungs.Total = sum(voiData, 'all');
            end
-         
+
             clear voiMask;
-            clear voiData;     
+            clear voiData;
         else
             tReport.Lungs.Cells  = [];
             tReport.Lungs.Volume = [];
-            tReport.Lungs.Mean   = [];            
-            tReport.Lungs.Total  = [];            
+            tReport.Lungs.Mean   = [];
+            tReport.Lungs.Total  = [];
         end
-        
+
         % Compute Lung Left segmentation
-        
+
         progressBar( 2/10, 'Computing lung left segmentation, please wait' );
-       
-        if numel(tReport.LungLeft.RoisTag) ~= 0  
-        
+
+        if numel(tReport.LungLeft.RoisTag) ~= 0
+
             voiMask = cell(1, numel(tReport.LungLeft.RoisTag));
             voiData = cell(1, numel(tReport.LungLeft.RoisTag));
-            
+
             dNbCells = 0;
 
             aMask = logical(false(size(aImage)));
-            
+
             for uu=1:numel(tReport.LungLeft.RoisTag)
 
-                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.LungLeft.RoisTag{uu}]} );                
-                
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.LungLeft.RoisTag{uu}]} );
+
                 tRoi = atRoiInput{find(aTagOffset, 1)};
-                
-                if bModifiedMatrix  == false && ... 
+
+                if bModifiedMatrix  == false && ...
                    bMovementApplied == false        % Can't use input buffer if movement have been applied
 
                     if numel(aImage) ~= numel(dicomBuffer('get'))
                         pTemp{1} = tRoi;
                         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
-                    end   
+                    end
                 end
-                
-                switch lower(tRoi.Axe)    
+
+                switch lower(tRoi.Axe)
 
                     case 'axe'
                         voiData{uu} = aImage(:,:);
                         voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
 
                         if bUpdateMasks == true
-                            aMask(:,:) = voiMask{uu}|aMask(:,:);   
+                            aMask(:,:) = voiMask{uu}|aMask(:,:);
                         end
 
                     case 'axes1'
@@ -2390,50 +2554,50 @@ function generate3DLungLobeReport(bInitReport)
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
-                            aMask(tRoi.SliceNb,:,:) = voiMask{uu}|aMask(tRoi.SliceNb,:,:);   
-                        end                        
-                        
+                            aMask(tRoi.SliceNb,:,:) = voiMask{uu}|aMask(tRoi.SliceNb,:,:);
+                        end
+
                     case 'axes2'
                         aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
-                            aMask(:,tRoi.SliceNb,:) = voiMask{uu}|aMask(:,tRoi.SliceNb,:);   
+                            aMask(:,tRoi.SliceNb,:) = voiMask{uu}|aMask(:,tRoi.SliceNb,:);
                         end
 
                    case 'axes3'
                         aSlice = aImage(:,:,tRoi.SliceNb);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
-                            aMask(:,:,tRoi.SliceNb) = voiMask{uu}|aMask(:,:,tRoi.SliceNb);  
+                            aMask(:,:,tRoi.SliceNb) = voiMask{uu}|aMask(:,:,tRoi.SliceNb);
                         end
-                end              
-                
-                if bSegmented  == true && ...      
-                   bModifiedMatrix == true % Can't use original buffer   
+                end
 
-                    voiDataTemp = voiData{uu}(voiMask{uu}); 
+                if bSegmented  == true && ...
+                   bModifiedMatrix == true % Can't use original buffer
+
+                    voiDataTemp = voiData{uu}(voiMask{uu});
                     voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
                     dNbCells = dNbCells+numel(voiDataTemp);
                 else
                     dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
                 end
             end
-            
+
             voiMask = cat(1, voiMask{:});
             voiData = cat(1, voiData{:});
-            
-            voiData(voiMask~=1) = [];
-            
-            if bSegmented  == true && ...      
-               bModifiedMatrix == true % Can't use original buffer   
 
-                voiData = voiData(voiData>cropValue('get'));                            
+            voiData(voiMask~=1) = [];
+
+            if bSegmented  == true && ...
+               bModifiedMatrix == true % Can't use original buffer
+
+                voiData = voiData(voiData>cropValue('get'));
             end
-            
+
             tReport.LungLeft.Cells  = dNbCells;
             tReport.LungLeft.Volume = dNbCells*dVoxVolume;
 
@@ -2442,74 +2606,74 @@ function generate3DLungLobeReport(bInitReport)
 
                 lungLobesMasks('set', 'lungLeft', aMask);
             else
-                tReport.LungLeft.Mask = lungLobesMasks('get', 'lungLeft');                
+                tReport.LungLeft.Mask = lungLobesMasks('get', 'lungLeft');
             end
 
             clear aMask;
 
             if strcmpi(sUnitDisplay, 'SUV')
-                
+
                 if bSUVUnit == true
-                    tReport.LungLeft.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-%                     tReport.LungLeft.Total = tReport.LungLeft.Mean*tReport.LungLeft.Volume*tQuantification.tSUV.dScale;             
-                    tReport.LungLeft.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.LungLeft.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;
+%                     tReport.LungLeft.Total = tReport.LungLeft.Mean*tReport.LungLeft.Volume*tQuantification.tSUV.dScale;
+                    tReport.LungLeft.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;
                 else
                     tReport.LungLeft.Mean  = mean(voiData, 'all');
 %                     tReport.LungLeft.Total = tReport.LungLeft.Mean*tReport.LungLeft.Volume;
                     tReport.LungLeft.Total = sum(voiData, 'all');
                end
             else
-                tReport.LungLeft.Mean  = mean(voiData, 'all');             
-%                 tReport.LungLeft.Total = tReport.LungLeft.Mean*tReport.LungLeft.Volume;             
-                tReport.LungLeft.Total = sum(voiData, 'all');             
+                tReport.LungLeft.Mean  = mean(voiData, 'all');
+%                 tReport.LungLeft.Total = tReport.LungLeft.Mean*tReport.LungLeft.Volume;
+                tReport.LungLeft.Total = sum(voiData, 'all');
             end
-         
+
             clear voiMask;
-            clear voiData;     
+            clear voiData;
         else
             tReport.LungLeft.Cells  = [];
             tReport.LungLeft.Volume = [];
-            tReport.LungLeft.Mean   = [];            
-            tReport.LungLeft.Total  = [];            
+            tReport.LungLeft.Mean   = [];
+            tReport.LungLeft.Total  = [];
         end
-          
+
         % Compute Lung Right segmentation
-        
+
         progressBar( 3/10, 'Computing lung right segmentation, please wait' );
-       
-        if numel(tReport.LungRight.RoisTag) ~= 0  
-        
+
+        if numel(tReport.LungRight.RoisTag) ~= 0
+
             voiMask = cell(1, numel(tReport.LungRight.RoisTag));
             voiData = cell(1, numel(tReport.LungRight.RoisTag));
-            
+
             dNbCells = 0;
 
             aMask = logical(false(size(aImage)));
-            
+
             for uu=1:numel(tReport.LungRight.RoisTag)
 
-                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.LungRight.RoisTag{uu}]} );                
-                
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.LungRight.RoisTag{uu}]} );
+
                 tRoi = atRoiInput{find(aTagOffset, 1)};
-                
-                if bModifiedMatrix  == false && ... 
+
+                if bModifiedMatrix  == false && ...
                    bMovementApplied == false        % Can't use input buffer if movement have been applied
 
                     if numel(aImage) ~= numel(dicomBuffer('get'))
                         pTemp{1} = tRoi;
                         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
-                    end   
+                    end
                 end
-                
-                switch lower(tRoi.Axe)     
+
+                switch lower(tRoi.Axe)
 
                     case 'axe'
                         voiData{uu} = aImage(:,:);
                         voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
 
                         if bUpdateMasks == true
-                            aMask(:,:) = voiMask{uu}|aMask(:,:);   
+                            aMask(:,:) = voiMask{uu}|aMask(:,:);
                         end
 
                     case 'axes1'
@@ -2518,50 +2682,50 @@ function generate3DLungLobeReport(bInitReport)
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
-                            aMask(tRoi.SliceNb,:,:) = voiMask{uu}|aMask(tRoi.SliceNb,:,:);   
-                        end                        
-                        
+                            aMask(tRoi.SliceNb,:,:) = voiMask{uu}|aMask(tRoi.SliceNb,:,:);
+                        end
+
                     case 'axes2'
                         aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
-                            aMask(:,tRoi.SliceNb,:) = voiMask{uu}|aMask(:,tRoi.SliceNb,:);   
+                            aMask(:,tRoi.SliceNb,:) = voiMask{uu}|aMask(:,tRoi.SliceNb,:);
                         end
 
                    case 'axes3'
                         aSlice = aImage(:,:,tRoi.SliceNb);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
-                            aMask(:,:,tRoi.SliceNb) = voiMask{uu}|aMask(:,:,tRoi.SliceNb);  
+                            aMask(:,:,tRoi.SliceNb) = voiMask{uu}|aMask(:,:,tRoi.SliceNb);
                         end
-                end              
-                
-                if bSegmented  == true && ...      
-                   bModifiedMatrix == true % Can't use original buffer   
+                end
 
-                    voiDataTemp = voiData{uu}(voiMask{uu}); 
+                if bSegmented  == true && ...
+                   bModifiedMatrix == true % Can't use original buffer
+
+                    voiDataTemp = voiData{uu}(voiMask{uu});
                     voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
                     dNbCells = dNbCells+numel(voiDataTemp);
                 else
                     dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
                 end
             end
-            
+
             voiMask = cat(1, voiMask{:});
             voiData = cat(1, voiData{:});
-            
-            voiData(voiMask~=1) = [];
-            
-            if bSegmented  == true && ...      
-               bModifiedMatrix == true % Can't use original buffer   
 
-                voiData = voiData(voiData>cropValue('get'));                            
+            voiData(voiMask~=1) = [];
+
+            if bSegmented  == true && ...
+               bModifiedMatrix == true % Can't use original buffer
+
+                voiData = voiData(voiData>cropValue('get'));
             end
-            
+
             tReport.LungRight.Cells  = dNbCells;
             tReport.LungRight.Volume = dNbCells*dVoxVolume;
 
@@ -2570,74 +2734,74 @@ function generate3DLungLobeReport(bInitReport)
 
                 lungLobesMasks('set', 'lungRight', aMask);
             else
-                tReport.LungRight.Mask = lungLobesMasks('get', 'lungRight');                
+                tReport.LungRight.Mask = lungLobesMasks('get', 'lungRight');
             end
 
             clear aMask;
 
             if strcmpi(sUnitDisplay, 'SUV')
-                
+
                 if bSUVUnit == true
-                    tReport.LungRight.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-%                     tReport.LungRight.Total = tReport.LungRight.Mean*tReport.LungRight.Volume*tQuantification.tSUV.dScale;             
-                    tReport.LungRight.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.LungRight.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;
+%                     tReport.LungRight.Total = tReport.LungRight.Mean*tReport.LungRight.Volume*tQuantification.tSUV.dScale;
+                    tReport.LungRight.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;
                 else
                     tReport.LungRight.Mean  = mean(voiData, 'all');
 %                     tReport.LungRight.Total = tReport.LungRight.Mean*tReport.LungRight.Volume;
                     tReport.LungRight.Total = sum(voiData, 'all');
                 end
             else
-                tReport.LungRight.Mean  = mean(voiData, 'all');             
-%                 tReport.LungRight.Total = tReport.LungRight.Mean*tReport.LungRight.Volume;             
-                tReport.LungRight.Total = sum(voiData, 'all');             
+                tReport.LungRight.Mean  = mean(voiData, 'all');
+%                 tReport.LungRight.Total = tReport.LungRight.Mean*tReport.LungRight.Volume;
+                tReport.LungRight.Total = sum(voiData, 'all');
             end
-         
+
             clear voiMask;
-            clear voiData;     
+            clear voiData;
         else
             tReport.LungRight.Cells  = [];
             tReport.LungRight.Volume = [];
-            tReport.LungRight.Mean   = [];            
-            tReport.LungRight.Total  = [];            
+            tReport.LungRight.Mean   = [];
+            tReport.LungRight.Total  = [];
         end
 
         % Compute upper Lobe Left segmentation
-        
+
         progressBar( 4/10, 'Computing lung upper lobe left segmentation, please wait' );
-       
-        if numel(tReport.LungUpperLobeLeft.RoisTag) ~= 0  
-        
+
+        if numel(tReport.LungUpperLobeLeft.RoisTag) ~= 0
+
             voiMask = cell(1, numel(tReport.LungUpperLobeLeft.RoisTag));
             voiData = cell(1, numel(tReport.LungUpperLobeLeft.RoisTag));
-            
+
             dNbCells = 0;
 
 %             aMask = logical(false(size(aImage)));
-            
+
             for uu=1:numel(tReport.LungUpperLobeLeft.RoisTag)
 
-                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.LungUpperLobeLeft.RoisTag{uu}]} );                
-                
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.LungUpperLobeLeft.RoisTag{uu}]} );
+
                 tRoi = atRoiInput{find(aTagOffset, 1)};
-                
-                if bModifiedMatrix  == false && ... 
+
+                if bModifiedMatrix  == false && ...
                    bMovementApplied == false        % Can't use input buffer if movement have been applied
 
                     if numel(aImage) ~= numel(dicomBuffer('get'))
                         pTemp{1} = tRoi;
                         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
-                    end   
+                    end
                 end
-                
-                switch lower(tRoi.Axe)  
+
+                switch lower(tRoi.Axe)
 
                     case 'axe'
                         voiData{uu} = aImage(:,:);
                         voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
 
 %                         if bUpdateMasks == true
-%                             aMask(:,:) = voiMask{uu}|aMask(:,:);   
+%                             aMask(:,:) = voiMask{uu}|aMask(:,:);
 %                         end
 
                     case 'axes1'
@@ -2646,126 +2810,126 @@ function generate3DLungLobeReport(bInitReport)
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
 %                         if bUpdateMasks == true
-%                             aMask(tRoi.SliceNb,:,:) = voiMask{uu}|aMask(tRoi.SliceNb,:,:);   
-%                         end                        
-                        
+%                             aMask(tRoi.SliceNb,:,:) = voiMask{uu}|aMask(tRoi.SliceNb,:,:);
+%                         end
+
                     case 'axes2'
                         aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
 %                         if bUpdateMasks == true
-%                             aMask(:,tRoi.SliceNb,:) = voiMask{uu}|aMask(:,tRoi.SliceNb,:);   
+%                             aMask(:,tRoi.SliceNb,:) = voiMask{uu}|aMask(:,tRoi.SliceNb,:);
 %                         end
 
                    case 'axes3'
                         aSlice = aImage(:,:,tRoi.SliceNb);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
 %                         if bUpdateMasks == true
-%                             aMask(:,:,tRoi.SliceNb) = voiMask{uu}|aMask(:,:,tRoi.SliceNb);  
+%                             aMask(:,:,tRoi.SliceNb) = voiMask{uu}|aMask(:,:,tRoi.SliceNb);
 %                         end
-                end              
-                
-                if bSegmented  == true && ...      
-                   bModifiedMatrix == true % Can't use original buffer   
+                end
 
-                    voiDataTemp = voiData{uu}(voiMask{uu}); 
+                if bSegmented  == true && ...
+                   bModifiedMatrix == true % Can't use original buffer
+
+                    voiDataTemp = voiData{uu}(voiMask{uu});
                     voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
                     dNbCells = dNbCells+numel(voiDataTemp);
                 else
                     dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
                 end
             end
-            
+
             voiMask = cat(1, voiMask{:});
             voiData = cat(1, voiData{:});
-            
-            voiData(voiMask~=1) = [];
-            
-            if bSegmented  == true && ...      
-               bModifiedMatrix == true % Can't use original buffer   
 
-                voiData = voiData(voiData>cropValue('get'));                            
+            voiData(voiMask~=1) = [];
+
+            if bSegmented  == true && ...
+               bModifiedMatrix == true % Can't use original buffer
+
+                voiData = voiData(voiData>cropValue('get'));
             end
-            
+
             tReport.LungUpperLobeLeft.Cells  = dNbCells;
             tReport.LungUpperLobeLeft.Volume = dNbCells*dVoxVolume;
 
 %             if bUpdateMasks == true
 %                 tReport.LungUpperLobeLeft.Mask = aMask;
-% 
+%
 %                 lungLobesMasks('set', 'lungUpperLobeLeft', aMask);
 %             else
-%                 tReport.LungUpperLobeLeft.Mask = lungLobesMasks('get', 'lungUpperLobeLeft');                
+%                 tReport.LungUpperLobeLeft.Mask = lungLobesMasks('get', 'lungUpperLobeLeft');
 %             end
-% 
+%
 %             clear aMask;
 
             if strcmpi(sUnitDisplay, 'SUV')
-                
+
                 if bSUVUnit == true
-                    tReport.LungUpperLobeLeft.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-%                     tReport.LungUpperLobeLeft.Total = tReport.LungUpperLobeLeft.Mean*tReport.LungUpperLobeLeft.Volume*tQuantification.tSUV.dScale;             
-                    tReport.LungUpperLobeLeft.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.LungUpperLobeLeft.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;
+%                     tReport.LungUpperLobeLeft.Total = tReport.LungUpperLobeLeft.Mean*tReport.LungUpperLobeLeft.Volume*tQuantification.tSUV.dScale;
+                    tReport.LungUpperLobeLeft.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;
                 else
                     tReport.LungUpperLobeLeft.Mean  = mean(voiData, 'all');
 %                     tReport.LungUpperLobeLeft.Total = tReport.LungUpperLobeLeft.Mean*tReport.LungUpperLobeLeft.Volume;
                     tReport.LungUpperLobeLeft.Total = sum(voiData, 'all');
                 end
             else
-                tReport.LungUpperLobeLeft.Mean  = mean(voiData, 'all');             
-%                 tReport.LungUpperLobeLeft.Total = tReport.LungUpperLobeLeft.Mean*tReport.LungUpperLobeLeft.Volume;             
-                tReport.LungUpperLobeLeft.Total = sum(voiData, 'all');             
+                tReport.LungUpperLobeLeft.Mean  = mean(voiData, 'all');
+%                 tReport.LungUpperLobeLeft.Total = tReport.LungUpperLobeLeft.Mean*tReport.LungUpperLobeLeft.Volume;
+                tReport.LungUpperLobeLeft.Total = sum(voiData, 'all');
             end
-         
+
             clear voiMask;
-            clear voiData;     
+            clear voiData;
         else
             tReport.LungUpperLobeLeft.Cells  = [];
             tReport.LungUpperLobeLeft.Volume = [];
-            tReport.LungUpperLobeLeft.Mean   = [];            
-            tReport.LungUpperLobeLeft.Total  = [];            
+            tReport.LungUpperLobeLeft.Mean   = [];
+            tReport.LungUpperLobeLeft.Total  = [];
         end
 
         % Compute Lung Lower Lobe Left segmentation
-        
+
         progressBar( 5/10, 'Computing lung lower lobe left segmentation, please wait' );
-       
-        if numel(tReport.LungLowerLobeLeft.RoisTag) ~= 0  
-        
+
+        if numel(tReport.LungLowerLobeLeft.RoisTag) ~= 0
+
             voiMask = cell(1, numel(tReport.LungLowerLobeLeft.RoisTag));
             voiData = cell(1, numel(tReport.LungLowerLobeLeft.RoisTag));
-            
+
             dNbCells = 0;
 
             aMask = logical(false(size(aImage)));
-            
+
             for uu=1:numel(tReport.LungLowerLobeLeft.RoisTag)
 
-                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.LungLowerLobeLeft.RoisTag{uu}]} );                
-                
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.LungLowerLobeLeft.RoisTag{uu}]} );
+
                 tRoi = atRoiInput{find(aTagOffset, 1)};
-                
-                if bModifiedMatrix  == false && ... 
+
+                if bModifiedMatrix  == false && ...
                    bMovementApplied == false        % Can't use input buffer if movement have been applied
 
                     if numel(aImage) ~= numel(dicomBuffer('get'))
                         pTemp{1} = tRoi;
                         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
-                    end   
+                    end
                 end
-                
-                switch lower(tRoi.Axe)   
+
+                switch lower(tRoi.Axe)
 
                     case 'axe'
                         voiData{uu} = aImage(:,:);
                         voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
 
                         if bUpdateMasks == true
-                            aMask(:,:) = voiMask{uu}|aMask(:,:);   
+                            aMask(:,:) = voiMask{uu}|aMask(:,:);
                         end
 
                     case 'axes1'
@@ -2774,50 +2938,50 @@ function generate3DLungLobeReport(bInitReport)
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
-                            aMask(tRoi.SliceNb,:,:) = voiMask{uu}|aMask(tRoi.SliceNb,:,:);   
-                        end                        
-                        
+                            aMask(tRoi.SliceNb,:,:) = voiMask{uu}|aMask(tRoi.SliceNb,:,:);
+                        end
+
                     case 'axes2'
                         aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
-                            aMask(:,tRoi.SliceNb,:) = voiMask{uu}|aMask(:,tRoi.SliceNb,:);   
+                            aMask(:,tRoi.SliceNb,:) = voiMask{uu}|aMask(:,tRoi.SliceNb,:);
                         end
 
                    case 'axes3'
                         aSlice = aImage(:,:,tRoi.SliceNb);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
-                            aMask(:,:,tRoi.SliceNb) = voiMask{uu}|aMask(:,:,tRoi.SliceNb);  
+                            aMask(:,:,tRoi.SliceNb) = voiMask{uu}|aMask(:,:,tRoi.SliceNb);
                         end
-                end              
-                
-                if bSegmented  == true && ...      
-                   bModifiedMatrix == true % Can't use original buffer   
+                end
 
-                    voiDataTemp = voiData{uu}(voiMask{uu}); 
+                if bSegmented  == true && ...
+                   bModifiedMatrix == true % Can't use original buffer
+
+                    voiDataTemp = voiData{uu}(voiMask{uu});
                     voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
                     dNbCells = dNbCells+numel(voiDataTemp);
                 else
                     dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
                 end
             end
-            
+
             voiMask = cat(1, voiMask{:});
             voiData = cat(1, voiData{:});
-            
-            voiData(voiMask~=1) = [];
-            
-            if bSegmented  == true && ...      
-               bModifiedMatrix == true % Can't use original buffer   
 
-                voiData = voiData(voiData>cropValue('get'));                            
+            voiData(voiMask~=1) = [];
+
+            if bSegmented  == true && ...
+               bModifiedMatrix == true % Can't use original buffer
+
+                voiData = voiData(voiData>cropValue('get'));
             end
-            
+
             tReport.LungLowerLobeLeft.Cells  = dNbCells;
             tReport.LungLowerLobeLeft.Volume = dNbCells*dVoxVolume;
 
@@ -2826,74 +2990,74 @@ function generate3DLungLobeReport(bInitReport)
 
                 lungLobesMasks('set', 'lungLowerLobeLeft', aMask);
             else
-                tReport.LungLowerLobeLeft.Mask = lungLobesMasks('get', 'lungLowerLobeLeft');                
+                tReport.LungLowerLobeLeft.Mask = lungLobesMasks('get', 'lungLowerLobeLeft');
             end
 
             clear aMask;
 
             if strcmpi(sUnitDisplay, 'SUV')
-                
+
                 if bSUVUnit == true
-                    tReport.LungLowerLobeLeft.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-%                     tReport.LungLowerLobeLeft.Total = tReport.LungLowerLobeLeft.Mean*tReport.LungLowerLobeLeft.Volume*tQuantification.tSUV.dScale;             
-                    tReport.LungLowerLobeLeft.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.LungLowerLobeLeft.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;
+%                     tReport.LungLowerLobeLeft.Total = tReport.LungLowerLobeLeft.Mean*tReport.LungLowerLobeLeft.Volume*tQuantification.tSUV.dScale;
+                    tReport.LungLowerLobeLeft.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;
                 else
                     tReport.LungLowerLobeLeft.Mean  = mean(voiData, 'all');
 %                     tReport.LungLowerLobeLeft.Total = tReport.LungLowerLobeLeft.Mean*tReport.LungLowerLobeLeft.Volume;
                     tReport.LungLowerLobeLeft.Total = sum(voiData, 'all');
                 end
             else
-                tReport.LungLowerLobeLeft.Mean  = mean(voiData, 'all');             
-%                 tReport.LungLowerLobeLeft.Total = tReport.LungLowerLobeLeft.Mean*tReport.LungLowerLobeLeft.Volume;             
-                tReport.LungLowerLobeLeft.Total = sum(voiData, 'all');             
+                tReport.LungLowerLobeLeft.Mean  = mean(voiData, 'all');
+%                 tReport.LungLowerLobeLeft.Total = tReport.LungLowerLobeLeft.Mean*tReport.LungLowerLobeLeft.Volume;
+                tReport.LungLowerLobeLeft.Total = sum(voiData, 'all');
             end
-         
+
             clear voiMask;
-            clear voiData;     
+            clear voiData;
         else
             tReport.LungLowerLobeLeft.Cells  = [];
             tReport.LungLowerLobeLeft.Volume = [];
-            tReport.LungLowerLobeLeft.Mean   = [];            
-            tReport.LungLowerLobeLeft.Total  = [];            
+            tReport.LungLowerLobeLeft.Mean   = [];
+            tReport.LungLowerLobeLeft.Total  = [];
         end
 
         % Compute Lung Upper Lobe right segmentation
-        
+
         progressBar( 6/10, 'Computing lung upper lobe right segmentation, please wait' );
-       
-        if numel(tReport.LungUpperLobeRight.RoisTag) ~= 0  
-        
+
+        if numel(tReport.LungUpperLobeRight.RoisTag) ~= 0
+
             voiMask = cell(1, numel(tReport.LungUpperLobeRight.RoisTag));
             voiData = cell(1, numel(tReport.LungUpperLobeRight.RoisTag));
-            
+
             dNbCells = 0;
 
 %             aMask = logical(false(size(aImage)));
-            
+
             for uu=1:numel(tReport.LungUpperLobeRight.RoisTag)
 
-                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.LungUpperLobeRight.RoisTag{uu}]} );                
-                
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.LungUpperLobeRight.RoisTag{uu}]} );
+
                 tRoi = atRoiInput{find(aTagOffset, 1)};
-                
-                if bModifiedMatrix  == false && ... 
+
+                if bModifiedMatrix  == false && ...
                    bMovementApplied == false        % Can't use input buffer if movement have been applied
 
                     if numel(aImage) ~= numel(dicomBuffer('get'))
                         pTemp{1} = tRoi;
                         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
-                    end   
+                    end
                 end
-                
-                switch lower(tRoi.Axe)    
+
+                switch lower(tRoi.Axe)
 
                     case 'axe'
                         voiData{uu} = aImage(:,:);
                         voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
 
 %                        if bUpdateMasks == true
-%                           aMask(:,:) = voiMask{uu}|aMask(:,:);   
+%                           aMask(:,:) = voiMask{uu}|aMask(:,:);
 %                        end
 
                     case 'axes1'
@@ -2902,126 +3066,126 @@ function generate3DLungLobeReport(bInitReport)
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
 %                        if bUpdateMasks == true
-%                            aMask(tRoi.SliceNb,:,:) = voiMask{uu}|aMask(tRoi.SliceNb,:,:);   
-%                        end                        
-                        
+%                            aMask(tRoi.SliceNb,:,:) = voiMask{uu}|aMask(tRoi.SliceNb,:,:);
+%                        end
+
                     case 'axes2'
                         aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
 %                        if bUpdateMasks == true
-%                            aMask(:,tRoi.SliceNb,:) = voiMask{uu}|aMask(:,tRoi.SliceNb,:);   
+%                            aMask(:,tRoi.SliceNb,:) = voiMask{uu}|aMask(:,tRoi.SliceNb,:);
 %                        end
 
                    case 'axes3'
                         aSlice = aImage(:,:,tRoi.SliceNb);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
 %                        if bUpdateMasks == true
-%                            aMask(:,:,tRoi.SliceNb) = voiMask{uu}|aMask(:,:,tRoi.SliceNb);  
+%                            aMask(:,:,tRoi.SliceNb) = voiMask{uu}|aMask(:,:,tRoi.SliceNb);
 %                        end
-                end              
-                
-                if bSegmented  == true && ...      
-                   bModifiedMatrix == true % Can't use original buffer   
+                end
 
-                    voiDataTemp = voiData{uu}(voiMask{uu}); 
+                if bSegmented  == true && ...
+                   bModifiedMatrix == true % Can't use original buffer
+
+                    voiDataTemp = voiData{uu}(voiMask{uu});
                     voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
                     dNbCells = dNbCells+numel(voiDataTemp);
                 else
                     dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
                 end
             end
-            
+
             voiMask = cat(1, voiMask{:});
             voiData = cat(1, voiData{:});
-            
-            voiData(voiMask~=1) = [];
-            
-            if bSegmented  == true && ...      
-               bModifiedMatrix == true % Can't use original buffer   
 
-                voiData = voiData(voiData>cropValue('get'));                            
+            voiData(voiMask~=1) = [];
+
+            if bSegmented  == true && ...
+               bModifiedMatrix == true % Can't use original buffer
+
+                voiData = voiData(voiData>cropValue('get'));
             end
-            
+
             tReport.LungUpperLobeRight.Cells  = dNbCells;
             tReport.LungUpperLobeRight.Volume = dNbCells*dVoxVolume;
 
 %             if bUpdateMasks == true
 %                tReport.LungUpperLobeRight.Mask = aMask;
-% 
+%
 %                lungLobesMasks('set', 'lungUpperLobeRight', aMask);
 %             else
-%                tReport.LungUpperLobeRight.Mask = lungLobesMasks('get', 'lungUpperLobeRight');                
+%                tReport.LungUpperLobeRight.Mask = lungLobesMasks('get', 'lungUpperLobeRight');
 %             end
-% 
+%
 %             clear aMask;
 
             if strcmpi(sUnitDisplay, 'SUV')
-                
+
                 if bSUVUnit == true
-                    tReport.LungUpperLobeRight.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-%                     tReport.LungUpperLobeRight.Total = tReport.LungUpperLobeRight.Mean*tReport.LungUpperLobeRight.Volume*tQuantification.tSUV.dScale;             
-                    tReport.LungUpperLobeRight.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.LungUpperLobeRight.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;
+%                     tReport.LungUpperLobeRight.Total = tReport.LungUpperLobeRight.Mean*tReport.LungUpperLobeRight.Volume*tQuantification.tSUV.dScale;
+                    tReport.LungUpperLobeRight.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;
                 else
                     tReport.LungUpperLobeRight.Mean  = mean(voiData, 'all');
 %                    tReport.LungUpperLobeRight.Total = tReport.LungUpperLobeRight.Mean*tReport.LungUpperLobeRight.Volume;
                     tReport.LungUpperLobeRight.Total = sum(voiData, 'all');
                 end
             else
-                tReport.LungUpperLobeRight.Mean  = mean(voiData, 'all');             
-%                 tReport.LungUpperLobeRight.Total = tReport.LungUpperLobeRight.Mean*tReport.LungUpperLobeRight.Volume;             
-                tReport.LungUpperLobeRight.Total = sum(voiData, 'all');             
+                tReport.LungUpperLobeRight.Mean  = mean(voiData, 'all');
+%                 tReport.LungUpperLobeRight.Total = tReport.LungUpperLobeRight.Mean*tReport.LungUpperLobeRight.Volume;
+                tReport.LungUpperLobeRight.Total = sum(voiData, 'all');
             end
-         
+
             clear voiMask;
-            clear voiData;     
+            clear voiData;
         else
             tReport.LungUpperLobeRight.Cells  = [];
             tReport.LungUpperLobeRight.Volume = [];
-            tReport.LungUpperLobeRight.Mean   = [];            
-            tReport.LungUpperLobeRight.Total  = [];            
+            tReport.LungUpperLobeRight.Mean   = [];
+            tReport.LungUpperLobeRight.Total  = [];
         end
 
         % Compute Lung middle Lobe right segmentation
-        
+
         progressBar( 7/10, 'Computing lung middle lobe left segmentation, please wait' );
-       
-        if numel(tReport.LungMiddleLobeRight.RoisTag) ~= 0  
-        
+
+        if numel(tReport.LungMiddleLobeRight.RoisTag) ~= 0
+
             voiMask = cell(1, numel(tReport.LungMiddleLobeRight.RoisTag));
             voiData = cell(1, numel(tReport.LungMiddleLobeRight.RoisTag));
-            
+
             dNbCells = 0;
 
             aMask = logical(false(size(aImage)));
-           
+
             for uu=1:numel(tReport.LungMiddleLobeRight.RoisTag)
 
-                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.LungMiddleLobeRight.RoisTag{uu}]} );                
-                
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.LungMiddleLobeRight.RoisTag{uu}]} );
+
                 tRoi = atRoiInput{find(aTagOffset, 1)};
-                
-                if bModifiedMatrix  == false && ... 
+
+                if bModifiedMatrix  == false && ...
                    bMovementApplied == false        % Can't use input buffer if movement have been applied
 
                     if numel(aImage) ~= numel(dicomBuffer('get'))
                         pTemp{1} = tRoi;
                         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
-                    end   
+                    end
                 end
-                
-                switch lower(tRoi.Axe)    
+
+                switch lower(tRoi.Axe)
 
                     case 'axe'
                         voiData{uu} = aImage(:,:);
                         voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
 
                         if bUpdateMasks == true
-                            aMask(:,:) = voiMask{uu}|aMask(:,:);   
+                            aMask(:,:) = voiMask{uu}|aMask(:,:);
                         end
 
                     case 'axes1'
@@ -3030,50 +3194,50 @@ function generate3DLungLobeReport(bInitReport)
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
-                            aMask(tRoi.SliceNb,:,:) = voiMask{uu}|aMask(tRoi.SliceNb,:,:);   
-                        end                        
-                        
+                            aMask(tRoi.SliceNb,:,:) = voiMask{uu}|aMask(tRoi.SliceNb,:,:);
+                        end
+
                     case 'axes2'
                         aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
-                            aMask(:,tRoi.SliceNb,:) = voiMask{uu}|aMask(:,tRoi.SliceNb,:);   
+                            aMask(:,tRoi.SliceNb,:) = voiMask{uu}|aMask(:,tRoi.SliceNb,:);
                         end
 
                    case 'axes3'
                         aSlice = aImage(:,:,tRoi.SliceNb);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
-                            aMask(:,:,tRoi.SliceNb) = voiMask{uu}|aMask(:,:,tRoi.SliceNb);  
+                            aMask(:,:,tRoi.SliceNb) = voiMask{uu}|aMask(:,:,tRoi.SliceNb);
                         end
-                end              
-                
-                if bSegmented  == true && ...      
-                   bModifiedMatrix == true % Can't use original buffer   
+                end
 
-                    voiDataTemp = voiData{uu}(voiMask{uu}); 
+                if bSegmented  == true && ...
+                   bModifiedMatrix == true % Can't use original buffer
+
+                    voiDataTemp = voiData{uu}(voiMask{uu});
                     voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
                     dNbCells = dNbCells+numel(voiDataTemp);
                 else
                     dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
                 end
             end
-            
+
             voiMask = cat(1, voiMask{:});
             voiData = cat(1, voiData{:});
-            
-            voiData(voiMask~=1) = [];
-            
-            if bSegmented  == true && ...      
-               bModifiedMatrix == true % Can't use original buffer   
 
-                voiData = voiData(voiData>cropValue('get'));                            
+            voiData(voiMask~=1) = [];
+
+            if bSegmented  == true && ...
+               bModifiedMatrix == true % Can't use original buffer
+
+                voiData = voiData(voiData>cropValue('get'));
             end
-            
+
             tReport.LungMiddleLobeRight.Cells  = dNbCells;
             tReport.LungMiddleLobeRight.Volume = dNbCells*dVoxVolume;
 
@@ -3082,74 +3246,74 @@ function generate3DLungLobeReport(bInitReport)
 
                 lungLobesMasks('set', 'lungMiddleLobeRight', aMask);
             else
-                tReport.LungMiddleLobeRight.Mask = lungLobesMasks('get', 'lungMiddleLobeRight');                
+                tReport.LungMiddleLobeRight.Mask = lungLobesMasks('get', 'lungMiddleLobeRight');
             end
 
             clear aMask;
 
             if strcmpi(sUnitDisplay, 'SUV')
-                
+
                 if bSUVUnit == true
-                    tReport.LungMiddleLobeRight.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-%                     tReport.LungMiddleLobeRight.Total = tReport.LungMiddleLobeRight.Mean*tReport.LungMiddleLobeRight.Volume*tQuantification.tSUV.dScale;             
-                    tReport.LungMiddleLobeRight.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.LungMiddleLobeRight.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;
+%                     tReport.LungMiddleLobeRight.Total = tReport.LungMiddleLobeRight.Mean*tReport.LungMiddleLobeRight.Volume*tQuantification.tSUV.dScale;
+                    tReport.LungMiddleLobeRight.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;
                 else
                     tReport.LungMiddleLobeRight.Mean  = mean(voiData, 'all');
 %                     tReport.LungMiddleLobeRight.Total = tReport.LungMiddleLobeRight.Mean*tReport.LungMiddleLobeRight.Volume;
-                    tReport.LungMiddleLobeRight.Total = sum(voiData, 'all'); 
+                    tReport.LungMiddleLobeRight.Total = sum(voiData, 'all');
                end
             else
-                tReport.LungMiddleLobeRight.Mean  = mean(voiData, 'all');             
-%                 tReport.LungMiddleLobeRight.Total = tReport.LungMiddleLobeRight.Mean*tReport.LungMiddleLobeRight.Volume;             
-                tReport.LungMiddleLobeRight.Total = sum(voiData, 'all');             
+                tReport.LungMiddleLobeRight.Mean  = mean(voiData, 'all');
+%                 tReport.LungMiddleLobeRight.Total = tReport.LungMiddleLobeRight.Mean*tReport.LungMiddleLobeRight.Volume;
+                tReport.LungMiddleLobeRight.Total = sum(voiData, 'all');
             end
-         
+
             clear voiMask;
-            clear voiData;     
+            clear voiData;
         else
             tReport.LungMiddleLobeRight.Cells  = [];
             tReport.LungMiddleLobeRight.Volume = [];
-            tReport.LungMiddleLobeRight.Mean   = [];            
-            tReport.LungMiddleLobeRight.Total  = [];            
+            tReport.LungMiddleLobeRight.Mean   = [];
+            tReport.LungMiddleLobeRight.Total  = [];
         end
 
         % Compute Lung Lower Lobe right segmentation
-        
+
         progressBar( 8/10, 'Computing Lower lobe left segmentation, please wait' );
-       
-        if numel(tReport.LungLowerLobeRight.RoisTag) ~= 0  
-        
+
+        if numel(tReport.LungLowerLobeRight.RoisTag) ~= 0
+
             voiMask = cell(1, numel(tReport.LungLowerLobeRight.RoisTag));
             voiData = cell(1, numel(tReport.LungLowerLobeRight.RoisTag));
-            
+
             dNbCells = 0;
 
             aMask = logical(false(size(aImage)));
 
             for uu=1:numel(tReport.LungLowerLobeRight.RoisTag)
 
-                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.LungLowerLobeRight.RoisTag{uu}]} );                
-                
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.LungLowerLobeRight.RoisTag{uu}]} );
+
                 tRoi = atRoiInput{find(aTagOffset, 1)};
-                
-                if bModifiedMatrix  == false && ... 
+
+                if bModifiedMatrix  == false && ...
                    bMovementApplied == false        % Can't use input buffer if movement have been applied
 
                     if numel(aImage) ~= numel(dicomBuffer('get'))
                         pTemp{1} = tRoi;
                         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
-                    end   
+                    end
                 end
-                
-                switch lower(tRoi.Axe)         
+
+                switch lower(tRoi.Axe)
 
                     case 'axe'
                         voiData{uu} = aImage(:,:);
                         voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
 
                         if bUpdateMasks == true
-                            aMask(:,:) = voiMask{uu}|aMask(:,:);   
+                            aMask(:,:) = voiMask{uu}|aMask(:,:);
                         end
 
                     case 'axes1'
@@ -3158,51 +3322,51 @@ function generate3DLungLobeReport(bInitReport)
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
-                            aMask(tRoi.SliceNb,:,:) = voiMask{uu}|aMask(tRoi.SliceNb,:,:);   
-                        end                        
-                        
+                            aMask(tRoi.SliceNb,:,:) = voiMask{uu}|aMask(tRoi.SliceNb,:,:);
+                        end
+
                     case 'axes2'
                         aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
-                            aMask(:,tRoi.SliceNb,:) = voiMask{uu}|aMask(:,tRoi.SliceNb,:);   
+                            aMask(:,tRoi.SliceNb,:) = voiMask{uu}|aMask(:,tRoi.SliceNb,:);
                         end
 
                    case 'axes3'
                         aSlice = aImage(:,:,tRoi.SliceNb);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
-                            aMask(:,:,tRoi.SliceNb) = voiMask{uu}|aMask(:,:,tRoi.SliceNb);  
+                            aMask(:,:,tRoi.SliceNb) = voiMask{uu}|aMask(:,:,tRoi.SliceNb);
                         end
 
-                end              
-                
-                if bSegmented  == true && ...      
-                   bModifiedMatrix == true % Can't use original buffer   
+                end
 
-                    voiDataTemp = voiData{uu}(voiMask{uu}); 
+                if bSegmented  == true && ...
+                   bModifiedMatrix == true % Can't use original buffer
+
+                    voiDataTemp = voiData{uu}(voiMask{uu});
                     voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
                     dNbCells = dNbCells+numel(voiDataTemp);
                 else
                     dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
                 end
             end
-            
+
             voiMask = cat(1, voiMask{:});
             voiData = cat(1, voiData{:});
-            
-            voiData(voiMask~=1) = [];
-            
-            if bSegmented  == true && ...      
-               bModifiedMatrix == true % Can't use original buffer   
 
-                voiData = voiData(voiData>cropValue('get'));                            
+            voiData(voiMask~=1) = [];
+
+            if bSegmented  == true && ...
+               bModifiedMatrix == true % Can't use original buffer
+
+                voiData = voiData(voiData>cropValue('get'));
             end
-            
+
             tReport.LungLowerLobeRight.Cells  = dNbCells;
             tReport.LungLowerLobeRight.Volume = dNbCells*dVoxVolume;
 
@@ -3211,63 +3375,63 @@ function generate3DLungLobeReport(bInitReport)
 
                 lungLobesMasks('set', 'LungLowerLobeRight', aMask);
             else
-                tReport.LungLowerLobeRight.Mask = lungLobesMasks('get', 'lungLowerLobeRight');                
+                tReport.LungLowerLobeRight.Mask = lungLobesMasks('get', 'lungLowerLobeRight');
             end
 
             clear aMask;
 
             if strcmpi(sUnitDisplay, 'SUV')
-                
+
                 if bSUVUnit == true
-                    tReport.LungLowerLobeRight.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-%                     tReport.LungLowerLobeRight.Total = tReport.LungLowerLobeRight.Mean*tReport.LungLowerLobeRight.Volume*tQuantification.tSUV.dScale;             
-                    tReport.LungLowerLobeRight.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;             
+                    tReport.LungLowerLobeRight.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;
+%                     tReport.LungLowerLobeRight.Total = tReport.LungLowerLobeRight.Mean*tReport.LungLowerLobeRight.Volume*tQuantification.tSUV.dScale;
+                    tReport.LungLowerLobeRight.Total = sum(voiData, 'all')*tQuantification.tSUV.dScale;
                else
                     tReport.LungLowerLobeRight.Mean  = mean(voiData, 'all');
 %                     tReport.LungLowerLobeRight.Total = tReport.LungLowerLobeRight.Mean*tReport.LungLowerLobeRight.Volume;
                     tReport.LungLowerLobeRight.Total = sum(voiData, 'all');
                end
             else
-                tReport.LungLowerLobeRight.Mean  = mean(voiData, 'all');             
-%                tReport.LungLowerLobeRight.Total = tReport.LungLowerLobeRight.Mean*tReport.LungLowerLobeRight.Volume;             
-                tReport.LungLowerLobeRight.Total = sum(voiData, 'all');             
+                tReport.LungLowerLobeRight.Mean  = mean(voiData, 'all');
+%                tReport.LungLowerLobeRight.Total = tReport.LungLowerLobeRight.Mean*tReport.LungLowerLobeRight.Volume;
+                tReport.LungLowerLobeRight.Total = sum(voiData, 'all');
             end
-         
+
             clear voiMask;
-            clear voiData;     
+            clear voiData;
         else
             tReport.LungLowerLobeRight.Cells  = [];
             tReport.LungLowerLobeRight.Volume = [];
-            tReport.LungLowerLobeRight.Mean   = [];            
-            tReport.LungLowerLobeRight.Total  = [];            
+            tReport.LungLowerLobeRight.Mean   = [];
+            tReport.LungLowerLobeRight.Total  = [];
         end
 
         clear aImage;
-        
+
         progressBar( 1 , 'Ready' );
-       
+
     end
 
     function exportCurrentLobeLungReportToPdfCallback(~, ~)
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-        
+
         atMetaData = dicomMetaData('get', [], dSeriesOffset);
 
         try
 
  %         fig3DLobeLungReport = fig3DLobeLungReportPtr('get');
-      
+
         filter = {'*.pdf'};
 
         sCurrentDir  = viewerRootPath('get');
 
         sMatFile = [sCurrentDir '/' 'lastReportDir.mat'];
-        
+
         % load last data directory
 
         if exist(sMatFile, 'file')
-           
+
             % lastDirMat mat file exists, load it
 
             load(sMatFile, 'saveReportLastUsedDir');
@@ -3280,13 +3444,13 @@ function generate3DLungLobeReport(bInitReport)
                 sCurrentDir = pwd;
             end
         end
-            
+
 %        sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
 
-        % Series Date 
-        
+        % Series Date
+
         sSeriesDate = atMetaData{1}.SeriesDate;
-        
+
         if isempty(sSeriesDate)
             sSeriesDate = '-';
         else
@@ -3305,47 +3469,71 @@ function generate3DLungLobeReport(bInitReport)
                 save(sMatFile, 'saveReportLastUsedDir');
             catch
                 progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-            end 
+            end
 
             sFileName = sprintf('%s%s', path, file);
-            
+
             if exist(sFileName, 'file')
                 delete(sFileName);
             end
-                
-            set(axe3DLobeLungReport,'LooseInset', get(axe3DLobeLungReport,'TightInset'));
-            unit = get(fig3DLobeLungReport,'Units');
-            set(fig3DLobeLungReport,'Units','inches');
-            pos = get(fig3DLobeLungReport,'Position');
-
-            set(fig3DLobeLungReport, ...
-                'PaperPositionMode', 'auto',...
-                'PaperUnits'       , 'inches',...
-                'PaperPosition'    , [0,0,pos(3),pos(4)],...
-                'PaperSize'        , [pos(3), pos(4)]);
 
             if ~contains(sFileName, '.pdf')
                 sFileName = [sFileName, '.pdf'];
             end
 
-            print(fig3DLobeLungReport, sFileName, '-image', '-dpdf', '-r0');
+            if viewerUIFigure('get') == true
 
-            set(fig3DLobeLungReport,'Units', unit);
+                aRGBImage = frame2im(getframe(fig3DLobeLungReport));
 
-            progressBar( 1 , sprintf('Export %s completed.', sFileName)); 
+                axePdfReport = ...
+                   axes(fig3DLobeLungReport, ...
+                         'Units'   , 'pixels', ...
+                         'Position', [0 0 FIG_REPORT_X FIG_REPORT_Y], ...
+                         'Color'   , 'none',...
+                         'Visible' , 'off'...
+                         );
+                axePdfReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                axePdfReport.Toolbar.Visible = 'off';
+                disableDefaultInteractivity(axePdfReport);
+
+                image(axePdfReport, aRGBImage);
+                axePdfReport.Visible = 'off';
+
+                exportgraphics(axePdfReport, sFileName);
+
+                delete(axePdfReport);
+            else
+
+                set(axe3DLobeLungReport,'LooseInset', get(axe3DLobeLungReport,'TightInset'));
+                unit = get(fig3DLobeLungReport,'Units');
+                set(fig3DLobeLungReport,'Units','inches');
+                pos = get(fig3DLobeLungReport,'Position');
+
+                set(fig3DLobeLungReport, ...
+                    'PaperPositionMode', 'auto',...
+                    'PaperUnits'       , 'inches',...
+                    'PaperPosition'    , [0,0,pos(3),pos(4)],...
+                    'PaperSize'        , [pos(3), pos(4)]);
+
+                print(fig3DLobeLungReport, sFileName, '-image', '-dpdf', '-r0');
+
+                set(fig3DLobeLungReport,'Units', unit);
+            end
+
+            progressBar( 1 , sprintf('Export %s completed.', sFileName));
 
             try
                 winopen(sFileName);
             catch
             end
         end
-        
+
         catch
             progressBar( 1 , 'Error: exportCurrentLobeLungReportToPdfCallback() cant export report' );
         end
 
         set(fig3DLobeLungReport, 'Pointer', 'default');
-        drawnow;        
+        drawnow;
     end
 
     function exportCurrentLobeLungAxialSlicesToAviCallback(~, ~)
@@ -3361,13 +3549,13 @@ function generate3DLungLobeReport(bInitReport)
         try
 
     %         fig3DLobeLungReport = fig3DLobeLungReportPtr('get');
-   
+
         filter = {'*.avi'};
 
         sCurrentDir  = viewerRootPath('get');
 
         sMatFile = [sCurrentDir '/' 'lastReportDir.mat'];
-        
+
         % load last data directory
         if exist(sMatFile, 'file')
                         % lastDirMat mat file exists, load it
@@ -3381,13 +3569,13 @@ function generate3DLungLobeReport(bInitReport)
                 sCurrentDir = pwd;
             end
         end
-            
+
      %   sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
 
-        % Series Date 
-        
+        % Series Date
+
         sSeriesDate = atMetaData{1}.SeriesDate;
-        
+
         if isempty(sSeriesDate)
             sSeriesDate = '-';
         else
@@ -3407,14 +3595,14 @@ function generate3DLungLobeReport(bInitReport)
                 save(sMatFile, 'saveReportLastUsedDir');
             catch
                 progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-            end 
+            end
 
             sFileName = sprintf('%s%s', path, file);
-            
+
             if exist(sFileName, 'file')
                 delete(sFileName);
             end
-                
+
             if ~contains(file, '.avi')
                 file = [file, '.avi'];
             end
@@ -3430,13 +3618,13 @@ function generate3DLungLobeReport(bInitReport)
             recordMultiFrame(recordIconMenuObject('get'), path, file, 'avi', axes3Ptr('get', [], dSeriesOffset));
 
         end
-        
+
         catch
             progressBar( 1 , 'Error: exportCurrentLobeLungAxialSlicesToAviCallback() cant export report' );
         end
 
         playback2DMipOnly('set', bMipPlayback);
-        
+
         multiFrameRecord('set', false);
 
         set(recordIconMenuObject('get'), 'State', 'off');
@@ -3446,7 +3634,7 @@ function generate3DLungLobeReport(bInitReport)
         sliderTraCallback();
 
         set(fig3DLobeLungReport, 'Pointer', 'default');
-        drawnow;          
+        drawnow;
     end
 
     function exportCurrentLobeLungAxialSlicesToDicomMovieCallback(~, ~)
@@ -3458,20 +3646,20 @@ function generate3DLungLobeReport(bInitReport)
         dAxialSliceNumber = sliceNumber('get', 'axial');
 
         try
-    
+
 %         fig3DLobeLungReport = fig3DLobeLungReportPtr('get');
-    
+
         sOutDir = outputDir('get');
-    
+
         if isempty(sOutDir)
-            
+
             sCurrentDir  = viewerRootPath('get');
-    
+
             sMatFile = [sCurrentDir '/' 'lastWriteDicomDir.mat'];
 
             % load last data directory
             if exist(sMatFile, 'file')  % lastDirMat mat file exists, load it
-                                       
+
                load(sMatFile, 'exportDicomLastUsedDir');
 
                if exist('exportDicomLastUsedDir', 'var')
@@ -3483,29 +3671,29 @@ function generate3DLungLobeReport(bInitReport)
                    sCurrentDir = pwd;
                end
             end
-    
+
             sOutDir = uigetdir(sCurrentDir);
 
             if sOutDir == 0
-                
+
                 return;
             end
             sOutDir = [sOutDir '/'];
-    
-%             sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                
-%             sWriteDir = char(sOutDir) + "TriDFusion_MFSC_" + char(sDate) + '/';              
+
+%             sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
+%             sWriteDir = char(sOutDir) + "TriDFusion_MFSC_" + char(sDate) + '/';
 %             if ~(exist(char(sWriteDir), 'dir'))
 %                 mkdir(char(sWriteDir));
 %             end
-            
+
             try
                 exportDicomLastUsedDir = sOutDir;
                 save(sMatFile, 'exportDicomLastUsedDir');
             catch
                 progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-            end   
-        end    
-    
+            end
+        end
+
         set(fig3DLobeLungReport, 'Pointer', 'watch');
         drawnow;
 
@@ -3520,13 +3708,13 @@ function generate3DLungLobeReport(bInitReport)
         recordMultiFrame(recordIconMenuObject('get'), sOutDir, [], 'dcm', axes3Ptr('get', [], dSeriesOffset));
 
 %         objectToDicomJpg(sWriteDir, fig3DLobeLungReport, '3DF MFSC', get(uiSeriesPtr('get'), 'Value'))
-    
+
         catch
             progressBar( 1 , 'Error: exportCurrentLobeLungAxialSlicesToDicomMovieCallback() cant export report' );
         end
 
         playback2DMipOnly('set', bMipPlayback);
-        
+
         multiFrameRecord('set', false);
 
         set(recordIconMenuObject('get'), 'State', 'off');
@@ -3536,36 +3724,60 @@ function generate3DLungLobeReport(bInitReport)
         sliderTraCallback();
 
         set(fig3DLobeLungReport, 'Pointer', 'default');
-        drawnow;     
+        drawnow;
     end
-    
+
     function copyLobeLungReportDisplayCallback(~, ~)
 
         try
 
             set(fig3DLobeLungReport, 'Pointer', 'watch');
-
-            inv = get(fig3DLobeLungReport,'InvertHardCopy');
-
-            set(fig3DLobeLungReport,'InvertHardCopy','Off');
-
             drawnow;
-            hgexport(fig3DLobeLungReport,'-clipboard');
 
-            set(fig3DLobeLungReport,'InvertHardCopy', inv);
+            if viewerUIFigure('get') == true
+
+                aRGBImage = frame2im(getframe(fig3DLobeLungReport));
+
+                axePdfReport = ...
+                   axes(fig3DLobeLungReport, ...
+                         'Units'   , 'pixels', ...
+                         'Position', [0 0 FIG_REPORT_X FIG_REPORT_Y], ...
+                         'Color'   , 'none',...
+                         'Visible' , 'off'...
+                         );
+                axePdfReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                axePdfReport.Toolbar.Visible = 'off';
+                disableDefaultInteractivity(axePdfReport);
+
+                image(axePdfReport, aRGBImage);
+                axePdfReport.Visible = 'off';
+
+                copygraphics(axePdfReport);
+
+                delete(axePdfReport);
+            else
+                inv = get(fig3DLobeLungReport,'InvertHardCopy');
+
+                set(fig3DLobeLungReport,'InvertHardCopy','Off');
+
+                hgexport(fig3DLobeLungReport,'-clipboard');
+
+                set(fig3DLobeLungReport,'InvertHardCopy', inv);
+            end
         catch
             progressBar( 1 , 'Error: copyLobeLungReportDisplayCallback() cant copy report' );
         end
 
         set(fig3DLobeLungReport, 'Pointer', 'default');
+        drawnow;
     end
 
     function display3DLobeLung()
 
         atInput = inputTemplate('get');
 
-        % Modality validation    
-           
+        % Modality validation
+
         dCTSerieOffset = [];
         for tt=1:numel(atInput)
             if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'ct')
@@ -3573,7 +3785,7 @@ function generate3DLungLobeReport(bInitReport)
                 break;
             end
         end
-    
+
         dNMSerieOffset = [];
         for tt=1:numel(atInput)
             if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'nm')
@@ -3581,18 +3793,18 @@ function generate3DLungLobeReport(bInitReport)
                 break;
             end
         end
-    
+
         if isempty(dCTSerieOffset) || ...
-           isempty(dNMSerieOffset)  
+           isempty(dNMSerieOffset)
             progressBar(1, 'Error: display3DLobeLung() require a CT and NM image!');
-            return;               
+            return;
         end
 
         atCTMetaData = dicomMetaData('get', [], dCTSerieOffset);
         if isempty(atCTMetaData)
             atCTMetaData = atInput(dCTSerieOffset).atDicomInfo;
         end
-        
+
         aCTBuffer = dicomBuffer('get', [], dCTSerieOffset);
         if isempty(aCTBuffer)
             aInputBuffer = inputBuffer('get');
@@ -3603,32 +3815,71 @@ function generate3DLungLobeReport(bInitReport)
         y = atCTMetaData{1}.PixelSpacing(2);
         z = computeSliceSpacing(atCTMetaData);
 
-        aScaleFactor = [y x z];  
+        aScaleFactor = [y x z];
         dScaleMax = max(aScaleFactor);
-    
+
         vec = linspace(0,2*pi(),120)';
-    
+
         myPosition = [dScaleMax*cos(vec) dScaleMax*sin(vec) zeros(size(vec))];
-    
+
         aCameraPosition = myPosition(1,:);
         aCameraUpVector =  [0 0 1];
-    
+
         for cc=1:numel(aCameraPosition) % Normalize to 1
             aCameraPosition(cc) = aCameraPosition(cc) / dScaleMax;
-        end            
-    
+        end
+
         [aCameraPosition, aCameraUpVector] = compute3Dflip(aCameraPosition, aCameraUpVector, 'right');
-    
+
         for cc=1:numel(aCameraPosition) % Add the zoom
             aCameraPosition(cc) = aCameraPosition(cc) *dScaleMax;
-        end 
+        end
 
-        % MIP display image 
+        % MIP display image
+
+        ptrViewer3d = [];
+
+        if ~verLessThan('matlab','9.13')
+
+            if viewerUIFigure('get') == true
+
+                [Mdti,~] = TransformMatrix(atCTMetaData{1}, computeSliceSpacing(atCTMetaData));
+
+                % if volume3DZOffset('get') == false
+
+                    Mdti(1,4) = 0;
+                    Mdti(2,4) = 0;
+                    Mdti(3,4) = 0;
+                    Mdti(4,4) = 1;
+                % end
+
+                tform = affinetform3d(Mdti);
+
+                ptrViewer3d = viewer3d('Parent'         , ui3DWindow, ...
+                                       'BackgroundColor', 'white', ...
+                                       'Lighting'       , 'off', ...
+                                       'GradientColor'  , [0.98 0.98 0.98], ...
+                                       'CameraZoom'     , 1.5, ...
+                                       'Lighting'       ,'off');
+                % sz = size(aCTBuffer);
+                % center = sz/2 + 0.5;
+                %
+                % numberOfFrames = 360;
+                % vec = linspace(0,2*pi,numberOfFrames)';
+                % dist = sqrt(sz(1)^2 + sz(2)^2 + sz(3)^2);
+                % myPosition = center + ([cos(vec) sin(vec) ones(size(vec))]*dist);
+                %
+                % aPosition = myPosition(250, :);
+                %
+                % aCameraPosition = [aPosition(1) -aPosition(3) abs(aPosition(2))];
+                % aCameraUpVector = [0 0 1];
+            end
+        end
 
         if ~isempty(aCTBuffer)
 
             aCTBuffer = aCTBuffer(:,:,end:-1:1);
-   
+
             if strcmpi(atCTMetaData{1}.Modality, 'CT')
                 aColormap = gray(256);
                 aAlphamap = defaultMipAlphaMap(aCTBuffer, 'CT');
@@ -3638,77 +3889,155 @@ function generate3DLungLobeReport(bInitReport)
             else
                 aAlphamap = defaultMipAlphaMap(aCTBuffer, 'PET');
                 aColormap = gray(256);
-            end  
+            end
 
-            % Isosurface display image 
+            % Isosurface display image
 
 %            aInputArguments = {'Parent', ui3DWindow, 'Renderer', 'Isosurface', 'BackgroundColor', 'white', 'ScaleFactors', aScaleFactor};
-       
+
 %            aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
-        
+
 %            if verLessThan('matlab','9.13')
 %                pObject = volshow(squeeze(aCTBuffer),  aInputArguments{:});
 %            else
-%                pObject = images.compatibility.volshow.R2022a.volshow(squeeze(aCTBuffer), aInputArguments{:});                   
+%                pObject = images.compatibility.volshow.R2022a.volshow(squeeze(aCTBuffer), aInputArguments{:});
 %            end
 %            pObject.IsosurfaceColor = 'white';
 %            pObject.Isovalue = ctHUToScalarValue(aCTBuffer, 150)/100;
 
 %            pObject.CameraPosition = aCameraPosition;
-%            pObject.CameraUpVector = aCameraUpVector;  
+%            pObject.CameraUpVector = aCameraUpVector;
 
-            % MaximumIntensityProjection display image 
+            % MaximumIntensityProjection display image
 
             aInputArguments = {'Parent', ui3DWindow, 'Renderer', 'MaximumIntensityProjection', 'BackgroundColor', 'white', 'ScaleFactors', aScaleFactor};
-       
+
             aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
-        
+
             if verLessThan('matlab','9.13')
+
                 pObject = volshow(squeeze(aCTBuffer),  aInputArguments{:});
             else
-                pObject = images.compatibility.volshow.R2022a.volshow(squeeze(aCTBuffer), aInputArguments{:});                   
+                if ~isempty(ptrViewer3d)
+
+                    pObject = volshow(squeeze(aCTBuffer), ...
+                                      'Parent'        , ptrViewer3d, ...
+                                      'RenderingStyle', 'MaximumIntensityProjection',...
+                                      'Alphamap'      , aAlphamap, ...
+                                      'Colormap'      , aColormap, ...
+                                      'Transformation', tform);
+                else
+                    pObject = images.compatibility.volshow.R2022a.volshow(squeeze(aCTBuffer), aInputArguments{:});
+                end
             end
-        
-            pObject.CameraPosition = aCameraPosition;
-            pObject.CameraUpVector = aCameraUpVector;  
+
+            if ~isempty(ptrViewer3d)
+
+
+                 % ptrViewer3d.CameraTarget   = aCameraTarget;
+                 % ptrViewer3d.CameraPosition = aCameraPosition;
+                 % ptrViewer3d.CameraUpVector = aCameraUpVector;
+            else
+                pObject.CameraPosition = aCameraPosition;
+                pObject.CameraUpVector = aCameraUpVector;
+            end
 
         end
 
-        % Mask Volume Rendering 
+        % Mask Volume Rendering
 
-        for jj=1:numel(gasMask)
-    
-            [aMask, aColor] = machineLearning3DMask('get', gasMask{jj});
+        if ~isempty(ptrViewer3d)
 
-            if ~isempty(aMask)
-                
+             for jj=1:numel(gasMask)
+
+                [aMask, aColor] = machineLearning3DMask('get', gasMask{jj});
+
+                if ~isempty(aMask)
+
+                    aMask = smooth3(aMask, 'box', 3);
+
+                    aColormap = zeros(256,3);
+
+                    aColormap(:,1) = aColor(1);
+                    aColormap(:,2) = aColor(2);
+                    aColormap(:,3) = aColor(3);
+
+                    dTransparencyValue = get(uiSlider3Dintensity, 'Value');
+
+                    aAlphamap = linspace(0, dTransparencyValue, 256)';
+
+
+                    gp3DObject{jj} = volshow(squeeze(aMask), ...
+                                             'Parent'        , ptrViewer3d, ...
+                                             'RenderingStyle', 'VolumeRendering',...
+                                             'Alphamap'      , aAlphamap, ...
+                                             'Colormap'      , aColormap, ...
+                                             'Transformation', tform);
+
+                end
+            end
+        else
+
+            aMasksColor = zeros(numel(gasMask), 3);
+            aMask = zeros(size(aCTBuffer));
+
+            dNbMasks = numel(gasMask);
+
+            for jj=1:dNbMasks
+
+                [aCurrentMask, aColor] = machineLearning3DMask('get', gasMask{jj});
+
+%                 if jj == 1
+%                     aMask(aCurrentMask==1) = 1;
+%                 else
+                    aMask(aCurrentMask==1) = jj;
+%                 end
+
+                aMasksColor(jj, :) = aColor;
+            end
+
+            if any(aMask(:) ~= 0)
+
                 aMask = smooth3(aMask, 'box', 3);
 
-                aColormap = zeros(256,3);
-
-                aColormap(:,1) = aColor(1);
-                aColormap(:,2) = aColor(2);
-                aColormap(:,3) = aColor(3);
+                numColors = 256;
+                aColormap = zeros(numColors, 3);
+                for ii = 1:dNbMasks
+                    startIdx = round((ii-1)*(numColors/dNbMasks))+1;
+                    endIdx = round(ii*(numColors/dNbMasks));
+                    aColormap(startIdx:endIdx, :) = repmat(aMasksColor(ii, :), endIdx-startIdx+1, 1);
+                end
 
                 dTransparencyValue = get(uiSlider3Dintensity, 'Value');
 
                 aAlphamap = linspace(0, dTransparencyValue, 256)';
 
                 aInputArguments = {'Parent', ui3DWindow, 'Renderer', 'VolumeRendering', 'BackgroundColor', 'white', 'ScaleFactors', aScaleFactor};
-        
+
                 aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
-          
+
                 if verLessThan('matlab','9.13')
-                    gp3DObject{jj} = volshow(squeeze(aMask),  aInputArguments{:});
+
+                    gp3DObject{1} = volshow(squeeze(aMask), aInputArguments{:});
+
                 else
-                    gp3DObject{jj} = images.compatibility.volshow.R2022a.volshow(squeeze(aMask), aInputArguments{:});                   
+
+                    gp3DObject{1} = images.compatibility.volshow.R2022a.volshow(squeeze(aMask), aInputArguments{:});
+
                 end
-        
-                gp3DObject{jj}.CameraPosition = aCameraPosition;
-                gp3DObject{jj}.CameraUpVector = aCameraUpVector;
+
+                gp3DObject{1}.CameraPosition = aCameraPosition;
+                gp3DObject{1}.CameraUpVector = aCameraUpVector;
+
+
+                clear aMask;
             end
         end
 
+        if ~isempty(ptrViewer3d)
+
+            set(ptrViewer3d, 'Lighting', 'on');
+        end
     end
 
     function slider3DLungLobesintensityCallback(~, ~)
@@ -3717,7 +4046,7 @@ function generate3DLungLobeReport(bInitReport)
 
         aAlphamap = linspace(0, dSliderValue, 256)';
 
-        for jj=1:numel(gasMask)
+        for jj=1:numel(gp3DObject)
             set(gp3DObject{jj}, 'Alphamap', aAlphamap);
         end
 
@@ -3726,11 +4055,11 @@ function generate3DLungLobeReport(bInitReport)
     function ui3DLobeLungReportSliderCallback(~, ~)
 
         val = get(ui3DLobeLungReportSlider, 'Value');
-    
+
         aPosition = get(ui3DLobeLungReport, 'Position');
-    
+
         dPanelOffset = -((1-val) * aPosition(4));
-    
+
         set(ui3DLobeLungReport, ...
             'Position', [aPosition(1) ...
                          0-dPanelOffset ...
@@ -3743,17 +4072,31 @@ function generate3DLungLobeReport(bInitReport)
     function sliderScrollableContoursInformationCallback(~, ~)
 
         val = get(ui3DLobeScrollableContoursInformation, 'Value');
-    
+
         aPosition = get(ui3DLobeScrollableContoursInformationReport, 'Position');
-    
+
         dPanelOffset = -((1-val) * aPosition(4));
-    
+
         set(ui3DLobeScrollableContoursInformationReport, ...
             'Position', [aPosition(1) ...
                          gaContourInformationScrollableUiPosition(2)-dPanelOffset ...
                          aPosition(3) ...
                          aPosition(4) ...
                          ] ...
-            );        
+            );
+    end
+
+    function setUiExtendedPosition(uiControl)
+
+        aUiExtent = get(uiControl, 'Extent');
+        aUiPosition = get(uiControl, 'Position');
+
+        dNbElements = size(uiControl.String, 1);
+
+        % Adjust the position to align the text at the top
+        % aNewUiPosition = [aUiPosition(1), (aUiPosition(4) - aUiExtent(4)) /2 - 10, aUiPosition(3), aUiPosition(4)];
+        aNewUiPosition = [aUiPosition(1), aUiPosition(2) + aUiPosition(4) - aUiExtent(4) - dNbElements, aUiPosition(3), aUiExtent(4) + dNbElements];
+
+        set(uiControl, 'Position', aNewUiPosition);
     end
 end

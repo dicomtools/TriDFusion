@@ -34,6 +34,7 @@ function aObject = volObject(sAction, aValue)
 
      if strcmpi('set', sAction)
         paObject = aValue;            
-     end      
-    aObject = paObject;
+     end     
+
+     aObject = paObject;
 end

@@ -60,6 +60,10 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
         end
     end
 
+    setFigureToobarsVisible('off');
+
+    setFigureTopMenuVisible('off');
+
     if (pAxe == axes1Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
        (isVsplash('get') == true && strcmpi(vSplahView('get'), 'coronal'))
         
@@ -287,13 +291,12 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
            strcmpi('avi'  , sExtention)
 
             tClassVideoWriter = VideoWriter([sPath sFileName], 'Motion JPEG AVI');
-
         else
             tClassVideoWriter = VideoWriter([sPath sFileName],  'MPEG-4');
         end
 
-        tClassVideoWriter.FrameRate = 1/multiFrameSpeed('get');
-        tClassVideoWriter.Quality = 100;
+        set(tClassVideoWriter, 'FrameRate', 1/multiFrameSpeed('get'));
+        set(tClassVideoWriter, 'Quality', 100);
 
         open(tClassVideoWriter);
     end
@@ -518,6 +521,10 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
         progressBar(1, sprintf('Error: recordMultiFrame()'));
     end
 
+    setFigureToobarsVisible('on');
+
+    setFigureTopMenuVisible('on');
+
     if     aAxe == axes1Ptr('get', [], dSeriesOffset)
 
         sliceNumber('set', 'coronal', iSavedCurrentSlice);
@@ -696,7 +703,7 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
         
         logoObject('set', uiLogo);
     end
-    
+   
     refreshImages();
 
     if bWriteSucceed == true

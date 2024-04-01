@@ -39,24 +39,24 @@ function setAlphaSliderPosition(uiAlphaSlider)
             dXoffset = uiSegMainPanel.Position(3); 
             dYoffset = 35; 
             dXsize   = aFigurePosition(3)-uiSegMainPanel.Position(3);
-            dYsize   = 15;
+            dYsize   = 20;
     
        elseif viewKernelPanel('get') == true
             dXoffset = uiKernelMainPanel.Position(3); 
             dYoffset = 35; 
             dXsize   = aFigurePosition(3)-uiKernelMainPanel.Position(3);
-            dYsize   = 15;
+            dYsize   = 20;
     
         elseif viewRoiPanel('get') == true
             dXoffset = uiRoiMainPanel.Position(3); 
             dYoffset = 35; 
             dXsize   = aFigurePosition(3)-uiRoiMainPanel.Position(3);
-            dYsize   = 15;
+            dYsize   = 20;
         else
             dXoffset = 0;
             dYoffset = 35; 
             dXsize   = aFigurePosition(3);
-            dYsize   = 15;
+            dYsize   = 20;
         end
     else
         if isVsplash('get') == true && ...
@@ -65,7 +65,7 @@ function setAlphaSliderPosition(uiAlphaSlider)
             dXoffset = getMainWindowSize('xsize')/2; 
             dYoffset = addOnWidth('get')+50; 
             dXsize   = getMainWindowSize('xsize')/2;
-            dYsize   = 15;
+            dYsize   = 20;
 
         else
             if isVsplash('get') == true
@@ -74,25 +74,25 @@ function setAlphaSliderPosition(uiAlphaSlider)
                     dXoffset = uiSegMainPanel.Position(3); 
                     dYoffset = addOnWidth('get')+50; 
                     dXsize   = aFigurePosition(3)-uiSegMainPanel.Position(3);
-                    dYsize   = 15;
+                    dYsize   = 20;
         
                 elseif viewKernelPanel('get') == true
                     dXoffset = uiKernelMainPanel.Position(3); 
                     dYoffset = addOnWidth('get')+50; 
                     dXsize   = aFigurePosition(3)-uiKernelMainPanel.Position(3);
-                    dYsize   = 15;
+                    dYsize   = 20;
         
                 elseif viewRoiPanel('get') == true
                     dXoffset = uiRoiMainPanel.Position(3); 
                     dYoffset = addOnWidth('get')+50; 
                     dXsize   = aFigurePosition(3)-uiRoiMainPanel.Position(3);
-                    dYsize   = 15;
+                    dYsize   = 20;
         
                 else
                     dXoffset = 0; 
                     dYoffset = addOnWidth('get')+50; 
                     dXsize   = aFigurePosition(3);
-                    dYsize   = 15;                
+                    dYsize   = 20;                
                 end                 
     
             else
@@ -107,25 +107,25 @@ function setAlphaSliderPosition(uiAlphaSlider)
                         dXoffset = uiSegMainPanel.Position(3); 
                         dYoffset = addOnWidth('get')+50; 
                         dXsize   = aFigurePosition(3)-uiSegMainPanel.Position(3);
-                        dYsize   = 15;
+                        dYsize   = 20;
             
                     elseif viewKernelPanel('get') == true
                         dXoffset = uiKernelMainPanel.Position(3); 
                         dYoffset = addOnWidth('get')+50; 
                         dXsize   = aFigurePosition(3)-uiKernelMainPanel.Position(3);
-                        dYsize   = 15;
+                        dYsize   = 20;
             
                     elseif viewRoiPanel('get') == true
                         dXoffset = uiRoiMainPanel.Position(3); 
                         dYoffset = addOnWidth('get')+50; 
                         dXsize   = aFigurePosition(3)-uiRoiMainPanel.Position(3);
-                        dYsize   = 15;
+                        dYsize   = 20;
             
                     else
                         dXoffset = 0; 
                         dYoffset = addOnWidth('get')+50; 
                         dXsize   = aFigurePosition(3);
-                        dYsize   = 15;                
+                        dYsize   = 20;                
                      end  
 
                 else
@@ -133,7 +133,7 @@ function setAlphaSliderPosition(uiAlphaSlider)
                     dXoffset = aFigurePosition(3)/2.5; 
                     dYoffset = addOnWidth('get')+50; 
                     dXsize   = aFigurePosition(3)/2.5;
-                    dYsize   = 15;                
+                    dYsize   = 20;                
                 end
             end
         end       

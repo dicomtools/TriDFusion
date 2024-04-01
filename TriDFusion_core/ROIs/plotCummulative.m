@@ -34,10 +34,10 @@ function ptrPlotCummulative = plotCummulative(pAxe, imCData, aColor)
     [N, ~] = histcounts(imCData,bin);
     ndist = N / sum(N);
     cdist = cumsum(ndist, 'reverse');
-    hold on
+    hold(pAxe, 'on');
     lineSec = (bin(1:end-1)+bin(2:end));
     ptrPlotCummulative = plot(pAxe, 0.5*lineSec, cdist);
-    hold off
+    hold(pAxe, 'off');
     ptrPlotCummulative.Color  = aColor;
     ptrPlotCummulative.LineWidth  = 1;
    

@@ -100,7 +100,9 @@ function setPanCallback(~, ~)
         uimenu('Parent',hCMZ,'Label','Pan off', 'Callback',@setPanCallback);
         
         hPan = pan(fiMainWindowPtr('get'));
-        hPan.UIContextMenu = hCMZ;
+
+        set(hPan, 'UIContextMenu', hCMZ);
+
         pan(fiMainWindowPtr('get'), 'on');          
     end           
 end

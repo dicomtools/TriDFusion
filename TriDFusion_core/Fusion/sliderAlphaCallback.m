@@ -29,38 +29,38 @@ function sliderAlphaCallback(~, ~)
 
     if size(dicomBuffer('get'), 3) == 1
         
-        alpha( axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
-        alpha( axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+        alpha( imAxeFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
+        alpha( imAxePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 1-get(uiAlphaSliderPtr('get'), 'Value') );
     else
         
-        alpha( axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
-        alpha( axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
-        alpha( axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
+        alpha( imCoronalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
+        alpha( imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
+        alpha( imAxialFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
         
         if link2DMip('get') == true && isVsplash('get') == false  
             
-            axesMipf = axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+            axesMipf = imMipFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
             if ~isempty(axesMipf)
                 alpha( axesMipf, get(uiAlphaSliderPtr('get'), 'Value') );                                
             end
         end 
         
-        alpha( axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
-        alpha( axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
-        alpha( axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+        alpha( imCoronalPtr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+        alpha( imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+        alpha( imAxialPtr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
         
         if link2DMip('get') == true && isVsplash('get') == false  
-            alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-get(uiAlphaSliderPtr('get'), 'Value') );                                
+            alpha( imMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-get(uiAlphaSliderPtr('get'), 'Value') );                                
         end 
         
         if isPlotContours('get') == true && isVsplash('get') == false 
             
-            alpha( axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
-            alpha( axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
-            alpha( axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+            alpha( imCoronalFcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+            alpha( imSagittalFcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+            alpha( imAxialFcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
             
             if link2DMip('get') == true && isVsplash('get') == false  
-                axesMipfc = axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                axesMipfc = imMipFcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
                 if ~isempty(axesMipfc)
                     alpha( axesMipfc, 1-get(uiAlphaSliderPtr('get'), 'Value') );                                
                 end
@@ -72,5 +72,9 @@ function sliderAlphaCallback(~, ~)
     sliderAlphaValue('set', get(uiAlphaSliderPtr('get'), 'Value') );
     
     setFusionColorbarLabel();
+
+    if viewerUIFigure('get') == true
+        drawnow;
+    end
 
 end

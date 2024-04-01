@@ -164,11 +164,22 @@ function figRoiDialogCallback(hObject, ~)
 
     if isfigVoiSimplified('get') == true
         sSimplifiedChecked = 'on';
+        sExpendVoiEnable = 'off';
     else
         sSimplifiedChecked = 'off';
+        sExpendVoiEnable = 'on';
     end
 
-    mSimplified          = ...
+    if isfigVoiExpendVoi('get') == true
+        sExpendVoiChecked = 'on';
+    else
+        sExpendVoiChecked = 'off';
+    end
+
+    mExpendVoi        = ...
+        uimenu(mRoiOptions,'Label', 'Expend VOI', 'Checked', sExpendVoiChecked, 'Enable', sExpendVoiEnable, 'Callback', @expendVoiCallback);
+
+    mSimplified       = ...
         uimenu(mRoiOptions,'Label', 'Simplified Display', 'Checked', sSimplifiedChecked, 'Enable', 'on', 'Callback', @simplifiedDisplayCallback);
 
     mColorBackground  = ...
@@ -260,9 +271,17 @@ function figRoiDialogCallback(hObject, ~)
     end
     
     if strcmpi(get(mSimplified, 'Checked'), 'on')
+
         setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
-    else               
-        setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+    else       
+
+        if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+            bExpendVoi = true;
+        else
+            bExpendVoi = false;
+        end
+
+        setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented, bExpendVoi);
     end
 
     setRoiFigureName();
@@ -561,12 +580,29 @@ function figRoiDialogCallback(hObject, ~)
             sInvConstChecked = 'off';
         end
 
+        if isfigVoiSimplified('get') == true
+            sSimplifiedChecked = 'on';
+            sExpendVoiEnable = 'off';
+        else
+            sSimplifiedChecked = 'off';
+            sExpendVoiEnable = 'on';
+        end
+    
+        if isfigVoiExpendVoi('get') == true
+            sExpendVoiChecked = 'on';
+        else
+            sExpendVoiChecked = 'off';
+        end
+
         set(mSUVUnit         , 'Checked', sSuvChecked);
         set(mModifiedMatrix  , 'Checked', sModifiedMatrixChecked);
         set(mSegmented       , 'Checked', sSegChecked);
         set(mColorBackground , 'Checked', sFigRoiInColorChecked);
         set(mInvertConstraint, 'Checked', sInvConstChecked);
-
+        set(mSimplified      , 'Checked', sSimplifiedChecked);
+        set(mExpendVoi       , 'Checked', sExpendVoiChecked);
+        set(mExpendVoi       , 'Enable' , sExpendVoiEnable);
+ 
     end
 
     function roiClickDown(~, ~)
@@ -1020,9 +1056,16 @@ end
             end
             
             if strcmpi(get(mSimplified, 'Checked'), 'on')
+
                 setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
             else 
-                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                    bExpendVoi = true;
+                else
+                    bExpendVoi = false;
+                end    
+
+                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented, bExpendVoi);
             end
 
             setVoiRoiSegPopup();
@@ -1183,9 +1226,16 @@ end
                         end
 
                         if strcmpi(get(mSimplified, 'Checked'), 'on')
+                            
                             setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
                         else
-                            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                            if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                                bExpendVoi = true;
+                            else
+                                bExpendVoi = false;
+                            end                            
+
+                            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented, bExpendVoi);
                         end
                     end
 
@@ -1230,9 +1280,16 @@ end
                                 end
 
                                 if strcmpi(get(mSimplified, 'Checked'), 'on')
+
                                     setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
-                                else                          
-                                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                                else       
+                                    if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                                        bExpendVoi = true;
+                                    else
+                                        bExpendVoi = false;
+                                    end   
+
+                                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented, bExpendVoi);
                                 end
 
                             end
@@ -1391,9 +1448,17 @@ end
                     end
                     
                     if strcmpi(get(mSimplified, 'Checked'), 'on')
+
                         setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
-                    else                          
-                        setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                    else  
+
+                        if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                            bExpendVoi = true;
+                        else
+                            bExpendVoi = false;
+                        end  
+
+                        setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented, bExpendVoi);
                     end
                     
                     delete(figRoiEditLabelWindow);
@@ -1524,9 +1589,16 @@ end
                         end
 
                         if strcmpi(get(mSimplified, 'Checked'), 'on')
+
                             setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
                         else
-                            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                            if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                                bExpendVoi = true;
+                            else
+                                bExpendVoi = false;
+                            end                              
+
+                            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented, bExpendVoi);
                         end
                     end
 
@@ -1571,9 +1643,16 @@ end
                                 end
 
                                 if strcmpi(get(mSimplified, 'Checked'), 'on')
+
                                     setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
                                 else
-                                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                                    if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                                        bExpendVoi = true;
+                                    else
+                                        bExpendVoi = false;
+                                    end                                         
+
+                                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented, bExpendVoi);
                                 end
 
                             end
@@ -1867,8 +1946,7 @@ end
 
     end
 
-    function setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented)
-
+    function setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented, bExpendVoi)
 
         sLbWindow = '';
         aVoiRoiTag = [];
@@ -1999,8 +2077,8 @@ end
                             sLine  = sprintf('<HTML><FONT color="%s" face="%s"><b>%s</b>', sColor, sFontName, sLine);
                         end
 
-                        sLbWindow = sprintf('%s%s\n', sLbWindow, sLine);
-
+                        sLbWindow = sprintf('%s%s\n', sLbWindow, sLine);                        
+                            
                         if ~isempty(aVoiRoiTag)
 
                             dResizeArray = numel(aVoiRoiTag)+1;
@@ -2011,83 +2089,86 @@ end
                              aVoiRoiTag{1}.Tag = atVoiInput{aa}.Tag;
                         end
 
-                        dNbTags =numel(atRoiComputed);
-                        for bb=1:numel(atRoiComputed)
+                        if bExpendVoi == true
 
-                            if ~isempty(atRoiComputed{bb})
-
-                                if dNbTags > 100
-                                    if mod(bb, 10)==1 || bb == dNbTags
-                                        progressBar( bb/dNbTags-0.0001, sprintf('Computing roi %d/%d, please wait.', bb, dNbTags) );
+                            dNbTags =numel(atRoiComputed);
+                            for bb=1:numel(atRoiComputed)
+    
+                                if ~isempty(atRoiComputed{bb})
+    
+                                    if dNbTags > 100
+                                        if mod(bb, 10)==1 || bb == dNbTags
+                                            progressBar( bb/dNbTags-0.0001, sprintf('Computing roi %d/%d, please wait.', bb, dNbTags) );
+                                        end
                                     end
-                                end
-
-                                if strcmpi(atRoiComputed{bb}.Axe, 'Axe')
-                                    sSliceNb = num2str(atRoiComputed{bb}.SliceNb);
-                                elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes1')
-                                    sSliceNb = ['C:' num2str(atRoiComputed{bb}.SliceNb)];
-                                elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes2')
-                                    sSliceNb = ['S:' num2str(atRoiComputed{bb}.SliceNb)];
-                                elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes3')
-                                    sSliceNb = ['A:' num2str(size(aDisplayBuffer, 3)-atRoiComputed{bb}.SliceNb+1)];
-                                end
-
-%                                 if isfield(atRoiComputed{bb}, 'subtraction')
-%                                     sSubtraction = num2str(atRoiComputed{bb}.subtraction);
-%                                 else
-%                                     sSubtraction = 'NaN';
-%                                 end
-
-                                if ~isempty(atRoiComputed{bb}.MaxDistances)
-
-                                    if atRoiComputed{bb}.MaxDistances.MaxXY.Length == 0
-                                        sMaxXY = 'NaN';
+    
+                                    if strcmpi(atRoiComputed{bb}.Axe, 'Axe')
+                                        sSliceNb = num2str(atRoiComputed{bb}.SliceNb);
+                                    elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes1')
+                                        sSliceNb = ['C:' num2str(atRoiComputed{bb}.SliceNb)];
+                                    elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes2')
+                                        sSliceNb = ['S:' num2str(atRoiComputed{bb}.SliceNb)];
+                                    elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes3')
+                                        sSliceNb = ['A:' num2str(size(aDisplayBuffer, 3)-atRoiComputed{bb}.SliceNb+1)];
+                                    end
+    
+    %                                 if isfield(atRoiComputed{bb}, 'subtraction')
+    %                                     sSubtraction = num2str(atRoiComputed{bb}.subtraction);
+    %                                 else
+    %                                     sSubtraction = 'NaN';
+    %                                 end
+    
+                                    if ~isempty(atRoiComputed{bb}.MaxDistances)
+    
+                                        if atRoiComputed{bb}.MaxDistances.MaxXY.Length == 0
+                                            sMaxXY = 'NaN';
+                                        else
+                                            sMaxXY = num2str(atRoiComputed{bb}.MaxDistances.MaxXY.Length);
+                                        end
+    
+                                        if atRoiComputed{bb}.MaxDistances.MaxCY.Length == 0
+                                            sMaxCY = 'NaN';
+                                        else
+                                            sMaxCY = num2str(atRoiComputed{bb}.MaxDistances.MaxCY.Length);
+                                        end
                                     else
-                                        sMaxXY = num2str(atRoiComputed{bb}.MaxDistances.MaxXY.Length);
+                                        sMaxXY = ' ';
+                                        sMaxCY = ' ';
                                     end
-
-                                    if atRoiComputed{bb}.MaxDistances.MaxCY.Length == 0
-                                        sMaxCY = 'NaN';
-                                    else
-                                        sMaxCY = num2str(atRoiComputed{bb}.MaxDistances.MaxCY.Length);
-                                    end
-                                else
-                                    sMaxXY = ' ';
-                                    sMaxCY = ' ';
-                                end
-
-                                sLine = sprintf('%-18s %-11s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s', ...
-                                    ' ', ...
-                                    sSliceNb, ...
-                                    num2str(atRoiComputed{bb}.cells), ...
-                                    num2str(atRoiComputed{bb}.total), ...
-                                    num2str(atRoiComputed{bb}.sum), ...
-                                    num2str(atRoiComputed{bb}.mean), ...
-                                    num2str(atRoiComputed{bb}.min), ...
-                                    num2str(atRoiComputed{bb}.max), ...
-                                    num2str(atRoiComputed{bb}.median), ...
-                                    num2str(atRoiComputed{bb}.std), ...
-                                    num2str(atRoiComputed{bb}.peak), ...
-                                    sMaxXY, ...
-                                    sMaxCY, ...
-                                    num2str(atRoiComputed{bb}.area), ...
-                                    ' ');
-
-                                 if isFigRoiInColor('get') == true
-                                     sLine = strrep(sLine, ' ', '&nbsp;');
-
-                                     aColor = atRoiComputed{bb}.Color;
-                                     sColor = reshape(dec2hex([int32(aColor(1)*255) int32(aColor(2)*255) int32(aColor(3)*255)], 2)',1, 6);
-                                     sLine  = sprintf('<HTML><FONT color="%s" face="%s">%s', sColor, sFontName, sLine);
-                                 end
-
-                                 sLbWindow = sprintf('%s%s\n', sLbWindow, sLine);
-
-                                 dResizeArray = numel(aVoiRoiTag)+1;
-
-                                 aVoiRoiTag{dResizeArray}.Tag = atRoiComputed{bb}.Tag;
-
-                            end  
+    
+                                    sLine = sprintf('%-18s %-11s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s %-12s', ...
+                                        ' ', ...
+                                        sSliceNb, ...
+                                        num2str(atRoiComputed{bb}.cells), ...
+                                        num2str(atRoiComputed{bb}.total), ...
+                                        num2str(atRoiComputed{bb}.sum), ...
+                                        num2str(atRoiComputed{bb}.mean), ...
+                                        num2str(atRoiComputed{bb}.min), ...
+                                        num2str(atRoiComputed{bb}.max), ...
+                                        num2str(atRoiComputed{bb}.median), ...
+                                        num2str(atRoiComputed{bb}.std), ...
+                                        num2str(atRoiComputed{bb}.peak), ...
+                                        sMaxXY, ...
+                                        sMaxCY, ...
+                                        num2str(atRoiComputed{bb}.area), ...
+                                        ' ');
+    
+                                     if isFigRoiInColor('get') == true
+                                         sLine = strrep(sLine, ' ', '&nbsp;');
+    
+                                         aColor = atRoiComputed{bb}.Color;
+                                         sColor = reshape(dec2hex([int32(aColor(1)*255) int32(aColor(2)*255) int32(aColor(3)*255)], 2)',1, 6);
+                                         sLine  = sprintf('<HTML><FONT color="%s" face="%s">%s', sColor, sFontName, sLine);
+                                     end
+    
+                                     sLbWindow = sprintf('%s%s\n', sLbWindow, sLine);
+    
+                                     dResizeArray = numel(aVoiRoiTag)+1;
+    
+                                     aVoiRoiTag{dResizeArray}.Tag = atRoiComputed{bb}.Tag;
+    
+                                end  
+                            end
                         end
                     end
                 end
@@ -2507,6 +2588,12 @@ end
 
         if strcmpi(get(hObject, 'Checked'), 'on')
 
+            if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                bExpendVoi = true;
+            else
+                bExpendVoi = false;
+            end  
+
             set(hObject, 'Checked', 'off');
 
             isfigVoiSimplified('set', false);          
@@ -2514,8 +2601,8 @@ end
             setRoiFigureUiContorl();
 
             setRoiFigureName();
-
-            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+            
+            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented, bExpendVoi);
        else
             set(hObject, 'Checked', 'on');
            
@@ -2528,6 +2615,50 @@ end
             setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented);          
         end
      
+    end
+
+    function expendVoiCallback(hObject, ~)
+
+        if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+            bSUVUnit = true;
+        else
+            bSUVUnit = false;
+        end
+        
+        if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+            bModifiedMatrix = true;
+        else
+            bModifiedMatrix = false;
+        end
+
+        if strcmpi(get(mSegmented, 'Checked'), 'on')
+            bSegmented = true;
+        else
+            bSegmented = false;
+        end
+
+        if strcmpi(get(hObject, 'Checked'), 'on')
+
+            set(hObject, 'Checked', 'off');
+
+            isfigVoiExpendVoi('set', false);          
+
+            setRoiFigureUiContorl();
+
+            setRoiFigureName();
+
+            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented, false);
+       else
+            set(hObject, 'Checked', 'on');
+           
+            isfigVoiExpendVoi('set', true); 
+
+            setRoiFigureUiContorl();
+
+            setRoiFigureName();
+
+            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented, true);          
+        end        
     end
 
     function SUVUnitCallback(hObject, ~)
@@ -2549,9 +2680,16 @@ end
             suvMenuUnitOption('set', false);
 
             if strcmpi(get(mSimplified, 'Checked'), 'on')
+
                 setVoiSimplifiedListbox(false, bModifiedMatrix, bSegmented); 
-            else    
-                setVoiRoiListbox(false, bModifiedMatrix, bSegmented);    
+            else 
+                if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                    bExpendVoi = true;
+                else
+                    bExpendVoi = false;
+                end    
+                
+                setVoiRoiListbox(false, bModifiedMatrix, bSegmented, bExpendVoi);    
             end
 
         else
@@ -2559,9 +2697,16 @@ end
             suvMenuUnitOption('set', true);
 
             if strcmpi(get(mSimplified, 'Checked'), 'on')
-                 setVoiSimplifiedListbox(true, bModifiedMatrix, bSegmented);          
+
+                setVoiSimplifiedListbox(true, bModifiedMatrix, bSegmented);          
             else
-                setVoiRoiListbox(true, bModifiedMatrix, bSegmented);
+                if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                    bExpendVoi = true;
+                else
+                    bExpendVoi = false;
+                end                   
+
+                setVoiRoiListbox(true, bModifiedMatrix, bSegmented, bExpendVoi);
             end
         end
 
@@ -2592,9 +2737,16 @@ end
                 hObject.Checked = 'on';
 
                 if strcmpi(get(mSimplified, 'Checked'), 'on')
+
                     setVoiSimplifiedListbox(bSUVUnit, true, bSegmented); 
                 else
-                    setVoiRoiListbox(bSUVUnit, true, bSegmented);           
+                    if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                        bExpendVoi = true;
+                    else
+                        bExpendVoi = false;
+                    end                         
+
+                    setVoiRoiListbox(bSUVUnit, true, bSegmented, bExpendVoi);           
                 end
             else
                 modifiedMatrixValueMenuOption('set', false);                         
@@ -2604,9 +2756,16 @@ end
                 set(mSegmented, 'Checked', 'off');                
 
                 if strcmpi(get(mSimplified, 'Checked'), 'on')
+
                     setVoiSimplifiedListbox(bSUVUnit, false, false); 
-                else           
-                    setVoiRoiListbox(bSUVUnit, false, false);           
+                else    
+                    if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                        bExpendVoi = true;
+                    else
+                        bExpendVoi = false;
+                    end   
+
+                    setVoiRoiListbox(bSUVUnit, false, false, bExpendVoi);           
                 end
             end
         else
@@ -2614,9 +2773,16 @@ end
             hObject.Checked = 'on';
 
             if strcmpi(get(mSimplified, 'Checked'), 'on')
+
                 setVoiSimplifiedListbox(bSUVUnit, true, bSegmented); 
-            else            
-                setVoiRoiListbox(bSUVUnit, true, bSegmented);
+            else
+                if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                    bExpendVoi = true;
+                else
+                    bExpendVoi = false;
+                end
+
+                setVoiRoiListbox(bSUVUnit, true, bSegmented, bExpendVoi);
             end
        end
 
@@ -2642,19 +2808,34 @@ end
             segMenuOption('set', false);
 
             if strcmpi(get(mSimplified, 'Checked'), 'on')
+
                 setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, false); 
-            else              
-                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, false);
+            else
+                if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                    bExpendVoi = true;
+                else
+                    bExpendVoi = false;
+                end
+
+                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, false, bExpendVoi);
             end
         else
             if bModifiedMatrix == true
+
                 hObject.Checked = 'on';
                 segMenuOption('set', true);
 
                 if strcmpi(get(mSimplified, 'Checked'), 'on')
+
                     setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, true); 
-                else                 
-                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, true);
+                else
+                    if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                        bExpendVoi = true;
+                    else
+                        bExpendVoi = false;
+                    end                    
+
+                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, true, bExpendVoi);
                 end
             else
                 hObject.Checked = 'off';
@@ -2788,9 +2969,16 @@ end
                 bModifiedMatrix = false;
             end
                 if strcmpi(get(mSimplified, 'Checked'), 'on')
+
                     setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
-                else          
-                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                else
+                    if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                        bExpendVoi = true;
+                    else
+                        bExpendVoi = false;
+                    end   
+
+                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented, bExpendVoi);
                 end
                         
             catch
@@ -2853,9 +3041,16 @@ end
         end
         
         if strcmpi(get(mSimplified, 'Checked'), 'on')
+
             setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
-        else              
-            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+        else
+            if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                bExpendVoi = true;
+            else
+                bExpendVoi = false;
+            end   
+
+            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented, bExpendVoi);
         end
 
     end
@@ -3314,9 +3509,16 @@ end
             end
 
             if strcmpi(get(mSimplified, 'Checked'), 'on')
+
                 setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
             else
-                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);            
+                if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                    bExpendVoi = true;
+                else
+                    bExpendVoi = false;
+                end   
+
+                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented, bExpendVoi);            
             end
 
             catch
@@ -3438,9 +3640,16 @@ end
                         end
 
                         if strcmpi(get(mSimplified, 'Checked'), 'on')
+
                             setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
                         else
-                            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                            if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                                bExpendVoi = true;
+                            else
+                                bExpendVoi = false;
+                            end                              
+
+                            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented, bExpendVoi);
                         end
                     end
                 end 
@@ -3568,9 +3777,16 @@ end
                             end
 
                             if strcmpi(get(mSimplified, 'Checked'), 'on')
+
                                 setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
                             else
-                                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                                if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                                    bExpendVoi = true;
+                                else
+                                    bExpendVoi = false;
+                                end    
+
+                                setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented, bExpendVoi);
                             end
                         end
                     end
@@ -3647,9 +3863,16 @@ end
         end
 
         if strcmpi(get(mSimplified, 'Checked'), 'on')
+
             setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
         else
-            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+            if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                bExpendVoi = true;
+            else
+                bExpendVoi = false;
+            end 
+
+            setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented, bExpendVoi);
         end
     end
 
@@ -3799,8 +4022,15 @@ end
                 end
                
                 if strcmpi(get(mSimplified, 'Checked'), 'on')
+
                     setVoiSimplifiedListbox(bSUVUnit, bModifiedMatrix, bSegmented); 
-                else             
+                else
+                    if strcmpi(get(mExpendVoi, 'Checked'), 'on') 
+                        bExpendVoi = true;
+                    else
+                        bExpendVoi = false;
+                    end    
+
                     setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
                 end
             end

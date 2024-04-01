@@ -53,18 +53,32 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
     FIG_HIST_Y = ySize*0.75;
     FIG_HIST_X = FIG_HIST_Y*0.85;
 
-    figRoiHistogramWindow = ...
-        figure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_HIST_X/2) ...
-               (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_HIST_Y/2) ...
-               FIG_HIST_X ...
-               FIG_HIST_Y],...
-               'Name', ' ',...
-               'NumberTitle','off',...
-               'MenuBar', 'none',...
-               'Resize', 'off', ...
-               'Color', viewerBackgroundColor('get'), ...
-               'Toolbar','none'...
-               );
+    % if viewerUIFigure('get') == true
+    if 0
+
+        figRoiHistogramWindow = ...
+            uifigure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_HIST_X/2) ...
+                    (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_HIST_Y/2) ...
+                    FIG_HIST_X ...
+                    FIG_HIST_Y],...
+                   'Resize', 'off', ...
+                   'Color', viewerBackgroundColor('get'),...
+                   'Name' , ' '...
+                   );
+    else
+        figRoiHistogramWindow = ...
+            figure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_HIST_X/2) ...
+                   (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_HIST_Y/2) ...
+                    FIG_HIST_X ...
+                    FIG_HIST_Y],...
+                   'Name', ' ',...
+                   'NumberTitle','off',...
+                   'MenuBar', 'none',...
+                   'Resize', 'off', ...
+                   'Color', viewerBackgroundColor('get'), ...
+                   'Toolbar','none'...
+                   );
+    end
 
     setHistFigureName();
 
@@ -131,7 +145,8 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
              'Visible' , 'on'...
              );
     axeHistogram.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    axeHistogram.Toolbar = [];
+    axeHistogram.Toolbar.Visible = 'off';
+    disableDefaultInteractivity(axeHistogram);
 
     sliBins = ...
         uicontrol(figRoiHistogramWindow, ...
@@ -144,7 +159,8 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                   'Visible' , 'off',...
                   'CallBack', @sliderBinsCallback ...
                   );
-     addlistener(sliBins,'Value','PreSet',@sliderBinsCallback);
+%      addlistener(sliBins,'Value','PreSet',@sliderBinsCallback);
+     addlistener(sliBins, 'ContinuousValueChange', @sliderBinsCallback);
 
      txtBins = ...
         uicontrol(figRoiHistogramWindow,...
@@ -198,28 +214,30 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
         axeHistogram.XColor = viewerForegroundColor('get');
         axeHistogram.YColor = viewerForegroundColor('get');
         axeHistogram.ZColor = viewerForegroundColor('get');
+        axeHistogram.Toolbar.Visible = 'off';
+        disableDefaultInteractivity(axeHistogram);
 
         if bDoseKernel == true
             axeHistogram.XLabel.String = 'Intensity (Gy)';
         else
             if  (strcmpi(atRoiVoiMetaData{1}.Modality, 'pt') || ...
                  strcmpi(atRoiVoiMetaData{1}.Modality, 'nm'))&& ...
-                 strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' )   
+                 strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' )
 
-                if bSUVUnit == true                 
+                if bSUVUnit == true
                     axeHistogram.XLabel.String = sprintf('Intensity (SUV/%s)', viewerSUVtype('get'));
                 else
                     axeHistogram.XLabel.String = 'Intensity (BQML)';
                 end
             else
-                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct') 
+                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct')
 
                     axeHistogram.XLabel.String = 'Intensity (HU)';
                 else
-     
-                    axeHistogram.XLabel.String = 'Intensity (Count)';                    
+
+                    axeHistogram.XLabel.String = 'Intensity (Count)';
                 end
-            end 
+            end
         end
 
         axeHistogram.YLabel.String = 'Frequency';
@@ -284,28 +302,30 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
         axeHistogram.XColor = viewerForegroundColor('get');
         axeHistogram.YColor = viewerForegroundColor('get');
         axeHistogram.ZColor = viewerForegroundColor('get');
+        axeHistogram.Toolbar.Visible = 'off';
+        disableDefaultInteractivity(axeHistogram);
 
         if bDoseKernel == true
             axeHistogram.XLabel.String = 'Intensity (Gy)';
         else
             if  (strcmpi(atRoiVoiMetaData{1}.Modality, 'pt') || ...
                  strcmpi(atRoiVoiMetaData{1}.Modality, 'nm'))&& ...
-                 strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' )  
+                 strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' )
 
-                if bSUVUnit == true                 
+                if bSUVUnit == true
                     axeHistogram.XLabel.String = sprintf('Intensity (SUV/%s)', viewerSUVtype('get'));
                 else
                     axeHistogram.XLabel.String = 'Intensity (BQML)';
                 end
             else
-                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct') 
+                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct')
 
                     axeHistogram.XLabel.String = 'Intensity (HU)';
                 else
                    axeHistogram.XLabel.String = 'Intensity (Count)';
-                    
+
                 end
-            end             
+            end
         end
 
         axeHistogram.YLabel.String = 'Fraction';
@@ -328,34 +348,34 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
         dLastSliderValue = 0;
         set(sliBins, 'Value', 0);
-  
+
         imCData = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
-        if bModifiedMatrix  == false && ... 
+        if bModifiedMatrix  == false && ...
            bMovementApplied == false        % Can't use input buffer if movement have been applied
 
             if numel(aInputBuffer) ~= numel(imCData)
                 pTemp{1} = ptrObject;
                 ptrRoiTemp = resampleROIs(imCData, atRoiVoiMetaData, aInputBuffer, atInputMetaData, pTemp, false);
                 ptrObject = ptrRoiTemp{1};
-            end        
+            end
 
             imCData = aInputBuffer;
-        end  
+        end
 
         if  (strcmpi(atRoiVoiMetaData{1}.Modality, 'pt') || ...
              strcmpi(atRoiVoiMetaData{1}.Modality, 'nm'))&& ...
-             strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' ) && ...     
-             bSUVUnit == true                 
-            imCData = imCData * dSUVScale;              
-         end 
+             strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' ) && ...
+             bSUVUnit == true
+            imCData = imCData * dSUVScale;
+         end
 
-%        if bSegmented  == true && ...      
+%        if bSegmented  == true && ...
 %           bModifiedMatrix == true    % Can't use original matrix
 
-%            imCData = imCData(imCData>cropValue('get'));                            
-%        end 
-    
-                
+%            imCData = imCData(imCData>cropValue('get'));
+%        end
+
+
         if strcmpi(ptrObject.Type, 'images.roi.rectangle')
 
             % Define the coordinates of the rectangle corners
@@ -364,13 +384,13 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
         else
             xValues = ptrObject.Position(:,1);
-            yValues = ptrObject.Position(:,2);               
+            yValues = ptrObject.Position(:,2);
         end
 
-        switch lower(ptrObject.Axe)    
+        switch lower(ptrObject.Axe)
 
             case 'axe'
-                imCData = imCData(:,:); 
+                imCData = imCData(:,:);
 
             case 'axes1'
                 imCData = permute(imCData(ptrObject.SliceNb,:,:), [3 2 1]);
@@ -379,12 +399,12 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                 imCData = permute(imCData(:,ptrObject.SliceNb,:), [3 1 2]) ;
 
             case 'axes3'
-                imCData  = imCData(:,:,ptrObject.SliceNb);  
+                imCData  = imCData(:,:,ptrObject.SliceNb);
 
-            otherwise   
+            otherwise
                 return;
-        end 
-        
+        end
+
         aProfile = improfile(imCData, xValues, yValues);
         ptrPlotProfile = plot(axeHistogram, aProfile);
         set(ptrPlotProfile, 'Color', ptrObject.Color);
@@ -392,12 +412,14 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
         axeHistogram.XColor = viewerForegroundColor('get');
         axeHistogram.YColor = viewerForegroundColor('get');
         axeHistogram.ZColor = viewerForegroundColor('get');
+        axeHistogram.Toolbar.Visible = 'off';
+        disableDefaultInteractivity(axeHistogram);
 
         axeHistogram.XLabel.String = 'Cells';
         if bDoseKernel == true
             axeHistogram.YLabel.String = 'Intensity (Gy)';
         else
-            if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct') 
+            if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct')
                 axeHistogram.YLabel.String = 'Intensity (HU)';
             else
                 if  (strcmpi(atRoiVoiMetaData{1}.Modality, 'pt') || ...
@@ -465,14 +487,14 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
         else
             sTitle = [sType ' Profile'];
         end
-       
-        if bModifiedMatrix == true           
+
+        if bModifiedMatrix == true
             sModified = ' - Cells Value: Display Image';
         else
             sModified = ' - Cells Value: Unmodified Image';
-        end   
-        
-        if bSegmented == true 
+        end
+
+        if bSegmented == true
             sSegmented = ' - Masked Cells Subtracted';
         else
             sSegmented = '';
@@ -483,14 +505,14 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
              if isfield(atRoiVoiMetaData{1}, 'DoseUnits')
 
                 if ~isempty(atRoiVoiMetaData{1}.DoseUnits)
-                    
+
                     sUnits = sprintf('Unit: %s', char(atRoiVoiMetaData{1}.DoseUnits));
                 else
                     sUnits = 'Unit: dose';
                 end
             else
                 sUnits = 'Unit: dose';
-            end  
+            end
         else
 
             if bSUVUnit == true
@@ -609,24 +631,26 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
             axeHistogram.XColor = viewerForegroundColor('get');
             axeHistogram.YColor = viewerForegroundColor('get');
             axeHistogram.ZColor = viewerForegroundColor('get');
+            axeHistogram.Toolbar.Visible = 'off';
+            disableDefaultInteractivity(axeHistogram);
 
             if bDoseKernel == true
 
                 if isfield(atRoiVoiMetaData{1}, 'DoseUnits')
-    
+
                     if ~isempty(atRoiVoiMetaData{1}.DoseUnits)
-                        
+
                         sUnit = char(atRoiVoiMetaData{1}.DoseUnits);
                     else
                         sUnit = 'dose';
                     end
                 else
                     sUnit = 'dose';
-                end      
+                end
 
                 axeHistogram.XLabel.String = sprintf('Intensity (%s)', sUnit);
             else
-                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct') 
+                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct')
                     axeHistogram.XLabel.String = 'Intensity (HU)';
                 else
                     if  (strcmpi(atRoiVoiMetaData{1}.Modality, 'pt') || ...
@@ -643,7 +667,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                     end
                 end
             end
-            
+
             axeHistogram.YLabel.String = 'Fraction';
 
             if strcmpi(ptrObject.ObjectType, 'voi')
@@ -695,21 +719,21 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
             if bDoseKernel == true
 
                 if isfield(atRoiVoiMetaData{1}, 'DoseUnits')
-    
+
                     if ~isempty(atRoiVoiMetaData{1}.DoseUnits)
-                        
+
                         sUnit = char(atRoiVoiMetaData{1}.DoseUnits);
                     else
                         sUnit = 'dose';
                     end
                 else
                     sUnit = 'dose';
-                end      
+                end
 
                 axeHistogram.XLabel.String = sprintf('Intensity (%s)', sUnit);
 
             else
-                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct') 
+                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct')
                     axeHistogram.XLabel.String = 'Intensity (HU)';
                 else
                     if  (strcmpi(atRoiVoiMetaData{1}.Modality, 'pt') || ...
@@ -765,8 +789,64 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
             dLastSliderValue = 0;
             set(sliBins, 'Value', 0);
 
-            xValues = ptrObject.Position(:,1);
-            yValues = ptrObject.Position(:,2);
+            set(edtBinsValue, 'String', num2str(dInitialBarWidth));
+            set(txtBins, 'String', 'Bar Width');
+
+            imCData = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
+            if bModifiedMatrix  == false && ...
+               bMovementApplied == false        % Can't use input buffer if movement have been applied
+
+                if numel(aInputBuffer) ~= numel(imCData)
+                    pTemp{1} = ptrObject;
+                    ptrRoiTemp = resampleROIs(imCData, atRoiVoiMetaData, aInputBuffer, atInputMetaData, pTemp, false);
+                    ptrObject = ptrRoiTemp{1};
+                end
+
+                imCData = aInputBuffer;
+            end
+
+            if  (strcmpi(atRoiVoiMetaData{1}.Modality, 'pt') || ...
+                 strcmpi(atRoiVoiMetaData{1}.Modality, 'nm'))&& ...
+                 strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' ) && ...
+                 bSUVUnit == true
+                imCData = imCData * dSUVScale;
+             end
+
+    %        if bSegmented  == true && ...
+    %           bModifiedMatrix == true    % Can't use original matrix
+
+    %            imCData = imCData(imCData>cropValue('get'));
+    %        end
+
+
+            if strcmpi(ptrObject.Type, 'images.roi.rectangle')
+
+                % Define the coordinates of the rectangle corners
+                xValues = [ptrObject.Position(1), ptrObject.Position(3), ptrObject.Position(3), ptrObject.Position(1), ptrObject.Position(1)];
+                yValues = [ptrObject.Position(2), ptrObject.Position(2), ptrObject.Position(4), ptrObject.Position(4), ptrObject.Position(2)];
+
+            else
+                xValues = ptrObject.Position(:,1);
+                yValues = ptrObject.Position(:,2);
+            end
+
+            switch lower(ptrObject.Axe)
+
+                case 'axe'
+                    imCData = imCData(:,:);
+
+                case 'axes1'
+                    imCData = permute(imCData(ptrObject.SliceNb,:,:), [3 2 1]);
+
+                case 'axes2'
+                    imCData = permute(imCData(:,ptrObject.SliceNb,:), [3 1 2]) ;
+
+                case 'axes3'
+                    imCData  = imCData(:,:,ptrObject.SliceNb);
+
+                otherwise
+                    return;
+            end
 
             aProfile = improfile(imCData, xValues, yValues);
             ptrPlotProfile = plot(axeHistogram, aProfile);
@@ -775,27 +855,14 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
             axeHistogram.XColor = viewerForegroundColor('get');
             axeHistogram.YColor = viewerForegroundColor('get');
             axeHistogram.ZColor = viewerForegroundColor('get');
+            axeHistogram.Toolbar.Visible = 'off';
+            disableDefaultInteractivity(axeHistogram);
 
             axeHistogram.XLabel.String = 'Cells';
-
             if bDoseKernel == true
-
-                if isfield(atRoiVoiMetaData{1}, 'DoseUnits')
-    
-                    if ~isempty(atRoiVoiMetaData{1}.DoseUnits)
-                        
-                        sUnit = char(atRoiVoiMetaData{1}.DoseUnits);
-                    else
-                        sUnit = 'dose';
-                    end
-                else
-                    sUnit = 'dose';
-                end      
-
-                axeHistogram.YLabel.String = sprintf('Intensity (%s)', sUnit);
-
+                axeHistogram.YLabel.String = 'Intensity (Gy)';
             else
-                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct') 
+                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct')
                     axeHistogram.YLabel.String = 'Intensity (HU)';
                 else
                     if  (strcmpi(atRoiVoiMetaData{1}.Modality, 'pt') || ...
@@ -804,7 +871,6 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
                         if bSUVUnit == true
                             axeHistogram.YLabel.String = sprintf('Intensity (SUV/%s)', viewerSUVtype('get'));
-
                         else
                             axeHistogram.YLabel.String = 'Intensity (BQML)';
                         end
@@ -825,6 +891,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
             set(sliBins     , 'Visible', 'off');
             set(txtBins     , 'Visible', 'off');
             set(edtBinsValue, 'Visible', 'off');
+
         end
 
         setHistFigureName();
@@ -914,7 +981,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
             elseif strcmpi(imageOrientation('get'), 'sagittal')
                 aInputBuffer = reorientBuffer(aInput{iOffset}, 'sagittal');
             end
-            
+
             if size(aInputBuffer, 3) ==1
 
                 if tInput(iOffset).bFlipLeftRight == true
@@ -923,7 +990,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
                 if tInput(iOffset).bFlipAntPost == true
                     aInputBuffer=aInputBuffer(end:-1:1,:);
-                end            
+                end
             else
                 if tInput(iOffset).bFlipLeftRight == true
                     aInputBuffer=aInputBuffer(:,end:-1:1,:);
@@ -935,9 +1002,9 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
                 if tInput(iOffset).bFlipHeadFeet == true
                     aInputBuffer=aInputBuffer(:,:,end:-1:1);
-                end 
-            end 
-        
+                end
+            end
+
             atInputMetaData = tInput(iOffset).atDicomInfo;
 
             try
@@ -974,11 +1041,11 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
             else
                 sHystogramType = '';
             end
-            
+
  %           sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
 
             sSeriesDate = info{1}.SeriesDate;
-            
+
             if isempty(sSeriesDate)
                 sSeriesDate = '-';
             else
@@ -1019,7 +1086,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
                 dNumberOfLines =1;
                 if strcmpi(ptrObject.ObjectType, 'voi')
-                    
+
                     for aa=1:numel(atVoiInput)
 
                         if strcmp(ptrObject.Tag, atVoiInput{aa}.Tag) %  Found the VOI
@@ -1061,16 +1128,16 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                 if bDoseKernel == true
 
                     if isfield(atMetaData{1}, 'DoseUnits')
-        
+
                         if ~isempty(atMetaData{1}.DoseUnits)
-                            
+
                             sUnits = char(atMetaData{1}.DoseUnits);
                         else
                             sUnits = 'dose';
                         end
                     else
                         sUnits = 'dose';
-                    end                    
+                    end
                 else
 
                     if bSUVUnit == true
@@ -1112,25 +1179,25 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                 asVoiRoiHeader{6} = sprintf('Series Time, %s'       , atMetaData{1}.SeriesTime);
                 asVoiRoiHeader{7} = sprintf('Unit, %s'              , sUnits);
                 asVoiRoiHeader{8} = (' ');
-                
+
                 if bSimplified == true
 
                     dNumberOfLines = dNumberOfLines + numel(asVoiRoiHeader)+6; % Add header and cell description and footer to number of needed lines
-    
+
                     asCell = cell(dNumberOfLines, 21); % Create an empty cell array
-    
+
                     dLineOffset = 1;
                     for ll=1:numel(asVoiRoiHeader)
-    
+
                         asCell{dLineOffset,1}  = asVoiRoiHeader{ll};
                         for tt=2:21
                             asCell{dLineOffset,tt}  = (' ');
                         end
-    
-    
+
+
                         dLineOffset = dLineOffset+1;
                     end
-    
+
                     asCell{dLineOffset,1}  = 'Name';
                     asCell{dLineOffset,2}  = 'Nb Cells';
                     asCell{dLineOffset,3}  = 'Total';
@@ -1149,11 +1216,11 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                     for tt=15:21
                         asCell{dLineOffset,tt}  = (' ');
                     end
-    
+
                     dLineOffset = dLineOffset+1;
-                    
+
                     bMovementApplied = tInput(iOffset).tMovement.bMovementApplied;
-                    
+
                     dNbVois = numel(atVoiInput);
 
                     for aa=1:dNbVois
@@ -1183,11 +1250,11 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                                bSegmented, ...
                                                bDoseKernel, ...
                                                bMovementApplied);
-                                
+
                                 if ~isempty(tVoiComputed)
 
                                     sVoiName = atVoiInput{aa}.Label;
-        
+
                                     asCell{dLineOffset,1}  = (sVoiName);
                                     asCell{dLineOffset,2} = [tVoiComputed.cells];
                                     asCell{dLineOffset,3} = [tVoiComputed.total];
@@ -1198,27 +1265,27 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                     asCell{dLineOffset,8} = [tVoiComputed.median];
                                     asCell{dLineOffset,9} = [tVoiComputed.std];
                                     asCell{dLineOffset,10} = [tVoiComputed.peak];
-        
+
                                     if isempty(tMaxDistances.Coronal)
                                         asCell{dLineOffset,11} = ('NaN');
                                     else
                                         asCell{dLineOffset,11} = [tMaxDistances.Coronal.MaxLength];
                                     end
-        
+
                                     if isempty(tMaxDistances.Sagittal)
                                         asCell{dLineOffset,12} = ('NaN');
                                     else
                                         asCell{dLineOffset,12} = [tMaxDistances.Sagittal.MaxLength];
                                     end
-        
+
                                     if isempty(tMaxDistances.Axial)
                                         asCell{dLineOffset,13} = ('NaN');
                                     else
                                         asCell{dLineOffset,13} = [tMaxDistances.Axial.MaxLength];
                                     end
-        
+
                                     asCell{dLineOffset,14} = [tVoiComputed.volume];
-        
+
                                     for tt=15:21
                                         asCell{dLineOffset,tt}  = (' ');
                                     end
@@ -1228,24 +1295,24 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                 end
                             end
                         end
-                    end                   
+                    end
                 else
                     dNumberOfLines = dNumberOfLines + numel(asVoiRoiHeader)+6; % Add header and cell description and footer to number of needed lines
-    
+
                     asCell = cell(dNumberOfLines, 21); % Create an empty cell array
-    
+
                     dLineOffset = 1;
                     for ll=1:numel(asVoiRoiHeader)
-    
+
                         asCell{dLineOffset,1}  = asVoiRoiHeader{ll};
                         for tt=2:21
                             asCell{dLineOffset,tt}  = (' ');
                         end
-    
-    
+
+
                         dLineOffset = dLineOffset+1;
                     end
-    
+
                     asCell{dLineOffset,1}  = 'Name';
                     asCell{dLineOffset,2}  = 'Image number';
                     asCell{dLineOffset,3}  = 'Nb Cells';
@@ -1265,25 +1332,25 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                     for tt=16:21
                         asCell{dLineOffset,tt}  = (' ');
                     end
-    
+
                     dLineOffset = dLineOffset+1;
-                    
+
                     bMovementApplied = tInput(iOffset).tMovement.bMovementApplied;
-                    
+
                     dNbVois = numel(atVoiInput);
                     if strcmpi(ptrObject.ObjectType, 'voi')
                         for aa=1:dNbVois
-    
+
                             if strcmp(ptrObject.Tag, atVoiInput{aa}.Tag)
-    
+
                                 if ~isempty(atVoiInput{aa}.RoisTag)
-    
+
                                     if dNbVois > 10
                                         if mod(aa, 5)==1 || aa == dNbVois
                                             progressBar(aa/dNbVois-0.0001, sprintf('Computing VOI %d/%d', aa, dNbVois ) );
                                         end
                                     end
-    
+
                                     [tVoiComputed, atRoiComputed] = ...
                                         computeVoi(aInputBuffer, ...
                                                    atInputMetaData, ...
@@ -1297,11 +1364,11 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                                    bSegmented, ...
                                                    bDoseKernel, ...
                                                    bMovementApplied);
-                                    
+
                                     if ~isempty(tVoiComputed)
-    
+
                                         sVoiName = atVoiInput{aa}.Label;
-    
+
                                         asCell{dLineOffset,1}  = (sVoiName);
                                         asCell{dLineOffset,2}  = (' ');
                                         asCell{dLineOffset,3}  = [tVoiComputed.cells];
@@ -1320,25 +1387,25 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
     %                                         asCell{dLineOffset,14} = ('NaN');
     %                                     else
     %                                         asCell{dLineOffset,14} = [tVoiComputed.maxDistance];
-    %                                     end                                  
+    %                                     end
                                         asCell{dLineOffset,15} = [tVoiComputed.volume];
                                         for tt=16:21
                                             asCell{dLineOffset,tt}  = (' ');
                                         end
-    
+
                                         dLineOffset = dLineOffset+1;
-    
+
                                         dNbTags = numel(atRoiComputed);
                                         for bb=1:dNbTags % Scan VOI/ROIs
-    
+
                                             if ~isempty(atRoiComputed{bb})
-    
+
                                                 if dNbTags > 100
                                                     if mod(bb, 10)==1 || bb == dNbTags
                                                         progressBar( bb/dNbTags-0.0001, sprintf('Computing ROI %d/%d, please wait', bb, dNbTags) );
                                                     end
                                                 end
-    
+
                                                 if strcmpi(atRoiComputed{bb}.Axe, 'Axe')
                                                     sSliceNb = num2str(atRoiComputed{bb}.SliceNb);
                                                 elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes1')
@@ -1348,7 +1415,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                                 elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes3')
                                                     sSliceNb = ['A:' num2str(size(aDisplayBuffer, 3)-atRoiComputed{bb}.SliceNb+1)];
                                                 end
-    
+
                                                 asCell{dLineOffset,1}  = (' ');
                                                 asCell{dLineOffset,2}  = (sSliceNb);
                                                 asCell{dLineOffset,3}  = [atRoiComputed{bb}.cells];
@@ -1366,7 +1433,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                                     else
                                                         asCell{dLineOffset, 12} = [atRoiComputed{bb}.MaxDistances.MaxXY.Length];
                                                     end
-                    
+
                                                     if atRoiComputed{bb}.MaxDistances.MaxCY.Length == 0
                                                         asCell{dLineOffset, 13} = ('NaN');
                                                     else
@@ -1378,37 +1445,37 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                                 end
                                                 asCell{dLineOffset,14} = [atRoiComputed{bb}.area];
                                                 asCell{dLineOffset,15} = (' ');
-                                                
+
                                                 for tt=16:21
                                                     asCell{dLineOffset,tt}  = (' ');
                                                 end
-    
+
                                                 dLineOffset = dLineOffset+1;
-    
+
                                             end
-    
+
 %                                             break;
                                         end
                                     end
                                 end
                             end
                         end
-    
+
                     else
-    
+
                         dNbRois = numel(atRoiInput);
                         for bb=1:dNbRois
-    
+
                             if strcmp(ptrObject.Tag, atRoiInput{bb}.Tag)
-    
+
                                 if dNbRois > 100
                                     if mod(bb, 10)==1 || bb == dNbRois
                                         progressBar( bb/dNbRois-0.0001, sprintf('Computing ROI %d/%d, please wait', bb, dNbRois) );
                                     end
                                 end
-                                
+
                                 if isvalid(atRoiInput{bb}.Object)
-    
+
                                     tRoiComputed = ...
                                         computeRoi(aInputBuffer, ...
                                                    atInputMetaData, ...
@@ -1421,9 +1488,9 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                                    bSegmented, ...
                                                    bDoseKernel, ...
                                                    bMovementApplied);
-    
+
                                     sRoiName = atRoiInput{bb}.Label;
-    
+
                                     if strcmpi(atRoiInput{bb}.Axe, 'Axe')
                                         sSliceNb = num2str(atRoiInput{bb}.SliceNb);
                                     elseif strcmpi(atRoiInput{bb}.Axe, 'Axes1')
@@ -1433,7 +1500,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                     elseif strcmpi(atRoiInput{bb}.Axe, 'Axes3')
                                         sSliceNb = ['A:' num2str(size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3)-atRoiInput{bb}.SliceNb+1)];
                                     end
-    
+
                                     asCell{dLineOffset, 1}  = (sRoiName);
                                     asCell{dLineOffset, 2}  = (sSliceNb);
                                     asCell{dLineOffset, 3}  = [tRoiComputed.cells];
@@ -1451,7 +1518,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                         else
                                             asCell{dLineOffset, 12} = [tRoiComputed.MaxDistances.MaxXY.Length];
                                         end
-        
+
                                         if tRoiComputed.MaxDistances.MaxCY.Length == 0
                                             asCell{dLineOffset, 13} = ('NaN');
                                         else
@@ -1463,13 +1530,13 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                     end
                                     asCell{dLineOffset, 14} = tRoiComputed.area;
                                     asCell{dLineOffset, 15} = (' ');
-                            
+
                                     for tt=16:21
                                         asCell{dLineOffset,tt}  = (' ');
                                     end
-    
+
                                     dLineOffset = dLineOffset+1;
-    
+
                                     break;
                                 end
                             end

@@ -38,7 +38,7 @@ function setCorSliderPosition(uiCorSlider)
             dXoffset = uiSegMainPanel.Position(3); 
             dYoffset = addOnWidth('get')+30; 
             dXsize   = getMainWindowSize('xsize')-(uiSegMainPanel.Position(3)/2);
-            dYsize   = 15;
+            dYsize   = 20;
                  
         else
             if isVsplash('get') == true   
@@ -46,19 +46,19 @@ function setCorSliderPosition(uiCorSlider)
                 dXoffset = uiSegMainPanel.Position(3); 
                 dYoffset = addOnWidth('get')+30; 
                 dXsize   = (getMainWindowSize('xsize')/4)-(uiSegMainPanel.Position(3)/2);
-                dYsize   = 15;                   
+                dYsize   = 20;                   
             else
                 if isPanelFullScreen(btnUiCorWindowFullScreenPtr('get')) 
 
                     dXoffset = uiSegMainPanel.Position(3); 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = getMainWindowSize('xsize')-uiSegMainPanel.Position(3);
-                    dYsize   = 15;                     
+                    dYsize   = 20;                     
                 else
                     dXoffset = uiSegMainPanel.Position(3); 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = (getMainWindowSize('xsize')/5)-(uiSegMainPanel.Position(3)/2);
-                    dYsize   = 15; 
+                    dYsize   = 20; 
                 end
 
             end
@@ -70,14 +70,14 @@ function setCorSliderPosition(uiCorSlider)
             dXoffset = uiKernelMainPanel.Position(3); 
             dYoffset = addOnWidth('get')+30; 
             dXsize   = getMainWindowSize('xsize')-(uiKernelMainPanel.Position(3)/2);
-            dYsize   = 15;                 
+            dYsize   = 20;                 
         else       
             if isVsplash('get') == true 
 
                 dXoffset = uiKernelMainPanel.Position(3); 
                 dYoffset = addOnWidth('get')+30; 
                 dXsize   = (getMainWindowSize('xsize')/4)-(uiKernelMainPanel.Position(3)/2);
-                dYsize   = 15;    
+                dYsize   = 20;    
                      
             else
                 if isPanelFullScreen(btnUiCorWindowFullScreenPtr('get'))
@@ -85,12 +85,12 @@ function setCorSliderPosition(uiCorSlider)
                     dXoffset = uiKernelMainPanel.Position(3); 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = getMainWindowSize('xsize')-uiKernelMainPanel.Position(3);
-                    dYsize   = 15;                     
+                    dYsize   = 20;                     
                 else
                     dXoffset = uiKernelMainPanel.Position(3); 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = (getMainWindowSize('xsize')/5)-(uiKernelMainPanel.Position(3)/2);
-                    dYsize   = 15;     
+                    dYsize   = 20;     
                 end
             end
         end
@@ -101,27 +101,27 @@ function setCorSliderPosition(uiCorSlider)
             dXoffset = uiRoiMainPanel.Position(3); 
             dYoffset = addOnWidth('get')+30; 
             dXsize   = getMainWindowSize('xsize')-(uiRoiMainPanel.Position(3)/2);
-            dYsize   = 15;                     
+            dYsize   = 20;                     
         else    
             if isVsplash('get') == true 
 
                 dXoffset = uiRoiMainPanel.Position(3); 
                 dYoffset = addOnWidth('get')+30; 
                 dXsize   = (getMainWindowSize('xsize')/4)-(uiRoiMainPanel.Position(3)/2);
-                dYsize   = 15;                    
+                dYsize   = 20;                    
             else
                 if isPanelFullScreen(btnUiCorWindowFullScreenPtr('get')) 
 
                     dXoffset = uiRoiMainPanel.Position(3); 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = getMainWindowSize('xsize')-uiRoiMainPanel.Position(3);
-                    dYsize   = 15;                     
+                    dYsize   = 20;                     
                 else
 
                     dXoffset = uiRoiMainPanel.Position(3); 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = (getMainWindowSize('xsize')/5)-(uiRoiMainPanel.Position(3)/2);
-                    dYsize   = 15;    
+                    dYsize   = 20;    
                 end
             end
         end            
@@ -132,26 +132,26 @@ function setCorSliderPosition(uiCorSlider)
             dXoffset = 0; 
             dYoffset = addOnWidth('get')+30; 
             dXsize   = getMainWindowSize('xsize');
-            dYsize   = 15;                   
+            dYsize   = 20;                   
         else
             if isVsplash('get') == true 
 
                 dXoffset = 0; 
                 dYoffset = addOnWidth('get')+30; 
                 dXsize   = getMainWindowSize('xsize')/4;
-                dYsize   = 15;                     
+                dYsize   = 20;                     
             else       
                 if isPanelFullScreen(btnUiCorWindowFullScreenPtr('get')) 
 
                     dXoffset = 0; 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = getMainWindowSize('xsize');
-                    dYsize   = 15;     
+                    dYsize   = 20;     
                 else
                     dXoffset = 0; 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = getMainWindowSize('xsize')/5;
-                    dYsize   = 15;                                            
+                    dYsize   = 20;                                            
                 end
             end
         end

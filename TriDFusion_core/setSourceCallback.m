@@ -339,340 +339,91 @@ function setSourceCallback(~, ~)
             set(btnVsplashPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
             set(btnVsplashPtr('get'), 'FontWeight', 'normal');
    
-            asMainDir = mainDir('get');
+            asMainDirectory = mainDir('get');
 
             registrationReport('set', '');
-
-            dNewNbEntry = 1;
-            for jj=1: numel(asMainDir)
-
-                tNewDatasets = dicomInfoSortFolder(asMainDir{jj});
-
-                if isfield(tNewDatasets, 'Contours')
-                    inputContours('add', tNewDatasets.Contours{:});
-                end
-
-                if isfield(tNewDatasets, 'FileNames'   ) && ...
-                   isfield(tNewDatasets, 'DicomInfos'  ) && ...
-                   isfield(tNewDatasets, 'DicomBuffers')
-
-                    atNewFrameInfo = dicomInfoComputeFrames(tNewDatasets.DicomInfos);
-                    
-                    asSeriesType = lower(tNewDatasets.DicomInfos{1}.SeriesType);
-
-                    bGated = false;
-                    if find(contains(asSeriesType, 'gated'))
-                        bGated = true;
-                    end
-
-                    bDynamic = false;
-                    if find(contains(asSeriesType, 'dynamic'))
-                        bDynamic = true;
-                    end
-
-           %         sFileList = datasets.FileNames;
-                    if bGated   == true || ...
-                       bDynamic == true || ...
-                       ~isempty(atNewFrameInfo)
-
-                        if bGated   == true || ...
-                           bDynamic == true 
-                       
-                            dNewNbFrames    = numel(tNewDatasets.DicomInfos) / tNewDatasets.DicomInfos{1}.NumberOfSlices;
-                            dNewNbOfSlices = tNewDatasets.DicomInfos{1}.NumberOfSlices;
-
-                            for dNewFramesLoop=1:dNewNbFrames
-
-                                dNewFrameOffset = dNewFramesLoop-1;
-                                dNewFrom = 1+ (dNewFrameOffset * dNewNbOfSlices);
-                                dNewTo   = dNewNbOfSlices * dNewFramesLoop;
-
-                                asNewFilesList{dNewNbEntry}  = tNewDatasets.FileNames(dNewFrom:dNewTo);
-                                atNewDicomInfo{dNewNbEntry}  = tNewDatasets.DicomInfos(dNewFrom:dNewTo);
-                                aNewDicomBuffer{dNewNbEntry} = tNewDatasets.DicomBuffers(dNewFrom:dNewTo);
-
-                                for dNewSeriesLoop = 1: numel(atNewDicomInfo{dNewNbEntry})
-                                    
-                                    if bGated == true
-                                        atNewDicomInfo{dNewNbEntry}{dNewSeriesLoop}.SeriesDescription = ...
-                                            sprintf('%s (Gate %d)', atNewDicomInfo{dNewNbEntry}{dNewSeriesLoop}.SeriesDescription, dNewFramesLoop);
-                                    else
-                                        atNewDicomInfo{dNewNbEntry}{dNewSeriesLoop}.SeriesDescription = ...
-                                            sprintf('%s (Dynamic %d)', atNewDicomInfo{dNewNbEntry}{dNewSeriesLoop}.SeriesDescription, dNewFramesLoop);                                        
-                                    end
-                                    atNewDicomInfo{dNewNbEntry}{dNewSeriesLoop}.din.frame = dNewFramesLoop;
-                                end
-
-                                dNewNbEntry = dNewNbEntry+1;
-
-                            end
-                        else
-
-                            for dNewFramesLoop=1:numel(atNewFrameInfo)
-
-                                if dNewFramesLoop == 1
-                                    dNewFrameOffset = dNewFramesLoop-1;
-                                    dNewNbOfSlices  = atNewFrameInfo{dNewFramesLoop}.NbSlices;
-
-                                    dNewFrom = 1+ (dNewFrameOffset * dNewNbOfSlices);
-                                    dNewTo   = dNewNbOfSlices * dNewFramesLoop;
-                                else
-                                    dNewNbOfSlices  = atNewFrameInfo{dNewFramesLoop}.NbSlices;
-                                    
-                                    dNewFrom = 1+dLastTo;
-                                    dNewTo   = dNewNbOfSlices + dLastTo;                                    
-                                end
-
-                                asNewFilesList{dNewNbEntry}  = tNewDatasets.FileNames(dNewFrom:dNewTo);
-                                atNewDicomInfo{dNewNbEntry}  = tNewDatasets.DicomInfos(dNewFrom:dNewTo);
-                                aNewDicomBuffer{dNewNbEntry} = tNewDatasets.DicomBuffers(dNewFrom:dNewTo);
-                                for dNewSeriesLoop = 1: numel(atNewDicomInfo{dNewNbEntry})
-                                    atNewDicomInfo{dNewNbEntry}{dNewSeriesLoop}.SeriesDescription = ...
-                                        sprintf('%s (Frame %d)', atNewDicomInfo{dNewNbEntry}{dNewSeriesLoop}.SeriesDescription, dNewFramesLoop);
-                                    atNewDicomInfo{dNewNbEntry}{dNewSeriesLoop}.din.frame = dNewFramesLoop;
-                                end
-
-                                dNewNbEntry = dNewNbEntry+1;                                
-                                dLastTo   = dNewTo;
-                           end
-
-                        end
-                    else
-                        if numel(tNewDatasets) == 1
-                            
-                            asImageType = lower(tNewDatasets.DicomInfos{1}.ImageType);  
-                            
-                            bStatic = false;
-                            if find(contains(asImageType, 'static')) 
-                                bStatic = true;
-                            end
-                            
-                            bWholeBody = false;
-                            if find(contains(asImageType, 'whole body')) 
-                                bWholeBody = true;
-                            end
-                            
-                            bScreenCapture = false;
-                            if strcmpi(tNewDatasets.DicomInfos{1}.SOPClassUID, '1.2.840.10008.5.1.4.1.1.7')
-                                bScreenCapture = true;
-                            end
-
-                    %        if find(contains(asImageType, 'secondary')) 
-                    %            bScreenCapture = true;
-                    %        end
-                            
-                            if bStatic    == true || ...
-                               bWholeBody == true 
-                           
-                                sSeriesDescription = tNewDatasets.DicomInfos{1}.SeriesDescription;
-                                
-                                if numel(tNewDatasets.DicomBuffers) > 1
-
-                                    dNbOfImages = numel(tNewDatasets.DicomBuffers);
-
-                                    for ll=1:dNbOfImages
-                                       
-                                        aTemp{1} = tNewDatasets.DicomBuffers{ll}(:,:);
-                                 
-                                        aNewDicomBuffer{dNewNbEntry} = aTemp;
-                                    
-                                        if bStatic == true
-                                            tNewDatasets.DicomInfos{ll}.SeriesDescription = sprintf('%s (Static %d)', sSeriesDescription, ll);
-                                        elseif bWholeBody == true
-                                            tNewDatasets.DicomInfos{ll}.SeriesDescription = sprintf('%s (Whole Body %d)', sSeriesDescription, ll);
-                                        end
-                                        
-                                        asNewFilesList{dNewNbEntry}  = tNewDatasets.FileNames(ll);
-                                        atNewDicomInfo{dNewNbEntry}  = tNewDatasets.DicomInfos(ll);
-                                        
-                                        dNewNbEntry = dNewNbEntry+1;             
-                                    end
-                                else
-                                    if size(tNewDatasets.DicomBuffers{1}, 3) == 1
-                                        dNbOfImages = size(tNewDatasets.DicomBuffers{1}, 4);
-                                        
-                                    else
-                                        dNbOfImages = size(tNewDatasets.DicomBuffers{1}, 3);
-                                    end                                    
-    
-                                    for ll=1:dNbOfImages
-    
-                                        if size(tNewDatasets.DicomBuffers{1}, 3) == 1
-                                            aTemp{1} = tNewDatasets.DicomBuffers{1}(:,:,1,ll);
-                                        else
-                                            aTemp{1} = tNewDatasets.DicomBuffers{1}(:,:,ll);
-                                        end                                    
-    
-                                        aNewDicomBuffer{dNewNbEntry} = aTemp;
-                                        
-                                        if bStatic == true
-                                            tNewDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Static %d)', sSeriesDescription, ll);
-                                        elseif bWholeBody == true
-                                            tNewDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Whole Body %d)', sSeriesDescription, ll);
-                                        end
-                                        
-                                        asNewFilesList{dNewNbEntry}  = tNewDatasets.FileNames;
-                                        atNewDicomInfo{dNewNbEntry}  = tNewDatasets.DicomInfos;
-                                        
-                                        dNewNbEntry = dNewNbEntry+1;                                      
-                                    end
-                                end
-                                
-                            elseif bScreenCapture == true
-
-                                sSeriesDescription = tNewDatasets.DicomInfos{1}.SeriesDescription;
-
-                                dNbSc = numel(tNewDatasets.DicomBuffers);
-                                for sc=1:dNbSc
-
-                                    if dNbSc > 1
-                                        tNewDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Frame %d)', sSeriesDescription, sc);
-                                    end
-
-                                    asNewFilesList{dNewNbEntry}  = tNewDatasets.FileNames;
-                                    atNewDicomInfo{dNewNbEntry}  = tNewDatasets.DicomInfos;
-                                    aNewDicomBuffer{dNewNbEntry}{1} = reshape(tNewDatasets.DicomBuffers{sc}, [size(tNewDatasets.DicomBuffers{sc}, 1), size(tNewDatasets.DicomBuffers{sc}, 2), 1, 3]);
-    
-                                    dNewNbEntry = dNewNbEntry+1;  
-                                end
-                            else
-                                asNewFilesList{dNewNbEntry}  = tNewDatasets.FileNames;
-                                atNewDicomInfo{dNewNbEntry}  = tNewDatasets.DicomInfos;
-                                aNewDicomBuffer{dNewNbEntry} = tNewDatasets.DicomBuffers;
-
-                                dNewNbEntry = dNewNbEntry+1;                                
-                            end
-                        else
-                            
-                            asNewFilesList{dNewNbEntry}  = tNewDatasets.FileNames;
-                            atNewDicomInfo{dNewNbEntry}  = tNewDatasets.DicomInfos;
-                            aNewDicomBuffer{dNewNbEntry} = tNewDatasets.DicomBuffers;
-
-                            dNewNbEntry = dNewNbEntry+1;
-                        end
-                    end
-
-                end
-            end
 
             switchTo3DMode    ('set', false);
             switchToIsoSurface('set', false);
             switchToMIPMode   ('set', false);
 
-            if exist('asNewFilesList' , 'var') && ...
-               exist('atNewDicomInfo' , 'var') && ...
-               exist('aNewDicomBuffer', 'var')
+            [asFilesList, atDicomInfo, aDicomBuffer] = readDicomFolder(asMainDirectory);
 
-               rotate3d(fiMainWindowPtr('get'), 'off');
+            if ~isempty(asFilesList) && ...
+               ~isempty(atDicomInfo) && ...
+               ~isempty(aDicomBuffer)
 
-               set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-               set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-               set(btnFusionPtr('get'), 'FontWeight', 'normal');
+                rotate3d(fiMainWindowPtr('get'), 'off');
 
-               set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-               set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-               set(btn3DPtr('get'), 'FontWeight', 'normal');
+                set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+                set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+                set(btnFusionPtr('get'), 'FontWeight', 'normal');
 
-               set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-               set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-               set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
+                set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+                set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+                set(btn3DPtr('get'), 'FontWeight', 'normal');
 
-               set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-               set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-               set(btnMIPPtr('get'), 'FontWeight', 'normal');
+                set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+                set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+                set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
 
-               set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
-               set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-               set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+                set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+                set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+                set(btnMIPPtr('get'), 'FontWeight', 'normal');
 
-               imageOrientation('set', 'axial');
+                set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+                set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+                set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
 
-               for ii=1: numel(asNewFilesList)
+                imageOrientation('set', 'axial');
 
-                        
-                    atNewInput(ii).asFilesList  = asNewFilesList{ii};
-                    atNewInput(ii).atDicomInfo  = atNewDicomInfo{ii};
-                    atNewInput(ii).aDicomBuffer = aNewDicomBuffer{ii};
+                [atInput, asSeriesDescription] = initInputTemplate(asFilesList, atDicomInfo, aDicomBuffer);
 
-                    atNewInput(ii).sOrientationView    = 'Axial';
-
-                    if strcmpi(atNewDicomInfo{ii}{1}.Modality, 'RTDOSE')
-                        bDoseKernel = true;
-                    else
-                        bDoseKernel = false;
-                    end
-
-                    atNewInput(ii).bEdgeDetection      = false;
-                    atNewInput(ii).bFlipLeftRight      = false;
-                    atNewInput(ii).bFlipAntPost        = false;
-                    atNewInput(ii).bFlipHeadFeet       = false;
-                    atNewInput(ii).bDoseKernel         = bDoseKernel;
-                    atNewInput(ii).bMathApplied        = false;
-                    atNewInput(ii).bFusedDoseKernel    = false;
-                    atNewInput(ii).bFusedEdgeDetection = false;
-                    
-                    atNewInput(ii).tMovement = [];
-                    
-                    atNewInput(ii).tMovement.bMovementApplied = false;
-                    atNewInput(ii).tMovement.aGeomtform       = [];
-                    
-                    atNewInput(ii).tMovement.atSeq{1}.sAxe         = [];
-                    atNewInput(ii).tMovement.atSeq{1}.aTranslation = [];
-                    atNewInput(ii).tMovement.atSeq{1}.dRotation    = [];                   
-                end
-
-                inputTemplate('set', atNewInput);
-
+                inputTemplate('set', atInput);
+           
                 if numel(inputTemplate('get')) ~= 0
 
-                    for ii = 1 : numel(inputTemplate('get'))
+                    seriesDescription('set', asSeriesDescription);
 
-                        if isempty(atNewInput(ii).atDicomInfo{1}.SeriesDate)
-                            sSeriesDate = '00010101';
-                        else
-                            sSeriesDate = atNewInput(ii).atDicomInfo{1}.SeriesDate;
-                        end
+                    set(uiSeriesPtr('get'), 'String', asSeriesDescription);
 
-                        if isempty(atNewInput(ii).atDicomInfo{1}.SeriesTime)
-                            sSeriesTime = '000000';
-                        else
-                            sSeriesTime = atNewInput(ii).atDicomInfo{1}.SeriesTime;
-                        end
-
-                        sNewVolSeriesDate = sprintf('%s%s', sSeriesDate, sSeriesTime);
-
-                        if contains(sNewVolSeriesDate,'.')
-                            sNewVolSeriesDate = extractBefore(sNewVolSeriesDate,'.');
-                        end
-                        sNewVolSeriesDate = datetime(sNewVolSeriesDate,'InputFormat','yyyyMMddHHmmss');
-                        sNewVolSeriesDescription = atNewInput(ii).atDicomInfo{1}.SeriesDescription;
-
-                        sNewVolumes{ii} = sprintf('%s %s', sNewVolSeriesDescription, sNewVolSeriesDate);
-                    end
-
-                    seriesDescription('set', sNewVolumes);
-
-                    set(uiSeriesPtr('get'), 'String', sNewVolumes);
-
-                    if  numel(sNewVolumes) > 1
-                        set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
+                    if  numel(asSeriesDescription) > 1
+                        set(uiFusedSeriesPtr('get'), 'String', asSeriesDescription);
                         set(uiFusedSeriesPtr('get'), 'Value', 2);
                     else
-                        set(uiFusedSeriesPtr('get'), 'String', sNewVolumes);
+                        set(uiFusedSeriesPtr('get'), 'String', asSeriesDescription);
                         set(uiFusedSeriesPtr('get'), 'Value', 1);
                    end
 
                 end
 
-                setInputOrientation();
+                setInputOrientation([]);
 
-                setDisplayBuffer();
+                setDisplayBuffer([]);
     
                 if numel(inputTemplate('get')) ~= 0
                     for dTemplateLoop = 1 : numel(inputTemplate('get'))       
                         setQuantification(dTemplateLoop);
                     end
                 end
+
+                atInput = inputTemplate('get');
+     
+                dicomMetaData('set', atInput(1).atDicomInfo);
+
+                aInputBuffer = inputBuffer('get');
+
+                dicomBuffer('set', aInputBuffer{1});    
+
+                for mm=1:numel(aInputBuffer)
+
+                    if size(aInputBuffer{mm}, 3) ~= 1
+
+                        mipBuffer('set', atInput(mm).aMip, mm);
+                    end
+                end
+
+                clear aInputBuffer;
 
                 cropValue('set', min(dicomBuffer('get'), [], 'all'));
 

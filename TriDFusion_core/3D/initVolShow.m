@@ -79,16 +79,36 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
          % Set object position
 
          switch sRenderer
+
              case 'VolumeRendering'
+
                  if ~isempty(isoObj)
-                     aCamera = {'CameraPosition', get(isoObj, 'CameraPosition'), ...
-                                'CameraUpVector', get(isoObj, 'CameraUpVector')};
+
+                     ptrViewer3d = viewer3dObject('get');
+                     if isempty(ptrViewer3d)
+                         aCamera = {'CameraPosition', get(isoObj, 'CameraPosition'), ...
+                                    'CameraUpVector', get(isoObj, 'CameraUpVector')};
+                     else
+                         aCamera = {'CameraPosition', get(ptrViewer3d, 'CameraPosition'), ...
+                                    'CameraUpVector', get(ptrViewer3d, 'CameraUpVector')};                         
+                     end
+                     % aCamera = {'CameraPosition', get(isoObj, 'CameraPosition'), ...
+                     %            'CameraUpVector', get(isoObj, 'CameraUpVector')};                    
                      aInputArguments = [aInputArguments(:)', aCamera(:)'];       
                  elseif ~isempty(mipObj)
-                     aCamera = {'CameraPosition', get(mipObj, 'CameraPosition'), ...
-                                'CameraUpVector', get(mipObj, 'CameraUpVector')};
+
+                     ptrViewer3d = viewer3dObject('get');
+                     if isempty(ptrViewer3d)
+                         aCamera = {'CameraPosition', get(mipObj, 'CameraPosition'), ...
+                                    'CameraUpVector', get(mipObj, 'CameraUpVector')};
+                     else
+                         aCamera = {'CameraPosition', get(ptrViewer3d, 'CameraPosition'), ...
+                                    'CameraUpVector', get(ptrViewer3d, 'CameraUpVector')};                         
+                     end                     
+                     % aCamera = {'CameraPosition', get(mipObj, 'CameraPosition'), ...
+                     %            'CameraUpVector', get(mipObj, 'CameraUpVector')};
                      aInputArguments = [aInputArguments(:)', aCamera(:)'];        
-                 else  
+                 else                  
                      aCamera = {'CameraPosition', [1 0 0], ...
                                 'CameraUpVector', [0 0 1]};
                                    
@@ -97,13 +117,31 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
 
              case 'Isosurface'
                  if ~isempty(volObj)
-                     aCamera = {'CameraPosition', get(volObj, 'CameraPosition'), ...
-                                'CameraUpVector', get(volObj, 'CameraUpVector')};
+
+                     ptrViewer3d = viewer3dObject('get');
+                     if isempty(ptrViewer3d)
+                         aCamera = {'CameraPosition', get(volObj, 'CameraPosition'), ...
+                                    'CameraUpVector', get(volObj, 'CameraUpVector')};
+                     else
+                         aCamera = {'CameraPosition', get(ptrViewer3d, 'CameraPosition'), ...
+                                    'CameraUpVector', get(ptrViewer3d, 'CameraUpVector')};                         
+                     end                     
+                     % aCamera = {'CameraPosition', get(volObj, 'CameraPosition'), ...
+                     %            'CameraUpVector', get(volObj, 'CameraUpVector')};
                      aInputArguments = [aInputArguments(:)', aCamera(:)'];       
 
                  elseif ~isempty(mipObj)
-                     aCamera = {'CameraPosition', get(mipObj, 'CameraPosition'), ...
-                                'CameraUpVector', get(mipObj, 'CameraUpVector')}; 
+
+                     ptrViewer3d = viewer3dObject('get');
+                     if isempty(ptrViewer3d)
+                         aCamera = {'CameraPosition', get(mipObj, 'CameraPosition'), ...
+                                    'CameraUpVector', get(mipObj, 'CameraUpVector')};
+                     else
+                         aCamera = {'CameraPosition', get(ptrViewer3d, 'CameraPosition'), ...
+                                    'CameraUpVector', get(ptrViewer3d, 'CameraUpVector')};                         
+                     end                        
+                     % aCamera = {'CameraPosition', get(mipObj, 'CameraPosition'), ...
+                     %            'CameraUpVector', get(mipObj, 'CameraUpVector')}; 
                      aInputArguments = [aInputArguments(:)', aCamera(:)'];  
                  else    
                      aCamera = {'CameraPosition', [1 0 0], ...
@@ -114,12 +152,30 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
 
              case 'MaximumIntensityProjection'
                  if ~isempty(volObj)
-                     aCamera = {'CameraPosition', get(volObj, 'CameraPosition'), ...
-                                'CameraUpVector', get(volObj, 'CameraUpVector')}; 
+
+                     ptrViewer3d = viewer3dObject('get');
+                     if isempty(ptrViewer3d)
+                         aCamera = {'CameraPosition', get(volObj, 'CameraPosition'), ...
+                                    'CameraUpVector', get(volObj, 'CameraUpVector')};
+                     else
+                         aCamera = {'CameraPosition', get(ptrViewer3d, 'CameraPosition'), ...
+                                    'CameraUpVector', get(ptrViewer3d, 'CameraUpVector')};                         
+                     end                          
+                     % aCamera = {'CameraPosition', get(volObj, 'CameraPosition'), ...
+                     %            'CameraUpVector', get(volObj, 'CameraUpVector')}; 
                      aInputArguments = [aInputArguments(:)', aCamera(:)'];       
                  elseif ~isempty(isoObj)
-                     aCamera = {'CameraPosition', get(isoObj, 'CameraPosition'), ...
-                                'CameraUpVector', get(isoObj, 'CameraUpVector')};
+
+                     ptrViewer3d = viewer3dObject('get');
+                     if isempty(ptrViewer3d)
+                         aCamera = {'CameraPosition', get(isoObj, 'CameraPosition'), ...
+                                    'CameraUpVector', get(isoObj, 'CameraUpVector')};
+                     else
+                         aCamera = {'CameraPosition', get(ptrViewer3d, 'CameraPosition'), ...
+                                    'CameraUpVector', get(ptrViewer3d, 'CameraUpVector')};                         
+                     end                       
+                     % aCamera = {'CameraPosition', get(isoObj, 'CameraPosition'), ...
+                     %            'CameraUpVector', get(isoObj, 'CameraUpVector')};
                      aInputArguments = [aInputArguments(:)', aCamera(:)'];       
                  else
                      aCamera = {'CameraPosition', [1 0 0], ...
@@ -135,7 +191,7 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
 
             x = aspectRatioValue('get', 'x');
             y = aspectRatioValue('get', 'y');
-            z = aspectRatioValue('get', 'z');                                                                    
+            z = aspectRatioValue('get', 'z');
 
 %            if  strcmpi(imageOrientation('get'), 'axial')   
 
@@ -149,9 +205,12 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
 %            end
 
         else                    
-            aScaleFactors = [1 1 1];
-        end
+            
+          aScaleFactors = [1 1 1];
+
+       end
         
+      
         dScaleMax = max(aScaleFactors);
 
 if 0                                
@@ -169,31 +228,123 @@ end
 
         % If another object exist, get other object ratio
 
-        if ~isempty(volObj)                        
-            aScaleFactors = get(volObj, 'ScaleFactors');
+        if ~isempty(volObj)   
+            if isempty(viewer3dObject('get'))           
+                aScaleFactors = get(volObj, 'ScaleFactors');
+            else
+                aScaleFactors = [];
+            end
         end
 
         if ~isempty(isoObj)                        
-            aScaleFactors = get(isoObj, 'ScaleFactors');
+            if isempty(viewer3dObject('get'))           
+                aScaleFactors = get(isoObj, 'ScaleFactors');
+            else
+                aScaleFactors = [];
+            end                
         end
 
         if ~isempty(mipObj)                        
-            aScaleFactors = get(mipObj, 'ScaleFactors');
+            if isempty(viewer3dObject('get'))           
+                aScaleFactors = get(mipObj, 'ScaleFactors');
+            else
+                aScaleFactors = [];
+            end            
         end
 
         aInputArguments = [aInputArguments(:)', {'ScaleFactors'}, {[1 1 1]}];
 
         if init3DPanel('get') == true
+
             view3DPanel('set', true);
 
             obj3DPanel = view3DPanelMenuObject('get');
             if ~isempty(obj3DPanel)
                 set(obj3DPanel, 'Checked', 'on');
             end
-            init3DuicontrolPanel();
 
+            init3DuicontrolPanel();
+            
+            ptrViewer3d = viewer3dObject('get');
+            if ~isempty(ptrViewer3d)
+                delete(ptrViewer3d);
+            end
+
+            viewer3dObject('set', []);
+
+            if ~verLessThan('matlab','9.13')
+
+                if viewerUIFigure('get') == true
+
+                    set(uiOneWindowPtr('get'), 'AutoResizeChildren', 'on');
+
+                    ptrViewer3d = viewer3d('Parent', uiWindow, ...
+                                           'BackgroundColor', surfaceColor('one', background3DOffset('get')), ...
+                                           'Lighting', 'off', ...
+                                           'GradientColor', [0.98 0.98 0.98], ...
+                                           'CameraZoom', 1.5000, ...
+                                           'ScaleBar', 'on', ...
+                                           'Lighting','off'); 
+
+                    if volLighting('get') == true
+                        set(ptrViewer3d, 'Lighting', 'on');
+                    else
+                        set(ptrViewer3d, 'Lighting', 'off');
+                    end
+       
+                    if background3DGradient('get') == true
+                        set(ptrViewer3d, 'BackgroundGradient', 'on');
+                    else
+                        set(ptrViewer3d, 'BackgroundGradient', 'off');
+                    end
+                    
+                    viewer3dObject('set', ptrViewer3d);
+                end
+            end
         end  
 
+        if aspectRatio('get') == true
+
+            if atMetaData{1}.PixelSpacing(1) == 0 || ...
+               atMetaData{1}.PixelSpacing(2) == 0 || ...
+               computeSliceSpacing(atMetaData) == 0
+
+                if ~isempty(viewer3dObject('get'))
+
+                    Mdti=[1 0 0 0; ...
+                          0 1 0 0; ...
+                          0 0 1 0; ...
+                          0 0 0 1];                 
+                    tform = affinetform3d(Mdti);
+               end
+           else
+                if ~isempty(viewer3dObject('get'))
+
+                    [Mdti,~] = TransformMatrix(atMetaData{1}, computeSliceSpacing(atMetaData));
+                    
+                    if volume3DZOffset('get') == false
+                        Mdti(1,4) = 0;
+                        Mdti(2,4) = 0;
+                        Mdti(3,4) = 0;
+                        Mdti(4,4) = 1;
+                    end    
+    
+                    tform = affinetform3d(Mdti);
+                end               
+            end
+
+        else                    
+            
+          if ~isempty(viewer3dObject('get'))
+    
+                Mdti=[1 0 0 0; ...
+                      0 1 0 0; ...
+                      0 0 1 0; ...
+                      0 0 0 1];  
+    
+                tform = affinetform3d(Mdti);
+           end
+        end  
 
         switch sRenderer
             
@@ -207,26 +358,41 @@ end
                 [aAlphamap, sType]  = getVolAlphaMap('get', im, atMetaData);
                 aColormap = get3DColorMap('one', colorMapVolOffset('get'));                
                 
-                bLightingIsSupported = true;
-                if verLessThan('matlab','9.8')
-                    bLightingIsSupported = false;                    
-                end
-                
-                if bLightingIsSupported == true                
-                    bLighting = volLighting('get');
-                    aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}, 'Lighting', bLighting];
-                else
-                    aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
-                end
-
 %                    volshow(im, 'Parent', uiOneWindowPtr('get'), 'Renderer', sRenderer)
-                if verLessThan('matlab','9.13')
-                    pObject = volshow(squeeze(im), aInputArguments{:});
+                if isempty(viewer3dObject('get'))
+
+                    bLightingIsSupported = true;
+                    if verLessThan('matlab','9.8')
+
+                        bLightingIsSupported = false;                    
+                    end
+                    
+                    if bLightingIsSupported == true                
+
+                        bLighting = volLighting('get');
+                        aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}, 'Lighting', bLighting];
+                    else
+                        aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
+                    end
+
+                    if verLessThan('matlab','9.13')
+                        pObject = volshow(squeeze(im), aInputArguments{:});
+                    else
+                         pObject = images.compatibility.volshow.R2022a.volshow(squeeze(im), aInputArguments{:});                   
+                    end
+
+                    set(pObject, 'ScaleFactors', aScaleFactors);
+                   
                 else
-                    pObject = images.compatibility.volshow.R2022a.volshow(squeeze(im), aInputArguments{:});
+  
+                    pObject = volshow(squeeze(im), ...
+                                      'Parent'        , viewer3dObject('get'), ...
+                                      'RenderingStyle', 'VolumeRendering',...
+                                      'Alphamap'      , aAlphamap, ...
+                                      'Colormap'      , aColormap, ...
+                                      'Transformation', tform);
                 end
 
-                set(pObject, 'ScaleFactors', aScaleFactors);
                 if isempty(isoObj)&&isempty(mipObj)&&multiFrame3DZoom('get')==0
                     multiFrame3DZoom('set', 3*dScaleMax);  % Normalize to 1
                 end
@@ -250,18 +416,32 @@ end
 
 
             case 'Isosurface'
+
                 aIsovalue = isoSurfaceValue('get');
                 aIsosurfaceColor = surfaceColor('one', isoColorOffset('get'));
 
-                aInputArguments = [aInputArguments(:)', {'Isovalue'}, {aIsovalue}, {'IsosurfaceColor'}, {aIsosurfaceColor}];
+                if isempty(viewer3dObject('get'))
 
-                if verLessThan('matlab','9.13')
-                    pObject = volshow(im, aInputArguments{:});
-                else
-                    pObject = images.compatibility.volshow.R2022a.volshow(im, aInputArguments{:});
+                    aInputArguments = [aInputArguments(:)', {'Isovalue'}, {aIsovalue}, {'IsosurfaceColor'}, {aIsosurfaceColor}];
+
+                    if verLessThan('matlab','9.13')
+    
+                        pObject = volshow(squeeze(im), aInputArguments{:});
+                    else
+                        pObject = images.compatibility.volshow.R2022a.volshow(squeeze(im), aInputArguments{:});                   
+                    end
+
+                    set(pObject, 'ScaleFactors', aScaleFactors);                   
+                else    
+
+                    pObject = volshow(squeeze(im), ...
+                                      'Parent'         , viewer3dObject('get'), ...
+                                      'RenderingStyle' , 'Isosurface',...
+                                      'IsosurfaceValue', aIsovalue, ...
+                                      'Colormap'       , aIsosurfaceColor, ...
+                                      'Transformation' , tform);
                 end
 
-                set(pObject, 'ScaleFactors', aScaleFactors);
                 if isempty(volObj)&&isempty(mipObj)&&multiFrame3DZoom('get')==0
                     multiFrame3DZoom('set', 3*dScaleMax);  % Normalize to 1
                 end                        
@@ -275,26 +455,42 @@ end
 
            %    aAlphamap = interp1(intensity,alpha,queryPoints)';
 
-               [aAlphamap, sType]  = getMipAlphaMap('get', im, atMetaData);
-               aColormap = get3DColorMap('one', colorMapMipOffset('get'));
+                [aAlphamap, sType]  = getMipAlphaMap('get', im, atMetaData);
+                aColormap = get3DColorMap('one', colorMapMipOffset('get'));
 
-               aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
+                if isempty(viewer3dObject('get'))
 
-               if verLessThan('matlab','9.13')
-                    pObject = volshow(im, aInputArguments{:});
-               else
-                    pObject = images.compatibility.volshow.R2022a.volshow(im, aInputArguments{:});                   
-               end
+                    aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
+    
+                    if verLessThan('matlab','9.13')
+    
+                        pObject = volshow(squeeze(im), aInputArguments{:});
+                    else
+                        pObject = images.compatibility.volshow.R2022a.volshow(squeeze(im), aInputArguments{:});                   
+                    end
 
-               set(pObject, 'ScaleFactors', aScaleFactors);
-               if isempty(volObj)&&isempty(isoObj)&&multiFrame3DZoom('get')==0
+                    set(pObject, 'ScaleFactors', aScaleFactors);
+
+                else
+
+                    pObject = volshow(squeeze(im), ...
+                                      'Parent'        , viewer3dObject('get'), ...
+                                      'RenderingStyle', 'MaximumIntensityProjection',...
+                                      'Alphamap'      , aAlphamap, ...
+                                      'Colormap'      , aColormap, ...
+                                      'Transformation', tform);
+                end
+
+                 % set(pObject, 'ScaleFactors', aScaleFactors);
+
+                if isempty(volObj)&&isempty(isoObj)&&multiFrame3DZoom('get')==0
                     multiFrame3DZoom('set', 3*dScaleMax);  % Normalize to 1
-               end                         
-%               mipObject('set', pObject);    
+                end                         
+%                mipObject('set', pObject);    
 
-               if init3DPanel('get') == false
+                if init3DPanel('get') == false
 
-                   ic = mipICObject('get');
+                    ic = mipICObject('get');
 %                   mipObj = mipObject('get');
 %                   ic.surfObj = mipObj;
 
@@ -302,7 +498,7 @@ end
                         set(pObject, 'Alphamap', computeAlphaMap(ic));
                     end
 
-               end     
+                end     
                       
   %             if displayMIPColorMap('get') == true        
   %                  uimipColorbar = mipColorbar(uiOneWindowPtr('get'), aColormap);

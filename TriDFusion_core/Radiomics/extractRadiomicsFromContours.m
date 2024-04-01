@@ -135,10 +135,23 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
         end
 
         progressBar(1/5, 'Computing images mask, please wait.');
-    
+
         % Create an empty mask
-    
-        aImagesMask = zeros(size(aImages));
+ 
+        aImagesMask = zeros(size(aImages));       
+
+        if bEntireVolume == true
+            aEntireImagesMask = zeros(size(aImages)); 
+        end
+
+        % .nrrd files 
+
+        origin = atMetaData{end}.ImagePositionPatient;
+        
+        pixelspacing=zeros(3,1);
+        pixelspacing(1)=atMetaData{1}.PixelSpacing(1);
+        pixelspacing(2)=atMetaData{1}.PixelSpacing(2);
+        pixelspacing(3) = computeSliceSpacing(atMetaData);
  
         % If a contour offset is specified, will compute it
 
@@ -147,7 +160,7 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
             dNbVois = dContourOffset;
         else % All contours
             dVoiOffset = 1;
-            dNbVois = numel(atVoiInput);
+            dNbVois = numel(atVoiInput);          
         end
 
         if bContourType == true
@@ -753,23 +766,30 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
                 end
     
             end
+
+            if bEntireVolume == true
+                aEntireImagesMask(aImagesMask~=0)=1;
+            end
+
+            sNrrdMaskName = sprintf('%smask%d.nrrd' , sNrrdTmpDir, vv);
+
+            aImagesMask = transformNrrdImage(aImagesMask);
+
+            nrrdWriter(sNrrdMaskName, squeeze(aImagesMask), pixelspacing, origin, 'raw'); % Write .nrrd mask
+            aImagesMask = zeros(size(aImages));    
+
         end
     
-        if bEntireVolume == true
-            aEntireImagesMask = aImagesMask;
-            aEntireImagesMask(aEntireImagesMask~=0)=1;
-        end
-
         progressBar(2/5, 'Writing .nrrd files, please wait.');
     
-        % Write .nrrd files 
-        
-        origin = atMetaData{end}.ImagePositionPatient;
-        
-        pixelspacing=zeros(3,1);
-        pixelspacing(1)=atMetaData{1}.PixelSpacing(1);
-        pixelspacing(2)=atMetaData{1}.PixelSpacing(2);
-        pixelspacing(3) = computeSliceSpacing(atMetaData);
+%         % Write .nrrd files 
+%         
+%         origin = atMetaData{end}.ImagePositionPatient;
+%         
+%         pixelspacing=zeros(3,1);
+%         pixelspacing(1)=atMetaData{1}.PixelSpacing(1);
+%         pixelspacing(2)=atMetaData{1}.PixelSpacing(2);
+%         pixelspacing(3) = computeSliceSpacing(atMetaData);
        
 %         if ~isempty(atMetaData{1}.SliceThickness)
 %             if atMetaData{1}.SliceThickness ~= 0
@@ -782,7 +802,6 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 %         end
     
         sNrrdImagesName = sprintf('%simges.nrrd', sNrrdTmpDir);
-        sNrrdMaskName   = sprintf('%smask.nrrd' , sNrrdTmpDir);
     
         if bSUVUnit == true
             aImages = aImages*dSUVScale;
@@ -792,10 +811,10 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
         nrrdWriter(sNrrdImagesName, squeeze(aImages), pixelspacing, origin, 'raw'); % Write .nrrd images 
         clear aImages;
-
-        aImagesMask = transformNrrdImage(aImagesMask);
-
-        nrrdWriter(sNrrdMaskName, squeeze(aImagesMask), pixelspacing, origin, 'raw'); % Write .nrrd mask
+% 
+%         aImagesMask = transformNrrdImage(aImagesMask);
+% 
+%         nrrdWriter(sNrrdMaskName, squeeze(aImagesMask), pixelspacing, origin, 'raw'); % Write .nrrd mask
         clear aImagesMask;
 
         if bEntireVolume == true   
@@ -1085,21 +1104,38 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
                 if ~isempty(sNrrdUnspecifiedMaskName)
                     
-                    progressBar(bProgressBarOffset+1*bProgressBarTypeOffset, sprintf('Computing radiomics unspecified, it can take several minutes, please be patient.'));
+                    if ~isempty(sNrrdBoneMaskName)           || ...
+                       ~isempty(sNrrdSoftTissueMaskName)     || ...
+                       ~isempty(sNrrdLungMaskName)           || ...
+                       ~isempty(sNrrdLiverMaskName)          || ...
+                       ~isempty(sNrrdParotidMaskName)        || ...
+                       ~isempty(sNrrdBloodPoolMaskName)      || ...
+                       ~isempty(sNrrdLymphNodesMaskName)     || ...
+                       ~isempty(sNrrdPrimaryDiseaseMaskName) || ...
+                       ~isempty(sNrrdCervicalMaskName)       || ...
+                       ~isempty(sNrrdSupraclavicularMaskName)|| ...
+                       ~isempty(sNrrdMediastinalMaskName)    || ...
+                       ~isempty(sNrrdParaspinalMaskName)     || ...
+                       ~isempty(sNrrdAxillaryMaskName)       || ...
+                       ~isempty(sNrrdAbdominalMaskName)      || ...
+                       ~isempty(sNrrdUnknowMaskName)
     
-                    sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
-                    writeYamlFile(sParametersFile, tReadiomics, 1);
+                        progressBar(bProgressBarOffset+1*bProgressBarTypeOffset, sprintf('Computing radiomics unspecified, it can take several minutes, please be patient.'));
+        
+                        sParametersFile = sprintf('%sparameters.yaml', sNrrdTmpDir);
+                        writeYamlFile(sParametersFile, tReadiomics, 1);
+        
+                        sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdUnspecifiedMaskName);    
+        
+                        sUnspecifiedMaskResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'UNSPECIFIED_MASK');
+        
+                        [bStatus, sCmdout] = system([sCommandLine ' -o ' sUnspecifiedMaskResultFile ' -p ' sParametersFile]);
     
-                    sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdUnspecifiedMaskName);    
-    
-                    sUnspecifiedMaskResultFile = sprintf('%s%s.csv', sNrrdTmpDir, 'UNSPECIFIED_MASK');
-    
-                    [bStatus, sCmdout] = system([sCommandLine ' -o ' sUnspecifiedMaskResultFile ' -p ' sParametersFile]);
-
-                    if bStatus 
-                        progressBar( 1, 'Error: An error occur during radiomics unspecified extraction!');
-                        errordlg(sprintf('An error occur during radiomics unspecified extraction: %s', sCmdout), 'Extraction Error');  
-                    end 
+                        if bStatus 
+                            progressBar( 1, 'Error: An error occur during radiomics unspecified extraction!');
+                            errordlg(sprintf('An error occur during radiomics unspecified extraction: %s', sCmdout), 'Extraction Error');  
+                        end 
+                    end
                 end
 
                 % Bone
@@ -1428,7 +1464,9 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
     
                 sParametersFile = sprintf('%sparameters%d.yaml', sNrrdTmpDir, vv);
                 writeYamlFile(sParametersFile, tReadiomics, vv);
-        
+
+                sNrrdMaskName = sprintf('%smask%d.nrrd' , sNrrdTmpDir, vv);
+
                 sCommandLine = sprintf('cmd.exe /c %s %s %s', sRadiomicsScript, sNrrdImagesName, sNrrdMaskName);    
     
                 acResultFile{vv} = sprintf('%s%s.csv', sNrrdTmpDir, cleanString(atVoiInput{vv}.Label));

@@ -1,5 +1,5 @@
-function loadNIIFile(sPath, sFileName)
-%function loadNIIFile(sPath, sFileName)
+function loadNIIFile(sPath, sFileName, bInitDisplay, dFactor)
+%function loadNIIFile(sPath, sFileName, bInitDisplay, dFactor)
 %Load .nii file to TriDFusion.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -30,9 +30,7 @@ function loadNIIFile(sPath, sFileName)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    % Deactivate main tool bar 
-    set(uiSeriesPtr('get'), 'Enable', 'off');                
-    mainToolBarEnable('off');
+    % Deactivate main tool bar
     
     atInput = inputTemplate('get');
 
@@ -45,53 +43,62 @@ function loadNIIFile(sPath, sFileName)
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow; 
     
-    releaseRoiWait();
+    if bInitDisplay == true    
 
-    set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
-    set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
-    set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+        set(uiSeriesPtr('get'), 'Enable', 'off');       
 
-    set(zoomMenu('get'), 'Checked', 'off');
-    set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnZoomPtr('get'), 'FontWeight', 'normal');
-    zoomTool('set', false);
-    zoom(fiMainWindowPtr('get'), 'off');           
-
-    set(panMenu('get'), 'Checked', 'off');
-    set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
-    set(btnPanPtr('get'), 'FontWeight', 'normal');
-    panTool('set', false);
-    pan(fiMainWindowPtr('get'), 'off');     
-
-    set(rotate3DMenu('get'), 'Checked', 'off');         
-    rotate3DTool('set', false);
-    rotate3d(fiMainWindowPtr('get'), 'off');
-
-    set(dataCursorMenu('get'), 'Checked', 'off');
-    dataCursorTool('set', false);              
-    datacursormode(fiMainWindowPtr('get'), 'off');  
+        mainToolBarEnable('off');
+        
+        releaseRoiWait();
     
-    switchTo3DMode    ('set', false);
-    switchToIsoSurface('set', false);
-    switchToMIPMode   ('set', false);
-
-    set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnFusionPtr('get'), 'FontWeight', 'normal');
-
-    set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btn3DPtr('get'), 'FontWeight', 'normal');
-
-    set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
-
-    set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
-    set(btnMIPPtr('get'), 'FontWeight', 'normal');
+        set(btnTriangulatePtr('get'), 'BackgroundColor', viewerButtonPushedBackgroundColor('get'));
+        set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
+        set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
+    
+        set(zoomMenu('get'), 'Checked', 'off');
+        set(btnZoomPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnZoomPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnZoomPtr('get'), 'FontWeight', 'normal');
+        zoomTool('set', false);
+        zoom(fiMainWindowPtr('get'), 'off');           
+    
+        set(panMenu('get'), 'Checked', 'off');
+        set(btnPanPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnPanPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));          
+        set(btnPanPtr('get'), 'FontWeight', 'normal');
+        panTool('set', false);
+        pan(fiMainWindowPtr('get'), 'off');     
+    
+        set(rotate3DMenu('get'), 'Checked', 'off');         
+        rotate3DTool('set', false);
+        rotate3d(fiMainWindowPtr('get'), 'off');
+    
+        set(dataCursorMenu('get'), 'Checked', 'off');
+        dataCursorTool('set', false);              
+        datacursormode(fiMainWindowPtr('get'), 'off');  
+        
+        switchTo3DMode    ('set', false);
+        switchToIsoSurface('set', false);
+        switchToMIPMode   ('set', false);
+    
+        set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnFusionPtr('get'), 'FontWeight', 'normal');
+    
+        set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btn3DPtr('get'), 'FontWeight', 'normal');
+    
+        set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
+    
+        set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
+        set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnMIPPtr('get'), 'FontWeight', 'normal');
+        
+        progressBar(0.5, 'Reading nrrd, please wait.');
+    end
     
     progressBar(0.5, 'Reading nii, please wait.');
 
@@ -149,6 +156,11 @@ function loadNIIFile(sPath, sFileName)
     else
         aBuffer = imrotate(nii.img, 90, 'nearest');
 %         aBuffer = aBuffer(end:-1:1,:);        
+    end
+
+    if ~isempty(dFactor)
+        
+        aBuffer = aBuffer * dFactor;
     end
 
     if ~isempty(atInput)
@@ -370,9 +382,7 @@ function loadNIIFile(sPath, sFileName)
             aBuffer = aBuffer(:,:,end:-1:1);
         end
     end
-
-    imageOrientation('set', 'axial');
-            
+           
     seriesDescription('set', asSeriesDescription);
             
     inputTemplate('set', atInput);
@@ -384,56 +394,74 @@ function loadNIIFile(sPath, sFileName)
     set(uiSeriesPtr('get'), 'String', asSeries);
     set(uiFusedSeriesPtr('get'), 'String', asSeries);
     
-    set(uiSeriesPtr('get'), 'Value', numel(atInput));
-    dicomMetaData('set', atInput(numel(atInput)).atDicomInfo);
-    dicomBuffer('set', aBuffer);
+    dicomMetaData('set', atInput(numel(atInput)).atDicomInfo, numel(atInput));
+    dicomBuffer('set', aBuffer, numel(atInput));
 
-    if numel(size(nii.img)) >2   
-        aMip = computeMIP(aBuffer);
-        mipBuffer('set', aMip, numel(atInput)) ;
-        atInput(numel(atInput)).aMip = aMip;   
+    if bInitDisplay == true    
+
+        set(uiSeriesPtr('get'), 'Value', numel(atInput));
+        
+        imageOrientation('set', 'axial');       
     end
 
     setQuantification(numel(atInput));
     
-    cropValue('set', min(dicomBuffer('get'), [], 'all'));
-
     tQuant = quantificationTemplate('get');
     atInput(numel(atInput)).tQuant = tQuant;
-    inputTemplate('set', atInput);  
 
-    clearDisplay();                       
-    initDisplay(3); 
-
-    initWindowLevel('set', true);
-
-    dicomViewerCore();  
+    if size(aBuffer, 3) ~= 1
     
-    setViewerDefaultColor(1, atInput(numel(atInput)).atDicomInfo);
-       
-    refreshImages();
-    
-    % Activate playback
-   
-    if size(dicomBuffer('get'), 3) ~= 1
-        setPlaybackToolbar('on');
+        aMip = computeMIP(aBuffer);
+        mipBuffer('set', aMip, numel(atInput)) ;
+        atInput(numel(atInput)).aMip = aMip;   
     end
     
-    setRoiToolbar('on');
+    inputTemplate('set', atInput);  
+
+    if bInitDisplay == true    
+
+        cropValue('set', min(dicomBuffer('get'), [], 'all'));
+
+        clearDisplay();                       
+
+        initDisplay(3); 
+
+        initWindowLevel('set', true);
     
+        dicomViewerCore();  
+        
+        setViewerDefaultColor(1, atInput(numel(atInput)).atDicomInfo);
+           
+        refreshImages();
+        
+        % Activate playback
+       
+        if size(dicomBuffer('get'), 3) ~= 1
+            setPlaybackToolbar('on');
+        end
+        
+        setRoiToolbar('on');
+        
+    end
+
     progressBar(1, sprintf('Import %s completed.', sFileName));
     
     catch
         progressBar(1, 'Error:loadNIIFile()');                        
     end
 
-    clear aBuffer;
-
-    % Reactivate main tool bar 
-    set(uiSeriesPtr('get'), 'Enable', 'on');        
-    mainToolBarEnable('on');
-    
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow; 
 
+    clear aBuffer;
+
+    if bInitDisplay == true    
+
+        % Reactivate main tool bar 
+
+        set(uiSeriesPtr('get'), 'Enable', 'on');        
+        mainToolBarEnable('on');
+       
+    end
+    
 end

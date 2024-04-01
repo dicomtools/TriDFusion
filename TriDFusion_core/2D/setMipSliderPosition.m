@@ -38,32 +38,32 @@ function setMipSliderPosition(uiMipSlider)
             dXoffset = uiSegMainPanel.Position(3); 
             dYoffset = addOnWidth('get')+30; 
             dXsize   = getMainWindowSize('xsize')-uiSegMainPanel.Position(3);
-            dYsize   = 15;
+            dYsize   = 20;
 
         elseif viewKernelPanel('get') == true
             dXoffset = uiKernelMainPanel.Position(3); 
             dYoffset = addOnWidth('get')+30; 
             dXsize   = getMainWindowSize('xsize')-uiKernelMainPanel.Position(3);
-            dYsize   = 15;
+            dYsize   = 20;
 
         elseif viewRoiPanel('get') == true
             dXoffset = uiRoiMainPanel.Position(3); 
             dYoffset = addOnWidth('get')+30; 
             dXsize   = getMainWindowSize('xsize')-uiRoiMainPanel.Position(3);
-            dYsize   = 15;
+            dYsize   = 20;
 
          else
 
             dXoffset = 0;
             dYoffset = addOnWidth('get')+30;
             dXsize   = getMainWindowSize('xsize');
-            dYsize   = 15;
+            dYsize   = 20;
          end                    
     else
         dXoffset = (getMainWindowSize('xsize')/1.25);
         dYoffset = addOnWidth('get')+30;
         dXsize   = getMainWindowSize('xsize')/5;
-        dYsize   = 15;       
+        dYsize   = 20;       
     end
 
     set(uiMipSlider, ...

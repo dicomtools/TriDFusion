@@ -27,78 +27,89 @@ function zoom3D(sZoomInOut, lStep)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    volObj = volObject('get');
-    isoObj = isoObject('get');                        
-    mipObj = mipObject('get');  
-    
-    voiObj = voiObject('get');                                                       
-    
-    volFusionObj = volFusionObject('get');
-    isoFusionObj = isoFusionObject('get');                        
-    mipFusionObj = mipFusionObject('get');  
-    
-    if ~isempty(mipObj)
-        if strcmpi(sZoomInOut, 'out')
-            mipObj.CameraPosition = mipObj.CameraPosition*lStep;
-        else
-            mipObj.CameraPosition = mipObj.CameraPosition/lStep;
-        end
-%        mipObj.CameraUpVector = [0 0 1];                
-    end
+    ptrViewer3d = viewer3dObject('get');
 
-    if ~isempty(isoObj)
-        if strcmpi(sZoomInOut, 'out')
-            isoObj.CameraPosition = isoObj.CameraPosition*lStep;
-        else
-            isoObj.CameraPosition = isoObj.CameraPosition/lStep;
-        end
-%        mipObj.CameraUpVector = [0 0 1];               
-    end
+    if ~isempty(ptrViewer3d)
 
-    if ~isempty(volObj)
         if strcmpi(sZoomInOut, 'out')
-            volObj.CameraPosition = volObj.CameraPosition*lStep;
+            ptrViewer3d.CameraZoom = ptrViewer3d.CameraZoom*lStep;
         else
-            volObj.CameraPosition = volObj.CameraPosition/lStep;
+            ptrViewer3d.CameraZoom = ptrViewer3d.CameraZoom/lStep;
         end
-%        mipObj.CameraUpVector = [0 0 1];               
-    end   
-    
-    if ~isempty(mipFusionObj)
-        if strcmpi(sZoomInOut, 'out')
-            mipFusionObj.CameraPosition = mipFusionObj.CameraPosition*lStep;
-        else
-            mipFusionObj.CameraPosition = mipFusionObj.CameraPosition/lStep;
-        end
-%        mipObj.CameraUpVector = [0 0 1];                
-    end
-
-    if ~isempty(isoFusionObj)
-        if strcmpi(sZoomInOut, 'out')
-            isoFusionObj.CameraPosition = isoFusionObj.CameraPosition*lStep;
-        else
-            isoFusionObj.CameraPosition = isoFusionObj.CameraPosition/lStep;
-        end
-%        mipObj.CameraUpVector = [0 0 1];               
-    end
-
-    if ~isempty(volFusionObj)
-        if strcmpi(sZoomInOut, 'out')
-            volFusionObj.CameraPosition = volFusionObj.CameraPosition*lStep;
-        else
-            volFusionObj.CameraPosition = volFusionObj.CameraPosition/lStep;
-        end
-%        mipObj.CameraUpVector = [0 0 1];               
-    end 
-    
-    if ~isempty(voiObj)
-        for ff=1:numel(voiObj)
+    else
+        volObj = volObject('get');
+        isoObj = isoObject('get');                        
+        mipObj = mipObject('get');  
+        
+        voiObj = voiObject('get');                                                       
+        
+        volFusionObj = volFusionObject('get');
+        isoFusionObj = isoFusionObject('get');                        
+        mipFusionObj = mipFusionObject('get');  
+        
+        if ~isempty(mipObj)
             if strcmpi(sZoomInOut, 'out')
-                voiObj{ff}.CameraPosition = voiObj{ff}.CameraPosition*lStep;
+                mipObj.CameraPosition = mipObj.CameraPosition*lStep;
             else
-                voiObj{ff}.CameraPosition = voiObj{ff}.CameraPosition/lStep;
+                mipObj.CameraPosition = mipObj.CameraPosition/lStep;
             end
-  %          voiObj{ff}.CameraUpVector =  [0 0 1];
+    %        mipObj.CameraUpVector = [0 0 1];                
         end
-    end               
+    
+        if ~isempty(isoObj)
+            if strcmpi(sZoomInOut, 'out')
+                isoObj.CameraPosition = isoObj.CameraPosition*lStep;
+            else
+                isoObj.CameraPosition = isoObj.CameraPosition/lStep;
+            end
+    %        mipObj.CameraUpVector = [0 0 1];               
+        end
+    
+        if ~isempty(volObj)
+            if strcmpi(sZoomInOut, 'out')
+                volObj.CameraPosition = volObj.CameraPosition*lStep;
+            else
+                volObj.CameraPosition = volObj.CameraPosition/lStep;
+            end
+    %        mipObj.CameraUpVector = [0 0 1];               
+        end   
+        
+        if ~isempty(mipFusionObj)
+            if strcmpi(sZoomInOut, 'out')
+                mipFusionObj.CameraPosition = mipFusionObj.CameraPosition*lStep;
+            else
+                mipFusionObj.CameraPosition = mipFusionObj.CameraPosition/lStep;
+            end
+    %        mipObj.CameraUpVector = [0 0 1];                
+        end
+    
+        if ~isempty(isoFusionObj)
+            if strcmpi(sZoomInOut, 'out')
+                isoFusionObj.CameraPosition = isoFusionObj.CameraPosition*lStep;
+            else
+                isoFusionObj.CameraPosition = isoFusionObj.CameraPosition/lStep;
+            end
+    %        mipObj.CameraUpVector = [0 0 1];               
+        end
+    
+        if ~isempty(volFusionObj)
+            if strcmpi(sZoomInOut, 'out')
+                volFusionObj.CameraPosition = volFusionObj.CameraPosition*lStep;
+            else
+                volFusionObj.CameraPosition = volFusionObj.CameraPosition/lStep;
+            end
+    %        mipObj.CameraUpVector = [0 0 1];               
+        end 
+        
+        if ~isempty(voiObj)
+            for ff=1:numel(voiObj)
+                if strcmpi(sZoomInOut, 'out')
+                    voiObj{ff}.CameraPosition = voiObj{ff}.CameraPosition*lStep;
+                else
+                    voiObj{ff}.CameraPosition = voiObj{ff}.CameraPosition/lStep;
+                end
+      %          voiObj{ff}.CameraUpVector =  [0 0 1];
+            end
+        end               
+    end
 end

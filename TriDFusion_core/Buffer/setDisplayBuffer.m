@@ -1,5 +1,5 @@
-function setDisplayBuffer()
-%function setDisplayBuffer()
+function setDisplayBuffer(dSeriesOffset)
+%function setDisplayBuffer(dSeriesOffset)
 %Set DICOM Input DICOM Globals Function.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,64 +27,73 @@ function setDisplayBuffer()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-%       iInstanceNumber = 0;
-    tInput = inputTemplate('get');
-%        aInput = ''; 
-    aInput = cell(numel(tInput), 1);
-    for i=1: numel(tInput)                                                                               
-        if size(tInput(i).aDicomBuffer{1}, 4) == 1 
-            aSize = size(tInput(i).aDicomBuffer{1});
-    %        X(aSize(1), aSize(2), numel(tInput(i).asFilesList))=0;
-    %        aInput{i} = gpuArray(X);
+    atInput = inputTemplate('get');
+
+    aInputBuffer = cell(numel(atInput), 1);
+
+    if ~isempty(dSeriesOffset)
+        dFromLoop = dSeriesOffset;
+        dToLoop   = dSeriesOffset;
+    else
+        dFromLoop = 1;
+        dToLoop = numel(atInput);
+    end
+
+    for i=dFromLoop: dToLoop                                                                              
+
+        if size(atInput(i).aDicomBuffer{1}, 4) == 1 
+            aSize = size(atInput(i).aDicomBuffer{1});
+    %        X(aSize(1), aSize(2), numel(atInput(i).asFilesList))=0;
+    %        aInputBuffer{i} = gpuArray(X);
             if numel(aSize) == 2
                 
-                aInput{i} = single(zeros(aSize(1), aSize(2), numel(tInput(i).asFilesList)));
+                aInputBuffer{i} = single(zeros(aSize(1), aSize(2), numel(atInput(i).asFilesList)));
 
-         %       aInput = dicomread(char(tInput(1).asFilesList(1)));
+         %       aInputBuffer = dicomread(char(atInput(1).asFilesList(1)));
 
-                 for ii=1: numel(tInput(i).asFilesList)
+                 for ii=1: numel(atInput(i).asFilesList)
 
-                     if ~isempty(tInput(i).aDicomBuffer{ii})
-                       aInput{i}(:,:,ii) = tInput(i).aDicomBuffer{ii};
+                     if ~isempty(atInput(i).aDicomBuffer{ii})
+                       aInputBuffer{i}(:,:,ii) = atInput(i).aDicomBuffer{ii};
 
-                        if tInput(i).atDicomInfo{ii}.RescaleSlope ~= 0
-                            aInput{i}(:,:,ii) = tInput(i).atDicomInfo{ii}.RescaleIntercept + (aInput{i}(:,:,ii) * tInput(i).atDicomInfo{ii}.RescaleSlope);
+                        if atInput(i).atDicomInfo{ii}.RescaleSlope ~= 0
+                            aInputBuffer{i}(:,:,ii) = atInput(i).atDicomInfo{ii}.RescaleIntercept + (aInputBuffer{i}(:,:,ii) * atInput(i).atDicomInfo{ii}.RescaleSlope);
                         else
-                            if isfield(tInput(i).atDicomInfo{ii}, 'RealWorldValueMappingSequence') % SUV Spect
-                                if tInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
-                                    fSlope = tInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
-                                    fIntercept = tInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
-                                    aInput{i}(:,:,ii) = fIntercept + (aInput{i}(:,:,ii) * fSlope);                            
+                            if isfield(atInput(i).atDicomInfo{ii}, 'RealWorldValueMappingSequence') % SUV Spect
+                                if atInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
+                                    fSlope = atInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
+                                    fIntercept = atInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
+                                    aInputBuffer{i}(:,:,ii) = fIntercept + (aInputBuffer{i}(:,:,ii) * fSlope);                            
                                 end                        
                             end                            
                         end
                     end
                  end  
             else
-                 for ii=1: numel(tInput(i).asFilesList)
+                 for ii=1: numel(atInput(i).asFilesList)
 
-                    if ~isempty(tInput(i).aDicomBuffer{ii})
+                    if ~isempty(atInput(i).aDicomBuffer{ii})
 
-                        aInput{i} = single(tInput(i).aDicomBuffer{ii});
+                        aInputBuffer{i} = single(atInput(i).aDicomBuffer{ii});
 
-                        if tInput(i).atDicomInfo{ii}.RescaleSlope ~= 0
-                            aInput{i} = tInput(i).atDicomInfo{ii}.RescaleIntercept + (aInput{i} * tInput(i).atDicomInfo{ii}.RescaleSlope);
+                        if atInput(i).atDicomInfo{ii}.RescaleSlope ~= 0
+                            aInputBuffer{i} = atInput(i).atDicomInfo{ii}.RescaleIntercept + (aInputBuffer{i} * atInput(i).atDicomInfo{ii}.RescaleSlope);
                         else
-                            if isfield(tInput(i).atDicomInfo{ii}, 'RealWorldValueMappingSequence') % SUV Spect
-                                if tInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
-                                    fSlope = tInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
-                                    fIntercept = tInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
-                                    aInput{i} = fIntercept + (aInput{i} * fSlope);                            
+                            if isfield(atInput(i).atDicomInfo{ii}, 'RealWorldValueMappingSequence') % SUV Spect
+                                if atInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
+                                    fSlope = atInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
+                                    fIntercept = atInput(i).atDicomInfo{ii}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
+                                    aInputBuffer{i} = fIntercept + (aInputBuffer{i} * fSlope);                            
                                 end                        
                             end
                         end
 
-                        if strcmpi(tInput(i).atDicomInfo{ii}.Modality, 'RTDOSE')
+                        if strcmpi(atInput(i).atDicomInfo{ii}.Modality, 'RTDOSE')
             
-                            if isfield(tInput(i).atDicomInfo{ii}, 'DoseGridScaling')
+                            if isfield(atInput(i).atDicomInfo{ii}, 'DoseGridScaling')
             
-                                if tInput(i).atDicomInfo{ii}.DoseGridScaling ~= 0
-                                     aInput{i} = aInput{i} * tInput(i).atDicomInfo{ii}.DoseGridScaling;
+                                if atInput(i).atDicomInfo{ii}.DoseGridScaling ~= 0
+                                     aInputBuffer{i} = aInputBuffer{i} * atInput(i).atDicomInfo{ii}.DoseGridScaling;
                                 end
             
                             end
@@ -93,39 +102,41 @@ function setDisplayBuffer()
                  end
             end
         else
-%        X = tInput(1).aDicomBuffer{1};
-%        aInput = tInput(1).aDicomBuffer{1};
+%        X = atInput(1).aDicomBuffer{1};
+%        aInputBuffer = atInput(1).aDicomBuffer{1};
 
-            if strcmpi(tInput(i).atDicomInfo{1}.SOPClassUID, '1.2.840.10008.5.1.4.1.1.7') % Secondary Capture Image IOD
-                aInput{i} = tInput(i).aDicomBuffer{1};
+            if strcmpi(atInput(i).atDicomInfo{1}.SOPClassUID, '1.2.840.10008.5.1.4.1.1.7') || ... % Secondary Capture Image IOD
+               strcmpi(atInput(i).atDicomInfo{1}.SOPClassUID, '1.2.840.10008.5.1.4.1.1.7.4')     
+      
+                aInputBuffer{i} = atInput(i).aDicomBuffer{1};
             else
-                aSize = size(tInput(i).aDicomBuffer{1});
+                aSize = size(atInput(i).aDicomBuffer{1});
               %  X(aSize(1), aSize(2), aSize(4))=0;
-                aInput{i}(aSize(1), aSize(2), aSize(4))=0;
-                aInput{i} = single(tInput(i).aDicomBuffer{1}(:,:,:));
+                aInputBuffer{i}(aSize(1), aSize(2), aSize(4))=0;
+                aInputBuffer{i} = single(atInput(i).aDicomBuffer{1}(:,:,:));
     
-                if isfield(tInput(i).atDicomInfo{1}, 'RescaleIntercept') && ...
-                   isfield(tInput(i).atDicomInfo{1}, 'RescaleSlope')
+                if isfield(atInput(i).atDicomInfo{1}, 'RescaleIntercept') && ...
+                   isfield(atInput(i).atDicomInfo{1}, 'RescaleSlope')
                           
-                    if tInput(i).atDicomInfo{1}.RescaleSlope ~= 0
-                        aInput{i} = tInput(i).atDicomInfo{1}.RescaleIntercept + (aInput{i} * tInput(i).atDicomInfo{1}.RescaleSlope);
+                    if atInput(i).atDicomInfo{1}.RescaleSlope ~= 0
+                        aInputBuffer{i} = atInput(i).atDicomInfo{1}.RescaleIntercept + (aInputBuffer{i} * atInput(i).atDicomInfo{1}.RescaleSlope);
                     else
-                        if isfield(tInput(i).atDicomInfo{1}, 'RealWorldValueMappingSequence') % SUV Spect
-                            if tInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
-                                fSlope     = tInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
-                                fIntercept = tInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
-                                aInput{i} = fIntercept + (aInput{i} * fSlope);                            
+                        if isfield(atInput(i).atDicomInfo{1}, 'RealWorldValueMappingSequence') % SUV Spect
+                            if atInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope ~= 0
+                                fSlope     = atInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueSlope;
+                                fIntercept = atInput(i).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.RealWorldValueIntercept;
+                                aInputBuffer{i} = fIntercept + (aInputBuffer{i} * fSlope);                            
                             end                        
                         end
                     end
                 end  
                 
-                if strcmpi(tInput(i).atDicomInfo{1}.Modality, 'RTDOSE')
+                if strcmpi(atInput(i).atDicomInfo{1}.Modality, 'RTDOSE')
     
-                    if isfield(tInput(i).atDicomInfo{1}, 'DoseGridScaling')
+                    if isfield(atInput(i).atDicomInfo{1}, 'DoseGridScaling')
     
-                        if tInput(i).atDicomInfo{1}.DoseGridScaling ~= 0
-                            aInput{i} = aInput{i} * tInput(i).atDicomInfo{1}.DoseGridScaling;
+                        if atInput(i).atDicomInfo{1}.DoseGridScaling ~= 0
+                            aInputBuffer{i} = aInputBuffer{i} * atInput(i).atDicomInfo{1}.DoseGridScaling;
                         end
     
                     end
@@ -135,30 +146,52 @@ function setDisplayBuffer()
         end
         
 % To reduce memory usage                
-        tInput(i).aDicomBuffer = [];
+        atInput(i).aDicomBuffer = [];
 % To reduce memory usage                
         
     end                
     
  %   if canUseGPU()    
- %       for mm=1:numel(aInput)
- %           aInput{mm} = uint16(aInput{mm});
+ %       for mm=1:numel(aInputBuffer)
+ %           aInputBuffer{mm} = uint16(aInputBuffer{mm});
  %       end
  %   end
+    if isempty(dSeriesOffset)
     
-    inputBuffer('set', aInput);
-
-    dicomBuffer('set', aInput{1});                    
+        inputBuffer('set', aInputBuffer);
+        
+        for mm=1:numel(aInputBuffer)
     
-    for mm=1:numel(aInput)
-        if size(aInput{mm}, 3) ~= 1
-            aMip = computeMIP(gather(aInput{mm}));
-            mipBuffer('set', aMip, mm);
-            tInput(mm).aMip = aMip; 
+            if size(aInputBuffer{mm}, 3) ~= 1
+    
+                aMip = computeMIP(gather(aInputBuffer{mm}));
+        
+                atInput(mm).aMip = aMip; 
+            end
         end
+        
+    else
+        aOldInputBuffer = inputBuffer('get');
+
+        for mm=1:numel(atInput)
+
+            if mm == dSeriesOffset
+                
+                if size(aInputBuffer{mm}, 3) ~= 1
+        
+                    aMip = computeMIP(gather(aInputBuffer{mm}));
+            
+                    atInput(mm).aMip = aMip; 
+                end              
+            else
+                aInputBuffer{mm} = aOldInputBuffer{mm};
+            end
+        end
+
+        inputBuffer('set', aInputBuffer);        
     end
-    
-    inputTemplate('set', tInput);
+
+    inputTemplate('set', atInput);
  
     progressBar(1, 'Ready'); 
 

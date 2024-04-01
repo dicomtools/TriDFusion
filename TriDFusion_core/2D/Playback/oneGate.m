@@ -195,6 +195,7 @@ function oneGate(sDirection)
     end
 
     aBuffer = dicomBuffer('get', [], dOffset);
+    
     if isempty(aBuffer)
 
         aBuffer = aInput{dOffset};

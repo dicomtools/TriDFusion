@@ -27,14 +27,37 @@ function init3DfusionBuffer()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
+    return;
+
     atInputTemplate  = inputTemplate('get');
     
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
     dFuseOffset   = get(uiFusedSeriesPtr('get'), 'Value');
-       
-    % Set buffer % Meta data
 
     aInput = inputBuffer('get');
+    
+    if ~verLessThan('matlab','9.13') && ...
+       viewerUIFigure('get') == true
+
+        % A = dicomBuffer('get', [], dFuseOffset);
+        % 
+        % if isempty(A)
+        %     A = aInput{dFuseOffset};
+        % end
+        % 
+        % atMetaData  = dicomMetaData('get', [], dFuseOffset);
+        % if isempty(atMetaData)
+        %     atMetaData = atInputTemplate(dFuseOffset).atDicomInfo;
+        %     dicomMetaData('set', atMetaData, dFuseOffset)
+        % end        
+        % 
+        % fusionBuffer('set', A, dFuseOffset);     
+        % 
+        % clear A;
+    else
+
+    % Set buffer % Meta data
+
 
 %    set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
     A = dicomBuffer('get', [], dSeriesOffset);
@@ -112,5 +135,5 @@ function init3DfusionBuffer()
     clear B;
     clear aInput;
     clear aResampled;
-
+    end
 end  

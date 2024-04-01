@@ -28,6 +28,9 @@ function ic = customAlphaCurve(objEditorAxe, surfObj, sType)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     cla(objEditorAxe, 'reset');
+    objEditorAxe.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+    objEditorAxe.Toolbar.Visible = 'off';
+    disableDefaultInteractivity(objEditorAxe);
 
     if      strcmpi(sType, 'mip')
         ic = mipICObject('get');
@@ -35,20 +38,20 @@ function ic = customAlphaCurve(objEditorAxe, surfObj, sType)
         ic = mipICFusionObject('get');
     elseif strcmpi(sType, 'vol')
         ic = volICObject('get');
-    elseif strcmpi(sType, 'volfusion')   
+    elseif strcmpi(sType, 'volfusion')
         ic = volICFusionObject('get');
     else
         ic = '';
         return;
     end
-    
+
     aAlphamap = linspace(0, 1, 256)';
     xMarkers  = 1:size(aAlphamap,1);
 
     yMarkers = zeros(1,size(aAlphamap,1));
     yMarkers(1,:) = aAlphamap(:,1);
-    
-    objEditorAxe.Color  = viewerAxesColor('get'); 
+
+    objEditorAxe.Color  = viewerAxesColor('get');
     objEditorAxe.XColor = viewerForegroundColor('get');
     objEditorAxe.YColor = viewerForegroundColor('get');
     objEditorAxe.ZColor = viewerForegroundColor('get');
@@ -56,24 +59,24 @@ function ic = customAlphaCurve(objEditorAxe, surfObj, sType)
     objEditorAxe.YLim = [0 1];
 
     axis(objEditorAxe, 'manual');
-        
+
     if ~isempty(ic)
         dNbOfMarkers = ic.numberOfMarkers;
         aX = ic.x;
         aY = ic.y;
-        
+
         deleteAlphaCurve(sType);
-                
+
         ic = interactive_curve(fiMainWindowPtr('get'), objEditorAxe, xMarkers, yMarkers);
         ic.setBoundary(1);
 
         ic.surfObj = surfObj;
-        
+
         deleteMarkerByHandle(ic, ic.markersHandles);
-        
+
         for jj=1:dNbOfMarkers
-            addMarker(ic,aX(jj), aY(jj));    
-        end        
+            addMarker(ic,aX(jj), aY(jj));
+        end
 
     else
 
@@ -91,7 +94,7 @@ function ic = customAlphaCurve(objEditorAxe, surfObj, sType)
             addMarker(ic,size(aAlphamap,1),1);
         end
     end
-    
+
     guidata(fiMainWindowPtr('get'), objEditorAxe);
 
 end

@@ -29,34 +29,51 @@ function setOptionsCallback(~, ~)
 
     DLG_OPTIONS_X = 380;
     DLG_OPTIONS_Y = 405;
-    
-    dlgOptions = ...
-        dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_OPTIONS_X/2) ...
-                            (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_OPTIONS_Y/2) ...
-                            DLG_OPTIONS_X ...
-                            DLG_OPTIONS_Y ...
-                            ],...
-               'MenuBar', 'none',...
-               'Resize', 'off', ...    
-               'NumberTitle','off',...
-               'MenuBar', 'none',...
-               'Color', viewerBackgroundColor('get'), ...
-               'Name', 'Set Properties',...
-               'Toolbar','none'...               
-               );   
-    
-    axeOptions = ...          
+
+    if viewerUIFigure('get') == true
+
+        dlgOptions = ...
+            uifigure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_OPTIONS_X/2) ...
+                                (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_OPTIONS_Y/2) ...
+                                DLG_OPTIONS_X ...
+                                DLG_OPTIONS_Y ...
+                                ],...
+                   'Resize', 'off', ...
+                   'Color', viewerBackgroundColor('get'),...
+                   'WindowStyle', 'modal', ...
+                   'Name' , 'Set Properties'...
+                   );
+    else
+        dlgOptions = ...
+            dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_OPTIONS_X/2) ...
+                                (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_OPTIONS_Y/2) ...
+                                DLG_OPTIONS_X ...
+                                DLG_OPTIONS_Y ...
+                                ],...
+                   'MenuBar', 'none',...
+                   'Resize', 'off', ...
+                   'NumberTitle','off',...
+                   'MenuBar', 'none',...
+                   'Color', viewerBackgroundColor('get'), ...
+                   'Name', 'Set Properties',...
+                   'Toolbar','none'...
+                   );
+    end
+
+    axeOptions = ...
         axes(dlgOptions, ...
              'Units'   , 'pixels', ...
              'Position', [0 0 DLG_OPTIONS_X DLG_OPTIONS_Y], ...
              'Color'   , viewerBackgroundColor('get'),...
              'XColor'  , viewerForegroundColor('get'),...
              'YColor'  , viewerForegroundColor('get'),...
-             'ZColor'  , viewerForegroundColor('get'),...             
-             'Visible' , 'off'...             
-             );    
+             'ZColor'  , viewerForegroundColor('get'),...
+             'Visible' , 'off'...
+             );
     axeOptions.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    axeOptions.Toolbar = [];        
+    axeOptions.Toolbar.Visible = 'off';
+    disableDefaultInteractivity(axeOptions);
+
 %    if integrateToBrowser('get') == true
 %        sLogo = './TriDFusion/logo.png';
 %    else
@@ -64,28 +81,28 @@ function setOptionsCallback(~, ~)
 %    end
 
 %   javaFrame = get(dlgOptions,'JavaFrame');
-%   javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));                              
+%   javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
     % Show border
 
          uicontrol(dlgOptions,...
                   'style'   , 'text',...
                   'string'  , 'SUV Type',...
                   'horizontalalignment', 'left',...
-                  'position', [20 357 200 20],...
+                  'position', [20 360 200 20],...
                   'Enable', 'Inactive',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get') ...                    
+                  'ForegroundColor', viewerForegroundColor('get') ...
                   );
 
-    gsSUVType = viewerSUVtype('get'); 
+    gsSUVType = viewerSUVtype('get');
 
     if strcmpi(gsSUVType, 'BW') % Body Weight
         dSUVoffset = 1;
     elseif strcmpi(gsSUVType, 'FDG') % Brads FDG specific SUV
         dSUVoffset = 2;
     elseif strcmpi(gsSUVType, 'BSA') % body surface area
-        dSUVoffset = 3;            
-    elseif strcmpi(gsSUVType, 'LBM') % lean body mass 
+        dSUVoffset = 3;
+    elseif strcmpi(gsSUVType, 'LBM') % lean body mass
         dSUVoffset = 4;
     elseif strcmpi(gsSUVType, 'LBMJANMA') % lean body mass by Janmahasatian method
         dSUVoffset = 5;
@@ -96,10 +113,10 @@ function setOptionsCallback(~, ~)
         uicontrol(dlgOptions, ...
                   'enable'  , 'on',...
                   'Style'   , 'popup', ...
-                  'position', [200 360 160 20],...
+                  'position', [200 360 160 25],...
                   'String'  , {'BW', 'FDG', 'BSA', 'LBM', 'LBMJANMA'}, ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Value'   , dSUVoffset, ...
                   'Callback', @updateSUVCallback...
                   );
@@ -108,12 +125,12 @@ function setOptionsCallback(~, ~)
                   'style'   , 'text',...
                   'string'  , 'Export DICOM',...
                   'horizontalalignment', 'left',...
-                  'position', [20 327 200 20],...
+                  'position', [20 330 200 20],...
                   'Enable', 'Inactive',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get') ...                    
+                  'ForegroundColor', viewerForegroundColor('get') ...
                   );
-              
+
     chkUpdateWriteUID = ...
         uicontrol(dlgOptions,...
                   'style'   , 'checkbox',...
@@ -121,7 +138,7 @@ function setOptionsCallback(~, ~)
                   'value'   , updateDicomWriteSeriesInstanceUID('get'),...
                   'position', [40 305 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @updateWriteUIDCallback...
                   );
 
@@ -129,10 +146,10 @@ function setOptionsCallback(~, ~)
                   'style'   , 'text',...
                   'string'  , 'Update DICOM Series Instance UID',...
                   'horizontalalignment', 'left',...
-                  'position', [60 302 200 20],...
+                  'position', [60 305 200 20],...
                   'Enable', 'Inactive',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'ButtonDownFcn', @updateWriteUIDCallback...
                   );
 
@@ -143,7 +160,7 @@ function setOptionsCallback(~, ~)
                   'value'   , modifiedImagesContourMatrix('get'),...
                   'position', [40 280 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @modifiedImagesContourMatrixCallback...
                   );
 
@@ -151,14 +168,14 @@ function setOptionsCallback(~, ~)
                   'style'   , 'text',...
                   'string'  , 'Modified Images Contour Matrix',...
                   'horizontalalignment', 'left',...
-                  'position', [60 277 200 20],...
+                  'position', [60 280 200 20],...
                   'Enable', 'Inactive',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'ButtonDownFcn', @modifiedImagesContourMatrixCallback...
-                  );              
-              
-              
+                  );
+
+
     chkMip2DOnly = ...
         uicontrol(dlgOptions,...
                   'style'   , 'checkbox',...
@@ -166,7 +183,7 @@ function setOptionsCallback(~, ~)
                   'value'   , playback2DMipOnly('get'),...
                   'position', [20 255 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @mip2DOnlyCallback...
                   );
 
@@ -174,61 +191,81 @@ function setOptionsCallback(~, ~)
                   'style'   , 'text',...
                   'string'  , '2D MIP Playback',...
                   'horizontalalignment', 'left',...
-                  'position', [40 252 200 20],...
+                  'position', [40 255 200 20],...
                   'Enable', 'Inactive',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'ButtonDownFcn', @mip2DOnlyCallback...
                   );
-              
+
+     bVoiViewer3d = false;
+     if ~verLessThan('matlab','9.13')
+
+        if viewerUIFigure('get') == true
+            bVoiViewer3d = true;
+        end
+     end
+
+    if bVoiViewer3d == true
+        sVoiRenderingEnable = 'off';
+    else
+        sVoiRenderingEnable = 'on';
+    end
+
          uicontrol(dlgOptions,...
                   'style'   , 'text',...
                   'string'  , '3D VOI Renderer',...
                   'horizontalalignment', 'left',...
-                  'position', [20 227 200 20],...
+                  'position', [20 230 200 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                  
-                  'Enable', 'On'...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'Enable', sVoiRenderingEnable...
                   );
-              
+
     sVoiRenderer = voi3DRenderer('get');
     if strcmpi(sVoiRenderer, 'VolumeRendering')
-       dVoiRendererOffset = 1;  
+       dVoiRendererOffset = 1;
     elseif strcmpi(sVoiRenderer, 'Isosurface')
-       dVoiRendererOffset = 2;  
+       dVoiRendererOffset = 2;
     else
        dVoiRendererOffset = 3;
     end
-              
+
+
     uiVoiRenderer = ...
         uicontrol(dlgOptions, ...
-                  'enable'  , 'on',...
+                  'Enable', sVoiRenderingEnable, ...
                   'Style'   , 'popup', ...
-                  'position', [200 230 160 20],...
-                  'String'  , {'VolumeRendering', 'Isosurface'}, ...
+                  'position', [200 230 160 25],...
+                  'String'  , {'VolumeRendering', 'Isosurface', 'LabelRendering'}, ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Value'   , dVoiRendererOffset ...
                   );
 
     chk3DVoiSmooth = ...
         uicontrol(dlgOptions,...
                   'style'   , 'checkbox',...
-                  'enable'  , 'on',...
+                  'Enable', sVoiRenderingEnable,...
                   'value'   , voi3DSmooth('get'),...
                   'position', [40 205 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get') ...                    
+                  'ForegroundColor', viewerForegroundColor('get') ...
                   );
 
+    if bVoiViewer3d == true
+        sVoiRenderingEnable = 'off';
+    else
+        sVoiRenderingEnable = 'Inactive';
+    end
          uicontrol(dlgOptions,...
                   'style'   , 'text',...
                   'string'  , 'Smooth 3D VOI',...
                   'horizontalalignment', 'left',...
-                  'position', [60 202 200 20],...
-                  'Enable', 'Inactive',...
+                  'position', [60 205 200 20],...
+                  'Enable', sVoiRenderingEnable,...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'ButtonDownFcn', @chk3DVoiSmoothCallback...
                   );
 
@@ -241,7 +278,7 @@ function setOptionsCallback(~, ~)
                   'value'   , showBorder('get'),...
                   'position', [20 180 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @viewBorderCallback...
                   );
 
@@ -249,10 +286,10 @@ function setOptionsCallback(~, ~)
                   'style'   , 'text',...
                   'string'  , 'Show Border',...
                   'horizontalalignment', 'left',...
-                  'position', [40 177 200 20],...
+                  'position', [40 180 200 20],...
                   'Enable', 'Inactive',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'ButtonDownFcn', @viewBorderCallback...
                   );
 
@@ -265,7 +302,7 @@ function setOptionsCallback(~, ~)
                   'value'   , ~gateUseSeriesUID('get'),...
                   'position', [20 155 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @gateUseSeriesUIDCallback...
                   );
 
@@ -273,10 +310,10 @@ function setOptionsCallback(~, ~)
                   'style'   , 'text',...
                   'string'  , 'Gate all series',...
                   'horizontalalignment', 'left',...
-                  'position', [40 152 200 20],...
+                  'position', [40 155 200 20],...
                   'Enable', 'Inactive',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'ButtonDownFcn', @gateUseSeriesUIDCallback...
                   );
 
@@ -293,7 +330,7 @@ function setOptionsCallback(~, ~)
                   'value'   , gateLookupTable('get'),...
                   'position', [40 130 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @gateLookupTableCallback...
                   );
 
@@ -301,10 +338,10 @@ function setOptionsCallback(~, ~)
                   'style'   , 'text',...
                   'string'  , 'Adjust Lookup Table',...
                   'horizontalalignment', 'left',...
-                  'position', [60 127 200 20],...
+                  'position', [60 130 200 20],...
                   'Enable', 'Inactive',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'ButtonDownFcn', @gateLookupTableCallback...
                   );
 
@@ -318,10 +355,10 @@ function setOptionsCallback(~, ~)
         uicontrol(dlgOptions, ...
                   'enable'  , sChkEnable,...
                   'Style'   , 'popup', ...
-                  'position', [200 130 160 20],...
+                  'position', [200 130 160 25],...
                   'String'  , {'Relative', 'Absolute'}, ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Value'   , dLookupValue ...
                   );
 
@@ -333,7 +370,7 @@ function setOptionsCallback(~, ~)
                   'value'   , aspectRatio('get'),...
                   'position', [20 100 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @aspectRatioCallback...
                   );
 
@@ -341,10 +378,10 @@ function setOptionsCallback(~, ~)
                   'style'   , 'text',...
                   'string'  , 'Aspect ratio',...
                   'horizontalalignment', 'left',...
-                  'position', [40 97 100 20],...
+                  'position', [40 100 100 20],...
                   'Enable', 'Inactive',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                    
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'ButtonDownFcn', @aspectRatioCallback...
                   );
 
@@ -381,7 +418,7 @@ function setOptionsCallback(~, ~)
                  'string'    , sXValue,...
                  'position'  , [255 100 50 20],...
                  'BackgroundColor', viewerBackgroundColor('get'), ...
-                 'ForegroundColor', viewerForegroundColor('get'), ...                   
+                 'ForegroundColor', viewerForegroundColor('get'), ...
                  'Callback'  , @aspectRatioCallback...
                  );
 
@@ -393,7 +430,7 @@ function setOptionsCallback(~, ~)
                  'string'    , sYValue,...
                  'position'  , [200 100 50 20],...
                  'BackgroundColor', viewerBackgroundColor('get'), ...
-                 'ForegroundColor', viewerForegroundColor('get'), ...                  
+                 'ForegroundColor', viewerForegroundColor('get'), ...
                  'Callback'  , @aspectRatioCallback...
                  );
 
@@ -405,70 +442,70 @@ function setOptionsCallback(~, ~)
                  'string'    , sZValue,...
                  'position'  , [310 100 50 20],...
                  'BackgroundColor', viewerBackgroundColor('get'), ...
-                 'ForegroundColor', viewerForegroundColor('get'), ...                  
+                 'ForegroundColor', viewerForegroundColor('get'), ...
                  'Callback'  , @aspectRatioCallback...
                  );
     % 3D Engine
 
-    chk3DEngine = ...
-        uicontrol(dlgOptions,...
-                  'style'   , 'checkbox',...
-                  'enable'  , 'on',...
-                  'value'   , is3DEngine('get'),...
-                  'position', [20 75 20 20],...
-                  'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                   
-                  'Callback', @set3DEngineCallback...
-                  );
-
-        uicontrol(dlgOptions,...
-                  'style'   , 'text',...
-                  'string'  , '3D Engine',...
-                  'horizontalalignment', 'left',...
-                  'position', [40 72 200 20],...
-                  'Enable', 'Inactive',...
-                  'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                   
-                  'ButtonDownFcn', @set3DEngineCallback...
-                  );
+%     chk3DEngine = ...
+%         uicontrol(dlgOptions,...
+%                   'style'   , 'checkbox',...
+%                   'enable'  , 'on',...
+%                   'value'   , is3DEngine('get'),...
+%                   'position', [20 75 20 20],...
+%                   'BackgroundColor', viewerBackgroundColor('get'), ...
+%                   'ForegroundColor', viewerForegroundColor('get'), ...
+%                   'Callback', @set3DEngineCallback...
+%                   );
+%
+%         uicontrol(dlgOptions,...
+%                   'style'   , 'text',...
+%                   'string'  , '3D Engine',...
+%                   'horizontalalignment', 'left',...
+%                   'position', [40 75 200 20],...
+%                   'Enable', 'Inactive',...
+%                   'BackgroundColor', viewerBackgroundColor('get'), ...
+%                   'ForegroundColor', viewerForegroundColor('get'), ...
+%                   'ButtonDownFcn', @set3DEngineCallback...
+%                   );
     % Shading
 
-    if is3DEngine('get') == true
-        sShadEnable = 'on';
-
-    else
-        sShadEnable = 'off';
-    end
+%     if is3DEngine('get') == true
+%         sShadEnable = 'on';
+%
+%     else
+%         sShadEnable = 'off';
+%     end
 
     chkShading = ...
         uicontrol(dlgOptions,...
                   'style'   , 'checkbox',...
-                  'enable'  , sShadEnable,...
+                  'enable'  , 'on',...
                   'value'   , isShading('get'),...
-                  'position', [40 50 20 20],...
+                  'position', [20 50 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                   
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @shadingCallback...
                   );
 
         uicontrol(dlgOptions,...
                   'style'   , 'text',...
-                  'string'  , '3D Interpolated Shading',...
+                  'string'  , 'Bilinear Interpolation',...
                   'horizontalalignment', 'left',...
-                  'position', [60 47 200 20],...
+                  'position', [40 50 200 20],...
                   'Enable', 'Inactive',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...                   
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'ButtonDownFcn', @shadingCallback...
                   );
-              
+
      % Cancel or Proceed
 
      uicontrol(dlgOptions,...
                'String','Cancel',...
                'Position',[285 7 75 25],...
                'BackgroundColor', viewerBackgroundColor('get'), ...
-               'ForegroundColor', viewerForegroundColor('get'), ...                
+               'ForegroundColor', viewerForegroundColor('get'), ...
                'Callback', @cancelOptionsCallback...
                );
 
@@ -476,7 +513,7 @@ function setOptionsCallback(~, ~)
               'String','Ok',...
               'Position',[200 7 75 25],...
               'BackgroundColor', viewerBackgroundColor('get'), ...
-              'ForegroundColor', viewerForegroundColor('get'), ...               
+              'ForegroundColor', viewerForegroundColor('get'), ...
               'Callback', @okOptionsCallback...
               );
 
@@ -488,11 +525,11 @@ function setOptionsCallback(~, ~)
         asSUVType = get(hObject, 'String');
         dSUVType  = get(hObject, 'Value');
 
-        viewerSUVtype('set', asSUVType{dSUVType});         
+        viewerSUVtype('set', asSUVType{dSUVType});
 
-        tInput = inputTemplate('get');                
-      
-        sUnitDisplay = getSerieUnitValue(dSeriesOffset);            
+        tInput = inputTemplate('get');
+
+        sUnitDisplay = getSerieUnitValue(dSeriesOffset);
         if strcmpi(sUnitDisplay, 'SUV')
             dMax = windowLevel('get', 'max')*tInput(dSeriesOffset).tQuant.tSUV.dScale;
             dMin = windowLevel('get', 'min')*tInput(dSeriesOffset).tQuant.tSUV.dScale;
@@ -500,22 +537,22 @@ function setOptionsCallback(~, ~)
 
         if isFusion('get')
 
-            sUnitDisplay = getSerieUnitValue(dFusionOffset);            
-            if strcmpi(sUnitDisplay, 'SUV')        
+            sUnitDisplay = getSerieUnitValue(dFusionOffset);
+            if strcmpi(sUnitDisplay, 'SUV')
                 dFusionMax = fusionWindowLevel('get', 'max')*tInput(dFusionOffset).tQuant.tSUV.dScale;
                 dFusionMin = fusionWindowLevel('get', 'min')*tInput(dFusionOffset).tQuant.tSUV.dScale;
             end
         end
 
         if numel(tInput) ~= 0
-            for dTemplateLoop = 1 : numel(tInput)       
+            for dTemplateLoop = 1 : numel(tInput)
                 setQuantification(dTemplateLoop);
             end
         end
 
-        tInput = inputTemplate('get');                
+        tInput = inputTemplate('get');
 
-        sUnitDisplay = getSerieUnitValue(dSeriesOffset);            
+        sUnitDisplay = getSerieUnitValue(dSeriesOffset);
         if strcmpi(sUnitDisplay, 'SUV')
             dMax = dMax/tInput(dSeriesOffset).tQuant.tSUV.dScale;
             dMin = dMin/tInput(dSeriesOffset).tQuant.tSUV.dScale;
@@ -524,66 +561,66 @@ function setOptionsCallback(~, ~)
             windowLevel('set', 'min', dMin);
 
 %             set(uiSliderWindowPtr('get'), 'value', 0.5);
-%             set(uiSliderLevelPtr('get') , 'value', 0.5);           
+%             set(uiSliderLevelPtr('get') , 'value', 0.5);
         end
 
         if isFusion('get')
 
-            sUnitDisplay = getSerieUnitValue(dFusionOffset);            
-            
-            if strcmpi(sUnitDisplay, 'SUV') 
-    
+            sUnitDisplay = getSerieUnitValue(dFusionOffset);
+
+            if strcmpi(sUnitDisplay, 'SUV')
+
                 dFusionMax = dFusionMax/tInput(dFusionOffset).tQuant.tSUV.dScale;
                 dFusionMin = dFusionMin/tInput(dFusionOffset).tQuant.tSUV.dScale;
 
                 fusionWindowLevel('set', 'max', dFusionMax);
                 fusionWindowLevel('set', 'min', dFusionMin);
-    
+
 %                 set(uiFusionSliderWindowPtr('get'), 'value', 0.5);
 %                 set(uiFusionSliderLevelPtr('get') , 'value', 0.5);
 
             end
 
-        end 
+        end
 
         if switchTo3DMode('get')     == false && ...
            switchToIsoSurface('get') == false && ...
            switchToMIPMode('get')    == false
 
-            sUnitDisplay = getSerieUnitValue(dSeriesOffset);            
+            sUnitDisplay = getSerieUnitValue(dSeriesOffset);
             if strcmpi(sUnitDisplay, 'SUV')
 
-                setWindowMinMax(dMax, dMin);                    
+                setWindowMinMax(dMax, dMin);
 
-%                 if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1            
+%                 if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
 %                     set(axePtr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);
 %                 else
 %                     set(axes1Ptr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);
 %                     set(axes2Ptr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);
 %                     set(axes3Ptr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);
-%                     
+%
 %                     if link2DMip('get') == true && isVsplash('get') == false
-%                         set(axesMipPtr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);            
+%                         set(axesMipPtr('get', [], dSeriesOffset), 'CLim', [dMin dMax]);
 %                     end
 %                 end
             end
 
             if isFusion('get')
 
-                sUnitDisplay = getSerieUnitValue(dFusionOffset);                            
-                if strcmpi(sUnitDisplay, 'SUV') 
-                    setFusionWindowMinMax(dFusionMax, dFusionMin);                    
+                sUnitDisplay = getSerieUnitValue(dFusionOffset);
+                if strcmpi(sUnitDisplay, 'SUV')
+                    setFusionWindowMinMax(dFusionMax, dFusionMin);
                 end
 
                 dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                 for rr=1:dNbFusedSeries
 
-                    sUnitDisplay = getSerieUnitValue(rr);            
-                
-                    if strcmpi(sUnitDisplay, 'SUV') 
-    
-                        if size(dicomBuffer('get', [], dNbFusedSeries), 3) == 1 
-    
+                    sUnitDisplay = getSerieUnitValue(rr);
+
+                    if strcmpi(sUnitDisplay, 'SUV')
+
+                        if size(dicomBuffer('get', [], dNbFusedSeries), 3) == 1
+
                             axefPtr = axefPtr('get', [], rr);
                             if ~isempty(axefPtr)
                                 set(axefPtr, 'CLim', [dFusionMin dFusionMax]);
@@ -599,24 +636,24 @@ function setOptionsCallback(~, ~)
                             if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
                                 set(axes1f, 'CLim', [dFusionMin dFusionMax]);
                                 set(axes2f, 'CLim', [dFusionMin dFusionMax]);
-                                set(axes3f, 'CLim', [dFusionMin dFusionMax]);                            
+                                set(axes3f, 'CLim', [dFusionMin dFusionMax]);
                             end
-    
+
                             if link2DMip('get') == true && isVsplash('get') == false
                                 axesMipf = axesMipfPtr('get', [], rr);
                                 if ~isempty(axesMipf)
-                                    set(axesMipf, 'CLim', [dFusionMin dFusionMax]);            
+                                    set(axesMipf, 'CLim', [dFusionMin dFusionMax]);
                                 end
                             end
-                          
+
                         end
                     end
                 end
-               
+
             end
-       
+
             refreshImages();
-        end        
+        end
 
     end
 
@@ -667,16 +704,21 @@ function setOptionsCallback(~, ~)
                        switchToIsoSurface('get') == false && ...
                        switchToMIPMode('get')    == false
 
-                        shading(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
+%                         shading(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
+                        set(imAxePtr('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'nearest');
 
                         if isFusion('get') == true
+
                             dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+
                             for rr=1:dNbFusedSeries
 
-                                axef = axefPtr('get', [], rr);
+%                                 axef = axefPtr('get', [], rr);
+                                imAxe = imAxeFPtr('get', [] , rr);
 
-                                if ~isempty(axef) 
-                                    shading(axef, 'flat');
+                                if ~isempty(imAxe)
+%                                     shading(axef, 'flat');
+                                    set(imAxe,  'Interpolation', 'nearest');
                                 end
                             end
                         end
@@ -687,35 +729,63 @@ function setOptionsCallback(~, ~)
                        switchToIsoSurface('get') == false && ...
                        switchToMIPMode('get')    == false
 
-                        shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
-                        shading(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
-                        shading(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
-                        
-                        if link2DMip('get') == true && isVsplash('get') == false                                               
-                            shading(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
+%                         shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
+%                         shading(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
+%                         shading(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
+%
+%                         if link2DMip('get') == true && isVsplash('get') == false
+%                             shading(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
+%                         end
+
+                        set(imCoronalPtr ('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'nearest');
+                        set(imSagittalPtr('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'nearest');
+                        set(imAxialPtr   ('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'nearest');
+
+                        if link2DMip('get') == true && isVsplash('get') == false
+
+                            set(imMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'nearest');
                         end
-                        
+
                         if isFusion('get') == true
-                            
+
                             dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                             for rr=1:dNbFusedSeries
 
-                                axes1f = axes1fPtr('get', [], rr);
-                                axes2f = axes2fPtr('get', [], rr);
-                                axes3f = axes3fPtr('get', [], rr);
+%                                 axes1f = axes1fPtr('get', [], rr);
+%                                 axes2f = axes2fPtr('get', [], rr);
+%                                 axes3f = axes3fPtr('get', [], rr);
 
-                                if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
-                                    shading(axes1f, 'flat');
-                                    shading(axes2f, 'flat');
-                                    shading(axes3f, 'flat');                                    
+
+%                                 if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
+%                                     shading(axes1f, 'flat');
+%                                     shading(axes2f, 'flat');
+%                                     shading(axes3f, 'flat');
+%                                 end
+
+                                imCoronalF  = imCoronalFPtr ('get', [] , rr);
+                                imSagittalF = imSagittalFPtr('get', [] , rr);
+                                imAxialF    = imAxialFPtr   ('get', [] , rr);
+
+                                if ~isempty(imCoronalF) && ~isempty(imSagittalF) && ~isempty(imAxialF)
+
+                                    set(imCoronalF ,  'Interpolation', 'nearest');
+                                    set(imSagittalF,  'Interpolation', 'nearest');
+                                    set(imAxialF   ,  'Interpolation', 'nearest');
                                 end
 
-                                if link2DMip('get') == true && isVsplash('get') == false 
-                                    axesMipf = axesMipfPtr('get', [], rr);
-                                    if ~isempty(axesMipf)
-                                        shading(axesMipf, 'flat');
-                                    end                                    
-                                end                                
+                                if link2DMip('get') == true && isVsplash('get') == false
+
+                                    imMipF = imMipFPtr('get', [], rr);
+
+                                    set(imMipF,  'Interpolation', 'nearest');
+                                end
+
+%                                 if link2DMip('get') == true && isVsplash('get') == false
+%                                     axesMipf = axesMipfPtr('get', [], rr);
+%                                     if ~isempty(axesMipf)
+%                                         shading(axesMipf, 'flat');
+%                                     end
+%                                 end
                             end
                         end
 
@@ -734,48 +804,81 @@ function setOptionsCallback(~, ~)
                             dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                             for rr=1:dNbFusedSeries
 
-                                axef = axefPtr('get', [], rr);
+%                                 axef = axefPtr('get', [], rr);
+%
+%                                 if ~isempty(axef)
+%                                     shading(axef, 'interp');
+%                                 end
+                                imAxe = imAxeFPtr('get', [] , rr);
 
-                                if ~isempty(axef) 
-                                    shading(axef, 'interp');
+                                if ~isempty(imAxe)
+%                                     shading(axef, 'flat');
+                                    set(imAxe,  'Interpolation', 'bilinear');
                                 end
-                            end                           
+                            end
                         end
                    end
                 else
                     if switchTo3DMode('get')     == false && ...
                        switchToIsoSurface('get') == false && ...
                        switchToMIPMode('get')    == false
+%
+%                         shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
+%                         shading(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
+%                         shading(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
+%
+%                         if link2DMip('get') == true && isVsplash('get') == false
+%                             shading(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
+%                         end
 
-                        shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
-                        shading(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
-                        shading(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
-                        
-                        if link2DMip('get') == true && isVsplash('get') == false                       
-                            shading(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
+                        set(imCoronalPtr ('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'bilinear');
+                        set(imSagittalPtr('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'bilinear');
+                        set(imAxialPtr   ('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'bilinear');
+
+                        if link2DMip('get') == true && isVsplash('get') == false
+
+                            set(imMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'bilinear');
                         end
 
                         if isFusion('get') == true
-                            
+
                             dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                             for rr=1:dNbFusedSeries
+%
+%                                 axes1f = axes1fPtr('get', [], rr);
+%                                 axes2f = axes2fPtr('get', [], rr);
+%                                 axes3f = axes3fPtr('get', [], rr);
+%
+%                                 if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
+%                                     shading(axes1f, 'interp');
+%                                     shading(axes2f, 'interp');
+%                                     shading(axes3f, 'interp');
+%                                 end
+%
+%                                 if link2DMip('get') == true && isVsplash('get') == false
+%
+%                                     axesMipf = axesMipfPtr('get', [], rr);
+%                                     if ~isempty(axesMipf)
+%                                         shading(axesMipf, 'interp');
+%                                     end
+%                                 end
 
-                                axes1f = axes1fPtr('get', [], rr);
-                                axes2f = axes2fPtr('get', [], rr);
-                                axes3f = axes3fPtr('get', [], rr);
+                                imCoronalF  = imCoronalFPtr ('get', [] , rr);
+                                imSagittalF = imSagittalFPtr('get', [] , rr);
+                                imAxialF    = imAxialFPtr   ('get', [] , rr);
 
-                                if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
-                                    shading(axes1f, 'interp');
-                                    shading(axes2f, 'interp');
-                                    shading(axes3f, 'interp');                                    
+                                if ~isempty(imCoronalF) && ~isempty(imSagittalF) && ~isempty(imAxialF)
+
+                                    set(imCoronalF ,  'Interpolation', 'bilinear');
+                                    set(imSagittalF,  'Interpolation', 'bilinear');
+                                    set(imAxialF   ,  'Interpolation', 'bilinear');
                                 end
 
                                 if link2DMip('get') == true && isVsplash('get') == false
 
-                                    axesMipf = axesMipfPtr('get', [], rr);
-                                    if ~isempty(axesMipf)
-                                        shading(axesMipf, 'interp');
-                                    end
+                                    imMipF = imMipFPtr('get', [], rr);
+
+                                    set(imMipF,  'Interpolation', 'bilinear');
                                 end
 
                             end
@@ -804,7 +907,7 @@ function setOptionsCallback(~, ~)
                 end
             end
         end
-        
+
         if get(chkAspect, 'Value') == 0
 
             set(edtRatioX, 'Enable', 'off');
@@ -818,59 +921,59 @@ function setOptionsCallback(~, ~)
                     axis(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
 
                     if isFusion('get') == true
-                        
+
                         dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                         for rr=1:dNbFusedSeries
 
                             axef = axefPtr('get', [], rr);
-                            if ~isempty(axef) 
+                            if ~isempty(axef)
                                 daspect(axef, [1 1 1]);
-                                axis(axef, 'normal');                                
+                                axis(axef, 'normal');
                             end
 
-                        end   
-                        
-                        if isPlotContours('get') == true 
-                            daspect(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [1 1 1]);                            
-                       end    
+                        end
+
+                        if isPlotContours('get') == true
+                            daspect(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [1 1 1]);
+                       end
                     end
                 else
                     daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [1 1 1]);
                     daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [1 1 1]);
                     daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [1 1 1]);
-                    
-                    if isVsplash('get') == false                      
+
+                    if isVsplash('get') == false
                         daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [1 1 1]);
                     end
 
                     axis(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
                     axis(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
                     axis(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
-                    
-                    if isVsplash('get') == false                                          
+
+                    if isVsplash('get') == false
                         axis(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
                     end
 
                     if isFusion('get') == true
-                        
+
                         dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                         for rr=1:dNbFusedSeries
-                            
+
                             axes1f = axes1fPtr('get', [], rr);
                             axes2f = axes2fPtr('get', [], rr);
                             axes3f = axes3fPtr('get', [], rr);
-                            
+
                             if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
                                 daspect(axes1f, [1 1 1]);
                                 daspect(axes2f, [1 1 1]);
                                 daspect(axes3f, [1 1 1]);
-                                
+
                                 axis(axes1f, 'normal');
                                 axis(axes2f, 'normal');
                                 axis(axes3f, 'normal');
                             end
-                            
-                            if link2DMip('get') == true && isVsplash('get') == false    
+
+                            if link2DMip('get') == true && isVsplash('get') == false
                                 axesMipf = axesMipfPtr('get', [], rr);
                                 if ~isempty(axesMipf)
                                     daspect(axesMipf, [1 1 1]);
@@ -879,22 +982,22 @@ function setOptionsCallback(~, ~)
                             end
                         end
                     end
-                    
+
                     if isPlotContours('get') == true && isVsplash('get') == false
 
                         daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [1 1 1]);
                         daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [1 1 1]);
                         daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [1 1 1]);
-                        
+
                         axis(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');
                         axis(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');
-                        axis(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');                        
-                        
-                        if isVsplash('get') == false                                               
+                        axis(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');
+
+                        if isVsplash('get') == false
                             daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [1 1 1]);
                             axis(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');
                         end
-                    end                    
+                    end
 
                 end
             end
@@ -927,23 +1030,23 @@ function setOptionsCallback(~, ~)
                     if switchTo3DMode('get')     == false && ...
                        switchToIsoSurface('get') == false && ...
                        switchToMIPMode('get')    == false
-                   
+
                         daspect(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y 1]);
-                        
+
                         if isFusion('get') == true % TO DO, support fusion with is own aspect
-                            
+
                             dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                             for rr=1:dNbFusedSeries
 
                                 axef = axefPtr('get', [], rr);
-                                if ~isempty(axef)                          
+                                if ~isempty(axef)
                                     daspect(axef, [x y 1]);
                                 end
                             end
 
-                            if isPlotContours('get') == true 
-                                daspect(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [x y 1]);                            
-                           end                           
+                            if isPlotContours('get') == true
+                                daspect(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [x y 1]);
+                           end
                         end
 
                     end
@@ -971,17 +1074,17 @@ function setOptionsCallback(~, ~)
                       switchToMIPMode('get')    == false
 
  %                      if strcmpi(imageOrientation('get'), 'axial')
-                           
+
                             daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
                             daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
                             daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
-                            
-                            if isVsplash('get') == false                       
+
+                            if isVsplash('get') == false
                                 daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
                             end
-                            
+
                             if isFusion('get') == true % TO DO, support fusion with is own aspect
-                                
+
                                 dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                                 for rr=1:dNbFusedSeries
 
@@ -992,41 +1095,41 @@ function setOptionsCallback(~, ~)
                                     if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
                                         daspect(axes1f, [z x y]);
                                         daspect(axes2f, [z y x]);
-                                        daspect(axes3f, [x y z]);                                        
+                                        daspect(axes3f, [x y z]);
                                     end
-                                    
-                                    if isVsplash('get') == false    
+
+                                    if isVsplash('get') == false
                                         axesMipf = axesMipfPtr('get', [], rr);
                                         if ~isempty(axesMipf)
                                             daspect(axesMipf, [z y x]);
                                         end
                                     end
-                                    
+
                                 end
                             end
-                            
+
                             if isPlotContours('get') == true && isVsplash('get') == false
                                 daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z x y]);
                                 daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z y x]);
                                 daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [x y z]);
-                                
-                                if isVsplash('get') == false                                                       
+
+                                if isVsplash('get') == false
                                     daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z y x]);
-                                end                                
+                                end
                             end
 
 %                       elseif strcmpi(imageOrientation('get'), 'coronal')
-%                           
+%
 %                            daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
 %                            daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [y z x]);
 %                            daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-                            
-%                            if link2DMip('get') == true && isVsplash('get') == false                                                   
+
+%                            if link2DMip('get') == true && isVsplash('get') == false
 %                                daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
 %                            end
-                            
+
 %                            if isFusion('get') == true % TO DO, support fusion with is own aspect
-                                
+
 %                                dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
 %                                for rr=1:dNbFusedSeries
 
@@ -1037,43 +1140,43 @@ function setOptionsCallback(~, ~)
 %                                    if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
 %                                        daspect(axes1f, [x y z]);
 %                                        daspect(axes2f, [y z x]);
-%                                        daspect(axes3f, [z x y]);                                        
+%                                        daspect(axes3f, [z x y]);
 %                                    end
-                                    
-%                                    if link2DMip('get') == true && isVsplash('get') == false 
-                                        
+
+%                                    if link2DMip('get') == true && isVsplash('get') == false
+
 %                                        axesMipf = axesMipfPtr('get', [], rr);
 %                                        if ~isempty(axesMipf)
 %                                            daspect(axesMipf, [x y z]);
 %                                        end
-%                                    end                                    
+%                                    end
 %                                end
 
 %                            end
-                            
+
 %                            if isPlotContours('get') == true && isVsplash('get') == false
-                                
+
 %                                daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [x y z]);
 %                                daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [y z x]);
 %                                daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z x y]);
-                                
-%                                if link2DMip('get') == true && isVsplash('get') == false                                                       
+
+%                                if link2DMip('get') == true && isVsplash('get') == false
 %                                    daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [x y z]);
-%                                end                                
+%                                end
 %                            end
-                            
+
 %                        elseif strcmpi(imageOrientation('get'), 'sagittal')
-                            
+
 %                            daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [y x z]);
 %                            daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x z y]);
 %                            daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-                            
-%                            if link2DMip('get') == true && isVsplash('get') == false                                                   
+
+%                            if link2DMip('get') == true && isVsplash('get') == false
 %                                daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [y x z]);
 %                            end
-                            
+
 %                            if isFusion('get') == true % TO DO, support fusion with is own aspect
-                                
+
 %                                dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
 %                                for rr=1:dNbFusedSeries
 
@@ -1084,30 +1187,30 @@ function setOptionsCallback(~, ~)
 %                                    if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
 %                                        daspect(axes1f, [y x z]);
 %                                        daspect(axes2f, [x z y]);
-%                                        daspect(axes3f, [z x y]);                                          
+%                                        daspect(axes3f, [z x y]);
 %                                    end
-                                    
-%                                    if link2DMip('get') == true && isVsplash('get') == false   
-                                        
+
+%                                    if link2DMip('get') == true && isVsplash('get') == false
+
 %                                        axesMipf = axesMipfPtr('get', [], rr);
 %                                        if ~isempty(axesMipf)
 %                                            daspect(axesMipf, [y x z]);
 %                                        end
-%                                    end                                     
+%                                    end
 %                                end
 
 %                            end
-                            
+
 %                            if isPlotContours('get') == true && isVsplash('get') == false
-                                
+
 %                                daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [y x z]);
 %                                daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [x z y]);
 %                                daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z x y]);
-                                
-%                                if link2DMip('get') == true && isVsplash('get') == false                                                       
+
+%                                if link2DMip('get') == true && isVsplash('get') == false
 %                                    daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [y x z]);
-%                                end                                
-%                            end                            
+%                                end
+%                            end
 %                       end
                    end
                 end
@@ -1288,14 +1391,14 @@ function setOptionsCallback(~, ~)
                     y = aspectRatioValue('get', 'y');
 
                     daspect(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y 1]);
-                    
+
                     if isFusion('get') == true
-                        
+
                         dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                         for rr=1:dNbFusedSeries
 
                             axef = axefPtr('get', [], rr);
-                            if ~isempty(axef)                                        
+                            if ~isempty(axef)
                                 daspect(axef, [x y 1]);
                             end
                         end
@@ -1303,16 +1406,16 @@ function setOptionsCallback(~, ~)
                 else
                     daspect(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), [1 1 1]);
                     axis(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
-                    
+
                     if isFusion('get') == true
-                        
+
                         dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                         for rr=1:dNbFusedSeries
 
                             axef = axefPtr('get', [], rr);
-                            if ~isempty(axef) 
+                            if ~isempty(axef)
                                 daspect(axef, [1 1 1]);
-                                axis(axef, 'normal');                                
+                                axis(axef, 'normal');
                             end
                         end
                     end
@@ -1324,33 +1427,33 @@ function setOptionsCallback(~, ~)
 
                     if isShading('get')
                         shading(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
-                        
+
                         if isFusion('get') == true
-                            
+
                             dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                             for rr=1:dNbFusedSeries
 
                                 axef = axefPtr('get', [], rr);
-                                if ~isempty(axef) 
+                                if ~isempty(axef)
                                     shading(axef, 'interp');
                                 end
                             end
                         end
 
                     else
-                        
+
                         shading(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
-                        
+
                         if isFusion('get') == true
-                            
+
                             dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                             for rr=1:dNbFusedSeries
 
                                 axef = axefPtr('get', [], rr);
-                                if ~isempty(axef) 
+                                if ~isempty(axef)
                                     shading(axef, 'flat');
                                 end
-                            end                            
+                            end
                         end
 
                     end
@@ -1369,17 +1472,17 @@ function setOptionsCallback(~, ~)
                     z = aspectRatioValue('get', 'z');
 
 %                   if strcmpi(imageOrientation('get'), 'axial')
-                       
+
                         daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
                         daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
                         daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
-                        
-                        if isVsplash('get') == false                       
+
+                        if isVsplash('get') == false
                             daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
                         end
-                        
+
                         if isFusion('get') == true
-                            
+
                             dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                             for rr=1:dNbFusedSeries
 
@@ -1390,7 +1493,7 @@ function setOptionsCallback(~, ~)
                                 if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
                                     daspect(axes1f, [z x y]);
                                     daspect(axes2f, [z y x]);
-                                    daspect(axes3f, [x y z]);                                    
+                                    daspect(axes3f, [x y z]);
                                 end
 
                                 if isVsplash('get') == false
@@ -1403,30 +1506,30 @@ function setOptionsCallback(~, ~)
 
                             end
                         end
-                        
-                        if isPlotContours('get') && isVsplash('get') == false 
-                            
+
+                        if isPlotContours('get') && isVsplash('get') == false
+
                             daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z x y]);
                             daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z y x]);
                             daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [x y z]);
-                            
-                            if isVsplash('get') == false                        
+
+                            if isVsplash('get') == false
                                 daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z y x]);
                             end
                         end
-                        
+
 %                   elseif strcmpi(imageOrientation('get'), 'coronal')
-                       
+
 %                        daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
 %                        daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [y z x]);
 %                        daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-                        
-%                        if link2DMip('get') == true && isVsplash('get') == false                                               
+
+%                        if link2DMip('get') == true && isVsplash('get') == false
 %                            daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
 %                        end
-                        
+
 %                        if isFusion('get') == true
-                            
+
 %                            dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
 %                            for rr=1:dNbFusedSeries
 
@@ -1437,7 +1540,7 @@ function setOptionsCallback(~, ~)
 %                                if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
 %                                    daspect(axes1f, [x y z]);
 %                                    daspect(axes2f, [y z x]);
-%                                    daspect(axes3f, [z x y]);                                    
+%                                    daspect(axes3f, [z x y]);
 %                                end
 
 %                                if link2DMip('get') == true && isVsplash('get') == false
@@ -1448,32 +1551,32 @@ function setOptionsCallback(~, ~)
 %                                    end
 %                                end
 
-%                            end                            
+%                            end
 %                        end
-                       
-%                        if isPlotContours('get') && isVsplash('get') == false 
-                            
+
+%                        if isPlotContours('get') && isVsplash('get') == false
+
 %                            daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [x y z]);
 %                            daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [y z x]);
 %                            daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z x y]);
-                            
-%                            if link2DMip('get') == true && isVsplash('get') == false                      
+
+%                            if link2DMip('get') == true && isVsplash('get') == false
 %                                daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [x y z]);
 %                            end
 %                        end
-                       
+
 %                    elseif strcmpi(imageOrientation('get'), 'sagittal')
-                        
+
 %                        daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [y x z]);
 %                        daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x z y]);
 %                        daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-                        
-%                        if link2DMip('get') == true && isVsplash('get') == false                                               
+
+%                        if link2DMip('get') == true && isVsplash('get') == false
 %                            daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [y x z]);
 %                        end
-                        
+
 %                        if isFusion('get') == true
-                            
+
 %                            dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
 %                            for rr=1:dNbFusedSeries
 
@@ -1484,7 +1587,7 @@ function setOptionsCallback(~, ~)
 %                                if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
 %                                    daspect(axes1f, [y x z]);
 %                                    daspect(axes2f, [x z y]);
-%                                    daspect(axes3f, [z x y]);                                    
+%                                    daspect(axes3f, [z x y]);
 %                                end
 
 %                                if link2DMip('get') == true && isVsplash('get') == false
@@ -1495,16 +1598,16 @@ function setOptionsCallback(~, ~)
 %                                    end
 %                                end
 
-%                            end                            
+%                            end
 %                        end
-                        
-%                        if isPlotContours('get') && isVsplash('get') == false 
-                            
+
+%                        if isPlotContours('get') && isVsplash('get') == false
+
 %                            daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [y x z]);
 %                            daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [x z y]);
 %                            daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z x y]);
-                            
-%                            if link2DMip('get') == true && isVsplash('get') == false                                   
+
+%                            if link2DMip('get') == true && isVsplash('get') == false
 %                                daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [y x z]);
 %                            end
 %                        end
@@ -1513,18 +1616,18 @@ function setOptionsCallback(~, ~)
                     daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [1 1 1]);
                     daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [1 1 1]);
                     daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [1 1 1]);
-                    
+
                     axis(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
                     axis(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
-                    axis(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');                    
-                    
-                    if isVsplash('get') == false                                           
+                    axis(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
+
+                    if isVsplash('get') == false
                         daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [1 1 1]);
                         axis(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
                     end
 
                     if isFusion('get') == true
-                        
+
                         dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                         for rr=1:dNbFusedSeries
 
@@ -1535,11 +1638,11 @@ function setOptionsCallback(~, ~)
                             if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
                                 daspect(axes1f, [1 1 1]);
                                 daspect(axes2f, [1 1 1]);
-                                daspect(axes3f, [1 1 1]);                                                                
+                                daspect(axes3f, [1 1 1]);
 
                                 axis(axes1f, 'normal');
                                 axis(axes2f, 'normal');
-                                axis(axes3f, 'normal');                                
+                                axis(axes3f, 'normal');
                             end
 
                             if isVsplash('get') == false
@@ -1551,38 +1654,38 @@ function setOptionsCallback(~, ~)
                                 end
                             end
 
-                        end                                                
+                        end
                     end
-                    
-                    if isPlotContours('get') && isVsplash('get') == false 
-                        
+
+                    if isPlotContours('get') && isVsplash('get') == false
+
                         daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [1 1 1]);
                         daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [1 1 1]);
                         daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [1 1 1]);
-                        
+
                         axis(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');
                         axis(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');
                         axis(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');
-                        
-                        if isVsplash('get') == false                                               
+
+                        if isVsplash('get') == false
                             daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [1 1 1]);
                             axis(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');
-                        end                       
+                        end
                     end
 
                 end
 
                 if isShading('get')
-                    
+
                     shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
                     shading(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
                     shading(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
-                    if link2DMip('get') == true && isVsplash('get') == false                                           
+                    if link2DMip('get') == true && isVsplash('get') == false
                         shading(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
                     end
-                    
+
                     if isFusion('get') == true
-                        
+
                         dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                         for rr=1:dNbFusedSeries
 
@@ -1610,13 +1713,13 @@ function setOptionsCallback(~, ~)
                     shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
                     shading(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
                     shading(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
-                    
-                    if link2DMip('get') == true && isVsplash('get') == false                                           
+
+                    if link2DMip('get') == true && isVsplash('get') == false
                         shading(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
                     end
-                    
+
                     if isFusion('get') == true
-                        
+
                         dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                         for rr=1:dNbFusedSeries
 
@@ -1627,7 +1730,7 @@ function setOptionsCallback(~, ~)
                             if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
                                 shading(axes1f, 'flat');
                                 shading(axes2f, 'flat');
-                                shading(axes3f, 'flat');                                
+                                shading(axes3f, 'flat');
                             end
 
                             if link2DMip('get') == true && isVsplash('get') == false
@@ -1651,33 +1754,33 @@ function setOptionsCallback(~, ~)
     function okOptionsCallback(~, ~)
 
         bRefresh = false;
-        
+
         if get(chkUpdateWriteUID, 'Value') == true
             updateDicomWriteSeriesInstanceUID('set', true);
         else
             updateDicomWriteSeriesInstanceUID('set', false);
         end
-        
+
         if get(chkOriginalMatrix, 'Value') == true
             modifiedImagesContourMatrix('set', true);
         else
             modifiedImagesContourMatrix('set', false);
         end
-        
+
         if get(chkMip2DOnly, 'Value') == true
             playback2DMipOnly('set', true);
         else
             playback2DMipOnly('set', false);
         end
-        
+
         if get(uiVoiRenderer, 'Value') == 1
             voi3DRenderer('set', 'VolumeRendering');
         elseif get(uiVoiRenderer, 'Value') == 2
-            voi3DRenderer('set', 'Isosurface');      
-        else            
-            voi3DRenderer('set', 'LabelRendering');      
+            voi3DRenderer('set', 'Isosurface');
+        else
+            voi3DRenderer('set', 'LabelRendering');
         end
-       
+
         if get(chk3DVoiSmooth, 'Value') == true
             voi3DSmooth('set', true);
         else
@@ -1690,10 +1793,10 @@ function setOptionsCallback(~, ~)
             showBorder('set', false);
         end
 
-        if get(chkShading , 'Value') ~= isShading('get' ) || ...
-           get(chk3DEngine, 'Value') ~= is3DEngine('get')
-            bRefresh = true;
-        end
+%         if get(chkShading , 'Value') ~= isShading('get' ) || ...
+%            get(chk3DEngine, 'Value') ~= is3DEngine('get')
+%             bRefresh = true;
+%         end
 
         if get(chkUseUID, 'Value') == false
             gateUseSeriesUID('set', true);
@@ -1724,12 +1827,12 @@ function setOptionsCallback(~, ~)
             aspectRatio('set', false);
         end
 
-        if get(chk3DEngine, 'Value') == true
-            is3DEngine('set', true);
-        else
-            is3DEngine('set', false);
-        end
-        
+%         if get(chk3DEngine, 'Value') == true
+%             is3DEngine('set', true);
+%         else
+%             is3DEngine('set', false);
+%         end
+
         aspectRatioValue('set', 'x', str2double(get(edtRatioX, 'String')));
         aspectRatioValue('set', 'y', str2double(get(edtRatioY, 'String')));
         aspectRatioValue('set', 'z', str2double(get(edtRatioZ, 'String')));
@@ -1765,7 +1868,7 @@ function setOptionsCallback(~, ~)
                     objKernelPanel.Checked = 'off';
                 end
             end
-            
+
             bInitRoiPanel = false;
             if  viewRoiPanel('get') == true
                 bInitRoiPanel = true;
@@ -1775,10 +1878,10 @@ function setOptionsCallback(~, ~)
                     objRoiPanel.Checked = 'off';
                 end
             end
-            
+
  %            triangulateCallback();
- 
-             bInitContours = false;   
+
+             bInitContours = false;
              if isPlotContours('get') == true % Deactivate Contours
                  bInitContours = true;
                  setPlotContoursCallback();
@@ -1789,10 +1892,10 @@ function setOptionsCallback(~, ~)
 
              if isFusion('get') == true
                  if bInitContours == true % Reactivate Contours
-                    setPlotContoursCallback();                     
+                    setPlotContoursCallback();
                  end
              end
-             
+
              dicomViewerCore();
 
              if bInitSegPanel == true
@@ -1802,10 +1905,10 @@ function setOptionsCallback(~, ~)
              if bInitKernelPanel == true
                 setViewKernelPanel();
              end
-             
+
              if bInitRoiPanel == true
                 setViewRoiPanel();
-             end             
+             end
          end
 
 %        if bRefreshImages == true

@@ -1,5 +1,5 @@
-function setInputOrientation()
-%function setInputOrientation()
+function setInputOrientation(dSeriesOffset)
+%function setInputOrientation(dSeriesOffset)
 %Set DICOM Input Images Orientation.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,40 +27,46 @@ function setInputOrientation()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tInputTemplate = inputTemplate('get');
+    atInput = inputTemplate('get');
     
-    for pp=1: numel(tInputTemplate)
+    if ~isempty(dSeriesOffset)
+        dFromLoop = dSeriesOffset;
+        dToLoop   = dSeriesOffset;
+    else
+        dFromLoop = 1;
+        dToLoop = numel(atInput);
+    end
+
+    for pp=dFromLoop: dToLoop
         
-        if  numel(tInputTemplate(pp).asFilesList) ~= 1 % Must be revisited!
+        if  numel(atInput(pp).asFilesList) ~= 1 % Must be revisited!
 
             bFlip = getImagePosition(pp);
 
             if bFlip == true
-                tInputTemplate(pp).atDicomInfo  = flip(tInputTemplate(pp).atDicomInfo);
-                tInputTemplate(pp).asFilesList  = flip(tInputTemplate(pp).asFilesList);
-                tInputTemplate(pp).aDicomBuffer = flip(tInputTemplate(pp).aDicomBuffer);
+                atInput(pp).atDicomInfo  = flip(atInput(pp).atDicomInfo);
+                atInput(pp).asFilesList  = flip(atInput(pp).asFilesList);
+                atInput(pp).aDicomBuffer = flip(atInput(pp).aDicomBuffer);
            end
         else
-            tDicomInfo1 = tInputTemplate(pp).atDicomInfo{1};
+            tDicomInfo1 = atInput(pp).atDicomInfo{1};
             
             if strcmpi(tDicomInfo1.PatientPosition, 'FFS')
-                tInputTemplate(pp).aDicomBuffer{1} = tInputTemplate(pp).aDicomBuffer{1}(:,:,end:-1:1);
+                atInput(pp).aDicomBuffer{1} = atInput(pp).aDicomBuffer{1}(:,:,end:-1:1);
             elseif strcmpi(tDicomInfo1.PatientPosition, 'FFP')
-                tInputTemplate(pp).aDicomBuffer{1} = tInputTemplate(pp).aDicomBuffer{1}(end:-1:1,:,:);
+                atInput(pp).aDicomBuffer{1} = atInput(pp).aDicomBuffer{1}(end:-1:1,:,:);
             else
             
                 bFlip = getImagePosition(pp);
                
                 if bFlip == true                   
-                    tInputTemplate(pp).aDicomBuffer{1} = tInputTemplate(pp).aDicomBuffer{1}(:,:,end:-1:1);
+                    atInput(pp).aDicomBuffer{1} = atInput(pp).aDicomBuffer{1}(:,:,end:-1:1);
                 end
                                
             end
         end
     end
 
-    inputTemplate('set', tInputTemplate);
-
-    dicomMetaData('set', tInputTemplate(1).atDicomInfo);
+    inputTemplate('set', atInput);
 
 end

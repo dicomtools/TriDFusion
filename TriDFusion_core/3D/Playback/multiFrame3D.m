@@ -37,130 +37,175 @@ function multiFrame3D(mPlay)
         return;
     end 
 
-    volObj = volObject('get');
-    isoObj = isoObject('get');                        
-    mipObj = mipObject('get');                
+    ptrViewer3d = viewer3dObject('get');
+
+    if ~isempty(viewer3dObject('get'))
+
+        idxOffset = multiFrame3DIndex('get');
+         
+        sz = size(dicomBuffer('get', [], dSeriesOffset));
+        center = sz/2 + 0.5;
+
+        % set(ptrViewer3d, 'CameraTarget', center);
+
+        numberOfFrames = 120;
+        vec = linspace(0,2*pi,numberOfFrames)';
+        dist = sqrt(sz(1)^2 + sz(2)^2 + sz(3)^2);
+        myPosition = center + ([cos(vec) sin(vec) ones(size(vec))]*dist);
+
+        while multiFrame3DPlayback('get')           
+           
+            for idx = 1:120
     
-    voiObj = voiObject('get');
-
-    volFusionObj = volFusionObject('get');
-    isoFusionObj = isoFusionObject('get');                        
-    mipFusionObj = mipFusionObject('get');       
-        
-    idxOffset = multiFrame3DIndex('get');
-
-    vec = linspace(0,2*pi(),120)';
-
-    while multiFrame3DPlayback('get')           
-       
-        for idx = 1:120
-
-            if ~multiFrame3DPlayback('get')
-                multiFrame3DIndex('set', idxOffset);
-
-                break;
-            end
-                                    
-            if ~isempty(mipObj)  
-
-                aCameraUpVector = mipObj.CameraUpVector;            
-
-            elseif ~isempty(volObj) 
-
-                aCameraUpVector = volObj.CameraUpVector;            
-
-            elseif ~isempty(isoObj) 
-
-                aCameraUpVector = isoObj.CameraUpVector;            
-
-            elseif ~isempty(voiObj) 
-
-                aCameraUpVector = voiObj{1}.CameraUpVector;
-            else
-                aCameraUpVector = [0 0 1];
-           end
-
-            if     abs(aCameraUpVector(1)) > abs(aCameraUpVector(2)) && ...
-                   abs(aCameraUpVector(1)) > abs(aCameraUpVector(3))
-
-                aCameraUpVector = [round(aCameraUpVector(1)) 0 0];
-
-            elseif abs(aCameraUpVector(2)) > abs(aCameraUpVector(1)) && ...
-                   abs(aCameraUpVector(2)) > abs(aCameraUpVector(3))
-
-                aCameraUpVector = [0 round(aCameraUpVector(2)) 0];
-            else
-                aCameraUpVector = [0 0 round(aCameraUpVector(3))];
-            end
-            
-            if     abs(round(aCameraUpVector(1))) == 1
-
-                myPosition = [zeros(size(vec)) multiFrame3DZoom('get')*sin(vec) multiFrame3DZoom('get')*cos(vec)];
-
-            elseif abs(round(aCameraUpVector(2))) == 1   
-
-                myPosition = [multiFrame3DZoom('get')*sin(vec) zeros(size(vec)) multiFrame3DZoom('get')*cos(vec)];           
-            else
-                myPosition = [multiFrame3DZoom('get')*cos(vec) multiFrame3DZoom('get')*sin(vec) zeros(size(vec))];
-            end
-
-            aPosition = myPosition(idxOffset,:);
-            
-            if ~isempty(mipObj)                    
-
-                mipObj.CameraPosition = aPosition;  
-                mipObj.CameraUpVector = aCameraUpVector;
-            end
-
-            if ~isempty(isoObj)                        
-
-                isoObj.CameraPosition = aPosition;
-                isoObj.CameraUpVector = aCameraUpVector;
-            end
-
-            if ~isempty(volObj)
-
-                volObj.CameraPosition = aPosition;
-                volObj.CameraUpVector = aCameraUpVector;
-            end
-            
-            if ~isempty(mipFusionObj)                    
-
-                mipFusionObj.CameraPosition = aPosition;  
-                mipFusionObj.CameraUpVector = aCameraUpVector;
-            end
-
-            if ~isempty(isoFusionObj)                        
-
-                isoFusionObj.CameraPosition = aPosition;
-                isoFusionObj.CameraUpVector = aCameraUpVector;
-            end
-
-            if ~isempty(volFusionObj)
-
-                volFusionObj.CameraPosition = aPosition;
-                volFusionObj.CameraUpVector = aCameraUpVector;
-            end
-            
-            if ~isempty(voiObj)
-
-                for ff=1:numel(voiObj)
-
-                    voiObj{ff}.CameraPosition = aPosition;
-                    voiObj{ff}.CameraUpVector = aCameraUpVector;
+                if ~multiFrame3DPlayback('get')
+                    multiFrame3DIndex('set', idxOffset);
+    
+                    break;
                 end
-            end  
 
-            idxOffset = idxOffset+1;
+                aPosition = myPosition(idxOffset,:);
 
-            if idxOffset >= 120
-                idxOffset =1;
+                set(ptrViewer3d, 'CameraPosition', aPosition);
+
+                % drawnow;
+                
+                idxOffset = idxOffset+1;
+    
+                if idxOffset >= 120
+                    idxOffset =1;
+                end
+    
+                pause(multiFrame3DSpeed('get'));  
+
             end
-
-            pause(multiFrame3DSpeed('get'));       
-
         end
+        
+    else
 
+        volObj = volObject('get');
+        isoObj = isoObject('get');                        
+        mipObj = mipObject('get');                
+        
+        voiObj = voiObject('get');
+    
+        volFusionObj = volFusionObject('get');
+        isoFusionObj = isoFusionObject('get');                        
+        mipFusionObj = mipFusionObject('get');       
+            
+        idxOffset = multiFrame3DIndex('get');
+    
+        vec = linspace(0,2*pi(),120)';
+    
+        while multiFrame3DPlayback('get')           
+           
+            for idx = 1:120
+    
+                if ~multiFrame3DPlayback('get')
+                    multiFrame3DIndex('set', idxOffset);
+    
+                    break;
+                end
+                                        
+                if ~isempty(mipObj)  
+    
+                    aCameraUpVector = mipObj.CameraUpVector;            
+    
+                elseif ~isempty(volObj) 
+    
+                    aCameraUpVector = volObj.CameraUpVector;            
+    
+                elseif ~isempty(isoObj) 
+    
+                    aCameraUpVector = isoObj.CameraUpVector;            
+    
+                elseif ~isempty(voiObj) 
+    
+                    aCameraUpVector = voiObj{1}.CameraUpVector;
+                else
+                    aCameraUpVector = [0 0 1];
+               end
+    
+                if     abs(aCameraUpVector(1)) > abs(aCameraUpVector(2)) && ...
+                       abs(aCameraUpVector(1)) > abs(aCameraUpVector(3))
+    
+                    aCameraUpVector = [round(aCameraUpVector(1)) 0 0];
+    
+                elseif abs(aCameraUpVector(2)) > abs(aCameraUpVector(1)) && ...
+                       abs(aCameraUpVector(2)) > abs(aCameraUpVector(3))
+    
+                    aCameraUpVector = [0 round(aCameraUpVector(2)) 0];
+                else
+                    aCameraUpVector = [0 0 round(aCameraUpVector(3))];
+                end
+                
+                if     abs(round(aCameraUpVector(1))) == 1
+    
+                    myPosition = [zeros(size(vec)) multiFrame3DZoom('get')*sin(vec) multiFrame3DZoom('get')*cos(vec)];
+    
+                elseif abs(round(aCameraUpVector(2))) == 1   
+    
+                    myPosition = [multiFrame3DZoom('get')*sin(vec) zeros(size(vec)) multiFrame3DZoom('get')*cos(vec)];           
+                else
+                    myPosition = [multiFrame3DZoom('get')*cos(vec) multiFrame3DZoom('get')*sin(vec) zeros(size(vec))];
+                end
+    
+                aPosition = myPosition(idxOffset,:);
+                
+                if ~isempty(mipObj)                    
+    
+                    mipObj.CameraPosition = aPosition;  
+                    mipObj.CameraUpVector = aCameraUpVector;
+                end
+    
+                if ~isempty(isoObj)                        
+    
+                    isoObj.CameraPosition = aPosition;
+                    isoObj.CameraUpVector = aCameraUpVector;
+                end
+    
+                if ~isempty(volObj)
+    
+                    volObj.CameraPosition = aPosition;
+                    volObj.CameraUpVector = aCameraUpVector;
+                end
+                
+                if ~isempty(mipFusionObj)                    
+    
+                    mipFusionObj.CameraPosition = aPosition;  
+                    mipFusionObj.CameraUpVector = aCameraUpVector;
+                end
+    
+                if ~isempty(isoFusionObj)                        
+    
+                    isoFusionObj.CameraPosition = aPosition;
+                    isoFusionObj.CameraUpVector = aCameraUpVector;
+                end
+    
+                if ~isempty(volFusionObj)
+    
+                    volFusionObj.CameraPosition = aPosition;
+                    volFusionObj.CameraUpVector = aCameraUpVector;
+                end
+                
+                if ~isempty(voiObj)
+    
+                    for ff=1:numel(voiObj)
+    
+                        voiObj{ff}.CameraPosition = aPosition;
+                        voiObj{ff}.CameraUpVector = aCameraUpVector;
+                    end
+                end  
+    
+                idxOffset = idxOffset+1;
+    
+                if idxOffset >= 120
+                    idxOffset =1;
+                end
+    
+                pause(multiFrame3DSpeed('get'));       
+    
+            end
+    
+        end
     end
-
 end

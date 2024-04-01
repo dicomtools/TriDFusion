@@ -32,5 +32,6 @@ function dZoom = multiFrame3DZoom(sAction, dValue)
     if strcmpi('set', sAction)
         pdZoom = dValue;            
     end
+    
     dZoom = pdZoom;    
 end

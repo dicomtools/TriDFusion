@@ -125,7 +125,7 @@ function setContours(tContours, bInitDisplay)
                                 [xfm,~] = TransformMatrix(atInput(bb).atDicomInfo{1}, sliceThikness);
 
 
-                                asTag = [];
+                                asTag = cell(numel(segments), 1);
 
                                 set(uiSeriesPtr('get'), 'Value', bb);
 
@@ -133,6 +133,7 @@ function setContours(tContours, bInitDisplay)
 
                                 progressBar( bNbContours/numel(atContours{cc})-0.0001, sprintf('Volume %d: Processing contour %d/%d', bb, bNbContours, numel(atContours{cc}) ));  
 
+                                points = cell(numel(segments), 1);
                                 for j=1:numel(segments)
                                     
                                     a3DOffset = segments{j};
@@ -197,12 +198,15 @@ function setContours(tContours, bInitDisplay)
 
              %                       set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
 
-                                    asTag{numel(asTag)+1} = sTag;                        
+%                                     asTag{numel(asTag)+1} = sTag;                        
+                                     asTag{j} = sTag;                        
+
                                 end
 
                                 if ~isempty(asTag)
+
                                     createVoiFromRois(bb, asTag, sLabel, aColor, sLesionType);                        
-                                end            
+                                end 
                             end
                         end
                     end

@@ -34,6 +34,8 @@
     end
     
     try
+    
+    atVoi = voiTemplate('get', get(uiSeriesPtr('get'), 'Value') ); 
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow; 
@@ -47,44 +49,83 @@
     else          
 
         aVoiEnableList = voi3DEnableList('get');            
-        if isempty(aVoiEnableList)
-            for aa=1:numel(voiObj)
+        if isempty(aVoiEnableList)                
+            for aa=1:numel(atVoi)
                 aVoiEnableList{aa} = true;
             end
         end
+%         voi3DEnableList('set', aVoiEnableList);
 
         aVoiTransparencyList = voi3DTransparencyList('get');            
         if isempty(aVoiTransparencyList)
-            for aa=1:numel(voiObj)
+            for aa=1:numel(atVoi)
                 aVoiTransparencyList{aa} = slider3DVoiTransparencyValue('get');
             end
         end
+%         voi3DTransparencyList('set', aVoiTransparencyList);   
 
-        if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
+        if ~isempty(viewer3dObject('get')) % with viewer3d, we are now using the LabelOverlay for the voi     
 
-            for ll=1:numel(voiObj)
+            if get(ui3DDispVoiPtr('get'), 'Value') == true 
+                sVisible = 'on';
+            else
+                sVisible = 'off';
+            end                       
+            set(voiObj{1}, 'Visible', sVisible);             
+        else
+            if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
+    
+                for ll=1:numel(voiObj)
+    
+                    if get(ui3DDispVoiPtr('get'), 'Value') == true && aVoiEnableList{ll} == true
+                        aAlphamap = compute3DVoiAlphamap(aVoiTransparencyList{ll});
+                    else
+                        aAlphamap = zeros(256,1);
+                    end                    
+    
+                    progressBar(ll/numel(voiObj)-0.0001, sprintf('Processing VOI %d/%d', ll, numel(voiObj) ) ); 
+    
+                    set(voiObj{ll}, 'Alphamap', aAlphamap);
+                end                
+            elseif strcmpi(voi3DRenderer('get'), 'LabelRendering')
+                            
+                aLabelOpacity = get(voiObj{1}, 'LabelOpacity');
 
-                if get(ui3DDispVoiPtr('get'), 'Value') == true && aVoiEnableList{ll} == true
-                    aAlphamap = compute3DVoiAlphamap(aVoiTransparencyList{ll});
+                if get(ui3DDispVoiPtr('get'), 'Value') == true 
+
+                    for ll=1:numel(aVoiEnableList)
+
+                        if aVoiEnableList{ll} == true
+                            aLabelOpacity(ll+1) = aVoiTransparencyList{ll};
+                        else
+                            aLabelOpacity(ll+1) = 0;
+                        end
+                    end
                 else
-                    aAlphamap = zeros(256,1);
-                end                    
+                    for ll=1:numel(aVoiEnableList)
+    
+                        aLabelOpacity(ll+1) = 0;                            
+                    end   
+                end
 
-                progressBar(ll/numel(voiObj)-0.0001, sprintf('Processing VOI %d/%d', ll, numel(voiObj) ) );      
-                set(voiObj{ll}, 'Alphamap', aAlphamap);
-            end                
-        else                    
-            for ll=1:numel(voiObj)
-                if get(ui3DDispVoiPtr('get'), 'Value') == true && aVoiEnableList{ll} == true
-                    sRenderer = 'Isosurface';
-                else
-                    sRenderer = 'LabelOverlayRendering';
-                end                    
+                set(voiObj{1}, 'LabelOpacity', aLabelOpacity);
+              
+            else                    
+                for ll=1:numel(voiObj)
+                   
+                    if get(ui3DDispVoiPtr('get'), 'Value') == true && aVoiEnableList{ll} == true
+                        sRenderer = 'Isosurface';
+                    else
+                        sRenderer = 'LabelOverlayRendering';
+                    end                    
 
-                progressBar(ll/numel(voiObj)-0.0001, sprintf('Processing VOI %d/%d', ll, numel(voiObj) ) );      
-                set(voiObj{ll}, 'Renderer', sRenderer);
+                    progressBar(ll/numel(voiObj)-0.0001, sprintf('Processing VOI %d/%d', ll, numel(voiObj) ) );   
+
+                    set(voiObj{ll}, 'Renderer', sRenderer);                   
+                end
             end
         end
+        
     end
 
     progressBar(1, 'Ready');      

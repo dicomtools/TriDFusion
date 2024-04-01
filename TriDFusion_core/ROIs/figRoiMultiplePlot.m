@@ -46,19 +46,34 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
     FIG_MPLOT_Y = ySize*0.75;
     FIG_MPLOT_X = FIG_MPLOT_Y;
 
-    figRoiMultiplePlot = ...
-        figure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_MPLOT_X/2) ...
-               (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_MPLOT_Y/2) ...
-               FIG_MPLOT_X ...
-               FIG_MPLOT_Y],...
-               'Name', ' ',...
-               'NumberTitle','off',...
-               'MenuBar', 'none',...
-               'Resize', 'on', ...
-               'Color', viewerBackgroundColor('get'), ...
-               'Toolbar','none',...
-               'SizeChangedFcn',@resizeFigRoiMultiplePlotCallback...
-               );
+    % if viewerUIFigure('get') == true
+    if 0
+        figRoiMultiplePlot = ...
+            uifigure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_MPLOT_X/2) ...
+                   (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_MPLOT_Y/2) ...
+                   FIG_MPLOT_X ...
+                   FIG_MPLOT_Y],...
+                   'Resize', 'on', ...
+                   'AutoResizeChildren', 'off', ...
+                   'Color', viewerBackgroundColor('get'),...
+                   'Name' , ' ',...
+                   'SizeChangedFcn',@resizeFigRoiMultiplePlotCallback...
+                  );
+    else
+        figRoiMultiplePlot = ...
+            figure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_MPLOT_X/2) ...
+                   (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_MPLOT_Y/2) ...
+                   FIG_MPLOT_X ...
+                   FIG_MPLOT_Y],...
+                   'Name', ' ',...
+                   'NumberTitle','off',...
+                   'MenuBar', 'none',...
+                   'Resize', 'on', ...
+                   'Color', viewerBackgroundColor('get'), ...
+                   'Toolbar','none',...
+                   'SizeChangedFcn',@resizeFigRoiMultiplePlotCallback...
+                   );
+    end
 
     setMultiplePlotFigureName();
 
@@ -83,7 +98,8 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
              'Visible' , 'on'...
              );
     axeMultiplePlot.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    axeMultiplePlot.Toolbar = [];
+    axeMultiplePlot.Toolbar.Visible = 'off';
+    disableDefaultInteractivity(axeMultiplePlot);
 
     axeMultiplePlot.Title.String = sType;
     axeMultiplePlot.Title.Color  = viewerForegroundColor('get');
@@ -95,36 +111,36 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
             if isfield(atRoiVoiMetaData{1}, 'DoseUnits')
 
                 if ~isempty(atRoiVoiMetaData{1}.DoseUnits)
-                    
+
                     sUnit = char(atRoiVoiMetaData{1}.DoseUnits);
                 else
                     sUnit = 'dose';
                 end
             else
                 sUnit = 'dose';
-            end      
+            end
 
             axeMultiplePlot.XLabel.String = sprintf('Intensity (%s)', sUnit);
 
         else
             if  (strcmpi(atRoiVoiMetaData{1}.Modality, 'pt') || ...
                  strcmpi(atRoiVoiMetaData{1}.Modality, 'nm'))&& ...
-                 strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' ) 
+                 strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' )
 
-                if bSUVUnit == true                 
+                if bSUVUnit == true
                     axeMultiplePlot.XLabel.String = sprintf('Intensity (SUV/%s)', viewerSUVtype('get'));
                 else
                     axeMultiplePlot.XLabel.String = 'Intensity (BQML)';
                 end
             else
-                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct') 
+                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct')
 
                     axeMultiplePlot.XLabel.String = 'Intensity (HU)';
                 else
- 
-                    axeMultiplePlot.XLabel.String = 'Intensity (Count)';                    
+
+                    axeMultiplePlot.XLabel.String = 'Intensity (Count)';
                 end
-            end             
+            end
         end
 
         axeMultiplePlot.YLabel.String = 'Fraction';
@@ -137,18 +153,18 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                  strcmpi(atRoiVoiMetaData{1}.Modality, 'nm'))&& ...
                  strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' )
 
-                if bSUVUnit == true                 
+                if bSUVUnit == true
                     axeMultiplePlot.YLabel.String = sprintf('Intensity (SUV/%s)', viewerSUVtype('get'));
                 else
                     axeMultiplePlot.YLabel.String = 'Intensity (BQML)';
                 end
             else
-                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct') 
+                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct')
                     axeMultiplePlot.YLabel.String = 'Intensity (HU)';
                 else
-                    axeMultiplePlot.YLabel.String = 'Intensity (Count)';                    
+                    axeMultiplePlot.YLabel.String = 'Intensity (Count)';
                 end
-            end  
+            end
         end
     end
 
@@ -199,7 +215,8 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback',@uiRoiListPanelSliderCallback ...
                   );
-    addlistener(uiRoiListPanelSlider, 'Value', 'PreSet', @uiRoiListPanelSliderCallback);
+%     addlistener(uiRoiListPanelSlider, 'Value', 'PreSet', @uiRoiListPanelSliderCallback);
+    addlistener(uiRoiListPanelSlider, 'ContinuousValueChange', @uiRoiListPanelSliderCallback);
 
     setMultiplePlotRoiVoi(atVoiRoiTag);
 
@@ -271,33 +288,33 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
     function setMultiplePlotFigureName()
 
         sTitle = sType;
-                
-        if bModifiedMatrix == true           
+
+        if bModifiedMatrix == true
             sModified = ' - Cells Value: Display Image';
         else
             sModified = ' - Cells Value: Unmodified Image';
-        end   
-        
-        if bSegmented == true 
+        end
+
+        if bSegmented == true
             sSegmented = ' - Masked Cells Subtracted';
         else
             sSegmented = '';
         end
-        
+
 
         if bDoseKernel == true
 
              if isfield(atRoiVoiMetaData{1}, 'DoseUnits')
 
                 if ~isempty(atRoiVoiMetaData{1}.DoseUnits)
-                    
+
                     sUnits = sprintf('Unit: %s', char(atRoiVoiMetaData{1}.DoseUnits));
                 else
                     sUnits = 'Unit: dose';
                 end
             else
                 sUnits = 'Unit: dose';
-            end  
+            end
 
         else
 
@@ -404,22 +421,22 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                     else
                         if  (strcmpi(atRoiVoiMetaData{1}.Modality, 'pt') || ...
                              strcmpi(atRoiVoiMetaData{1}.Modality, 'nm'))&& ...
-                             strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' ) 
+                             strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' )
 
-                            if bSUVUnit == true                 
+                            if bSUVUnit == true
                                 axeMultiplePlot.XLabel.String = sprintf('Intensity (SUV/%s)', viewerSUVtype('get'));
                             else
                                 axeMultiplePlot.XLabel.String = 'Intensity (BQML)';
                             end
                         else
-                            if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct') 
+                            if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct')
 
                                 axeMultiplePlot.XLabel.String = 'Intensity (HU)';
                             else
 
-                                axeMultiplePlot.XLabel.String = 'Intensity (Count)';                                
+                                axeMultiplePlot.XLabel.String = 'Intensity (Count)';
                             end
-                        end                
+                        end
                     end
                     axeMultiplePlot.YLabel.String = 'Fraction';
 
@@ -486,21 +503,21 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                         else
                             if  (strcmpi(atRoiVoiMetaData{1}.Modality, 'pt') || ...
                                  strcmpi(atRoiVoiMetaData{1}.Modality, 'nm'))&& ...
-                                 strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' ) 
+                                 strcmpi(atRoiVoiMetaData{1}.Units, 'BQML' )
 
-                                if bSUVUnit == true                 
+                                if bSUVUnit == true
                                     axeMultiplePlot.XLabel.String = sprintf('Intensity (SUV/%s)', viewerSUVtype('get'));
                                 else
                                     axeMultiplePlot.XLabel.String = 'Intensity (BQML)';
                                 end
                             else
-                                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct') 
+                                if  strcmpi(atRoiVoiMetaData{1}.Modality, 'ct')
 
                                     axeMultiplePlot.XLabel.String = 'Intensity (HU)';
                                 else
                                     axeMultiplePlot.XLabel.String = 'Intensity (Count)';
                                 end
-                            end 
+                            end
                         end
                         axeMultiplePlot.YLabel.String = 'Fraction';
 
@@ -614,7 +631,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
             if tInput(iOffset).bFlipAntPost == true
                 aInputBuffer=aInputBuffer(end:-1:1,:);
-            end            
+            end
         else
             if tInput(iOffset).bFlipLeftRight == true
                 aInputBuffer=aInputBuffer(:,end:-1:1,:);
@@ -626,9 +643,9 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
             if tInput(iOffset).bFlipHeadFeet == true
                 aInputBuffer=aInputBuffer(:,:,end:-1:1);
-            end 
-        end 
-            
+            end
+        end
+
         atInputMetaData = tInput(iOffset).atDicomInfo;
 
         try
@@ -655,10 +672,10 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                 sCurrentDir = pwd;
             end
         end
-        
+
 %        sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
         sSeriesDate = info{1}.SeriesDate;
-        
+
         if isempty(sSeriesDate)
             sSeriesDate = '-';
         else
@@ -737,16 +754,16 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
             if bDoseKernel == true
 
                 if isfield(atMetaData{1}, 'DoseUnits')
-    
+
                     if ~isempty(atMetaData{1}.DoseUnits)
-                        
+
                         sUnits = char(atMetaData{1}.DoseUnits);
                     else
                         sUnits = 'dose';
                     end
                 else
                     sUnits = 'dose';
-                end     
+                end
             else
 
                 if bSUVUnit == true
@@ -827,17 +844,17 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                 end
 
                 dLineOffset = dLineOffset+1;
-                
+
                 bMovementApplied = tInput(iOffset).tMovement.bMovementApplied;
-                
+
                 for rt=1:numel(atVoiRoiTag)
 
                     dNbVois = numel(atVoiInput);
 
                     for aa=1:dNbVois
-    
+
                         if strcmp(atVoiRoiTag{rt}.Tag, atVoiInput{aa}.Tag) % Found a VOI
-    
+
                             if dNbVois > 10
                                 if mod(aa, 5)==1 || aa == dNbVois
                                     progressBar(aa/dNbVois-0.0001, sprintf('Computing VOI %d/%d', aa, dNbVois ) );
@@ -859,11 +876,11 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                            bSegmented, ...
                                            bDoseKernel, ...
                                            bMovementApplied);
-                            
+
                             if ~isempty(tVoiComputed)
 
                                 sVoiName = atVoiInput{aa}.Label;
-    
+
                                 asCell{dLineOffset,1}  = (sVoiName);
                                 asCell{dLineOffset,2} = [tVoiComputed.cells];
                                 asCell{dLineOffset,3} = [tVoiComputed.total];
@@ -874,27 +891,27 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                 asCell{dLineOffset,8} = [tVoiComputed.median];
                                 asCell{dLineOffset,9} = [tVoiComputed.std];
                                 asCell{dLineOffset,10} = [tVoiComputed.peak];
-    
+
                                 if isempty(tMaxDistances.Coronal)
                                     asCell{dLineOffset,11} = ('NaN');
                                 else
                                     asCell{dLineOffset,11} = [tMaxDistances.Coronal.MaxLength];
                                 end
-    
+
                                 if isempty(tMaxDistances.Sagittal)
                                     asCell{dLineOffset,12} = ('NaN');
                                 else
                                     asCell{dLineOffset,12} = [tMaxDistances.Sagittal.MaxLength];
                                 end
-    
+
                                 if isempty(tMaxDistances.Axial)
                                     asCell{dLineOffset,13} = ('NaN');
                                 else
                                     asCell{dLineOffset,13} = [tMaxDistances.Axial.MaxLength];
                                 end
-    
+
                                 asCell{dLineOffset,14} = [tVoiComputed.volume];
-    
+
                                 for tt=15:21
                                     asCell{dLineOffset,tt}  = (' ');
                                 end
@@ -906,24 +923,24 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                             break;
 
                         end
-                    end    
+                    end
                 end
-            else    
+            else
                 dNumberOfLines = dNumberOfLines + numel(asVoiRoiHeader)+(3*numel(gtxtRoiList)+(1*numel(gtxtRoiList))+3); % Add header and cell description and footer to number of needed lines
-    
+
                 asCell = cell(dNumberOfLines, 21); % Create an empty cell array
-    
+
                 dLineOffset = 1;
                 for ll=1:numel(asVoiRoiHeader)
-    
+
                     asCell{dLineOffset,1}  = asVoiRoiHeader{ll};
                     for tt=2:21
                         asCell{dLineOffset,tt}  = (' ');
                     end
-    
+
                     dLineOffset = dLineOffset+1;
                 end
-    
+
                 asCell{dLineOffset,1}  = 'Name';
                 asCell{dLineOffset,2}  = 'Image number';
                 asCell{dLineOffset,3}  = 'Nb Cells';
@@ -942,9 +959,9 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                 for tt=16:21
                     asCell{dLineOffset,tt}  = (' ');
                 end
-                
+
                 bMovementApplied = tInput(iOffset).tMovement.bMovementApplied;
-    
+
                 dLineOffset = dLineOffset+1;
 
                 for rt=1:numel(atVoiRoiTag)
@@ -952,19 +969,19 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                     dNbVois = numel(atVoiInput);
 
                     for vv=1:dNbVois
-    
+
                         if strcmp(atVoiRoiTag{rt}.Tag, atVoiInput{vv}.Tag) % Found a VOI
 
                            if strcmpi(atVoiInput{vv}.ObjectType, 'voi')
-                               
+
                                 if ~isempty(atVoiInput{vv}.RoisTag)
-    
+
                                     if dNbVois > 10
                                         if mod(vv, 5)==1 || vv == dNbVois
                                             progressBar(vv/dNbVois-0.0001, sprintf('Computing VOI %d/%d', vv, dNbVois ) );
                                         end
                                     end
-    
+
                                     [tVoiComputed, atRoiComputed] = ...
                                         computeVoi(aInputBuffer, ...
                                                    atInputMetaData, ...
@@ -978,11 +995,11 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                                    bSegmented, ...
                                                    bDoseKernel, ...
                                                    bMovementApplied);
-                   
+
                                     if ~isempty(tVoiComputed)
-    
+
                                         sVoiName = atVoiInput{vv}.Label;
-    
+
                                         asCell{dLineOffset,1}  = (sVoiName);
                                         asCell{dLineOffset,2}  = (' ');
                                         asCell{dLineOffset,3}  = [tVoiComputed.cells];
@@ -996,25 +1013,25 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                         asCell{dLineOffset,11} = [tVoiComputed.peak];
                                         asCell{dLineOffset,12} = (' ');
                                         asCell{dLineOffset,13} = (' ');
-                                        asCell{dLineOffset,14} = (' ');                                 
+                                        asCell{dLineOffset,14} = (' ');
                                         asCell{dLineOffset,15} = [tVoiComputed.volume];
                                         for tt=16:21
                                             asCell{dLineOffset,tt}  = (' ');
                                         end
-    
+
                                         dLineOffset = dLineOffset+1;
-    
+
                                         dNbTags = numel(atRoiComputed);
                                         for bb=1:dNbTags
-    
+
                                             if ~isempty(atRoiComputed{bb})
-    
+
                                                 if dNbTags > 100
                                                      if mod(bb, 10)==1 || bb == dNbTags
                                                          progressBar( bb/dNbTags-0.0001, sprintf('Computing ROI %d/%d, please wait', bb, dNbTags) );
                                                      end
                                                 end
-    
+
                                                 if strcmpi(atRoiComputed{bb}.Axe, 'Axe')
                                                     sSliceNb = num2str(atRoiComputed{bb}.SliceNb);
                                                 elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes1')
@@ -1024,7 +1041,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                                 elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes3')
                                                     sSliceNb = ['A:' num2str(size(aDisplayBuffer, 3)-atRoiComputed{bb}.SliceNb+1)];
                                                 end
-    
+
                                                 asCell{dLineOffset,1}  = (' ');
                                                 asCell{dLineOffset,2}  = (sSliceNb);
                                                 asCell{dLineOffset,3}  = [atRoiComputed{bb}.cells];
@@ -1043,7 +1060,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                                     else
                                                         asCell{dLineOffset, 12} = [atRoiComputed{bb}.MaxDistances.MaxXY.Length];
                                                     end
-                    
+
                                                     if atRoiComputed{bb}.MaxDistances.MaxCY.Length == 0
                                                         asCell{dLineOffset, 13} = ('NaN');
                                                     else
@@ -1056,11 +1073,11 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
                                                 asCell{dLineOffset,14} = [atRoiComputed{bb}.area];
                                                 asCell{dLineOffset,15} = (' ');
-                                                
+
                                                 for tt=16:21
                                                     asCell{dLineOffset,tt}  = (' ');
                                                 end
-    
+
                                                 dLineOffset = dLineOffset+1;
                                             end
                                         end
@@ -1071,23 +1088,23 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                            end
                         end
                     end
-    
+
                     dNbRois = numel(atRoiInput);
 
                     for bb=1:dNbRois
-    
+
                         if strcmp(atVoiRoiTag{rt}.Tag, atRoiInput{bb}.Tag)  % Found a ROI
-                            
+
                             if ~strcmpi(atRoiInput{bb}.ObjectType, 'voi')
-    
+
                                 if dNbRois > 100
                                     if mod(bb, 10)==1 || bb == dNbRois
                                         progressBar( bb/dNbRois-0.0001, sprintf('Computing ROI %d/%d, please wait', bb, dNbRois) );
                                     end
                                 end
-                                
+
                                 if isvalid(atRoiInput{bb}.Object)
-    
+
                                     tRoiComputed = ...
                                         computeRoi(aInputBuffer, ...
                                                    atInputMetaData, ...
@@ -1100,9 +1117,9 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                                    bSegmented, ...
                                                    bDoseKernel, ...
                                                    bMovementApplied);
-    
+
                                     sRoiName = atRoiInput{bb}.Label;
-    
+
                                     if strcmpi(atRoiInput{bb}.Axe, 'Axe')
                                         sSliceNb = num2str(atRoiInput{bb}.SliceNb);
                                     elseif strcmpi(atRoiInput{bb}.Axe, 'Axes1')
@@ -1112,7 +1129,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                     elseif strcmpi(atRoiInput{bb}.Axe, 'Axes3')
                                         sSliceNb = ['A:' num2str(size(dicomBuffer('get', [], iOffset), 3)-atRoiInput{bb}.SliceNb+1)];
                                     end
-    
+
                                     asCell{dLineOffset, 1}  = (sRoiName);
                                     asCell{dLineOffset, 2}  = (sSliceNb);
                                     asCell{dLineOffset, 3}  = [tRoiComputed.cells];
@@ -1130,7 +1147,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                         else
                                             asCell{dLineOffset, 12} = [tRoiComputed.MaxDistances.MaxXY.Length];
                                         end
-        
+
                                         if tRoiComputed.MaxDistances.MaxCY.Length == 0
                                             asCell{dLineOffset, 13} = ('NaN');
                                         else
@@ -1142,11 +1159,11 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                     end
                                     asCell{dLineOffset, 14} = tRoiComputed.area;
                                     asCell{dLineOffset, 15} = (' ');
-                                    
+
                                     for tt=16:21
                                         asCell{dLineOffset,tt}  = (' ');
                                     end
-    
+
                                     dLineOffset = dLineOffset+1;
                                 end
                             end

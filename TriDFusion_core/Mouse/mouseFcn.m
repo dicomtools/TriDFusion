@@ -27,7 +27,8 @@ function mouseFcn(sAction)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if strcmp(sAction, 'reset')
+    if strcmpi(sAction, 'reset')
+    
         set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , []);
         set(fiMainWindowPtr('get'), 'WindowButtonDownFcn'  , []);
         set(fiMainWindowPtr('get'), 'WindowKeyPressFcn'    , []);
@@ -39,7 +40,7 @@ function mouseFcn(sAction)
         set(fiMainWindowPtr('get'), 'WindowKeyPressFcn'    , @catchKeyPress);
         set(fiMainWindowPtr('get'), 'WindowButtonMotionFcn', @mouseMove    );
         set(fiMainWindowPtr('get'), 'WindowButtonUpFcn'    , @clickUp      );
-        set(fiMainWindowPtr('get'), 'CloseRequestFcn'      , @closeFigure  );
+        % set(fiMainWindowPtr('get'), 'CloseRequestFcn'      , @closeFigure  );
     end
 
 end

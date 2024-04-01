@@ -32,56 +32,56 @@ function clickDown(~, ~)
 
     % Callback function to detect a double-click on the figure
 
-    persistent lastClickTime;
-    persistent isDoubleClick;
+    % persistent lastClickTime;
+    % persistent isDoubleClick;
     
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-    if isempty(lastClickTime)  % First click
-        lastClickTime = now;
-        isDoubleClick = false;
-    else
-        timeNow = now;
-        timeDiff = timeNow - lastClickTime;
-        
-        if timeDiff * 24 * 60 * 60 < 0.3  % Define the time threshold for a double-click (0.3 seconds)
-            isDoubleClick = true;
-            lastClickTime = [];
-        else
-            lastClickTime = timeNow;
-            isDoubleClick = false;
-        end
-    end
+    % if isempty(lastClickTime)  % First click
+    %     lastClickTime = datetime('now');
+    %     isDoubleClick = false;
+    % else
+    %     timeNow = datetime('now');
+    %     timeDiff = timeNow - lastClickTime;
+    % 
+    %     if timeDiff * 24 * 60 * 60 < 0.3  % Define the time threshold for a double-click (0.3 seconds)
+    %         isDoubleClick = true;
+    %         lastClickTime = [];
+    %     else
+    %         lastClickTime = timeNow;
+    %         isDoubleClick = false;
+    %     end
+    % end
 
-    if isDoubleClick && ...
-       isVsplash('get')          == false && ...
-       switchTo3DMode('get')     == false && ...
-       switchToIsoSurface('get') == false && ...
-       switchToMIPMode('get')    == false && ...
-      ~strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'custom')
-
-        % Perform full screen action on double-click
-
-        pAxe = getAxeFromMousePosition(dSeriesOffset);
-
-        isCoronal  = pAxe == axes1Ptr('get', [], dSeriesOffset); 
-        isSagittal = pAxe == axes2Ptr('get', [], dSeriesOffset);
-        isAxial    = pAxe == axes3Ptr('get', [], dSeriesOffset);
-        isMip      = pAxe == axesMipPtr('get', [], dSeriesOffset);
-
-        if isCoronal
-            btnUiCorWindowFullScreenCallback();
-
-        elseif isSagittal 
-            btnUiSagWindowFullScreenCallback();
-
-        elseif isAxial
-            btnUiTraWindowFullScreenCallback();
-
-        elseif isMip
-            btnUiMipWindowFullScreenCallback();
-        end
-    else
+    % if isDoubleClick && ...
+    %    isVsplash('get')          == false && ...
+    %    switchTo3DMode('get')     == false && ...
+    %    switchToIsoSurface('get') == false && ...
+    %    switchToMIPMode('get')    == false && ...
+    %   ~strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'custom')
+    % 
+    %     % Perform full screen action on double-click
+    % 
+    %     pAxe = getAxeFromMousePosition(dSeriesOffset);
+    % 
+    %     isCoronal  = pAxe == axes1Ptr('get', [], dSeriesOffset); 
+    %     isSagittal = pAxe == axes2Ptr('get', [], dSeriesOffset);
+    %     isAxial    = pAxe == axes3Ptr('get', [], dSeriesOffset);
+    %     isMip      = pAxe == axesMipPtr('get', [], dSeriesOffset);
+    % 
+    %     if isCoronal
+    %         btnUiCorWindowFullScreenCallback();
+    % 
+    %     elseif isSagittal 
+    %         btnUiSagWindowFullScreenCallback();
+    % 
+    %     elseif isAxial
+    %         btnUiTraWindowFullScreenCallback();
+    % 
+    %     elseif isMip
+    %         btnUiMipWindowFullScreenCallback();
+    %     end
+    % else
         set(fiMainWindowPtr('get'), 'UserData', 'down');
 
         if is2DBrush('get') == true
@@ -262,6 +262,7 @@ function clickDown(~, ~)
             end
             
         else
+            setOverlayPatientInformation(dSeriesOffset);
     
             if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
         
@@ -277,7 +278,9 @@ function clickDown(~, ~)
                         
                         rotateFusedImage(true);
                     else
-                        adjWL(get(0, 'PointerLocation'));
+                        if strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow')
+                            adjWL(get(0, 'PointerLocation'));
+                        end
                     end
         
                 else
@@ -285,7 +288,6 @@ function clickDown(~, ~)
                 end
         
             else
-        
                 if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
         
                     if switchTo3DMode('get')     == false && ...
@@ -341,6 +343,6 @@ function clickDown(~, ~)
                 end
             end      
         end
-    end
+    % end
 end 
 

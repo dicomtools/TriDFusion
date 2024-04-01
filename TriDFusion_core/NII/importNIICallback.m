@@ -83,7 +83,7 @@ function importNIICallback(~, ~)
             set(btnLinkMipPtr('get'), 'FontWeight', 'bold');            
         end
             
-        loadNIIFile(sPath, sFileName);    
+        loadNIIFile(sPath, sFileName, true, []);    
 
      end
 

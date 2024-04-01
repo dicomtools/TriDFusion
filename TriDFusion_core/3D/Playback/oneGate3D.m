@@ -65,10 +65,19 @@ function oneGate3D(sDirection)
     if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
        gateUseSeriesUID('get') == true
 
-        return
+        return;
     end
 
-    aInputBuffer  = inputBuffer('get');
+    set(btn3DPtr('get')        , 'Enable', 'off');
+    set(btnIsoSurfacePtr('get'), 'Enable', 'off');
+    set(btnMIPPtr('get')       , 'Enable', 'off');
+
+    if isFusion('get') == true
+
+        set(btnFusionPtr ('get')   , 'Enable', 'off');
+        set(btnLinkMipPtr('get')   , 'Enable', 'off');
+        set(uiFusedSeriesPtr('get'), 'Enable', 'off');
+    end
 
     if strcmpi(sDirection, 'Foward')
 
@@ -139,13 +148,7 @@ function oneGate3D(sDirection)
             end
         end
     end
-    
-    if isempty( axePtr('get', [], dOffset) )
-
-        axe = axePtr('get', [], dSeriesOffset);
-        axePtr('set', axe, dOffset);
-    end
-       
+           
     set(uiSeriesPtr('get'), 'Value', dOffset);
     
     atMetaData = dicomMetaData('get', [], dOffset);
@@ -159,7 +162,11 @@ function oneGate3D(sDirection)
 
     if isempty(aBuffer)
 
+        aInputBuffer = inputBuffer('get');
+
         aBuffer = aInputBuffer{dOffset};
+
+        clear aInputBuffer;
 
         if     strcmpi(imageOrientation('get'), 'axial')
 %                 aImage = aImage;
@@ -187,278 +194,400 @@ function oneGate3D(sDirection)
 
     cropValue('set', min(dicomBuffer('get', [], dOffset), [], 'all'));
 
-    if switchTo3DMode('get') == true
-
-        bLighting           = volObjBak.Lighting;
-        aVolScaleFactors    = volObjBak.ScaleFactors;
-        aVolBackgroundColor = volObjBak.BackgroundColor;
-        aVolCameraPosition  = volObjBak.CameraPosition;
-        aVolCameraUpVector  = volObjBak.CameraUpVector;
-        aVolAlphamap        = volObjBak.Alphamap;
-        aVolColormap        = volObjBak.Colormap;
-
-        if isFusion('get') == true
-
-            bFusionLighting    = volFusionObjBak.Lighting;
-            aVolFusionAlphamap = volFusionObjBak.Alphamap;
-            aVolFusionColormap = volFusionObjBak.Colormap;
-        end
-    end
-
-    if switchToMIPMode('get') == true
-
-        aMipScaleFactors    = mipObjBak.ScaleFactors;
-        aMipBackgroundColor = mipObjBak.BackgroundColor;
-        aMipCameraPosition  = mipObjBak.CameraPosition;
-        aMipCameraUpVector  = mipObjBak.CameraUpVector;
-        aMipAlphamap        = mipObjBak.Alphamap;
-        aMipColormap        = mipObjBak.Colormap;
-
-        if isFusion('get') == true
-            aMipFusionAlphamap = mipFusionObjBak.Alphamap;
-            aMipFusionColormap = mipFusionObjBak.Colormap;
-        end
-    end
-
-    if switchToIsoSurface('get') == true
-
-        aIsoScaleFactors    = isoObjBak.ScaleFactors;
-        aIsoBackgroundColor = isoObjBak.BackgroundColor;
-        aIsoCameraPosition  = isoObjBak.CameraPosition;
-        aIsoCameraUpVector  = isoObjBak.CameraUpVector;
-        aIsovalue           = isoObjBak.Isovalue;
-        aIsosurfaceColor    = isoObjBak.IsosurfaceColor;
-
-        if isFusion('get') == true
-
-            aFusionIsovalue        = isoFusionObjBak.Isovalue;
-            aFusionIsosurfaceColor = isoFusionObjBak.IsosurfaceColor;
-        end
-    end
-
-    if switchTo3DMode('get') == true
-
-        delete(volObjBak);
-        volObject('set', '');
-
-        if isFusion('get') == true
-
-            delete(volFusionObjBak);
-            volFusionObject('set', '');
-        end
-    end
-
-    if switchToMIPMode('get') == true
-
-        delete(mipObjBak);
-        mipObject('set', '');
-
-        if isFusion('get') == true
-
-            delete(mipFusionObjBak);
-            mipFusionObject('set', '');
-        end
-    end
-
-    if switchToIsoSurface('get') == true
-
-        delete(isoObjBak);
-        isoObject('set', '');
-
-        if isFusion('get') == true
-
-            delete(isoFusionObjBak);
-            isoFusionObject('set', '');
-        end
-    end
-
-    if ~isempty(voiObjBak)
-
-        for ll=1:numel(voiObjBak)
-            delete(voiObjBak{ll});
-        end
-
-%        voiTemplate('set', '');
-        voiObject  ('set', '');
-    end
-
-    clearDisplay();
-    initDisplay(1);
-
-    init3DPanel('set', true);
-
-    for dPriorityLoop=1:3
+    if ~isempty(viewer3dObject('get'))
 
         if switchToMIPMode('get') == true
 
-            dPriority = surface3DPriority('get', 'MaximumIntensityProjection');
-            if dPriority == dPriorityLoop
-
-                mipObj = initVolShow(aBuffer, uiOneWindowPtr('get'), 'MaximumIntensityProjection', atMetaData);
-                if isFusion('get') == true
-
-                    mipFusionObj = initVolShow(squeeze(fusionBuffer('get', [], dFuseOffset)), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);
-                end
-            end
+            set(mipObjBak, 'Visible', 'off'); 
         end
 
         if switchToIsoSurface('get') == true
 
-            dPriority = surface3DPriority('get', 'Isosurface');
-            if dPriority == dPriorityLoop
-
-                isoObj = initVolShow(aBuffer, uiOneWindowPtr('get'), 'Isosurface', atMetaData);
-                if isFusion('get') == true
-
-                    isoFusionObj = initVolShow(squeeze(fusionBuffer('get', [], dFuseOffset)), uiOneWindowPtr('get'), 'Isosurface', atFuseMetaData);
-                end
-            end
+            set(isoObjBak, 'Visible', 'off');
         end
 
         if switchTo3DMode('get') == true
 
-            dPriority = surface3DPriority('get', 'VolumeRendering');
-            if dPriority == dPriorityLoop
+            set(volObjBak, 'Visible', 'off');
+        end  
 
-                volObj = initVolShow(aBuffer, uiOneWindowPtr('get'), 'VolumeRendering', atMetaData);
-                if isFusion('get') == true
+        aBuffer = aBuffer(:,:, end:-1:1);
 
-                    volFusionObj = initVolShow(squeeze(fusionBuffer('get', [], dFuseOffset)), uiOneWindowPtr('get'), 'VolumeRendering', atFuseMetaData);
+        for dPriorityLoop=1:3
+
+            if switchToMIPMode('get') == true
+
+                dPriority = surface3DPriority('get', 'MaximumIntensityProjection');
+
+                if dPriority == dPriorityLoop
+
+                    mipObj = volshow(squeeze(aBuffer), ...
+                                     'Parent'        , viewer3dObject('get'), ...
+                                     'RenderingStyle', 'MaximumIntensityProjection',...
+                                     'Alphamap'      , get(mipObjBak, 'Alphamap'), ...
+                                     'Colormap'      , get(mipObjBak, 'Colormap'), ...
+                                     'Visible'       , 'on', ...
+                                     'Transformation', get(mipObjBak, 'Transformation')); 
+
+                    mipObject('set', mipObj);
+
+                    mipIc = mipICObject('get');
+                    if ~isempty(mipIc)
+            
+                        mipIc.surfObj = mipObj;
+                        mipICObject('set', mipIc);
+                    end
+
+                    drawnow;
+
+                    delete(mipObjBak);
+                end   
+            end
+
+            if switchToIsoSurface('get') == true
+
+                dPriority = surface3DPriority('get', 'Isosurface');
+
+                if dPriority == dPriorityLoop
+
+                    isoObj = volshow(squeeze(aBuffer), ...
+                                     'Parent'         , viewer3dObject('get'), ...
+                                     'RenderingStyle' , 'Isosurface',...
+                                     'Alphamap'       , get(isoObjBak, 'Alphamap'), ...
+                                     'Colormap'       , get(isoObjBak, 'Colormap'), ...
+                                     'IsosurfaceValue', get(isoObjBak, 'IsosurfaceValue'), ...                                 
+                                     'Visible'        , 'on', ...
+                                     'Transformation' , get(isoObjBak, 'Transformation'));  
+
+                    isoObject('set', isoObj);
+    
+                    drawnow;
+
+                    delete(isoObjBak);
+                end
+            end
+
+            if switchTo3DMode('get') == true
+
+                dPriority = surface3DPriority('get', 'VolumeRendering');
+
+                if dPriority == dPriorityLoop
+
+                    volObj = volshow(squeeze(aBuffer), ...
+                                         'Parent'        , viewer3dObject('get'), ...
+                                         'RenderingStyle', 'VolumeRendering',...
+                                         'Alphamap'      , get(volObjBak, 'Alphamap'), ...
+                                         'Colormap'      , get(volObjBak, 'Colormap'), ...
+                                         'Visible'       , 'on', ...
+                                         'Transformation', get(volObjBak, 'Transformation'));  
+
+                    volObject('set', volObj);
+
+                    volIc = volICObject('get');
+                    if ~isempty(volIc)
+            
+                        volIc.surfObj = volObjBak;
+                        volICObject('set', volIc);
+                    end
+
+                    drawnow;
+                   
+                    delete(volObjBak);
                 end
             end
         end
-    end
 
-    if switchTo3DMode('get') == true
-
-        volObj.Lighting        = bLighting;
-        volObj.ScaleFactors    = aVolScaleFactors;
-        volObj.BackgroundColor = aVolBackgroundColor;
-        volObj.CameraPosition  = aVolCameraPosition;
-        volObj.CameraUpVector  = aVolCameraUpVector;
-        volObj.Alphamap        = aVolAlphamap;
-        volObj.Colormap        = aVolColormap;
-
-        volObject('set', volObj);
-
-        if isFusion('get') == true
-
-            volFusionObj.Lighting        = bFusionLighting;
-            volFusionObj.ScaleFactors    = aVolScaleFactors;
-            volFusionObj.BackgroundColor = aVolBackgroundColor;
-            volFusionObj.CameraPosition  = aVolCameraPosition;
-            volFusionObj.CameraUpVector  = aVolCameraUpVector;
-            volFusionObj.Alphamap        = aVolFusionAlphamap;
-            volFusionObj.Colormap        = aVolFusionColormap;
-
-            volFusionObject('set', volFusionObj);
+    else
+    
+        if isempty( axePtr('get', [], dOffset) )
+    
+            axe = axePtr('get', [], dSeriesOffset);
+            axePtr('set', axe, dOffset);
         end
-
-        volIc = volICObject('get');
-        if ~isempty(volIc)
-
-            if isFusion('get') == true && get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
-               
-                volIc.surfObj = volFusionObj;
-            else
-                volIc.surfObj = volObj;
+    
+        if switchTo3DMode('get') == true
+    
+            bLighting           = volObjBak.Lighting;
+            aVolScaleFactors    = volObjBak.ScaleFactors;
+            aVolBackgroundColor = volObjBak.BackgroundColor;
+            aVolCameraPosition  = volObjBak.CameraPosition;
+            aVolCameraUpVector  = volObjBak.CameraUpVector;
+            aVolAlphamap        = volObjBak.Alphamap;
+            aVolColormap        = volObjBak.Colormap;
+    
+            if isFusion('get') == true
+    
+                bFusionLighting    = volFusionObjBak.Lighting;
+                aVolFusionAlphamap = volFusionObjBak.Alphamap;
+                aVolFusionColormap = volFusionObjBak.Colormap;
             end
         end
-
-        if displayVolColorMap('get') == true
-
-            uivolColorbar = volColorbar(uiOneWindowPtr('get'), aVolColormap);
-            volColorObject('set', uivolColorbar);
-        end
-    end
-
-    if switchToMIPMode('get') == true
-
-        mipObj.ScaleFactors    = aMipScaleFactors;
-        mipObj.BackgroundColor = aMipBackgroundColor;
-        mipObj.CameraPosition  = aMipCameraPosition;
-        mipObj.CameraUpVector  = aMipCameraUpVector;
-        mipObj.Alphamap        = aMipAlphamap;
-        mipObj.Colormap        = aMipColormap;
-
-        mipObject('set', mipObj);
-
-        if isFusion('get') == true
-
-            mipFusionObj.ScaleFactors    = aMipScaleFactors;
-            mipFusionObj.BackgroundColor = aMipBackgroundColor;
-            mipFusionObj.CameraPosition  = aMipCameraPosition;
-            mipFusionObj.CameraUpVector  = aMipCameraUpVector;
-            mipFusionObj.Alphamap        = aMipFusionAlphamap;
-            mipFusionObj.Colormap        = aMipFusionColormap;
-
-            mipFusionObject('set', mipFusionObj);
-        end
-
-
-        mipIc = mipICObject('get');
-        if ~isempty(mipIc)
-
-            if isFusion('get') == true && get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
-               
-                mipIc.surfObj = mipFusionObj;
-            else
-                mipIc.surfObj = mipObj;
+    
+        if switchToMIPMode('get') == true
+    
+            aMipScaleFactors    = mipObjBak.ScaleFactors;
+            aMipBackgroundColor = mipObjBak.BackgroundColor;
+            aMipCameraPosition  = mipObjBak.CameraPosition;
+            aMipCameraUpVector  = mipObjBak.CameraUpVector;
+            aMipAlphamap        = mipObjBak.Alphamap;
+            aMipColormap        = mipObjBak.Colormap;
+    
+            if isFusion('get') == true
+                aMipFusionAlphamap = mipFusionObjBak.Alphamap;
+                aMipFusionColormap = mipFusionObjBak.Colormap;
             end
         end
-
-        if displayMIPColorMap('get') == true && switchToMIPMode('get') == true
-            
-            uimipColorbar = mipColorbar(uiOneWindowPtr('get'), aMipAlphamap);
-            mipColorObject('set', uimipColorbar);
+    
+        if switchToIsoSurface('get') == true
+    
+            aIsoScaleFactors    = isoObjBak.ScaleFactors;
+            aIsoBackgroundColor = isoObjBak.BackgroundColor;
+            aIsoCameraPosition  = isoObjBak.CameraPosition;
+            aIsoCameraUpVector  = isoObjBak.CameraUpVector;
+            aIsovalue           = isoObjBak.Isovalue;
+            aIsosurfaceColor    = isoObjBak.IsosurfaceColor;
+    
+            if isFusion('get') == true
+    
+                aFusionIsovalue        = isoFusionObjBak.Isovalue;
+                aFusionIsosurfaceColor = isoFusionObjBak.IsosurfaceColor;
+            end
         end
-    end
-
-    if switchToIsoSurface('get') == true
-
-        isoObj.ScaleFactors    = aIsoScaleFactors;
-        isoObj.BackgroundColor = aIsoBackgroundColor;
-        isoObj.CameraPosition  = aIsoCameraPosition;
-        isoObj.CameraUpVector  = aIsoCameraUpVector;
-        isoObj.Isovalue        = aIsovalue;
-        isoObj.IsosurfaceColor = aIsosurfaceColor;
-
-        isoObject('set', isoObj);
-
-        if isFusion('get') == true
-
-            isoFusionObj.ScaleFactors    = aIsoScaleFactors;
-            isoFusionObj.BackgroundColor = aIsoBackgroundColor;
-            isoFusionObj.CameraPosition  = aIsoCameraPosition;
-            isoFusionObj.CameraUpVector  = aIsoCameraUpVector;
-            isoFusionObj.Isovalue        = aFusionIsovalue;
-            isoFusionObj.IsosurfaceColor = aFusionIsosurfaceColor;
-
-            isoFusionObject('set', isoFusionObj);
+    
+        if switchTo3DMode('get') == true
+    
+            delete(volObjBak);
+            volObject('set', '');
+    
+            if isFusion('get') == true
+    
+                delete(volFusionObjBak);
+                volFusionObject('set', '');
+            end
         end
-    end
-
-    if ~isempty(atVoi)
-        
-        voiObj = initVoiIsoSurface(uiOneWindowPtr('get'), voi3DSmooth('get'));
-
-        if ~isempty(voiObj)
-
-            for ll=1:numel(voiObj)
-
-                if displayVoi('get') == true
-                    
-                    set(voiObj{ll}, 'Renderer', 'Isosurface');
+    
+        if switchToMIPMode('get') == true
+    
+            delete(mipObjBak);
+            mipObject('set', '');
+    
+            if isFusion('get') == true
+    
+                delete(mipFusionObjBak);
+                mipFusionObject('set', '');
+            end
+        end
+    
+        if switchToIsoSurface('get') == true
+    
+            delete(isoObjBak);
+            isoObject('set', '');
+    
+            if isFusion('get') == true
+    
+                delete(isoFusionObjBak);
+                isoFusionObject('set', '');
+            end
+        end
+    
+        if ~isempty(voiObjBak)
+    
+            for ll=1:numel(voiObjBak)
+                delete(voiObjBak{ll});
+            end
+    
+    %        voiTemplate('set', '');
+            voiObject  ('set', '');
+        end
+    
+        clearDisplay();
+        initDisplay(1);
+    
+        init3DPanel('set', true);
+    
+        for dPriorityLoop=1:3
+    
+            if switchToMIPMode('get') == true
+    
+                dPriority = surface3DPriority('get', 'MaximumIntensityProjection');
+                if dPriority == dPriorityLoop
+    
+                    mipObj = initVolShow(aBuffer, uiOneWindowPtr('get'), 'MaximumIntensityProjection', atMetaData);
+                    if isFusion('get') == true
+    
+                        mipFusionObj = initVolShow(squeeze(fusionBuffer('get', [], dFuseOffset)), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atFuseMetaData);
+                    end
+                end
+            end
+    
+            if switchToIsoSurface('get') == true
+    
+                dPriority = surface3DPriority('get', 'Isosurface');
+                if dPriority == dPriorityLoop
+    
+                    isoObj = initVolShow(aBuffer, uiOneWindowPtr('get'), 'Isosurface', atMetaData);
+                    if isFusion('get') == true
+    
+                        isoFusionObj = initVolShow(squeeze(fusionBuffer('get', [], dFuseOffset)), uiOneWindowPtr('get'), 'Isosurface', atFuseMetaData);
+                    end
+                end
+            end
+    
+            if switchTo3DMode('get') == true
+    
+                dPriority = surface3DPriority('get', 'VolumeRendering');
+                if dPriority == dPriorityLoop
+    
+                    volObj = initVolShow(aBuffer, uiOneWindowPtr('get'), 'VolumeRendering', atMetaData);
+                    if isFusion('get') == true
+    
+                        volFusionObj = initVolShow(squeeze(fusionBuffer('get', [], dFuseOffset)), uiOneWindowPtr('get'), 'VolumeRendering', atFuseMetaData);
+                    end
+                end
+            end
+        end
+    
+        if switchTo3DMode('get') == true
+    
+            volObj.Lighting        = bLighting;
+            volObj.ScaleFactors    = aVolScaleFactors;
+            volObj.BackgroundColor = aVolBackgroundColor;
+            volObj.CameraPosition  = aVolCameraPosition;
+            volObj.CameraUpVector  = aVolCameraUpVector;
+            volObj.Alphamap        = aVolAlphamap;
+            volObj.Colormap        = aVolColormap;
+    
+            volObject('set', volObj);
+    
+            if isFusion('get') == true
+    
+                volFusionObj.Lighting        = bFusionLighting;
+                volFusionObj.ScaleFactors    = aVolScaleFactors;
+                volFusionObj.BackgroundColor = aVolBackgroundColor;
+                volFusionObj.CameraPosition  = aVolCameraPosition;
+                volFusionObj.CameraUpVector  = aVolCameraUpVector;
+                volFusionObj.Alphamap        = aVolFusionAlphamap;
+                volFusionObj.Colormap        = aVolFusionColormap;
+    
+                volFusionObject('set', volFusionObj);
+            end
+    
+            volIc = volICObject('get');
+            if ~isempty(volIc)
+    
+                if isFusion('get') == true && get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+                   
+                    volIc.surfObj = volFusionObj;
                 else
-                    set(voiObj{ll}, 'Renderer', 'LabelOverlayRendering');
-               end
+                    volIc.surfObj = volObj;
+                end
+            end
+    
+            if displayVolColorMap('get') == true
+    
+                uivolColorbar = volColorbar(uiOneWindowPtr('get'), aVolColormap);
+                volColorObject('set', uivolColorbar);
             end
         end
-
-        voiObject  ('set', voiObj);
+    
+        if switchToMIPMode('get') == true
+    
+            mipObj.ScaleFactors    = aMipScaleFactors;
+            mipObj.BackgroundColor = aMipBackgroundColor;
+            mipObj.CameraPosition  = aMipCameraPosition;
+            mipObj.CameraUpVector  = aMipCameraUpVector;
+            mipObj.Alphamap        = aMipAlphamap;
+            mipObj.Colormap        = aMipColormap;
+    
+            mipObject('set', mipObj);
+    
+            if isFusion('get') == true
+    
+                mipFusionObj.ScaleFactors    = aMipScaleFactors;
+                mipFusionObj.BackgroundColor = aMipBackgroundColor;
+                mipFusionObj.CameraPosition  = aMipCameraPosition;
+                mipFusionObj.CameraUpVector  = aMipCameraUpVector;
+                mipFusionObj.Alphamap        = aMipFusionAlphamap;
+                mipFusionObj.Colormap        = aMipFusionColormap;
+    
+                mipFusionObject('set', mipFusionObj);
+            end
+    
+    
+            mipIc = mipICObject('get');
+            if ~isempty(mipIc)
+    
+                if isFusion('get') == true && get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+                   
+                    mipIc.surfObj = mipFusionObj;
+                else
+                    mipIc.surfObj = mipObj;
+                end
+            end
+    
+            if displayMIPColorMap('get') == true && switchToMIPMode('get') == true
+                
+                uimipColorbar = mipColorbar(uiOneWindowPtr('get'), aMipAlphamap);
+                mipColorObject('set', uimipColorbar);
+            end
+        end
+    
+        if switchToIsoSurface('get') == true
+    
+            isoObj.ScaleFactors    = aIsoScaleFactors;
+            isoObj.BackgroundColor = aIsoBackgroundColor;
+            isoObj.CameraPosition  = aIsoCameraPosition;
+            isoObj.CameraUpVector  = aIsoCameraUpVector;
+            isoObj.Isovalue        = aIsovalue;
+            isoObj.IsosurfaceColor = aIsosurfaceColor;
+    
+            isoObject('set', isoObj);
+    
+            if isFusion('get') == true
+    
+                isoFusionObj.ScaleFactors    = aIsoScaleFactors;
+                isoFusionObj.BackgroundColor = aIsoBackgroundColor;
+                isoFusionObj.CameraPosition  = aIsoCameraPosition;
+                isoFusionObj.CameraUpVector  = aIsoCameraUpVector;
+                isoFusionObj.Isovalue        = aFusionIsovalue;
+                isoFusionObj.IsosurfaceColor = aFusionIsosurfaceColor;
+    
+                isoFusionObject('set', isoFusionObj);
+            end
+        end
+    
+        if ~isempty(atVoi)
+            
+            voiObj = initVoiIsoSurface(uiOneWindowPtr('get'), voi3DSmooth('get'));
+    
+            if ~isempty(voiObj)
+    
+                for ll=1:numel(voiObj)
+    
+                    if displayVoi('get') == true
+                        
+                        set(voiObj{ll}, 'Renderer', 'Isosurface');
+                    else
+                        set(voiObj{ll}, 'Renderer', 'LabelOverlayRendering');
+                   end
+                end
+            end
+    
+            voiObject  ('set', voiObj);
+        end
     end
 
     uiLogo = displayLogo(uiOneWindowPtr('get'));
     logoObject('set', uiLogo);
 
+    set(btn3DPtr('get')        , 'Enable', 'on');
+    set(btnIsoSurfacePtr('get'), 'Enable', 'on');
+    set(btnMIPPtr('get')       , 'Enable', 'on');
+
+    if isFusion('get') == true
+
+        set(btnFusionPtr ('get')   , 'Enable', 'on');
+        set(btnLinkMipPtr('get')   , 'Enable', 'on');
+        set(uiFusedSeriesPtr('get'), 'Enable', 'on');
+    end
 end

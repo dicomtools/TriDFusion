@@ -1,5 +1,5 @@
-function aObject = volFusionLighting(sAction, aValue)
-%function aObject = volFusionLighting(sAction, aValue)
+function bEnable = volFusionLighting(sAction, bValue)
+%function bEnable = volFusionLighting(sAction, bValue)
 %Get\Set 3D Volume Fusion Lighting.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -30,10 +30,11 @@ function aObject = volFusionLighting(sAction, aValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-     persistent paObject; 
+    persistent pbEnable; 
 
-     if strcmpi('set', sAction)
-        paObject = aValue;            
-     end      
-    aObject = paObject;
+    if strcmpi('set', sAction)
+        pbEnable = bValue;            
+    end      
+
+    bEnable = pbEnable;
 end

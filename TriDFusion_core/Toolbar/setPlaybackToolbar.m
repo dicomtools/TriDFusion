@@ -131,6 +131,7 @@ function setPlaybackToolbar(sVisible)
             switch  hObject.TooltipString
 
                 case 'Play'
+
                     if  multiFrame3DRecord('get') == false
                         if multiFrame3DPlayback('get') == false
 
@@ -155,6 +156,7 @@ function setPlaybackToolbar(sVisible)
 
                      if multiFrame3DPlayback('get') == false && ...
                         multiFrame3DRecord('get')   == false
+                         
                          if strcmpi(get(mGate, 'State'), 'on')
 
                             set(mFoward, 'Enable', 'off');
@@ -177,6 +179,7 @@ function setPlaybackToolbar(sVisible)
                       set(mFoward, 'State', 'off');
 
                  case 'Backward'
+
                      if multiFrame3DPlayback('get') == false && ...
                         multiFrame3DRecord('get')   == false
                         if strcmpi(get(mGate, 'State'), 'on')
@@ -357,7 +360,7 @@ function setPlaybackToolbar(sVisible)
 
                         if strcmpi(get(mGate, 'State'), 'on')
 
-                            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'))), 3) ~=1
+                            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
 
                                 oneGate(hObject.TooltipString);
                             end

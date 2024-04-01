@@ -65,7 +65,6 @@ function catchKeyPress(~,evnt)
                 dZFactor = dZFactor+0.025;
                 multiFrameZoom('set', 'in', dZFactor);
 
-
                 switch pAxe
 
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
@@ -521,14 +520,13 @@ end
     persistent pdAlphaSlider;
 
     if strcmpi(evnt.Key,'f')
-        
+ 
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true
             return;
         end
         
-
         dNbFusedSeries = 0;
         
         if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
@@ -576,29 +574,29 @@ end
 
                 if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
 
-                    alpha( axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
+                    alpha( imAxePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
                     if dNbFusedSeries == 1
-                        alpha( axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
+                        alpha( imAxeFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
                     end                    
                 else
-                    alpha( axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
-                    alpha( axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
-                    alpha( axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
+                    alpha( imCoronalPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
+                    alpha( imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
+                    alpha( imAxialPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
 
                     if link2DMip('get') == true  && isVsplash('get') == false                                        
-                        set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
-                        alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
+                        set( imMipPtr ('get', [], get(uiSeriesPtr('get'), 'Value')), 'Visible', 'on' );
+                        alpha( imMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
                     end  
                     
                     if dNbFusedSeries == 1
 
-                        alpha( axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
-                        alpha( axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
-                        alpha( axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
+                        alpha( imCoronalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
+                        alpha( imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
+                        alpha( imAxialFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
 
                         if link2DMip('get') == true  && isVsplash('get') == false                                        
                            set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
-                           alpha( axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
+                           alpha( imMipFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
                         end                        
                     end
                 end
@@ -648,15 +646,15 @@ end
 
                     if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
 
-                        alpha( axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
+                        alpha( imAxePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
                     else
-                        alpha( axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
-                        alpha( axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
-                        alpha( axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
+                        alpha( imCoronalPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
+                        alpha( imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
+                        alpha( imAxialPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
 
                         if link2DMip('get') == true  && isVsplash('get') == false                                        
-                            set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
-                            alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
+                            set( imMipPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
+                            alpha( imMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
                         end 
                                                 
                     end
@@ -696,25 +694,25 @@ end
 %                    sliderAlphaValue('set', pdAlphaSlider);
 
                     if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
-                        alpha( axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
+                        alpha( imAxePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
                     else
-                        alpha( axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
-                        alpha( axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
-                        alpha( axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
+                        alpha( imCoronalPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
+                        alpha( imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
+                        alpha( imAxialPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
 
                         if link2DMip('get') == true && isVsplash('get') == false                       
-                            alpha( axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
+                            alpha( imMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
                         end
                         
                         if dNbFusedSeries == 1
 
-                            alpha( axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
-                            alpha( axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
-                            alpha( axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
+                            alpha( imCoronalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
+                            alpha( imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
+                            alpha( imAxialFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
 
                             if link2DMip('get') == true  && isVsplash('get') == false                                        
                                 set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
-                                alpha( axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
+                                alpha( imMipFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
                             end                        
                         end                        
                    end   
@@ -760,10 +758,10 @@ end
 
 %             setFusionColorbarLabel();
 
-                
-            refreshImages();   
-
         end
+       
+        refreshImages();   
+  
     end
 
     if strcmpi(evnt.Key,'i')

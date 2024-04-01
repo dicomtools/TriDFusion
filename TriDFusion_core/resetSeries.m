@@ -47,13 +47,48 @@ function resetSeries(dOffset, bInitDisplay)
         
         link2DMip('set', true);
     end
-    
+
     if isFusion('get') == true
-        setFusionCallback(); % Deactivate fusion
+
+        isFusion('set', false);
+
+        set(btnFusionPtr('get'), 'BackgroundColor', viewerBackgroundColor ('get'));
+        set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnFusionPtr('get'), 'FontWeight', 'normal');
+
     end
 
-    if isPlotContours('get') == true
-       setPlotContoursCallback(); % Deactivate plot contours
+     if isPlotContours('get') == true
+
+         isPlotContours('set', false);
+%         setPlotContoursCallback(); % Deactivate plot contours
+     end
+    
+    if switchToIsoSurface('get') == true
+
+        switchToIsoSurface('set', false);
+
+        set(btnIsoSurfacePtr('get'), 'BackgroundColor', viewerBackgroundColor ('get'));
+        set(btnIsoSurfacePtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnIsoSurfacePtr('get'), 'FontWeight', 'normal');
+    end
+
+    if switchToMIPMode('get') == true
+
+        switchToMIPMode('set', false);
+
+        set(btnMIPPtr('get'), 'BackgroundColor', viewerBackgroundColor ('get'));
+        set(btnMIPPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btnMIPPtr('get'), 'FontWeight', 'normal');
+    end
+
+    if switchToMIPMode('get') == true
+
+        switchToMIPMode('set', false);
+
+        set(btn3DPtr('get'), 'BackgroundColor', viewerBackgroundColor ('get'));
+        set(btn3DPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
+        set(btn3DPtr('get'), 'FontWeight', 'normal');
     end
 
     aInput = inputBuffer('get');
@@ -216,6 +251,9 @@ function resetSeries(dOffset, bInitDisplay)
             initDisplay(3);
 
             dicomViewerCore();
+
+            setViewerDefaultColor(true, dicomMetaData('get', [], dInitOffset));
+            
 %        else
 %            [lMin, lMax] = setWindowLevel(aBuffer, atInitInput(dOffset).atDicomInfo);    
 

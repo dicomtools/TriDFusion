@@ -27,8 +27,8 @@ function setIsoSurfaceCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if numel(dicomBuffer('get')) && ...
-       size(dicomBuffer('get'), 3) ~= 1
+    if numel(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
+       size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
    
 %        try
             
@@ -131,9 +131,7 @@ function setIsoSurfaceCallback(~, ~)
             objRoiPanel.Checked = 'off';
         end
 
-        if switchToIsoSurface('get') == true
-            
-            displayVoi('set', false);
+        if switchToIsoSurface('get') == true           
 
             switchToIsoSurface('set', false);
             
@@ -143,7 +141,9 @@ function setIsoSurfaceCallback(~, ~)
                 
             if switchTo3DMode('get')  == false && ...
                switchToMIPMode('get') == false
-                
+
+                displayVoi('set', false);
+           
                 view3DPanel('set', false);
                 init3DPanel('set', true);
 
@@ -179,7 +179,7 @@ function setIsoSurfaceCallback(~, ~)
                 volColorObj = volColorObject('get');
                 if ~isempty(volColorObj)
                     delete(volColorObj);
-                    volColorObject('set', '');
+                    volColorObject('set', []);
                 end
 
 %%%                deleteAlphaCurve('mip');
@@ -187,31 +187,31 @@ function setIsoSurfaceCallback(~, ~)
                 mipColorObj = mipColorObject('get');
                 if ~isempty(mipColorObj)
                     delete(mipColorObj);
-                    mipColorObject('set', '');
+                    mipColorObject('set', []);
                 end
 
                 logoObj = logoObject('get');
                 if ~isempty(logoObj)
                     delete(logoObj);
-                    logoObject('set', '');
+                    logoObject('set', []);
                 end
 
                 volObj = volObject('get');
                 if ~isempty(volObj)
                     delete(volObj);
-                    volObject('set', '');
+                    volObject('set', []);
                 end
 
                 isoObj = isoObject('get');
                 if ~isempty(isoObj)
                     delete(isoObj);
-                    isoObject('set', '');
+                    isoObject('set', []);
                 end
 
                 mipObj = mipObject('get');
                 if ~isempty(mipObj)
                     delete(mipObj);
-                    mipObject('set', '');
+                    mipObject('set', []);
                 end
 
                 voiObj = voiObject('get');
@@ -219,25 +219,25 @@ function setIsoSurfaceCallback(~, ~)
                     for vv=1:numel(voiObj)
                         delete(voiObj{vv})
                     end
-                    voiObject('set', '');
+                    voiObject('set', []);
                 end
 
                 volFusionObj = volFusionObject('get');
                 if ~isempty(volFusionObj)
                     delete(volFusionObj);
-                    volFusionObject('set', '');
+                    volFusionObject('set', []);
                 end
 
                 isoFusionObj = isoFusionObject('get');
                 if ~isempty(isoFusionObj)
                     delete(isoFusionObj);
-                    isoFusionObject('set', '');
+                    isoFusionObject('set', []);
                 end
 
                 mipFusionObj = mipFusionObject('get');
                 if ~isempty(mipFusionObj)
                     delete(mipFusionObj);
-                    mipFusionObject('set', '');
+                    mipFusionObject('set', []);
                 end
 
                 isoGateObj = isoGateObject('get');
@@ -245,7 +245,7 @@ function setIsoSurfaceCallback(~, ~)
                     for vv=1:numel(isoGateObj)
                         delete(isoGateObj{vv});
                     end
-                    isoGateObject('set', '');
+                    isoGateObject('set', []);
                 end
 
                 isoGateFusionObj = isoGateFusionObject('get');
@@ -253,7 +253,7 @@ function setIsoSurfaceCallback(~, ~)
                     for vv=1:numel(isoGateFusionObj)
                         delete(isoGateFusionObj{vv});
                     end
-                    isoGateFusionObject('set', '');
+                    isoGateFusionObject('set', []);
                 end
 
                 mipGateObj = mipGateObject('get');
@@ -261,7 +261,7 @@ function setIsoSurfaceCallback(~, ~)
                     for vv=1:numel(mipGateObj)
                         delete(mipGateObj{vv});
                     end
-                    mipGateObject('set', '');
+                    mipGateObject('set', []);
                 end
 
                 mipGateFusionObj = mipGateFusionObject('get');
@@ -269,7 +269,7 @@ function setIsoSurfaceCallback(~, ~)
                     for vv=1:numel(mipGateFusionObj)
                         delete(mipGateFusionObj{vv});
                     end
-                    mipGateFusionObject('set', '');
+                    mipGateFusionObject('set', []);
                 end
 
                 volGateObj = volGateObject('get');
@@ -277,7 +277,7 @@ function setIsoSurfaceCallback(~, ~)
                     for vv=1:numel(volGateObj)
                         delete(volGateObj{vv})
                     end
-                    volGateObject('set', '');
+                    volGateObject('set', []);
                 end
 
                 volGateFusionObj = volGateFusionObject('get');
@@ -285,7 +285,7 @@ function setIsoSurfaceCallback(~, ~)
                     for vv=1:numel(volGateFusionObj)
                         delete(volGateFusionObj{vv})
                     end
-                    volGateFusionObject('set', '');
+                    volGateFusionObject('set', []);
                 end
 
                 voiGateObj = voiGateObject('get');
@@ -295,7 +295,7 @@ function setIsoSurfaceCallback(~, ~)
                             delete(voiGateObj{tt}{ll});
                         end
                     end
-                    voiGateObject('set', '');
+                    voiGateObject('set', []);
                 end
 
                 ui3DGateWindowObj = ui3DGateWindowObject('get');
@@ -303,7 +303,15 @@ function setIsoSurfaceCallback(~, ~)
                     for vv=1:numel(ui3DGateWindowObj)
                         delete(ui3DGateWindowObj{vv})
                     end
-                    ui3DGateWindowObject('set', '');
+                    ui3DGateWindowObject('set', []);
+                end
+
+                ptrViewer3d = viewer3dObject('get');
+                if ~isempty(ptrViewer3d)
+                    delete(ptrViewer3d);
+                    viewer3dObject('set', []);
+                    
+                    set(uiOneWindowPtr('get'), 'AutoResizeChildren', 'off');
                 end
 
                 voi3DEnableList('set', '');
@@ -320,14 +328,16 @@ function setIsoSurfaceCallback(~, ~)
 
                 dicomViewerCore();
                                 
-                atMetaData = dicomMetaData('get');
+                atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
 
                 if isFusion('get')
-                    tFuseInput    = inputTemplate('get');
-                    iFuseOffset   = get(uiFusedSeriesPtr('get'), 'Value');
-                    tFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
+                    % tFuseInput    = inputTemplate('get');
+                    % iFuseOffset   = get(uiFusedSeriesPtr('get'), 'Value');
+                    % tFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
 
-                    setViewerDefaultColor(true, atMetaData, tFuseMetaData);
+                    atFuseMetaData = fusionMetaData('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+
+                    setViewerDefaultColor(true, atMetaData, atFuseMetaData);
                 else
                     setViewerDefaultColor(true, atMetaData);
                 end
@@ -352,10 +362,7 @@ function setIsoSurfaceCallback(~, ~)
 %                       robotClick();
 
             else
-                isoObj = isoObject('get');
-                isoObj.Isovalue = 1;
-                isoObject('set', isoObj);                
-                            
+                                           
                 set(ui3DCreateIsoMaskPtr       ('get'), 'Enable', 'off');                 
                 set(txtAddVoiIsoMaskPtr        ('get'), 'Enable', 'On' );
                 set(chkPixelEdgeIsoMaskPtr     ('get'), 'Enable', 'off');
@@ -376,12 +383,35 @@ function setIsoSurfaceCallback(~, ~)
 %                set(chkResampledContoursIsoMaskPtr('get'), 'Enable', 'off');
 %                set(txtResampledContoursIsoMaskPtr('get'), 'Enable', 'on');
 
-                isoFusionObj = isoFusionObject('get');
-                if ~isempty(isoFusionObj)
-                    isoFusionObj.Isovalue = 1;
-                    isoFusionObject('set', isoFusionObj);
-                end
-            
+                if isempty(viewer3dObject('get'))
+
+                    isoObj = isoObject('get');    
+                   
+                    set(isoObj, 'Isovalue'       ,  1);
+           
+                    % isoObj.Isovalue = 1;
+                    isoObject('set', isoObj); 
+    
+                    isoFusionObj = isoFusionObject('get');
+                    if ~isempty(isoFusionObj)
+    
+                        % isoFusionObj.Isovalue = 1;
+                        set(isoFusionObj, 'Isovalue',  1);
+
+                        isoFusionObject('set', isoFusionObj);
+                    end
+                else
+                    isoObj = isoObject('get');
+                    set(isoObj, 'Visible', 'off');
+
+                    isoFusionObj = isoFusionObject('get');
+                    if ~isempty(isoFusionObj)
+                        % if isFusion('get')
+                            set(isoFusionObj, 'Visible', 'off');
+                        % end
+                    end                         
+                end 
+
                 set(btn3DPtr('get')        , 'Enable', 'on');                
                 set(btnMIPPtr('get')       , 'Enable', 'on');
                 set(btnIsoSurfacePtr('get'), 'Enable', 'on');
@@ -392,7 +422,7 @@ function setIsoSurfaceCallback(~, ~)
                 
             switchToIsoSurface('set', true);            
                         
-            atMetaData = dicomMetaData('get');
+            atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
             
             sSeriesUnit = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
 
@@ -401,7 +431,7 @@ function setIsoSurfaceCallback(~, ~)
                 % isoSurfaceFusionValue default value is preset
                 % for CT
                 if isoSurfaceValue('get') == defaultIsoSurfaceValue('get') 
-                    isoSurfaceValue('set', ctHUToScalarValue(dicomBuffer('get'), 150)/100);
+                    isoSurfaceValue('set', ctHUToScalarValue(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 150)/100);
                 end
 
                 % isoColorFusionOffset default color is preset
@@ -446,9 +476,11 @@ function setIsoSurfaceCallback(~, ~)
 
                 setViewerDefaultColor(false, atMetaData);
 
-                isoObj = initVolShow(squeeze(dicomBuffer('get')), uiOneWindowPtr('get'), 'Isosurface');
-                set(isoObj, 'InteractionsEnabled', true);
+                isoObj = initVolShow(squeeze(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'Isosurface', atMetaData);
 
+                if isempty(viewer3dObject('get'))
+                    set(isoObj, 'InteractionsEnabled', true);
+                end
                 isoObject('set', isoObj);
 
                 set(ui3DCreateIsoMaskPtr('get'), 'Enable', 'on');
@@ -596,14 +628,27 @@ function setIsoSurfaceCallback(~, ~)
                 
                 if isFusion('get') == true
                     
-                    set(btnFusionPtr('get'), 'Enable', 'on');
+                    set(btnFusionPtr('get'), 'Enable', 'on');            
+                    
+                    % tFuseInput     = inputTemplate('get');
+                    % iFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
+                    % atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
 
-                    isoFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'Isosurface');
-                    set(isoFusionObj, 'InteractionsEnabled', false);
+                    atFuseMetaData = fusionMetaData('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
 
-                    isoFusionObj.IsosurfaceColor  = surfaceColor('one', isoColorFusionOffset('get') );
-                    isoFusionObj.Isovalue         = isoSurfaceFusionValue('get');
+                    isoFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'Isosurface', atFuseMetaData);
 
+                    if isempty(viewer3dObject('get'))
+
+                        set(isoFusionObj, 'InteractionsEnabled', false);              
+                   
+                        set(isoFusionObj, 'IsosurfaceColor',  surfaceColor('one', isoColorFusionOffset('get') ));
+                        set(isoFusionObj, 'Isovalue'       ,  isoSurfaceFusionValue('get'));
+                    else
+                        set(isoFusionObj, 'Colormap'       ,  surfaceColor('one', isoColorFusionOffset('get') ));
+                        set(isoFusionObj, 'IsosurfaceValue',  isoSurfaceFusionValue('get'));                        
+                    end
+                    
                     isoFusionObject('set', isoFusionObj);
                 else
                     set(btnFusionPtr('get'), 'Enable', 'off');                    
@@ -661,10 +706,42 @@ function setIsoSurfaceCallback(~, ~)
                 isoObj = isoObject('get');
                 if ~isempty(isoObj)
 
-                    set(isoObj, 'Isovalue', isoSurfaceValue('get') );
-                    set(isoObj, 'IsosurfaceColor', surfaceColor('get', isoColorOffset('get')) );
-                                
+                    if isempty(viewer3dObject('get'))
+
+                        % set(isoObj, 'Isovalue', isoSurfaceValue('get') );
+                        % set(isoObj, 'IsosurfaceColor', surfaceColor('get', isoColorOffset('get')) );
+               
+                        set(isoObj, 'IsosurfaceColor',  surfaceColor('one', isoColorOffset('get') ));
+                        set(isoObj, 'Isovalue'       ,  isoSurfaceValue('get'));
+
+                        isoFusionObj = isoFusionObject('get');
+                        if ~isempty(isoFusionObj)&& isFusion('get') == true
+    
+                            % set(isoFusionObj, 'Isovalue', isoSurfaceFusionValue('get'));
+                            % set(isoFusionObj, 'IsosurfaceColor', surfaceColor('get', isoColorFusionOffset('get')) );
+                               
+                            set(isoFusionObj, 'IsosurfaceColor',  surfaceColor('one', isoColorFusionOffset('get') ));
+                            set(isoFusionObj, 'Isovalue'       ,  isoSurfaceFusionValue('get'));
+    
+                            isoFusionObject('set', isoFusionObj);
+                        end                   
+                    else
+
+                        isoObj = isoObject('get');
+                        set(isoObj, 'Visible', 'on');
+    
+                        isoFusionObj = isoFusionObject('get');
+                        if ~isempty(isoFusionObj)
+
+                            if isFusion('get')
+                                set(isoFusionObj, 'Visible', 'on');
+                            end
+                        end  
+
+                    end
+
                     isoObject('set', isoObj);
+                    
                     if get(ui3DVolumePtr('get'), 'Value') == 1 % Not Fusion
                                                                    
                         set(ui3DCreateIsoMaskPtr       ('get'), 'Enable', 'on');
@@ -806,14 +883,6 @@ function setIsoSurfaceCallback(~, ~)
                         end                     
                     end
 
-                    isoFusionObj = isoFusionObject('get');
-                    if ~isempty(isoFusionObj)&& isFusion('get') == true
-
-                        set(isoFusionObj, 'Isovalue', isoSurfaceFusionValue('get'));
-                        set(isoFusionObj, 'IsosurfaceColor', surfaceColor('get', isoColorFusionOffset('get')) );
-
-                        isoFusionObject('set', isoFusionObj);
-                    end
                 else
 
                     if ~isempty(volObject('get')) && ...
@@ -823,8 +892,13 @@ function setIsoSurfaceCallback(~, ~)
                         surface3DPriority('set', 'Isosurface', 2);
                     end
 
-                    isoObj = initVolShow(squeeze(dicomBuffer('get')), uiOneWindowPtr('get'), 'Isosurface');
-                    set(isoObj, 'InteractionsEnabled', false);
+                    atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
+
+                    isoObj = initVolShow(squeeze(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'Isosurface', atMetaData);
+
+                    if isempty(viewer3dObject('get'))
+                        set(isoObj, 'InteractionsEnabled', false);
+                    end
 
                     isoObject('set', isoObj);
 
@@ -967,11 +1041,24 @@ function setIsoSurfaceCallback(~, ~)
                     end
                 
                     if isFusion('get')
-                        isoFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'Isosurface');
-                        set(isoFusionObj, 'InteractionsEnabled', false);
 
-                        isoFusionObj.IsosurfaceColor  = surfaceColor('one', isoColorFusionOffset('get') );
-                        isoFusionObj.Isovalue         = isoSurfaceFusionValue('get');
+                        atFuseMetaData = fusionMetaData('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+
+                        isoFusionObj = initVolShow(squeeze(fusionBuffer('get', [], get(uiFusedSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'Isosurface', atFuseMetaData);
+
+                        % isoFusionObj.IsosurfaceColor  = surfaceColor('one', isoColorFusionOffset('get') );
+                        % isoFusionObj.Isovalue         = isoSurfaceFusionValue('get');
+
+                        if isempty(viewer3dObject('get'))
+
+                            set(isoFusionObj, 'InteractionsEnabled', false);
+                      
+                            set(isoFusionObj, 'IsosurfaceColor',  surfaceColor('one', isoColorFusionOffset('get') ));
+                            set(isoFusionObj, 'Isovalue'       ,  isoSurfaceFusionValue('get'));
+                        else
+                            set(isoFusionObj, 'Colormap'       ,  surfaceColor('one', isoColorFusionOffset('get') ));
+                            set(isoFusionObj, 'IsosurfaceValue',  isoSurfaceFusionValue('get'));                        
+                        end
 
                         isoFusionObject('set', isoFusionObj);
                     end
@@ -1027,42 +1114,54 @@ end
            (switchToMIPMode('get') == true || ...
             switchTo3DMode('get') == true)
 
-            isoObj = isoObject('get');
-            set(isoObj, 'InteractionsEnabled', false);
-            isoObject('set', isoObj);
+            if isempty(viewer3dObject('get'))
+
+                isoObj = isoObject('get');
+                set(isoObj, 'InteractionsEnabled', false);
+                isoObject('set', isoObj);
+            end
 
             if switchTo3DMode('get') == true && ...
                switchToMIPMode('get') == true
                 if surface3DPriority('get', 'VolumeRendering') < ...
                    surface3DPriority('get', 'MaximumIntensityProjection')
 
-                    volObj = volObject('get');
-                    set(volObj, 'InteractionsEnabled', true);
-                    volObject('set', volObj);
+                    if isempty(viewer3dObject('get'))
 
-                    mipObj = mipObject('get');
-                    set(mipObj, 'InteractionsEnabled', false);
-                    mipObject('set', mipObj);
+                        volObj = volObject('get');
+                        set(volObj, 'InteractionsEnabled', true);
+                        volObject('set', volObj);
+                    
+
+                        mipObj = mipObject('get');
+                        set(mipObj, 'InteractionsEnabled', false);
+                        mipObject('set', mipObj);
+                    end
                 else
-                    volObj = volObject('get');
-                    set(volObj, 'InteractionsEnabled', false);
-                    volObject('set', volObj);
-
-                    mipObj = mipObject('get');
-                    set(mipObj, 'InteractionsEnabled', true);
-                    mipObject('set', mipObj);
+                    if isempty(viewer3dObject('get'))
+                        volObj = volObject('get');
+                        set(volObj, 'InteractionsEnabled', false);
+                        volObject('set', volObj);
+    
+                        mipObj = mipObject('get');
+                        set(mipObj, 'InteractionsEnabled', true);
+                        mipObject('set', mipObj);
+                    end
                 end
             else
-                if switchTo3DMode('get') == true
-                    volObj = volObject('get');
-                    set(volObj, 'InteractionsEnabled', true);
-                    volObject('set', volObj);
-                end
+                if isempty(viewer3dObject('get'))
 
-                if switchToMIPMode('get') == true
-                    mipObj = mipObject('get');
-                    set(mipObj, 'InteractionsEnabled', true);
-                    mipObject('set', mipObj);
+                    if switchTo3DMode('get') == true
+                        volObj = volObject('get');
+                        set(volObj, 'InteractionsEnabled', true);
+                        volObject('set', volObj);
+                    end
+    
+                    if switchToMIPMode('get') == true
+                        mipObj = mipObject('get');
+                        set(mipObj, 'InteractionsEnabled', true);
+                        mipObject('set', mipObj);
+                    end
                 end
             end
         end

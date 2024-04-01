@@ -27,7 +27,7 @@ function init3DuicontrolPanel()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    hold on;
+    % hold on;
 
     init3DPanel('set', false);
 
@@ -38,7 +38,7 @@ function init3DuicontrolPanel()
                   'string'  , '3D Volume',...
                   'horizontalalignment', 'left',...
                   'FontWeight', 'bold',...
-                  'position', [25 872 200 20], ...
+                  'position', [25 875 200 20], ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get') ...
                   );
@@ -66,7 +66,7 @@ function init3DuicontrolPanel()
        ui3DVolume = ...
            uicontrol(ui3DPanelPtr('get'), ...
                      'Style'   , 'popup', ...
-                     'Position', [135 875 510 20], ...
+                     'Position', [135 875 510 25], ...
                      'String'  , as3DVolume, ...
                      'Value'   , 1 ,...
                      'Enable'  , sVolumeEnable, ...
@@ -83,10 +83,10 @@ function init3DuicontrolPanel()
                      'style'   , 'checkbox',...
                      'enable'  , 'on',...
                      'value'   , displayVoi('get'),...
-                     'position', [350 750 20 20],...
+                     'position', [350 760 20 20],...
                      'BackgroundColor', viewerBackgroundColor('get'), ...
                      'ForegroundColor', viewerForegroundColor('get'), ...
-                     'Callback', @display3DVoiCallback...
+                     'Callback', @display3DVoiTxtCallback...
                      );
        ui3DDispVoiPtr('set', chkDispVoi);
 
@@ -94,15 +94,16 @@ function init3DuicontrolPanel()
                     'style'   , 'text',...
                     'string'  , 'Display Contours',...
                     'horizontalalignment', 'left',...
-                    'position', [375 747 250 20],...
+                    'position', [375 760 250 20],...
                     'Enable', 'Inactive',...
                     'BackgroundColor', viewerBackgroundColor('get'), ...
                     'ForegroundColor', viewerForegroundColor('get'), ...
                     'ButtonDownFcn', @display3DVoiTxtCallback...
                     );
 
+    btnContourTransparencyList = ...
         uicontrol(ui3DPanelPtr('get'),...
-                  'Position', [505 720 140 25],...
+                  'Position', [505 735 140 25],...
                   'String'  , 'List',...
                   'Enable'  , 'on', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -110,19 +111,45 @@ function init3DuicontrolPanel()
                   'Callback', @voiEnableListCallback...
                   );
 
+    txtContourTransparencyList = ...
           uicontrol(ui3DPanelPtr('get'),...
                     'style'   , 'text',...
-                    'string'  , 'Contour Setting',...
+                    'string'  , 'Contours Transparency',...
                     'horizontalalignment', 'left',...
-                    'position', [350 717 150 20],...
+                    'position', [350 735 150 20],...
                     'BackgroundColor', viewerBackgroundColor('get'), ...
                     'ForegroundColor', viewerForegroundColor('get'), ...
                     'Enable', 'On'...
                     );
+
+    uiSliderAllVoiTransparency = ...
+        uicontrol(ui3DPanelPtr('get'), ...
+                  'Style'   , 'Slider', ...
+                  'Position', [350 710 295 20], ...
+                  'Value'   , slider3DVoiTransparencyValue('get'), ...
+                  'Enable'  , 'on', ...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'CallBack', @uiSliderAllVoiTransparencyCallback ...
+                  );
+%     uiSliderAllVoiTransparencyPtr('set', uiSliderAllVoiTransparency);
+
+    if displayVoi('get') == true
+        set(txtContourTransparencyList, 'Enable', 'on');
+        set(btnContourTransparencyList, 'Enable', 'on');
+        set(uiSliderAllVoiTransparency, 'Enable', 'on');
+    else
+        set(txtContourTransparencyList, 'Enable', 'off');
+        set(btnContourTransparencyList, 'Enable', 'off');
+        set(uiSliderAllVoiTransparency, 'Enable', 'off');
+    end
+
+
+
 if 0
           uicontrol(ui3DPanelPtr('get'),...
                     'style'   , 'text',...
-                    'string'  , 'VOI Transparency',...
+                    'string'  , 'Contour Transparency',...
                     'horizontalalignment', 'left',...
                     'position', [350 715 150 20],...
                     'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -133,7 +160,7 @@ if 0
     uislider3DVoiTransparency = ...
          uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'Slider', ...
-                  'Position', [350 700 295 14], ...
+                  'Position', [350 700 295 20], ...
                   'Value'   , slider3DVoiTransparencyValue('get'), ...
                   'Enable'  , 'on', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -150,13 +177,13 @@ end
                    'horizontalalignment', 'left',...
                    'BackgroundColor', viewerBackgroundColor('get'), ...
                    'ForegroundColor', viewerForegroundColor('get'), ...
-                   'position', [350 822 200 20]...
+                   'position', [350 830 200 20]...
                    );
 
-    ui3DBackground = ...
+     ui3DBackground = ...
          uicontrol(ui3DPanelPtr('get'), ...
                    'Style'   , 'popup', ...
-                   'Position', [505 825 140 20], ...
+                   'Position', [505 830 140 25], ...
                    'String'  , surfaceColor('all'), ...
                    'Value'   , background3DOffset('get'),...
                    'Enable'  , 'on', ...
@@ -164,7 +191,49 @@ end
                    'ForegroundColor', viewerForegroundColor('get'), ...
                    'CallBack', @background3DCallback ...
                    );
-    ui3DBackgroundPtr('set', ui3DBackground);
+     ui3DBackgroundPtr('set', ui3DBackground);
+
+     bGradiantEnable = false;
+     if ~verLessThan('matlab','9.13')
+
+        if viewerUIFigure('get') == true
+            bGradiantEnable = true;
+        end
+     end
+
+     if bGradiantEnable == true
+         sGradientEnable = 'on';
+     else
+         sGradientEnable = 'off';
+     end
+
+     chkBackgroundGradient = ...
+        uicontrol(ui3DPanelPtr('get'),...
+                  'style'   , 'checkbox',...
+                  'enable'  , sGradientEnable,...
+                  'value'   , background3DGradient('get'),...
+                  'position', [350 805 20 20],...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'Callback', @backgroundGradientCallback...
+                  );
+
+     if bGradiantEnable == true
+         sGradientEnable = 'inactive';
+     else
+         sGradientEnable = 'off';
+     end
+
+        uicontrol(ui3DPanelPtr('get'),...
+                  'style'   , 'text',...
+                  'string'  , 'Background Gradient',...
+                  'horizontalalignment', 'left',...
+                  'position', [375 805 150 20],...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'Enable', sGradientEnable, ...
+                  'ButtonDownFcn', @backgroundGradientCallback...
+                  );
 
     % Volume Aspect Ration
 
@@ -172,7 +241,7 @@ end
     uiSlider3DRatio = ...
          uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'Slider', ...
-                  'Position', [631 565 14 70], ...
+                  'Position', [631 605 14 70], ...
                   'Value'   , slider3DRatioLastValue('get'), ...
                   'Enable'  , 'on', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -184,7 +253,7 @@ end
     uiEdit3DXRatio = ...
         uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
-                  'Position', [505 615 120 20], ...
+                  'Position', [505 655 120 20], ...
                   'String'  , volumeScaleFator('get', 'x'), ...
                   'Enable'  , 'on', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -198,13 +267,13 @@ end
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [350 612 120 20]...
+                  'position', [350 655 120 20]...
                   );
 
     uiEdit3DYRatio = ...
         uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
-                  'Position', [505 590 120 20], ...
+                  'Position', [505 630 120 20], ...
                   'String'  , volumeScaleFator('get', 'y'), ...
                   'Enable'  , 'on', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -218,13 +287,13 @@ end
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [350 587 120 20]...
+                  'position', [350 630 120 20]...
                   );
 
     uiEdit3DZRatio = ...
         uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
-                  'Position', [505 565 120 20], ...
+                  'Position', [505 605 120 20], ...
                   'String'  , volumeScaleFator('get', 'z'), ...
                   'Enable'  , 'on', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -238,8 +307,9 @@ end
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [350 562 120 20]...
+                  'position', [350 605 120 20]...
                   );
+
 
     % Volume Lighting
 
@@ -247,7 +317,6 @@ end
     if verLessThan('matlab','9.8')
         bLightingIsSupported = false;
     end
-
 
     if bLightingIsSupported == true
         sChkLightingEnable = 'on';
@@ -263,7 +332,7 @@ end
                   'style'   , 'checkbox',...
                   'enable'  , sChkLightingEnable,...
                   'value'   , volLighting('get'),...
-                  'position', [25 535 20 20],...
+                  'position', [25 545 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @volLightingCallback...
@@ -275,7 +344,7 @@ end
                   'style'   , 'text',...
                   'string'  , 'Volume Lighting',...
                   'horizontalalignment', 'left',...
-                  'position', [45 533 200 20],...
+                  'position', [45 545 200 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Enable', sTxtLightingEnable ...
@@ -287,23 +356,43 @@ end
 
      % Volume Colormap
 
+    bVolColormapEnable = true;
+    if ~verLessThan('matlab','9.13')
+
+        if viewerUIFigure('get') == true
+            bVolColormapEnable = false;
+        end
+    end
+
+    if bVolColormapEnable == true
+        sVolColormapEnable = 'on';
+    else
+        sVolColormapEnable = 'off';
+    end
+
     chkDispVolColormap = ...
         uicontrol(ui3DPanelPtr('get'),...
                   'style'   , 'checkbox',...
-                  'enable'  , 'on',...
+                  'enable'  , sVolColormapEnable,...
                   'value'   , displayVolColorMap('get'),...
-                  'position', [25 510 20 20],...
+                  'position', [25 520 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @displayVolColorMapCallback...
                   );
 
+    if bVolColormapEnable == true
+        sVolColormapEnable = 'Inactive';
+    else
+        sVolColormapEnable = 'off';
+    end
+
         uicontrol(ui3DPanelPtr('get'),...
                   'style'   , 'text',...
                   'string'  , 'Display Volume Colormap',...
                   'horizontalalignment', 'left',...
-                  'position', [45 507 200 20],...
-                  'Enable', 'Inactive',...
+                  'position', [45 520 200 20],...
+                  'Enable', sVolColormapEnable,...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'ButtonDownFcn', @displayVolColorMapCallback...
@@ -315,13 +404,13 @@ end
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [25 482 150 20]...
+                  'position', [25 495 150 20]...
                   );
 
     uiColorVol = ...
         uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'popup', ...
-                  'Position', [180 485 140 20], ...
+                  'Position', [180 495 140 25], ...
                   'String'  , get3DColorMap('all'), ...
                   'Value'   , colorMapVolOffset('get'),...
                   'Enable'  , 'on', ...
@@ -340,7 +429,7 @@ end
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [25 457 150 20]...
+                  'position', [25 465 150 20]...
                   );
 
     [aMap, sType] = getVolAlphaMap('get', dicomBuffer('get'), dicomMetaData('get'));
@@ -350,7 +439,7 @@ end
     uiVolumeAlphaMapType = ...
         uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'popup', ...
-                  'Position', [180 460 140 20], ...
+                  'Position', [180 460 140 25], ...
                   'String'  , {'Linear', 'Custom', 'MR', 'CT', 'PET'}, ...
                   'Value'   , dVolAlphaOffset,...
                   'Enable'  , 'on', ...
@@ -366,13 +455,13 @@ end
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [25 435 200 20]...
+                  'position', [25 440 200 20]...
                   );
 
     uiSliderVolLinAlpha = ...
         uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'Slider', ...
-                  'Position', [25 420 295 14], ...
+                  'Position', [25 420 295 20], ...
                   'Value'   , volLinearAlphaValue('get'), ...
                   'Enable'  , sVolMapSliderEnable, ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -381,7 +470,9 @@ end
                   );
     ui3DSliderVolLinAlphaPtr('set', uiSliderVolLinAlpha);
 
-    uiSliderVolLinAlphaListener = addlistener(uiSliderVolLinAlpha, 'Value', 'PreSet', @sliderVolLinearAlphaCallback);
+    % uiSliderVolLinAlphaListener = addlistener(uiSliderVolLinAlpha, 'Value', 'PreSet', @sliderVolLinearAlphaCallback);
+    uiSliderVolLinAlphaListener = addlistener(uiSliderVolLinAlpha, 'ContinuousValueChange', @sliderVolLinearAlphaCallback);
+
 
     % Vol Alphamap Editor
 
@@ -397,6 +488,7 @@ end
     axeVolAlphmap = ...
         axes(ui3DPanelPtr('get'),...
              'Units'   , 'pixels',...
+             'Tag'     , 'Volume Alphamap',...
              'Color'   , viewerAxesColor('get'),...
              'XColor'  , viewerForegroundColor('get'),...
              'YColor'  , viewerForegroundColor('get'),...
@@ -404,7 +496,8 @@ end
              'position', [25 35 295 350]...
              );
     axeVolAlphmap.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    axeVolAlphmap.Toolbar = [];
+    axeVolAlphmap.Toolbar.Visible = 'off';
+    disableDefaultInteractivity(axeVolAlphmap);
 
     axe3DPanelVolAlphmapPtr('set', axeVolAlphmap);
  %   axeVolAlphmap.Title.String = 'Volume Alphamap';
@@ -424,7 +517,7 @@ end
                   'style'   , 'checkbox',...
                   'enable'  , 'off',...
                   'value'   , addVoiIsoMask('get'),...
-                  'position', [25 750 20 20],...
+                  'position', [25 760 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @addVoiIsoMaskCallback...
@@ -436,7 +529,7 @@ end
                   'style'   , 'text',...
                   'string'  , 'Add Contours',...
                   'horizontalalignment', 'left',...
-                  'position', [45 747 200 20],...
+                  'position', [45 760 200 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Enable', 'On', ...
@@ -449,7 +542,7 @@ end
                   'style'   , 'checkbox',...
                   'enable'  , 'off',...
                   'value'   , pixelEdge('get'),...
-                  'position', [45 725 20 20],...
+                  'position', [45 735 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @pixelEdgeIsoMaskCallback...
@@ -461,7 +554,7 @@ end
                   'style'   , 'text',...
                   'string'  , 'Pixel Edge',...
                   'horizontalalignment', 'left',...
-                  'position', [65 722 150 20],...
+                  'position', [65 735 150 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Enable', 'On', ...
@@ -472,7 +565,7 @@ end
     uiEditAddVoiIsoMask = ...
         uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
-                  'Position', [255 700 65 20], ...
+                  'Position', [255 710 65 20], ...
                   'String'  , voiIsoMaskMax('get'), ...
                   'Enable'  , 'off', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -491,7 +584,7 @@ end
                   'style'   , 'checkbox',...
                   'enable'  , 'off',...
                   'value'   , percentOfPeakIsoMask('get'),...
-                  'position', [45 700 20 20],...
+                  'position', [45 710 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @percentOfPeakIsoMaskCallback...
@@ -503,7 +596,7 @@ end
                   'style'   , 'text',...
                   'string'  , 'Percent of Peak',...
                   'horizontalalignment', 'left',...
-                  'position', [65 697 150 20],...
+                  'position', [65 710 150 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Enable', 'On', ...
@@ -524,7 +617,7 @@ end
                   'style'   , 'checkbox',...
                   'enable'  , 'off',...
                   'value'   , multiplePeaksIsoMask('get'),...
-                  'position', [65 675 20 20],...
+                  'position', [65 685 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @multiplePeaksIsoMaskCallback...
@@ -536,7 +629,7 @@ end
                   'style'   , 'text',...
                   'string'  , 'Multiple Peaks (% of peak)',...
                   'horizontalalignment', 'left',...
-                  'position', [85 672 200 20],...
+                  'position', [85 685 200 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Enable', 'On', ...
@@ -548,7 +641,7 @@ end
     uiEditPeakPercentIsoMask = ...
         uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
-                  'Position', [255 675 65 20], ...
+                  'Position', [255 685 65 20], ...
                   'String'  , peakPercentIsoMask('get'), ...
                   'Enable'  , 'off', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -561,10 +654,10 @@ end
                   'style'   , 'text',...
                   'string'  , 'Min SUV Formula',...
                   'horizontalalignment', 'left',...
-                  'position', [65 647 200 20],...
+                  'position', [65 655 200 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'Enable', 'On' ...
+                  'Enable', 'on' ...
                   );
 
 %    uiValueFormulaIsoMask = ...
@@ -589,13 +682,13 @@ end
     uiValueFormulaIsoMask = ...
         uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'popup', ...
-                  'Position', [180 650 140 20], ...
+                  'Position', [180 655 140 25], ...
                   'string'  , {'Fixed', ...
                                '(4.30/SUVmean)x(SUVmean + SD)', ...
                                '(4.30/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map' ...
                                },...
                   'Value'   , valueFormulaIsoMask('get'), ...
-                  'Enable'  , 'on', ...
+                  'Enable'  , 'off', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @minSuvFromFormulaIsoMaskValue ...
@@ -606,7 +699,7 @@ end
                   'style'   , 'Text',...
                   'string'  , 'Smallest Contour (ml)',...
                   'horizontalalignment', 'left',...
-                  'position', [45 622 200 20],...
+                  'position', [45 630 200 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Enable', 'On' ...
@@ -615,7 +708,7 @@ end
     uiEditSmalestIsoMask = ...
         uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
-                  'Position', [255 625 65 20], ...
+                  'Position', [255 630 65 20], ...
                   'String'  , smalestIsoMask('get'), ...
                   'Enable'  , 'off', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -641,7 +734,7 @@ end
                   'style'   , 'text',...
                   'string'  , 'Resample to CT',...
                   'horizontalalignment', 'left',...
-                  'position', [45 597 200 20],...
+                  'position', [45 600 200 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Enable', 'On', ...
@@ -673,7 +766,7 @@ end
     uiResampleToCTIsoMask = ...
         uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'popup', ...
-                  'Position', [180 600 140 20], ...
+                  'Position', [180 600 140 25], ...
                   'String'  , asCTSeries, ...
                   'Value'   , isoMaskCtSerieOffset('get'),...
                   'Enable'  , 'off', ...
@@ -719,7 +812,7 @@ end
 
     uiCreateIsoMask = ...
         uicontrol(ui3DPanelPtr('get'),...
-                  'Position', [180 565 140 25],...
+                  'Position', [180 570 140 25],...
                   'FontWeight',  'bold',...
                   'String'  , 'Create Mask',...
                   'Enable'  , 'off', ...
@@ -737,14 +830,14 @@ end
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [25 822 150 20]...
+                  'position', [25 830 150 20]...
                   );
 
     asColor = [surfaceColor('all') 'Custom'];
     uiIsoSurfaceColor = ...
        uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'popup', ...
-                  'Position', [180 825 140 20], ...
+                  'Position', [180 830 140 25], ...
                   'String'  , asColor, ...
                   'Value'   , isoColorOffset('get'),...
                   'Enable'  , 'on', ...
@@ -760,13 +853,13 @@ end
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [25 800 300 20]...
+                  'position', [25 805 300 20]...
                               );
 
     uiSliderIsoSurface = ...
         uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'Slider', ...
-                  'Position', [25 785 225 14], ...
+                  'Position', [25 785 225 20], ...
                   'Value'   , isoSurfaceValue('get'), ...
                   'Enable'  , 'on', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -776,8 +869,8 @@ end
     ui3DSliderIsoSurfacePtr('set', uiSliderIsoSurface);
 
     bypassUiSliderIsoSurfaceListener('set', false);
-    uiSliderIsoSurfaceListener = addlistener(uiSliderIsoSurface,'Value','PreSet',@sliderIsoCallback);
-
+    % uiSliderIsoSurfaceListener = addlistener(uiSliderIsoSurface,'Value','PreSet',@sliderIsoCallback);
+    uiSliderIsoSurfaceListener = addlistener(uiSliderIsoSurface, 'ContinuousValueChange', @sliderIsoCallback);
 
     uiEditIsoSurface = ...
         uicontrol(ui3DPanelPtr('get'), ...
@@ -793,23 +886,43 @@ end
 
     % MIP Colormap
 
+    bMipColormapEnable = true;
+    if ~verLessThan('matlab','9.13')
+
+        if viewerUIFigure('get') == true
+            bMipColormapEnable = false;
+        end
+    end
+
+    if bMipColormapEnable == true
+        sMipColormapEnable = 'on';
+    else
+        sMipColormapEnable = 'off';
+    end
+
     chkDispMipColormap = ...
         uicontrol(ui3DPanelPtr('get'),...
                   'style'   , 'checkbox',...
-                  'enable'  , 'on',...
+                  'enable'  , sMipColormapEnable,...
                   'value'   , displayMIPColorMap('get'),...
-                  'position', [350 510 20 20],...
+                  'position', [350 520 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @displayMIPColorMapCallback...
                   );
 
+    if bMipColormapEnable == true
+        sMipColormapEnable = 'Inactive';
+    else
+        sMipColormapEnable = 'off';
+    end
+
         uicontrol(ui3DPanelPtr('get'),...
                   'style'   , 'text',...
                   'string'  , 'Display MIP Colormap',...
                   'horizontalalignment', 'left',...
-                  'position', [375 507 200 20],...
-                  'Enable', 'Inactive',...
+                  'position', [375 520 200 20],...
+                  'Enable', sMipColormapEnable,...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'ButtonDownFcn', @displayMIPColorMapCallback...
@@ -821,13 +934,13 @@ end
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [350 482 100 20]...
+                  'position', [350 495 100 20]...
                   );
 
     uiColorMip = ...
         uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'popup', ...
-                  'Position', [505 485 140 20], ...
+                  'Position', [505 495 140 25], ...
                   'String'  , get3DColorMap('all'), ...
                   'Value'   , colorMapMipOffset('get'),...
                   'Enable'  , 'on', ...
@@ -845,7 +958,7 @@ end
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [350 457 100 20]...
+                  'position', [350 465 100 20]...
                   );
 
     [aMap, sType] = getMipAlphaMap('get', dicomBuffer('get'), dicomMetaData('get'));
@@ -855,7 +968,7 @@ end
     uiMipAlphaMapType = ...
          uicontrol(ui3DPanelPtr('get'), ...
                    'Style'   , 'popup', ...
-                   'Position', [505 460 140 20], ...
+                   'Position', [505 460 140 25], ...
                    'String'  , {'Linear', 'Custom', 'MR', 'CT', 'PET'}, ...
                    'Value'   , dMipAlphaOffset,...
                    'Enable'  , 'on', ...
@@ -873,20 +986,21 @@ end
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [350 435 235 20]...
+                  'position', [350 440 235 20]...
                   );
 
     uiSliderMipLinAlpha = ...
         uicontrol(ui3DPanelPtr('get'), ...
                   'Style'   , 'Slider', ...
-                  'Position', [350 420 295 14], ...
+                  'Position', [350 420 295 20], ...
                   'Value'   , mipLinearAlphaValue('get'), ...
                   'Enable'  , sMipMapSliderEnable, ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @sliderMipLinearAlphaCallback ...
                   );
-    uiSliderMipLinAlphaListener = addlistener(uiSliderMipLinAlpha, 'Value', 'PreSet', @sliderMipLinearAlphaCallback);
+    % uiSliderMipLinAlphaListener = addlistener(uiSliderMipLinAlpha, 'Value', 'PreSet', @sliderMipLinearAlphaCallback);
+    uiSliderMipLinAlphaListener = addlistener(uiSliderMipLinAlpha, 'ContinuousValueChange', @sliderMipLinearAlphaCallback);
     ui3DSliderMipLinAlphaPtr('set', uiSliderMipLinAlpha);
 
     % MIP Alphamap Editor
@@ -911,8 +1025,9 @@ end
              'position', [350 35 295 350]...
              );
     axeMipAlphmap.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    axeMipAlphmap.Toolbar = [];   
-    
+    axeMipAlphmap.Toolbar.Visible = 'off';
+    disableDefaultInteractivity(axeMipAlphmap);
+
     axe3DPanelMipAlphmapPtr('set', axeMipAlphmap);
 %      axeVolAlphmap.Title.String = 'MIP Alphamap';
 
@@ -924,17 +1039,31 @@ end
         displayAlphaCurve(aMap, axeMipAlphmap);
     end
 
-    hold off;
+    % hold off;
 
-    function display3DVoiTxtCallback(~, ~)
+    function display3DVoiTxtCallback(hObject, ~)
 
-        if get(ui3DDispVoiPtr('get'), 'Value') == true
+        if strcmpi(get(hObject, 'style'), 'text')
 
-            set(ui3DDispVoiPtr('get'), 'Value', false);
+            if get(chkDispVoi, 'Value') == true
+
+                set(chkDispVoi, 'Value', false);
+            else
+                set(chkDispVoi, 'Value', true);
+            end
+        end
+
+        if get(chkDispVoi, 'Value') == true
+
+            set(txtContourTransparencyList, 'Enable', 'on');
+            set(btnContourTransparencyList, 'Enable', 'on');
+            set(uiSliderAllVoiTransparency, 'Enable', 'on');
 
             display3DVoiCallback();
         else
-            set(ui3DDispVoiPtr('get'), 'Value', true);
+            set(txtContourTransparencyList, 'Enable', 'off');
+            set(btnContourTransparencyList, 'Enable', 'off');
+            set(uiSliderAllVoiTransparency, 'Enable', 'off');
 
             display3DVoiCallback();
         end
@@ -970,7 +1099,7 @@ end
 
     end
 
-    function dObectValue = slider3DRatioLastValue(sAction, dValue)
+    function dObjectValue = slider3DRatioLastValue(sAction, dValue)
 
          persistent pdObjectValue;
 
@@ -984,7 +1113,7 @@ end
             pdObjectValue = dValue;
          end
 
-         dObectValue = pdObjectValue;
+         dObjectValue = pdObjectValue;
 
     end
 
@@ -1016,40 +1145,135 @@ end
         volumeScaleFator('set', 'y', yValue);
         volumeScaleFator('set', 'z', zValue);
 
-        volObj = volObject('get');
-        if ~isempty(volObj)
-            set(volObj, 'ScaleFactors', [xValue yValue zValue]);
-        end
+        ptrViewer3d = viewer3dObject('get');
 
-        isoObj = isoObject('get');
-        if ~isempty(isoObj)
-            set(isoObj, 'ScaleFactors', [xValue yValue zValue]);
-        end
+        if ~isempty(ptrViewer3d)
 
-        mipObj = mipObject('get');
-        if ~isempty(mipObj)
-            set(mipObj, 'ScaleFactors', [xValue yValue zValue]);
-        end
+            if  get(ui3DVolume, 'Value') == 2 % Fusion
 
-        volFusionObj = volFusionObject('get');
-        if ~isempty(volFusionObj)
-            set(volFusionObj, 'ScaleFactors', [xValue yValue zValue]);
-        end
+                volFusionObj = volFusionObject('get');
+                if ~isempty(volFusionObj)
 
-        isoFusionObj = isoFusionObject('get');
-        if ~isempty(isoFusionObj)
-            set(isoFusionObj, 'ScaleFactors', [xValue yValue zValue]);
-        end
+                    aAffinetform3d = get(volFusionObj, 'Transformation');
 
-        mipFusionObj = mipFusionObject('get');
-        if ~isempty(mipFusionObj)
-            set(mipFusionObj, 'ScaleFactors', [xValue yValue zValue]);
-        end
+                    aAffinetform3d.A(1,1) = xValue;
+                    aAffinetform3d.A(2,2) = yValue;
+                    aAffinetform3d.A(3,3) = zValue;
 
-        voiObj = voiObject('get');
-        if ~isempty(voiObj)
-            for ff=1:numel(voiObj)
-                set(voiObj{ff}, 'ScaleFactors', [xValue yValue zValue]);
+                    set(volFusionObj, 'Transformation', aAffinetform3d);
+                end
+
+                isoFusionObj = isoFusionObject('get');
+                if ~isempty(isoFusionObj)
+
+                    aAffinetform3d = get(isoFusionObj, 'Transformation');
+
+                    aAffinetform3d.A(1,1) = xValue;
+                    aAffinetform3d.A(2,2) = yValue;
+                    aAffinetform3d.A(3,3) = zValue;
+
+                    set(isoFusionObj, 'Transformation', aAffinetform3d);
+                end
+
+                mipFusionObj = mipFusionObject('get');
+                if ~isempty(mipFusionObj)
+
+                    aAffinetform3d = get(mipFusionObj, 'Transformation');
+
+                    aAffinetform3d.A(1,1) = xValue;
+                    aAffinetform3d.A(2,2) = yValue;
+                    aAffinetform3d.A(3,3) = zValue;
+
+                    set(mipFusionObj, 'Transformation', aAffinetform3d);
+                end
+            else
+                volObj = volObject('get');
+                if ~isempty(volObj)
+
+                    aAffinetform3d = get(volObj, 'Transformation');
+
+                    aAffinetform3d.A(1,1) = xValue;
+                    aAffinetform3d.A(2,2) = yValue;
+                    aAffinetform3d.A(3,3) = zValue;
+
+                    set(volObj, 'Transformation', aAffinetform3d);
+                end
+
+                isoObj = isoObject('get');
+                if ~isempty(isoObj)
+
+                    aAffinetform3d = get(isoObj, 'Transformation');
+
+                    aAffinetform3d.A(1,1) = xValue;
+                    aAffinetform3d.A(2,2) = yValue;
+                    aAffinetform3d.A(3,3) = zValue;
+
+                    set(isoObj, 'Transformation', aAffinetform3d);
+                end
+
+                mipObj = mipObject('get');
+                if ~isempty(mipObj)
+
+                    aAffinetform3d = get(mipObj, 'Transformation');
+
+                    aAffinetform3d.A(1,1) = xValue;
+                    aAffinetform3d.A(2,2) = yValue;
+                    aAffinetform3d.A(3,3) = zValue;
+
+                    set(mipObj, 'Transformation', aAffinetform3d);
+                end
+
+                voiObj = voiObject('get');
+                if ~isempty(voiObj)
+                    for ff=1:numel(voiObj)
+
+                        aAffinetform3d = get(voiObj{ff}, 'Transformation');
+
+                        aAffinetform3d.A(1,1) = xValue;
+                        aAffinetform3d.A(2,2) = yValue;
+                        aAffinetform3d.A(3,3) = zValue;
+
+                        set(voiObj{ff}, 'Transformation', aAffinetform3d);
+                    end
+                end
+            end
+
+        else
+            volObj = volObject('get');
+            if ~isempty(volObj)
+                set(volObj, 'ScaleFactors', [xValue yValue zValue]);
+            end
+
+            isoObj = isoObject('get');
+            if ~isempty(isoObj)
+                set(isoObj, 'ScaleFactors', [xValue yValue zValue]);
+            end
+
+            mipObj = mipObject('get');
+            if ~isempty(mipObj)
+                set(mipObj, 'ScaleFactors', [xValue yValue zValue]);
+            end
+
+            volFusionObj = volFusionObject('get');
+            if ~isempty(volFusionObj)
+                set(volFusionObj, 'ScaleFactors', [xValue yValue zValue]);
+            end
+
+            isoFusionObj = isoFusionObject('get');
+            if ~isempty(isoFusionObj)
+                set(isoFusionObj, 'ScaleFactors', [xValue yValue zValue]);
+            end
+
+            mipFusionObj = mipFusionObject('get');
+            if ~isempty(mipFusionObj)
+                set(mipFusionObj, 'ScaleFactors', [xValue yValue zValue]);
+            end
+
+            voiObj = voiObject('get');
+            if ~isempty(voiObj)
+                for ff=1:numel(voiObj)
+                    set(voiObj{ff}, 'ScaleFactors', [xValue yValue zValue]);
+                end
             end
         end
 
@@ -1079,20 +1303,35 @@ end
             end
         end
 
-        if get(ui3DVolume, 'Value') == 2 % Fusion
+        ptrViewer3d = viewer3dObject('get');
 
-            volFusionLighting('set', get(chkVolLighting, 'Value'));
+        if isempty(ptrViewer3d)
 
-            volFusionObj = volFusionObject('get');
-            if ~isempty(volFusionObj)
-                set(volFusionObj, 'Lighting', volFusionLighting('get'));
+            if get(ui3DVolume, 'Value') == 2 % Fusion
+
+                volFusionLighting('set', get(chkVolLighting, 'Value'));
+
+                volFusionObj = volFusionObject('get');
+                if ~isempty(volFusionObj)
+                    set(volFusionObj, 'Lighting', volFusionLighting('get'));
+                end
+            else
+                volLighting('set', get(chkVolLighting, 'Value'));
+
+                volObj = volObject('get');
+                if ~isempty(volObj)
+                    set(volObj, 'Lighting', volLighting('get'));
+                end
             end
         else
-            volLighting('set', get(chkVolLighting, 'Value'));
 
-            volObj = volObject('get');
-            if ~isempty(volObj)
-                set(volObj, 'Lighting', volLighting('get'));
+            volLighting('set', get(chkVolLighting, 'Value'));
+            volFusionLighting('set', get(chkVolLighting, 'Value'));
+
+            if volLighting('get') == true
+                set(ptrViewer3d, 'Lighting', 'on');
+            else
+                set(ptrViewer3d, 'Lighting', 'off');
             end
         end
 
@@ -1316,6 +1555,17 @@ end
 
             volFusionObj = volFusionObject('get');
             if ~isempty(volFusionObj)
+
+
+                if ~isempty(viewer3dObject('get'))
+
+                    aAffinetform3d = get(volFusionObj, 'Transformation');
+
+                    volumeScaleFator('set', 'x', num2str(aAffinetform3d.A(1,1)) );
+                    volumeScaleFator('set', 'y', num2str(aAffinetform3d.A(2,2)) );
+                    volumeScaleFator('set', 'z', num2str(aAffinetform3d.A(3,3)) );
+                end
+
                 ic = volICFusionObject('get');
                 if ~isempty(ic)
                     ic.surfObj = volFusionObj;
@@ -1364,10 +1614,35 @@ end
 
             end
 
+            % ISO
+
+            isoFusionObj = isoFusionObject('get');
+            if ~isempty(isoFusionObj)
+
+                if ~isempty(viewer3dObject('get'))
+
+                    aAffinetform3d = get(isoFusionObj, 'Transformation');
+
+                    volumeScaleFator('set', 'x', num2str(aAffinetform3d.A(1,1)) );
+                    volumeScaleFator('set', 'y', num2str(aAffinetform3d.A(2,2)) );
+                    volumeScaleFator('set', 'z', num2str(aAffinetform3d.A(3,3)) );
+                end
+            end
+
             % Mip
 
             mipFusionObj = mipFusionObject('get');
             if ~isempty(mipFusionObj)
+
+                if ~isempty(viewer3dObject('get'))
+
+                    aAffinetform3d = get(mipFusionObj, 'Transformation');
+
+                    volumeScaleFator('set', 'x', num2str(aAffinetform3d.A(1,1)) );
+                    volumeScaleFator('set', 'y', num2str(aAffinetform3d.A(2,2)) );
+                    volumeScaleFator('set', 'z', num2str(aAffinetform3d.A(3,3)) );
+                end
+
                 ic = mipICFusionObject('get');
                 if ~isempty(ic)
                     ic.surfObj = mipFusionObj;
@@ -1430,6 +1705,16 @@ end
 
             volObj = volObject('get');
             if ~isempty(volObj)
+
+                if ~isempty(viewer3dObject('get'))
+
+                    aAffinetform3d = get(volObj, 'Transformation');
+
+                    volumeScaleFator('set', 'x', num2str(aAffinetform3d.A(1,1)) );
+                    volumeScaleFator('set', 'y', num2str(aAffinetform3d.A(2,2)) );
+                    volumeScaleFator('set', 'z', num2str(aAffinetform3d.A(3,3)) );
+                end
+
                 ic = volICObject('get');
                 if ~isempty(ic)
                     ic.surfObj = volObj;
@@ -1473,10 +1758,35 @@ end
                 set(chkVolLighting, 'Value', volLighting('get'));
             end
 
+            % ISO
+
+            isoObj = isoObject('get');
+            if ~isempty(isoObj)
+
+                if ~isempty(viewer3dObject('get'))
+
+                    aAffinetform3d = get(isoObj, 'Transformation');
+
+                    volumeScaleFator('set', 'x', num2str(aAffinetform3d.A(1,1)) );
+                    volumeScaleFator('set', 'y', num2str(aAffinetform3d.A(2,2)) );
+                    volumeScaleFator('set', 'z', num2str(aAffinetform3d.A(3,3)) );
+                end
+            end
+
             % Mip
 
             mipObj = mipObject('get');
             if ~isempty(mipObj)
+
+                if ~isempty(viewer3dObject('get'))
+
+                    aAffinetform3d = get(mipObj, 'Transformation');
+
+                    volumeScaleFator('set', 'x', num2str(aAffinetform3d.A(1,1)) );
+                    volumeScaleFator('set', 'y', num2str(aAffinetform3d.A(2,2)) );
+                    volumeScaleFator('set', 'z', num2str(aAffinetform3d.A(3,3)) );
+                end
+
                 ic = mipICObject('get');
                 if ~isempty(ic)
                     ic.surfObj = mipObj;
@@ -1527,9 +1837,17 @@ end
 
         end
 
-        uiSliderMipLinAlphaListener = addlistener(uiSliderMipLinAlpha, 'Value', 'PreSet', @sliderMipLinearAlphaCallback);
-        uiSliderVolLinAlphaListener = addlistener(uiSliderVolLinAlpha, 'Value', 'PreSet', @sliderVolLinearAlphaCallback);
-        uiSliderIsoSurfaceListener  = addlistener(uiSliderIsoSurface , 'Value', 'PreSet', @sliderIsoCallback);
+        set(uiEdit3DXRatio, 'String', volumeScaleFator('get', 'x'));
+        set(uiEdit3DYRatio, 'String', volumeScaleFator('get', 'y'));
+        set(uiEdit3DZRatio, 'String', volumeScaleFator('get', 'z'));
+
+        % uiSliderMipLinAlphaListener = addlistener(uiSliderMipLinAlpha, 'Value', 'PreSet', @sliderMipLinearAlphaCallback);
+        % uiSliderVolLinAlphaListener = addlistener(uiSliderVolLinAlpha, 'Value', 'PreSet', @sliderVolLinearAlphaCallback);
+        % uiSliderIsoSurfaceListener  = addlistener(uiSliderIsoSurface , 'Value', 'PreSet', @sliderIsoCallback);
+
+        uiSliderMipLinAlphaListener = addlistener(uiSliderMipLinAlpha, 'ContinuousValueChange', @sliderMipLinearAlphaCallback);
+        uiSliderVolLinAlphaListener = addlistener(uiSliderVolLinAlpha, 'ContinuousValueChange', @sliderVolLinearAlphaCallback);
+        uiSliderIsoSurfaceListener  = addlistener(uiSliderIsoSurface , 'ContinuousValueChange', @sliderIsoCallback);
     end
 
     function voiEnableListCallback(~, ~)
@@ -1544,17 +1862,33 @@ end
 
         if ~isempty(atVoiInput)
 
-            dlgVoiListEnable = ...
-               dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-540/2) ...
-                                    (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-280/2) ...
-                                    540 ...
-                                    280 ...
-                                    ],...
-                       'Color', viewerBackgroundColor('get'), ...
-                       'Name', 'Voi Setting'...
-                       );
 
-           uiVoiListWindow = ...
+            if viewerUIFigure('get') == true
+
+                dlgVoiListEnable = ...
+                    uifigure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-540/2) ...
+                                        (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-540/2) ...
+                                        540 ...
+                                        540 ...
+                                        ],...
+                           'Resize', 'off', ...
+                           'Color', viewerBackgroundColor('get'),...
+                           'WindowStyle', 'modal', ...
+                           'Name' , 'Voi Transparency'...
+                           );
+            else
+                dlgVoiListEnable = ...
+                   dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-540/2) ...
+                                        (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-540/2) ...
+                                        540 ...
+                                        540 ...
+                                        ],...
+                           'Color', viewerBackgroundColor('get'), ...
+                           'Name', 'Voi Transparency'...
+                           );
+            end
+
+            uiVoiListWindow = ...
                uipanel(dlgVoiListEnable,...
                       'Units'   , 'pixels',...
                       'position', [0 ...
@@ -1582,7 +1916,8 @@ end
                         'ForegroundColor', viewerForegroundColor('get'), ...
                         'Callback', @uiVoiListEnableCallback ...
                         );
-            addlistener(uiVoiListSlider,'Value','PreSet', @uiVoiListEnableCallback);
+            % addlistener(uiVoiListSlider,'Value','PreSet', @uiVoiListEnableCallback);
+            addlistener(uiVoiListSlider, 'ContinuousValueChange', @uiVoiListEnableCallback);
 
             aVoiEnableList = voi3DEnableList('get');
             if isempty(aVoiEnableList)
@@ -1620,7 +1955,7 @@ end
                               'style'   , 'text',...
                               'string'  , sVoiName,...
                               'horizontalalignment', 'left',...
-                              'position', [40 chkVoiList{aa}.Position(2)-3 200 20],...
+                              'position', [40 chkVoiList{aa}.Position(2) 200 20],...
                               'Enable', 'Inactive',...
                               'UserData', aa, ...
                               'ForegroundColor', aVoiColor, ...
@@ -1697,28 +2032,60 @@ end
             voi3DEnableList('set', aVoiEnableList);
 
             if displayVoi('get') == true
+
                 voiObj = voiObject('get');
+
                 if ~isempty(voiObj)
-                    if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
+
+                    if ~isempty(viewer3dObject('get')) % with viewer3d, we are now using the LabelOverlay for the voi
+
+                        aOverlayAlphamap = get(voiObj{1}, 'OverlayAlphamap');
 
                         if aVoiEnableList{dVoiOffset} == true
-                            aAlphamap = compute3DVoiAlphamap(aVoiTransparencyList{dVoiOffset});
+                            aOverlayAlphamap(dVoiOffset+1) = aVoiTransparencyList{dVoiOffset};
                         else
-                            aAlphamap = zeros(256,1);
+                            aOverlayAlphamap(dVoiOffset+1) = 0;
                         end
 
-                        set(voiObj{dVoiOffset}, 'Alphamap', aAlphamap);
+                        set(voiObj{1}, 'OverlayAlphamap', aOverlayAlphamap);
+
                     else
-                        if aVoiEnableList{dVoiOffset} == true
-                            sRenderer = 'Isosurface';
+                        if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
+
+                            if aVoiEnableList{dVoiOffset} == true
+                                aAlphamap = compute3DVoiAlphamap(aVoiTransparencyList{dVoiOffset});
+                            else
+                                aAlphamap = zeros(256,1);
+                            end
+
+                            set(voiObj{dVoiOffset}, 'Alphamap', aAlphamap);
+
+                        elseif strcmpi(voi3DRenderer('get'), 'LabelRendering')
+
+                            aLabelOpacity = get(voiObj{1}, 'LabelOpacity');
+
+                            if aVoiEnableList{dVoiOffset} == true
+                                aLabelOpacity(dVoiOffset+1) = aVoiTransparencyList{dVoiOffset};
+                            else
+                                aLabelOpacity(dVoiOffset+1) = 0;
+                            end
+
+                            set(voiObj{1}, 'LabelOpacity', aLabelOpacity);
                         else
-                            sRenderer = 'LabelOverlayRendering';
+
+                            dIsoValue = compute3DVoiTransparency(aVoiTransparencyList{dVoiOffset});
+
+                            if aVoiEnableList{dVoiOffset} == true
+                                sRenderer = 'Isosurface';
+                            else
+                                sRenderer = 'LabelOverlayRendering';
+                            end
+
+                            set(voiObj{dVoiOffset}, 'Isovalue',  dIsoValue );
+                            set(voiObj{dVoiOffset}, 'Renderer', sRenderer);
+
+                            % set(voiObj{dVoiOffset}, 'Isovalue', dIsoValue);
                         end
-
-                        dIsoValue = compute3DVoiTransparency(aVoiTransparencyList{dVoiOffset});
-
-                        set(voiObj{dVoiOffset}, 'Isovalue', dIsoValue);
-                        set(voiObj{dVoiOffset}, 'Renderer', sRenderer);
                     end
                 end
             end
@@ -1741,16 +2108,50 @@ end
 
                 voiObj = voiObject('get');
 
-                if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
+                if ~isempty(voiObj)
 
-                    if ~isempty(voiObj) && aVoiEnableList{dVoiOffset} == true
-                        aAlphamap = compute3DVoiAlphamap(dSliderValue);
-                        set(voiObj{dVoiOffset}, 'Alphamap', aAlphamap);
-                    end
-                else
-                    if ~isempty(voiObj) && aVoiEnableList{dVoiOffset} == true
-                        dIsoValue = compute3DVoiTransparency(dSliderValue);
-                        set(voiObj{dVoiOffset}, 'Isovalue', dIsoValue);
+                    if ~isempty(viewer3dObject('get')) % with viewer3d, we are now using the LabelOverlay for the voi
+
+                        aOverlayAlphamap = get(voiObj{1}, 'OverlayAlphamap');
+
+                        if aVoiEnableList{dVoiOffset} == true
+                            aOverlayAlphamap(dVoiOffset+1) = dSliderValue;
+                        else
+                            aOverlayAlphamap(dVoiOffset+1) = 0;
+                        end
+
+                        set(voiObj{1}, 'OverlayAlphamap', aOverlayAlphamap);
+
+                    else
+                        if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
+
+                            if ~isempty(voiObj) && aVoiEnableList{dVoiOffset} == true
+                                aAlphamap = compute3DVoiAlphamap(dSliderValue);
+                                set(voiObj{dVoiOffset}, 'Alphamap', aAlphamap);
+                            end
+                        elseif strcmpi(voi3DRenderer('get'), 'LabelRendering')
+
+                            aLabelOpacity = get(voiObj{1}, 'LabelOpacity');
+
+                            if aVoiEnableList{dVoiOffset} == true
+                                aLabelOpacity(dVoiOffset+1) = dSliderValue;
+                            else
+                                aLabelOpacity(dVoiOffset+1) = 0;
+                            end
+
+                            set(voiObj{1}, 'LabelOpacity', aLabelOpacity);
+                        else
+                            if ~isempty(voiObj) && aVoiEnableList{dVoiOffset} == true
+                                dIsoValue = compute3DVoiTransparency(dSliderValue);
+                                if isempty(viewer3dObject('get'))
+
+                                    set(voiObj{dVoiOffset}, 'Isovalue'       ,  dIsoValue );
+                                else
+                                    set(voiObj{dVoiOffset}, 'IsosurfaceValue',  dIsoValue );
+                                end
+                                % set(voiObj{dVoiOffset}, 'Isovalue', dIsoValue);
+                            end
+                        end
                     end
                 end
             end
@@ -1778,17 +2179,50 @@ end
             if displayVoi('get') == true
 
                 voiObj = voiObject('get');
+                if ~isempty(voiObj)
 
-                if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
+                    if ~isempty(viewer3dObject('get')) % with viewer3d, we are now using the LabelOverlay for the voi
 
-                    if ~isempty(voiObj) && aVoiEnableList{dVoiOffset} == true
-                        aAlphamap = compute3DVoiAlphamap(dSliderValue);
-                        set(voiObj{dVoiOffset}, 'Alphamap', aAlphamap);
-                    end
-                else
-                    if ~isempty(voiObj) && aVoiEnableList{dVoiOffset} == true
-                        dIsoValue = compute3DVoiTransparency(dSliderValue);
-                        set(voiObj{dVoiOffset}, 'Isovalue', dIsoValue);
+                        aOverlayAlphamap = get(voiObj{1}, 'OverlayAlphamap');
+
+                        if aVoiEnableList{dVoiOffset} == true
+                            aOverlayAlphamap(dVoiOffset+1) = dSliderValue;
+                        else
+                            aOverlayAlphamap(dVoiOffset+1) = 0;
+                        end
+
+                        set(voiObj{1}, 'OverlayAlphamap', aOverlayAlphamap);
+
+                    else
+
+                        if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
+
+                            if ~isempty(voiObj) && aVoiEnableList{dVoiOffset} == true
+
+                                aAlphamap = compute3DVoiAlphamap(dSliderValue);
+                                set(voiObj{dVoiOffset}, 'Alphamap', aAlphamap);
+                            end
+                        elseif strcmpi(voi3DRenderer('get'), 'LabelRendering')
+
+                            aLabelOpacity = get(voiObj{1}, 'LabelOpacity');
+
+                            if aVoiEnableList{dVoiOffset} == true
+                                aLabelOpacity(dVoiOffset+1) = dSliderValue;
+                            else
+                                aLabelOpacity(dVoiOffset+1) = 0;
+                            end
+
+                            set(voiObj{1}, 'LabelOpacity', aLabelOpacity);
+                        else
+                            if ~isempty(voiObj) && aVoiEnableList{dVoiOffset} == true
+
+                                dIsoValue = compute3DVoiTransparency(dSliderValue);
+
+                                set(voiObj{dVoiOffset}, 'Isovalue'       ,  dIsoValue );
+
+                                % set(voiObj{dVoiOffset}, 'Isovalue', dIsoValue);
+                            end
+                        end
                     end
                 end
             end
@@ -1800,6 +2234,93 @@ end
             voi3DTransparencyList('set', aVoiTransparencyList);
 
         end
+    end
+
+    function uiSliderAllVoiTransparencyCallback(~, ~)
+
+        try
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+
+        if displayVoi('get') == true
+
+            voiObj = voiObject('get');
+
+            if ~isempty(voiObj)
+
+                atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
+                dAllVoiTransparencyValue = get(uiSliderAllVoiTransparency, 'Value');
+
+                aVoiTransparencyList = voi3DTransparencyList('get');
+
+                aVoiEnableList = voi3DEnableList('get');
+
+                if ~isempty(atVoiInput)
+
+                    for aa=1:numel(atVoiInput)
+
+                        if aVoiEnableList{aa} == true % Set list transparency sliders
+
+                            aVoiTransparencyList{aa} = dAllVoiTransparencyValue;
+                        end
+
+                        if ~isempty(viewer3dObject('get')) % with viewer3d, we are now using the LabelOverlay for the voi
+
+                            aOverlayAlphamap = get(voiObj{1}, 'OverlayAlphamap');
+
+                            if aVoiEnableList{aa} == true
+                                aOverlayAlphamap(aa+1) = dAllVoiTransparencyValue;
+                            else
+                                aOverlayAlphamap(aa+1) = 0;
+                            end
+
+                            set(voiObj{1}, 'OverlayAlphamap', aOverlayAlphamap);
+                        else
+                            if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
+
+                                if ~isempty(voiObj) && aVoiEnableList{aa} == true
+
+                                    aAlphamap = compute3DVoiAlphamap(dAllVoiTransparencyValue);
+                                    set(voiObj{aa}, 'Alphamap', aAlphamap);
+                                end
+                            elseif strcmpi(voi3DRenderer('get'), 'LabelRendering')
+
+                                aLabelOpacity = get(voiObj{1}, 'LabelOpacity');
+
+                                if aVoiEnableList{aa} == true
+                                    aLabelOpacity(aa+1) = dAllVoiTransparencyValue;
+                                else
+                                    aLabelOpacity(aa+1) = 0;
+                                end
+
+                                set(voiObj{1}, 'LabelOpacity', aLabelOpacity);
+                            else
+                                if ~isempty(voiObj) && aVoiEnableList{aa} == true
+
+                                    dIsoValue = compute3DVoiTransparency(dAllVoiTransparencyValue);
+
+                                    set(voiObj{aa}, 'Isovalue',  dIsoValue );
+
+                                    % set(voiObj{dVoiOffset}, 'Isovalue', dIsoValue);
+                                end
+                            end
+                        end
+                    end
+                end
+
+                slider3DVoiTransparencyValue('set', dAllVoiTransparencyValue);
+
+            end
+        end
+        catch
+            progressBar(1, 'Error: uiSliderAllVoiTransparencyCallback()');
+
+        end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;
     end
 
     function slider3DVoiTransparencyCallback(hObject, ~)
@@ -1826,6 +2347,7 @@ end
             if strcmpi(voi3DRenderer('get'), 'VolumeRendering')
 
                 aAlphamap = compute3DVoiAlphamap(dSliderValue);
+
                 if ~isempty(voiObj)
                     for ll=1:numel(voiObj)
                         progressBar(ll/numel(voiObj)-0.0001, sprintf('Processing VOI Transparency %d/%d', ll, numel(voiObj) ) );
@@ -1835,12 +2357,21 @@ end
                     end
                 end
             else
+
                 dIsoValue = compute3DVoiTransparency(dSliderValue);
+
                 if ~isempty(voiObj)
                     for ll=1:numel(voiObj)
                         progressBar(ll/numel(voiObj)-0.0001, sprintf('Processing VOI Transparency %d/%d', ll, numel(voiObj) ) );
                         if aVoiEnableList{ll} == true
-                            set(voiObj{ll}, 'Isovalue', dIsoValue);
+
+                            if isempty(viewer3dObject('get'))
+
+                                set(voiObj{ll}, 'Isovalue'       ,  dIsoValue );
+                            else
+                                set(voiObj{ll}, 'IsosurfaceValue',  dIsoValue );
+                            end
+                            % set(voiObj{ll}, 'Isovalue', dIsoValue);
                         end
                     end
                 end
@@ -1870,7 +2401,15 @@ end
 
             volObj = volObject('get');
             if ~isempty(volObj)
-                set(volObj, 'BackgroundColor', asColor);
+
+                % set(volObj, 'BackgroundColor', asColor);
+                ptrViewer3d = viewer3dObject('get');
+                if isempty(ptrViewer3d)
+
+                    set(volObj     , 'BackgroundColor',  asColor);
+                else
+                    set(ptrViewer3d, 'BackgroundColor',  asColor);
+                end
 
                 if displayVolColorMap('get') == true
 
@@ -1887,12 +2426,29 @@ end
 
             isoObj = isoObject('get');
             if ~isempty(isoObj)
-                set(isoObj, 'BackgroundColor', asColor);
+
+                ptrViewer3d = viewer3dObject('get');
+                if isempty(ptrViewer3d)
+
+                    set(isoObj     , 'BackgroundColor',  asColor);
+                else
+                    set(ptrViewer3d, 'BackgroundColor',  asColor);
+                end
+                % set(isoObj, 'BackgroundColor', asColor);
             end
 
             mipObj = mipObject('get');
+
             if ~isempty(mipObj)
-                set(mipObj, 'BackgroundColor', asColor);
+
+                % set(mipObj, 'BackgroundColor', asColor);
+                ptrViewer3d = viewer3dObject('get');
+                if isempty(ptrViewer3d)
+
+                    set(mipObj     , 'BackgroundColor',  asColor);
+                else
+                    set(ptrViewer3d, 'BackgroundColor',  asColor);
+                end
 
                 if displayMIPColorMap('get') == true
 
@@ -1918,6 +2474,32 @@ end
             logoObject('set', uiLogo);
 
             initGate3DObject('set', true);
+        end
+    end
+
+    function backgroundGradientCallback(hObject, ~)
+
+        if strcmpi(get(hObject, 'style'), 'text')
+
+            if get(chkBackgroundGradient, 'Value') == true
+                set(chkBackgroundGradient, 'Value', false);
+            else
+                set(chkBackgroundGradient, 'Value', true);
+            end
+        end
+
+        background3DGradient('set', get(chkBackgroundGradient, 'Value'));
+
+        ptrViewer3d = viewer3dObject('get');
+
+        if ~isempty(ptrViewer3d)
+
+            if background3DGradient('get') == true
+
+                set(ptrViewer3d, 'BackgroundGradient', 'on');
+            else
+                set(ptrViewer3d, 'BackgroundGradient', 'off');
+            end
         end
     end
 
@@ -2465,7 +3047,13 @@ end
             dMin = min(im, [], 'all');
             dMax = max(im, [], 'all');
             dScale = abs(dMin)+abs(dMax);
-            dOffset = dScale*isoObj.Isovalue;
+            if isempty(viewer3dObject('get'))
+
+                dIsosurfaceValue = get(isoObj, 'Isovalue');
+            else
+                dIsosurfaceValue = get(isoObj, 'IsosurfaceValue');
+            end
+            dOffset = dScale*dIsosurfaceValue;
             dIsoValue = dMin+dOffset;
 
             % Get constraint
@@ -2648,7 +3236,7 @@ end
 
 % To reduce memory usage
 %                 atInput(numel(atInput)).aDicomBuffer = imMask;
-% To reduce memory usage                
+% To reduce memory usage
 
                 inputTemplate('set', atInput);
 
@@ -2800,17 +3388,17 @@ end
 
                                 progressBar(0.6, sprintf('Resampling ct, please wait'));
 
-                                BWCT = resample3DImage(BWCT, atFuseMetaData, im, atMetaData, 'Cubic');                                 
-                                BWCT = imbinarize(BWCT);                        
+                                BWCT = resample3DImage(BWCT, atFuseMetaData, im, atMetaData, 'Cubic');
+                                BWCT = imbinarize(BWCT);
 
-                                if ~isequal(size(BWCT), size(im)) % Verify if both images are in the same field of view     
-                                    BWCT = resizeMaskToImageSize(BWCT, im); 
+                                if ~isequal(size(BWCT), size(im)) % Verify if both images are in the same field of view
+                                    BWCT = resizeMaskToImageSize(BWCT, im);
                                 end
                             else
-                                BWCT = imbinarize(BWCT);                                                      
+                                BWCT = imbinarize(BWCT);
                             end
 %                         else
-%                             BWCT = imbinarize(BWCT);                        
+%                             BWCT = imbinarize(BWCT);
 %                         end
 
 
@@ -2828,9 +3416,9 @@ end
                         BWCT = fusionBuffer('get', [], dFusedSeriesOffset);
 
                         if isempty(BWCT)
-    
+
                             BWCT = aInputBuffer{dFusedSeriesOffset};
-    
+
                             if     strcmpi(imageOrientation('get'), 'axial')
                             %    BWCT = BWCT;
                             elseif strcmpi(imageOrientation('get'), 'coronal')
@@ -2838,15 +3426,15 @@ end
                             elseif strcmpi(imageOrientation('get'), 'sagittal')
                                 BWCT = reorientBuffer(BWCT, 'sagittal');
                             end
-    
+
                             if atInput(dFusedSeriesOffset).bFlipLeftRight == true
                                 BWCT=BWCT(:,end:-1:1,:);
                             end
-    
+
                             if atInput(dFusedSeriesOffset).bFlipAntPost == true
                                 BWCT=BWCT(end:-1:1,:,:);
                             end
-    
+
                             if atInput(dFusedSeriesOffset).bFlipHeadFeet == true
                                 BWCT=BWCT(:,:,end:-1:1);
                             end
@@ -2861,7 +3449,13 @@ end
                             dCTmin = min(BWCT, [], 'all');
                             dCTmax = max(BWCT, [], 'all');
                             dScale = abs(dCTmin)+abs(dCTmax);
-                            dOffset = dScale*isoFusionObj.Isovalue;
+                            if isempty(viewer3dObject('get'))
+
+                                dIsosurfaceValue = get(isoFusionObj, 'Isovalue');
+                            else
+                                dIsosurfaceValue = get(isoFusionObj, 'IsosurfaceValue');
+                            end
+                            dOffset = dScale*dIsosurfaceValue;
                             dIsoValue = dCTmin+dOffset;
 
                             progressBar(0.6, sprintf('Computing ct iso map, please wait'));
@@ -2877,7 +3471,7 @@ end
 %                            imCT(BWCT =~ 0) = dCTmin;
                         else
                             BWCT(BWCT < 100) = 0;
-                            BWCT = imfill(BWCT, 4, 'holes');                            
+                            BWCT = imfill(BWCT, 4, 'holes');
                         end
 
 %                         if resampleToCTIsoMask('get') == true && ...
@@ -2892,16 +3486,16 @@ end
                                     atFuseMetaData = atInput(dCTSeriesNumber).atDicomInfo;
                                 end
 
-                                BWCT = resample3DImage(BWCT, atFuseMetaData, im, atMetaData, 'Cubic');                                 
-                                BWCT = imbinarize(BWCT);                        
+                                BWCT = resample3DImage(BWCT, atFuseMetaData, im, atMetaData, 'Cubic');
+                                BWCT = imbinarize(BWCT);
 
-                                if ~isequal(size(BWCT), size(im)) % Verify if both images are in the same field of view     
-                                    BWCT = resizeMaskToImageSize(BWCT, im); 
+                                if ~isequal(size(BWCT), size(im)) % Verify if both images are in the same field of view
+                                    BWCT = resizeMaskToImageSize(BWCT, im);
                                 end
                             else
-                                BWCT = imbinarize(BWCT);                                                      
+                                BWCT = imbinarize(BWCT);
                             end
-%                         end                       
+%                         end
 
                     else
                         bUseFormula = true;
@@ -3149,7 +3743,13 @@ end
                 isoFusionObj = isoFusionObject('get');
                 if ~isempty(isoFusionObj)
                     if numel(asColor) ~= 1
-                        set(isoFusionObj, 'IsosurfaceColor', asColor);
+                        if isempty(viewer3dObject('get'))
+
+                            set(isoFusionObj, 'IsosurfaceColor',  asColor);
+                        else
+                            set(isoFusionObj, 'Colormap'       ,  asColor);
+                        end
+                        % set(isoFusionObj, 'IsosurfaceColor', asColor);
                     end
                 end
             end
@@ -3161,7 +3761,13 @@ end
                 isoObj = isoObject('get');
                 if ~isempty(isoObj)
                     if numel(asColor) ~= 1
-                        set(isoObj, 'IsosurfaceColor', asColor);
+                        % set(isoObj, 'IsosurfaceColor', asColor);
+                        if isempty(viewer3dObject('get'))
+
+                            set(isoObj, 'IsosurfaceColor',  asColor);
+                        else
+                            set(isoObj, 'Colormap'       ,  asColor);
+                        end
                     end
                 end
             end
@@ -3538,7 +4144,7 @@ end
             end
 
             mipLinearAlphaValue('set',  get(uiSliderMipLinAlpha, 'Value'));
-            getMipAlphaMap('set', dicomBuffer('get'), 'Linear', aAlphamap);
+            getMipAlphaMap('set', dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 'Linear', aAlphamap);
         end
 
         displayAlphaCurve(aAlphamap, axeMipAlphmap);
@@ -3564,7 +4170,14 @@ end
             if switchToIsoSurface('get') == true && isFusion('get') == true
                 isoFusionObj = isoFusionObject('get');
                 if ~isempty(isoFusionObj)
-                    set(isoFusionObj, 'Isovalue', get(uiSliderIsoSurface, 'Value'));
+                    % set(isoFusionObj, 'Isovalue', get(uiSliderIsoSurface, 'Value'));
+
+                    if isempty(viewer3dObject('get'))
+
+                        set(isoFusionObj, 'Isovalue'       ,  get(uiSliderIsoSurface, 'Value'));
+                    else
+                        set(isoFusionObj, 'IsosurfaceValue',  get(uiSliderIsoSurface, 'Value'));
+                    end
                 end
             end
 
@@ -3574,7 +4187,14 @@ end
             if switchToIsoSurface('get') == true
                 isoObj = isoObject('get');
                 if ~isempty(isoObj)
-                    set(isoObj, 'Isovalue', get(uiSliderIsoSurface, 'Value'));
+
+                    % set(isoObj, 'Isovalue', get(uiSliderIsoSurface, 'Value'));
+                    if isempty(viewer3dObject('get'))
+
+                        set(isoObj, 'Isovalue'       ,  get(uiSliderIsoSurface, 'Value'));
+                    else
+                        set(isoObj, 'IsosurfaceValue',  get(uiSliderIsoSurface, 'Value'));
+                    end
                 end
             end
 
@@ -3612,7 +4232,15 @@ end
             isoFusionObj = isoFusionObject('get');
             if switchToIsoSurface('get') == true  && isFusion('get') == true
                 if ~isempty(isoFusionObj)
-                    set(isoFusionObj, 'Isovalue', dValue/100 );
+
+                    % set(isoFusionObj, 'Isovalue', dValue/100 );
+
+                    if isempty(viewer3dObject('get'))
+
+                        set(isoFusionObj, 'Isovalue'       ,  dValue/100 );
+                    else
+                        set(isoFusionObj, 'IsosurfaceValue',  dValue/100 );
+                    end
                 end
             end
             isoSurfaceFusionValue('set', dValue/100 );
@@ -3620,7 +4248,15 @@ end
             if switchToIsoSurface('get') == true
                 isoObj = isoObject('get');
                 if ~isempty(isoObj)
+
                     set(isoObj, 'Isovalue', dValue/100 );
+
+                    if isempty(viewer3dObject('get'))
+
+                        set(isoObj, 'Isovalue'       ,  dValue/100 );
+                    else
+                        set(isoObj, 'IsosurfaceValue',  dValue/100 );
+                    end
                 end
             end
             isoSurfaceValue('set', dValue/100);

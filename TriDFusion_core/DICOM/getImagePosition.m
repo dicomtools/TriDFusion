@@ -1,5 +1,5 @@
-function bFlip = getImagePosition(dInputOffset)
-%function sOrientation = getImagePosition(dInputOffset)
+function bFlip = getImagePosition(dSeriesOffset)
+%function sOrientation = getImagePosition(dSeriesOffset)
 %Return if images need to be flipped or not.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -29,16 +29,16 @@ function bFlip = getImagePosition(dInputOffset)
 
     bFlip = false;
 
-    tInputTemplate = inputTemplate('get');
+    atInput = inputTemplate('get');
 
-    if isempty(tInputTemplate(dInputOffset).asFilesList)
+    if isempty(atInput(dSeriesOffset).asFilesList)
         return;
     end
     
-    if  numel(tInputTemplate(dInputOffset).asFilesList) ~= 1 
+    if  numel(atInput(dSeriesOffset).asFilesList) ~= 1 
 
-        tDicomInfo1 = tInputTemplate(dInputOffset).atDicomInfo{1}; 
-        tDicomInfo2 = tInputTemplate(dInputOffset).atDicomInfo{2}; 
+        tDicomInfo1 = atInput(dSeriesOffset).atDicomInfo{1}; 
+        tDicomInfo2 = atInput(dSeriesOffset).atDicomInfo{2}; 
 
         xyz1 = tDicomInfo1.ImagePositionPatient;
         pos1 = tDicomInfo1.ImageOrientationPatient;
@@ -75,7 +75,7 @@ function bFlip = getImagePosition(dInputOffset)
         end
     else
         
-        tDicomInfo1 = tInputTemplate(dInputOffset).atDicomInfo{1};
+        tDicomInfo1 = atInput(dSeriesOffset).atDicomInfo{1};
 
         sOrientation = getImageOrientation(tDicomInfo1.ImageOrientationPatient);
 

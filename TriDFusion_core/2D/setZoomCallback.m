@@ -104,7 +104,9 @@ function setZoomCallback(~, ~)
         uimenu('Parent',hCMZ,'Label','Zoom off', 'Callback',@setZoomCallback);
         
         hZoom = zoom(fiMainWindowPtr('get'));
-        hZoom.UIContextMenu = hCMZ;
+
+        set(hZoom, 'UIContextMenu', hCMZ);
+
         zoom(fiMainWindowPtr('get'), 'on');           
     end           
 end  

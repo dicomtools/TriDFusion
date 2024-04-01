@@ -56,152 +56,196 @@ function tMaxDistances = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlot
 %            aBinaryImage = createMask(atRoi.Object, imCData);                                
             aBinaryImage = roiTemplateToMask(atRoi, imCData);
 
-            % Dimensions of the image.          
-            [~, columns, ~] = size(aBinaryImage);                
-
-            if strcmpi(atRoi.Type, 'images.roi.freehand') || ...
-               strcmpi(atRoi.Type, 'images.roi.assistedfreehand') || ...
-               strcmpi(atRoi.Type, 'images.roi.polygon')
-
-                % Plot the borders of all the coins on the original grayscale image using ROI coordinates.
-                x = atRoi.Position(:, 1); % x = columns.
-                y = atRoi.Position(:, 2); % y = rows.
-            else
-                boundaries = bwboundaries(aBinaryImage, 8, 'noholes');
-                if ~isempty(boundaries)
-                    thisBoundary = boundaries{1};
-
-                    x = thisBoundary(:, 2); % x = columns.
-                    y = thisBoundary(:, 1); % y = rows.
+            if any(aBinaryImage(:) ~= 0)
+            
+                % Dimensions of the image.          
+                [~, columns] = size(aBinaryImage);                
+    
+                if strcmpi(atRoi.Type, 'images.roi.freehand') || ...
+                   strcmpi(atRoi.Type, 'images.roi.assistedfreehand') || ...
+                   strcmpi(atRoi.Type, 'images.roi.polygon')
+    
+                    % Plot the borders of all the coins on the original grayscale image using ROI coordinates.
+                    x = atRoi.Position(:, 1); % x = columns.
+                    y = atRoi.Position(:, 2); % y = rows.
                 else
-                    isRoiValid = false;
-                end
-            end
-
-            if isRoiValid == true
-
-                % Find which two boundary points are farthest from each other.
-                maxDistance = -inf;
-                for k = 1 : length(x)
-                    distances = sqrt( (x(k) - x) .^ 2 + (y(k) - y) .^ 2 );
-                    [thisMaxDistance, indexOfMaxDistance] = max(distances);
-                    if thisMaxDistance > maxDistance
-                        maxDistance = thisMaxDistance;
-                        longestIndex1 = k;
-                        longestIndex2 = indexOfMaxDistance;
-
-                        bFoundMaxDistance = true;
+                    boundaries = bwboundaries(aBinaryImage, 8, 'noholes');
+                    if ~isempty(boundaries)
+                        thisBoundary = boundaries{1};
+    
+                        x = thisBoundary(:, 2); % x = columns.
+                        y = thisBoundary(:, 1); % y = rows.
+                    else
+                        isRoiValid = false;
                     end
                 end
+    
+                if isRoiValid == true
+    
+                    % Find which two boundary points are farthest from each other.
+                    maxDistance = -inf;
+                    for k = 1 : length(x)
+                        distances = sqrt( (x(k) - x) .^ 2 + (y(k) - y) .^ 2 );
+                        [thisMaxDistance, indexOfMaxDistance] = max(distances);
+                        if thisMaxDistance > maxDistance
+                            maxDistance = thisMaxDistance;
+                            longestIndex1 = k;
+                            longestIndex2 = indexOfMaxDistance;
+    
+                            bFoundMaxDistance = true;
+                        end
+                    end
+    
+                    if bFoundMaxDistance == true
+    
+                        % Find the midpoint of the line.
+                        xMidPoint = mean([x(longestIndex1), x(longestIndex2)]);
+                        yMidPoint = mean([y(longestIndex1), y(longestIndex2)]);
+                        longSlope = (y(longestIndex1) - y(longestIndex2)) / (x(longestIndex1) - x(longestIndex2));
+                        perpendicularSlope = -1/longSlope;
+    
+                        % Use point slope formula (y-ym) = slope * (x - xm) to get points                    
+                        y1 = perpendicularSlope * (1 - xMidPoint) + yMidPoint;
+                        y2 = perpendicularSlope * (columns - xMidPoint) + yMidPoint;
+    
+                        if ~isnan(y1) && ~isnan(y2) % ROI is valid
+    
+                            % % Get the profile perpendicular to the midpoint so we can find out when if first enters and last leaves the object.
+                            % [cxMax, cyMax, cMax] = improfile(aBinaryImage, [1, columns], [y1, y2]);
+                            % 
+                            % % Get rid of NAN's that occur when the line's endpoints go above or below the image.
+                            % cMax(isnan(cMax)) = 0;
+                            % perpendicularIndex1 = find(cMax, 1, 'first');
+                            % perpendicularIndex2 = find(cMax, 1, 'last');
+                            % 
+                            % if ~isempty(perpendicularIndex1) && ... % Find a perpendicular
+                            %    ~isempty(perpendicularIndex2)
+                            % 
+                            %     % Use the coordinates from improfile directly
+                            %     x1CY = cxMax(perpendicularIndex1);
+                            %     y1CY = cyMax(perpendicularIndex1);
+                            %     x2CY = cxMax(perpendicularIndex2);
+                            %     y2CY = cyMax(perpendicularIndex2);
+                            % 
+                            %     % Find the closest points on the contour to ensure lCY endpoints are on the contour
+                            %     [x1CY, y1CY] = findClosestContourPoint(x1CY, y1CY, x, y);
+                            %     [x2CY, y2CY] = findClosestContourPoint(x2CY, y2CY, x, y);
+                            % 
+                            %     x1XY = x(longestIndex1);
+                            %     x2XY = x(longestIndex2);
+                            %     y1XY = y(longestIndex1);
+                            %     y2XY = y(longestIndex2);
 
-                if bFoundMaxDistance == true
+                            % Compute the equation of the line passing through (1, y1) and (columns, y2)
+                            m = (y2 - y1) / (columns - 1); % slope
+                            b = y1 - m; % y-intercept
+                        
+                            % Generate x values along the line
+                            xValues = 1:columns;
+                        
+                            % Compute corresponding y values
+                            yValues = m * xValues + b;
+                        
+                            % Round the y values to integer indices
+                            yIndices = round(yValues);
+                        
+                            % Ensure indices stay within image bounds
+                            yIndices = max(1, min(yIndices, size(aBinaryImage, 1)));
+                        
+                            % Extract intensity values from the image along the line
+                            cMax = aBinaryImage(sub2ind(size(aBinaryImage), yIndices, xValues));
+                        
+                            % Get rid of NAN's that occur when the line's endpoints go above or below the image.
+                            cMax(isnan(cMax)) = 0;
+                            
+                            perpendicularIndex1 = find(cMax, 1, 'first');
+                            perpendicularIndex2 = find(cMax, 1, 'last');
+                        
+                            if ~isempty(perpendicularIndex1) && ~isempty(perpendicularIndex2)
+                                % Use the coordinates directly
+                                x1CY = xValues(perpendicularIndex1);
+                                y1CY = yIndices(perpendicularIndex1);
+                                x2CY = xValues(perpendicularIndex2);
+                                y2CY = yIndices(perpendicularIndex2);
+                                
+                                % Find the closest points on the contour to ensure lCY endpoints are on the contour
+                                [x1CY, y1CY] = findClosestContourPoint(x1CY, y1CY, x, y);
+                                [x2CY, y2CY] = findClosestContourPoint(x2CY, y2CY, x, y);
+                        
+                                x1XY = x(longestIndex1);
+                                x2XY = x(longestIndex2);
+                                y1XY = y(longestIndex1);
+                                y2XY = y(longestIndex2);
 
-                    % Find the midpoint of the line.
-                    xMidPoint = mean([x(longestIndex1), x(longestIndex2)]);
-                    yMidPoint = mean([y(longestIndex1), y(longestIndex2)]);
-                    longSlope = (y(longestIndex1) - y(longestIndex2)) / (x(longestIndex1) - x(longestIndex2));
-                    perpendicularSlope = -1/longSlope;
-
-                    % Use point slope formula (y-ym) = slope * (x - xm) to get points                    
-                    y1 = perpendicularSlope * (1 - xMidPoint) + yMidPoint;
-                    y2 = perpendicularSlope * (columns - xMidPoint) + yMidPoint;
-
-                    if ~isnan(y1) && ~isnan(y2) % ROI is valid
-
-                        % Get the profile perpendicular to the midpoint so we can find out when if first enters and last leaves the object.
-                        [cxMax, cyMax, cMax] = improfile(aBinaryImage, [1, columns], [y1, y2]);
- 
-                        % Get rid of NAN's that occur when the line's endpoints go above or below the image.
-                        cMax(isnan(cMax)) = 0;
-                        perpendicularIndex1 = find(cMax, 1, 'first');
-                        perpendicularIndex2 = find(cMax, 1, 'last');
-
-                        if ~isempty(perpendicularIndex1) && ... % Find a perpendicular
-                           ~isempty(perpendicularIndex2)
-
-                            % Use the coordinates from improfile directly
-                            x1CY = cxMax(perpendicularIndex1);
-                            y1CY = cyMax(perpendicularIndex1);
-                            x2CY = cxMax(perpendicularIndex2);
-                            y2CY = cyMax(perpendicularIndex2);
-                                                   
-                            % Find the closest points on the contour to ensure lCY endpoints are on the contour
-                            [x1CY, y1CY] = findClosestContourPoint(x1CY, y1CY, x, y);
-                            [x2CY, y2CY] = findClosestContourPoint(x2CY, y2CY, x, y);
-                 
-                            x1XY = x(longestIndex1);
-                            x2XY = x(longestIndex2);
-                            y1XY = y(longestIndex1);
-                            y2XY = y(longestIndex2);
-
-                            if bPlotLine == true 
-                                sLineVisible = 'on';
-                            else
-                                sLineVisible = 'off';
-                            end
-
-                            lXY = line(atRoi.Object.Parent, [x1XY, x2XY], [y1XY, y2XY], 'Color', 'r', 'LineWidth', 1, 'Visible', sLineVisible);	
-                            lCY = line(atRoi.Object.Parent, [x1CY, x2CY], [y1CY, y2CY], 'Color', 'm', 'LineWidth', 1, 'Visible', sLineVisible);
-
-                            tMaxDistances.MaxXY.Line = lXY;
-                            tMaxDistances.MaxCY.Line = lCY;
-
-                            if is3DEngine('get') == true
-
-                                if size(imRoi, 3) == 1 
-                                    if strcmpi(atRoi.Axe, 'Axe')
-                                        imPtr = imAxePtr ('get', [], get(uiSeriesPtr('get'), 'Value') );
-                                   end
+                                if bPlotLine == true 
+                                    sLineVisible = 'on';
                                 else
-                                    switch(lower(atRoi.Axe))
-                                        case lower( 'Axes1')                        
-                                            imPtr = imCoronalPtr ('get', [], get(uiSeriesPtr('get'), 'Value') );
-
-                                        case lower( 'Axes2')                   
-                                            imPtr = imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value') );
-
-                                        case lower( 'Axes3')                   
-                                            imPtr = imAxialPtr   ('get', [], get(uiSeriesPtr('get'), 'Value') ); 
-                                    end
+                                    sLineVisible = 'off';
                                 end
-
-                                lXY.ZData = [max(max(get(imPtr,'Zdata'))) max(max(get(imPtr,'Zdata')))];
-                                lCY.ZData = [max(max(get(imPtr,'Zdata'))) max(max(get(imPtr,'Zdata')))];
-                            end    
-
-                            % Compute XY distance in mm
-
-                            roiObject.Position(1,1) = x1XY;
-                            roiObject.Position(1,2) = y1XY;
-
-                            roiObject.Position(2,1) = x2XY;
-                            roiObject.Position(2,2) = y2XY;
-
-                            dXYLength = computeLineLength(atMetaData, atRoi.Axe, roiObject);
-                            tMaxDistances.MaxXY.Length = dXYLength;                    
-
-                            % Compute CY distance in mm
-
-                            roiObject.Position(1,1) = x1CY;
-                            roiObject.Position(1,2) = y1CY;
-
-                            roiObject.Position(2,1) = x2CY;
-                            roiObject.Position(2,2) = y2CY;
-
-                            dCYLength = computeLineLength(atMetaData, atRoi.Axe, roiObject);
-                            tMaxDistances.MaxCY.Length = dCYLength;                    
-
-                            if bPlotText == true  
-                                sTextVisible = 'on';
-                            else
-                                sTextVisible = 'off';
+    
+                                lXY = line(atRoi.Object.Parent, [x1XY, x2XY], [y1XY, y2XY], 'Color', 'r', 'LineWidth', 1, 'Visible', sLineVisible);	
+                                lCY = line(atRoi.Object.Parent, [x1CY, x2CY], [y1CY, y2CY], 'Color', 'm', 'LineWidth', 1, 'Visible', sLineVisible);
+    
+                                tMaxDistances.MaxXY.Line = lXY;
+                                tMaxDistances.MaxCY.Line = lCY;
+    
+                                if is3DEngine('get') == true
+    
+                                    if size(imRoi, 3) == 1 
+                                        if strcmpi(atRoi.Axe, 'Axe')
+                                            imPtr = imAxePtr ('get', [], get(uiSeriesPtr('get'), 'Value') );
+                                       end
+                                    else
+                                        switch(lower(atRoi.Axe))
+                                            case lower( 'Axes1')                        
+                                                imPtr = imCoronalPtr ('get', [], get(uiSeriesPtr('get'), 'Value') );
+    
+                                            case lower( 'Axes2')                   
+                                                imPtr = imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value') );
+    
+                                            case lower( 'Axes3')                   
+                                                imPtr = imAxialPtr   ('get', [], get(uiSeriesPtr('get'), 'Value') ); 
+                                        end
+                                    end
+    
+                                    lXY.ZData = [max(max(get(imPtr,'Zdata'))) max(max(get(imPtr,'Zdata')))];
+                                    lCY.ZData = [max(max(get(imPtr,'Zdata'))) max(max(get(imPtr,'Zdata')))];
+                                end    
+    
+                                % Compute XY distance in mm
+    
+                                roiObject.Position(1,1) = x1XY;
+                                roiObject.Position(1,2) = y1XY;
+    
+                                roiObject.Position(2,1) = x2XY;
+                                roiObject.Position(2,2) = y2XY;
+    
+                                dXYLength = computeLineLength(atMetaData, atRoi.Axe, roiObject);
+                                tMaxDistances.MaxXY.Length = dXYLength;                    
+    
+                                % Compute CY distance in mm
+    
+                                roiObject.Position(1,1) = x1CY;
+                                roiObject.Position(1,2) = y1CY;
+    
+                                roiObject.Position(2,1) = x2CY;
+                                roiObject.Position(2,2) = y2CY;
+    
+                                dCYLength = computeLineLength(atMetaData, atRoi.Axe, roiObject);
+                                tMaxDistances.MaxCY.Length = dCYLength;                    
+    
+                                if bPlotText == true  
+                                    sTextVisible = 'on';
+                                else
+                                    sTextVisible = 'off';
+                                end
+    
+                                tXY = text(atRoi.Object.Parent, x1XY, y1XY, sprintf('%s mm', num2str(dXYLength)), 'Color', 'r', 'Visible', sTextVisible);
+                                tCY = text(atRoi.Object.Parent, x2CY, y2CY, sprintf('%s mm', num2str(dCYLength)), 'Color', 'm', 'Visible', sTextVisible);
+    
+                                tMaxDistances.MaxXY.Text = tXY;
+                                tMaxDistances.MaxCY.Text = tCY;                    
                             end
-
-                            tXY = text(atRoi.Object.Parent, x1XY, y1XY, sprintf('%s mm', num2str(dXYLength)), 'Color', 'r', 'Visible', sTextVisible);
-                            tCY = text(atRoi.Object.Parent, x2CY, y2CY, sprintf('%s mm', num2str(dCYLength)), 'Color', 'm', 'Visible', sTextVisible);
-
-                            tMaxDistances.MaxXY.Text = tXY;
-                            tMaxDistances.MaxCY.Text = tCY;                    
                         end
                     end
                 end
@@ -219,5 +263,6 @@ function tMaxDistances = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlot
         xClosest = xContour(index);
         yClosest = yContour(index);
     end
- 
+
+
 end

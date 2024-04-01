@@ -38,7 +38,7 @@ function closeFigure(~, ~)
         multiFramePlayback('set', false);
         multiFrame3DPlayback('set', false);
 
-        releaseRoiWait();
+        % releaseRoiWait();
 
         deleteObject(volObject('get'));
         deleteObject(isoObject('get'));

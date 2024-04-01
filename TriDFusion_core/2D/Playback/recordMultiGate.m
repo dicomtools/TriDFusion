@@ -88,6 +88,10 @@ function recordMultiGate(mRecord, sPath, sFileName, sExtention, pAxe)
         end
     end
 
+    setFigureToobarsVisible('off');
+
+    setFigureTopMenuVisible('off');
+
     lMinBak = windowLevel('get', 'min');
     lMaxBak = windowLevel('get', 'max');
 
@@ -905,6 +909,10 @@ end
         bWriteSucceed = false;
         progressBar(1, sprintf('Error: recordMultiGate()'));
     end
+
+    setFigureToobarsVisible('on');
+
+    setFigureTopMenuVisible('on');
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;

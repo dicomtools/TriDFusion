@@ -1,5 +1,5 @@
 function sType = viewerSUVtype(sAction, sValue)
-%functionsType = viewerSUVtype(sAction, sValue)
+%function sType = viewerSUVtype(sAction, sValue)
 %Get/Set Viewer SUV Type.
 %See TriDFuison.doc (or pdf) for more information about options.
 %

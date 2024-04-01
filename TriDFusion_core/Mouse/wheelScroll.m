@@ -28,7 +28,6 @@ function wheelScroll(~, evnt)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
     windowButton('set', 'scrool');  
-
     if size(dicomBuffer('get'), 3) ~= 1 && ...
        switchTo3DMode('get')      == false && ...
        switchToIsoSurface('get')  == false && ...
@@ -134,7 +133,7 @@ function wheelScroll(~, evnt)
                     end
                     
                     set(uiSliderMipPtr('get'), 'Value', dMipSliderValue);
-                    
+                    sliderMipCallback();
                 otherwise
 
             end

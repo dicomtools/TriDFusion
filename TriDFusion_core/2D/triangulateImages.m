@@ -79,7 +79,8 @@ function triangulateImages()
                             set(uiSliderSagPtr('get'), 'Value', clickedPtX / iSagittalSize);
                             set(uiSliderTraPtr('get'), 'Value', 1 - (clickedPtY / iAxialSize));
     
-                            refreshImages();
+                            refreshImages(clickedPtX, clickedPtY);
+
                             axeClicked('set', true);
                             uiresume(fiMainWindowPtr('get'));
                         end
@@ -97,7 +98,7 @@ function triangulateImages()
                             set(uiSliderCorPtr('get'), 'Value', clickedPtX / iCoronalSize);
                             set(uiSliderTraPtr('get'), 'Value', 1 - (clickedPtY / iAxialSize));
     
-                            refreshImages();
+                            refreshImages(clickedPtX, clickedPtY);
     
                             axeClicked('set', true);
                             uiresume(fiMainWindowPtr('get'));                                
@@ -116,7 +117,7 @@ function triangulateImages()
                             set(uiSliderSagPtr('get'), 'Value', clickedPtX / iSagittalSize);
                             set(uiSliderCorPtr('get'), 'Value', clickedPtY / iCoronalSize);
     
-                            refreshImages();
+                            refreshImages(clickedPtX, clickedPtY);
     
                             axeClicked('set', true);
                             uiresume(fiMainWindowPtr('get'));
@@ -127,7 +128,6 @@ function triangulateImages()
                         if clickedPtY <= iAxialSize && ...
                            clickedPtX > 0 && ...
                            clickedPtY > 0
-
 
                             if isFusion('get') == true
         

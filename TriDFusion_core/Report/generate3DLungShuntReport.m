@@ -45,33 +45,57 @@ function generate3DLungShuntReport(bInitReport)
     FIG_REPORT_X = 1245;
     FIG_REPORT_Y = 840;
 
-    fig3DLungShuntReport = ...
-        figure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_REPORT_X/2) ...
-               (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_REPORT_Y/2) ...
-               FIG_REPORT_X ...
-               FIG_REPORT_Y],...
-               'Name', 'TriDFusion (3DF) 3D SPECT Lung Shunt Report',...
-               'NumberTitle','off',...
-               'MenuBar', 'none',...
-               'Resize', 'off', ...
-               'Color', 'white', ...
-               'Toolbar','none'...
-               );
-     fig3DLungShuntReportPtr('set', fig3DLungShuntReport);
+    if viewerUIFigure('get') == true
 
-     axe3DLungShuntReport = ...
+        fig3DLungShuntReport = ...
+            uifigure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_REPORT_X/2) ...
+                    (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_REPORT_Y/2) ...
+                    FIG_REPORT_X ...
+                    FIG_REPORT_Y],...
+                    'Resize', 'off', ...
+                    'Color', 'white',...
+                    'Name' , 'TriDFusion (3DF) 3D SPECT Lung Shunt Report'...
+                    );
+    else
+
+        fig3DLungShuntReport = ...
+            figure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_REPORT_X/2) ...
+                   (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_REPORT_Y/2) ...
+                   FIG_REPORT_X ...
+                   FIG_REPORT_Y],...
+                   'Name', 'TriDFusion (3DF) 3D SPECT Lung Shunt Report',...
+                   'NumberTitle','off',...
+                   'MenuBar', 'none',...
+                   'Resize', 'off', ...
+                   'Color', 'white', ...
+                   'Toolbar','none'...
+                   );
+    end
+
+    if viewerUIFigure('get') == true
+        set(fig3DLungShuntReport, 'Renderer', 'opengl'); 
+        set(fig3DLungShuntReport, 'GraphicsSmoothing', 'off'); 
+    else
+        set(fig3DLungShuntReport, 'Renderer', 'opengl'); 
+        set(fig3DLungShuntReport, 'doublebuffer', 'on');   
+    end
+
+    fig3DLungShuntReportPtr('set', fig3DLungShuntReport);
+
+    axe3DLungShuntReport = ...
        axes(fig3DLungShuntReport, ...
              'Units'   , 'pixels', ...
              'Position', [0 0 FIG_REPORT_X FIG_REPORT_Y], ...
              'Color'   , 'white',...
              'XColor'  , viewerForegroundColor('get'),...
              'YColor'  , viewerForegroundColor('get'),...
-             'ZColor'  , viewerForegroundColor('get'),...             
-             'Visible' , 'off'...             
-             );  
+             'ZColor'  , viewerForegroundColor('get'),...
+             'Visible' , 'off'...
+             );
       axe3DLungShuntReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-      axe3DLungShuntReport.Toolbar = [];  
-     
+      axe3DLungShuntReport.Toolbar.Visible = 'off';
+      disableDefaultInteractivity(axe3DLungShuntReport);
+
       ui3DLungShuntReport = ...
          uipanel(fig3DLungShuntReport,...
                  'Units'   , 'pixels',...
@@ -100,7 +124,8 @@ function generate3DLungShuntReport(bInitReport)
                   'BackgroundColor', 'white', ...
                   'ForegroundColor', 'black' ...
                   );
-    addlistener(ui3DLungShuntReportSlider, 'Value', 'PreSet', @ui3DLungShuntReportSliderCallback);
+%     addlistener(ui3DLungShuntReportSlider, 'Value', 'PreSet', @ui3DLungShuntReportSliderCallback);
+    addlistener(ui3DLungShuntReportSlider, 'ContinuousValueChange', @ui3DLungShuntReportSliderCallback);
 
         uicontrol(ui3DLungShuntReport,...
                   'style'     , 'text',...
@@ -112,8 +137,8 @@ function generate3DLungShuntReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [0 FIG_REPORT_Y-30 FIG_REPORT_X 20]...
-                  ); 
-              
+                  );
+
         uicontrol(ui3DLungShuntReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
@@ -124,10 +149,10 @@ function generate3DLungShuntReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [0 FIG_REPORT_Y-50 FIG_REPORT_X 20]...
-                  ); 
-         
-         % Patient Information     
-         
+                  );
+
+         % Patient Information
+
          uicontrol(ui3DLungShuntReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -138,8 +163,9 @@ function generate3DLungShuntReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [0 FIG_REPORT_Y-80 FIG_REPORT_X/3-50 20]...
-                  ); 
-              
+                  );
+
+   uiReportPatientInformation = ...
         uicontrol(ui3DLungShuntReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
@@ -150,10 +176,26 @@ function generate3DLungShuntReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [0 FIG_REPORT_Y-465 FIG_REPORT_X/3-50 375]...
-                  );    
-              
-         % Series Information     
-              
+                  );
+
+    % if viewerUIFigure('get') == true
+    %
+    %     aUiExtent = get(uiReportPatientInformation, 'Extent');
+    %     aUiPosition = get(uiReportPatientInformation, 'Position');
+    %
+    %     % Adjust the position to align the text at the top
+    %     aNewUiPosition = [aUiPosition(1), aUiPosition(2) + aUiPosition(4) - aUiExtent(4) - 20, aUiPosition(3), aUiExtent(4) + 20];
+    %
+    %     set(uiReportPatientInformation, 'Position', aNewUiPosition);
+    % end
+
+    if viewerUIFigure('get') == true
+
+        setUiExtendedPosition(uiReportPatientInformation);
+    end
+
+    % Series Information
+
          uicontrol(ui3DLungShuntReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -164,8 +206,9 @@ function generate3DLungShuntReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X/3-50 FIG_REPORT_Y-80 FIG_REPORT_X/3-50 20]...
-                  ); 
-              
+                  );
+
+    uiReportSeriesInformation = ...
         uicontrol(ui3DLungShuntReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
@@ -176,11 +219,26 @@ function generate3DLungShuntReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X/3-50 FIG_REPORT_Y-490 FIG_REPORT_X/3-50 400]...
-                  );    
-              
-         % Contours Information              
-         
-         uiReport3DLungShuntInformation = ...       
+                  );
+
+    %  if viewerUIFigure('get') == true
+    %
+    %     aUiExtent = get(uiReportSeriesInformation, 'Extent');
+    %     aUiPosition = get(uiReportSeriesInformation, 'Position');
+    %
+    %     % Adjust the position to align the text at the top
+    %     aNewUiPosition = [aUiPosition(1), aUiPosition(2) + aUiPosition(4) - aUiExtent(4) - 20, aUiPosition(3), aUiExtent(4) + 20];
+    %
+    %     set(uiReportSeriesInformation, 'Position', aNewUiPosition);
+    % end
+    if viewerUIFigure('get') == true
+
+        setUiExtendedPosition(uiReportSeriesInformation);
+    end
+
+         % Contours Information
+
+         uiReport3DLungShuntInformation = ...
          uicontrol(ui3DLungShuntReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -191,10 +249,10 @@ function generate3DLungShuntReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-80 FIG_REPORT_X/3+100 20]...
-                  ); 
-              
+                  );
+
          % Contour Type
-              
+
           uicontrol(ui3DLungShuntReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -205,8 +263,8 @@ function generate3DLungShuntReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-110 115 20]...
-                  ); 
-              
+                  );
+
         uicontrol(ui3DLungShuntReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
@@ -217,11 +275,11 @@ function generate3DLungShuntReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 FIG_REPORT_Y-210 115 90]...
-                  );  
-              
-              
+                  );
+
+
          % 3DLungShunt Mean
-              
+
           uicontrol(ui3DLungShuntReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -232,9 +290,9 @@ function generate3DLungShuntReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+15 FIG_REPORT_Y-110 100 20]...
-                  ); 
-              
-        uiReportLesionMean = ...       
+                  );
+
+        uiReportLesionMean = ...
         uicontrol(ui3DLungShuntReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
@@ -245,10 +303,10 @@ function generate3DLungShuntReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+15 FIG_REPORT_Y-210 100 90]...
-                  );  
-              
+                  );
+
          % 3DLungShunt Total
-              
+
           uicontrol(ui3DLungShuntReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -259,9 +317,9 @@ function generate3DLungShuntReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+125 FIG_REPORT_Y-110 100 20]...
-                  ); 
-              
-        uiReportLesionTotal = ...       
+                  );
+
+        uiReportLesionTotal = ...
         uicontrol(ui3DLungShuntReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
@@ -272,21 +330,21 @@ function generate3DLungShuntReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+125 FIG_REPORT_Y-210 100 90]...
-                  ); 
+                  );
 
 %         axe3DLungShuntLungsTotalRectangle = ...
 %         axes(ui3DLungShuntReport, ...
 %              'Units'   , 'pixels', ...
 %              'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)+115 FIG_REPORT_Y-240 60 40], ...
-%              'Color'   , 'white',...          
-%              'Visible' , 'off'...             
-%              );  
+%              'Color'   , 'white',...
+%              'Visible' , 'off'...
+%              );
 %         axe3DLungShuntLungsTotalRectangle.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-%         axe3DLungShuntLungsTotalRectangle.Toolbar = [];  
+%         axe3DLungShuntLungsTotalRectangle.Toolbar = [];
 %         rectangle(axe3DLungShuntLungsTotalRectangle, 'position', [0 0 1 1], 'EdgeColor', [1 0.33 0.16]);
 
           % Contour Volume
-              
+
           uicontrol(ui3DLungShuntReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -297,9 +355,9 @@ function generate3DLungShuntReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+235 FIG_REPORT_Y-110 100 20]...
-                  ); 
-              
-        uiReportLesionVolume = ...       
+                  );
+
+        uiReportLesionVolume = ...
         uicontrol(ui3DLungShuntReport,...
                   'style'     , 'text',...
                   'FontWeight', 'Normal',...
@@ -310,11 +368,11 @@ function generate3DLungShuntReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)+235 FIG_REPORT_Y-210 100 90]...
-                  );               
+                  );
 
          % Lung Shunt
-              
-         uiReport3DLungShuntLungRatio = ...       
+
+         uiReport3DLungShuntLungRatio = ...
          uicontrol(ui3DLungShuntReport,...
                   'style'     , 'text',...
                   'FontWeight', 'bold',...
@@ -325,17 +383,18 @@ function generate3DLungShuntReport(bInitReport)
                   'BackgroundColor', 'White', ...
                   'ForegroundColor', 'Black', ...
                   'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 580 300 20]...
-                  ); 
+                  );
 
     axe3DLungShuntRectangle = ...
        axes(ui3DLungShuntReport, ...
              'Units'   , 'pixels', ...
              'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 570 FIG_REPORT_X/3+60 40], ...
-             'Color'   , 'white',...          
-             'Visible' , 'off'...             
-             );  
+             'Color'   , 'white',...
+             'Visible' , 'off'...
+             );
     axe3DLungShuntRectangle.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    axe3DLungShuntRectangle.Toolbar = [];    
+    axe3DLungShuntRectangle.Toolbar.Visible = 'off';
+    disableDefaultInteractivity(axe3DLungShuntRectangle);
 
     rectangle(axe3DLungShuntRectangle, 'position', [0 0 1 1], 'EdgeColor', [1 0.33 0.16]);
 
@@ -344,17 +403,16 @@ function generate3DLungShuntReport(bInitReport)
     ui3DWindow = ...
     uipanel(ui3DLungShuntReport,...
             'Units'   , 'pixels',...
-            'BorderWidth', showBorder('get'),...
-            'HighlightColor', [0 1 1],...
+            'BorderType', 'none',...
             'BackgroundColor', surfaceColor('get', background3DOffset('get')),...
             'position', [20 15 FIG_REPORT_X/3-75-15 340]...
-            );  
+            );
 
     uiSlider3Dintensity = ...
     uicontrol(ui3DLungShuntReport, ...
               'Style'   , 'Slider', ...
               'Position', [5 15 15 340], ...
-              'Value'   , 0.9, ...
+              'Value'   , 0.75, ...
               'Enable'  , 'on', ...
               'Tooltip' , 'Intensity', ...
               'BackgroundColor', 'White', ...
@@ -386,7 +444,7 @@ function generate3DLungShuntReport(bInitReport)
               'BackgroundColor', 'White', ...
               'ForegroundColor', 'Black', ...
               'position', [FIG_REPORT_X/3-40 255 320 20]...
-              ); 
+              );
 
     uiEditInjectedActivity = ...
     uicontrol(ui3DLungShuntReport, ...
@@ -411,7 +469,7 @@ function generate3DLungShuntReport(bInitReport)
               'BackgroundColor', 'White', ...
               'ForegroundColor', 'Black', ...
               'position', [aEditInjectedActivityPosition(1)+aEditInjectedActivityPosition(3)+5 aEditInjectedActivityPosition(2)-3 100 20]...
-              ); 
+              );
 
     uicalculateLungDose = ...
     uicontrol(ui3DLungShuntReport,...
@@ -428,15 +486,16 @@ function generate3DLungShuntReport(bInitReport)
        axes(ui3DLungShuntReport, ...
              'Units'   , 'pixels', ...
              'Position', [FIG_REPORT_X/3-50 210 FIG_REPORT_X/3-75 75], ...
-             'Color'   , 'white',...          
-             'Visible' , 'off'...             
-             );  
+             'Color'   , 'white',...
+             'Visible' , 'off'...
+             );
     axe3DLungShuntEstimatedDoseRectangle.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    axe3DLungShuntEstimatedDoseRectangle.Toolbar = [];
+    axe3DLungShuntEstimatedDoseRectangle.Toolbar.Visible = 'off';
+    disableDefaultInteractivity(axe3DLungShuntEstimatedDoseRectangle);
 
     rectangle(axe3DLungShuntEstimatedDoseRectangle, 'position', [0 0 1 1], 'EdgeColor', [0.75 0.75 0.75]);
 
-     uiReport3DLungShuntCalculatedDose = ...       
+     uiReport3DLungShuntCalculatedDose = ...
      uicontrol(ui3DLungShuntReport,...
               'style'     , 'text',...
               'FontWeight', 'bold',...
@@ -447,17 +506,18 @@ function generate3DLungShuntReport(bInitReport)
               'BackgroundColor', 'White', ...
               'ForegroundColor', 'Black', ...
               'position', [FIG_REPORT_X/3-40 170 300 20]...
-              ); 
+              );
 
     axe3DLungShuntEstimatedDoseRectangle = ...
        axes(ui3DLungShuntReport, ...
              'Units'   , 'pixels', ...
              'Position', [FIG_REPORT_X/3-50 160 FIG_REPORT_X/3-75 40], ...
-             'Color'   , 'white',...          
-             'Visible' , 'off'...             
-             );  
+             'Color'   , 'white',...
+             'Visible' , 'off'...
+             );
     axe3DLungShuntEstimatedDoseRectangle.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    axe3DLungShuntEstimatedDoseRectangle.Toolbar = [];
+    axe3DLungShuntEstimatedDoseRectangle.Toolbar.Visible = 'off';
+    disableDefaultInteractivity(axe3DLungShuntEstimatedDoseRectangle);
 
     rectangle(axe3DLungShuntEstimatedDoseRectangle, 'position', [0 0 1 1], 'EdgeColor', [1 0.33 0.16]);
 
@@ -475,16 +535,16 @@ function generate3DLungShuntReport(bInitReport)
     % Notes
 
     uiEditWindow = ...
-    uicontrol(ui3DLungShuntReport,...       
+    uicontrol(ui3DLungShuntReport,...
               'style'     , 'edit',...
               'FontWeight', 'Normal',...
               'FontSize'  , 11,...
               'FontName'  , 'MS Sans Serif', ...
               'horizontalalignment', 'left',...
               'BackgroundColor', 'White', ...
-              'ForegroundColor', 'Black', ...              
+              'ForegroundColor', 'Black', ...
               'position', [FIG_REPORT_X/3-50 15 FIG_REPORT_X/3-75 90]...
-             );  
+             );
     set(uiEditWindow, 'Min', 0, 'Max', 2);
 
      uicontrol(ui3DLungShuntReport,...
@@ -510,20 +570,21 @@ function generate3DLungShuntReport(bInitReport)
               'horizontalalignment', 'left',...
               'BackgroundColor', 'White', ...
               'ForegroundColor', 'Black', ...
-              'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 505 390 20]...
-              ); 
+              'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 510 390 20]...
+              );
 
     uiSliderLungsVolumeRatio = ...
     uicontrol(ui3DLungShuntReport, ...
               'Style'   , 'Slider', ...
-              'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 485 390 15], ...
+              'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 485 390 20], ...
               'Value'   , 1, ...
               'Enable'  , 'on', ...
               'Tooltip' , 'Estimate lungs Volume', ...
               'BackgroundColor', 'White', ...
               'CallBack', @uiSliderLungsVolumeRatioCallback ...
               );
-    uiSliderLungsVolumeRatioListener = addlistener(uiSliderLungsVolumeRatio, 'Value', 'PreSet', @uiSliderLungsVolumeRatioCallback);
+%     uiSliderLungsVolumeRatioListener = addlistener(uiSliderLungsVolumeRatio, 'Value', 'PreSet', @uiSliderLungsVolumeRatioCallback);
+    uiSliderLungsVolumeRatioListener = addlistener(uiSliderLungsVolumeRatio, 'ContinuousValueChange', @uiSliderLungsVolumeRatioCallback);
 
     aSliderLungVolumeRatioPosition = get(uiSliderLungsVolumeRatio, 'position');
 
@@ -539,10 +600,10 @@ function generate3DLungShuntReport(bInitReport)
               'ForegroundColor', 'Black', ...
               'CallBack', @uiEditLungsVolumeRatioCallback, ...
               'position', [aSliderLungVolumeRatioPosition(1)+aSliderLungVolumeRatioPosition(3)+5 aSliderLungVolumeRatioPosition(2)-3 60 30]...
-              ); 
+              );
 
     % Liver estimate volume
-     
+
     uicontrol(ui3DLungShuntReport,...
               'style'     , 'text',...
               'FontWeight', 'normal',...
@@ -552,20 +613,21 @@ function generate3DLungShuntReport(bInitReport)
               'horizontalalignment', 'left',...
               'BackgroundColor', 'White', ...
               'ForegroundColor', 'Black', ...
-              'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 450 390 20]...
-              ); 
+              'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 455 390 20]...
+              );
 
     uiSliderLiverVolumeRatio = ...
     uicontrol(ui3DLungShuntReport, ...
               'Style'   , 'Slider', ...
-              'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 430 390 15], ...
+              'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 430 390 20], ...
               'Value'   , 1, ...
               'Enable'  , 'on', ...
               'Tooltip' , 'Estimate liver Volume', ...
               'BackgroundColor', 'White', ...
               'CallBack', @uiSliderLiverVolumeRatioCallback ...
               );
-    uiSliderLiverVolumeRatioListener = addlistener(uiSliderLiverVolumeRatio, 'Value', 'PreSet', @uiSliderLiverVolumeRatioCallback);
+%     uiSliderLiverVolumeRatioListener = addlistener(uiSliderLiverVolumeRatio, 'Value', 'PreSet', @uiSliderLiverVolumeRatioCallback);
+    uiSliderLiverVolumeRatioListener = addlistener(uiSliderLiverVolumeRatio, 'ContinuousValueChange', @uiSliderLiverVolumeRatioCallback);
 
     aSliderLiverVolumeRatioPosition = get(uiSliderLiverVolumeRatio, 'position');
 
@@ -581,22 +643,23 @@ function generate3DLungShuntReport(bInitReport)
               'ForegroundColor', 'Black', ...
               'CallBack', @uiEditLiverVolumeRatioCallback, ...
               'position', [aSliderLiverVolumeRatioPosition(1)+aSliderLiverVolumeRatioPosition(3)+5 aSliderLiverVolumeRatioPosition(2) 60 30]...
-              ); 
+              );
 
     axeVolumeRatio = ...
     axes(ui3DLungShuntReport, ...
          'Units'   , 'pixels', ...
          'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 415 FIG_REPORT_X/3+60 120], ...
-         'Color'   , 'white',...          
-         'Visible' , 'off'...             
-         );  
+         'Color'   , 'white',...
+         'Visible' , 'off'...
+         );
     axeVolumeRatio.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    axeVolumeRatio.Toolbar = [];
+    axeVolumeRatio.Toolbar.Visible = 'off';
+    disableDefaultInteractivity(axeVolumeRatio);
 
     rectangle(axeVolumeRatio, 'position', [0 0 1 1], 'EdgeColor', [0.75 0.75 0.75]);
 
     % Liver volume-of-interest oversized
-     
+
     uicontrol(ui3DLungShuntReport,...
               'style'     , 'text',...
               'FontWeight', 'bold',...
@@ -607,7 +670,7 @@ function generate3DLungShuntReport(bInitReport)
               'BackgroundColor', 'White', ...
               'ForegroundColor', 'Black', ...
               'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 380 400 20]...
-              ); 
+              );
 
     uiEditLiverVolumeOversized = ...
     uicontrol(ui3DLungShuntReport, ...
@@ -633,10 +696,10 @@ function generate3DLungShuntReport(bInitReport)
               'BackgroundColor', 'White', ...
               'ForegroundColor', 'Black', ...
               'position', [aEditLiverVolumeSizePosition(1)+aEditLiverVolumeSizePosition(3)+5 aEditLiverVolumeSizePosition(2)-3 200 20]...
-              ); 
+              );
 
     % Cutoff for the extra slices above the top of the liver volume-of-interest
-     
+
     uicontrol(ui3DLungShuntReport,...
               'style'     , 'text',...
               'FontWeight', 'normal',...
@@ -647,7 +710,7 @@ function generate3DLungShuntReport(bInitReport)
               'BackgroundColor', 'White', ...
               'ForegroundColor', 'Black', ...
               'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 315 460 20]...
-              ); 
+              );
 
     uiEditLiverTopOfVolumeExtraSlices = ...
     uicontrol(ui3DLungShuntReport, ...
@@ -673,10 +736,10 @@ function generate3DLungShuntReport(bInitReport)
               'BackgroundColor', 'White', ...
               'ForegroundColor', 'Black', ...
               'position', [aEditLiverTopOfVolumeExtraSlicesPosition(1)+aEditLiverTopOfVolumeExtraSlicesPosition(3)+5 aEditLiverTopOfVolumeExtraSlicesPosition(2)-3 200 20]...
-              ); 
+              );
 
     % Cutoff for the extra slices under the bottom of the liver volume-of-interest
-     
+
     uicontrol(ui3DLungShuntReport,...
               'style'     , 'text',...
               'FontWeight', 'normal',...
@@ -687,7 +750,7 @@ function generate3DLungShuntReport(bInitReport)
               'BackgroundColor', 'White', ...
               'ForegroundColor', 'Black', ...
               'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 255 460 20]...
-              ); 
+              );
 
     uiEditLiverBottomOfVolumeExtraSlices = ...
     uicontrol(ui3DLungShuntReport, ...
@@ -713,10 +776,10 @@ function generate3DLungShuntReport(bInitReport)
               'BackgroundColor', 'White', ...
               'ForegroundColor', 'Black', ...
               'position', [auiEditLiverBottomOfVolumeExtraSlicesPosition(1)+auiEditLiverBottomOfVolumeExtraSlicesPosition(3)+5 auiEditLiverBottomOfVolumeExtraSlicesPosition(2)-3 200 20]...
-              ); 
+              );
 
     % Lungs volume-of-interest oversized
-     
+
     uicontrol(ui3DLungShuntReport,...
               'style'     , 'text',...
               'FontWeight', 'bold',...
@@ -727,7 +790,7 @@ function generate3DLungShuntReport(bInitReport)
               'BackgroundColor', 'White', ...
               'ForegroundColor', 'Black', ...
               'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-80 175 400 20]...
-              ); 
+              );
 
     % Overlap the liver
 
@@ -781,7 +844,7 @@ function generate3DLungShuntReport(bInitReport)
               'BackgroundColor', 'White', ...
               'ForegroundColor', 'Black', ...
               'position', [aEditLungsVolumeSizePosition(1)+aEditLungsVolumeSizePosition(3)+5 aEditLungsVolumeSizePosition(2)-3 200 20]...
-              ); 
+              );
 
     uiProceedLiverVolumeOversize = ...
     uicontrol(ui3DLungShuntReport,...
@@ -798,17 +861,18 @@ function generate3DLungShuntReport(bInitReport)
      axes(ui3DLungShuntReport, ...
           'Units'   , 'pixels', ...
           'Position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 65 FIG_REPORT_X/3+60 340], ...
-          'Color'   , 'white',...          
-          'Visible' , 'off'...             
+          'Color'   , 'white',...
+          'Visible' , 'off'...
          );
     axeProceedLiverVolumeOversize.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    axeProceedLiverVolumeOversize.Toolbar = [];
+    axeProceedLiverVolumeOversize.Toolbar.Visible = 'off';
+    disableDefaultInteractivity(axeProceedLiverVolumeOversize);
 
     rectangle(axeProceedLiverVolumeOversize, 'position', [0 0 1 1], 'EdgeColor', [0.75 0.75 0.75]);
 
 
     % Liver volume-of-interest oversized
-     
+
     uicontrol(ui3DLungShuntReport,...
               'style'     , 'text',...
               'FontWeight', 'bold',...
@@ -819,19 +883,19 @@ function generate3DLungShuntReport(bInitReport)
               'BackgroundColor', 'White', ...
               'ForegroundColor', 'Black', ...
               'position', [FIG_REPORT_X-(FIG_REPORT_X/3)-90 15 100 20]...
-              ); 
+              );
 
 %     uiEditSignatireWindow = ...
-    uicontrol(ui3DLungShuntReport,...       
+    uicontrol(ui3DLungShuntReport,...
               'style'     , 'edit',...
               'FontWeight', 'Normal',...
               'FontSize'  , 11,...
               'FontName'  , 'MS Sans Serif', ...
               'horizontalalignment', 'left',...
               'BackgroundColor', 'White', ...
-              'ForegroundColor', 'Black', ...              
+              'ForegroundColor', 'Black', ...
               'position', [FIG_REPORT_X-(FIG_REPORT_X/3) 15 385 40]...
-             );  
+             );
 
     mReportFile = uimenu(fig3DLungShuntReport,'Label','File');
     uimenu(mReportFile,'Label', 'Export report to .pdf...'             ,'Callback', @exportCurrentLungLiverReportToPdfCallback);
@@ -843,18 +907,18 @@ function generate3DLungShuntReport(bInitReport)
     mReportEdit = uimenu(fig3DLungShuntReport,'Label','Edit');
     uimenu(mReportEdit,'Label', 'Copy Display', 'Callback', @copyLungLiverReportDisplayCallback);
 
-    mReportOptions = uimenu(fig3DLungShuntReport,'Label','Options', 'Callback', @figLungLiverRatioReportRefreshOption);    
-    
-     if suvMenuUnitOption('get') == true && ...
-       atInput(dSeriesOffset).bDoseKernel == false    
+    mReportOptions = uimenu(fig3DLungShuntReport,'Label','Options', 'Callback', @figLungLiverRatioReportRefreshOption);
 
-        sUnitDisplay = getSerieUnitValue(dSeriesOffset);  
+     if suvMenuUnitOption('get') == true && ...
+       atInput(dSeriesOffset).bDoseKernel == false
+
+        sUnitDisplay = getSerieUnitValue(dSeriesOffset);
         if strcmpi(sUnitDisplay, 'SUV')
             sSuvChecked = 'on';
         else
             if suvMenuUnitOption('get') == true
                 suvMenuUnitOption('set', false);
-            end            
+            end
             sSuvChecked = 'off';
         end
     else
@@ -863,20 +927,20 @@ function generate3DLungShuntReport(bInitReport)
         end
         sSuvChecked = 'off';
     end
-    
+
     if atInput(dSeriesOffset).bDoseKernel == true
         sSuvEnable = 'off';
     else
-        sUnitDisplay = getSerieUnitValue(dSeriesOffset);  
-        if strcmpi(sUnitDisplay, 'SUV')        
+        sUnitDisplay = getSerieUnitValue(dSeriesOffset);
+        if strcmpi(sUnitDisplay, 'SUV')
             sSuvEnable = 'on';
         else
             sSuvEnable = 'off';
         end
     end
-    
+
     mSUVUnit = uimenu(mReportOptions, 'Label', 'SUV Unit', 'Checked', sSuvChecked , 'Enable', sSuvEnable, 'Callback', @lungLiverReportSUVUnitCallback);
-           
+
     setLungLiverRatioReportFigureName();
 
     if bInitReport == false % Reopen the report
@@ -885,7 +949,7 @@ function generate3DLungShuntReport(bInitReport)
         gtReport = computeLungLiverReportContoursInformation(suvMenuUnitOption('get'), false, false, true);
 
 %        if lungShuntLiverVolumeOversized('get') ~= 0 || ...
-%           lungShuntLungsVolumeOversized('get') ~= 0     
+%           lungShuntLungsVolumeOversized('get') ~= 0
 
             proceedLiverVolumeOversize();
             bInitReport = false;
@@ -895,30 +959,30 @@ function generate3DLungShuntReport(bInitReport)
             display3DLungLiver();
         end
     end
-    
+
     function refreshReportLesionInformation(bSUVUnit)
-      
+
         gtReport = computeLungLiverReportContoursInformation(bSUVUnit, false, false, false);
 
         if ~isempty(gtReport) % Fill information
 
-            if isvalid(uiReport3DLungShuntInformation) % Make sure the figure is still open     
-                set(uiReport3DLungShuntInformation, 'String', sprintf('Contours Information (%s)', getLungLiverReportUnitValue()));                                             
+            if isvalid(uiReport3DLungShuntInformation) % Make sure the figure is still open
+                set(uiReport3DLungShuntInformation, 'String', sprintf('Contours Information (%s)', getLungLiverReportUnitValue()));
             end
-           
-            if isvalid(uiReportLesionMean) % Make sure the figure is still open        
+
+            if isvalid(uiReportLesionMean) % Make sure the figure is still open
                 set(uiReportLesionMean, 'String', getLungLiverReportMeanInformation('get', gtReport));
-            end        
-            
-            if isvalid(uiReportLesionTotal) % Make sure the figure is still open        
+            end
+
+            if isvalid(uiReportLesionTotal) % Make sure the figure is still open
 
                 set(uiReportLesionTotal, 'String', getLungLiverReportTotalInformation('get', gtReport));
 %                 set(uiReportLesionTotal, 'FontWeight', 'Bold');
-            end    
-            
-            if isvalid(uiReportLesionVolume) % Make sure the figure is still open        
+            end
+
+            if isvalid(uiReportLesionVolume) % Make sure the figure is still open
                 set(uiReportLesionVolume, 'String', getLungLiverReportVolumeInformation('get', gtReport));
-            end  
+            end
 
             if isvalid(uiReport3DLungShuntLungRatio)
                 set(uiReport3DLungShuntLungRatio, 'String', getLungLiverReportRatioInformation(gtReport));
@@ -927,7 +991,7 @@ function generate3DLungShuntReport(bInitReport)
             if isvalid(ui3DWindow)
                 display3DLungLiver();
             end
-          
+
         end
     end
 
@@ -935,48 +999,48 @@ function generate3DLungShuntReport(bInitReport)
 
         if ~isvalid(fig3DLungShuntReport)
             return;
-        end        
-    
+        end
+
         atMetaData = dicomMetaData('get');
-       
+
         sUnit = sprintf('Unit: %s', getLungLiverReportUnitValue());
-        
+
         fig3DLungShuntReport.Name = ['TriDFusion (3DF) 3D SPECT Lung Shunt Report - ' atMetaData{1}.SeriesDescription ' - ' sUnit];
 
     end
-    
+
     function figLungLiverRatioReportRefreshOption(~, ~)
 
-        if suvMenuUnitOption('get') == true 
+        if suvMenuUnitOption('get') == true
             sSuvChecked = 'on';
         else
             sSuvChecked = 'off';
         end
-              
+
         set(mSUVUnit, 'Checked', sSuvChecked);
 
     end
 
     function sUnit = getLungLiverReportUnitValue()
-        
+
         atMetaData = dicomMetaData('get');
-       
+
         atInput = inputTemplate('get');
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-    
+
         if atInput(dSeriesOffset).bDoseKernel == true
 
             if isfield(atMetaData{1}, 'DoseUnits')
 
                 if ~isempty(atMetaData{1}.DoseUnits)
-                    
+
                     sUnit = char(atMetaData{1}.DoseUnits);
                 else
                     sUnit = 'dose';
                 end
             else
                 sUnit = 'dose';
-            end   
+            end
         else
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
 
@@ -1012,53 +1076,53 @@ function generate3DLungShuntReport(bInitReport)
                     end
                  end
             end
-         end 
+         end
     end
 
     function lungLiverReportSUVUnitCallback(hObject, ~)
-   
+
         if strcmpi(hObject.Checked, 'on')
 
             hObject.Checked = 'off';
             suvMenuUnitOption('set', false);
-            
-            refreshReportLesionInformation(false);            
+
+            refreshReportLesionInformation(false);
         else
             hObject.Checked = 'on';
             suvMenuUnitOption('set', true);
-            
-            refreshReportLesionInformation(true);            
+
+            refreshReportLesionInformation(true);
         end
 
         setLungLiverRatioReportFigureName();
     end
 
     function sReport = getLungLiverReportLesionTypeInformation()
-                
-        sReport = '';      
-      
+
+        sReport = '';
+
   %      [~, gasOrganList] = getLesionType('');
-        
+
         for ll=1:numel(gasOrganList)
 
-            if  ll==1          
+            if  ll==1
 
                 sReport = sprintf( '%s%s', sReport, ['NM ' char(gasOrganList{ll})] );
             else
                 sReport = sprintf( '%s\n\n%s', sReport, ['NM ' char(gasOrganList{ll})] );
             end
-        end       
-      
+        end
+
         sReport = sprintf( '%s\n\n%s', sReport, 'CT Lungs' );
 
     end
 
     function sReport = getLungLiverReportMeanInformation(sAction, tReport)
-                
+
 %        [~, gasOrganList] = getLesionType('');
-        
+
         if strcmpi(sAction, 'init')
-            sReport = '';    
+            sReport = '';
             for ll=1:numel(gasOrganList)
 
                 if isempty(sReport)
@@ -1067,23 +1131,23 @@ function generate3DLungShuntReport(bInitReport)
                 else
                     sReport = sprintf('%s\n\n%s', sReport, '-');
                 end
-            end    
+            end
 
             sReport = sprintf('%s\n\n%s', sReport, '-');
-            
+
         else
-            
+
   %          if ~isempty(tReport.All.Mean)
-  %              sReport = sprintf('%-12s\n___________', num2str(tReport.All.Mean));      
+  %              sReport = sprintf('%-12s\n___________', num2str(tReport.All.Mean));
   %          else
-  %              sReport = sprintf('%s\n___________', '-');      
+  %              sReport = sprintf('%s\n___________', '-');
   %          end
-            sReport = '';    
-                
-            for ll=1:numel(gasOrganList)      
-                
+            sReport = '';
+
+            for ll=1:numel(gasOrganList)
+
                 switch lower(gasOrganList{ll})
-                                            
+
                     case 'lungs'
 
                         if ~isempty(tReport.NM.Lungs.Mean)
@@ -1096,8 +1160,8 @@ function generate3DLungShuntReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
-                        
+                        end
+
                     case 'liver'
 
                         if ~isempty(tReport.NM.Liver.Mean)
@@ -1110,30 +1174,30 @@ function generate3DLungShuntReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
-                        
-                    otherwise                        
+                        end
+
+                    otherwise
                         sReport = sprintf('%s\n\n%s', sReport, '-');
                 end
-            end  
+            end
 
             if ~isempty(tReport.CT.Lungs.Volume)
-       
+
                 sReport = sprintf('%s\n\n%s', sReport, 'NaN');
             else
                 sReport = sprintf('%s\n\n%s', sReport, '-');
             end
-           
-        end      
+
+        end
     end
 
     function sReport = getLungLiverReportTotalInformation(sAction, tReport)
-                
+
 %        [~, gasOrganList] = getLesionType('');
-        
+
         if strcmpi(sAction, 'init')
 
-            sReport = '';      
+            sReport = '';
 
             for ll=1:numel(gasOrganList)
 
@@ -1143,23 +1207,23 @@ function generate3DLungShuntReport(bInitReport)
                 else
                     sReport = sprintf('%s\n\n%s', sReport, '-');
                 end
-            end 
+            end
 
             sReport = sprintf('%s\n\n%s', sReport, '-');
-        
+
         else
-            
+
  %           if ~isempty(tReport.All.Total)
- %               sReport = sprintf('%-12s\n___________', num2str(tReport.All.Total));      
+ %               sReport = sprintf('%-12s\n___________', num2str(tReport.All.Total));
  %           else
- %               sReport = sprintf('%s\n___________', '-');      
+ %               sReport = sprintf('%s\n___________', '-');
  %           end
-            sReport = '';    
-                
-            for ll=1:numel(gasOrganList)      
-                
+            sReport = '';
+
+            for ll=1:numel(gasOrganList)
+
                 switch lower(gasOrganList{ll})
-                                             
+
                     case 'lungs'
 
                         if ~isempty(tReport.NM.Lungs.Total)
@@ -1171,8 +1235,8 @@ function generate3DLungShuntReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
-                        
+                        end
+
                     case 'liver'
 
                         if ~isempty(tReport.NM.Liver.Total)
@@ -1185,29 +1249,29 @@ function generate3DLungShuntReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
+                        end
 
-                    otherwise    
+                    otherwise
                         sReport = sprintf('%s\n\n%s', sReport, '-');
                 end
-            end             
+            end
 
             if ~isempty(tReport.CT.Lungs.Volume)
-       
+
                 sReport = sprintf('%s\n\n%s', sReport, 'NaN');
             else
                 sReport = sprintf('%s\n\n%s', sReport, '-');
-            end            
-        end      
+            end
+        end
     end
 
     function sReport = getLungLiverReportVolumeInformation(sAction, tReport)
-                
+
  %       [~, gasOrganList] = getLesionType('');
-        
+
         if strcmpi(sAction, 'init')
 
-            sReport = '';    
+            sReport = '';
 
             for ll=1:numel(gasOrganList)
 
@@ -1217,23 +1281,23 @@ function generate3DLungShuntReport(bInitReport)
                 else
                     sReport = sprintf('%s\n\n%s', sReport, '-');
                 end
-            end 
+            end
 
             sReport = sprintf('%s\n\n%s', sReport, '-');
-        
+
         else
-            
+
    %         if ~isempty(tReport.All.Volume)
-   %             sReport = sprintf('%-12s\n___________', num2str(tReport.All.Volume));      
+   %             sReport = sprintf('%-12s\n___________', num2str(tReport.All.Volume));
    %         else
-   %             sReport = sprintf('%s\n___________', '-');      
+   %             sReport = sprintf('%s\n___________', '-');
    %         end
-            sReport = '';    
-                
-            for ll=1:numel(gasOrganList)      
-                
+            sReport = '';
+
+            for ll=1:numel(gasOrganList)
+
                 switch lower(gasOrganList{ll})
-                        
+
                     case 'lungs'
 
                         if ~isempty(tReport.NM.Lungs.Volume)
@@ -1245,8 +1309,8 @@ function generate3DLungShuntReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
-                        
+                        end
+
                     case 'liver'
 
                         if ~isempty(tReport.NM.Liver.Volume)
@@ -1258,13 +1322,13 @@ function generate3DLungShuntReport(bInitReport)
                             else
                                 sReport = sprintf('%s\n\n%s', sReport, '-');
                             end
-                        end  
-                        
-                        
-                    otherwise    
+                        end
+
+
+                    otherwise
                         sReport = sprintf('%s\n\n%s', sReport, '-');
                 end
-            end    
+            end
 
             if ~isempty(tReport.CT.Lungs.Volume)
 
@@ -1275,10 +1339,10 @@ function generate3DLungShuntReport(bInitReport)
                     sReport = '-';
                 else
                     sReport = sprintf('%s\n\n%s', sReport, 'NaN');
-                end                
+                end
             end
 
-        end         
+        end
     end
 
     function sLungShuntFraction = getLungLiverReportRatioInformation(tReport)
@@ -1288,7 +1352,7 @@ function generate3DLungShuntReport(bInitReport)
 
             %                    ( 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
             % Lung 𝑆ℎ𝑢𝑛𝑡 = ____________________________ × 100
-            %   
+            %
 
             dLungShuntFraction = dLungsTotal/(dLiverTotal+dLungsTotal)*100;
 
@@ -1296,52 +1360,52 @@ function generate3DLungShuntReport(bInitReport)
 
 
             dInjectedActivity = str2double(get(uiEditInjectedActivity, 'String')); % In MBq
-    
+
             if dInjectedActivity > 0 && ~isnan(dInjectedActivity)
 
                 %                          Total amount of injected activity (GBq)
-                % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF 
+                % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF
                 %                                   Lung mass (Kg)
- 
+
                 dLungsVolume = gtReport.NM.Lungs.Volume;
 
                 dInjectedActivity = dInjectedActivity/1000; % In GBq
 
                 dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
-           
+
                 sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
-                set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
-            end 
+                set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);
+            end
 
     end
 
 
     function tReport = computeLungLiverReportContoursInformation(bSUVUnit, bModifiedMatrix, bSegmented, bUpdateMasks)
-        
+
         tReport = [];
-        
+
         atInput = inputTemplate('get');
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-        
+
         bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
-               
+
         sUnitDisplay = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));
         tQuantification = quantificationTemplate('get');
-        
+
         atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));     
-        
+        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
         if isempty(atVoiInput)
             return;
-        end     
-                               
-        if bModifiedMatrix == false && ... 
+        end
+
+        if bModifiedMatrix == false && ...
            bMovementApplied == false        % Can't use input buffer if movement have been applied
-        
-            atDicomMeta = dicomMetaData('get', [], dSeriesOffset);                              
+
+            atDicomMeta = dicomMetaData('get', [], dSeriesOffset);
             atMetaData  = atInput(dSeriesOffset).atDicomInfo;
             aImage      = inputBuffer('get');
-            
+
 %            if     strcmpi(imageOrientation('get'), 'axial')
 %                aImage = permute(aImage{dSeriesOffset}, [1 2 3]);
 %            elseif strcmpi(imageOrientation('get'), 'coronal')
@@ -1373,7 +1437,7 @@ function generate3DLungShuntReport(bInitReport)
                 if atInput(dSeriesOffset).bFlipAntPost == true
 
                     aImage=aImage(end:-1:1,:);
-                end            
+                end
             else
                 if atInput(dSeriesOffset).bFlipLeftRight == true
 
@@ -1388,144 +1452,144 @@ function generate3DLungShuntReport(bInitReport)
                 if atInput(dSeriesOffset).bFlipHeadFeet == true
 
                     aImage=aImage(:,:,end:-1:1);
-                end 
-            end              
+                end
+            end
 
         else
-            atMetaData = dicomMetaData('get');                              
-            aImage     = dicomBuffer('get');      
+            atMetaData = dicomMetaData('get');
+            aImage     = dicomBuffer('get');
         end
-        
-        % Set Voxel Size
-        
-        xPixel = atMetaData{1}.PixelSpacing(1)/10;
-        yPixel = atMetaData{1}.PixelSpacing(2)/10; 
 
-        if size(aImage, 3) == 1 
+        % Set Voxel Size
+
+        xPixel = atMetaData{1}.PixelSpacing(1)/10;
+        yPixel = atMetaData{1}.PixelSpacing(2)/10;
+
+        if size(aImage, 3) == 1
 
             zPixel = 1;
         else
-            zPixel = computeSliceSpacing(atMetaData)/10; 
+            zPixel = computeSliceSpacing(atMetaData)/10;
 
             if zPixel == 0 % We can't determine the z size of a pixel, we will presume the pixel is square.
 
                 zPixel = xPixel;
-            end           
+            end
         end
-        
-        dVoxVolume = xPixel * yPixel * zPixel;            
-        
-        % Count contour Type number 
-       
+
+        dVoxVolume = xPixel * yPixel * zPixel;
+
+        % Count contour Type number
+
         dLungsCount  = 0;
         dLiverCount  = 0;
 
         dNbLungsRois = 0;
         dNbLiverRois = 0;
-        
+
         for vv=1:numel(atVoiInput)
-            
+
             dNbRois = numel(atVoiInput{vv}.RoisTag);
-            
+
             switch lower(atVoiInput{vv}.Label)
-                                    
+
                 case 'lungs-lun'
 
-                    dLungsCount  = dLungsCount+1;                    
+                    dLungsCount  = dLungsCount+1;
                     dNbLungsRois = dNbLungsRois+dNbRois;
-                    
+
                 case 'liver-liv'
 
-                    dLiverCount  = dLiverCount+1;                    
+                    dLiverCount  = dLiverCount+1;
                     dNbLiverRois = dNbLiverRois+dNbRois;
             end
         end
-        
+
         % Set report type count
-                        
+
         if dLungsCount == 0
 
             tReport.NM.Lungs.Count = [];
         else
             tReport.NM.Lungs.Count = dLungsCount;
         end
-        
+
         if dLiverCount == 0
 
             tReport.NM.Liver.Count = [];
         else
             tReport.NM.Liver.Count = dLiverCount;
         end
-                                    
-        % Clasify ROIs by lession type      
-  
+
+        % Clasify ROIs by lession type
+
         tReport.NM.Lungs.RoisTag = cell(1, dNbLungsRois);
-        tReport.NM.Liver.RoisTag = cell(1, dNbLiverRois);    
-           
+        tReport.NM.Liver.RoisTag = cell(1, dNbLiverRois);
+
         dLungsRoisOffset = 1;
         dLiverRoisOffset = 1;
-        
+
         for vv=1:numel(atVoiInput)
-            
+
             dNbRois = numel(atVoiInput{vv}.RoisTag);
-            
-           
+
+
             switch lower(atVoiInput{vv}.Label)
-                                    
+
                 case 'lungs-lun'
 
                     dFrom = dLungsRoisOffset;
                     dTo   = dLungsRoisOffset+dNbRois-1;
-                    
+
                     tReport.NM.Lungs.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
-                    
+
                     dLungsRoisOffset = dLungsRoisOffset+dNbRois;
 
                     tReport.NM.Lungs.Color = atVoiInput{vv}.Color;
-                
+
                 case 'liver-liv'
 
                     dFrom = dLiverRoisOffset;
                     dTo   = dLiverRoisOffset+dNbRois-1;
-                    
+
                     tReport.NM.Liver.RoisTag(dFrom:dTo) = atVoiInput{vv}.RoisTag;
-                    
-                    dLiverRoisOffset = dLiverRoisOffset+dNbRois;               
+
+                    dLiverRoisOffset = dLiverRoisOffset+dNbRois;
 
                     tReport.NM.Liver.Color = atVoiInput{vv}.Color;
            end
-        end    
+        end
 
         % Compute Liver lesion
-        
+
         progressBar( 1/3, 'Computing liver segmentation, please wait' );
 
-        if numel(tReport.NM.Liver.RoisTag) ~= 0  
+        if numel(tReport.NM.Liver.RoisTag) ~= 0
 
             voiMask = cell(1, numel(tReport.NM.Liver.RoisTag));
             voiData = cell(1, numel(tReport.NM.Liver.RoisTag));
-            
+
             dNbCells = 0;
 
             liverMask = logical(false(size(aImage)));
-         
+
             for uu=1:numel(tReport.NM.Liver.RoisTag)
 
-                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.NM.Liver.RoisTag{uu}]} );                
-                
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.NM.Liver.RoisTag{uu}]} );
+
                 tRoi = atRoiInput{find(aTagOffset, 1)};
-                
-                if bModifiedMatrix  == false && bMovementApplied == false % Can't use input buffer if movement have been applied 
-                   
+
+                if bModifiedMatrix  == false && bMovementApplied == false % Can't use input buffer if movement have been applied
+
                     if numel(aImage) ~= numel(dicomBuffer('get'))
 
                         pTemp{1} = tRoi;
                         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
-                    end   
+                    end
                 end
-                
-                switch lower(tRoi.Axe)  
+
+                switch lower(tRoi.Axe)
 
                     case 'axe'
 
@@ -1533,7 +1597,7 @@ function generate3DLungShuntReport(bInitReport)
                         voiMask{uu} = roiTemplateToMask(tRoi, aImage(:,:));
 
 %                         if bUpdateMasks == true
-                            liverMask(:,:) = voiMask{uu}|liverMask(:,:);   
+                            liverMask(:,:) = voiMask{uu}|liverMask(:,:);
 %                         end
 
                     case 'axes1'
@@ -1543,62 +1607,62 @@ function generate3DLungShuntReport(bInitReport)
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
 %                         if bUpdateMasks == true
-                            liverMask(tRoi.SliceNb,:,:) = voiMask{uu}|liverMask(tRoi.SliceNb,:,:);   
+                            liverMask(tRoi.SliceNb,:,:) = voiMask{uu}|liverMask(tRoi.SliceNb,:,:);
 %                         end
 
                     case 'axes2'
 
                         aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
 %                         if bUpdateMasks == true
-                            liverMask(:,tRoi.SliceNb,:) = voiMask{uu}|liverMask(:,tRoi.SliceNb,:);   
+                            liverMask(:,tRoi.SliceNb,:) = voiMask{uu}|liverMask(:,tRoi.SliceNb,:);
 %                         end
 
                    case 'axes3'
 
                         aSlice = aImage(:,:,tRoi.SliceNb);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
 %                         if bUpdateMasks == true
-                            liverMask(:,:,tRoi.SliceNb) = voiMask{uu}|liverMask(:,:,tRoi.SliceNb);  
+                            liverMask(:,:,tRoi.SliceNb) = voiMask{uu}|liverMask(:,:,tRoi.SliceNb);
 %                         end
 
-                end              
-                
-                if bSegmented  == true && bModifiedMatrix == true % Can't use original buffer       
-                     
-                    voiDataTemp = voiData{uu}(voiMask{uu}); 
+                end
+
+                if bSegmented  == true && bModifiedMatrix == true % Can't use original buffer
+
+                    voiDataTemp = voiData{uu}(voiMask{uu});
                     voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
                     dNbCells = dNbCells+numel(voiDataTemp);
                 else
                     dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
                 end
             end
-            
+
             voiMask = cat(1, voiMask{:});
             voiData = cat(1, voiData{:});
 
             voiData(voiMask~=1) = [];
-            
-            if bSegmented  == true && ...      
-               bModifiedMatrix == true % Can't use original buffer   
 
-                voiData = voiData(voiData>cropValue('get'));                            
+            if bSegmented  == true && ...
+               bModifiedMatrix == true % Can't use original buffer
+
+                voiData = voiData(voiData>cropValue('get'));
             end
-            
+
             tReport.NM.Liver.Cells  = dNbCells;
             tReport.NM.Liver.Volume = dNbCells*dVoxVolume;
 
-            if bUpdateMasks == true 
+            if bUpdateMasks == true
 
                 tReport.NM.Liver.Mask = liverMask;
 
                 lungShuntMasks('set', 'Liver', liverMask);
             else
-                tReport.NM.Liver.Mask = lungShuntMasks('get', 'Liver');                               
+                tReport.NM.Liver.Mask = lungShuntMasks('get', 'Liver');
             end
 
             aImage(liverMask) = min(aImage, [], 'all');
@@ -1606,62 +1670,62 @@ function generate3DLungShuntReport(bInitReport)
             clear liverMask;
 
             if strcmpi(sUnitDisplay, 'SUV')
-                
+
                 if bSUVUnit == true
-                    tReport.NM.Liver.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-                    tReport.NM.Liver.Total = sum (voiData, 'all')*tQuantification.tSUV.dScale;             
-%                    tReport.NM.Liver.Total = tReport.NM.Liver.Mean*tReport.NM.Liver.Volume*tQuantification.tSUV.dScale;             
+                    tReport.NM.Liver.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;
+                    tReport.NM.Liver.Total = sum (voiData, 'all')*tQuantification.tSUV.dScale;
+%                    tReport.NM.Liver.Total = tReport.NM.Liver.Mean*tReport.NM.Liver.Volume*tQuantification.tSUV.dScale;
                 else
                     tReport.NM.Liver.Mean  = mean(voiData, 'all');
                     tReport.NM.Liver.Total = sum (voiData, 'all');
 %                    tReport.NM.Liver.Total = tReport.NM.Liver.Mean*tReport.NM.Liver.Volume;
                 end
             else
-                tReport.NM.Liver.Mean  = mean(voiData, 'all');             
-                tReport.NM.Liver.Total = sum (voiData, 'all');             
-%                tReport.NM.Liver.Total = tReport.NM.Liver.Mean*tReport.NM.Liver.Volume;             
+                tReport.NM.Liver.Mean  = mean(voiData, 'all');
+                tReport.NM.Liver.Total = sum (voiData, 'all');
+%                tReport.NM.Liver.Total = tReport.NM.Liver.Mean*tReport.NM.Liver.Volume;
             end
-         
+
             clear voiMask;
-            clear voiData;  
+            clear voiData;
 
         else
             tReport.NM.Liver.Cells  = [];
             tReport.NM.Liver.Volume = [];
-            tReport.NM.Liver.Mean   = [];            
-            tReport.NM.Liver.Total  = [];            
-        end        
-                
+            tReport.NM.Liver.Mean   = [];
+            tReport.NM.Liver.Total  = [];
+        end
+
         % Compute Lungs segmentation
-        
+
         progressBar( 1/3, 'Computing lungs segmentation, please wait' );
-       
-        if numel(tReport.NM.Lungs.RoisTag) ~= 0  
-       
+
+        if numel(tReport.NM.Lungs.RoisTag) ~= 0
+
             voiMask = cell(1, numel(tReport.NM.Lungs.RoisTag));
             voiData = cell(1, numel(tReport.NM.Lungs.RoisTag));
-            
+
             dNbCells = 0;
 
             lungsMask = logical(false(size(aImage)));
-         
+
             for uu=1:numel(tReport.NM.Lungs.RoisTag)
 
-                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.NM.Lungs.RoisTag{uu}]} );                
-                
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[tReport.NM.Lungs.RoisTag{uu}]} );
+
                 tRoi = atRoiInput{find(aTagOffset, 1)};
-                
-                if bModifiedMatrix  == false && bMovementApplied == false % Can't use input buffer if movement have been applied 
-                   
+
+                if bModifiedMatrix  == false && bMovementApplied == false % Can't use input buffer if movement have been applied
+
                     if numel(aImage) ~= numel(dicomBuffer('get'))
 
                         pTemp{1} = tRoi;
                         ptrRoiTemp = resampleROIs(dicomBuffer('get'), atDicomMeta, aImage, atMetaData, pTemp, false);
                         tRoi = ptrRoiTemp{1};
-                    end   
+                    end
                 end
-                
-                switch lower(tRoi.Axe)  
+
+                switch lower(tRoi.Axe)
 
                     case 'axe'
 
@@ -1670,9 +1734,9 @@ function generate3DLungShuntReport(bInitReport)
 
                         if bUpdateMasks == true
 
-                            lungsMask(:,:) = voiMask{uu}|lungsMask(:,:);   
+                            lungsMask(:,:) = voiMask{uu}|lungsMask(:,:);
                         end
-                     
+
                     case 'axes1'
 
                         aSlice = permute(aImage(tRoi.SliceNb,:,:), [3 2 1]);
@@ -1681,58 +1745,58 @@ function generate3DLungShuntReport(bInitReport)
 
                         if bUpdateMasks == true
 
-                            lungsMask(tRoi.SliceNb,:,:) = voiMask{uu}|lungsMask(tRoi.SliceNb,:,:);   
+                            lungsMask(tRoi.SliceNb,:,:) = voiMask{uu}|lungsMask(tRoi.SliceNb,:,:);
                         end
-                        
+
                     case 'axes2'
 
                         aSlice = permute(aImage(:,tRoi.SliceNb,:), [3 1 2]);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
 
-                            lungsMask(:,tRoi.SliceNb,:) = voiMask{uu}|lungsMask(:,tRoi.SliceNb,:);   
+                            lungsMask(:,tRoi.SliceNb,:) = voiMask{uu}|lungsMask(:,tRoi.SliceNb,:);
                         end
-                         
+
                    case 'axes3'
 
                         aSlice = aImage(:,:,tRoi.SliceNb);
-                        voiData{uu} = aSlice;                        
+                        voiData{uu} = aSlice;
                         voiMask{uu} = roiTemplateToMask(tRoi, aSlice);
 
                         if bUpdateMasks == true
 
-                            lungsMask(:,:,tRoi.SliceNb) = voiMask{uu}|lungsMask(:,:,tRoi.SliceNb);   
+                            lungsMask(:,:,tRoi.SliceNb) = voiMask{uu}|lungsMask(:,:,tRoi.SliceNb);
                         end
-                end              
-                
-                if bSegmented  == true && ...      
-                   bModifiedMatrix == true % Can't use original buffer   
+                end
 
-                    voiDataTemp = voiData{uu}(voiMask{uu}); 
+                if bSegmented  == true && ...
+                   bModifiedMatrix == true % Can't use original buffer
+
+                    voiDataTemp = voiData{uu}(voiMask{uu});
                     voiDataTemp = voiDataTemp(voiDataTemp>cropValue('get'));
                     dNbCells = dNbCells+numel(voiDataTemp);
                 else
                     dNbCells = dNbCells+numel(voiData{uu}(voiMask{uu}==1));
                 end
             end
-            
+
             voiMask = cat(1, voiMask{:});
             voiData = cat(1, voiData{:});
-            
-            voiData(voiMask~=1) = [];
-           
-            if bSegmented  == true && ...      
-               bModifiedMatrix == true % Can't use original buffer   
 
-                voiData = voiData(voiData>cropValue('get'));                            
+            voiData(voiMask~=1) = [];
+
+            if bSegmented  == true && ...
+               bModifiedMatrix == true % Can't use original buffer
+
+                voiData = voiData(voiData>cropValue('get'));
             end
-            
+
             tReport.NM.Lungs.Cells  = dNbCells;
             tReport.NM.Lungs.Volume = dNbCells*dVoxVolume;
 
-            if bUpdateMasks == true 
+            if bUpdateMasks == true
                 tReport.NM.Lungs.Mask = lungsMask;
 
                 lungShuntMasks('set', 'Lungs', lungsMask);
@@ -1742,33 +1806,33 @@ function generate3DLungShuntReport(bInitReport)
             end
 
             clear lungsMask;
-           
+
             if strcmpi(sUnitDisplay, 'SUV')
-                
+
                 if bSUVUnit == true
-                    tReport.NM.Lungs.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;             
-                    tReport.NM.Lungs.Total = sum (voiData, 'all')*tQuantification.tSUV.dScale;             
-%                    tReport.NM.Lungs.Total = tReport.NM.Lungs.Mean*tReport.NM.Lungs.Volume*tQuantification.tSUV.dScale;             
+                    tReport.NM.Lungs.Mean  = mean(voiData, 'all')*tQuantification.tSUV.dScale;
+                    tReport.NM.Lungs.Total = sum (voiData, 'all')*tQuantification.tSUV.dScale;
+%                    tReport.NM.Lungs.Total = tReport.NM.Lungs.Mean*tReport.NM.Lungs.Volume*tQuantification.tSUV.dScale;
                 else
                     tReport.NM.Lungs.Mean  = mean(voiData, 'all');
                     tReport.NM.Lungs.Total = sum (voiData, 'all');
 %                    tReport.NM.Lungs.Total = tReport.NM.Lungs.Mean*tReport.NM.Lungs.Volume;
                 end
             else
-                tReport.NM.Lungs.Mean  = mean(voiData, 'all');             
-                tReport.NM.Lungs.Total = sum (voiData, 'all');             
-%                tReport.NM.Lungs.Total = tReport.NM.Lungs.Mean*tReport.NM.Lungs.Volume;             
+                tReport.NM.Lungs.Mean  = mean(voiData, 'all');
+                tReport.NM.Lungs.Total = sum (voiData, 'all');
+%                tReport.NM.Lungs.Total = tReport.NM.Lungs.Mean*tReport.NM.Lungs.Volume;
             end
-         
+
             clear voiMask;
-            clear voiData;    
+            clear voiData;
         else
             tReport.NM.Lungs.Cells  = [];
             tReport.NM.Lungs.Volume = [];
-            tReport.NM.Lungs.Mean   = [];            
-            tReport.NM.Lungs.Total  = [];            
+            tReport.NM.Lungs.Mean   = [];
+            tReport.NM.Lungs.Total  = [];
         end
-                         
+
         [~, ~, dCTVolume] = machineLearning3DMask('get', 'Lungs');
 
         if isempty(dCTVolume) % Acquire CT volume
@@ -1789,9 +1853,9 @@ function generate3DLungShuntReport(bInitReport)
 
                     if strcmpi(atInput(tt).atDicomInfo{1}.StudyInstanceUID, ... % Try to find the first series
                         atInput(dSeriesOffset).atDicomInfo{1}.StudyInstanceUID)
-        
+
                         % Found an associated CT
-                        
+
                         atCTVoi = voiTemplate('get', tt);
                         atCTRoi = roiTemplate('get', tt);
 
@@ -1806,40 +1870,40 @@ function generate3DLungShuntReport(bInitReport)
                                     for rr=1:numel(atCTVoi{vv}.RoisTag)
 
                                         aTagOffset = strcmp( cellfun( @(atCTRoi) atCTRoi.Tag, atCTRoi, 'uni', false ), atCTVoi{vv}.RoisTag{rr} );
-                                        dTagOffset = find(aTagOffset, 1);  
-                                        
+                                        dTagOffset = find(aTagOffset, 1);
+
                                         if ~isempty(dTagOffset)
 
                                             tRoi = atCTRoi{dTagOffset};
 
-                                            switch lower(tRoi.Axe)  
-                                                                            
+                                            switch lower(tRoi.Axe)
+
                                                 case 'axes1'
-                            
+
                                                     aSlice = permute(aInputBuffer{tt}(tRoi.SliceNb,:,:), [3 2 1]);
                                                     voiMask = roiTemplateToMask(tRoi, aSlice);
-                            
-                                                    aLiverCTMask(tRoi.SliceNb,:,:) = voiMask|aLiverCTMask(tRoi.SliceNb,:,:);   
-                
-                            
+
+                                                    aLiverCTMask(tRoi.SliceNb,:,:) = voiMask|aLiverCTMask(tRoi.SliceNb,:,:);
+
+
                                                 case 'axes2'
-                            
+
                                                     aSlice = permute(aInputBuffer{tt}(:,tRoi.SliceNb,:), [3 1 2]);
                                                     voiMask = roiTemplateToMask(tRoi, aSlice);
-                            
-                                                    aLiverCTMask(:,tRoi.SliceNb,:) = voiMask|aLiverCTMask(:,tRoi.SliceNb,:);   
-                            
+
+                                                    aLiverCTMask(:,tRoi.SliceNb,:) = voiMask|aLiverCTMask(:,tRoi.SliceNb,:);
+
                                                case 'axes3'
-                            
+
                                                     aSlice = aInputBuffer{tt}(:,:,tRoi.SliceNb);
                                                     voiMask = roiTemplateToMask(tRoi, aSlice);
-                            
-                                                    aLiverCTMask(:,:,tRoi.SliceNb) = voiMask|aLiverCTMask(:,:,tRoi.SliceNb);  
-                            
-                                            end    
+
+                                                    aLiverCTMask(:,:,tRoi.SliceNb) = voiMask|aLiverCTMask(:,:,tRoi.SliceNb);
+
+                                            end
                                         end
                                     end
-                                  
+
                                     aLiverCTMask = aLiverCTMask(:,:,end:-1:1);
 
                                     machineLearning3DMask('set', 'Liver', aLiverCTMask, atCTVoi{vv}.Color, computeMaskVolume(aLiverCTMask, atInput(tt).atDicomInfo));
@@ -1853,41 +1917,41 @@ function generate3DLungShuntReport(bInitReport)
                                     for rr=1:numel(atCTVoi{vv}.RoisTag)
 
                                         aTagOffset = strcmp( cellfun( @(atCTRoi) atCTRoi.Tag, atCTRoi, 'uni', false ), atCTVoi{vv}.RoisTag{rr} );
-                                        dTagOffset = find(aTagOffset, 1);  
+                                        dTagOffset = find(aTagOffset, 1);
 
                                         if ~isempty(dTagOffset)
 
                                             tRoi = atCTRoi{dTagOffset};
 
-                                            switch lower(tRoi.Axe)  
-                                                                            
+                                            switch lower(tRoi.Axe)
+
                                                 case 'axes1'
-                            
+
                                                     aSlice = permute(aInputBuffer{tt}(tRoi.SliceNb,:,:), [3 2 1]);
                                                     voiMask = roiTemplateToMask(tRoi, aSlice);
-                            
-                                                    aLungsCTMask(tRoi.SliceNb,:,:) = voiMask|aLungsCTMask(tRoi.SliceNb,:,:);   
-                
-                            
+
+                                                    aLungsCTMask(tRoi.SliceNb,:,:) = voiMask|aLungsCTMask(tRoi.SliceNb,:,:);
+
+
                                                 case 'axes2'
-                            
+
                                                     aSlice = permute(aInputBuffer{tt}(:,tRoi.SliceNb,:), [3 1 2]);
                                                     voiMask = roiTemplateToMask(tRoi, aSlice);
-                            
-                                                    aLungsCTMask(:,tRoi.SliceNb,:) = voiMask|aLungsCTMask(:,tRoi.SliceNb,:);   
-                            
+
+                                                    aLungsCTMask(:,tRoi.SliceNb,:) = voiMask|aLungsCTMask(:,tRoi.SliceNb,:);
+
                                                case 'axes3'
-                            
+
                                                     aSlice = aInputBuffer{tt}(:,:,tRoi.SliceNb);
                                                     voiMask = roiTemplateToMask(tRoi, aSlice);
-                            
-                                                    aLungsCTMask(:,:,tRoi.SliceNb) = voiMask|aLungsCTMask(:,:,tRoi.SliceNb);  
+
+                                                    aLungsCTMask(:,:,tRoi.SliceNb) = voiMask|aLungsCTMask(:,:,tRoi.SliceNb);
                                             end
                                         end
-                                    end     
-                                    
+                                    end
+
                                     aLungsCTMask = aLungsCTMask(:,:,end:-1:1);
-                            
+
                                     machineLearning3DMask('set', 'Lungs', aLungsCTMask, atCTVoi{vv}.Color, computeMaskVolume(aLungsCTMask, atInput(tt).atDicomInfo));
                                     clear aLungsCTMask;
                                 end
@@ -1906,36 +1970,36 @@ function generate3DLungShuntReport(bInitReport)
 
             if isempty(dCTVolume) % Acquire CT volume
 
-                tReport.CT.Lungs.Volume  = [];            
+                tReport.CT.Lungs.Volume  = [];
             else
-                tReport.CT.Lungs.Volume  = dCTVolume;            
+                tReport.CT.Lungs.Volume  = dCTVolume;
             end
         else
-            tReport.CT.Lungs.Volume  = dCTVolume;            
+            tReport.CT.Lungs.Volume  = dCTVolume;
         end
 
         clear aImage;
-        
+
         progressBar( 1 , 'Ready' );
-       
+
     end
 
     function exportCurrentLungLiverReportToPdfCallback(~, ~)
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-   
+
         atMetaData = dicomMetaData('get', [], dSeriesOffset);
-       
+
         try
 
  %         fig3DLungShuntReport = fig3DLungShuntReportPtr('get');
-      
+
         filter = {'*.pdf'};
 
         sCurrentDir  = viewerRootPath('get');
 
         sMatFile = [sCurrentDir '/' 'lastReportDir.mat'];
-        
+
         % load last data directory
         if exist(sMatFile, 'file')
                         % lastDirMat mat file exists, load it
@@ -1949,13 +2013,13 @@ function generate3DLungShuntReport(bInitReport)
                 sCurrentDir = pwd;
             end
         end
-            
+
      %   sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
 
-        % Series Date 
-        
+        % Series Date
+
         sSeriesDate = atMetaData{1}.SeriesDate;
-        
+
         if isempty(sSeriesDate)
             sSeriesDate = '-';
         else
@@ -1975,32 +2039,55 @@ function generate3DLungShuntReport(bInitReport)
                 save(sMatFile, 'saveReportLastUsedDir');
             catch
                 progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-            end 
+            end
 
             sFileName = sprintf('%s%s', path, file);
-            
+
             if exist(sFileName, 'file')
                 delete(sFileName);
             end
-                
-            set(axe3DLungShuntReport,'LooseInset', get(axe3DLungShuntReport,'TightInset'));
-            unit = get(fig3DLungShuntReport,'Units');
-            set(fig3DLungShuntReport,'Units','inches');
-            pos = get(fig3DLungShuntReport,'Position');
-
-            set(fig3DLungShuntReport, ...
-                'PaperPositionMode' , 'auto',...
-                'PaperUnits'        , 'inches',...
-                'PaperPosition'     , [0,0,pos(3),pos(4)],...
-                'PaperSize'         , [pos(3), pos(4)]);
 
             if ~contains(sFileName, '.pdf')
                 sFileName = [sFileName, '.pdf'];
             end
 
-            print(fig3DLungShuntReport, sFileName, '-image', '-dpdf', '-r0');
+            if viewerUIFigure('get') == true
 
-            set(fig3DLungShuntReport,'Units', unit);
+                aRGBImage = frame2im(getframe(fig3DLungShuntReport));
+
+                axePdfReport = ...
+                   axes(fig3DLungShuntReport, ...
+                         'Units'   , 'pixels', ...
+                         'Position', [0 0 FIG_REPORT_X FIG_REPORT_Y], ...
+                         'Color'   , 'none',...
+                         'Visible' , 'off'...
+                         );
+                axePdfReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                axePdfReport.Toolbar.Visible = 'off';
+                disableDefaultInteractivity(axePdfReport);
+
+                image(axePdfReport, aRGBImage);
+                axePdfReport.Visible = 'off';
+
+                exportgraphics(axePdfReport, sFileName);
+
+                delete(axePdfReport);
+            else
+                set(axe3DLungShuntReport,'LooseInset', get(axe3DLungShuntReport,'TightInset'));
+                unit = get(fig3DLungShuntReport,'Units');
+                set(fig3DLungShuntReport,'Units','inches');
+                pos = get(fig3DLungShuntReport,'Position');
+
+                set(fig3DLungShuntReport, ...
+                    'PaperPositionMode' , 'auto',...
+                    'PaperUnits'        , 'inches',...
+                    'PaperPosition'     , [0,0,pos(3),pos(4)],...
+                    'PaperSize'         , [pos(3), pos(4)]);
+
+                print(fig3DLungShuntReport, sFileName, '-image', '-dpdf', '-r0');
+
+                set(fig3DLungShuntReport,'Units', unit);
+            end
 
             progressBar( 1 , sprintf('Export %s completed.', sFileName));
 
@@ -2009,15 +2096,15 @@ function generate3DLungShuntReport(bInitReport)
             catch
             end
         end
-        
+
         catch
             progressBar( 1 , 'Error: exportCurrentLungLiverReportToPdfCallback() cant export report' );
         end
 
         set(fig3DLungShuntReport, 'Pointer', 'default');
-        drawnow;        
+        drawnow;
     end
-    
+
     function exportCurrentLungLiverAxialSlicesToAviCallback(~, ~)
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
@@ -2031,13 +2118,13 @@ function generate3DLungShuntReport(bInitReport)
         try
 
  %         fig3DLungShuntReport = fig3DLungShuntReportPtr('get');
-      
+
         filter = {'*.avi'};
 
         sCurrentDir  = viewerRootPath('get');
 
         sMatFile = [sCurrentDir '/' 'lastReportDir.mat'];
-        
+
         % load last data directory
         if exist(sMatFile, 'file')
                         % lastDirMat mat file exists, load it
@@ -2051,13 +2138,13 @@ function generate3DLungShuntReport(bInitReport)
                 sCurrentDir = pwd;
             end
         end
-            
+
      %   sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
 
-        % Series Date 
-        
+        % Series Date
+
         sSeriesDate = atMetaData{1}.SeriesDate;
-        
+
         if isempty(sSeriesDate)
             sSeriesDate = '-';
         else
@@ -2077,14 +2164,14 @@ function generate3DLungShuntReport(bInitReport)
                 save(sMatFile, 'saveReportLastUsedDir');
             catch
                 progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-            end 
+            end
 
             sFileName = sprintf('%s%s', path, file);
-            
+
             if exist(sFileName, 'file')
                 delete(sFileName);
             end
-                
+
             if ~contains(file, '.avi')
                 file = [file, '.avi'];
             end
@@ -2100,23 +2187,23 @@ function generate3DLungShuntReport(bInitReport)
             recordMultiFrame(recordIconMenuObject('get'), path, file, 'avi', axes3Ptr('get', [], dSeriesOffset));
 
         end
-        
+
         catch
             progressBar( 1 , 'Error: exportCurrentLungLiverAxialSlicesToAviCallback() cant export report' );
         end
 
         playback2DMipOnly('set', bMipPlayback);
-        
+
         multiFrameRecord('set', false);
 
         set(recordIconMenuObject('get'), 'State', 'off');
 
         sliceNumber('set', 'axial', dAxialSliceNumber);
 
-        sliderTraCallback();  
+        sliderTraCallback();
 
         set(fig3DLungShuntReport, 'Pointer', 'default');
-        drawnow;          
+        drawnow;
     end
 
     function exportCurrentLungLiverAxialSlicesToDicomMovieCallback(~, ~)
@@ -2130,19 +2217,19 @@ function generate3DLungShuntReport(bInitReport)
         try
 
 %         fig3DLungShuntReport = fig3DLungShuntReportPtr('get');
-    
+
         sOutDir = outputDir('get');
-    
+
         if isempty(sOutDir)
-            
+
             sCurrentDir  = viewerRootPath('get');
-    
+
             sMatFile = [sCurrentDir '/' 'lastWriteDicomDir.mat'];
 
             % load last data directory
 
             if exist(sMatFile, 'file') % lastDirMat mat file exists, load it
-                                        
+
               load(sMatFile, 'exportDicomLastUsedDir');
 
               if exist('exportDicomLastUsedDir', 'var')
@@ -2154,29 +2241,29 @@ function generate3DLungShuntReport(bInitReport)
                    sCurrentDir = pwd;
                end
             end
-    
+
             sOutDir = uigetdir(sCurrentDir);
 
             if sOutDir == 0
-                
+
                 return;
             end
             sOutDir = [sOutDir '/'];
-    
-%             sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                
-%             sWriteDir = char(sOutDir) + "TriDFusion_MFSC_" + char(sDate) + '/';              
+
+%             sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
+%             sWriteDir = char(sOutDir) + "TriDFusion_MFSC_" + char(sDate) + '/';
 %             if ~(exist(char(sWriteDir), 'dir'))
 %                 mkdir(char(sWriteDir));
 %             end
-            
+
             try
                 exportDicomLastUsedDir = sOutDir;
                 save(sMatFile, 'exportDicomLastUsedDir');
             catch
                 progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
-            end   
-        end    
-    
+            end
+        end
+
         set(fig3DLungShuntReport, 'Pointer', 'watch');
         drawnow;
 
@@ -2191,23 +2278,23 @@ function generate3DLungShuntReport(bInitReport)
         recordMultiFrame(recordIconMenuObject('get'), sOutDir, [], 'dcm', axes3Ptr('get', [], dSeriesOffset));
 
 %         objectToDicomJpg(sWriteDir, fig3DLungShuntReport, '3DF MFSC', get(uiSeriesPtr('get'), 'Value'))
-    
+
         catch
             progressBar( 1 , 'Error: exportCurrentLungLiverAxialSlicesToDicomMovieCallback() cant export report' );
         end
 
         playback2DMipOnly('set', bMipPlayback);
-        
+
         multiFrameRecord('set', false);
 
         set(recordIconMenuObject('get'), 'State', 'off');
 
         sliceNumber('set', 'axial', dAxialSliceNumber);
 
-        sliderTraCallback();      
+        sliderTraCallback();
 
         set(fig3DLungShuntReport, 'Pointer', 'default');
-        drawnow;     
+        drawnow;
     end
 
     function copyLungLiverReportDisplayCallback(~, ~)
@@ -2215,28 +2302,52 @@ function generate3DLungShuntReport(bInitReport)
         try
 
             set(fig3DLungShuntReport, 'Pointer', 'watch');
-
-            inv = get(fig3DLungShuntReport,'InvertHardCopy');
-
-            set(fig3DLungShuntReport,'InvertHardCopy','Off');
-
             drawnow;
-            hgexport(fig3DLungShuntReport,'-clipboard');
 
-            set(fig3DLungShuntReport,'InvertHardCopy',inv);
+            if viewerUIFigure('get') == true
+
+                aRGBImage = frame2im(getframe(fig3DLungShuntReport));
+
+                axePdfReport = ...
+                   axes(fig3DLungShuntReport, ...
+                         'Units'   , 'pixels', ...
+                         'Position', [0 0 FIG_REPORT_X FIG_REPORT_Y], ...
+                         'Color'   , 'none',...
+                         'Visible' , 'off'...
+                         );
+                axePdfReport.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+                axePdfReport.Toolbar.Visible = 'off';
+                disableDefaultInteractivity(axePdfReport);
+
+                image(axePdfReport, aRGBImage);
+                axePdfReport.Visible = 'off';
+
+                copygraphics(axePdfReport);
+
+                delete(axePdfReport);
+            else
+                inv = get(fig3DLungShuntReport,'InvertHardCopy');
+
+                set(fig3DLungShuntReport,'InvertHardCopy','Off');
+
+                hgexport(fig3DLungShuntReport,'-clipboard');
+
+                set(fig3DLungShuntReport,'InvertHardCopy',inv);
+            end
         catch
             progressBar( 1 , 'Error: copyLungLiverReportDisplayCallback() cant copy report' );
         end
 
         set(fig3DLungShuntReport, 'Pointer', 'default');
+        drawnow;
     end
 
     function display3DLungLiver()
 
         atInput = inputTemplate('get');
 
-        % Modality validation    
-           
+        % Modality validation
+
         dCTSerieOffset = [];
         for tt=1:numel(atInput)
 
@@ -2246,7 +2357,7 @@ function generate3DLungShuntReport(bInitReport)
                 break;
             end
         end
-    
+
         dNMSerieOffset = [];
         for tt=1:numel(atInput)
 
@@ -2256,11 +2367,11 @@ function generate3DLungShuntReport(bInitReport)
                 break;
             end
         end
-    
+
         if isempty(dCTSerieOffset) || isempty(dNMSerieOffset)
-             
+
             progressBar(1, 'Error: display3DLungLiver() require a CT and NM image!');
-            return;               
+            return;
         end
 
         atCTMetaData = dicomMetaData('get', [], dCTSerieOffset);
@@ -2268,7 +2379,7 @@ function generate3DLungShuntReport(bInitReport)
 
             atCTMetaData = atInput(dCTSerieOffset).atDicomInfo;
         end
-        
+
         aCTBuffer = dicomBuffer('get', [], dCTSerieOffset);
         if isempty(aCTBuffer)
 
@@ -2282,39 +2393,79 @@ function generate3DLungShuntReport(bInitReport)
         y = atCTMetaData{1}.PixelSpacing(2);
         z = computeSliceSpacing(atCTMetaData);
 
-        aScaleFactor = [y x z];  
+        aScaleFactor = [y x z];
         dScaleMax = max(aScaleFactor);
-        
+
         if size(aCTBuffer, 3) > 200 % Two beds position
 
             dScaleMax = dScaleMax*1.5;
         end
-    
+
         vec = linspace(0,2*pi(),120)';
-    
+
         myPosition = [dScaleMax*cos(vec) dScaleMax*sin(vec) zeros(size(vec))];
-    
+
         aCameraPosition = myPosition(1,:);
         aCameraUpVector =  [0 0 1];
-    
+
         for cc=1:numel(aCameraPosition) % Normalize to 1
 
             aCameraPosition(cc) = aCameraPosition(cc) / dScaleMax;
-        end            
-    
+        end
+
         [aCameraPosition, aCameraUpVector] = compute3Dflip(aCameraPosition, aCameraUpVector, 'right');
-    
+
         for cc=1:numel(aCameraPosition) % Add the zoom
 
             aCameraPosition(cc) = aCameraPosition(cc) *dScaleMax;
-        end 
+        end
 
-        % MIP display 
+
+        % MIP display
+
+        ptrViewer3d = [];
+
+        if ~verLessThan('matlab','9.13')
+
+            if viewerUIFigure('get') == true
+
+                [Mdti,~] = TransformMatrix(atCTMetaData{1}, computeSliceSpacing(atCTMetaData));
+
+                % if volume3DZOffset('get') == false
+
+                    Mdti(1,4) = 0;
+                    Mdti(2,4) = 0;
+                    Mdti(3,4) = 0;
+                    Mdti(4,4) = 1;
+                % end
+
+                tform = affinetform3d(Mdti);
+
+                ptrViewer3d = viewer3d('Parent'         , ui3DWindow, ...
+                                       'BackgroundColor', 'white', ...
+                                       'Lighting'       , 'off', ...
+                                       'GradientColor'  , [0.98 0.98 0.98], ...
+                                       'CameraZoom'     , 1.5, ...
+                                       'Lighting'       ,'off');
+                % sz = size(aCTBuffer);
+                % center = sz/2 + 0.5;
+                %
+                % numberOfFrames = 360;
+                % vec = linspace(0,2*pi,numberOfFrames)';
+                % dist = sqrt(sz(1)^2 + sz(2)^2 + sz(3)^2);
+                % myPosition = center + ([cos(vec) sin(vec) ones(size(vec))]*dist);
+                %
+                % aPosition = myPosition(250, :);
+                %
+                % aCameraPosition = [aPosition(1) -aPosition(3) abs(aPosition(2))];
+                % aCameraUpVector = [0 0 1];
+            end
+        end
 
         if ~isempty(aCTBuffer)
 
             aCTBuffer = aCTBuffer(:,:,end:-1:1);
-   
+
             if strcmpi(atCTMetaData{1}.Modality, 'CT')
 
                 aColormap = gray(256);
@@ -2327,78 +2478,172 @@ function generate3DLungShuntReport(bInitReport)
             else
                 aAlphamap = defaultMipAlphaMap(aCTBuffer, 'PET');
                 aColormap = gray(256);
-            end  
+            end
 
-            % Isosurface display image 
+            % Isosurface display image
 
 %            aInputArguments = {'Parent', ui3DWindow, 'Renderer', 'Isosurface', 'BackgroundColor', 'white', 'ScaleFactors', aScaleFactor};
-       
+
 %            aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
-        
+
 %            if verLessThan('matlab','9.13')
 %                pObject = volshow(squeeze(aCTBuffer),  aInputArguments{:});
 %            else
-%                pObject = images.compatibility.volshow.R2022a.volshow(squeeze(aCTBuffer), aInputArguments{:});                   
+%                pObject = images.compatibility.volshow.R2022a.volshow(squeeze(aCTBuffer), aInputArguments{:});
 %            end
 %            pObject.IsosurfaceColor = 'white';
 %            pObject.Isovalue = ctHUToScalarValue(aCTBuffer, 150)/100;
 
 %            pObject.CameraPosition = aCameraPosition;
-%            pObject.CameraUpVector = aCameraUpVector;  
+%            pObject.CameraUpVector = aCameraUpVector;
 
-            % MaximumIntensityProjection display image 
+            % MaximumIntensityProjection display image
 
             aInputArguments = {'Parent', ui3DWindow, 'Renderer', 'MaximumIntensityProjection', 'BackgroundColor', 'white', 'ScaleFactors', aScaleFactor};
-       
+
             aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
-        
+
             if verLessThan('matlab','9.13')
+
                 pObject = volshow(squeeze(aCTBuffer),  aInputArguments{:});
             else
-                pObject = images.compatibility.volshow.R2022a.volshow(squeeze(aCTBuffer), aInputArguments{:});                   
+                if ~isempty(ptrViewer3d)
+
+                    pObject = volshow(squeeze(aCTBuffer), ...
+                                      'Parent'        , ptrViewer3d, ...
+                                      'RenderingStyle', 'MaximumIntensityProjection',...
+                                      'Alphamap'      , aAlphamap, ...
+                                      'Colormap'      , aColormap, ...
+                                      'Transformation', tform);
+                else
+                    pObject = images.compatibility.volshow.R2022a.volshow(squeeze(aCTBuffer), aInputArguments{:});
+                end
             end
-        
-            pObject.CameraPosition = aCameraPosition;
-            pObject.CameraUpVector = aCameraUpVector;  
+
+            if ~isempty(ptrViewer3d)
+                %
+                % idxOffset = 270;
+                %
+                % sz = size(aCTBuffer);
+                % center = sz/2 + 0.5;
+                %
+                % % set(ptrViewer3d, 'CameraTarget', center);
+                %
+                % numberOfFrames = 360;
+                % vec = linspace(0,2*pi,numberOfFrames)';
+                % dist = sqrt(sz(1)^2 + sz(2)^2 + sz(3)^2);
+                % myPosition = center + ([cos(vec) sin(vec) ones(size(vec))]*dist);
+                %
+                %
+                % aPosition = myPosition(idxOffset,:);
+                %
+                % set(ptrViewer3d, 'CameraPosition', aPosition);
+
+
+
+                 % ptrViewer3d.CameraTarget   = aCameraTarget;
+                 % ptrViewer3d.CameraPosition = aCameraPosition;
+                 % ptrViewer3d.CameraUpVector = aCameraUpVector;
+            else
+                pObject.CameraPosition = aCameraPosition;
+                pObject.CameraUpVector = aCameraUpVector;
+            end
 
         end
 
-        % Mask Volume Rendering 
+        % Mask Volume Rendering
 
-        for jj=1:numel(gasMask)
-    
-            [aMask, aColor] = machineLearning3DMask('get', gasMask{jj});
-            
-            if ~isempty(aMask)
+        if ~isempty(ptrViewer3d)
+
+            for jj=1:numel(gasMask)
+
+                [aMask, aColor] = machineLearning3DMask('get', gasMask{jj});
+
+                if ~isempty(aMask)
+
+                    aMask = smooth3(aMask, 'box', 3);
+
+                    aColormap = zeros(256,3);
+
+                    aColormap(:,1) = aColor(1);
+                    aColormap(:,2) = aColor(2);
+                    aColormap(:,3) = aColor(3);
+
+                    dTransparencyValue = get(uiSlider3Dintensity, 'Value');
+
+                    aAlphamap = linspace(0, dTransparencyValue, 256)';
+
+                    gp3DObject{jj} = volshow(squeeze(aMask), ...
+                                             'Parent'        , ptrViewer3d, ...
+                                             'RenderingStyle', 'VolumeRendering',...
+                                             'Alphamap'      , aAlphamap, ...
+                                             'Colormap'      , aColormap, ...
+                                             'Transformation', tform);
+
+                    clear aMask;
+                end
+            end
+
+        else
+
+            aMasksColor = zeros(numel(gasMask), 3);
+            aMask = zeros(size(aCTBuffer));
+
+            dNbMasks = numel(gasMask);
+
+            for jj=1:dNbMasks
+
+                [aCurrentMask, aColor] = machineLearning3DMask('get', gasMask{jj});
+
+                if jj == 1
+                    aMask(aCurrentMask==1) = 1;
+                else
+                    aMask(aCurrentMask==1) = jj+1;
+                end
+
+                aMasksColor(jj, :) = aColor;
+            end
+
+            if any(aMask(:) ~= 0)
 
                 aMask = smooth3(aMask, 'box', 3);
 
-                aColormap = zeros(256,3);
-
-                aColormap(:,1) = aColor(1);
-                aColormap(:,2) = aColor(2);
-                aColormap(:,3) = aColor(3);
+                numColors = 256;
+                aColormap = zeros(numColors, 3);
+                for ii = 1:dNbMasks
+                    startIdx = round((ii-1)*(numColors/dNbMasks))+1;
+                    endIdx = round(ii*(numColors/dNbMasks));
+                    aColormap(startIdx:endIdx, :) = repmat(aMasksColor(ii, :), endIdx-startIdx+1, 1);
+                end
 
                 dTransparencyValue = get(uiSlider3Dintensity, 'Value');
 
                 aAlphamap = linspace(0, dTransparencyValue, 256)';
 
                 aInputArguments = {'Parent', ui3DWindow, 'Renderer', 'VolumeRendering', 'BackgroundColor', 'white', 'ScaleFactors', aScaleFactor};
-        
+
                 aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
-          
+
                 if verLessThan('matlab','9.13')
 
-                    gp3DObject{jj} = volshow(squeeze(aMask),  aInputArguments{:});
+                    gp3DObject{1} = volshow(squeeze(aMask), aInputArguments{:});
+
                 else
-                    gp3DObject{jj} = images.compatibility.volshow.R2022a.volshow(squeeze(aMask), aInputArguments{:});                   
+
+                    gp3DObject{1} = images.compatibility.volshow.R2022a.volshow(squeeze(aMask), aInputArguments{:});
+
                 end
-    
-                gp3DObject{jj}.CameraPosition = aCameraPosition;
-                gp3DObject{jj}.CameraUpVector = aCameraUpVector;
+
+                gp3DObject{1}.CameraPosition = aCameraPosition;
+                gp3DObject{1}.CameraUpVector = aCameraUpVector;
 
                 clear aMask;
             end
+        end
+
+        if ~isempty(ptrViewer3d)
+
+            set(ptrViewer3d, 'Lighting', 'on');
         end
     end
 
@@ -2412,17 +2657,17 @@ function generate3DLungShuntReport(bInitReport)
 
             gp3DObject{jj}.Alphamap = aAlphamap;
         end
-        
+
     end
 
     function ui3DLungShuntReportSliderCallback(~, ~)
 
         val = get(ui3DLungShuntReportSlider, 'Value');
-    
+
         aPosition = get(ui3DLungShuntReport, 'Position');
-    
+
         dPanelOffset = -((1-val) * aPosition(4));
-    
+
         set(ui3DLungShuntReport, ...
             'Position', [aPosition(1) ...
                          0-dPanelOffset ...
@@ -2436,8 +2681,8 @@ function generate3DLungShuntReport(bInitReport)
 
         atInput = inputTemplate('get');
 
-        % Modality validation    
-          
+        % Modality validation
+
         dNMSerieOffset = [];
         for tt=1:numel(atInput)
 
@@ -2448,7 +2693,7 @@ function generate3DLungShuntReport(bInitReport)
             end
         end
 
-        if ~isempty(dNMSerieOffset)  
+        if ~isempty(dNMSerieOffset)
 
             dVolumeOversizedSize = atInput(dNMSerieOffset).atDicomInfo{1}.PixelSpacing(1)*dNbPixels;
         else
@@ -2461,8 +2706,8 @@ function generate3DLungShuntReport(bInitReport)
 
         atInput = inputTemplate('get');
 
-        % Modality validation    
-          
+        % Modality validation
+
         dNMSerieOffset = [];
         for tt=1:numel(atInput)
 
@@ -2473,8 +2718,8 @@ function generate3DLungShuntReport(bInitReport)
             end
         end
 
-        if ~isempty(dNMSerieOffset)  
-            
+        if ~isempty(dNMSerieOffset)
+
             dSliceThickness = computeSliceSpacing(atInput(dNMSerieOffset).atDicomInfo);
 
             dVolumeExtraSlicesSize = dSliceThickness*dNbSlices;
@@ -2513,7 +2758,7 @@ function generate3DLungShuntReport(bInitReport)
 
     end
 
-    
+
     function uiEditLiverBottomOfVolumeExtraSlicesCallback(~, ~)
 
         dNbExtraSlices = round(str2double(get(uiEditLiverBottomOfVolumeExtraSlices, 'String')));
@@ -2537,7 +2782,7 @@ function generate3DLungShuntReport(bInitReport)
             if bOverlap == true
                 bOverlap = false;
             else
-                 bOverlap = true;               
+                 bOverlap = true;
             end
 
             set(uiCheckLungsVolumeOverlap, 'value', bOverlap);
@@ -2560,15 +2805,15 @@ function generate3DLungShuntReport(bInitReport)
 
         sExtraSlicesSize = sprintf('slice(s) (%2.2f mm)', getVolumeExtraSlicesSize(dNbPixels));
         set(uiTextLungsVolumeOversized, 'String', sExtraSlicesSize);
-        
+
     end
 
     function proceedLiverVolumeOversize(~, ~)
 
         atInput = inputTemplate('get');
 
-        % Modality validation    
-          
+        % Modality validation
+
         dNMSerieOffset = [];
         for tt=1:numel(atInput)
 
@@ -2603,11 +2848,11 @@ function generate3DLungShuntReport(bInitReport)
         atNMMetaData = atInput(dNMSerieOffset).atDicomInfo;
         atCTMetaData = atInput(dCTSerieOffset).atDicomInfo;
 
-        if isempty(dCTSerieOffset) || isempty(dNMSerieOffset)  
-           
+        if isempty(dCTSerieOffset) || isempty(dNMSerieOffset)
+
             progressBar(1, 'Error: proceedLiverVolumeOversize() 3D Lung Liver Ratio require a CT and NM image!');
-            errordlg('Error: proceedLiverVolumeOversize() 3D Lung Liver Ratio require a CT and NM image!', 'Modality Validation');  
-            return;               
+            errordlg('Error: proceedLiverVolumeOversize() 3D Lung Liver Ratio require a CT and NM image!', 'Modality Validation');
+            return;
         end
 
         dNbExtraSlicesAtTop    = round(str2double(get(uiEditLiverTopOfVolumeExtraSlices, 'String')));
@@ -2618,7 +2863,7 @@ function generate3DLungShuntReport(bInitReport)
 
         bLungsCanOverlapTheLiver = get(uiCheckLungsVolumeOverlap, 'value');
 
-        if ~isempty(gtReport) 
+        if ~isempty(gtReport)
 
              try
 
@@ -2643,22 +2888,22 @@ function generate3DLungShuntReport(bInitReport)
             set(uicalculateLungDose   , 'Enable', 'off');
 
             set(uiReport3DLungShuntLungRatio     , 'string', ' ');
-            set(uiReport3DLungShuntCalculatedDose, 'String', ' ');                
-            set(uiEditWindow, 'string', ' ');  
+            set(uiReport3DLungShuntCalculatedDose, 'String', ' ');
+            set(uiEditWindow, 'string', ' ');
 
             progressBar(1/4, 'Computing oversized liver mask, please wait.');
 
             if dNbExtraSlicesAtTop    ~= lungShuntLiverTopOfVolumeExtraSlices('get')    || ...
                dNbExtraSlicesAtBottom ~= lungShuntLiverBottomOfVolumeExtraSlices('get') || ...
                dLiverMaskOffset       ~= lungShuntLiverVolumeOversized('get')           || ...
-               dLungsMaskOffset       ~= lungShuntLungsVolumeOversized('get')           || ... 
+               dLungsMaskOffset       ~= lungShuntLungsVolumeOversized('get')           || ...
                bInitReport            == true % First run
 
                 dFirstSlice = [];
                 dLastSlice = [];
-    
+
                 aLiverMask = gtReport.NM.Liver.Mask;
-    
+
                 for jj=1:size(aLiverMask, 3)
 
                     dOffset = find(aLiverMask(:,:,jj), 1);
@@ -2672,39 +2917,39 @@ function generate3DLungShuntReport(bInitReport)
                         dLastSlice = jj;
                     end
                 end
-    
+
                 if dLiverMaskOffset ~= 0
-    
+
                     if dNbExtraSlicesAtTop < 0 || dNbExtraSlicesAtBottom < 0
-                           
+
                         aLiverMaskTemp = imdilate(aLiverMask, strel('sphere', dLiverMaskOffset)); % Increse mask by x pixels
-        
+
                         aLiverMaskTemp(:,:,1:dFirstSlice-1-dNbExtraSlicesAtTop) = 0;
                         aLiverMaskTemp(:,:,dLastSlice+1+dNbExtraSlicesAtBottom:end) = 0;
-    
+
                         if dNbExtraSlicesAtTop < 0
 
                             aLiverMaskTemp(:,:,dFirstSlice:dFirstSlice-1-dNbExtraSlicesAtTop) = ...
                                 aLiverMask(:,:,dFirstSlice:dFirstSlice-1-dNbExtraSlicesAtTop);
                         end
-    
+
                         if dNbExtraSlicesAtBottom < 0
 
                             aLiverMaskTemp(:,:,dLastSlice+1+dNbExtraSlicesAtBottom:dLastSlice) = ...
                                 aLiverMask(:,:,dLastSlice+1+dNbExtraSlicesAtBottom:dLastSlice);
                         end
-    
+
                         aLiverMask = aLiverMaskTemp;
-    
+
                         clear aLiverMaskTemp;
                     else
                         aLiverMask = imdilate(aLiverMask, strel('sphere', dLiverMaskOffset)); % Increse mask by x pixels
-        
+
                         aLiverMask(:,:,1:dFirstSlice-1-dNbExtraSlicesAtTop) = 0;
-                        aLiverMask(:,:,dLastSlice+1+dNbExtraSlicesAtBottom:end) = 0;                    
+                        aLiverMask(:,:,dLastSlice+1+dNbExtraSlicesAtBottom:end) = 0;
                     end
                 end
-                          
+
                 deleteLungShuntVoiContours('Liver-LIV', dNMSerieOffset);
 
 %                 if pixelEdge('get') == false
@@ -2713,23 +2958,23 @@ function generate3DLungShuntReport(bInitReport)
 
                 if numel(aLiverMask) ~= numel(aNMImage)
 
-                    [aLiverMask, ~] = resampleImage(aLiverMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false); 
+                    [aLiverMask, ~] = resampleImage(aLiverMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false);
                 end
 
 %                 if pixelEdge('get') == false
-%                     
+%
 %                     % Smooth the 3D mask using smooth3
 %                     aLiverMask = smooth3(aLiverMask, 'box', 3);
 %                 end
 
                 maskToVoi(aLiverMask, 'Liver', 'Liver', gtReport.NM.Liver.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
-                
+
                 % Clean Lungs Mask
-    
+
                 progressBar(2/4, 'Computing oversized lungs mask, please wait.');
-    
+
                 aLungsMask = gtReport.NM.Lungs.Mask;
-    
+
                 if dLungsMaskOffset ~= 0
 
                     aLungsMask = imdilate(aLungsMask, strel('sphere', dLungsMaskOffset)); % Increse mask by x pixels
@@ -2741,11 +2986,11 @@ function generate3DLungShuntReport(bInitReport)
 
                 if numel(aLungsMask) ~= numel(aNMImage)
 
-                    [aLungsMask, ~] = resampleImage(aLungsMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false);  
-                end  
+                    [aLungsMask, ~] = resampleImage(aLungsMask, atNMMetaData, aCTImage, atCTMetaData, 'Nearest', false, false);
+                end
 
 %                 if pixelEdge('get') == false
-%                     
+%
 %                     % Smooth the 3D mask using smooth3
 %                     aLungsMask = smooth3(aLungsMask, 'box', 3);
 %                 end
@@ -2754,28 +2999,28 @@ function generate3DLungShuntReport(bInitReport)
 
                     aLungsMask(aLiverMask~=0)=0;
                 end
-        
+
                 deleteLungShuntVoiContours('Lungs-LUN', dNMSerieOffset);
 
                 maskToVoi(aLungsMask, 'Lungs', 'Lung', gtReport.NM.Lungs.Color, 'axial', dNMSerieOffset, pixelEdge('get'));
-    
+
                 lungShuntLiverTopOfVolumeExtraSlices   ('set', dNbExtraSlicesAtTop);
                 lungShuntLiverBottomOfVolumeExtraSlices('set', dNbExtraSlicesAtBottom);
-    
+
                 lungShuntLiverVolumeOversized('set', dLiverMaskOffset);
                 lungShuntLungsVolumeOversized('set', dLungsMaskOffset);
 
 %                 if numel(aLiverMask) ~= numel(aNMImage)
-% 
+%
 %                     atRoi = roiTemplate('get', dNMSerieOffset);
-%                 
+%
 %                     atResampledRoi = resampleROIs(aLiverMask, atNMMetaData, dicomBuffer('get'), dicomMetaData('get'), atRoi, true);
-%                                             
+%
 %                     roiTemplate('set', dNMSerieOffset, atResampledRoi);
 %                 end
 
                 clear aLiverMask;
-                clear aLungsMask;                  
+                clear aLungsMask;
             end
 
             clear aNMImage;
@@ -2785,65 +3030,65 @@ function generate3DLungShuntReport(bInitReport)
 
             gtReport = computeLungLiverReportContoursInformation(suvMenuUnitOption('get'), false, false, false);
 
-            if isvalid(uiReport3DLungShuntInformation) % Make sure the figure is still open     
+            if isvalid(uiReport3DLungShuntInformation) % Make sure the figure is still open
 
-                set(uiReport3DLungShuntInformation, 'String', sprintf('Contours Information (%s)', getLungLiverReportUnitValue()));                                             
+                set(uiReport3DLungShuntInformation, 'String', sprintf('Contours Information (%s)', getLungLiverReportUnitValue()));
             end
-           
-            if isvalid(uiReportLesionMean) % Make sure the figure is still open       
+
+            if isvalid(uiReportLesionMean) % Make sure the figure is still open
 
                 set(uiReportLesionMean, 'String', getLungLiverReportMeanInformation('get', gtReport));
-            end        
-            
-            if isvalid(uiReportLesionTotal) % Make sure the figure is still open        
+            end
+
+            if isvalid(uiReportLesionTotal) % Make sure the figure is still open
 
                 set(uiReportLesionTotal, 'String', getLungLiverReportTotalInformation('get', gtReport));
-            end    
-            
-            if isvalid(uiReportLesionVolume) % Make sure the figure is still open        
+            end
+
+            if isvalid(uiReportLesionVolume) % Make sure the figure is still open
 
                 set(uiReportLesionVolume, 'String', getLungLiverReportVolumeInformation('get', gtReport));
-            end  
+            end
 
             if isvalid(uiReport3DLungShuntLungRatio)
 
                 set(uiReport3DLungShuntLungRatio, 'String', getLungLiverReportRatioInformation(gtReport));
             end
-            
+
             if get(uiSliderLiverVolumeRatio, 'Value') ~=1 || ...
                get(uiSliderLungsVolumeRatio, 'Value') ~=1
 
                 dLiverPercent = get(uiSliderLiverVolumeRatio, 'Value')*100;
                 dLungsPercent = get(uiSliderLungsVolumeRatio, 'Value')*100;
-    
+
                 if ~isempty(gtReport)
-        
+
                     dLungsTotal = gtReport.NM.Lungs.Total*100/dLungsPercent;
                     dLiverTotal = gtReport.NM.Liver.Total*100/dLiverPercent;
 
                     if ~isempty(gtReport.CT.Lungs.Volume)
-                        
+
                         dLungsVolume = gtReport.CT.Lungs.Volume*100/dLungsPercent;
                     else
                         dLungsVolume = [];
                     end
-       
+
                     %                    ( 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
                     % Lung 𝑆ℎ𝑢𝑛𝑡 = ____________________________ × 100
-                    %              ( L𝑣𝑒𝑟 𝐶𝑜𝑢𝑛𝑡𝑠 + 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 ) 
+                    %              ( L𝑣𝑒𝑟 𝐶𝑜𝑢𝑛𝑡𝑠 + 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
 
                     dLungShuntFraction = dLungsTotal/(dLiverTotal+dLungsTotal)*100;
-      
+
                     sLungShuntFraction = sprintf('Lung Shunt: %2.2f%%',  dLungShuntFraction);
-        
+
                     set(uiReport3DLungShuntLungRatio , 'string', sLungShuntFraction);
-        
+
                     if dLiverPercent == 100 && dLungsPercent == 100
 
                         set(uiEditWindow, 'string', '');
                     else
-                       
-                        if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+
+                        if get(uiSliderLungsVolumeRatio, 'Value') ~= 1
 
                             sUpdatedValues = sprintf('Updated NM lungs counts: %.2f\n', dLungsTotal);
                         else
@@ -2851,17 +3096,17 @@ function generate3DLungShuntReport(bInitReport)
                         end
 
 
-                        if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
+                        if get(uiSliderLiverVolumeRatio, 'Value') ~= 1
 
                             sUpdatedValues = sprintf('%sUpdated NM liver counts  : %.2f', sUpdatedValues, dLiverTotal);
                         end
 
                         if ~isempty(dLungsVolume)
 
-                            if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+                            if get(uiSliderLungsVolumeRatio, 'Value') ~= 1
 
-                                if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
-        
+                                if get(uiSliderLiverVolumeRatio, 'Value') ~= 1
+
                                     sUpdatedValues = sprintf('%s\n\nUpdated CT lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
                                 else
                                     sUpdatedValues = sprintf('%s\nUpdated CT lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
@@ -2869,26 +3114,26 @@ function generate3DLungShuntReport(bInitReport)
                             end
                         end
 
-                        set(uiEditWindow, 'string', sUpdatedValues);  
-                    end 
+                        set(uiEditWindow, 'string', sUpdatedValues);
+                    end
 
                     %                          Total amount of injected activity (GBq)
-                    % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF 
+                    % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF
                     %                                   Lung mass (Kg)
 
                     if ~isempty(dLungsVolume)
 
                         dInjectedActivity = str2double(get(uiEditInjectedActivity, 'String')); % In MBq
-                
+
                         if dInjectedActivity > 0 && ~isnan(dInjectedActivity)
-            
+
                             dInjectedActivity = dInjectedActivity/1000; % In GBq
-      
+
                             dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
-                       
+
                             sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
-                            set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
-                        end  
+                            set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);
+                        end
                     end
                 end
             end
@@ -2926,17 +3171,17 @@ function generate3DLungShuntReport(bInitReport)
     end
 
     function deleteLungShuntVoiContours(sVoiLabel, dSerieOffset)
-                
+
         atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                        
+        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
         if ~isempty(atVoiInput)
-            
-            % Search for a voi tag, if we don't find one, then the tag is            
+
+            % Search for a voi tag, if we don't find one, then the tag is
             % roi
 
             aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Label, atVoiInput, 'uni', false ), sVoiLabel );
-           
+
             if aTagOffset(aTagOffset==1) % tag is a voi
 
                 dTagOffset = find(aTagOffset, 1);
@@ -2951,7 +3196,7 @@ function generate3DLungShuntReport(bInitReport)
                         for ro=1:numel(atVoiInput{dTagOffset}.RoisTag)
 
                             aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[atVoiInput{dTagOffset}.RoisTag{ro}]} );
-                            aRoisTagOffset(ro) = find(aTagOffset, 1);    
+                            aRoisTagOffset(ro) = find(aTagOffset, 1);
                         end
 
                         if numel(atVoiInput{dTagOffset}.RoisTag)
@@ -3008,18 +3253,18 @@ function generate3DLungShuntReport(bInitReport)
 
                             atRoiInput(cellfun(@isempty, atRoiInput)) = [];
 
-                            roiTemplate('set', dSerieOffset, atRoiInput);  
+                            roiTemplate('set', dSerieOffset, atRoiInput);
                         end
                     end
 
                     % Clear voi from voi input template
 
-                    atVoiInput{dTagOffset} = [];            
+                    atVoiInput{dTagOffset} = [];
                     atVoiInput(cellfun(@isempty, atVoiInput)) = [];
 
                     voiTemplate('set', dSerieOffset, atVoiInput);
 
-                end 
+                end
             end
         end
     end
@@ -3030,7 +3275,7 @@ function generate3DLungShuntReport(bInitReport)
         dLungsPercent = str2double(get(uiEditLungsVolumeRatio, 'String'));
 
         set(uiEditLiverVolumeRatio, 'string',  sprintf('%2.2f', dLiverPercent));
-                    
+
         if ~isempty(gtReport)
 
             dLungsTotal = gtReport.NM.Lungs.Total*100/dLungsPercent;
@@ -3045,37 +3290,37 @@ function generate3DLungShuntReport(bInitReport)
 
             %                    ( 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
             % Lung 𝑆ℎ𝑢𝑛𝑡 = ____________________________ × 100
-            %              ( L𝑣𝑒𝑟 𝐶𝑜𝑢𝑛𝑡𝑠 + 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 ) 
+            %              ( L𝑣𝑒𝑟 𝐶𝑜𝑢𝑛𝑡𝑠 + 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
 
             dLungShuntFraction = dLungsTotal/(dLiverTotal+dLungsTotal)*100;
 
             sLungShuntFraction = sprintf('Lung Shunt: %2.2f%%',  dLungShuntFraction);
 
-            set(uiReport3DLungShuntLungRatio , 'string', sLungShuntFraction);      
+            set(uiReport3DLungShuntLungRatio , 'string', sLungShuntFraction);
 
             if dLiverPercent == 100 && dLungsPercent == 100
 
                 set(uiEditWindow, 'string', '');
             else
 
-                if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
-    
+                if get(uiSliderLungsVolumeRatio, 'Value') ~= 1
+
                     sUpdatedValues = sprintf('Updated NM lungs counts: %.2f\n', dLungsTotal);
                 else
                     sUpdatedValues = '';
                 end
-    
-    
-                if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
-    
+
+
+                if get(uiSliderLiverVolumeRatio, 'Value') ~= 1
+
                     sUpdatedValues = sprintf('%sUpdated NM liver counts  : %.2f', sUpdatedValues, dLiverTotal);
                 end
 
                 if ~isempty(dLungsVolume)
 
-                    if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+                    if get(uiSliderLungsVolumeRatio, 'Value') ~= 1
 
-                        if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
+                        if get(uiSliderLiverVolumeRatio, 'Value') ~= 1
 
                             sUpdatedValues = sprintf('%s\n\nUpdated CT lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
                         else
@@ -3084,26 +3329,26 @@ function generate3DLungShuntReport(bInitReport)
                     end
                 end
 
-                set(uiEditWindow, 'string', sUpdatedValues);  
-            end 
+                set(uiEditWindow, 'string', sUpdatedValues);
+            end
 
             %                          Total amount of injected activity (GBq)
-            % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF 
+            % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF
             %                                   Lung mass (Kg)
 
             if ~isempty(dLungsVolume)
 
                 dInjectedActivity = str2double(get(uiEditInjectedActivity, 'String')); % In MBq
-        
+
                 if dInjectedActivity > 0 && ~isnan(dInjectedActivity)
-    
+
                     dInjectedActivity = dInjectedActivity/1000; % In GBq
-        
+
                     dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
-               
+
                     sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
-                    set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
-                end             
+                    set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);
+                end
             end
         end
 
@@ -3138,7 +3383,7 @@ function generate3DLungShuntReport(bInitReport)
 
             %                    ( 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
             % Lung 𝑆ℎ𝑢𝑛𝑡 = ____________________________ × 100
-            %              ( L𝑣𝑒𝑟 𝐶𝑜𝑢𝑛𝑡𝑠 + 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 ) 
+            %              ( L𝑣𝑒𝑟 𝐶𝑜𝑢𝑛𝑡𝑠 + 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
 
             dLungShuntFraction = dLungsTotal/(dLiverTotal+dLungsTotal)*100;
 
@@ -3153,7 +3398,7 @@ function generate3DLungShuntReport(bInitReport)
                 set(uiEditWindow, 'string', '');
             else
 
-                if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+                if get(uiSliderLungsVolumeRatio, 'Value') ~= 1
 
                     sUpdatedValues = sprintf('Updated NM lungs counts: %.2f\n', dLungsTotal);
                 else
@@ -3161,16 +3406,16 @@ function generate3DLungShuntReport(bInitReport)
                 end
 
 
-                if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
+                if get(uiSliderLiverVolumeRatio, 'Value') ~= 1
 
                     sUpdatedValues = sprintf('%sUpdated NM liver counts  : %.2f', sUpdatedValues, dLiverTotal);
                 end
 
                 if ~isempty(dLungsVolume)
 
-                    if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+                    if get(uiSliderLungsVolumeRatio, 'Value') ~= 1
 
-                        if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
+                        if get(uiSliderLiverVolumeRatio, 'Value') ~= 1
 
                             sUpdatedValues = sprintf('%s\n\nUpdated CT lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
                         else
@@ -3179,31 +3424,32 @@ function generate3DLungShuntReport(bInitReport)
                     end
                 end
 
-                set(uiEditWindow, 'string', sUpdatedValues);   
+                set(uiEditWindow, 'string', sUpdatedValues);
             end
 
             %                          Total amount of injected activity (GBq)
-            % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF 
+            % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF
             %                                   Lung mass (Kg)
 
             if ~isempty(dLungsVolume)
 
                 dInjectedActivity = str2double(get(uiEditInjectedActivity, 'String')); % In MBq
-        
+
                 if dInjectedActivity > 0 && ~isnan(dInjectedActivity)
-    
+
                     dInjectedActivity = dInjectedActivity/1000; % In GBq
-        
+
                     dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
-               
+
                     sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
-                    set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
-                end              
+                    set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);
+                end
             end
         end
 
-        uiSliderLungsVolumeRatioListener = addlistener(uiSliderLungsVolumeRatio, 'Value', 'PreSet', @uiSliderLungsVolumeRatioCallback);
-      
+%         uiSliderLungsVolumeRatioListener = addlistener(uiSliderLungsVolumeRatio, 'Value', 'PreSet', @uiSliderLungsVolumeRatioCallback);
+        uiSliderLungsVolumeRatioListener = addlistener(uiSliderLungsVolumeRatio, 'ContinuousValueChange', @uiSliderLungsVolumeRatioCallback);
+
     end
 
     function uiSliderLungsVolumeRatioCallback(~, ~)
@@ -3212,7 +3458,7 @@ function generate3DLungShuntReport(bInitReport)
         dLungsPercent = get(uiSliderLungsVolumeRatio, 'Value')*100;
 
         set(uiEditLungsVolumeRatio, 'string',  sprintf('%2.2f', dLungsPercent));
-            
+
         if ~isempty(gtReport)
 
             dLungsTotal = gtReport.NM.Lungs.Total*100/dLungsPercent;
@@ -3227,7 +3473,7 @@ function generate3DLungShuntReport(bInitReport)
 
             %                    ( 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
             % Lung 𝑆ℎ𝑢𝑛𝑡 = ____________________________ × 100
-            %              ( L𝑣𝑒𝑟 𝐶𝑜𝑢𝑛𝑡𝑠 + 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 ) 
+            %              ( L𝑣𝑒𝑟 𝐶𝑜𝑢𝑛𝑡𝑠 + 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
 
             dLungShuntFraction = dLungsTotal/(dLiverTotal+dLungsTotal)*100;
 
@@ -3240,7 +3486,7 @@ function generate3DLungShuntReport(bInitReport)
                 set(uiEditWindow, 'string', '');
             else
 
-                if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+                if get(uiSliderLungsVolumeRatio, 'Value') ~= 1
 
                     sUpdatedValues = sprintf('Updated NM lungs counts: %.2f\n', dLungsTotal);
                 else
@@ -3248,16 +3494,16 @@ function generate3DLungShuntReport(bInitReport)
                 end
 
 
-                if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
+                if get(uiSliderLiverVolumeRatio, 'Value') ~= 1
 
                     sUpdatedValues = sprintf('%sUpdated NM liver counts  : %.2f', sUpdatedValues, dLiverTotal);
                 end
 
                 if ~isempty(dLungsVolume)
 
-                    if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+                    if get(uiSliderLungsVolumeRatio, 'Value') ~= 1
 
-                        if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
+                        if get(uiSliderLiverVolumeRatio, 'Value') ~= 1
 
                             sUpdatedValues = sprintf('%s\n\nUpdated CT lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
                         else
@@ -3266,26 +3512,26 @@ function generate3DLungShuntReport(bInitReport)
                     end
                 end
 
-                set(uiEditWindow, 'string', sUpdatedValues);            
+                set(uiEditWindow, 'string', sUpdatedValues);
             end
 
             %                          Total amount of injected activity (GBq)
-            % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF 
+            % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF
             %                                   Lung mass (Kg)
 
             if ~isempty(dLungsVolume)
 
                 dInjectedActivity = str2double(get(uiEditInjectedActivity, 'String')); % In MBq
-        
+
                 if dInjectedActivity > 0 && ~isnan(dInjectedActivity)
-    
+
                     dInjectedActivity = dInjectedActivity/1000; % In GBq
-       
+
                     dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
-               
+
                     sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
-                    set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
-                end            
+                    set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);
+                end
             end
         end
     end
@@ -3319,7 +3565,7 @@ function generate3DLungShuntReport(bInitReport)
 
             %                    ( 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
             % Lung 𝑆h𝑢𝑛𝑡 = ____________________________ × 100
-            %              ( L𝑣𝑒𝑟 𝐶𝑜𝑢𝑛𝑡𝑠 + 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 ) 
+            %              ( L𝑣𝑒𝑟 𝐶𝑜𝑢𝑛𝑡𝑠 + 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
 
             dLungShuntFraction = dLungsTotal/(dLiverTotal+dLungsTotal)*100;
 
@@ -3334,7 +3580,7 @@ function generate3DLungShuntReport(bInitReport)
                 set(uiEditWindow, 'string', '');
             else
 
-                if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+                if get(uiSliderLungsVolumeRatio, 'Value') ~= 1
 
                     sUpdatedValues = sprintf('Updated NM lungs counts: %.2f\n', dLungsTotal);
                 else
@@ -3342,16 +3588,16 @@ function generate3DLungShuntReport(bInitReport)
                 end
 
 
-                if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
+                if get(uiSliderLiverVolumeRatio, 'Value') ~= 1
 
                     sUpdatedValues = sprintf('%sUpdated NM liver counts  : %.2f', sUpdatedValues, dLiverTotal);
                 end
 
                 if ~isempty(dLungsVolume)
 
-                    if get(uiSliderLungsVolumeRatio, 'Value') ~= 1 
+                    if get(uiSliderLungsVolumeRatio, 'Value') ~= 1
 
-                        if get(uiSliderLiverVolumeRatio, 'Value') ~= 1 
+                        if get(uiSliderLiverVolumeRatio, 'Value') ~= 1
 
                             sUpdatedValues = sprintf('%s\n\nUpdated CT lungs volume: %.2f ml', sUpdatedValues, dLungsVolume);
                         else
@@ -3361,30 +3607,31 @@ function generate3DLungShuntReport(bInitReport)
                 end
 
                 set(uiEditWindow, 'string', sUpdatedValues);
-            end        
+            end
 
             %                          Total amount of injected activity (GBq)
-            % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF 
+            % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF
             %                                   Lung mass (Kg)
 
             if ~isempty(dLungsVolume)
-    
+
                 dInjectedActivity = str2double(get(uiEditInjectedActivity, 'String')); % In MBq
-        
+
                 if dInjectedActivity > 0 && ~isnan(dInjectedActivity)
-    
+
                     dInjectedActivity = dInjectedActivity/1000; % In GBq
-        
+
                     dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
-               
+
                     sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
-                    set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);                
+                    set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);
                 end
             end
 
         end
 
-        uiSliderLiverVolumeRatioListener = addlistener(uiSliderLiverVolumeRatio, 'Value', 'PreSet', @uiSliderLiverVolumeRatioCallback);
+%         uiSliderLiverVolumeRatioListener = addlistener(uiSliderLiverVolumeRatio, 'Value', 'PreSet', @uiSliderLiverVolumeRatioCallback);
+        uiSliderLiverVolumeRatioListener = addlistener(uiSliderLiverVolumeRatio, 'ContinuousValueChange', @uiSliderLiverVolumeRatioCallback);
 
     end
 
@@ -3427,25 +3674,37 @@ function generate3DLungShuntReport(bInitReport)
 
             %                    ( 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
             % Lung 𝑆ℎ𝑢𝑛𝑡 = ____________________________ × 100
-            %              ( L𝑣𝑒𝑟 𝐶𝑜𝑢𝑛𝑡𝑠 + 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 ) 
+            %              ( L𝑣𝑒𝑟 𝐶𝑜𝑢𝑛𝑡𝑠 + 𝐿𝑢𝑛𝑔 𝐶𝑜𝑢𝑛𝑡𝑠 )
 
             dLungShuntFraction = dLungsTotal/(dLiverTotal+dLungsTotal)*100;
 
             %                          Total amount of injected activity (GBq)
-            % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF 
+            % Lung Dose (Gy) = 49.67 x _______________________________________ x LSF
             %                                   Lung mass (Kg)
 
             if ~isempty(dLungsVolume)
 
                 dInjectedActivity = dInjectedActivity/1000; % In GBq
-               
+
                 dLungMass = dLungsVolume*0.00024; % Lung density of healthy subjects obtained via x-ray was reported to be 0.24 g/cm3
-    
+
                 sCalculateDose = sprintf('Lung Absorbed Dose: %.2f Gy', 49.67*(dInjectedActivity/dLungMass) * (dLungShuntFraction/100));
                 set(uiReport3DLungShuntCalculatedDose, 'String', sCalculateDose);
             end
         end
-
     end
 
+    function setUiExtendedPosition(uiControl)
+
+        aUiExtent = get(uiControl, 'Extent');
+        aUiPosition = get(uiControl, 'Position');
+
+        dNbElements = size(uiControl.String, 1);
+
+        % Adjust the position to align the text at the top
+        % aNewUiPosition = [aUiPosition(1), (aUiPosition(4) - aUiExtent(4)) /2 - 10, aUiPosition(3), aUiPosition(4)];
+        aNewUiPosition = [aUiPosition(1), aUiPosition(2) + aUiPosition(4) - aUiExtent(4) - dNbElements, aUiPosition(3), aUiExtent(4) + dNbElements];
+
+        set(uiControl, 'Position', aNewUiPosition);
+    end
 end

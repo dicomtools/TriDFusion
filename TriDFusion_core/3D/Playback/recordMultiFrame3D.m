@@ -55,6 +55,10 @@ function recordMultiFrame3D(mRecord, sPath, sFileName, sExtention)
         end
     end
 
+    setFigureToobarsVisible('off');
+
+    setFigureTopMenuVisible('off');
+
     volObj = volObject('get');
     isoObj = isoObject('get');                        
     mipObj = mipObject('get');            
@@ -363,6 +367,10 @@ function recordMultiFrame3D(mRecord, sPath, sFileName, sExtention)
     catch
         progressBar(1, sprintf('Error: recordMultiFrame3D()'));
     end
+
+    setFigureToobarsVisible('on');
+
+    setFigureTopMenuVisible('on');
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;

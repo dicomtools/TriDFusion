@@ -78,6 +78,12 @@ function setOneWindowPosition(uiOneWindow)
                 end
             end
         end
+         
+        aUiPosition = get(uiOneWindow, 'Position');
+        ptrViewer3d = viewer3dObject('get');
+        if ~isempty(ptrViewer3d)
+        end
+
     else
         if viewSegPanel('get') == true 
             set(uiOneWindow, ...

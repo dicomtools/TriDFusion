@@ -37,7 +37,7 @@ function setTraSliderPosition(uiTraSlider)
         dXoffset = getMainWindowSize('xsize')/2; 
         dYoffset = addOnWidth('get')+30; 
         dXsize   = getMainWindowSize('xsize')/2;
-        dYsize   = 15;
+        dYsize   = 20;
 
     else
         if isVsplash('get') == true
@@ -47,25 +47,25 @@ function setTraSliderPosition(uiTraSlider)
                 dXoffset = uiSegMainPanel.Position(3); 
                 dYoffset = addOnWidth('get')+30; 
                 dXsize   = getMainWindowSize('xsize')-uiSegMainPanel.Position(3);
-                dYsize   = 15;
+                dYsize   = 20;
     
             elseif viewKernelPanel('get') == true
                 dXoffset = uiKernelMainPanel.Position(3); 
                 dYoffset = addOnWidth('get')+30; 
                 dXsize   = getMainWindowSize('xsize')-uiKernelMainPanel.Position(3);
-                dYsize   = 15;
+                dYsize   = 20;
     
             elseif viewRoiPanel('get') == true
                 dXoffset = uiRoiMainPanel.Position(3); 
                 dYoffset = addOnWidth('get')+30; 
                 dXsize   = getMainWindowSize('xsize')-uiRoiMainPanel.Position(3);
-                dYsize   = 15;
+                dYsize   = 20;
     
             else
                 dXoffset = 0; 
                 dYoffset = addOnWidth('get')+30; 
                 dXsize   = getMainWindowSize('xsize');
-                dYsize   = 15;                
+                dYsize   = 20;                
             end                 
 
         else
@@ -77,32 +77,32 @@ function setTraSliderPosition(uiTraSlider)
                     dXoffset = uiSegMainPanel.Position(3); 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = getMainWindowSize('xsize')-uiSegMainPanel.Position(3);
-                    dYsize   = 15;
+                    dYsize   = 20;
         
                 elseif viewKernelPanel('get') == true
                     dXoffset = uiKernelMainPanel.Position(3); 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = getMainWindowSize('xsize')-uiKernelMainPanel.Position(3);
-                    dYsize   = 15;
+                    dYsize   = 20;
         
                 elseif viewRoiPanel('get') == true
                     dXoffset = uiRoiMainPanel.Position(3); 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = getMainWindowSize('xsize')-uiRoiMainPanel.Position(3);
-                    dYsize   = 15;
+                    dYsize   = 20;
         
                 else
                     dXoffset = 0; 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = getMainWindowSize('xsize');
-                    dYsize   = 15;                
+                    dYsize   = 20;                
                  end  
             else
 
                 dXoffset = getMainWindowSize('xsize')/2.5; 
                 dYoffset = addOnWidth('get')+30; 
                 dXsize   = getMainWindowSize('xsize')/2.5;
-                dYsize   = 15;                
+                dYsize   = 20;                
             end
         end
     end       

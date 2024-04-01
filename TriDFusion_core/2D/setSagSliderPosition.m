@@ -38,26 +38,26 @@ function setSagSliderPosition(uiSagSlider)
             dXoffset = uiSegMainPanel.Position(3); 
             dYoffset = addOnWidth('get')+30; 
             dXsize   = getMainWindowSize('xsize')-(uiSegMainPanel.Position(3)/2);
-            dYsize   = 15;                      
+            dYsize   = 20;                      
         else
             if isVsplash('get') == true 
 
                 dXoffset = (uiSegMainPanel.Position(3)/2)+(getMainWindowSize('xsize')/4); 
                 dYoffset = addOnWidth('get')+30; 
                 dXsize   = (getMainWindowSize('xsize')/4)-(uiSegMainPanel.Position(3)/2);
-                dYsize   = 15;                         
+                dYsize   = 20;                         
             else
                  if isPanelFullScreen(btnUiSagWindowFullScreenPtr('get')) 
 
                     dXoffset = uiSegMainPanel.Position(3); 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = getMainWindowSize('xsize')-uiSegMainPanel.Position(3);
-                    dYsize   = 15;                     
+                    dYsize   = 20;                     
                 else               
                     dXoffset = (uiSegMainPanel.Position(3)/2)+(getMainWindowSize('xsize')/5); 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = (getMainWindowSize('xsize')/5)-(uiSegMainPanel.Position(3)/2);
-                    dYsize   = 15;  
+                    dYsize   = 20;  
                 end
             end
         end
@@ -68,26 +68,26 @@ function setSagSliderPosition(uiSagSlider)
             dXoffset = uiKernelMainPanel.Position(3); 
             dYoffset = addOnWidth('get')+30; 
             dXsize   = getMainWindowSize('xsize')-(uiKernelMainPanel.Position(3)/2);
-            dYsize   = 15;                     
+            dYsize   = 20;                     
         else
             if isVsplash('get') == true
 
                dXoffset = (uiKernelMainPanel.Position(3)/2)+(getMainWindowSize('xsize')/4); 
                dYoffset = addOnWidth('get')+30; 
                dXsize   = (getMainWindowSize('xsize')/4)-(uiKernelMainPanel.Position(3)/2);
-               dYsize   = 15;                                    
+               dYsize   = 20;                                    
             else 
                 if isPanelFullScreen(btnUiSagWindowFullScreenPtr('get')) 
 
                     dXoffset = uiKernelMainPanel.Position(3); 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = getMainWindowSize('xsize')-uiKernelMainPanel.Position(3);
-                    dYsize   = 15;    
+                    dYsize   = 20;    
                  else
                     dXoffset = (uiKernelMainPanel.Position(3)/2)+(getMainWindowSize('xsize')/5); 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = (getMainWindowSize('xsize')/5)-(uiKernelMainPanel.Position(3)/2);
-                    dYsize   = 15;                   
+                    dYsize   = 20;                   
                 end
            end
         end
@@ -98,26 +98,26 @@ function setSagSliderPosition(uiSagSlider)
             dXoffset = uiRoiMainPanel.Position(3); 
             dYoffset = addOnWidth('get')+30; 
             dXsize   = getMainWindowSize('xsize')-(uiRoiMainPanel.Position(3)/2);
-            dYsize   = 15;                                   
+            dYsize   = 20;                                   
         else
             if isVsplash('get') == true
 
                dXoffset = (uiRoiMainPanel.Position(3)/2)+(getMainWindowSize('xsize')/4); 
                dYoffset = addOnWidth('get')+30; 
                dXsize   = (getMainWindowSize('xsize')/4)-(uiRoiMainPanel.Position(3)/2);
-               dYsize   = 15;                          
+               dYsize   = 20;                          
             else   
                 if isPanelFullScreen(btnUiSagWindowFullScreenPtr('get')) 
 
                     dXoffset = uiRoiMainPanel.Position(3); 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = getMainWindowSize('xsize')-uiRoiMainPanel.Position(3);
-                    dYsize   = 15;    
+                    dYsize   = 20;    
                  else               
                     dXoffset = (uiRoiMainPanel.Position(3)/2)+(getMainWindowSize('xsize')/5); 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = (getMainWindowSize('xsize')/5)-(uiRoiMainPanel.Position(3)/2);
-                    dYsize   = 15;                 
+                    dYsize   = 20;                 
                 end
            end
         end            
@@ -128,25 +128,25 @@ function setSagSliderPosition(uiSagSlider)
            dXoffset = 0; 
            dYoffset = addOnWidth('get')+30; 
            dXsize   = getMainWindowSize('xsize');
-           dYsize   = 15;                     
+           dYsize   = 20;                     
         else
             if isVsplash('get') == true
                 dXoffset = (getMainWindowSize('xsize')/4); 
                 dYoffset = addOnWidth('get')+30; 
                 dXsize   = getMainWindowSize('xsize')/4;
-                dYsize   = 15;                                    
+                dYsize   = 20;                                    
             else 
                 if isPanelFullScreen(btnUiSagWindowFullScreenPtr('get')) 
 
                     dXoffset = 0; 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = getMainWindowSize('xsize');
-                    dYsize   = 15;  
+                    dYsize   = 20;  
                 else
                     dXoffset = (getMainWindowSize('xsize')/5); 
                     dYoffset = addOnWidth('get')+30; 
                     dXsize   = getMainWindowSize('xsize')/5;
-                    dYsize   = 15;                  
+                    dYsize   = 20;                  
                 end
             end
         end

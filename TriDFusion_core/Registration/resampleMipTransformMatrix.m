@@ -83,62 +83,64 @@ function [resampImage, atDcmMetaData, zMoveOffsetRemaining] = resampleMipTransfo
 
     aRspSize = size(resampImage);
 
-    if aRspSize(3) ~= dimsRef(3) % Fix for z offset
+    if strcmpi(atDcmMetaData{1}.StudyInstanceUID, atRefMetaData{1}.StudyInstanceUID) % Same study         
 
-        if aRspSize(3) > dimsRef(3)
-
-            [dDcmFirstZ, dDcmLastZ] = getImageZPosition(atDcmMetaData, dcmImage);
-            [dRefFirstZ, dRefLastZ] = getImageZPosition(atRefMetaData, refImage);
-
-            dFirstOffset = abs(dRefFirstZ - dDcmFirstZ)/refSliceThickness;
-%                 dLastOffset = abs(dRefLastZ - dDcmLastZ)/refSliceThickness;
-
-
-            dImageOffset = round(dFirstOffset);
-            zMoveOffsetRemaining = dFirstOffset-dImageOffset;
-
-
-
-             resampImage = resampImage(:,:,1:end);
+        if aRspSize(3) ~= dimsRef(3) % Fix for z offset
+    
+            if aRspSize(3) > dimsRef(3)
+    
+                [dDcmFirstZ, dDcmLastZ] = getImageZPosition(atDcmMetaData, dcmImage);
+                [dRefFirstZ, dRefLastZ] = getImageZPosition(atRefMetaData, refImage);
+    
+                dFirstOffset = abs(dRefFirstZ - dDcmFirstZ)/refSliceThickness;
+    %                 dLastOffset = abs(dRefLastZ - dDcmLastZ)/refSliceThickness;
+    
+    
+                dImageOffset = round(dFirstOffset);
+                zMoveOffsetRemaining = dFirstOffset-dImageOffset;
+    
+    
+    
+                 resampImage = resampImage(:,:,1:end);
+                
+    %                 dOffset = (dRefPosition - dDcmPosition)
+    %%%%%%% TEMP PATH, NEED TO REVISIT
+    %                 if dFirstOffset > dLastOffset
+    %              
+    %                     resampImage = resampImage(:,:,1+aRspSize(3)-dimsRef(3):end);
+    %                 else
+    %            %       resampImage = resampImage(:,:,round(dFirstOffset):aRspSize(3)-(aRspSize(3)-dimsRef(3)) );
+    %                     resampImage = resampImage(:,:,1:aRspSize(3)-(aRspSize(3)-dimsRef(3)));
+    %                 end
+           else
+                aResample = zeros(aRspSize(1), aRspSize(2), dimsRef(3));
+    
+                [dDcmFirstZ, dDcmLastZ] = getImageZPosition(atDcmMetaData, dcmImage);
+                [dRefFirstZ, dRefLastZ] = getImageZPosition(atRefMetaData, refImage);
+    
+                dFirstOffset = abs(dRefFirstZ - dDcmFirstZ)/refSliceThickness;
+    %                 dLastOffset = abs(dRefLastZ - dDcmLastZ)/refSliceThickness;
+    %                 dOffset = (dRefPosition - dDcmPosition)
+    
+                dImageOffset = round(dFirstOffset);
+                zMoveOffsetRemaining = dFirstOffset-dImageOffset;
+    
+    
+    
+                aResample(:,:,1+dImageOffset:aRspSize(3)+dImageOffset)=resampImage;
             
-%                 dOffset = (dRefPosition - dDcmPosition)
-%%%%%%% TEMP PATH, NEED TO REVISIT
-%                 if dFirstOffset > dLastOffset
-%              
-%                     resampImage = resampImage(:,:,1+aRspSize(3)-dimsRef(3):end);
-%                 else
-%            %       resampImage = resampImage(:,:,round(dFirstOffset):aRspSize(3)-(aRspSize(3)-dimsRef(3)) );
-%                     resampImage = resampImage(:,:,1:aRspSize(3)-(aRspSize(3)-dimsRef(3)));
-%                 end
-       else
-            aResample = zeros(aRspSize(1), aRspSize(2), dimsRef(3));
-
-            [dDcmFirstZ, dDcmLastZ] = getImageZPosition(atDcmMetaData, dcmImage);
-            [dRefFirstZ, dRefLastZ] = getImageZPosition(atRefMetaData, refImage);
-
-            dFirstOffset = abs(dRefFirstZ - dDcmFirstZ)/refSliceThickness;
-%                 dLastOffset = abs(dRefLastZ - dDcmLastZ)/refSliceThickness;
-%                 dOffset = (dRefPosition - dDcmPosition)
-
-            dImageOffset = round(dFirstOffset);
-            zMoveOffsetRemaining = dFirstOffset-dImageOffset;
-
-
-
-            aResample(:,:,1+dImageOffset:aRspSize(3)+dImageOffset)=resampImage;
-        
-%%%%%%% TEMP PATH, NEED TO REVISIT
-%                 if dFirstOffset > dLastOffset
-%                     aResample(:,:,1+dimsRef(3)-aRspSize(3):end)=resampImage;
-%                 else
-%                     aResample(:,:,1:dimsRef(3)-(dimsRef(3)-aRspSize(3)))=resampImage;
-%                 end
-
-            resampImage = aResample;
-            clear aResample;
+    %%%%%%% TEMP PATH, NEED TO REVISIT
+    %                 if dFirstOffset > dLastOffset
+    %                     aResample(:,:,1+dimsRef(3)-aRspSize(3):end)=resampImage;
+    %                 else
+    %                     aResample(:,:,1:dimsRef(3)-(dimsRef(3)-aRspSize(3)))=resampImage;
+    %                 end
+    
+                resampImage = aResample;
+                clear aResample;
+            end
         end
     end
-
 %        if dimsRef(3)==dimsDcm(3)
 %            aResampledImageSize = size(resampImage);
 %            resampImage=imresize3(resampImage, [aResampledImageSize(1) aResampledImageSize(2) dimsRef(3)]);

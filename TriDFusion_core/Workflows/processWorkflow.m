@@ -88,6 +88,9 @@ function processWorkflow(sWorkflowName)
 
             setSegmentationPSMACallback();
         
+        case 'setsegmentationmrtorganscallback' % setSegmentationMRTOrgansCallback.m
+
+            setSegmentationMRTOrgansCallback();
 
         % Modules
 
@@ -138,7 +141,6 @@ function processWorkflow(sWorkflowName)
         case 'setmachinelearningpetliverdosimetrycallback' % setMachineLearningPETLiverDosimetryCallback.m
 
             setMachineLearningPETLiverDosimetryCallback();
-
 
 
     end
