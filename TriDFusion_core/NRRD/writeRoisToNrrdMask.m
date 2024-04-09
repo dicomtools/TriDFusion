@@ -1,5 +1,5 @@
-function writeRoisToNrrdMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dOffset, bIndex)
-%function writeRoisToNrrdMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dOffset, bIndex)
+function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dOffset, bIndex)
+%function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dOffset, bIndex)
 %Export ROIs To .nrrd mask.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -37,7 +37,7 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicom
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
 
-    dicomdict('factory');    
+%     dicomdict('factory');    
         
     % Set series label
     
@@ -96,16 +96,20 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicom
                             roiMask = createMask(tRoiInput{tt}.Object, aSlice);
                         end
 
-                        if bIndex == true
+                        if bIndex == 1
                             aSlice( roiMask) =cc;
                             aSlice(~roiMask) =0;                            
+                        elseif bIndex == 2
+                            aSlice( roiMask) =getLesionTypeMaskValue(tRoiInput{tt}.LesionType);
+                            aSlice(~roiMask) =0;                             
                         else
                             aSlice( roiMask) =1;
                             aSlice(~roiMask) =0;
                         end
 
                         aSliceMask =  aMaskBuffer(:,:);
-                        if bIndex == true 
+
+                        if bIndex
                              aMaskBuffer(:,:) = aSlice+aSliceMask;
                        else
                             aMaskBuffer(:,:) = aSlice|aSliceMask;
@@ -122,16 +126,20 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicom
                             roiMask = createMask(tRoiInput{tt}.Object, aSlice);
                         end
 
-                        if bIndex == true
+                        if bIndex == 1
                             aSlice( roiMask) =cc;
-                            aSlice(~roiMask) =0;                            
+                            aSlice(~roiMask) =0;  
+                        elseif bIndex == 2
+                            aSlice( roiMask) =getLesionTypeMaskValue(tRoiInput{tt}.LesionType);
+                            aSlice(~roiMask) =0;                               
                         else
                             aSlice( roiMask) =1;
                             aSlice(~roiMask) =0;
                         end
 
                         aSliceMask =  permute(aMaskBuffer(dSliceNb,:,:), [3 2 1]);
-                        if bIndex == true 
+
+                        if bIndex 
                             aSlice = aSlice+aSliceMask;
                         else
                             aSlice = aSlice|aSliceMask;
@@ -149,20 +157,25 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicom
                             roiMask = createMask(tRoiInput{tt}.Object, aSlice);
                         end
                         
-                        if bIndex == true
+                        if bIndex == 1
                             aSlice( roiMask) =cc;
-                            aSlice(~roiMask) =0;                            
+                            aSlice(~roiMask) =0;  
+                        elseif bIndex == 2
+                            aSlice( roiMask) =getLesionTypeMaskValue(tRoiInput{tt}.LesionType);
+                            aSlice(~roiMask) =0;                               
                         else
                             aSlice( roiMask) =1;
                             aSlice(~roiMask) =0;
                         end
 
                         aSliceMask =  permute(aMaskBuffer(:,dSliceNb,:), [3 1 2]);
-                        if bIndex == true 
+
+                        if bIndex 
                             aSlice = aSlice+aSliceMask;
                         else
                             aSlice = aSlice|aSliceMask;
                         end
+
                         aMaskBuffer(:,dSliceNb,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
                     end
                     
@@ -176,9 +189,12 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicom
                             roiMask = createMask(tRoiInput{tt}.Object, aSlice);
                         end
 
-                        if bIndex == true
+                        if bIndex == 1
                             aSlice( roiMask) =cc;
                             aSlice(~roiMask) =0;                            
+                        elseif bIndex == 2
+                            aSlice( roiMask) =getLesionTypeMaskValue(tRoiInput{tt}.LesionType);
+                            aSlice(~roiMask) =0;                               
                         else
                             aSlice( roiMask) =1;
                             aSlice(~roiMask) =0;
@@ -186,7 +202,7 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicom
 
                         aSliceMask =  aMaskBuffer(:,:,dSliceNb);
 
-                        if bIndex == true 
+                        if bIndex
                             aMaskBuffer(:,:,dSliceNb) = aSlice+aSliceMask;                        
                         else
                             aMaskBuffer(:,:,dSliceNb) = aSlice|aSliceMask;                        
@@ -235,7 +251,7 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicom
 %         pixelspacing(3) = computeSliceSpacing(atDicomMeta);
 %     end
 
-    sNrrdImagesName = sprintf('%s%s.nrrd', sWriteDir, cleanString(atDicomMeta{1}.SeriesDescription));
+    sNrrdImagesName = sprintf('%s%s', sWriteDir, sNrrdName);
 
 %     if size(aMaskBuffer, 3) ~=1
 %         aMaskBuffer = imrotate3(aMaskBuffer, 90, [0 0 1], 'nearest');
@@ -261,4 +277,24 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicom
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;
 
+    function dMaskValue = getLesionTypeMaskValue(sLesionType)
+
+        switch lower(sLesionType)
+             
+            case 'cervical' 
+                dMaskValue = 1;
+            case 'supraclavicular'
+                dMaskValue = 2;
+            case 'mediastinal'
+                dMaskValue = 3;
+            case 'paraspinal'
+                dMaskValue = 4;
+            case 'axillary'
+                dMaskValue = 5;
+            case 'abdominal'
+                dMaskValue = 6;
+            otherwise
+                dMaskValue = 7;
+        end
+    end
 end

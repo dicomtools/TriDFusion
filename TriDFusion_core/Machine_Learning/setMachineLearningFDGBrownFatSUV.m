@@ -49,8 +49,8 @@ function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombin
 
     if isempty(dCTSerieOffset) || ...
        isempty(dPTSerieOffset)  
-        progressBar(1, 'Error: FDG tumor segmentation require a CT and PT image!');
-        errordlg('FDG tumor segmentation require a CT and PT image!', 'Modality Validation');  
+        progressBar(1, 'Error: FDG brown fat segmentation require a CT and PT image!');
+        errordlg('FDG brown fat segmentation require a CT and PT image!', 'Modality Validation');  
         return;               
     end
 

@@ -283,6 +283,7 @@ function setRoiToolbar(sVisible)
 
                     uimenu(a.UIContextMenu, 'Label', 'Copy Contour' , 'UserData', a, 'Callback', @copyRoiCallback, 'Separator', 'on');
                     uimenu(a.UIContextMenu, 'Label', 'Paste Contour', 'UserData', a, 'Callback', @pasteRoiCallback);
+                    uimenu(a.UIContextMenu, 'Label', 'Paste Mirror', 'UserData', a, 'Callback', @pasteMirroirRoiCallback);
 
                     uimenu(a.UIContextMenu,'Label', 'Snap To Circles'   , 'UserData',a, 'Callback',@snapLinesToCirclesCallback, 'Separator', 'on');
                     uimenu(a.UIContextMenu,'Label', 'Snap To Rectangles', 'UserData',a, 'Callback',@snapLinesToRectanglesCallback);
@@ -425,7 +426,7 @@ function setRoiToolbar(sVisible)
                                 );
                 a.FaceAlpha = roiFaceAlphaValue('get');
 
-  %                  a.Waypoints(:) = false;
+                a.Waypoints(:) = false;
 %test hf=a;
                     if ~isvalid(t)
                         return;
@@ -2090,12 +2091,16 @@ end
 
                 if isAxe
                     set(uiOneWindowPtr('get'), 'HighlightColor', [1 0 0]);
+                    set(uiOneWindowPtr('get'), 'BorderType', 'line');
                 elseif isCoronal
                     set(uiCorWindowPtr('get'), 'HighlightColor', [1 0 0]);
+                    set(uiCorWindowPtr('get'), 'BorderType', 'line');
                 elseif isSagittal
                     set(uiSagWindowPtr('get'), 'HighlightColor', [1 0 0]);
+                    set(uiSagWindowPtr('get'), 'BorderType', 'line');
                 elseif isAxial
                     set(uiTraWindowPtr('get'), 'HighlightColor', [1 0 0]);
+                    set(uiTraWindowPtr('get'), 'BorderType', 'line');
                 end
             end
         else

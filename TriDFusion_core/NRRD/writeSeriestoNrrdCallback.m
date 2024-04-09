@@ -93,44 +93,14 @@ function writeSeriestoNrrdCallback(~, ~)
 
     atMetaData  = dicomMetaData('get', [], dSeriesOffset);
         
-    origin = atMetaData{end}.ImagePositionPatient;
-    
-    pixelspacing = zeros(3,1);
-
-    pixelspacing(1) = atMetaData{1}.PixelSpacing(1);
-    pixelspacing(2) = atMetaData{1}.PixelSpacing(2);
-    pixelspacing(3) = computeSliceSpacing(atMetaData);
-
-%     if ~isempty(atMetaData{1}.SliceThickness)
-%         if atMetaData{1}.SliceThickness ~= 0
-%             pixelspacing(3) = atMetaData{1}.SliceThickness;
-%         else
-%             pixelspacing(3) = computeSliceSpacing(atMetaData);
-%         end           
-%     else    
-%         pixelspacing(3) = computeSliceSpacing(atMetaData);
-%     end
+    if isempty(atMetaData)
+        atInput = inputTemplate('get');
+        atMetaData = atInput(dSeriesOffset).atDicomInfo;
+    end  
 
     sNrrdImagesName = sprintf('%s%s.nrrd', sOutDir, cleanString(atMetaData{1}.SeriesDescription));
-
-    aBuffer = dicomBuffer('get', [], dSeriesOffset);
-
-    if size(aBuffer, 3) ~=1
-
-        aBuffer = aBuffer(:,:,end:-1:1);
-    end
-
-%      if size(aBuffer, 3) ~=1
-%          aBuffer = imrotate3(aBuffer, 90, [0 0 1], 'nearest');
-%          aBuffer = aBuffer(end:-1:1,:,:);
-%      else
-%           aBuffer = imrotate(aBuffer, 90, 'nearest');
-%           aBuffer = aBuffer(end:-1:1,:);        
-%      end
-
-    nrrdWriter(sNrrdImagesName, squeeze(aBuffer), pixelspacing, origin, 'raw'); % Write .nrrd images 
     
-    clear aBuffer;
+    series2nrrd(dSeriesOffset, sNrrdImagesName)
 
     progressBar(1, sprintf('Export %s completed', sNrrdImagesName));
 

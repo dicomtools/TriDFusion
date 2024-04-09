@@ -99,15 +99,19 @@ function clickDown(~, ~)
     
             if isAxe
                 set(uiOneWindowPtr('get'), 'HighlightColor', [1 0 0]);
+                set(uiOneWindowPtr('get'), 'BorderType', 'line');
 
             elseif isCoronal
                 set(uiCorWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
+                set(uiCorWindowPtr('get'), 'BorderType', 'line');                    
 
             elseif isSagittal 
                 set(uiSagWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
+                set(uiSagWindowPtr('get'), 'BorderType', 'line');                    
 
             else
                 set(uiTraWindowPtr('get'), 'HighlightColor', [1 0 0]); 
+                set(uiTraWindowPtr('get'), 'BorderType', 'line'); 
 %             else
 %                 set(uiMipWindowPtr('get'), 'HighlightColor', [1 0 0]); 
             end  

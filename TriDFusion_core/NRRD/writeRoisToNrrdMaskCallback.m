@@ -77,6 +77,6 @@ function writeRoisToNrrdMaskCallback(~, ~)
     tInput = inputTemplate('get');    
     aInputBuffer = inputBuffer('get');
     
-    writeRoisToNrrdMask(sOutDir, bSubDir, aInputBuffer{dOffset}, tInput(dOffset).atDicomInfo, dicomBuffer('get',[],dOffset), dicomMetaData('get',[],dOffset), dOffset, true);
+    writeRoisToNrrdMask(sOutDir, bSubDir, sprintf('%s.nrrd',cleanString(tInput(dOffset).atDicomInfo{1}.SeriesDescription)), aInputBuffer{dOffset}, tInput(dOffset).atDicomInfo, dicomBuffer('get',[],dOffset), dicomMetaData('get',[],dOffset), dOffset, 1);
 
 end

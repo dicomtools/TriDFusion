@@ -31,16 +31,26 @@ function triangulateImages()
 
     if is2DBrush('get') == true
     
-        axeClicked('set', true);
+        axeClicked('set', true);o
         uiresume(fiMainWindowPtr('get'));
 
     else
         if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
     
-            if showBorder('get') == false && is2DBrush('get') == false
+            if  is2DBrush('get') == false
                 % To reset next, delete, previous contour end of list
-    %            set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 1]);
-                set(uiTraWindowPtr('get'), 'BorderWidth', 0);          
+%                 set(uiTraWindowPtr('get'), 'HighlightColor', [0.7000 0.7000 0.7000]);
+                if showBorder('get') == false
+                    if ~strcmpi(get(uiTraWindowPtr('get'), 'BorderType'), 'none')
+
+                        set(uiTraWindowPtr('get'), 'BorderType', 'none');          
+                    end
+                else
+                    if ~any(get(uiTraWindowPtr('get'), 'HighlightColor') == [0.7000    0.7000    0.7000])
+
+                        set(uiTraWindowPtr('get'), 'HighlightColor', [0.7000 0.7000 0.7000]);
+                    end
+                end
             end
     
             im = dicomBuffer('get', [], dSeriesOffset);

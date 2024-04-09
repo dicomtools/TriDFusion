@@ -52,6 +52,7 @@ function rightClickMenu(sAction, objectPtr)
     elseif strcmpi('add', sAction)
         cm = uicontextmenu(fiMainWindowPtr('get'));
         uimenu(cm, 'Text', 'Paste Contour', 'Callback', @pasteRoiCallback);
+        uimenu(cm, 'Text', 'Paste Mirror', 'Callback', @pasteMirroirRoiCallback);
         uimenu(cm, 'Text', 'Hide Menu', 'Separator', 'on', 'Callback', @hideRoiMenuCallback);
 
         if isfield(objectPtr, 'ContextMenu')

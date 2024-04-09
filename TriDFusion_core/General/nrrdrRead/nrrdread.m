@@ -72,6 +72,14 @@ end
 
 datatype = getDatatype(meta.type);
 
+if ~isfield(meta, 'endian')
+    meta.endian = 'little';
+end
+
+if ~isfield(meta, 'encoding')
+    meta.endian = 'gzip';
+end
+
 % Get the size of the data.
 assert(isfield(meta, 'sizes') && ...
        isfield(meta, 'dimension') && ...

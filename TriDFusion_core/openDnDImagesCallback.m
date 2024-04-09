@@ -47,8 +47,7 @@ function openDnDImagesCallback(hObject, tObject)
 
             switch lower(sExt)
     
-                case '.nii'
-
+                case {'.nii', '.gz'}
 
                     loadNIIFile([sPath '/'], sprintf('%s%s',sFileName, sExt), bInitDisplay, []);   
 
@@ -120,9 +119,10 @@ function openDnDImagesCallback(hObject, tObject)
                         else
                             bInitDisplay = true;
                         end 
+                        
                         switch lower(sExt)
                 
-                            case '.nii'
+                            case {'.nii', '.gz'}
                                 loadNIIFile([sPath '/'], sprintf('%s%s',sFileName, sExt), bInitDisplay, []);   
             
                             case '.nrrd'

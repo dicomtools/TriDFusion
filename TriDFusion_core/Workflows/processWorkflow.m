@@ -113,6 +113,18 @@ function processWorkflow(sWorkflowName)
             setMachineLearningFDGBrownFatSUVRT_structureCallback();
 
 
+        case 'setmachinelearningfdgbrownfatfullairt_structurecallback' % setMachineLearningFDGBrownFatFullAIRT_structureCallback.m
+
+            setMachineLearningFDGBrownFatFullAIRT_structureCallback();
+
+        case 'setmachinelearningfdgbrownfatfullaicallback' % setMachineLearningFDGBrownFatFullAICallback.m
+
+            setMachineLearningFDGBrownFatFullAICallback();
+
+        case 'setmachinelearningfdgbrownfatexporttoainetworkcallback' % setMachineLearningFDGBrownFatSUVRT_structureCallback.m
+
+            setMachineLearningFDGBrownFatExportToAINetworkCallback();
+
         case 'setmachinelearningfdglymphnodesuvcallback' % setMachineLearningFDGLymphNodeSUVCallback.m
 
             setMachineLearningFDGLymphNodeSUVCallback();

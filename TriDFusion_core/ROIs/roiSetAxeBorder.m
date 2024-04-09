@@ -29,10 +29,15 @@ function roiSetAxeBorder(bStatus, pAxe)
     
     if bStatus == true
 
+        sBorderType = 'line';
+
         if exist('axe', 'var')
             if pAxe == axe
-                set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 1]);
-                set(uiOneWindowPtr('get'), 'BorderWidth'   , 1);
+%                 set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 1]);
+
+%                 set(uiOneWindowPtr('get'), 'BorderWidth'   , 1);
+                set(uiOneWindowPtr('get'), 'HighlightColor', [0.7000 0.7000 0.7000]);
+                set(uiOneWindowPtr('get'), 'BorderType', sBorderType);
             end
         end
 
@@ -41,33 +46,44 @@ function roiSetAxeBorder(bStatus, pAxe)
            ~isempty(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')))
 
             if pAxe == axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                set(uiCorWindowPtr('get'), 'HighlightColor', [0 1 1]);
-                set(uiCorWindowPtr('get'), 'BorderWidth'   , 1);
+%                 set(uiCorWindowPtr('get'), 'HighlightColor', [0 1 1]);
+%                 set(uiCorWindowPtr('get'), 'BorderWidth'   , 1);
+                set(uiCorWindowPtr('get'), 'HighlightColor', [0.7000 0.7000 0.7000]);
+                set(uiCorWindowPtr('get'), 'BorderType'   , sBorderType);
             end
 
             if pAxe == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                set(uiSagWindowPtr('get'), 'HighlightColor', [0 1 1]);
-                set(uiSagWindowPtr('get'), 'BorderWidth'   , 1);
+%                 set(uiSagWindowPtr('get'), 'HighlightColor', [0 1 1]);
+%                 set(uiSagWindowPtr('get'), 'BorderWidth'   , 1);
+                set(uiSagWindowPtr('get'), 'HighlightColor', [0.7000 0.7000 0.7000]);
+                set(uiSagWindowPtr('get'), 'BorderType'   , sBorderType);
             end
 
             if pAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 1]);
-                set(uiTraWindowPtr('get'), 'BorderWidth'   , 1);
+%                 set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 1]);
+%                 set(uiTraWindowPtr('get'), 'BorderWidth'   , 1);
+                set(uiTraWindowPtr('get'), 'HighlightColor', [0.7000 0.7000 0.7000]);
+                set(uiTraWindowPtr('get'), 'BorderType'    , sBorderType);
             end 
         end
     else
+        sBorderType = 'none';
 
         if exist('axe', 'var')
-            set(uiOneWindowPtr('get'), 'BorderWidth', showBorder('get'));
+%             set(uiOneWindowPtr('get'), 'BorderWidth', showBorder('get'));
+            set(uiOneWindowPtr('get'), 'BorderType'   , sBorderType);
         end
 
         if ~isempty(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
            ~isempty(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
            ~isempty(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')))
 
-            set(uiCorWindowPtr('get'), 'BorderWidth', showBorder('get'));
-            set(uiSagWindowPtr('get'), 'BorderWidth', showBorder('get'));
-            set(uiTraWindowPtr('get'), 'BorderWidth', showBorder('get'));
+%             set(uiCorWindowPtr('get'), 'BorderWidth', showBorder('get'));
+%             set(uiSagWindowPtr('get'), 'BorderWidth', showBorder('get'));
+%             set(uiTraWindowPtr('get'), 'BorderWidth', showBorder('get'));
+            set(uiCorWindowPtr('get'), 'BorderType'   , sBorderType);
+            set(uiSagWindowPtr('get'), 'BorderType'   , sBorderType);
+            set(uiTraWindowPtr('get'), 'BorderType'   , sBorderType);
         end
     end
 

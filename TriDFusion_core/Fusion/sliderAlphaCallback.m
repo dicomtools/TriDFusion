@@ -53,19 +53,19 @@ function sliderAlphaCallback(~, ~)
             alpha( imMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-get(uiAlphaSliderPtr('get'), 'Value') );                                
         end 
         
-        if isPlotContours('get') == true && isVsplash('get') == false 
+%         if isPlotContours('get') == true && isVsplash('get') == false 
             
-            alpha( imCoronalFcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
-            alpha( imSagittalFcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
-            alpha( imAxialFcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
-            
-            if link2DMip('get') == true && isVsplash('get') == false  
-                axesMipfc = imMipFcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
-                if ~isempty(axesMipfc)
-                    alpha( axesMipfc, 1-get(uiAlphaSliderPtr('get'), 'Value') );                                
-                end
-            end 
-        end
+%             alpha( imCoronalFcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+%             alpha( imSagittalFcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+%             alpha( imAxialFcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+%             
+%             if link2DMip('get') == true && isVsplash('get') == false  
+%                 axesMipfc = imMipFcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+%                 if ~isempty(axesMipfc)
+%                     alpha( axesMipfc, 1-get(uiAlphaSliderPtr('get'), 'Value') );                                
+%                 end
+%             end 
+%         end
         
     end            
 

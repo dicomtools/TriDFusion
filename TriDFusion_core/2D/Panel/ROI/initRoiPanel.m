@@ -807,30 +807,39 @@ function initRoiPanel()
 
             if is2DBrush('get') == false
 
-                bViewAxeBorder = false;       
+%                 bViewAxeBorder = false;   
+                sBorderType= 'none';
                 if dVoiOffset == 1 && dNbVOIs > 1
-                    bViewAxeBorder = true;       
+%                     bViewAxeBorder = true;       
+                    sBorderType= 'line';
                 end
         
                 if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
                     set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
-                    set(uiOneWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+%                     set(uiOneWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+                    set(uiOneWindowPtr('get'), 'BorderType', sBorderType);
+
                 else
                     set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
-                    set(uiTraWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+%                     set(uiTraWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+                    set(uiTraWindowPtr('get'), 'BorderType', sBorderType);
                 end
             else
                 if dVoiOffset == 1 && dNbVOIs > 1
-                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
+                   if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
                         set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
-                    else
+                        set(uiOneWindowPtr('get'), 'BorderType', 'line');
+                   else
                         set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
-                    end  
+                        set(uiTraWindowPtr('get'), 'BorderType', 'line');
+                   end  
                 else
                     if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
-                        set(uiOneWindowPtr('get'), 'HighlightColor', [1 0 0]);
-                    else
+                         set(uiOneWindowPtr('get'), 'HighlightColor', [1 0 0]);
+                         set(uiOneWindowPtr('get'), 'BorderType', 'line');
+                   else
                         set(uiTraWindowPtr('get'), 'HighlightColor', [1 0 0]);
+                        set(uiTraWindowPtr('get'), 'BorderType', 'line');
                     end                      
                 end
 
@@ -896,30 +905,36 @@ function initRoiPanel()
 
             if is2DBrush('get') == false
         
-                bViewAxeBorder = false;       
+                sBorderType = 'none';       
                 if dVoiOffset == 1 && dNbVOIs > 1
-                    bViewAxeBorder = true;       
+                    sBorderType = 'line';       
                 end
     
                 if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
-                    set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
-                    set(uiOneWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
-                else
-                    set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
-                    set(uiTraWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+                     set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
+%                     set(uiOneWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+                     set(uiOneWindowPtr('get'), 'BorderType', sBorderType);
+               else
+                     set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
+%                     set(uiTraWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
+                     set(uiTraWindowPtr('get'), 'BorderType', sBorderType);
                 end
             else
                 if dVoiOffset == 1 && dNbVOIs > 1
                     if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
                         set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
+                        set(uiOneWindowPtr('get'), 'BorderType', 'line');
                     else
                         set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
+                        set(uiTraWindowPtr('get'), 'BorderType', 'line');
                     end  
                 else
                     if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
                         set(uiOneWindowPtr('get'), 'HighlightColor', [1 0 0]);
+                        set(uiOneWindowPtr('get'), 'BorderType', 'line');
                     else
                         set(uiTraWindowPtr('get'), 'HighlightColor', [1 0 0]);
+                        set(uiTraWindowPtr('get'), 'BorderType', 'line');
                     end                      
                 end
        
@@ -1047,10 +1062,13 @@ function initRoiPanel()
 
                         if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
                             set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
-                            set(uiOneWindowPtr('get'), 'BorderWidth'   , true);
+%                             set(uiOneWindowPtr('get'), 'BorderWidth'   , true);
+                            set(uiOneWindowPtr('get'), 'BorderType', 'line');
+
                         else
                             set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
-                            set(uiTraWindowPtr('get'), 'BorderWidth'   , true);
+%                             set(uiTraWindowPtr('get'), 'BorderWidth'   , true);
+                            set(uiTraWindowPtr('get'), 'BorderType', 'line');
                         end
                       
                         setCrossVisibility(true);                    

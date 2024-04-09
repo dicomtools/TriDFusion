@@ -221,8 +221,7 @@ function figRoiDialogCallback(hObject, ~)
     uiVoiRoiWindow = ...
         uipanel(figRoiWindow,...
                 'Units'   , 'pixels',...
-                'BorderWidth', 0,...
-                'HighlightColor', [0 1 1],...
+                'BorderType', 'none', ...
                 'position', [0 0 FIG_ROI_X FIG_ROI_Y]...
                );
 
@@ -634,12 +633,13 @@ function figRoiDialogCallback(hObject, ~)
                     end
                 end
 
-if 0
+if 1
                 mCopyMirror = uimenu(c,'Label', 'Copy Mirror To');
                 asSeriesDescription = seriesDescription('get');
                 for sd=1:numel(asSeriesDescription)
                     uimenu(mCopyMirror,'Text', asSeriesDescription{sd}, 'MenuSelectedFcn', @figRoiCopyMirrorCallback);
                 end
+    
 end
                 uimenu(c,'Label', 'Edit Label', 'Separator', 'on', 'Callback',@figRoiEditLabelCallback);
 

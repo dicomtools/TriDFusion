@@ -191,6 +191,7 @@ function mainWindowMenu()
     % PSMA Lu177
 
     mLu177 = uimenu(mWorkflows,'Label','PSMA - Lu177');
+    uimenu(mLu177, 'Label','PSMA Lu177 2D Wholebody Segmentation'          , 'Callback', @set2DWholobodySegmentationLu177Callback);
     uimenu(mLu177, 'Label','PSMA Lu177 Tumor Segmentation (Threshold)'     , 'Callback', @setSegmentationLu177Callback);
     uimenu(mLu177, 'Label','PSMA Lu177 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningLu177Callback);
     uimenu(mLu177, 'Label','PET/CT Fusion'                                 , 'Callback', @setPETCTLu177FusionCallback, 'Separator','on');
@@ -212,10 +213,18 @@ function mainWindowMenu()
     uimenu(mFDGTumor, 'Label','PET/CT Fusion'                                     , 'Callback', @setPETCTFDGFusionCallback, 'Separator','on');
 
     mFDGBrownFat = uimenu(mFDG,'Label','Brown Fat Segmentation');
-    uimenu(mFDGBrownFat, 'Label','FDG Brown Fat Segmentation (Threshold + AI)', 'Callback', @setMachineLearningFDGBrownFatSUVCallback);
-    uimenu(mFDGBrownFat, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure (Threshold + AI)', 'Callback', @setMachineLearningFDGBrownFatSUVRT_structureCallback);
-    uimenu(mFDGBrownFat, 'Label','PET/CT Fusion'                              , 'Callback', @setPETCTFDGFusionCallback, 'Separator','on');
-
+    mFDGBrownFatThreshold = uimenu(mFDGBrownFat,'Label','Threshold + AI');
+    uimenu(mFDGBrownFatThreshold, 'Label','FDG Brown Fat Segmentation (Threshold + AI)'                           , 'Callback', @setMachineLearningFDGBrownFatSUVCallback);
+    uimenu(mFDGBrownFatThreshold, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure (Threshold + AI)', 'Callback', @setMachineLearningFDGBrownFatSUVRT_structureCallback);
+    mFDGBrownFatFullAI = uimenu(mFDGBrownFat,'Label','Full AI');
+    uimenu(mFDGBrownFatFullAI, 'Label','FDG Brown Fat Segmentation (Full AI)'                            , 'Callback', @setMachineLearningFDGBrownFatFullAICallback);
+    uimenu(mFDGBrownFatFullAI, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure  (Full AI)', 'Callback', @setMachineLearningFDGBrownFatFullAIRT_structureCallback);
+    mFDGBrownFatAiToolkit = uimenu(mFDGBrownFatFullAI,'Label','AI Toolkit', 'Separator','on');
+    uimenu(mFDGBrownFatAiToolkit, 'Label','Export Segmentation to AI Trainning Network', 'Callback', @setMachineLearningFDGBrownFatExportToAINetworkCallback);
+    uimenu(mFDGBrownFatAiToolkit, 'Label','Pre-processing of AI Training Network'      , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingCallback);
+    uimenu(mFDGBrownFat, 'Label','PET/CT Fusion', 'Callback', @setPETCTFDGFusionCallback, 'Separator','on');
+    
+ 
     % FDHT
 
     mFDHT = uimenu(mWorkflows,'Label','FDHT - fluorodihydrotestosterone');
@@ -251,9 +260,9 @@ function mainWindowMenu()
     mMachineProcessing = uimenu(mMachineLearning, 'Label','Machine Learning Processing', 'Separator','on');
 
     mMachineReport = uimenu(mMachineProcessing, 'Label','Report');
-    uimenu(mMachineReport, 'Label','3D SPECT Lung Shunt Report'      , 'Callback', @generate3DLungShuntReportCallback);
+    uimenu(mMachineReport, 'Label','3D SPECT Lung Shunt Report'     , 'Callback', @generate3DLungShuntReportCallback);
     uimenu(mMachineReport, 'Label','3D SPECT Lung Lobe Ratio Report', 'Callback', @generate3DLungLobeReportCallback);
-    uimenu(mMachineReport, 'Label','PET Y90 Liver Dosimetry Report'  , 'Callback', @generatePETLiverDosimetryReportCallback);
+    uimenu(mMachineReport, 'Label','PET Y90 Liver Dosimetry Report' , 'Callback', @generatePETLiverDosimetryReportCallback);
 
     uimenu(mMachineProcessing, 'Label','3D SPECT Lung Shunt'     , 'Callback', @setMachineLearning3DLungShuntCallback, 'Separator','on');
     uimenu(mMachineProcessing, 'Label','3D SPECT Lung Lobe Ratio', 'Callback', @setMachineLearning3DLobeLungCallback);
@@ -274,9 +283,14 @@ function mainWindowMenu()
     % FDG
 
     mFDG = uimenu(mMachineSegmentation,'Label','FDG - fluorodeoxyglucose');
-    uimenu(mFDG, 'Label','FDG Tumor Segmentation Lymph Node (Threshold + AI)', 'Callback', @setMachineLearningFDGLymphNodeSUVCallback);
-    uimenu(mFDG, 'Label','FDG Brown Fat Segmentation (Threshold + AI)', 'Callback'       , @setMachineLearningFDGBrownFatSUVCallback);
+    uimenu(mFDG, 'Label','FDG Tumor Segmentation Lymph Node (Threshold + AI)', 'Callback'                    , @setMachineLearningFDGLymphNodeSUVCallback);
+    uimenu(mFDG, 'Label','FDG Brown Fat Segmentation (Threshold + AI)', 'Callback'                           , @setMachineLearningFDGBrownFatSUVCallback);
     uimenu(mFDG, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure (Threshold + AI)', 'Callback', @setMachineLearningFDGBrownFatSUVRT_structureCallback);
+    uimenu(mFDG, 'Label','FDG Brown Fat Segmentation (Full AI)', 'Callback'                                  , @setMachineLearningFDGBrownFatFullAICallback);
+    uimenu(mFDG, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure  (Full AI)', 'Callback'      , @setMachineLearningFDGBrownFatFullAIRT_structureCallback);
+    mFDGmFDGAiToolkit = uimenu(mFDG,'Label','AI Toolkit', 'Separator','on');
+    uimenu(mFDGmFDGAiToolkit, 'Label','Export Segmentation to AI Trainning Network', 'Callback', @setMachineLearningFDGBrownFatExportToAINetworkCallback);
+    uimenu(mFDGmFDGAiToolkit, 'Label','Pre-processing of AI Training Network', 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingCallback);
 
     % FDHT
 
@@ -992,8 +1006,9 @@ function mainWindowMenu()
         if bStatus == true
 
             if exist('axe', 'var')
-                set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 1]);
-                set(uiOneWindowPtr('get'), 'BorderWidth'   , 1);
+                 set(uiOneWindowPtr('get'), 'HighlightColor', [0.7000 0.7000 0.7000]);
+%                 set(uiOneWindowPtr('get'), 'BorderWidth'   , 1);
+                 set(uiOneWindowPtr('get'), 'BorderType'   , 'line');
             end
 
             if ~isempty(axes1Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
@@ -1002,22 +1017,33 @@ function mainWindowMenu()
                ~isempty(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
                isVsplash('get') == false
 
-                set(uiCorWindowPtr('get'), 'HighlightColor', [0 1 1]);
-                set(uiCorWindowPtr('get'), 'BorderWidth'   , 1);
+                 set(uiCorWindowPtr('get'), 'HighlightColor', [0.7000 0.7000 0.7000]);
+%                 set(uiCorWindowPtr('get'), 'BorderWidth'   , 1);
+% 
+                 set(uiSagWindowPtr('get'), 'HighlightColor', [0.7000 0.7000 0.7000]);
+%                 set(uiSagWindowPtr('get'), 'BorderWidth'   , 1);
+% 
+                 set(uiTraWindowPtr('get'), 'HighlightColor', [0.7000 0.7000 0.7000]);
+%                 set(uiTraWindowPtr('get'), 'BorderWidth'   , 1);
+% 
+                 set(uiMipWindowPtr('get'), 'HighlightColor', [0.7000 0.7000 0.7000]);
+%                 set(uiMipWindowPtr('get'), 'BorderWidth'   , 1);
+                 set(uiCorWindowPtr('get'), 'BorderType'   , 'line');
+                 set(uiSagWindowPtr('get'), 'BorderType'   , 'line');
+                 set(uiTraWindowPtr('get'), 'BorderType'   , 'line');
+                 set(uiMipWindowPtr('get'), 'BorderType'   , 'line');
 
-                set(uiSagWindowPtr('get'), 'HighlightColor', [0 1 1]);
-                set(uiSagWindowPtr('get'), 'BorderWidth'   , 1);
-
-                set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 1]);
-                set(uiTraWindowPtr('get'), 'BorderWidth'   , 1);
-
-                set(uiMipWindowPtr('get'), 'HighlightColor', [0 1 1]);
-                set(uiMipWindowPtr('get'), 'BorderWidth'   , 1);
             end
         else
+            if showBorder('get') == true
+                sBorderType = 'line';
+            else
+                sBorderType = 'none';
+            end
 
             if exist('axe', 'var')
-                set(uiOneWindowPtr('get'), 'BorderWidth', showBorder('get'));
+%                 set(uiOneWindowPtr('get'), 'BorderWidth', showBorder('get'));
+                set(uiOneWindowPtr('get'), 'BorderType'   , sBorderType);
             end
 
             if ~isempty(axes1Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
@@ -1026,10 +1052,14 @@ function mainWindowMenu()
                ~isempty(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))) && ...
                isVsplash('get') == false
 
-                set(uiCorWindowPtr('get'), 'BorderWidth', showBorder('get'));
-                set(uiSagWindowPtr('get'), 'BorderWidth', showBorder('get'));
-                set(uiTraWindowPtr('get'), 'BorderWidth', showBorder('get'));
-                set(uiMipWindowPtr('get'), 'BorderWidth', showBorder('get'));
+%                 set(uiCorWindowPtr('get'), 'BorderWidth', showBorder('get'));
+%                 set(uiSagWindowPtr('get'), 'BorderWidth', showBorder('get'));
+%                 set(uiTraWindowPtr('get'), 'BorderWidth', showBorder('get'));
+%                 set(uiMipWindowPtr('get'), 'BorderWidth', showBorder('get'));
+                 set(uiCorWindowPtr('get'), 'BorderType'   , sBorderType);
+                 set(uiSagWindowPtr('get'), 'BorderType'   , sBorderType);
+                 set(uiTraWindowPtr('get'), 'BorderType'   , sBorderType);
+                 set(uiMipWindowPtr('get'), 'BorderType'   , sBorderType);
             end
         end
 
