@@ -1,6 +1,6 @@
-function setMachineLearningFDGBrownFatDataPreProcessingCallback(hObject, ~)
-%function setMachineLearningFDGBrownFatDataPreProcessingCallback(hObject)
-%AI Data Pre-processing, The tool is called from the main menu.
+function setMachineLearningFDGBrownFatDataPreProcessingPETCallback(hObject, ~)
+%function setMachineLearningFDGBrownFatDataPreProcessingPETCallback(hObject)
+%AI PET Data Pre-processing, The tool is called from the main menu.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -27,18 +27,18 @@ function setMachineLearningFDGBrownFatDataPreProcessingCallback(hObject, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    sTask99FolderPath = getenv('nnUnet_Task99_BAT');
+    sTask98FolderPath = getenv('nnUnet_Task98_BAT_PETAC');
 
-    if isempty(sTask99FolderPath)
+    if isempty(sTask98FolderPath)
 
-       progressBar( 1, 'Error: nnUnet_Task99_BAT environment variable not detected!');
+       progressBar( 1, 'Error: nnUnet_Task98_BAT_PETAC environment variable not detected!');
        if exist('hObject', 'var')   
-            errordlg(sprintf('nnUnet_Task99_BAT environment variable detected!\n Please define an environment variable nnUnet_Task99_BAT'), 'nnUnet_Task99_BAT Validation');  
+            errordlg(sprintf('nnUnet_Task98_BAT_PETAC environment variable detected!\n Please define an environment variable nnUnet_Task98_BAT_PETAC'), 'nnUnet_Task98_BAT_PETAC Validation');  
         end
         return;
     end
 
-    sPreProcessingFile = sprintf('%s/nrrd.py', sTask99FolderPath);
+    sPreProcessingFile = sprintf('%s/nrrd.py', sTask98FolderPath);
 
     if ~exist(sPreProcessingFile, 'file')
 
@@ -57,10 +57,10 @@ function setMachineLearningFDGBrownFatDataPreProcessingCallback(hObject, ~)
         progressBar( 1, 'Error: An error occur during machine learning data pre-processing!');
         errordlg(sprintf('An error occur during machine learning data pre-processing: %s', sCmdout), 'Pre-processing Error'); 
     else
-          progressBar( 1, sprintf('Machine learning data pre-processing of folder %s completed.', sTask99FolderPath));      
+          progressBar( 1, sprintf('Machine learning data pre-processing of folder %s completed.', sTask98FolderPath));      
     end
 
-    sCommandLine = sprintf('cmd.exe /c start /wait nnUNetv2_plan_and_preprocess -d 099');    
+    sCommandLine = sprintf('cmd.exe /c start /wait nnUNetv2_plan_and_preprocess -d 098');    
 
     [bStatus, sCmdout] = system(sCommandLine);
     if bStatus 
@@ -70,7 +70,7 @@ function setMachineLearningFDGBrownFatDataPreProcessingCallback(hObject, ~)
           progressBar( 1, sprintf('Machine learning nnUNetv2_plan_and_preprocess completed.'));      
     end
 % 
-%     sCommandLine = sprintf('cmd.exe /c start /wait nnUNetv2_train 099 3d_fullres 2');    
+%     sCommandLine = sprintf('cmd.exe /c start /wait nnUNetv2_train 098 3d_fullres 2');    
 %     [bStatus, sCmdout] = system(sCommandLine);
 %     if bStatus 
 %         progressBar( 1, 'Error: An error occur during machine learning nnUNetv2_train!');
@@ -78,3 +78,4 @@ function setMachineLearningFDGBrownFatDataPreProcessingCallback(hObject, ~)
 %     else
 %           progressBar( 1, sprintf('Machine learning nnUNetv2_train completed.'));      
 %     end
+end

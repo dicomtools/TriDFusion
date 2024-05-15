@@ -1,6 +1,6 @@
-function setMachineLearningFDGBrownFatFullAI(sPredictScript, tBrownFatFullAI)
-%function setMachineLearningFDGBrownFatFullAI(sPredictScript, tBrownFatFullAI)
-%Run FDG brown Fat Full AI Segmentation.
+function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
+%function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
+%Run FDG brown Fat PET Full AI Segmentation.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -125,7 +125,17 @@ function setMachineLearningFDGBrownFatFullAI(sPredictScript, tBrownFatFullAI)
 
     sNrrdImagesName = sprintf('%sPT_0001.nrrd', sNrrdTmpDir);
 
-    series2nrrd(dPTSerieOffset, sNrrdImagesName)
+    dSUVconv = computeSUV(atPTMetaData, 'LBM');
+
+    if dSUVconv == 0
+        dSUVconv = computeSUV(atPTMetaData, 'BW');
+    end
+
+    if dSUVconv == 0
+        dSUVconv = 1;
+    end
+
+    series2nrrd(dPTSerieOffset, sNrrdImagesName, dSUVconv);
     
     sNrrdFullFileName = '';
     
@@ -158,7 +168,7 @@ function setMachineLearningFDGBrownFatFullAI(sPredictScript, tBrownFatFullAI)
 %            if fastMachineLearningDialog('get') == true
 %                sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s --fast', sPredictScript, sNiiFullFileName, sSegmentationFolderName);    
 %            else
-                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 099 -c 3d_fullres --save_probabilities', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);    
+                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 098 -c 3d_fullres --save_probabilities', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);    
 %            end
         
             [bStatus, sCmdout] = system(sCommandLine);

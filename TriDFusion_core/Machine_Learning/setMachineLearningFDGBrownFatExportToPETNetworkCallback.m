@@ -1,5 +1,5 @@
-function setMachineLearningFDGBrownFatExportToAINetworkCallback(hObject, ~)
-%function setMachineLearningFDGBrownFatExportToAINetworkCallback(hObject)
+function setMachineLearningFDGBrownFatExportToPETNetworkCallback(hObject, ~)
+%function setMachineLearningFDGBrownFatExportToPETNetworkCallback(hObject)
 %Export BAT PET series and contours to a BAT AI trainning network, The tool is called from the main menu.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,20 +27,22 @@ function setMachineLearningFDGBrownFatExportToAINetworkCallback(hObject, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
     atInput = inputTemplate('get');
 
-    sTask99FolderPath = getenv('nnUnet_Task99_BAT');
+    sTask98FolderPath = getenv('nnUnet_Task98_BAT_PETAC');
 
-    if isempty(sTask99FolderPath)
+    if isempty(sTask98FolderPath)
 
-       progressBar( 1, 'Error: nnUnet_Task99_BAT environment variable not detected!');
+       progressBar( 1, 'Error: nnUnet_Task98_BAT_PETAC environment variable not detected!');
        if exist('hObject', 'var')   
-            errordlg(sprintf('nnUnet_Task99_BAT environment variable detected!\n Please define an environment variable nnUnet_Task99_BAT'), 'nnUnet_Task99_BAT Validation');  
+            errordlg(sprintf('nnUnet_Task98_BAT_PETAC environment variable detected!\n Please define an environment variable nnUnet_Task98_BAT_PETAC'), 'nnUnet_Task98_BAT_PETAC Validation');  
         end
         return;
     end
 
-    aListing = dir(sTask99FolderPath);
+    aListing = dir(sTask98FolderPath);
 
     bFoundData0 = false;
     for dd=1:numel(aListing)
@@ -53,12 +55,12 @@ function setMachineLearningFDGBrownFatExportToAINetworkCallback(hObject, ~)
     end
 
     if bFoundData0 == false
-        mkdir(sprintf('%s/data0', sTask99FolderPath));
-        mkdir(sprintf('%s/data0/training', sTask99FolderPath));
-        mkdir(sprintf('%s/data0/testing', sTask99FolderPath));
+        mkdir(sprintf('%s/data0', sTask98FolderPath));
+        mkdir(sprintf('%s/data0/training', sTask98FolderPath));
+        mkdir(sprintf('%s/data0/testing', sTask98FolderPath));
     end
 
-    sTrainingFoder = sprintf('%s/data0/training', sTask99FolderPath);
+    sTrainingFoder = sprintf('%s/data0/training', sTask98FolderPath);
 
     aListing = dir(sTrainingFoder);
     
@@ -80,13 +82,18 @@ function setMachineLearningFDGBrownFatExportToAINetworkCallback(hObject, ~)
     % Export PT series;
 
     dPTSerieOffset = [];
-    for tt=1:numel(atInput)
-        if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'pt')
-            dPTSerieOffset = tt;
-            break;
+    if strcmpi(atInput(dSeriesOffset).atDicomInfo{1}.Modality, 'pt')
+
+        dPTSerieOffset = dSeriesOffset;
+    else
+        for tt=1:numel(atInput)
+            if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'pt')
+                dPTSerieOffset = tt;
+                break;
+            end
         end
     end
-    
+
     if isempty(dPTSerieOffset)  
 
         progressBar(1, 'Error: FDG Brown fat export to AI network require a PT image!');
@@ -94,8 +101,11 @@ function setMachineLearningFDGBrownFatExportToAINetworkCallback(hObject, ~)
         if exist('hObject', 'var')
             errordlg('FDG Brown fat export to AI network require a PT image!', 'Modality Validation');  
         end
+        delete(sDFolder);
         return;               
     end
+
+
 
     if get(uiSeriesPtr('get'), 'Value') ~= dPTSerieOffset
         set(uiSeriesPtr('get'), 'Value', dPTSerieOffset);
@@ -112,34 +122,47 @@ function setMachineLearningFDGBrownFatExportToAINetworkCallback(hObject, ~)
         if exist('hObject', 'var')
             errordlg('FDG Brown fat export to AI network require contours!', 'Contours Validation');  
         end
+        delete(sDFolder);
         return;
     end
 
-    atMetaData  = dicomMetaData('get', [], dPTSerieOffset);
-    if isempty(atMetaData)
-        atMetaData = atInput(dPTSerieOffset).atDicomInfo;
+    atPTMetaData  = dicomMetaData('get', [], dPTSerieOffset);
+    if isempty(atPTMetaData)
+        atPTMetaData = atInput(dPTSerieOffset).atDicomInfo;
     end
         
-    origin = atMetaData{end}.ImagePositionPatient;
+    origin = atPTMetaData{end}.ImagePositionPatient;
     
     pixelspacing = zeros(3,1);
 
-    pixelspacing(1) = atMetaData{1}.PixelSpacing(1);
-    pixelspacing(2) = atMetaData{1}.PixelSpacing(2);
-    pixelspacing(3) = computeSliceSpacing(atMetaData);
+    pixelspacing(1) = atPTMetaData{1}.PixelSpacing(1);
+    pixelspacing(2) = atPTMetaData{1}.PixelSpacing(2);
+    pixelspacing(3) = computeSliceSpacing(atPTMetaData);
 
     sNrrdImagesName = sprintf('%sD%d.nrrd', sDFolder, dNewEntryNumber);
 
-    aBuffer = dicomBuffer('get', [], dPTSerieOffset);
+    aPTImage = dicomBuffer('get', [], dPTSerieOffset);
 
-    if size(aBuffer, 3) ~=1
+    if size(aPTImage, 3) ~=1
 
-        aBuffer = aBuffer(:,:,end:-1:1);
+        aPTImage = aPTImage(:,:,end:-1:1);
     end
 
-    nrrdWriter(sNrrdImagesName, squeeze(aBuffer), pixelspacing, origin, 'raw'); % Write .nrrd images 
+    dSUVconv = computeSUV(atPTMetaData, 'LBM');
+
+    if dSUVconv == 0
+        dSUVconv = computeSUV(atPTMetaData, 'BW');
+    end
+
+    if dSUVconv == 0
+        dSUVconv = 1;
+    end
+
+    aPTImage = aPTImage*dSUVconv;
+
+    nrrdWriter(sNrrdImagesName, squeeze(aPTImage), pixelspacing, origin, 'raw'); % Write .nrrd images 
     
-    clear aBuffer;
+    clear aPTImage;
 
     aInputBuffer = inputBuffer('get');
 
@@ -147,6 +170,8 @@ function setMachineLearningFDGBrownFatExportToAINetworkCallback(hObject, ~)
 
     writeRoisToNrrdMask(sDFolder, false, sNrrdMaskImagesName,aInputBuffer{dPTSerieOffset}, atInput(dPTSerieOffset).atDicomInfo, dicomBuffer('get',[],dPTSerieOffset), dicomMetaData('get',[],dPTSerieOffset), dPTSerieOffset, 2);
 
+    clear aInputBuffer;
+    
     progressBar(1, sprintf('Export to %s completed', sDFolder));
 
     if ~exist('hObject', 'var')

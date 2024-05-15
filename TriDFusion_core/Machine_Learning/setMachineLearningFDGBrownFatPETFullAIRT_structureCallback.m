@@ -1,6 +1,6 @@
-function setMachineLearningFDGBrownFatFullAIRT_structureCallback(~, ~)
-%function setMachineLearningFDGBrownFatFullAIRT_structureCallback()
-%Run FDG SUV Brown Fat Segmentation, The tool is called from the main menu.
+function setMachineLearningFDGBrownFatPETFullAIRT_structureCallback(~, ~)
+%function setMachineLearningFDGBrownFatPETFullAIRT_structureCallback()
+%Run FDG SUV Brown Fat PET Segmentation, The tool is called from the main menu.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org

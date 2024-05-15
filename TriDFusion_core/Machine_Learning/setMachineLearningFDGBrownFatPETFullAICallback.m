@@ -1,6 +1,6 @@
-function setMachineLearningFDGBrownFatFullAICallback(hObject, ~)
-%function setMachineLearningFDGBrownFatFullAICallback(hObject)
-%Run FDG SUV Brown Fat Segmentation, The tool is called from the main menu.
+function setMachineLearningFDGBrownFatPETFullAICallback(hObject, ~)
+%function setMachineLearningFDGBrownFatPETFullAICallback(hObject)
+%Run FDG SUV Brown Fat PET Segmentation, The tool is called from the main menu.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -163,7 +163,7 @@ function setMachineLearningFDGBrownFatFullAICallback(hObject, ~)
             tBrownFatFullAI.options.smalestVoiValue = FDGBrownFatSmalestVoiValue('get');
             tBrownFatFullAI.options.pixelEdge       = pixelEdge('get');
         
-            setMachineLearningFDGBrownFatFullAI(sPredictScript, tBrownFatFullAI); 
+            setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI); 
         end
     end
 
@@ -229,6 +229,6 @@ function setMachineLearningFDGBrownFatFullAICallback(hObject, ~)
 
         delete(dlgFDGBrownFatFullAISegmentation);
 
-        setMachineLearningFDGBrownFatFullAI(sPredictScript, tBrownFatFullAI); 
+        setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI); 
     end
 end
