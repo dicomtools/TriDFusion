@@ -44,11 +44,11 @@ function oneGate(sDirection)
         return;
     end
 
-    if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
-       gateUseSeriesUID('get') == true
-        set(uiSeriesPtr('get'), 'Enable', 'on');
-        return
-    end
+%     if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
+%        gateUseSeriesUID('get') == true
+%         set(uiSeriesPtr('get'), 'Enable', 'on');
+%         return
+%     end
 
     tRefreshRoi = roiTemplate('get', dSeriesOffset);
     if ~isempty(tRefreshRoi)

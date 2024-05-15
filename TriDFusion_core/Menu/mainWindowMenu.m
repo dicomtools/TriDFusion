@@ -217,11 +217,15 @@ function mainWindowMenu()
     uimenu(mFDGBrownFatThreshold, 'Label','FDG Brown Fat Segmentation (Threshold + AI)'                           , 'Callback', @setMachineLearningFDGBrownFatSUVCallback);
     uimenu(mFDGBrownFatThreshold, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure (Threshold + AI)', 'Callback', @setMachineLearningFDGBrownFatSUVRT_structureCallback);
     mFDGBrownFatFullAI = uimenu(mFDGBrownFat,'Label','Full AI');
-    uimenu(mFDGBrownFatFullAI, 'Label','FDG Brown Fat Segmentation (Full AI)'                            , 'Callback', @setMachineLearningFDGBrownFatFullAICallback);
-    uimenu(mFDGBrownFatFullAI, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure  (Full AI)', 'Callback', @setMachineLearningFDGBrownFatFullAIRT_structureCallback);
+    uimenu(mFDGBrownFatFullAI, 'Label','FDG Brown Fat PET Segmentation (Full AI)'                               , 'Callback', @setMachineLearningFDGBrownFatPETFullAICallback);
+    uimenu(mFDGBrownFatFullAI, 'Label','FDG Brown Fat PET Segmentation, export DICOM-RT structure  (Full AI)'   , 'Callback', @setMachineLearningFDGBrownFatPETFullAIRT_structureCallback);
+    uimenu(mFDGBrownFatFullAI, 'Label','FDG Brown Fat PET\CT Segmentation (Full AI)'                            , 'Callback', @setMachineLearningFDGBrownFatPETCTFullAICallback, 'Separator','on');
+    uimenu(mFDGBrownFatFullAI, 'Label','FDG Brown Fat PET\CT Segmentation, export DICOM-RT structure  (Full AI)', 'Callback', @setMachineLearningFDGBrownFatPETCTFullAIRT_structureCallback);    
     mFDGBrownFatAiToolkit = uimenu(mFDGBrownFatFullAI,'Label','AI Toolkit', 'Separator','on');
-    uimenu(mFDGBrownFatAiToolkit, 'Label','Export Segmentation to AI Trainning Network', 'Callback', @setMachineLearningFDGBrownFatExportToAINetworkCallback);
-    uimenu(mFDGBrownFatAiToolkit, 'Label','Pre-processing of AI Training Network'      , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingCallback);
+    uimenu(mFDGBrownFatAiToolkit, 'Label','Export Segmentation to AI PET Trainning Network'   , 'Callback', @setMachineLearningFDGBrownFatExportToPETNetworkCallback);
+    uimenu(mFDGBrownFatAiToolkit, 'Label','Pre-processing AI PET Training Network'            , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCallback);
+    uimenu(mFDGBrownFatAiToolkit, 'Label','Export Segmentation to AI PET/CT Trainning Network', 'Callback', @setMachineLearningFDGBrownFatExportToPETCTNetworkCallback, 'Separator','on');
+    uimenu(mFDGBrownFatAiToolkit, 'Label','Pre-processing AI PET/CT Training Network'         , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCTCallback);
     uimenu(mFDGBrownFat, 'Label','PET/CT Fusion', 'Callback', @setPETCTFDGFusionCallback, 'Separator','on');
     
  
@@ -285,12 +289,16 @@ function mainWindowMenu()
     mFDG = uimenu(mMachineSegmentation,'Label','FDG - fluorodeoxyglucose');
     uimenu(mFDG, 'Label','FDG Tumor Segmentation Lymph Node (Threshold + AI)', 'Callback'                    , @setMachineLearningFDGLymphNodeSUVCallback);
     uimenu(mFDG, 'Label','FDG Brown Fat Segmentation (Threshold + AI)', 'Callback'                           , @setMachineLearningFDGBrownFatSUVCallback);
-    uimenu(mFDG, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure (Threshold + AI)', 'Callback', @setMachineLearningFDGBrownFatSUVRT_structureCallback);
-    uimenu(mFDG, 'Label','FDG Brown Fat Segmentation (Full AI)', 'Callback'                                  , @setMachineLearningFDGBrownFatFullAICallback);
-    uimenu(mFDG, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure  (Full AI)', 'Callback'      , @setMachineLearningFDGBrownFatFullAIRT_structureCallback);
+    uimenu(mFDG, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure (Threshold + AI)' , 'Callback', @setMachineLearningFDGBrownFatSUVRT_structureCallback);
+    uimenu(mFDG, 'Label','FDG Brown Fat PET Segmentation (Full AI)'                               , 'Callback', @setMachineLearningFDGBrownFatPETFullAICallback);
+    uimenu(mFDG, 'Label','FDG Brown Fat PET Segmentation, export DICOM-RT structure  (Full AI)'   , 'Callback', @setMachineLearningFDGBrownFatPETFullAIRT_structureCallback);
+    uimenu(mFDG, 'Label','FDG Brown Fat PET\CT Segmentation (Full AI)'                            , 'Callback', @setMachineLearningFDGBrownFatPETCTFullAICallback, 'Separator','on');
+    uimenu(mFDG, 'Label','FDG Brown Fat PET\CT Segmentation, export DICOM-RT structure  (Full AI)', 'Callback', @setMachineLearningFDGBrownFatPETCTFullAIRT_structureCallback);
     mFDGmFDGAiToolkit = uimenu(mFDG,'Label','AI Toolkit', 'Separator','on');
-    uimenu(mFDGmFDGAiToolkit, 'Label','Export Segmentation to AI Trainning Network', 'Callback', @setMachineLearningFDGBrownFatExportToAINetworkCallback);
-    uimenu(mFDGmFDGAiToolkit, 'Label','Pre-processing of AI Training Network', 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingCallback);
+    uimenu(mFDGmFDGAiToolkit, 'Label','Export Segmentation to AI PET Trainning Network'   , 'Callback', @setMachineLearningFDGBrownFatExportToPETNetworkCallback);
+    uimenu(mFDGmFDGAiToolkit, 'Label','Pre-processing AI PET Training Network'            , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCallback);
+    uimenu(mFDGmFDGAiToolkit, 'Label','Export Segmentation to AI PET/CT Trainning Network', 'Callback', @setMachineLearningFDGBrownFatExportToPETCTNetworkCallback, 'Separator','on');
+    uimenu(mFDGmFDGAiToolkit, 'Label','Pre-processing AI PET/CT Training Network'         , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCTCallback);
 
     % FDHT
 

@@ -211,7 +211,9 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         atInput(numel(atInput)).tMovement.atSeq{1}.sAxe         = [];
         atInput(numel(atInput)).tMovement.atSeq{1}.aTranslation = [];
         atInput(numel(atInput)).tMovement.atSeq{1}.dRotation    = [];  
-        
+
+        atInput(numel(atInput)).aDicomBuffer = [];
+     
         asSeries = get(uiSeriesPtr('get'), 'String');
         asSeries{numel(asSeries)+1} = asSeriesDescription{numel(asSeriesDescription)};   
         
@@ -313,7 +315,9 @@ function readSTLModel(sPath, sFileName, dimX, dimY, dimZ, voxelX, voxelY, voxelZ
         atInput(1).tMovement.atSeq{1}.sAxe         = [];
         atInput(1).tMovement.atSeq{1}.aTranslation = [];
         atInput(1).tMovement.atSeq{1}.dRotation    = [];  
-        
+
+        atInput(1).aDicomBuffer = [];
+     
         asSeries{1} = asSeriesDescription{1};              
     end   
     

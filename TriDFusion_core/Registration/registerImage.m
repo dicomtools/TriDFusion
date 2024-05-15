@@ -36,14 +36,11 @@ function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = regi
     % 'similarity'	Nonreflective similarity transformation consisting of translation, rotation, and scale.
     % 'affine' Affine transformation consisting of translation, rotation, scale, and shear.        
     
-    if strcmpi(sType, 'Deformable')
-        bDemons = true;
-    else
-        bDemons = false;
-    end
     
-    if bRefOutputView == false && bDemons == false  
+    if bRefOutputView == false 
+
         if ~isequal(size(imReference), size(imToRegister))      
+            
             [imReference, atReferenceMetaData] = ...
                 resampleImage(imReference, atReferenceMetaData, imToRegister, atImToRegisterMetaData, 'Nearest', true, false);
         end
@@ -135,47 +132,37 @@ function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = regi
        
     
     if exist('registratedGeomtform', 'var')        
-                
-        if bDemons == true        
-            imRegistered = imwarp(imToRegister, registratedGeomtform, 'bicubic', 'FillValues', dMovingMin);
-        else        
+                       
             imRegistered = imwarp(imToRegister, Rmoving, registratedGeomtform, 'bicubic', 'OutputView', Routput, 'FillValues', dMovingMin);  
-        end
-        geomtform = registratedGeomtform;
+            geomtform = registratedGeomtform;
     else
-        if bDemons == true
-%            imToRegister = gpuArray(imToRegister);
-%            imReference  = gpuArray(imReference);
-           
-            [geomtform, imRegistered] = registerDemons(imToRegister, imReference, optimizer.MaximumIterations, bRefOutputView);
-        else
-            if ~isempty(aLogicalMask(aLogicalMask)) % Use a logical mask 
 
-                imToRegisterMasked = imToRegister;  
+        if ~isempty(aLogicalMask(aLogicalMask)) % Use a logical mask 
 
-                if ~isequal(size(imToRegisterMasked), size(aLogicalMask))
-                    [aLogicalMask, ~] = ...
-                        resampleImage(double(aLogicalMask), atReferenceMetaData, imToRegister, atImToRegisterMetaData, 'Nearest', true, false);                
-                    aLogicalMask = logical(imbinarize(aLogicalMask));
-                end
+            imToRegisterMasked = imToRegister;  
 
-                imToRegisterMasked(aLogicalMask==0) = min(imToRegister, [], 'all'); 
-
-                imReferenceMasked = imReference;          
-                imReferenceMasked(aLogicalMask==0) = min(imReference, [], 'all');  
-
-                geomtform = imregtform(imToRegisterMasked, Rmoving, imReferenceMasked, Rfixed, sType, optimizer, metric);
-
-                clear imToRegisterMasked;
-            else    
-                geomtform = imregtform(imToRegister, Rmoving, imReference, Rfixed, sType, optimizer, metric);
+            if ~isequal(size(imToRegisterMasked), size(aLogicalMask))
+                [aLogicalMask, ~] = ...
+                    resampleImage(double(aLogicalMask), atReferenceMetaData, imToRegister, atImToRegisterMetaData, 'Nearest', true, false);                
+                aLogicalMask = logical(imbinarize(aLogicalMask));
             end
-            
-            imRegistered = imwarp(imToRegister, Rmoving, geomtform, 'OutputView', Routput, 'FillValues', dMovingMin); 
-        end              
+
+            imToRegisterMasked(aLogicalMask==0) = min(imToRegister, [], 'all'); 
+
+            imReferenceMasked = imReference;          
+            imReferenceMasked(aLogicalMask==0) = min(imReference, [], 'all');  
+
+            geomtform = imregtform(imToRegisterMasked, Rmoving, imReferenceMasked, Rfixed, sType, optimizer, metric);
+
+            clear imToRegisterMasked;
+        else    
+            geomtform = imregtform(imToRegister, Rmoving, imReference, Rfixed, sType, optimizer, metric);
+        end
+        
+        imRegistered = imwarp(imToRegister, Rmoving, geomtform, 'OutputView', Routput, 'FillValues', dMovingMin); 
     end
                
-    if bRefOutputView == true
+    if bRefOutputView == true 
         
 %        newSliceThickness = fixedSliceThickness;        
      

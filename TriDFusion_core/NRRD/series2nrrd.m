@@ -1,5 +1,5 @@
-function series2nrrd(dSeriesOffset, sNrrdImagesName)
-%function series2nrrd(dSeriesOffset, sNrrdImagesName)
+function series2nrrd(dSeriesOffset, sNrrdImagesName, dConvFactor)
+%function series2nrrd(dSeriesOffset, sNrrdImagesName, dConvFactor)
 %Export series to .nrrd file type.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -68,7 +68,9 @@ function series2nrrd(dSeriesOffset, sNrrdImagesName)
 
         aBuffer = aBuffer(:,:,end:-1:1);
     end
-
+    
+    aBuffer = aBuffer * dConvFactor;
+    
 %      if size(aBuffer, 3) ~=1
 %          aBuffer = imrotate3(aBuffer, 90, [0 0 1], 'nearest');
 %          aBuffer = aBuffer(end:-1:1,:,:);

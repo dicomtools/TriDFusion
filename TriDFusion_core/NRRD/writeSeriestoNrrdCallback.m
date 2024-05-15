@@ -31,7 +31,7 @@ function writeSeriestoNrrdCallback(~, ~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     try
-        
+
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
 
@@ -40,14 +40,14 @@ function writeSeriestoNrrdCallback(~, ~)
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
     if dSeriesOffset > numel(atInputTemplate)
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
-        drawnow;        
+        drawnow;
         return;
     end
-    
+
 %     sOutDir = outputDir('get');
-%     
+%
 %     if isempty(sOutDir)
-                
+
         sCurrentDir  = viewerRootPath('get');
 
          sMatFile = [sCurrentDir '/' 'exportNrrdLastUsedDir.mat'];
@@ -77,30 +77,30 @@ function writeSeriestoNrrdCallback(~, ~)
         catch
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
         end
-    
-        sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                
-        sOutDir = char(sOutDir) + "TriDFusion_NRRD_" + char(sDate) + '/';              
+
+        sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
+        sOutDir = char(sOutDir) + "TriDFusion_NRRD_" + char(sDate) + '/';
         if ~(exist(char(sOutDir), 'dir'))
             mkdir(char(sOutDir));
         end
 %     end
-    
+
 %     [sFilePath, ~, ~] = fileparts(char(atInputTemplate(dSeriesOffset).asFilesList{1}));
-% 
+%
 %     dicm2nii(sFilePath, sOutDir, 1);
 
-    % Write .nrrd files 
+    % Write .nrrd files
 
     atMetaData  = dicomMetaData('get', [], dSeriesOffset);
-        
+
     if isempty(atMetaData)
         atInput = inputTemplate('get');
         atMetaData = atInput(dSeriesOffset).atDicomInfo;
-    end  
+    end
 
     sNrrdImagesName = sprintf('%s%s.nrrd', sOutDir, cleanString(atMetaData{1}.SeriesDescription));
-    
-    series2nrrd(dSeriesOffset, sNrrdImagesName)
+
+    series2nrrd(dSeriesOffset, sNrrdImagesName, 1);
 
     progressBar(1, sprintf('Export %s completed', sNrrdImagesName));
 
@@ -109,5 +109,5 @@ function writeSeriestoNrrdCallback(~, ~)
     end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
-    drawnow;    
+    drawnow;
 end

@@ -60,6 +60,7 @@ function actGate = dicomInfoComputeFrames(atDicomInfo)
             end
 
              dSliceSpacing = spacingBetweenTwoSlices(atDicomInfo{jj},atDicomInfo{jj+1});
+
              if dSliceSpacing == 0
                  dSliceSpacing = atDicomInfo{jj}.SpacingBetweenSlices;
                  if dSliceSpacing == 0
@@ -69,31 +70,29 @@ function actGate = dicomInfoComputeFrames(atDicomInfo)
 
             dComputedNextSliceLocation = str2double(sprintf('%.3f', atDicomInfo{jj}.SliceLocation + dSliceSpacing));
             dNextSliceLocation         = str2double(sprintf('%.3f', atDicomInfo{jj+1}.SliceLocation));
-                    
-            if dComputedNextSliceLocation>dNextSliceLocation % For GE result seies
-                dSliceRatio = dComputedNextSliceLocation/dNextSliceLocation;
-            else
-                dSliceRatio = dNextSliceLocation/dComputedNextSliceLocation;
-            end
-         
+
+            dSliceRatio = abs(((dComputedNextSliceLocation - dNextSliceLocation) / dNextSliceLocation))*100;
+                            
             if dNextSliceLocation == 0 && dComputedNextSliceLocation == 0 % Inf
-                dSliceRatio = 1;
+                dSliceRatio = 0;
             end
 
-            if dSliceRatio > 0.9 && dSliceRatio < 1.1 % Within 10% of the computed next slice
+            if dSliceRatio >= 0 && dSliceRatio < 100 % Within 100% of the computed next slice
                 
                 dInconsistentSpacing = false;                
             else
                 dComputedNextSliceLocation = str2double(sprintf('%.3f', atDicomInfo{jj}.SliceLocation - dSliceSpacing));
                 dNextSliceLocation         = str2double(sprintf('%.3f', atDicomInfo{jj+1}.SliceLocation));
 
-                if dComputedNextSliceLocation>dNextSliceLocation % For GE result seies
-                    dSliceRatio = dComputedNextSliceLocation/dNextSliceLocation;
-                else
-                    dSliceRatio = dNextSliceLocation/dComputedNextSliceLocation;
+                dSliceRatio = abs(((dComputedNextSliceLocation - dNextSliceLocation) / dNextSliceLocation))*100;
+
+                if dNextSliceLocation == 0 && dComputedNextSliceLocation == 0 % Inf
+
+                    dSliceRatio = 0;
                 end
-             
-                if dSliceRatio > 0.9 && dSliceRatio < 1.1 % Within 10% of the computed next slice
+            
+                if dSliceRatio >= 0 && dSliceRatio < 100 % Within 100% of the computed next slice
+
                     dInconsistentSpacing = false;
                 else
                     dInconsistentSpacing = true;
@@ -101,7 +100,8 @@ function actGate = dicomInfoComputeFrames(atDicomInfo)
             end
 
             if atDicomInfo{jj}.SpacingBetweenSlices ~= 0
-                if abs(dSliceSpacing) > (2*abs(atDicomInfo{jj}.SpacingBetweenSlices)) % The computed spacing is too far
+
+                if abs(dSliceSpacing) > (2*abs(atDicomInfo{jj}.SpacingBetweenSlices)) % The computed spacing is to far
                     dInconsistentSpacing = true;
                 end
             end

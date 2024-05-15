@@ -278,10 +278,12 @@ function aBuffer = loadNrrdFile(sPath, sFileName, bInitDisplay, dFactor)
         atInput(numel(atInput)).tMovement.atSeq{1}.sAxe         = [];
         atInput(numel(atInput)).tMovement.atSeq{1}.aTranslation = [];
         atInput(numel(atInput)).tMovement.atSeq{1}.dRotation    = [];  
+
+        atInput(numel(atInput)).aDicomBuffer = [];
         
         asSeries = get(uiSeriesPtr('get'), 'String');
-        asSeries{numel(asSeries)+1} = asSeriesDescription{numel(asSeriesDescription)};   
-        
+        asSeries{numel(asSeries)+1} = asSeriesDescription{numel(asSeriesDescription)}; 
+
     else
         
         asSeriesDescription{1}=sprintf('NRRD-%s', sFileName);
@@ -383,7 +385,9 @@ function aBuffer = loadNrrdFile(sPath, sFileName, bInitDisplay, dFactor)
         atInput(1).tMovement.atSeq{1}.sAxe         = [];
         atInput(1).tMovement.atSeq{1}.aTranslation = [];
         atInput(1).tMovement.atSeq{1}.dRotation    = [];  
-        
+
+        atInput(1).aDicomBuffer = [];
+
         asSeries{1} = asSeriesDescription{1};              
     end   
                 

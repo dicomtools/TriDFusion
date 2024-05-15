@@ -273,7 +273,7 @@ function setRegistrationCallback(~, ~)
         uicontrol(dlgRegister, ...
                   'Style'          , 'popup', ...
                   'position'       , [220 425 130 20],...
-                  'String'         , {'Translation', 'Rigid', 'Similarity', 'Affine'}, ...
+                  'String'         , {'Translation', 'Rigid', 'Similarity', 'Affine', 'Deformable'}, ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Value'          , dTransformValue, ...
@@ -302,9 +302,16 @@ function setRegistrationCallback(~, ~)
             dModalityValue = 1;
     end
 
+    if strcmpi(tRegistration.Transformation, 'deformable')
+        sModalityIntensityEnable = 'off';
+    else
+        sModalityIntensityEnable = 'on';
+    end
+
     uiModality = ...
         uicontrol(dlgRegister, ...
                   'Style'   , 'popup', ...
+                  'Enable'  , sModalityIntensityEnable, ... 
                   'position', [220 400 130 20],...
                   'String'  , {'Automatic', 'Monomodal', 'Multimodal'}, ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -623,7 +630,7 @@ function setRegistrationCallback(~, ~)
 
     uiMaximumIterations = ...
          uicontrol(dlgRegister,...
-                  'enable'    , 'on',...
+                  'enable'    , sOptimizerMonomodalEnable,...
                   'style'     , 'edit',...
                   'Background', 'white',...
                   'string'    , num2str(tRegistration.Optimizer.MaximumIterations),...
@@ -856,10 +863,12 @@ function setRegistrationCallback(~, ~)
         bInitRef = true;
         dNextSeries = 1;
         for hh=1:dNbElements
+
             for kk=1:numel(adLbSeries)
 
 %                set(uiSeriesPtr('get'), 'Value', kk);
                 aBuffer    = dicomBuffer('get', [], kk);
+
                 atMetaData = dicomMetaData('get', [], kk);
 
                 if ~isempty(aInput{kk})
@@ -877,14 +886,15 @@ function setRegistrationCallback(~, ~)
 
                     end
 
-                    if isVsplash('get') == false && ...
-                        ~(size(aInput{kk}, 3) == 1)
-                        aMip = mipBuffer('get', [], kk);
-                    end
+                    % if isVsplash('get') == false && ...
+                    %     ~(size(aInput{kk}, 3) == 1)
+                    %     aMip = mipBuffer('get', [], kk);
+                    % end
 
                 end
 
                 if isempty(atMetaData)
+
                     atMetaData = tInput(kk).atDicomInfo;
                 end
 
@@ -893,26 +903,29 @@ function setRegistrationCallback(~, ~)
                     tInput(adLbSeries(kk)).bEdgeDetection = false;
 
               %      dInitOffset = kk;
-                    bInitRef = false;
+                    bInitRef      = false;
                     atRefMetaData = atMetaData;
-                    refImage = aBuffer;
-                    dNextSeries = 2;
+                    refImage      = aBuffer;
+                    dNextSeries   = 2;
 
                     dicomBuffer('set', refImage, kk);
+
                     dicomMetaData('set', atRefMetaData, kk);
+
                     setQuantification(kk);
 
                     updateDescription('set', get(chkRegSeriesDescription, 'Value'));
-                    if size(aInput{kk}, 3) ~= 1
-                        if isVsplash('get') == false
-                            refMip = aMip;
-                        end
-                    end
+                    % if size(aInput{kk}, 3) ~= 1
+                    %     if isVsplash('get') == false
+                    %         refMip = aMip;
+                    %     end
+                    % end
 
                     break;
                 end
 
                 if dNextSeries >1
+
                     if adLbSeries(kk) == dNextSeries
 
                         if dInitOffset == kk
@@ -924,22 +937,36 @@ function setRegistrationCallback(~, ~)
                         progressBar(dNextSeries/dNbElements-0.000001, sprintf('Processing resampling %d/%d, please wait', dNextSeries-1, dNbElements-1));
 
                %         try
-                        [aResampledBuffer, atResampledMetaData] = resampleImage(aBuffer, atMetaData, refImage, atRefMetaData, sInterpolation, referenceOutputView('get'), updateDescription('get'));
+                        [aResampledBuffer, atResampledMetaData] = ...
+                            resampleImage(aBuffer       , ...
+                                          atMetaData    , ...
+                                          refImage      , ...
+                                          atRefMetaData , ...
+                                          sInterpolation, ...
+                                          referenceOutputView('get'), ...
+                                          updateDescription('get'));
 
                         atRoi = roiTemplate('get', kk);
 
-                        atResampledRoi = resampleROIs(aBuffer, atMetaData, aResampledBuffer, atResampledMetaData, atRoi, true);
+                        atResampledRoi = ...
+                            resampleROIs(aBuffer            , ...
+                                         atMetaData         , ...
+                                         aResampledBuffer   , ...
+                                         atResampledMetaData, ...
+                                         atRoi              , ...
+                                         true);
 
                         roiTemplate('set', kk, atResampledRoi);
 
                         if size(aInput{kk}, 3) ~= 1
+
                             if isVsplash('get') == false
 
                             %    aResampledMip = resampleMip(aMip, atMetaData, refMip, atRefMetaData, sInterpolation, referenceOutputView('get'));
 
-                                aResampledMip = computeMIP(aResampledBuffer);
+                                % aResampledMip = computeMIP(aResampledBuffer);
 
-                                mipBuffer('set', aResampledMip, kk);
+                                mipBuffer('set', computeMIP(aResampledBuffer), kk);
                             end
                         end
 
@@ -947,7 +974,10 @@ function setRegistrationCallback(~, ~)
                 %        end
 
                         dicomMetaData('set', atResampledMetaData, kk);
+
                         dicomBuffer('set', aResampledBuffer, kk);
+
+                        clear aResampledBuffer;
 
                         setQuantification(kk);
 
@@ -963,7 +993,7 @@ function setRegistrationCallback(~, ~)
 
         inputTemplate('set', tInput);
 
-        set(uiSeriesPtr('get'), 'Value', dInitOffset);
+        % set(uiSeriesPtr('get'), 'Value', dInitOffset);
         set(uiSeriesPtr('get'), 'Enable', 'on');
 
         set(dlgRegister, 'Pointer', 'default');
@@ -988,14 +1018,14 @@ function setRegistrationCallback(~, ~)
 
 %        dicomViewerCore();
 
-        setViewerDefaultColor(true, dicomMetaData('get'));
+        setViewerDefaultColor(true, dicomMetaData('get', [], dInitOffset));
 
 %            triangulateCallback();
         if bResampleAxe == true
 
-            if ~isempty(dicomBuffer('get'))
+            if ~isempty(dicomBuffer('get', [], dInitOffset))
 
-                resampleAxes(dicomBuffer('get'), dicomMetaData('get'));
+                resampleAxes(dicomBuffer('get'), dicomMetaData('get', [], dInitOffset));
 
                 setImagesAspectRatio();
             end
@@ -1048,6 +1078,7 @@ function setRegistrationCallback(~, ~)
 
         if strcmpi(sTransformation, 'Deformable')
 
+            set(uiModality              , 'enable', 'off');
             set(uiNumberOfSpatialSamples, 'enable', 'off');
             set(uiNumberOfHistogramBins , 'enable', 'off');
             set(uiUseAllPixels          , 'enable', 'off');
@@ -1060,6 +1091,7 @@ function setRegistrationCallback(~, ~)
             set(uiMinimumStepLength         , 'enable', 'off');
             set(uiMaximumStepLength         , 'enable', 'off');
             set(uiRelaxationFactor          , 'enable', 'off');
+            set(uiMaximumIterations         , 'enable', 'off');
 
         else
             setRegistrationModalityCallback();
@@ -1072,6 +1104,7 @@ function setRegistrationCallback(~, ~)
         sTransformation  = asModality{get(uiTransformation, 'Value')};
 
         if ~strcmpi(sTransformation, 'Deformable')
+
             tRegistration = registrationTemplate('get');
 
             asModality = get(uiModality, 'String');
@@ -1089,6 +1122,8 @@ function setRegistrationCallback(~, ~)
             else
                 sMetricEnable = 'off';
             end
+
+            set(uiModality              , 'enable', 'on');
 
             set(uiNumberOfSpatialSamples, 'enable', sMetricEnable);
             set(uiNumberOfHistogramBins , 'enable', sMetricEnable);
@@ -1120,7 +1155,8 @@ function setRegistrationCallback(~, ~)
             set(uiMinimumStepLength         , 'enable', sOptimizerMonomodalEnable);
             set(uiMaximumStepLength         , 'enable', sOptimizerMonomodalEnable);
             set(uiRelaxationFactor          , 'enable', sOptimizerMonomodalEnable);
-        end
+             set(uiMaximumIterations        , 'enable', sOptimizerMonomodalEnable);
+       end
 
     end
 
@@ -1192,6 +1228,7 @@ function setRegistrationCallback(~, ~)
 
         asUseAllPixels = get(uiUseAllPixels, 'String');
         sUseAllPixels  = asUseAllPixels{get(uiUseAllPixels, 'Value')};
+
         if strcmpi(sUseAllPixels, 'True')
             bUseAllPixels = true;
         else
@@ -1229,7 +1266,7 @@ function setRegistrationCallback(~, ~)
 
         registrationTemplate('set', tRegistration);
 
-        sInterpolation = tRegistration.Interpolation;
+        % sInterpolation = tRegistration.Interpolation;
 
         sMode     = tRegistration.Transformation;
         sModality = tRegistration.Modality;
@@ -1256,18 +1293,23 @@ function setRegistrationCallback(~, ~)
 
         bInitRef = true;
         dNextSeries = 1;
+
         for hh=1:dNbElements
+
             for kk=1:numel(adLbSeries)
 
 %                set(uiSeriesPtr('get'), 'Value', kk);
                 aBuffer    = dicomBuffer('get', [], kk);
+
                 atMetaData = dicomMetaData('get', [], kk);
 
                 if ~isempty(aInput{kk})
 
                     if(size(aInput{kk}, 3) == 1)
+
                         if  isempty(aBuffer)
-                            aBuffer  = aInput{kk};
+
+                            aBuffer = aInput{kk};
                         end
                     else
 
@@ -1285,6 +1327,7 @@ function setRegistrationCallback(~, ~)
                 end
 
                 if isempty(atMetaData)
+
                     atMetaData = tInput(kk).atDicomInfo;
                 end
 
@@ -1292,15 +1335,16 @@ function setRegistrationCallback(~, ~)
 
                     tInput(adLbSeries(kk)).bEdgeDetection = false;
 
-                    bInitRef = false;
+                    bInitRef      = false;
                     atRefMetaData = atMetaData;
-                    refImage = aBuffer;
-                    dNextSeries = 2;
+                    refImage      = aBuffer;
+                    dNextSeries   = 2;
 
                     sRefStudyInstanceUID    = atMetaData{1}.StudyInstanceUID;
                     sRefFrameOfReferenceUID = atMetaData{1}.FrameOfReferenceUID;
 
                     if get(chkRegSeriesDescription, 'Value') == true
+
                         atRefMetaData{1}.SeriesDescription  = sprintf('REF-COREG %s', atRefMetaData{1}.SeriesDescription);
                         asDescription = seriesDescription('get');
                         asDescription{kk} = sprintf('REF-COREG %s', asDescription{kk});
@@ -1309,7 +1353,9 @@ function setRegistrationCallback(~, ~)
                     end
 
                     dicomBuffer('set', refImage, kk);
+
                     dicomMetaData('set', atRefMetaData, kk);
+
                     setQuantification(kk);
 
                     updateDescription('set', get(chkRegSeriesDescription, 'Value'));
@@ -1390,6 +1436,7 @@ function setRegistrationCallback(~, ~)
 
                         if get(chkRegAssociateSeries, 'Value') == true && ...
                            isempty(adAssociatedSeries) % The sub series is not on the list
+
                             for mm=1:numel(tInput)
 
                                 sCurrentStudyInstanceUID = ...
@@ -1419,37 +1466,67 @@ function setRegistrationCallback(~, ~)
                         if bProceedWithRegistration == true
 
                             if dInitOffset == kk
+
                                 bResampleAxe = true;
                             end
 
                             progressBar(dNextSeries/dNbElements-0.000001, sprintf('Processing registration %d/%d, please wait', dNextSeries-1, dNbElements-1));
 
-                            [aRegistratedBuffer, atRegisteredMetaData, Rmoving, Rregistered, registratedGeomtform] = ...
-                                registerImage(aBuffer, atMetaData, refImage, atRefMetaData, aLogicalMask, sMode, sModality, optimizer, metric, referenceOutputView('get'), updateDescription('get'));
+                            if strcmpi(sMode, 'Deformable')
+
+                                [aRegistratedBuffer, atRegisteredMetaData, registratedGeomtform] = ...
+                                    deformableRegistration(aBuffer      , ...
+                                                           atMetaData   , ...
+                                                           refImage     , ...
+                                                           atRefMetaData, ...
+                                                           aLogicalMask , ...
+                                                           updateDescription('get'));
+                            else
+                                [aRegistratedBuffer, atRegisteredMetaData, Rmoving, Rregistered, registratedGeomtform] = ...
+                                    registerImage(aBuffer      , ...
+                                                  atMetaData   , ...
+                                                  refImage     , ...
+                                                  atRefMetaData, ...
+                                                  aLogicalMask , ...
+                                                  sMode        , ...
+                                                  sModality    , ...
+                                                  optimizer    , ...
+                                                  metric       , ...
+                                                  referenceOutputView('get'), ...
+                                                  updateDescription('get'));
+                            end
 
                             tInput(adLbSeries(kk)).tMovement.bMovementApplied = true;
-                            if isfield(registratedGeomtform, 'T')
+                            % if isfield(registratedGeomtform, 'T')
+                            %     tInput(adLbSeries(kk)).tMovement.aGeomtform = registratedGeomtform;
+                            % else
                                 tInput(adLbSeries(kk)).tMovement.aGeomtform = registratedGeomtform;
-                            else
-                                tInput(adLbSeries(kk)).tMovement.aGeomtform = [];
-                            end
+                            % end
 
                             sReport = sprintf('Registration %d', dNextSeries-1);
                             sReport = sprintf('%s\nFixed Series : %s', sReport, atRefMetaData{1}.SeriesDescription);
                             sReport = sprintf('%s\nMoving Series: %s', sReport, atRegisteredMetaData{1}.SeriesDescription);
 
-                            sRmoving = R_regToString(Rmoving);
-                            sReport = sprintf('%s\n\nMoving Series:\n%s', sReport, sRmoving);
-                            sRregistered = R_regToString(Rregistered);
-                            sReport = sprintf('%s\nRegistrated Series:\n%s\n', sReport, sRregistered);
-                            if isfield(registratedGeomtform, 'T')
-                                sGeomtform = num2str(registratedGeomtform.T);
-                                dGeomtformSize = size(sGeomtform, 1);
-                                sReport = sprintf('%sGeomtform:',sReport);
-                                for go=1:dGeomtformSize
-                                    sReport = sprintf('%s\n%s',sReport, sGeomtform(go,:));
+                            if ~strcmpi(sMode, 'Deformable')
+
+                                sRmoving     = R_regToString(Rmoving);
+                                sReport      = sprintf('%s\n\nMoving Series:\n%s', sReport, sRmoving);
+                                sRregistered = R_regToString(Rregistered);
+                                sReport      = sprintf('%s\nRegistrated Series:\n%s\n', sReport, sRregistered);
+    
+                                if isfield(registratedGeomtform, 'T')
+    
+                                    sGeomtform = num2str(registratedGeomtform.T);
+                                    dGeomtformSize = size(sGeomtform, 1);
+                                    sReport = sprintf('%sGeomtform:',sReport);
+
+                                    for go=1:dGeomtformSize
+
+                                        sReport = sprintf('%s\n%s',sReport, sGeomtform(go,:));
+                                    end
+
+                                    sReport = sprintf('%s\n\n',sReport);
                                 end
-                                sReport = sprintf('%s\n\n',sReport);
                             end
 
                             registrationReport('add', sReport);
@@ -1466,16 +1543,23 @@ function setRegistrationCallback(~, ~)
                        %         dicomMetaData('set', atResampledMetaData);
                        %     else
                             dicomBuffer('set', aRegistratedBuffer, kk);
+
                             dicomMetaData('set', atRegisteredMetaData, kk);
+
                             setQuantification(kk);
                        %     end
 
                             if link2DMip('get') == true
-                                if size(dicomBuffer('get'), 3) ~= 1
-                                    aRegistratedMip = computeMIP(aRegistratedBuffer);
-                                    mipBuffer('set', aRegistratedMip, kk);
+
+                                if size(aRegistratedBuffer, 3) ~= 1
+
+                                    % aRegistratedMip = computeMIP(aRegistratedBuffer);
+
+                                    mipBuffer('set', computeMIP(aRegistratedBuffer), kk);
                                 end
                             end
+
+                            % clear aRegistratedBuffer;
 
                             adLbSeries(kk) = 0; % This series is done
 
@@ -1484,19 +1568,24 @@ function setRegistrationCallback(~, ~)
                             if ~isempty(adAssociatedSeries) % We need to moved the associated series
 
                                 dNbOfAssociatedSeries = numel(adAssociatedSeries);
+
                                 for ee=1:dNbOfAssociatedSeries
 
                                     dAssociatedSeries = adAssociatedSeries{ee};
 
 %                                    progressBar(ee/dNbOfAssociatedSeries-0.000001, sprintf('Moving sub series %d/%d, please wait', ee, dNbOfAssociatedSeries));
 
-                                    set(uiSeriesPtr('get'), 'Value', dAssociatedSeries);
+                                    % set(uiSeriesPtr('get'), 'Value', dAssociatedSeries);
+
                                     aBuffer    = dicomBuffer('get', [], dAssociatedSeries);
+
                                     atMetaData = dicomMetaData('get', [], dAssociatedSeries);
 
                                     if(size(aInput{dAssociatedSeries}, 3) == 1)
-                                        if  isempty(aBuffer)
-                                            aBuffer  = aInput{dAssociatedSeries};
+
+                                        if isempty(aBuffer)
+
+                                            aBuffer = aInput{dAssociatedSeries};
                                         end
                                     else
 
@@ -1513,35 +1602,68 @@ function setRegistrationCallback(~, ~)
                                     end
 
                                     if isempty(atMetaData)
+
                                         atMetaData = tInput(dAssociatedSeries).atDicomInfo;
                                     end
 
-                                    [aAssociatedRegistratedBuffer, atAssociatedRegisteredMetaData, Rmoving, Rregistered] = ...
-                                        registerImage(aBuffer, atMetaData, aRegistratedBuffer, atRegisteredMetaData, aLogicalMask, sMode, sModality, optimizer, metric, referenceOutputView('get'), updateDescription('get'), registratedGeomtform);
+                                    if strcmpi(sMode, 'Deformable')
 
-                                    tInput(dAssociatedSeries).tMovement.bMovementApplied = true;
-                                    if isfield(registratedGeomtform, 'T')
-                                        tInput(dAssociatedSeries).tMovement.aGeomtform = registratedGeomtform;
+                                        [aAssociatedRegistratedBuffer, atAssociatedRegisteredMetaData, registratedGeomtform] = ...
+                                            deformableRegistration(aBuffer             , ...
+                                                                   atMetaData          , ...
+                                                                   aRegistratedBuffer  , ...
+                                                                   atRegisteredMetaData, ...
+                                                                   aLogicalMask        , ...
+                                                                   updateDescription('get'), ...
+                                                                   registratedGeomtform);                                        
                                     else
-                                        tInput(dAssociatedSeries).tMovement.aGeomtform = [];
+
+                                        [aAssociatedRegistratedBuffer, atAssociatedRegisteredMetaData, Rmoving, Rregistered] = ...
+                                            registerImage(aBuffer             , ...
+                                                          atMetaData          , ...
+                                                          aRegistratedBuffer  , ...
+                                                          atRegisteredMetaData, ...
+                                                          aLogicalMask        , ...
+                                                          sMode               , ...
+                                                          sModality           , ...
+                                                          optimizer           , ...
+                                                          metric              , ...
+                                                          referenceOutputView('get'), ...
+                                                          updateDescription('get'), ...
+                                                          registratedGeomtform);
                                     end
+                                    % 
+                                    % tInput(dAssociatedSeries).tMovement.bMovementApplied = true;
+                                    % if isfield(registratedGeomtform, 'T')
+                                        tInput(dAssociatedSeries).tMovement.aGeomtform = registratedGeomtform;
+                                    % else
+                                    %     tInput(dAssociatedSeries).tMovement.aGeomtform = [];
+                                    % end
 
                                     sReport = sprintf('Moving Series %d', ee);
                                     sReport = sprintf('%s\nFixed Series : %s', sReport, atRegisteredMetaData{1}.SeriesDescription);
                                     sReport = sprintf('%s\nMoving Series: %s', sReport, atAssociatedRegisteredMetaData{1}.SeriesDescription);
 
-                                    sRmoving = R_regToString(Rmoving);
-                                    sReport = sprintf('%s\n\nMoving Series:\n%s', sReport, sRmoving);
-                                    sRregistered = R_regToString(Rregistered);
-                                    sReport = sprintf('%s\nRegistrated Series:\n%s\n', sReport, sRregistered);
-                                    if isfield(registratedGeomtform, 'T')
-                                        sGeomtform = num2str(registratedGeomtform.T);
-                                        dGeomtformSize = size(sGeomtform, 1);
-                                        sReport = sprintf('%sGeomtform:',sReport);
-                                        for go=1:dGeomtformSize
-                                            sReport = sprintf('%s\n%s',sReport, sGeomtform(go,:));
+                                    if ~strcmpi(sMode, 'Deformable')
+
+                                        sRmoving     = R_regToString(Rmoving);
+                                        sReport      = sprintf('%s\n\nMoving Series:\n%s', sReport, sRmoving);
+                                        sRregistered = R_regToString(Rregistered);
+                                        sReport      = sprintf('%s\nRegistrated Series:\n%s\n', sReport, sRregistered);
+
+                                        if isfield(registratedGeomtform, 'T')
+
+                                            sGeomtform = num2str(registratedGeomtform.T);
+                                            dGeomtformSize = size(sGeomtform, 1);
+                                            sReport = sprintf('%sGeomtform:',sReport);
+
+                                            for go=1:dGeomtformSize
+
+                                                sReport = sprintf('%s\n%s',sReport, sGeomtform(go,:));
+                                            end
+
+                                            sReport = sprintf('%s\n\n',sReport);
                                         end
-                                        sReport = sprintf('%s\n\n',sReport);
                                     end
 
                                     registrationReport('add', sReport);
@@ -1554,20 +1676,29 @@ function setRegistrationCallback(~, ~)
                           %              dicomMetaData('set', atAssiciatedResampledMetaData);
                           %          else
                                         dicomBuffer('set', aAssociatedRegistratedBuffer, dAssociatedSeries);
+
                                         dicomMetaData('set', atAssociatedRegisteredMetaData, dAssociatedSeries);
+
                                         setQuantification(dAssociatedSeries);
                           %          end
 
                                     if link2DMip('get') == true
-                                        if size(dicomBuffer('get'), 3) ~= 1
-                                            aRegistratedMip = computeMIP(dicomBuffer('get'));
-                                            mipBuffer('set', aRegistratedMip, dAssociatedSeries);
+
+                                        if size(aAssociatedRegistratedBuffer, 3) ~= 1
+
+                                            % aRegistratedMip = computeMIP(aAssociatedRegistratedBuffer);
+
+                                            mipBuffer('set', computeMIP(aAssociatedRegistratedBuffer), dAssociatedSeries);
                                         end
                                     end
 
+                                    clear aAssociatedRegistratedBuffer;
+
                                     for vv=1:numel(adLbSeries)
+
                                         if adLbSeries(vv) ~= 0 && ...
                                            vv == dAssociatedSeries
+
                                             adLbSeries(vv) = 0; % This series is done
                                         end
                                     end
@@ -1575,6 +1706,8 @@ function setRegistrationCallback(~, ~)
                                 end
 
                             end
+
+                            clear aRegistratedBuffer; 
 
                         end
                     end
@@ -1587,7 +1720,8 @@ function setRegistrationCallback(~, ~)
 
         inputTemplate('set', tInput);
 
-        set(uiSeriesPtr('get'), 'Value', dInitOffset);
+        % set(uiSeriesPtr('get'), 'Value', dInitOffset);
+
         set(uiSeriesPtr('get'), 'Enable', 'on');
 
 %        isFusion('set', false);
@@ -1595,6 +1729,7 @@ function setRegistrationCallback(~, ~)
 %        set(btnFusionPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
 
         set(dlgRegister, 'Pointer', 'default');
+
         delete(dlgRegister);
 
 %        setQuantification(dInitOffset);
@@ -1613,7 +1748,7 @@ function setRegistrationCallback(~, ~)
 
 %        dicomViewerCore();
 
-        setViewerDefaultColor(true, dicomMetaData('get'));
+        setViewerDefaultColor(true, dicomMetaData('get', [], dInitOffset));
 
         if bResampleAxe == true
 
@@ -1627,7 +1762,7 @@ function setRegistrationCallback(~, ~)
 
                 clearDisplay();
 
-                if size(dicomBuffer('get'), 3) == 1
+                if size(dicomBuffer('get', [], dInitOffset), 3) == 1
                     initDisplay(1);
                 else
                     initDisplay(3);
@@ -1669,13 +1804,16 @@ function setRegistrationCallback(~, ~)
     function associateRegistrationCallback(hObject, ~)
 
         if get(chkRegAssociateSeries, 'Value') == true
+
             if strcmpi(get(hObject, 'Style'), 'Checkbox')
+
                 set(chkRegAssociateSeries, 'Value', true);
             else
                 set(chkRegAssociateSeries, 'Value', false);
             end
         else
             if strcmpi(hObject.Style, 'Checkbox')
+
                 set(chkRegAssociateSeries, 'Value', false);
             else
                 set(chkRegAssociateSeries, 'Value', true);
@@ -1688,13 +1826,16 @@ function setRegistrationCallback(~, ~)
     function updateRegDescriptionCallback(hObject, ~)
 
         if get(chkRegSeriesDescription, 'Value') == true
+
             if strcmpi(get(hObject, 'Style'), 'Checkbox')
+
                 set(chkRegSeriesDescription, 'Value', true);
             else
                 set(chkRegSeriesDescription, 'Value', false);
             end
         else
             if strcmpi(hObject.Style, 'Checkbox')
+
                 set(chkRegSeriesDescription, 'Value', false);
             else
                 set(chkRegSeriesDescription, 'Value', true);
@@ -1707,13 +1848,16 @@ function setRegistrationCallback(~, ~)
     function resampleRegistrationCallback(hObject, ~)
 
         if get(chkRegResampleRegistration, 'Value') == true
+
             if strcmpi(get(hObject, 'Style'), 'Checkbox')
+
                 set(chkRegResampleRegistration, 'Value', true);
             else
                 set(chkRegResampleRegistration, 'Value', false);
             end
         else
             if strcmpi(hObject.Style, 'Checkbox')
+
                 set(chkRegResampleRegistration, 'Value', false);
             else
                 set(chkRegResampleRegistration, 'Value', true);

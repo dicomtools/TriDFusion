@@ -308,7 +308,7 @@ function resize = dicomViewer()
 
     FDGBrownFatSUVType                 ('set', 'LBM'); 
     FDGBrownFatSUVThresholdValue       ('set', 1.8); % SUV
-    FDGBrownFatHUThresholdValue        ('set', -500, 0); % HU
+    FDGBrownFatHUThresholdValue        ('set', -500, 500); % HU
     FDGBrownFatSmalestVoiValue         ('set', 0.1);
 
     excludeBrownFatSUVBrain            ('set', true);

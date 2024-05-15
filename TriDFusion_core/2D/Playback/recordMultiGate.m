@@ -50,25 +50,25 @@ function recordMultiGate(mRecord, sPath, sFileName, sExtention, pAxe)
         return;
     end
 
-    if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}, 'din') && ...
-       gateUseSeriesUID('get') == true
-
-        progressBar(1, 'Error: Require a 4D series!');
-        multiFrameRecord('set', false);
-        mRecord.State = 'off';
-        set(uiSeriesPtr('get'), 'Enable', 'on');
-        return;
-    end
-
-    if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
-       gateUseSeriesUID('get') == true
-
-        progressBar(1, 'Error: Require a 4D series!');
-        multiFrameRecord('set', false);
-        mRecord.State = 'off';
-        set(uiSeriesPtr('get'), 'Enable', 'on');
-        return
-    end
+%     if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}, 'din') && ...
+%        gateUseSeriesUID('get') == true
+% 
+%         progressBar(1, 'Error: Require a 4D series!');
+%         multiFrameRecord('set', false);
+%         mRecord.State = 'off';
+%         set(uiSeriesPtr('get'), 'Enable', 'on');
+%         return;
+%     end
+% 
+%     if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
+%        gateUseSeriesUID('get') == true
+% 
+%         progressBar(1, 'Error: Require a 4D series!');
+%         multiFrameRecord('set', false);
+%         mRecord.State = 'off';
+%         set(uiSeriesPtr('get'), 'Enable', 'on');
+%         return
+%     end
 
     atMetaData = dicomMetaData('get', [], dSeriesOffset);
 
@@ -96,20 +96,23 @@ function recordMultiGate(mRecord, sPath, sFileName, sExtention, pAxe)
     lMaxBak = windowLevel('get', 'max');
 
     set(uiSeriesPtr('get'), 'Enable', 'off');
-
-    if pAxe ==  axes1Ptr('get', [], dSeriesOffset) && playback2DMipOnly('get') == false 
+    
+    if (pAxe == axes1Ptr('get', [], dSeriesOffset) && playback2DMipOnly('get') == false) || ...
+       (isVsplash('get') == true && strcmpi(vSplahView('get'), 'coronal'))     
 
         iLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 1);
         iCurrentSlice = sliceNumber('get', 'coronal');
         aAxe = axes1Ptr('get', [], dSeriesOffset);
 
-    elseif pAxe == axes2Ptr('get', [], dSeriesOffset) && playback2DMipOnly('get') == false
+    elseif (pAxe == axes2Ptr('get', [], dSeriesOffset) && playback2DMipOnly('get') == false) || ...
+           (isVsplash('get') == true && strcmpi(vSplahView('get'), 'sagittal'))     
 
         iLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 2);
         iCurrentSlice = sliceNumber('get', 'sagittal');
         aAxe = axes2Ptr('get', [], dSeriesOffset);
 
-    elseif pAxe == axes3Ptr('get', [], dSeriesOffset) && playback2DMipOnly('get') == false
+    elseif (pAxe == axes3Ptr('get', [], dSeriesOffset) && playback2DMipOnly('get') == false) || ...
+           (isVsplash('get') == true && strcmpi(vSplahView('get'), 'axial'))     
 
         iLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 3);
         iCurrentSlice = sliceNumber('get', 'axial');
@@ -401,7 +404,7 @@ function recordMultiGate(mRecord, sPath, sFileName, sExtention, pAxe)
         open(tClassVideoWriter);
     end
 
-    try
+%     try
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
@@ -684,7 +687,7 @@ end
                 if isVsplash('get') == true
 
                     [lFirst, lLast] = computeVsplashLayout(aBuffer, 'coronal', iCurrentSlice);
-                    sSliceNb = sprintf('%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(iLastSlice));
+                    sSliceNb = sprintf('%s-%s/%s', num2str(lFirst)+1, num2str(lLast)+1, num2str(iLastSlice));
                 else
                     sSliceNb = sprintf('%s/%s', num2str(iCurrentSlice), num2str(iLastSlice));
                 end
@@ -694,7 +697,17 @@ end
                if isVsplash('get') == true
 
                    [lFirst, lLast] = computeVsplashLayout(aBuffer, 'sagittal', iCurrentSlice);
-                   sSliceNb = sprintf('%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(iLastSlice));
+                   sSliceNb = sprintf('%s-%s/%s', num2str(lFirst)+1, num2str(lLast)+1, num2str(iLastSlice));
+               else
+                   sSliceNb = sprintf('%s/%s', num2str(iCurrentSlice), num2str(iLastSlice));
+               end
+
+            elseif aAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
+               if isVsplash('get') == true
+
+                   [lFirst, lLast] = computeVsplashLayout(aBuffer, 'axial', iCurrentSlice);
+                   sSliceNb = sprintf('%s-%s/%s', num2str(lFirst)+1, num2str(lLast)+1, num2str(iLastSlice));
                else
                    sSliceNb = sprintf('%s/%s', num2str(iCurrentSlice), num2str(iLastSlice));
                end
@@ -715,6 +728,7 @@ end
                     sSliceNb = sprintf('%s/%s', num2str(1+iLastSlice-iCurrentSlice), num2str(iLastSlice));
                 end
             end
+
 
             sAxeText = sprintf('\nFrame %d\n%s', dOffset, sSliceNb);
                 
@@ -750,6 +764,7 @@ end
         refreshImages();
 
         I = getframe(aAxe);
+        drawnow; % Ensure frame is captured before proceeding
         [indI,cm] = rgb2ind(I.cdata, 256);
 
         if idx == 1
@@ -758,6 +773,7 @@ end
                strcmpi('avi'  , sExtention) || ...
                strcmpi('*.mp4', sExtention) || ...
                strcmpi('mp4'  , sExtention)
+
 
                  writeVideo(tClassVideoWriter, I);
 
@@ -839,6 +855,14 @@ end
                 strcmpi('avi'  , sExtention) || ...
                 strcmpi('*.mp4', sExtention) || ...
                 strcmpi('mp4'  , sExtention)
+                
+                 aAcquireSize = size(I.cdata);
+
+                 if aAcquireSize(1) ~= tClassVideoWriter.Height || ...
+                    aAcquireSize(2) ~= tClassVideoWriter.Width
+
+                    I.cdata = imresize(I.cdata, [tClassVideoWriter.Height, tClassVideoWriter.Width]);   
+                 end
 
                  writeVideo(tClassVideoWriter, I);
 
@@ -905,10 +929,10 @@ end
         close(tClassVideoWriter);
     end
 
-    catch
-        bWriteSucceed = false;
-        progressBar(1, sprintf('Error: recordMultiGate()'));
-    end
+%     catch
+%         bWriteSucceed = false;
+%         progressBar(1, sprintf('Error: recordMultiGate()'));
+%     end
 
     setFigureToobarsVisible('on');
 

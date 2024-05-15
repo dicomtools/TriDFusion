@@ -260,7 +260,9 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
         atInput(numel(atInput)).tMovement.atSeq{1}.sAxe         = [];
         atInput(numel(atInput)).tMovement.atSeq{1}.aTranslation = [];
         atInput(numel(atInput)).tMovement.atSeq{1}.dRotation    = [];  
-        
+
+        atInput(numel(atInput)).aDicomBuffer = [];
+       
         asSeries = get(uiSeriesPtr('get'), 'String');
         asSeries{numel(asSeries)+1} = asSeriesDescription{numel(asSeriesDescription)};   
         
@@ -362,7 +364,9 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
         atInput(1).tMovement.atSeq{1}.sAxe         = [];
         atInput(1).tMovement.atSeq{1}.aTranslation = [];
         atInput(1).tMovement.atSeq{1}.dRotation    = [];  
-        
+
+        atInput(1).aDicomBuffer = [];
+       
         asSeries{1} = asSeriesDescription{1};              
     end    
     

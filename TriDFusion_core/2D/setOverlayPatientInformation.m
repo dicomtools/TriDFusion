@@ -80,7 +80,11 @@ function setOverlayPatientInformation(dSeriesOffset)
             if contains(sSeriesDate,'.')
                 sSeriesDate = extractBefore(sSeriesDate,'.');
             end
-            sSeriesDate = datetime(sSeriesDate,'InputFormat','yyyyMMddHHmmss');
+            try
+                sSeriesDate = datetime(sSeriesDate,'InputFormat','yyyyMMddHHmmss');
+            catch
+                sSeriesDate = '';
+            end
         end
     else
         sSeriesDate = '';

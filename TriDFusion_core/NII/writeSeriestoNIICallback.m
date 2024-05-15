@@ -29,9 +29,9 @@ function writeSeriestoNIICallback(~, ~)
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-           
+
     try
-        
+
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
 
@@ -43,10 +43,10 @@ function writeSeriestoNIICallback(~, ~)
         drawnow;
         return;
     end
-    
+
 %     sOutDir = outputDir('get');
 %     if isempty(sOutDir)
-                
+
          sCurrentDir  = viewerRootPath('get');
 
          sMatFile = [sCurrentDir '/' 'exportNIILastUsedDir.mat'];
@@ -76,14 +76,14 @@ function writeSeriestoNIICallback(~, ~)
         catch
             progressBar(1 , sprintf('Warning: Cant save file %s', sMatFile));
         end
-    
-        sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                
-        sOutDir = char(sOutDir) + "TriDFusion_NII_" + char(sDate) + '/';              
+
+        sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
+        sOutDir = char(sOutDir) + "TriDFusion_NII_" + char(sDate) + '/';
         if ~(exist(char(sOutDir), 'dir'))
             mkdir(char(sOutDir));
         end
 %     end
-    
+
     atMetaData  = dicomMetaData('get', [], dSeriesOffset);
 
     aBuffer = dicomBuffer('get', [], dSeriesOffset);
@@ -102,9 +102,9 @@ function writeSeriestoNIICallback(~, ~)
     end
 
     aImageOrientationPatient = zeros(6,1);
-    
+
     % Axial
-    
+
     aImageOrientationPatient(1) = 1;
     aImageOrientationPatient(5) = 1;
 
@@ -121,23 +121,25 @@ function writeSeriestoNIICallback(~, ~)
     atDcmDicomMeta{1}.PatientBirthDate        = atMetaData{1}.PatientBirthDate;
     atDcmDicomMeta{1}.SeriesDescription       = cleanString(atMetaData{1}.SeriesDescription);
     atDcmDicomMeta{1}.PatientPosition         = atMetaData{1}.PatientPosition;
-    atDcmDicomMeta{1}.ImagePositionPatient    = atMetaData{1}.ImagePositionPatient;
+    atDcmDicomMeta{1}.ImagePositionPatient    = atMetaData{end}.ImagePositionPatient;
 %     atDcmDicomMeta{1}.ImageOrientationPatient = atMetaData{1}.ImageOrientationPatient;
     atDcmDicomMeta{1}.ImageOrientationPatient = aImageOrientationPatient;
+%     atDcmDicomMeta{1}.MediaStorageSOPClassUID     = atMetaData{1}.MediaStorageSOPClassUID;
+%     atDcmDicomMeta{1}.MediaStorageSOPInstanceUID  = atMetaData{1}.MediaStorageSOPInstanceUID;      
     atDcmDicomMeta{1}.SOPClassUID             = atMetaData{1}.SOPClassUID;
     atDcmDicomMeta{1}.SOPInstanceUID          = atMetaData{1}.SOPInstanceUID;
     atDcmDicomMeta{1}.SeriesInstanceUID       = dicomuid;
     atDcmDicomMeta{1}.StudyInstanceUID        = atMetaData{1}.StudyInstanceUID;
     atDcmDicomMeta{1}.AccessionNumber         = atMetaData{1}.AccessionNumber;
     atDcmDicomMeta{1}.SeriesTime              = char(datetime('now','TimeZone','local','Format','HHmmss'));
-    atDcmDicomMeta{1}.SeriesDate              = char(datetime('now','TimeZone','local','Format','yyyyMMd'));
+    atDcmDicomMeta{1}.SeriesDate              = char(datetime('now','TimeZone','local','Format','yyyyMMddHHmmss'));
     atDcmDicomMeta{1}.AcquisitionTime         = atMetaData{1}.AcquisitionTime;
-    atDcmDicomMeta{1}.AcquisitionDate         = atMetaData{1}.AcquisitionDate;    
+    atDcmDicomMeta{1}.AcquisitionDate         = atMetaData{1}.AcquisitionDate;
 
 %     if ~isempty(atMetaData{1}.RescaleIntercept)
 %         atDcmDicomMeta{1}.RescaleIntercept = atMetaData{1}.RescaleIntercept;
 %     end
-% 
+%
 %     if ~isempty(atMetaData{1}.RescaleSlope)
 %         atDcmDicomMeta{1}.RescaleSlope = atMetaData{1}.RescaleSlope;
 %     end
@@ -146,7 +148,7 @@ function writeSeriestoNIICallback(~, ~)
     if exist(char(sTmpDir), 'dir')
         rmdir(char(sTmpDir), 's');
     end
-    mkdir(char(sTmpDir));  
+    mkdir(char(sTmpDir));
 
 %     if size(aBuffer, 3) ==1
 %         aBuffer = aBuffer(end:-1:1,:);
@@ -154,15 +156,15 @@ function writeSeriestoNIICallback(~, ~)
 %         aBuffer = aBuffer(:,:,end:-1:1);
 %         aBuffer = aBuffer(end:-1:1,:,:);
 %     end
-    
+
     writeOtherFormatToDICOM(aBuffer, atDcmDicomMeta, sTmpDir, dSeriesOffset, false);
 
     clear aBuffer;
 
     dicm2nii(sTmpDir, sOutDir, 1);
-  
 
-    rmdir(char(sTmpDir), 's');    
+
+    rmdir(char(sTmpDir), 's');
 
     progressBar(1, sprintf('Export to %s completed', char(sOutDir)));
 

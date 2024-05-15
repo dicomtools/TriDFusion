@@ -144,11 +144,12 @@ function info = dicominfo4che3(fileInput)
     info.SeriesInstanceUID = char(dataset.getString(org.dcm4che3.data.Tag.SeriesInstanceUID, 0));
     info.StudyInstanceUID  = char(dataset.getString(org.dcm4che3.data.Tag.StudyInstanceUID, 0));
     
-    info.SOPClassUID             = char(dataset.getString(org.dcm4che3.data.Tag.SOPClassUID, 0));
-    info.MediaStorageSOPClassUID = char(dataset.getString(org.dcm4che3.data.Tag.MediaStorageSOPClassUID, 0));
-    info.SOPInstanceUID          = char(dataset.getString(org.dcm4che3.data.Tag.SOPInstanceUID, 0));
-    info.FrameOfReferenceUID     = char(dataset.getString(org.dcm4che3.data.Tag.FrameOfReferenceUID, 0));    
-    
+    info.MediaStorageSOPClassUID    = char(dataset.getString(org.dcm4che3.data.Tag.MediaStorageSOPClassUID, 0));
+    info.MediaStorageSOPInstanceUID = char(dataset.getString(org.dcm4che3.data.Tag.MediaStorageSOPInstanceUID, 0));
+    info.SOPClassUID                = char(dataset.getString(org.dcm4che3.data.Tag.SOPClassUID, 0));
+    info.SOPInstanceUID             = char(dataset.getString(org.dcm4che3.data.Tag.SOPInstanceUID, 0));
+    info.FrameOfReferenceUID        = char(dataset.getString(org.dcm4che3.data.Tag.FrameOfReferenceUID, 0));    
+
     info.AccessionNumber = char(dataset.getString(org.dcm4che3.data.Tag.AccessionNumber, 0));
     info.StudyID         = char(dataset.getString(org.dcm4che3.data.Tag.StudyID, 0));
 

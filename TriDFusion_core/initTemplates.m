@@ -55,7 +55,9 @@ function initTemplates()
             setDisplayBuffer([]);
 
             if numel(inputTemplate('get')) ~= 0
+
                 for dTemplateLoop = 1 : numel(inputTemplate('get'))       
+                    
                     setQuantification(dTemplateLoop);
                 end
             end

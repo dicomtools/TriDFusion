@@ -252,7 +252,11 @@ function refreshImages(clickedPtX, clickedPtY)
                                     if contains(sFusedSeriesDate,'.')
                                         sFusedSeriesDate = extractBefore(sFusedSeriesDate,'.');
                                     end
-                                    sFusedSeriesDate = datetime(sFusedSeriesDate, 'InputFormat', 'yyyyMMddHHmmss');
+                                        try
+                                            sFusedSeriesDate = datetime(sFusedSeriesDate, 'InputFormat', 'yyyyMMddHHmmss');
+                                        catch
+                                            sFusedSeriesDate = ''; 
+                                        end
                                 end
                             else
                                 sFusedSeriesDate = '';
@@ -1439,7 +1443,11 @@ function refreshImages(clickedPtX, clickedPtY)
                                         if contains(sFusedSeriesDate,'.')
                                             sFusedSeriesDate = extractBefore(sFusedSeriesDate,'.');
                                         end
-                                        sFusedSeriesDate = datetime(sFusedSeriesDate, 'InputFormat', 'yyyyMMddHHmmss');
+                                        try
+                                            sFusedSeriesDate = datetime(sFusedSeriesDate, 'InputFormat', 'yyyyMMddHHmmss');
+                                        catch
+                                            sFusedSeriesDate = ''; 
+                                        end
                                     end
                                 else
                                     sFusedSeriesDate = '';

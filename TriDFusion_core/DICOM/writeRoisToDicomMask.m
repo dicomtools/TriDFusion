@@ -240,7 +240,7 @@ function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDico
 
 
 %     for jj=1:numel(atDicomMeta)
-        atDcmDicomMeta{1}.Modality                = 'ot';
+        atDcmDicomMeta{1}.Modality                = atDicomMeta{1}.Modality;
         atDcmDicomMeta{1}.Units                   = 'Counts';
         atDcmDicomMeta{1}.PixelSpacing            = atDicomMeta{1}.PixelSpacing;
 
@@ -264,15 +264,19 @@ function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDico
 %         atDcmDicomMeta{1}.PatientBirthDate        = atDicomMeta{1}.PatientBirthDate;
         atDcmDicomMeta{1}.SeriesDescription       = sprintf('MASK-%s', atDicomMeta{1}.SeriesDescription);
         atDcmDicomMeta{1}.PatientPosition         = atDicomMeta{1}.PatientPosition;
-        atDcmDicomMeta{1}.ImagePositionPatient    = atDicomMeta{1}.ImagePositionPatient;
+        atDcmDicomMeta{1}.ImagePositionPatient    = atDicomMeta{end}.ImagePositionPatient;
         atDcmDicomMeta{1}.ImageOrientationPatient = atDicomMeta{1}.ImageOrientationPatient;
-        atDcmDicomMeta{1}.SOPClassUID             = '1.2.840.10008.5.1.4.1.1.20';
-        atDcmDicomMeta{1}.SOPInstanceUID          = '1.2.752.37.54.2572.122881719510441496582642976905549489909';
+        % atDcmDicomMeta{1}.SOPClassUID             = '1.2.840.10008.5.1.4.1.1.20';
+        % atDcmDicomMeta{1}.SOPInstanceUID          = '1.2.752.37.54.2572.122881719510441496582642976905549489909';
+%         atDcmDicomMeta{1}.MediaStorageSOPClassUID     = atDicomMeta{1}.MediaStorageSOPClassUID;
+%         atDcmDicomMeta{1}.MediaStorageSOPInstanceUID  = atDicomMeta{1}.MediaStorageSOPInstanceUID;            
+        atDcmDicomMeta{1}.SOPClassUID             = atDicomMeta{1}.SOPClassUID;
+        atDcmDicomMeta{1}.SOPInstanceUID          = atDicomMeta{1}.SOPInstanceUID;        
         atDcmDicomMeta{1}.SeriesInstanceUID       = dicomuid;
         atDcmDicomMeta{1}.StudyInstanceUID        = atDicomMeta{1}.StudyInstanceUID;
         atDcmDicomMeta{1}.AccessionNumber         = atDicomMeta{1}.AccessionNumber;
         atDcmDicomMeta{1}.SeriesTime              = char(datetime('now','TimeZone','local','Format','HHmmss'));
-        atDcmDicomMeta{1}.SeriesDate              = char(datetime('now','TimeZone','local','Format','yyyyMMd'));
+        atDcmDicomMeta{1}.SeriesDate              = char(datetime('now','TimeZone','local','Format','yyyyMMddHHmmss'));
 %         atDcmDicomMeta{1}.AcquisitionTime        = '';
 %         atDcmDicomMeta{1}.AcquisitionDate        = '';       
 %         atDcmDicomMeta{1}.RescaleIntercept        = 0;

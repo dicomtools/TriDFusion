@@ -109,7 +109,11 @@ function [atInput, asSeriesDescription] = initInputTemplate(asFilesList, atDicom
                 if contains(sVolSeriesDate,'.')
                     sVolSeriesDate = extractBefore(sVolSeriesDate,'.');
                 end
-                sVolSeriesDate = datetime(sVolSeriesDate,'InputFormat','yyyyMMddHHmmss');
+                try
+                    sVolSeriesDate = datetime(sVolSeriesDate,'InputFormat','yyyyMMddHHmmss');
+                catch
+                    sVolSeriesDate = '';
+                end
             end
             
             sVolSeriesDescription = atInput(dSeriesLoop).atDicomInfo{1}.SeriesDescription;

@@ -162,14 +162,25 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, 
 
         if isempty(atWriteMetaData{ww}.SOPClassUID)
 
-            atWriteMetaData{ww}.SOPClassUID  = '1.2.840.10008.5.1.4.1.1.20';
+            atWriteMetaData{ww}.SOPClassUID  = '1.2.840.10008.5.1.4.1.1.128';
         end
 
-        if isempty(atWriteMetaData{ww}.SOPInstanceUID)       
-
-            atWriteMetaData{ww}.SOPInstanceUID  = '1.2.752.37.54.2572.122881719510441496582642976905549489909';
-        end
+        % if isempty(atWriteMetaData{ww}.SOPInstanceUID)       
+        % 
+        %     atWriteMetaData{ww}.SOPInstanceUID  = dicomuid;
+        % end
         
+%         if isempty(atWriteMetaData{ww}.MediaStorageSOPClassUID) 
+% 
+%             atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.128';
+%         end
+
+%         if isempty(atWriteMetaData{ww}.MediaStorageSOPInstanceUID) 
+% 
+%             atWriteMetaData{ww}.MediaStorageSOPInstanceUID = '1.2.840.113619.2.290.430754041.1667595622.405863';
+%         end
+ 
+
         atWriteMetaData{ww}.SeriesInstanceUID = dSeriesInstanceUID;
 
         atWriteMetaData{ww}.BitsAllocated = 32;
@@ -182,7 +193,7 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, 
                    sOutFile           , ...
                    atWriteMetaData{ww}, ...
                    'CreateMode'       , ...
-                   'Copy'             , ...
+                   'Copy'           , ...
                    'WritePrivate'     , true ...
                   ); 
 

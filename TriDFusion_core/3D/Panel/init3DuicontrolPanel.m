@@ -3222,6 +3222,7 @@ end
                 atInput(numel(atInput)).tMovement.atSeq{1}.dRotation = [];
 
                 atInput(numel(atInput)).atDicomInfo = atDcmMetaData;
+                atInput(numel(atInput)).aDicomBuffer = [];
 
                 asSeriesDescription = seriesDescription('get');
                 asSeriesDescription{numel(asSeriesDescription)+1}=sprintf('MASK %s', asSeriesDescription{dSeriesOffset});
@@ -4249,7 +4250,7 @@ end
                 isoObj = isoObject('get');
                 if ~isempty(isoObj)
 
-                    set(isoObj, 'Isovalue', dValue/100 );
+                    % set(isoObj, 'Isovalue', dValue/100 );
 
                     if isempty(viewer3dObject('get'))
 

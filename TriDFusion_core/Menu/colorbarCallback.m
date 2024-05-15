@@ -25,24 +25,46 @@ function colorbarCallback(hObject, ~)
 % See the GNU General Public License for more details.
 %
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/
 
     windowButton('set', 'up'); % Fix for Linux
 
-    tInput = inputTemplate('get');
+    atInput = inputTemplate('get');
 
     dFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
-    if dFuseOffset > numel(tInput)
+    if dFuseOffset > numel(atInput)
         return;
     end
 
     dOffset = get(uiSeriesPtr('get'), 'Value');
-    if dOffset > numel(tInput)
+    if dOffset > numel(atInput)
         return;
     end
 
+    % if(numel(hObject.UIContextMenu.Children) > 1)
+    % 
+    %     if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
+    % 
+    %         dColorbarOffset = fusionColorMapOffset('get');
+    %     else
+    %         dColorbarOffset = colorMapOffset('get');
+    %     end
+    % 
+    %     asColorMap = getColorMapsName();
+    % 
+    %     for mm = 1:numel(hObject.UIContextMenu.Children)
+    % 
+    %         if strcmpi(hObject.UIContextMenu.Children(mm).Text, asColorMap{dColorbarOffset})    
+    %             set(hObject.UIContextMenu.Children(mm), 'Checked', 'on');
+    %         else
+    %             set(hObject.UIContextMenu.Children(mm), 'Checked', 'off');
+    %         end
+    %     end
+    % end
+    
     c = uicontextmenu(fiMainWindowPtr('get'));
     set(c, 'tag', get(hObject, 'Tag'));
+    % set(c, 'MenuSelectedFcn', @handleColormapSelection);
 
   %  hObject.UIContextMenu = c;
     set(hObject, 'UIContextMenu', c);
@@ -51,6 +73,8 @@ function colorbarCallback(hObject, ~)
 
         d = uimenu(c,'Label','Tools');
         set(d, 'tag', get(hObject, 'Tag'));
+        set(d, 'MenuSelectedFcn', @handleColorbarTools);
+       
         if isCombineMultipleFusion('get') == true
             set(d, 'Enable', 'off');
         else
@@ -60,6 +84,7 @@ function colorbarCallback(hObject, ~)
         mEdge = uimenu(d,'Label','Edge Detection', 'Callback',@setColorbarEdgeDetection);
 
         mManualSync = uimenu(d,'Label','Manual Alignment');
+        set(mManualSync, 'MenuSelectedFcn', @handleColorbarManualAlignment);
 
         mMoveImage         = uimenu(mManualSync,'Label','Move Image'               , 'Callback',@setMoveImageCallback);
         mMoveAssociated    = uimenu(mManualSync,'Label','Move Associated Series'   , 'Callback',@setMoveAssociatedSeriesCallback);
@@ -89,10 +114,11 @@ function colorbarCallback(hObject, ~)
             set(mUpdateDescription, 'Enable' , 'off');
         end
 
-        sModality = tInput(dFuseOffset).atDicomInfo{1}.Modality;
+        sModality = atInput(dFuseOffset).atDicomInfo{1}.Modality;
 %        if ~strcmpi(sModality, 'CT')
 
             mPlot = uimenu(d,'Label','Plot Contours');
+            set(mPlot, 'MenuSelectedFcn', @handleColorbarPlotContours);
       %      set(mPlot, 'tag', get(hObject, 'Tag'));
 
             mPlotContours = uimenu(mPlot,'Label','Show Contours', 'Callback', @setPlotContoursCallback);
@@ -166,27 +192,28 @@ function colorbarCallback(hObject, ~)
     end
 
     if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
-        if numel(tInput) == 1
-            if tInput(dFuseOffset).bFusedEdgeDetection == true
+        if numel(atInput) == 1
+            if atInput(dFuseOffset).bFusedEdgeDetection == true
                 set(findall(d, 'Label', 'Edge Detection'), 'Checked', 'on');
             end
         else
-            if tInput(dFuseOffset).bEdgeDetection == true
+            if atInput(dFuseOffset).bEdgeDetection == true
                 set(findall(d, 'Label', 'Edge Detection'), 'Checked', 'on');
             end
         end
-        sModality = tInput(dFuseOffset).atDicomInfo{1}.Modality;
+        sModality = atInput(dFuseOffset).atDicomInfo{1}.Modality;
 
     else
-%        if tInput(dOffset).bEdgeDetection == true
+%        if atInput(dOffset).bEdgeDetection == true
 %            set(findall(d, 'Label', 'Edge Detection'), 'Checked', 'on');
 %        end
 
-        sModality = tInput(dOffset).atDicomInfo{1}.Modality;
+        sModality = atInput(dOffset).atDicomInfo{1}.Modality;
     end
 
     e = uimenu(c,'Label','Window');
     set(e, 'tag', get(hObject, 'Tag'));
+    set(e, 'MenuSelectedFcn', @handleWindowSelection);
 
     if isCombineMultipleFusion('get') == true && strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
         set(e, 'Enable', 'off');
@@ -200,6 +227,7 @@ function colorbarCallback(hObject, ~)
 
         i = uimenu(c,'Label','Multi-Fusion');
         set(i, 'tag', get(hObject, 'Tag'));
+        set(i, 'MenuSelectedFcn', @handleColorbarMultiFusion);
 
         mCombineRGB = uimenu(i,'Label','Combine RGB', 'Callback',@setFusionCombineRGB);
         if isCombineMultipleFusion('get') == true
@@ -279,21 +307,23 @@ function colorbarCallback(hObject, ~)
     end
 
     if strcmpi(sModality, 'CT')
+        % Create uimenus with labels and tags
+        asMenuLabels = {'(F1) Lung', '(F2) Soft Tissue', '(F3) Bone', '(F4) Liver', ...
+                        '(F5) Brain', '(F6) Head and Neck', '(F7) Enchanced Lung', ...
+                        '(F8) Mediastinum', '(F9) Temporal Bone', '(F9) Vertebra', ...
+                        '(F9) All', 'Custom'};
 
-        mF1 = uimenu(e,'Label','(F1) Lung'          , 'Callback',@setCTColorbarWindowLevel);
-        mF2 = uimenu(e,'Label','(F2) Soft Tissue'   , 'Callback',@setCTColorbarWindowLevel);
-        mF3 = uimenu(e,'Label','(F3) Bone'          , 'Callback',@setCTColorbarWindowLevel);
-        mF4 = uimenu(e,'Label','(F4) Liver'         , 'Callback',@setCTColorbarWindowLevel);
-        mF5 = uimenu(e,'Label','(F5) Brain'         , 'Callback',@setCTColorbarWindowLevel);
-        mF6 = uimenu(e,'Label','(F6) Head and Neck' , 'Callback',@setCTColorbarWindowLevel);
-        mF7 = uimenu(e,'Label','(F7) Enchanced Lung', 'Callback',@setCTColorbarWindowLevel);
-        mF8 = uimenu(e,'Label','(F8) Mediastinum'   , 'Callback',@setCTColorbarWindowLevel);
-        mF91 = uimenu(e,'Label','(F9) Temporal Bone', 'Callback',@setCTColorbarWindowLevel);
-        mF92 = uimenu(e,'Label','(F9) Vertebra'     , 'Callback',@setCTColorbarWindowLevel);
-%         mF93 = uimenu(e,'Label','(F9) Scout CT'     , 'Callback',@setCTColorbarWindowLevel);
-        mF34 = uimenu(e,'Label','(F9) All'          , 'Callback',@setCTColorbarWindowLevel);
-        mCtm = uimenu(e,'Label','Custom'            , 'Enable', 'off','Callback',@setCTColorbarWindowLevel);
+        asMenuTags = {'Lung', 'SoftTissue', 'Bone', 'Liver', 'Brain', 'HeadAndNeck', ...
+                      'EnhancedLung', 'Mediastinum', 'TemporalBone', 'Vertebra', ...
+                      'All', 'Custom'};
 
+        menus = gobjects(1, numel(asMenuLabels));
+        for i = 1:numel(asMenuLabels)
+            menus(i) = uimenu(e, 'Label', asMenuLabels{i}, 'Callback', @setCTColorbarWindowLevel, 'Tag', asMenuTags{i});
+        end
+        set(menus(end), 'Enable', 'off');
+
+        % Get window and level
         if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
             dMax = fusionWindowLevel('get', 'max');
             dMin = fusionWindowLevel('get', 'min');
@@ -301,177 +331,69 @@ function colorbarCallback(hObject, ~)
             dMax = windowLevel('get', 'max');
             dMin = windowLevel('get', 'min');
         end
-
         [dWindow, dLevel] = computeWindowMinMax(dMax, dMin);
         sWindowName = getWindowName(dWindow, dLevel);
 
-        switch lower(sWindowName)
+        % Set checked menu based on window name
+        checkedMenu = findobj(menus, 'Tag', regexprep(sWindowName, '\s', ''));
+        if ~isempty(checkedMenu)
 
-            case 'lung'
-                set(mF1, 'Checked', 'on');
-
-            case 'soft tissue'
-                set(mF2, 'Checked', 'on');
-
-            case 'bone'
-                set(mF3, 'Checked', 'on');
-
-            case 'liver'
-                set(mF4, 'Checked', 'on');
-
-            case 'brain'
-                set(mF5, 'Checked', 'on');
-
-            case 'head and neck'
-                set(mF6, 'Checked', 'on');
-
-            case 'enhanced lung'
-                set(mF7, 'Checked', 'on');
-
-            case 'mediastinum'
-                set(mF8, 'Checked', 'on');
-
-            case 'temporal bone'
-                set(mF91, 'Checked', 'on');
-
-            case 'vertebra'
-                set(mF92, 'Checked', 'on');
-
-            case 'all'
-                set(mF34, 'Checked', 'on');
-
-            otherwise
-                set(mCtm, 'Checked', 'on');
+            set(checkedMenu, 'Checked', 'on');
+            
+        else
+            set(findobj(menus, 'Tag', 'Custom'), 'Checked', 'on');
         end
-
     end
 
-    uimenu(c,'Label','Parula'       ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Jet'          ,'Callback',@setColorOffset);
-    uimenu(c,'Label','HSV'          ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Hot'          ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Cool'         ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Spring'       ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Summer'       ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Autumn'       ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Winter'       ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Gray'         ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Invert Linear','Callback',@setColorOffset);
-    uimenu(c,'Label','Bone'         ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Copper'       ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Pink'         ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Lines'        ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Colorcube'    ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Prism'        ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Flag'         ,'Callback',@setColorOffset);
-    uimenu(c,'Label','PET'          ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Hot Metal'    ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Angio'        ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Yellow'       ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Magenta'      ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Cyan'         ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Red'          ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Green'        ,'Callback',@setColorOffset);
-    uimenu(c,'Label','Blue'         ,'Callback',@setColorOffset);
-
+    asColorMap = getColorMapsName();
+    
+    for i = 1:numel(asColorMap)
+        uimenu(c, 'Label', asColorMap{i}, 'Callback', @setColorOffset);
+    end
+    
     if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
-        dOffset = fusionColorMapOffset('get');
+
+        dColorbarOffset = fusionColorMapOffset('get');
     else
-        dOffset = colorMapOffset('get');
+        dColorbarOffset = colorMapOffset('get');
     end
-
-    switch dOffset
-        case 1
-            set(findall(c,'Label','Parula'), 'Checked', 'on');
-        case 2
-            set(findall(c,'Label','Jet'), 'Checked', 'on');
-        case 3
-            set(findall(c,'Label','HSV'), 'Checked', 'on');
-        case 4
-            set(findall(c,'Label','Hot'), 'Checked', 'on');
-        case 5
-            set(findall(c,'Label','Cool'), 'Checked', 'on');
-        case 6
-            set(findall(c,'Label','Spring'), 'Checked', 'on');
-        case 7
-            set(findall(c,'Label','Summer'), 'Checked', 'on');
-        case 8
-            set(findall(c,'Label','Autumn'), 'Checked', 'on');
-        case 9
-            set(findall(c,'Label','Winter'), 'Checked', 'on');
-        case 10
-            set(findall(c,'Label','Gray'), 'Checked', 'on');
-        case 11
-            set(findall(c,'Label','Invert Linear'), 'Checked', 'on');
-        case 12
-            set(findall(c,'Label','Bone'), 'Checked', 'on');
-        case 13
-            set(findall(c,'Label','Copper'), 'Checked', 'on');
-        case 14
-            set(findall(c,'Label','Pink'), 'Checked', 'on');
-        case 15
-            set(findall(c,'Label','Lines'), 'Checked', 'on');
-        case 16
-            set(findall(c,'Label','Colorcube'), 'Checked', 'on');
-        case 17
-            set(findall(c,'Label','Prism'), 'Checked', 'on');
-        case 18
-            set(findall(c,'Label','Flag'), 'Checked', 'on');
-        case 19
-            set(findall(c,'Label','PET'), 'Checked', 'on');
-        case 20
-            set(findall(c,'Label','Hot Metal'), 'Checked', 'on');
-        case 21
-            set(findall(c,'Label','Angio'), 'Checked', 'on');
-        case 22
-            set(findall(c,'Label','Yellow'), 'Checked', 'on');
-        case 23
-            set(findall(c,'Label','Magenta'), 'Checked', 'on');
-        case 24
-            set(findall(c,'Label','Cyan'), 'Checked', 'on');
-        case 25
-            set(findall(c,'Label','Red'), 'Checked', 'on');
-        case 26
-            set(findall(c,'Label','Green'), 'Checked', 'on');
-        case 27
-            set(findall(c,'Label','Blue'), 'Checked', 'on');
-    end
-
+    
+    set(findall(c.Children, 'Type', 'uimenu'), 'Checked', 'off');
+    set(findall(c.Children, 'Label', asColorMap{dColorbarOffset}), 'Checked', 'on');
+    
     function setColorOffset(hObject, ~)
 
         if strcmpi(get(get(hObject, 'Parent'), 'Tag'), 'Fusion Colorbar')
-            iOffset = getColorMapOffset(get(hObject, 'Label'));
-            fusionColorMapOffset('set', iOffset);
+
+            fusionColorMapOffset('set', getColorMapOffset(get(hObject, 'Label')));
         else
-            iOffset = getColorMapOffset(get(hObject, 'Label'));
-            colorMapOffset('set', iOffset);
+            colorMapOffset('set', getColorMapOffset(get(hObject, 'Label')));
         end
 
         refreshColorMap();
-
     end
 
     function setColorbarEdgeDetection(hObject, ~)
 
-        tInput = inputTemplate('get');
+        atInput = inputTemplate('get');
         aInput = inputBuffer('get');
 
         iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-        if iSeriesOffset > numel(tInput)
+        if iSeriesOffset > numel(atInput)
             return;
         end
 
         if strcmpi(get(get(hObject, 'Parent'), 'Tag'), 'Fusion Colorbar')
 
             iFusionOffset   = get(uiFusedSeriesPtr('get'), 'Value');
-            if iFusionOffset > numel(tInput)
+            if iFusionOffset > numel(atInput)
                 return;
             end
 
-            if numel(tInput) == 1
-                bEdge = tInput(iFusionOffset).bFusedEdgeDetection;
+            if numel(atInput) == 1
+                bEdge = atInput(iFusionOffset).bFusedEdgeDetection;
             else
-                bEdge = tInput(iFusionOffset).bEdgeDetection;
+                bEdge = atInput(iFusionOffset).bEdgeDetection;
             end
 
             if bEdge == true
@@ -480,13 +402,13 @@ function colorbarCallback(hObject, ~)
 
                 tMetaData  = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
                 if isempty(tMetaData)
-                    tMetaData = tInput(iSeriesOffset).atDicomInfo;
+                    tMetaData = atInput(iSeriesOffset).atDicomInfo;
                 end
 
-                if numel(tInput) == 1
-                    tInput(iFusionOffset).bFusedEdgeDetection = false;
+                if numel(atInput) == 1
+                    atInput(iFusionOffset).bFusedEdgeDetection = false;
                 else
-                    tInput(iFusionOffset).bEdgeDetection = false;
+                    atInput(iFusionOffset).bEdgeDetection = false;
                 end
 
                 set(uiSeriesPtr('get'), 'Value', iFusionOffset);
@@ -497,17 +419,17 @@ function colorbarCallback(hObject, ~)
 
                 tFuseMetaData = dicomMetaData('get');
                 if isempty(tFuseMetaData)
-                    tFuseMetaData = tInput(iFusionOffset).atDicomInfo;
+                    tFuseMetaData = atInput(iFusionOffset).atDicomInfo;
                 end
 
                 if size(aFuseImage, 3) == 1
 
                     if iSeriesOffset ~= iFusionOffset
-                        if tInput(iSeriesOffset).bFlipLeftRight == true
+                        if atInput(iSeriesOffset).bFlipLeftRight == true
                             aFuseImage=aFuseImage(:,end:-1:1);
                         end
 
-                        if tInput(iSeriesOffset).bFlipAntPost == true
+                        if atInput(iSeriesOffset).bFlipAntPost == true
                             aFuseImage=aFuseImage(end:-1:1,:);
                         end
                     end
@@ -518,15 +440,15 @@ function colorbarCallback(hObject, ~)
                 else
 
                     if iSeriesOffset ~= iFusionOffset
-                        if tInput(iSeriesOffset).bFlipLeftRight == true
+                        if atInput(iSeriesOffset).bFlipLeftRight == true
                             aFuseImage=aFuseImage(:,end:-1:1,:);
                         end
 
-                        if tInput(iSeriesOffset).bFlipAntPost == true
+                        if atInput(iSeriesOffset).bFlipAntPost == true
                             aFuseImage=aFuseImage(end:-1:1,:,:);
                         end
 
-                        if tInput(iSeriesOffset).bFlipHeadFeet == true
+                        if atInput(iSeriesOffset).bFlipHeadFeet == true
                             aFuseImage=aFuseImage(:,:,end:-1:1);
                         end
                     end
@@ -582,10 +504,10 @@ function colorbarCallback(hObject, ~)
 
             else
 
-                if numel(tInput) == 1
-                    tInput(iFusionOffset).bFusedEdgeDetection = true;
+                if numel(atInput) == 1
+                    atInput(iFusionOffset).bFusedEdgeDetection = true;
                 else
-                    tInput(iFusionOffset).bEdgeDetection = true;
+                    atInput(iFusionOffset).bEdgeDetection = true;
                 end
 
                 dFudgeFactor = fudgeFactorSegValue('get');
@@ -599,7 +521,7 @@ function colorbarCallback(hObject, ~)
 
             end
 
-            inputTemplate('set', tInput);
+            inputTemplate('set', atInput);
 
             setFusionColorbarLabel();
 
@@ -611,7 +533,7 @@ function colorbarCallback(hObject, ~)
     function setColorbarWindowLevel(hObject,~)
 
 
-        tInput = inputTemplate('get');
+        atInput = inputTemplate('get');
 
         if strcmpi(get(get(hObject, 'Parent'), 'Tag'), 'Fusion Colorbar')
 
@@ -697,8 +619,8 @@ function colorbarCallback(hObject, ~)
                 end
             else
                 if bDefaultUnit == true
-                    dMax = dMax*tInput(dOffset).tQuant.tSUV.dScale;
-                    dMin = dMin*tInput(dOffset).tQuant.tSUV.dScale;
+                    dMax = dMax*atInput(dOffset).tQuant.tSUV.dScale;
+                    dMin = dMin*atInput(dOffset).tQuant.tSUV.dScale;
                 end
             end
             bUnitEnable = 'on';
@@ -895,8 +817,8 @@ function colorbarCallback(hObject, ~)
 
                 case 'SUV'
 
-                    sMinValue = dMinValue*tInput(dOffset).tQuant.tSUV.dScale;
-                    sMaxValue = dMaxValue*tInput(dOffset).tQuant.tSUV.dScale;
+                    sMinValue = dMinValue*atInput(dOffset).tQuant.tSUV.dScale;
+                    sMaxValue = dMaxValue*atInput(dOffset).tQuant.tSUV.dScale;
 
                 case 'BQML'
 
@@ -924,8 +846,8 @@ function colorbarCallback(hObject, ~)
             lMin = str2double(get(edtMinValue, 'String'));
 
             if strcmpi(sUnitDisplay, 'SUV')
-                lMin = lMin/tInput(dOffset).tQuant.tSUV.dScale;
-                lMax = lMax/tInput(dOffset).tQuant.tSUV.dScale;
+                lMin = lMin/atInput(dOffset).tQuant.tSUV.dScale;
+                lMax = lMax/atInput(dOffset).tQuant.tSUV.dScale;
             end
 
             if strcmpi(sUnitDisplay, 'Window Level')
@@ -1191,6 +1113,246 @@ function colorbarCallback(hObject, ~)
         else
             updateDescription('set', true);
         end
+    end
+
+    function handleWindowSelection(hObject, ~)
+
+        atInput = inputTemplate('get');
+    
+        dFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
+        if dFuseOffset > numel(atInput)
+            return;
+        end
+    
+        dOffset = get(uiSeriesPtr('get'), 'Value');
+        if dOffset > numel(atInput)
+            return;
+        end
+
+        if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
+            sModality = atInput(dFuseOffset).atDicomInfo{1}.Modality;
+    
+        else
+            sModality = atInput(dOffset).atDicomInfo{1}.Modality;
+        end
+
+        if strcmpi(sModality, 'CT')
+    
+            % Get window and level
+            if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
+                dMax = fusionWindowLevel('get', 'max');
+                dMin = fusionWindowLevel('get', 'min');
+            else
+                dMax = windowLevel('get', 'max');
+                dMin = windowLevel('get', 'min');
+            end
+            [dWindow, dLevel] = computeWindowMinMax(dMax, dMin);
+            sWindowName = getWindowName(dWindow, dLevel);
+    
+            % Set checked menu based on window name
+            checkedMenu = findobj(hObject.Children, 'Tag', regexprep(sWindowName, '\s', ''));
+            if ~isempty(checkedMenu)
+    
+                set(checkedMenu, 'Checked', 'on');
+                
+            else
+                set(findobj(hObject.Children, 'Tag', 'Custom'), 'Checked', 'on');
+            end
+        end
+        
+    end
+
+    function handleColorbarTools(hObject, ~)
+
+        atInput = inputTemplate('get');
+
+        if strcmpi(get(get(hObject, 'Parent'), 'Tag'), 'Fusion Colorbar')
+
+            iFusionOffset   = get(uiFusedSeriesPtr('get'), 'Value');
+
+            if iFusionOffset > numel(atInput)
+                return;
+            end
+
+            if numel(atInput) == 1
+                bEdge = atInput(iFusionOffset).bFusedEdgeDetection;
+            else
+                bEdge = atInput(iFusionOffset).bEdgeDetection;
+            end
+
+            if bEdge == true
+                set(findall(hObject.Children, 'Label', 'Edge Detection'), 'Checked', 'on');
+            else
+                set(findall(hObject.Children, 'Label', 'Edge Detection'), 'Checked', 'off');
+            end
+        end
+
+    end
+    
+    function handleColorbarManualAlignment(hObject, ~)
+
+        if isMoveImageActivated('get') == true
+
+            set(findall(hObject.Children, 'Label', 'Move Image'), 'Checked', 'on');
+
+            set(findall(hObject.Children, 'Label', 'Move Associated Series'   ), 'Enable', 'on');
+            set(findall(hObject.Children, 'Label', 'Update Series Description'), 'Enable', 'on');
+        else
+            set(findall(hObject.Children, 'Label', 'Move Image'), 'Checked', 'off');
+
+            set(findall(hObject.Children, 'Label', 'Move Associated Series'   ), 'Enable', 'off');
+            set(findall(hObject.Children, 'Label', 'Update Series Description'), 'Enable', 'off');                
+        end
+
+        if associateRegistrationModality('get') == true
+
+            set(findall(hObject.Children, 'Label', 'Move Associated Series'), 'Checked', 'on');
+        else
+            set(findall(hObject.Children, 'Label', 'Move Associated Series'), 'Checked', 'off');
+        end
+
+        if updateDescription('get') == true
+
+            set(findall(hObject.Children, 'Label', 'Update Series Description'), 'Checked', 'on');
+        else
+            set(findall(hObject.Children, 'Label', 'Update Series Description'), 'Checked', 'off');
+        end
+
+    end
+
+    function handleColorbarPlotContours(hObject, ~)
+
+        if isPlotContours('get') == true
+
+            set(findall(hObject.Children, 'Label', 'Show Contours'), 'Checked', 'on');
+
+            set(findall(hObject.Children, 'Label', 'Show Face Alpha'), 'Enable', 'on');
+            set(findall(hObject.Children, 'Label', 'Set Level List' ), 'Enable', 'on');
+            set(findall(hObject.Children, 'Label', 'Set Level Step' ), 'Enable', 'on');
+            set(findall(hObject.Children, 'Label', 'Set Line Width' ), 'Enable', 'on');
+            set(findall(hObject.Children, 'Label', 'Show Text'      ), 'Enable', 'on');
+         
+            if size(dicomBuffer('get'), 3) == 1 % 2D Image
+
+                if isShowTextContours('get', 'axe') == true
+
+                    set(findall(hObject.Children, 'Label', 'Set Text List'), 'Enable', 'on');
+                else
+                    set(findall(hObject.Children, 'Label', 'Set Text List'), 'Enable', 'off');
+                end
+            else
+                if isShowTextContours('get', 'coronal')  == true || ...
+                   isShowTextContours('get', 'sagittal') == true || ...
+                   isShowTextContours('get', 'axial')    == true || ...
+                   isShowTextContours('get', 'mip')      == true
+
+                    set(findall(hObject.Children, 'Label', 'Set Text List'), 'Enable', 'on');
+                else
+                    set(findall(hObject.Children, 'Label', 'Set Text List'), 'Enable', 'off');
+                end
+            end                
+      else
+            set(findall(hObject.Children, 'Label', 'Show Contours'), 'Checked', 'off');
+
+            set(findall(hObject.Children, 'Label', 'Show Face Alpha'), 'Enable', 'off');
+            set(findall(hObject.Children, 'Label', 'Set Level List' ), 'Enable', 'off');
+            set(findall(hObject.Children, 'Label', 'Set Level Step' ), 'Enable', 'off');
+            set(findall(hObject.Children, 'Label', 'Set Line Width' ), 'Enable', 'off');
+            set(findall(hObject.Children, 'Label', 'Show Text'      ), 'Enable', 'off');                
+            set(findall(hObject.Children, 'Label', 'Set Text List'  ), 'Enable', 'off');
+        end
+
+        if isShowFaceAlphaContours('get') == true
+            set(findall(hObject.Children, 'Label', 'Show Face Alpha'), 'Checked', 'on');
+        else
+            set(findall(hObject.Children, 'Label', 'Show Face Alpha'), 'Checked', 'off');
+        end
+
+        if size(dicomBuffer('get'), 3) == 1 % 2D Image
+            if isShowTextContours('get', 'axe') == true
+                set(findall(hObject.Children, 'Label', 'Show Text'), 'Checked', 'on');
+            else
+                set(findall(hObject.Children, 'Label', 'Show Text'), 'Checked', 'off');
+            end
+        else
+            set(findall(hObject.Children, 'Label', 'Show Text'), 'Checked', 'off');
+        end
+    end
+
+    function handleColorbarMultiFusion(hObject, ~)
+            
+        if isCombineMultipleFusion('get') == true
+
+            set(findall(hObject.Children, 'Label', 'Combine RGB'), 'Checked', 'on');
+          
+        else
+            set(findall(hObject.Children, 'Label', 'Combine RGB'), 'Checked', 'off');
+
+            set(findall(hObject.Children, 'Label', 'Intensity Min\Max'), 'Enable', 'off');
+        end
+        set(findall(hObject.Children, 'Label', 'Combine RGB'), 'Enable', 'on');
+
+        set(findall(hObject.Children, 'Label', 'Normalize to Liver'), 'Checked', 'off');
+        if isCombineMultipleFusion('get') == true && ...
+           isVsplash('get') == false
+            if isRGBFusionNormalizeToLiver('get') == false
+                set(findall(hObject.Children, 'Label', 'Normalize to Liver'), 'Enable', 'on');
+            else
+                set(findall(hObject.Children, 'Label', 'Normalize to Liver'), 'Enable', 'off');
+            end
+        else
+            set(findall(hObject.Children, 'Label', 'Normalize to Liver'), 'Enable', 'off');
+        end
+
+        set(findall(hObject.Children, 'Label', 'Intensity Min\Max'), 'Checked', 'off');
+        if isCombineMultipleFusion('get') == true
+            set(findall(hObject.Children, 'Label', 'Intensity Min\Max'), 'Enable', 'on');
+        else
+            set(findall(hObject.Children, 'Label', 'Intensity Min\Max'), 'Enable', 'off');
+        end
+
+        if size(dicomBuffer('get'), 3) == 1 || ...
+           isVsplash('get') == true
+            set(findall(hObject.Children, 'Label', 'Show RGB Colormap'), 'Enable', 'off');
+        else
+            set(findall(hObject.Children, 'Label', 'Show RGB Colormap'), 'Enable', 'on');
+        end
+
+        axeRGBImage = axeRGBImagePtr('get');
+        if ~isempty(axeRGBImage)
+            set(findall(hObject.Children, 'Label', 'Show RGB Colormap'), 'Checked', 'on');
+        else
+            set(findall(hObject.Children, 'Label', 'Show RGB Colormap'), 'Checked', 'off');
+        end
+
+        if ~isempty(axeRGBImage) && ...
+           size(dicomBuffer('get'), 3) ~= 1 && ...
+           isVsplash('get') == false
+
+            set(findall(hObject.Children, 'Label', 'RGB plus' ), 'Enable', 'on');
+            set(findall(hObject.Children, 'Label', 'RGB block'), 'Enable', 'on');
+            set(findall(hObject.Children, 'Label', 'RGB wheel'), 'Enable', 'on');
+            set(findall(hObject.Children, 'Label', 'RGB cube' ), 'Enable', 'on');
+
+        else
+            set(findall(hObject.Children, 'Label', 'RGB plus' ), 'Enable', 'off');
+            set(findall(hObject.Children, 'Label', 'RGB block'), 'Enable', 'off');
+            set(findall(hObject.Children, 'Label', 'RGB wheel'), 'Enable', 'off');
+            set(findall(hObject.Children, 'Label', 'RGB cube' ), 'Enable', 'off');
+        end    
+
+        sImageName = getRGBColormapImage('get');
+
+        if    strcmpi(sImageName, 'rgb-plus.png')
+            set(findall(hObject.Children, 'Label', 'RGB plus' ), 'Checked', 'on');
+        elseif strcmpi(sImageName, 'rgb-block.png')
+            set(findall(hObject.Children, 'Label', 'RGB block'), 'Checked', 'on');
+        elseif strcmpi(sImageName, 'rgb-wheel.png')
+            set(findall(hObject.Children, 'Label', 'RGB wheel'), 'Checked', 'on');
+        elseif strcmpi(sImageName, 'rgb-cube.png')
+            set(findall(hObject.Children, 'Label', 'RGB cube'), 'Checked', 'on');
+        else
+        end       
     end
 
 end

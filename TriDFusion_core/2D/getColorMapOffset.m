@@ -1,5 +1,5 @@
-function lOffset = getColorMapOffset(sLabel)
-%function lOffset = getColorMapOffset(sLabel)
+function dOffset = getColorMapOffset(sLabel)
+%function dOffset = getColorMapOffset(sLabel)
 %Get Label 2D Color Map Offset.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,64 +27,14 @@ function lOffset = getColorMapOffset(sLabel)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    switch lower(sLabel) 
-        case 'parula'
-            lOffset = 1;
-        case 'jet'
-            lOffset = 2;
-        case 'hsv'
-            lOffset = 3;
-        case 'hot'
-            lOffset = 4;
-        case 'cool'
-            lOffset = 5;
-        case 'spring'
-            lOffset = 6;                    
-        case 'summer'
-            lOffset = 7;
-        case 'autumn'
-            lOffset = 8;
-        case 'winter'
-            lOffset = 9;
-        case 'gray'
-            lOffset = 10;
-        case 'invert linear'
-            lOffset = 11;            
-        case 'bone'
-            lOffset = 12;                
-        case 'copper'
-            lOffset = 13;
-        case 'pink'
-            lOffset = 14;
-        case 'lines'
-            lOffset = 15;
-        case 'colorcube'
-            lOffset = 16;
-        case 'prism'
-            lOffset = 17;  
-        case 'flag'                       
-            lOffset = 18;
-        case 'pet'
-            lOffset = 19;
-        case 'hot metal'
-            lOffset = 20;    
-        case 'angio'
-            lOffset = 21;            
-        case 'yellow'
-            lOffset = 22;    
-        case 'magenta'
-            lOffset = 23;                
-        case 'cyan'
-            lOffset = 24;                
-        case 'red'
-            lOffset = 25;          
-        case 'green'
-            lOffset = 26;    
-        case 'blue'
-            lOffset = 27;         
-             
-        otherwise
-            lOffset = 0;
+    asColorMap = getColorMapsName();
+    
+    % Find the index of the input label within the cell array
+    dOffset = find(strcmpi(sLabel, asColorMap), 1);
+    
+    % If the label is not found, set dOffset to 0
+    if isempty(dOffset)
+        dOffset = 0;
     end
     
 end

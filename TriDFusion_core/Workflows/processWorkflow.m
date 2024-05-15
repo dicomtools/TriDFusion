@@ -112,23 +112,40 @@ function processWorkflow(sWorkflowName)
 
             setMachineLearningFDGBrownFatSUVRT_structureCallback();
 
+        case 'setmachinelearningfdgbrownfatpetfullaicallback' % setMachineLearningFDGBrownFatPETFullAICallback.m
+   
+            setMachineLearningFDGBrownFatPETFullAICallback();
 
-        case 'setmachinelearningfdgbrownfatfullairt_structurecallback' % setMachineLearningFDGBrownFatFullAIRT_structureCallback.m
+        case 'setmachinelearningfdgbrownfatpetfullairt_structurecallback' % setMachineLearningFDGBrownFatPETFullAIRT_structureCallback.m    
 
-            setMachineLearningFDGBrownFatFullAIRT_structureCallback();
+            setMachineLearningFDGBrownFatPETFullAIRT_structureCallback();
 
-        case 'setmachinelearningfdgbrownfatfullaicallback' % setMachineLearningFDGBrownFatFullAICallback.m
+        case 'setmachinelearningfdgbrownfatpetctfullaicallback' % setMachineLearningFDGBrownFatPETCTFullAICallback.m    
 
-            setMachineLearningFDGBrownFatFullAICallback();
+            setMachineLearningFDGBrownFatPETCTFullAICallback();
 
-        case 'setmachinelearningfdgbrownfatexporttoainetworkcallback' % setMachineLearningFDGBrownFatSUVRT_structureCallback.m
+        case 'setmachinelearningfdgbrownfatpetctfullairt_structurecallback' % setMachineLearningFDGBrownFatPETCTFullAIRT_structureCallback    
 
-            setMachineLearningFDGBrownFatExportToAINetworkCallback();
+            setMachineLearningFDGBrownFatPETCTFullAIRT_structureCallback();
+
+        case 'setmachinelearningfdgbrownfatexporttopetnetworkcallback' % setMachineLearningFDGBrownFatExportToPETNetworkCallback.m    
+
+            setMachineLearningFDGBrownFatExportToPETNetworkCallback();
+
+        case 'setmachinelearningfdgbrownfatdatapreprocessingpetcallback' % setMachineLearningFDGBrownFatDataPreProcessingPETCallback.m   
+
+            setMachineLearningFDGBrownFatDataPreProcessingPETCallback();
+
+        case 'setmachinelearningfdgbrownfatexporttopetctnetworkcallback' % setMachineLearningFDGBrownFatExportToPETCTNetworkCallback.m
+            setMachineLearningFDGBrownFatExportToPETCTNetworkCallback();
+
+        case 'setmachinelearningfdgbrownfatdatapreprocessingpetctcallback' % setMachineLearningFDGBrownFatDataPreProcessingPETCTCallback.m     
+
+            setMachineLearningFDGBrownFatDataPreProcessingPETCTCallback();
 
         case 'setmachinelearningfdglymphnodesuvcallback' % setMachineLearningFDGLymphNodeSUVCallback.m
 
             setMachineLearningFDGLymphNodeSUVCallback();
-
 
         case 'setmachinelearningfdhtcallback' % setMachineLearningFDHTCallback.m   
 

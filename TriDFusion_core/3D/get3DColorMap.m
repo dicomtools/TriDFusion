@@ -27,38 +27,47 @@ function aColorMap = get3DColorMap(sAction, lOffset, aAxeColorMap)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    pasColorMap = {'Parula', 'Jet'   , 'HSV'   , 'Hot'   , 'Cool', ...
-                   'Spring', 'Summer', 'Autumn', 'Winter', 'Gray', ...
-                   'Invert Linear'   ,'Bone'  , 'Copper' , 'Pink', ...
-                   'Lines' , 'Colorcube', 'Prism', 'Flag', 'PET' , ...
-                   'Hot Metal', 'Angio', 'Yellow', 'Magenta', ...
-                   'Cyan', 'Red', 'Green','Blue'};                     
+    persistent pasColorMap;
+    persistent paColorMap;
 
-    paColorMap = {parula(256), jet(256)   , hsv(256)   , hot(256)   , cool(256), ...
-                  spring(256), summer(256), autumn(256), winter(256), gray(256), ...
-                  flipud(gray(256)), bone(256)  , copper(256), pink(256)  , lines(256) , colorcube(256), ...
-                  prism(256) , flag(256), getPetColorMap(), getHotMetalColorMap(), ...
-                  getAngioColorMap(), getYellowColorMap(), getMagentaColorMap(), getCyanColorMap(), getRedColorMap(), ...
-                  getGreenColorMap(), getBlueColorMap()};                
+    if isempty(pasColorMap)
+
+        pasColorMap = getColorMapsName();                     
+    end
+
+    if isempty(paColorMap)
+
+        paColorMap = getColorMapsValue();             
+    end             
 
     if strcmpi(sAction, 'all')
+
         aColorMap = pasColorMap;
+
     elseif strcmpi(sAction, 'name')
+
         aColorMap = '';
+
         for kk=1:numel(paColorMap)
             
-            aColorCurrentMap = paColorMap{kk};            
-            if aColorCurrentMap == aAxeColorMap
+            if invertColor('get')
+                aColorCurrentMap = flipud(paColorMap{kk});
+            else
+                aColorCurrentMap = paColorMap{kk};
+            end
+
+            if isequal(aColorCurrentMap, aAxeColorMap)
                 aColorMap = pasColorMap{kk};
                 break;
             end
         end
     else
-%        if invertColor('get')
-%            aColorMap = flipud(paColorMap{lOffset});
-%
-%       else
+        if invertColor('get')
+            
+            aColorMap = flipud(paColorMap{lOffset});
+
+        else
             aColorMap = paColorMap{lOffset};                     
-%        end
-    end           
+        end
+    end            
 end    

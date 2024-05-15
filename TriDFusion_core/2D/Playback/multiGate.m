@@ -51,25 +51,25 @@ function multiGate(mPlay, pAxe)
         return;
     end
 
-    if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}, 'din') && ...
-       gateUseSeriesUID('get') == true
-
-        progressBar(1, 'Error: Require a 4D series!');
-        multiFramePlayback('set', false);
-        mPlay.State = 'off';
-        set(uiSeriesPtr('get'), 'Enable', 'on');
-        return;
-    end
-
-    if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
-       gateUseSeriesUID('get') == true
-
-        progressBar(1, 'Error: Require a 4D series!');
-        multiFramePlayback('set', false);
-        mPlay.State = 'off';
-        set(uiSeriesPtr('get'), 'Enable', 'on');
-        return;
-    end
+%     if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}, 'din') && ...
+%        gateUseSeriesUID('get') == true
+% 
+%         progressBar(1, 'Error: Require a 4D series!');
+%         multiFramePlayback('set', false);
+%         mPlay.State = 'off';
+%         set(uiSeriesPtr('get'), 'Enable', 'on');
+%         return;
+%     end
+% 
+%     if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
+%        gateUseSeriesUID('get') == true
+% 
+%         progressBar(1, 'Error: Require a 4D series!');
+%         multiFramePlayback('set', false);
+%         mPlay.State = 'off';
+%         set(uiSeriesPtr('get'), 'Enable', 'on');
+%         return;
+%     end
 
     lMinBak = windowLevel('get', 'min');
     lMaxBak = windowLevel('get', 'max');

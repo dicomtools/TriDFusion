@@ -725,7 +725,9 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
             atInput(dNewSeriesOffset).tMovement.atSeq{1}.sAxe         = [];
             atInput(dNewSeriesOffset).tMovement.atSeq{1}.aTranslation = [];
             atInput(dNewSeriesOffset).tMovement.atSeq{1}.dRotation    = [];  
-    
+
+            atInput(dNewSeriesOffset).aDicomBuffer = [];
+
             imageOrientation('set', 'axial');
     
             sSeriesDate = atRtDoseHeader{1}.InstanceCreationDate;
@@ -1016,6 +1018,8 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
         % First run
 
         if isempty(tCblTemplate) || isempty(caCblParam)
+
+            rng(255);
 
             dCurrentLine = 1;
     
