@@ -198,7 +198,7 @@ function sReport = getReportSeriesInformation()
 
                         dateInjDate = datenum(sInjDateTime);
 
-                        relT = seconds((dateInjDate - dateInjDate)*(24*60*60)); 
+                        relT = seconds((dayAcquisitionDate - dateInjDate)*(24*60*60)); 
                         relT.Format = 'dd:hh:mm:ss';
                         sDecayTime = char(relT);
 
@@ -207,11 +207,11 @@ function sReport = getReportSeriesInformation()
                         case 'none'
 
                      %   dayAcquisitionDate = datenum(sAcquisitionDateTime);
-                        dateInjDate        = datenum(sInjDateTime);
+%                         dateInjDate        = datenum(sInjDateTime);
 
-                        relT = seconds((dayAcquisitionDate - dateInjDate)*(24*60*60)); 
-                        relT.Format = 'dd:hh:mm:ss';
-                        sDecayTime = char(relT);
+%                         relT = seconds((24*60*60)); 
+%                         relT.Format = 'dd:hh:mm:ss';
+                        sDecayTime = '0';
 
                         sDecayCorrection = 'No decay correction';
 

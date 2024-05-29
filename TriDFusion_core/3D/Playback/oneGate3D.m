@@ -62,11 +62,11 @@ function oneGate3D(sDirection)
         return;
     end
 
-    if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
-       gateUseSeriesUID('get') == true
-
-        return;
-    end
+    % if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
+    %    gateUseSeriesUID('get') == true
+    % 
+    %     return;
+    % end
 
     set(btn3DPtr('get')        , 'Enable', 'off');
     set(btnIsoSurfacePtr('get'), 'Enable', 'off');

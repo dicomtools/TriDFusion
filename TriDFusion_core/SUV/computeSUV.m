@@ -127,7 +127,10 @@ function dSUVconv = computeSUV(atMetaData, suvType)
             % Decay correction
             
             sDecayCorrection = atMetaData{1}.DecayCorrection;
+
+
             if strcmpi(sDecayCorrection, 'START')
+
                 if daySeriesDate > dayAcquisitionDate
                     daySeriesDate = dayAcquisitionDate;
                 end
@@ -135,12 +138,14 @@ function dSUVconv = computeSUV(atMetaData, suvType)
     %            relT = (dayAcquisitionDate - dateInjDate)*(24*60*60); % Acquisition start time min values
            
             elseif strcmpi(sDecayCorrection, 'ADMIN')
-                relT = (dateInjDate - dateInjDate)*(24*60*60); % Radiopharmaceutical administration time
-                    
+%                 relT = (dateInjDate - dateInjDate)*(24*60*60); % Radiopharmaceutical administration time
+                  relT = (dayAcquisitionDate - dateInjDate)*(24*60*60); % Radiopharmaceutical administration time
+                
             elseif strcmpi(sDecayCorrection, 'NONE')
                  %   relT = 0; % No decay
                %relT = (daySeriesDate - dateInjDate)*(24*60*60); % Acquisition start time
-               relT = (dayAcquisitionDate - dateInjDate)*(24*60*60); % No decay correction
+%                relT = (dayAcquisitionDate - dateInjDate)*(24*60*60); % No decay correction
+                relT = 0;
            
             else
                 relT = inf;
@@ -238,7 +243,18 @@ function dSUVconv = computeSUV(atMetaData, suvType)
                 
                 % Transformation to Bq/L
 
-                if strcmpi(sUnits, 'BQML') || strcmpi(sUnits, 'BQCC')
+                if strcmpi(sUnits, 'CNTS')
+
+                    if isfield(atMetaData{1}, 'petActivityConcentrationScaleFactor')
+
+                        activityScaleFactor = atMetaData{1}.petActivityConcentrationScaleFactor;
+
+                        if activityScaleFactor ~=0
+                            dSUVconv = dSUVconv *activityScaleFactor* 1000; 
+                        end
+                    end
+
+                elseif strcmpi(sUnits, 'BQML') || strcmpi(sUnits, 'BQCC')
                     dSUVconv = dSUVconv * 1e3; 
 
                 elseif strcmpi(sUnits, 'KBQCC') || strcmpi(sUnits, 'KBQML')

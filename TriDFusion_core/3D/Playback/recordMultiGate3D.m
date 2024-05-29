@@ -36,6 +36,7 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
         return;
     end
     
+
     atVoi = voiTemplate('get', dSeriesOffset);
 
     volGateObj = volGateObject('get');
@@ -81,14 +82,14 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
         return;
     end
 
-    if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
-       gateUseSeriesUID('get') == true
-
-        progressBar(1, 'Error: Require a dynamic 3D Volume!');
-        multiFrame3DRecord('set', false);
-        mRecord.State = 'off';
-        return;
-    end
+    % if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
+    %    gateUseSeriesUID('get') == true
+    % 
+    %     progressBar(1, 'Error: Require a dynamic 3D Volume!');
+    %     multiFrame3DRecord('set', false);
+    %     mRecord.State = 'off';
+    %     return;
+    % end
 
     setFigureToobarsVisible('off');
 
@@ -929,6 +930,12 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
            dicomMetaData('set', atMetaData, tt);
        end
 
+       if isempty( axePtr('get', [], tt) )
+
+           axe = axePtr('get', [], dSeriesOffset);
+           axePtr('set', axe, tt);
+        end 
+
         if ~isempty(viewer3dObject('get'))
 
             if switchToMIPMode('get') == true
@@ -945,17 +952,11 @@ function recordMultiGate3D(mRecord, sPath, sFileName, sExtention)
 
                 set(volObj{tt}, 'Visible', 'on'); 
             end
-
         else
-            if isempty( axePtr('get', [], tt) )
-    
-               axe = axePtr('get', [], dSeriesOffset);
-               axePtr('set', axe, tt);
-            end        
-            
             set(ui3DWindow{tt}, 'Visible', 'on');
-        end
 
+        end
+       
         I = getframe(axePtr('get', [], tt ));
         [indI,cm] = rgb2ind(I.cdata, 256);
 

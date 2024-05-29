@@ -191,7 +191,7 @@ function mainWindowMenu()
     % PSMA Lu177
 
     mLu177 = uimenu(mWorkflows,'Label','PSMA - Lu177');
-    uimenu(mLu177, 'Label','PSMA Lu177 2D Wholebody Segmentation'          , 'Callback', @set2DWholobodySegmentationLu177Callback);
+%     uimenu(mLu177, 'Label','PSMA Lu177 2D Wholebody Segmentation'          , 'Callback', @set2DWholobodySegmentationLu177Callback);
     uimenu(mLu177, 'Label','PSMA Lu177 Tumor Segmentation (Threshold)'     , 'Callback', @setSegmentationLu177Callback);
     uimenu(mLu177, 'Label','PSMA Lu177 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningLu177Callback);
     uimenu(mLu177, 'Label','PET/CT Fusion'                                 , 'Callback', @setPETCTLu177FusionCallback, 'Separator','on');

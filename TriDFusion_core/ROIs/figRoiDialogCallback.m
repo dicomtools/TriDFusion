@@ -1021,21 +1021,50 @@ end
             dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
             aVoiRoiTag = voiRoiTag('get');
-            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
             
+            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+         
             asTag = cell(1, numel(aVoiRoiTag));
 
             for hh=1:numel(aVoiRoiTag)
                 asTag{hh} = aVoiRoiTag{hh}.Tag;
             end
             
-            
+            asRoiTags = [];
+
             asTag = asTag(get(lbVoiRoiWindow, 'Value'));
-            
-            aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), asTag(1) );
-            aRoiTagOffset = find(aTagOffset, 1);   
-                                
-            createVoiFromRois(dSeriesOffset, asTag, [], atRoiInput{aRoiTagOffset}.Color, 'Unspecified');
+             
+            dNbTags = numel(asTag);
+            for jj=1:dNbTags
+
+                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), asTag(jj) );
+                dRoiTagOffset = find(aTagOffset, 1); 
+
+                if isempty(dRoiTagOffset) % Tag is a VOI
+
+                    aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), asTag(jj) );
+                    dVoiTagOffset = find(aTagOffset, 1); 
+
+                    if ~isempty(dVoiTagOffset) % Tag is a VOI
+
+                        dNbRois = numel(atVoiInput{dVoiTagOffset}.RoisTag);
+
+                        for vv=1: dNbRois
+
+                            asRoiTags{numel(asRoiTags)+1} = atVoiInput{dVoiTagOffset}.RoisTag{vv};
+                        end
+                    end
+                else
+
+                    if isempty(find(ismember(asRoiTags, asTag{jj}), 1)) % The tag is not already added
+
+                        asRoiTags{numel(asRoiTags)+1} =  asTag{jj};
+                    end
+                end
+            end
+
+            createVoiFromRois(dSeriesOffset, asRoiTags, [], [0 1 1], 'Unspecified');
 
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                 bSUVUnit = true;

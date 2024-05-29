@@ -147,10 +147,35 @@ function setDisplayBuffer(dSeriesOffset)
         
 % To reduce memory usage                
         atInput(i).aDicomBuffer = [];
-% To reduce memory usage                
-        
+% To reduce memory usage  
+
+% % For image co-registration
+% 
+%         dSliceThickness = computeSliceSpacing(atInput(i).atDicomInfo);       
+% 
+%         dPixelSpacingX = atInput(i).atDicomInfo{1}.PixelSpacing(1);
+%         dPixelSpacingY = atInput(i).atDicomInfo{1}.PixelSpacing(2);
+% 
+%         if dSliceThickness ~= 0 && dPixelSpacingX ~= 0 && dPixelSpacingY ~= 0  
+% 
+%             [Mdti,~] = TransformMatrix(atInput(i).atDicomInfo{1}, dSliceThickness);
+% 
+%             TF = affine3d(Mdti');
+% 
+%             if 1
+%                [aInputBuffer{i}, ~] = imwarp(aInputBuffer{i}, TF, 'Interp', 'Nearest', 'FillValues', double(min(aInputBuffer{i},[],'all')), 'OutputView', imref3d(size(aInputBuffer{i})));  
+%             else
+% 
+%                 % [aInputBuffer{i}, ~] = imwarp(aInputBuffer{i}, Rdcm, TF,'Interp', 'Nearest', 'FillValues', double(min(aInputBuffer{i},[],'all')));  
+%             end
+% 
+%         end
+% 
+% % End For image co-registration
+
     end                
     
+
  %   if canUseGPU()    
  %       for mm=1:numel(aInputBuffer)
  %           aInputBuffer{mm} = uint16(aInputBuffer{mm});

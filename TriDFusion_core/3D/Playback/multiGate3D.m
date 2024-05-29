@@ -54,14 +54,14 @@ function multiGate3D(mPlay)
         return;
     end
 
-    if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
-       gateUseSeriesUID('get') == true
-
-        progressBar(1, 'Error: Require a dynamic 3D Volume!');
-        multiFrame3DPlayback('set', false);
-        mPlay.State = 'off';
-        return;
-    end
+    % if ~isfield(atInputTemplate(dSeriesOffset).atDicomInfo{1}.din, 'frame') && ...
+    %    gateUseSeriesUID('get') == true
+    % 
+    %     progressBar(1, 'Error: Require a dynamic 3D Volume!');
+    %     multiFrame3DPlayback('set', false);
+    %     mPlay.State = 'off';
+    %     return;
+    % end
 
     if gateUseSeriesUID('get') == true
 

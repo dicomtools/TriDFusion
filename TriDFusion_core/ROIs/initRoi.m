@@ -27,16 +27,19 @@ function initRoi()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+    atRoi = roiTemplate('get', dSeriesOffset);
+
     if isempty(atRoi)
         return;
     end
+    
+    atVoi = voiTemplate('get', dSeriesOffset);
 
-    atVoi = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    atDicomInfo = dicomMetaData('get', [], dSeriesOffset);
 
-    atDicomInfo = dicomMetaData('get');
-
-    imRoi  = dicomBuffer('get');
+    imRoi  = dicomBuffer('get', [], dSeriesOffset);
 
     endLoop = numel(atRoi);
     for bb=1:numel(atRoi)
@@ -46,19 +49,20 @@ function initRoi()
         end
 
         if ~isempty(atRoi{bb})
+            
             switch lower(atRoi{bb}.Axe)
                 
                 case 'axes1'
-                axRoi = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));       
+                axRoi = axes1Ptr('get', [], dSeriesOffset);       
                 
                 case 'axes2'
-                axRoi = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));       
+                axRoi = axes2Ptr('get', [], dSeriesOffset);       
                 
                 case 'axes3'
-                axRoi = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));            
+                axRoi = axes3Ptr('get', [], dSeriesOffset);            
                 
                 case'axe'
-                axRoi = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                axRoi = axePtr('get', [], dSeriesOffset);
                 
                 otherwise
                 break;
@@ -315,11 +319,21 @@ function initRoi()
     
             end
             
+
             if strcmpi(atRoi{bb}.ObjectType, 'voi-roi') % Add VOI submenu
-                for vo=1:numel(atVoi)     
-                    if find(contains(atVoi{vo}.RoisTag, atRoi{bb}.Tag))         
+             
+                % aTagOffset = cellfun(@(v) any(strcmp(v.RoisTag,  atRoi{bb}.Tag)), atVoi);
+                % if any(aTagOffset)
+                %     voiDefaultMenu(roiPtr, atVoi{find(aTagOffset, 1, 'first')}.Tag);
+                % end
+                % 
+                % % Iterate over VOIs and check for matching RoisTag
+
+                for vo = 1:numel(atVoi)
+                    if any(contains(atVoi{vo}.RoisTag, atRoi{bb}.Tag))
+                        % Call voiDefaultMenu with the matched VOI tag
                         voiDefaultMenu(roiPtr, atVoi{vo}.Tag);
-                        break;
+                        break; % Exit loop after the first match
                     end
                 end
             end
@@ -334,11 +348,10 @@ function initRoi()
         end
     end
 
-    roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoi);
+    roiTemplate('set', dSeriesOffset, atRoi);
 
     setVoiRoiSegPopup();
 
     progressBar(1, 'Ready');
-
 
 end
