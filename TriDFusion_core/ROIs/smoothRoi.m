@@ -30,6 +30,7 @@ function aPosition = smoothRoi(aPosition, aSize)
     % Original ROI positions
 
 try
+if 0
     aRoiX = aPosition(:,1);
     aRoiY = aPosition(:,2);
     
@@ -58,7 +59,44 @@ try
     aPosition = zeros(numel(aSmoothedX), 2);
     aPosition(:,1) = aSmoothedX(:);
     aPosition(:,2) = aSmoothedY(:);
-
+else
+    aRoiX = aPosition(:,1);
+    aRoiY = aPosition(:,2);
+    
+    dWindowWidth = 11;
+    if rem(dWindowWidth,2) == 0 % Must be an odd number
+        dWindowWidth = dWindowWidth-1;
+    end
+    
+    if numel(aRoiX) < dWindowWidth
+        dWindowWidth = numel(aRoiX);
+        if rem(dWindowWidth,2) == 0 % Must be an odd number
+            dWindowWidth = dWindowWidth-1;
+        end
+    end
+    
+    dPolynomialOrder = 4;
+    if numel(aRoiX) < dPolynomialOrder
+        dPolynomialOrder = 1;
+    end
+    
+    % Extend the data at both ends for padding
+    halfWindow = (dWindowWidth - 1) / 2;
+    padX = [flipud(aRoiX(1:halfWindow)); aRoiX; flipud(aRoiX(end-halfWindow+1:end))];
+    padY = [flipud(aRoiY(1:halfWindow)); aRoiY; flipud(aRoiY(end-halfWindow+1:end))];
+    
+    % Apply the Savitzky-Golay filter
+    padSmoothedX = sgolayfilt(padX, dPolynomialOrder, dWindowWidth);
+    padSmoothedY = sgolayfilt(padY, dPolynomialOrder, dWindowWidth);
+    
+    % Remove the padding
+    aSmoothedX = padSmoothedX(halfWindow+1:end-halfWindow);
+    aSmoothedY = padSmoothedY(halfWindow+1:end-halfWindow);
+    
+    aPosition = zeros(numel(aSmoothedX), 2);
+    aPosition(:,1) = aSmoothedX(:);
+    aPosition(:,2) = aSmoothedY(:);    
+end
 catch
 end
 

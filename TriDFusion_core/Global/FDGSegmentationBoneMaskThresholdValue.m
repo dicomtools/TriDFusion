@@ -1,6 +1,6 @@
 function dHUValue = FDGSegmentationBoneMaskThresholdValue(sAction, dValue)
 %function dHUValue = FDGSegmentationBoneMaskThresholdValue(sAction, dValue)
-%Get/Set segmentation FDG Bone Mask value.
+%Get/Set FDG segmentation Bone Mask value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org

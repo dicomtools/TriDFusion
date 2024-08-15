@@ -53,8 +53,8 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
 
     if isempty(dCTSerieOffset) || ...
        isempty(dNMSerieOffset)
-        progressBar(1, 'Error: FDG tumor segmentation require a CT and NM image!');
-        errordlg('FDG tumor segmentation require a CT and NM image!', 'Modality Validation');
+        progressBar(1, 'Error: PSMA Lu177 tumor segmentation require a CT and NM image!');
+        errordlg('PSMA Lu177 tumor segmentation require a CT and NM image!', 'Modality Validation');
         return;
     end
 
@@ -251,10 +251,32 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
     BWCT(BWCT < dBoneMaskThreshold) = 0;
     BWCT = imfill(BWCT, 4, 'holes');
 
+%     BWCT = aCTImage;
+% 
+%     % Thresholding to create a binary mask
+%     BWCT = BWCT >= dBoneMaskThreshold;
+%     
+%     % Perform morphological closing to smooth contours and fill small gaps
+%     se = strel('disk', 3); % Adjust the size as needed
+%     BWCT = imclose(BWCT, se);
+%     
+%     % Fill holes in the binary image
+%     BWCT = imfill(BWCT, 'holes');
+%     
+%     % Optional: Remove small objects that are not part of the bone
+%     BWCT = bwareaopen(BWCT, 100); % Adjust the size threshold as needed
+%     
+%     % Perform another round of morphological closing if necessary
+%     BWCT = imclose(BWCT, se);
+%     
+%     % Optional: Perform morphological opening to remove small spurious regions
+%     BWCT = imopen(BWCT, se);
+
     if ~isequal(size(BWCT), size(aResampledNMImage)) % Verify if both images are in the same field of view
 
-         BWCT = resample3DImage(BWCT, atCTMetaData, aResampledNMImage, atResampledNMMetaData, 'Cubic');
-         BWCT = imbinarize(BWCT);
+        BWCT = resample3DImage(BWCT, atCTMetaData, aResampledNMImage, atResampledNMMetaData, 'Cubic');
+        
+        BWCT = imbinarize(BWCT);
 
         if ~isequal(size(BWCT), size(aResampledNMImage)) % Verify if both images are in the same field of view
             BWCT = resizeMaskToImageSize(BWCT, aResampledNMImage);
@@ -266,7 +288,7 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
     progressBar(9/10, 'Creating contours, please wait.');
 
     imMask = aResampledNMImage;
-    imMask(aBWMask == 0) = dMin;
+%     imMask(aBWMask == 0) = dMin;
 
     setSeriesCallback();
 

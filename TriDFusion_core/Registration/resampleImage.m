@@ -272,14 +272,25 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
 
         if dRefOutputView == 2
             for jj=1:numel(atDcmMetaData)
-                atDcmMetaData{jj}.ImagePositionPatient    = atRefMetaData{jj}.ImagePositionPatient;
-                atDcmMetaData{jj}.ImageOrientationPatient = atRefMetaData{jj}.ImageOrientationPatient;
-                atDcmMetaData{jj}.PixelSpacing            = atRefMetaData{jj}.PixelSpacing;  
-                atDcmMetaData{jj}.Rows                    = atRefMetaData{jj}.Rows;  
-                atDcmMetaData{jj}.Columns                 = atRefMetaData{jj}.Columns;  
-                atDcmMetaData{jj}.SpacingBetweenSlices    = atRefMetaData{jj}.SpacingBetweenSlices;  
-                atDcmMetaData{jj}.SliceThickness          = atRefMetaData{jj}.SliceThickness;      
-                atDcmMetaData{jj}.SliceLocation           = atRefMetaData{jj}.SliceLocation;      
+                if numel(atRefMetaData) == numel(atDcmMetaData)
+                    atDcmMetaData{jj}.ImagePositionPatient    = atRefMetaData{jj}.ImagePositionPatient;
+                    atDcmMetaData{jj}.ImageOrientationPatient = atRefMetaData{jj}.ImageOrientationPatient;
+                    atDcmMetaData{jj}.PixelSpacing            = atRefMetaData{jj}.PixelSpacing;  
+                    atDcmMetaData{jj}.Rows                    = atRefMetaData{jj}.Rows;  
+                    atDcmMetaData{jj}.Columns                 = atRefMetaData{jj}.Columns;  
+                    atDcmMetaData{jj}.SpacingBetweenSlices    = atRefMetaData{jj}.SpacingBetweenSlices;  
+                    atDcmMetaData{jj}.SliceThickness          = atRefMetaData{jj}.SliceThickness;      
+                    atDcmMetaData{jj}.SliceLocation           = atRefMetaData{jj}.SliceLocation;      
+                else
+                    atDcmMetaData{jj}.ImagePositionPatient    = atRefMetaData{1}.ImagePositionPatient;
+                    atDcmMetaData{jj}.ImageOrientationPatient = atRefMetaData{1}.ImageOrientationPatient;
+                    atDcmMetaData{jj}.PixelSpacing            = atRefMetaData{1}.PixelSpacing;  
+                    atDcmMetaData{jj}.Rows                    = atRefMetaData{1}.Rows;  
+                    atDcmMetaData{jj}.Columns                 = atRefMetaData{1}.Columns;  
+                    atDcmMetaData{jj}.SpacingBetweenSlices    = atRefMetaData{1}.SpacingBetweenSlices;  
+                    atDcmMetaData{jj}.SliceThickness          = atRefMetaData{1}.SliceThickness;      
+                    atDcmMetaData{jj}.SliceLocation           = atRefMetaData{1}.SliceLocation;                    
+                end
             end            
         else
             if dRefOutputView == false % Keep source z

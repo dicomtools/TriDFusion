@@ -1,6 +1,6 @@
-function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, dTreshold)
-%function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, dTreshold)
-%Run FDG Segmentation base on a SUV treshold.
+function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, dThreshold , dBoneThreshold)
+%function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, dThreshold , dBoneThreshold)
+%Run FDG Segmentation base on a SUV Threshold .
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -144,21 +144,40 @@ function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge,
 
     dMin = min(aBWMask, [], 'all');
 
-    aBWMask(aBWMask*dSUVScale<dTreshold)=dMin;
+    aBWMask(aBWMask*dSUVScale<dThreshold )=dMin;
 
     aBWMask = imbinarize(aBWMask);
 
     progressBar(8/10, 'Computing ct map, please wait.');
 
     BWCT = aCTImage;
-
     BWCT(BWCT < dBoneMaskThreshold) = 0;                                    
-    BWCT = imfill(BWCT, 4, 'holes');                       
+    BWCT = imfill(BWCT, 4, 'holes'); 
+
+%     % Thresholding to create a binary mask
+%     BWCT = BWCT >= dBoneMaskThreshold;
+%     
+%     % Perform morphological closing to smooth contours and fill small gaps
+%     se = strel('disk', 3); % Adjust the size as needed
+%     BWCT = imclose(BWCT, se);
+%     
+%     % Fill holes in the binary image
+%     BWCT = imfill(BWCT, 'holes');
+%     
+%     % Optional: Remove small objects that are not part of the bone
+%     BWCT = bwareaopen(BWCT, 100); % Adjust the size threshold as needed
+%     
+%     % Perform another round of morphological closing if necessary
+%     BWCT = imclose(BWCT, se);
+%     
+%     % Optional: Perform morphological opening to remove small spurious regions
+%     BWCT = imopen(BWCT, se);
 
     if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view 
 
-         BWCT = resample3DImage(BWCT, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
-         BWCT = imbinarize(BWCT);
+        BWCT = resample3DImage(BWCT, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
+        
+        BWCT = imbinarize(BWCT);
 
         if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view     
             BWCT = resizeMaskToImageSize(BWCT, aResampledPTImage); 
@@ -170,14 +189,31 @@ function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge,
     progressBar(9/10, 'Creating contours, please wait.');
 
     imMask = aResampledPTImage;
-    imMask(aBWMask == 0) = dMin;
+%     imMask(aBWMask == 0) = dMin;
+
+    if dBoneThreshold ~= dThreshold
+        aBWMask2 = aResampledPTImage;
+    
+        dMin = min(aBWMask2, [], 'all');
+    
+        aBWMask2(aBWMask2*dSUVScale<dBoneThreshold)=dMin;
+%         aBWMask2(BWCT==0)=dMin;
+    
+%         aBWMask2 = imbinarize(aBWMask2);
+%     
+%         imMask(aBWMask2) = aResampledPTImage(aBWMask2);
+    
+        aBWMask = aBWMask|aBWMask2;
+    
+        clear aBWMask2;
+    end
 
     setSeriesCallback();
 
-    sFormula = 'Lymph Nodes';
+    sFormula = 'Lymph Nodes & Bone SUV, CT Bone Map';
 
-    maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, dTreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue);                    
-  
+    maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, dThreshold , false, 0, true, sFormula, BWCT, dSmalestVoiValue, [],[],[], dBoneThreshold);                    
+
     clear aResampledPTImage;
     clear aBWMask;
     clear refMip;                        

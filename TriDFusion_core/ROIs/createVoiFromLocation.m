@@ -112,13 +112,21 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
             aSlice = aBuffer(:, :, iAxial);
 
     end
-    
-    aSlice(aSlice<=dValue) = 0;
+
+
+    dPreSeg = max(aBuffer, [], 'all') * 0.15;
+%     if dValue < dPreSeg
+%         dPreSeg = dValue;
+%     end
+
+    aSlice(aSlice<=dPreSeg) = 0;
     aSlice(aSlice~=0) =1; 
 
     boundary = bwboundaries(aSlice, 8, 'noholes');
 
     if ~isempty(boundary)
+
+        aBuffer(aBuffer<=dPreSeg)=0;
 
         bBreak = false;
 

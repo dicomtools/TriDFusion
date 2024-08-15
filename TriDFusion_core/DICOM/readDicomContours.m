@@ -81,7 +81,8 @@ function tContours = readDicomContours(sFileName)
                 tContours(i).Referenced.SeriesInstanceUID = rtssheader.ReferencedFrameOfReferenceSequence.Item_1.RTReferencedStudySequence.Item_1.RTReferencedSeriesSequence.Item_1.SeriesInstanceUID;                
                 
                 tContours(i).Referenced.FrameOfReferenceUID = rtssheader.ReferencedFrameOfReferenceSequence.Item_1.FrameOfReferenceUID;                           
-                
+                tContours(i).SeriesDescription = rtssheader.SeriesDescription;                           
+              
             end
         end
         

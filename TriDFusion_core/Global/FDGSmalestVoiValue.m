@@ -1,6 +1,6 @@
 function dSmallestSize = FDGSmalestVoiValue(sAction, dValue)
 %function dSmallestSize = FDGSmalestVoiValue(sAction, dValue)
-%Get/Set FDG smallest voi value.
+%Get/Set FDG segmentation smallest voi value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org

@@ -28,7 +28,11 @@ function aResampledImage = rotateImageFromAngle(aImage, aAxe, dRotation)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     if size(aImage, 3) == 1 
-        aResampledImage = imrotate(aImage(:,:), dRotation, 'linear','crop');
+        try
+            aResampledImage = imrotate(aImage(:,:), dRotation, 'linear','crop');
+        catch
+            aResampledImage = imrotate(aImage(:,:), dRotation,'crop');
+        end
     else
         switch aAxe
             case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) % Coronal    

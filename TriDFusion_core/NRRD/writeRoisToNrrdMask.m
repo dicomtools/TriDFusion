@@ -66,7 +66,7 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputM
 
     aBufferSize = size(aDicomBuffer);
 
-    aMaskBuffer = zeros(aBufferSize);
+    aMaskBuffer = single(zeros(aBufferSize));
  %   aMaskBuffer(aMaskBuffer==0) = min(double(aDicomBuffer),[], 'all');
  
     nbContours = numel(tVoiInput);
@@ -100,7 +100,10 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputM
                             aSlice( roiMask) =cc;
                             aSlice(~roiMask) =0;                            
                         elseif bIndex == 2
-                            aSlice( roiMask) =getLesionTypeMaskValue(tRoiInput{tt}.LesionType);
+                            aSlice( roiMask) =getBrownFatLesionTypeMaskValue(tRoiInput{tt}.LesionType);
+                            aSlice(~roiMask) =0;                             
+                        elseif bIndex == 3
+                            aSlice( roiMask) =getPSMALesionTypeMaskValue(tRoiInput{tt}.LesionType);
                             aSlice(~roiMask) =0;                             
                         else
                             aSlice( roiMask) =1;
@@ -130,8 +133,11 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputM
                             aSlice( roiMask) =cc;
                             aSlice(~roiMask) =0;  
                         elseif bIndex == 2
-                            aSlice( roiMask) =getLesionTypeMaskValue(tRoiInput{tt}.LesionType);
+                            aSlice( roiMask) =getBrownFatLesionTypeMaskValue(tRoiInput{tt}.LesionType);
                             aSlice(~roiMask) =0;                               
+                        elseif bIndex == 3
+                            aSlice( roiMask) =getPSMALesionTypeMaskValue(tRoiInput{tt}.LesionType);
+                            aSlice(~roiMask) =0; 
                         else
                             aSlice( roiMask) =1;
                             aSlice(~roiMask) =0;
@@ -161,8 +167,11 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputM
                             aSlice( roiMask) =cc;
                             aSlice(~roiMask) =0;  
                         elseif bIndex == 2
-                            aSlice( roiMask) =getLesionTypeMaskValue(tRoiInput{tt}.LesionType);
+                            aSlice( roiMask) =getBrownFatLesionTypeMaskValue(tRoiInput{tt}.LesionType);
                             aSlice(~roiMask) =0;                               
+                        elseif bIndex == 3
+                            aSlice( roiMask) =getPSMALesionTypeMaskValue(tRoiInput{tt}.LesionType);
+                            aSlice(~roiMask) =0;                             
                         else
                             aSlice( roiMask) =1;
                             aSlice(~roiMask) =0;
@@ -193,8 +202,11 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputM
                             aSlice( roiMask) =cc;
                             aSlice(~roiMask) =0;                            
                         elseif bIndex == 2
-                            aSlice( roiMask) =getLesionTypeMaskValue(tRoiInput{tt}.LesionType);
+                            aSlice( roiMask) =getBrownFatLesionTypeMaskValue(tRoiInput{tt}.LesionType);
                             aSlice(~roiMask) =0;                               
+                        elseif bIndex == 3
+                            aSlice( roiMask) =getPSMALesionTypeMaskValue(tRoiInput{tt}.LesionType);
+                            aSlice(~roiMask) =0;                             
                         else
                             aSlice( roiMask) =1;
                             aSlice(~roiMask) =0;
@@ -277,7 +289,7 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputM
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;
 
-    function dMaskValue = getLesionTypeMaskValue(sLesionType)
+    function dMaskValue = getBrownFatLesionTypeMaskValue(sLesionType)
 
         switch lower(sLesionType)
              
@@ -293,8 +305,35 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputM
                 dMaskValue = 5;
             case 'abdominal'
                 dMaskValue = 6;
+                
             otherwise
                 dMaskValue = 7;
+        end
+    end
+
+    function dMaskValue = getPSMALesionTypeMaskValue(sLesionType)
+
+        switch lower(sLesionType)
+             
+            case 'lymph nodes' 
+                dMaskValue = 1;
+            case 'soft tissue' 
+                dMaskValue = 2;                
+            case 'bone'
+                dMaskValue = 3;
+            case 'liver'
+                dMaskValue = 4;
+            case 'primary disease'
+                dMaskValue = 5;                 
+            case 'lung'
+                dMaskValue = 6; 
+            case 'parotid'
+                dMaskValue = 7;      
+            case 'blood pool'
+                dMaskValue = 8;  
+
+            otherwise
+                dMaskValue = 9;
         end
     end
 end

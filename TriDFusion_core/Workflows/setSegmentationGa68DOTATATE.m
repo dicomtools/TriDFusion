@@ -312,12 +312,34 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
     BWCT = aCTImage;
 
     BWCT(BWCT < dBoneMaskThreshold) = 0;                                    
-    BWCT = imfill(BWCT, 4, 'holes');                       
+    BWCT = imfill(BWCT, 4, 'holes'); 
+
+%     BWCT = aCTImage;
+% 
+%     % Thresholding to create a binary mask
+%     BWCT = BWCT >= dBoneMaskThreshold;
+%     
+%     % Perform morphological closing to smooth contours and fill small gaps
+%     se = strel('disk', 3); % Adjust the size as needed
+%     BWCT = imclose(BWCT, se);
+%     
+%     % Fill holes in the binary image
+%     BWCT = imfill(BWCT, 'holes');
+%     
+%     % Optional: Remove small objects that are not part of the bone
+%     BWCT = bwareaopen(BWCT, 100); % Adjust the size threshold as needed
+%     
+%     % Perform another round of morphological closing if necessary
+%     BWCT = imclose(BWCT, se);
+%     
+%     % Optional: Perform morphological opening to remove small spurious regions
+%     BWCT = imopen(BWCT, se);
 
     if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view 
 
-         BWCT = resample3DImage(BWCT, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
-         BWCT = imbinarize(BWCT);
+        BWCT = resample3DImage(BWCT, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
+        
+        BWCT = imbinarize(BWCT);
 
         if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view     
             BWCT = resizeMaskToImageSize(BWCT, aResampledPTImage); 
@@ -329,7 +351,7 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
     progressBar(10/11, 'Creating contours, please wait.');
 
     imMask = aResampledPTImage;
-    imMask(aBWMask == 0) = dMin;
+%     imMask(aBWMask == 0) = dMin;
 
     if ~isempty(gaLiverMask)
 

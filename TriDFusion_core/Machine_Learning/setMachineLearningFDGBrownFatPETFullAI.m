@@ -26,11 +26,11 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-            
+
     atInput = inputTemplate('get');
-    
-    % Modality validation    
-       
+
+    % Modality validation
+
     dCTSerieOffset = [];
     for tt=1:numel(atInput)
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'ct')
@@ -47,28 +47,28 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
         end
     end
 
-    if isempty(dPTSerieOffset)        
+    if isempty(dPTSerieOffset)
         progressBar(1, 'Error: FDG brown fat full AI segmentation require a PT image!');
-        errordlg('FDG brown fat full AI segmentation require a PT image!', 'Modality Validation');  
-        return;               
+        errordlg('FDG brown fat full AI segmentation require a PT image!', 'Modality Validation');
+        return;
     end
 
     aCTImage = [];
 
-    if ~isempty(dCTSerieOffset)        
-  
+    if ~isempty(dCTSerieOffset)
+
         atCTMetaData = dicomMetaData('get', [], dCTSerieOffset);
 
         if isempty(atCTMetaData)
             atCTMetaData = atInput(dCTSerieOffset).atDicomInfo;
-        end    
+        end
 
         aCTImage = dicomBuffer('get', [], dCTSerieOffset);
         if isempty(aCTImage)
             aInputBuffer = inputBuffer('get');
             aCTImage = aInputBuffer{dCTSerieOffset};
         end
-        
+
     end
 
     atPTMetaData = dicomMetaData('get', [], dPTSerieOffset);
@@ -91,56 +91,67 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
     end
 
 
-    % Apply ROI constraint 
+    % Apply ROI constraint
     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dPTSerieOffset);
 
     bInvertMask = invertConstraint('get');
 
     tRoiInput = roiTemplate('get', dPTSerieOffset);
-    
+
     aPTImageTemp = aPTImage;
-    aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask); 
-    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint 
+    aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
+    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
 
-    resetSeries(dPTSerieOffset, true);   
+    resetSeries(dPTSerieOffset, true);
 
 
-    try 
+    try
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-    drawnow;    
-    
-    
-    % Create an empty directory    
+    drawnow;
+
+
+    % Create an empty directory
 
     sNrrdTmpDir = sprintf('%stemp_nrrd_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
     if exist(char(sNrrdTmpDir), 'dir')
         rmdir(char(sNrrdTmpDir), 's');
     end
-    mkdir(char(sNrrdTmpDir));    
-    
-    % Convert dicom to .nii     
-    
+    mkdir(char(sNrrdTmpDir));
+
+    % Convert dicom to .nii
+
     progressBar(1/10, 'DICOM to NRRD conversion, please wait.');
 
-    sNrrdImagesName = sprintf('%sPT_0001.nrrd', sNrrdTmpDir);
+    sNrrdImagesName = sprintf('%sCase01_0000.nrrd', sNrrdTmpDir);
 
-    dSUVconv = computeSUV(atPTMetaData, 'LBM');
+    if tBrownFatFullAI.options.SUVScaled == true
 
-    if dSUVconv == 0
-        dSUVconv = computeSUV(atPTMetaData, 'BW');
+        dSUVconv = computeSUV(atPTMetaData, 'LBM');
+
+        if dSUVconv == 0
+            dSUVconv = computeSUV(atPTMetaData, 'BW');
+        end
+
+        if dSUVconv == 0
+            dSUVconv = 1;
+        end
+
+        if tBrownFatFullAI.options.SUVNormalization == true
+            if dSUVconv ~= 1
+                dSUVconv = 1+dSUVconv;
+            end
+        end
+
+        series2nrrd(dPTSerieOffset, sNrrdImagesName, dSUVconv);
+    else
+        series2nrrd(dPTSerieOffset, sNrrdImagesName, 1);
     end
 
-    if dSUVconv == 0
-        dSUVconv = 1;
-    end
-
-    series2nrrd(dPTSerieOffset, sNrrdImagesName, dSUVconv);
-    
     sNrrdFullFileName = '';
-    
+
     f = java.io.File(char(sNrrdTmpDir)); % Get .nii file name
-    dinfo = f.listFiles();                   
+    dinfo = f.listFiles();
     for K = 1 : 1 : numel(dinfo)
         if ~(dinfo(K).isDirectory)
             if contains(sprintf('%s%s', sNrrdTmpDir, dinfo(K).getName()), '.nrrd')
@@ -148,92 +159,226 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
                 break;
             end
         end
-    end 
+    end
 
     if isempty(sNrrdFullFileName)
-        
+
         progressBar(1, 'Error: nrrd file mot found!');
-        errordlg('nrrd file mot found!!', '.nrrd file Validation'); 
+        errordlg('nrrd file mot found!!', '.nrrd file Validation');
     else
 
         progressBar(2/10, 'Machine learning in progress, this might take several minutes, please be patient.');
-       
+
         sSegmentationFolderName = sprintf('%stemp_seg_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
         if exist(char(sSegmentationFolderName), 'dir')
             rmdir(char(sSegmentationFolderName), 's');
         end
-        mkdir(char(sSegmentationFolderName)); 
-    
+        mkdir(char(sSegmentationFolderName));
+
         if ispc % Windows
-%            if fastMachineLearningDialog('get') == true
-%                sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s --fast', sPredictScript, sNiiFullFileName, sSegmentationFolderName);    
-%            else
-                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 098 -c 3d_fullres --save_probabilities', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);    
-%            end
-        
+% %            if fastMachineLearningDialog('get') == true
+% %                sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s --fast', sPredictScript, sNiiFullFileName, sSegmentationFolderName);
+% %            else
+%                 if tBrownFatFullAI.options.SUVScaled == true
+%                     if tBrownFatFullAI.options.SUVNormalization == true
+%                         sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 100 -c 3d_fullres --save_probabilities', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
+%                     else
+%                         sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 098 -c 3d_fullres --save_probabilities', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
+%                     end
+%                 else
+%                     sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 096 -c 3d_fullres --save_probabilities', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
+%                 end
+% %            end
+
+                if tBrownFatFullAI.options.CELossTrainer == true
+
+                    if tBrownFatFullAI.options.SUVScaled == true
+                        if tBrownFatFullAI.options.SUVNormalization == true
+                            sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 100 -c 3d_fullres --save_probabilities -tr nnUNetTrainerDiceCELoss_noSmooth', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
+                        else
+                            sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 098 -c 3d_fullres --save_probabilities -tr nnUNetTrainerDiceCELoss_noSmooth', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
+                        end
+                    else
+                        sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 96 -c 3d_fullres --save_probabilities -tr nnUNetTrainerDiceCELoss_noSmooth', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
+                    end
+                else
+                    if tBrownFatFullAI.options.SUVScaled == true
+                        if tBrownFatFullAI.options.SUVNormalization == true
+                            sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 091 -c 3d_fullres --save_probabilities', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
+                        else
+                            sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 093 -c 3d_fullres --save_probabilities', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
+                        end
+                    else
+                        sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 095 -c 3d_fullres --save_probabilities', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
+                    end
+                end
+
+%                          sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 095 -c 3d_fullres --save_probabilities', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
+
             [bStatus, sCmdout] = system(sCommandLine);
-            
-            if bStatus 
+
+            if bStatus
                 progressBar( 1, 'Error: An error occur during machine learning segmentation!');
-                errordlg(sprintf('An error occur during machine learning segmentation: %s', sCmdout), 'Segmentation Error');  
+                errordlg(sprintf('An error occur during machine learning segmentation: %s', sCmdout), 'Segmentation Error');
             else % Process succeed
 
 
                 progressBar(3/10, 'Importing prediction, please wait.');
 
-                [aMask, ~] = nrrdread( sprintf('%sPT.nrrd',sSegmentationFolderName));
-            
+                [aMask, ~] = nrrdread( sprintf('%sCase01.nrrd',sSegmentationFolderName));
+
                 aMask = aMask(:,:,end:-1:1);
-                
-                dSmalestValue = tBrownFatFullAI.options.smalestVoiValue;
-                bPixelEdge    = tBrownFatFullAI.options.pixelEdge;
-     
+
+                bCELossTrainer        = tBrownFatFullAI.options.CELossTrainer;
+                bClassifySegmentation = tBrownFatFullAI.options.classifySegmentation;
+                bSmoothMask           = tBrownFatFullAI.options.smoothMask;
+                dSmallestValue        = tBrownFatFullAI.options.smallestVoiValue;
+                bPixelEdge            = tBrownFatFullAI.options.pixelEdge;
 
                 progressBar(4/10, 'Segmenting prediction mask, please wait.');
 
-                maskAddBrownFatVoiToSeries(aPTImageTemp, aMask, atPTMetaData, dPTSerieOffset, dSmalestValue, bPixelEdge);
-                
+                if bCELossTrainer == false
+
+                    maskAddVoiByTypeToSeries(aPTImageTemp, aMask, atPTMetaData, dPTSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, false, 1);
+                else
+
+                    maskAddVoiByTypeToSeries(aPTImageTemp, aMask, atPTMetaData, dPTSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, bClassifySegmentation, 1);
+                end
+
                 clear aPTImageTemp;
 
                 if exist(char(sSegmentationFolderName), 'dir')
-            
+
                     rmdir(char(sSegmentationFolderName), 's');
-                end    
+                end
 
                 if ~isempty(aCTImage)
 
                     progressBar(5/10, 'Resampling series, please wait.');
-    
-                    [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
-    
+
+                    [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
+
                     dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
                     dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
 
                     progressBar(6/10, 'Resampling mip, please wait.');
-                        
-                    refMip = mipBuffer('get', [], dCTSerieOffset);                        
+
+                    refMip = mipBuffer('get', [], dCTSerieOffset);
                     aMip   = mipBuffer('get', [], dPTSerieOffset);
-                  
+
                     aMip = resampleMip(aMip, atPTMetaData, refMip, atCTMetaData, 'Linear', true);
-                                   
+
                     mipBuffer('set', aMip, dPTSerieOffset);
-                
-                    setQuantification(dPTSerieOffset);     
+
+                    setQuantification(dPTSerieOffset);
 
                     progressBar(7/10, 'Resampling contours, please wait.');
 
 
                     atRoi = roiTemplate('get', dPTSerieOffset);
-    
-                    atResampledRoi = resampleROIs(aPTImage, atPTMetaData, aResampledPTImage, atResampledPTMetaData, atRoi, true);
-    
-                    roiTemplate('set', dPTSerieOffset, atResampledRoi); 
+
+                    if ~isempty(atRoi)
+
+                        atResampledRoi = resampleROIs(aPTImage, atPTMetaData, aResampledPTImage, atResampledPTMetaData, atRoi, true);
+
+                        roiTemplate('set', dPTSerieOffset, atResampledRoi);
+                    end
 
                     progressBar(8/10, 'Resampling axes, please wait.');
 
                     resampleAxes(aResampledPTImage, atResampledPTMetaData);
 
                     setImagesAspectRatio();
+
+                    if bCELossTrainer == false && ...
+                       bClassifySegmentation == true && ...
+                       ~isempty(atRoi)
+
+                        progressBar(9/10, 'Machine learning classification in progress, this might take several minutes, please be patient.');
+
+                        sTotalSegmentorFolderName = sprintf('%stemp_seg_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
+                        if exist(char(sTotalSegmentorFolderName), 'dir')
+                            rmdir(char(sTotalSegmentorFolderName), 's');
+                        end
+                        mkdir(char(sTotalSegmentorFolderName));
+
+                        if ispc % Windows
+
+                            % Get DICOM directory directory
+
+                            [sFilePath, ~, ~] = fileparts(char(atInput(dCTSerieOffset).asFilesList{1}));
+
+                            % Create an empty directory
+
+                            sNiiTmpDir = sprintf('%stemp_nii_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
+                            if exist(char(sNiiTmpDir), 'dir')
+                                rmdir(char(sNiiTmpDir), 's');
+                            end
+                            mkdir(char(sNiiTmpDir));
+
+                            dicm2nii(sFilePath, sNiiTmpDir, 1);
+
+                            sNiiFullFileName = '';
+
+                            f = java.io.File(char(sNiiTmpDir)); % Get .nii file name
+                            dinfo = f.listFiles();
+                            for K = 1 : 1 : numel(dinfo)
+                                if ~(dinfo(K).isDirectory)
+                                    if contains(sprintf('%s%s', sNiiTmpDir, dinfo(K).getName()), '.nii.gz')
+                                        sNiiFullFileName = sprintf('%s%s', sNiiTmpDir, dinfo(K).getName());
+                                        break;
+                                    end
+                                end
+                            end
+
+                            [sSegmentatorScript, ~] = validateSegmentatorInstallation();
+
+                            if ~isempty(sSegmentatorScript)
+
+                                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s --fast --force_split --body_seg', sSegmentatorScript, sNiiFullFileName, sTotalSegmentorFolderName);
+
+                                [bStatus, sCmdout] = system(sCommandLine);
+
+                                if bStatus
+                                    progressBar( 1, 'Error: An error occur during machine learning classification!');
+                                    errordlg(sprintf('An error occur during machine learning classification: %s', sCmdout), 'Segmentation Error');
+                                else % Process succeed
+
+                                    aBrownFatMask = getBrownFatTotalSegmentorAnnotationMask(sTotalSegmentorFolderName, zeros(size(aCTImage)));
+
+                                    atVoiInput = voiTemplate('get', dPTSerieOffset);
+                                    atRoiInput = roiTemplate('get', dPTSerieOffset);
+
+                                    if ~isequal(size(aBrownFatMask), size(aResampledPTImage)) % Verify if both images are in the same field of view
+
+                                         aBrownFatMask = resample3DImage(aBrownFatMask, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
+
+                                        if ~isequal(size(aBrownFatMask), size(aResampledPTImage)) % Verify if both images are in the same field of view
+                                            aBrownFatMask = resizeMaskToImageSize(aBrownFatMask, aResampledPTImage);
+                                        end
+
+                                    end
+
+                                    [atVoiInput, atRoiInput] = setBrownFatVoiTypeMask(aBrownFatMask, atVoiInput, atRoiInput);
+
+                                    voiTemplate('set', dPTSerieOffset, atVoiInput);
+                                    roiTemplate('set', dPTSerieOffset, atRoiInput);
+
+                                    clear aBrownFatMask;
+                                end
+
+                            end
+
+                            if exist(char(sNiiTmpDir), 'dir')
+                                rmdir(char(sNiiTmpDir), 's');
+                            end
+
+                        end
+
+                        if exist(char(sTotalSegmentorFolderName), 'dir')
+                            rmdir(char(sTotalSegmentorFolderName), 's');
+                        end
+                    end
 
                 end
 
@@ -253,7 +398,7 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
 
         if exist(char(sSegmentationFolderName), 'dir')
             rmdir(char(sSegmentationFolderName), 's');
-        end         
+        end
     end
 
     setVoiRoiSegPopup();
@@ -263,18 +408,18 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
     link2DMip('set', false);
 
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
+    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
     set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
-   
+
     % Set fusion
     if ~isempty(aCTImage)
-        
+
         progressBar(9/10, 'Processing fusion, please wait.');
 
         if isFusion('get') == false
-    
+
             set(uiFusedSeriesPtr('get'), 'Value', dCTSerieOffset);
-    
+
             setFusionCallback();
         end
     end
@@ -301,193 +446,21 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
     clear aPTImage;
     clear aCTImage;
 
-    % Delete .nii folder    
-    
+    % Delete .nii folder
+
     if exist(char(sNrrdTmpDir), 'dir')
 
         rmdir(char(sNrrdTmpDir), 's');
-    end       
-    
+    end
+
     progressBar(1, 'Ready');
 
-    catch 
-        resetSeries(dPTSerieOffset, true);       
+    catch
+        resetSeries(dPTSerieOffset, true);
         progressBar( 1 , 'Error: setMachineLearningFDGBrownFatFullAI()' );
     end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;
-   
-    function maskAddBrownFatVoiToSeries(aImage, aMask, atMetaData, dSeriesOffset, dSmalestValue, bPixelEdge)
 
-        PIXEL_EDGE_RATIO = 3;
-
-        dPixelSizeX = atMetaData{1}.PixelSpacing(1);
-        if dPixelSizeX == 0 
-            dPixelSizeX = 1;
-        end
-        
-        dPixelSizeY = atMetaData{1}.PixelSpacing(2);
-        if dPixelSizeY == 0 
-            dPixelSizeY = 1;
-        end                    
-        
-        dPixelSizeZ = computeSliceSpacing(atMetaData);
-        if dPixelSizeZ == 0  
-            dPixelSizeZ = 1;
-        end            
-    
-        dVoxelSize = dPixelSizeX * dPixelSizeY * dPixelSizeZ;
-        
-        dSmalestValueNbVoxels = round(dSmalestValue/(dVoxelSize/1000)); % In ml
-     
-        aBWImage = imbinarize(aImage);
-
-        aBWImage(aMask==0) = 0;
-
-        CC = bwconncomp(aBWImage, 26);
-        dNbElements = numel(CC.PixelIdxList);
-
-        for bb=1:dNbElements  % Nb VOI
-
-            if mod(bb,5)==1 || bb == 1 || bb == dNbElements
-  
-                progressBar( bb/dNbElements-0.0001, sprintf('Computing contour %d/%d, please wait.', bb, dNbElements) );
-            end   
-
-            BW = zeros(size(aBWImage));
-    
-            BW(CC.PixelIdxList{bb}) = aBWImage(CC.PixelIdxList{bb});
-
-            asTag = [];
-    
-            xmin=0.5;
-            xmax=1;
-            aColor=xmin+rand(1,3)*(xmax-xmin);
-        
-            aPixelsList = find(BW);
-            if numel(aPixelsList) < dSmalestValueNbVoxels
-                continue;
-            end
-    
-            [~,~,adSlices] = ind2sub(size(BW), aPixelsList);
-            adSlices = unique(adSlices);                
-            
-            dNbComputedSlices = numel(adSlices);
-
-            sLesionType = getMaskLessionType(aMask(CC.PixelIdxList{bb}));
-    
-            for aa=1:dNbComputedSlices % Find ROI
-    
-                if cancelCreateVoiRoiPanel('get') == true
-                    break;
-                end
-    
-                dCurrentSlice = adSlices(aa);
-    
-                aAxial = BW(:, :, dCurrentSlice);
-
-                if bPixelEdge == true
-                    aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
-                end
-                
-                [maskAxial, ~, dNbSlicesElements] = bwboundaries(aAxial, 8, 'noholes');                    
-                                 
-                for jj=1:dNbSlicesElements
-    
-                    if cancelCreateVoiRoiPanel('get') == true
-                        break;
-                    end
-    
-                    if bPixelEdge == true
-                        maskAxial{jj} = (maskAxial{jj} +1)/PIXEL_EDGE_RATIO;
-                        maskAxial{jj} = reducepoly(maskAxial{jj});
-                    end   
-    
-                    curentMask = maskAxial(jj);
-        
-                    sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
-    
-                    aPosition = flip(curentMask{1}, 2);
-
-                    if bPixelEdge == false
-                
-                        aPosition = smoothRoi(aPosition, size(aImage));
-                    end
-    
-                    sliceNumber('set', 'axial', dCurrentSlice);
-                    
-                    roiPtr = images.roi.Freehand(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'Smoothing', 1, 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', roiFaceAlphaValue('get'), 'Visible', 'off');
-                    roiPtr.Waypoints(:) = false;                    
-    
-                    addRoi(roiPtr, get(uiSeriesPtr('get'), 'Value'), sLesionType);
-    
-                    roiDefaultMenu(roiPtr);
-    
-                    uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',roiPtr, 'Callback', @hideViewFaceAlhaCallback);
-                    uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData',roiPtr, 'Callback', @clearWaypointsCallback);
-    
-                    constraintMenu(roiPtr);
-    
-                    cropMenu(roiPtr);
-    
-                    voiMenu(roiPtr);
-    
-                    uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
-                                           
-                    asTag{numel(asTag)+1} = sTag;
-
-                    if viewRoiPanel('get') == true
-                        drawnow limitrate;
-                    end
-                end
-            end
-
-            if ~isempty(asTag)
-    
-                if exist('sVOIName', 'var')
-                    sLabel = sprintf('%s %d', sVOIName, bb);
-                else
-                    sLabel = sprintf('VOI%d', bb);
-                end
-    
-                createVoiFromRois(dSeriesOffset, asTag, sLabel, aColor, sLesionType);
-            end  
-
-            clear BW;
-        end
-
-        clear aBWImage;
-    end
-
-    function  sLesionType = getMaskLessionType(aMask)
-
-        dLesionTypeOffset = max(aMask(aMask~=0), [], 'all');
-
-        switch dLesionTypeOffset
-
-            case 1
-                sLesionType = 'Cervical';
-
-            case 2
-                sLesionType = 'Supraclavicular';
-
-            case 3
-                sLesionType = 'Mediastinal';
-
-            case 4
-                sLesionType = 'Paraspinal';
-
-            case 5
-                sLesionType = 'Axillary';
-
-            case 6
-                sLesionType = 'Abdominal';
-
-            otherwise
-                sLesionType = 'Unknow';
-            
-        end
-
-    end
 end

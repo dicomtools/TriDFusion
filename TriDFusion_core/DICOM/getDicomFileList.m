@@ -51,7 +51,7 @@ function [tFileList, iNbFiles] = getDicomFileList(sDirName, tFileList)
 
                     tContours = readDicomContours(asFileList(iLoop)); 
                     
-                    tFileList.Contours {iNbContours} = tContours;                   
+                    tFileList.Contours{iNbContours} = tContours;   
                else
                     dInstanceNumber = 0;
                     adImagePositionPatient = [0 0 0];

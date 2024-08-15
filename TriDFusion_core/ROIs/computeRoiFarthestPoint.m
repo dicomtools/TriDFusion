@@ -110,72 +110,73 @@ function tMaxDistances = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlot
     
                         if ~isnan(y1) && ~isnan(y2) % ROI is valid
     
-                            % % Get the profile perpendicular to the midpoint so we can find out when if first enters and last leaves the object.
-                            % [cxMax, cyMax, cMax] = improfile(aBinaryImage, [1, columns], [y1, y2]);
-                            % 
-                            % % Get rid of NAN's that occur when the line's endpoints go above or below the image.
-                            % cMax(isnan(cMax)) = 0;
-                            % perpendicularIndex1 = find(cMax, 1, 'first');
-                            % perpendicularIndex2 = find(cMax, 1, 'last');
-                            % 
-                            % if ~isempty(perpendicularIndex1) && ... % Find a perpendicular
-                            %    ~isempty(perpendicularIndex2)
-                            % 
-                            %     % Use the coordinates from improfile directly
-                            %     x1CY = cxMax(perpendicularIndex1);
-                            %     y1CY = cyMax(perpendicularIndex1);
-                            %     x2CY = cxMax(perpendicularIndex2);
-                            %     y2CY = cyMax(perpendicularIndex2);
-                            % 
-                            %     % Find the closest points on the contour to ensure lCY endpoints are on the contour
-                            %     [x1CY, y1CY] = findClosestContourPoint(x1CY, y1CY, x, y);
-                            %     [x2CY, y2CY] = findClosestContourPoint(x2CY, y2CY, x, y);
-                            % 
-                            %     x1XY = x(longestIndex1);
-                            %     x2XY = x(longestIndex2);
-                            %     y1XY = y(longestIndex1);
-                            %     y2XY = y(longestIndex2);
-
-                            % Compute the equation of the line passing through (1, y1) and (columns, y2)
-                            m = (y2 - y1) / (columns - 1); % slope
-                            b = y1 - m; % y-intercept
-                        
-                            % Generate x values along the line
-                            xValues = 1:columns;
-                        
-                            % Compute corresponding y values
-                            yValues = m * xValues + b;
-                        
-                            % Round the y values to integer indices
-                            yIndices = round(yValues);
-                        
-                            % Ensure indices stay within image bounds
-                            yIndices = max(1, min(yIndices, size(aBinaryImage, 1)));
-                        
-                            % Extract intensity values from the image along the line
-                            cMax = aBinaryImage(sub2ind(size(aBinaryImage), yIndices, xValues));
-                        
+                            % Get the profile perpendicular to the midpoint so we can find out when if first enters and last leaves the object.
+                            [cxMax, cyMax, cMax] = improfile(aBinaryImage, [1, columns], [y1, y2]);
+                            
                             % Get rid of NAN's that occur when the line's endpoints go above or below the image.
                             cMax(isnan(cMax)) = 0;
-                            
                             perpendicularIndex1 = find(cMax, 1, 'first');
                             perpendicularIndex2 = find(cMax, 1, 'last');
-                        
-                            if ~isempty(perpendicularIndex1) && ~isempty(perpendicularIndex2)
-                                % Use the coordinates directly
-                                x1CY = xValues(perpendicularIndex1);
-                                y1CY = yIndices(perpendicularIndex1);
-                                x2CY = xValues(perpendicularIndex2);
-                                y2CY = yIndices(perpendicularIndex2);
-                                
+                            
+                            if ~isempty(perpendicularIndex1) && ... % Find a perpendicular
+                               ~isempty(perpendicularIndex2)
+                            
+                                % Use the coordinates from improfile directly
+                                x1CY = cxMax(perpendicularIndex1);
+                                y1CY = cyMax(perpendicularIndex1);
+                                x2CY = cxMax(perpendicularIndex2);
+                                y2CY = cyMax(perpendicularIndex2);
+                            
                                 % Find the closest points on the contour to ensure lCY endpoints are on the contour
                                 [x1CY, y1CY] = findClosestContourPoint(x1CY, y1CY, x, y);
                                 [x2CY, y2CY] = findClosestContourPoint(x2CY, y2CY, x, y);
-                        
+                            
                                 x1XY = x(longestIndex1);
                                 x2XY = x(longestIndex2);
                                 y1XY = y(longestIndex1);
                                 y2XY = y(longestIndex2);
+   
+
+%                             % Compute the equation of the line passing through (1, y1) and (columns, y2)
+%                             m = (y2 - y1) / (columns - 1); % slope
+%                             b = y1 - m; % y-intercept
+%                         
+%                             % Generate x values along the line
+%                             xValues = 1:columns;
+%                         
+%                             % Compute corresponding y values
+%                             yValues = m * xValues + b;
+%                         
+%                             % Round the y values to integer indices
+%                             yIndices = round(yValues);
+%                         
+%                             % Ensure indices stay within image bounds
+%                             yIndices = max(1, min(yIndices, size(aBinaryImage, 1)));
+%                         
+%                             % Extract intensity values from the image along the line
+%                             cMax = aBinaryImage(sub2ind(size(aBinaryImage), yIndices, xValues));
+%                         
+%                             % Get rid of NAN's that occur when the line's endpoints go above or below the image.
+%                             cMax(isnan(cMax)) = 0;
+%                             
+%                             perpendicularIndex1 = find(cMax, 1, 'first');
+%                             perpendicularIndex2 = find(cMax, 1, 'last');
+%                         
+%                             if ~isempty(perpendicularIndex1) && ~isempty(perpendicularIndex2)
+%                                 % Use the coordinates directly
+%                                 x1CY = xValues(perpendicularIndex1);
+%                                 y1CY = yIndices(perpendicularIndex1);
+%                                 x2CY = xValues(perpendicularIndex2);
+%                                 y2CY = yIndices(perpendicularIndex2);
+%                                 
+%                                 % Find the closest points on the contour to ensure lCY endpoints are on the contour
+%                                 [x1CY, y1CY] = findClosestContourPoint(x1CY, y1CY, x, y);
+%                                 [x2CY, y2CY] = findClosestContourPoint(x2CY, y2CY, x, y);
+%                         
+%                                 x1XY = x(longestIndex1);
+%                                 x2XY = x(longestIndex2);
+%                                 y1XY = y(longestIndex1);
+%                                 y2XY = y(longestIndex2);
 
                                 if bPlotLine == true 
                                     sLineVisible = 'on';
@@ -189,7 +190,8 @@ function tMaxDistances = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlot
                                 tMaxDistances.MaxXY.Line = lXY;
                                 tMaxDistances.MaxCY.Line = lCY;
     
-                                if is3DEngine('get') == true
+                                if is3DEngine('get') == true && ...
+                                   viewerUIFigure('get') == false
     
                                     if size(imRoi, 3) == 1 
                                         if strcmpi(atRoi.Axe, 'Axe')

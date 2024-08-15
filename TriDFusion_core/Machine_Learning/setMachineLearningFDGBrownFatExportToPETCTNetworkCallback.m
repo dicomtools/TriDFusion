@@ -31,18 +31,58 @@ function setMachineLearningFDGBrownFatExportToPETCTNetworkCallback(hObject, ~)
 
     atInput = inputTemplate('get');
 
-    sTask99FolderPath = getenv('nnUnet_Task99_BAT_PETAC_CTAC');
+    sEnvironment = 'nnUNet_raw_data_base';
 
-    if isempty(sTask99FolderPath)
+    sRawFolderPath = getenv(sEnvironment);
+    
+    if isempty(sRawFolderPath)
+      
+        progressBar( 1, sprintf('Error: %s environment variable not detected!', sEnvironment));
 
-       progressBar( 1, 'Error: nnUnet_Task99_BAT_PETAC_CTAC environment variable not detected!');
-       if exist('hObject', 'var')   
-            errordlg(sprintf('nnUnet_Task99_BAT_PETAC_CTAC environment variable detected!\n Please define an environment variable nnUnet_Task99_BAT_PETAC_CTAC'), 'nnUnet_Task99_BAT_PETAC_CTAC Validation');  
-        end
+        if exist('hObject', 'var')   
+            errordlg(sprintf('%s environment variable not detected!\n Please define an environment variable', sEnvironment), sprintf('%s Validation', sEnvironment));  
+        end   
+
         return;
     end
 
-    aListing = dir(sTask99FolderPath);
+    if machineLearningFDGBrownFatSUVScaled('get') == true
+
+        if machineLearningFDGBrownFatSUVNormalization('get') == true
+
+            dTaskNumber = 101;
+        else
+            dTaskNumber = 99;
+        end
+    else
+        dTaskNumber = 97;
+    end
+
+    aListing = dir(sRawFolderPath);
+
+    bFoundTask = false;
+    for dd=1:numel(aListing)
+        if aListing(dd).isdir == true
+            if strfind(aListing(dd).name, num2str(dTaskNumber))
+                bFoundTask = true;
+                sTaskFolderPath = sprintf('%s/%s', sRawFolderPath, aListing(dd).name);
+                break;
+            end
+        end
+    end
+
+    if bFoundTask == false
+
+        progressBar( 1, sprintf('Error: Task %s environment variable not detected!', num2str(dTaskNumber)));
+
+        if exist('hObject', 'var')   
+            errordlg(sprintf('Task %s not detected!\n Please create a task under %s', num2str(dTaskNumber), sEnvironment), sprintf('Task %s Validation', num2str(dTaskNumber)));  
+        end   
+
+        return;        
+    end
+
+    aListing = dir(sTaskFolderPath);
 
     bFoundData0 = false;
     for dd=1:numel(aListing)
@@ -55,12 +95,12 @@ function setMachineLearningFDGBrownFatExportToPETCTNetworkCallback(hObject, ~)
     end
 
     if bFoundData0 == false
-        mkdir(sprintf('%s/data0', sTask99FolderPath));
-        mkdir(sprintf('%s/data0/training', sTask99FolderPath));
-        mkdir(sprintf('%s/data0/testing', sTask99FolderPath));
+        mkdir(sprintf('%s/data0', sTaskFolderPath));
+        mkdir(sprintf('%s/data0/training', sTaskFolderPath));
+        mkdir(sprintf('%s/data0/testing', sTaskFolderPath));
     end
 
-    sTrainingFoder = sprintf('%s/data0/training', sTask99FolderPath);
+    sTrainingFoder = sprintf('%s/data0/training', sTaskFolderPath);
 
     aListing = dir(sTrainingFoder);
     
@@ -169,19 +209,29 @@ function setMachineLearningFDGBrownFatExportToPETCTNetworkCallback(hObject, ~)
         aPTImage = aPTImage(:,:,end:-1:1);
     end
 
-    dSUVconv = computeSUV(atPTMetaData, 'LBM');
+    if machineLearningFDGBrownFatSUVScaled('get') == true
+    
+        dSUVconv = computeSUV(atPTMetaData, 'LBM');
+    
+        if dSUVconv == 0
+            dSUVconv = computeSUV(atPTMetaData, 'BW');
+        end
+    
+        if dSUVconv == 0
+            dSUVconv = 1;
+        end
 
-    if dSUVconv == 0
-        dSUVconv = computeSUV(atPTMetaData, 'BW');
+        if machineLearningFDGBrownFatSUVNormalization('get') == true
+            if dSUVconv ~= 1
+                dSUVconv = 1+dSUVconv;
+            end
+        end
+
+        nrrdWriter(sNrrdImagesName, squeeze(aPTImage*dSUVconv), pixelspacing, origin, 'raw'); % Write .nrrd images     
+    else
+        nrrdWriter(sNrrdImagesName, squeeze(aPTImage), pixelspacing, origin, 'raw'); % Write .nrrd images             
     end
 
-    if dSUVconv == 0
-        dSUVconv = 1;
-    end
-
-    aPTImage = aPTImage*dSUVconv;
-
-    nrrdWriter(sNrrdImagesName, squeeze(aPTImage), pixelspacing, origin, 'raw'); % Write .nrrd images     
 
     atCTMetaData  = dicomMetaData('get', [], dCTSerieOffset);
     if isempty(atCTMetaData)
@@ -193,7 +243,11 @@ function setMachineLearningFDGBrownFatExportToPETCTNetworkCallback(hObject, ~)
         aInputBuffer = inputBuffer('get');
         aCTImage = aInputBuffer{dCTSerieOffset};
     end
-        
+
+    if size(aCTImage, 3) ~=1
+    
+        aCTImage = aCTImage(:,:,end:-1:1);
+    end
 
     [aResampledCTImage, ~] = resampleImage(aCTImage, atCTMetaData, aPTImage, atPTMetaData, 'Linear', true, false);   
 

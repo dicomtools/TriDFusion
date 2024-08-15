@@ -188,19 +188,54 @@ function mainWindowMenu()
     uimenu(mAnalCancer, 'Label','Export Contours to RT-structure...','Callback', @writeRTStructCallback);
     uimenu(mAnalCancer, 'Label','PET/CT Fusion', 'Callback'         , @setPETCTAnalCancerFusionCallback, 'Separator','on');
 
+    % Metabolism Breast Cancer
+     mMetastaticBreastCancer = uimenu(mWorkflows,'Label','Metastatic Breast Cancer');
+     
+     uimenu(mMetastaticBreastCancer, 'Label','Metastatic Breast Cancer Segmentation (Threshold)', 'Callback', @setSegmentationMetastaticBreastCancerSegmentationCallback);
+%      uimenu(mMetastaticBreastCancer, 'Label','Metastatic Breast Cancer Segmentation (Threshold + AI)', 'Callback', @set);
+
+    uimenu(mMetastaticBreastCancer, 'Label','PET/CT Fusion', 'Callback'         , @setPETCTAnalCancerFusionCallback, 'Separator','on');
+
     % PSMA Lu177
 
     mLu177 = uimenu(mWorkflows,'Label','PSMA - Lu177');
-%     uimenu(mLu177, 'Label','PSMA Lu177 2D Wholebody Segmentation'          , 'Callback', @set2DWholobodySegmentationLu177Callback);
-    uimenu(mLu177, 'Label','PSMA Lu177 Tumor Segmentation (Threshold)'     , 'Callback', @setSegmentationLu177Callback);
-    uimenu(mLu177, 'Label','PSMA Lu177 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningLu177Callback);
-    uimenu(mLu177, 'Label','PET/CT Fusion'                                 , 'Callback', @setPETCTLu177FusionCallback, 'Separator','on');
+    mLu177Planar = uimenu(mLu177,'Label','2D Planar');
+    uimenu(mLu177Planar, 'Label','PSMA Lu177 2D Wholebody Segmentation'          , 'Callback', @set2DWholobodySegmentationLu177Callback);
+
+    mLu177Threshold = uimenu(mLu177,'Label','Threshold-based Segmentation');
+    uimenu(mLu177Threshold, 'Label','PSMA Lu177 Tumor Segmentation (Threshold)'     , 'Callback', @setSegmentationLu177Callback);
+    uimenu(mLu177Threshold, 'Label','PSMA Lu177 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningLu177Callback);
+
+    mLu177FullAI = uimenu(mLu177,'Label','Machine Learning Segmentation');
+    uimenu(mLu177FullAI, 'Label','PSMA Lu177 Segmentation using NN-Unet SPECT Network (Full AI)'     , 'Callback', @setMachineLearningPSMALu177SPECTFullAICallback);
+    uimenu(mLu177FullAI, 'Label','PSMA Lu177 Segmentation using NN-Unet SPECT & CT Network (Full AI)', 'Callback', @setMachineLearningPSMALu177SPECTCTFullAICallback);
+
+    mLu177FullAIToolkit = uimenu(mLu177FullAI,'Label','AI Toolkit', 'Separator','on');
+    uimenu(mLu177FullAIToolkit, 'Label','Export PSMA Lu177 segmentation to NN-Unet SPECT Network'     , 'Callback', @setMachineLearningPSMALu177ExportToSPECTNetworkCallback);
+    uimenu(mLu177FullAIToolkit, 'Label','Pre-processing NN-Unet PSMA Lu177 SPECT Network'             , 'Callback', @setMachineLearningPSMALu177DataPreProcessingSPECTCallback);
+    uimenu(mLu177FullAIToolkit, 'Label','Export PSMA Lu177 segmentation to NN-Unet SPECT & CT Network', 'Callback', @setMachineLearningPSMALu177ExportToSPECTCTNetworkCallback, 'Separator','on');
+    uimenu(mLu177FullAIToolkit, 'Label','Pre-processing NN-Unet PSMA Lu177 SPECT & CT Network'        , 'Callback', @setMachineLearningPSMALu177DataPreProcessingSPECTCTCallback);
+
+    uimenu(mLu177, 'Label','PET/CT Fusion', 'Callback', @setPETCTLu177FusionCallback, 'Separator','on');
 
     % PSMA Ga68
 
     mPSMA = uimenu(mWorkflows,'Label','PSMA - Ga68');
-    uimenu(mPSMA, 'Label','PSMA Ga68 Tumor Segmentation (Threshold)'     , 'Callback', @setSegmentationPSMACallback);
-    uimenu(mPSMA, 'Label','PSMA Ga68 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningPSMACallback);
+
+    mPSMAThreshold = uimenu(mPSMA,'Label','Threshold-based Segmentation');    
+    uimenu(mPSMAThreshold, 'Label','PSMA Ga68 Tumor Segmentation (Threshold)'     , 'Callback', @setSegmentationPSMACallback);
+    uimenu(mPSMAThreshold, 'Label','PSMA Ga68 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningPSMACallback);
+
+    mPSMAFullAI = uimenu(mPSMA,'Label','Machine Learning Segmentation');
+    uimenu(mPSMAFullAI, 'Label','PSMA Ga68 Segmentation using NN-Unet PET Network (Full AI)'     , 'Callback', @setMachineLearningPSMAGa68PETFullAICallback);
+    uimenu(mPSMAFullAI, 'Label','PSMA Ga68 Segmentation using NN-Unet PET & CT Network (Full AI)', 'Callback', @setMachineLearningPSMAGa68PETCTFullAICallback);
+
+    mPSMAFullAIToolkit = uimenu(mPSMAFullAI,'Label','AI Toolkit', 'Separator','on');
+    uimenu(mPSMAFullAIToolkit, 'Label','Export PSMA Ga68 segmentation to NN-Unet PET Network'     , 'Callback', @setMachineLearningPSMAGa68ExportToPETNetworkCallback);
+    uimenu(mPSMAFullAIToolkit, 'Label','Pre-processing NN-Unet PSMA Ga68 PET Network'             , 'Callback', @setMachineLearningPSMAGa68DataPreProcessingPETCallback);
+    uimenu(mPSMAFullAIToolkit, 'Label','Export PSMA Ga68 segmentation to NN-Unet PET & CT Network', 'Callback', @setMachineLearningPSMAGa68ExportToPETCTNetworkCallback, 'Separator','on');
+    uimenu(mPSMAFullAIToolkit, 'Label','Pre-processing NN-Unet PSMA Ga68 PET & CT Network'        , 'Callback', @setMachineLearningPSMAGa68DataPreProcessingPETCTCallback);
+
     uimenu(mPSMA, 'Label','PET/CT Fusion'                                , 'Callback', @setPETCTPSMAFusionCallback, 'Separator','on');
 
     % FDG
@@ -214,18 +249,18 @@ function mainWindowMenu()
 
     mFDGBrownFat = uimenu(mFDG,'Label','Brown Fat Segmentation');
     mFDGBrownFatThreshold = uimenu(mFDGBrownFat,'Label','Threshold + AI');
-    uimenu(mFDGBrownFatThreshold, 'Label','FDG Brown Fat Segmentation (Threshold + AI)'                           , 'Callback', @setMachineLearningFDGBrownFatSUVCallback);
-    uimenu(mFDGBrownFatThreshold, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure (Threshold + AI)', 'Callback', @setMachineLearningFDGBrownFatSUVRT_structureCallback);
-    mFDGBrownFatFullAI = uimenu(mFDGBrownFat,'Label','Full AI');
-    uimenu(mFDGBrownFatFullAI, 'Label','FDG Brown Fat PET Segmentation (Full AI)'                               , 'Callback', @setMachineLearningFDGBrownFatPETFullAICallback);
-    uimenu(mFDGBrownFatFullAI, 'Label','FDG Brown Fat PET Segmentation, export DICOM-RT structure  (Full AI)'   , 'Callback', @setMachineLearningFDGBrownFatPETFullAIRT_structureCallback);
-    uimenu(mFDGBrownFatFullAI, 'Label','FDG Brown Fat PET\CT Segmentation (Full AI)'                            , 'Callback', @setMachineLearningFDGBrownFatPETCTFullAICallback, 'Separator','on');
-    uimenu(mFDGBrownFatFullAI, 'Label','FDG Brown Fat PET\CT Segmentation, export DICOM-RT structure  (Full AI)', 'Callback', @setMachineLearningFDGBrownFatPETCTFullAIRT_structureCallback);    
+    uimenu(mFDGBrownFatThreshold, 'Label','FDG BAT Segmentation (Threshold + AI)'                           , 'Callback', @setMachineLearningFDGBrownFatSUVCallback);
+%     uimenu(mFDGBrownFatThreshold, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure (Threshold + AI)', 'Callback', @setMachineLearningFDGBrownFatSUVRT_structureCallback);
+    mFDGBrownFatFullAI = uimenu(mFDGBrownFat,'Label','Machine Learning');
+    uimenu(mFDGBrownFatFullAI, 'Label','FDG BAT Segmentation using NN-Unet PET Network (Full AI)'                               , 'Callback', @setMachineLearningFDGBrownFatPETFullAICallback);
+%     uimenu(mFDGBrownFatFullAI, 'Label','FDG Brown Fat PET Segmentation, export DICOM-RT structure  (Full AI)'   , 'Callback', @setMachineLearningFDGBrownFatPETFullAIRT_structureCallback);
+    uimenu(mFDGBrownFatFullAI, 'Label','FDG BAT Segmentation using NN-Unet PET & CT Network (Full AI)'                            , 'Callback', @setMachineLearningFDGBrownFatPETCTFullAICallback);
+%     uimenu(mFDGBrownFatFullAI, 'Label','FDG Brown Fat PET\CT Segmentation, export DICOM-RT structure  (Full AI)', 'Callback', @setMachineLearningFDGBrownFatPETCTFullAIRT_structureCallback);    
     mFDGBrownFatAiToolkit = uimenu(mFDGBrownFatFullAI,'Label','AI Toolkit', 'Separator','on');
-    uimenu(mFDGBrownFatAiToolkit, 'Label','Export Segmentation to AI PET Trainning Network'   , 'Callback', @setMachineLearningFDGBrownFatExportToPETNetworkCallback);
-    uimenu(mFDGBrownFatAiToolkit, 'Label','Pre-processing AI PET Training Network'            , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCallback);
-    uimenu(mFDGBrownFatAiToolkit, 'Label','Export Segmentation to AI PET/CT Trainning Network', 'Callback', @setMachineLearningFDGBrownFatExportToPETCTNetworkCallback, 'Separator','on');
-    uimenu(mFDGBrownFatAiToolkit, 'Label','Pre-processing AI PET/CT Training Network'         , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCTCallback);
+    uimenu(mFDGBrownFatAiToolkit, 'Label','Export BAT segmentation to NN-Unet PET Network'     , 'Callback', @setMachineLearningFDGBrownFatExportToPETNetworkCallback);
+    uimenu(mFDGBrownFatAiToolkit, 'Label','Pre-processing NN-Unet BAT PET Network'             , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCallback);
+    uimenu(mFDGBrownFatAiToolkit, 'Label','Export BAT segmentation to NN-Unet PET & CT Network', 'Callback', @setMachineLearningFDGBrownFatExportToPETCTNetworkCallback, 'Separator','on');
+    uimenu(mFDGBrownFatAiToolkit, 'Label','Pre-processing NN-Unet BAT PET & CT Network'        , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCTCallback);
     uimenu(mFDGBrownFat, 'Label','PET/CT Fusion', 'Callback', @setPETCTFDGFusionCallback, 'Separator','on');
     
  
@@ -248,10 +283,12 @@ function mainWindowMenu()
     mGa68DOTATATE = uimenu(mWorkflows,'Label','DOTATATE - Ga68');
 
     if Ga68_DOTATATE
-        uimenu(mGa68DOTATATE, 'Label','DOTATATE Ga68 Tumor Segmentation (Threshold)'     , 'Callback', @setSegmentationGa68DOTATATECallback);
-        uimenu(mGa68DOTATATE, 'Label','DOTATATE Ga68 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningGa68DOTATATECallback);
-        uimenu(mGa68DOTATATE, 'Label','DOTATATE Ga68 Tumor Segmentation (Full AI)'       , 'Callback', @setMachineLearningFullAIGa68DOTATATECallback);
-        uimenu(mGa68DOTATATE, 'Label','PET/CT Fusion'                                    , 'Callback', @setPETCTGa68DOTATATEFusionCallback, 'Separator','on');
+        mGa68DOTATATEThreshold = uimenu(mGa68DOTATATE,'Label','Threshold-based Segmentation');
+        uimenu(mGa68DOTATATEThreshold, 'Label','DOTATATE Ga68 Tumor Segmentation (Threshold)'     , 'Callback', @setSegmentationGa68DOTATATECallback);
+        uimenu(mGa68DOTATATEThreshold, 'Label','DOTATATE Ga68 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningGa68DOTATATECallback);
+        mGa68DOTATATEFullAI = uimenu(mGa68DOTATATE,'Label','Machine Learning Segmentation');
+        uimenu(mGa68DOTATATEFullAI, 'Label','DOTATATE Ga68 Tumor Segmentation using ONNX Network (Full AI)', 'Callback', @setMachineLearningFullAIGa68DOTATATECallback);
+        uimenu(mGa68DOTATATEFullAI, 'Label','PET/CT Fusion'                                    , 'Callback', @setPETCTGa68DOTATATEFusionCallback, 'Separator','on');
     else
        uimenu(mGa68DOTATATE, 'Label','DOTATATE Ga68 Tumor Segmentation (Threshold)'      , 'Callback', @setSegmentationGa68DOTATATECallback);
        uimenu(mGa68DOTATATE, 'Label','PET/CT Fusion'                                     , 'Callback', @setPETCTGa68DOTATATEFusionCallback, 'Separator','on');
@@ -272,7 +309,7 @@ function mainWindowMenu()
     uimenu(mMachineProcessing, 'Label','3D SPECT Lung Lobe Ratio', 'Callback', @setMachineLearning3DLobeLungCallback);
     uimenu(mMachineProcessing, 'Label','PET Y90 Liver Dosimetry' , 'Callback', @setMachineLearningPETLiverDosimetryCallback);
 
-    mMachineSegmentation = uimenu(mMachineLearning, 'Label','Machine Learning Tumor Segmentation');
+    mMachineSegmentation = uimenu(mMachineLearning, 'Label','Machine Learning Segmentation');
 
     % PSMA Lu177
 
@@ -288,17 +325,17 @@ function mainWindowMenu()
 
     mFDG = uimenu(mMachineSegmentation,'Label','FDG - fluorodeoxyglucose');
     uimenu(mFDG, 'Label','FDG Tumor Segmentation Lymph Node (Threshold + AI)', 'Callback'                    , @setMachineLearningFDGLymphNodeSUVCallback);
-    uimenu(mFDG, 'Label','FDG Brown Fat Segmentation (Threshold + AI)', 'Callback'                           , @setMachineLearningFDGBrownFatSUVCallback);
-    uimenu(mFDG, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure (Threshold + AI)' , 'Callback', @setMachineLearningFDGBrownFatSUVRT_structureCallback);
-    uimenu(mFDG, 'Label','FDG Brown Fat PET Segmentation (Full AI)'                               , 'Callback', @setMachineLearningFDGBrownFatPETFullAICallback);
-    uimenu(mFDG, 'Label','FDG Brown Fat PET Segmentation, export DICOM-RT structure  (Full AI)'   , 'Callback', @setMachineLearningFDGBrownFatPETFullAIRT_structureCallback);
-    uimenu(mFDG, 'Label','FDG Brown Fat PET\CT Segmentation (Full AI)'                            , 'Callback', @setMachineLearningFDGBrownFatPETCTFullAICallback, 'Separator','on');
-    uimenu(mFDG, 'Label','FDG Brown Fat PET\CT Segmentation, export DICOM-RT structure  (Full AI)', 'Callback', @setMachineLearningFDGBrownFatPETCTFullAIRT_structureCallback);
+    uimenu(mFDG, 'Label','FDG BAT Segmentation (Threshold + AI)', 'Callback'                           , @setMachineLearningFDGBrownFatSUVCallback);
+%     uimenu(mFDG, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure (Threshold + AI)' , 'Callback', @setMachineLearningFDGBrownFatSUVRT_structureCallback);
+    uimenu(mFDG, 'Label','FDG BAT Segmentation using NN-Unet PET Network (Full AI)'                               , 'Callback', @setMachineLearningFDGBrownFatPETFullAICallback);
+%     uimenu(mFDG, 'Label','FDG Brown Fat PET Segmentation, export DICOM-RT structure  (Full AI)'   , 'Callback', @setMachineLearningFDGBrownFatPETFullAIRT_structureCallback);
+    uimenu(mFDG, 'Label','FDG BAT Segmentation using NN-Unet PET & CT Network (Full AI)'                            , 'Callback', @setMachineLearningFDGBrownFatPETCTFullAICallback);
+%     uimenu(mFDG, 'Label','FDG Brown Fat PET\CT Segmentation, export DICOM-RT structure  (Full AI)', 'Callback', @setMachineLearningFDGBrownFatPETCTFullAIRT_structureCallback);
     mFDGmFDGAiToolkit = uimenu(mFDG,'Label','AI Toolkit', 'Separator','on');
-    uimenu(mFDGmFDGAiToolkit, 'Label','Export Segmentation to AI PET Trainning Network'   , 'Callback', @setMachineLearningFDGBrownFatExportToPETNetworkCallback);
-    uimenu(mFDGmFDGAiToolkit, 'Label','Pre-processing AI PET Training Network'            , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCallback);
-    uimenu(mFDGmFDGAiToolkit, 'Label','Export Segmentation to AI PET/CT Trainning Network', 'Callback', @setMachineLearningFDGBrownFatExportToPETCTNetworkCallback, 'Separator','on');
-    uimenu(mFDGmFDGAiToolkit, 'Label','Pre-processing AI PET/CT Training Network'         , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCTCallback);
+    uimenu(mFDGmFDGAiToolkit, 'Label','Export BAT segmentation to NN-Unet PET Network'    , 'Callback', @setMachineLearningFDGBrownFatExportToPETNetworkCallback);
+    uimenu(mFDGmFDGAiToolkit, 'Label','Pre-processing NN-Unet BAT PET Network'                 , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCallback);
+    uimenu(mFDGmFDGAiToolkit, 'Label','Export BAT segmentation to NN-Unet PET & CT Network', 'Callback', @setMachineLearningFDGBrownFatExportToPETCTNetworkCallback, 'Separator','on');
+    uimenu(mFDGmFDGAiToolkit, 'Label','Pre-processing NN-Unet BAT PET & CT Network'            , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCTCallback);
 
     % FDHT
 
@@ -316,7 +353,7 @@ function mainWindowMenu()
         mGa68DOTATATE = uimenu(mMachineSegmentation,'Label','DOTATATE - Ga68');
 
         uimenu(mGa68DOTATATE, 'Label','DOTATATE Ga68 Tumor Segmentation (Treshold + AI)', 'Callback', @setMachineLearningGa68DOTATATECallback);
-        uimenu(mGa68DOTATATE, 'Label','DOTATATE Ga68 Tumor Segmentation (Full AI)'      , 'Callback', @setMachineLearningFullAIGa68DOTATATECallback);
+        uimenu(mGa68DOTATATE, 'Label','DOTATATE Ga68 Tumor Segmentation using ONNX Network(Full AI)'      , 'Callback', @setMachineLearningFullAIGa68DOTATATECallback);
     end
 
     mRadiomics = uimenu(mModules, 'Label','Radiomics');

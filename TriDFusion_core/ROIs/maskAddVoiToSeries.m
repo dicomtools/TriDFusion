@@ -1,5 +1,5 @@
-function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxOrMaxSUVValue, bMultiplePeaks, dMultiplePeaksPercentValue, bUseFormula, sMinSUVformula, BWCT, dSmalestValue, dLiverMean, dLiverSTD, sVOIName)
-%function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxOrMaxSUVValue, bMultiplePeaks, dMultiplePeaksPercentValue, bUseFormula, sMinSUVformula, BWCT, dSmalestValue, dLiverMean, dLiverSTD, sVOIName)
+function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxOrMaxSUVValue, bMultiplePeaks, dMultiplePeaksPercentValue, bUseFormula, sMinSUVformula, BWCT, dSmalestValue, dLiverMean, dLiverSTD, sVOIName, dBoneThreshold)
+%function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxOrMaxSUVValue, bMultiplePeaks, dMultiplePeaksPercentValue, bUseFormula, sMinSUVformula, BWCT, dSmalestValue, dLiverMean, dLiverSTD, sVOIName, dBoneThreshold)
 %create contour from a mask and formula.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -81,6 +81,8 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 %            dMaxValue = max(imMask, [], 'all');
 
 %    CC = bwconncomp(gather(BW), 18);
+
+
     CC = bwconncomp(gather(BW), 26);
     dNbElements = numel(CC.PixelIdxList);
 
@@ -214,7 +216,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                     dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
 
                     dPercentMaxOrMaxSUVValue = (4.30/dMean)*(dMean + dSTD);                                
-                    BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                    BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     BW2(BW2 ~= dMinValue) = 1;
                     BW2(BW2 == dMinValue) = 0;                                
 
@@ -229,7 +231,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                         sLesionType = 'Bone';
 
                         dPercentMaxOrMaxSUVValue = 3;                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     else
                         sLesionType = 'Soft Tissue';
 
@@ -237,7 +239,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                         dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
 
                         dPercentMaxOrMaxSUVValue = (4.30/dMean)*(dMean + dSTD);                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     end
 
                     BW2(BW2 ~= dMinValue) = 1;
@@ -255,7 +257,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                         sLesionType = 'Bone';
 
                         dPercentMaxOrMaxSUVValue = 3;                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     else
                         sLesionType = 'Soft Tissue';
 
@@ -263,7 +265,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 %                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
 
                         dPercentMaxOrMaxSUVValue = (4.30/dLiverMean)*(dLiverMean + dLiverSTD);                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     end
 
                     BW2(BW2 ~= dMinValue) = 1;
@@ -280,7 +282,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                         sLesionType = 'Bone';
 
                         dPercentMaxOrMaxSUVValue = 3;                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     else
                         sLesionType = 'Soft Tissue';
 
@@ -288,7 +290,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 %                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
 
                         dPercentMaxOrMaxSUVValue = (4.44/dLiverMean)*(dLiverMean + dLiverSTD);                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     end
 
                     BW2(BW2 ~= dMinValue) = 1;
@@ -305,7 +307,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                         sLesionType = 'Bone';
 
                         dPercentMaxOrMaxSUVValue = 3;                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     else
                         sLesionType = 'Soft Tissue';
 
@@ -313,7 +315,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                         dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
                         
                         dPercentMaxOrMaxSUVValue = (4.30/dMean)*(dMean + dSTD);                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     end
 
                     BW2(BW2 ~= dMinValue) = 1;
@@ -330,12 +332,12 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                         sLesionType = 'Bone';
 
                         dPercentMaxOrMaxSUVValue = 3;                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     else
                         sLesionType = 'Soft Tissue';
 
                         dPercentMaxOrMaxSUVValue = 4;                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     end
 
                     BW2(BW2 ~= dMinValue) = 1;
@@ -352,19 +354,19 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                         sLesionType = 'Bone';
 
                         dPercentMaxOrMaxSUVValue = 3;                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     else
                         sLesionType = 'Soft Tissue';
 
                         dPercentMaxOrMaxSUVValue = 4;                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     end
 
                     BW2(BW2 ~= dMinValue) = 1;
                     BW2(BW2 == dMinValue) = 0; 
 %                                clear(BWANDBWCT);
                 elseif strcmpi(sMinSUVformula, '(1.5 x Normal Liver SUVmean)+(2 x Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map')
-                    
+
                     BWANDBWCT = BW2&BWCT2;
 
                     dBWnbPixel        = numel(BW2(BW2~=0));
@@ -374,7 +376,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                         sLesionType = 'Bone';
 
                         dPercentMaxOrMaxSUVValue = 3;                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     else
                         sLesionType = 'Soft Tissue';
 
@@ -382,7 +384,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 %                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
 
                         dPercentMaxOrMaxSUVValue = (1.5*dLiverMean)+(2 * dLiverSTD);                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     end
 
                     BW2(BW2 ~= dMinValue) = 1;
@@ -399,7 +401,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                         sLesionType = 'Bone';
 
                         dPercentMaxOrMaxSUVValue = 2;                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     else
                         sLesionType = 'Soft Tissue';
 
@@ -407,7 +409,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 %                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
 
                         dPercentMaxOrMaxSUVValue = (1.2*dLiverMean)+(2 * dLiverSTD);                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     end
 
                     BW2(BW2 ~= dMinValue) = 1;
@@ -423,7 +425,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                         sLesionType = 'Bone';
 
                         dPercentMaxOrMaxSUVValue = 2.5;                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     else
                         sLesionType = 'Soft Tissue';
 
@@ -431,7 +433,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 %                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
 
                         dPercentMaxOrMaxSUVValue = (1.5*dLiverMean)+(2 * dLiverSTD);                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     end
 
                     BW2(BW2 ~= dMinValue) = 1;
@@ -447,7 +449,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                         sLesionType = 'Bone';
 
                         dPercentMaxOrMaxSUVValue = 2.5;                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     else
                         sLesionType = 'Lymph Nodes';
 
@@ -455,12 +457,34 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 %                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
 
                         dPercentMaxOrMaxSUVValue = (1.5*dLiverMean)+(2 * dLiverSTD);                                
-                        BW2(BW2*dSUVScale <= dPercentMaxOrMaxSUVValue) = dMinValue;
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
                     end
 
                     BW2(BW2 ~= dMinValue) = 1;
                     BW2(BW2 == dMinValue) = 0; 
+                elseif strcmpi(sMinSUVformula, 'Lymph Nodes & Bone SUV, CT Bone Map')
+                    
+                    BWANDBWCT = BW2&BWCT2;
 
+                    dBWnbPixel        = numel(BW2(BW2~=0));
+                    dBWandBWCTnbPixel = numel(BWANDBWCT(BWANDBWCT~=0));
+
+                    if (dBWandBWCTnbPixel/dBWnbPixel*100) > 10 % At least 10% of the legion is bone
+                        sLesionType = 'Bone';
+
+%                         dPercentMaxOrMaxSUVValue = dBoneThreshold;                                
+                        BW2(BW2*dSUVScale < dBoneThreshold) = dMinValue;
+                    else
+                        sLesionType = 'Lymph Nodes';
+
+%                                dMean = mean(BW2(BW2~=dMinValue), 'all') * dSUVScale;
+%                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
+
+                        BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
+                    end
+
+                    BW2(BW2 ~= dMinValue) = 1;
+                    BW2(BW2 == dMinValue) = 0;                     
                 else
                     return;
                 end
@@ -569,10 +593,28 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 
         if ~isempty(asTag)
 
-            if exist('sVOIName', 'var')
-                sLabel = sprintf('%s %d', sVOIName, bb);
+            if exist('sVOIName', 'var') 
+
+                if ~isempty(sVOIName)
+                    sLabel = sprintf('%s %d', sVOIName, bb);
+                else
+                    bUseBoneTreshold = false;
+                    if strcmpi(sLesionType, 'Bone') 
+                        if exist('dBoneThreshold', 'var')
+                            if ~isempty(dBoneThreshold)
+                                bUseBoneTreshold = true;
+                            end
+                        end
+                    end
+
+                    if bUseBoneTreshold == true
+                        sLabel = sprintf('RMAX-%.2f-VOI%d', dBoneThreshold, bb);
+                    else
+                        sLabel = sprintf('RMAX-%.2f-VOI%d', dPercentMaxOrMaxSUVValue, bb);
+                    end
+                end
             else
-                sLabel = sprintf('RMAX-%d-VOI%d', dPercentMaxOrMaxSUVValue, bb);
+                sLabel = sprintf('RMAX-%.2f-VOI%d', dPercentMaxOrMaxSUVValue, bb);
             end
 
             createVoiFromRois(dSeriesOffset, asTag, sLabel, aColor, sLesionType);

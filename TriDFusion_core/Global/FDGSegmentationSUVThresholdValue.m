@@ -1,6 +1,6 @@
 function dSUVValue = FDGSegmentationSUVThresholdValue(sAction, dValue)
 %function dSUVValue = FDGSegmentationSUVThresholdValue(sAction, dValue)
-%Get/Set segmentation FDG SUV value.
+%Get/Set FDG segmentation SUV value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org

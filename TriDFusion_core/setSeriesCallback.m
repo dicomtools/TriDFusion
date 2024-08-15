@@ -28,9 +28,9 @@ function setSeriesCallback(~,~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     tInput  = inputTemplate('get');
-    iOffset = get(uiSeriesPtr('get'), 'Value');
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-    if iOffset <= numel(tInput)
+    if dSeriesOffset <= numel(tInput)
         
   %      try
         isColorbarDefaultUnit('reset');
@@ -266,39 +266,39 @@ function setSeriesCallback(~,~)
         set(btnTriangulatePtr('get'), 'ForegroundColor', viewerButtonPushedForegroundColor('get'));
         set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
 
-        if isempty(dicomMetaData('get'))
-            atMetaData = tInput(iOffset).atDicomInfo;
-            dicomMetaData('set', atMetaData);
+        if isempty(dicomMetaData('get', [], dSeriesOffset))
+            atMetaData = tInput(dSeriesOffset).atDicomInfo;
+            dicomMetaData('set', atMetaData, dSeriesOffset);
         end
         
-        imageOrientation('set', tInput(iOffset).sOrientationView);       
+        imageOrientation('set', tInput(dSeriesOffset).sOrientationView);       
 
         aInput  = inputBuffer('get');
-        aBuffer = dicomBuffer('get', [], iOffset);
+        aBuffer = dicomBuffer('get', [], dSeriesOffset);
 
         if isempty(aBuffer)
-            aBuffer = aInput{iOffset};
+            aBuffer = aInput{dSeriesOffset};
 %            if     strcmp(imageOrientation('get'), 'axial')
-%                aBuffer = permute(aInput{iOffset}, [1 2 3]);
+%                aBuffer = permute(aInput{dSeriesOffset}, [1 2 3]);
 %            elseif strcmp(imageOrientation('get'), 'coronal')
-%                aBuffer = permute(aInput{iOffset}, [3 2 1]);
+%                aBuffer = permute(aInput{dSeriesOffset}, [3 2 1]);
 %            elseif strcmp(imageOrientation('get'), 'sagittal')
-%                aBuffer = permute(aInput{iOffset}, [3 1 2]);
+%                aBuffer = permute(aInput{dSeriesOffset}, [3 1 2]);
 %            end
 
-            dicomBuffer('set', aBuffer, iOffset);
+            dicomBuffer('set', aBuffer, dSeriesOffset);
         end
 
-%        quantificationTemplate('set', tInput(iOffset).tQuant);
-        setQuantification(iOffset);
+%        quantificationTemplate('set', tInput(dSeriesOffset).tQuant);
+        setQuantification(dSeriesOffset);
         
-        cropValue('set', min(dicomBuffer('get', [], iOffset), [], 'all'));
+        cropValue('set', min(dicomBuffer('get', [], dSeriesOffset), [], 'all'));
 
         imageSegTreshValue('set', 'lower', 0);
         imageSegTreshValue('set', 'upper', 1);
 
-%        imageSegEditValue('set', 'lower', tInput(iOffset).tQuant.tCount.dMin);
-%        imageSegEditValue('set', 'upper', tInput(iOffset).tQuant.tCount.dMax);
+%        imageSegEditValue('set', 'lower', tInput(dSeriesOffset).tQuant.tCount.dMin);
+%        imageSegEditValue('set', 'upper', tInput(dSeriesOffset).tQuant.tCount.dMax);
     
         getMipAlphaMap('set', '', 'auto');
         getVolAlphaMap('set', '', 'auto');

@@ -28,8 +28,12 @@ function figVoiSimplifiedDialogCallback(~, ~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
 
+    bIsfigVoiSimplified = isfigVoiSimplified('get'); % backup status
+
     isfigVoiSimplified('set', true);      
 
     figRoiDialogCallback();
+
+    isfigVoiSimplified('set', bIsfigVoiSimplified); % restore status      
 
 end

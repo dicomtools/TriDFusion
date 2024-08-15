@@ -1,5 +1,5 @@
-function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dOffset, bIndex)
-%function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dOffset, bIndex)
+function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dOffset, bIndex, sSeriesDescription)
+%function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer, atDicomMeta, dOffset, bIndex,sSeriesDescription)
 %Export ROIs To DICOM mask.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -223,7 +223,7 @@ function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDico
 % 
 %     bInputIsDicom = false;
 % 
-%     try
+%      try
 %         if exist(char(atInput(dOffset).asFilesList{1}), 'file') % Input series is dicom
 %             if isdicom(char(atInput(dOffset).asFilesList{1}))
 %                 bInputIsDicom = true;
@@ -252,7 +252,8 @@ function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDico
             atDcmDicomMeta{1}.SpacingBetweenSlices = dSliceSPacing;
             atDcmDicomMeta{1}.SliceThickness       = dSliceSPacing;
         end
-        
+               
+
         atDcmDicomMeta{1}.Rows                    = atDicomMeta{1}.Rows;
         atDcmDicomMeta{1}.Columns                 = atDicomMeta{1}.Columns;
         atDcmDicomMeta{1}.PatientName             = atDicomMeta{1}.PatientName;
@@ -264,7 +265,7 @@ function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDico
 %         atDcmDicomMeta{1}.PatientBirthDate        = atDicomMeta{1}.PatientBirthDate;
         atDcmDicomMeta{1}.SeriesDescription       = sprintf('MASK-%s', atDicomMeta{1}.SeriesDescription);
         atDcmDicomMeta{1}.PatientPosition         = atDicomMeta{1}.PatientPosition;
-        atDcmDicomMeta{1}.ImagePositionPatient    = atDicomMeta{end}.ImagePositionPatient;
+        atDcmDicomMeta{1}.ImagePositionPatient    = atDicomMeta{1}.ImagePositionPatient;
         atDcmDicomMeta{1}.ImageOrientationPatient = atDicomMeta{1}.ImageOrientationPatient;
         % atDcmDicomMeta{1}.SOPClassUID             = '1.2.840.10008.5.1.4.1.1.20';
         % atDcmDicomMeta{1}.SOPInstanceUID          = '1.2.752.37.54.2572.122881719510441496582642976905549489909';
@@ -276,17 +277,63 @@ function writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDico
         atDcmDicomMeta{1}.StudyInstanceUID        = atDicomMeta{1}.StudyInstanceUID;
         atDcmDicomMeta{1}.AccessionNumber         = atDicomMeta{1}.AccessionNumber;
         atDcmDicomMeta{1}.SeriesTime              = char(datetime('now','TimeZone','local','Format','HHmmss'));
-        atDcmDicomMeta{1}.SeriesDate              = char(datetime('now','TimeZone','local','Format','yyyyMMddHHmmss'));
+        atDcmDicomMeta{1}.SeriesDate              = char(datetime('now','TimeZone','local','Format','yyyyMMdd'));
+        atDcmDicomMeta{1}.StudyTime               = atDicomMeta{1}.StudyTime;
+        atDcmDicomMeta{1}.StudyDate               = atDicomMeta{1}.StudyDate;
+        atDcmDicomMeta{1}.StudyInstanceUID        = atDicomMeta{1}.StudyInstanceUID;
+        atDcmDicomMeta{1}.LargestImagePixelValue  = max(aMaskBuffer, [], 'all');
 %         atDcmDicomMeta{1}.AcquisitionTime        = '';
 %         atDcmDicomMeta{1}.AcquisitionDate        = '';       
 %         atDcmDicomMeta{1}.RescaleIntercept        = 0;
 %         atDcmDicomMeta{1}.RescaleSlope            = 1;
 %     end
 
-%    if bInputIsDicom == true % Input series is dicom
-%        writeDICOM(aMaskBuffer, atDicomMeta, sDICOMPath, dOffset, false);
-%    else % Input series is another format 
-      writeOtherFormatToDICOM(aMaskBuffer, atDcmDicomMeta, sWriteDir, dOffset, false);
+%     if bInputIsDicom == true % Input series is dicom
+% 
+%         for ww=1:numel(atDicomMeta)
+%             atDicomMeta{ww}.RescaleIntercept = 0;
+%             atDicomMeta{ww}.RescaleSlope = 1;
+%         end       
+% 
+%         writeDICOM(aMaskBuffer, atDicomMeta, sWriteDir, dOffset, false);
+%     else % Input series is another format 
+% atDcmDicomMeta{1}.FrameIncrementPointer  = 'FrameTime';
+
+
+     if numel(atDicomMeta) > 1
+ 	     atDcmDicomMeta{1}.InstanceNumber = 1;
+         for jj=2:numel(atDicomMeta)
+             atDcmDicomMeta{jj} = atDcmDicomMeta{1};
+ 	         atDcmDicomMeta{jj}.InstanceNumber = jj;
+             atDcmDicomMeta{jj}.ImagePositionPatient = atDicomMeta{jj}.ImagePositionPatient;
+         end
+
+        aMaskBuffer = aMaskBuffer(:,:,end:-1:1);
+     end
+
+    if exist('sSeriesDescription', 'var')
+        for jj=1:numel(atDicomMeta)
+            atDcmDicomMeta{jj}.SeriesDescription = sSeriesDescription;      
+        end
+    else     
+        atContours = inputContours('get');
+        if ~isempty(atContours)
+             for cc=1:numel(atContours)
+                if strcmp(atDcmDicomMeta{1}.StudyInstanceUID, atContours{cc}(1).Referenced.StudyInstanceUID)
+                    for hh=1:numel(atDcmDicomMeta)
+                        atDcmDicomMeta{hh}.SeriesDescription  = sprintf('MASK-%s', atContours{cc}(1).SeriesDescription);
+                        if contains(atDcmDicomMeta{hh}.SeriesDescription, 'RT-')
+                            atDcmDicomMeta{hh}.SeriesDescription = strrep(atDcmDicomMeta{hh}.SeriesDescription, 'RT-', '');
+                        end
+                    end
+                    break;
+                end
+             end
+        end
+    end
+
+    writeOtherFormatToDICOM(aMaskBuffer, atDcmDicomMeta, sWriteDir, dOffset, false);
+%     end
 
     catch
         progressBar(1, 'Error:writeRoisToDicomMask()');

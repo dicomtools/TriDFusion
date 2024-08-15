@@ -27,7 +27,11 @@ function writeRoisToDicomMaskCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    dOffset = get(uiSeriesPtr('get'), 'Value');
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+    if isempty(voiTemplate('get', dSeriesOffset))
+        return;
+    end
     
     bSubDir = false;
     
@@ -77,6 +81,7 @@ function writeRoisToDicomMaskCallback(~, ~)
     tInput = inputTemplate('get');    
     aInputBuffer = inputBuffer('get');
     
-    writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer{dOffset}, tInput(dOffset).atDicomInfo, dicomBuffer('get'), dicomMetaData('get'), dOffset, true);
+   
+    writeRoisToDicomMask(sOutDir, bSubDir, aInputBuffer{dSeriesOffset}, tInput(dSeriesOffset).atDicomInfo, dicomBuffer('get',[], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), dSeriesOffset, true);
 
 end

@@ -180,7 +180,7 @@ function figRoiDialogCallback(hObject, ~)
         uimenu(mRoiOptions,'Label', 'Expend VOI', 'Checked', sExpendVoiChecked, 'Enable', sExpendVoiEnable, 'Callback', @expendVoiCallback);
 
     mSimplified       = ...
-        uimenu(mRoiOptions,'Label', 'Simplified Display', 'Checked', sSimplifiedChecked, 'Enable', 'on', 'Callback', @simplifiedDisplayCallback);
+        uimenu(mRoiOptions,'Label', 'Display TCS Farthest Distance', 'Checked', sSimplifiedChecked, 'Enable', 'on', 'Callback', @simplifiedDisplayCallback);
 
     mColorBackground  = ...
         uimenu(mRoiOptions,'Label', 'Display in Color' , 'Checked', sFigRoiInColorChecked, 'Callback', @figRoiColorCallback);

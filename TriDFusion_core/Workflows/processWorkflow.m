@@ -112,21 +112,71 @@ function processWorkflow(sWorkflowName)
 
             setMachineLearningFDGBrownFatSUVRT_structureCallback();
 
+        % PET Full AI
+
         case 'setmachinelearningfdgbrownfatpetfullaicallback' % setMachineLearningFDGBrownFatPETFullAICallback.m
    
             setMachineLearningFDGBrownFatPETFullAICallback();
 
-        case 'setmachinelearningfdgbrownfatpetfullairt_structurecallback' % setMachineLearningFDGBrownFatPETFullAIRT_structureCallback.m    
+        case 'setmachinelearningfdgbrownfatpetfullaibqmlrtstructcallback' % setMachineLearningFDGBrownFatPETFullAIBQMLRTstructCallback.m    
 
-            setMachineLearningFDGBrownFatPETFullAIRT_structureCallback();
+            setMachineLearningFDGBrownFatPETFullAIBQMLRTstructCallback();
+
+        case 'setmachinelearningfdgbrownfatpetfullaisuvrtstructcallback' % setMachineLearningFDGBrownFatPETFullAISUVRTstructCallback.m    
+
+            setMachineLearningFDGBrownFatPETFullAISUVRTstructCallback();
+
+        case 'setmachinelearningfdgbrownfatpetfullainormrtstructcallback' % setMachineLearningFDGBrownFatPETFullAINormRTstructCallback.m    
+
+            setMachineLearningFDGBrownFatPETFullAINormRTstructCallback();
+
+        % PET CE Loss 
+
+        case 'setmachinelearningfdgbrownfatpetfullaicebqmlrtstructcallback' % setMachineLearningFDGBrownFatPETFullAICEBQMLRTstructCallback.m    
+
+            setMachineLearningFDGBrownFatPETFullAICEBQMLRTstructCallback();
+
+        case 'setmachinelearningfdgbrownfatpetfullaicesuvrtstructcallback' % setMachineLearningFDGBrownFatPETFullAICESUVRTstructCallback.m    
+
+            setMachineLearningFDGBrownFatPETFullAICESUVRTstructCallback();
+
+        case 'setmachinelearningfdgbrownfatpetfullaicenormrtstructcallback' % setMachineLearningFDGBrownFatPETFullAICENormRTstructCallback.m    
+
+            setMachineLearningFDGBrownFatPETFullAICENormRTstructCallback();
+
+        % PET/CT Full AI
+
 
         case 'setmachinelearningfdgbrownfatpetctfullaicallback' % setMachineLearningFDGBrownFatPETCTFullAICallback.m    
 
             setMachineLearningFDGBrownFatPETCTFullAICallback();
 
-        case 'setmachinelearningfdgbrownfatpetctfullairt_structurecallback' % setMachineLearningFDGBrownFatPETCTFullAIRT_structureCallback    
+        case 'setmachinelearningfdgbrownfatpetctfullaibqmlrtstructcallback' % setMachineLearningFDGBrownFatPETCTFullAIBQMLRTstructCallback    
 
-            setMachineLearningFDGBrownFatPETCTFullAIRT_structureCallback();
+            setMachineLearningFDGBrownFatPETCTFullAIBQMLRTstructCallback();
+
+        case 'setmachinelearningfdgbrownfatpetctfullaisuvrtstructcallback' % setMachineLearningFDGBrownFatPETCTFullAISUVRTstructCallback    
+
+            setMachineLearningFDGBrownFatPETCTFullAISUVRTstructCallback();
+
+        case 'setmachinelearningfdgbrownfatpetctfullainormrtstructcallback' % setMachineLearningFDGBrownFatPETCTFullAINormRTstructCallback    
+
+            setMachineLearningFDGBrownFatPETCTFullAINormRTstructCallback();
+
+        % PET/CT CE Loss 
+
+        case 'setmachinelearningfdgbrownfatpetctfullaicebqmlrtstructcallback' % setMachineLearningFDGBrownFatPETCTFullAICEBQMLRTstructCallback    
+
+            setMachineLearningFDGBrownFatPETCTFullAICEBQMLRTstructCallback();
+
+        case 'setmachinelearningfdgbrownfatpetctfullaicesuvrtstructcallback' % setMachineLearningFDGBrownFatPETCTFullAICESUVRTstructCallback    
+
+            setMachineLearningFDGBrownFatPETCTFullAICESUVRTstructCallback();
+
+        case 'setmachinelearningfdgbrownfatpetctfullaicenormrtstructcallback' % setMachineLearningFDGBrownFatPETCTFullAICENormRTstructCallback    
+
+            setMachineLearningFDGBrownFatPETCTFullAICENormRTstructCallback();
+
 
         case 'setmachinelearningfdgbrownfatexporttopetnetworkcallback' % setMachineLearningFDGBrownFatExportToPETNetworkCallback.m    
 
@@ -142,6 +192,10 @@ function processWorkflow(sWorkflowName)
         case 'setmachinelearningfdgbrownfatdatapreprocessingpetctcallback' % setMachineLearningFDGBrownFatDataPreProcessingPETCTCallback.m     
 
             setMachineLearningFDGBrownFatDataPreProcessingPETCTCallback();
+
+        case 'setmachinelearningfdgbrownfatexporttonetworkcallback' % setMachineLearningFDGBrownFatExportToNetworkCallback.m
+            
+            setMachineLearningFDGBrownFatExportToNetworkCallback();     
 
         case 'setmachinelearningfdglymphnodesuvcallback' % setMachineLearningFDGLymphNodeSUVCallback.m
 
@@ -171,7 +225,62 @@ function processWorkflow(sWorkflowName)
 
             setMachineLearningPETLiverDosimetryCallback();
 
+        case 'writeroistodicommaskclosefigurecallback' % writeRoisToDicomMaskCloseFigureCallback.m
 
+            writeRoisToDicomMaskCloseFigureCallback();
+
+
+        % PSMA Ga68 
+
+        case 'setmachinelearningpsmaga68datapreprocessingpetcallback' % setMachineLearningPSMAGa68DataPreProcessingPETCallback.m
+
+            setMachineLearningPSMAGa68DataPreProcessingPETCallback();
+
+        case 'setmachinelearningpsmaga68datapreprocessingpetctcallback' % setMachineLearningPSMAGa68DataPreProcessingPETCTCallback.m            
+
+            setMachineLearningPSMAGa68DataPreProcessingPETCTCallback();
+
+        case 'setmachinelearningpsmaga68exporttopetctnetworkcallback' % setMachineLearningPSMAGa68ExportToPETCTNetworkCallback.m
+
+            setMachineLearningPSMAGa68ExportToPETCTNetworkCallback();
+
+        case 'setmachinelearningpsmaga68exporttopetnetworkcallback' % setMachineLearningPSMAGa68ExportToPETNetworkCallback.m
+
+            setMachineLearningPSMAGa68ExportToPETNetworkCallback();
+
+        case 'setmachinelearningpsmaga68petfullaicallback' % setMachineLearningPSMAGa68PETFullAICallback.m
+
+            setMachineLearningPSMAGa68PETFullAICallback();
+
+        case 'setmachinelearningpsmaga68petctfullaicallback' % setMachineLearningPSMAGa68PETCTFullAICallback.m
+     
+            setMachineLearningPSMAGa68PETCTFullAICallback();
+
+        % PSMA Lu177 
+
+        case 'setmachinelearningpsmalu177datapreprocessingspectctcallback' % setMachineLearningPSMALu177DataPreProcessingSPECTCTCallback.m
+
+            setMachineLearningPSMALu177DataPreProcessingSPECTCTCallback();
+
+        case 'setmachinelearningpsmalu177datapreprocessingspectcallback' % setMachineLearningPSMALu177DataPreProcessingSPECTCallback.m
+
+            setMachineLearningPSMALu177DataPreProcessingSPECTCallback();
+
+        case 'setmachinelearningpsmalu177exporttospectctnetworkcallback' % setMachineLearningPSMALu177ExportToSPECTCTNetworkCallback.m
+
+            setMachineLearningPSMALu177ExportToSPECTCTNetworkCallback();
+
+        case 'setmachinelearningpsmalu177exporttospectnetworkcallback' % setMachineLearningPSMALu177ExportToSPECTNetworkCallback.m
+
+            setMachineLearningPSMALu177ExportToSPECTNetworkCallback();
+
+        case 'setmachinelearningpsmalu177spectfullaicallback' % setMachineLearningPSMALu177SPECTFullAICallback.m
+
+            setMachineLearningPSMALu177SPECTFullAICallback();
+
+        case 'setmachinelearningpsmalu177spectctfullaicallback' % setMachineLearningPSMALu177SPECTCTFullAICallback.m
+
+            setMachineLearningPSMALu177SPECTCTFullAICallback();
     end
 
 end

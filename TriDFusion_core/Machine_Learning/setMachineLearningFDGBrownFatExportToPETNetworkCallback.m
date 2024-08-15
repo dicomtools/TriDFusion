@@ -31,18 +31,58 @@ function setMachineLearningFDGBrownFatExportToPETNetworkCallback(hObject, ~)
 
     atInput = inputTemplate('get');
 
-    sTask98FolderPath = getenv('nnUnet_Task98_BAT_PETAC');
+    sEnvironment = 'nnUNet_raw_data_base';
 
-    if isempty(sTask98FolderPath)
+    sRawFolderPath = getenv(sEnvironment);
+    
+    if isempty(sRawFolderPath)
+      
+        progressBar( 1, sprintf('Error: %s environment variable not detected!', sEnvironment));
 
-       progressBar( 1, 'Error: nnUnet_Task98_BAT_PETAC environment variable not detected!');
-       if exist('hObject', 'var')   
-            errordlg(sprintf('nnUnet_Task98_BAT_PETAC environment variable detected!\n Please define an environment variable nnUnet_Task98_BAT_PETAC'), 'nnUnet_Task98_BAT_PETAC Validation');  
-        end
+        if exist('hObject', 'var')   
+            errordlg(sprintf('%s environment variable not detected!\n Please define an environment variable', sEnvironment), sprintf('%s Validation', sEnvironment));  
+        end   
+
         return;
     end
 
-    aListing = dir(sTask98FolderPath);
+    if machineLearningFDGBrownFatSUVScaled('get') == true
+
+        if machineLearningFDGBrownFatSUVNormalization('get') == true
+
+            dTaskNumber = 100;
+        else
+            dTaskNumber = 98;
+        end
+    else
+        dTaskNumber = 96;
+    end
+
+    aListing = dir(sRawFolderPath);
+
+    bFoundTask = false;
+    for dd=1:numel(aListing)
+        if aListing(dd).isdir == true
+            if strfind(aListing(dd).name, num2str(dTaskNumber))
+                bFoundTask = true;
+                sTaskFolderPath = sprintf('%s/%s', sRawFolderPath, aListing(dd).name);
+                break;
+            end
+        end
+    end
+
+    if bFoundTask == false
+
+        progressBar( 1, sprintf('Error: Task %s environment variable not detected!', num2str(dTaskNumber)));
+
+        if exist('hObject', 'var')   
+            errordlg(sprintf('Task %s not detected!\n Please create a task under %s', num2str(dTaskNumber), sEnvironment), sprintf('Task %s Validation', num2str(dTaskNumber)));  
+        end   
+
+        return;        
+    end
+
+    aListing = dir(sTaskFolderPath);
 
     bFoundData0 = false;
     for dd=1:numel(aListing)
@@ -55,12 +95,12 @@ function setMachineLearningFDGBrownFatExportToPETNetworkCallback(hObject, ~)
     end
 
     if bFoundData0 == false
-        mkdir(sprintf('%s/data0', sTask98FolderPath));
-        mkdir(sprintf('%s/data0/training', sTask98FolderPath));
-        mkdir(sprintf('%s/data0/testing', sTask98FolderPath));
+        mkdir(sprintf('%s/data0', sTaskFolderPath));
+        mkdir(sprintf('%s/data0/training', sTaskFolderPath));
+        mkdir(sprintf('%s/data0/testing', sTaskFolderPath));
     end
 
-    sTrainingFoder = sprintf('%s/data0/training', sTask98FolderPath);
+    sTrainingFoder = sprintf('%s/data0/training', sTaskFolderPath);
 
     aListing = dir(sTrainingFoder);
     
@@ -105,8 +145,6 @@ function setMachineLearningFDGBrownFatExportToPETNetworkCallback(hObject, ~)
         return;               
     end
 
-
-
     if get(uiSeriesPtr('get'), 'Value') ~= dPTSerieOffset
         set(uiSeriesPtr('get'), 'Value', dPTSerieOffset);
 
@@ -148,20 +186,29 @@ function setMachineLearningFDGBrownFatExportToPETNetworkCallback(hObject, ~)
         aPTImage = aPTImage(:,:,end:-1:1);
     end
 
-    dSUVconv = computeSUV(atPTMetaData, 'LBM');
+    if machineLearningFDGBrownFatSUVScaled('get') == true
 
-    if dSUVconv == 0
-        dSUVconv = computeSUV(atPTMetaData, 'BW');
-    end
-
-    if dSUVconv == 0
-        dSUVconv = 1;
-    end
-
-    aPTImage = aPTImage*dSUVconv;
-
-    nrrdWriter(sNrrdImagesName, squeeze(aPTImage), pixelspacing, origin, 'raw'); % Write .nrrd images 
+        dSUVconv = computeSUV(atPTMetaData, 'LBM');
     
+        if dSUVconv == 0
+            dSUVconv = computeSUV(atPTMetaData, 'BW');
+        end
+    
+        if dSUVconv == 0
+            dSUVconv = 1;
+        end
+
+        if machineLearningFDGBrownFatSUVNormalization('get') == true
+            if dSUVconv ~= 1
+                dSUVconv = 1+dSUVconv;
+            end
+        end
+
+        nrrdWriter(sNrrdImagesName, squeeze(aPTImage* dSUVconv), pixelspacing, origin, 'raw'); % Write .nrrd images         
+    else
+        nrrdWriter(sNrrdImagesName, squeeze(aPTImage), pixelspacing, origin, 'raw'); % Write .nrrd images 
+    end
+
     clear aPTImage;
 
     aInputBuffer = inputBuffer('get');

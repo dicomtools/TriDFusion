@@ -291,9 +291,10 @@ function resize = dicomViewer()
     FDGSmoothMaskValue('set', false);
 
     FDGSegmentationSUVThresholdValue     ('set', 4); % SUV
+    FDGSegmentationBoneSUVThresholdValue ('set', 4); % SUV
     FDGSegmentationPercentOfPeakValue    ('set', 41); % Percent
     FDGSegmentationMultiplePeaksValue    ('set', 65); % Percent
-    FDGSegmentationBoneMaskThresholdValue('set', 100); % HU
+    FDGSegmentationBoneMaskThresholdValue('set', 200); % HU
     FDGSegmentationBoundaryPercentValue  ('set', 10);
     FDGSmalestVoiValue('set', 0.3);
 
@@ -303,6 +304,13 @@ function resize = dicomViewer()
     excludeLymphNodeSUVKidneyRight   ('set', false);
     excludeLymphNodeSUVSmallBowel    ('set', false);
     segmentLymphNodeSUVSpleen        ('set', true);
+
+    % Breast Cancer
+
+    breastCancerSmalestVoiValue('set', 0.3);
+    breastCancerSegmentationBoneMaskThresholdValue('set', 200);
+    breastCancerSegmentationSUVThresholdValue('set', 4);
+    breastCancerSegmentationBoneSUVThresholdValue('set', 3);
 
     % Brown fat
 
@@ -331,6 +339,13 @@ function resize = dicomViewer()
     excludeBrownFatSUVColon            ('set', true);
 
     excludeBrownFatSUVSkeleton         ('set', true);
+
+    machineLearningFDGBrownFatSUVScaled('set', true);
+    machineLearningFDGBrownFatSUVNormalization('set', false);
+    machineLearningFDGBrownFatSmoothMask('set', true);
+    machineLearningFDGBrownFatClassifySegmentation('set', true);
+    machineLearningFDGBrownFatCELoss('set', true);
+    machineLearningFDGBrownFatSmallestVoiValue('set', 0);
 
     % FDHT segmentation
 
@@ -362,6 +377,13 @@ function resize = dicomViewer()
     excludeLu177SmallBowel    ('set', false);
     excludeLu177Spleen        ('set', true);
 
+    % PSMA Lu177 Segmentation
+
+    machineLearningPSMALu177CELoss('set', true);
+    machineLearningPSMALu177ClassifySegmentation('set', true);
+    machineLearningPSMALu177SmoothMask('set', true);
+    machineLearningPSMALu177SmallestVoiValue('set', 0);
+
     % PSMA segmentation
 
     PSMASegmentationBoneMaskThresholdValue('set', 150); % HU
@@ -376,6 +398,13 @@ function resize = dicomViewer()
     excludePSMAKidneyRight   ('set', true);
     excludePSMASmallBowel    ('set', true);
     excludePSMASpleen        ('set', true);
+
+    % PSMA Ga68 Segmentation
+
+    machineLearningPSMAGa68CELoss('set', true);
+    machineLearningPSMAGa68ClassifySegmentation('set', true);
+    machineLearningPSMAGa68SmoothMask('set', true);
+    machineLearningPSMAGa68SmallestVoiValue('set', 0);
 
     % Ga68DOTATATE segmentation
 

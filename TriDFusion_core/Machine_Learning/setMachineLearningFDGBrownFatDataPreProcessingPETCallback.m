@@ -27,18 +27,58 @@ function setMachineLearningFDGBrownFatDataPreProcessingPETCallback(hObject, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    sTask98FolderPath = getenv('nnUnet_Task98_BAT_PETAC');
+    sEnvironment = 'nnUNet_raw_data_base';
 
-    if isempty(sTask98FolderPath)
+    sRawFolderPath = getenv(sEnvironment);
+    
+    if isempty(sRawFolderPath)
+      
+        progressBar( 1, sprintf('Error: %s environment variable not detected!', sEnvironment));
 
-       progressBar( 1, 'Error: nnUnet_Task98_BAT_PETAC environment variable not detected!');
-       if exist('hObject', 'var')   
-            errordlg(sprintf('nnUnet_Task98_BAT_PETAC environment variable detected!\n Please define an environment variable nnUnet_Task98_BAT_PETAC'), 'nnUnet_Task98_BAT_PETAC Validation');  
-        end
+        if exist('hObject', 'var')   
+            errordlg(sprintf('%s environment variable not detected!\n Please define an environment variable', sEnvironment), sprintf('%s Validation', sEnvironment));  
+        end   
+
         return;
     end
 
-    sPreProcessingFile = sprintf('%s/nrrd.py', sTask98FolderPath);
+    if machineLearningFDGBrownFatSUVScaled('get') == true
+
+        if machineLearningFDGBrownFatSUVNormalization('get') == true
+
+            dTaskNumber = 100;
+        else
+            dTaskNumber = 98;
+        end
+    else
+        dTaskNumber = 96;
+    end
+
+    aListing = dir(sRawFolderPath);
+
+    bFoundTask = false;
+    for dd=1:numel(aListing)
+        if aListing(dd).isdir == true
+            if strfind(aListing(dd).name, num2str(dTaskNumber))
+                bFoundTask = true;
+                sTaskFolderPath = sprintf('%s/%s', sRawFolderPath, aListing(dd).name);
+                break;
+            end
+        end
+    end
+
+    if bFoundTask == false
+
+        progressBar( 1, sprintf('Error: Task %s environment variable not detected!', num2str(dTaskNumber)));
+
+        if exist('hObject', 'var')   
+            errordlg(sprintf('Task %s not detected!\n Please create a task under %s', num2str(dTaskNumber), sEnvironment), sprintf('Task %s Validation', num2str(dTaskNumber)));  
+        end   
+
+        return;        
+    end   
+
+    sPreProcessingFile = sprintf('%s/nrrd.py', sTaskFolderPath);
 
     if ~exist(sPreProcessingFile, 'file')
 
@@ -57,10 +97,10 @@ function setMachineLearningFDGBrownFatDataPreProcessingPETCallback(hObject, ~)
         progressBar( 1, 'Error: An error occur during machine learning data pre-processing!');
         errordlg(sprintf('An error occur during machine learning data pre-processing: %s', sCmdout), 'Pre-processing Error'); 
     else
-          progressBar( 1, sprintf('Machine learning data pre-processing of folder %s completed.', sTask98FolderPath));      
+          progressBar( 1, sprintf('Machine learning data pre-processing of folder %s completed.', sTaskFolderPath));      
     end
 
-    sCommandLine = sprintf('cmd.exe /c start /wait nnUNetv2_plan_and_preprocess -d 098');    
+    sCommandLine = sprintf('cmd.exe /c start /wait nnUNetv2_plan_and_preprocess -d %s --verify_dataset_integrity -c 3d_fullres', num2str(dTaskNumber));    
 
     [bStatus, sCmdout] = system(sCommandLine);
     if bStatus 
