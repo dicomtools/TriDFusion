@@ -1,13 +1,13 @@
-function dDiameter = sphereDefaultDiameter(sAction, dValue)
-%function dDiameter = sphereDefaultDiameter(sAction, dValue)
-%Get/Set roi sphere default diameter.
+function dPreSeg = clickVoiPreSegmentationValue(sAction, dValue)
+%function dPreSeg = clickVoiPreSegmentationValue(sAction, dValue)
+%Get/Set click VOI pre-segmentation percentage value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2021, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2024, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -27,11 +27,11 @@ function dDiameter = sphereDefaultDiameter(sAction, dValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    persistent pdDiameter; 
+    persistent pdPreSeg; 
 
     if strcmpi('set', sAction)
-        pdDiameter = dValue;            
+        pdPreSeg = dValue;            
     end
     
-    dDiameter = pdDiameter;
+    dPreSeg = pdPreSeg;
 end

@@ -71,11 +71,31 @@ function [asFilesList, atDicomInfo, aDicomBuffer] = readDicomFolder(asMainDirect
                     dNbFrames   = numel(tDatasets.DicomInfos) / tDatasets.DicomInfos{1}.NumberOfSlices;
                     dNbOfSlices = tDatasets.DicomInfos{1}.NumberOfSlices;
 
-                    for dFramesLoop=1:dNbFrames
+                    dNumericTimeFirst = str2double(tDatasets.DicomInfos{1}.AcquisitionTime);
+                    dNumericTimeLast = str2double(tDatasets.DicomInfos{end}.AcquisitionTime);
 
-                        dFrameOffset = dFramesLoop-1;
-                        dFrom = 1+ (dFrameOffset * dNbOfSlices);
-                        dTo   = dNbOfSlices * dFramesLoop;
+                    if dNumericTimeLast < dNumericTimeFirst
+                        tDatasets.FileNames    = flipud(tDatasets.FileNames);
+                        tDatasets.DicomInfos   = flipud(tDatasets.DicomInfos);
+                        tDatasets.DicomBuffers = flipud(tDatasets.DicomBuffers);
+%                         dInitialEntry = dNbEntry;
+                    end
+                    
+                    for dFramesLoop=1:dNbFrames
+% 
+%                         if dNumericTimeLast < dNumericTimeFirst
+%                             dFrameOffset = dInitialEntry + (dNbFrames-dFramesLoop-1);
+%                             dFrom = 1+(dFrameOffset * dNbOfSlices);
+%                             dTo   = dFrom+dNbOfSlices-1;  
+%                         else
+                            dFrameOffset = dFramesLoop-1;
+                            dFrom = 1+ (dFrameOffset * dNbOfSlices);
+                            dTo   = dNbOfSlices * dFramesLoop;  
+%                         end
+% 
+%                         dFrameOffset = dNbEntry-1;
+%                         dFrom = 1+ (dFrameOffset * dNbOfSlices);
+%                         dTo   = dNbOfSlices * dNbEntry;  
 
                         asFilesList{dNbEntry}  = tDatasets.FileNames(dFrom:dTo);
                         atDicomInfo{dNbEntry}  = tDatasets.DicomInfos(dFrom:dTo);
@@ -92,9 +112,8 @@ function [asFilesList, atDicomInfo, aDicomBuffer] = readDicomFolder(asMainDirect
                             atDicomInfo{dNbEntry}{dSeriesLoop}.din.frame = dFramesLoop;
                         end
 
-
                         dNbEntry = dNbEntry+1;
-
+                       
                     end
 
                 else

@@ -255,6 +255,7 @@ function resize = dicomViewer()
        
     sphereDefaultDiameter ('set', 50); % in mm
     brush2dDefaultDiameter('set', 30); % in mm  
+    clickVoiPreSegmentationValue('set', 10); % In Perent
 
     mipAngle('set', 1);
 
@@ -381,7 +382,7 @@ function resize = dicomViewer()
 
     machineLearningPSMALu177CELoss('set', true);
     machineLearningPSMALu177ClassifySegmentation('set', true);
-    machineLearningPSMALu177SmoothMask('set', true);
+    machineLearningPSMALu177SmoothMask('set', false);
     machineLearningPSMALu177SmallestVoiValue('set', 0);
 
     % PSMA segmentation

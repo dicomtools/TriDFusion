@@ -53,6 +53,8 @@ function setMachineLearningPSMALu177SPECTFullAI(sPredictScript, tPSMALu177SPECTF
         return;
     end
 
+    resetSeries(dNMSerieOffset, true);
+
     aCTImage = [];
 
     if ~isempty(dCTSerieOffset)
@@ -90,19 +92,60 @@ function setMachineLearningPSMALu177SPECTFullAI(sPredictScript, tPSMALu177SPECTF
         setSeriesCallback();
     end
 
+    if ~isempty(aCTImage)
 
-    % Apply ROI constraint
-    [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dNMSerieOffset);
+        progressBar(5/10, 'Resampling series, please wait.');
 
-    bInvertMask = invertConstraint('get');
+        [aNMImage, atNMMetaData] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);
 
-    tRoiInput = roiTemplate('get', dNMSerieOffset);
+        dicomMetaData('set', atNMMetaData, dNMSerieOffset);
+        dicomBuffer  ('set', aNMImage, dNMSerieOffset);
 
-    aNMImageTemp = aNMImage;
-    aLogicalMask = roiConstraintToMask(aNMImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
-    aNMImageTemp(aLogicalMask==0) = 0;  % Set constraint
+        progressBar(6/10, 'Resampling mip, please wait.');
 
-    resetSeries(dNMSerieOffset, true);
+%         refMip = mipBuffer('get', [], dCTSerieOffset);
+%         aMip   = mipBuffer('get', [], dNMSerieOffset);
+% 
+%         aMip = resampleMip(aMip, atNMMetaData, refMip, atCTMetaData, 'Linear', false);
+        
+        mipBuffer('set', computeMIP(gather(aNMImage)), dNMSerieOffset);
+
+        setQuantification(dNMSerieOffset);
+
+        progressBar(7/10, 'Resampling contours, please wait.');
+
+
+%         atRoi = roiTemplate('get', dNMSerieOffset);
+% 
+%         if ~isempty(atRoi)
+% 
+%             atResampledRoi = resampleROIs(aNMImage, atNMMetaData, aResampledNMImage, atResampledNMMetaData, atRoi, true);
+% 
+%             roiTemplate('set', dNMSerieOffset, atResampledRoi);
+%         end
+
+        progressBar(8/10, 'Resampling axes, please wait.');
+
+        resampleAxes(aNMImage, atNMMetaData);
+
+        setImagesAspectRatio();
+
+        refreshImages();
+
+    end
+
+%     % Apply ROI constraint
+%     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dNMSerieOffset);
+% 
+%     bInvertMask = invertConstraint('get');
+% 
+%     tRoiInput = roiTemplate('get', dNMSerieOffset);
+% 
+%     aNMImageTemp = aNMImage;
+%     aLogicalMask = roiConstraintToMask(aNMImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
+%     aNMImageTemp(aLogicalMask==0) = 0;  % Set constraint
+
+%     resetSeries(dNMSerieOffset, true);
 
 
     try
@@ -197,54 +240,54 @@ function setMachineLearningPSMALu177SPECTFullAI(sPredictScript, tPSMALu177SPECTF
 
                 progressBar(4/10, 'Segmenting prediction mask, please wait.');
 
-                maskAddVoiByTypeToSeries(aNMImageTemp, aMask, atNMMetaData, dNMSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, bClassifySegmentation, 2);
+                maskAddVoiByTypeToSeries(aNMImage, aMask, atNMMetaData, dNMSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, bClassifySegmentation, 2);
                 
-                clear aNMImageTemp;
+%                 clear aNMImageTemp;
 
                 if exist(char(sSegmentationFolderName), 'dir')
 
                     rmdir(char(sSegmentationFolderName), 's');
                 end
 
-                if ~isempty(aCTImage)
-
-                    progressBar(5/10, 'Resampling series, please wait.');
-
-                    [aResampledNMImage, atResampledNMMetaData] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);
-
-                    dicomMetaData('set', atResampledNMMetaData, dNMSerieOffset);
-                    dicomBuffer  ('set', aResampledNMImage, dNMSerieOffset);
-
-                    progressBar(6/10, 'Resampling mip, please wait.');
-
-                    refMip = mipBuffer('get', [], dCTSerieOffset);
-                    aMip   = mipBuffer('get', [], dNMSerieOffset);
-
-                    aMip = resampleMip(aMip, atNMMetaData, refMip, atCTMetaData, 'Linear', false);
-
-                    mipBuffer('set', aMip, dNMSerieOffset);
-
-                    setQuantification(dNMSerieOffset);
-
-                    progressBar(7/10, 'Resampling contours, please wait.');
-
-
-                    atRoi = roiTemplate('get', dNMSerieOffset);
-
-                    if ~isempty(atRoi)
-
-                        atResampledRoi = resampleROIs(aNMImage, atNMMetaData, aResampledNMImage, atResampledNMMetaData, atRoi, true);
-
-                        roiTemplate('set', dNMSerieOffset, atResampledRoi);
-                    end
-
-                    progressBar(8/10, 'Resampling axes, please wait.');
-
-                    resampleAxes(aResampledNMImage, atResampledNMMetaData);
-
-                    setImagesAspectRatio();
-
-                end
+%                 if ~isempty(aCTImage)
+% 
+%                     progressBar(5/10, 'Resampling series, please wait.');
+% 
+%                     [aResampledNMImage, atResampledNMMetaData] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);
+% 
+%                     dicomMetaData('set', atResampledNMMetaData, dNMSerieOffset);
+%                     dicomBuffer  ('set', aResampledNMImage, dNMSerieOffset);
+% 
+%                     progressBar(6/10, 'Resampling mip, please wait.');
+% 
+%                     refMip = mipBuffer('get', [], dCTSerieOffset);
+%                     aMip   = mipBuffer('get', [], dNMSerieOffset);
+% 
+%                     aMip = resampleMip(aMip, atNMMetaData, refMip, atCTMetaData, 'Linear', false);
+% 
+%                     mipBuffer('set', aMip, dNMSerieOffset);
+% 
+%                     setQuantification(dNMSerieOffset);
+% 
+%                     progressBar(7/10, 'Resampling contours, please wait.');
+% 
+% 
+%                     atRoi = roiTemplate('get', dNMSerieOffset);
+% 
+%                     if ~isempty(atRoi)
+% 
+%                         atResampledRoi = resampleROIs(aNMImage, atNMMetaData, aResampledNMImage, atResampledNMMetaData, atRoi, true);
+% 
+%                         roiTemplate('set', dNMSerieOffset, atResampledRoi);
+%                     end
+% 
+%                     progressBar(8/10, 'Resampling axes, please wait.');
+% 
+%                     resampleAxes(aResampledNMImage, atResampledNMMetaData);
+% 
+%                     setImagesAspectRatio();
+% 
+%                 end
 
 
             end
@@ -285,6 +328,8 @@ function setMachineLearningPSMALu177SPECTFullAI(sPredictScript, tPSMALu177SPECTF
             set(uiFusedSeriesPtr('get'), 'Value', dCTSerieOffset);
 
             setFusionCallback();
+
+            computeMIPCallback();
         end
     end
 

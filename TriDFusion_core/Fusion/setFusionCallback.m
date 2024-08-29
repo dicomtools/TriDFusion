@@ -1047,6 +1047,7 @@ end
                      imComputed = computeMontage(imf(:,:,end:-1:1), ...
                                                 'axial', size(dicomBuffer('get'), 3)-sliceNumber('get', 'axial')+1 ...
                                                 ); 
+%                     fusionBuffer('set', imComputed,  get(uiFusedSeriesPtr('get'), 'Value'));
 
                     if gaussFilter('get') == true    
 
@@ -2089,32 +2090,41 @@ end
                 axes1  = axes1Ptr ('get', [], get(uiSeriesPtr('get'), 'Value')  );
                 axes1f = axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
 
-                % set(axes1f, 'XLim', axes1.XLim);
-                % set(axes1f, 'YLim', axes1.YLim); 
+                if isVsplash('get') == true
+                    set(axes1f, 'XLim', axes1.XLim);
+                    set(axes1f, 'YLim', axes1.YLim); 
+                else
 
-                set(axes1f, 'XLim', [0 aFusionSize(2)]);
-                set(axes1f, 'YLim', [0 aFusionSize(3)]); 
+                    set(axes1f, 'XLim', [0 aFusionSize(2)]);
+                    set(axes1f, 'YLim', [0 aFusionSize(3)]); 
+                end
 
                 linkaxes([axes1 axes1f], 'xy'); 
 
                 axes2  = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')  );
                 axes2f = axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
 
-                % set(axes2f, 'XLim', axes2.XLim);
-                % set(axes2f, 'YLim', axes2.YLim); 
+                if isVsplash('get') == true
 
-                set(axes2f, 'XLim', [0 aFusionSize(1)]);
-                set(axes2f, 'YLim', [0 aFusionSize(3)]); 
+                    set(axes2f, 'XLim', axes2.XLim);
+                    set(axes2f, 'YLim', axes2.YLim); 
+                else
+                    set(axes2f, 'XLim', [0 aFusionSize(1)]);
+                    set(axes2f, 'YLim', [0 aFusionSize(3)]); 
+                end
 
                 linkaxes([axes2 axes2f], 'xy'); 
 
                 axes3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')  );
                 axes3f = axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
-                % 
-                % set(axes3f, 'XLim', axes3.XLim);
-                % set(axes3f, 'YLim', axes3.YLim); 
-                set(axes3f, 'XLim', [0 aFusionSize(2)]);
-                set(axes3f, 'YLim', [0 aFusionSize(1)]); 
+
+                if isVsplash('get') == true
+                    set(axes3f, 'XLim', axes3.XLim);
+                    set(axes3f, 'YLim', axes3.YLim); 
+                else
+                    set(axes3f, 'XLim', [0 aFusionSize(2)]);
+                    set(axes3f, 'YLim', [0 aFusionSize(1)]); 
+                end
 
                 linkaxes([axes3 axes3f], 'xy');                 
 

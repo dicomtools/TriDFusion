@@ -97,7 +97,7 @@ function figRoiDialogCallback(hObject, ~)
     end
 
     mRoiOptions = uimenu(figRoiWindow,'Label','Options', 'Callback', @figRoiRefreshOption);
-
+    
     if suvMenuUnitOption('get') == true && ...
        atInput(dSeriesOffset).bDoseKernel == false    
         sUnitDisplay = getSerieUnitValue(dSeriesOffset);  
@@ -162,13 +162,14 @@ function figRoiDialogCallback(hObject, ~)
         sInvConstChecked = 'off';
     end
 
-    if isfigVoiSimplified('get') == true
+    if isfigVoiSimplified('get') == true 
         sSimplifiedChecked = 'on';
         sExpendVoiEnable = 'off';
     else
         sSimplifiedChecked = 'off';
         sExpendVoiEnable = 'on';
     end
+   
 
     if isfigVoiExpendVoi('get') == true
         sExpendVoiChecked = 'on';
@@ -176,11 +177,22 @@ function figRoiDialogCallback(hObject, ~)
         sExpendVoiChecked = 'off';
     end
 
+    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1 % 2D Image
+
+        isfigVoiSimplified('set', false);
+        isfigVoiExpendVoi('set', false);
+
+        sExpendVoiEnable = 'off';
+        sSimplifiedEnable = 'off';
+    else
+        sSimplifiedEnable = 'on';     
+    end
+
     mExpendVoi        = ...
         uimenu(mRoiOptions,'Label', 'Expend VOI', 'Checked', sExpendVoiChecked, 'Enable', sExpendVoiEnable, 'Callback', @expendVoiCallback);
 
     mSimplified       = ...
-        uimenu(mRoiOptions,'Label', 'Display TCS Farthest Distance', 'Checked', sSimplifiedChecked, 'Enable', 'on', 'Callback', @simplifiedDisplayCallback);
+        uimenu(mRoiOptions,'Label', 'Display TCS Farthest Distance', 'Checked', sSimplifiedChecked, 'Enable', sSimplifiedEnable, 'Callback', @simplifiedDisplayCallback);
 
     mColorBackground  = ...
         uimenu(mRoiOptions,'Label', 'Display in Color' , 'Checked', sFigRoiInColorChecked, 'Callback', @figRoiColorCallback);
@@ -249,7 +261,7 @@ function figRoiDialogCallback(hObject, ~)
 
     setRoiFigureUiContorl();
 
-    tRoiMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
+    atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
 
     if strcmpi(mSUVUnit.Checked, 'on')
         bSUVUnit = true;
@@ -593,6 +605,11 @@ function figRoiDialogCallback(hObject, ~)
             sExpendVoiChecked = 'off';
         end
 
+        if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1 % 2D Image
+    
+            sExpendVoiEnable  = 'off';   
+        end
+
         set(mSUVUnit         , 'Checked', sSuvChecked);
         set(mModifiedMatrix  , 'Checked', sModifiedMatrixChecked);
         set(mSegmented       , 'Checked', sSegChecked);
@@ -606,6 +623,8 @@ function figRoiDialogCallback(hObject, ~)
 
     function roiClickDown(~, ~)
 
+        atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
+
         if strcmp(get(figRoiWindow,'selectiontype'),'alt')
             
             bDispayMenu = false;
@@ -613,208 +632,249 @@ function figRoiDialogCallback(hObject, ~)
             aVoiRoiTag  = voiRoiTag('get', get(uiSeriesPtr('get'), 'Value'));
             atRoiInput  = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
 
-            adOffset = get(lbVoiRoiWindow, 'Value');
-            asRoiWindow = cellstr(get(lbVoiRoiWindow, 'String'));
-            if isempty(char(asRoiWindow(end)))
-                asRoiWindow = asRoiWindow(1:end-1);
-            end
-
-            if numel(adOffset) < 2
-                c = uicontextmenu(figRoiWindow);
-                lbVoiRoiWindow.UIContextMenu = c;
-
-                uimenu(c,'Label', 'Delete Contour', 'Callback',@figRoiDeleteObjectCallback);
-
-                mCopyObject = uimenu(c,'Label', 'Copy Contour To');
-                asSeriesDescription = seriesDescription('get');
-                for sd=1:numel(asSeriesDescription)
-                    if sd ~= dSeriesOffset
-                        uimenu(mCopyObject, 'Text', asSeriesDescription{sd}, 'MenuSelectedFcn', @figRoiCopyObjectCallback);
-                    end
+            if ~isempty(aVoiRoiTag) || ~isempty(atRoiInput)
+              
+                adOffset = get(lbVoiRoiWindow, 'Value');
+                asRoiWindow = cellstr(get(lbVoiRoiWindow, 'String'));
+                if isempty(char(asRoiWindow(end)))
+                    asRoiWindow = asRoiWindow(1:end-1);
                 end
-
-if 1
-                mCopyMirror = uimenu(c,'Label', 'Copy Mirror To');
-                asSeriesDescription = seriesDescription('get');
-                for sd=1:numel(asSeriesDescription)
-                    uimenu(mCopyMirror,'Text', asSeriesDescription{sd}, 'MenuSelectedFcn', @figRoiCopyMirrorCallback);
-                end
+                
     
-end
-                uimenu(c,'Label', 'Edit Label', 'Separator', 'on', 'Callback',@figRoiEditLabelCallback);
+                if numel(adOffset) < 2
 
-                mList = uimenu(c,'Label', 'Predefined Label');
-                aList = getRoiLabelList();
-                for pp=1:numel(aList)
-                    uimenu(mList,'Text', aList{pp}, 'MenuSelectedFcn', @figRoiPredefinedLabelCallback);
-                end
-
-                uimenu(c,'Label', 'Edit Color', 'Callback',@figRoiEditColorCallback);
-                uimenu(c,'Label', 'Hide/View Face Alpha', 'Callback', @figRoiHideViewFaceAlhaCallback);
-
-                atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-            
-                bIsVoiTag= false;
-                if ~isempty(atVoiInput)
-                    aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag} );
-                    if aTagOffset(aTagOffset==1) % tag is a voi
-                        bIsVoiTag = true;
-                    end
-                end
-                
-                mFigRoiConstraint = ...
-                    uimenu(c, ...
-                           'Label'    , 'Constraint' , ...
-                           'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
-                           'Callback' , @setFigRoiConstraintCheckedCallback, ...
-                           'Separator', 'on' ...
-                          ); 
-
-                mFigRoiConstraintInsideObject = ...
-                    uimenu(mFigRoiConstraint, ...
-                           'Label'    , 'Inside This Contour' , ...
-                           'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
-                           'Callback' , @constraintContourFromMenuCallback ...
-                          ); 
-
-                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 % 2D Image
-                    
-                    if bIsVoiTag == false
-
-                        mFigRoiConstraintInsideEverySlice = ...
-                            uimenu(mFigRoiConstraint, ...
-                                   'Label'    , 'Inside Every Slice' , ...
-                                   'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
-                                   'Callback' , @constraintContourFromMenuCallback ...
-                                  );
-                    end
-                end
-
-                mFigRoiConstraintInvert = ...
-                    uimenu(mFigRoiConstraint, ...
-                           'Label'   , 'Invert Constraint' , ...
-                           'Checked' , invertConstraint('get'), ...
-                           'Callback', @invertConstraintFromMenuCallback ...
-                          );                 
-                      
-                mFigRoiMask = ...
-                    uimenu(c, ...
-                           'Label'    , 'Mask' , ...
-                           'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
-                           'Separator', 'on' ...
-                          ); 
-
-                    uimenu(mFigRoiMask, ...
-                           'Label'    , 'Inside This Contour' , ...
-                           'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
-                           'Callback' , @maskContourFromMenuCallback ...
-                          ); 
-                      
-                    uimenu(mFigRoiMask, ...
-                           'Label'    , 'Outside This Contour' , ...
-                           'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
-                           'Callback' , @maskContourFromMenuCallback ...
-                          ); 
-                      
-            
-                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 % 2D Image
-                    
-                    if bIsVoiTag == false
-                        uimenu(mFigRoiMask, ...
-                               'Label'    , 'Inside Every Slice' , ...
-                               'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
-                               'Callback' , @maskContourFromMenuCallback ...
-                              );
-                          
-                        uimenu(mFigRoiMask, ...
-                               'Label'    , 'Outside Every Slice' , ...
-                               'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
-                               'Callback' , @maskContourFromMenuCallback ...
-                              );
-                    end
-                end
-                
-                uimenu(c,'Label', 'Bar Histogram'  , 'Separator', 'on' , 'Callback',@figRoiHistogramCallback);
-                uimenu(c,'Label', 'Cumulative DVH', 'Separator', 'off', 'Callback',@figRoiHistogramCallback);
-
-                if ~isempty(atRoiInput)
-                    for dd=1:numel(atRoiInput)
-                        if isvalid(atRoiInput{dd}.Object)
-                            if strcmpi(atRoiInput{dd}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
-                                 if strcmpi(atRoiInput{dd}.Type, 'images.roi.line') || ...
-                                     strcmpi(atRoiInput{dd}.Type, 'images.roi.rectangle')     
-                                     
-                                    uimenu(c,'Label', 'Profile', 'Separator', 'off', 'Callback',@figRoiHistogramCallback);
-                                 end
-                            end
-                        end
-                    end
-                end
-
-                return;
-            end
-
-            for i=1: numel(adOffset)
-                if numel(asRoiWindow) > adOffset(i)
-                    sLine = asRoiWindow(adOffset(i));
-                    if strlength(sLine)
-                        bDispayMenu = true;
-                        break;
-                    end
-                end
-            end
-
-            if bDispayMenu == true
-
-                c = uicontextmenu(figRoiWindow);
-                lbVoiRoiWindow.UIContextMenu = c;
-
-                if numel(adOffset) > 1
-
-                    uimenu(c,'Label', 'Delete Contours', 'Separator', 'off', 'Callback',@figRoiDeleteMultipleObjectsCallback);
-
-                    mCopyObject = uimenu(c,'Label', 'Copy Contours To');
+                    c = uicontextmenu(figRoiWindow);
+                    lbVoiRoiWindow.UIContextMenu = c;
+    
+                    uimenu(c,'Label', 'Delete Contour', 'Callback',@figRoiDeleteObjectCallback);
+    
+                    mCopyObject = uimenu(c,'Label', 'Copy Contour To');
                     asSeriesDescription = seriesDescription('get');
                     for sd=1:numel(asSeriesDescription)
                         if sd ~= dSeriesOffset
-                            uimenu(mCopyObject, 'Text', asSeriesDescription{sd}, 'MenuSelectedFcn', @figRoiCopyMultipleObjectsCallback);
+                            uimenu(mCopyObject, 'Text', asSeriesDescription{sd}, 'MenuSelectedFcn', @figRoiCopyObjectCallback);
                         end
-                    end               
-                end
-
-            end
-
-            if bDispayMenu == true && ...
-               size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
-
-                uimenu(c,'Label', 'Create Volume-of-interest', 'Separator', 'on', 'Callback',@figRoiCreateVolumeCallback);
-
-                if numel(adOffset) == 2
+                    end
+    
+    if 1
+                    mCopyMirror = uimenu(c,'Label', 'Copy Mirror To');
+                    asSeriesDescription = seriesDescription('get');
+                    for sd=1:numel(asSeriesDescription)
+%                         if sd ~= dSeriesOffset
+                            uimenu(mCopyMirror,'Text', asSeriesDescription{sd}, 'MenuSelectedFcn', @figRoiCopyMultipleMirrorCallback);
+%                         end
+                    end
+        
+    end
+                    uimenu(c,'Label', 'Edit Label', 'Separator', 'on', 'Callback',@figRoiEditLabelCallback);
+    
+                    mList = uimenu(c,'Label', 'Predefined Label');
+                    aList = getRoiLabelList();
+                    for pp=1:numel(aList)
+                        uimenu(mList,'Text', aList{pp}, 'MenuSelectedFcn', @figRoiPredefinedLabelCallback);
+                    end
+    
+                    uimenu(c,'Label', 'Edit Color', 'Callback',@figRoiEditColorCallback);
+                    uimenu(c,'Label', 'Hide/View Face Alpha', 'Callback', @figRoiHideViewFaceAlhaCallback);
+    
                     atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-            
+                
                     bIsVoiTag= false;
                     if ~isempty(atVoiInput)
-                        for ll=1:numel(adOffset)
-                            aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{adOffset(ll)}.Tag} );
-                            if aTagOffset(aTagOffset==1) % tag is a voi
-                                bIsVoiTag = true;
-                                break
+                        aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag} );
+                        if aTagOffset(aTagOffset==1) % tag is a voi
+                            bIsVoiTag = true;
+                        end
+                    end
+                    
+                    mFigRoiConstraint = ...
+                        uimenu(c, ...
+                               'Label'    , 'Constraint' , ...
+                               'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
+                               'Callback' , @setFigRoiConstraintCheckedCallback, ...
+                               'Separator', 'on' ...
+                              ); 
+    
+                    mFigRoiConstraintInsideObject = ...
+                        uimenu(mFigRoiConstraint, ...
+                               'Label'    , 'Inside This Contour' , ...
+                               'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
+                               'Callback' , @constraintContourFromMenuCallback ...
+                              ); 
+    
+                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 % 2D Image
+                        
+                        if bIsVoiTag == false
+    
+                            mFigRoiConstraintInsideEverySlice = ...
+                                uimenu(mFigRoiConstraint, ...
+                                       'Label'    , 'Inside Every Slice' , ...
+                                       'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
+                                       'Callback' , @constraintContourFromMenuCallback ...
+                                      );
+                        end
+                    end
+    
+                    mFigRoiConstraintInvert = ...
+                        uimenu(mFigRoiConstraint, ...
+                               'Label'   , 'Invert Constraint' , ...
+                               'Checked' , invertConstraint('get'), ...
+                               'Callback', @invertConstraintFromMenuCallback ...
+                              );                 
+                          
+                    mFigRoiMask = ...
+                        uimenu(c, ...
+                               'Label'    , 'Mask' , ...
+                               'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
+                               'Separator', 'on' ...
+                              ); 
+    
+                        uimenu(mFigRoiMask, ...
+                               'Label'    , 'Inside This Contour' , ...
+                               'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
+                               'Callback' , @maskContourFromMenuCallback ...
+                              ); 
+                          
+                        uimenu(mFigRoiMask, ...
+                               'Label'    , 'Outside This Contour' , ...
+                               'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
+                               'Callback' , @maskContourFromMenuCallback ...
+                              ); 
+                          
+                
+                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 % 3D Image
+                        
+                        if bIsVoiTag == false
+                            uimenu(mFigRoiMask, ...
+                                   'Label'    , 'Inside Every Slice' , ...
+                                   'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
+                                   'Callback' , @maskContourFromMenuCallback ...
+                                  );
+                              
+                            uimenu(mFigRoiMask, ...
+                                   'Label'    , 'Outside Every Slice' , ...
+                                   'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
+                                   'Callback' , @maskContourFromMenuCallback ...
+                                  );
+                        end
+                    end
+                    
+                    uimenu(c,'Label', 'Bar Histogram' , 'Separator', 'on' , 'Callback',@figRoiHistogramCallback);
+                    uimenu(c,'Label', 'Cumulative DVH', 'Separator', 'off', 'Callback',@figRoiHistogramCallback);
+
+                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 % 3D Image
+                      
+                        if contains(lower(atMetaData{1}.SeriesType), 'dynamic')
+
+                            timeActivity = uimenu(c,'Label', 'Time Activity');
+        
+                            uimenu(timeActivity,'Label', 'Total', 'Callback',@figRoiTimeActivityCallback);
+                            uimenu(timeActivity,'Label', 'Sum'  , 'Callback',@figRoiTimeActivityCallback);
+                            uimenu(timeActivity,'Label', 'Mean' , 'Callback',@figRoiTimeActivityCallback);
+                            uimenu(timeActivity,'Label', 'Max'  , 'Callback',@figRoiTimeActivityCallback);
+                            uimenu(timeActivity,'Label', 'Peak' , 'Callback',@figRoiTimeActivityCallback);
+                        end
+                    end
+
+                    if ~isempty(atRoiInput)
+                        for dd=1:numel(atRoiInput)
+                            if isvalid(atRoiInput{dd}.Object)
+                                if strcmpi(atRoiInput{dd}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
+                                     if strcmpi(atRoiInput{dd}.Type, 'images.roi.line') || ...
+                                         strcmpi(atRoiInput{dd}.Type, 'images.roi.rectangle')     
+                                         
+                                        uimenu(c,'Label', 'Profile', 'Separator', 'off', 'Callback',@figRoiHistogramCallback);
+                                     end
+                                end
                             end
                         end
                     end
-
-                    if bIsVoiTag == false
-                        uimenu(c,'Label', 'Insert Region-of-interest between', 'Separator', 'off', 'Callback',@figRoiInsertBetweenRoisCallback);
-                    end
-                    
+    
+                    return;
                 end
+    
+                for i=1: numel(adOffset)
+                    if numel(asRoiWindow) > adOffset(i)
+                        sLine = asRoiWindow(adOffset(i));
+                        if strlength(sLine)
+                            bDispayMenu = true;
+                            break;
+                        end
+                    end
+                end
+    
+                if bDispayMenu == true
+    
+                    c = uicontextmenu(figRoiWindow);
+                    lbVoiRoiWindow.UIContextMenu = c;
+    
+                    if numel(adOffset) > 1
+    
+                        uimenu(c,'Label', 'Delete Contours', 'Separator', 'off', 'Callback',@figRoiDeleteMultipleObjectsCallback);
+    
+                        mCopyObject = uimenu(c,'Label', 'Copy Contours To');
+                        asSeriesDescription = seriesDescription('get');
+                        for sd=1:numel(asSeriesDescription)
+                            if sd ~= dSeriesOffset
+                                uimenu(mCopyObject, 'Text', asSeriesDescription{sd}, 'MenuSelectedFcn', @figRoiCopyMultipleObjectsCallback);
+                            end
+                        end  
 
-                uimenu(c,'Label', 'Cumulative DVH', 'Separator', 'on' , 'Callback',@figRoiMultiplePlotCallback);
+                        mCopyMirror = uimenu(c,'Label', 'Copy Mirror To');
+                        asSeriesDescription = seriesDescription('get');
+                        for sd=1:numel(asSeriesDescription)
+                            uimenu(mCopyMirror,'Text', asSeriesDescription{sd}, 'MenuSelectedFcn', @figRoiCopyMultipleMirrorCallback);
+                        end
 
-            else
-                lbVoiRoiWindow.UIContextMenu = [];
+                    end
+    
+                end
+    
+                if bDispayMenu == true && ...
+                   size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
+    
+                    uimenu(c,'Label', 'Create Volume-of-interest', 'Separator', 'on', 'Callback',@figRoiCreateVolumeCallback);
+    
+                    if numel(adOffset) == 2
+                        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+                
+                        bIsVoiTag= false;
+                        if ~isempty(atVoiInput)
+                            for ll=1:numel(adOffset)
+                                aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), {aVoiRoiTag{adOffset(ll)}.Tag} );
+                                if aTagOffset(aTagOffset==1) % tag is a voi
+                                    bIsVoiTag = true;
+                                    break
+                                end
+                            end
+                        end
+    
+                        if bIsVoiTag == false
+                            uimenu(c,'Label', 'Insert Region-of-interest between', 'Separator', 'off', 'Callback',@figRoiInsertBetweenRoisCallback);
+                        end
+                        
+                    end
+    
+                    uimenu(c,'Label', 'Cumulative DVH', 'Separator', 'on' , 'Callback',@figRoiMultiplePlotCallback);
+
+                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 % 3D Image
+
+                        if contains(lower(atMetaData{1}.SeriesType), 'dynamic')
+
+                            timeActivity = uimenu(c,'Label', 'Time Activity');
+        
+                            uimenu(timeActivity,'Label', 'Total', 'Callback',@figRoiTimeActivityCallback);
+                            uimenu(timeActivity,'Label', 'Sum'  , 'Callback',@figRoiTimeActivityCallback);
+                            uimenu(timeActivity,'Label', 'Mean' , 'Callback',@figRoiTimeActivityCallback);
+                            uimenu(timeActivity,'Label', 'Max'  , 'Callback',@figRoiTimeActivityCallback);
+                            uimenu(timeActivity,'Label', 'Peak' , 'Callback',@figRoiTimeActivityCallback);
+                        end
+                    end
+    
+                else
+    %                 lbVoiRoiWindow.UIContextMenu = [];
+                end
             end
-
         end
         
         function setFigRoiConstraintCheckedCallback(hObject, ~)
@@ -1194,6 +1254,60 @@ end
             clear aInputBuffer;
             clear aInput;
 
+        end
+
+        function figRoiTimeActivityCallback(hObject, ~)
+
+            atInput = inputTemplate('get');
+
+            dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+            if dSeriesOffset > numel(atInput)
+                return;
+            end
+        
+            aVoiRoiTag = voiRoiTag('get');            
+            
+            if strcmpi(get(mSUVUnit, 'Checked'), 'on')
+                bSUVUnit = true;
+            else
+                bSUVUnit = false;
+            end
+
+            if strcmpi(get(mSegmented, 'Checked'), 'on')
+                bSegmented = true;
+            else
+                bSegmented = false;
+            end
+            
+            if strcmpi(get(mModifiedMatrix, 'Checked'), 'on') 
+                bModifiedMatrix = true;
+            else
+                bModifiedMatrix = false;
+            end
+
+            if strcmpi(get(mSimplified, 'Checked'), 'on')
+                bSimplified = true; 
+            else 
+                bSimplified = false; 
+            end
+
+            bDoseKernel      = atInput(dSeriesOffset).bDoseKernel;
+            bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;  
+            
+            sType = get(hObject, 'Label');
+            atVoiRoiTag = aVoiRoiTag(get(lbVoiRoiWindow, 'Value'));
+            
+            figRoiTimeActivity(sType, ...
+                               atVoiRoiTag, ...
+                               bSUVUnit, ...
+                               bModifiedMatrix, ...
+                               bSegmented, ...
+                               bDoseKernel, ...
+                               bMovementApplied, ...
+                               bSimplified);
+
+            clear aInputBuffer;
+            clear aInput;            
         end
 
         function figRoiDeleteObjectCallback(~, ~)
@@ -1923,11 +2037,11 @@ end
         
         if atInput(dSeriesOffset).bDoseKernel == true
 
-            if isfield(tRoiMetaData{1}, 'DoseUnits')
+            if isfield(atMetaData{1}, 'DoseUnits')
 
-                if ~isempty(tRoiMetaData{1}.DoseUnits)
+                if ~isempty(atMetaData{1}.DoseUnits)
                     
-                    sUnits = sprintf('Unit: %s', char(tRoiMetaData{1}.DoseUnits));
+                    sUnits = sprintf('Unit: %s', char(atMetaData{1}.DoseUnits));
                 else
                     sUnits = 'Unit: dose';
                 end
@@ -1938,25 +2052,25 @@ end
         else
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                 sUnits = getSerieUnitValue(dSeriesOffset);
-                if (strcmpi(tRoiMetaData{1}.Modality, 'pt') || ...
-                    strcmpi(tRoiMetaData{1}.Modality, 'nm'))&& ...
+                if (strcmpi(atMetaData{1}.Modality, 'pt') || ...
+                    strcmpi(atMetaData{1}.Modality, 'nm'))&& ...
                     strcmpi(sUnits, 'SUV' )
                     sSUVtype = viewerSUVtype('get');
                     sUnits =  sprintf('Unit: SUV/%s', sSUVtype);
                 else
-                    if (strcmpi(tRoiMetaData{1}.Modality, 'ct'))
+                    if (strcmpi(atMetaData{1}.Modality, 'ct'))
                        sUnits =  'Unit: HU';
                     else
                        sUnits =  'Unit: Counts';
                     end
                 end
             else
-                 if (strcmpi(tRoiMetaData{1}.Modality, 'ct'))
+                 if (strcmpi(atMetaData{1}.Modality, 'ct'))
                     sUnits =  'Unit: HU';
                  else
                     sUnits = getSerieUnitValue(dSeriesOffset);
-                    if (strcmpi(tRoiMetaData{1}.Modality, 'pt') || ...
-                        strcmpi(tRoiMetaData{1}.Modality, 'nm'))&& ...
+                    if (strcmpi(atMetaData{1}.Modality, 'pt') || ...
+                        strcmpi(atMetaData{1}.Modality, 'nm'))&& ...
                         strcmpi(sUnits, 'SUV' )
                         sUnits =  'Unit: BQML';
                     else
@@ -1968,9 +2082,9 @@ end
         end
 
         if strcmpi(get(mSimplified, 'Checked'), 'on')
-            set(figRoiWindow, 'Name', ['TriDFusion (3DF) VOI Simplified Result - ' tRoiMetaData{1}.SeriesDescription ' - ' sUnits sModified sSegmented]);
+            set(figRoiWindow, 'Name', ['TriDFusion (3DF) VOI Simplified Result - ' atMetaData{1}.SeriesDescription ' - ' sUnits sModified sSegmented]);
         else
-            set(figRoiWindow, 'Name', ['TriDFusion (3DF) ROI/VOI Result - ' tRoiMetaData{1}.SeriesDescription ' - ' sUnits sModified sSegmented]);
+            set(figRoiWindow, 'Name', ['TriDFusion (3DF) ROI/VOI Result - ' atMetaData{1}.SeriesDescription ' - ' sUnits sModified sSegmented]);
         end
 
     end
@@ -2308,12 +2422,14 @@ end
             if size(lbVoiRoiWindow.String, 1) > 0
                 lbVoiRoiWindow.String(end,:) = [];
             end
-            set(lbVoiRoiWindow, 'ListboxTop', dListboxTop);
 
             if dListboxValue < size(lbVoiRoiWindow.String, 1)
                 set(lbVoiRoiWindow, 'Value', dListboxValue);
+                set(lbVoiRoiWindow, 'ListboxTop', dListboxTop);
+          
             else
                 set(lbVoiRoiWindow, 'Value', size(lbVoiRoiWindow.String, 1));
+                set(lbVoiRoiWindow, 'ListboxTop', size(lbVoiRoiWindow.String, 1));
             end
         end
 
@@ -2499,15 +2615,17 @@ end
 
             set(lbVoiRoiWindow, 'Value', 1);
             set(lbVoiRoiWindow, 'String', sLbWindow);
+            
             if size(lbVoiRoiWindow.String, 1) > 0
                 lbVoiRoiWindow.String(end,:) = [];
             end
-            set(lbVoiRoiWindow, 'ListboxTop', dListboxTop);
 
             if dListboxValue < size(lbVoiRoiWindow.String, 1)
                 set(lbVoiRoiWindow, 'Value', dListboxValue);
+                set(lbVoiRoiWindow, 'ListboxTop', dListboxTop);
             else
                 set(lbVoiRoiWindow, 'Value', size(lbVoiRoiWindow.String, 1));
+                set(lbVoiRoiWindow, 'ListboxTop', size(lbVoiRoiWindow.String, 1));
             end
         end
 
@@ -3978,10 +4096,11 @@ end
 
     end
 
-    function figRoiCopyMirrorCallback(hObject, ~)
+    function figRoiCopyMultipleMirrorCallback(hObject, ~)
 
         dToSeriesOffset = 0;
-        tObject = [];
+    
+        bRefreshListbox = false;
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
@@ -4000,36 +4119,47 @@ end
         atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
         atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
-        if ~isempty(atVoiInput) && ...
-           ~isempty(aVoiRoiTag)
-            for aa=1:numel(atVoiInput)
-                if strcmpi(atVoiInput{aa}.Tag, aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag)
-                    % Object is a VOI
-                    tObject = atVoiInput{aa};
-                    break;
-                end
+        for ii=1:numel(lbVoiRoiWindow.Value) 
 
-            end
+            tObject = [];
 
-        end
-
-        if ~isempty(atRoiInput) && ...
-           ~isempty(aVoiRoiTag)
-
-            for cc=1:numel(atRoiInput)
-                if isvalid(atRoiInput{cc}.Object)
-                    if strcmpi(atRoiInput{cc}.Tag, aVoiRoiTag{lbVoiRoiWindow.Value}.Tag)
-                        % Object is a ROI
-                        tObject = atRoiInput{cc};
+            if ~isempty(atVoiInput) && ...
+               ~isempty(aVoiRoiTag)
+        
+                for aa=1:numel(atVoiInput)
+                    if strcmpi(atVoiInput{aa}.Tag, aVoiRoiTag{lbVoiRoiWindow.Value(ii)}.Tag)
+                        % Object is a VOI
+                        tObject = atVoiInput{aa};
                         break;
+                    end
+    
+                end
+    
+            end
+    
+            if ~isempty(atRoiInput) && ...
+               ~isempty(aVoiRoiTag)
+    
+                for cc=1:numel(atRoiInput)
+                    if isvalid(atRoiInput{cc}.Object)
+                        if strcmpi(atRoiInput{cc}.Tag, aVoiRoiTag{lbVoiRoiWindow.Value(ii)}.Tag)
+                            % Object is a ROI
+                            tObject = atRoiInput{cc};
+                            break;
+                        end
                     end
                 end
             end
+    
+            if dToSeriesOffset~=0 && ~isempty(tObject)
+                % Copy the object
+                copyRoiVoiToSerie(dSeriesOffset, dToSeriesOffset, tObject, true);
+                bRefreshListbox = true;
+            end
         end
 
-        if dToSeriesOffset~=0 && ~isempty(tObject)
-            % Copy the object
-            copyRoiVoiToSerie(dSeriesOffset, dToSeriesOffset, tObject, true);
+        if bRefreshListbox == true
+
             if dSeriesOffset == dToSeriesOffset % Refresh ROIs list
                 if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                     bSUVUnit = true;
@@ -4064,7 +4194,6 @@ end
                 end
             end
         end
-
     end
 
     function sOutput = maxLength(sString, iMaxLength)

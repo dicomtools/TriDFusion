@@ -54,14 +54,19 @@ function setRoiToolbar(sVisible)
             roiToolbar('set', true);
         end
 
+        % Draw line
+
         [img,~] = imread(sprintf('%s//line.png', sIconsPath));
         img = double(img)/255;
 
         t8 = uitoggletool(tbRoi,'CData',img,'TooltipString','Draw Line');
         t8.ClickedCallback = @drawlineCallback;
 
+        % Draw freehand
+
         [img,~] = imread(sprintf('%s//freehand.png', sIconsPath));
-        img = double(img)/255;
+        img = rescaleAndRemoveIconBackground(img);
+
     %    icon = ind2rgb(img,map);
 
         t = uitoggletool(tbRoi,'CData',img,'TooltipString','Draw Freehand');
@@ -74,62 +79,90 @@ function setRoiToolbar(sVisible)
   %      t7 = uitoggletool(tbRoi,'CData',img,'TooltipString','Draw Assisted');
   %      t7.ClickedCallback = @drawassistedCallback;
 
-       [img,~] = imread(sprintf('%s//polygon.png', sIconsPath));
-       img = double(img)/255;
+        % Draw polygon
+
+        [img,~] = imread(sprintf('%s//polygon.png', sIconsPath));
+        img = rescaleAndRemoveIconBackground(img);
 
         t6 = uitoggletool(tbRoi,'CData',img,'TooltipString','Draw Polygon');
         t6.ClickedCallback = @drawpolygonCallback;
 
+        % Draw circle
+
         [img,~] = imread(sprintf('%s//circle.png', sIconsPath));
-        img = double(img)/255;
+        img = rescaleAndRemoveIconBackground(img);
 
         t2 = uitoggletool(tbRoi,'CData',img,'TooltipString','Draw Circle');
         t2.ClickedCallback = @drawcircleCallback;
 
+        % Draw elipse
+
         [img,~] = imread(sprintf('%s//elipse.png', sIconsPath));
-        img = double(img)/255;
+        img = rescaleAndRemoveIconBackground(img);
 
         t5 = uitoggletool(tbRoi,'CData',img,'TooltipString','Draw Elipse');
         t5.ClickedCallback = @drawellipseCallback;
 
+        % Draw rectangle
+
         [img,~] = imread(sprintf('%s//rectangle.png', sIconsPath));
-        img = double(img)/255;
+        img = rescaleAndRemoveIconBackground(img);
 
         t3 = uitoggletool(tbRoi,'CData',img,'TooltipString','Draw Rectangle');
         t3.ClickedCallback = @drawrectangleCallback;
 
-        [img,~] = imread(sprintf('%s//sphere.png', sIconsPath));
-        img = double(img)/255;
+        % Click Sphere
 
+        [img,~] = imread(sprintf('%s//sphere.png', sIconsPath));
+        img = rescaleAndRemoveIconBackground(img);
+        
         t11 = uitoggletool(tbRoi,'CData',img,'TooltipString','<html>Draw Sphere<br>Activate the View/Contour Panel to modify the diameter</html>', 'Separator', 'on');
         t11.ClickedCallback = @drawsphereCallback;
 
+        % Click VOI
+
         [img,~] = imread(sprintf('%s//voi-click.png', sIconsPath));
-        img = double(img)/255;
+        img = rescaleAndRemoveIconBackground(img);
 
         t12 = uitoggletool(tbRoi,'CData',img,'TooltipString','<html>Click VOI<br>Activate the View/Contour Panel to fine-tune the threshold</html>');
         t12.ClickedCallback = @drawClickVoiCallback;
 
+        % Continuous
+
         [img,~] = imread(sprintf('%s//continuous.png', sIconsPath));
-        img = double(img)/255;
+        img = rescaleAndRemoveIconBackground(img);
 
         tContinuous = uitoggletool(tbRoi,'CData',img,'TooltipString','Continuous', 'Separator', 'on');
         tContinuous.ClickedCallback = @setContinuousCallback;
 
+        % Farthest distances
+
         [img,~] = imread(sprintf('%s//farthest.png', sIconsPath));
-        img = double(img)/255;
+        img = rescaleAndRemoveIconBackground(img);
 
         tFarthest = uitoggletool(tbRoi,'CData',img,'TooltipString','View Farthest Distances');
         tFarthest.ClickedCallback = @viewFarthestDistancesCallback;
 
+        % Brush
+
         [img,~] = imread(sprintf('%s//brush.png', sIconsPath));
-        img = double(img)/255;
+        img = rescaleAndRemoveIconBackground(img);
 
         t2Dbrush = uitoggletool(tbRoi,'CData',img,'TooltipString','2D Brush');
         t2Dbrush.ClickedCallback = @set2DBrushCallback;
 
+        % Scissor
+
+        [img,~] = imread(sprintf('%s//scissor.png', sIconsPath));
+        img = rescaleAndRemoveIconBackground(img);
+
+        t2Dscissor = uitoggletool(tbRoi,'CData',img,'TooltipString','2D scissor');
+        t2Dscissor.ClickedCallback = @set2DScissorCallback;
+
+        % Result
+
         [img,~] = imread(sprintf('%s//result.png', sIconsPath));
-        img = double(img)/255;
+        img = rescaleAndRemoveIconBackground(img);
 
         t10 = uitoggletool(tbRoi,'CData',img,'TooltipString','Result', 'Tag', 'toolbar', 'Separator', 'on');
         t10.ClickedCallback = @figRoiDialogCallback;
@@ -152,6 +185,16 @@ function setRoiToolbar(sVisible)
             tbRoi.Visible = 'on';
             roiToolbar('set', true);
        end
+    end
+
+    function img = rescaleAndRemoveIconBackground(img)
+
+        whiteThresh = 0.95; % You can adjust this threshold 
+
+        img = double(img)/255;
+
+        backgroundMask = img(:,:,1) > whiteThresh & img(:,:,2) > whiteThresh & img(:,:,3) > whiteThresh;
+        img(repmat(backgroundMask, [1 1 3])) = NaN;
     end
 
     function releaseRoiAxeWait(tMenu)
@@ -1516,14 +1559,14 @@ function setRoiToolbar(sVisible)
 
         if strcmpi(get(t12, 'State'), 'off')
 %                   robotReleaseKey();
-            if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
-                set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on');
-                set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'on');
-                set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'on');
-                set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'on');
-                set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'on');
-                set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'on');
-            end
+%             if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
+%                 set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on');
+%                 set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'on');
+%                 set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'on');
+%                 set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'on');
+%                 set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'on');
+%                 set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'on');
+%             end
 
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
             drawnow;
@@ -1549,12 +1592,12 @@ function setRoiToolbar(sVisible)
 
         try
 
-        set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'off');
-        set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'off');
-        set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'off');
-        set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'off');
-        set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'off');
-        set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'off');
+%         set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'off');
+%         set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'off');
+%         set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'off');
+%         set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'off');
+%         set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'off');
+%         set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'off');
 
         set(fiMainWindowPtr('get'), 'Pointer', 'cross');
         drawnow;
@@ -1600,11 +1643,37 @@ function setRoiToolbar(sVisible)
                 switch pAxe
 
                     case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        aClickedPt = get(pAxe,'CurrentPoint');
+        
+                        clickedPtX = round(aClickedPt(1,1));
+                        clickedPtY = round(aClickedPt(1,2));
+
                     case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        aClickedPt = get(pAxe,'CurrentPoint');
+        
+                        clickedPtX = round(aClickedPt(1,1));
+                        clickedPtY = round(aClickedPt(1,2));
+
                     case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        aClickedPt = get(pAxe,'CurrentPoint');
+        
+                        clickedPtX = round(aClickedPt(1,1));
+                        clickedPtY = round(aClickedPt(1,2));
+
                     case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        aClickedPt = get(pAxe,'CurrentPoint');
+        
+                        clickedPtX = round(aClickedPt(1,1));
+                        clickedPtY = round(aClickedPt(1,2));
+
+                    case axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                        triangulateImages();
+                        pAxe = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                        clickedPtX = sliceNumber('get', 'sagittal');
+                        clickedPtY = sliceNumber('get', 'coronal');
 
                     otherwise
+
                         return;
                 end
 
@@ -1617,11 +1686,6 @@ function setRoiToolbar(sVisible)
 
                 aBuffer = dicomBuffer('get', [], dSeriesOffset);
 
-   %              while strcmpi(get(t, 'State'), 'on')
-                aClickedPt = get(pAxe,'CurrentPoint');
-
-                clickedPtX = round(aClickedPt(1,1));
-                clickedPtY = round(aClickedPt(1,2));
 
                 % Set ROI pael Segment btn to Cancel
 
@@ -1732,15 +1796,15 @@ function setRoiToolbar(sVisible)
             progressBar(1, 'Error:drawClickVoiCallback()');
         end
 
-        if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
-
-            set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on');
-            set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'on');
-            set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'on');
-            set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'on');
-            set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'on');
-            set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'on');
-        end
+%         if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
+% 
+%             set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on');
+%             set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'on');
+%             set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'on');
+%             set(uiPrevVoiRoiPanelObject      ('get'), 'Enable', 'on');
+%             set(uiDelVoiRoiPanelObject       ('get'), 'Enable', 'on');
+%             set(uiNextVoiRoiPanelObject      ('get'), 'Enable', 'on');
+%         end
 
         set(t12, 'State', 'off');
 
@@ -1959,6 +2023,129 @@ end
 
     end
 
+    function draw2DscissorCallback()
+
+        if switchTo3DMode('get')     == true || ...
+           switchToIsoSurface('get') == true || ...
+           switchToMIPMode('get')    == true || ...
+           isVsplash('get')          == true
+            set(t2Dscissor, 'State', 'off');
+            return;
+        end
+
+%               releaseRoiAxeWait(t8);
+        robotReleaseKey();
+
+        if strcmpi(get(t2Dscissor, 'State'), 'off')
+
+ %           robotReleaseKey();
+
+            set(t2Dscissor, 'State', 'off');
+            roiSetAxeBorder(false);
+
+            windowButton('set', 'up');
+            mouseFcn('set');
+            mainToolBarEnable('on');
+            setCrossVisibility(true);
+
+            return;
+        end
+
+        releaseRoiAxeWait(t2Dscissor);
+
+%         robotReleaseKey();
+
+        setCrossVisibility(false);
+
+        triangulateCallback();
+
+        doWhileContinuous = true;
+        while doWhileContinuous == true
+     %       w=waitforbuttonpress;
+            axeClicked('set', false);
+            doWhile = true;
+            while doWhile == true
+                uiwait(fiMainWindowPtr('get'));
+                if axeClicked('get') == true
+                    doWhile = false;
+                    if strcmpi(windowButton('get'), 'up')
+                        doWhileContinuous = false;
+                    end
+        %            axeClicked('set', false);
+                end
+            end
+
+            if ~isvalid(t2Dscissor)
+                return;
+            end
+
+            if strcmpi(get(t2Dscissor, 'State'), 'off')
+                return;
+            end
+     %       if w == 0
+            if  strcmpi(windowButton('get'), 'down')
+
+                robotClick();
+
+                pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+
+                switch pAxe
+
+                    case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+
+                    otherwise
+                        return;
+                end
+
+                mainToolBarEnable('off');
+                mouseFcn('reset');
+
+                roiSetAxeBorder(true, pAxe);
+
+         %       while strcmpi(get(t8, 'State'), 'on')
+
+                    pRoiPtr = drawline(pAxe, 'Color', 'red', 'lineWidth', 1, 'Tag', num2str(randi([-(2^52/2),(2^52/2)],1)), 'LabelVisible', 'off');
+                    pRoiPtr.LabelVisible = 'off';
+
+                    scissor2Dptr('set', pRoiPtr);
+
+                    if ~isvalid(t2Dscissor)
+                        return;
+                    end
+
+                    if strcmpi(get(t2Dscissor, 'State'), 'off')
+
+                        roiSetAxeBorder(false);
+
+                        return;
+                    end
+
+%                     if strcmpi(get(tContinuous, 'State'), 'off')
+                        doWhileContinuous = false;
+%                     end
+
+         %       end
+
+                roiSetAxeBorder(false);
+
+                windowButton('set', 'up');
+                mouseFcn('set');
+                mainToolBarEnable('on');
+
+                splitContour(pAxe, pRoiPtr);
+
+                delete(pRoiPtr);
+            end
+        end
+
+        set(t2Dscissor, 'State', 'off');
+
+        setCrossVisibility(true);     
+    end
+
     function setContinuousCallback(hObject, ~)
 
         axeClicked('set', true);
@@ -2011,6 +2198,7 @@ end
         set(t8 , 'State', 'off');
         set(t11, 'State', 'off');
         set(t12, 'State', 'off');
+        set(t2Dscissor, 'State', 'off');
 
         if strcmpi(get(hObject, 'State'), 'on')
 
@@ -2056,6 +2244,7 @@ end
             set(t11, 'Enable', 'off');
             set(t12, 'Enable', 'off');
             set(tFarthest, 'Enable', 'off');
+            set(t2Dscissor, 'Enable', 'off');
 
             atRoiInput = roiTemplate('get', dSeriesOffset);
 
@@ -2070,7 +2259,7 @@ end
             if strcmpi(get(t2Dbrush, 'State'), 'on')
 
                 pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
-
+            
                 switch pAxe
 
                     case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
@@ -2149,6 +2338,7 @@ end
             set(t11, 'Enable', 'on');
             set(t12, 'Enable', 'on');
             set(tFarthest, 'Enable', 'on');
+            set(t2Dscissor, 'Enable', 'on');
         end
 
         catch
@@ -2158,4 +2348,86 @@ end
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;
     end
+
+    function set2DScissorCallback(hObject, ~)
+
+        if switchTo3DMode('get')     == true || ...
+           switchToIsoSurface('get') == true || ...
+           switchToMIPMode('get')    == true || ...
+           isVsplash('get')          == true
+           set(hObject, 'State', 'off');
+           return;
+        end
+
+        try
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+
+        axeClicked('set', true);
+        uiresume(fiMainWindowPtr('get'));
+
+        set(t  , 'State', 'off');
+        set(t2 , 'State', 'off');
+        set(t3 , 'State', 'off');
+        set(t5 , 'State', 'off');
+        set(t6 , 'State', 'off');
+        set(t8 , 'State', 'off');
+        set(t11, 'State', 'off');
+        set(t12, 'State', 'off');
+        set(t2Dbrush, 'State', 'off');
+
+        if is2DScissor('get') == false
+
+            is2DScissor('set', true);
+
+            setCrossVisibility(false);
+
+            set(t  , 'Enable', 'off');
+            set(t2 , 'Enable', 'off');
+            set(t3 , 'Enable', 'off');
+            set(t5 , 'Enable', 'off');
+            set(t6 , 'Enable', 'off');
+            set(t8 , 'Enable', 'off');
+            set(t11, 'Enable', 'off');
+            set(t12, 'Enable', 'off');
+            set(tFarthest, 'Enable', 'off');
+            set(t2Dbrush, 'Enable', 'off');
+
+            draw2DscissorCallback();
+
+            is2DScissor('set', false);
+
+            roiSetAxeBorder(false);
+
+            setCrossVisibility(true);
+        end
+        catch
+            progressBar(1, 'Error:set2DScissorCallback()');
+        end
+
+        pRoiPtr = scissor2Dptr('get');
+
+        if ~isempty(pRoiPtr)
+            delete(pRoiPtr);
+            scissor2Dptr('set', []);
+        end
+
+        is2DScissor('set', false);
+
+        set(t  , 'Enable', 'on');
+        set(t2 , 'Enable', 'on');
+        set(t3 , 'Enable', 'on');
+        set(t5 , 'Enable', 'on');
+        set(t6 , 'Enable', 'on');
+        set(t8 , 'Enable', 'on');
+        set(t11, 'Enable', 'on');
+        set(t12, 'Enable', 'on');
+        set(tFarthest, 'Enable', 'on');
+        set(t2Dbrush, 'Enable', 'on');
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;        
+    end
+
 end

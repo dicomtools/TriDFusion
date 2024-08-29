@@ -1,5 +1,5 @@
-function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bPixelEdge)
-%function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bPixelEdge)
+function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bPixelEdge, sOptions)
+%function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bPixelEdge, sOptions)
 %Create a VOI from a 3D mask.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -78,7 +78,43 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
                 aSlice = imresize(aSlice,3, 'nearest'); % do not go directly through pixel centers
             end
             
-            [maskSlice, ~,~,~] = bwboundaries(aSlice, 4, 'noholes'); 
+            if exist('sOptions', 'var')
+                 [maskSlice,~,~,~] = bwboundaries(aSlice, 4, sOptions); 
+            else
+                [maskSlice,~,~,~] = bwboundaries(aSlice, 4, 'noholes'); 
+            end
+
+% % Initialize arrays to store boundary types
+% innerBoundaries = false(length(maskSlice), 1);
+% 
+%     % Loop through each boundary
+%     for i = 1:length(maskSlice)
+%         % Get the coordinates of the current boundary
+%         boundary_i = maskSlice{i};
+%         
+%         % Check if this boundary is contained within any other boundary
+%         for j = 1:length(maskSlice)
+%             if i ~= j
+%                 % Get the coordinates of the other boundary
+%                 boundary_j = maskSlice{j};
+%                 
+%                 % Check if boundary_i is within boundary_j
+%                 if inpolygon(boundary_i(:,2), boundary_i(:,1), boundary_j(:,2), boundary_j(:,1))
+%                     innerBoundaries(i) = true;
+%                     
+%                     % Mark the outer boundary (boundary_j) as having an inner boundary
+%                     hasInnerBoundary(j) = true;
+%                 end
+%             end
+%         end
+%     end
+% 
+% % Filter out inner boundaries
+% outerBoundariesWithInner = maskSlice(hasInnerBoundary);
+% 
+% Initialize arrays to store outer and inner boundaries
+% Initialize arrays to store outer boundaries and their associated inner boundaries
+
 
             if ~isempty(maskSlice)
 
@@ -97,7 +133,7 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
                     sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
 
                     curentMask = maskSlice(jj);
-                    
+
                     if bPixelEdge == true                    
                         curentMask{1} = (curentMask{1} +1)/3; 
                     end
@@ -120,6 +156,7 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
                                                'Visible'       , 'off', ...
                                                'FaceSelectable', 0, ...
                                                'FaceAlpha'     , roiFaceAlphaValue('get'));  
+
                     if bPixelEdge == true
                         reduce(pRoi);
                     end   

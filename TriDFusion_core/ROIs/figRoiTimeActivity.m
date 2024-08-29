@@ -1,13 +1,13 @@
-function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied, bSimplified)
-%function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied, bSimplified)
-%Display a figure of multiple plot.
+function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied, bSimplified)
+%function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied, bSimplified)
+%Display a time activity figure.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2024, Daniel Lafontaine, on behalf of the TriDFusion development team.
 %
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 %
@@ -27,6 +27,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    gaAcquisitionTime = [];
     gtxtRoiList = [];
 
     atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
@@ -48,7 +49,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
     % if viewerUIFigure('get') == true
     if 0
-        figRoiMultiplePlot = ...
+        figRoiTimeActivity = ...
             uifigure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_MPLOT_X/2) ...
                    (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_MPLOT_Y/2) ...
                    FIG_MPLOT_X ...
@@ -57,10 +58,10 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                    'AutoResizeChildren', 'off', ...
                    'Color', viewerBackgroundColor('get'),...
                    'Name' , ' ',...
-                   'SizeChangedFcn',@resizeFigRoiMultiplePlotCallback...
+                   'SizeChangedFcn',@resizefigRoiTimeActivityCallback...
                   );
     else
-        figRoiMultiplePlot = ...
+        figRoiTimeActivity = ...
             figure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-FIG_MPLOT_X/2) ...
                    (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-FIG_MPLOT_Y/2) ...
                    FIG_MPLOT_X ...
@@ -71,24 +72,32 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                    'Resize', 'on', ...
                    'Color', viewerBackgroundColor('get'), ...
                    'Toolbar','none',...
-                   'SizeChangedFcn',@resizeFigRoiMultiplePlotCallback...
+                   'SizeChangedFcn',@resizefigRoiTimeActivityCallback...
                    );
     end
 
-    setMultiplePlotFigureName();
+    setTimeActivityFigureName();
 
-    mMultiplePlotFile = uimenu(figRoiMultiplePlot,'Label','File');
-    uimenu(mMultiplePlotFile,'Label', 'Export to .csv...','Callback', @exportCurrentMultiplePlotCallback);
-    uimenu(mMultiplePlotFile,'Label', 'Close' ,'Callback', 'close', 'Separator','on');
+    mTimeActivityFile = uimenu(figRoiTimeActivity,'Label','File');
+    uimenu(mTimeActivityFile,'Label', 'Export to .csv...','Callback', @exportCurrentTimeActivityCallback);
+    uimenu(mTimeActivityFile,'Label', 'Close' ,'Callback', 'close', 'Separator','on');
 
 
-    mMultiplePlotEdit = uimenu(figRoiMultiplePlot,'Label','Edit');
-    uimenu(mMultiplePlotEdit,'Label', 'Copy Display', 'Callback', @copyMultiplePlotDisplayCallback);
+    mTimeActivityEdit = uimenu(figRoiTimeActivity,'Label','Edit');
+    uimenu(mTimeActivityEdit,'Label', 'Copy Display', 'Callback', @copyTimeActivityDisplayCallback);
 
-    aFigurePosition = get(figRoiMultiplePlot, 'Position');
+    mTimeActivityOptions = uimenu(figRoiTimeActivity,'Label','Options','Callback', @refreshTimeActivityAggregate);
+    uimenu(mTimeActivityOptions,'Label', 'Total', 'Callback',@figRoiSetTimeActivityAggregate);
+    uimenu(mTimeActivityOptions,'Label', 'Sum'  , 'Callback',@figRoiSetTimeActivityAggregate);
+    uimenu(mTimeActivityOptions,'Label', 'Mean' , 'Callback',@figRoiSetTimeActivityAggregate);
+    uimenu(mTimeActivityOptions,'Label', 'Max'  , 'Callback',@figRoiSetTimeActivityAggregate);
+    uimenu(mTimeActivityOptions,'Label', 'Peak' , 'Callback',@figRoiSetTimeActivityAggregate);
 
-    axeMultiplePlot = ...
-        axes(figRoiMultiplePlot, ...
+
+    aFigurePosition = get(figRoiTimeActivity, 'Position');
+
+    axeTimeActivity = ...
+        axes(figRoiTimeActivity, ...
              'Units'   , 'pixels', ...
              'Position', [60 60 aFigurePosition(3)-360 aFigurePosition(4)-90], ...
              'Color'   , viewerAxesColor('get'),...
@@ -97,81 +106,17 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
              'ZColor'  , viewerForegroundColor('get'),...
              'Visible' , 'on'...
              );
-    axeMultiplePlot.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-    axeMultiplePlot.Toolbar.Visible = 'off';
-    disableDefaultInteractivity(axeMultiplePlot);
+    axeTimeActivity.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+    axeTimeActivity.Toolbar.Visible = 'off';
+    disableDefaultInteractivity(axeTimeActivity);
 
-    axeMultiplePlot.Title.String = sType;
-    axeMultiplePlot.Title.Color  = viewerForegroundColor('get');
+    axeTimeActivity.Title.String = sType;
+    axeTimeActivity.Title.Color  = viewerForegroundColor('get');
 
-    if contains(lower(sType), 'cumulative')
-
-        if bDoseKernel == true
-
-            if isfield(atMetaData{1}, 'DoseUnits')
-
-                if ~isempty(atMetaData{1}.DoseUnits)
-
-                    sUnit = char(atMetaData{1}.DoseUnits);
-                else
-                    sUnit = 'dose';
-                end
-            else
-                sUnit = 'dose';
-            end
-
-            axeMultiplePlot.XLabel.String = sprintf('Intensity (%s)', sUnit);
-
-        else
-            if  (strcmpi(atMetaData{1}.Modality, 'pt') || ...
-                 strcmpi(atMetaData{1}.Modality, 'nm'))&& ...
-                 strcmpi(atMetaData{1}.Units, 'BQML' )
-
-                if bSUVUnit == true
-                    axeMultiplePlot.XLabel.String = sprintf('Intensity (SUV/%s)', viewerSUVtype('get'));
-                else
-                    axeMultiplePlot.XLabel.String = 'Intensity (BQML)';
-                end
-            else
-                if  strcmpi(atMetaData{1}.Modality, 'ct')
-
-                    axeMultiplePlot.XLabel.String = 'Intensity (HU)';
-                else
-
-                    axeMultiplePlot.XLabel.String = 'Intensity (Count)';
-                end
-            end
-        end
-
-        axeMultiplePlot.YLabel.String = 'Fraction';
-    else
-        axeMultiplePlot.XLabel.String = 'cells';
-        if bDoseKernel == true
-            axeMultiplePlot.YLabel.String = 'Intensity (Gy)';
-        else
-            if  (strcmpi(atMetaData{1}.Modality, 'pt') || ...
-                 strcmpi(atMetaData{1}.Modality, 'nm'))&& ...
-                 strcmpi(atMetaData{1}.Units, 'BQML' )
-
-                if bSUVUnit == true
-                    axeMultiplePlot.YLabel.String = sprintf('Intensity (SUV/%s)', viewerSUVtype('get'));
-                else
-                    axeMultiplePlot.YLabel.String = 'Intensity (BQML)';
-                end
-            else
-                if  strcmpi(atMetaData{1}.Modality, 'ct')
-                    axeMultiplePlot.YLabel.String = 'Intensity (HU)';
-                else
-                    axeMultiplePlot.YLabel.String = 'Intensity (Count)';
-                end
-            end
-        end
-    end
-
-    aAxePosition = get(axeMultiplePlot, 'Position');
+    aAxePosition = get(axeTimeActivity, 'Position');
 
     uiRoiListMainPanel = ...
-        uipanel(figRoiMultiplePlot,...
+        uipanel(figRoiTimeActivity,...
                 'Title'   , 'VOI/ROI List', ...
                 'Units'   , 'pixels',...
                 'position', [aAxePosition(1)+aAxePosition(3)+5 ...
@@ -183,6 +128,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                 'ForegroundColor', viewerForegroundColor('get'), ...
                 'Visible', 'on'...
                 );
+    
 
     aRoiListMainPosition = get(uiRoiListMainPanel, 'Position');
 
@@ -218,26 +164,69 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 %     addlistener(uiRoiListPanelSlider, 'Value', 'PreSet', @uiRoiListPanelSliderCallback);
     addlistener(uiRoiListPanelSlider, 'ContinuousValueChange', @uiRoiListPanelSliderCallback);
 
-    setMultiplePlotRoiVoi(atVoiRoiTag);
+    if numel(atVoiRoiTag) == 1
+        set(uiRoiListPanelSlider, 'Visible', 'off');
+        set(uiRoiListPanel, 'Visible', 'off');
+        set(uiRoiListMainPanel, 'Visible', 'off');
 
-    function resizeFigRoiMultiplePlotCallback(~, ~)
+        set(axeTimeActivity, 'Position', [60 60 aFigurePosition(3)-90 aFigurePosition(4)-90]);
+    end
 
-        if ~exist('figRoiMultiplePlot', 'var')
+    setTimeActivityRoiVoi(atVoiRoiTag);
+
+    function refreshTimeActivityAggregate(hObject, ~)
+
+        for jj=1: numel(hObject.Children)
+            if strcmpi(hObject.Children(jj).Text, sType)
+                hObject.Children(jj).Checked = 'on';
+            else
+                hObject.Children(jj).Checked = 'off';
+            end
+        end
+
+    end
+
+    function figRoiSetTimeActivityAggregate(hObject, ~)
+       
+        sType = hObject.Text;
+
+        cla(axeTimeActivity);
+
+        axeTimeActivity.Title.String = sType;
+
+        setTimeActivityRoiVoi(atVoiRoiTag);
+
+    end
+
+    function resizefigRoiTimeActivityCallback(~, ~)
+
+        if ~exist('figRoiTimeActivity', 'var')
             return;
         end
 
-        aFigurePosition  = get(figRoiMultiplePlot, 'Position');
+        aFigurePosition  = get(figRoiTimeActivity, 'Position');
 
-        set(axeMultiplePlot, ...
-            'Position', ...
-            [60 ...
-             60 ...
-             aFigurePosition(3)-360 ...
-             aFigurePosition(4)-90 ...
-            ] ...
-            );
+        if numel(atVoiRoiTag) == 1
+            set(axeTimeActivity, ...
+                'Position', ...
+                [60 ...
+                 60 ...
+                 aFigurePosition(3)-90 ...
+                 aFigurePosition(4)-90 ...
+                ] ...
+                );            
+        else
+            set(axeTimeActivity, ...
+                'Position', ...
+                [60 ...
+                 60 ...
+                 aFigurePosition(3)-360 ...
+                 aFigurePosition(4)-90 ...
+                ] ...
+                );
+        end
 
-        aAxePosition = get(axeMultiplePlot   , 'Position');
+        aAxePosition = get(axeTimeActivity   , 'Position');
 
         set(uiRoiListMainPanel, ...
             'position', [aAxePosition(1)+aAxePosition(3)+5 ...
@@ -285,9 +274,9 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
             );
     end
 
-    function setMultiplePlotFigureName()
+    function setTimeActivityFigureName()
 
-        sTitle = sType;
+        sTitle = sprintf('Time Activity Curve %s', sType);
 
         if bModifiedMatrix == true
             sModified = ' - Cells Value: Display Image';
@@ -349,22 +338,27 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
             end
         end
 
-        set(figRoiMultiplePlot, 'Name', [sTitle ' - ' atMetaData{1}.SeriesDescription ' - ' sUnits sModified sSegmented]);
+        set(figRoiTimeActivity, 'Name', [sTitle ' - ' atMetaData{1}.SeriesDescription ' - ' sUnits sModified sSegmented]);
 
     end
 
-    function setMultiplePlotRoiVoi(atVoiRoiTag)
+    function setTimeActivityRoiVoi(atVoiRoiTag)
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+          
+        atInputTemplate = inputTemplate('get');
+
+        sSeriesInstanceUID = atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID;
 
         try
 
         txtRoiList = [];
 
-        set(figRoiMultiplePlot, 'Pointer', 'watch');
+        set(figRoiTimeActivity, 'Pointer', 'watch');
         drawnow;
 
         atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
         atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-        atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));
 
         tQuant = quantificationTemplate('get');
         if isfield(tQuant, 'tSUV')
@@ -377,86 +371,200 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
         dOffset=1;
 
+        dYMin = [];
+        dYMax = [];
+
         for aa=1:numel(atVoiRoiTag)
+
+            gaAcquisitionTime = [];
+            aAggregate = [];
+            aTime = [];
 
             bFoundTag = false;
 
             for bb=1:numel(atVoiInput)
+
                 if strcmp(atVoiRoiTag{aa}.Tag, atVoiInput{bb}.Tag)
 
                     try
 
-                    imCData = computeHistogram(aInputBuffer, ...
-                                               atInputMetaData, ...
-                                               dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), ...
-                                               atMetaData, ...
-                                               atVoiInput{bb}, ...
-                                               atRoiInput, ...
-                                               dSUVScale, ...
-                                               bSUVUnit, ...
-                                               bModifiedMatrix, ...
-                                               bSegmented, ...
-                                               bDoseKernel, ...
-                                               bMovementApplied);
+                    for sr=1:numel(atInputTemplate)
+            
+                        if strcmpi(sSeriesInstanceUID, atInputTemplate(sr).atDicomInfo{1}.SeriesInstanceUID) % Same series
+                          
+                            aInputBuffer = inputBuffer('get');
 
-                    set(axeMultiplePlot, 'XLim', [min(double(imCData),[],'all') max(double(imCData),[],'all')]);
-                    set(axeMultiplePlot, 'YLim', [0 1]);
-
-                    ptrPlot = plotCummulative(axeMultiplePlot, imCData, atVoiInput{bb}.Color);
-
-                    if dOffset==1
-                        imCumCDataMasked = imCData;
-                    else
-                        imCumCDataMasked = [imCumCDataMasked;  imCData];
-                    end
-
-                    set(axeMultiplePlot, 'XLim', [min(double(imCumCDataMasked),[],'all') max(double(imCumCDataMasked),[],'all')]);
-
-                    axeMultiplePlot.XColor = viewerForegroundColor('get');
-                    axeMultiplePlot.YColor = viewerForegroundColor('get');
-                    axeMultiplePlot.ZColor = viewerForegroundColor('get');
-
-                    if bDoseKernel == true
-                        axeMultiplePlot.XLabel.String = 'Intensity (Gy)';
-                    else
-                        if  (strcmpi(atMetaData{1}.Modality, 'pt') || ...
-                             strcmpi(atMetaData{1}.Modality, 'nm'))&& ...
-                             strcmpi(atMetaData{1}.Units, 'BQML' )
-
-                            if bSUVUnit == true
-                                axeMultiplePlot.XLabel.String = sprintf('Intensity (SUV/%s)', viewerSUVtype('get'));
-                            else
-                                axeMultiplePlot.XLabel.String = 'Intensity (BQML)';
+                            switch lower(imageOrientation('get'))
+                
+                                case'axial'
+                                    aInputBuffer = aInputBuffer{sr};                   
+                                    
+                                case 'coronal'
+                                    aInputBuffer = reorientBuffer(aInputBuffer{sr}, 'coronal');
+                                    
+                                case'sagittal'
+                                    aInputBuffer = reorientBuffer(aInputBuffer{sr}, 'sagittal');
                             end
-                        else
-                            if  strcmpi(atMetaData{1}.Modality, 'ct')
-
-                                axeMultiplePlot.XLabel.String = 'Intensity (HU)';
+                
+                            if size(aInputBuffer, 3) ==1
+                
+                                if atInputTemplate(sr).bFlipLeftRight == true
+                                    aInputBuffer=aInputBuffer(:,end:-1:1);
+                                end
+                
+                                if atInputTemplate(sr).bFlipAntPost == true
+                                    aInputBuffer=aInputBuffer(end:-1:1,:);
+                                end            
                             else
+                                if atInputTemplate(sr).bFlipLeftRight == true
+                                    aInputBuffer=aInputBuffer(:,end:-1:1,:);
+                                end
+                
+                                if atInputTemplate(sr).bFlipAntPost == true
+                                    aInputBuffer=aInputBuffer(end:-1:1,:,:);
+                                end
+                
+                                if atInputTemplate(sr).bFlipHeadFeet == true
+                                    aInputBuffer=aInputBuffer(:,:,end:-1:1);
+                                end 
+                            end   
 
-                                axeMultiplePlot.XLabel.String = 'Intensity (Count)';
+                            if isempty(dicomBuffer('get', [], sr))
+                                dicomBuffer('set', aInputBuffer, sr);
                             end
+
+                            atInputMetaData = atInputTemplate(sr).atDicomInfo;
+
+                            if isempty(dicomMetaData('get', [], sr))
+                                dicomMetaData('set', atInputMetaData, sr)
+                            end
+
+                            tQuant = quantificationTemplate('get', [], sr);
+                            if isfield(tQuant, 'tSUV')
+                                dSUVScale = tQuant.tSUV.dScale;
+                            else
+                                dSUVScale = 0;
+                            end
+
+                            tVoiComputed = computeVoi(aInputBuffer, ...
+                                                       atInputMetaData, ...
+                                                       dicomBuffer('get', [], sr), ...
+                                                       dicomMetaData('get', [], sr), ...
+                                                       atVoiInput{bb}, ...
+                                                       atRoiInput, ...
+                                                       dSUVScale, ...
+                                                       bSUVUnit, ...
+                                                       bModifiedMatrix, ...
+                                                       bSegmented, ...
+                                                       bDoseKernel, ...
+                                                       bMovementApplied);   
+
+                            switch lower(sType)
+
+                                case 'total'
+                                    aAggregate{numel(aAggregate)+1} = tVoiComputed.total;
+              
+                                case 'sum'
+                                    aAggregate{numel(aAggregate)+1} = tVoiComputed.sum;
+    
+                                case 'mean'
+                                    aAggregate{numel(aAggregate)+1} = tVoiComputed.mean;
+
+                                case 'max'
+                                    aAggregate{numel(aAggregate)+1} = tVoiComputed.max;
+
+                                case 'peak'
+                                    aAggregate{numel(aAggregate)+1} = tVoiComputed.peak;                              
+                            end
+
+                            if isempty(aTime)
+                                aTime{1} = 0;
+                            else
+                                aTime{numel(aTime)+1} = aTime{numel(aTime)} + atInputMetaData{1}.ActualFrameDuration/1000/60;
+                            end
+
+                            gaAcquisitionTime{numel(gaAcquisitionTime)+1} =  atInputMetaData{1}.AcquisitionTime;  
+
                         end
                     end
-                    axeMultiplePlot.YLabel.String = 'Fraction';
 
-                    axeMultiplePlot.Title.Color = viewerForegroundColor('get');
-                    axeMultiplePlot.Color = viewerAxesColor('get');
-
-                    txtRoiList{dOffset} = ...
-                        uicontrol(uiRoiListPanel,...
-                                  'style'   , 'text',...
-                                  'string'  , atVoiInput{bb}.Label,...
-                                  'horizontalalignment', 'left',...
-                                  'position', [5 (dOffset-1)*25 aRoiListPosition(3)-35 20],...
-                                  'Enable', 'Inactive',...
-                                  'UserData', ptrPlot, ...
-                                  'ForegroundColor', atVoiInput{bb}.Color, ...
-                                  'BackgroundColor', viewerBackgroundColor('get'), ...
-                                  'ButtonDownFcn', @highlightPlotCallback...
-                                  );
-                    dOffset = dOffset+1;
-                    bFoundTag = true;
+                    if ~isempty(aAggregate)
+                            
+                        dMinIntensity = min(cell2mat(aAggregate), [], 'all');
+                        dMaxIntensity = max(cell2mat(aAggregate), [], 'all');
+    
+                        if isempty(dYMin)
+                            dYMin = dMinIntensity;
+                        else
+                            if dMinIntensity < dYMin
+                                dYMin = dMinIntensity; 
+                            end
+                        end
+    
+                        if isempty(dYMax)
+                            dYMax = dMaxIntensity;
+                        else
+                            if dMaxIntensity > dYMax
+                                dYMax = dMaxIntensity; 
+                            end
+                        end
+    
+                        set(axeTimeActivity, 'YLim', [dYMin dYMax]);
+                        set(axeTimeActivity, 'XLim', [min(cell2mat(aTime), [], 'all') max(cell2mat(aTime), [], 'all')]);
+    
+                        hold(axeTimeActivity, 'on');
+                        ptrPlot = plot(axeTimeActivity, cell2mat(aTime), cell2mat(aAggregate), '-o');
+                        ptrPlot.Color  = atVoiInput{bb}.Color;
+                        ptrPlot.LineWidth  = 1;
+                        hold(axeTimeActivity, 'off');
+    
+                        axeTimeActivity.XColor = viewerForegroundColor('get');
+                        axeTimeActivity.YColor = viewerForegroundColor('get');
+                        axeTimeActivity.ZColor = viewerForegroundColor('get');
+    
+                        if bDoseKernel == true
+                            axeTimeActivity.YLabel.String = 'Intensity (Gy)';
+                        else
+                            if  (strcmpi(atMetaData{1}.Modality, 'pt') || ...
+                                 strcmpi(atMetaData{1}.Modality, 'nm'))&& ...
+                                 strcmpi(atMetaData{1}.Units, 'BQML' )
+    
+                                if bSUVUnit == true
+                                    axeTimeActivity.YLabel.String = sprintf('Intensity (SUV/%s)', viewerSUVtype('get'));
+                                else
+                                    axeTimeActivity.YLabel.String = 'Intensity (BQML)';
+                                end
+                            else
+                                if  strcmpi(atMetaData{1}.Modality, 'ct')
+    
+                                    axeTimeActivity.YLabel.String = 'Intensity (HU)';
+                                else
+    
+                                    axeTimeActivity.XLabel.String = 'Intensity (Count)';
+                                end
+                            end
+                        end
+    
+                        axeTimeActivity.XLabel.String = 'Time (min)';
+    
+                        axeTimeActivity.Title.Color = viewerForegroundColor('get');
+                        axeTimeActivity.Color = viewerAxesColor('get');
+    
+                        txtRoiList{dOffset} = ...
+                            uicontrol(uiRoiListPanel,...
+                                      'style'   , 'text',...
+                                      'string'  , atVoiInput{bb}.Label,...
+                                      'horizontalalignment', 'left',...
+                                      'position', [5 (dOffset-1)*25 aRoiListPosition(3)-35 20],...
+                                      'Enable', 'Inactive',...
+                                      'UserData', ptrPlot, ...
+                                      'ForegroundColor', atVoiInput{bb}.Color, ...
+                                      'BackgroundColor', viewerBackgroundColor('get'), ...
+                                      'ButtonDownFcn', @highlightPlotCallback...
+                                      );
+                        dOffset = dOffset+1;
+                        bFoundTag = true;
+                    end
 
                     catch
                     end
@@ -468,77 +576,182 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                 for bb=1:numel(atRoiInput)
                     if strcmp(atVoiRoiTag{aa}.Tag, atRoiInput{bb}.Tag)
                         try
-                        imCData = computeHistogram(aInputBuffer, ...
-                                                   atInputMetaData, ...
-                                                   dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), ...
-                                                   atMetaData, ...
-                                                   atRoiInput{bb}, ...
-                                                   atRoiInput, ...
-                                                   dSUVScale, ...
-                                                   bSUVUnit, ...
-                                                   bModifiedMatrix, ...
-                                                   bSegmented, ...
-                                                   bDoseKernel, ...
-                                                   bMovementApplied);
 
-                        set(axeMultiplePlot, 'XLim', [min(double(imCData),[],'all') max(double(imCData),[],'all')]);
-                        set(axeMultiplePlot, 'YLim', [0 1]);
-
-                        ptrPlot = plotCummulative(axeMultiplePlot, imCData, atRoiInput{bb}.Color);
-
-                        if dOffset==1
-                            imCumCDataMasked = imCData;
-                        else
-                            imCumCDataMasked = [imCumCDataMasked;  imCData];
-                        end
-
-                        set(axeMultiplePlot, 'XLim', [min(double(imCumCDataMasked),[],'all') max(double(imCumCDataMasked),[],'all')]);
-
-                        axeMultiplePlot.XColor = viewerForegroundColor('get');
-                        axeMultiplePlot.YColor = viewerForegroundColor('get');
-                        axeMultiplePlot.ZColor = viewerForegroundColor('get');
-
-                        if bDoseKernel == true
-                            axeMultiplePlot.XLabel.String = 'Intensity (Gy)';
-                        else
-                            if  (strcmpi(atMetaData{1}.Modality, 'pt') || ...
-                                 strcmpi(atMetaData{1}.Modality, 'nm'))&& ...
-                                 strcmpi(atMetaData{1}.Units, 'BQML' )
-
-                                if bSUVUnit == true
-                                    axeMultiplePlot.XLabel.String = sprintf('Intensity (SUV/%s)', viewerSUVtype('get'));
-                                else
-                                    axeMultiplePlot.XLabel.String = 'Intensity (BQML)';
+                        for sr=1:numel(atInputTemplate)
+                
+                            if strcmpi(sSeriesInstanceUID, atInputTemplate(sr).atDicomInfo{1}.SeriesInstanceUID) % Same series
+                              
+                                aInputBuffer = inputBuffer('get');
+    
+                                switch lower(imageOrientation('get'))
+                    
+                                    case'axial'
+                                        aInputBuffer = aInputBuffer{sr};                   
+                                        
+                                    case 'coronal'
+                                        aInputBuffer = reorientBuffer(aInputBuffer{sr}, 'coronal');
+                                        
+                                    case'sagittal'
+                                        aInputBuffer = reorientBuffer(aInputBuffer{sr}, 'sagittal');
                                 end
-                            else
-                                if  strcmpi(atMetaData{1}.Modality, 'ct')
-
-                                    axeMultiplePlot.XLabel.String = 'Intensity (HU)';
+                    
+                                if size(aInputBuffer, 3) ==1
+                    
+                                    if atInputTemplate(sr).bFlipLeftRight == true
+                                        aInputBuffer=aInputBuffer(:,end:-1:1);
+                                    end
+                    
+                                    if atInputTemplate(sr).bFlipAntPost == true
+                                        aInputBuffer=aInputBuffer(end:-1:1,:);
+                                    end            
                                 else
-                                    axeMultiplePlot.XLabel.String = 'Intensity (Count)';
+                                    if atInputTemplate(sr).bFlipLeftRight == true
+                                        aInputBuffer=aInputBuffer(:,end:-1:1,:);
+                                    end
+                    
+                                    if atInputTemplate(sr).bFlipAntPost == true
+                                        aInputBuffer=aInputBuffer(end:-1:1,:,:);
+                                    end
+                    
+                                    if atInputTemplate(sr).bFlipHeadFeet == true
+                                        aInputBuffer=aInputBuffer(:,:,end:-1:1);
+                                    end 
+                                end   
+    
+                                if isempty(dicomBuffer('get', [], sr))
+                                    dicomBuffer('set', aInputBuffer, sr);
                                 end
+    
+                                atInputMetaData = atInputTemplate(sr).atDicomInfo;
+    
+                                if isempty(dicomMetaData('get', [], sr))
+                                    dicomMetaData('set', atInputMetaData, sr)
+                                end
+    
+                                tQuant = quantificationTemplate('get', [], sr);
+                                if isfield(tQuant, 'tSUV')
+                                    dSUVScale = tQuant.tSUV.dScale;
+                                else
+                                    dSUVScale = 0;
+                                end
+    
+                                tRoiComputed = computeRoi(aInputBuffer, ...
+                                                           atInputMetaData, ...
+                                                           dicomBuffer('get', [], sr), ...
+                                                           dicomMetaData('get', [], sr), ...
+                                                           atRoiInput{bb}, ...
+                                                           dSUVScale, ...
+                                                           bSUVUnit, ...
+                                                           bModifiedMatrix, ...
+                                                           bSegmented, ...
+                                                           bDoseKernel, ...
+                                                           bMovementApplied);   
+    
+                                switch lower(sType)
+    
+                                    case 'total'
+                                        aAggregate{numel(aAggregate)+1} = tRoiComputed.total;
+                  
+                                    case 'sum'
+                                        aAggregate{numel(aAggregate)+1} = tRoiComputed.sum;
+        
+                                    case 'mean'
+                                        aAggregate{numel(aAggregate)+1} = tRoiComputed.mean;
+    
+                                    case 'max'
+                                        aAggregate{numel(aAggregate)+1} = tRoiComputed.max;
+    
+                                    case 'peak'
+                                        aAggregate{numel(aAggregate)+1} = tRoiComputed.peak;                              
+                                end
+
+                                if isempty(aTime)
+                                    aTime{1} = 0;
+                                else
+                                    aTime{numel(aTime)+1} = aTime{numel(aTime)} + atInputMetaData{1}.ActualFrameDuration/1000/60;
+                                end
+
+                                gaAcquisitionTime{numel(gaAcquisitionTime)+1} =  atInputMetaData{1}.AcquisitionTime;  
+
                             end
                         end
-                        axeMultiplePlot.YLabel.String = 'Fraction';
+    
+                        if ~isempty(aAggregate)                        
 
-                        axeMultiplePlot.Title.Color = viewerForegroundColor('get');
-                        axeMultiplePlot.Color = viewerAxesColor('get');
+                            dMinIntensity = min(cell2mat(aAggregate), [], 'all');
+                            dMaxIntensity = max(cell2mat(aAggregate), [], 'all');
 
-                        txtRoiList{dOffset} = ...
-                            uicontrol(uiRoiListPanel,...
-                                      'style'   , 'text',...
-                                      'string'  , atRoiInput{bb}.Label,...
-                                      'horizontalalignment', 'left',...
-                                      'position', [5 (dOffset-1)*25 aRoiListPosition(3)-35 20],...
-                                      'Enable', 'Inactive',...
-                                      'UserData', ptrPlot, ...
-                                      'ForegroundColor', atRoiInput{bb}.Color, ...
-                                      'BackgroundColor', viewerBackgroundColor('get'), ...
-                                      'ButtonDownFcn', @highlightPlotCallback...
-                                      );
-
-                        dOffset = dOffset+1;
-                        bFoundTag = true;
+                            if isempty(dYMin)
+                                dYMin = dMinIntensity;
+                            else
+                                if dMinIntensity < dYMin
+                                    dYMin = dMinIntensity; 
+                                end
+                            end
+        
+                            if isempty(dYMax)
+                                dYMax = dMaxIntensity;
+                            else
+                                if dMaxIntensity > dYMax
+                                    dYMax = dMaxIntensity; 
+                                end
+                            end
+        
+                            set(axeTimeActivity, 'YLim', [dYMin dYMax]);
+                            set(axeTimeActivity, 'XLim', [min(cell2mat(aTime), [], 'all') max(cell2mat(aTime), [], 'all')]);
+                            
+                            hold(axeTimeActivity, 'on');
+                            ptrPlot = plot(axeTimeActivity, cell2mat(aTime), cell2mat(aAggregate), '-o');
+                            ptrPlot.Color  = atRoiInput{bb}.Color;
+                            ptrPlot.LineWidth  = 1;
+                            hold(axeTimeActivity, 'off');
+    
+                            axeTimeActivity.XColor = viewerForegroundColor('get');
+                            axeTimeActivity.YColor = viewerForegroundColor('get');
+                            axeTimeActivity.ZColor = viewerForegroundColor('get');
+    
+                            if bDoseKernel == true
+                                axeTimeActivity.YLabel.String = 'Intensity (Gy)';
+                            else
+                                if  (strcmpi(atMetaData{1}.Modality, 'pt') || ...
+                                     strcmpi(atMetaData{1}.Modality, 'nm'))&& ...
+                                     strcmpi(atMetaData{1}.Units, 'BQML' )
+    
+                                    if bSUVUnit == true
+                                        axeTimeActivity.YLabel.String = sprintf('Intensity (SUV/%s)', viewerSUVtype('get'));
+                                    else
+                                        axeTimeActivity.YLabel.String = 'Intensity (BQML)';
+                                    end
+                                else
+                                    if  strcmpi(atMetaData{1}.Modality, 'ct')
+    
+                                        axeTimeActivity.YLabel.String = 'Intensity (HU)';
+                                    else
+                                        axeTimeActivity.YLabel.String = 'Intensity (Count)';
+                                    end
+                                end
+                            end
+                            axeTimeActivity.XLabel.String = 'Time (min)';
+    
+                            axeTimeActivity.Title.Color = viewerForegroundColor('get');
+                            axeTimeActivity.Color = viewerAxesColor('get');
+    
+                            txtRoiList{dOffset} = ...
+                                uicontrol(uiRoiListPanel,...
+                                          'style'   , 'text',...
+                                          'string'  , atRoiInput{bb}.Label,...
+                                          'horizontalalignment', 'left',...
+                                          'position', [5 (dOffset-1)*25 aRoiListPosition(3)-35 20],...
+                                          'Enable', 'Inactive',...
+                                          'UserData', ptrPlot, ...
+                                          'ForegroundColor', atRoiInput{bb}.Color, ...
+                                          'BackgroundColor', viewerBackgroundColor('get'), ...
+                                          'ButtonDownFcn', @highlightPlotCallback...
+                                          );
+    
+                            dOffset = dOffset+1;
+                            bFoundTag = true;
+                        end
 
                         catch
                         end
@@ -550,7 +763,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
         end
 
         if bFoundTag == true
-            pCursor = datacursormode(figRoiMultiplePlot);
+            pCursor = datacursormode(figRoiTimeActivity);
             pCursor.Enable = 'on';
         end
 
@@ -558,7 +771,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
             progressBar(1, 'Error:figRoiHistogram()');
         end
 
-        set(figRoiMultiplePlot, 'Pointer', 'default');
+        set(figRoiTimeActivity, 'Pointer', 'default');
         drawnow;
 
         function highlightPlotCallback(hObject, ~)
@@ -575,34 +788,34 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
         gtxtRoiList = txtRoiList;
     end
 
-    function copyMultiplePlotDisplayCallback(~, ~)
+    function copyTimeActivityDisplayCallback(~, ~)
 
         try
 
-            set(figRoiMultiplePlot, 'Pointer', 'watch');
+            set(figRoiTimeActivity, 'Pointer', 'watch');
 
 %            rdr = get(hFig,'Renderer');
-            inv = get(figRoiMultiplePlot,'InvertHardCopy');
+            inv = get(figRoiTimeActivity,'InvertHardCopy');
 
 %            set(hFig,'Renderer','Painters');
-            set(figRoiMultiplePlot,'InvertHardCopy','Off');
+            set(figRoiTimeActivity,'InvertHardCopy','Off');
 
             drawnow;
-            hgexport(figRoiMultiplePlot,'-clipboard');
+            hgexport(figRoiTimeActivity,'-clipboard');
 
 %            set(hFig,'Renderer',rdr);
-            set(figRoiMultiplePlot,'InvertHardCopy',inv);
+            set(figRoiTimeActivity,'InvertHardCopy',inv);
         catch
         end
 
-        set(figRoiMultiplePlot, 'Pointer', 'default');
+        set(figRoiTimeActivity, 'Pointer', 'default');
     end
 
-    function exportCurrentMultiplePlotCallback(~, ~)
+    function exportCurrentTimeActivityCallback(~, ~)
 
-        tInput = inputTemplate('get');
+        atInputTemplate = inputTemplate('get');
         iOffset = get(uiSeriesPtr('get'), 'Value');
-        if iOffset > numel(tInput)
+        if iOffset > numel(atInputTemplate)
             return;
         end
 
@@ -625,28 +838,28 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
         if size(aInputBuffer, 3) ==1
 
-            if tInput(iOffset).bFlipLeftRight == true
+            if atInputTemplate(iOffset).bFlipLeftRight == true
                 aInputBuffer=aInputBuffer(:,end:-1:1);
             end
 
-            if tInput(iOffset).bFlipAntPost == true
+            if atInputTemplate(iOffset).bFlipAntPost == true
                 aInputBuffer=aInputBuffer(end:-1:1,:);
             end
         else
-            if tInput(iOffset).bFlipLeftRight == true
+            if atInputTemplate(iOffset).bFlipLeftRight == true
                 aInputBuffer=aInputBuffer(:,end:-1:1,:);
             end
 
-            if tInput(iOffset).bFlipAntPost == true
+            if atInputTemplate(iOffset).bFlipAntPost == true
                 aInputBuffer=aInputBuffer(end:-1:1,:,:);
             end
 
-            if tInput(iOffset).bFlipHeadFeet == true
+            if atInputTemplate(iOffset).bFlipHeadFeet == true
                 aInputBuffer=aInputBuffer(:,:,end:-1:1);
             end
         end
 
-        atInputMetaData = tInput(iOffset).atDicomInfo;
+        atInputMetaData = atInputTemplate(iOffset).atDicomInfo;
 
         try
             matlab.io.internal.getExcelInstance;
@@ -682,14 +895,14 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
             sSeriesDate = datetime(sSeriesDate,'InputFormat','yyyyMMdd');
         end
 
-        [file, path] = uiputfile(filter, 'Save Histogram Result', sprintf('%s/%s_%s_%s_%s_MULTI_CUMULATIVE_DVH_TriDFusion.csv' , ...
+        [file, path] = uiputfile(filter, 'Save Histogram Result', sprintf('%s/%s_%s_%s_%s_TIME_ACTIVITY_TriDFusion.csv' , ...
             sCurrentDir, cleanString(info{1}.PatientName), cleanString(info{1}.PatientID), cleanString(info{1}.SeriesDescription), sSeriesDate) );
 
         if file ~= 0
 
             try
 
-            set(figRoiMultiplePlot, 'Pointer', 'watch');
+            set(figRoiTimeActivity, 'Pointer', 'watch');
             drawnow;
 
             try
@@ -804,7 +1017,8 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
             asVoiRoiHeader{5} = sprintf('Series Date, %s'       , atMetaData{1}.SeriesDate);
             asVoiRoiHeader{6} = sprintf('Series Time, %s'       , atMetaData{1}.SeriesTime);
             asVoiRoiHeader{7} = sprintf('Unit, %s'              , sUnits);
-            asVoiRoiHeader{8} = (' ');
+            asVoiRoiHeader{8} = sprintf('Aggregate, %s'         , sType);
+            asVoiRoiHeader{9} = (' ');
 
             if bSimplified == true
 
@@ -845,7 +1059,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
                 dLineOffset = dLineOffset+1;
 
-                bMovementApplied = tInput(iOffset).tMovement.bMovementApplied;
+                bMovementApplied = atInputTemplate(iOffset).tMovement.bMovementApplied;
 
                 for rt=1:numel(atVoiRoiTag)
 
@@ -960,7 +1174,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                     asCell{dLineOffset,tt}  = (' ');
                 end
 
-                bMovementApplied = tInput(iOffset).tMovement.bMovementApplied;
+                bMovementApplied = atInputTemplate(iOffset).tMovement.bMovementApplied;
 
                 dLineOffset = dLineOffset+1;
 
@@ -1192,36 +1406,38 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
                 dLineOffset = dLineOffset+1;
 
-                % XYData
-
-                asCell{dLineOffset,1}    = ('XData');
-                asCell{dLineOffset+1,1}  = ('YData');
-
-                dNbElements = numel(ptrPlotCummulative.XData);
-                if dNbElements >= 20
-                    asCell{dLineOffset,2}  = (ptrPlotCummulative.XData(1));
-                    asCell{dLineOffset,21} = (ptrPlotCummulative.XData(end));
-
-                    asCell{dLineOffset+1,2}  = (ptrPlotCummulative.YData(1));
-                    asCell{dLineOffset+1,21} = (ptrPlotCummulative.YData(end));
-
-                    dOffsetValue = dNbElements/20;
-                    for jj=2:19
-                        asCell{dLineOffset  ,jj+1} =  (ptrPlotCummulative.XData(round(jj*dOffsetValue)));
-                        asCell{dLineOffset+1,jj+1} =  (ptrPlotCummulative.YData(round(jj*dOffsetValue)));
+                asCell{dLineOffset,1} = ('Acquisition Time');
+                for tt=1:numel(gaAcquisitionTime)
+                    try
+                    if contains(gaAcquisitionTime{tt},'.')                                      
+                        sAcquisitionTime = extractBefore(gaAcquisitionTime{tt},'.');
+                    else
+                        sAcquisitionTime = gaAcquisitionTime{tt};
                     end
-                else
-                    for kk=1:dNbElements
-                        asCell{dLineOffset  ,kk+1} =  (ptrPlotCummulative.XData(kk));
-                        asCell{dLineOffset+1,kk+1} =  (ptrPlotCummulative.YData(kk));
-                    end
-
-                    for bb=dNbElements:21
-                        asCell{dLineOffset  , bb+1} =  (' ');
-                        asCell{dLineOffset+1, bb+1} =  (' ');
+                    asCell{dLineOffset  ,tt+1} =  (char(datetime(sAcquisitionTime, 'InputFormat', 'HHmmss', 'Format', 'HH:mm:ss')));
+                    catch
                     end
                 end
+               
+                dLineOffset = dLineOffset+1;
 
+                % XYData
+
+                asCell{dLineOffset,1}    = ('XData (Time)');
+                asCell{dLineOffset+1,1}  = ('YData (Intensity)');
+
+                dNbElements = numel(ptrPlotCummulative.XData);
+
+                for kk=1:dNbElements
+                    asCell{dLineOffset  ,kk+1} =  (ptrPlotCummulative.XData(kk));
+                    asCell{dLineOffset+1,kk+1} =  (ptrPlotCummulative.YData(kk));
+                end
+
+                for bb=dNbElements:21
+                    asCell{dLineOffset  , bb+1} =  (' ');
+                    asCell{dLineOffset+1, bb+1} =  (' ');
+                end
+                
                 dLineOffset = dLineOffset+2;
 
                 % Blank line
@@ -1239,8 +1455,8 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
                 % XYLimits
 
-                asCell{dLineOffset  ,1}  = ('XLimits');
-                asCell{dLineOffset+1,1}  = ('YLimits');
+                asCell{dLineOffset  ,1}  = ('XLimits (Time)');
+                asCell{dLineOffset+1,1}  = ('YLimits (Intensity)');
 
                 asCell{dLineOffset,  2}  = (ptrPlotCummulative.Parent.XLim(1));
                 asCell{dLineOffset+1,2}  = (ptrPlotCummulative.Parent.YLim(1));
@@ -1261,13 +1477,13 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
             progressBar(1, sprintf('Write %s%s completed', path, file));
 
            catch
-               progressBar(1, 'Error: exportCurrentMultiplePlotCallback()');
+               progressBar(1, 'Error: exportCurrentTimeActivityCallback()');
             end
 
             clear aDisplayBuffer;
             clear aInput;
 
-            set(figRoiMultiplePlot, 'Pointer', 'default');
+            set(figRoiTimeActivity, 'Pointer', 'default');
             drawnow;
         end
 

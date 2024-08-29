@@ -177,6 +177,7 @@ function initViewerGlobal()
     viewRoiPanel   ('set', false);
 
     is2DBrush('set', false);
+    is2DScissor('set', false);
 
     optionsPanelMenuObject   ('set', []);
     viewRoiObject            ('set', []);

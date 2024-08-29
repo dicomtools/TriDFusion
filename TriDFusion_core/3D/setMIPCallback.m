@@ -480,7 +480,11 @@ end
 %                if (strcmpi(atMetaData{1}.Modality, 'nm') || ...
 %                    strcmpi(atMetaData{1}.Modality, 'pt')) 
 %                else        
-                    colorMapMipOffset('set', colorMapOffset('get')); %  % Set 3D Mip from 2D
+                if  colorMapOffset('get') == 10 % Gray
+                    colorMapMipOffset('set', 11); % Invert Linear
+                else
+                    colorMapMipOffset('set', colorMapOffset('get')); % Set 3D Mip from 2D
+                end
 %                end
 
                 mipObj = initVolShow(squeeze(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'))), uiOneWindowPtr('get'), 'MaximumIntensityProjection', atMetaData);

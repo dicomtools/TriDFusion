@@ -200,17 +200,18 @@ function setMathCallback(~, ~)
     function lbMathWindowCallback(~, ~)
 
         aAlphabet = 'abcdefghijklmnopqrstuvwxyz';
-        if numel(seriesDescription('get')) > numel(aAlphabet)
-            progressBar(1, sprintf('Error:lbMathWindowCallback() only support up to %d series!', numel(aAlphabet)));
-            delete(dlgMathematic);
-            return;
-        end
+%          if numel(adLbOffset) > 72
+%              progressBar(1, sprintf('Error:lbMathWindowCallback() only support up to %d series!', 72));
+%              delete(dlgMathematic);
+%              return;
+%          end
 
         adLbOffset = get(lbMathWindow,  'Value');
         asLbString = get(lbMathWindow,  'String');
         asSeriesString = seriesDescription('get');
 
         if numel(adLbOffset) > numel(asLbString) || ...
+           numel(adLbOffset) > numel(aAlphabet)  || ...    
            isempty(seriesDescription('get'))
             return;
         end
@@ -365,6 +366,7 @@ function setMathCallback(~, ~)
             cLetter = sLbString(1);
 
             switch(cLetter)
+
                 case 'a'; a=double(aBuffer);
                 case 'b'; b=double(aBuffer);
                 case 'c'; c=double(aBuffer);
@@ -391,6 +393,7 @@ function setMathCallback(~, ~)
                 case 'x'; x=double(aBuffer);
                 case 'y'; y=double(aBuffer);
                 case 'z'; z=double(aBuffer);
+
                 otherwise
                     progressBar(1,'Error:executeMathCallback() Associated set serie cant be found!');
                     break;
@@ -466,6 +469,7 @@ function setMathCallback(~, ~)
                             case 'x'; aBuffer = double(x);
                             case 'y'; aBuffer = double(y);
                             case 'z'; aBuffer = double(z);
+                              
                         otherwise
                             progressBar(1,'Error:executeMathCallback() Associated result serie cant be found!');
                             break;
@@ -483,11 +487,14 @@ function setMathCallback(~, ~)
 
                         aBuffer(aLogicalMask==0) = aBufferInit(aLogicalMask==0);                                                
                         
-                        dicomBuffer('set', aBuffer);
+                        dicomBuffer('set', aBuffer, dCurOffset);
+                        if size(aBuffer, 3) ~=1
+                            mipBuffer('set', computeMIP(aBuffer), dCurOffset);
+                        end
 
                         if get(chkMathSeriesDescription, 'Value') == true
 
-                            atMetaData = dicomMetaData('get');
+                            atMetaData = dicomMetaData('get', [], dCurOffset);
                             if isempty(atMetaData)
                                 atMetaData = tInput(dCurOffset).atDicomInfo;
                             end
@@ -499,7 +506,7 @@ function setMathCallback(~, ~)
                             asDescription{dCurOffset} = sprintf('MATH %s', asDescription{dCurOffset});
 
                             seriesDescription('set', asDescription);
-                            dicomMetaData('set', atMetaData);
+                            dicomMetaData('set', atMetaData, dCurOffset);
                         end
 
                         updateDescription('set', get(chkMathSeriesDescription, 'Value'));

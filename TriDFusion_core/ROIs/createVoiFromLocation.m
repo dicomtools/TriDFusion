@@ -63,6 +63,9 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
 
     aBuffer(aLogicalMask==0) = min(aBuffer, [], 'all'); % Apply constraint
 
+    % Define the size of the neighborhood
+    neighborhoodSize = 2; % 1 for 3x3, 2 for 5x5, etc.
+
     switch (pAxe)
 
         case axePtr('get', [], dSeriesOffset) % 2D
@@ -79,54 +82,128 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
 
             iCoronal = sliceNumber('get', 'coronal');
     
+%             if bRelativeToMax == true
+%                 dValue = aBuffer(iCoronal,ptX,ptY) * dMaxTreshold;
+%             else
+%                 dValue = aBuffer(iCoronal,ptX,ptY) * dMinTreshold;
+%             end
+% 
+%             aSlice = permute(aBuffer(iCoronal,:,:), [3 2 1]) ;
+            % Get the size of the buffer
+            [~, cols, slices] = size(aBuffer);
+            
+            % Determine the indices of the neighborhood in the coronal slice
+            minX = max(ptX - neighborhoodSize, 1);
+            maxX = min(ptX + neighborhoodSize, cols);
+            minZ = max(ptY - neighborhoodSize, 1);
+            maxZ = min(ptY + neighborhoodSize, slices);
+            
+            % Extract the neighborhood
+            neighborhood = aBuffer(iCoronal, minX:maxX, minZ:maxZ);
+            
+            % Calculate the threshold value based on the neighborhood
             if bRelativeToMax == true
-                dValue = aBuffer(iCoronal,ptX,ptY) * dMaxTreshold;
+                dValue = max(neighborhood(:)) * dMaxTreshold;
             else
-                dValue = aBuffer(iCoronal,ptX,ptY) * dMinTreshold;
+                dValue = max(neighborhood(:)) * dMinTreshold;
             end
-
-            aSlice = permute(aBuffer(iCoronal,:,:), [3 2 1]) ;
+            
+            aSlice = permute(aBuffer(iCoronal, :, :), [3 2 1]);
 
         case axes2Ptr('get', [], dSeriesOffset) % Sagittal
 
             iSagittal = sliceNumber('get', 'sagittal');
     
+%             if bRelativeToMax == true
+%                 dValue = aBuffer(ptX,iSagittal,ptY) * dMaxTreshold;
+%             else
+%                 dValue = aBuffer(ptX,iSagittal,ptY) * dMinTreshold;
+%             end
+% 
+%             aSlice = permute(aBuffer(:,iSagittal,:), [3 1 2]) ;
+            
+            
+            % Get the size of the buffer
+            [rows, ~, slices] = size(aBuffer);
+            
+            % Determine the indices of the neighborhood in the sagittal slice
+            minY = max(ptX - neighborhoodSize, 1);
+            maxY = min(ptX + neighborhoodSize, rows);
+            minZ = max(ptY - neighborhoodSize, 1);
+            maxZ = min(ptY + neighborhoodSize, slices);
+            
+            % Extract the neighborhood
+            neighborhood = aBuffer(minY:maxY, iSagittal, minZ:maxZ);
+            
+            % Calculate the threshold value based on the neighborhood
             if bRelativeToMax == true
-                dValue = aBuffer(ptX,iSagittal,ptY) * dMaxTreshold;
+                dValue = max(neighborhood(:)) * dMaxTreshold;
             else
-                dValue = aBuffer(ptX,iSagittal,ptY) * dMinTreshold;
+                dValue = max(neighborhood(:)) * dMinTreshold;
             end
-
-            aSlice = permute(aBuffer(:,iSagittal,:), [3 1 2]) ;
-
+            
+            aSlice = permute(aBuffer(:, iSagittal, :), [3 1 2]);
         case axes3Ptr('get', [], dSeriesOffset) % Axial
 
             iAxial = sliceNumber('get', 'axial');
-    
+% 
+%             if bRelativeToMax == true
+%                 dValue = aBuffer(ptY,ptX,iAxial) * dMaxTreshold;
+%             else
+%                 dValue = aBuffer(ptY,ptX,iAxial) * dMinTreshold;
+%             end
+%             
+%             aSlice = aBuffer(:, :, iAxial);
+
+            
+            % Get the size of the buffer
+            [rows, cols, ~] = size(aBuffer);
+
+        
+            % Determine the indices of the neighborhood
+            minY = max(ptY - neighborhoodSize, 1);
+            maxY = min(ptY + neighborhoodSize, rows);
+            minX = max(ptX - neighborhoodSize, 1);
+            maxX = min(ptX + neighborhoodSize, cols);
+            
+            % Extract the neighborhood
+            neighborhood = aBuffer(minY:maxY, minX:maxX, iAxial);
+
+            % Calculate the mean value of the neighborhood
             if bRelativeToMax == true
-                dValue = aBuffer(ptY,ptX,iAxial) * dMaxTreshold;
+                dValue = max(neighborhood(:)) * dMaxTreshold;
             else
-                dValue = aBuffer(ptY,ptX,iAxial) * dMinTreshold;
+                dValue = max(neighborhood(:)) * dMinTreshold;
             end
 
             aSlice = aBuffer(:, :, iAxial);
 
     end
 
+    dImageMax = max(aBuffer, [], 'all');
 
-    dPreSeg = max(aBuffer, [], 'all') * 0.15;
+    dValueRatio = dValue / dImageMax;
+%     dScalingFactor = 177.75; 
+    dScalingFactor = 20; 
+
+       dPreSeg = max(aBuffer, [], 'all') * clickVoiPreSegmentationValue('get') / 100;
+
+%     dPreSeg = max(aBuffer, [], 'all') * dValueRatio * dScalingFactor / 100;
+
+%     dPreSeg = graythresh(aBuffer) * max(aBuffer, [], 'all');
 %     if dValue < dPreSeg
 %         dPreSeg = dValue;
 %     end
 
-    aSlice(aSlice<=dPreSeg) = 0;
-    aSlice(aSlice~=0) =1; 
+     aSlice(aSlice<=dPreSeg) = 0;
+     aSlice(aSlice~=0) =1; 
 
-    boundary = bwboundaries(aSlice, 8, 'noholes');
+     boundary = bwboundaries(imbinarize(aSlice), 8, 'noholes');
+%     boundary = bwboundaries(imbinarize(aSlice,graythresh(aSlice)), 8, 'noholes');
 
     if ~isempty(boundary)
 
-        aBuffer(aBuffer<=dPreSeg)=0;
+        aBuffer(aBuffer<=dPreSeg)=min(aBuffer, [], 'all');
 
         bBreak = false;
 
@@ -153,11 +230,11 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
             inBoundary = inpolygon(ptX, ptY, boundary{jj}(:, 2), boundary{jj}(:, 1));
 
             if inBoundary
-
+% 
                 aBuffer(aBuffer<=dValue)=0;
                 aBuffer(aBuffer~=0) =1;     
 
-                boundary3D = bwconncomp(aBuffer, 26);
+                boundary3D = bwconncomp(imbinarize(aBuffer), 6);
                 switch (pAxe)
                     case axePtr('get', [], dSeriesOffset) % 2D
                          linearIndex = sub2ind(size(aBuffer), ptX, ptY, 1);
@@ -226,7 +303,9 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
                             % Get the subscripts corresponding to the current uniqueZ value
                             currZ = uniqueZ(i);
 
-                            progressBar(i/numel(uniqueZ), sprintf('Processing mask slice %d/%d', i, numel(uniqueZ) ) );      
+                            if numel(uniqueZ) > 25
+                                progressBar(i/numel(uniqueZ), sprintf('Processing mask slice %d/%d', i, numel(uniqueZ) ) );      
+                            end
 
                             switch (pAxe)
                                case axePtr('get', [], dSeriesOffset) % 2D
@@ -262,7 +341,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
                                 if cancelCreateVoiRoiPanel('get') == true
                                     break;
                                 end
-
+                                
                                 aPosition = B{ii};
                                 aPosition = flip(aPosition, 2);
 
@@ -332,13 +411,13 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
 
         switch (pAxe)
 
-           case axes1Ptr('get', [], dSeriesOffset) % Axial
+            case axes1Ptr('get', [], dSeriesOffset) % Axial
                 sliceNumber('set', 'coronal', iCoronal);
 
-           case axes2Ptr('get', [], dSeriesOffset) % Axial
+            case axes2Ptr('get', [], dSeriesOffset) % Axial
                 sliceNumber('set', 'sagittal', iSagittal);
 
-           case axes3Ptr('get', [], dSeriesOffset) % Axial
+            case axes3Ptr('get', [], dSeriesOffset) % Axial
                 sliceNumber('set', 'axial', iAxial);
         end
 

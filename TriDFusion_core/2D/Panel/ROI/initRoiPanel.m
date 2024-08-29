@@ -36,7 +36,7 @@ function initRoiPanel()
          uicontrol(uiRoiPanelPtr('get'),...
                   'String'  ,'Report',...
                   'FontWeight', 'bold',...
-                  'Position',[160 645 100 25],...
+                  'Position',[160 670 100 25],...
                   'Enable'  , 'On', ...
                   'BackgroundColor', [0.75 0.75 0.75], ...
                   'ForegroundColor', [0.1 0.1 0.1], ...
@@ -52,14 +52,14 @@ function initRoiPanel()
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [15 620 200 20]...
+                  'position', [15 645 200 20]...
                   );                
               
               
      uiDeleteVoiRoiPanel = ...
          uicontrol(uiRoiPanelPtr('get'), ...
                   'Style'   , 'popup', ...
-                  'Position', [15 595 245 25], ...
+                  'Position', [15 620 245 25], ...
                   'String'  , ' ', ...
                   'Value'   , 1,...
                   'Enable'  , 'Off', ...
@@ -72,7 +72,7 @@ function initRoiPanel()
     uiLesionTypeVoiRoiPanel = ...
          uicontrol(uiRoiPanelPtr('get'), ...
                   'Style'   , 'popup', ...
-                  'Position', [15 565 245 25], ...
+                  'Position', [15 590 245 25], ...
                   'String'  , ' ', ...
                   'Value'   , 1,...
                   'Enable'  , 'Off', ...
@@ -86,7 +86,7 @@ function initRoiPanel()
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'pushbutton',...
                   'String'  ,'Add',...
-                  'Position',[15 535 32 25],...
+                  'Position',[15 560 32 25],...
                   'Enable'  , 'Off', ...
                   'BackgroundColor', [0.5300 0.6300 0.4000], ...
                   'ForegroundColor', [0.1 0.1 0.1], ...
@@ -98,7 +98,7 @@ function initRoiPanel()
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'pushbutton',...
                   'String'  ,'Previous',...
-                  'Position',[48 535 75 25],...
+                  'Position',[48 560 75 25],...
                   'Enable'  , 'Off', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
@@ -110,7 +110,7 @@ function initRoiPanel()
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'pushbutton',...
                   'String'  ,'Delete',...
-                  'Position',[124 535 60 25],...
+                  'Position',[124 560 60 25],...
                   'Enable'  , 'Off', ...
                   'BackgroundColor', [0.2 0.039 0.027], ...
                   'ForegroundColor', [0.94 0.94 0.94], ...
@@ -122,7 +122,7 @@ function initRoiPanel()
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'pushbutton',...
                   'String'  ,'Next',...
-                  'Position',[185 535 75 25],...
+                  'Position',[185 560 75 25],...
                   'Enable'  , 'Off', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
@@ -139,7 +139,7 @@ function initRoiPanel()
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [15 495 200 20]...
+                  'position', [15 520 200 20]...
                   );
 
     % Roi Face Alpha
@@ -151,13 +151,13 @@ function initRoiPanel()
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [15 475 200 20]...
+                  'position', [15 500 200 20]...
                   );
 
     uiSliderRoisFaceAlphaRoiPanel = ...
         uicontrol(uiRoiPanelPtr('get'), ...
                   'Style'   , 'Slider', ...
-                  'Position', [15 455 245 20], ...
+                  'Position', [15 480 245 20], ...
                   'Value'   , roiFaceAlphaValue('get'), ...
                   'Enable'  , 'on', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -172,7 +172,30 @@ function initRoiPanel()
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'text',...
                   'FontWeight', 'normal',...
-                  'string'  , 'Sphere Diameter (mm)',...
+                  'string'  , 'Draw Sphere Diameter (mm)',...
+                  'horizontalalignment', 'left',...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'position', [15 442 200 20]...
+                  );
+
+         uicontrol(uiRoiPanelPtr('get'),...
+                  'enable'    , 'on',...
+                  'style'     , 'edit',...
+                  'Background', 'white',...
+                  'string'    , num2str(sphereDefaultDiameter('get')),...
+                  'BackgroundColor', viewerBackgroundColor('get'), ...
+                  'ForegroundColor', viewerForegroundColor('get'), ...
+                  'position'  , [195 445 65 20],...
+                  'Callback', @edtSphereDiameterCallback...
+                  );
+
+    % Click VOI pre-segmentation (%)
+
+        uicontrol(uiRoiPanelPtr('get'),...
+                  'style'   , 'text',...
+                  'FontWeight', 'normal',...
+                  'string'  , 'Click VOI Sensibility (%)',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
@@ -183,11 +206,11 @@ function initRoiPanel()
                   'enable'    , 'on',...
                   'style'     , 'edit',...
                   'Background', 'white',...
-                  'string'    , num2str(sphereDefaultDiameter('get')),...
+                  'string'    , num2str(clickVoiPreSegmentationValue('get')),...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'position'  , [195 420 65 20],...
-                  'Callback', @edtSphereDiameterCallback...
+                  'Callback', @edtClickVoiPreSegmentationCallback...
                   );
 
     % Contour segmentation
@@ -660,7 +683,7 @@ function initRoiPanel()
 
     
     function addVoiRoiPanelCallback(~, ~)
-         
+
 %        triangulateCallback()
         
         dSerieOffset = get(uiSeriesPtr('get'), 'Value');
@@ -768,6 +791,8 @@ function initRoiPanel()
 
     function previousVoiRoiPanelCallback(~, ~)
 
+        sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
+
         atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
         dNbVOIs = numel(atVoiInput);
 
@@ -859,13 +884,15 @@ function initRoiPanel()
             set(uiNextVoiRoiPanel, 'Enable', 'on');
             set(uiDelVoiRoiPanel , 'Enable', 'on');
 
-            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
             drawnow;             
         end
 
     end
 
     function nextVoiRoiPanelCallback(~, ~)
+
+        sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
 
         atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
         dNbVOIs = numel(atVoiInput);
@@ -882,7 +909,8 @@ function initRoiPanel()
             set(uiNextVoiRoiPanel, 'Enable', 'off');
             set(uiDelVoiRoiPanel , 'Enable', 'off');
 
-            setCrossVisibility(false);                    
+            setCrossVisibility(false);   
+
 
             set(fiMainWindowPtr('get'), 'Pointer', 'watch');
             drawnow;
@@ -955,13 +983,15 @@ function initRoiPanel()
             set(uiNextVoiRoiPanel, 'Enable', 'on');
             set(uiDelVoiRoiPanel , 'Enable', 'on');
 
-            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
             drawnow;            
         end
 
     end
 
     function deleteVoiRoiPanelCallback(~, ~)
+
+        sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
 
         dSerieOffset = get(uiSeriesPtr('get'), 'Value');
         
@@ -1118,7 +1148,7 @@ function initRoiPanel()
                 set(uiDelVoiRoiPanel , 'Enable', 'on');
             end
 
-            set(fiMainWindowPtr('get'), 'Pointer', 'default');
+            set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
             drawnow;
         end
     end
@@ -1126,6 +1156,8 @@ function initRoiPanel()
     function sliderRoisFaceAlphaRoiPanelCallback(~, ~)
 
         try
+
+        sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
 
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
@@ -1151,7 +1183,7 @@ function initRoiPanel()
             progressBar(1, 'Error:sliderRoisFaceAlphaRoiPanelCallback()');
         end
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
         drawnow;
     end
 
@@ -1168,12 +1200,31 @@ function initRoiPanel()
 
     end
 
+    function edtClickVoiPreSegmentationCallback(hObject, ~)
+
+        dPreSegmentationValue = str2double(get(hObject, 'String'));
+
+        if dPreSegmentationValue > 100  
+            dPreSegmentationValue = 100;
+            set(hObject, 'String', 100);
+        elseif dPreSegmentationValue <= 0 
+            dPreSegmentationValue = 1;
+            set(hObject, 'String', 1);            
+        end
+
+        clickVoiPreSegmentationValue('set', dPreSegmentationValue);
+
+    end
+
     function btnUnitTypeRoiPanelCallback(~, ~)
+
+        sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
 
         aBuffer = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
         if isempty(aBuffer)
             return;
         end
+
 
         try
 
@@ -1238,11 +1289,13 @@ function initRoiPanel()
             progressBar(1, 'Error:btnUnitTypeRoiPanelCallback()');
         end
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
         drawnow;
     end
 
     function chkUseCTRoiPanelCallback(hObject, ~)
+
+        sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
 
         aBuffer = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
         if isempty(aBuffer)
@@ -1344,13 +1397,15 @@ function initRoiPanel()
             progressBar(1, 'Error:chkUseCTRoiPanelCallback()');
         end
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
         drawnow;      
     end
 
     function chkHolesRoiPanelCallback(hObject, ~)
 
         try
+
+        sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
 
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
@@ -1376,13 +1431,15 @@ function initRoiPanel()
             progressBar(1, 'Error:chkHolesRoiPanelCallback()');
         end
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
         drawnow; 
     end
 
     function chkPixelEdgeCallback(hObject, ~)
 
         try
+
+        sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
 
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
@@ -1402,13 +1459,15 @@ function initRoiPanel()
             progressBar(1, 'Error:chkPixelEdgeCallback()');
         end
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
         drawnow;        
     end
 
     function chkMultipleObjectsRoiPanelCallback(hObject, ~)
 
         try
+
+        sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
 
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
@@ -1434,13 +1493,15 @@ function initRoiPanel()
             progressBar(1, 'Error:chkMultipleObjectsRoiPanelCallback()');
         end
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
         drawnow; 
     end
 
     function edtSmalestRegionCallback(hObject, ~)
 
         try
+
+        sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
 
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
@@ -1466,7 +1527,7 @@ function initRoiPanel()
             progressBar(1, 'Error:edtSmalestRegionCallback()');
         end
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
         drawnow;         
       
     end
@@ -1475,6 +1536,8 @@ function initRoiPanel()
     function sliderMaxTresholdRoiPanelCallback(~, hEvent)
 
         try
+
+        sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
 
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
@@ -1545,13 +1608,15 @@ function initRoiPanel()
             progressBar(1, 'Error:sliderMaxTresholdRoiPanelCallback()');
         end
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
         drawnow;         
     end
 
     function editMaxTresholdRoiPanelCallback(hObject, ~)
 
         try
+
+        sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
 
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
@@ -1650,13 +1715,15 @@ function initRoiPanel()
             progressBar(1, 'Error:editMaxTresholdRoiPanelCallback()');
         end
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
         drawnow;        
     end
 
     function sliderMinTresholdRoiPanelCallback(~, hEvent)
 
         try
+
+        sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
 
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
@@ -1735,13 +1802,15 @@ function initRoiPanel()
             progressBar(1, 'Error:sliderMinTresholdRoiPanelCallback()');
         end
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
         drawnow;
     end
 
     function editMinTresholdRoiPanelCallback(hObject, ~)
 
         try
+
+        sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
 
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
@@ -1840,11 +1909,13 @@ function initRoiPanel()
             progressBar(1, 'Error:editMinTresholdRoiPanelCallback()');
         end
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
         drawnow;        
     end
 
     function chkRelativeToMaxRoiPanelCallback(hObject, ~)
+
+        sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
 
         aBuffer = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
         if isempty(aBuffer)
@@ -1944,13 +2015,15 @@ function initRoiPanel()
             progressBar(1, 'Error:chkRelativeToMaxRoiPanelCallback()');
         end
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
         drawnow;
 
     end
 
     function chkInPercentRoiPanelCallback(hObject, ~)
         
+        sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
+
         aBuffer = dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
         if isempty(aBuffer)
             return;
@@ -2084,7 +2157,7 @@ function initRoiPanel()
             progressBar(1, 'Error:chkInPercentRoiPanelCallback()');
         end
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
         drawnow;
 
 %        uiSliderMaxTresholdRoiListener = addlistener(uiSliderMaxTresholdRoiPanel, 'Value', 'PreSet', @sliderMaxTresholdRoiPanelCallback);
@@ -2475,6 +2548,8 @@ function initRoiPanel()
 
         try
 
+        sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
+
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
 
@@ -2650,40 +2725,40 @@ function initRoiPanel()
 
                             cropMenu(pRoi);
                             
-                            voiMenu(pRoi);
+%                             voiMenu(pRoi);
 
                             uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
 %                             asTag{numel(asTag)+1} = sTag;
-                            asTag{jj} = sTag;
+%                             asTag{jj} = sTag;
                        end
 
                         drawnow limitrate;
                     end
 
-                    asTag(cellfun(@isempty, asTag)) = [];
-
-                    if ~isempty(asTag)
-
-                        if bInPercent == true
-                            dMinValue = dSliderMin*100;
-                            dMaxValue = dSliderMax*100;
-                        else
-                            dMinValue = dMinTreshold;
-                            dMaxValue = dMaxTreshold;
-                        end
-
-                        if bRelativeToMax == true
-                            sLabel = sprintf('RMAX-%d', dMaxValue);
-                        else
-                            sLabel = sprintf('MIN-MAX-%d-%d-%d', dMinValue, dMaxValue);
-                        end
-
-                        createVoiFromRois(dSerieOffset, asTag, sLabel, aColor, 'Unspecified');
-
-                    end
-                    
-                    setVoiRoiSegPopup();
+%                     asTag(cellfun(@isempty, asTag)) = [];
+% 
+%                     if ~isempty(asTag)
+% 
+%                         if bInPercent == true
+%                             dMinValue = dSliderMin*100;
+%                             dMaxValue = dSliderMax*100;
+%                         else
+%                             dMinValue = dMinTreshold;
+%                             dMaxValue = dMaxTreshold;
+%                         end
+% 
+%                         if bRelativeToMax == true
+%                             sLabel = sprintf('RMAX-%d', dMaxValue);
+%                         else
+%                             sLabel = sprintf('MIN-MAX-%d-%d-%d', dMinValue, dMaxValue);
+%                         end
+% 
+%                         createVoiFromRois(dSerieOffset, asTag, sLabel, aColor, 'Unspecified');
+% 
+%                     end
+%                     
+%                     setVoiRoiSegPopup();
         
                     refreshImages();
         
@@ -2981,7 +3056,7 @@ function initRoiPanel()
 
         clear aBuffer;
 
-        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
         drawnow;
 
     end

@@ -305,7 +305,8 @@ function setMachineLearningPSMALu177SPECTCTFullAICallback(hObject, ~)
         tPSMALu177SPECTCTFullAI.options.classifySegmentation =            get(chkPSMALu177SPECTCTFullAIClassifySegmentation, 'Value');
         tPSMALu177SPECTCTFullAI.options.smoothMask           =            get(chkPSMALu177SPECTCTFullAISmoothMask, 'Value');
         tPSMALu177SPECTCTFullAI.options.smallestVoiValue     = str2double(get(edtPSMALu177SPECTCTFullAISmallestVoiValue , 'String'));
-
+        tPSMALu177SPECTCTFullAI.options.pixelEdge            =            get(chkPSMALu177SPECTCTFullAIPixelEdge, 'Value');
+        
         delete(dlgPSMALu177SPECTCTFullAISegmentation);
 
         setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPECTCTFullAI); 

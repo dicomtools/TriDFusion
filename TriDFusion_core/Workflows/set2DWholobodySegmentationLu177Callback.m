@@ -338,7 +338,7 @@ function set2DWholobodySegmentationLu177Callback(hObject, ~)
         end
     end
 
-    if 1
+    if 0
     % exportResultToExcel
 
     if ~isempty(atRoiInput)
