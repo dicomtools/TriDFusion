@@ -281,6 +281,10 @@ function processWorkflow(sWorkflowName)
         case 'setmachinelearningpsmalu177spectctfullaicallback' % setMachineLearningPSMALu177SPECTCTFullAICallback.m
 
             setMachineLearningPSMALu177SPECTCTFullAICallback();
+
+        case 'machinelearningctfaceanonymizationcallback' % machineLearningCTFaceAnonymizationCallback.m
+
+            machineLearningCTFaceAnonymizationCallback();
     end
 
 end

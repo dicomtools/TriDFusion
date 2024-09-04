@@ -862,7 +862,50 @@ function refreshImages(clickedPtX, clickedPtY)
                     if isCoronal || isSagittal || isAxial
     
                         currentRoi.Object.Visible = 'on';
-                        
+
+%                         roiPosition = currentRoi.Position;
+%                         coronalX = roiPosition(:, 1); % X coordinates
+%                         coronalY = roiPosition(:, 2); % Y coordinates
+%                         
+%                         % Define rotation angle in degrees
+%                         rotationAngle =  (iMipAngle - 1) * 11.25; % Example angle; adjust as needed
+% 
+%             iSagittalSize = aBufferSize(2);
+%             iCoronalSize  = aBufferSize(1);
+%             iAxialSize    = aBufferSize(3);                        
+% % Convert angle to radians
+% theta = deg2rad(rotationAngle);
+% 
+% % Compute rotation matrix
+% R = [cos(theta) -sin(theta); sin(theta) cos(theta)];
+% 
+% % Calculate the center of the ROI coordinates
+% centerX = mean(coronalX);
+% centerY = mean(coronalY);
+% 
+% % Shift coordinates to center around origin
+% centeredX = coronalX - centerX;
+% centeredY = coronalY - centerY;
+% 
+% % Apply rotation to the centered coordinates
+% % Rotate coordinates around the origin
+% rotatedCenteredCoords = (R * [centeredX'; centeredY'])';
+% 
+% % Shift coordinates back to original position
+% rotatedX = rotatedCenteredCoords(:, 1) + centerX;
+% rotatedY = rotatedCenteredCoords(:, 2) + centerY;
+% 
+% % Ensure rotated coordinates are within image bounds
+% rotatedX = max(min(rotatedX, iSagittalSize), 1); % Constrain within image width
+% rotatedY = max(min(rotatedY, iCoronalSize), 1); % Constrain within image height
+% 
+%                         % Map to coronal plane
+%                         rotatedY(:) = currentRoi.SliceNb; % Assuming you want to keep the same slice number
+%    
+%                         hold(axesMipPtr('get', [], dSeriesOffset), 'on');
+%                         plot(axesMipPtr('get', [], dSeriesOffset), rotatedX, rotatedY, 'r-', 'LineWidth', 2); % Customize color and line width as needed
+%                         hold(axesMipPtr('get', [], dSeriesOffset), 'off');
+
                         if viewFarthest == true
                             currentDistances.MaxXY.Line.Visible = 'on';
                             currentDistances.MaxCY.Line.Visible = 'on';
@@ -986,7 +1029,7 @@ function refreshImages(clickedPtX, clickedPtY)
             
             alAxesMipLine{6}.XData = [xOffset(1), xOffset(1)];
             alAxesMipLine{6}.YData = [iAxial + iCrossSize, iAxialSize];      
-        
+
         end
 
         if overlayActivate('get') == true
@@ -1595,4 +1638,40 @@ function refreshImages(clickedPtX, clickedPtY)
      %       drawnow limitrate;
      % end
 
+    function mipCoords = convertToMIPCoords(axialCoords, angle, sagittalSize, coronalSize)
+    % Convert multiple axial coordinates (x, y) to MIP coordinates
+    % Assume rotation about Z-axis
+
+    % Convert angle to radians
+    angleRad = deg2rad(angle);
+
+    % Center coordinates
+    centerX = sagittalSize / 2;
+    centerY = coronalSize / 2;
+
+    % Initialize output
+    mipCoords = zeros(size(axialCoords));
+
+    % Compute MIP coordinates
+    for i = 1:size(axialCoords, 1)
+        % Axial coordinates
+        iSagittal = axialCoords(i, 1);
+        iCoronal = axialCoords(i, 2);
+
+        if angle == 0
+            xOffset = iSagittal;
+        elseif angle == 90
+            xOffset = iCoronal;
+        elseif angle == 180
+            xOffset = sagittalSize - iSagittal;
+        elseif angle == 270
+            xOffset = coronalSize - iCoronal;
+        else
+            xOffset = (iSagittal - centerX) * cos(angleRad) + (iCoronal - centerY) * sin(angleRad) + centerX;
+        end
+
+        mipCoords(i, 1) = xOffset; % x coordinate
+        mipCoords(i, 2) = iCoronal; % y coordinate (unchanged)
+    end
+end
 end

@@ -429,7 +429,7 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177, bUseDefault)
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;
 
-      function Lu177NormalLiverMeanSDDialog()
+    function Lu177NormalLiverMeanSDDialog()
 
         DLG_Lu177_MEAN_SD_X = 380;
         DLG_Lu177_MEAN_SD_Y = 150;

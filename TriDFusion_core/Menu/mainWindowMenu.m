@@ -181,6 +181,9 @@ function mainWindowMenu()
 
     mWorkflows = uimenu(fiMainWindowPtr('get'),'Label','Workflows');
 
+    mAnonymization = uimenu(mWorkflows,'Label','Anonymization');
+    uimenu(mAnonymization, 'Label','Machine Learning CT Face Anonymization', 'Callback', @machineLearningCTFaceAnonymizationCallback);
+    
     mAnalCancer = uimenu(mWorkflows,'Label','Anal Cancer');
 
     uimenu(mAnalCancer, 'Label','Display Result', 'Callback'        , @figVoiSimplifiedDialogCallback);
