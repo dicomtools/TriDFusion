@@ -139,6 +139,7 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
     atRoi = roiTemplate('get', dSeries1Offset);
 
     if ~isempty(atRoi)
+
         atResampledRois = resampleROIs(aSerie1Image, atSerie1MetaData, aResampledImage, atResampledMetaData, atRoi, true);
 
         roiTemplate('set', dSeries1Offset, atResampledRois);
@@ -154,6 +155,10 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
             triangulateRoi(atVoiInput{1}.RoisTag{dRoiOffset});
         end
 
+        if size(dicomBuffer('get', [], dSeries1Offset), 3) ~= 1
+            
+            plotRotatedRoiOnMip(axesMipPtr('get', [], dSeries1Offset), dicomBuffer('get', [], dSeries1Offset), mipAngle('get'));       
+        end  
     end
 
     clear aResampledImage;

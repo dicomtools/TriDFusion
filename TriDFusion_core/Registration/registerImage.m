@@ -227,31 +227,52 @@ function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = regi
             atImToRegisterMetaData{jj}.Columns = dimsRef(2);
             
         end
-
-        for cc=1:numel(atImToRegisterMetaData)-1
-            if atImToRegisterMetaData{1}.ImagePositionPatient(3) < atImToRegisterMetaData{2}.ImagePositionPatient(3)
-                atImToRegisterMetaData{cc+1}.ImagePositionPatient(3) = atImToRegisterMetaData{cc}.ImagePositionPatient(3) + fixedSliceThickness;               
-                atImToRegisterMetaData{cc+1}.SliceLocation = atImToRegisterMetaData{cc}.SliceLocation + fixedSliceThickness; 
-            else
-                atImToRegisterMetaData{cc+1}.ImagePositionPatient(3) = atImToRegisterMetaData{cc}.ImagePositionPatient(3) - fixedSliceThickness;               
-                atImToRegisterMetaData{cc+1}.SliceLocation = atImToRegisterMetaData{cc}.SliceLocation - fixedSliceThickness;             
+        
+        if (numel(atImToRegisterMetaData) == numel(atReferenceMetaData)) 
+            for cc=1:numel(atImToRegisterMetaData)
+                atImToRegisterMetaData{cc}.ImagePositionPatient = atReferenceMetaData{cc}.ImagePositionPatient;
+                atImToRegisterMetaData{cc}.SliceLocation = atReferenceMetaData{cc}.SliceLocation;
             end
-        end      
-    end
-    
-    atRegisteredMetaData = atImToRegisterMetaData;
-  
-    if bUpdateDescription == true 
-        for jj=1:numel(atRegisteredMetaData)
-            atRegisteredMetaData{jj}.SeriesDescription  = sprintf('MOV-COREG %s', atRegisteredMetaData{jj}.SeriesDescription);
+        else
+
+            for cc=1:numel(atImToRegisterMetaData)-1
+                if atImToRegisterMetaData{1}.ImagePositionPatient(3) < atImToRegisterMetaData{2}.ImagePositionPatient(3)
+                    atImToRegisterMetaData{cc+1}.ImagePositionPatient(3) = atImToRegisterMetaData{cc}.ImagePositionPatient(3) + fixedSliceThickness;               
+                    atImToRegisterMetaData{cc+1}.SliceLocation = atImToRegisterMetaData{cc}.SliceLocation + fixedSliceThickness; 
+                else
+                    atImToRegisterMetaData{cc+1}.ImagePositionPatient(3) = atImToRegisterMetaData{cc}.ImagePositionPatient(3) - fixedSliceThickness;               
+                    atImToRegisterMetaData{cc+1}.SliceLocation = atImToRegisterMetaData{cc}.SliceLocation - fixedSliceThickness;             
+                end
+            end 
         end
     end
     
-    iOffset = get(uiSeriesPtr('get'), 'Value');
-    if iOffset <= numel(inputTemplate('get')) && bUpdateDescription == true 
-        asDescription = seriesDescription('get');
-        asDescription{iOffset} = sprintf('MOV-COREG %s', asDescription{iOffset});
-        seriesDescription('set', asDescription);
-    end  
+    atRegisteredMetaData = atImToRegisterMetaData;    
+    
+    if bUpdateDescription == true
+
+        for jj=1:numel(atRegisteredMetaData)
+            atRegisteredMetaData{jj}.SeriesDescription  = sprintf('MOV-COREG %s', atRegisteredMetaData{jj}.SeriesDescription);
+        end
+
+        dMovingSeriesOffset = [];
+        atInput = inputTemplate('get');
+        for jj=1:numel(atInput)
+            if strcmpi(atInput(jj).atDicomInfo{1}.SeriesInstanceUID, atImToRegisterMetaData{1}.SeriesInstanceUID)
+                dMovingSeriesOffset = jj;
+                break;
+            end
+        end
+        
+        if ~isempty(dMovingSeriesOffset)
+
+            asDescription = seriesDescription('get');
+            asDescription{dMovingSeriesOffset} = sprintf('MOV-COREG %s', asDescription{dMovingSeriesOffset});
+            seriesDescription('set', asDescription);
+    
+            set(uiSeriesPtr('get'), 'String', asDescription);
+            set(uiFusedSeriesPtr('get'), 'String', asDescription);            
+        end
+    end
          
 end

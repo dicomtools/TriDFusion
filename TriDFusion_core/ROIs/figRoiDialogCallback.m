@@ -764,7 +764,7 @@ function figRoiDialogCallback(hObject, ~)
 
                     if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 % 3D Image
                       
-                        if contains(lower(atMetaData{1}.SeriesType), 'dynamic')
+                        if contains(lower(atMetaData{1}.SeriesType), 'dynamic') || gateUseSeriesUID('get') == false
 
                             timeActivity = uimenu(c,'Label', 'Time Activity');
         
@@ -859,7 +859,7 @@ function figRoiDialogCallback(hObject, ~)
 
                     if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 % 3D Image
 
-                        if contains(lower(atMetaData{1}.SeriesType), 'dynamic')
+                        if contains(lower(atMetaData{1}.SeriesType), 'dynamic') ||  gateUseSeriesUID('get') == false
 
                             timeActivity = uimenu(c,'Label', 'Time Activity');
         

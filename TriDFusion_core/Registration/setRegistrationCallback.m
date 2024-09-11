@@ -1028,6 +1028,11 @@ function setRegistrationCallback(~, ~)
                 resampleAxes(dicomBuffer('get'), dicomMetaData('get', [], dInitOffset));
 
                 setImagesAspectRatio();
+                
+                if size(dicomBuffer('get', [], dInitOffset), 3) ~= 1
+                    
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dInitOffset), dicomBuffer('get', [], dInitOffset), mipAngle('get'));       
+                end               
             end
 
             % if is3DEngine('get') == true

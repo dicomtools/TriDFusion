@@ -27,7 +27,7 @@ function setFusionCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    try
+%     try
         
     if switchTo3DMode('get')     == false && ...
        switchToIsoSurface('get') == false && ...
@@ -2339,10 +2339,10 @@ end
         refreshImages();            
     end
     
-    catch   
-        
-        progressBar(1, 'Error:setFusionCallback()');
-    end
+%     catch   
+%         
+%         progressBar(1, 'Error:setFusionCallback()');
+%     end
     
     if switchTo3DMode('get')     == false && ...
        switchToIsoSurface('get') == false && ...

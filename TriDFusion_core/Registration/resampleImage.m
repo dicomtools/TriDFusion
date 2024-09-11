@@ -338,12 +338,27 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
         end
     end
     
-    iOffset = get(uiSeriesPtr('get'), 'Value');
-    if iOffset <= numel(inputTemplate('get')) && bUpdateDescription == true 
-        asDescription = seriesDescription('get');
-        asDescription{iOffset} = sprintf('RSP %s', asDescription{iOffset});
-        seriesDescription('set', asDescription);
-    end   
+    if bUpdateDescription == true
+
+        dMovingSeriesOffset = [];
+        atInput = inputTemplate('get');
+        for jj=1:numel(atInput)
+            if strcmpi(atInput(jj).atDicomInfo{1}.SeriesInstanceUID, atDcmMetaData{1}.SeriesInstanceUID)
+                dMovingSeriesOffset = jj;
+                break;
+            end
+        end
+        
+        if ~isempty(dMovingSeriesOffset)
+            
+            asDescription = seriesDescription('get');
+            asDescription{dMovingSeriesOffset} = sprintf('MOV-COREG %s', asDescription{dMovingSeriesOffset});
+            seriesDescription('set', asDescription);
+    
+            set(uiSeriesPtr('get'), 'String', asDescription);
+            set(uiFusedSeriesPtr('get'), 'String', asDescription);            
+        end
+    end
   
 end  
 

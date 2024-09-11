@@ -390,52 +390,58 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
 
                     for sr=1:numel(atInputTemplate)
             
-                        if strcmpi(sSeriesInstanceUID, atInputTemplate(sr).atDicomInfo{1}.SeriesInstanceUID) % Same series
-                          
-                            aInputBuffer = inputBuffer('get');
+                        if strcmpi(sSeriesInstanceUID, atInputTemplate(sr).atDicomInfo{1}.SeriesInstanceUID) || ... % Same series
+                           gateUseSeriesUID('get') == false
 
-                            switch lower(imageOrientation('get'))
-                
-                                case'axial'
-                                    aInputBuffer = aInputBuffer{sr};                   
-                                    
-                                case 'coronal'
-                                    aInputBuffer = reorientBuffer(aInputBuffer{sr}, 'coronal');
-                                    
-                                case'sagittal'
-                                    aInputBuffer = reorientBuffer(aInputBuffer{sr}, 'sagittal');
-                            end
-                
-                            if size(aInputBuffer, 3) ==1
-                
-                                if atInputTemplate(sr).bFlipLeftRight == true
-                                    aInputBuffer=aInputBuffer(:,end:-1:1);
-                                end
-                
-                                if atInputTemplate(sr).bFlipAntPost == true
-                                    aInputBuffer=aInputBuffer(end:-1:1,:);
-                                end            
-                            else
-                                if atInputTemplate(sr).bFlipLeftRight == true
-                                    aInputBuffer=aInputBuffer(:,end:-1:1,:);
-                                end
-                
-                                if atInputTemplate(sr).bFlipAntPost == true
-                                    aInputBuffer=aInputBuffer(end:-1:1,:,:);
-                                end
-                
-                                if atInputTemplate(sr).bFlipHeadFeet == true
-                                    aInputBuffer=aInputBuffer(:,:,end:-1:1);
-                                end 
-                            end   
+                            aInputBuffer = dicomBuffer('get', [], sr);
 
-                            if isempty(dicomBuffer('get', [], sr))
+                            if isempty(aInputBuffer)
+
+                                aInputBuffer = inputBuffer('get');
+    
+                                switch lower(imageOrientation('get'))
+                    
+                                    case'axial'
+                                        aInputBuffer = aInputBuffer{sr};                   
+                                        
+                                    case 'coronal'
+                                        aInputBuffer = reorientBuffer(aInputBuffer{sr}, 'coronal');
+                                        
+                                    case'sagittal'
+                                        aInputBuffer = reorientBuffer(aInputBuffer{sr}, 'sagittal');
+                                end
+                    
+                                if size(aInputBuffer, 3) ==1
+                    
+                                    if atInputTemplate(sr).bFlipLeftRight == true
+                                        aInputBuffer=aInputBuffer(:,end:-1:1);
+                                    end
+                    
+                                    if atInputTemplate(sr).bFlipAntPost == true
+                                        aInputBuffer=aInputBuffer(end:-1:1,:);
+                                    end            
+                                else
+                                    if atInputTemplate(sr).bFlipLeftRight == true
+                                        aInputBuffer=aInputBuffer(:,end:-1:1,:);
+                                    end
+                    
+                                    if atInputTemplate(sr).bFlipAntPost == true
+                                        aInputBuffer=aInputBuffer(end:-1:1,:,:);
+                                    end
+                    
+                                    if atInputTemplate(sr).bFlipHeadFeet == true
+                                        aInputBuffer=aInputBuffer(:,:,end:-1:1);
+                                    end 
+                                end   
+
                                 dicomBuffer('set', aInputBuffer, sr);
+                            
                             end
 
-                            atInputMetaData = atInputTemplate(sr).atDicomInfo;
+                            atInputMetaData = dicomMetaData('get', [], sr);
 
-                            if isempty(dicomMetaData('get', [], sr))
+                            if isempty(atInputMetaData)
+                                atInputMetaData = atInputTemplate(sr).atDicomInfo;
                                 dicomMetaData('set', atInputMetaData, sr)
                             end
 
@@ -579,52 +585,58 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
 
                         for sr=1:numel(atInputTemplate)
                 
-                            if strcmpi(sSeriesInstanceUID, atInputTemplate(sr).atDicomInfo{1}.SeriesInstanceUID) % Same series
-                              
-                                aInputBuffer = inputBuffer('get');
+                            if strcmpi(sSeriesInstanceUID, atInputTemplate(sr).atDicomInfo{1}.SeriesInstanceUID) || ... % Same series
+                               gateUseSeriesUID('get') == false
+
+                                aInputBuffer = dicomBuffer('get', [], sr);
+
+                                if isempty(aInputBuffer)
+
+                                    aInputBuffer = inputBuffer('get');
+        
+                                    switch lower(imageOrientation('get'))
+                        
+                                        case'axial'
+                                            aInputBuffer = aInputBuffer{sr};                   
+                                            
+                                        case 'coronal'
+                                            aInputBuffer = reorientBuffer(aInputBuffer{sr}, 'coronal');
+                                            
+                                        case'sagittal'
+                                            aInputBuffer = reorientBuffer(aInputBuffer{sr}, 'sagittal');
+                                    end
+                        
+                                    if size(aInputBuffer, 3) ==1
+                        
+                                        if atInputTemplate(sr).bFlipLeftRight == true
+                                            aInputBuffer=aInputBuffer(:,end:-1:1);
+                                        end
+                        
+                                        if atInputTemplate(sr).bFlipAntPost == true
+                                            aInputBuffer=aInputBuffer(end:-1:1,:);
+                                        end            
+                                    else
+                                        if atInputTemplate(sr).bFlipLeftRight == true
+                                            aInputBuffer=aInputBuffer(:,end:-1:1,:);
+                                        end
+                        
+                                        if atInputTemplate(sr).bFlipAntPost == true
+                                            aInputBuffer=aInputBuffer(end:-1:1,:,:);
+                                        end
+                        
+                                        if atInputTemplate(sr).bFlipHeadFeet == true
+                                            aInputBuffer=aInputBuffer(:,:,end:-1:1);
+                                        end 
+                                    end   
     
-                                switch lower(imageOrientation('get'))
-                    
-                                    case'axial'
-                                        aInputBuffer = aInputBuffer{sr};                   
-                                        
-                                    case 'coronal'
-                                        aInputBuffer = reorientBuffer(aInputBuffer{sr}, 'coronal');
-                                        
-                                    case'sagittal'
-                                        aInputBuffer = reorientBuffer(aInputBuffer{sr}, 'sagittal');
-                                end
-                    
-                                if size(aInputBuffer, 3) ==1
-                    
-                                    if atInputTemplate(sr).bFlipLeftRight == true
-                                        aInputBuffer=aInputBuffer(:,end:-1:1);
-                                    end
-                    
-                                    if atInputTemplate(sr).bFlipAntPost == true
-                                        aInputBuffer=aInputBuffer(end:-1:1,:);
-                                    end            
-                                else
-                                    if atInputTemplate(sr).bFlipLeftRight == true
-                                        aInputBuffer=aInputBuffer(:,end:-1:1,:);
-                                    end
-                    
-                                    if atInputTemplate(sr).bFlipAntPost == true
-                                        aInputBuffer=aInputBuffer(end:-1:1,:,:);
-                                    end
-                    
-                                    if atInputTemplate(sr).bFlipHeadFeet == true
-                                        aInputBuffer=aInputBuffer(:,:,end:-1:1);
-                                    end 
-                                end   
-    
-                                if isempty(dicomBuffer('get', [], sr))
                                     dicomBuffer('set', aInputBuffer, sr);
                                 end
     
-                                atInputMetaData = atInputTemplate(sr).atDicomInfo;
-    
-                                if isempty(dicomMetaData('get', [], sr))
+                                atInputMetaData = dicomMetaData('get', [], sr);
+                                
+                                if isempty(atInputMetaData)
+
+                                    atInputMetaData = atInputTemplate(sr).atDicomInfo;
                                     dicomMetaData('set', atInputMetaData, sr)
                                 end
     
