@@ -240,5 +240,7 @@ end
                 end
             end          
         end 
+
+        plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), iMipAngle);       
     end
 end

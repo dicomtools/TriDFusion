@@ -182,7 +182,7 @@ function mainWindowMenu()
     mWorkflows = uimenu(fiMainWindowPtr('get'),'Label','Workflows');
 
     mAnonymization = uimenu(mWorkflows,'Label','Anonymization');
-    uimenu(mAnonymization, 'Label','Machine Learning CT Face Anonymization', 'Callback', @machineLearningCTFaceAnonymizationCallback);
+    uimenu(mAnonymization, 'Label','Machine Learning CT Image Anonymization', 'Callback', @machineLearningCTAnonymizationCallback);
     
     mAnalCancer = uimenu(mWorkflows,'Label','Anal Cancer');
 
@@ -301,7 +301,10 @@ function mainWindowMenu()
     mMachineLearning = uimenu(mModules, 'Label','Machine Learning');
     uimenu(mMachineLearning, 'Label','Machine Learning Organ Segmentation', 'Callback', @setMachineLearningSegmentationCallback);
 
-    mMachineProcessing = uimenu(mMachineLearning, 'Label','Machine Learning Processing', 'Separator','on');
+    mMachineAnonymization = uimenu(mMachineLearning,'Label','Machine Learning Anonymization', 'Separator','on');
+    uimenu(mMachineAnonymization, 'Label','Machine Learning CT Image Anonymization', 'Callback', @machineLearningCTAnonymizationCallback);
+
+    mMachineProcessing = uimenu(mMachineLearning, 'Label','Machine Learning Processing');
 
     mMachineReport = uimenu(mMachineProcessing, 'Label','Report');
     uimenu(mMachineReport, 'Label','3D SPECT Lung Shunt Report'     , 'Callback', @generate3DLungShuntReportCallback);

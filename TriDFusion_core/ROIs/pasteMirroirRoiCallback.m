@@ -30,7 +30,9 @@ function pasteMirroirRoiCallback(~, ~)
     windowButton('set', 'up'); % Patch for Linux
 
     ptrRoi = copyRoiPtr('get');
- 
+
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
     if isempty(ptrRoi)
         return;
     end
@@ -39,7 +41,7 @@ function pasteMirroirRoiCallback(~, ~)
         return;
     end
     
-    pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+    pAxe = getAxeFromMousePosition(dSeriesOffset);
 
     if isempty(pAxe)
         return;
@@ -49,7 +51,7 @@ function pasteMirroirRoiCallback(~, ~)
         return;
     end
 
-    [imgHeight, imgWidth, ~] =  size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')));
+    [imgHeight, imgWidth, ~] =  size(dicomBuffer('get', [], dSeriesOffset));
 
     sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
     
@@ -103,7 +105,7 @@ function pasteMirroirRoiCallback(~, ~)
 
             uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
-            addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
 
         case lower('images.roi.freehand')
@@ -152,7 +154,7 @@ function pasteMirroirRoiCallback(~, ~)
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
-            addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
 
         case lower('images.roi.polygon')
@@ -198,7 +200,7 @@ function pasteMirroirRoiCallback(~, ~)
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
 
-            addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
             
 
         case lower('images.roi.circle')
@@ -236,7 +238,7 @@ function pasteMirroirRoiCallback(~, ~)
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
-            addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
             
         case lower('images.roi.ellipse')
@@ -279,12 +281,12 @@ function pasteMirroirRoiCallback(~, ~)
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
-            addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
             
             if strcmpi(pRoi.UserData, 'Sphere')
 
-                atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-                atVoi = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+                atRoi = roiTemplate('get', dSeriesOffset);
+                atVoi = voiTemplate('get', dSeriesOffset);
                 
                 aRoiTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {ptrRoi.Tag} );
                 dFirstRoiOffset = find(aRoiTagOffset, 1); 
@@ -364,7 +366,7 @@ function pasteMirroirRoiCallback(~, ~)
                                                            'Visible'            , 'off' ...
                                                            );
 
-                                    addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+                                    addRoi(a, dSeriesOffset, 'Unspecified');
 
                                     asTag{numel(asTag)+1} = sTag;    
 
@@ -373,7 +375,7 @@ function pasteMirroirRoiCallback(~, ~)
                             end
                         end
                         
-                        createVoiFromRois(get(uiSeriesPtr('get'), 'Value'), asTag, sprintf('Sphere %s mm', num2str(atRoi{dFirstRoiOffset}.MaxDistances.MaxXY.Length)), ptrRoi.Color, 'Unspecified');
+                        createVoiFromRois(dSeriesOffset, asTag, sprintf('Sphere %s mm', num2str(atRoi{dFirstRoiOffset}.MaxDistances.MaxXY.Length)), ptrRoi.Color, 'Unspecified');
 
                         setVoiRoiSegPopup();
 
@@ -431,13 +433,17 @@ function pasteMirroirRoiCallback(~, ~)
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
-            addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
         otherwise
             return;
     end
     
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
 
+        plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+    end
+            
 %    setVoiRoiSegPopup();
 
 

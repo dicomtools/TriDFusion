@@ -154,6 +154,9 @@ function oneFrame(sDirection)
             end
 
             set(uiSliderMipPtr('get'), 'Value', dMipSliderValue);
+
+            plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), iMipAngleValue);       
+
         end
     end
 

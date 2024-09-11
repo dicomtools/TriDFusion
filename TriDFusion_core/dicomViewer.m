@@ -491,6 +491,10 @@ function resize = dicomViewer()
     voxelDosimetryPHITSDebugWindow('set', true); 
     voxelDosimetryAllContours('set', false); 
 
+    machineLearningCTAnonymizationAnonymizationModule('set', 'face');
+    machineLearningCTAnonymizationAnonymizationTechnique('set', 'gauss filter');
+    machineLearningCTAnonymizationAssociatedSeries('set', true);
+
     clearDisplay();
 
     uiTopWindow = ...

@@ -1159,6 +1159,11 @@ function figRoiDialogCallback(hObject, ~)
 
             setVoiRoiSegPopup();
 
+            if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+                
+                plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));    
+            end
+
         end
 
         function figRoiMultiplePlotCallback(hObject, ~)
@@ -1322,10 +1327,12 @@ function figRoiDialogCallback(hObject, ~)
 
         function figRoiPredefinedLabelCallback(hObject, ~)
 
+            dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
             aVoiRoiTag = voiRoiTag('get');
 
-            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-            atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            atRoiInput = roiTemplate('get', dSeriesOffset);
+            atVoiInput = voiTemplate('get', dSeriesOffset);
             
             if ~isempty(aVoiRoiTag)
                 
@@ -1348,7 +1355,7 @@ function figRoiDialogCallback(hObject, ~)
 
                         % Refresh contour figure and contour popup
 
-                        setVoiRoiSegPopup();
+                        setVoiRoiSegPopup();                                           
 
                         if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                             bSUVUnit = true;
@@ -1688,10 +1695,12 @@ function figRoiDialogCallback(hObject, ~)
 
         function figRoiEditColorCallback(~, ~)
 
+            dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
             aVoiRoiTag = voiRoiTag('get');
 
-            atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-            atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+            atRoiInput = roiTemplate('get', dSeriesOffset);
+            atVoiInput = voiTemplate('get', dSeriesOffset);
             
             if ~isempty(aVoiRoiTag)
                 
@@ -1802,6 +1811,12 @@ function figRoiDialogCallback(hObject, ~)
                         end
                     end
                 end
+
+                if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+    
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+                end
+
             end                          
 
             function figRoiSetColor(ptrObject, sColor)
@@ -3098,6 +3113,11 @@ function figRoiDialogCallback(hObject, ~)
 
             setVoiRoiSegPopup();
 
+            if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get')); 
+            end
+
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                 bSUVUnit = true;
             else
@@ -3637,6 +3657,11 @@ function figRoiDialogCallback(hObject, ~)
 
             refreshImages();
 
+            if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+            end
+
             if strcmpi(get(mSUVUnit, 'Checked'), 'on')
                 bSUVUnit = true;
             else
@@ -3765,6 +3790,11 @@ function figRoiDialogCallback(hObject, ~)
                     % Refresh contour figure
 
                     setVoiRoiSegPopup();
+
+                    if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                        plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));    
+                    end
 
                     if bUpdateVoiRoiListbox
 
@@ -3896,12 +3926,16 @@ function figRoiDialogCallback(hObject, ~)
 
                            atVoiInput(cellfun(@isempty, atVoiInput)) = [];
 
-                           voiTemplate('set', dSeriesOffset, atVoiInput);                                        
-                        end
+                           voiTemplate('set', dSeriesOffset, atVoiInput);   
 
-                        % Refresh contour figure and contour popup
+                        end   
 
                         setVoiRoiSegPopup();
+                        
+                        if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                            plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));    
+                        end
 
                         if bUpdateVoiRoiListbox
 
@@ -4025,6 +4059,11 @@ function figRoiDialogCallback(hObject, ~)
 
     function figRoiCopyMultipleObjectsCallback(hObject, ~)
 
+        try
+
+        set(figRoiWindow, 'Pointer', 'watch');
+        drawnow;  
+
         sCopyTo = get(hObject, 'Text');
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
@@ -4094,9 +4133,20 @@ function figRoiDialogCallback(hObject, ~)
             end
         end
 
+        catch
+             progressBar(1, 'Error:figRoiCopyMultipleObjectsCallback()');          
+        end
+
+        set(figRoiWindow, 'Pointer', 'default');
+        drawnow; 
     end
 
     function figRoiCopyMultipleMirrorCallback(hObject, ~)
+
+        try
+
+        set(figRoiWindow, 'Pointer', 'watch');
+        drawnow;      
 
         dToSeriesOffset = 0;
     
@@ -4190,10 +4240,17 @@ function figRoiDialogCallback(hObject, ~)
                         bExpendVoi = false;
                     end    
 
-                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented);
+                    setVoiRoiListbox(bSUVUnit, bModifiedMatrix, bSegmented, bExpendVoi);
                 end
             end
         end
+
+        catch
+             progressBar(1, 'Error:figRoiCopyMultipleMirrorCallback()');          
+        end
+
+        set(figRoiWindow, 'Pointer', 'default');
+        drawnow;         
     end
 
     function sOutput = maxLength(sString, iMaxLength)

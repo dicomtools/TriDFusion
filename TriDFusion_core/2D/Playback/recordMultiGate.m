@@ -88,9 +88,12 @@ function recordMultiGate(mRecord, sPath, sFileName, sExtention, pAxe)
         end
     end
 
-    setFigureToobarsVisible('off');
+    if viewerUIFigure('get') == true
 
-    setFigureTopMenuVisible('off');
+        setFigureToobarsVisible('off');
+    
+        setFigureTopMenuVisible('off');
+    end
 
     lMinBak = windowLevel('get', 'min');
     lMaxBak = windowLevel('get', 'max');
@@ -151,6 +154,16 @@ function recordMultiGate(mRecord, sPath, sFileName, sExtention, pAxe)
             logoObject('set', '');
         end
     end
+    
+    % Colorbar 
+
+    sLineColorbarIntensityMaxPtrVisible = get(lineColorbarIntensityMaxPtr('get'), 'Visible');
+    sLineColorbarIntensityMinPtrVisible = get(lineColorbarIntensityMinPtr('get'), 'Visible');
+
+    sTextColorbarIntensityMaxPtrVisible = get(textColorbarIntensityMaxPtr('get'), 'Visible');
+    sTextColorbarIntensityMinPtrVisible = get(textColorbarIntensityMinPtr('get'), 'Visible');
+
+    sUiColorbarPtrVisible = get(uiColorbarPtr('get'), 'Visible');
 
     set(lineColorbarIntensityMaxPtr('get'), 'Visible', 'off');
     set(lineColorbarIntensityMinPtr('get'), 'Visible', 'off');
@@ -162,11 +175,20 @@ function recordMultiGate(mRecord, sPath, sFileName, sExtention, pAxe)
 
     if isFusion('get')
 
+        sLineFusionColorbarIntensityMaxPtrVisible = get(lineFusionColorbarIntensityMaxPtr('get'), 'Visible');
+        sLineFusionColorbarIntensityMinPtrVisible = get(lineFusionColorbarIntensityMaxPtr('get'), 'Visible');
+
         set(lineFusionColorbarIntensityMaxPtr('get'), 'Visible', 'off');
         set(lineFusionColorbarIntensityMinPtr('get'), 'Visible', 'off');
 
+        sTextFusionColorbarIntensityMaxPtrVisible = get(textFusionColorbarIntensityMaxPtr('get'), 'Visible');
+        sTextFusionColorbarIntensityMinPtrVisible = get(textFusionColorbarIntensityMinPtr('get'), 'Visible');
+
         set(textFusionColorbarIntensityMaxPtr('get'), 'Visible', 'off');
         set(textFusionColorbarIntensityMinPtr('get'), 'Visible', 'off');
+
+        sAlphaSliderPtrVisible    =  get(uiAlphaSliderPtr('get')   , 'Visible');
+        sFusionColorbarPtrVisible =  get(uiFusionColorbarPtr('get'), 'Visible');
 
         set(uiAlphaSliderPtr('get')   , 'Visible', 'off');
         set(uiFusionColorbarPtr('get'), 'Visible', 'off');
@@ -279,19 +301,16 @@ function recordMultiGate(mRecord, sPath, sFileName, sExtention, pAxe)
     end
 
     sLogo = sprintf('%s\n', 'TriDFusion (3DF)');
-    tLogo = text(aAxe, 0.02, 0.03, sLogo, 'Units','normalized');
 
-    if strcmpi(backgroundColor('get'), 'black')
-        tLogo.Color = [0.8500 0.8500 0.8500];
-    else
-        tLogo.Color = [0.1500 0.1500 0.1500];
-    end
+    tLogo    = text(aAxe, 0.02, 0.03, sLogo, 'Units','normalized');
+    tOverlay = text(aAxe, 0.02, 0.97, ''   , 'Units','normalized');
 
-    tOverlay = text(aAxe, 0.02, 0.97, '', 'Units','normalized');
-    if strcmpi(backgroundColor('get'), 'black')
-        tOverlay.Color = [0.8500 0.8500 0.8500];
+    if any(aAxe.Parent.BackgroundColor) % Not black
+        set(tLogo   , 'Color', [0.1500 0.1500 0.1500]);
+        set(tOverlay, 'Color', [0.1500 0.1500 0.1500]);
     else
-        tOverlay.Color = [0.1500 0.1500 0.1500];
+        set(tLogo   , 'Color', [0.8500 0.8500 0.8500]);
+        set(tOverlay, 'Color', [0.8500 0.8500 0.8500]);        
     end
 
     if overlayActivate('get') == false
@@ -934,9 +953,12 @@ end
 %         progressBar(1, sprintf('Error: recordMultiGate()'));
 %     end
 
-    setFigureToobarsVisible('on');
+    if viewerUIFigure('get') == true
 
-    setFigureTopMenuVisible('on');
+        setFigureToobarsVisible('on');
+    
+        setFigureTopMenuVisible('on');
+    end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;
@@ -946,24 +968,30 @@ end
     set(uiSliderTraPtr('get'), 'Visible', 'on');
     set(uiSliderMipPtr('get'), 'Visible', 'on');
 
-    set(lineColorbarIntensityMaxPtr('get'), 'Visible', 'on');
-    set(lineColorbarIntensityMinPtr('get'), 'Visible', 'on');
+    % Colorbar
 
-    set(textColorbarIntensityMaxPtr('get'), 'Visible', 'on');
-    set(textColorbarIntensityMinPtr('get'), 'Visible', 'on');
+    set(lineColorbarIntensityMaxPtr('get'), 'Visible', sLineColorbarIntensityMaxPtrVisible);
+    set(lineColorbarIntensityMinPtr('get'), 'Visible', sLineColorbarIntensityMinPtrVisible);
 
-    set(uiColorbarPtr('get'), 'Visible', 'on');
+    set(textColorbarIntensityMaxPtr('get'), 'Visible', sTextColorbarIntensityMaxPtrVisible);
+    set(textColorbarIntensityMinPtr('get'), 'Visible', sTextColorbarIntensityMinPtrVisible);
+
+    set(uiColorbarPtr('get'), 'Visible', sUiColorbarPtrVisible);
+
 
     if isFusion('get')
 
-        set(lineFusionColorbarIntensityMaxPtr('get'), 'Visible', 'on');
-        set(lineFusionColorbarIntensityMinPtr('get'), 'Visible', 'on');
+        set(lineFusionColorbarIntensityMaxPtr('get'), 'Visible', 'off');
+        set(lineFusionColorbarIntensityMinPtr('get'), 'Visible', 'off');
 
-        set(textFusionColorbarIntensityMaxPtr('get'), 'Visible', 'on');
-        set(textFusionColorbarIntensityMinPtr('get'), 'Visible', 'on');
+        set(lineFusionColorbarIntensityMaxPtr('get'), 'Visible', sLineFusionColorbarIntensityMaxPtrVisible);
+        set(lineFusionColorbarIntensityMinPtr('get'), 'Visible', sLineFusionColorbarIntensityMinPtrVisible);
 
-        set(uiAlphaSliderPtr('get')   , 'Visible', 'on');
-        set(uiFusionColorbarPtr('get'), 'Visible', 'on');
+        set(textFusionColorbarIntensityMaxPtr('get'), 'Visible', sTextFusionColorbarIntensityMaxPtrVisible);
+        set(textFusionColorbarIntensityMinPtr('get'), 'Visible', sTextFusionColorbarIntensityMinPtrVisible);
+
+        set(uiAlphaSliderPtr('get')   , 'Visible', sAlphaSliderPtrVisible);
+        set(uiFusionColorbarPtr('get'), 'Visible', sFusionColorbarPtrVisible);
     end
 
     if overlayActivate('get')

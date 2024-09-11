@@ -69,10 +69,10 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
 
        % Voi
 
-        asTag = [];
+        asTag = cell(numel(tRoiVoiObject.RoisTag), 1);
 
-        endIloop = numel(tRoiVoiObject.RoisTag);
-        for kk=1:endIloop
+        dEndLoop = numel(tRoiVoiObject.RoisTag);
+        for kk=1:dEndLoop
 
             for ll=1:numel(atRefRoiInput)
 
@@ -83,10 +83,138 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
                         tRoi = atRefRoiInput{ll};
                         tRoi.Tag = num2str(randi([-(2^52/2),(2^52/2)],1));
 
+                        if bMirror == true
+                            [aNewPosition, aRadius, aSemiAxes] = computeRoiScaledPosition(imRoi, atDicomInfo, imRoi, atDicomInfo, tRoi);
+                        end
+
+                        switch lower(tRoi.Type)
+
+                            case lower('images.roi.circle')
+
+                                switch lower(tRoi.Axe)
+
+                                    case 'axes1'
+
+                                        if bMirror == true
+                                            tRoi.Position = [];
+                                            progressBar(1, 'Error: Copy of a circle from a coronal plane is not yet supported!');
+                                        end
+
+                                    case 'axes2'
+
+                                        if bMirror == true
+                                            tRoi.Position = [];
+                                            progressBar(1, 'Error: Copy of a circle from a sagitttal plane is not yet supported!');
+                                        end
+
+                                    otherwise
+                                        if bMirror == true
+                                            
+                                            % Get the position of the freehand ROI
+                                            roiPos = aNewPosition;
+                                            
+                                            % Get the size of the image
+                                            [~, imgWidth, ~] = size(aBuffer{dSeriesToOffset});
+                                            
+                                            % Perform flipping operations
+                                            % Horizontal flip
+                                            tRoi.Position(:,1) = imgWidth - roiPos(:,1);
+                                            
+                                            % Vertical flip
+                                            tRoi.Position(:,2) = aNewPosition(:,2);
+                                            tRoi.SliceNb       = round(aNewPosition(1,3));
+                                            tRoi.Radius        = aRadius;                                                   
+                                        end
+                                end
+
+                            case lower('images.roi.ellipse')
+
+                                switch lower(tRoi.Axe)
+
+                                    case 'axes1'
+
+                                        if bMirror == true
+
+                                            tRoi.Position = [];
+                                            progressBar(1, 'Error: Copy mirror of an ellipse from a coronal plane is not yet supported!');
+                                        end
+
+
+                                    case 'axes2'
+
+                                        if bMirror == true
+                                            tRoi.Position = [];
+                                            progressBar(1, 'Error: Copy mirror of an ellipse from a sagittal plane is not yet supported!');
+                                        end
+
+                                    otherwise
+            
+                                        if bMirror == true
+                                            
+                                            % Get the position of the freehand ROI
+                                            roiPos = aNewPosition;
+                                            
+                                            % Get the size of the image
+                                            [~, imgWidth, ~] = size(aBuffer{dSeriesToOffset});
+                                            
+                                            % Perform flipping operations
+                                            % Horizontal flip
+                                            tRoi.Position(:,1) = imgWidth - roiPos(:,1);
+                                            
+                                            % Vertical flip
+                                            tRoi.Position(:,2) = aNewPosition(:,2);
+                                            tRoi.SliceNb       = round(aNewPosition(1,3));
+                                            tRoi.SemiAxes      = aSemiAxes;                                                     
+                                        end
+                                end
+
+                            case lower('images.roi.rectangle')
+
+                                if bMirror == true
+            
+                                    aRectanglePosition = aNewPosition;
+                        
+                                    x = aRectanglePosition(1);
+                                    y = aRectanglePosition(2);
+                                    w = aRectanglePosition(3);
+                                    h = aRectanglePosition(4);
+                
+                                   [~, imgWidth, ~] = size(aBuffer{dSeriesToOffset});
+                                
+                                    % Calculate the new X position for horizontal flip
+                                    newX = imgWidth - x - w;
+                                    
+                                    % Update the rectangle's position
+                                    tRoi.Position = [newX, y, w, h];
+                                    tRoi.SliceNb  = round(aNewPosition(5));
+                                end
+
+                            otherwise
+
+                                 if bMirror == true
+                                    
+                                    % Get the position of the freehand ROI
+                                    roiPos = aNewPosition;
+                                    
+                                    % Get the size of the image
+                                    [~, imgWidth, ~] = size(aBuffer{dSeriesToOffset});
+                                    
+                                    % Perform flipping operations
+                                    % Horizontal flip
+                                    tRoi.Position(:,1) = imgWidth - roiPos(:,1);
+                                    
+                                    % Vertical flip
+                                    tRoi.Position(:,2) = aNewPosition(:,2);
+                                    tRoi.SliceNb       = round(aNewPosition(1,3));
+                                end                               
+
+                        end
+
+
                         tRoi = addRoiFromTemplate(tRoi, dSeriesOffset);
 
                         tMaxDistances = computeRoiFarthestPoint(imRoi, atDicomInfo, tRoi, false, false);
-                        tRoi.MaxDistances = tMaxDistances;
+                        tRoi.MaxDistances = tMaxDistances;                        
 
                     else
                         tRoi     = atRefRoiInput{ll};
@@ -275,7 +403,7 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
 
                         roiTemplate('set', dSeriesToOffset, atRoiInput);
 
-                        asTag{numel(asTag)+1} = tRoi.Tag;
+                        asTag{kk} = tRoi.Tag;
 
                     end
 
@@ -285,9 +413,20 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
             end
         end
 
+        asTag = asTag(~cellfun(@isempty, asTag));
+
         if ~isempty(asTag)
 
             createVoiFromRois(dSeriesToOffset, asTag, tRoiVoiObject.Label, tRoiVoiObject.Color, tRoiVoiObject.LesionType);
+            
+            if dSeriesOffset == dSeriesToOffset
+
+                refreshImages();
+
+                setVoiRoiSegPopup();
+    
+                plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get')); 
+            end
         end
 
     else
@@ -659,9 +798,15 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
             roiTemplate('set', dSeriesToOffset, atRoiInput);
         end
     
-
         if dSeriesOffset == dSeriesToOffset
+
             refreshImages();
+            
+            if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get')); 
+            end
+
         end
 
     end

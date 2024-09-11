@@ -89,7 +89,6 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
 
                 dSecondBoundaryOffset = getLargestboundary(B2);
 
-
                 if pixelEdge('get')
 
                     B2{dSecondBoundaryOffset} = (B2{dSecondBoundaryOffset} + 1) / 3;
@@ -98,7 +97,7 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
                     B2{dSecondBoundaryOffset} = smoothRoi(B2{dSecondBoundaryOffset}, [xSize, ySize]);
                 end
 
-                 if size(B2{dSecondBoundaryOffset}, 1) > 2
+                 if size(B2{dSecondBoundaryOffset}, 1) > 10
                       addFreehandRoi([B2{dSecondBoundaryOffset}(:, 2), B2{dSecondBoundaryOffset}(:, 1)], dVoiOffset, hf.Color, sLesionType, dSerieOffset);
                  end
             else

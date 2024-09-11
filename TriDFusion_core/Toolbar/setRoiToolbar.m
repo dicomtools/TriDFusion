@@ -124,7 +124,7 @@ function setRoiToolbar(sVisible)
         [img,~] = imread(sprintf('%s//voi-click.png', sIconsPath));
         img = rescaleAndRemoveIconBackground(img);
 
-        t12 = uitoggletool(tbRoi,'CData',img,'TooltipString','<html>Click VOI<br>Activate the View/Contour Panel to fine-tune the threshold</html>');
+        t12 = uitoggletool(tbRoi,'CData',img,'TooltipString','<html>Click-VOI<br>Activate the View/Contour Panel to fine-tune the threshold</html>');
         t12.ClickedCallback = @drawClickVoiCallback;
 
         % Continuous
@@ -227,6 +227,8 @@ function setRoiToolbar(sVisible)
             return;
         end
 
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
 %               releaseRoiAxeWait(t8);
         robotReleaseKey();
 
@@ -281,14 +283,14 @@ function setRoiToolbar(sVisible)
 
                 robotClick();
 
-                pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+                pAxe = getAxeFromMousePosition(dSeriesOffset);
 
                 switch pAxe
 
-                    case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axePtr('get', [], dSeriesOffset)
+                    case axes1Ptr('get', [], dSeriesOffset)
+                    case axes2Ptr('get', [], dSeriesOffset)
+                    case axes3Ptr('get', [], dSeriesOffset)
 
                     otherwise
                         return;
@@ -320,7 +322,7 @@ function setRoiToolbar(sVisible)
                     dLength = computeRoiLineLength(a);
                     a.Label = [num2str(dLength) ' mm'];
 
-                    addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+                    addRoi(a, dSeriesOffset, 'Unspecified');
 
 %                    setVoiRoiSegPopup();
 
@@ -344,6 +346,10 @@ function setRoiToolbar(sVisible)
 
 %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
                     refreshImages();
+
+                    if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+                        plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+                    end
 
                     if strcmpi(get(tContinuous, 'State'), 'off')
                         doWhileContinuous = false;
@@ -375,6 +381,8 @@ function setRoiToolbar(sVisible)
             set(t, 'State', 'off');
             return;
         end
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
 %               releaseRoiAxeWait(t);
         robotReleaseKey();
@@ -437,14 +445,14 @@ function setRoiToolbar(sVisible)
                 robotClick();
 %                 gca = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
 
-                pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+                pAxe = getAxeFromMousePosition(dSeriesOffset);
 
                 switch pAxe
 
-                    case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axePtr('get', [], dSeriesOffset)
+                    case axes1Ptr('get', [], dSeriesOffset)
+                    case axes2Ptr('get', [], dSeriesOffset)
+                    case axes3Ptr('get', [], dSeriesOffset)
 
                     otherwise
                         return;
@@ -487,7 +495,7 @@ function setRoiToolbar(sVisible)
                         return;
                     end
 
-                    addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+                    addRoi(a, dSeriesOffset, 'Unspecified');
 
 %                    setVoiRoiSegPopup();
 
@@ -506,6 +514,10 @@ function setRoiToolbar(sVisible)
 
 %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
                     refreshImages();
+
+                    if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+                        plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+                    end
 
                     if strcmpi(get(tContinuous, 'State'), 'off')
                         doWhileContinuous = false;
@@ -536,6 +548,8 @@ function setRoiToolbar(sVisible)
             set(t2, 'State', 'off');
             return;
         end
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
 %               releaseRoiAxeWait(t2);
         robotReleaseKey();
@@ -592,14 +606,14 @@ function setRoiToolbar(sVisible)
 
                 robotClick();
 
-                pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+                pAxe = getAxeFromMousePosition(dSeriesOffset);
 
                 switch pAxe
 
-                    case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axePtr('get', [], dSeriesOffset)
+                    case axes1Ptr('get', [], dSeriesOffset)
+                    case axes2Ptr('get', [], dSeriesOffset)
+                    case axes3Ptr('get', [], dSeriesOffset)
 
                     otherwise
                         return;
@@ -641,7 +655,7 @@ function setRoiToolbar(sVisible)
 %test addlistener(he,'MovingROI', @(varargin)editorROIMoving(he, hf));
 %test addlistener(he,'ROIMoved', @(varargin)editFreehand(hf, he));
 
-                addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+                addRoi(a, dSeriesOffset, 'Unspecified');
 
 %                    setVoiRoiSegPopup();
 
@@ -659,6 +673,10 @@ function setRoiToolbar(sVisible)
 
 %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
                 refreshImages();
+
+                if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+                end
 
                 if strcmpi(get(tContinuous, 'State'), 'off')
                     doWhileContinuous = false;
@@ -720,6 +738,8 @@ function setRoiToolbar(sVisible)
             return;
         end
 
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
 %             releaseRoiAxeWait(t5);
         robotReleaseKey();
 
@@ -776,14 +796,14 @@ function setRoiToolbar(sVisible)
 
                 robotClick();
 
-                pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+                pAxe = getAxeFromMousePosition(dSeriesOffset);
 
                 switch pAxe
 
-                    case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axePtr('get', [], dSeriesOffset)
+                    case axes1Ptr('get', [], dSeriesOffset)
+                    case axes2Ptr('get', [], dSeriesOffset)
+                    case axes3Ptr('get', [], dSeriesOffset)
 
                     otherwise
                         return;
@@ -821,7 +841,7 @@ function setRoiToolbar(sVisible)
                         return;
                     end
 
-                    addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+                    addRoi(a, dSeriesOffset, 'Unspecified');
 
 %                    setVoiRoiSegPopup();
 
@@ -839,6 +859,10 @@ function setRoiToolbar(sVisible)
 
 %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll  );
                     refreshImages();
+
+                    if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+                        plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+                    end
 
                     if strcmpi(get(tContinuous, 'State'), 'off')
                         doWhileContinuous = false;
@@ -867,6 +891,8 @@ function setRoiToolbar(sVisible)
             set(t3, 'State', 'off');
             return;
         end
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
 %             releaseRoiAxeWait(t3);
         robotReleaseKey();
@@ -924,14 +950,14 @@ function setRoiToolbar(sVisible)
 
                 robotClick();
 
-                pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+                pAxe = getAxeFromMousePosition(dSeriesOffset);
 
                 switch pAxe
 
-                    case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axePtr('get', [], dSeriesOffset)
+                    case axes1Ptr('get', [], dSeriesOffset)
+                    case axes2Ptr('get', [], dSeriesOffset)
+                    case axes3Ptr('get', [], dSeriesOffset)
 
                     otherwise
                         return;
@@ -971,7 +997,7 @@ function setRoiToolbar(sVisible)
                     return;
                 end
 
-                addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+                addRoi(a, dSeriesOffset, 'Unspecified');
 
 %                    setVoiRoiSegPopup();
 
@@ -989,6 +1015,10 @@ function setRoiToolbar(sVisible)
 
 %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
                 refreshImages();
+
+                if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+                end
 
                 if strcmpi(get(tContinuous, 'State'), 'off')
                     doWhileContinuous = false;
@@ -1018,6 +1048,8 @@ function setRoiToolbar(sVisible)
             set(t6, 'State', 'off');
             return;
         end
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
         robotReleaseKey();
 
@@ -1074,14 +1106,14 @@ function setRoiToolbar(sVisible)
 
                 robotClick();
 
-                pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+                pAxe = getAxeFromMousePosition(dSeriesOffset);
 
                 switch pAxe
 
-                    case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axePtr('get', [], dSeriesOffset)
+                    case axes1Ptr('get', [], dSeriesOffset)
+                    case axes2Ptr('get', [], dSeriesOffset)
+                    case axes3Ptr('get', [], dSeriesOffset)
 
                     otherwise
                         return;
@@ -1119,7 +1151,7 @@ function setRoiToolbar(sVisible)
                     return;
                 end
 
-                addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+                addRoi(a, dSeriesOffset, 'Unspecified');
 
 %                    setVoiRoiSegPopup();
 
@@ -1137,6 +1169,10 @@ function setRoiToolbar(sVisible)
 
 %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
                 refreshImages();
+
+                if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+                end
 
                 if strcmpi(get(tContinuous, 'State'), 'off')
                     doWhileContinuous = false;
@@ -1166,6 +1202,8 @@ function setRoiToolbar(sVisible)
             set(t11, 'State', 'off');
             return;
         end
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
         robotReleaseKey();
 
@@ -1241,14 +1279,14 @@ function setRoiToolbar(sVisible)
                 set(fiMainWindowPtr('get'), 'Pointer', 'watch');
                 drawnow;
 
-                pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+                pAxe = getAxeFromMousePosition(dSeriesOffset);
 
                 switch pAxe
 
-                    case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                    case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axePtr('get', [], dSeriesOffset)
+                    case axes1Ptr('get', [], dSeriesOffset)
+                    case axes2Ptr('get', [], dSeriesOffset)
+                    case axes3Ptr('get', [], dSeriesOffset)
 
                     otherwise
                         return;
@@ -1269,19 +1307,27 @@ function setRoiToolbar(sVisible)
                 atMetaData = dicomMetaData('get');
                 dSliceThickness = computeSliceSpacing(atMetaData);
 
+                aDicomBuffer = dicomBuffer('get', [], dSeriesOffset);
+
                 switch(pAxe)
 
-                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) % Coronal
+                    case axes1Ptr('get', [], dSeriesOffset) % Coronal
                         xPixel = atMetaData{1}.PixelSpacing(1);
                         yPixel = dSliceThickness;
+                       
+                        dBufferSize = size(aDicomBuffer, 1);
 
-                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) % Sagittal
+                    case axes2Ptr('get', [], dSeriesOffset) % Sagittal
                         xPixel = atMetaData{1}.PixelSpacing(2);
                         yPixel = dSliceThickness;
+
+                        dBufferSize = size(aDicomBuffer, 2);
 
                     otherwise % Axial
                         xPixel = atMetaData{1}.PixelSpacing(1);
                         yPixel = atMetaData{1}.PixelSpacing(2);
+
+                        dBufferSize = size(aDicomBuffer, 3);
                 end
 
                 dSphereDiameter = sphereDefaultDiameter('get'); % in mm
@@ -1302,7 +1348,7 @@ function setRoiToolbar(sVisible)
                     dSemiAxesY = yPixel/2;
                 end
 
-                asTag =[];
+                asTag = cell(dBufferSize, 1);
 
                 sTag = num2str(randi([-(2^52/2),(2^52/2)],1));
 
@@ -1343,7 +1389,7 @@ function setRoiToolbar(sVisible)
                     return;
                 end
 
-                addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+                addRoi(a, dSeriesOffset, 'Unspecified');
 
     %                    setVoiRoiSegPopup();
 
@@ -1371,13 +1417,11 @@ function setRoiToolbar(sVisible)
 
                 dRadius = dSphereDiameter/xPixel/2; % In pixel
 
-                aDicomBuffer = dicomBuffer('get');
-
                 switch pAxe
 
                     % Coronal axe
 
-                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes1Ptr('get', [], dSeriesOffset)
 
                         sPlane = 'coronal';
 
@@ -1389,12 +1433,10 @@ function setRoiToolbar(sVisible)
 
                         dPixelRatio = xPixel/yPixel;
 
-                        dBufferSize = size(aDicomBuffer, 1);
-
 
                     % Sagittal axe
 
-                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes2Ptr('get', [], dSeriesOffset)
 
                         sPlane = 'sagittal';
 
@@ -1405,8 +1447,6 @@ function setRoiToolbar(sVisible)
                         zPixelOffset = clickedPtY;
 
                         dPixelRatio = xPixel/yPixel;
-
-                        dBufferSize = size(aDicomBuffer, 2);
 
                      % Axial axe
 
@@ -1420,13 +1460,12 @@ function setRoiToolbar(sVisible)
                         zPixelOffset = dSliceNb;
 
                         dPixelRatio = xPixel/yPixel;
-
-                        dBufferSize = size(aDicomBuffer, 3);
-
                 end
 
 
                 aSphereMask = getSphereMask(aDicomBuffer, xPixelOffset, yPixelOffset, zPixelOffset, dRadius);
+
+                clear aDicomBuffer;
 
                 for zz=1:dBufferSize
 
@@ -1500,16 +1539,20 @@ function setRoiToolbar(sVisible)
                                                );
                         a.FaceAlpha = roiFaceAlphaValue('get');
 
-                        addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+                        addRoi(a, dSeriesOffset, 'Unspecified');
 
-                        asTag{numel(asTag)+1} = sTag;
+                        asTag{zz+1} = sTag;
 
                     end
                 end
 
-                createVoiFromRois(get(uiSeriesPtr('get'), 'Value'), asTag, sprintf('Sphere %d mm', dSphereDiameter), [0 1 1], 'Unspecified');
+                asTag = asTag(~cellfun(@isempty, asTag));
+
+                createVoiFromRois(dSeriesOffset, asTag, sprintf('Sphere %d mm', dSphereDiameter), [0 1 1], 'Unspecified');
 
                 setVoiRoiSegPopup();
+            
+                plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
 
                 sliceNumber('set', sPlane, dSliceNb);
 
@@ -1527,7 +1570,7 @@ function setRoiToolbar(sVisible)
             progressBar(1, 'Error:drawsphereCallback()');
         end
 
-        if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
+        if ~isempty(voiTemplate('get', dSeriesOffset))
             set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on');
             set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'on');
             set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'on');
@@ -2123,12 +2166,19 @@ end
                         return;
                     end
 
+
+
 %                     if strcmpi(get(tContinuous, 'State'), 'off')
                         doWhileContinuous = false;
 %                     end
 
          %       end
+                try 
 
+                sMainWindowPtrPointer = get(fiMainWindowPtr('get'), 'Pointer');    
+                set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+                drawnow;
+                
                 roiSetAxeBorder(false);
 
                 windowButton('set', 'up');
@@ -2138,6 +2188,14 @@ end
                 splitContour(pAxe, pRoiPtr);
 
                 delete(pRoiPtr);
+
+                catch 
+                    progressBar(1, 'Error:draw2DscissorCallback()');
+
+                end
+
+                set(fiMainWindowPtr('get'), 'Pointer', sMainWindowPtrPointer);
+                drawnow;
             end
         end
 
@@ -2324,6 +2382,11 @@ end
             end
 
             roiTemplate('set', dSeriesOffset, atRoiInput);
+
+            if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+            end
 
             roiSetAxeBorder(false);
 

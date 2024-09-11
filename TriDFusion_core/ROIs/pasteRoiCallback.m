@@ -30,7 +30,9 @@ function pasteRoiCallback(~, ~)
     windowButton('set', 'up'); % Patch for Linux
 
     ptrRoi = copyRoiPtr('get');
- 
+
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
     if isempty(ptrRoi)
         return;
     end
@@ -39,7 +41,7 @@ function pasteRoiCallback(~, ~)
         return;
     end
     
-    pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+    pAxe = getAxeFromMousePosition(dSeriesOffset);
 
     if isempty(pAxe)
         return;
@@ -96,7 +98,7 @@ function pasteRoiCallback(~, ~)
 
             uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
-            addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
 
         case lower('images.roi.freehand')
@@ -141,7 +143,7 @@ function pasteRoiCallback(~, ~)
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
-            addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
 
         case lower('images.roi.polygon')
@@ -183,7 +185,7 @@ function pasteRoiCallback(~, ~)
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
 
-            addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
             
 
         case lower('images.roi.circle')
@@ -215,7 +217,7 @@ function pasteRoiCallback(~, ~)
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
-            addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
             
         case lower('images.roi.ellipse')
@@ -251,12 +253,12 @@ function pasteRoiCallback(~, ~)
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
-            addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
             
             if strcmpi(pRoi.UserData, 'Sphere')
 
-                atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-                atVoi = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+                atRoi = roiTemplate('get', dSeriesOffset);
+                atVoi = voiTemplate('get', dSeriesOffset);
                 
                 aRoiTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {ptrRoi.Tag} );
                 dFirstRoiOffset = find(aRoiTagOffset, 1); 
@@ -332,7 +334,7 @@ function pasteRoiCallback(~, ~)
                                                            'Visible'            , 'off' ...
                                                            );
 
-                                    addRoi(a, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+                                    addRoi(a, dSeriesOffset, 'Unspecified');
 
                                     asTag{numel(asTag)+1} = sTag;    
 
@@ -341,7 +343,7 @@ function pasteRoiCallback(~, ~)
                             end
                         end
                         
-                        createVoiFromRois(get(uiSeriesPtr('get'), 'Value'), asTag, sprintf('Sphere %s mm', num2str(atRoi{dFirstRoiOffset}.MaxDistances.MaxXY.Length)), ptrRoi.Color, 'Unspecified');
+                        createVoiFromRois(dSeriesOffset, asTag, sprintf('Sphere %s mm', num2str(atRoi{dFirstRoiOffset}.MaxDistances.MaxXY.Length)), ptrRoi.Color, 'Unspecified');
 
                         setVoiRoiSegPopup();
 
@@ -392,13 +394,17 @@ function pasteRoiCallback(~, ~)
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
-            addRoi(pRoi, get(uiSeriesPtr('get'), 'Value'), 'Unspecified');
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
         otherwise
             return;
     end
-    
 
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+        plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+    end
+              
 %    setVoiRoiSegPopup();
 
 

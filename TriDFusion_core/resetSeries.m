@@ -167,11 +167,14 @@ function resetSeries(dOffset, bInitDisplay)
     asDescription{dOffset} = sprintf('%s %s', sInitSeriesDescription, sInitSeriesDate);
     
     seriesDescription('set', asDescription);
-           
+
+    set(uiSeriesPtr('get'), 'String', asDescription);
+    set(uiFusedSeriesPtr('get'), 'String', asDescription);
+
     set(uiSeriesPtr('get'), 'Value', dOffset);
 
-    aCurrentBuffer   = dicomBuffer('get');
-    aCurrentMeteData = dicomMetaData('get');
+    aCurrentBuffer   = dicomBuffer('get', [], dOffset);
+    aCurrentMeteData = dicomMetaData('get', [], dOffset);
 
     bImageIsResampled = false;
     if numel(aBuffer) ~= numel(aCurrentBuffer)

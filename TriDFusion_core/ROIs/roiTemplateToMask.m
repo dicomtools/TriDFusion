@@ -30,9 +30,9 @@ function aLogicalMask = roiTemplateToMask(tRoi, aSlice)
     aPosition = tRoi.Position;
     sType     = tRoi.Type;
 
-    switch sType
+    switch lower(sType)
         
-        case lower('images.roi.line')
+        case 'images.roi.line'
                        
             xValues = int32(aPosition(:,1));
             yValues = int32(aPosition(:,2));
@@ -40,7 +40,7 @@ function aLogicalMask = roiTemplateToMask(tRoi, aSlice)
             rectMask(xValues, yValues)= 1;
             aLogicalMask = logical(rectMask);
             
-        case lower('images.roi.rectangle')
+        case 'images.roi.rectangle'
 
 %            rectMask = zeros(size(aSlice, 1), size(aSlice, 2)); % generate grid of ones
 
@@ -63,7 +63,7 @@ function aLogicalMask = roiTemplateToMask(tRoi, aSlice)
             xy = tRoi.Vertices;
             aLogicalMask = poly2mask(xy(:, 1), xy(:, 2), size(aSlice,1), size(aSlice,2));
 
-        case lower('images.roi.ellipse')
+        case 'images.roi.ellipse'
             
 %            dRotationAngle = tRoi.RotationAngle+270;
 %            aSemiAxes      = tRoi.SemiAxes;
@@ -89,7 +89,7 @@ function aLogicalMask = roiTemplateToMask(tRoi, aSlice)
 %            aLogicalMask = poly2mask(x(:),y(:), size(aSlice,1), size(aSlice,2));
      
                        
-        case lower('images.roi.circle')
+        case 'images.roi.circle'
             
 %            dRadius = tRoi.Radius;
 

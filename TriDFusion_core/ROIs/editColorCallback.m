@@ -27,6 +27,8 @@ function editColorCallback(hObject,~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
     sColor = uisetcolor([hObject.UserData.Color],'Select a color');
     
     atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
@@ -47,7 +49,12 @@ function editColorCallback(hObject,~)
             atRoiInput{dTagOffset}.Object.Color = sColor;
         end
 
-        roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+        roiTemplate('set', dSeriesOffset, atRoiInput);
     end
-                      
+
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+        plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+    end
+
 end

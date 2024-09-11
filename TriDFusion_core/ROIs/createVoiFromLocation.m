@@ -27,7 +27,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    try
+%     try
 
     switch (pAxe)
 
@@ -64,7 +64,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
     aBuffer(aLogicalMask==0) = min(aBuffer, [], 'all'); % Apply constraint
 
     % Define the size of the neighborhood
-    neighborhoodSize = 2; % 1 for 3x3, 2 for 5x5, etc.
+    neighborhoodSize = 3; % 1 for 3x3, 2 for 5x5, etc.
 
     switch (pAxe)
 
@@ -180,11 +180,12 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
 
     end
 
-    dImageMax = max(aBuffer, [], 'all');
+%     dImageMin = min(aBuffer, [], 'all');
+%     dImageMax = max(aBuffer, [], 'all');
 
-    dValueRatio = dValue / dImageMax;
+%     dValueRatio = dValue / dImageMax;
 %     dScalingFactor = 177.75; 
-    dScalingFactor = 20; 
+%     dScalingFactor = 20; 
 
        dPreSeg = max(aBuffer, [], 'all') * clickVoiPreSegmentationValue('get') / 100;
 
@@ -196,16 +197,23 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
 %     end
 
      aSlice(aSlice<=dPreSeg) = 0;
+     aSlice(aSlice<=dValue ) = 0;
      aSlice(aSlice~=0) =1; 
 
-     boundary = bwboundaries(imbinarize(aSlice), 8, 'noholes');
+     boundary = bwboundaries(aSlice, 8, 'noholes');
 %     boundary = bwboundaries(imbinarize(aSlice,graythresh(aSlice)), 8, 'noholes');
+ 
 
     if ~isempty(boundary)
 
-        aBuffer(aBuffer<=dPreSeg)=min(aBuffer, [], 'all');
-
         bBreak = false;
+
+        aMask = zeros(size(aBuffer));
+
+%         aBuffer(aBuffer<=dPreSeg)=0;
+% 
+%         aBuffer(aBuffer<=dValue)=0;
+%         aBuffer(aBuffer~=0) =1;  
 
         xmin=0.5;
         xmax=1;
@@ -219,11 +227,15 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
             sLabel = sprintf('MIN-MAX-%d-%d-VOI%d', dMinTreshold*100, dMaxTreshold*100, numel(voiTemplate('get', dSeriesOffset))+1);
         end
 
-        asTag = [];
+%         asTag = [];
+        asTag = cell(1000, 1);
+
+        dTagOffset=1;
 
         for jj=1:numel(boundary)
 
             if cancelCreateVoiRoiPanel('get') == true
+                % bBreak = true;
                 break;
             end
 
@@ -231,27 +243,33 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
 
             if inBoundary
 % 
-                aBuffer(aBuffer<=dValue)=0;
-                aBuffer(aBuffer~=0) =1;     
+                aSegmentedBuffer = aBuffer;
 
-                boundary3D = bwconncomp(imbinarize(aBuffer), 6);
+                aSegmentedBuffer(aSegmentedBuffer<=dPreSeg)=0;   
+                aSegmentedBuffer(aSegmentedBuffer<=dValue )=0;
+                aSegmentedBuffer(aSegmentedBuffer~=0)=1;      
+
+%                 boundary3D = bwconncomp(aSegmentedBuffer, 6);
+                boundary3D = bwconncomp(aSegmentedBuffer, conndef(3,'maximal'));
+
                 switch (pAxe)
                     case axePtr('get', [], dSeriesOffset) % 2D
-                         linearIndex = sub2ind(size(aBuffer), ptX, ptY, 1);
+                         linearIndex = sub2ind(aMaskSize, ptX, ptY, 1);
 
                     case axes1Ptr('get', [], dSeriesOffset) % Coronal
-                         linearIndex = sub2ind(size(aBuffer), iCoronal, ptX, ptY);
+                         linearIndex = sub2ind(aMaskSize, iCoronal, ptX, ptY);
 
                     case axes2Ptr('get', [], dSeriesOffset) % Sagittal
-                         linearIndex = sub2ind(size(aBuffer), ptX, iSagittal, ptY);
+                         linearIndex = sub2ind(aMaskSize, ptX, iSagittal, ptY);
 
                    case axes3Ptr('get', [], dSeriesOffset) % Axial
-                        linearIndex = sub2ind(size(aBuffer), ptY, ptX, iAxial);
+                        linearIndex = sub2ind(aMaskSize, ptY, ptX, iAxial);
                 end
 
                 for kk=1:numel(boundary3D.PixelIdxList)
 
                     if cancelCreateVoiRoiPanel('get') == true
+                        bBreak = true;
                         break;
                     end
 
@@ -260,18 +278,19 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
 
                     if isInsideComponent
 
-                        aBuffer = dicomBuffer('get', [], dSeriesOffset);
+                        aSegmentedBuffer = aBuffer;
     
-                        dVoiMax = max(aBuffer(boundary3D.PixelIdxList{kk}), [], 'all');    
+                        dVoiMax = max(aSegmentedBuffer(boundary3D.PixelIdxList{kk}), [], 'all');    
 
-                        aMask=zeros(size(aBuffer));
+%                         aMask=zeros(size(aSegmentedBuffer));
+                        aMask(:) = 0;
                         aMask(boundary3D.PixelIdxList{kk})=1; 
 
                         if bRelativeToMax == true
-                            aMask(aBuffer<=(dVoiMax*dMaxTreshold)) = 0;
+                            aMask(aSegmentedBuffer<=(dVoiMax*dMaxTreshold)) = 0;
                         else
-                            aMask(aBuffer>=(dVoiMax*dMaxTreshold)) = 0;
-                            aMask(aBuffer<=(dVoiMax*dMinTreshold)) = 0;
+                            aMask(aSegmentedBuffer>=(dVoiMax*dMaxTreshold)) = 0;
+                            aMask(aSegmentedBuffer<=(dVoiMax*dMinTreshold)) = 0;
                         end
                     
                         % Get the subscripts of the connected component voxels
@@ -297,7 +316,8 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
                         for i = 1:numel(uniqueZ)
 
                             if cancelCreateVoiRoiPanel('get') == true
-                                break;
+                               bBreak = true;
+                               break;
                             end
 
                             % Get the subscripts corresponding to the current uniqueZ value
@@ -339,6 +359,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
                             for ii = 1:numel(B)
 
                                 if cancelCreateVoiRoiPanel('get') == true
+                                    bBreak = true;
                                     break;
                                 end
                                 
@@ -382,31 +403,52 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
                             
                                 uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');          
 
-                                asTag{numel(asTag)+1} = sTag;
+%                                 asTag{numel(asTag)+1} = sTag;
+                                asTag{dTagOffset} = sTag;
+                                dTagOffset = dTagOffset+1;
 
                                 drawnow limitrate;
-                        
+                                
+                                if dTagOffset > numel(asTag)
+                                    bBreak = true;
+                                    break;
+                                end
+
+                                if bBreak == true
+                                    break;
+                                end                        
                             end
+
+                            if bBreak == true
+                                break;
+                            end                        
                         end
                         
-                        clear aMask;
+                        % clear aMask;
 
-                        bBreak = true;
-                        break;    
+                        % bBreak = true;
+                        % break;    
+                    end
+
+                    if bBreak == true
+                        break;
                     end
                 end
 
-                if bBreak == true
-                    break;
-                end
-
+                clear aSegmentedBuffer;
             end
-            
+
+            if bBreak == true
+                break;
+            end            
         end
+
+        asTag = asTag(~cellfun(@isempty, asTag));
 
         if ~isempty(asTag)
             createVoiFromRois(dSeriesOffset, asTag, sLabel, aColor, sLesionType);
             setVoiRoiSegPopup();
+            plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
         end
 
         switch (pAxe)
@@ -423,13 +465,14 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dMinTreshold, dMaxTresho
 
         refreshImages();
 
+        clear aMask;
     end
 
     progressBar(1, 'Ready');      
 
-    catch
-        progressBar(1, 'Error:createVoiFromLocation()');          
-    end  
+%     catch
+%         progressBar(1, 'Error:createVoiFromLocation()');          
+%     end  
 
     set(fiMainWindowPtr('get'), 'Pointer', pMousePointer);
     drawnow;  

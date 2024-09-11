@@ -56,8 +56,11 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
         dImageSize = aImageSize(3);
     end
      
-    asTag = [];
-        
+    asTag = cell(5000, 1);
+    dTagOffset =1;
+
+    bBreak = false;
+
     for mm=1: dMaskSize
         
         if mm > dImageSize
@@ -180,16 +183,32 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
 
                %     set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
 
-                    asTag{numel(asTag)+1} = sTag;
+                    asTag{dTagOffset} = sTag;
+                    dTagOffset = dTagOffset+1;
+
+                    if dTagOffset > numel(asTag)
+                        bBreak = true;
+                        break;
+                    end
                 end
-            end
-            
+            end        
         end
+
+        if bBreak == true
+            break;
+        end          
     end
     
+    asTag = asTag(~cellfun(@isempty, asTag));
+
     if ~isempty(asTag)
+
         createVoiFromRois(dSeriesOffset, asTag, sLabel, aColor, sLesionType);
+
         setVoiRoiSegPopup();
+
+        plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+    
     end
     
     progressBar(1, 'Ready' );      

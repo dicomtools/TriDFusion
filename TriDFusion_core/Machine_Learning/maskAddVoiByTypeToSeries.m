@@ -68,7 +68,10 @@ function maskAddVoiByTypeToSeries(aImage, aMask, atMetaData, dSeriesOffset, dSma
 
         BW(CC.PixelIdxList{bb}) = aBWImage(CC.PixelIdxList{bb});
 
-        asTag = [];
+        asTag = cell(5000, 1);
+        dTagOffset =1;
+
+        bBreak = false;
 
         xmin=0.5;
         xmax=1;
@@ -154,13 +157,26 @@ function maskAddVoiByTypeToSeries(aImage, aMask, atMetaData, dSeriesOffset, dSma
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
                                        
-                asTag{numel(asTag)+1} = sTag;
+                asTag{dTagOffset} = sTag;
+                dTagOffset = dTagOffset+1;
+                
+                if dTagOffset > numel(asTag)
+                    bBreak = true;
+                    break;
+                end
 
                 if viewRoiPanel('get') == true
                     drawnow limitrate;
                 end
             end
+
+            if bBreak == true
+                break;
+            end
+
         end
+
+        asTag = asTag(~cellfun(@isempty, asTag));
 
         if ~isempty(asTag)
 
@@ -177,6 +193,14 @@ function maskAddVoiByTypeToSeries(aImage, aMask, atMetaData, dSeriesOffset, dSma
     end
 
     clear aBWImage;
+
+    setVoiRoiSegPopup();
+    
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+        plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+    end
+
 end
 
 function  sLesionType = getMaskLessionType(aMask, bType)

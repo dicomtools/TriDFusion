@@ -369,7 +369,7 @@ function setPlaybackToolbar(sVisible)
                             if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 4) ~= 1
                                 screenCaptureFrame('Next');
                             else
-                                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'))), 3) ~=1
+                                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
                                     oneFrame(hObject.TooltipString);
                                 end
                             end
@@ -398,7 +398,7 @@ function setPlaybackToolbar(sVisible)
                                 if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 4) ~= 1
                                     screenCaptureFrame('Previous');
                                 else
-                                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'))), 3) ~=1
+                                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
                                         oneFrame(hObject.TooltipString);
                                     end
                                 end

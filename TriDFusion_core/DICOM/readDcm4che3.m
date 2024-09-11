@@ -33,16 +33,16 @@ if 0
 
     try
         
-     aReshaped = reshape(info.din.pixeldata, info.din.cols, info.din.rows);
-     aImage    = cast(zeros(info.din.rows, info.din.cols), class(info.din.pixeldata));
+     aReshaped = reshape(info.din.pixeldata, info.Columns, info.Rows);
+     aImage    = cast(zeros(info.Rows, info.Columns), class(info.din.pixeldata));
      
-     for i =1 :info.din.rows-1
-        for j=1 :info.din.cols-1
-            aImage(i, j)= aReshaped(info.din.cols-j,i);
+     for i =1 :info.Rows-1
+        for j=1 :info.Columns-1
+            aImage(i, j)= aReshaped(info.Columns-j,i);
         end
      end
 
-    aImage = aImage(1:dinfo.in.rows, info.din.cols:-1:1);
+    aImage = aImage(1:dinfo.in.rows, info.Columns:-1:1);
     clear aReshaped;
     
     catch

@@ -352,6 +352,11 @@ function initRoi()
 
     setVoiRoiSegPopup();
 
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+        plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+    end
+
     progressBar(1, 'Ready');
 
 end

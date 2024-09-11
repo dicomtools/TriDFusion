@@ -337,7 +337,15 @@ function clearDisplay()
         clear uiTraWindow;
         uiTraWindowPtr('set', []);
     end
-    
+
+    ptrPlot = plotMipPtr('get');
+    if ~isempty(ptrPlot)
+        for pp=1:numel(ptrPlot)
+            delete(ptrPlot{pp});
+        end
+        plotMipPtr('set', []);    
+    end
+
     imMipPtr  ('reset');    
     imMipFcPtr('reset');    
     imMipFPtr ('reset');    

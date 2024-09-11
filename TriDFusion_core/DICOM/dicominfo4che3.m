@@ -282,11 +282,11 @@ function info = dicominfo4che3(fileInput)
     info.BitsStored    = dataset.getInt(org.dcm4che3.data.Tag.BitsStored, 0);
     info.HighBit       = dataset.getInt(org.dcm4che3.data.Tag.HighBit, 0);
 
-%    if info.HighBit == info.BitsStored -1 % 16 bits
-%        info.din.pixeldata  = uint16(dataset.getInts(org.dcm4che3.data.Tag.PixelData));
-%    else
-%        info.din.pixeldata  = dataset.getInts(org.dcm4che3.data.Tag.PixelData);
-%    end
+   % if info.HighBit == info.BitsStored -1 % 16 bits
+   %     info.din.pixeldata  = uint16(dataset.getInts(org.dcm4che3.data.Tag.PixelData));
+   % else
+   %     info.din.pixeldata  = dataset.getInts(org.dcm4che3.data.Tag.PixelData);
+   % end
 
     % DetectorInformationSequence
 

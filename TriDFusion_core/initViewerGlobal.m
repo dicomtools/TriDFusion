@@ -226,6 +226,8 @@ function initViewerGlobal()
     axePtr  ('reset');
     axefcPtr('reset');
     axefPtr ('reset');
+    
+    plotMipPtr('set', []);
 
     imCoronalPtr ('reset');
     imSagittalPtr('reset');

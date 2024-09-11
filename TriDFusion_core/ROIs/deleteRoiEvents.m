@@ -29,21 +29,21 @@ function deleteRoiEvents(hObject, ~)
 
     sRoiTag = hObject.Tag;
 
-    dSerieOffset = get(uiSeriesPtr('get'), 'Value');
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-    atRoiInput = roiTemplate('get', dSerieOffset);
-    atVoiInput = voiTemplate('get', dSerieOffset);  
+    atRoiInput = roiTemplate('get', dSeriesOffset);
+    atVoiInput = voiTemplate('get', dSeriesOffset);  
             
     % Clear it constraint
 
-    [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dSerieOffset);
+    [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dSeriesOffset);
 
     if ~isempty(asConstraintTagList)
 
         dConstraintOffset = find(contains(asConstraintTagList, {sRoiTag}));
 
         if ~isempty(dConstraintOffset) % tag exist
-             roiConstraintList('set', dSerieOffset,  asConstraintTagList{dConstraintOffset}, asConstraintTypeList{dConstraintOffset});
+             roiConstraintList('set', dSeriesOffset,  asConstraintTagList{dConstraintOffset}, asConstraintTypeList{dConstraintOffset});
         end    
     end
     
@@ -78,7 +78,7 @@ function deleteRoiEvents(hObject, ~)
 
             atRoiInput(dTagOffset) = [];
            
-            roiTemplate('set', dSerieOffset, atRoiInput);  
+            roiTemplate('set', dSeriesOffset, atRoiInput);  
 
   %          atRoiInput(cellfun(@isempty, atRoiInput)) = [];
 
@@ -101,7 +101,7 @@ function deleteRoiEvents(hObject, ~)
                         else
                             
 if 0 % Need to improve the operation speed  
-                            if ~isempty(atRoiInput)               
+                           if ~isempty(atRoiInput)               
                 
                                 dNbTags = numel(atVoiInput{vo}.RoisTag);
                 
@@ -130,8 +130,8 @@ end
                 end
 
   %             atVoiInput(cellfun(@isempty, atVoiInput)) = [];
-               roiTemplate('set', dSerieOffset, atRoiInput);  
-               voiTemplate('set', dSerieOffset, atVoiInput);                                        
+               roiTemplate('set', dSeriesOffset, atRoiInput);  
+               voiTemplate('set', dSeriesOffset, atVoiInput);                                        
             end
 
             % Refresh contour popup
@@ -139,6 +139,11 @@ end
             setVoiRoiSegPopup();
 
         end
+    end
+
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+        plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
     end
 
 end
