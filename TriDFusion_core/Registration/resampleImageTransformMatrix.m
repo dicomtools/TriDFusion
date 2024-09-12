@@ -56,9 +56,12 @@ function [resampImage, atDcmMetaData, xMoveOffset, yMoveOffset, zMoveOffsetRemai
 
     if isequal(dimsRef, dimsDcm)
         
-        if isequal(Rdcm.PixelExtentInWorldX, Rref.PixelExtentInWorldX) && ...
-           isequal(Rdcm.PixelExtentInWorldY, Rref.PixelExtentInWorldY) && ...
-           isequal(Rdcm.PixelExtentInWorldZ, Rref.PixelExtentInWorldZ)
+        dTolerance = 1e-5;  % Adjust this value based on the acceptable margin
+
+        % Check if pixel extents are equal within the specified tolerance
+        if abs(Rdcm.PixelExtentInWorldX - Rref.PixelExtentInWorldX) < dTolerance && ...
+           abs(Rdcm.PixelExtentInWorldY - Rref.PixelExtentInWorldY) < dTolerance && ...
+           abs(Rdcm.PixelExtentInWorldZ - Rref.PixelExtentInWorldZ) < dTolerance
 
             resampImage = dcmImage;
             return;           

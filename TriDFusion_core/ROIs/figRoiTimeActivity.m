@@ -27,6 +27,7 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    gaAcquisitionDate = [];
     gaAcquisitionTime = [];
     gtxtRoiList = [];
 
@@ -348,7 +349,43 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
           
         atInputTemplate = inputTemplate('get');
 
-        sSeriesInstanceUID = atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID;
+        if gateUseSeriesUID('get') == false
+              
+            % Extract the number of elements in atInputTemplate
+            nElements = numel(atInputTemplate);
+            
+            % Initialize arrays to store datetime values for sorting
+            aDatetimeArray = datetime.empty(nElements, 0);
+            
+            % Loop through each element to extract and convert SeriesDate and SeriesTime
+            for i = 1:nElements
+                % Extract SeriesDate and SeriesTime
+                sSeriesDate = atInputTemplate(i).atDicomInfo{1}.SeriesDate; % 'YYYYMMDD' format
+                sSeriesTime = atInputTemplate(i).atDicomInfo{1}.SeriesTime; % 'HHMMSS' format
+
+                if contains(sSeriesDate,'.')                                      
+                    sSeriesDate = extractBefore(sSeriesDate,'.');
+                end
+
+                if contains(sSeriesTime,'.')                                      
+                    sSeriesTime = extractBefore(sSeriesTime,'.');
+                end
+
+                % Combine SeriesDate and SeriesTime into a single datetime object
+                aDatetimeArray(i) = datetime([sSeriesDate sSeriesTime], 'InputFormat', 'yyyyMMddHHmmss');
+            end
+            
+            % Sort datetimeArray and get sorting indices
+            [~, aSortIdx] = sort(aDatetimeArray);
+
+            % Sort atInputTemplate based on sorted indices
+            atInputTemplate = atInputTemplate(aSortIdx);  
+
+            sSeriesInstanceUID = atInputTemplate(1).atDicomInfo{1}.SeriesInstanceUID;
+        else
+            sSeriesInstanceUID = atInputTemplate(dSeriesOffset).atDicomInfo{1}.SeriesInstanceUID;
+        end
+
 
         try
 
@@ -376,11 +413,14 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
 
         for aa=1:numel(atVoiRoiTag)
 
+            gaAcquisitionDate = [];
             gaAcquisitionTime = [];
+
             aAggregate = [];
             aTime = [];
 
             bFoundTag = false;
+           
 
             for bb=1:numel(atVoiInput)
 
@@ -393,7 +433,13 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
                         if strcmpi(sSeriesInstanceUID, atInputTemplate(sr).atDicomInfo{1}.SeriesInstanceUID) || ... % Same series
                            gateUseSeriesUID('get') == false
 
-                            aInputBuffer = dicomBuffer('get', [], sr);
+                            if gateUseSeriesUID('get') == false
+                                dCurrentSeriesOffset = aSortIdx(sr);
+                            else
+                                dCurrentSeriesOffset = sr;
+                            end
+
+                            aInputBuffer = dicomBuffer('get', [], dCurrentSeriesOffset);
 
                             if isempty(aInputBuffer)
 
@@ -402,50 +448,50 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
                                 switch lower(imageOrientation('get'))
                     
                                     case'axial'
-                                        aInputBuffer = aInputBuffer{sr};                   
+                                        aInputBuffer = aInputBuffer{dCurrentSeriesOffset};                   
                                         
                                     case 'coronal'
-                                        aInputBuffer = reorientBuffer(aInputBuffer{sr}, 'coronal');
+                                        aInputBuffer = reorientBuffer(aInputBuffer{dCurrentSeriesOffset}, 'coronal');
                                         
                                     case'sagittal'
-                                        aInputBuffer = reorientBuffer(aInputBuffer{sr}, 'sagittal');
+                                        aInputBuffer = reorientBuffer(aInputBuffer{dCurrentSeriesOffset}, 'sagittal');
                                 end
                     
                                 if size(aInputBuffer, 3) ==1
                     
-                                    if atInputTemplate(sr).bFlipLeftRight == true
+                                    if atInputTemplate(dCurrentSeriesOffset).bFlipLeftRight == true
                                         aInputBuffer=aInputBuffer(:,end:-1:1);
                                     end
                     
-                                    if atInputTemplate(sr).bFlipAntPost == true
+                                    if atInputTemplate(dCurrentSeriesOffset).bFlipAntPost == true
                                         aInputBuffer=aInputBuffer(end:-1:1,:);
                                     end            
                                 else
-                                    if atInputTemplate(sr).bFlipLeftRight == true
+                                    if atInputTemplate(dCurrentSeriesOffset).bFlipLeftRight == true
                                         aInputBuffer=aInputBuffer(:,end:-1:1,:);
                                     end
                     
-                                    if atInputTemplate(sr).bFlipAntPost == true
+                                    if atInputTemplate(dCurrentSeriesOffset).bFlipAntPost == true
                                         aInputBuffer=aInputBuffer(end:-1:1,:,:);
                                     end
                     
-                                    if atInputTemplate(sr).bFlipHeadFeet == true
+                                    if atInputTemplate(dCurrentSeriesOffset).bFlipHeadFeet == true
                                         aInputBuffer=aInputBuffer(:,:,end:-1:1);
                                     end 
                                 end   
 
-                                dicomBuffer('set', aInputBuffer, sr);
+                                dicomBuffer('set', aInputBuffer, dCurrentSeriesOffset);
                             
                             end
 
-                            atInputMetaData = dicomMetaData('get', [], sr);
+                            atInputMetaData = dicomMetaData('get', [], dCurrentSeriesOffset);
 
                             if isempty(atInputMetaData)
-                                atInputMetaData = atInputTemplate(sr).atDicomInfo;
-                                dicomMetaData('set', atInputMetaData, sr)
+                                atInputMetaData = atInputTemplate(dCurrentSeriesOffset).atDicomInfo;
+                                dicomMetaData('set', atInputMetaData, dCurrentSeriesOffset)
                             end
 
-                            tQuant = quantificationTemplate('get', [], sr);
+                            tQuant = quantificationTemplate('get', [], dCurrentSeriesOffset);
                             if isfield(tQuant, 'tSUV')
                                 dSUVScale = tQuant.tSUV.dScale;
                             else
@@ -454,8 +500,8 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
 
                             tVoiComputed = computeVoi(aInputBuffer, ...
                                                        atInputMetaData, ...
-                                                       dicomBuffer('get', [], sr), ...
-                                                       dicomMetaData('get', [], sr), ...
+                                                       dicomBuffer('get', [], dCurrentSeriesOffset), ...
+                                                       dicomMetaData('get', [], dCurrentSeriesOffset), ...
                                                        atVoiInput{bb}, ...
                                                        atRoiInput, ...
                                                        dSUVScale, ...
@@ -484,11 +530,72 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
                             end
 
                             if isempty(aTime)
-                                aTime{1} = 0;
+                                aTime{1} = atInputMetaData{1}.ActualFrameDuration/1000/60/2;
+                                dPreviousActualTime = atInputMetaData{1}.ActualFrameDuration/1000/60;
+
+                                if gateUseSeriesUID('get') == false
+                                    sSeriesInstanceUID = atInputMetaData{1}.SeriesInstanceUID; 
+
+                                    sLastSeriesDate = atInputMetaData{1}.SeriesDate;
+                                    sLastSeriesTime = atInputMetaData{1}.SeriesTime;
+
+                                    if contains(sLastSeriesDate,'.')                                      
+                                        sLastSeriesDate = extractBefore(sLastSeriesDate,'.');
+                                    end
+
+                                    if contains(sLastSeriesTime,'.')                                      
+                                        sLastSeriesTime = extractBefore(sLastSeriesTime,'.');
+                                    end
+                               end
+
                             else
-                                aTime{numel(aTime)+1} = aTime{numel(aTime)} + atInputMetaData{1}.ActualFrameDuration/1000/60;
+                                aTime{numel(aTime)+1} = dPreviousActualTime + atInputMetaData{1}.ActualFrameDuration/1000/60/2;
+
+                                if gateUseSeriesUID('get') == false
+
+                                    if ~strcmpi(sSeriesInstanceUID, atInputTemplate(dCurrentSeriesOffset).atDicomInfo{1}.SeriesInstanceUID)
+
+                                        sCurrentDate = atInputMetaData{1}.SeriesDate;
+                                        sCurrentTime = atInputMetaData{1}.SeriesTime;
+
+                                        if contains(sCurrentDate,'.')                                      
+                                            sCurrentDate = extractBefore(sCurrentDate,'.');
+                                        end
+    
+                                        if contains(sCurrentTime,'.')                                      
+                                            sCurrentTime = extractBefore(sCurrentTime,'.');
+                                        end
+
+                                        % Convert date and time strings to datetime objects
+                                        tCurrentDatetime = datetime([sCurrentDate sCurrentTime], 'InputFormat', 'yyyyMMddHHmmss');
+                                        tLastSeriesDatetime = datetime([sLastSeriesDate sLastSeriesTime], 'InputFormat', 'yyyyMMddHHmmss');
+                                        
+                                        % Calculate the difference in time
+                                        tTimeDifference = tCurrentDatetime - tLastSeriesDatetime;
+
+                                        dPreviousActualTime = dPreviousActualTime+ minutes(tTimeDifference);
+                                    else
+                                        dPreviousActualTime = dPreviousActualTime+atInputMetaData{1}.ActualFrameDuration/1000/60;                                        
+                                    end
+
+                                    sSeriesInstanceUID = atInputMetaData{1}.SeriesInstanceUID;
+
+                                    sLastSeriesDate = atInputMetaData{1}.SeriesDate;
+                                    sLastSeriesTime = atInputMetaData{1}.SeriesTime;     
+
+                                    if contains(sLastSeriesDate,'.')                                      
+                                        sLastSeriesDate = extractBefore(sLastSeriesDate,'.');
+                                    end
+
+                                    if contains(sLastSeriesTime,'.')                                      
+                                        sLastSeriesTime = extractBefore(sLastSeriesTime,'.');
+                                    end
+                                else
+                                    dPreviousActualTime = dPreviousActualTime+atInputMetaData{1}.ActualFrameDuration/1000/60;
+                                end
                             end
 
+                            gaAcquisitionDate{numel(gaAcquisitionDate)+1} =  atInputMetaData{1}.AcquisitionDate;  
                             gaAcquisitionTime{numel(gaAcquisitionTime)+1} =  atInputMetaData{1}.AcquisitionTime;  
 
                         end
@@ -588,7 +695,13 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
                             if strcmpi(sSeriesInstanceUID, atInputTemplate(sr).atDicomInfo{1}.SeriesInstanceUID) || ... % Same series
                                gateUseSeriesUID('get') == false
 
-                                aInputBuffer = dicomBuffer('get', [], sr);
+                                if gateUseSeriesUID('get') == false
+                                    dCurrentSeriesOffset = aSortIdx(sr);
+                                else
+                                    dCurrentSeriesOffset = sr;
+                                end
+
+                                aInputBuffer = dicomBuffer('get', [], dCurrentSeriesOffset);
 
                                 if isempty(aInputBuffer)
 
@@ -597,50 +710,50 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
                                     switch lower(imageOrientation('get'))
                         
                                         case'axial'
-                                            aInputBuffer = aInputBuffer{sr};                   
+                                            aInputBuffer = aInputBuffer{dCurrentSeriesOffset};                   
                                             
                                         case 'coronal'
-                                            aInputBuffer = reorientBuffer(aInputBuffer{sr}, 'coronal');
+                                            aInputBuffer = reorientBuffer(aInputBuffer{dCurrentSeriesOffset}, 'coronal');
                                             
                                         case'sagittal'
-                                            aInputBuffer = reorientBuffer(aInputBuffer{sr}, 'sagittal');
+                                            aInputBuffer = reorientBuffer(aInputBuffer{dCurrentSeriesOffset}, 'sagittal');
                                     end
                         
                                     if size(aInputBuffer, 3) ==1
                         
-                                        if atInputTemplate(sr).bFlipLeftRight == true
+                                        if atInputTemplate(dCurrentSeriesOffset).bFlipLeftRight == true
                                             aInputBuffer=aInputBuffer(:,end:-1:1);
                                         end
                         
-                                        if atInputTemplate(sr).bFlipAntPost == true
+                                        if atInputTemplate(dCurrentSeriesOffset).bFlipAntPost == true
                                             aInputBuffer=aInputBuffer(end:-1:1,:);
                                         end            
                                     else
-                                        if atInputTemplate(sr).bFlipLeftRight == true
+                                        if atInputTemplate(dCurrentSeriesOffset).bFlipLeftRight == true
                                             aInputBuffer=aInputBuffer(:,end:-1:1,:);
                                         end
                         
-                                        if atInputTemplate(sr).bFlipAntPost == true
+                                        if atInputTemplate(dCurrentSeriesOffset).bFlipAntPost == true
                                             aInputBuffer=aInputBuffer(end:-1:1,:,:);
                                         end
                         
-                                        if atInputTemplate(sr).bFlipHeadFeet == true
+                                        if atInputTemplate(dCurrentSeriesOffset).bFlipHeadFeet == true
                                             aInputBuffer=aInputBuffer(:,:,end:-1:1);
                                         end 
                                     end   
     
-                                    dicomBuffer('set', aInputBuffer, sr);
+                                    dicomBuffer('set', aInputBuffer, dCurrentSeriesOffset);
                                 end
     
-                                atInputMetaData = dicomMetaData('get', [], sr);
+                                atInputMetaData = dicomMetaData('get', [], dCurrentSeriesOffset);
                                 
                                 if isempty(atInputMetaData)
 
-                                    atInputMetaData = atInputTemplate(sr).atDicomInfo;
-                                    dicomMetaData('set', atInputMetaData, sr)
+                                    atInputMetaData = atInputTemplate(dCurrentSeriesOffset).atDicomInfo;
+                                    dicomMetaData('set', atInputMetaData, dCurrentSeriesOffset)
                                 end
     
-                                tQuant = quantificationTemplate('get', [], sr);
+                                tQuant = quantificationTemplate('get', [], dCurrentSeriesOffset);
                                 if isfield(tQuant, 'tSUV')
                                     dSUVScale = tQuant.tSUV.dScale;
                                 else
@@ -649,8 +762,8 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
     
                                 tRoiComputed = computeRoi(aInputBuffer, ...
                                                            atInputMetaData, ...
-                                                           dicomBuffer('get', [], sr), ...
-                                                           dicomMetaData('get', [], sr), ...
+                                                           dicomBuffer('get', [], dCurrentSeriesOffset), ...
+                                                           dicomMetaData('get', [], dCurrentSeriesOffset), ...
                                                            atRoiInput{bb}, ...
                                                            dSUVScale, ...
                                                            bSUVUnit, ...
@@ -678,11 +791,72 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
                                 end
 
                                 if isempty(aTime)
-                                    aTime{1} = 0;
+                                    aTime{1} = atInputMetaData{1}.ActualFrameDuration/1000/60/2;
+                                    dPreviousActualTime = atInputMetaData{1}.ActualFrameDuration/1000/60;
+
+                                    if gateUseSeriesUID('get') == false
+                                        sSeriesInstanceUID = atInputMetaData{1}.SeriesInstanceUID; 
+
+                                        sLastSeriesDate = atInputMetaData{1}.SeriesDate;
+                                        sLastSeriesTime = atInputMetaData{1}.SeriesTime;
+
+                                        if contains(sLastSeriesDate,'.')                                      
+                                            sLastSeriesDate = extractBefore(sLastSeriesDate,'.');
+                                        end
+    
+                                        if contains(sLastSeriesTime,'.')                                      
+                                            sLastSeriesTime = extractBefore(sLastSeriesTime,'.');
+                                        end                                        
+                                   end
+
                                 else
-                                    aTime{numel(aTime)+1} = aTime{numel(aTime)} + atInputMetaData{1}.ActualFrameDuration/1000/60;
+                                    aTime{numel(aTime)+1} = dPreviousActualTime + atInputMetaData{1}.ActualFrameDuration/1000/60/2;
+
+                                    if gateUseSeriesUID('get') == false
+
+                                        if ~strcmpi(sSeriesInstanceUID, atInputTemplate(dCurrentSeriesOffset).atDicomInfo{1}.SeriesInstanceUID)
+
+                                            sCurrentDate = atInputMetaData{1}.SeriesDate;
+                                            sCurrentTime = atInputMetaData{1}.SeriesTime;
+
+                                            if contains(sCurrentDate,'.')                                      
+                                                sCurrentDate = extractBefore(sCurrentDate,'.');
+                                            end
+        
+                                            if contains(sCurrentTime,'.')                                      
+                                                sCurrentTime = extractBefore(sCurrentTime,'.');
+                                            end   
+
+                                            % Convert date and time strings to datetime objects
+                                            tCurrentDatetime = datetime([sCurrentDate sCurrentTime], 'InputFormat', 'yyyyMMddHHmmss');
+                                            tLastSeriesDatetime = datetime([sLastSeriesDate sLastSeriesTime], 'InputFormat', 'yyyyMMddHHmmss');
+                                            
+                                            % Calculate the difference in time
+                                            tTimeDifference = tCurrentDatetime - tLastSeriesDatetime;
+
+                                            dPreviousActualTime = dPreviousActualTime+ minutes(tTimeDifference);
+                                        else
+                                            dPreviousActualTime = dPreviousActualTime+atInputMetaData{1}.ActualFrameDuration/1000/60;                                        
+                                        end
+
+                                        sSeriesInstanceUID = atInputMetaData{1}.SeriesInstanceUID;
+
+                                        sLastSeriesDate = atInputMetaData{1}.SeriesDate;
+                                        sLastSeriesTime = atInputMetaData{1}.SeriesTime; 
+
+                                        if contains(sLastSeriesDate,'.')                                      
+                                            sLastSeriesDate = extractBefore(sLastSeriesDate,'.');
+                                        end
+    
+                                        if contains(sLastSeriesTime,'.')                                      
+                                            sLastSeriesTime = extractBefore(sLastSeriesTime,'.');
+                                        end                                           
+                                    else
+                                        dPreviousActualTime = dPreviousActualTime+atInputMetaData{1}.ActualFrameDuration/1000/60;
+                                    end
                                 end
 
+                                gaAcquisitionDate{numel(gaAcquisitionDate)+1} =  atInputMetaData{1}.AcquisitionDate;  
                                 gaAcquisitionTime{numel(gaAcquisitionTime)+1} =  atInputMetaData{1}.AcquisitionTime;  
 
                             end
@@ -1418,6 +1592,21 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
 
                 dLineOffset = dLineOffset+1;
 
+                asCell{dLineOffset,1} = ('Acquisition Date');
+                for dd=1:numel(gaAcquisitionDate)
+                    try
+                    if contains(gaAcquisitionDate{dd},'.')                                      
+                        sAcquisitionTime = extractBefore(gaAcquisitionDate{dd},'.');
+                    else
+                        sAcquisitionTime = gaAcquisitionDate{dd};
+                    end
+                    asCell{dLineOffset  ,dd+1} = (char(datetime(sAcquisitionTime, 'InputFormat', 'yyyyMMdd', 'Format', 'MMM-d-y')));
+                    catch
+                    end
+                end
+
+                dLineOffset = dLineOffset+1;
+
                 asCell{dLineOffset,1} = ('Acquisition Time');
                 for tt=1:numel(gaAcquisitionTime)
                     try
@@ -1445,10 +1634,10 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
                     asCell{dLineOffset+1,kk+1} =  (ptrPlotCummulative.YData(kk));
                 end
 
-                for bb=dNbElements:21
-                    asCell{dLineOffset  , bb+1} =  (' ');
-                    asCell{dLineOffset+1, bb+1} =  (' ');
-                end
+%                 for bb=dNbElements:21
+%                     asCell{dLineOffset  , bb+1} =  (' ');
+%                     asCell{dLineOffset+1, bb+1} =  (' ');
+%                 end
                 
                 dLineOffset = dLineOffset+2;
 
