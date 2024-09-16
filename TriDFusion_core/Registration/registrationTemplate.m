@@ -39,8 +39,17 @@ function tRegistration = registrationTemplate(sAction, tValue)
         
         ptRegistration.Modality = 'Automatic';   
 
-        [tOptimizer, tMetric] = imregconfig('multimodal');
+        % [tOptimizer, tMetric] = imregconfig('multimodal');
         
+        % Deformable
+        ptRegistration.Deformable.NumberOfPyramidLevelsMode = 'Automatic';
+        ptRegistration.Deformable.NumberOfPyramidLevels = 6;
+        ptRegistration.Deformable.GridRegularization = 0.005;
+        ptRegistration.Deformable.GridSpacingMode = 'Automatic';
+        ptRegistration.Deformable.GridSpacing = [1 1 1];
+        ptRegistration.Deformable.PixelResolutionMode = 'Automatic';
+        ptRegistration.Deformable.PixelResolution = [1 1 1];
+
         % Multimodal
         ptRegistration.Metric.NumberOfSpatialSamples = 5000;
         ptRegistration.Metric.NumberOfHistogramBins  = 50;        
@@ -61,6 +70,7 @@ function tRegistration = registrationTemplate(sAction, tValue)
         ptRegistration.Optimizer.MaximumIterations = 100;    
         
     elseif strcmpi('set', sAction)
+
        ptRegistration = tValue;            
     end
 

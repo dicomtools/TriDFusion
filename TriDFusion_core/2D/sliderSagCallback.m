@@ -27,23 +27,26 @@ function sliderSagCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if get(uiSliderSagPtr('get'), 'Value') >= 0 && ...
-       get(uiSliderSagPtr('get'), 'Value') <= 1 && ...
-       strcmpi(windowButton('get'), 'up')  
+    if ~isempty(uiSliderSagPtr('get'))
 
-        if get(uiSliderSagPtr('get'), 'Value') == 0
-            iSliceNumber = 1;
-        else
-            iSliceNumber = round(get(uiSliderSagPtr('get'), 'Value') * size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 2));
+        if get(uiSliderSagPtr('get'), 'Value') >= 0 && ...
+           get(uiSliderSagPtr('get'), 'Value') <= 1 && ...
+           strcmpi(windowButton('get'), 'up')  
+    
+            if get(uiSliderSagPtr('get'), 'Value') == 0
+                dSliceNumber = 1;
+            else
+                dSliceNumber = round(get(uiSliderSagPtr('get'), 'Value') * size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 2));
+            end
+            if dSliceNumber < 0
+                dSliceNumber = 1;
+            end
+            
+            sliceNumber('set', 'sagittal', dSliceNumber); 
+            
+            refreshImages();
+            
+            % drawnow;
         end
-        if iSliceNumber < 0
-            iSliceNumber = 1;
-        end
-        
-        sliceNumber('set', 'sagittal', iSliceNumber); 
-        
-        refreshImages();
-        
-        drawnow;
-   end
+    end
 end    

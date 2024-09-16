@@ -170,16 +170,18 @@ function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = regi
 %        dimsDcm = size(imToRegister);
         
         %Add missing slice
-     
-        if dimsRef(3) < numel(atImToRegisterMetaData) && ...
-           numel(atImToRegisterMetaData) ~= 1   
-            atImToRegisterMetaData = atImToRegisterMetaData(1:dimsRef(3));
 
-        elseif dimsRef(3) > numel(atImToRegisterMetaData) && ...
+        if numel(atImToRegisterMetaData) ~= 1
+            if dimsRef(3) < numel(atImToRegisterMetaData) && ...
                numel(atImToRegisterMetaData) ~= 1   
-
-            for cc=1:dimsRef(3)- numel(atImToRegisterMetaData)
-                atImToRegisterMetaData{end+1} = atImToRegisterMetaData{end};
+                atImToRegisterMetaData = atImToRegisterMetaData(1:dimsRef(3));
+    
+            elseif dimsRef(3) > numel(atImToRegisterMetaData) && ...
+                   numel(atImToRegisterMetaData) ~= 1   
+    
+                for cc=1:dimsRef(3)- numel(atImToRegisterMetaData)
+                    atImToRegisterMetaData{end+1} = atImToRegisterMetaData{end};
+                end
             end
         end
 

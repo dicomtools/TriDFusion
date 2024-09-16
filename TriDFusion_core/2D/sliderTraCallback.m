@@ -27,24 +27,27 @@ function sliderTraCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if get(uiSliderTraPtr('get'), 'Value') >= 0 && ...
-       get(uiSliderTraPtr('get'), 'Value') <= 1 && ...
-       strcmpi(windowButton('get'), 'up')  
+    if ~isempty(uiSliderTraPtr('get'))
 
-        if get(uiSliderTraPtr('get'), 'Value') == 1 
-            iSliceNumber = 1;
-        else
-            iSliceNumber = round((1-get(uiSliderTraPtr('get'), 'Value')) * size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3));
+        if get(uiSliderTraPtr('get'), 'Value') >= 0 && ...
+           get(uiSliderTraPtr('get'), 'Value') <= 1 && ...
+           strcmpi(windowButton('get'), 'up')  
+    
+            if get(uiSliderTraPtr('get'), 'Value') == 1 
+                dSliceNumber = 1;
+            else
+                dSliceNumber = round((1-get(uiSliderTraPtr('get'), 'Value')) * size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3));
+            end
+    
+            if dSliceNumber < 0
+                dSliceNumber = 1;
+            end
+    
+            sliceNumber('set', 'axial', dSliceNumber);    
+    
+            refreshImages();
+            
+            % drawnow;
         end
-
-        if iSliceNumber < 0
-            iSliceNumber = 1;
-        end
-
-        sliceNumber('set', 'axial', iSliceNumber);    
-
-        refreshImages();
-        
-        drawnow;
     end
 end

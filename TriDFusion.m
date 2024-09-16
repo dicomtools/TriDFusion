@@ -127,7 +127,7 @@ function TriDFusion(varargin)
                     end
                 end
 
-            case '-w' % Output directory
+            case '-w' % Workflow name
 
                 if k+1 <= length(varargin)
 

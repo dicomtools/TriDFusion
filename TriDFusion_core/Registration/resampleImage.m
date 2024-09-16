@@ -241,6 +241,7 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
             dimsRsp = size(resampImage);
 
             if dRefOutputView == true
+                
                 if dimsRsp(1)~=dimsRef(1) || ...
                    dimsRsp(2)~=dimsRef(2) || ...     
                    dimsRsp(3)~=dimsRef(3)

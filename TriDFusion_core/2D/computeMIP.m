@@ -56,7 +56,7 @@ function imComputed = computeMIP(im)
         
     end    
 
-%     imComputed = gather(imComputed);
+    imComputed = gather(imComputed);
 
     clear aImage;
     clear aRotatedImage;

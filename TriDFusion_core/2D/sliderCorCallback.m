@@ -27,24 +27,27 @@ function sliderCorCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if get(uiSliderCorPtr('get'), 'Value') >= 0 && ...
-       get(uiSliderCorPtr('get'), 'Value') <= 1 && ...
-       strcmpi(windowButton('get'), 'up')  
+    if ~isempty(uiSliderCorPtr('get'))
 
-        if get(uiSliderCorPtr('get'), 'Value') == 0
-            iSliceNumber = 1;
-        else
-            iSliceNumber = round(get(uiSliderCorPtr('get'), 'Value') * size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1));
+        if get(uiSliderCorPtr('get'), 'Value') >= 0 && ...
+           get(uiSliderCorPtr('get'), 'Value') <= 1 && ...
+           strcmpi(windowButton('get'), 'up')  
+    
+            if get(uiSliderCorPtr('get'), 'Value') == 0
+                dSliceNumber = 1;
+            else
+                dSliceNumber = round(get(uiSliderCorPtr('get'), 'Value') * size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1));
+            end
+    
+            if dSliceNumber < 0
+                dSliceNumber = 1;
+            end
+    
+            sliceNumber('set', 'coronal', dSliceNumber); 
+            
+            refreshImages();
+            
+            % drawnow;
         end
-
-        if iSliceNumber < 0
-            iSliceNumber = 1;
-        end
-
-        sliceNumber('set', 'coronal', iSliceNumber); 
-        
-        refreshImages();
-        
-        drawnow;
     end
 end
