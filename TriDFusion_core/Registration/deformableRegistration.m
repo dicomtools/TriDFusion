@@ -109,7 +109,7 @@ function [imRegistered, atRegisteredMetaData, dispField] = deformableRegistratio
 
         % if bReferenceOutputView == true
 
-            [dispField, imRegistered] = ...
+            [dispField, ~] = ...
                 imregdeform(rescale(imResampled), ...                           % Image to register (moving)
                             rescale(imReference) , ...                          % Reference image (fixed)
                             'NumPyramidLevels'   , dNumberOfPyramidLevels, ...  % Number of pyramid levels 
@@ -117,6 +117,9 @@ function [imRegistered, atRegisteredMetaData, dispField] = deformableRegistratio
                             'GridSpacing'        , aGridSpacing, ...            % Spacing between control points in the deformation grid
                             'PixelResolution'    , aPixelResolution, ...        % Physical resolution of the images (e.g., mm per pixel)
                             'DisplayProgress'    , true);                       % Display progress during registration
+            
+            [imRegistered, ~] = imwarp(imResampled, dispField, 'Interp', sInterpolation);        
+           
         % else
         %     [dispField, ~] = ...
         %         imregdeform(rescale(imResampled), ...                           % Image to register (moving)

@@ -780,6 +780,8 @@ end
             end
         end
 
+        setOverlayPatientInformation(dOffset);
+
         refreshImages();
 
         I = getframe(aAxe);
@@ -1176,6 +1178,8 @@ end
     end
 
     set(uiSeriesPtr('get'), 'Enable', 'on');
+
+    setOverlayPatientInformation(dSeriesOffset);
 
     refreshImages();
 end

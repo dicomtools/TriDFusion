@@ -443,6 +443,8 @@ end
 
     set(uiSeriesPtr('get'), 'Enable', 'on');
 
+    setOverlayPatientInformation(dOffset);
+
     refreshImages();
 
     if size(dicomBuffer('get', [], dOffset), 3) ~=1

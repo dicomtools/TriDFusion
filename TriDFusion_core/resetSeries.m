@@ -229,8 +229,9 @@ function resetSeries(dOffset, bInitDisplay)
     inputTemplate('set', atInitInput);
     
     % Reset Display Buffer
-   
-    dicomBuffer('set', aBuffer);
+    fusionBuffer('set', [], dOffset);
+
+    dicomBuffer('set', aBuffer, dOffset);
 
     if size(aBuffer, 3) ~= 1
         mipBuffer('set', atInitInput(dOffset).aMip, dOffset);
