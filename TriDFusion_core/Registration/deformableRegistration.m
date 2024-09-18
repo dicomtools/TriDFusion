@@ -1,5 +1,5 @@
-function [imRegistered, atRegisteredMetaData, dispField] = deformableRegistration(imToRegister, atImToRegisterMetaData, imReference, atReferenceMetaData, aLogicalMask, sInterpolation, sNumberOfPyramidLevelsMode, dNumberOfPyramidLevels, dGridRegularization, sGridSpacingMode, aGridSpacing, sPixelResolutionMode, aPixelResolution, bReferenceOutputView, bUpdateDescription, dispField)
-%function [imRegistered, atRegisteredMetaData, dispField] = deformableRegistration(imToRegister, atImToRegisterMetaData, imReference, atReferenceMetaData, aLogicalMask, sInterpolation, sNumberOfPyramidLevelsMode, dNumberOfPyramidLevels, dGridRegularization, sGridSpacingMode, aGridSpacing, sPixelResolutionMode, aPixelResolution, bReferenceOutputView, bUpdateDescription, dispField)
+function [imRegistered, atRegisteredMetaData, dispField] = deformableRegistration(imToRegister, atImToRegisterMetaData, imReference, atReferenceMetaData, aLogicalMask, sInterpolation, sNumberOfPyramidLevelsMode, dNumberOfPyramidLevels, dGridRegularization, sGridSpacingMode, aGridSpacing, sPixelResolutionMode, aPixelResolution, bReferenceOutputView, bUpdateDescription, dMovingSeriesOffset, dispField)
+%function [imRegistered, atRegisteredMetaData, dispField] = deformableRegistration(imToRegister, atImToRegisterMetaData, imReference, atReferenceMetaData, aLogicalMask, sInterpolation, sNumberOfPyramidLevelsMode, dNumberOfPyramidLevels, dGridRegularization, sGridSpacingMode, aGridSpacing, sPixelResolutionMode, aPixelResolution, bReferenceOutputView, bUpdateDescription, dMovingSeriesOffset, dispField)
 %Deformable registration of grayscale images or intensity volumes using total variation method.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -192,16 +192,20 @@ function [imRegistered, atRegisteredMetaData, dispField] = deformableRegistratio
             atRegisteredMetaData{jj}.SeriesDescription  = sprintf('MOV-COREG %s', atRegisteredMetaData{jj}.SeriesDescription);
         end
 
-        dMovingSeriesOffset = [];
-        atInput = inputTemplate('get');
+        if ~exist('dMovingSeriesOffset', 'var')
 
-        for jj=1:numel(atInput)
-            if strcmpi(atInput(jj).atDicomInfo{1}.SeriesInstanceUID, atImToRegisterMetaData{1}.SeriesInstanceUID)
-                dMovingSeriesOffset = jj;
-                break;
+            dMovingSeriesOffset = [];
+            atInput = inputTemplate('get');
+    
+    
+            for jj=1:numel(atInput)
+                if strcmpi(atInput(jj).atDicomInfo{1}.SeriesInstanceUID, atImToRegisterMetaData{1}.SeriesInstanceUID)
+                    dMovingSeriesOffset = jj;
+                    break;
+                end
             end
         end
-        
+
         if ~isempty(dMovingSeriesOffset)
 
             asDescription = seriesDescription('get');

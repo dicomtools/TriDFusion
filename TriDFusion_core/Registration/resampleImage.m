@@ -1,5 +1,5 @@
-function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, dRefOutputView, bUpdateDescription)
-%function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, dRefOutputView, bUpdateDescription)
+function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, dRefOutputView, bUpdateDescription, dMovingSeriesOffset)
+%function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, refImage, atRefMetaData, sMode, dRefOutputView, bUpdateDescription, dMovingSeriesOffset)
 %Resample any modalities.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -341,19 +341,23 @@ function [resampImage, atDcmMetaData] = resampleImage(dcmImage, atDcmMetaData, r
     
     if bUpdateDescription == true
 
-        dMovingSeriesOffset = [];
-        atInput = inputTemplate('get');
-        for jj=1:numel(atInput)
-            if strcmpi(atInput(jj).atDicomInfo{1}.SeriesInstanceUID, atDcmMetaData{1}.SeriesInstanceUID)
-                dMovingSeriesOffset = jj;
-                break;
+        if ~exist('dMovingSeriesOffset', 'var')
+
+            dMovingSeriesOffset = [];
+            atInput = inputTemplate('get');
+            
+            for jj=1:numel(atInput)
+                if strcmpi(atInput(jj).atDicomInfo{1}.SeriesInstanceUID, atDcmMetaData{1}.SeriesInstanceUID)
+                    dMovingSeriesOffset = jj;
+                    break;
+                end
             end
         end
-        
+
         if ~isempty(dMovingSeriesOffset)
             
             asDescription = seriesDescription('get');
-            asDescription{dMovingSeriesOffset} = sprintf('MOV-COREG %s', asDescription{dMovingSeriesOffset});
+            asDescription{dMovingSeriesOffset} = sprintf('RSP %s', asDescription{dMovingSeriesOffset});
             seriesDescription('set', asDescription);
     
             set(uiSeriesPtr('get'), 'String', asDescription);
