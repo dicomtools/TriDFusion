@@ -394,6 +394,8 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
 
     refreshImages();
 
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dNMSerieOffset), dicomBuffer('get', [], dNMSerieOffset), mipAngle('get'));       
+
     clear aNMImage;
     clear aCTImage;
 

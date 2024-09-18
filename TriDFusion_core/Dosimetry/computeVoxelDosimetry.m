@@ -309,8 +309,8 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
 %             pixelspacing(3) = computeSliceSpacing(atMetaData);
 %         end             
 %         aLabelImage = rotateNrrdImage(aLabelImage);
-        aLabelImage=aLabelImage(:,:,end:-1:1);
-   
+        aLabelImage = aLabelImage(:,:,end:-1:1);
+
         nrrdWriter(sSegmentationLabelFileName, double(aLabelImage), pixelspacing, origin, 'raw'); % Write .nrrd images 
 
 %         clear aLabelImage;
@@ -353,7 +353,7 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
 
     sNrrdImagesName = sprintf('%simage.nrrd', sTempInputDir);
     
-    aImage=aImage(:,:,end:-1:1);
+    aImage = aImage(:,:,end:-1:1);
 
 %     aImage = rotateNrrdImage(aImage);
 
@@ -885,7 +885,9 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
                 setViewerDefaultColor(1, atRtDoseHeader);
                    
                 refreshImages();
-                
+
+                plotRotatedRoiOnMip(axesMipPtr('get', [], dNewSeriesOffset), dicomBuffer('get', [], dNewSeriesOffset), mipAngle('get'));       
+               
                 % Activate playback
                
                 setPlaybackToolbar('on');
@@ -928,6 +930,7 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
                 clear aEmptyMask;
 
                 refreshImages();
+               
             end
 
         else

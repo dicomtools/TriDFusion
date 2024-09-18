@@ -334,6 +334,8 @@ function setMachineLearningPSMAGa68PETCTFullAI(sPredictScript, tPSMAGa68PETCTFul
     end
 
     refreshImages();
+    
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
 
     clear aPTImage;
     clear aCTImage;

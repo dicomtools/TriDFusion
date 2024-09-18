@@ -351,6 +351,8 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
     end
 
     refreshImages();
+    
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
 
     clear aPTImage;
     clear aCTImage;

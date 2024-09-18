@@ -247,6 +247,8 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript, bResampleSeries
 
                     refreshImages();
 
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dDoseSerieOffset), dicomBuffer('get', [], dDoseSerieOffset), mipAngle('get'));       
+
                     drawnow;
 
                     % Increase image intensity

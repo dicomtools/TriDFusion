@@ -137,6 +137,7 @@ function convert3DSeriesToPlanar(sPlane, sMethod, dFromSlice, dToSlice)
     dSeriesInstanceUID = dicomuid;
 
     for hh=1:numel(atInput(numel(atInput)).atDicomInfo)
+        atInput(numel(atInput)).atDicomInfo{hh}.Modality = 'ot';
         atInput(numel(atInput)).atDicomInfo{hh}.SeriesDescription = asSeriesDescription{numel(asSeriesDescription)};
         atInput(numel(atInput)).atDicomInfo{hh}.SeriesInstanceUID = dSeriesInstanceUID;
     end
@@ -169,8 +170,8 @@ function convert3DSeriesToPlanar(sPlane, sMethod, dFromSlice, dToSlice)
     clearDisplay();
     initDisplay(1);
 
-    dicomViewerCore();
-
     initWindowLevel('set', true);
-            
+    
+    dicomViewerCore();
+     
 end

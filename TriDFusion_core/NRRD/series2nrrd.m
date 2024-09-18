@@ -64,20 +64,12 @@ function series2nrrd(dSeriesOffset, sNrrdImagesName, dConvFactor)
     end
 
 
-    if size(aBuffer, 3) ~=1
+    if size(aBuffer, 3) ~=1       
 
         aBuffer = aBuffer(:,:,end:-1:1);
     end
     
     aBuffer = aBuffer * dConvFactor;
     
-%      if size(aBuffer, 3) ~=1
-%          aBuffer = imrotate3(aBuffer, 90, [0 0 1], 'nearest');
-%          aBuffer = aBuffer(end:-1:1,:,:);
-%      else
-%           aBuffer = imrotate(aBuffer, 90, 'nearest');
-%           aBuffer = aBuffer(end:-1:1,:);        
-%      end
-
     nrrdWriter(sNrrdImagesName, squeeze(aBuffer), pixelspacing, origin, 'raw'); % Write .nrrd images 
 end

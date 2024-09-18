@@ -375,6 +375,8 @@ function setMachineLearningFDGBrownFatFullAI(sPredictScript, sDatasetId, bProces
     end
 
     refreshImages();
+    
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
 
     clear aPTImage;
     clear aCTImage;

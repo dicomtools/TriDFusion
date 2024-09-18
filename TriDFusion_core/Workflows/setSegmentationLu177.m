@@ -365,6 +365,8 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
 
     refreshImages();
 
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dNMSerieOffset), dicomBuffer('get', [], dNMSerieOffset), mipAngle('get'));       
+
     clear aNMImage;
     clear aCTImage;
 

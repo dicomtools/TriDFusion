@@ -410,6 +410,8 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177, bUseDefault)
 
     refreshImages();
 
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dNMSerieOffset), dicomBuffer('get', [], dNMSerieOffset), mipAngle('get'));       
+
     clear aNMImage;
     clear aCTImage;
 

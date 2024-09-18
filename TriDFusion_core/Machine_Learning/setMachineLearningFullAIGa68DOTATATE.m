@@ -466,6 +466,8 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorScript, sOnnxPath, dMo
     end
 
     refreshImages();
+    
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
 
     clear aPTImage;
     clear aCTImage;

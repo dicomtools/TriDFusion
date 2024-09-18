@@ -158,7 +158,7 @@ function setMachineLearningFDGBrownFatPETCTFullAI(sPredictScript, tBrownFatFullA
 
         nrrdWriter(sNrrdPTImagesName, squeeze(aPTImage(:,:,end:-1:1)), pixelspacing, origin, 'raw'); % Write .nrrd images
     end
-
+    
     sNrrdPTFullFileName = '';
 
     f = java.io.File(char(sNrrdTmpDir)); % Get .nii file name
@@ -462,10 +462,13 @@ function setMachineLearningFDGBrownFatPETCTFullAI(sPredictScript, tBrownFatFullA
     % Activate ROI Panel
 
     if viewRoiPanel('get') == false
+        
         setViewRoiPanel();
     end
 
     refreshImages();
+
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
 
     clear aPTImage;
     clear aCTImage;

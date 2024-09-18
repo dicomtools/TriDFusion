@@ -178,6 +178,9 @@ function maskImageToVoi(aMask, dSeriesOffset, aClassificationMask, bLesionClassi
             sLabel = sprintf('LESION-%d', bb);
 
             createVoiFromRois(dSeriesOffset, asTag, sLabel, aColor, sLesionType);
+
+            plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+
         end           
     end
 

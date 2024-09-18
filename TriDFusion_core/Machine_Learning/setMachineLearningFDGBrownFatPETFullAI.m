@@ -282,7 +282,7 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
                         atResampledRoi = resampleROIs(aPTImage, atPTMetaData, aResampledPTImage, atResampledPTMetaData, atRoi, true);
 
                         roiTemplate('set', dPTSerieOffset, atResampledRoi);
-                    end
+                   end
 
                     progressBar(8/10, 'Resampling axes, please wait.');
 
@@ -382,7 +382,6 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
 
                 end
 
-
             end
 
         elseif isunix % Linux is not yet supported
@@ -442,6 +441,8 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
     end
 
     refreshImages();
+    
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
 
     clear aPTImage;
     clear aCTImage;
