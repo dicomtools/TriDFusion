@@ -30,44 +30,44 @@ function [atInput, asSeriesDescription] = initInputTemplate(asFilesList, atDicom
     atInput = [];
     asSeriesDescription = [];
 
-    dNbFiles = numel(asFilesList);
+    dNbFolders = numel(asFilesList);
     
-    if dNbFiles > 0
+    if dNbFolders > 0
 
         atInput = struct();
 
-        asSeriesDescription = cell(dNbFiles, 1);
+        asSeriesDescription = cell(dNbFolders, 1);
 
-        atInput(dNbFiles).asFilesList         = [];
-        atInput(dNbFiles).atDicomInfo         = [];
-        atInput(dNbFiles).aDicomBuffer        = [];
-        atInput(dNbFiles).bEdgeDetection      = [];   
-        atInput(dNbFiles).bDoseKernel         = [];      
-        atInput(dNbFiles).bFlipLeftRight      = [];   
-        atInput(dNbFiles).bFlipAntPost        = [];   
-        atInput(dNbFiles).bFlipHeadFeet       = [];   
-        atInput(dNbFiles).bMathApplied        = [];   
-        atInput(dNbFiles).bFusedDoseKernel    = [];   
-        atInput(dNbFiles).bFusedEdgeDetection = [];   
+        atInput(dNbFolders).asFilesList         = [];
+        atInput(dNbFolders).atDicomInfo         = [];
+        atInput(dNbFolders).aDicomBuffer        = [];
+        atInput(dNbFolders).bEdgeDetection      = [];   
+        atInput(dNbFolders).bDoseKernel         = [];      
+        atInput(dNbFolders).bFlipLeftRight      = [];   
+        atInput(dNbFolders).bFlipAntPost        = [];   
+        atInput(dNbFolders).bFlipHeadFeet       = [];   
+        atInput(dNbFolders).bMathApplied        = [];   
+        atInput(dNbFolders).bFusedDoseKernel    = [];   
+        atInput(dNbFolders).bFusedEdgeDetection = [];   
         
-        atInput(dNbFiles).tMovement = [];
-        atInput(dNbFiles).tMovement.bMovementApplied = [];   
-        atInput(dNbFiles).tMovement.aGeomtform       = [];                
+        atInput(dNbFolders).tMovement = [];
+        atInput(dNbFolders).tMovement.bMovementApplied = [];   
+        atInput(dNbFolders).tMovement.aGeomtform       = [];                
         
-        atInput(dNbFiles).tMovement.atSeq{1}.sAxe         = [];
-        atInput(dNbFiles).tMovement.atSeq{1}.aTranslation = [];
-        atInput(dNbFiles).tMovement.atSeq{1}.dRotation    = [];
+        atInput(dNbFolders).tMovement.atSeq{1}.sAxe         = [];
+        atInput(dNbFolders).tMovement.atSeq{1}.aTranslation = [];
+        atInput(dNbFolders).tMovement.atSeq{1}.dRotation    = [];
 
-        atInput(dNbFiles).aMip = [];
-        atInput(dNbFiles).tQuant = [];
+        atInput(dNbFolders).aMip = [];
+        atInput(dNbFolders).tQuant = [];
 
-        for dSeriesLoop=1: dNbFiles
+        for dSeriesLoop=1: dNbFolders
         
             atInput(dSeriesLoop).asFilesList  = asFilesList{dSeriesLoop};
             atInput(dSeriesLoop).atDicomInfo  = atDicomInfo{dSeriesLoop};
             atInput(dSeriesLoop).aDicomBuffer = aDicomBuffer{dSeriesLoop};
             
-            atInput(dSeriesLoop).sOrientationView    = 'Axial';
+            atInput(dSeriesLoop).sOrientationView = 'Axial';
         
             if strcmpi(atDicomInfo{dSeriesLoop}{1}.Modality, 'RTDOSE')
                 bDoseKernel = true;

@@ -31,6 +31,10 @@ function setOverlayPatientInformation(dSeriesOffset)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     atMetaData = dicomMetaData('get', [], dSeriesOffset);
+
+    if isempty(atMetaData)
+        return;
+    end
                 
     if isfield(atMetaData{1}, 'PatientName')
         sPatientName = atMetaData{1}.PatientName;
