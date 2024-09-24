@@ -42,8 +42,13 @@ function [asFilesList, atDicomInfo, aDicomBuffer] = readDicomFolder(asMainDirect
             continue;
         end
         
-        if ~isAllBuffersSameSize(tDatasets.DicomBuffers)
-            atGroupedDatasets= splitDatasets(tDatasets);
+        if isfield(tDatasets, 'DicomBuffers')
+
+            if ~isAllBuffersSameSize(tDatasets.DicomBuffers)
+                atGroupedDatasets= splitDatasets(tDatasets);
+            else
+                atGroupedDatasets = tDatasets;
+            end
         else
             atGroupedDatasets = tDatasets;
         end
