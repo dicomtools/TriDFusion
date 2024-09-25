@@ -255,7 +255,8 @@ function resize = dicomViewer()
        
     sphereDefaultDiameter ('set', 50); % in mm
     brush2dDefaultDiameter('set', 30); % in mm  
-    clickVoiPreSegmentationValue('set', 10); % In Perent
+    clickVoiPreSegmentationValue('set', 0); % In Perent
+    clickVoiPercentOfMaxValue('set', 41); % In Perent
 
     mipAngle('set', 1);
 
