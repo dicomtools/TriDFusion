@@ -176,7 +176,7 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
 
         voiMenu(pRoi);
 
-        uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData', pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+        uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
         if ~isempty(dVoiOffset)
 
@@ -194,25 +194,34 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
                 if ~isempty(dTagOffset)
         
                     voiDefaultMenu(atRoiInput{dTagOffset}.Object, atVoiInput{dVoiOffset}.Tag);
-if 0 % Need to improve the operation speed    
+
+if 1 % Need to improve the operation speed    
 
                     dNbTags = numel(atVoiInput{dVoiOffset}.RoisTag);
-                    for dRoiNb=1:dNbTags
-    
-                        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), atVoiInput{dVoiOffset}.RoisTag{dRoiNb} );
-    
-                        if ~isempty(aTagOffset)
-    
+                    
+                    % Precompute the tags only once outside the loop for faster access
+                    allTags = cellfun(@(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false);
+                    
+                    % Loop over the number of tags
+                    for dRoiNb = 1:dNbTags
+                        
+                        % Find matching tag offset outside the loop
+                        aTagOffset = strcmp(allTags, atVoiInput{dVoiOffset}.RoisTag{dRoiNb});
+                        
+                        % If a matching tag is found
+                        if any(aTagOffset)
+                            % Get the first match
                             dTagOffset = find(aTagOffset, 1);
-    
-                            if~isempty(dTagOffset)
-    
+                            
+                            % If valid offset found, update the relevant fields
+                            if ~isempty(dTagOffset)
                                 sLabel = sprintf('%s (roi %d/%d)', atVoiInput{dVoiOffset}.Label, dRoiNb, dNbTags);
-    
+                                
+                                % Update fields in the structure
                                 atRoiInput{dTagOffset}.Label = sLabel;
                                 atRoiInput{dTagOffset}.Object.Label = sLabel;                           
                                 atRoiInput{dTagOffset}.ObjectType  = 'voi-roi';
-                           end
+                            end
                         end                 
                     end
 end

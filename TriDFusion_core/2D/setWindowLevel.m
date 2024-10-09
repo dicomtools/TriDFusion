@@ -40,12 +40,17 @@ function [lMin, lMax] = setWindowLevel(im, atMetaData)
     else
         if strcmpi(sUnitDisplay, 'SUV')
             tQuant = quantificationTemplate('get');
-            if tQuant.tSUV.dScale
-                lMin = suvWindowLevel('get', 'min')/tQuant.tSUV.dScale;
-                lMax = suvWindowLevel('get', 'max')/tQuant.tSUV.dScale;
+            if isfield(tQuant, 'tSUV')
+                if tQuant.tSUV.dScale
+                    lMin = suvWindowLevel('get', 'min')/tQuant.tSUV.dScale;
+                    lMax = suvWindowLevel('get', 'max')/tQuant.tSUV.dScale;
+                else
+                    lMin = min(im, [], 'all');
+                    lMax = max(im, [], 'all');
+                end
             else
                 lMin = min(im, [], 'all');
-                lMax = max(im, [], 'all');
+                lMax = max(im, [], 'all');                
             end
         else
             lMin = min(im, [], 'all');

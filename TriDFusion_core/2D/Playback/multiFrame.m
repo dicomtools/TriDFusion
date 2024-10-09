@@ -44,50 +44,67 @@ function multiFrame(mPlay, pAxe)
            (isVsplash('get') == true && strcmpi(vSplahView('get'), 'coronal'))
             
             dLastSlice = size(dicomBuffer('get'), 1);  
+
             dCurrentSlice = sliceNumber('get', 'coronal');
-%             set(uiSliderCorPtr('get'), 'Value', iSlider);
+
             if dCurrentSlice < dLastSlice
+
                 dCurrentSlice = dCurrentSlice +1;
             else
                 dCurrentSlice = 1;
             end  
 
-            sliceNumber('set', 'coronal', dCurrentSlice);
+            % sliceNumber('set', 'coronal', dCurrentSlice);
+
+            set(uiSliderCorPtr('get'), 'Value', dCurrentSlice/dLastSlice);
+
+            sliderCorCallback();
 
         elseif (pAxe == axes2Ptr('get', [], dSeriesOffset) && playback2DMipOnly('get') == false) || ...
                (isVsplash('get') == true &&  strcmpi(vSplahView('get'), 'sagittal'))
            
-%              set(uiSliderSagPtr('get'), 'Value', iSlider);
             dLastSlice = size(dicomBuffer('get'), 2);    
+
             dCurrentSlice = sliceNumber('get', 'sagittal'); 
 
             if dCurrentSlice < dLastSlice
+
                 dCurrentSlice = dCurrentSlice +1;
             else
                 dCurrentSlice = 1;
             end   
+            % sliceNumber('set', 'sagittal', dCurrentSlice);
 
-            sliceNumber('set', 'sagittal', dCurrentSlice);
+            set(uiSliderSagPtr('get'), 'Value', dCurrentSlice/dLastSlice);
+
+            sliderSagCallback();
+
 
         elseif (pAxe == axes3Ptr('get', [], dSeriesOffset) && playback2DMipOnly('get') == false) || ...
                (isVsplash('get') == true && strcmpi(vSplahView('get'), 'axial'))
             
             dLastSlice = size(dicomBuffer('get'), 3);            
+
             dCurrentSlice = sliceNumber('get', 'axial');
 
             if dCurrentSlice >= 1
+
                 dCurrentSlice = dCurrentSlice -1;
             end        
 
             if dCurrentSlice == 0
+
                 dCurrentSlice = dLastSlice;
             end    
 
-            sliceNumber('set', 'axial', dCurrentSlice);
+            % sliceNumber('set', 'axial', dCurrentSlice);
 
-   %         iSlider = dCurrentSlice/dLastSlice; 
+            dSlider = 1-(dCurrentSlice/dLastSlice);
 
-   %         set(uiSliderTraPtr('get'), 'Value', iSlider);
+            set(uiSliderTraPtr('get'), 'Value', dSlider);
+
+            sliderTraCallback();
+
         else
             if isVsplash('get') == false
                 
@@ -99,7 +116,7 @@ function multiFrame(mPlay, pAxe)
                     iMipAngleValue = 1;
                 end    
 
-                mipAngle('set', iMipAngleValue);                    
+                % mipAngle('set', iMipAngleValue);                    
 
         %        if iMipAngleValue == 1
         %            dMipSliderValue = 0;
@@ -108,12 +125,15 @@ function multiFrame(mPlay, pAxe)
         %        end
 
         %        set(uiSliderMipPtr('get'), 'Value', dMipSliderValue);
-                plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), iMipAngleValue);       
+                % plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), iMipAngleValue);       
 
+                set(uiSliderMipPtr('get'), 'Value', iMipAngleValue/32);
+
+                sliderMipCallback();
             end
         end
 
-        refreshImages();                        
+        % refreshImages();                        
 
         pause(multiFrameSpeed('get'));
         

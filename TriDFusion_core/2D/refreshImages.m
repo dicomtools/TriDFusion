@@ -27,6 +27,12 @@ function refreshImages(clickedPtX, clickedPtY)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    if exist('clickedPtX', 'var') && ...
+       exist('clickedPtY', 'var')     
+        bAxeClicked = true;
+    else
+        bAxeClicked = false;       
+    end
 
     atInputTemplate = inputTemplate('get');
 
@@ -137,33 +143,36 @@ function refreshImages(clickedPtX, clickedPtY)
 %             if isShading('get') == true
 %                 shading(axe, 'interp');
 %             end
-        atRoiInput = roiTemplate('get', dSeriesOffset);
-        if ~isempty(atRoiInput)
-            for bb=1:numel(atRoiInput)
-                if isvalid(atRoiInput{bb}.Object)
-                    atRoiInput{bb}.Object.Visible = 'on';
-                    if viewFarthestDistances('get') == true
-                        if ~isempty(atRoiInput{bb}.MaxDistances)
-                            atRoiInput{bb}.MaxDistances.MaxXY.Line.Visible = 'on';
-                            atRoiInput{bb}.MaxDistances.MaxCY.Line.Visible = 'on';
-                            atRoiInput{bb}.MaxDistances.MaxXY.Text.Visible = 'on';
-                            atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'on';
+        if contourVisibilityRoiPanelValue('get') == true
+
+            atRoiInput = roiTemplate('get', dSeriesOffset);
+            if ~isempty(atRoiInput)
+                for bb=1:numel(atRoiInput)
+                    if isvalid(atRoiInput{bb}.Object)
+                        atRoiInput{bb}.Object.Visible = 'on';
+                        if viewFarthestDistances('get') == true
+                            if ~isempty(atRoiInput{bb}.MaxDistances)
+                                atRoiInput{bb}.MaxDistances.MaxXY.Line.Visible = 'on';
+                                atRoiInput{bb}.MaxDistances.MaxCY.Line.Visible = 'on';
+                                atRoiInput{bb}.MaxDistances.MaxXY.Text.Visible = 'on';
+                                atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'on';
+                            end
+                        else
+                            if ~isempty(atRoiInput{bb}.MaxDistances)
+                                atRoiInput{bb}.MaxDistances.MaxXY.Line.Visible = 'off';
+                                atRoiInput{bb}.MaxDistances.MaxCY.Line.Visible = 'off';
+                                atRoiInput{bb}.MaxDistances.MaxXY.Text.Visible = 'off';
+                                atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'off';
+                            end
                         end
-                    else
-                        if ~isempty(atRoiInput{bb}.MaxDistances)
-                            atRoiInput{bb}.MaxDistances.MaxXY.Line.Visible = 'off';
-                            atRoiInput{bb}.MaxDistances.MaxCY.Line.Visible = 'off';
-                            atRoiInput{bb}.MaxDistances.MaxXY.Text.Visible = 'off';
-                            atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'off';
-                        end
-                    end
-               end
+                   end
+                end
             end
         end
 
         if overlayActivate('get') == true
 
-            if ~exist('clickedPtX', 'var')
+            if bAxeClicked == false
 
                 clickedPt = get(axePtr('get', [], dSeriesOffset), 'CurrentPoint');
     
@@ -245,19 +254,19 @@ function refreshImages(clickedPtX, clickedPtY)
                                     else
                                         sFusedSeriesTime = atFuseMetaData{1}.SeriesTime;
                                     end
-                                    sFusedSeriesDate = sprintf('%s%s', sFusedSeriesDate, sFusedSeriesTime);
+                                    sFusedSeriesDate = sprintf('%s-%s', sFusedSeriesDate, sFusedSeriesTime);
                                 end
 
-                                if ~isempty(sFusedSeriesDate)
-                                    if contains(sFusedSeriesDate,'.')
-                                        sFusedSeriesDate = extractBefore(sFusedSeriesDate,'.');
-                                    end
-                                        try
-                                            sFusedSeriesDate = datetime(sFusedSeriesDate, 'InputFormat', 'yyyyMMddHHmmss');
-                                        catch
-                                            sFusedSeriesDate = ''; 
-                                        end
-                                end
+%                                 if ~isempty(sFusedSeriesDate)
+%                                     if contains(sFusedSeriesDate,'.')
+%                                         sFusedSeriesDate = extractBefore(sFusedSeriesDate,'.');
+%                                     end
+%                                         try
+%                                             sFusedSeriesDate = datetime(sFusedSeriesDate, 'InputFormat', 'yyyyMMddHHmmss');
+%                                         catch
+%                                             sFusedSeriesDate = ''; 
+%                                         end
+%                                 end
                             else
                                 sFusedSeriesDate = '';
                             end
@@ -315,14 +324,14 @@ function refreshImages(clickedPtX, clickedPtY)
         imCoronal  = imCoronalPtr ('get', [], dSeriesOffset);
         imSagittal = imSagittalPtr('get', [], dSeriesOffset);
         imAxial    = imAxialPtr   ('get', [], dSeriesOffset);
-        if isVsplash('get') == false
+        if isVsplash('get') == false && bAxeClicked == false
             imMip = imMipPtr('get', [], dSeriesOffset);
         end
           
         imCoronalFc  = imCoronalFcPtr ('get', [], dFusionSeriesOffset);
         imSagittalFc = imSagittalFcPtr('get', [], dFusionSeriesOffset);
         imAxialFc    = imAxialFcPtr   ('get', [], dFusionSeriesOffset);
-        if isVsplash('get') == false
+        if isVsplash('get') == false && bAxeClicked == false
             imMipFc = imMipFcPtr('get', [], dFusionSeriesOffset);
         end
 
@@ -336,14 +345,17 @@ function refreshImages(clickedPtX, clickedPtY)
         vBoundAxes3Ptr = visBoundAxes3Ptr('get');
 
         if ~isempty(vBoundAxes1Ptr)
+            
             delete(vBoundAxes1Ptr);
         end
 
         if ~isempty(vBoundAxes2Ptr)
+
             delete(vBoundAxes2Ptr);
         end
 
         if ~isempty(vBoundAxes3Ptr)
+
             delete(vBoundAxes3Ptr);
         end
 
@@ -629,42 +641,55 @@ function refreshImages(clickedPtX, clickedPtY)
             montageText('set', 'axes3', ptMontageAxes3);
 
         else
-            imM  = mipBuffer('get', [], dSeriesOffset);
+
 
 %               pAxe = gca(fiMainWindowPtr('get'));
+             pAxe = getAxeFromMousePosition(dSeriesOffset);
 
             % clickedPt = get(gca,'CurrentPoint');
             % clickedPtX = num2str(round(clickedPt(1,1)));
             % clickedPtY = num2str(round(clickedPt(1,2)));
 
-%             if pAxe ~= axes1Ptr('get', [], dSeriesOffset)         
-                imCoronal.CData  = permute(im(iCoronal,:,:), [3 2 1]);
+               if pAxe ~= axes1Ptr('get', [], dSeriesOffset) || bAxeClicked == false  
+         %       imCoronal.CData  = permute(im(iCoronal,:,:), [3 2 1]);
+                imCoronal.CData  = reshape(im(iCoronal,:,:), aBufferSize(2), aBufferSize(3))';     
+               end
+
+                
+                 
 %             end
             
-%             if pAxe ~= axes2Ptr('get', [], dSeriesOffset)         
-                imSagittal.CData = permute(im(:,iSagittal,:), [3 1 2]) ;
-%             end
+             if pAxe ~= axes2Ptr('get', [], dSeriesOffset) || bAxeClicked == false             
+                % imSagittal.CData = permute(im(:,iSagittal,:), [3 1 2]) ;
+                imSagittal.CData  = reshape(im(:,iSagittal,:), aBufferSize(1), aBufferSize(3))';     
+             end
 
-%             if pAxe ~= axes3Ptr('get', [], dSeriesOffset)         
+             if pAxe ~= axes3Ptr('get', [], dSeriesOffset) || bAxeClicked == false           
                 imAxial.CData  = im(:,:,iAxial);
-%             end
+             end
+            
+             if bAxeClicked == false
+            
+                 imM = mipBuffer('get', [], dSeriesOffset);
+                
+                 % imMip.CData = permute(imM(iMipAngle,:,:), [3 2 1]);
+                 imMip.CData = reshape(imM(iMipAngle,:,:), aBufferSize(2), aBufferSize(3))';     
+             end
 
-             imMip.CData      = permute(imM(iMipAngle,:,:), [3 2 1]);
+             if isFusion('get') == true
 
-            if isFusion('get') == true
-
-                if isCombineMultipleFusion('get') == true
-
-                    if invertColor('get')
-                        aRedColorMap   = flipud(getRedColorMap());
-                        aGreenColorMap = flipud(getGreenColorMap());
-                        aBlueColorMap  = flipud(getBlueColorMap());
-                    else
-                        aRedColorMap   = getRedColorMap();
-                        aGreenColorMap = getGreenColorMap();
-                        aBlueColorMap  = getBlueColorMap();
-                    end
-                end
+                % if isCombineMultipleFusion('get') == true
+                % 
+                %     if invertColor('get')
+                %         aRedColorMap   = flipud(getRedColorMap());
+                %         aGreenColorMap = flipud(getGreenColorMap());
+                %         aBlueColorMap  = flipud(getBlueColorMap());
+                %     else
+                %         aRedColorMap   = getRedColorMap();
+                %         aGreenColorMap = getGreenColorMap();
+                %         aBlueColorMap  = getBlueColorMap();
+                %     end
+                % end
 
                 dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                 for rr=1:dNbFusedSeries
@@ -684,22 +709,24 @@ function refreshImages(clickedPtX, clickedPtY)
                             
                             if aFusionBufferSize(1) > iCoronal
 
-%                                 if pAxe ~= axes1Ptr('get', [], dSeriesOffset)         
-                                    imCoronalF.CData  = permute(imf(iCoronal,:,:) , [3 2 1]);
-    %                             end
+                                if pAxe ~= axes1Ptr('get', [], dSeriesOffset) || bAxeClicked == false            
+                                    % imCoronalF.CData  = permute(imf(iCoronal,:,:) , [3 2 1]);
+                                    imCoronalF.CData  = reshape(imf(iCoronal,:,:), aFusionBufferSize(2), aFusionBufferSize(3))';     
+                                end
                             end
 
                             if aFusionBufferSize(2) > iSagittal                         
 
-%                                 if pAxe ~= axes2Ptr('get', [], dSeriesOffset)         
-                                    imSagittalF.CData = permute(imf(:,iSagittal,:), [3 1 2]) ;
-%                                 end
+                                if pAxe ~= axes2Ptr('get', [], dSeriesOffset) || bAxeClicked == false             
+                                    % imSagittalF.CData = permute(imf(:,iSagittal,:), [3 1 2]) ;
+                                    imSagittalF.CData = reshape(imf(:,iSagittal,:), aFusionBufferSize(1), aFusionBufferSize(3))';     
+                                end
                             end
 
                             if aFusionBufferSize(3) > iAxial                         
-%                                 if pAxe ~= axes3Ptr('get', [], dSeriesOffset)         
-                                    imAxialF.CData    = imf(:,:,iAxial);
-%                                 end
+                                if pAxe ~= axes3Ptr('get', [], dSeriesOffset) || bAxeClicked == false             
+                                    imAxialF.CData = imf(:,:,iAxial);
+                                end
                             end
 
                             if isCombineMultipleFusion('get') == true
@@ -734,26 +761,29 @@ function refreshImages(clickedPtX, clickedPtY)
                             end
                         end
 
-                       imMf = mipFusionBuffer('get', [], rr);
-
-                       if ~isempty(imMf)
-                            imMipF = imMipFPtr('get', [], rr);
-                            if ~isempty(imMipF)
-
-                                imMipF.CData = permute(imMf(iMipAngle,:,:), [3 2 1]);
-
-                                if isCombineMultipleFusion('get') == true
-
-                                    if colormap(imMipF.Parent) == aRedColorMap
-                                        imMipR  = imMipF.CData;
-                                    end
-
-                                    if colormap(imMipF.Parent) == aGreenColorMap
-                                        imMipG  = imMipF.CData;
-                                    end
-
-                                    if colormap(imMipF.Parent) == aBlueColorMap
-                                        imMipB  = imMipF.CData;
+                        if bAxeClicked == false
+    
+                           imMf = mipFusionBuffer('get', [], rr);
+    
+                           if ~isempty(imMf)
+                                imMipF = imMipFPtr('get', [], rr);
+                                if ~isempty(imMipF)
+    
+                                    imMipF.CData = permute(imMf(iMipAngle,:,:), [3 2 1]);
+    
+                                    if isCombineMultipleFusion('get') == true
+    
+                                        if colormap(imMipF.Parent) == aRedColorMap
+                                            imMipR  = imMipF.CData;
+                                        end
+    
+                                        if colormap(imMipF.Parent) == aGreenColorMap
+                                            imMipG  = imMipF.CData;
+                                        end
+    
+                                        if colormap(imMipF.Parent) == aBlueColorMap
+                                            imMipB  = imMipF.CData;
+                                        end
                                     end
                                 end
                             end
@@ -800,6 +830,8 @@ function refreshImages(clickedPtX, clickedPtY)
 
                    imf = squeeze(fusionBuffer('get', [], dFusionSeriesOffset));
                    if ~isempty(imf)
+                       
+                        aFusionBufferSize = size(imf);
 
                         sUnitDisplay = getSerieUnitValue(dFusionSeriesOffset);
                         if strcmpi(sUnitDisplay, 'SUV')
@@ -807,25 +839,37 @@ function refreshImages(clickedPtX, clickedPtY)
                             if atInputTemplate(dFusionSeriesOffset).bDoseKernel == false
                                 if ~isempty(tQuantification)
                                     imf = imf*tQuantification.tSUV.dScale;
-                                    imMf = imMf*tQuantification.tSUV.dScale;
+                                    % imMf = imMf*tQuantification.tSUV.dScale;
                                 end
                             end
                         end
                        
+                        if pAxe ~= axes1Ptr('get', [], dSeriesOffset) || bAxeClicked == false             
 %                         if pAxe ~= axes1Ptr('get', [], dSeriesOffset)         
-                            imCoronalFc.ZData  = permute(imf(iCoronal,:,:), [3 2 1]);
-%                         end
+                            % imCoronalFc.ZData  = permute(imf(iCoronal,:,:), [3 2 1]);
+                            imCoronalFc.ZData  = reshape(imf(iCoronal,:,:), aFusionBufferSize(2), aFusionBufferSize(3))';     
+                       end
 
 %                         if pAxe ~= axes2Ptr('get', [], dSeriesOffset)         
-                            imSagittalFc.ZData = permute(imf(:,iSagittal,:), [3 1 2]);
+                        if pAxe ~= axes2Ptr('get', [], dSeriesOffset) || bAxeClicked == false             
+                            % imSagittalFc.ZData = permute(imf(:,iSagittal,:), [3 1 2]);
+                            imSagittalFc.ZData = reshape(imf(:,iSagittal,:), aFusionBufferSize(1), aFusionBufferSize(3))';     
+                        end
 %                         end
+                        if pAxe ~= axes3Ptr('get', [], dSeriesOffset) || bAxeClicked == false             
 
 %                         if pAxe ~= axes3Ptr('get', [], dSeriesOffset)         
-                            imAxialFc.ZData    = imf(:,:,iAxial);
+                            imAxialFc.ZData = imf(:,:,iAxial);
 %                         end
-                        % if ~isempty(imMipFc)
-                            imMipFc.ZData  = permute(imMf(iMipAngle,:,:), [3 2 1]);
-                        % end
+                        end
+
+                        if bAxeClicked == false
+    
+                            if ~isempty(imMipFc)
+                                % imMipFc.ZData  = permute(imMf(iMipAngle,:,:), [3 2 1]);
+                                imMipFc.ZData  = reshape(imMf(iMipAngle,:,:), aFusionBufferSize(2), aFusionBufferSize(3))';     
+                            end
+                        end
                     end
                 end
             end
@@ -834,46 +878,49 @@ function refreshImages(clickedPtX, clickedPtY)
 
         % Contours
         
-        atRoiInput = roiTemplate('get', dSeriesOffset);
-    
-        if ~isempty(atRoiInput) && isVsplash('get') == false
+        if contourVisibilityRoiPanelValue('get') == true
+     
+            atRoiInput = roiTemplate('get', dSeriesOffset);
         
-            numRoiInputs = numel(atRoiInput);
-            viewFarthest = viewFarthestDistances('get');
+            if ~isempty(atRoiInput) && isVsplash('get') == false
             
-            for bb = 1:numRoiInputs
-                currentRoi = atRoiInput{bb};
+                numRoiInputs = numel(atRoiInput);
+                viewFarthest = viewFarthestDistances('get');
                 
-                if isvalid(currentRoi.Object)
-                    isCoronal = strcmpi(currentRoi.Axe, 'Axes1') && iCoronal == currentRoi.SliceNb;
-                    isSagittal = strcmpi(currentRoi.Axe, 'Axes2') && iSagittal == currentRoi.SliceNb;
-                    isAxial = strcmpi(currentRoi.Axe, 'Axes3') && iAxial == currentRoi.SliceNb;
+                for bb = 1:numRoiInputs
+                    currentRoi = atRoiInput{bb};
                     
-                    currentRoi.Object.Visible = 'off';
-                    currentDistances = currentRoi.MaxDistances;
-    
-                     if ~isempty(currentDistances) && viewFarthest == true
-                        currentDistances.MaxXY.Line.Visible = 'off';
-                        currentDistances.MaxCY.Line.Visible = 'off';
-                        currentDistances.MaxXY.Text.Visible = 'off';
-                        currentDistances.MaxCY.Text.Visible = 'off';                        
-                    end
-    
-                    if isCoronal || isSagittal || isAxial
-    
-                        currentRoi.Object.Visible = 'on';
-
-                        if viewFarthest == true
-                            currentDistances.MaxXY.Line.Visible = 'on';
-                            currentDistances.MaxCY.Line.Visible = 'on';
-                            currentDistances.MaxXY.Text.Visible = 'on';
-                            currentDistances.MaxCY.Text.Visible = 'on';
-                        end
+                    if isvalid(currentRoi.Object)
+                        isCoronal  = strcmpi(currentRoi.Axe, 'Axes1') && iCoronal  == currentRoi.SliceNb;
+                        isSagittal = strcmpi(currentRoi.Axe, 'Axes2') && iSagittal == currentRoi.SliceNb;
+                        isAxial    = strcmpi(currentRoi.Axe, 'Axes3') && iAxial    == currentRoi.SliceNb;
                         
+                        currentRoi.Object.Visible = 'off';
+                        currentDistances = currentRoi.MaxDistances;
+        
+                         if ~isempty(currentDistances) && viewFarthest == true
+                            currentDistances.MaxXY.Line.Visible = 'off';
+                            currentDistances.MaxCY.Line.Visible = 'off';
+                            currentDistances.MaxXY.Text.Visible = 'off';
+                            currentDistances.MaxCY.Text.Visible = 'off';                        
+                        end
+        
+                        if isCoronal || isSagittal || isAxial
+        
+                            currentRoi.Object.Visible = 'on';
+    
+                            if viewFarthest == true
+                                currentDistances.MaxXY.Line.Visible = 'on';
+                                currentDistances.MaxCY.Line.Visible = 'on';
+                                currentDistances.MaxXY.Text.Visible = 'on';
+                                currentDistances.MaxCY.Text.Visible = 'on';
+                            end
+                            
+                        end
                     end
                 end
-            end
-        end       
+            end       
+        end
 
         if crossActivate('get') == true && isVsplash('get') == false
            
@@ -995,7 +1042,7 @@ function refreshImages(clickedPtX, clickedPtY)
 
             pAxe = gca(fiMainWindowPtr('get'));
       
-            if ~exist('clickedPtX', 'var')
+            if bAxeClicked == false
 
                 clickedPt = pAxe.CurrentPoint;
     
@@ -1241,7 +1288,7 @@ function refreshImages(clickedPtX, clickedPtY)
                             case {'pt', 'nm'}
     
                                 sUnit = getSerieUnitValue(dSeriesOffset);
-    
+
                                 if strcmpi(sUnit, 'SUV')
                                     
                                     switch lower(atMetaData{1}.DecayCorrection)
@@ -1360,6 +1407,9 @@ function refreshImages(clickedPtX, clickedPtY)
                                     dLevel, ...
                                     dAxialSliceNumber, ...
                                     aBufferSize(3));
+
+
+
     
                            otherwise
                                 sAxe3Text = sprintf('\n\n\n\n\n\n%s\n%s\n%s\n%s\nMin: %.2f\nMax: %.2f\nTotal: %.2f\nCurrent: %.2f\nLookup Table: %.2f - %.2f\nA: %d/%d', ...
@@ -1436,19 +1486,27 @@ function refreshImages(clickedPtX, clickedPtY)
                                         else
                                             sFusedSeriesTime = atFuseMetaData{1}.SeriesTime;
                                         end
-                                        sFusedSeriesDate = sprintf('%s%s', sFusedSeriesDate, sFusedSeriesTime);
+                                        sFusedSeriesDate = sprintf('%s-%s', sFusedSeriesDate, sFusedSeriesTime);
                                     end
 
-                                    if ~isempty(sFusedSeriesDate)
-                                        if contains(sFusedSeriesDate,'.')
-                                            sFusedSeriesDate = extractBefore(sFusedSeriesDate,'.');
-                                        end
-                                        try
-                                            sFusedSeriesDate = datetime(sFusedSeriesDate, 'InputFormat', 'yyyyMMddHHmmss');
-                                        catch
-                                            sFusedSeriesDate = ''; 
-                                        end
-                                    end
+%                                      if ~isempty(sFusedSeriesDate)
+%                                         if contains(sFusedSeriesDate,'.')
+%                                             sFusedSeriesDate = extractBefore(sFusedSeriesDate,'.');
+%                                         end
+%                                         try
+%                                             
+% %                                             sFusedSeriesDate = datetime(sFusedSeriesDate, 'InputFormat', 'yyyyMMddHHmmss');
+%                                             sFusedSeriesDate = datetime([str2double(sFusedSeriesDate(1:4)), ...
+%                                                                          str2double(sFusedSeriesDate(5:6)), ...
+%                                                                          str2double(sFusedSeriesDate(7:8)), ...
+%                                                                          str2double(sFusedSeriesDate(9:10)), ...
+%                                                                          str2double(sFusedSeriesDate(11:12)), ...
+%                                                                          str2double(sFusedSeriesDate(13:14))]);
+%                                             
+%                                         catch
+%                                             sFusedSeriesDate = ''; 
+%                                         end
+%                                     end
                                 else
                                     sFusedSeriesDate = '';
                                 end
@@ -1471,7 +1529,7 @@ function refreshImages(clickedPtX, clickedPtY)
 
                                         sUnit = getSerieUnitValue(rr);
 
-                                        if strcmpi(sUnit, 'SUV')
+                                        if strcmpi(sUnit, 'SUV') 
 
                                             sSUVtype = viewerSUVtype('get');
                                             suvValue = dFusedCurrent * atInputTemplate(rr).tQuant.tSUV.dScale;

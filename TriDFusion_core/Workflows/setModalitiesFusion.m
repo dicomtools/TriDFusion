@@ -193,8 +193,8 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
                 dSUVScale = 1;
             end
 
-            dSeries1Min    = dModality1IntensityMin/dSUVScale;
-            dSeries1Max    = dModality1IntensityMax/dSUVScale;
+            dSeries1Min = dModality1IntensityMin/dSUVScale;
+            dSeries1Max = dModality1IntensityMax/dSUVScale;
 
             if size(aSerie1Image, 3) ~= 1
 
@@ -204,7 +204,7 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
         case 'hu'
 
-            [dSeries1Max   , dSeries1Min   ] = computeWindowLevel(dModality1IntensityMax   , dModality1IntensityMin   );
+            [dSeries1Max, dSeries1Min] = computeWindowLevel(dModality1IntensityMax   , dModality1IntensityMin   );
 
             if size(aSerie1Image, 3) ~= 1
                 [dSeries1MIPMax, dSeries1MIPMin] = computeWindowLevel(dModality1MIPIntensityMax, dModality1MIPIntensityMin);
@@ -212,8 +212,8 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
         otherwise
 
-            dSeries1Min    = min(aSerie1Image, [], 'all');
-            dSeries1Max    = max(aSerie1Image, [], 'all');
+            dSeries1Min = min(aSerie1Image, [], 'all');
+            dSeries1Max = max(aSerie1Image, [], 'all');
 
             if size(aSerie1Image, 3) ~= 1
 
@@ -232,7 +232,7 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 %     set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries1Min dSeries1Max]);
 
     windowLevel('set', 'max', dSeries1Max);
-    windowLevel('set', 'min' ,dSeries1Min);
+    windowLevel('set', 'min', dSeries1Min);
 
     setWindowMinMax(dSeries1Max, dSeries1Min);
 
@@ -338,16 +338,17 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
         set(axesMipfPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dSeries2MIPMin dSeries2MIPMax]);
     end
 
-    if size(aSerie1Image, 3) ~= 1
+%     if size(aSerie1Image, 3) ~= 1
+% 
+%         progressBar(3/4, 'Set fusion, please wait.');
 
-        progressBar(3/4, 'Set fusion, please wait.');
+%         sliderCorCallback();
+%         sliderSagCallback();
+%         sliderTraCallback();
+%         sliderMipCallback();
+%     end
 
-        sliderCorCallback();
-        sliderSagCallback();
-        sliderTraCallback();
-    end
-
-%    refreshImages();
+    refreshImages();
 
     clear aSerie1Image;
     clear aSerie2Image;

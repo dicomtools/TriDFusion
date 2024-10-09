@@ -48,19 +48,19 @@ function setColorbarIntensityMaxScaleValue(dYOffset, dRatio, bDefaultUnit, dSeri
 %         dRatio=100;
 %     end
 
-if 0
-    aInputBuffer = inputBuffer('get');
-
-    dMin = min(aInputBuffer{dSeriesOffset}, [], 'all');
-    dMax = max(aInputBuffer{dSeriesOffset}, [], 'all');
-
-    clear aInputBuffer;
-else
+% if 0
+%     aInputBuffer = inputBuffer('get');
+% 
+%     dMin = min(aInputBuffer{dSeriesOffset}, [], 'all');
+%     dMax = max(aInputBuffer{dSeriesOffset}, [], 'all');
+% 
+%     clear aInputBuffer;
+% else
     tQuantification = quantificationTemplate('get', [], dSeriesOffset);
 
     dMin = tQuantification.tCount.dMin;
     dMax = tQuantification.tCount.dMax;         
-end
+% end
 
     % Compute intensity
 
@@ -90,7 +90,9 @@ end
     if strcmpi(sUnitDisplay, 'SUV')  
         if bDefaultUnit == true
             tQuant = quantificationTemplate('get', [], dSeriesOffset);
-            dLevelMax = dLevelMax*tQuant.tSUV.dScale;      
+            if isfield(tQuant, 'tSUV')
+                dLevelMax = dLevelMax*tQuant.tSUV.dScale;      
+            end
         end
     end
 

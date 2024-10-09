@@ -44,87 +44,103 @@ function oneFrame(sDirection)
     %     return;
     % end
 
-    windowButton('set', 'down');  
+    % windowButton('set', 'down');  
 
     if (pAxe == axes1Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
        (isVsplash('get') == true && strcmpi(vSplahView('get'), 'coronal'))
         
             dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 1);  
+
             dCurrentSlice = sliceNumber('get', 'coronal');
-%             set(uiSliderCorPtr('get'), 'Value', iSlider);
+
             if strcmpi(sDirection, 'Foward')
 
                 if dCurrentSlice < dLastSlice
+
                     dCurrentSlice = dCurrentSlice +1;
                 end
 
                 if dCurrentSlice == dLastSlice
+
                     dCurrentSlice = 1;
                 end  
             else
                 if dCurrentSlice > 1
+
                     dCurrentSlice = dCurrentSlice -1;
                 else
                     dCurrentSlice = dLastSlice;
                 end                              
             end
 
-            sliceNumber('set', 'coronal', dCurrentSlice);
+            % sliceNumber('set', 'coronal', dCurrentSlice);
             
-            set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get'), 1));
+            set(uiSliderCorPtr('get'), 'Value', dCurrentSlice / dLastSlice);
+
+            sliderCorCallback();
 
     elseif (pAxe == axes2Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
            (isVsplash('get') == true && strcmpi(vSplahView('get'), 'sagittal'))
-        
-    
-%              set(uiSliderSagPtr('get'), 'Value', iSlider);
+            
             dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 2);    
+
             dCurrentSlice = sliceNumber('get', 'sagittal'); 
 
             if strcmpi(sDirection, 'Foward')
+
                 if dCurrentSlice < dLastSlice
+
                     dCurrentSlice = dCurrentSlice +1;
                 end
 
                 if dCurrentSlice == dLastSlice
+
                     dCurrentSlice = 1;
                 end  
             else
                 if dCurrentSlice > 1
+
                     dCurrentSlice = dCurrentSlice -1;
                 else
                     dCurrentSlice = dLastSlice;
                 end                              
             end  
 
-            sliceNumber('set', 'sagittal', dCurrentSlice);
+            % sliceNumber('set', 'sagittal', dCurrentSlice);
             
-            set(uiSliderSagPtr('get'), 'Value', sliceNumber('get', 'sagittal') / size(dicomBuffer('get'), 2));
+            set(uiSliderSagPtr('get'), 'Value', dCurrentSlice / dLastSlice);
+
+            sliderSagCallback();
 
     elseif (pAxe == axes3Ptr('get', [], dSeriesOffset)  && playback2DMipOnly('get') == false) || ...
            (isVsplash('get') == true && strcmpi(vSplahView('get'), 'axial'))
          
-            dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 3);            
+            dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 3);  
+
             dCurrentSlice = sliceNumber('get', 'axial');
 
              if strcmpi(sDirection, 'Foward')
 
                 if dCurrentSlice > 1
+
                     dCurrentSlice = dCurrentSlice -1;
                 else
                     dCurrentSlice = dLastSlice;
                 end 
             else
                 if dCurrentSlice < dLastSlice
+
                     dCurrentSlice = dCurrentSlice +1;
                 else
                     dCurrentSlice = 1;
                 end                              
             end     
 
-            sliceNumber('set', 'axial', dCurrentSlice);
+            % sliceNumber('set', 'axial', dCurrentSlice);
 
-           set(uiSliderTraPtr('get'), 'Value', 1 - (sliceNumber('get', 'axial') / size(dicomBuffer('get'), 3)));                       
+            set(uiSliderTraPtr('get'), 'Value', 1 - (dCurrentSlice / dLastSlice));       
+
+            sliderTraCallback();
 
     else
         if isVsplash('get') == false
@@ -145,22 +161,23 @@ function oneFrame(sDirection)
                 iMipAngleValue = 1;
             end    
 
-            mipAngle('set', iMipAngleValue);                    
+            % mipAngle('set', iMipAngleValue);                    
 
             if iMipAngleValue == 1
                 dMipSliderValue = 0;
             else
-                dMipSliderValue = mipAngle('get')/32;
+                dMipSliderValue = iMipAngleValue/32;
             end
 
             set(uiSliderMipPtr('get'), 'Value', dMipSliderValue);
 
-            plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), iMipAngleValue);       
+            % plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), iMipAngleValue);       
+            sliderMipCallback();
 
         end
     end
 
-    refreshImages();        
+    % refreshImages();        
     
     windowButton('set', 'up');  
 

@@ -1,4 +1,4 @@
-function set2DWholobodySegmentationLu177Callback(hObject, ~)
+function set2DWholobodySegmentationLu177Callback(~, ~)
 %function set2DWholobodySegmentationLu177Callback()
 %Run Lu177 Tumor Segmentation, The tool is called from the main menu.
 %See TriDFuison.doc (or pdf) for more information about options.
@@ -35,7 +35,7 @@ function set2DWholobodySegmentationLu177Callback(hObject, ~)
 
     atRoi = roiTemplate('get', dSerieOffset);
 
-    dNbRoi = numel(atRoi);
+    % dNbRoi = numel(atRoi);
 
     aImage = dicomBuffer('get', [], dSerieOffset);
                  
@@ -233,7 +233,7 @@ function set2DWholobodySegmentationLu177Callback(hObject, ~)
         
             cropMenu(pRoi);
                     
-            uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+            uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
     
             clear aArms;
         end
@@ -319,7 +319,7 @@ function set2DWholobodySegmentationLu177Callback(hObject, ~)
     
         cropMenu(pRoi);
             
-        uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+        uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
     end
 
     atRoiInput = roiTemplate('get', dSerieOffset);

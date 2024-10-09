@@ -32,6 +32,12 @@ function dScalarValue = ctHUToScalarValue(aImage, dHUvalue)
     
     dMinToMax = abs(dMin) + abs(dMax);
     
-    dScalarValue = ((abs(dMin) + dHUvalue) * 100) / dMinToMax;
+    if dMax < dHUvalue
+        dScalarValue = defaultIsoSurfaceValue('get')*100;
+    else
+
+        dScalarValue = ((abs(dMin) + dHUvalue) * 100) / dMinToMax;
+    end
+
 
 end

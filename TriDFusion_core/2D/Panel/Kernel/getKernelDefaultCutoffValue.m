@@ -1,5 +1,5 @@
-function dCutOffValue = getKernelDefaultCutoffValue(sTissueDependent, sIsotope)
-%function dCutOffValue = getKernelDefaultCutoffValue(sTissueDependent, sIsotope)
+function dCutOffValue = getKernelDefaultCutoffValue(sIsotope)
+%function dCutOffValue = getKernelDefaultCutoffValue(sIsotope)
 %Retun the Kernel default cuttof value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %

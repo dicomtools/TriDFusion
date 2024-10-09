@@ -267,10 +267,12 @@ function triangulateImages()
                                 set(uiSliderCorPtr('get'), 'Value', iCoronal / iCoronalSize);
         
                                 sliceNumber('set', 'axial', iAxial);
-                                set(uiSliderTraPtr('get'), 'Value', iAxial / iAxialSize);                       
+
+                                set(uiSliderTraPtr('get'), 'Value', 1-( iAxial / iAxialSize));                       
                             end
                         
                             refreshImages();
+                            
                             axeClicked('set', true);
                             uiresume(fiMainWindowPtr('get'));             
         

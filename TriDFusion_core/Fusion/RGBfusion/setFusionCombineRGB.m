@@ -185,6 +185,7 @@ function setFusionCombineRGB(~, ~)
             showRGBColormapImage(true);
 
             refreshImages();
+            sliderMipCallback();
 
         end
     end

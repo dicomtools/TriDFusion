@@ -509,7 +509,26 @@ end
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
     set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
     set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
-   
+
+    % Set intensity
+
+    tQuant = atInput(dPTSerieOffset).tQuant;
+
+    if isfield(tQuant, 'tSUV')
+        dSUVScale = tQuant.tSUV.dScale;
+        
+        dSeriesMin = 0/dSUVScale;
+        dSeriesMax = 5/dSUVScale;
+    else
+        dSeriesMin = min(aPTImage, [], 'all');
+        dSeriesMax = max(aPTImage, [], 'all');
+    end
+    
+    windowLevel('set', 'max', dSeriesMax);
+    windowLevel('set', 'min', dSeriesMin);
+
+    setWindowMinMax(dSeriesMax, dSeriesMin);
+
     % Set fusion
 
     if isFusion('get') == false
@@ -533,12 +552,13 @@ end
     % Activate ROI Panel
 
     if viewRoiPanel('get') == false
+        
         setViewRoiPanel();
     end
 
-    refreshImages();
-    
-    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
+%     refreshImages();
+%     
+%     plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
 
     clear aPTImage;
     clear aCTImage;

@@ -28,7 +28,8 @@ function voiDefaultMenu(ptrRoi, sTag)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     if ~exist('sTag', 'var') % Add menu
-            mVoiFolder = ...
+
+        mVoiFolder = ...
             uimenu(ptrRoi.UIContextMenu, ...
                    'Label'    , 'Volume-of-interest' , ...
                    'UserData' , ptrRoi, ...
@@ -36,13 +37,34 @@ function voiDefaultMenu(ptrRoi, sTag)
                    'Separator', 'on' ...
                    );
 
+        [~, asLesionList] = getLesionType('');
+        
+        if ~isempty(asLesionList)
+    
+            mEditLocation = uimenu(mVoiFolder, ...
+                                   'Label', 'Edit Location', ...
+                                   'UserData', ptrRoi      , ...
+                                   'Visible'  , 'off'      , ...
+                                   'MenuSelectedFcn'       , @refreshVoiMenuLocationCallback);
+    
+            for ll = 1: numel(asLesionList)
+    
+                uimenu(mEditLocation, ...
+                       'Text', asLesionList{ll}, ...
+                       'UserData', ptrRoi      , ...
+                       'MenuSelectedFcn', @editVoiLesionTypeCallback);
+            end
+    
+        end
+
         mVoiConstraint = ...
             uimenu(mVoiFolder, ...
                    'Label'    , 'Constraint' , ...
                    'UserData' , ptrRoi, ...
                    'Visible'  , 'off', ...
-                   'Callback' , @setMenuConstraintCheckedCallback ...
-                   );
+                   'Callback' , @setMenuConstraintCheckedCallback, ...
+                   'Separator', 'on' ... 
+                  );
 
             uimenu(mVoiConstraint, ...
                    'Label'    , 'Inside This Contour' , ...
@@ -262,10 +284,38 @@ function voiDefaultMenu(ptrRoi, sTag)
     function increaseVoiPositionCallback(hObject, ~)
 
         increaseVoiPosition(get(hObject, 'UserData'), voiIncrementRatio('get'));
+
+        plotRotatedRoiOnMip(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), mipAngle('get'))
+     
     end
 
     function decreaseVoiPositionCallback(hObject, ~)
 
         decreaseVoiPosition(get(hObject, 'UserData'), voiIncrementRatio('get'));
+
+        plotRotatedRoiOnMip(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), mipAngle('get'))
+
+    end
+
+    function refreshVoiMenuLocationCallback(hObject, ~) 
+
+        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
+        dTagOffset = find(strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), hObject.UserData ) );
+
+        if ~isempty(dTagOffset) % Tag is a VOI
+
+            for ch=1:numel(hObject.Children)
+    
+                if strcmpi(hObject.Children(ch).Text, atVoiInput{dTagOffset}.LesionType)
+                    
+                    set(hObject.Children(ch), 'Checked', 'on');
+                else
+
+                    set(hObject.Children(ch), 'Checked', 'off');
+                end
+            end
+
+        end
     end
 end

@@ -96,7 +96,7 @@ function pasteRoiCallback(~, ~)
 
             cropMenu(pRoi);
 
-            uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+            uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
             addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
@@ -141,7 +141,7 @@ function pasteRoiCallback(~, ~)
             
             voiMenu(pRoi);
 
-            uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
+            uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
             addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
@@ -183,7 +183,7 @@ function pasteRoiCallback(~, ~)
             
             voiMenu(pRoi);
 
-            uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
+            uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
 
             addRoi(pRoi, dSeriesOffset, 'Unspecified');
             
@@ -215,7 +215,7 @@ function pasteRoiCallback(~, ~)
             
             voiMenu(pRoi);
 
-            uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
+            uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
             addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
@@ -251,7 +251,7 @@ function pasteRoiCallback(~, ~)
             
             voiMenu(pRoi);
 
-            uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
+            uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
             addRoi(pRoi, dSeriesOffset, 'Unspecified');
             
@@ -392,7 +392,7 @@ function pasteRoiCallback(~, ~)
             
             voiMenu(pRoi);
 
-            uimenu(pRoi.UIContextMenu, 'Label', 'Display Result' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
+            uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
             addRoi(pRoi, dSeriesOffset, 'Unspecified');
 

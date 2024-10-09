@@ -61,19 +61,58 @@ function roiDefaultMenu(ptrRoi)
                'UserData'       , ptrRoi   , ...
                'MenuSelectedFcn', @predefinedLabelCallback ...
               );
-    end  
+    end 
 
     uimenu(ptrRoi.UIContextMenu, ...
            'Label'   , 'Hide/View Label', ...
            'UserData', ptrRoi, ...
            'Callback', @hideViewLabelCallback ...
            ); 
-       
+
+    [~, asLesionList] = getLesionType('');
+    
+    if ~isempty(asLesionList)
+
+        mEditLocation = uimenu(ptrRoi.UIContextMenu, ...
+                               'Label', 'Edit Location', ...
+                               'UserData', ptrRoi      , ...
+                               'MenuSelectedFcn'       , @refreshRoiMenuLocationCallback);
+
+        for ll = 1: numel(asLesionList)
+
+            uimenu(mEditLocation, ...
+                   'Text', asLesionList{ll}, ...
+                   'UserData', ptrRoi      , ...
+                   'MenuSelectedFcn', @editRoiLesionTypeCallback);
+        end
+
+    end
+
     uimenu(ptrRoi.UIContextMenu, ...
            'Label'   , 'Edit Color', ...
            'UserData', ptrRoi, ...
            'Callback', @editColorCallback ...
            );     
        
-       
+    function refreshRoiMenuLocationCallback(hObject, ~) 
+
+        atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
+        dTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), hObject.UserData.Tag ) );
+
+        if ~isempty(dTagOffset) % Tag is a ROI
+
+            for ch=1:numel(hObject.Children)
+    
+                if strcmpi(hObject.Children(ch).Text, atRoiInput{dTagOffset}.LesionType)
+
+                    set(hObject.Children(ch), 'Checked', 'on');
+                else
+                    set(hObject.Children(ch), 'Checked', 'off');
+                end
+            end
+
+        end
+
+    end
 end

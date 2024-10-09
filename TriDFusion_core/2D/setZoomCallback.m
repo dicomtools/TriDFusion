@@ -106,7 +106,41 @@ function setZoomCallback(~, ~)
         hZoom = zoom(fiMainWindowPtr('get'));
 
         set(hZoom, 'UIContextMenu', hCMZ);
+        % set(hZoom, 'ActionPostCallback', @(obj, evd) adjustAxesToPanel(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), uiMipWindowPtr('get')));
 
         zoom(fiMainWindowPtr('get'), 'on');           
-    end           
+    end
+
+    % % Custom function to adjust axes size based on panel and aspect ratio
+    % function adjustAxesToPanel(hAxes, hPanel)
+    %     % Get the size of the panel
+    %     panelPos = getpixelposition(hPanel);
+    % 
+    %     % Get the current axes limits
+    %     xLim = get(hAxes, 'XLim');
+    %     yLim = get(hAxes, 'YLim');
+    % 
+    %     % Calculate the data aspect ratio based on the current limits
+    %     dataAspectRatio = diff(xLim) / diff(yLim);
+    % 
+    %     % Calculate the panel aspect ratio (width/height)
+    %     panelAspectRatio = panelPos(3) / panelPos(4);
+    % 
+    %     if panelAspectRatio > dataAspectRatio
+    %         % The panel is wider than the data aspect ratio, so adjust x-axis limits
+    %         newXLimWidth = diff(yLim) * panelAspectRatio;  % Maintain aspect ratio
+    %         midX = mean(xLim);
+    %         newXLim = [midX - newXLimWidth / 2, midX + newXLimWidth / 2];
+    %         set(hAxes, 'XLim', newXLim);
+    %     else
+    %         % The panel is taller, so adjust y-axis limits
+    %         newYLimHeight = diff(xLim) / panelAspectRatio;  % Maintain aspect ratio
+    %         midY = mean(yLim);
+    %         newYLim = [midY - newYLimHeight / 2, midY + newYLimHeight / 2];
+    %         set(hAxes, 'YLim', newYLim);
+    %     end
+    % 
+    %     % Set axes to fill the panel, maintaining proportions
+    %     set(hAxes, 'Position', [0 0 1 1], 'DataAspectRatioMode', 'manual');
+    % end          
 end  

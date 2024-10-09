@@ -164,7 +164,7 @@ function setRoiToolbar(sVisible)
         [img,~] = imread(sprintf('%s//result.png', sIconsPath));
         img = rescaleAndRemoveIconBackground(img);
 
-        t10 = uitoggletool(tbRoi,'CData',img,'TooltipString','Result', 'Tag', 'toolbar', 'Separator', 'on');
+        t10 = uitoggletool(tbRoi,'CData',img,'TooltipString','Display Statistics', 'Tag', 'toolbar', 'Separator', 'on');
         t10.ClickedCallback = @figRoiDialogCallback;
 
 
@@ -257,6 +257,20 @@ function setRoiToolbar(sVisible)
 
         doWhileContinuous = true;
         while doWhileContinuous == true
+
+            if contourVisibilityRoiPanelValue('get') == false
+
+                contourVisibilityRoiPanelValue('set', true);
+                set(chkContourVisibilityPanelObject('get'), 'Value', true);
+
+                refreshImages();   
+
+                if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+                end
+            end
+
      %       w=waitforbuttonpress;
             axeClicked('set', false);
             doWhile = true;
@@ -412,6 +426,19 @@ function setRoiToolbar(sVisible)
 
         doWhileContinuous = true;
         while doWhileContinuous == true
+
+            if contourVisibilityRoiPanelValue('get') == false
+
+                contourVisibilityRoiPanelValue('set', true);
+                set(chkContourVisibilityPanelObject('get'), 'Value', true);
+
+                refreshImages();   
+
+                if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+                end
+            end
 
      %       w=waitforbuttonpress;
             axeClicked('set', false);
@@ -579,6 +606,19 @@ function setRoiToolbar(sVisible)
 
         doWhileContinuous = true;
         while doWhileContinuous == true
+
+            if contourVisibilityRoiPanelValue('get') == false
+
+                contourVisibilityRoiPanelValue('set', true);
+                set(chkContourVisibilityPanelObject('get'), 'Value', true);
+
+                refreshImages();   
+
+                if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+                end
+            end
 
    %         w = waitforbuttonpress;
             axeClicked('set', false);
@@ -769,6 +809,19 @@ function setRoiToolbar(sVisible)
         doWhileContinuous = true;
         while doWhileContinuous == true
 
+            if contourVisibilityRoiPanelValue('get') == false
+
+                contourVisibilityRoiPanelValue('set', true);
+                set(chkContourVisibilityPanelObject('get'), 'Value', true);
+
+                refreshImages();   
+
+                if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+                end
+            end
+
             axeClicked('set', false);
 
             doWhile = true;
@@ -922,6 +975,19 @@ function setRoiToolbar(sVisible)
 
         doWhileContinuous = true;
         while doWhileContinuous == true
+
+            if contourVisibilityRoiPanelValue('get') == false
+
+                contourVisibilityRoiPanelValue('set', true);
+                set(chkContourVisibilityPanelObject('get'), 'Value', true);
+
+                refreshImages();   
+
+                if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+                end
+            end
 
             axeClicked('set', false);
 
@@ -1078,6 +1144,19 @@ function setRoiToolbar(sVisible)
 
         doWhileContinuous = true;
         while doWhileContinuous == true
+
+            if contourVisibilityRoiPanelValue('get') == false
+
+                contourVisibilityRoiPanelValue('set', true);
+                set(chkContourVisibilityPanelObject('get'), 'Value', true);
+
+                refreshImages();   
+
+                if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+                end
+            end
 
             axeClicked('set', false);
 
@@ -1257,6 +1336,19 @@ function setRoiToolbar(sVisible)
         doWhileContinuous = true;
         while doWhileContinuous == true
 
+            if contourVisibilityRoiPanelValue('get') == false
+
+                contourVisibilityRoiPanelValue('set', true);
+                set(chkContourVisibilityPanelObject('get'), 'Value', true);
+
+                refreshImages();   
+
+                if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+                end
+            end
+
             axeClicked('set', false);
 
             uiwait(fiMainWindowPtr('get'));
@@ -1268,6 +1360,7 @@ function setRoiToolbar(sVisible)
             if strcmpi(get(t11, 'State'), 'off')
                 return;
             end
+
 
      %       doWhileContinuous = true;
      %       while doWhileContinuous == true
@@ -1598,6 +1691,8 @@ function setRoiToolbar(sVisible)
             return;
         end
 
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
 %               releaseRoiAxeWait(t);
         robotReleaseKey();
 
@@ -1648,6 +1743,20 @@ function setRoiToolbar(sVisible)
 
         doWhileContinuous = true;
         while doWhileContinuous == true
+
+            if contourVisibilityRoiPanelValue('get') == false
+
+                contourVisibilityRoiPanelValue('set', true);
+                set(chkContourVisibilityPanelObject('get'), 'Value', true);
+
+                refreshImages();   
+
+                if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+                end
+            end
+
 
      %       w=waitforbuttonpress;
             axeClicked('set', false);
@@ -2059,6 +2168,21 @@ end
 %               releaseRoiAxeWait(t8);
         robotReleaseKey();
 
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        if contourVisibilityRoiPanelValue('get') == false
+
+            contourVisibilityRoiPanelValue('set', true);
+            set(chkContourVisibilityPanelObject('get'), 'Value', true);
+
+            refreshImages();   
+
+            if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+            end
+        end
+
         if strcmpi(get(t2Dscissor, 'State'), 'off')
 
  %           robotReleaseKey();
@@ -2268,6 +2392,8 @@ end
         end
 
         if is2DBrush('get') == false
+
+
 
             is2DBrush('set', true);
 

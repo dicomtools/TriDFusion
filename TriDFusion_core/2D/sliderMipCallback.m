@@ -118,11 +118,14 @@ function sliderMipCallback(~, ~)
     
             if isPlotContours('get') == true
     
-               imf = squeeze(fusionBuffer('get', [], dFusionSeriesOffset));
-               if ~isempty(imf)
+               imMf = squeeze(mipFusionBuffer('get', [], dFusionSeriesOffset));
+               if ~isempty(imMf)
     
                     sUnitDisplay = getSerieUnitValue(dFusionSeriesOffset);
                     if strcmpi(sUnitDisplay, 'SUV')
+
+                        atInputTemplate = inputTemplate('get');
+
                         tQuantification = quantificationTemplate('get', [], dFusionSeriesOffset);
                         if atInputTemplate(dFusionSeriesOffset).bDoseKernel == false
                             if ~isempty(tQuantification)
@@ -178,16 +181,16 @@ function sliderMipCallback(~, ~)
                 
                 angle = (iMipAngle - 1) * 11.25; % to rotate 90 counterclockwise
     
-    if 0
-                if angle >= 0 && angle < 180
-                    ratio = (iMipAngle-1) * 0.102;
-    
-                else
-                    ratio = (17*0.102)-(iMipAngle-16)*0.102;
-                end
-    
-                xOffset = (iSagittal * (1 - ratio)) + (iCoronal * ratio)
-    else
+    % if 0
+    %             if angle >= 0 && angle < 180
+    %                 ratio = (iMipAngle-1) * 0.102;
+    % 
+    %             else
+    %                 ratio = (17*0.102)-(iMipAngle-16)*0.102;
+    %             end
+    % 
+    %             xOffset = (iSagittal * (1 - ratio)) + (iCoronal * ratio)
+    % else
                 if angle == 0
                     xOffset = iSagittal;
                 elseif angle == 90
@@ -205,7 +208,7 @@ function sliderMipCallback(~, ~)
                     xOffset = (iSagittal - centerX) * cosAngle + (iCoronal - centerY) * sinAngle + centerX;
                 end    
       
-    end
+    % end
     
                 % Set MIP Line 1-5 with found xOffset
                 
@@ -227,20 +230,20 @@ function sliderMipCallback(~, ~)
                 alAxesMipLine{6}.XData = [xOffset(1), xOffset(1)];
                 alAxesMipLine{6}.YData = [iAxial + crossSize('get'), iAxialSize];
         
-                if multiFrameRecord('get') == false
-        
-                    if multiFramePlayback('get') == false && ...
-                       crossActivate('get') == true
-    
-                        for ll=1:numel(alAxesMipLine)
-                            set(alAxesMipLine{ll}, 'Visible', 'on');
-                        end
-                    else
-                        for ll=1:numel(alAxesMipLine)
-                            set(alAxesMipLine{ll}, 'Visible', 'off');
-                        end
-                    end
-                end          
+                % if multiFrameRecord('get') == false
+                % 
+                %     if multiFramePlayback('get') == false && ...
+                %        crossActivate('get') == true
+                % 
+                %         for ll=1:numel(alAxesMipLine)
+                %             set(alAxesMipLine{ll}, 'Visible', 'on');
+                %         end
+                %     else
+                %         for ll=1:numel(alAxesMipLine)
+                %             set(alAxesMipLine{ll}, 'Visible', 'off');
+                %         end
+                %     end
+                % end          
             end 
     
             plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), iMipAngle);       

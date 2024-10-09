@@ -1,5 +1,5 @@
-function lineColorbarIntensityMinClick(hObject, ~)
-%function lineColorbarIntensityMinClick(hObject, ~)
+function lineColorbarIntensityMinClick(~, ~)
+%function lineColorbarIntensityMinClick(~, ~)
 %line Colorbar Intensity Min object is Clicked.
 %See TriDFuison.doc (or pdf) for more information about options.
 %

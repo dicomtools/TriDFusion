@@ -617,6 +617,12 @@ function loadCerrPlanC(planC)
             setSeriesCallback();
             mainToolBarEnable('off');
         end
+        
+        if contourVisibilityRoiPanelValue('get') == false
+    
+            contourVisibilityRoiPanelValue('set', true);
+            set(chkContourVisibilityPanelObject('get'), 'Value', true);
+        end 
 
         aVoiColor   = planC{4}(mm).structureColor;
         sStructName = planC{4}(mm).structureName;

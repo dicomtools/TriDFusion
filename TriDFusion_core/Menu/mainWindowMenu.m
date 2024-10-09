@@ -186,18 +186,29 @@ function mainWindowMenu()
     
     mAnalCancer = uimenu(mWorkflows,'Label','Anal Cancer');
 
-    uimenu(mAnalCancer, 'Label','Display Result', 'Callback'        , @figVoiSimplifiedDialogCallback);
-    uimenu(mAnalCancer, 'Label','Export Report...', 'Callback'      , @setAnalCancerReportCallback, 'Separator','on');
+    uimenu(mAnalCancer, 'Label','Display Statistics ', 'Callback'              , @figVoiSimplifiedDialogCallback);
+    uimenu(mAnalCancer, 'Label','Export Report...', 'Callback'                 , @setAnalCancerReportCallback, 'Separator','on');
     uimenu(mAnalCancer, 'Label','Export Contours to RT-structure...','Callback', @writeRTStructCallback);
-    uimenu(mAnalCancer, 'Label','PET/CT Fusion', 'Callback'         , @setPETCTAnalCancerFusionCallback, 'Separator','on');
+    uimenu(mAnalCancer, 'Label','PET/CT Fusion', 'Callback'                    , @setPETCTAnalCancerFusionCallback, 'Separator','on');
 
-    % Metabolism Breast Cancer
-     mMetastaticBreastCancer = uimenu(mWorkflows,'Label','Metastatic Breast Cancer');
-     
-     uimenu(mMetastaticBreastCancer, 'Label','Metastatic Breast Cancer Segmentation (Threshold)', 'Callback', @setSegmentationMetastaticBreastCancerSegmentationCallback);
-%      uimenu(mMetastaticBreastCancer, 'Label','Metastatic Breast Cancer Segmentation (Threshold + AI)', 'Callback', @set);
+    % Metastatic Breast Cancer
 
-    uimenu(mMetastaticBreastCancer, 'Label','PET/CT Fusion', 'Callback'         , @setPETCTAnalCancerFusionCallback, 'Separator','on');
+    mMetastaticBreastCancer = uimenu(mWorkflows,'Label','Metastatic Breast Cancer');
+
+    mMetastaticBreastCancerThreshold = uimenu(mMetastaticBreastCancer,'Label','Threshold-based Segmentation');
+    uimenu(mMetastaticBreastCancerThreshold, 'Label','Metastatic Breast Cancer Segmentation (Threshold)', 'Callback', @setSegmentationMetastaticBreastCancerSegmentationCallback);
+
+    mMetastaticBreastCancerThresholdFullAI = uimenu(mMetastaticBreastCancer,'Label','Machine Learning Segmentation');
+    uimenu(mMetastaticBreastCancerThresholdFullAI, 'Label','Metastatic Breast Cancer Segmentation using NN-Unet PET Network (Full AI)'     , 'Callback', @setMachineLearningBreastCancerPETFullAICallback);
+    uimenu(mMetastaticBreastCancerThresholdFullAI, 'Label','Metastatic Breast Cancer Segmentation using NN-Unet PET & CT Network (Full AI)', 'Callback', @setMachineLearningBreastCancerPETCTFullAICallback);
+
+    mMetastaticBreastCancerFullAIToolkit = uimenu(mMetastaticBreastCancer,'Label','AI Toolkit', 'Separator','on');
+    uimenu(mMetastaticBreastCancerFullAIToolkit, 'Label','Export Metastatic Breast Cancer segmentation to NN-Unet PET Network'     , 'Callback', @setMachineLearningBreastCancerExportToPETNetworkCallback);
+    uimenu(mMetastaticBreastCancerFullAIToolkit, 'Label','Pre-processing NN-Unet Metastatic Breast Cancer PET Network'             , 'Callback', @setMachineLearningBreastCancerDataPreProcessingPETCallback);
+    uimenu(mMetastaticBreastCancerFullAIToolkit, 'Label','Export Metastatic Breast Cancer segmentation to NN-Unet PET & CT Network', 'Callback', @setMachineLearningBreastCancerExportToPETCTNetworkCallback, 'Separator','on');
+    uimenu(mMetastaticBreastCancerFullAIToolkit, 'Label','Pre-processing NN-Unet Metastatic Breast Cancer PET & CT Network'        , 'Callback', @setMachineLearningBreastCancerDataPreProcessingPETCTCallback);
+
+    uimenu(mMetastaticBreastCancer, 'Label','PET/CT Fusion', 'Callback', @setPETCTAnalCancerFusionCallback, 'Separator','on');
 
     % PSMA Lu177
 
@@ -239,7 +250,7 @@ function mainWindowMenu()
     uimenu(mPSMAFullAIToolkit, 'Label','Export PSMA Ga68 segmentation to NN-Unet PET & CT Network', 'Callback', @setMachineLearningPSMAGa68ExportToPETCTNetworkCallback, 'Separator','on');
     uimenu(mPSMAFullAIToolkit, 'Label','Pre-processing NN-Unet PSMA Ga68 PET & CT Network'        , 'Callback', @setMachineLearningPSMAGa68DataPreProcessingPETCTCallback);
 
-    uimenu(mPSMA, 'Label','PET/CT Fusion'                                , 'Callback', @setPETCTPSMAFusionCallback, 'Separator','on');
+    uimenu(mPSMA, 'Label','PET/CT Fusion', 'Callback', @setPETCTPSMAFusionCallback, 'Separator','on');
 
     % FDG
 
@@ -252,7 +263,7 @@ function mainWindowMenu()
 
     mFDGBrownFat = uimenu(mFDG,'Label','Brown Fat Segmentation');
     mFDGBrownFatThreshold = uimenu(mFDGBrownFat,'Label','Threshold + AI');
-    uimenu(mFDGBrownFatThreshold, 'Label','FDG BAT Segmentation (Threshold + AI)'                           , 'Callback', @setMachineLearningFDGBrownFatSUVCallback);
+    uimenu(mFDGBrownFatThreshold, 'Label','FDG BAT Segmentation (Threshold + AI)', 'Callback', @setMachineLearningFDGBrownFatSUVCallback);
 %     uimenu(mFDGBrownFatThreshold, 'Label','FDG Brown Fat Segmentation, export DICOM-RT structure (Threshold + AI)', 'Callback', @setMachineLearningFDGBrownFatSUVRT_structureCallback);
     mFDGBrownFatFullAI = uimenu(mFDGBrownFat,'Label','Machine Learning');
     uimenu(mFDGBrownFatFullAI, 'Label','FDG BAT Segmentation using NN-Unet PET Network (Full AI)'                               , 'Callback', @setMachineLearningFDGBrownFatPETFullAICallback);
@@ -264,7 +275,7 @@ function mainWindowMenu()
     uimenu(mFDGBrownFatAiToolkit, 'Label','Pre-processing NN-Unet BAT PET Network'             , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCallback);
     uimenu(mFDGBrownFatAiToolkit, 'Label','Export BAT segmentation to NN-Unet PET & CT Network', 'Callback', @setMachineLearningFDGBrownFatExportToPETCTNetworkCallback, 'Separator','on');
     uimenu(mFDGBrownFatAiToolkit, 'Label','Pre-processing NN-Unet BAT PET & CT Network'        , 'Callback', @setMachineLearningFDGBrownFatDataPreProcessingPETCTCallback);
-    uimenu(mFDGBrownFat, 'Label','PET/CT Fusion', 'Callback', @setPETCTFDGFusionCallback, 'Separator','on');
+    uimenu(mFDGBrownFat, 'Label','PET/CT Fusion', 'Callback', @setPETCTBrownFatFusionCallback, 'Separator','on');
     
  
     % FDHT

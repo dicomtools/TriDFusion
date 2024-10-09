@@ -27,7 +27,7 @@ classdef interactive_curve < handle
      end
      methods (Access = private)
          % mouse functions:
-         function button_down(ic,src,eventdata)          
+         function button_down(ic,src,~)          
              
              if strcmp(get(ic.figureHandle,'selectiontype'),'alt')
               %  alphaCurveMenu(ic);
@@ -71,7 +71,7 @@ classdef interactive_curve < handle
             end            
          end
          
-         function button_motion(ic,src,eventdata,makerHandle)                         
+         function button_motion(ic,~,~,makerHandle)                         
             
             % used when mouse motion with mouse button clicked
             p=get(ic.axesHandle,'CurrentPoint');
@@ -89,7 +89,7 @@ classdef interactive_curve < handle
             % limits from rest markers:
             f=find(ic.markersHandles==makerHandle); % find current maker in list of markers.
             L=length(ic.markersHandles);
-            dx=x2-x1;
+            % dx=x2-x1;
             %dxs=dx/(4*L); % margin, prevent too close markers
             dxs=ic.gap;
             switch L
@@ -160,7 +160,7 @@ classdef interactive_curve < handle
             end
          end
                   
-         function button_up(ic,src,eventdata)
+         function button_up(ic,src,~)
              
          windowButton('set', 'up'); 
              
@@ -173,7 +173,7 @@ classdef interactive_curve < handle
             ic.mouseMode=1;           
          end
          
-         function axes_button_down(ic,src,eventdata)
+         function axes_button_down(ic,~,~)
              % used when clicked in axes to create new makrer if ic.mouseMode=2
             windowButton('set', 'down'); 
              
@@ -190,14 +190,14 @@ classdef interactive_curve < handle
              end
          end
          
-         function close_figure_request(ic,src,eventdata)
-         if 0    
-             % used when figure close
-             hf=ic.figureHandle;
-             delete(ic); % delete interactive curve
-             delete(hf); % delete figure
-         end
-         end
+         % function close_figure_request(ic,src,eventdata)
+         % if 0    
+         %     % used when figure close
+         %     hf=ic.figureHandle;
+         %     delete(ic); % delete interactive curve
+         %     delete(hf); % delete figure
+         % end
+         % end
      end
      methods
          function ic=interactive_curve(varargin)
@@ -903,25 +903,25 @@ classdef interactive_curve < handle
              ic.redraw();
          end
                         
-         function delete(ic)
-         if 0    
-             % ic.delete() delete interactive curve
-             % delete interactive curve object makrers and line and empty callbacks in axes and figure
-             
-             % first run additionalDeleteFunctionHandle if exist:
-             if ~isempty(ic.additionalDeleteFunctionHandle)
-                 af=ic.additionalDeleteFunctionHandle;
-                 af();
-             end
-             set(ic.figureHandle,'WindowButtonMotionFcn','','WindowButtonUpFcn','');
-             set(ic.axesHandle,'ButtonDownFcn','');
-             % delete instance of class
-             for c=1:length(ic.markersHandles)
-                 delete(ic.markersHandles(c));
-             end
-             delete(ic.lineHandle);
-         end
-         end
+         % function delete(ic)
+         % if 0    
+         %     % ic.delete() delete interactive curve
+         %     % delete interactive curve object makrers and line and empty callbacks in axes and figure
+         % 
+         %     % first run additionalDeleteFunctionHandle if exist:
+         %     if ~isempty(ic.additionalDeleteFunctionHandle)
+         %         af=ic.additionalDeleteFunctionHandle;
+         %         af();
+         %     end
+         %     set(ic.figureHandle,'WindowButtonMotionFcn','','WindowButtonUpFcn','');
+         %     set(ic.axesHandle,'ButtonDownFcn','');
+         %     % delete instance of class
+         %     for c=1:length(ic.markersHandles)
+         %         delete(ic.markersHandles(c));
+         %     end
+         %     delete(ic.lineHandle);
+         % end
+         % end
         
      end
 end

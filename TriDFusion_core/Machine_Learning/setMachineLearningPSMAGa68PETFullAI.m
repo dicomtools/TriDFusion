@@ -91,25 +91,67 @@ function setMachineLearningPSMAGa68PETFullAI(sPredictScript, tPSMAGa68PETFullAI)
     end
 
 
-    % Apply ROI constraint
-    [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dPTSerieOffset);
-
-    bInvertMask = invertConstraint('get');
-
-    tRoiInput = roiTemplate('get', dPTSerieOffset);
-
-    aPTImageTemp = aPTImage;
-    aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
-    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
+%     % Apply ROI constraint
+%     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dPTSerieOffset);
+% 
+%     bInvertMask = invertConstraint('get');
+% 
+%     tRoiInput = roiTemplate('get', dPTSerieOffset);
+% 
+%     aPTImageTemp = aPTImage;
+%     aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
+%     aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
 
     resetSeries(dPTSerieOffset, true);
 
 
     try
+% 
+%     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+%     drawnow;
 
+   % Resample series
+
+    if ~isempty(aCTImage)
+
+        progressBar(1/10, 'Resampling series, please wait.');
+
+        [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
+
+        dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
+        dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
+
+        progressBar(2/10, 'Resampling mip, please wait.');
+
+        refMip = mipBuffer('get', [], dCTSerieOffset);
+        aMip   = mipBuffer('get', [], dPTSerieOffset);
+
+        aMip = resampleMip(aMip, atPTMetaData, refMip, atCTMetaData, 'Linear', true);
+
+        mipBuffer('set', aMip, dPTSerieOffset);
+
+        setQuantification(dPTSerieOffset);
+
+        aPTImage = aResampledPTImage;
+        atPTMetaData = atResampledPTMetaData;
+
+        clear aResampledPTImage;
+        if get(uiSeriesPtr('get'), 'Value') ~= dPTSerieOffset
+            set(uiSeriesPtr('get'), 'Value', dPTSerieOffset);
+        end
+
+        setSeriesCallback();
+
+    else
+        if get(uiSeriesPtr('get'), 'Value') ~= dPTSerieOffset
+
+            set(uiSeriesPtr('get'), 'Value', dPTSerieOffset);
+            setSeriesCallback();
+       end
+    end
+    
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
-
 
     % Create an empty directory
 
@@ -121,7 +163,7 @@ function setMachineLearningPSMAGa68PETFullAI(sPredictScript, tPSMAGa68PETFullAI)
 
     % Convert dicom to .nii
 
-    progressBar(1/10, 'DICOM to NRRD conversion, please wait.');
+    progressBar(3/10, 'DICOM to NRRD conversion, please wait.');
 
     sNrrdImagesName = sprintf('%sCase01_0000.nrrd', sNrrdTmpDir);
 
@@ -157,7 +199,7 @@ function setMachineLearningPSMAGa68PETFullAI(sPredictScript, tPSMAGa68PETFullAI)
         errordlg('nrrd file mot found!!', '.nrrd file Validation');
     else
 
-        progressBar(2/10, 'Machine learning in progress, this might take several minutes, please be patient.');
+        progressBar(4/10, 'Machine learning in progress, this might take several minutes, please be patient.');
 
         sSegmentationFolderName = sprintf('%stemp_seg_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
         if exist(char(sSegmentationFolderName), 'dir')
@@ -184,7 +226,7 @@ function setMachineLearningPSMAGa68PETFullAI(sPredictScript, tPSMAGa68PETFullAI)
             else % Process succeed
 
 
-                progressBar(3/10, 'Importing prediction, please wait.');
+                progressBar(5/10, 'Importing prediction, please wait.');
 
                 [aMask, ~] = nrrdread( sprintf('%sCase01.nrrd',sSegmentationFolderName));
 
@@ -195,56 +237,56 @@ function setMachineLearningPSMAGa68PETFullAI(sPredictScript, tPSMAGa68PETFullAI)
                 dSmallestValue        = tPSMAGa68PETFullAI.options.smallestVoiValue;
                 bPixelEdge            = tPSMAGa68PETFullAI.options.pixelEdge;
 
-                progressBar(4/10, 'Segmenting prediction mask, please wait.');
+                progressBar(6/10, 'Segmenting prediction mask, please wait.');
 
-                maskAddVoiByTypeToSeries(aPTImageTemp, aMask, atPTMetaData, dPTSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, bClassifySegmentation, 2);
+                maskAddVoiByTypeToSeries(aPTImage, aMask, atPTMetaData, dPTSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, bClassifySegmentation, 2);
                 
-                clear aPTImageTemp;
+%                 clear aPTImageTemp;
 
                 if exist(char(sSegmentationFolderName), 'dir')
 
                     rmdir(char(sSegmentationFolderName), 's');
                 end
 
-                if ~isempty(aCTImage)
-
-                    progressBar(5/10, 'Resampling series, please wait.');
-
-                    [aResampledNMImage, atResampledNMMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
-
-                    dicomMetaData('set', atResampledNMMetaData, dPTSerieOffset);
-                    dicomBuffer  ('set', aResampledNMImage, dPTSerieOffset);
-
-                    progressBar(6/10, 'Resampling mip, please wait.');
-
-                    refMip = mipBuffer('get', [], dCTSerieOffset);
-                    aMip   = mipBuffer('get', [], dPTSerieOffset);
-
-                    aMip = resampleMip(aMip, atPTMetaData, refMip, atCTMetaData, 'Linear', true);
-
-                    mipBuffer('set', aMip, dPTSerieOffset);
-
-                    setQuantification(dPTSerieOffset);
-
-                    progressBar(7/10, 'Resampling contours, please wait.');
-
-
-                    atRoi = roiTemplate('get', dPTSerieOffset);
-
-                    if ~isempty(atRoi)
-
-                        atResampledRoi = resampleROIs(aPTImage, atPTMetaData, aResampledNMImage, atResampledNMMetaData, atRoi, true);
-
-                        roiTemplate('set', dPTSerieOffset, atResampledRoi);
-                    end
-
-                    progressBar(8/10, 'Resampling axes, please wait.');
-
-                    resampleAxes(aResampledNMImage, atResampledNMMetaData);
-
-                    setImagesAspectRatio();
-
-                end
+%                 if ~isempty(aCTImage)
+% 
+%                     progressBar(5/10, 'Resampling series, please wait.');
+% 
+%                     [aResampledNMImage, atResampledNMMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
+% 
+%                     dicomMetaData('set', atResampledNMMetaData, dPTSerieOffset);
+%                     dicomBuffer  ('set', aResampledNMImage, dPTSerieOffset);
+% 
+%                     progressBar(6/10, 'Resampling mip, please wait.');
+% 
+%                     refMip = mipBuffer('get', [], dCTSerieOffset);
+%                     aMip   = mipBuffer('get', [], dPTSerieOffset);
+% 
+%                     aMip = resampleMip(aMip, atPTMetaData, refMip, atCTMetaData, 'Linear', true);
+% 
+%                     mipBuffer('set', aMip, dPTSerieOffset);
+% 
+%                     setQuantification(dPTSerieOffset);
+% 
+%                     progressBar(7/10, 'Resampling contours, please wait.');
+% 
+% 
+%                     atRoi = roiTemplate('get', dPTSerieOffset);
+% 
+%                     if ~isempty(atRoi)
+% 
+%                         atResampledRoi = resampleROIs(aPTImage, atPTMetaData, aResampledNMImage, atResampledNMMetaData, atRoi, true);
+% 
+%                         roiTemplate('set', dPTSerieOffset, atResampledRoi);
+%                     end
+% 
+%                     progressBar(8/10, 'Resampling axes, please wait.');
+% 
+%                     resampleAxes(aResampledNMImage, atResampledNMMetaData);
+% 
+%                     setImagesAspectRatio();
+% 
+%                 end
 
 
             end

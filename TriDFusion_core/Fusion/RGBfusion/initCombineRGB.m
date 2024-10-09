@@ -224,7 +224,7 @@ function  initCombineRGB()
 
             getRGBcombinedColor('set', 'G', 0, dGreenOffset, 0);
 
-        elseif dRedOffset == 0 && dGreenOffset ~= 0 && dBlueOffset == 0
+        elseif dRedOffset == 0 && dGreenOffset == 0 && dBlueOffset ~= 0
 
             aBlueBuffer = squeeze(fusionBuffer('get', [], dBlueOffset )); 
             
@@ -563,7 +563,7 @@ function  initCombineRGB()
             
             getRGBcombinedColor('set', 'G', 0, dGreenOffset, 0);
 
-        elseif dRedOffset == 0 && dGreenOffset ~= 0 && dBlueOffset == 0
+        elseif dRedOffset == 0 && dGreenOffset == 0 && dBlueOffset ~= 0
 
             aBlueBuffer     = squeeze(fusionBuffer('get', [], dBlueOffset )); 
             if isVsplash('get') == false

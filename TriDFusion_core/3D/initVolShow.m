@@ -213,15 +213,15 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
       
         dScaleMax = max(aScaleFactors);
 
-if 0                                
-        % Normalize to 1
-        
-        aScaleFactors(1)=aScaleFactors(1)/dScaleMax;
-        aScaleFactors(2)=aScaleFactors(2)/dScaleMax;
-        aScaleFactors(3)=aScaleFactors(3)/dScaleMax;
-else
-
-end                
+% if 0                                
+%         % Normalize to 1
+% 
+%         aScaleFactors(1)=aScaleFactors(1)/dScaleMax;
+%         aScaleFactors(2)=aScaleFactors(2)/dScaleMax;
+%         aScaleFactors(3)=aScaleFactors(3)/dScaleMax;
+% else
+% 
+% end                
         volumeScaleFator('set', 'x', aScaleFactors(1));
         volumeScaleFator('set', 'y', aScaleFactors(2));
         volumeScaleFator('set', 'z', aScaleFactors(3));

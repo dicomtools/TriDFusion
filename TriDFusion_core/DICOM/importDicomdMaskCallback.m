@@ -36,7 +36,9 @@ function importDicomdMaskCallback(~, ~)
 
          return;
      end     
-        
+   
+     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+   
 %      filter = {'*.nii'};
 
      sCurrentDir  = viewerRootPath('get');
@@ -59,6 +61,19 @@ function importDicomdMaskCallback(~, ~)
 
      if sFileName ~= 0
 
+        if contourVisibilityRoiPanelValue('get') == false
+
+            contourVisibilityRoiPanelValue('set', true);
+            set(chkContourVisibilityPanelObject('get'), 'Value', true);
+
+            refreshImages();  
+
+            if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+            end
+        end
+
         try
             importDicomLastUsedDir = sPath;
             save(sMatFile, 'importDicomLastUsedDir');
@@ -71,7 +86,8 @@ function importDicomdMaskCallback(~, ~)
 
         loadDcmMaskFile(sPath, sFileName); 
 
-        triangulateImages();
+%        triangulateImages();
+        refreshImages();
 
      end
 

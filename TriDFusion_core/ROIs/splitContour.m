@@ -279,7 +279,7 @@ function splitContour(pAxe, pRoiLinePtr)
             
                             voiMenu(roiPtr);
             
-                            uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                            uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
                             asRoiTags{numel(asRoiTags)+1} = sTag;
 
@@ -514,7 +514,7 @@ function splitContour(pAxe, pRoiLinePtr)
 % 
 %                 voiMenu(roiPtr);
 % 
-%                 uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+%                 uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
                 % Add ROI 2
 
@@ -555,7 +555,7 @@ function splitContour(pAxe, pRoiLinePtr)
 
                 voiMenu(roiPtr);
 
-                uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
 
 %                 % Delete original ROI

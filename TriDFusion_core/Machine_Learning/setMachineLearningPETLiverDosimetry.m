@@ -126,7 +126,7 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript, bResampleSeries
 
     progressBar(2/7, 'Applying Y90 dose kernel, please wait.');
 
-    setDoseKernel('Local Deposition', 1, 'SoftTissue', 'Y90', getKernelDefaultCutoffValue('SoftTissue', 'Y90'), 'Linear', false, dCTSerieOffset, true);
+    setDoseKernel('Local Deposition', 1, 'SoftTissue', 'Y90', getKernelDefaultCutoffValue('Y90'), 'Linear', false, dCTSerieOffset, true);
 
     dDoseSerieOffset = get(uiSeriesPtr('get'), 'Value');
 
@@ -247,7 +247,7 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript, bResampleSeries
 
                     refreshImages();
 
-                    plotRotatedRoiOnMip(axesMipPtr('get', [], dDoseSerieOffset), dicomBuffer('get', [], dDoseSerieOffset), mipAngle('get'));       
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dDoseSerieOffset), dicomBuffer('get', [], dDoseSerieOffset), mipAngle('get'));
 
                     drawnow;
 

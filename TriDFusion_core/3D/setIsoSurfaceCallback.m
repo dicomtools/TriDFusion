@@ -1062,19 +1062,19 @@ function setIsoSurfaceCallback(~, ~)
 
                         isoFusionObject('set', isoFusionObj);
                     end
-if 0
-                    % Set 3D UI Panel
-
-                    if get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
-                        set(ui3DIsoSurfaceColorPtr('get') , 'Value' , isoColorFusionOffset('get') );
-                        set(ui3DSliderIsoSurfacePtr('get'), 'Value' , isoSurfaceFusionValue('get'));
-                        set(ui3DEditIsoSurfacePtr('get')  , 'String', num2str(isoSurfaceFusionValue('get')));
-                    else
-                        set(ui3DIsoSurfaceColorPtr('get') , 'Value' , isoColorOffset('get') );
-                        set(ui3DSliderIsoSurfacePtr('get'), 'Value' , isoSurfaceValue('get'));
-                        set(ui3DEditIsoSurfacePtr('get')  , 'String', num2str(isoSurfaceValue('get')));
-                    end
-end
+% if 0
+%                     % Set 3D UI Panel
+% 
+%                     if get(ui3DVolumePtr('get'), 'Value') == 2 % Fusion
+%                         set(ui3DIsoSurfaceColorPtr('get') , 'Value' , isoColorFusionOffset('get') );
+%                         set(ui3DSliderIsoSurfacePtr('get'), 'Value' , isoSurfaceFusionValue('get'));
+%                         set(ui3DEditIsoSurfacePtr('get')  , 'String', num2str(isoSurfaceFusionValue('get')));
+%                     else
+%                         set(ui3DIsoSurfaceColorPtr('get') , 'Value' , isoColorOffset('get') );
+%                         set(ui3DSliderIsoSurfacePtr('get'), 'Value' , isoSurfaceValue('get'));
+%                         set(ui3DEditIsoSurfacePtr('get')  , 'String', num2str(isoSurfaceValue('get')));
+%                     end
+% end
                 end
                 
                 set(btnFusionPtr('get'), 'Enable', sFusionBtnEnable);                                        

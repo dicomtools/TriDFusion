@@ -29,19 +29,19 @@ function dYOffsetMin = computeLineColorbarIntensityMinYOffset(dSeriesOffset)
 
     dLevelMin = windowLevel('get', 'min');
 
-if 0
-    aInputBuffer = inputBuffer('get');
-
-    dImageMin = min(aInputBuffer{dSeriesOffset}, [], 'all');
-    dImageMax = max(aInputBuffer{dSeriesOffset}, [], 'all');
-
-    clear aInputBuffer;    
-else
+% if 0
+%     aInputBuffer = inputBuffer('get');
+% 
+%     dImageMin = min(aInputBuffer{dSeriesOffset}, [], 'all');
+%     dImageMax = max(aInputBuffer{dSeriesOffset}, [], 'all');
+% 
+%     clear aInputBuffer;    
+% else
     tQuantification = quantificationTemplate('get', [], dSeriesOffset);
 
     dImageMin = tQuantification.tCount.dMin;
     dImageMax = tQuantification.tCount.dMax;       
-end
+% end
 
     dColorbarScale = colorbarScale('get');
 

@@ -155,7 +155,7 @@ function maskAddVoiByTypeToSeries(aImage, aMask, atMetaData, dSeriesOffset, dSma
 
                 voiMenu(roiPtr);
 
-                uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
                                        
                 asTag{dTagOffset} = sTag;
                 dTagOffset = dTagOffset+1;

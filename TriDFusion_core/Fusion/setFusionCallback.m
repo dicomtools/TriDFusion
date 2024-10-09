@@ -1304,7 +1304,9 @@ end
                 sUnitDisplay = getSerieUnitValue(dFusionSeriesOffset);
 
                 if strcmpi(sUnitDisplay, 'SUV')
-                    if atInputTemplate(dFusionSeriesOffset).tQuant.tSUV.dScale
+
+                    if isfield(atInputTemplate(dFusionSeriesOffset).tQuant, 'tSUV')
+                        
                         dMin = suvWindowLevel('get', 'min')/atInputTemplate(dFusionSeriesOffset).tQuant.tSUV.dScale;
                         dMax = suvWindowLevel('get', 'max')/atInputTemplate(dFusionSeriesOffset).tQuant.tSUV.dScale;
                     else

@@ -30,9 +30,11 @@ function sliderSagCallback(~, ~)
     if ~isempty(uiSliderSagPtr('get'))
 
         if get(uiSliderSagPtr('get'), 'Value') >= 0 && ...
-           get(uiSliderSagPtr('get'), 'Value') <= 1 && ...
-           strcmpi(windowButton('get'), 'up')  
-    
+           get(uiSliderSagPtr('get'), 'Value') <= 1 
+           % strcmpi(windowButton('get'), 'up')  
+
+%             windowButton('set', 'scrool');
+
             if get(uiSliderSagPtr('get'), 'Value') == 0
                 dSliceNumber = 1;
             else
@@ -45,7 +47,9 @@ function sliderSagCallback(~, ~)
             sliceNumber('set', 'sagittal', dSliceNumber); 
             
             refreshImages();
-            
+
+%             windowButton('set', 'up');
+        
             % drawnow;
         end
     end

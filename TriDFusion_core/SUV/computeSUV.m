@@ -65,8 +65,16 @@ function dSUVconv = computeSUV(atMetaData, suvType)
                         acquisitionTime = sprintf('%s.00', acquisitionTime);
                     end            
 
-                    datetimeAcquisitionDate = datetime([acquisitionDate acquisitionTime],'InputFormat','yyyyMMddHHmmss.SS');
-                    dayCurAcquisitionDate = datenum(datetimeAcquisitionDate);
+%                     datetimeAcquisitionDate = datetime([acquisitionDate acquisitionTime],'InputFormat','yyyyMMddHHmmss.SS');
+%                     dayCurAcquisitionDate = datenum(datetimeAcquisitionDate);
+                    try
+                        fullAcquisitionDate = [acquisitionDate acquisitionTime(1:6)];  % Ignoring milliseconds for speed
+                        dayCurAcquisitionDate = datenum(fullAcquisitionDate, 'yyyymmddHHMMSS');
+                    catch
+                        datetimeAcquisitionDate = datetime([acquisitionDate acquisitionTime],'InputFormat','yyyyMMddHHmmss.SS');
+                        dayCurAcquisitionDate = datenum(datetimeAcquisitionDate);                        
+                    end
+
                     if dayCurAcquisitionDate < dayAcquisitionDate % Find min time
                         dayAcquisitionDate = dayCurAcquisitionDate;
                     end                    

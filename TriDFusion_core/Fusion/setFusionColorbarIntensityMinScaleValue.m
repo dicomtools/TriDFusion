@@ -97,7 +97,10 @@ end
         if bDefaultUnit == true
 
             tQuant = quantificationTemplate('get', [], dSeriesOffset);
-            dLevelMin = dLevelMin*tQuant.tSUV.dScale;      
+
+            if isfield(tQuant, 'tSUV')
+                dLevelMin = dLevelMin*tQuant.tSUV.dScale;      
+            end
         end
     end
 

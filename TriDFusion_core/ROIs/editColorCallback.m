@@ -30,6 +30,9 @@ function editColorCallback(hObject,~)
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
     sColor = uisetcolor([hObject.UserData.Color],'Select a color');
+    if sColor == 0
+        return;
+    end
     
     atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
     

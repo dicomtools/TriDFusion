@@ -36,7 +36,9 @@ function importNrrdMaskCallback(~, ~)
 
          return;
      end     
-        
+    
+     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+ 
 %      filter = {'*.nii'};
 
      sCurrentDir  = viewerRootPath('get');
@@ -59,6 +61,19 @@ function importNrrdMaskCallback(~, ~)
 
      if sFileName ~= 0
 
+        if contourVisibilityRoiPanelValue('get') == false
+
+            contourVisibilityRoiPanelValue('set', true);
+            set(chkContourVisibilityPanelObject('get'), 'Value', true);
+
+            refreshImages();  
+
+            if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+            end
+        end
+
         try
             importNrrdLastUsedDir = sPath;
             save(sMatFile, 'importNrrdLastUsedDir');
@@ -74,7 +89,7 @@ function importNrrdMaskCallback(~, ~)
             setVsplashCallback();
         end
 
-        if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
+        if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
             
             link2DMip('set', true);
 
@@ -85,7 +100,8 @@ function importNrrdMaskCallback(~, ~)
 
         loadNrrdMaskFile(sPath, sFileName); 
 
-        triangulateImages();
+%        triangulateImages();
+        refreshImages();
 
      end
 

@@ -619,8 +619,11 @@ function colorbarCallback(hObject, ~)
                 end
             else
                 if bDefaultUnit == true
-                    dMax = dMax*atInput(dOffset).tQuant.tSUV.dScale;
-                    dMin = dMin*atInput(dOffset).tQuant.tSUV.dScale;
+
+                    if isfield(atInput(dOffset).tQuant, 'tSUV')
+                        dMax = dMax*atInput(dOffset).tQuant.tSUV.dScale;
+                        dMin = dMin*atInput(dOffset).tQuant.tSUV.dScale;
+                    end
                 end
             end
             bUnitEnable = 'on';
@@ -629,9 +632,14 @@ function colorbarCallback(hObject, ~)
         end
 
         if strcmpi(sUnitDisplay, 'SUV')
+
             if bDefaultUnit == true
                 sSUVtype = viewerSUVtype('get');
-                sUnitType = sprintf('Unit in SUV/%s', sSUVtype);
+                if isfield(atInput(dOffset).tQuant, 'tSUV')
+                    sUnitType = sprintf('Unit in SUV/%s', sSUVtype);
+                else
+                    sUnitType = 'Unit in BQML';
+                end
             else
                sUnitType = 'Unit in BQML';
             end
@@ -817,8 +825,11 @@ function colorbarCallback(hObject, ~)
 
                 case 'SUV'
 
-                    sMinValue = dMinValue*atInput(dOffset).tQuant.tSUV.dScale;
-                    sMaxValue = dMaxValue*atInput(dOffset).tQuant.tSUV.dScale;
+                    if isfield(atInput(dOffset).tQuant, 'tSUV')
+    
+                        sMinValue = dMinValue*atInput(dOffset).tQuant.tSUV.dScale;
+                        sMaxValue = dMaxValue*atInput(dOffset).tQuant.tSUV.dScale;
+                    end
 
                 case 'BQML'
 
@@ -846,8 +857,12 @@ function colorbarCallback(hObject, ~)
             lMin = str2double(get(edtMinValue, 'String'));
 
             if strcmpi(sUnitDisplay, 'SUV')
-                lMin = lMin/atInput(dOffset).tQuant.tSUV.dScale;
-                lMax = lMax/atInput(dOffset).tQuant.tSUV.dScale;
+             
+                if isfield(atInput(dOffset).tQuant, 'tSUV')
+
+                    lMin = lMin/atInput(dOffset).tQuant.tSUV.dScale;
+                    lMax = lMax/atInput(dOffset).tQuant.tSUV.dScale;
+                end
             end
 
             if strcmpi(sUnitDisplay, 'Window Level')

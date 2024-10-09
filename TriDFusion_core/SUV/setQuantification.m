@@ -113,6 +113,7 @@ function setQuantification(dSeriesOffset)
             dScale = computeSUV(atQuantDicomInfo, viewerSUVtype('get'));
 
             if dScale ~= 0
+                
                 xPixel = 0;
                 yPixel = 0;
 %                zPixel = 0;

@@ -448,8 +448,9 @@ end
     refreshImages();
 
     if size(dicomBuffer('get', [], dOffset), 3) ~=1
-
-        plotRotatedRoiOnMip(axesMipPtr('get', [], dOffset), dicomBuffer('get', [], dOffset), mipAngle('get'));       
+        
+        sliderMipCallback();
+        % plotRotatedRoiOnMip(axesMipPtr('get', [], dOffset), dicomBuffer('get', [], dOffset), mipAngle('get'));       
     end
 
 end

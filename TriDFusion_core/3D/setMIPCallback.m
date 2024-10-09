@@ -448,7 +448,7 @@ function setMIPCallback(~, ~)
 
                 if isFusion('get') == true
 
-if 1                    
+% if 1                    
                     % tFuseInput     = inputTemplate('get');
                     % iFuseOffset    = get(uiFusedSeriesPtr('get'), 'Value');
                     atFuseMetaData = fusionMetaData('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
@@ -471,11 +471,11 @@ if 1
                     
 %                        colorMapMipOffset('set', 11); % Invert Linear
                         background3DOffset('set', 7); % White
-                   else
+                    else
                         background3DOffset('set', 8); % Black
  %                       colorMapMipOffset('set', colorMapOffset('get')); %  % Set 3D Mip from 2D                        
                     end
-end
+% end
                 end            
 %                if (strcmpi(atMetaData{1}.Modality, 'nm') || ...
 %                    strcmpi(atMetaData{1}.Modality, 'pt')) 

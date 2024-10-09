@@ -338,7 +338,7 @@ function initKernelPanel()
 
     sUserInterpolation = kernelInterpolation('get');
     asKernelInterpolation = {'Linear', 'Nearest', 'Next', 'Pchip', 'Makima', 'Spline'};
-    
+
     for dIterpolationValue =1: numel(asKernelInterpolation)
         if strcmpi(asKernelInterpolation{dIterpolationValue}, sUserInterpolation)
             break;
@@ -365,8 +365,8 @@ function initKernelPanel()
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @uiKernelInterpolationCallback...
-                  );    
-  
+                  );
+
          uicontrol(uiKernelPanelPtr('get'),...
                   'Enable'  , 'On', ...
                   'style'   , 'text',...
@@ -376,7 +376,7 @@ function initKernelPanel()
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [15 202 200 20]...
                   );
-              
+
     uiPlotDistance = ...
         uicontrol(uiKernelPanelPtr('get'),...
                   'Enable'  , sEnable, ...
@@ -385,17 +385,17 @@ function initKernelPanel()
                   'BackgroundColor', [0.75 0.75 0.75], ...
                   'ForegroundColor', [0.1 0.1 0.1], ...
                   'Callback', @plotKernelDistanceCallback...
-                  ); 
-              
-          
+                  );
+
+
     dTissue   = get(uiKernelTissue , 'Value' );
     asTissue  = get(uiKernelTissue , 'String');
 
     dIsotope  = get(uiKernelIsotope, 'Value' );
     asIsotope = get(uiKernelIsotope, 'String');
-        
-    dCutoffValue = getKernelDefaultCutoffValue(asTissue{dTissue}, asIsotope{dIsotope});
-    
+
+    dCutoffValue = getKernelDefaultCutoffValue(asIsotope{dIsotope});
+
     uiEditKernelCutoff = ...
         uicontrol(uiKernelPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
@@ -406,7 +406,7 @@ function initKernelPanel()
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @editKernelCutoffCallback ...
                   );
-    
+
     chkMicrosphereInSpecimen = ...
         uicontrol(uiKernelPanelPtr('get'),...
                   'style'   , 'checkbox',...
@@ -426,9 +426,9 @@ function initKernelPanel()
                   'Enable'  , 'Inactive',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'ButtonDownFcn', @chkMicrosphereInSpecimenCallback...  
+                  'ButtonDownFcn', @chkMicrosphereInSpecimenCallback...
                   );
-              
+
     uiDoseKernelPanel = ...
         uicontrol(uiKernelPanelPtr('get'),...
                   'Enable'  , sEnable, ...
@@ -438,7 +438,7 @@ function initKernelPanel()
                   'BackgroundColor', [0.6300 0.6300 0.4000], ...
                   'ForegroundColor', [0.1 0.1 0.1], ...
                   'Callback', @doseKernelCallback...
-                  ); 
+                  );
 
     % 3D Gauss Filter
 
@@ -650,7 +650,7 @@ function initKernelPanel()
 
                 aInput = inputBuffer('get');
                 aCtBuffer = aInput{tKernelCtDoseMap{dCtOffset}.dSeriesNumber};
-                
+
                 if     strcmpi(imageOrientation('get'), 'axial')
                 %    aCtBuffer = aCtBuffer;
                 elseif strcmpi(imageOrientation('get'), 'coronal')
@@ -692,8 +692,8 @@ function initKernelPanel()
                               'Nearest', ...
                               2, ...
                               false);
-           
-            % Get constraint 
+
+            % Get constraint
 
             [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value'));
 
@@ -706,12 +706,12 @@ function initKernelPanel()
                                     tRoiInput, ...
                                     asConstraintTagList, ...
                                     asConstraintTypeList, ...
-                                    bInvertMask);        
+                                    bInvertMask);
 
             dImageMin = min(double(aResamCt),[], 'all');
 
             aResamCt(aLogicalMask==0) = dImageMin; % Apply constraint
-       
+
             dCtMIn = min(double(aResamCt),[], 'all');
 
             dUpperValue = str2double( get(uiEditKernelUpperTreshold, 'String') );
@@ -961,35 +961,35 @@ function initKernelPanel()
     end
 
     function uiKernelIsotopeCallback(~, ~)
-        
+
         dTissue   = get(uiKernelTissue , 'Value' );
         asTissue  = get(uiKernelTissue , 'String');
 
         dIsotope  = get(uiKernelIsotope, 'Value' );
-        asIsotope = get(uiKernelIsotope, 'String');        
-        
-        dCutOffValue = getKernelDefaultCutoffValue(asTissue{dTissue}, asIsotope{dIsotope});
-        
+        asIsotope = get(uiKernelIsotope, 'String');
+
+        dCutOffValue = getKernelDefaultCutoffValue(asIsotope{dIsotope});
+
         set(uiEditKernelCutoff, 'String', num2str(dCutOffValue));
-        
+
     end
 
     function uiKernelInterpolationCallback(~, ~)
-       
+
         asKernelInterpolation = get(uiKernelInterpolation, 'String');
         dInterpolationValue   = get(uiKernelInterpolation, 'Value');
 
-        kernelInterpolation('set', asKernelInterpolation{dInterpolationValue});           
+        kernelInterpolation('set', asKernelInterpolation{dInterpolationValue});
     end
 
     function plotKernelDistanceCallback(~, ~)
-       
+
         % Get custom distance
-        
+
         dDistance = str2double(get(uiEditKernelCutoff, 'String'));
 
         % Get kernel details
-        
+
         dModel    = get(uiKernelModel   , 'Value');
 
         dTissue   = get(uiKernelTissue , 'Value' );
@@ -1004,13 +1004,13 @@ function initKernelPanel()
 
         if numel(asField) == 2
             aDistance = tKernel.(asField{1});
-            aDoseR2   = tKernel.(asField{2});                   
+            aDoseR2   = tKernel.(asField{2});
         else
             return;
-        end         
-        
+        end
+
         % Build plot figure
-        
+
         dScreenSize  = get(groot, 'Screensize');
 
         ySize = dScreenSize(4);
@@ -1019,7 +1019,7 @@ function initKernelPanel()
         PLOT_FIGURE_X = PLOT_FIGURE_Y;
 
         sPlotKernelFigureName = sprintf('Distance Plot: Tissue Dependent %s, Isotope %s', asTissue{dTissue}, asIsotope{dIsotope});
-        
+
         figPlotKernelDistance = ...
             dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-PLOT_FIGURE_X/2) ...
                    (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-PLOT_FIGURE_Y/2) ...
@@ -1031,10 +1031,10 @@ function initKernelPanel()
                    'Resize', 'on', ...
                    'Color', viewerBackgroundColor('get'), ...
                    'Toolbar','none'...
-                   );        
-               
+                   );
+
         aFigurePosition = get(figPlotKernelDistance, 'Position');
-              
+
         axePlotKernelDistance = ...
             axes(figPlotKernelDistance, ...
                  'Units'   , 'pixels', ...
@@ -1044,58 +1044,58 @@ function initKernelPanel()
                  'YColor'  , viewerForegroundColor('get'),...
                  'ZColor'  , viewerForegroundColor('get'),...
                  'Visible' , 'on'...
-                 );    
+                 );
         axePlotKernelDistance.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        axePlotKernelDistance.Toolbar = [];  
+        axePlotKernelDistance.Toolbar = [];
 
         pDistancePlot = plot(axePlotKernelDistance, aDistance, log10(aDoseR2./aDistance.^2));
         set(pDistancePlot, 'Color', 'cyan');
 %        set(axePlotKernelDistance,'XDir','Reverse');
 %        set(axePlotKernelDistance,'YDir','Reverse');
- 
+
         axePlotKernelDistance.XLabel.String = 'Distance (mm)';
-        axePlotKernelDistance.YLabel.String = 'Log10 of kernel';     
-        
+        axePlotKernelDistance.YLabel.String = 'Log10 of kernel';
+
         axePlotKernelDistance.XColor = viewerForegroundColor('get');
         axePlotKernelDistance.YColor = viewerForegroundColor('get');
-        axePlotKernelDistance.ZColor = viewerForegroundColor('get');        
-        
+        axePlotKernelDistance.ZColor = viewerForegroundColor('get');
+
         axePlotKernelDistance.Title.Color = viewerForegroundColor('get');
         axePlotKernelDistance.Color = viewerAxesColor('get');
-        
+
         cDataCursor = datacursormode(figPlotKernelDistance);
         cDataCursor.UpdateFcn = @displayCursorCoordinates;
-        set(cDataCursor, 'Enable', 'on');  
-        
+        set(cDataCursor, 'Enable', 'on');
+
         dTip = createDatatip(cDataCursor, pDistancePlot);
 
         [~, dIndex] = min(abs(pDistancePlot.XData-dDistance));
-        
+
 %        dIndex = find(pDistancePlot.XData == dDistance);
-        
+
         xPosition = pDistancePlot.XData(dIndex);
         yPosition = pDistancePlot.YData(dIndex);
-        
+
         dTip.Position = [xPosition yPosition];
-        
+
         function txt = displayCursorCoordinates(~,info)
             x = info.Position(1);
             y = info.Position(2);
             txt = ['(' num2str(x) ', ' num2str(y) ')'];
-            
+
             set(uiEditKernelCutoff, 'String', num2str(x));
-            
+
             kernelCutoff('set', x);
         end
 
     end
 
     function editKernelCutoffCallback(~, ~)
-                
+
         dDistance = str2double(get(uiEditKernelCutoff, 'string'));
-        
+
         % Get kernel details
-        
+
         dModel    = get(uiKernelModel   , 'Value');
 
         dTissue   = get(uiKernelTissue , 'Value' );
@@ -1110,37 +1110,37 @@ function initKernelPanel()
 
         if numel(asField) == 2
             aDistance = tKernel.(asField{1});
-%            aDoseR2   = tKernel.(asField{2});                   
+%            aDoseR2   = tKernel.(asField{2});
         else
             return;
-        end  
-        
+        end
+
         [~, dIndex] = min(abs(aDistance-dDistance));
         dKernelCutoff = aDistance(dIndex);
-               
+
         kernelCutoff('set', dKernelCutoff);
-        
-        set(uiEditKernelCutoff, 'string', num2str(dKernelCutoff));   
+
+        set(uiEditKernelCutoff, 'string', num2str(dKernelCutoff));
     end
 
     function chkMicrosphereInSpecimenCallback(hObject, ~)
-        
+
        if get(chkMicrosphereInSpecimen, 'Value') == 1
            if strcmpi(hObject.Style, 'checkbox')
                 set(chkMicrosphereInSpecimen, 'Value', 1);
             else
                 set(chkMicrosphereInSpecimen, 'Value', 0);
-           end            
+           end
         else
            if strcmpi(hObject.Style, 'checkbox')
                 set(chkMicrosphereInSpecimen, 'Value', 0);
             else
                 set(chkMicrosphereInSpecimen, 'Value', 1);
-           end  
-       end        
-        
+           end
+       end
+
        kernelMicrosphereInSpecimen('set', get(chkMicrosphereInSpecimen, 'Value'));
-       
+
     end
 
     function doseKernelCallback(~, ~)
@@ -1153,26 +1153,26 @@ function initKernelPanel()
         drawnow;
 
         try
-            % Dectivate uipanel 
-            
+            % Dectivate uipanel
+
             set(uiKernelMethod       , 'Enable', 'off');
             set(uiKernelTissue       , 'Enable', 'off');
             set(uiKernelIsotope      , 'Enable', 'off');
             set(uiKernelModel        , 'Enable', 'off');
             set(uiKernelInterpolation, 'Enable', 'off');
-            set(uiDoseKernelPanel    , 'Enable', 'off');            
+            set(uiDoseKernelPanel    , 'Enable', 'off');
             set(uiEditKernelCutoff   , 'Enable', 'off');
-            set(uiPlotDistance       , 'Enable', 'off'); 
+            set(uiPlotDistance       , 'Enable', 'off');
 
             dMethod  = get(uiKernelMethod, 'Value');
             asMethod = get(uiKernelMethod, 'String');
             sMethod  = asMethod{dMethod};
 
             dModel    = get(uiKernelModel   , 'Value');
-        
+
             dTissue   = get(uiKernelTissue , 'Value' );
             asTissue  = get(uiKernelTissue , 'String');
-        
+
             dIsotope  = get(uiKernelIsotope , 'Value' );
             asIsotope = get(uiKernelIsotope, 'String');
 
@@ -1195,7 +1195,7 @@ function initKernelPanel()
                           true);
 
             setColorbarLabel();
-           
+
         catch
             progressBar(1, 'Error: An error occur during kernel processing!');
             h = msgbox('Error: doseKernelCallback(): An error occur during kernel processing!', 'Error');
@@ -1212,7 +1212,7 @@ function initKernelPanel()
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;
 
-        % Activate uipanel 
+        % Activate uipanel
 
         if isvalid(uiKernelMethod)
               set(uiKernelMethod, 'Enable', 'on');
@@ -1237,15 +1237,15 @@ function initKernelPanel()
         end
 
         if isvalid(uiDoseKernelPanel)
-            set(uiDoseKernelPanel, 'Enable', 'on');            
+            set(uiDoseKernelPanel, 'Enable', 'on');
         end
 
         if isvalid(uiEditKernelCutoff)
             set(uiEditKernelCutoff, 'Enable', 'on');
         end
-        
+
         if isvalid(uiPlotDistance)
-            set(uiPlotDistance       , 'Enable', 'on'); 
+            set(uiPlotDistance       , 'Enable', 'on');
         end
 
 
@@ -1331,24 +1331,24 @@ function initKernelPanel()
 
         aActivity = imgaussfilt3(aBuffer,[xPixel,yPixel,zPixel]);
 
-        % Apply ROI constraint 
+        % Apply ROI constraint
 
         [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dSeriesOffset);
-    
+
         bInvertMask = invertConstraint('get');
-    
+
         tRoiInput = roiTemplate('get', dSeriesOffset);
-    
-        aLogicalMask = roiConstraintToMask(aBuffer, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);        
-        
-        aActivity(aLogicalMask==0) = aBuffer(aLogicalMask==0); % Set constraint 
+
+        aLogicalMask = roiConstraintToMask(aBuffer, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
+
+        aActivity(aLogicalMask==0) = aBuffer(aLogicalMask==0); % Set constraint
 
         dicomBuffer('set', aActivity);
-        
+
         setColorbarLabel();
 
         refreshImages();
-        
+
         modifiedMatrixValueMenuOption('set', true);
 
         clear aActivity;
@@ -1364,28 +1364,28 @@ function initKernelPanel()
     end
 
     function resetKernelCallback(~, ~)
-                      
+
         try
-            
-        % Deactivate main tool bar 
-        set(uiSeriesPtr('get'), 'Enable', 'off');                
+
+        % Deactivate main tool bar
+        set(uiSeriesPtr('get'), 'Enable', 'off');
         mainToolBarEnable('off');
-    
+
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
 
         resetSeries(get(uiSeriesPtr('get'), 'Value'), true);
-        
+
         progressBar(1, 'Ready');
 
         catch
             progressBar(1, 'Error:resetKernelCallback()');
         end
-        
-        % Reactivate main tool bar 
-        set(uiSeriesPtr('get'), 'Enable', 'on');                
+
+        % Reactivate main tool bar
+        set(uiSeriesPtr('get'), 'Enable', 'on');
         mainToolBarEnable('on');
-        
+
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
         drawnow;
     end

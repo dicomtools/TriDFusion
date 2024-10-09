@@ -1,5 +1,5 @@
-function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRoiMetaData, ptrRoi, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied)  
-%function tRoiComputed = computeRoi(imInput, atInputMetaData, imRoi, atRoiMetaData, ptrRoi, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied)  
+function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRoiMetaData, ptrRoi, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, ~, bMovementApplied)  
+%function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRoiMetaData, ptrRoi, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, ~, bMovementApplied
 %Compute ROI values from ROI object.
 %See TriDFuison.doc (or pdf) for more information about options.
 %

@@ -102,7 +102,7 @@ function initRoi()
     
                     cropMenu(roiPtr);
     
-                    uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                    uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
     
                 case lower('images.roi.freehand')
                     
@@ -141,7 +141,7 @@ function initRoi()
                     
                     voiMenu(roiPtr);
     
-                    uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                    uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
     
                     addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
                     addlistener(roiPtr, 'WaypointRemoved', @waypointEvents);
@@ -183,7 +183,7 @@ function initRoi()
                     
                     voiMenu(roiPtr);
     
-                    uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                    uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
     
                     addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
                     addlistener(roiPtr, 'WaypointRemoved', @waypointEvents);
@@ -215,7 +215,7 @@ function initRoi()
                     
                     voiMenu(roiPtr);
     
-                    uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                    uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
     
                 case lower('images.roi.circle')
     
@@ -246,7 +246,7 @@ function initRoi()
                     
                     voiMenu(roiPtr);
     
-                    uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                    uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
     
                 case lower('images.roi.ellipse')
     
@@ -281,7 +281,7 @@ function initRoi()
                     
                     voiMenu(roiPtr);
     
-                    uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                    uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
     
                 case lower('images.roi.rectangle')
                     roiPtr = images.roi.Rectangle(axRoi, ...
@@ -315,7 +315,7 @@ function initRoi()
                     
                     voiMenu(roiPtr);
     
-                    uimenu(roiPtr.UIContextMenu,'Label', 'Display Result' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                    uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
     
             end
             

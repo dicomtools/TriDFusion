@@ -1,5 +1,5 @@
-function lineFusionColorbarIntensityMaxClick(hObject, ~)
-%function lineFusionColorbarIntensityMaxClick(hObject, ~)
+function lineFusionColorbarIntensityMaxClick(~, ~)
+%function lineFusionColorbarIntensityMaxClick(~, ~)
 %line Fusion Colorbar Intensity Max object is Clicked.
 %See TriDFuison.doc (or pdf) for more information about options.
 %

@@ -1,5 +1,5 @@
-function [imCData, logicalMask] = computeHistogram(imInput, atInputMetaData, imRoiVoi, atRoiVoiMetaData, ptrRoiVoi, tRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied)
-%function [imCData, logicalMask] = computeHistogram(imInput, atInputMetaData, imRoiVoi, atRoiVoiMetaData, ptrRoiVoi, tRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied)
+function [imCData, logicalMask] = computeHistogram(imInput, atInputMetaData, imRoiVoi, atRoiVoiMetaData, ptrRoiVoi, tRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, ~, bMovementApplied)
+%function [imCData, logicalMask] = computeHistogram(imInput, atInputMetaData, imRoiVoi, atRoiVoiMetaData, ptrRoiVoi, tRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, ~, bMovementApplied)
 %Compute Histogram from ROIs.
 %See TriDFuison.doc (or pdf) for more information about options.
 %

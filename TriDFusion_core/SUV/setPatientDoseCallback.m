@@ -257,12 +257,12 @@ function setPatientDoseCallback(~, ~)
 
         % Radionuclide Total Dose
 
-        if strcmpi(atDoseMetaData{1}.Modality, 'nm')
-%            sMeasured = 'Mbq';
+%         if strcmpi(atDoseMetaData{1}.Modality, 'nm')
+% %            sMeasured = 'Mbq';
+%             sMeasured = 'bq';
+%         else
             sMeasured = 'bq';
-        else
-            sMeasured = 'bq';
-        end
+        % end
 
            uicontrol(dlgPatientDose,...
                      'style'   , 'text',...

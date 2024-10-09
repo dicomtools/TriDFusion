@@ -75,9 +75,12 @@ function increaseVoiPosition(sRoiTag, dNbPixels)
                             y = atRoi{dRoiTagOffset}.Position(i, 2);
                             
                             % Calculate the new position for the vertex
-                            
-                            new_x = centerX + (x - centerX) * (1 + dNbPixels / 100); % Adjust the factor as needed
-                            new_y = centerY + (y - centerY) * (1 + dNbPixels / 100); % Adjust the factor as needed
+
+                            new_x = x + (dNbPixels * sign(x - centerX)); 
+                            new_y = y + (dNbPixels * sign(y - centerY)); 
+
+%                             new_x = centerX + (x - centerX) * (1 + dNbPixels / 100); % Adjust the factor as needed
+%                             new_y = centerY + (y - centerY) * (1 + dNbPixels / 100); % Adjust the factor as needed
 
                             atRoi{dRoiTagOffset}.Position(i, 1) = new_x;
                             atRoi{dRoiTagOffset}.Position(i, 2) = new_y;

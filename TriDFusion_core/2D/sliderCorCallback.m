@@ -30,9 +30,11 @@ function sliderCorCallback(~, ~)
     if ~isempty(uiSliderCorPtr('get'))
 
         if get(uiSliderCorPtr('get'), 'Value') >= 0 && ...
-           get(uiSliderCorPtr('get'), 'Value') <= 1 && ...
-           strcmpi(windowButton('get'), 'up')  
-    
+           get(uiSliderCorPtr('get'), 'Value') <= 1 
+           % strcmpi(windowButton('get'), 'up')  
+
+%             windowButton('set', 'scrool');
+  
             if get(uiSliderCorPtr('get'), 'Value') == 0
                 dSliceNumber = 1;
             else
@@ -46,7 +48,9 @@ function sliderCorCallback(~, ~)
             sliceNumber('set', 'coronal', dSliceNumber); 
             
             refreshImages();
-            
+
+            % windowButton('set', 'up');
+         
             % drawnow;
         end
     end

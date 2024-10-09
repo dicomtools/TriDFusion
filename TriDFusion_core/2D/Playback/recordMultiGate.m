@@ -711,6 +711,8 @@ end
                     sSliceNb = sprintf('%s/%s', num2str(iCurrentSlice), num2str(iLastSlice));
                 end
 
+                sliderCorCallback();
+
             elseif aAxe == axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
 
                if isVsplash('get') == true
@@ -721,7 +723,9 @@ end
                    sSliceNb = sprintf('%s/%s', num2str(iCurrentSlice), num2str(iLastSlice));
                end
 
-            elseif aAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+               sliderSagCallback();
+
+       elseif aAxe == axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
 
                if isVsplash('get') == true
 
@@ -731,13 +735,28 @@ end
                    sSliceNb = sprintf('%s/%s', num2str(iCurrentSlice), num2str(iLastSlice));
                end
 
-            elseif aAxe == axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
+               sliderTraCallback();
 
-               if isVsplash('get') == false
+            elseif aAxe == axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) 
+               
+                if isVsplash('get') == false
 
                     sSliceNb = sprintf('%s/%s', num2str(mipAngle('get')), num2str(32));
+                    sliderMipCallback();
+                else
+%                     windowButton('set', 'scrool');
+
+                    [lFirst, lLast] = computeVsplashLayout(aBuffer, 'axial', 1+iLastSlice-iCurrentSlice);
+                    sSliceNb = sprintf('%s-%s/%s', num2str(lFirst), num2str(lLast), num2str(iLastSlice));                   
+
+                    refreshImages();
+
+%                     windowButton('set', 'up');
                end
+
+             
             else
+%                 windowButton('set', 'scrool');
 
                 if isVsplash('get') == true
 
@@ -746,8 +765,12 @@ end
                 else
                     sSliceNb = sprintf('%s/%s', num2str(1+iLastSlice-iCurrentSlice), num2str(iLastSlice));
                 end
-            end
 
+                refreshImages();
+                
+%                 windowButton('set', 'up');
+      
+            end
 
             sAxeText = sprintf('\nFrame %d\n%s', dOffset, sSliceNb);
                 
@@ -782,7 +805,13 @@ end
 
         setOverlayPatientInformation(dOffset);
 
-        refreshImages();
+        % refreshImages();
+        % 
+        % if size(dicomBuffer('get', [], dOffset), 3) ~=1
+        % 
+        %     sliderMipCallback();
+        %     % plotRotatedRoiOnMip(axesMipPtr('get', [], dOffset), dicomBuffer('get', [], dOffset), mipAngle('get'));       
+        % end
 
         I = getframe(aAxe);
         drawnow; % Ensure frame is captured before proceeding
@@ -1181,5 +1210,5 @@ end
 
     setOverlayPatientInformation(dSeriesOffset);
 
-    refreshImages();
+    % refreshImages();
 end

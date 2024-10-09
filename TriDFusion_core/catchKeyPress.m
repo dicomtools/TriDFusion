@@ -162,84 +162,108 @@ function catchKeyPress(~,evnt)
     end    
     
     if strcmpi(evnt.Key,'uparrow')
-        
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true 
 
             flip3Dobject('up');    
         else               
-            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
+            if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
 
-                windowButton('set', 'down');  
+                % windowButton('set', 'up');  
 
                 pAxe = gca(fiMainWindowPtr('get'));
              
                 switch pAxe
 
-                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes1Ptr('get', [], dSeriesOffset)
 
-                        if sliceNumber('get', 'coronal') == size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1)
-                            iSliceNumber = 1;
-                        else
-                            iSliceNumber = sliceNumber('get', 'coronal')+1;
-                        end
-
-                        sliceNumber('set', 'coronal', iSliceNumber);    
-
-                        set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1));
+                        dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 1);  
+            
+                        dCurrentSlice = sliceNumber('get', 'coronal');
                         
-                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-
-                        if sliceNumber('get', 'sagittal') == size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 2)
-                            iSliceNumber = 1;
-                        else
-                            iSliceNumber = sliceNumber('get', 'sagittal')+1;
+                        if dCurrentSlice < dLastSlice
+        
+                            dCurrentSlice = dCurrentSlice +1;
                         end
+        
+                        if dCurrentSlice == dLastSlice
+        
+                            dCurrentSlice = 1;
+                        end  
 
-                        sliceNumber('set', 'sagittal', iSliceNumber);    
-
-                        set(uiSliderSagPtr('get'), 'Value', sliceNumber('get', 'sagittal') / size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 2));
+                        % sliceNumber('set', 'coronal', dCurrentSlice);
                         
+                        set(uiSliderCorPtr('get'), 'Value', dCurrentSlice / dLastSlice);
+            
+                        sliderCorCallback();
+                                  
+                    case axes2Ptr('get', [], dSeriesOffset)
+
+                        dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 2);    
+            
+                        dCurrentSlice = sliceNumber('get', 'sagittal'); 
+                        
+                        if dCurrentSlice < dLastSlice
+
+                            dCurrentSlice = dCurrentSlice +1;
+                        end
+        
+                        if dCurrentSlice == dLastSlice
+
+                            dCurrentSlice = 1;
+                        end 
+
+                        % sliceNumber('set', 'sagittal', iSliceNumber);    
+
+                        set(uiSliderSagPtr('get'), 'Value', dCurrentSlice / dLastSlice);
+
+                        sliderSagCallback();
+                    
                     otherwise  
-                        if sliceNumber('get', 'axial') == 1
-                            iSliceNumber = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3);
-                        else
-                            iSliceNumber = sliceNumber('get', 'axial')-1;
-                        end
 
-                        sliceNumber('set', 'axial', iSliceNumber);    
+                        dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 3);  
+            
+                        dCurrentSlice = sliceNumber('get', 'axial');
+
+                        if dCurrentSlice > 1
+                            dCurrentSlice = dCurrentSlice -1;
+                        else
+                            dCurrentSlice = dLastSlice;
+                        end 
+
+                        % sliceNumber('set', 'axial', dCurrentSlice);    
+
+                        set(uiSliderTraPtr('get'), 'Value', 1 - (dCurrentSlice / dLastSlice));       
+                        
+                        sliderTraCallback();
                 end
-                set(uiSliderTraPtr('get'), 'Value', 1 - (sliceNumber('get', 'axial') / size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3)));
+
+                % refreshImages();                
                 
-                refreshImages();                
-                
-                windowButton('set', 'up');  
+                % windowButton('set', 'up');  
 
             end
-            
-if 0                    
-            im = dicomBuffer('get');
-
-            B = imrotate3(im,45,[0 1 0],'nearest','loose','FillValues',0);
-
-            dicomBuffer('set', B, get(uiSeriesPtr('get'), 'Value'));
-            refreshImages();
-end                    
+                               
         end
     end   
     
     if strcmpi(evnt.Key,'downarrow')
-        
+      
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true 
 
             flip3Dobject('down');   
         else
-            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
+            if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
 
-                windowButton('set', 'down'); 
+                % windowButton('set', 'down'); 
 
                 pAxe = gca(fiMainWindowPtr('get'));
 
@@ -247,45 +271,67 @@ end
            
                 switch pAxe
 
-                    case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                    case axes1Ptr('get', [], dSeriesOffset)
 
-                        if sliceNumber('get', 'coronal') == 1
-                            iSliceNumber = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1);
+                        dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 1);  
+            
+                        dCurrentSlice = sliceNumber('get', 'coronal');
+                    
+                        if dCurrentSlice > 1
+            
+                            dCurrentSlice = dCurrentSlice -1;
                         else
-                            iSliceNumber = sliceNumber('get', 'coronal')-1;
-                        end
-
-                        sliceNumber('set', 'coronal', iSliceNumber);    
-
-                        set(uiSliderCorPtr('get'), 'Value', sliceNumber('get', 'coronal') / size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 1));
+                            dCurrentSlice = dLastSlice;
+                        end                                                     
+            
+                        % sliceNumber('set', 'coronal', dCurrentSlice);
                         
-                    case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-
-                        if sliceNumber('get', 'sagittal') == 1
-                            iSliceNumber = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 2);
-                        else
-                            iSliceNumber = sliceNumber('get', 'sagittal')-1;
-                        end
-
-                        sliceNumber('set', 'sagittal', iSliceNumber);    
-
-                        set(uiSliderSagPtr('get'), 'Value', sliceNumber('get', 'sagittal') / size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 2));
+                        set(uiSliderCorPtr('get'), 'Value', dCurrentSlice / dLastSlice);
+            
+                        sliderCorCallback();
                         
-                    otherwise                
-                        if sliceNumber('get', 'axial') == size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3)
-                            iSliceNumber = 1;
+                    case axes2Ptr('get', [], dSeriesOffset)
+
+                        dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 2);    
+            
+                        dCurrentSlice = sliceNumber('get', 'sagittal');        
+        
+                        if dCurrentSlice > 1
+        
+                            dCurrentSlice = dCurrentSlice -1;
                         else
-                            iSliceNumber = sliceNumber('get', 'axial')+1;
-                        end
+                            dCurrentSlice = dLastSlice;
+                        end                              
+                          
+                        % sliceNumber('set', 'sagittal', dCurrentSlice);
+                        
+                        set(uiSliderSagPtr('get'), 'Value', dCurrentSlice / dLastSlice);
+            
+                        sliderSagCallback();
+                        
+                    otherwise    
 
-                        sliceNumber('set', 'axial', iSliceNumber);    
-
-                        set(uiSliderTraPtr('get'), 'Value', 1 - (sliceNumber('get', 'axial') / size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3)));                       
+                        dLastSlice = size(dicomBuffer('get', [], dSeriesOffset), 3);  
+            
+                        dCurrentSlice = sliceNumber('get', 'axial');
+            
+                        if dCurrentSlice < dLastSlice
+        
+                            dCurrentSlice = dCurrentSlice +1;
+                        else
+                            dCurrentSlice = 1;
+                        end                              
+                
+                        % sliceNumber('set', 'axial', dCurrentSlice);
+            
+                        set(uiSliderTraPtr('get'), 'Value', 1 - (dCurrentSlice / dLastSlice));       
+            
+                        sliderTraCallback();                     
                 end
                 
-                refreshImages();
-                
-                windowButton('set', 'up'); 
+                % refreshImages();
+                % 
+                % windowButton('set', 'up'); 
             end            
         end
     end     
@@ -301,30 +347,33 @@ end
             if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 && ...
                isVsplash('get') == false    
                 
-                windowButton('set', 'down');  
-
                 iMipAngleValue = mipAngle('get');
+    
 
                 iMipAngleValue = iMipAngleValue-1;
-
+                
+                
                 if iMipAngleValue <=0
                     iMipAngleValue = 32;
+                end   
+                    
+                if iMipAngleValue > 32
+                    iMipAngleValue = 1;
                 end    
-
-                mipAngle('set', iMipAngleValue);                    
-
+    
+                % mipAngle('set', iMipAngleValue);                    
+    
                 if iMipAngleValue == 1
                     dMipSliderValue = 0;
                 else
-                    dMipSliderValue = mipAngle('get')/32;
+                    dMipSliderValue = iMipAngleValue/32;
                 end
-
-                set(uiSliderMipPtr('get'), 'Value', dMipSliderValue);                
-                
-                refreshImages();
-                
-                windowButton('set', 'up'); 
-                
+    
+                set(uiSliderMipPtr('get'), 'Value', dMipSliderValue);
+    
+                % plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), iMipAngleValue);       
+                sliderMipCallback();
+                    
             end  
         end
     end
@@ -339,29 +388,30 @@ end
         else
             if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 && isVsplash('get') == false    
                 
-                windowButton('set', 'down');  
-                
                 iMipAngleValue = mipAngle('get');
-
+        
                 iMipAngleValue = iMipAngleValue+1;
-
+   
+                if iMipAngleValue <=0
+                    iMipAngleValue = 32;
+                end   
+                    
                 if iMipAngleValue > 32
                     iMipAngleValue = 1;
                 end    
-
-                mipAngle('set', iMipAngleValue);                    
-
+    
+                % mipAngle('set', iMipAngleValue);                    
+    
                 if iMipAngleValue == 1
                     dMipSliderValue = 0;
                 else
-                    dMipSliderValue = mipAngle('get')/32;
+                    dMipSliderValue = iMipAngleValue/32;
                 end
-
+    
                 set(uiSliderMipPtr('get'), 'Value', dMipSliderValue);
-                
-                refreshImages();
-                
-                windowButton('set', 'up');                
+    
+                % plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), iMipAngleValue);       
+                sliderMipCallback();               
             end            
         end
     end 

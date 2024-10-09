@@ -1,5 +1,5 @@
-function aImage = readDcm4che3(fileInput, info)
-%function aImage = readDcm4che3(fileInput, info)
+function aImage = readDcm4che3(fileInput, ~)
+%function aImage = readDcm4che3(fileInput, ~)
 %Return the dicom buffer.
 % An example of how to use the dcm4che toolkit from matlab for file
 % reading or other dicom functions.
@@ -29,29 +29,29 @@ function aImage = readDcm4che3(fileInput, info)
 % pathDcm4che : path package dcm4che2
 % fileInput: noun and path file extension .dcm or no-extension dicom 
 
-if 0
-
-    try
-        
-     aReshaped = reshape(info.din.pixeldata, info.Columns, info.Rows);
-     aImage    = cast(zeros(info.Rows, info.Columns), class(info.din.pixeldata));
-     
-     for i =1 :info.Rows-1
-        for j=1 :info.Columns-1
-            aImage(i, j)= aReshaped(info.Columns-j,i);
-        end
-     end
-
-    aImage = aImage(1:dinfo.in.rows, info.Columns:-1:1);
-    clear aReshaped;
-    
-    catch
-        aImage = dicomread(char(fileInput));
-    end
-else
+% if 0
+% 
+%     try
+% 
+%      aReshaped = reshape(info.din.pixeldata, info.Columns, info.Rows);
+%      aImage    = cast(zeros(info.Rows, info.Columns), class(info.din.pixeldata));
+% 
+%      for i =1 :info.Rows-1
+%         for j=1 :info.Columns-1
+%             aImage(i, j)= aReshaped(info.Columns-j,i);
+%         end
+%      end
+% 
+%     aImage = aImage(1:dinfo.in.rows, info.Columns:-1:1);
+%     clear aReshaped;
+% 
+%     catch
+%         aImage = dicomread(char(fileInput));
+%     end
+% else
     aImage = dicomread(char(fileInput));
 %     aImage = rgb2gray(aImage);
-end
+% end
 
 
 end

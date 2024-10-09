@@ -622,6 +622,7 @@ function loadCerrDoseVolume(planC, structNamC)
     set(uiSliderTraPtr('get'), 'Visible', 'off');
     set(uiSliderMipPtr('get'), 'Visible', 'off');
 
+
     for mm=1:numel(strMaskC)
         progressBar(0.7+(0.299999*mm/numel(strMaskC)), sprintf('Processing Contour %d/%d', mm, numel(strMaskC)));
 
@@ -638,6 +639,12 @@ function loadCerrDoseVolume(planC, structNamC)
             setSeriesCallback();
             mainToolBarEnable('off');            
         end
+
+        if contourVisibilityRoiPanelValue('get') == false
+    
+            contourVisibilityRoiPanelValue('set', true);
+            set(chkContourVisibilityPanelObject('get'), 'Value', true);
+        end 
 
         maskToVoi(strMaskC{mm}, structNamC{mm}, 'Unspecified' ,aVoiColor, 'axial',  planC{4}(mm).associatedScan, false);
     end
@@ -676,6 +683,7 @@ function loadCerrDoseVolume(planC, structNamC)
     % Activate playback
 
     if size(dicomBuffer('get'), 3) ~= 1
+        
         setPlaybackToolbar('on');
     end
     

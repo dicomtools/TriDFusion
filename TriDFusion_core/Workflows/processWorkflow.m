@@ -43,6 +43,9 @@ function processWorkflow(sWorkflowName)
 
             setPETCTFDGFusionCallback();
 
+        case 'setpetctbrownfatfusioncallback'  % setPETCTBrownFatFusionCallback.m
+
+            setPETCTBrownFatFusionCallback();
 
         case 'setpetctfdhtfusioncallback' % setPETCTFDHTFusionCallback.m
             
@@ -229,6 +232,35 @@ function processWorkflow(sWorkflowName)
 
             writeRoisToDicomMaskCloseFigureCallback();
 
+        % Metastatic Breast Cancer
+
+        case  'setsegmentationmetastaticbreastcancersegmentationcallback' % setSegmentationMetastaticBreastCancerSegmentationCallback.m
+
+            setSegmentationMetastaticBreastCancerSegmentationCallback();
+
+        case 'setmachinelearningbreastcancerpetfullaicallback' % setMachineLearningBreastCancerPETFullAICallback.m
+
+            setMachineLearningBreastCancerPETFullAICallback();
+
+        case 'setmachinelearningbreastcancerpetctfullaicallback' % setMachineLearningBreastCancerPETCTFullAICallback.m
+
+            setMachineLearningBreastCancerPETCTFullAICallback();
+
+        case'setmachinelearningbreastcancerexporttopetnetworkcallback' % setMachineLearningBreastCancerExportToPETNetworkCallback.m 
+
+            setMachineLearningBreastCancerExportToPETNetworkCallback();
+
+        case 'setmachinelearningbreastcancerdatapreprocessingpetcallback' % setMachineLearningBreastCancerDataPreProcessingPETCallback.m  
+
+            setMachineLearningBreastCancerDataPreProcessingPETCallback();
+
+        case 'setmachinelearningbreastcancerexporttopetctnetworkcallback' % setMachineLearningBreastCancerExportToPETCTNetworkCallback.m  
+
+            setMachineLearningBreastCancerExportToPETCTNetworkCallback();
+
+        case 'setmachinelearningbreastcancerdatapreprocessingpetctcallback' % setMachineLearningBreastCancerDataPreProcessingPETCTCallback.m  
+
+            setMachineLearningBreastCancerDataPreProcessingPETCTCallback();            
 
         % PSMA Ga68 
 

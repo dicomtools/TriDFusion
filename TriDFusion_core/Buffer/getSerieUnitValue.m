@@ -1,5 +1,5 @@
-function sUnit = getSerieUnitValue(dOffset)
-%function sUnit = getSerieUnitValue(dOffset)
+function sUnit = getSerieUnitValue(dSeriesOffset)
+%function sUnit = getSerieUnitValue(dSeriesOffset)
 %Get DICOM image unit type.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,30 +27,35 @@ function sUnit = getSerieUnitValue(dOffset)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    if isempty(dOffset)
+    if isempty(dSeriesOffset)
         sUnit = '';
         return;
     end
     
     tInput = inputTemplate('get');                
 
-    switch lower(tInput(dOffset).atDicomInfo{1}.Modality)
+    switch lower(tInput(dSeriesOffset).atDicomInfo{1}.Modality)
         
         case {'pt', 'nm'}
 
-            if strcmpi(tInput(dOffset).atDicomInfo{1}.Units, 'BQML') && ...
-               tInput(dOffset).bDoseKernel == false && ...    
-               isfield(tInput(dOffset).tQuant, 'tSUV') 
-           
-                sUnit = 'SUV';
+            if strcmpi(tInput(dSeriesOffset).atDicomInfo{1}.Units, 'BQML') && ...
+               tInput(dSeriesOffset).bDoseKernel == false && ...    
+               isfield(tInput(dSeriesOffset).tQuant, 'tSUV') 
 
-            elseif tInput(dOffset).bDoseKernel == true
+%                 if computeSUV(tInput(dSeriesOffset).atDicomInfo, viewerSUVtype('get')) ~= 0
+           
+                    sUnit = 'SUV';
+%                 else
+%                     sUnit = 'BQML';
+%                 end
+
+            elseif tInput(dSeriesOffset).bDoseKernel == true
                
-                if isfield(tInput(dOffset).atDicomInfo{1}, 'DoseUnits')
+                if isfield(tInput(dSeriesOffset).atDicomInfo{1}, 'DoseUnits')
     
-                    if ~isempty(tInput(dOffset).atDicomInfo{1}.DoseUnits)
+                    if ~isempty(tInput(dSeriesOffset).atDicomInfo{1}.DoseUnits)
                         
-                        sUnit = char(tInput(dOffset).atDicomInfo{1}.DoseUnits);
+                        sUnit = char(tInput(dSeriesOffset).atDicomInfo{1}.DoseUnits);
                     else
                         sUnit = 'dose';
                     end
@@ -59,34 +64,42 @@ function sUnit = getSerieUnitValue(dOffset)
                 end   
 
             else
-                if isfield(tInput(dOffset).atDicomInfo{1}, 'RealWorldValueMappingSequence') % SUV SPECT
-                    if isfield(tInput(dOffset).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1, 'MeasurementUnitsCodeSequence')
-                        if strcmpi(tInput(dOffset).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue, 'Bq/ml')
-                            sUnit = 'SUV';
-                        elseif strcmpi(tInput(dOffset).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue, 'Bq/ml') && ...
-                            tInput(dOffset).bDoseKernel == true && ...                   
-                            isfield(tInput(dOffset).tQuant, 'tSUV')   
+                if isfield(tInput(dSeriesOffset).atDicomInfo{1}, 'RealWorldValueMappingSequence') % SUV SPECT
+                    if isfield(tInput(dSeriesOffset).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1, 'MeasurementUnitsCodeSequence')
+                        if strcmpi(tInput(dSeriesOffset).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue, 'Bq/ml')
+                            
+%                             if computeSUV(dicomMetaData('get', [], dSeriesOffset), viewerSUVtype('get')) ~= 0
+                            if isfield(tInput(dSeriesOffset).tQuant, 'tSUV') 
+
+                                sUnit = 'SUV';
+                            else
+                                sUnit = 'BQML';
+                            end
+
+                        elseif strcmpi(tInput(dSeriesOffset).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue, 'Bq/ml') && ...
+                            tInput(dSeriesOffset).bDoseKernel == true && ...                   
+                            isfield(tInput(dSeriesOffset).tQuant, 'tSUV')   
                              sUnit = 'Dose';                            
                         else
-                            if isempty(tInput(dOffset).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue)
+                            if isempty(tInput(dSeriesOffset).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue)
                                 sUnit = 'Counts';                            
                             else
-                                sUnit = tInput(dOffset).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue;           
+                                sUnit = tInput(dSeriesOffset).atDicomInfo{1}.RealWorldValueMappingSequence.Item_1.MeasurementUnitsCodeSequence.Item_1.CodeValue;           
                             end                             
                         end
                         
                     else
-                        if isempty(tInput(dOffset).atDicomInfo{1}.Units)
+                        if isempty(tInput(dSeriesOffset).atDicomInfo{1}.Units)
                             sUnit = 'Counts';                            
                         else
-                            sUnit = tInput(dOffset).atDicomInfo{1}.Units;           
+                            sUnit = tInput(dSeriesOffset).atDicomInfo{1}.Units;           
                         end                        
                     end
                 else
-                    if isempty(tInput(dOffset).atDicomInfo{1}.Units)
+                    if isempty(tInput(dSeriesOffset).atDicomInfo{1}.Units)
                         sUnit = 'Counts';                            
                     else
-                        sUnit = tInput(dOffset).atDicomInfo{1}.Units;           
+                        sUnit = tInput(dSeriesOffset).atDicomInfo{1}.Units;           
                     end
                 end
             end
@@ -95,10 +108,10 @@ function sUnit = getSerieUnitValue(dOffset)
                 sUnit = 'HU';   
 
         otherwise
-            if isempty(tInput(dOffset).atDicomInfo{1}.Units)
+            if isempty(tInput(dSeriesOffset).atDicomInfo{1}.Units)
                 sUnit = 'Counts';                            
             else                    
-                sUnit = tInput(dOffset).atDicomInfo{1}.Units;
+                sUnit = tInput(dSeriesOffset).atDicomInfo{1}.Units;
             end
     end
 end

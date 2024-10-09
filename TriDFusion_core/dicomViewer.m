@@ -88,6 +88,8 @@ function resize = dicomViewer()
     
     invertConstraint('set', false);
 
+    contourVisibilityRoiPanelValue('set', true);
+
     minTresholdRoiPanelValue('set', true, '', 0);
     maxTresholdRoiPanelValue('set', true, '', 0);
 
@@ -231,7 +233,7 @@ function resize = dicomViewer()
     pixelEdge                 ('set', true);
     holesRoiPanel             ('set', false);
 
-    voiIncrementRatio('set', 5);
+    voiIncrementRatio('set', 1);
 
     % Machine Learning
 
@@ -314,6 +316,11 @@ function resize = dicomViewer()
     breastCancerSegmentationSUVThresholdValue('set', 4);
     breastCancerSegmentationBoneSUVThresholdValue('set', 3);
 
+    machineLearningBreastCancerCELoss('set', true);
+    machineLearningBreastCancerClassifySegmentation('set', true);
+    machineLearningBreastCancerSmoothMask('set', false);
+    machineLearningBreastCancerSmallestVoiValue('set', 0);
+
     % Brown fat
 
     FDGBrownFatSUVType                 ('set', 'LBM'); 
@@ -344,7 +351,7 @@ function resize = dicomViewer()
 
     machineLearningFDGBrownFatSUVScaled('set', true);
     machineLearningFDGBrownFatSUVNormalization('set', false);
-    machineLearningFDGBrownFatSmoothMask('set', true);
+    machineLearningFDGBrownFatSmoothMask('set', false);
     machineLearningFDGBrownFatClassifySegmentation('set', true);
     machineLearningFDGBrownFatCELoss('set', true);
     machineLearningFDGBrownFatSmallestVoiValue('set', 0);
@@ -405,7 +412,7 @@ function resize = dicomViewer()
 
     machineLearningPSMAGa68CELoss('set', true);
     machineLearningPSMAGa68ClassifySegmentation('set', true);
-    machineLearningPSMAGa68SmoothMask('set', true);
+    machineLearningPSMAGa68SmoothMask('set', false);
     machineLearningPSMAGa68SmallestVoiValue('set', 0);
 
     % Ga68DOTATATE segmentation

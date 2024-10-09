@@ -327,7 +327,7 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
 
         if aAxe == axes1Ptr('get', [], dSeriesOffset)
 
-            sliceNumber('set', 'coronal', dCurrentSlice);
+            % sliceNumber('set', 'coronal', dCurrentSlice);
 
             if isVsplash('get') == true
 
@@ -337,9 +337,13 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
                 sSliceNb = sprintf('\n%s/%s', num2str(dCurrentSlice), num2str(dLastSlice));
             end
 
+            set(uiSliderCorPtr('get'), 'Value', dCurrentSlice/dLastSlice);
+
+            sliderCorCallback();
+
         elseif aAxe == axes2Ptr('get', [], dSeriesOffset)
 
-            sliceNumber('set', 'sagittal', dCurrentSlice);
+            % sliceNumber('set', 'sagittal', dCurrentSlice);
 
             if isVsplash('get') == true
 
@@ -348,9 +352,14 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
             else
                 sSliceNb = sprintf('\n%s/%s', num2str(dCurrentSlice), num2str(dLastSlice));
             end
+
+            set(uiSliderSagPtr('get'), 'Value', dCurrentSlice/dLastSlice);
+
+            sliderSagCallback();
+
         elseif aAxe == axes3Ptr('get', [], dSeriesOffset)
 
-            sliceNumber('set', 'axial', dCurrentSlice);
+            % sliceNumber('set', 'axial', dCurrentSlice);
 
             if isVsplash('get') == true
 
@@ -359,16 +368,27 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
             else
                 sSliceNb = sprintf('\n%s/%s', num2str(1+dLastSlice-dCurrentSlice), num2str(dLastSlice));
             end
+
+            set(uiSliderTraPtr('get'), 'Value', 1-(dCurrentSlice/dLastSlice));
+
+            sliderTraCallback();
+
         else
-            mipAngle('set', dCurrentSlice);           
+            % mipAngle('set', dCurrentSlice);           
             sSliceNb = sprintf('\n%s/%s', num2str(dCurrentSlice), num2str(dLastSlice));
 
-            plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), dCurrentSlice);       
+            set(uiSliderMipPtr('get'), 'Value', dCurrentSlice/32);
+
+            sliderMipCallback();
+
+            % plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), dCurrentSlice);       
         end
 
         set(tOverlay, 'String', sSliceNb);
 
-        refreshImages();
+        % windowButton('set', 'scrool');
+        % 
+        % refreshImages();
 
         if aAxe == axes3Ptr('get', [], dSeriesOffset)
 
@@ -543,20 +563,20 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
         setFigureTopMenuVisible('on');
     end
 
-    if     aAxe == axes1Ptr('get', [], dSeriesOffset)
-
-        sliceNumber('set', 'coronal', iSavedCurrentSlice);
-
-    elseif aAxe == axes2Ptr('get', [], dSeriesOffset)
-
-        sliceNumber('set', 'sagittal', iSavedCurrentSlice);
-
-    elseif aAxe == axes3Ptr('get', [], dSeriesOffset)
-
-        sliceNumber('set', 'axial', iSavedCurrentSlice);
-    else
-        mipAngle('set', iSavedCurrentSlice);           
-    end
+    % if     aAxe == axes1Ptr('get', [], dSeriesOffset)
+    % 
+    %     sliceNumber('set', 'coronal', iSavedCurrentSlice);
+    % 
+    % elseif aAxe == axes2Ptr('get', [], dSeriesOffset)
+    % 
+    %     sliceNumber('set', 'sagittal', iSavedCurrentSlice);
+    % 
+    % elseif aAxe == axes3Ptr('get', [], dSeriesOffset)
+    % 
+    %     sliceNumber('set', 'axial', iSavedCurrentSlice);
+    % else
+    %     mipAngle('set', iSavedCurrentSlice);           
+    % end
 
     set(uiSliderSagPtr('get'), 'Visible', 'on');
     set(uiSliderCorPtr('get'), 'Visible', 'on');
@@ -725,7 +745,9 @@ function recordMultiFrame(mRecord, sPath, sFileName, sExtention, pAxe)
         logoObject('set', uiLogo);
     end
    
-    refreshImages();
+    % refreshImages();
+
+    % windowButton('set', 'up');
 
     if bWriteSucceed == true
 

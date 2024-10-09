@@ -179,7 +179,7 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
 
                     voiMenu(pRoi);
                 
-                    uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on'); 
+                    uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on'); 
 
                %     set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
 

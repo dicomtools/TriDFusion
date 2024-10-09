@@ -491,7 +491,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
             
                                 voiMenu(pRoi);
                             
-                                uimenu(pRoi.UIContextMenu,'Label', 'Display Result' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');          
+                                uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');          
 
 %                                 asTag{numel(asTag)+1} = sTag;
                                 asTag{dTagOffset} = sTag;

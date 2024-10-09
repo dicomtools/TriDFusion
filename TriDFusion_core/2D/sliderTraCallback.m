@@ -29,10 +29,13 @@ function sliderTraCallback(~, ~)
 
     if ~isempty(uiSliderTraPtr('get'))
 
+
         if get(uiSliderTraPtr('get'), 'Value') >= 0 && ...
-           get(uiSliderTraPtr('get'), 'Value') <= 1 && ...
-           strcmpi(windowButton('get'), 'up')  
-    
+           get(uiSliderTraPtr('get'), 'Value') <= 1 
+           % strcmpi(windowButton('get'), 'up')  
+            
+%             windowButton('set', 'scrool');
+
             if get(uiSliderTraPtr('get'), 'Value') == 1 
                 dSliceNumber = 1;
             else
@@ -46,7 +49,9 @@ function sliderTraCallback(~, ~)
             sliceNumber('set', 'axial', dSliceNumber);    
     
             refreshImages();
-            
+
+%             windowButton('set', 'up');
+   
             % drawnow;
         end
     end

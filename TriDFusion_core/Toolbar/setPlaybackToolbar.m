@@ -390,7 +390,7 @@ function setPlaybackToolbar(sVisible)
 
                             if strcmpi(get(mGate, 'State'), 'on')
                                
-                                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'))), 3) ~=1
+                                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
 
                                     oneGate(hObject.TooltipString);
                                 end

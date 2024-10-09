@@ -524,7 +524,13 @@ end
         setOverlayPatientInformation(dOffset);
 
         refreshImages();
-        
+       
+        if size(dicomBuffer('get', [], dOffset), 3) ~=1
+            
+            sliderMipCallback();
+            % plotRotatedRoiOnMip(axesMipPtr('get', [], dOffset), dicomBuffer('get', [], dOffset), mipAngle('get'));       
+        end
+     
         pause(multiFrameSpeed('get'));
         
         try
@@ -564,6 +570,11 @@ end
     
     setOverlayPatientInformation(dSeriesOffset);
 
-    refreshImages();
-
+    % refreshImages();
+    % 
+    % if size(dicomBuffer('get', [], dSeriesOffset), 3) ~=1
+    % 
+    %     sliderMipCallback();
+    %     % plotRotatedRoiOnMip(axesMipPtr('get', [], dOffset), dicomBuffer('get', [], dOffset), mipAngle('get'));       
+    % end
 end

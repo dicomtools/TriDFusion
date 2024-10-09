@@ -79,37 +79,73 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
         aPTImage = aInputBuffer{dPTSerieOffset};
     end
 
-
     if isempty(atPTMetaData)
         atPTMetaData = atInput(dPTSerieOffset).atDicomInfo;
     end
 
-    if get(uiSeriesPtr('get'), 'Value') ~= dPTSerieOffset
-        set(uiSeriesPtr('get'), 'Value', dPTSerieOffset);
-
-        setSeriesCallback();
-    end
 
 
-    % Apply ROI constraint
-    [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dPTSerieOffset);
-
-    bInvertMask = invertConstraint('get');
-
-    tRoiInput = roiTemplate('get', dPTSerieOffset);
-
-    aPTImageTemp = aPTImage;
-    aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
-    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
+%     % Apply ROI constraint
+%     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dPTSerieOffset);
+% 
+%     bInvertMask = invertConstraint('get');
+% 
+%     tRoiInput = roiTemplate('get', dPTSerieOffset);
+% 
+%     aPTImageTemp = aPTImage;
+%     aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
+%     aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
 
     resetSeries(dPTSerieOffset, true);
 
 
     try
 
+%     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+%     drawnow;
+
+    % Resample series
+
+    if ~isempty(aCTImage)
+
+        progressBar(1/10, 'Resampling series, please wait.');
+
+        [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
+
+        dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
+        dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
+
+        progressBar(2/10, 'Resampling mip, please wait.');
+
+        refMip = mipBuffer('get', [], dCTSerieOffset);
+        aMip   = mipBuffer('get', [], dPTSerieOffset);
+
+        aMip = resampleMip(aMip, atPTMetaData, refMip, atCTMetaData, 'Linear', true);
+
+        mipBuffer('set', aMip, dPTSerieOffset);
+
+        setQuantification(dPTSerieOffset);
+
+        aPTImage = aResampledPTImage;
+        atPTMetaData = atResampledPTMetaData;
+
+        clear aResampledPTImage;
+        if get(uiSeriesPtr('get'), 'Value') ~= dPTSerieOffset
+            set(uiSeriesPtr('get'), 'Value', dPTSerieOffset);
+        end
+
+        setSeriesCallback();
+
+    else
+        if get(uiSeriesPtr('get'), 'Value') ~= dPTSerieOffset
+
+            set(uiSeriesPtr('get'), 'Value', dPTSerieOffset);
+            setSeriesCallback();
+       end
+    end
+
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
-
 
     % Create an empty directory
 
@@ -121,7 +157,7 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
 
     % Convert dicom to .nii
 
-    progressBar(1/10, 'DICOM to NRRD conversion, please wait.');
+    progressBar(3/10, 'DICOM to NRRD conversion, please wait.');
 
     sNrrdImagesName = sprintf('%sCase01_0000.nrrd', sNrrdTmpDir);
 
@@ -167,7 +203,7 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
         errordlg('nrrd file mot found!!', '.nrrd file Validation');
     else
 
-        progressBar(2/10, 'Machine learning in progress, this might take several minutes, please be patient.');
+        progressBar(4/10, 'Machine learning in progress, this might take several minutes, please be patient.');
 
         sSegmentationFolderName = sprintf('%stemp_seg_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
         if exist(char(sSegmentationFolderName), 'dir')
@@ -223,7 +259,7 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
             else % Process succeed
 
 
-                progressBar(3/10, 'Importing prediction, please wait.');
+                progressBar(5/10, 'Importing prediction, please wait.');
 
                 [aMask, ~] = nrrdread( sprintf('%sCase01.nrrd',sSegmentationFolderName));
 
@@ -235,14 +271,14 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
                 dSmallestValue        = tBrownFatFullAI.options.smallestVoiValue;
                 bPixelEdge            = tBrownFatFullAI.options.pixelEdge;
 
-                progressBar(4/10, 'Segmenting prediction mask, please wait.');
+                progressBar(6/10, 'Segmenting prediction mask, please wait.');
 
                 if bCELossTrainer == false
 
-                    maskAddVoiByTypeToSeries(aPTImageTemp, aMask, atPTMetaData, dPTSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, false, 1);
+                    maskAddVoiByTypeToSeries(aPTImage, aMask, atPTMetaData, dPTSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, false, 1);
                 else
 
-                    maskAddVoiByTypeToSeries(aPTImageTemp, aMask, atPTMetaData, dPTSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, bClassifySegmentation, 1);
+                    maskAddVoiByTypeToSeries(aPTImage, aMask, atPTMetaData, dPTSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, bClassifySegmentation, 1);
                 end
 
                 clear aPTImageTemp;
@@ -253,48 +289,48 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
                 end
 
                 if ~isempty(aCTImage)
-
-                    progressBar(5/10, 'Resampling series, please wait.');
-
-                    [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
-
-                    dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
-                    dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
-
-                    progressBar(6/10, 'Resampling mip, please wait.');
-
-                    refMip = mipBuffer('get', [], dCTSerieOffset);
-                    aMip   = mipBuffer('get', [], dPTSerieOffset);
-
-                    aMip = resampleMip(aMip, atPTMetaData, refMip, atCTMetaData, 'Linear', true);
-
-                    mipBuffer('set', aMip, dPTSerieOffset);
-
-                    setQuantification(dPTSerieOffset);
-
-                    progressBar(7/10, 'Resampling contours, please wait.');
-
-
-                    atRoi = roiTemplate('get', dPTSerieOffset);
-
-                    if ~isempty(atRoi)
-
-                        atResampledRoi = resampleROIs(aPTImage, atPTMetaData, aResampledPTImage, atResampledPTMetaData, atRoi, true);
-
-                        roiTemplate('set', dPTSerieOffset, atResampledRoi);
-                   end
-
-                    progressBar(8/10, 'Resampling axes, please wait.');
-
-                    resampleAxes(aResampledPTImage, atResampledPTMetaData);
-
-                    setImagesAspectRatio();
+% 
+%                     progressBar(5/10, 'Resampling series, please wait.');
+% 
+%                     [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
+% 
+%                     dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
+%                     dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
+% 
+%                     progressBar(6/10, 'Resampling mip, please wait.');
+% 
+%                     refMip = mipBuffer('get', [], dCTSerieOffset);
+%                     aMip   = mipBuffer('get', [], dPTSerieOffset);
+% 
+%                     aMip = resampleMip(aMip, atPTMetaData, refMip, atCTMetaData, 'Linear', true);
+% 
+%                     mipBuffer('set', aMip, dPTSerieOffset);
+% 
+%                     setQuantification(dPTSerieOffset);
+% 
+%                     progressBar(7/10, 'Resampling contours, please wait.');
+% 
+% 
+%                     atRoi = roiTemplate('get', dPTSerieOffset);
+% 
+%                     if ~isempty(atRoi)
+% 
+%                         atResampledRoi = resampleROIs(aPTImage, atPTMetaData, aResampledPTImage, atResampledPTMetaData, atRoi, true);
+% 
+%                         roiTemplate('set', dPTSerieOffset, atResampledRoi);
+%                    end
+% 
+%                     progressBar(8/10, 'Resampling axes, please wait.');
+% 
+%                     resampleAxes(aResampledPTImage, atResampledPTMetaData);
+% 
+%                     setImagesAspectRatio();
 
                     if bCELossTrainer == false && ...
                        bClassifySegmentation == true && ...
                        ~isempty(atRoi)
 
-                        progressBar(9/10, 'Machine learning classification in progress, this might take several minutes, please be patient.');
+                        progressBar(7/10, 'Machine learning classification in progress, this might take several minutes, please be patient.');
 
                         sTotalSegmentorFolderName = sprintf('%stemp_seg_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
                         if exist(char(sTotalSegmentorFolderName), 'dir')
@@ -349,12 +385,12 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
                                     atVoiInput = voiTemplate('get', dPTSerieOffset);
                                     atRoiInput = roiTemplate('get', dPTSerieOffset);
 
-                                    if ~isequal(size(aBrownFatMask), size(aResampledPTImage)) % Verify if both images are in the same field of view
+                                    if ~isequal(size(aBrownFatMask), size(aPTImage)) % Verify if both images are in the same field of view
 
-                                         aBrownFatMask = resample3DImage(aBrownFatMask, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
+                                         aBrownFatMask = resample3DImage(aBrownFatMask, atCTMetaData, aPTImage, atResampledPTMetaData, 'Cubic');
 
-                                        if ~isequal(size(aBrownFatMask), size(aResampledPTImage)) % Verify if both images are in the same field of view
-                                            aBrownFatMask = resizeMaskToImageSize(aBrownFatMask, aResampledPTImage);
+                                        if ~isequal(size(aBrownFatMask), size(aPTImage)) % Verify if both images are in the same field of view
+                                            aBrownFatMask = resizeMaskToImageSize(aBrownFatMask, aPTImage);
                                         end
 
                                     end
@@ -410,10 +446,30 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
     set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
     set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
 
+    % Set intensity
+
+    tQuant = atInput(dPTSerieOffset).tQuant;
+
+    if isfield(tQuant, 'tSUV')
+        dSUVScale = tQuant.tSUV.dScale;
+        
+        dSeriesMin = 0/dSUVScale;
+        dSeriesMax = 5/dSUVScale;
+    else
+        dSeriesMin = min(aPTImage, [], 'all');
+        dSeriesMax = max(aPTImage, [], 'all');
+    end
+    
+    windowLevel('set', 'max', dSeriesMax);
+    windowLevel('set', 'min', dSeriesMin);
+
+    setWindowMinMax(dSeriesMax, dSeriesMin);
+
     % Set fusion
+
     if ~isempty(aCTImage)
 
-        progressBar(9/10, 'Processing fusion, please wait.');
+        progressBar(8/10, 'Processing fusion, please wait.');
 
         if isFusion('get') == false
 
@@ -437,12 +493,13 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
     % Activate ROI Panel
 
     if viewRoiPanel('get') == false
+        
         setViewRoiPanel();
     end
 
-    refreshImages();
-    
-    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
+%     refreshImages();
+%     
+%     plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
 
     clear aPTImage;
     clear aCTImage;

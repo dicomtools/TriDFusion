@@ -63,7 +63,6 @@ function series2nrrd(dSeriesOffset, sNrrdImagesName, dConvFactor)
         clear aInputBuffer;
     end
 
-
     if size(aBuffer, 3) ~=1       
 
         aBuffer = aBuffer(:,:,end:-1:1);

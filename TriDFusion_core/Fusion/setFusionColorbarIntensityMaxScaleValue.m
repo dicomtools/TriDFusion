@@ -98,7 +98,10 @@ end
     if strcmpi(sUnitDisplay, 'SUV')  
         if bDefaultUnit == true
             tQuant = quantificationTemplate('get', [], dSeriesOffset);
-            dLevelMax = dLevelMax*tQuant.tSUV.dScale;      
+
+            if isfield(tQuant, 'tSUV')
+                dLevelMax = dLevelMax*tQuant.tSUV.dScale;      
+            end
         end
     end
 

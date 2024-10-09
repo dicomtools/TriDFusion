@@ -52,6 +52,17 @@ function initViewerGlobal()
     ui3DPanelPtr          ('set', []);
     ui3DPanelSliderPtr    ('set', []);
 
+    uiDeleteVoiRoiPanelObject          ('set', []);
+    uiLesionTypeVoiRoiPanelObject      ('set', []);
+    uiAddVoiRoiPanelObject             ('set', []);
+    uiPrevVoiRoiPanelObject            ('set', []);
+    uiDelVoiRoiPanelObject             ('set', []);
+    uiNextVoiRoiPanelObject            ('set', []);
+    chkContourVisibilityPanelObject    ('set', []);
+    uiSliderRoisFaceAlphaRoiPanelObject('set', []);
+    uiCTRoiPanelSeriesObject           ('set', []);
+    uiCreateVoiRoiPanelObject          ('set', []);
+
     btnUiSagWindowFullScreenPtr('set', []);
     btnUiCorWindowFullScreenPtr('set', []);
     btnUiTraWindowFullScreenPtr('set', []);
