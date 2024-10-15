@@ -800,7 +800,31 @@ function figRoiDialogCallback(hObject, ~)
                                   );
                         end
                     end
-                    
+
+                    if bIsVoiTag == true
+            
+                        uimenu(c, ...
+                               'Label'    , 'Adjust increment ratio' , ...
+                               'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
+                               'Separator', 'on', ...
+                               'Callback' , @figRoiEditIncrementRatioVoiPositionCallback ...
+                              );
+            
+                        uimenu(c, ...
+                               'Label'    , 'Increase Contours' , ...
+                               'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
+                               'Visible'  , 'on', ...
+                               'Callback' , @figRoiIncreaseVoiPositionCallback ...
+                               );
+            
+                        uimenu(c, ...
+                               'Label'    , 'Decrease Contours' , ...
+                               'UserData' , aVoiRoiTag{get(lbVoiRoiWindow, 'Value')}.Tag, ...
+                               'Visible'  , 'on', ...
+                               'Callback' , @figRoiDecreaseVoiPositionCallback ...
+                               );
+                    end
+
                     uimenu(c,'Label', 'Bar Histogram' , 'Separator', 'on' , 'Callback',@figRoiHistogramCallback);
                     uimenu(c,'Label', 'Cumulative DVH', 'Separator', 'off', 'Callback',@figRoiHistogramCallback);
 
@@ -887,9 +911,8 @@ function figRoiDialogCallback(hObject, ~)
                     end                    
                 end
 
-                if bDispayMenu == true && ...
-                   size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
-    
+                if bDispayMenu == true && size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
+                   
                     uimenu(c,'Label', 'Create Volume-of-interest', 'Separator', 'on', 'Callback',@figRoiCreateVolumeCallback);
     
                     if numel(adOffset) == 2
@@ -949,7 +972,9 @@ function figRoiDialogCallback(hObject, ~)
             set(mFigRoiConstraintInsideObject , 'Checked', 'off');                    
 
             if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 % 2D Image   
+
                 if exist('mFigRoiConstraintInsideEverySlice', 'var')
+
                     set(mFigRoiConstraintInsideEverySlice , 'Checked', 'off'); 
                 end
             end
@@ -957,16 +982,134 @@ function figRoiDialogCallback(hObject, ~)
             [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value') );
 
             for tt=1:numel(asConstraintTagList)
+
                 if strcmp(asConstraintTagList{tt}, sConstraintTag)
+
                     if     strcmpi(asConstraintTypeList{tt}, 'Inside This Contour')
+
                         set(mFigRoiConstraintInsideObject, 'Checked', 'on');                                     
                     elseif strcmpi(asConstraintTypeList{tt}, 'Inside Every Slice')                        
+
                         set(mFigRoiConstraintInsideEverySlice, 'Checked', 'on');                                      
                     end
                 end
             end 
         end
-                
+
+        function figRoiEditIncrementRatioVoiPositionCallback(~, ~)
+        
+            DLG_INCREAMENT_X = 380;
+            DLG_INCREAMENT_Y = 100;
+            
+            dlgIncrement = ...
+                dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_INCREAMENT_X/2) ...
+                                    (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_INCREAMENT_Y/2) ...
+                                    DLG_INCREAMENT_X ...
+                                    DLG_INCREAMENT_Y ...
+                                    ],...
+                       'MenuBar', 'none',...
+                       'Resize', 'off', ...    
+                       'NumberTitle','off',...
+                       'MenuBar', 'none',...
+                       'Color', viewerBackgroundColor('get'), ...
+                       'Name', 'Adjust increment ratio',...
+                       'Toolbar','none'...               
+                       );        
+        
+            edtIncrementRatio = ...
+               uicontrol(dlgIncrement,...
+                         'style'     , 'edit',...
+                         'enable'    , 'on',...
+                         'Background', 'white',...
+                         'string'    , num2str(voiIncrementRatio('get')),...
+                         'position'  , [200 50 100 20],...
+                         'BackgroundColor', viewerBackgroundColor('get'), ...
+                         'ForegroundColor', viewerForegroundColor('get'), ...                  
+                         'Callback'  , @editIncrementRatioCallback...
+                         );
+            set(edtIncrementRatio, 'KeyPressFcn', @checkEditRatioKeyPress);
+        
+                uicontrol(dlgIncrement,...
+                          'style'   , 'text',...
+                          'string'  , 'Increment ratio',...
+                          'horizontalalignment', 'left',...
+                          'position', [20 47 180 20],...
+                          'Enable', 'On',...
+                          'BackgroundColor', viewerBackgroundColor('get'), ...
+                          'ForegroundColor', viewerForegroundColor('get') ...                   
+                          ); 
+        
+             % Cancel or Proceed
+        
+             uicontrol(dlgIncrement,...
+                       'String','Cancel',...
+                       'Position',[285 7 75 25],...
+                       'BackgroundColor', viewerBackgroundColor('get'), ...
+                       'ForegroundColor', viewerForegroundColor('get'), ...                
+                       'Callback', @cancelEditIncrementRatioCallback...
+                       );
+        
+             uicontrol(dlgIncrement,...
+                      'String','Change',...
+                      'Position',[200 7 75 25],...
+                      'BackgroundColor', viewerBackgroundColor('get'), ...
+                      'ForegroundColor', viewerForegroundColor('get'), ...               
+                      'Callback', @changeEditIncrementRatioCallback...
+                      );
+        
+                function checkEditRatioKeyPress(~, event)
+                    if strcmp(event.Key, 'return')
+                        drawnow;
+                        changeEditIncrementRatioCallback();
+                    end
+                end 
+        
+                function editIncrementRatioCallback(~, ~)
+        
+                    dIncrement = str2double(get(edtIncrementRatio, 'String'));
+        
+                    if dIncrement < 0
+                        set(edtIncrementRatio, 'String', '1');
+                    end
+                end
+        
+                function changeEditIncrementRatioCallback(~, ~)
+        
+                    dIncrement = str2double(get(edtIncrementRatio, 'String'));
+        
+                    if dIncrement < 0
+        
+                        set(edtIncrementRatio, 'String', '1');
+                    else
+                        voiIncrementRatio('set', dIncrement);
+        
+                        delete(dlgIncrement);
+                    end
+                end
+        
+                function cancelEditIncrementRatioCallback(~, ~) 
+        
+                    delete(dlgIncrement);
+                end
+        
+        end        
+
+        function figRoiIncreaseVoiPositionCallback(hObject, ~)
+    
+            increaseVoiPosition(get(hObject, 'UserData'), voiIncrementRatio('get'));
+    
+            plotRotatedRoiOnMip(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), mipAngle('get'))
+         
+        end
+    
+        function figRoiDecreaseVoiPositionCallback(hObject, ~)
+    
+            decreaseVoiPosition(get(hObject, 'UserData'), voiIncrementRatio('get'));
+    
+            plotRotatedRoiOnMip(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), mipAngle('get'))
+    
+        end
+
         function figRoiHistogramCallback(hObject, ~)
             
             atInput = inputTemplate('get');
@@ -1208,6 +1351,11 @@ function figRoiDialogCallback(hObject, ~)
                                         bTagIsUpdated = true;
 
                                         atRoiInput{dRoiTagOffset}.Label = replace(atRoiInput{dRoiTagOffset}.Label, asLesionShortName{nn}, asLesionShortName{bLesionOffset});
+
+                                        if isvalid(atRoiInput{dRoiTagOffset}.Object)
+
+                                            atRoiInput{dRoiTagOffset}.Object.Label = atRoiInput{dRoiTagOffset}.Label;
+                                        end
                                         break;
                                     end
                                 end
@@ -1242,6 +1390,11 @@ function figRoiDialogCallback(hObject, ~)
                                     bTagIsUpdated = true;
 
                                     atRoiInput{dRoiTagOffset}.Label = replace(atRoiInput{dRoiTagOffset}.Label, asLesionShortName{nn}, asLesionShortName{bLesionOffset});
+
+                                    if isvalid(atRoiInput{dRoiTagOffset}.Object)
+
+                                        atRoiInput{dRoiTagOffset}.Object.Label = atRoiInput{dRoiTagOffset}.Label;
+                                    end                                   
                                     break;
                                 end
                             end
@@ -1249,6 +1402,11 @@ function figRoiDialogCallback(hObject, ~)
                             if bTagIsUpdated == false
 
                                 atRoiInput{dRoiTagOffset}.Label = sprintf('%s-%s', atRoiInput{dRoiTagOffset}.Label, asLesionShortName{bLesionOffset});    
+
+                                if isvalid(atRoiInput{dRoiTagOffset}.Object)
+
+                                    atRoiInput{dRoiTagOffset}.Object.Label = atRoiInput{dRoiTagOffset}.Label;
+                                end                                  
                             end     
 
                             atRoiInput{dRoiTagOffset}.LesionType = sSelectedType;                                
@@ -2185,6 +2343,7 @@ function figRoiDialogCallback(hObject, ~)
                             if ~isempty(atRoiInput)
 
                                 for ro=1:numel(ptrObject.RoisTag)
+
                                     aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[ptrObject.RoisTag{ro}]} );
                                     aRoisTagOffset(ro) = find(aTagOffset, 1);    
                                 end
@@ -2192,6 +2351,7 @@ function figRoiDialogCallback(hObject, ~)
                                 if numel(ptrObject.RoisTag)
                                     
                                     if atRoiInput{aRoisTagOffset(1)}.FaceAlpha == 0
+
                                         dFaceAlpha = roiFaceAlphaValue('get');
                                     end
                                     
@@ -2202,6 +2362,7 @@ function figRoiDialogCallback(hObject, ~)
                                             atRoiInput{aRoisTagOffset(ro)}.FaceAlpha = dFaceAlpha;
 
                                             if isvalid(atRoiInput{aRoisTagOffset(ro)}.Object)
+
                                                 atRoiInput{aRoisTagOffset(ro)}.Object.FaceAlpha = dFaceAlpha;
                                             end
                                         end
@@ -2234,11 +2395,14 @@ function figRoiDialogCallback(hObject, ~)
                             if ~isempty(dTagOffset)
 
                                 if atRoiInput{dTagOffset}.FaceAlpha == 0
+
                                     dFaceAlpha = roiFaceAlphaValue('get');
                                 end
 
                                 atRoiInput{dTagOffset}.FaceAlpha = dFaceAlpha;
+
                                 if isvalid(atRoiInput{dTagOffset}.Object)
+
                                     atRoiInput{dTagOffset}.Object.FaceAlpha = dFaceAlpha;
                                 end
 
@@ -2316,6 +2480,7 @@ function figRoiDialogCallback(hObject, ~)
         end
 
         if strcmpi(get(mSimplified, 'Checked'), 'on')
+
             set(figRoiWindow, 'Name', ['TriDFusion (3DF) VOI Simplified Result - ' atMetaData{1}.SeriesDescription ' - ' sUnits sModified sSegmented]);
         else
             set(figRoiWindow, 'Name', ['TriDFusion (3DF) ROI/VOI Result - ' atMetaData{1}.SeriesDescription ' - ' sUnits sModified sSegmented]);

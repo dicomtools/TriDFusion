@@ -177,8 +177,8 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
         
         % Patient information
        
-        atInput(numel(atInput)).atDicomInfo{1}.PatientName      = asSeriesDescription{1}; 
-        atInput(numel(atInput)).atDicomInfo{1}.PatientID        = asSeriesDescription{1};
+        atInput(numel(atInput)).atDicomInfo{1}.PatientName      = asSeriesDescription{end}; 
+        atInput(numel(atInput)).atDicomInfo{1}.PatientID        = asSeriesDescription{end};
         
         atInput(numel(atInput)).atDicomInfo{1}.PatientWeight    = [];
         atInput(numel(atInput)).atDicomInfo{1}.PatientSize      = [];
@@ -186,7 +186,7 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
         atInput(numel(atInput)).atDicomInfo{1}.PatientAge       = '';
         atInput(numel(atInput)).atDicomInfo{1}.PatientBirthDate = '';        
         
-        atInput(numel(atInput)).atDicomInfo{1}.SeriesDescription = asSeriesDescription{1}; 
+        atInput(numel(atInput)).atDicomInfo{1}.SeriesDescription = asSeriesDescription{end}; 
        
         atInput(numel(atInput)).atDicomInfo{1}.InstanceNumber          = 1; 
         atInput(numel(atInput)).atDicomInfo{1}.PatientPosition         = [];
@@ -264,7 +264,7 @@ function loadRawFile(sPathName, sFileName, dimX, dimY, dimZ, voxelX, voxelY, vox
         atInput(numel(atInput)).aDicomBuffer = [];
        
         asSeries = get(uiSeriesPtr('get'), 'String');
-        asSeries{numel(asSeries)+1} = asSeriesDescription{numel(asSeriesDescription)};   
+        asSeries{numel(asSeries)+1} = asSeriesDescription{end};   
         
     else
         

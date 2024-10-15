@@ -65,7 +65,6 @@ function adjBrush2D(pRoiPtr, dInitCoord)
             yPixel = atMetaData{1}.PixelSpacing(2);
     end
     
-
     if xPixel == 0
         xPixel = 1;
     end

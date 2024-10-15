@@ -77,7 +77,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 %            SMALEST_ROI_SIZE = 0;
     PIXEL_EDGE_RATIO = 3;
 
-    dMinValue = min(imMask, [], 'all');
+    dMinValue = single(min(imMask, [], 'all'));
 %            dMaxValue = max(imMask, [], 'all');
 
 %    CC = bwconncomp(gather(BW), 18);
@@ -90,13 +90,13 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 %            asAllTag = [];
      
     if canUseGPU()
-        BW2       = gpuArray(zeros(size(imMask))); % Init BW2 buffer                                       
-        BWCT2     = gpuArray(BWCT);
-        BWANDBWCT = gpuArray(zeros(size(BWCT)));
+        BW2    = gpuArray(single(zeros(size(imMask)))); % Init BW2 buffer                                       
+        BWCT2  = gpuArray(BWCT);
+        % BWANDBWCT = gpuArray(zeros(size(BWCT)));
     else
-        BW2       = zeros(size(imMask)); % Init BW2 buffer                                       
-        BWCT2     = BWCT;
-        BWANDBWCT = zeros(size(BWCT));                
+        BW2   = single(zeros(size(imMask))); % Init BW2 buffer                                       
+        BWCT2 = BWCT;
+        % BWANDBWCT = zeros(size(BWCT));                
     end
 
     for bb=1:dNbElements  % Nb VOI
@@ -481,6 +481,9 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 %                                dSTD = std(BW2(BW2~=dMinValue), [],'all') * dSUVScale;
 
                         BW2(BW2*dSUVScale < dPercentMaxOrMaxSUVValue) = dMinValue;
+%                        mask = (BW2 .* dSUVScale < dPercentMaxOrMaxSUVValue);
+%                        BW2(mask) = dMinValue;  
+
                     end
 
                     BW2(BW2 ~= dMinValue) = 1;

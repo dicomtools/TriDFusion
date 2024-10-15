@@ -28,6 +28,7 @@ function initRoiPanel()
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     if isempty(dicomBuffer('get'))
+
         return;
     end
 
@@ -3427,8 +3428,9 @@ function initRoiPanel()
                 end
 
                 if bMultipleObjects == true
-                    BW = zeros(size(aBuffer));
-                    BW(CC.PixelIdxList{bb}) = 1;
+
+                    BW = false(size(aBuffer));  
+                    BW(CC.PixelIdxList{bb}) = true;                  
                 end
 
 
@@ -3459,6 +3461,7 @@ function initRoiPanel()
                     end
 
                     aAxial = BW(:,:,aa);
+
                     if aAxial(aAxial==1)
 
                         if bHoles == true

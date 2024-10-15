@@ -202,7 +202,7 @@ function mainWindowMenu()
     uimenu(mMetastaticBreastCancerThresholdFullAI, 'Label','Metastatic Breast Cancer Segmentation using NN-Unet PET Network (Full AI)'     , 'Callback', @setMachineLearningBreastCancerPETFullAICallback);
     uimenu(mMetastaticBreastCancerThresholdFullAI, 'Label','Metastatic Breast Cancer Segmentation using NN-Unet PET & CT Network (Full AI)', 'Callback', @setMachineLearningBreastCancerPETCTFullAICallback);
 
-    mMetastaticBreastCancerFullAIToolkit = uimenu(mMetastaticBreastCancer,'Label','AI Toolkit', 'Separator','on');
+    mMetastaticBreastCancerFullAIToolkit = uimenu(mMetastaticBreastCancerThresholdFullAI,'Label','AI Toolkit', 'Separator','on');
     uimenu(mMetastaticBreastCancerFullAIToolkit, 'Label','Export Metastatic Breast Cancer segmentation to NN-Unet PET Network'     , 'Callback', @setMachineLearningBreastCancerExportToPETNetworkCallback);
     uimenu(mMetastaticBreastCancerFullAIToolkit, 'Label','Pre-processing NN-Unet Metastatic Breast Cancer PET Network'             , 'Callback', @setMachineLearningBreastCancerDataPreProcessingPETCallback);
     uimenu(mMetastaticBreastCancerFullAIToolkit, 'Label','Export Metastatic Breast Cancer segmentation to NN-Unet PET & CT Network', 'Callback', @setMachineLearningBreastCancerExportToPETCTNetworkCallback, 'Separator','on');

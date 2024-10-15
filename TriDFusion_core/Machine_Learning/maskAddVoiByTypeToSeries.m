@@ -264,7 +264,33 @@ function  sLesionType = getMaskLessionType(aMask, bType)
 
             otherwise
                 sLesionType = 'Unknow';
-            
+        end
+        
+    elseif bType == 3 % Breast Cancer
+
+        switch dLesionTypeOffset
+    
+            case 1
+                sLesionType = 'Lymph Nodes';
+    
+            case 2
+                sLesionType = 'Bone';
+    
+            case 3
+                sLesionType = 'Liver';
+    
+            case 4
+                sLesionType = 'Lung';
+
+            case 5
+                sLesionType = 'Primary Disease'; 
+
+            case 6
+                sLesionType = 'Soft Tissue'; 
+
+            otherwise
+                sLesionType = 'Unknow';
+
         end
     else
     end

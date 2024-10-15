@@ -41,13 +41,16 @@ function hideViewFaceAlhaCallback(hObject, ~)
                 dFaceAlpha = 0;
 
                 if hObject.UserData.FaceAlpha == 0
+                    
                     dFaceAlpha = roiFaceAlphaValue('get');
                 end
 
                 hObject.UserData.FaceAlpha = dFaceAlpha;
 
                 atRoiInput{dTagOffset}.FaceAlpha = dFaceAlpha;
+
                 if isvalid(atRoiInput{dTagOffset}.Object)
+
                     atRoiInput{dTagOffset}.Object.FaceAlpha = dFaceAlpha;
                 end
 

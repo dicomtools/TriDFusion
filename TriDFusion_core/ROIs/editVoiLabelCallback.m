@@ -1,6 +1,6 @@
-function editLabelCallback(hObject, ~)
-%function editLabelCallback(hObject, ~)
-%Edit ROI Label.
+function editVoiLabelCallback(hObject, ~)
+%function editVoiLabelCallback(hObject, ~)
+%Edit VOI and assiciated ROIs Label.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -48,13 +48,22 @@ function editLabelCallback(hObject, ~)
               'ForegroundColor', viewerForegroundColor('get'), ...   
               'position', [20 52 80 25]...
               );
+    
+    atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value')); 
+
+    dVoiTagOffset = find(strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), hObject.UserData ) );       
+    if ~isempty(dVoiTagOffset)
+        sVoiLabel = atVoiInput{dVoiTagOffset}.Label;
+    else
+        sVoiLabel = '';
+    end
 
     edtLabelName = ...
         uicontrol(editLabelWindow,...
               'style'     , 'edit',...
               'horizontalalignment', 'left',...
               'Background', 'white',...
-              'string'    , hObject.UserData.Label,...
+              'string'    , sVoiLabel,...
               'position'  , [100 55 150 25], ...
               'BackgroundColor', viewerBackgroundColor('get'), ...
               'ForegroundColor', viewerForegroundColor('get'), ...              
@@ -94,36 +103,44 @@ function editLabelCallback(hObject, ~)
         sLabel = get(edtLabelName, 'String');
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-
-        atRoiInput = roiTemplate('get', dSeriesOffset);     
+    
+        atVoiInput = voiTemplate('get', dSeriesOffset);                
+        atRoiInput = roiTemplate('get', dSeriesOffset);                
+       
+        if ~isempty(atVoiInput) 
+    
+            dVoiTagOffset = find(strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), hObject.UserData ) );
         
-        if isempty(atRoiInput) 
-            
-            aTagOffset = 0;
-        else
-            aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );            
-        end
-        
-        if aTagOffset(aTagOffset==1) % tag is a roi
-
-            dTagOffset = find(aTagOffset, 1);
-
-            if ~isempty(dTagOffset)
-
-                hObject.UserData.Label = sLabel;
-
-                atRoiInput{dTagOffset}.Color = sLabel;
-
-                if isvalid(atRoiInput{dTagOffset}.Object)
-
-                    atRoiInput{dTagOffset}.Object.Label = sLabel;
+            if ~isempty(dVoiTagOffset)
+    
+                atVoiInput{dVoiTagOffset}.Label = sLabel;
+    
+                dNbRois = numel(atVoiInput{dVoiTagOffset}.RoisTag);
+    
+                for vv=1: dNbRois
+    
+                    dRoiTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), atVoiInput{dVoiTagOffset}.RoisTag{vv} ) );
+    
+                    if ~isempty(dRoiTagOffset) % Found the Tag 
+    
+                        atRoiInput{dRoiTagOffset}.Label = sprintf('%s (roi %d/%d)',sLabel, vv, dNbRois);
+    
+                        if isvalid(atRoiInput{dRoiTagOffset}.Object)
+    
+                            atRoiInput{dRoiTagOffset}.Object.Label = atRoiInput{dRoiTagOffset}.Label;
+                        end
+                                 
+                    end
+    
                 end
-
+    
                 roiTemplate('set', dSeriesOffset, atRoiInput);
-            end                      
-            
-%            setVoiRoiSegPopup(); Not need for ROI
-        end        
+                voiTemplate('set', dSeriesOffset, atVoiInput);
+                
+                setVoiRoiSegPopup(); 
+    
+            end         
+        end     
        
         delete(editLabelWindow);
                 

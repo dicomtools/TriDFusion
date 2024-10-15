@@ -104,7 +104,10 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputM
                             aSlice(~roiMask) =0;                             
                         elseif bIndex == 3
                             aSlice( roiMask) =getPSMALesionTypeMaskValue(tRoiInput{tt}.LesionType);
-                            aSlice(~roiMask) =0;                             
+                            aSlice(~roiMask) =0;
+                        elseif bIndex == 4
+                            aSlice( roiMask) =getBreastCancerLesionTypeMaskValue(tRoiInput{tt}.LesionType);
+                            aSlice(~roiMask) =0;                              
                         else
                             aSlice( roiMask) =1;
                             aSlice(~roiMask) =0;
@@ -113,6 +116,7 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputM
                         aSliceMask =  aMaskBuffer(:,:);
 
                         if bIndex
+                             aSliceMask(roiMask)=0;
                              aMaskBuffer(:,:) = aSlice+aSliceMask;
                        else
                             aMaskBuffer(:,:) = aSlice|aSliceMask;
@@ -138,14 +142,18 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputM
                         elseif bIndex == 3
                             aSlice( roiMask) =getPSMALesionTypeMaskValue(tRoiInput{tt}.LesionType);
                             aSlice(~roiMask) =0; 
+                        elseif bIndex == 4
+                            aSlice( roiMask) =getBreastCancerLesionTypeMaskValue(tRoiInput{tt}.LesionType);
+                            aSlice(~roiMask) =0;                             
                         else
                             aSlice( roiMask) =1;
                             aSlice(~roiMask) =0;
                         end
 
-                        aSliceMask =  permute(aMaskBuffer(dSliceNb,:,:), [3 2 1]);
+                        aSliceMask = permute(aMaskBuffer(dSliceNb,:,:), [3 2 1]);
 
                         if bIndex 
+                            aSliceMask(roiMask)=0;
                             aSlice = aSlice+aSliceMask;
                         else
                             aSlice = aSlice|aSliceMask;
@@ -171,16 +179,20 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputM
                             aSlice(~roiMask) =0;                               
                         elseif bIndex == 3
                             aSlice( roiMask) =getPSMALesionTypeMaskValue(tRoiInput{tt}.LesionType);
-                            aSlice(~roiMask) =0;                             
+                            aSlice(~roiMask) =0;   
+                        elseif bIndex == 4
+                            aSlice( roiMask) =getBreastCancerLesionTypeMaskValue(tRoiInput{tt}.LesionType);
+                            aSlice(~roiMask) =0;                              
                         else
                             aSlice( roiMask) =1;
                             aSlice(~roiMask) =0;
                         end
 
-                        aSliceMask =  permute(aMaskBuffer(:,dSliceNb,:), [3 1 2]);
+                        aSliceMask = permute(aMaskBuffer(:,dSliceNb,:), [3 1 2]);
 
                         if bIndex 
-                            aSlice = aSlice+aSliceMask;
+                          aSliceMask(roiMask)=0;
+                          aSlice = aSlice+aSliceMask;
                         else
                             aSlice = aSlice|aSliceMask;
                         end
@@ -207,14 +219,18 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputM
                         elseif bIndex == 3
                             aSlice( roiMask) =getPSMALesionTypeMaskValue(tRoiInput{tt}.LesionType);
                             aSlice(~roiMask) =0;                             
+                        elseif bIndex == 4
+                            aSlice( roiMask) =getBreastCancerLesionTypeMaskValue(tRoiInput{tt}.LesionType);
+                            aSlice(~roiMask) =0;                              
                         else
                             aSlice( roiMask) =1;
                             aSlice(~roiMask) =0;
                         end
 
-                        aSliceMask =  aMaskBuffer(:,:,dSliceNb);
+                        aSliceMask = aMaskBuffer(:,:,dSliceNb);
 
                         if bIndex
+                            aSliceMask(roiMask)=0;
                             aMaskBuffer(:,:,dSliceNb) = aSlice+aSliceMask;                        
                         else
                             aMaskBuffer(:,:,dSliceNb) = aSlice|aSliceMask;                        
@@ -336,4 +352,26 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputM
                 dMaskValue = 9;
         end
     end
+
+    function dMaskValue = getBreastCancerLesionTypeMaskValue(sLesionType)
+
+        switch lower(sLesionType)
+             
+            case 'lymph nodes' 
+                dMaskValue = 1;               
+            case 'bone'
+                dMaskValue = 2;
+            case 'liver'
+                dMaskValue = 3;                
+            case 'lung'
+                dMaskValue = 4;
+            case 'primary disease'
+                dMaskValue = 5;                 
+            case 'soft tissue' 
+                dMaskValue = 6;
+            otherwise
+                dMaskValue = 7;
+        end
+    end
+
 end

@@ -239,7 +239,7 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
 
                 progressBar(6/10, 'Segmenting prediction mask, please wait.');
 
-                maskAddVoiByTypeToSeries(aPTImage, aMask, atPTMetaData, dPTSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, bClassifySegmentation, 2);
+                maskAddVoiByTypeToSeries(aPTImage, aMask, atPTMetaData, dPTSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, bClassifySegmentation, 3);
                 
 %                 clear aPTImageTemp;
 

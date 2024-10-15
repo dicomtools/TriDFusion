@@ -239,7 +239,7 @@ function setMachineLearningBreastCancerExportToPETCTNetworkCallback(hObject, ~)
 
     sNrrdMaskImagesName = sprintf('D%d_gt.nrrd', dNewEntryNumber);
 
-    writeRoisToNrrdMask(sDFolder, false, sNrrdMaskImagesName,aInputBuffer{dPTSerieOffset}, atInput(dPTSerieOffset).atDicomInfo, dicomBuffer('get',[],dPTSerieOffset), dicomMetaData('get',[],dPTSerieOffset), dPTSerieOffset, 3);
+    writeRoisToNrrdMask(sDFolder, false, sNrrdMaskImagesName,aInputBuffer{dPTSerieOffset}, atInput(dPTSerieOffset).atDicomInfo, dicomBuffer('get',[],dPTSerieOffset), dicomMetaData('get',[],dPTSerieOffset), dPTSerieOffset, 4);
 
     clear aInputBuffer;
 

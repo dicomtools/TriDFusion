@@ -498,90 +498,152 @@ function setPlaybackToolbar(sVisible)
                     
                     set(mZoomIn, 'State', 'off');
 
-                    if size(dicomBuffer('get'), 3) ~=1
+                    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-                        set(mZoomIn, 'Enable', 'off');
+                    pAxe = gca(fiMainWindowPtr('get'));
 
-                        multiFrameZoom('set', 'out', 1);
+                    set(mZoomIn, 'Enable', 'off');
 
-                        if multiFrameZoom('get', 'axe') ~= gca(fiMainWindowPtr('get'))
-                            multiFrameZoom('set', 'in', 1);
-                        end
+                    multiFrameZoom('set', 'out', 1);
 
-                        dZFactor = multiFrameZoom('get', 'in');
-                        dZFactor = dZFactor+0.025;
-                        multiFrameZoom('set', 'in', dZFactor);
-
-                        switch gca(fiMainWindowPtr('get'))
-                            case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                                zoom(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
-                                multiFrameZoom('set', 'axe', axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
-
-                            case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                                zoom(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
-                                multiFrameZoom('set', 'axe', axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
-                                
-                            case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                                zoom(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
-                                multiFrameZoom('set', 'axe', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
-                                
-                            case axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                                zoom(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
-                                multiFrameZoom('set', 'axe', axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')));
-                                
-                            otherwise
-                                zoom(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
-                                multiFrameZoom('set', 'axe', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
-                        end
-
-                        set(mZoomIn, 'Enable', 'on');
-
-                    end
-
-                case 'Zoom Out'
-                    set(mZoomOut, 'State', 'off');
-
-                    if size(dicomBuffer('get'), 3) ~=1
-
-                        set(mZoomOut, 'Enable', 'off');
+                    if multiFrameZoom('get', 'axe') ~= pAxe
 
                         multiFrameZoom('set', 'in', 1);
-
-                        if multiFrameZoom('get', 'axe') ~= gca(fiMainWindowPtr('get'))
-                            multiFrameZoom('set', 'out', 1);
-                        end
-
-                        dZFactor = multiFrameZoom('get', 'out');
-                        if dZFactor > 0.025
-                            dZFactor = dZFactor-0.025;
-                            multiFrameZoom('set', 'out', dZFactor);
-                        end
-
-                        switch gca(fiMainWindowPtr('get'))
-                            case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                                zoom(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
-                                multiFrameZoom('set', 'axe', axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
-
-                            case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                                zoom(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
-                                multiFrameZoom('set', 'axe', axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
-                                
-                            case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                                zoom(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
-                                multiFrameZoom('set', 'axe', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
-                                
-                            case axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                                zoom(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
-                                multiFrameZoom('set', 'axe', axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')));
-                                
-                            otherwise
-                                zoom(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), dZFactor);
-                                multiFrameZoom('set', 'axe', axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
-                        end
-
-                        set(mZoomOut, 'Enable', 'on');
-
                     end
+
+                    dZFactor = multiFrameZoom('get', 'in')+0.025;
+
+                    multiFrameZoom('set', 'in', dZFactor);
+
+                    switch pAxe
+    
+                        case axePtr('get', [], dSeriesOffset)
+    
+                            axesHandle = axePtr('get', [], dSeriesOffset);
+    
+                        case axes1Ptr('get', [], dSeriesOffset)
+    
+                            axesHandle = axes1Ptr('get', [], dSeriesOffset);
+    
+                        case axes2Ptr('get', [], dSeriesOffset)
+    
+                            axesHandle = axes2Ptr('get', [], dSeriesOffset);
+                            
+                        case axes3Ptr('get', [], dSeriesOffset)
+    
+                            axesHandle = axes3Ptr('get', [], dSeriesOffset);
+                            
+                        case axesMipPtr('get', [], dSeriesOffset)
+    
+                            axesHandle = axesMipPtr('get', [], dSeriesOffset);
+                            
+                        otherwise
+    
+                            axesHandle = axes3Ptr('get', [], dSeriesOffset);
+    
+                    end 
+
+                    if isempty(getappdata(axesHandle, 'matlab_graphics_resetplotview'))
+                        
+                        zoom(axesHandle, dZFactor);
+                    else
+                        % Get the current axes limits
+                        xLim = get(axesHandle, 'XLim');
+                        yLim = get(axesHandle, 'YLim');
+        
+                        % Compute the center of the current axes
+                        xCenter = mean(xLim);
+                        yCenter = mean(yLim);
+        
+                        % Calculate the new limits based on the zoom factor
+                        newXLim = xCenter + (xLim - xCenter) / dZFactor;  % Zoom in/out
+                        newYLim = yCenter + (yLim - yCenter) / dZFactor;
+        
+                        % Apply the new limits to the axes
+                        set(axesHandle, 'XLim', newXLim, 'YLim', newYLim);
+                    end
+
+                    multiFrameZoom('set', 'axe', axesHandle);
+
+                    set(mZoomIn, 'Enable', 'on');
+
+                case 'Zoom Out'
+
+                    set(mZoomOut, 'State', 'off');
+
+                    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+                    pAxe = gca(fiMainWindowPtr('get'));
+
+                    set(mZoomOut, 'Enable', 'off');
+
+                    multiFrameZoom('set', 'in', 1);
+
+                    if multiFrameZoom('get', 'axe') ~= pAxe
+
+                        multiFrameZoom('set', 'out', 1);
+                    end
+
+                    dZFactor = multiFrameZoom('get', 'out');
+
+                    if dZFactor > 0.025
+
+                        dZFactor = dZFactor-0.025;
+
+                        multiFrameZoom('set', 'out', dZFactor);
+                    end
+
+                    switch pAxe
+    
+                        case axePtr('get', [], dSeriesOffset)
+    
+                            axesHandle = axePtr('get', [], dSeriesOffset);
+    
+                        case axes1Ptr('get', [], dSeriesOffset)
+    
+                            axesHandle = axes1Ptr('get', [], dSeriesOffset);
+    
+                        case axes2Ptr('get', [], dSeriesOffset)
+    
+                            axesHandle = axes2Ptr('get', [], dSeriesOffset);
+                            
+                        case axes3Ptr('get', [], dSeriesOffset)
+    
+                            axesHandle = axes3Ptr('get', [], dSeriesOffset);
+                            
+                        case axesMipPtr('get', [], dSeriesOffset)
+    
+                            axesHandle = axesMipPtr('get', [], dSeriesOffset);
+                            
+                        otherwise
+    
+                            axesHandle = axes3Ptr('get', [], dSeriesOffset);
+    
+                    end 
+
+                    if isempty(getappdata(axesHandle, 'matlab_graphics_resetplotview')) 
+                        
+                        zoom(axesHandle, dZFactor);
+                    else
+                        % Get the current axes limits
+                        xLim = get(axesHandle, 'XLim');
+                        yLim = get(axesHandle, 'YLim');
+        
+                        % Compute the center of the current axes
+                        xCenter = mean(xLim);
+                        yCenter = mean(yLim);
+        
+                        % Calculate the new limits based on the zoom factor
+                        newXLim = xCenter + (xLim - xCenter) / dZFactor;  % Zoom in/out
+                        newYLim = yCenter + (yLim - yCenter) / dZFactor;
+        
+                        % Apply the new limits to the axes
+                        set(axesHandle, 'XLim', newXLim, 'YLim', newYLim);
+                    end
+
+                    multiFrameZoom('set', 'axe', axesHandle);
+
+                    set(mZoomOut, 'Enable', 'on');                 
 
                 case 'Gate'
 

@@ -52,5 +52,6 @@ function bIsFullScreen = isPanelFullScreen(btnUiWindowFullScreenPtr)
             bIsFullScreen = true;
        end
     end
+
         
 end

@@ -1837,7 +1837,7 @@ function setRoiToolbar(sVisible)
 
                 dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-                aBuffer = dicomBuffer('get', [], dSeriesOffset);
+                % aBuffer = dicomBuffer('get', [], dSeriesOffset);
 
 
                 % Set ROI pael Segment btn to Cancel
@@ -1879,7 +1879,7 @@ function setRoiToolbar(sVisible)
                     end
                 % end
 
-                createVoiFromLocation(pAxe, clickedPtX, clickedPtY, aBuffer, dPercentOfMax/100, dSeriesOffset,  pixelEdge('get'));
+                createVoiFromLocation(pAxe, clickedPtX, clickedPtY, dicomBuffer('get', [], dSeriesOffset), dPercentOfMax/100, dSeriesOffset,  pixelEdge('get'));
 
                 cancelCreateVoiRoiPanel('set', false);
 

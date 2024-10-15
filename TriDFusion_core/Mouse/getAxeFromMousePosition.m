@@ -27,6 +27,7 @@ function pAxe = getAxeFromMousePosition(dSeriesOffset)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
+
     if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
         pAxe = axePtr('get', [], dSeriesOffset);
     else
@@ -85,16 +86,24 @@ function pAxe = getAxeFromMousePosition(dSeriesOffset)
 %                 else
 %                     pAxe = axesMipPtr('get', [], dSeriesOffset); % MIP
 %                 end   
+
                 % Get the current mouse position
-                current_point = get(fiMainWindowPtr('get'), 'CurrentPoint');
+
+                current_point = fiMainWindowPtr('get').CurrentPoint;
+                
                 mouseX = current_point(1, 1);
                 mouseY = current_point(1, 2);
                 
-                % Retrieve pixel positions only once
-                posCor = getpixelposition(uiCorWindowPtr('get', dSeriesOffset));
-                posSag = getpixelposition(uiSagWindowPtr('get', dSeriesOffset));
-                posTra = getpixelposition(uiTraWindowPtr('get', dSeriesOffset));
+                % % Retrieve pixel positions only once
+                % posCor = getpixelposition(uiCorWindowPtr('get', dSeriesOffset), false);
+                % posSag = getpixelposition(uiSagWindowPtr('get', dSeriesOffset), false);
+                % posTra = getpixelposition(uiTraWindowPtr('get', dSeriesOffset), false);
                 
+                posCor = uiCorWindowPtr('get', dSeriesOffset).Position;
+                posSag = uiSagWindowPtr('get', dSeriesOffset).Position;
+                posTra = uiTraWindowPtr('get', dSeriesOffset).Position;
+                posMip = uiMipWindowPtr('get', dSeriesOffset).Position;
+
                 % Define boundaries for checking
                 isInCor = mouseX > posCor(1) && mouseX < (posCor(1) + posCor(3)) && ...
                           mouseY > posCor(2) && mouseY < (posCor(2) + posCor(4));
@@ -102,7 +111,9 @@ function pAxe = getAxeFromMousePosition(dSeriesOffset)
                           mouseY > posSag(2) && mouseY < (posSag(2) + posSag(4));
                 isInTra = mouseX > posTra(1) && mouseX < (posTra(1) + posTra(3)) && ...
                           mouseY > posTra(2) && mouseY < (posTra(2) + posTra(4));
-                
+                isInMip = mouseX > posMip(1) && mouseX < (posMip(1) + posMip(3)) && ...
+                          mouseY > posMip(2) && mouseY < (posMip(2) + posMip(4));
+
                 % Determine which axes to get based on mouse position
                 if isInCor
                     pAxe = axes1Ptr('get', [], dSeriesOffset); % Coronal
@@ -110,10 +121,11 @@ function pAxe = getAxeFromMousePosition(dSeriesOffset)
                     pAxe = axes2Ptr('get', [], dSeriesOffset); % Sagittal
                 elseif isInTra
                     pAxe = axes3Ptr('get', [], dSeriesOffset); % Axial
-                else
-                    pAxe = axesMipPtr('get', [], dSeriesOffset); % MIP
+                elseif isInMip
+                    pAxe = axesMipPtr('get', [], dSeriesOffset); % Axial
+               else
+                    pAxe = axes3Ptr('get', [], dSeriesOffset); % MIP
                 end
-
             end
         end
     end

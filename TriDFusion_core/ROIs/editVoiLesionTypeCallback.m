@@ -79,6 +79,11 @@ function editVoiLesionTypeCallback(hObject,~)
                             bTagIsUpdated = true;
 
                             atRoiInput{dRoiTagOffset}.Label = replace(atRoiInput{dRoiTagOffset}.Label, asLesionShortName{nn}, asLesionShortName{bLesionOffset});
+
+                            if isvalid(atRoiInput{dRoiTagOffset}.Object)
+
+                                atRoiInput{dRoiTagOffset}.Object.Label = atRoiInput{dRoiTagOffset}.Label;
+                            end
                             break;
                         end
                     end
@@ -86,6 +91,12 @@ function editVoiLesionTypeCallback(hObject,~)
                      if bTagIsUpdated == false
 
                         atRoiInput{dRoiTagOffset}.Label = sprintf('%s-%s', atRoiInput{dRoiTagOffset}.Label, asLesionShortName{bLesionOffset});    
+
+                        if isvalid(atRoiInput{dRoiTagOffset}.Object)
+                            
+                            atRoiInput{dRoiTagOffset}.Object.Label = atRoiInput{dRoiTagOffset}.Label;
+                        end
+
                      end       
 
                     atRoiInput{dRoiTagOffset}.LesionType = hObject.Text;                                

@@ -1,6 +1,6 @@
 function editColorCallback(hObject,~)
 %function editColorCallback(hObject,~)
-%Set ROIs Edit Color.
+%Edit ROI Color.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -29,8 +29,8 @@ function editColorCallback(hObject,~)
 
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-    sColor = uisetcolor([hObject.UserData.Color],'Select a color');
-    if sColor == 0
+    aColor = uisetcolor([hObject.UserData.Color],'Select a color');
+    if aColor == 0
         return;
     end
     
@@ -45,11 +45,13 @@ function editColorCallback(hObject,~)
 
     if ~isempty(dTagOffset)
 
-        hObject.UserData.Color = sColor;
+        hObject.UserData.Color = aColor;
 
-        atRoiInput{dTagOffset}.Color = sColor;
+        atRoiInput{dTagOffset}.Color = aColor;
+
         if isvalid(atRoiInput{dTagOffset}.Object)
-            atRoiInput{dTagOffset}.Object.Color = sColor;
+            
+            atRoiInput{dTagOffset}.Object.Color = aColor;
         end
 
         roiTemplate('set', dSeriesOffset, atRoiInput);
