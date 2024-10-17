@@ -27,9 +27,9 @@ function [asFilesList, atDicomInfo, aDicomBuffer] = readDicomFolder(asMainDirect
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    asFilesList  = [];
-    atDicomInfo  = [];
-    aDicomBuffer = [];
+    asFilesList  = cell(1,100000);
+    atDicomInfo  = cell(1,100000);
+    aDicomBuffer = cell(1,100000);
 
     dNbEntry = 1;
 
@@ -66,8 +66,13 @@ function [asFilesList, atDicomInfo, aDicomBuffer] = readDicomFolder(asMainDirect
                isfield(tDatasets, 'DicomBuffers')                              
     
                 atFrameInfo = dicomInfoComputeFrames(tDatasets.DicomInfos);
-    
-                asSeriesType = lower(tDatasets.DicomInfos{1}.SeriesType);
+                
+                if isfield(tDatasets.DicomInfos{1}, 'SeriesType')
+                    
+                    asSeriesType = lower(tDatasets.DicomInfos{1}.SeriesType);
+                else
+                    asSeriesType = '';
+                end
                 
                 bGated = false;
                 if find(contains(asSeriesType, 'gated'))
@@ -153,9 +158,10 @@ function [asFilesList, atDicomInfo, aDicomBuffer] = readDicomFolder(asMainDirect
                                 dTo   = dNbOfSlices + dLastTo;                                    
                             end
     
-                            asFilesList{dNbEntry}  = tDatasets.FileNames(dFrom:dTo);
-                            atDicomInfo{dNbEntry}  = tDatasets.DicomInfos(dFrom:dTo);
+                            asFilesList {dNbEntry} = tDatasets.FileNames(dFrom:dTo);
+                            atDicomInfo {dNbEntry} = tDatasets.DicomInfos(dFrom:dTo);
                             aDicomBuffer{dNbEntry} = tDatasets.DicomBuffers(dFrom:dTo);
+
                             for dSeriesLoop = 1: numel(atDicomInfo{dNbEntry})
                                 atDicomInfo{dNbEntry}{dSeriesLoop}.SeriesDescription = ...
                                     sprintf('%s (Frame %d)', atDicomInfo{dNbEntry}{dSeriesLoop}.SeriesDescription, dFramesLoop);
@@ -168,7 +174,7 @@ function [asFilesList, atDicomInfo, aDicomBuffer] = readDicomFolder(asMainDirect
     
                     end
                 else
-                    if numel(tDatasets) == 1
+                    if isscalar(tDatasets)
                         
                         asImageType = lower(tDatasets.DicomInfos{1}.ImageType);  
                         
@@ -283,32 +289,39 @@ function [asFilesList, atDicomInfo, aDicomBuffer] = readDicomFolder(asMainDirect
                 end
             end
         end
+
+        % Clean up empty entry
+
+        asFilesList  = asFilesList(~cellfun(@isempty, asFilesList));
+        atDicomInfo  = atDicomInfo(~cellfun(@isempty, atDicomInfo));
+        aDicomBuffer = aDicomBuffer(~cellfun(@isempty, aDicomBuffer));
+
     end
 
 
-    function allSameSize = isAllBuffersSameSize(buffers)
+    function bAllSameSize = isAllBuffersSameSize(aBuffers)
 
         % Access the DicomBuffers
         % buffers = tDatasets.DicomBuffers;
         
-        % Get the number of buffers
-        numBuffers = numel(buffers);
+        dNumBuffers = numel(aBuffers);  % Get the number of buffers
         
-        % Initialize a flag to track if sizes are the same
-        allSameSize = true;
+        bAllSameSize = true;
         
-        % Get the size of the first buffer as a reference
-        if numBuffers > 0
-            refSize = size(buffers{1});
-            
-            % Loop through the buffers and compare sizes
-            for i = 2:numBuffers
-                currentSize = size(buffers{i});
+        if dNumBuffers > 0
+
+            aRefSize = size(aBuffers{1});
+                       
+            for i = 2:dNumBuffers % Loop through the buffers and compare sizes
+
+                aCurrentSize = size(aBuffers{i});
                 
                 % Compare current buffer size with the reference size
-                if ~isequal(refSize, currentSize)
-                    allSameSize = false;
-                    disp(['Buffer ' num2str(i) ' has a different size: ', mat2str(currentSize)]);
+
+                if ~isequal(aRefSize, aCurrentSize)
+
+                    bAllSameSize = false;
+                    % disp(['Buffer ' num2str(i) ' has a different size: ', mat2str(aCurrentSize)]);
                 end
             end
             
@@ -316,57 +329,59 @@ function [asFilesList, atDicomInfo, aDicomBuffer] = readDicomFolder(asMainDirect
 
     end
 
+    function atGroupedDatasets= splitDatasets(tDatasets)
 
-    function groupedDatasets= splitDatasets(tDatasets)
+        aBuffers     = tDatasets.DicomBuffers;
+        asFileNames  = tDatasets.FileNames;
+        atDicomInfos = tDatasets.DicomInfos;
+        
+        dNumBuffers = numel(aBuffers);
+        atGroupedDatasets = struct('FileNames', {}, 'DicomInfos', {}, 'DicomBuffers', {});
+        
+        if dNumBuffers > 0
 
-        buffers = tDatasets.DicomBuffers;
-        fileNames = tDatasets.FileNames;
-        dicomInfos = tDatasets.DicomInfos;
-        
-        % Initialize variables
-        numBuffers = numel(buffers);
-        groupedDatasets = struct('FileNames', {}, 'DicomInfos', {}, 'DicomBuffers', {});
-        
-        if numBuffers > 0
-            % Start with the first buffer as a reference size
-            refSize = size(buffers{1});
+            aRefSize = size(aBuffers{1});
             
             % Temporary storage for grouping
-            currentGroup = struct('FileNames', {{}}, 'DicomInfos', {{}}, 'DicomBuffers', {{}});
-            currentGroup.FileNames = fileNames(1);
-            currentGroup.DicomInfos = dicomInfos(1);
-            currentGroup.DicomBuffers = buffers(1);
-            
-            % Initialize a counter for grouped datasets
-            groupCounter = 1;
-        
-            % Loop through the buffers starting from the second one
-            for i = 2:numBuffers
-                currentSize = size(buffers{i});
+
+            tCurrentGroup = struct('FileNames', {{}}, 'DicomInfos', {{}}, 'DicomBuffers', {{}});
+            tCurrentGroup.FileNames    = asFileNames(1);
+            tCurrentGroup.DicomInfos   = atDicomInfos(1);
+            tCurrentGroup.DicomBuffers = aBuffers(1);
+                     
+            dGroupCounter = 1; % Initialize a counter for grouped datasets
+                  
+            for i = 2:dNumBuffers % Loop through the buffers starting from the second one
+
+                aCurrentSize = size(aBuffers{i});
                 
-                if isequal(refSize, currentSize)
-                    % If sizes are the same, add the buffer to the current group
-                    currentGroup.FileNames = [currentGroup.FileNames; fileNames(i)];
-                    currentGroup.DicomInfos = [currentGroup.DicomInfos; dicomInfos(i)];
-                    currentGroup.DicomBuffers = [currentGroup.DicomBuffers; buffers{i}];
-                else
-                    % If sizes are different, save the current group and start a new one
-                    groupedDatasets(groupCounter) = currentGroup;
-                    groupCounter = groupCounter + 1;
+                if isequal(aRefSize, aCurrentSize)  % If sizes are the same, add the buffer to the current group
+                   
+                    tCurrentGroup.FileNames    = [tCurrentGroup.FileNames; asFileNames(i)];
+                    tCurrentGroup.DicomInfos   = [tCurrentGroup.DicomInfos; atDicomInfos(i)];
+                    tCurrentGroup.DicomBuffers = [tCurrentGroup.DicomBuffers; aBuffers{i}];
+
+                else  % If sizes are different, save the current group and start a new one
+                   
+                    atGroupedDatasets(dGroupCounter) = tCurrentGroup;
+                    dGroupCounter = dGroupCounter + 1;
                     
                     % Start a new group
-                    currentGroup = struct('FileNames', {{}}, 'DicomInfos', {{}}, 'DicomBuffers', {{}});
-                    currentGroup.FileNames = fileNames(i);
-                    currentGroup.DicomInfos = dicomInfos(i);
-                    currentGroup.DicomBuffers = buffers(i);
+
+                    tCurrentGroup = struct('FileNames', {{}}, 'DicomInfos', {{}}, 'DicomBuffers', {{}});
+                    tCurrentGroup.FileNames    = asFileNames(i);
+                    tCurrentGroup.DicomInfos   = atDicomInfos(i);
+                    tCurrentGroup.DicomBuffers = aBuffers(i);
                     
                     % Update the reference size
-                    refSize = currentSize;
+
+                    aRefSize = aCurrentSize;
                 end
             end
             
             % Save the last group
-            groupedDatasets(groupCounter) = currentGroup;
+
+            atGroupedDatasets(dGroupCounter) = tCurrentGroup;
         end
     end
 

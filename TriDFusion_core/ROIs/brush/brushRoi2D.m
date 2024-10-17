@@ -50,8 +50,10 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
     
     if any(hfMask(:) ~= newMask(:))
 
-        if pixelEdge('get')          
-            newMask = kron(newMask, ones(3));
+        if pixelEdge('get')  
+         
+             % newMask = kron(newMask, ones(3));
+            newMask = imresize(newMask, 3, 'nearest');            
         end
 
         [B,~,n,~] = bwboundaries(newMask, 4, 'noholes');
@@ -75,6 +77,7 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
                     set(uiDeleteVoiRoiPanelObject('get'), 'Value', dVoiOffset);
                     
                     if ~isempty(sLesionType)
+
                         set(uiLesionTypeVoiRoiPanelObject('get'), 'Value', getLesionType(sLesionType));
                     end
                 end
@@ -119,28 +122,33 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
     end
 
     function largestBoundary = getLargestboundary(cBoundaries)
+        
+        % Find the index of the largest boundary
 
-        % Initialize variables to keep track of the largest boundary and its size
-        largestBoundary = 1;
-        largestSize = 0;
+        [~, largestBoundary] = max(cellfun(@(x) size(x, 1), cBoundaries));
+
+        % % Initialize variables to keep track of the largest boundary and its size
+        % largestBoundary = 1;
+        % largestSize = 0;
+        % 
+        % % Determine the number of boundaries outside the loop for efficiency
+        % numBoundaries = length(cBoundaries);
     
-        % Determine the number of boundaries outside the loop for efficiency
-        numBoundaries = length(cBoundaries);
-    
-        % Loop through each boundary in 'B'
-        for k = 1:numBoundaries
-            % Get the current boundary
-            boundary = cBoundaries{k};
-    
-            % Calculate the size of the current boundary
-            boundarySize = size(boundary, 1);
-    
-            % Check if the current boundary is larger than the previous largest
-            if boundarySize > largestSize
-                largestSize = boundarySize;
-                largestBoundary = k;
-            end
-        end
+        % % Loop through each boundary in 'B'
+        % for k = 1:numBoundaries
+        %     % Get the current boundary
+        %     boundary = cBoundaries{k};
+        % 
+        %     % Calculate the size of the current boundary
+        %     boundarySize = size(boundary, 1);
+        % 
+        %     % Check if the current boundary is larger than the previous largest
+        %     if boundarySize > largestSize
+        % 
+        %         largestSize = boundarySize;
+        %         largestBoundary = k;
+        %     end
+        % end
     end
 
     function addFreehandRoi(aPosition, dVoiOffset, aColor, sLesionType, dSerieOffset)
@@ -188,43 +196,32 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
             
             if ~isempty(atRoiInput)
 
-                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {sRoiTag} );
-                dTagOffset = find(aTagOffset, 1);       
+                dTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), sRoiTag ), 1);
     
                 if ~isempty(dTagOffset)
         
                     voiDefaultMenu(atRoiInput{dTagOffset}.Object, atVoiInput{dVoiOffset}.Tag);
 
-if 1 % Need to improve the operation speed    
-
                     dNbTags = numel(atVoiInput{dVoiOffset}.RoisTag);
                     
-                    % Precompute the tags only once outside the loop for faster access
                     allTags = cellfun(@(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false);
-                    
-                    % Loop over the number of tags
-                    for dRoiNb = 1:dNbTags
+                                 
+                    for dRoiNb = 1:dNbTags % Loop over the number of tags
                         
                         % Find matching tag offset outside the loop
-                        aTagOffset = strcmp(allTags, atVoiInput{dVoiOffset}.RoisTag{dRoiNb});
-                        
-                        % If a matching tag is found
-                        if any(aTagOffset)
-                            % Get the first match
-                            dTagOffset = find(aTagOffset, 1);
+                        dTagOffset = find(strcmp(allTags, atVoiInput{dVoiOffset}.RoisTag{dRoiNb}), 1);
+                                                                          
+                        if ~isempty(dTagOffset) % If valid offset found, update the label
                             
-                            % If valid offset found, update the relevant fields
-                            if ~isempty(dTagOffset)
-                                sLabel = sprintf('%s (roi %d/%d)', atVoiInput{dVoiOffset}.Label, dRoiNb, dNbTags);
-                                
-                                % Update fields in the structure
-                                atRoiInput{dTagOffset}.Label = sLabel;
-                                atRoiInput{dTagOffset}.Object.Label = sLabel;                           
-                                atRoiInput{dTagOffset}.ObjectType  = 'voi-roi';
-                            end
-                        end                 
+                            sLabel = sprintf('%s (roi %d/%d)', atVoiInput{dVoiOffset}.Label, dRoiNb, dNbTags);
+                            
+                            % Update fields in the structure
+                            atRoiInput{dTagOffset}.Label = sLabel;
+                            atRoiInput{dTagOffset}.Object.Label = sLabel;                           
+                            atRoiInput{dTagOffset}.ObjectType  = 'voi-roi';
+                        end
                     end
-end
+
                 end
 
             end

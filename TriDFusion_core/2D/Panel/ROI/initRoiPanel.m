@@ -776,27 +776,34 @@ function initRoiPanel()
     function addVoiRoiPanelCallback(~, ~)
 
 %        triangulateCallback()
+        try
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-        if contourVisibilityRoiPanelValue('get') == false
+        atVoiInput = voiTemplate('get', dSeriesOffset);
 
-            contourVisibilityRoiPanelValue('set', true);
-            set(chkContourVisibilityPanelObject('get'), 'Value', true);
+        if isempty(atVoiInput)
+            return;
+        end
 
-            refreshImages();  
-
-            if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
-
-                plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+        if is2DBrush('get') == false
+        
+            if contourVisibilityRoiPanelValue('get') == false
+    
+                contourVisibilityRoiPanelValue('set', true);
+                set(chkContourVisibilityPanelObject('get'), 'Value', true);
+    
+                refreshImages();  
+    
+                if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+    
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+                end
             end
         end
 
-        dVoiOffset = get(uiDeleteVoiRoiPanel, 'Value');
-                
-        atVoiInput = voiTemplate('get', dSeriesOffset);
-                
         if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
+            
             pAxe = axePtr('get', [], dSeriesOffset);
         else
             pAxe = axes3Ptr('get', [], dSeriesOffset);
@@ -804,23 +811,38 @@ function initRoiPanel()
         
         % Set axe & viewer for ROI
 
-        setCrossVisibility(false);
-     
-        roiSetAxeBorder(true, pAxe);
+        if is2DBrush('get') == false
 
-        mainToolBarEnable('off');
-        mouseFcn('reset');
-        
+            setCrossVisibility(false);
+         
+            roiSetAxeBorder(true, pAxe);
+    
+            mainToolBarEnable('off');
+        else
+
+            pRoiPtr = brush2Dptr('get');
+            if ~isempty(pRoiPtr)
+                pRoiPtr.Visible = 'off';
+            end
+        end
+       
+        set(fiMainWindowPtr('get'), 'WindowButtonDownFcn'  , []);
+        set(fiMainWindowPtr('get'), 'WindowButtonMotionFcn', []);
+        set(fiMainWindowPtr('get'), 'WindowButtonUpFcn'    , []);
+
+        dVoiOffset = get(uiDeleteVoiRoiPanel, 'Value');
+                
         sRoiTag = num2str(randi([-(2^52/2),(2^52/2)],1));
         
         pRoi = drawfreehand(pAxe, 'Color', atVoiInput{dVoiOffset}.Color, 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', sRoiTag, 'FaceSelectable', 1, 'FaceAlpha', 0);
 
         if numel(pRoi.Position) >2
 
+            pRoi.Waypoints(:) = false;
             pRoi.FaceAlpha = roiFaceAlphaValue('get');
-    
-            if is2DBrush('get') == true    
-                pRoi.Waypoints(:) = false;
+
+            if is2DBrush('get') == true  
+
                 pRoi.InteractionsAllowed = 'none';              
             end
     
@@ -884,14 +906,20 @@ function initRoiPanel()
             roiSetAxeBorder(false, pAxe);
            
             setCrossVisibility(true);
+        else
+            
+            pRoiPtr = brush2Dptr('get');
+            if ~isempty(pRoiPtr)
+                pRoiPtr.Visible = 'on';
+            end        
         end
          
         
-%        catch
-%        end
+        catch
+
+        end
             
-%        set(fiMainWindowPtr('get'), 'Pointer', 'default');
-%        drawnow;                
+        drawnow;                
         
 %        atVoiInput{dVoiOffset}.RoisTag
    

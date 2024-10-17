@@ -34,6 +34,7 @@ function [tFileList, iNbFiles] = getDicomFileList(sDirName, tFileList)
     asFileList = f.listFiles();
     
     endIloop = length(asFileList);
+
     for iLoop=1:endIloop
         
         if mod(iLoop,15)==1 || iLoop == endIloop         
@@ -58,13 +59,17 @@ function [tFileList, iNbFiles] = getDicomFileList(sDirName, tFileList)
                     sFileName = asFileList(iLoop);
 
                     if (isfield(tInfo,'InstanceNumber'))
+
                         if numel(tInfo.InstanceNumber)                        
-                            dInstanceNumber=tInfo.InstanceNumber; 
+
+                            dInstanceNumber = tInfo.InstanceNumber; 
                         end    
                     end
 
                     if (isfield(tInfo,'ImagePositionPatient'))
+
                         if ~isempty(tInfo.ImagePositionPatient)
+                            
                             adImagePositionPatient = tInfo.ImagePositionPatient;  
                         end
                     end

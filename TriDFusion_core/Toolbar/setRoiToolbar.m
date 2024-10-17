@@ -230,7 +230,8 @@ function setRoiToolbar(sVisible)
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
 %               releaseRoiAxeWait(t8);
-        robotReleaseKey();
+    % robotReleaseKey();
+        uiresume(fiMainWindowPtr('get'));
 
         if strcmpi(get(t8, 'State'), 'off')
 
@@ -400,7 +401,8 @@ function setRoiToolbar(sVisible)
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
 %               releaseRoiAxeWait(t);
-        robotReleaseKey();
+        % robotReleaseKey();
+        uiresume(fiMainWindowPtr('get'));
 
         if strcmpi(get(t, 'State'), 'off')
 %                   robotReleaseKey();
@@ -580,7 +582,8 @@ function setRoiToolbar(sVisible)
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
 %               releaseRoiAxeWait(t2);
-        robotReleaseKey();
+        % robotReleaseKey();
+        uiresume(fiMainWindowPtr('get'));
 
         if strcmpi(get(t2, 'State'), 'off')
 %                    robotReleaseKey();
@@ -667,6 +670,8 @@ function setRoiToolbar(sVisible)
 
           %      while strcmpi(get(t2, 'State'), 'on')
 
+                % hListener = addlistener(fiMainWindowPtr('get'), 'WaitStatus', 'PostSet', @(src, event) checkWaitStatus(src));
+
                 a = drawcircle(pAxe, ...
                                'Color'         , 'cyan', ...
                                'lineWidth'     , 1, ...
@@ -677,6 +682,8 @@ function setRoiToolbar(sVisible)
                                'FaceAlpha'     , 0 ...
                                );
                 a.FaceAlpha = roiFaceAlphaValue('get');
+
+                % delete(hListener);
 
                 if ~isvalid(t2)
                     return;
@@ -782,7 +789,8 @@ function setRoiToolbar(sVisible)
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
 %             releaseRoiAxeWait(t5);
-        robotReleaseKey();
+        % robotReleaseKey();
+        uiresume(fiMainWindowPtr('get'));
 
         if strcmpi(get(t5, 'State'), 'off')
 %                    robotReleaseKey();
@@ -949,7 +957,8 @@ function setRoiToolbar(sVisible)
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
 %             releaseRoiAxeWait(t3);
-        robotReleaseKey();
+        % robotReleaseKey();
+        uiresume(fiMainWindowPtr('get'));
 
         if strcmpi(get(t3, 'State'), 'off')
 %                    robotReleaseKey();
@@ -1118,7 +1127,8 @@ function setRoiToolbar(sVisible)
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-        robotReleaseKey();
+        % robotReleaseKey();
+        uiresume(fiMainWindowPtr('get'));
 
         if strcmpi(get(t6, 'State'), 'off')
   %          robotReleaseKey();
@@ -1285,7 +1295,8 @@ function setRoiToolbar(sVisible)
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-        robotReleaseKey();
+        % robotReleaseKey();
+        uiresume(fiMainWindowPtr('get'));
 
         if strcmpi(get(t11, 'State'), 'off')
   %          robotReleaseKey();
@@ -1694,7 +1705,8 @@ function setRoiToolbar(sVisible)
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
 %               releaseRoiAxeWait(t);
-        robotReleaseKey();
+        % robotReleaseKey();
+        uiresume(fiMainWindowPtr('get'));
 
         if strcmpi(get(t12, 'State'), 'off')
 %                   robotReleaseKey();
@@ -1911,6 +1923,7 @@ function setRoiToolbar(sVisible)
                     refreshImages();
 
                     if strcmpi(get(tContinuous, 'State'), 'off')
+
                         doWhileContinuous = false;
                     end
 
@@ -1989,7 +2002,10 @@ function setRoiToolbar(sVisible)
 
     function draw2DbrushCallback(~,~)
 
-        robotReleaseKey();
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        % robotReleaseKey();
+        uiresume(fiMainWindowPtr('get'));
 
         if strcmpi(get(t2Dbrush, 'State'), 'off')
   %          robotReleaseKey();
@@ -2005,7 +2021,7 @@ function setRoiToolbar(sVisible)
             return;
         end
 
-        aImageSize = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')));
+        % aImageSize = size(dicomBuffer('get', [], dSeriesOffset));
 
 %             robotReleaseKey();
 
@@ -2018,10 +2034,12 @@ function setRoiToolbar(sVisible)
         uiwait(fiMainWindowPtr('get'));
 
         if ~isvalid(t2Dbrush)
+
             return;
         end
 
         if strcmpi(get(t2Dbrush, 'State'), 'off')
+
             return;
         end
 
@@ -2032,14 +2050,14 @@ function setRoiToolbar(sVisible)
 
     %        robotClick();
 
-            pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+            pAxe = getAxeFromMousePosition(dSeriesOffset);
 
             switch pAxe
 
-                case axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
-                case axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))
+                case axePtr('get', [], dSeriesOffset)
+                case axes1Ptr('get', [], dSeriesOffset)
+                case axes2Ptr('get', [], dSeriesOffset)
+                case axes3Ptr('get', [], dSeriesOffset)
 
                 otherwise
                     return;
@@ -2052,7 +2070,7 @@ function setRoiToolbar(sVisible)
 
         %    while strcmpi(get(t11, 'State'), 'on')
 
-            clickedPt = get(pAxe,'CurrentPoint');
+            clickedPt  = get(pAxe,'CurrentPoint');
             clickedPtX = clickedPt(1,1);
             clickedPtY = clickedPt(1,2);
 
@@ -2061,25 +2079,25 @@ function setRoiToolbar(sVisible)
 
             switch(pAxe)
 
-                case axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) % Coronal
+                case axes1Ptr('get', [], dSeriesOffset) % Coronal
                     xPixel = atMetaData{1}.PixelSpacing(1);
                     yPixel = dSliceThickness;
 
-                    xImageSize = aImageSize(1);
+                    % xImageSize = aImageSize(1);
 %                     yImageSize = aImageSize(3);
 
-                case axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) % Sagittal
+                case axes2Ptr('get', [], dSeriesOffset) % Sagittal
                     xPixel = atMetaData{1}.PixelSpacing(2);
                     yPixel = dSliceThickness;
 
-                    xImageSize = aImageSize(2);
+                    % xImageSize = aImageSize(2);
 %                     yImageSize = aImageSize(3);
 
                 otherwise % Axial
                     xPixel = atMetaData{1}.PixelSpacing(1);
                     yPixel = atMetaData{1}.PixelSpacing(2);
 
-                    xImageSize = aImageSize(1);
+                    % xImageSize = aImageSize(1);
 %                     yImageSize = aImageSize(2);
             end
 
@@ -2090,7 +2108,7 @@ function setRoiToolbar(sVisible)
             if yPixel == 0
                 yPixel = 1;
             end
-if 0
+if 1
             dSphereDiameter = brush2dDefaultDiameter('get'); % in mm
 else
             dSphereDiameter = (xImageSize/10)*xPixel;
@@ -2166,7 +2184,8 @@ end
         end
 
 %               releaseRoiAxeWait(t8);
-        robotReleaseKey();
+        % robotReleaseKey();
+        uiresume(fiMainWindowPtr('get'));
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
@@ -2393,8 +2412,6 @@ end
 
         if is2DBrush('get') == false
 
-
-
             is2DBrush('set', true);
 
             setCrossVisibility(false);
@@ -2599,4 +2616,12 @@ end
         drawnow;        
     end
 
+    % function checkWaitStatus(src)
+    %     a=1
+    %     f = fiMainWindowPtr('get');
+    %     if strcmp(f.WaitStatus, 'waiting')
+    %         % Reset WaitStatus to 'inactive'
+    %         set(f, 'WaitStatus', 'inactive');
+    %     end
+    % end
 end

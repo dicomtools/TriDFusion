@@ -32,10 +32,14 @@ function actGate = dicomInfoComputeFrames(atDicomInfo)
    
 %    if strcmpi(atDicomInfo{1}.Modality, 'MR') || ...
 %       strcmpi(atDicomInfo{1}.Modality, 'PT') && ...
-     if contains(lower(atDicomInfo{1}.SeriesType), 'static') 
-         return;
+
+     if isfield(atDicomInfo{1}, 'SeriesType')
+
+         if contains(lower(atDicomInfo{1}.SeriesType), 'static') 
+             return;
+         end
      end
-          
+
      if numel(atDicomInfo) > 2
                  
         dNbGate   = 1;
@@ -99,11 +103,15 @@ function actGate = dicomInfoComputeFrames(atDicomInfo)
                 end
             end
 
-            if atDicomInfo{jj}.SpacingBetweenSlices ~= 0
+            if isfield(atDicomInfo{jj}, 'SpacingBetweenSlices')
 
-                if abs(dSliceSpacing) > (2*abs(atDicomInfo{jj}.SpacingBetweenSlices)) % The computed spacing is to far
-                    dInconsistentSpacing = true;
+                if atDicomInfo{jj}.SpacingBetweenSlices ~= 0
+    
+                    if abs(dSliceSpacing) > (2*abs(atDicomInfo{jj}.SpacingBetweenSlices)) % The computed spacing is to far
+                        dInconsistentSpacing = true;
+                    end
                 end
+             
             end
 
             if dInconsistentSpacing == true                      || ... % Inconsistent spacing 

@@ -46,8 +46,29 @@ function setSourceCallback(~, ~)
 
     sMainDir{1} = uigetdir(sCurrentDir);
 
+
     if sMainDir{1} ~= 0
 
+        % sTmpDir = sprintf('%stemp_nii_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
+        % mkdir(sTmpDir);
+        % 
+        % for i = 1:length(sMainDir)
+        % 
+        %     [~, folderName, ~] = fileparts(sMainDir{i});  % Extract folder name
+        %     zipFileName = fullfile(sTmpDir, [folderName '.zip']);  % Target zip file path
+        %     zip(zipFileName, sMainDir{i});
+        %     unzip(zipFileName, sTmpDir);
+        %     delete(zipFileName);    
+        % 
+        %     % Split the path by backslashes
+        %     folderParts = strsplit(sMainDir{i}, filesep);
+        % 
+        %     % Extract the last part, which is the full folder name
+        %     lastFolderName = folderParts{end};
+        % 
+        %     sMainDir{i} = fullfile(sTmpDir, lastFolderName);
+        % end
+        % 
         roiConstraintList('reset'); % Delete all masks
        
          % Deactivate main tool bar 

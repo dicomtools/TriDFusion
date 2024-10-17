@@ -31,7 +31,7 @@ function releaseRoiWait()
     axeClicked('set', true);
     
     uiresume(fiMainWindowPtr('get'));
-    robotReleaseKey();
+    % robotReleaseKey();
     
     if is2DBrush('get') == true
 

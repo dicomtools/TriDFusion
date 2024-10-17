@@ -29,29 +29,36 @@ function clickUp(~, ~)
 
     windowButton('set', 'up'); 
 
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
     bRefreshImage = false;
 
     if isLineColorbarIntensityMaxClicked('get') == true
+
         isLineColorbarIntensityMaxClicked('set', false);
         bRefreshImage = true;
     end
 
     if isLineColorbarIntensityMinClicked('get') == true   
+
         isLineColorbarIntensityMinClicked('set', false);
         bRefreshImage = true;
     end
     
     if isLineFusionColorbarIntensityMaxClicked('get') == true
+
         isLineFusionColorbarIntensityMaxClicked('set', false);
         bRefreshImage = true;
     end
 
     if isLineFusionColorbarIntensityMinClicked('get') == true
+
         isLineFusionColorbarIntensityMinClicked('set', false);
         bRefreshImage = true;
     end
 
     if bRefreshImage == true
+
        set(fiMainWindowPtr('get'), 'Pointer', 'default');            
        refreshImages();
     end
@@ -95,38 +102,44 @@ function clickUp(~, ~)
 
             if is2DBrush('get') == true
 
-                atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+                atRoiInput = roiTemplate('get', dSeriesOffset);
 
                 acPtrList = currentRoiPointer('get'); 
+
                 for jj=1:numel(acPtrList) % Need to set ROI template new position
+
                     if isvalid(acPtrList{jj}.Object)
-                        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), acPtrList{jj}.Tag );
-                        dTagOffset = find(aTagOffset, 1);
+
+                        dTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), acPtrList{jj}.Tag ), 1);
+
                         if ~isempty(dTagOffset)
+
                             atRoiInput{dTagOffset}.Position = acPtrList{jj}.Object.Position;
-                            tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [],  get(uiSeriesPtr('get'), 'Value')), dicomMetaData('get', [],  get(uiSeriesPtr('get'), 'Value')), atRoiInput{dTagOffset}, false, false);
+
+                            tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [],  dSeriesOffset), dicomMetaData('get', [],  dSeriesOffset), atRoiInput{dTagOffset}, false, false);
+
                             atRoiInput{dTagOffset}.MaxDistances = tMaxDistances;   
                         end
              %           editorRoiMoving(pRoiPtr, acPtrList{jj}.Object);
                     end
                 end                
 
-                roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
+                roiTemplate('set', dSeriesOffset, atRoiInput);
 
                 pRoiPtr = brush2Dptr('get');
+                
                 if ~isempty(pRoiPtr)
 
-                    pAxe = gca(fiMainWindowPtr('get'));
-
-                    mousePos = get(pAxe, 'CurrentPoint');
-                    newPosition = mousePos(1, 1:2);
-                    
-                    pRoiPtr.Position = newPosition;
+                    pRoiPtr.Position = pRoiPtr.Parent.CurrentPoint(1, 1:2);
                 end
             else
                 if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
-                    adjWL(get(0, 'PointerLocation'));   
+                   
+                    % pFigure = fiMainWindowPtr('get');
+                    % 
+                    % adjWL(pFigure.CurrentPoint(1, 1:2));   
                     refreshImages();
+                    
                 end
             end
 

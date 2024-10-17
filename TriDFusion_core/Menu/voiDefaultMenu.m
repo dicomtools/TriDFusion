@@ -180,6 +180,7 @@ function voiDefaultMenu(ptrRoi, sTag)
                 if strcmpi(hObject.Children(mcc).Label, 'Invert Constraint')
 
                     if invertConstraint('get') == true
+
                         set(hObject.Children(mcc), 'Checked', 'on');
                     else
                         set(hObject.Children(mcc), 'Checked', 'off');
@@ -188,17 +189,22 @@ function voiDefaultMenu(ptrRoi, sTag)
                     sConstraintTag = get(hObject, 'UserData');
 
                     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value') );
+
                     if isempty(asConstraintTagList)
+
                         set(hObject.Children(mcc), 'Checked', 'off');
                     else
                         aTagOffset = strcmp( cellfun( @(asConstraintTagList) asConstraintTagList, asConstraintTagList, 'uni', false ), sConstraintTag);
                         dVoiTagOffset = find(aTagOffset, 1);
 
                         if ~isempty(dVoiTagOffset) % tag is active
+
                             if     strcmpi(asConstraintTypeList{dVoiTagOffset}, 'Inside This Contour')
                                 set(hObject.Children(mcc), 'Checked', 'on');
+
                             elseif strcmpi(asConstraintTypeList{dVoiTagOffset}, 'Inside Every Slice')
                                 set(hObject.Children(mcc), 'Checked', 'on');
+
                             else
                                 set(hObject.Children(mcc), 'Checked', 'off');
                             end

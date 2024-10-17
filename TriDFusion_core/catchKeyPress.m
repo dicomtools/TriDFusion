@@ -33,6 +33,50 @@ function catchKeyPress(~,evnt)
         return;
     end
 
+    if strcmpi(evnt.Key,'shift')
+
+        if isMoveImageActivated('get') == false && ...
+           switchTo3DMode('get')       == false && ...
+           switchToIsoSurface('get')   == false && ...
+           switchToMIPMode('get')      == false
+
+            set(fiMainWindowPtr('get'), 'Pointer', 'bottom');
+
+            setCrossVisibility(false);            
+
+        end
+    end
+
+    if strcmpi(evnt.Key,'tab')
+
+        uiAddVoiRoiPanel = uiAddVoiRoiPanelObject('get');
+
+        if ~isempty(uiAddVoiRoiPanel)
+
+            callbackFunction = get(uiAddVoiRoiPanel, 'Callback');  
+            callbackFunction(uiAddVoiRoiPanel);
+        end
+
+
+    end
+
+    if strcmpi(evnt.Key,'escape')
+
+        uiresume(fiMainWindowPtr('get'));
+
+        uiCreateVoiRoiPanel = uiCreateVoiRoiPanelObject('get');
+        if ~isempty(uiCreateVoiRoiPanel)
+            
+            if strcmpi(uiCreateVoiRoiPanel.String, 'Cancel')
+
+                callbackFunction = get(uiCreateVoiRoiPanel, 'Callback');  
+                callbackFunction(uiCreateVoiRoiPanel);
+            end
+        end
+
+    end
+
+
     if strcmpi(evnt.Key,'add')
 
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
@@ -561,6 +605,7 @@ function catchKeyPress(~,evnt)
         set(btnTriangulatePtr('get'), 'FontWeight', 'bold');
         
         if isMoveImageActivated('get') == true
+
             set(fiMainWindowPtr('get'), 'Pointer', 'fleur');           
         end
 
@@ -573,6 +618,7 @@ function catchKeyPress(~,evnt)
             resetAxePlotView(axes3Ptr('get', [], dSeriesOffset));
 
             if link2DMip('get') == true && isVsplash('get') == false
+
                 resetAxePlotView(axesMipPtr('get', [], dSeriesOffset));
             end            
         end

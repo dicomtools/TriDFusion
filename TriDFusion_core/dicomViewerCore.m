@@ -89,9 +89,15 @@ function dicomViewerCore()
     end
    
     if isfield(atMetaData{1}, 'PatientName')
-        sPatientName = atMetaData{1}.PatientName;
-        sPatientName = strrep(sPatientName,'^',' ');
-        sPatientName = strtrim(sPatientName);
+        if  isstruct(atMetaData{1}.PatientName)
+            sPatientName = sprintf('%s %s %s', atMetaData{1}.PatientName.GivenName, atMetaData{1}.PatientName.MiddleName, atMetaData{1}.PatientName.FamilyName);
+            sPatientName = strrep(sPatientName,'^',' ');
+            sPatientName = strtrim(sPatientName);
+        else
+            sPatientName = atMetaData{1}.PatientName;
+            sPatientName = strrep(sPatientName,'^',' ');
+            sPatientName = strtrim(sPatientName);
+        end
     else
         sPatientName = '';
     end

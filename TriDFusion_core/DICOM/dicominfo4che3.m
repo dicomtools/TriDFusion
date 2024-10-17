@@ -26,20 +26,22 @@ function info = dicominfo4che3(fileInput)
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.    
-
+  
     try 
         din = org.dcm4che3.io.DicomInputStream(...
                 java.io.BufferedInputStream(java.io.FileInputStream(char(fileInput))));    
-            
+
         dataset = din.readDataset(-1, -1);                  
     catch 
         try 
+            
         info = dicominfo(char(fileInput)); 
 %        info.din.rows       = info.Rows;
 %        info.din.cols       = info.Columns;   
         catch
             info = [];
         end
+        
         return;
     end  
 

@@ -28,37 +28,23 @@ function adjWL(dInitCoord)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     persistent pdInitialCoord;
+    persistent pdClickDown;
 
     if exist('dInitCoord', 'var')
+
         pdInitialCoord = dInitCoord;
+        pdClickDown = dInitCoord;
     end
+   
+    pFigure = fiMainWindowPtr('get');
 
-    tQuantification = quantificationTemplate('get', [], get(uiSeriesPtr('get'), 'Value'));
+    aClickDownPosDiff = pFigure.CurrentPoint(1, 1:2) - pdClickDown;
 
-    dImageMin = tQuantification.tCount.dMin;
-    dImageMax = tQuantification.tCount.dMax; 
-            
-    dMin = windowLevel('get', 'min');
-    dMax = windowLevel('get', 'max');
-    
-    dWLAdjCoe = (dImageMax-dImageMin)/1024;
-
-    aPosDiff = get(0, 'PointerLocation') - pdInitialCoord;
-
-    dMax = dMax + (aPosDiff(2) * dWLAdjCoe);
-    dMin = dMin + (aPosDiff(1) * dWLAdjCoe);
-
-%     if (dMax < 1)
-%         dMax = 1;
-%     end
-
-    if aPosDiff(1) == 0 && aPosDiff(2) == 0
+    if aClickDownPosDiff(1) == 0 && aClickDownPosDiff(2) == 0
 
         ptrRoi = copyRoiPtr('get');
 
-        pAxe = gca(fiMainWindowPtr('get'));
-
-        if ~isempty(ptrRoi) && isvalid(ptrRoi) && ptrRoi.Parent == pAxe
+        if ~isempty(ptrRoi) && isvalid(ptrRoi) && ptrRoi.Parent == gca(pFigure)
             
             rightClickMenu('on');
 
@@ -69,7 +55,22 @@ function adjWL(dInitCoord)
         end
 
     else
-        rightClickMenu('off');
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        tQuantification = quantificationTemplate('get', [], dSeriesOffset);
+    
+        dImageMin = tQuantification.tCount.dMin;
+        dImageMax = tQuantification.tCount.dMax; 
+                
+        dMin = windowLevel('get', 'min');
+        dMax = windowLevel('get', 'max');
+        
+        dWLAdjCoe = (dImageMax-dImageMin)/1024;
+    
+        aPosDiff = pFigure.CurrentPoint(1, 1:2) - pdInitialCoord;
+    
+        dMax = dMax + (aPosDiff(2) * dWLAdjCoe);
+        dMin = dMin + (aPosDiff(1) * dWLAdjCoe);
         
         if dMax > dMin
             
@@ -78,31 +79,31 @@ function adjWL(dInitCoord)
     
             % Compute colorbar line y offset
         
-            dYOffsetMax = computeLineColorbarIntensityMaxYOffset(get(uiSeriesPtr('get'), 'Value'));
-            dYOffsetMin = computeLineColorbarIntensityMinYOffset(get(uiSeriesPtr('get'), 'Value'));
+            dYOffsetMax = computeLineColorbarIntensityMaxYOffset(dSeriesOffset);
+            dYOffsetMin = computeLineColorbarIntensityMinYOffset(dSeriesOffset);
     
             % Ajust the intensity 
     
             setColorbarIntensityMaxScaleValue(dYOffsetMax, ...
                                               colorbarScale('get'), ...
                                               isColorbarDefaultUnit('get'), ...
-                                              get(uiSeriesPtr('get'), 'Value')...
+                                              dSeriesOffset...
                                               );
     
             setColorbarIntensityMinScaleValue(dYOffsetMin, ...
                                               colorbarScale('get'), ...
                                               isColorbarDefaultUnit('get'), ...
-                                              get(uiSeriesPtr('get'), 'Value')...
+                                              dSeriesOffset...
                                               );
     
-            setAxesIntensity(get(uiSeriesPtr('get'), 'Value'));
-    
+            setAxesIntensity(dSeriesOffset);
+
+            rightClickMenu('off');
         end        
+
+        pdInitialCoord = pFigure.CurrentPoint(1, 1:2);
+      
     end
 
-    pdInitialCoord = get(0,'PointerLocation');
 
-%     if isVsplash('get') == false      
-%         refreshImages();
-%     end
 end

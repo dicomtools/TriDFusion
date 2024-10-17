@@ -34,7 +34,16 @@ function clickDown(~, ~)
 
     % persistent lastClickTime;
     % persistent isDoubleClick;
-    
+
+    if switchTo3DMode('get')     == true || ...
+       switchToIsoSurface('get') == true || ...
+       switchToMIPMode('get')    == true
+
+        windowButton('set', 'down');  
+     
+        return;
+    end
+
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
     % if isempty(lastClickTime)  % First click
@@ -83,58 +92,81 @@ function clickDown(~, ~)
     %     end
     % else
         set(fiMainWindowPtr('get'), 'UserData', 'down');
+      
+        pAxe = getAxeFromMousePosition(dSeriesOffset);
+
+        bBrush2DSameAxe = false;
 
         if is2DBrush('get') == true
-    
-            setCrossVisibility(false);                    
-    
+
+            pRoiPtr = brush2Dptr('get'); % Adjust brush size
+
+            if ~isempty(pRoiPtr)    
+                if pAxe == pRoiPtr.Parent
+                    bBrush2DSameAxe = true;
+                end
+            end
+        end
+
+        if is2DBrush('get') == true && bBrush2DSameAxe == true
+
             windowButton('set', 'down');                      
 
-            pAxe = getAxeFromMousePosition(dSeriesOffset);
-    
-            isAxe      = pAxe == axePtr  ('get', [], dSeriesOffset); 
-            isCoronal  = pAxe == axes1Ptr('get', [], dSeriesOffset); 
-            isSagittal = pAxe == axes2Ptr('get', [], dSeriesOffset);
-%             isAxial    = pAxe == axes3Ptr('get', [], dSeriesOffset);
-    
-            if isAxe
-                set(uiOneWindowPtr('get'), 'HighlightColor', [1 0 0]);
-                set(uiOneWindowPtr('get'), 'BorderType', 'line');
+            rightClickMenu('off'); 
 
-            elseif isCoronal
-                set(uiCorWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
-                set(uiCorWindowPtr('get'), 'BorderType', 'line');                    
+            % pRoiPtr = brush2Dptr('get'); % Adjust brush size
 
-            elseif isSagittal 
-                set(uiSagWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
-                set(uiSagWindowPtr('get'), 'BorderType', 'line');                    
-
-            else
-                set(uiTraWindowPtr('get'), 'HighlightColor', [1 0 0]); 
-                set(uiTraWindowPtr('get'), 'BorderType', 'line'); 
-%             else
-%                 set(uiMipWindowPtr('get'), 'HighlightColor', [1 0 0]); 
-            end  
-    
             if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
     
-                pRoiPtr = brush2Dptr('get'); % Adjust brush size
 
                 if ~isempty(pRoiPtr)    
-                   adjBrush2D(pRoiPtr, get(0, 'PointerLocation'));
+                   
+                   adjBrush2D(pRoiPtr, pRoiPtr.Parent.CurrentPoint(1, 1:2));
                 end            
             else
     
+                setCrossVisibility(false);                    
+            
+                pAxe = getAxeFromMousePosition(dSeriesOffset);
+        
+                isAxe      = pAxe == axePtr  ('get', [], dSeriesOffset); 
+                isCoronal  = pAxe == axes1Ptr('get', [], dSeriesOffset); 
+                isSagittal = pAxe == axes2Ptr('get', [], dSeriesOffset);
+    %             isAxial    = pAxe == axes3Ptr('get', [], dSeriesOffset);
+                if isempty(pRoiPtr)    
+      
+                    if isAxe
+                        set(uiOneWindowPtr('get'), 'HighlightColor', [1 0 0]);
+                        set(uiOneWindowPtr('get'), 'BorderType', 'line');
+        
+                    elseif isCoronal
+                        set(uiCorWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
+                        set(uiCorWindowPtr('get'), 'BorderType', 'line');                    
+        
+                    elseif isSagittal 
+                        set(uiSagWindowPtr('get'), 'HighlightColor', [1 0 0]);                    
+                        set(uiSagWindowPtr('get'), 'BorderType', 'line');                    
+        
+                    else
+                        set(uiTraWindowPtr('get'), 'HighlightColor', [1 0 0]); 
+                        set(uiTraWindowPtr('get'), 'BorderType', 'line'); 
+        %             else
+        %                 set(uiMipWindowPtr('get'), 'HighlightColor', [1 0 0]); 
+                    end 
+                end
+
                 atRoiInput = roiTemplate('get', dSeriesOffset);
                 atVoiInput = voiTemplate('get', dSeriesOffset);
          
                 if ~isempty(atRoiInput)
     
-                    acPtrList=[];
+                    % acPtrList=[];
     
 %                     aImageSize = size(dicomBuffer('get', [], dSeriesOffset));
               
                     if size(dicomBuffer('get', [], dSeriesOffset), 3) ==1
+
+                        acPtrList = cell(1, numel(atRoiInput));
 
                          for jj=1:numel(atRoiInput)
     
@@ -179,17 +211,21 @@ function clickDown(~, ~)
     
                                         t.Object = currentRoi.Object;
                                         t.Tag = currentRoi.Tag;
-                                        acPtrList{numel(acPtrList)+1} = t;
+                                        acPtrList{jj} = t;
                                    end
                                 end
                             end
                          end
+
+                         acPtrList = acPtrList(~cellfun(@isempty, acPtrList));
+                       
                     else
-                                
+                        acPtrList = cell(1, numel(atRoiInput));
+        
                         for jj=1:numel(atRoiInput)
     
                             currentRoi = atRoiInput{jj};
-                            
+
                             if isvalid(currentRoi.Object)
         
                                 iCoronal  = sliceNumber('get', 'coronal' );
@@ -250,12 +286,14 @@ function clickDown(~, ~)
 
                                         t.Object = currentRoi.Object;
                                         t.Tag = currentRoi.Tag;
-                                        acPtrList{numel(acPtrList)+1} = t;
+                                        acPtrList{jj} = t;
                                     end
                                 end
         
                             end                    
                         end
+
+                        acPtrList = acPtrList(~cellfun(@isempty, acPtrList));
                     end
 
                     currentRoiPointer('set', acPtrList);
@@ -266,13 +304,12 @@ function clickDown(~, ~)
             end
             
         else
-            setOverlayPatientInformation(dSeriesOffset);
     
             if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
         
-                if switchTo3DMode('get')     == false && ...
-                   switchToIsoSurface('get') == false && ...
-                   switchToMIPMode('get')    == false          
+                % if switchTo3DMode('get')     == false && ...
+                %    switchToIsoSurface('get') == false && ...
+                %    switchToMIPMode('get')    == false          
         
                     windowButton('set', 'down');                         
 
@@ -283,20 +320,63 @@ function clickDown(~, ~)
                         rotateFusedImage(true);
                     else
                         if strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow')
-                            adjWL(get(0, 'PointerLocation'));
+
+                            pFigure = fiMainWindowPtr('get');
+                                
+                            adjWL(pFigure.CurrentPoint(1, 1:2));
+                            
                         end
                     end
         
-                else
-                    windowButton('set', 'down');                      
-                end
+                % else
+                %     windowButton('set', 'down');                      
+                % end
         
             else
+                
                 if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
         
-                    if switchTo3DMode('get')     == false && ...
-                       switchToIsoSurface('get') == false && ...
-                       switchToMIPMode('get')    == false
+                    % if switchTo3DMode('get')     == false && ...
+                    %    switchToIsoSurface('get') == false && ...
+                    %    switchToMIPMode('get')    == false
+        
+                        windowButton('set', 'down');
+                        
+                        if isMoveImageActivated('get') == true
+                            
+                            set(fiMainWindowPtr('get'), 'Pointer', 'fleur');
+             
+                            moveFusedImage(true);
+                        else
+
+                            setOverlayPatientInformation(dSeriesOffset);
+
+                            if ismember('shift', get(fiMainWindowPtr('get'), 'CurrentModifier'))
+
+                                % pRoiPtr = brush2Dptr('get');
+                                % 
+                                % if ~isempty(pRoiPtr) 
+                                %     pRoiPtr.Visible = 'off';
+                                % end
+
+                                pFigure = fiMainWindowPtr('get');
+
+                                % set(pFigure, 'Pointer', 'bottom');
+     
+                                adjScroll(pFigure.CurrentPoint(1, 1:2));
+                                
+                            else
+    
+                                triangulateImages();
+                            end
+                        end
+                    % else
+                    %     windowButton('set', 'down');  
+                    % end
+                else
+                    % if switchTo3DMode('get')     == false && ...
+                    %    switchToIsoSurface('get') == false && ...
+                    %    switchToMIPMode('get')    == false
         
                         windowButton('set', 'down');
 
@@ -306,23 +386,8 @@ function clickDown(~, ~)
              
                             moveFusedImage(true);
                         else
-                            triangulateImages();
-                        end
-                    else
-                        windowButton('set', 'down');  
-                    end
-                else
-                    if switchTo3DMode('get')     == false && ...
-                       switchToIsoSurface('get') == false && ...
-                       switchToMIPMode('get')    == false
-        
-                        windowButton('set', 'down');
-                        if isMoveImageActivated('get') == true
-                            
-                            set(fiMainWindowPtr('get'), 'Pointer', 'fleur');
-             
-                            moveFusedImage(true);
-                        else
+                            setOverlayPatientInformation(dSeriesOffset);
+
                             triangulateImages();
                         end
                         
@@ -343,7 +408,7 @@ function clickDown(~, ~)
         
                         refreshImages();
         
-                    end
+                    % end
                 end
             end      
         end

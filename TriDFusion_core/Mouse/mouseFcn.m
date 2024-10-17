@@ -34,12 +34,14 @@ function mouseFcn(sAction)
         set(fiMainWindowPtr('get'), 'WindowKeyPressFcn'    , []);
         set(fiMainWindowPtr('get'), 'WindowButtonMotionFcn', []);
         set(fiMainWindowPtr('get'), 'WindowButtonUpFcn'    , []);
+        set(fiMainWindowPtr('get'), 'WindowKeyReleaseFcn'  , []);
     else
         set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll  );
         set(fiMainWindowPtr('get'), 'WindowButtonDownFcn'  , @clickDown    );
         set(fiMainWindowPtr('get'), 'WindowKeyPressFcn'    , @catchKeyPress);
         set(fiMainWindowPtr('get'), 'WindowButtonMotionFcn', @mouseMove    );
         set(fiMainWindowPtr('get'), 'WindowButtonUpFcn'    , @clickUp      );
+        set(fiMainWindowPtr('get'), 'WindowKeyReleaseFcn'  , @keyRelease    );
         % set(fiMainWindowPtr('get'), 'CloseRequestFcn'      , @closeFigure  );
     end
 

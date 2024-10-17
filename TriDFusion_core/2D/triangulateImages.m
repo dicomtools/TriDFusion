@@ -29,12 +29,12 @@ function triangulateImages()
 
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-    if is2DBrush('get') == true
-    
-        axeClicked('set', true);o
-        uiresume(fiMainWindowPtr('get'));
-
-    else
+    % if is2DBrush('get') == true
+    % 
+    %     axeClicked('set', true);
+    %     uiresume(fiMainWindowPtr('get'));
+    % 
+    % else
         if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
     
             if  is2DBrush('get') == false
@@ -55,9 +55,11 @@ function triangulateImages()
     
             im = dicomBuffer('get', [], dSeriesOffset);
     
-            iCoronalSize  = size(im,1);
-            iSagittalSize = size(im,2);
-            iAxialSize    = size(im,3);        
+            aImageSize = size(im);
+
+            iCoronalSize  = aImageSize(1);
+            iSagittalSize = aImageSize(2);
+            iAxialSize    = aImageSize(3);      
     
             % clickedPt = get(axes3Ptr('get', [], dSeriesOffset),'CurrentPoint')
             % % clickedPt = get(fiMainWindowPtr('get'),'CurrentPoint')
@@ -65,16 +67,14 @@ function triangulateImages()
             % clickedPtX = round(clickedPt(1  ));
             % clickedPtY = round(clickedPt(1,2));
 
-            pAxe = gca(fiMainWindowPtr('get'));
+            pFigure = gca(fiMainWindowPtr('get'));
       
-            aClickedPt = get(pAxe,'CurrentPoint');
-
-            clickedPtX = round(aClickedPt(1,1));
-            clickedPtY = round(aClickedPt(1,2));
+            clickedPtX = round(pFigure.CurrentPoint(1,1));
+            clickedPtY = round(pFigure.CurrentPoint(1,2));
 
              % if clickedPtX > 0 && clickedPtY > 0
     
-                switch pAxe
+                switch pFigure
 
                     case axes1Ptr('get', [], dSeriesOffset)  
                         
@@ -289,5 +289,5 @@ function triangulateImages()
                 set(uiOneWindowPtr('get'), 'BorderWidth', 0);
             end
         end
-    end
+    % end
 end

@@ -28,6 +28,7 @@ function setColorbarIntensityMaxScaleValue(dYOffset, dRatio, bDefaultUnit, dSeri
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
     if dYOffset < 0
+
         dYOffset = 0;
     end
 
@@ -87,16 +88,21 @@ function setColorbarIntensityMaxScaleValue(dYOffset, dRatio, bDefaultUnit, dSeri
 
     % Set colorbar text
 
-    if strcmpi(sUnitDisplay, 'SUV')  
+    if strcmpi(sUnitDisplay, 'SUV')
+
         if bDefaultUnit == true
+
             tQuant = quantificationTemplate('get', [], dSeriesOffset);
+
             if isfield(tQuant, 'tSUV')
+
                 dLevelMax = dLevelMax*tQuant.tSUV.dScale;      
             end
         end
     end
 
     if strcmpi(sUnitDisplay, 'HU')
+
         if bDefaultUnit == true
         
             [dLevelMax, ~] = computeWindowMinMax(dLevelMax, windowLevel('get', 'min'));  
@@ -104,7 +110,9 @@ function setColorbarIntensityMaxScaleValue(dYOffset, dRatio, bDefaultUnit, dSeri
     end
 
     sLevelMax = sprintf('%.1f', dLevelMax);
+
     if strcmpi(sLevelMax, '-0.0')
+        
         sLevelMax = 0;
     end
 

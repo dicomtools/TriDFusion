@@ -27,6 +27,7 @@ function mouseMove(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
+
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
     if isLineColorbarIntensityMaxClicked('get') == true
@@ -85,15 +86,19 @@ function mouseMove(~, ~)
     if is2DBrush('get') == false
     
         if strcmpi(windowButton('get'), 'down')
+
             if switchTo3DMode('get')     == false && ...
                switchToIsoSurface('get') == false && ...
                switchToMIPMode('get')    == false
     
                 if strcmp(get(fiMainWindowPtr('get'),'selectiontype'),'alt')
+
                     if isMoveImageActivated('get') == true
+
                         rotateFusedImage(false);                    
                     else
                         if strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow')
+
                             adjWL();
                         end
                     end
@@ -103,41 +108,62 @@ function mouseMove(~, ~)
                         moveFusedImage(false);
                     else
                         if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
-                            triangulateImages();  
+
+                            if ismember('shift', get(fiMainWindowPtr('get'), 'CurrentModifier'))
+             
+                                adjScroll();
+
+                            else
+                                
+                                triangulateImages();  
+                            end
                         else
                             refreshImages();
                         end
                     end
                 end
+                
             else            
                 updateObjet3DPosition();      
             end
                 
         end    
     else
+
+        if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1 && ...
+           strcmpi(windowButton('get'), 'down') 
+
+            if ismember('shift', get(fiMainWindowPtr('get'), 'CurrentModifier'))
+
+                adjScroll();
+
+            end
+
+        end
+
         if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt') && ...
            strcmpi(windowButton('get'), 'down') 
 
             if isMoveImageActivated('get') == false   
 
-                rightClickMenu('off');
+                % rightClickMenu('off');
     
                 pRoiPtr = brush2Dptr('get');
+
                 if ~isempty(pRoiPtr) 
+
                     adjBrush2D(pRoiPtr);
                 end
             end
         else
 
             pRoiPtr = brush2Dptr('get');
+
             if ~isempty(pRoiPtr)    
 
                 % pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
-                pAxe = gca(fiMainWindowPtr('get'));
 
-                mousePos         = get(pAxe, 'CurrentPoint');
-                newPosition      = mousePos(1, 1:2);
-                pRoiPtr.Position = newPosition;
+                pRoiPtr.Position = pRoiPtr.Parent.CurrentPoint(1, 1:2);
         
                 if strcmpi(windowButton('get'), 'down') 
                     
@@ -146,6 +172,7 @@ function mouseMove(~, ~)
                         acPtrList = currentRoiPointer('get');
 
                         for jj=1:numel(acPtrList)
+
                             if isvalid(acPtrList{jj}.Object)
 
                                 brushRoi2D(pRoiPtr, acPtrList{jj}.Object, acPtrList{jj}.xSize, acPtrList{jj}.ySize, acPtrList{jj}.VoiOffset, acPtrList{jj}.LesionType, dSeriesOffset);
@@ -153,7 +180,9 @@ function mouseMove(~, ~)
                         end
                     else
                         releaseRoiWait();
+
                         roiSetAxeBorder(false);
+
                         setCrossVisibility(true);
                     end
           %          brushRoi2D(a{3}.Object, a{2}.Object);
@@ -161,6 +190,5 @@ function mouseMove(~, ~)
             end
         end
     end
-
 
 end  

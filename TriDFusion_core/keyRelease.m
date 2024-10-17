@@ -1,16 +1,13 @@
-function robotClick()
-%function robotClick()
-%Use Java Robot to simulate a mouse click.
+function keyRelease(~,evnt)
+%function keyRelease(~,evnt)
+%Catch\Execute Keyboard Key release.
 %See TriDFuison.doc (or pdf) for more information about options.
-%
-%Note: option settings must fit on one line and can contain one semicolon at most.
-%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2024, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -28,15 +25,30 @@ function robotClick()
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    import java.awt.Robot;
-    import java.awt.event.MouseEvent;
-    
-    pRobot = Robot;  
+    if  strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'bottom')
 
-    % pRobot.mouseRelease(MouseEvent.BUTTON1_MASK);
-    pRobot.mousePress(MouseEvent.BUTTON1_MASK);
-%    pRobot.mouseRelease(MouseEvent.BUTTON1_MASK);
+        if is2DBrush('get')            == false && ...
+           isMoveImageActivated('get') == false && ...
+           switchTo3DMode('get')       == false && ...
+           switchToIsoSurface('get')   == false && ...
+           switchToMIPMode('get')      == false
+
+            setCrossVisibility(true);
+        end
+
+        % if is2DBrush('get')== true
+        % 
+        %     pRoiPtr = brush2Dptr('get');
+        % 
+        %     if ~isempty(pRoiPtr) 
+        %         pRoiPtr.Visible = 'on';
+        %     end
+        % end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
     
-end  
+    end
+            
+end

@@ -48,8 +48,13 @@ function dSUVconv = computeSUV(atMetaData, suvType)
             else
                 injDateTime = atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadiopharmaceuticalStartDateTime;      
             end
-            
-            injDose    = str2double(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose);
+     
+            if ischar(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose)
+
+                injDose = str2double(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose);
+            else
+                injDose = atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose;
+            end
             
 
             % Acquisition Date Time
@@ -96,7 +101,13 @@ function dSUVconv = computeSUV(atMetaData, suvType)
             if patWeight == 0 || isnan(patWeight)
                 patWeight =1;
             end
-            halfLife = str2double(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife);
+
+            if ischar(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideTotalDose)
+
+                halfLife = str2double(atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife);
+            else
+                halfLife = atMetaData{1}.RadiopharmaceuticalInformationSequence.Item_1.RadionuclideHalfLife;
+            end
 
             % Radiopharmaceutical Date Time
             

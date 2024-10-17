@@ -281,8 +281,9 @@ function importContoursCallback(~, ~)
 
             for jj=1:numel(atContours)
                 if aContourImported(jj) == false
-                    atContours(jj).Referenced.SeriesInstanceUID = atInput(dSerieOffset).atDicomInfo{1}.SeriesInstanceUID;         
-                                                                   
+                    atContours(jj).Referenced.SeriesInstanceUID   = atInput(dSerieOffset).atDicomInfo{1}.SeriesInstanceUID;         
+                    atContours(jj).Referenced.FrameOfReferenceUID = atInput(dSerieOffset).atDicomInfo{1}.FrameOfReferenceUID;         
+                                                             
                     inputContours('add', atContours(jj));
                         
                     setContours({atContours(jj)}, false);                
