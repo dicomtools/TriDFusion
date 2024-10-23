@@ -305,6 +305,7 @@ function setMachineLearningBreastCancerPETFullAICallback(hObject, ~)
         tBreastCancerPETFullAI.options.classifySegmentation =            get(chkBreastCancerPETFullAIClassifySegmentation, 'Value');
         tBreastCancerPETFullAI.options.smoothMask           =            get(chkBreastCancerPETFullAISmoothMask, 'Value');
         tBreastCancerPETFullAI.options.smallestVoiValue     = str2double(get(edtBreastCancerPETFullAISmallestVoiValue , 'String'));
+        tBreastCancerPETFullAI.options.pixelEdge            =            get(chkBreastCancerPETFullAIPixelEdge, 'Value');
 
         delete(dlgBreastCancerPETFullAISegmentation);
 

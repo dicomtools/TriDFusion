@@ -132,13 +132,18 @@ function clickUp(~, ~)
 
                     pRoiPtr.Position = pRoiPtr.Parent.CurrentPoint(1, 1:2);
                 end
+                
+                if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
+                    set(fiMainWindowPtr('get'), 'selectiontype', 'normal');
+                end
+
             else
                 if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
                    
                     % pFigure = fiMainWindowPtr('get');
                     % 
                     % adjWL(pFigure.CurrentPoint(1, 1:2));   
-                    refreshImages();
+                    % refreshImages();
                     
                 end
             end
@@ -146,5 +151,5 @@ function clickUp(~, ~)
         end
         
     end
-    
+
 end

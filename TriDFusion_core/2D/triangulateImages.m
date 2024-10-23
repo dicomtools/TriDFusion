@@ -66,15 +66,17 @@ function triangulateImages()
             % 
             % clickedPtX = round(clickedPt(1  ));
             % clickedPtY = round(clickedPt(1,2));
-
-            pFigure = gca(fiMainWindowPtr('get'));
-      
-            clickedPtX = round(pFigure.CurrentPoint(1,1));
-            clickedPtY = round(pFigure.CurrentPoint(1,2));
+             
+            pAxe = gca(fiMainWindowPtr('get'));
+            
+%             pAxe = getAxeFromMousePosition(dSeriesOffset);
+ 
+            clickedPtX = round(pAxe.CurrentPoint(1,1));
+            clickedPtY = round(pAxe.CurrentPoint(1,2));
 
              % if clickedPtX > 0 && clickedPtY > 0
     
-                switch pFigure
+                switch pAxe
 
                     case axes1Ptr('get', [], dSeriesOffset)  
                         

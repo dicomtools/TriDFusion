@@ -58,6 +58,10 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
 
         [B,~,n,~] = bwboundaries(newMask, 4, 'noholes');
 
+        clear hfMask;
+        clear heMask;
+        clear newMask;
+
         bDeleteRoi = false;
         if n == 1
             if size(B{1}, 1) < 3

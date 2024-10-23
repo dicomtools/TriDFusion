@@ -392,6 +392,7 @@ function dicomViewerCore()
         ptrColorbar.TickLabels = [];
         ptrColorbar.Ticks = [];
         ptrColorbar.TickLength = 0;
+        ptrColorbar.Interruptible = 'off'; % Prevent interruptions
 
         uiColorbarPtr('set', ptrColorbar);
         colorbarCallback(ptrColorbar); % Fix for Linux
@@ -1024,12 +1025,12 @@ function dicomViewerCore()
                     imSagittal = imshow(permute(im (:,iSagittal,:), [3 1 2]), ...
                                         'Parent'       , axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
                                         'Interpolation', 'bilinear'... 
-                                       );                    
+                                        );                    
                 else
                     imSagittal = imshow(permute(im (:,iSagittal,:), [3 1 2]), ...
                                         'Parent'       , axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
                                         'Interpolation', 'nearest'... 
-                                       );
+                                        );
                 end
             end
 
@@ -1166,6 +1167,8 @@ function dicomViewerCore()
         end
         axesText('set', 'axes2', ptAxes2Text);
 
+        % Axe 3 
+
         axesText('set', 'axes3', '');
         axesText('set', 'axes3View', '');
 
@@ -1244,7 +1247,7 @@ function dicomViewerCore()
                     imAxial = imshow(imgaussfilt(im (:,:,iAxial), 1),  ...
                                      'Parent'       , axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
                                      'Interpolation', 'nearest'... 
-                                    );                  
+                                     );                  
                 end
 
             else
@@ -1257,7 +1260,7 @@ function dicomViewerCore()
                     imAxial = imshow(im (:,:,iAxial),  ...
                                      'Parent'       , axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
                                      'Interpolation', 'nearest'... 
-                                    );
+                                     );
                 end
             end           
 
@@ -1472,7 +1475,9 @@ function dicomViewerCore()
             tAxes3View{2} = text(axAxes3View, 0.03, 0.46, 'Right', 'Color', overlayColor('get'),'Rotation', 270);
 
             if overlayActivate('get') == false
+
                 for tt=1:numel(tAxes3View)
+
                     set(tAxes3View{tt}, 'Visible', 'off');
                 end
             end
@@ -1836,6 +1841,7 @@ function dicomViewerCore()
          ptrColorbar.TickLabels = [];
          ptrColorbar.Ticks = [];
          ptrColorbar.TickLength = 0;
+         ptrColorbar.Interruptible = 'off';
 
          uiColorbarPtr('set', ptrColorbar);
          colorbarCallback(ptrColorbar); % Fix for Linux

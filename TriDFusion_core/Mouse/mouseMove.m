@@ -27,7 +27,6 @@ function mouseMove(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
     if isLineColorbarIntensityMaxClicked('get') == true
@@ -97,10 +96,23 @@ function mouseMove(~, ~)
 
                         rotateFusedImage(false);                    
                     else
-                        if strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow')
+                    %     if ismember('shift', get(fiMainWindowPtr('get'), 'CurrentModifier'))
+                    % 
+                    %         % if strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'bottom')
+                    %         % 
+                    %         %     adjWL();
+                    %         % end
+                    %     else
+                    %         if strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow')
+                    % 
+                    %             adjPan();
+                    %         end    
+                         if ~ismember('shift'  , get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...
+                            ~ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...  
+                            strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow') 
 
-                            adjWL();
-                        end
+                             adjPan();
+                         end
                     end
                 else
                     if isMoveImageActivated('get') == true
@@ -109,16 +121,32 @@ function mouseMove(~, ~)
                     else
                         if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
 
-                            if ismember('shift', get(fiMainWindowPtr('get'), 'CurrentModifier'))
-             
+                            if ismember('shift', get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...
+                               strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'bottom') 
+
                                 adjScroll();
 
                             else
-                                
-                                triangulateImages();  
+                                if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'extend') && ...
+                                   strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow') 
+     
+                                    adjZoom();          
+                                else                        
+                                    triangulateImages();  
+                                end
                             end
                         else
-                            refreshImages();
+
+                            if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'extend')
+                                if ~ismember('shift'  , get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...
+                                   ~ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...
+                                   strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow') 
+
+                                    adjZoom();     
+                                end
+                            else                               
+                                refreshImages();
+                            end
                         end
                     end
                 end
@@ -133,57 +161,120 @@ function mouseMove(~, ~)
         if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1 && ...
            strcmpi(windowButton('get'), 'down') 
 
-            if ismember('shift', get(fiMainWindowPtr('get'), 'CurrentModifier'))
+            if isMoveImageActivated('get') == false   
 
-                adjScroll();
+                rightClickMenu('off');
 
+                if ismember('shift', get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...
+                   strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'bottom')
+
+                    adjScroll();
+    
+                elseif ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...
+                       strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow') 
+
+                    if is2DBrush('get') == true
+              
+                        pRoiPtr = brush2Dptr('get');
+            
+                        if ~isempty(pRoiPtr) 
+    
+                            if strcmpi(windowButton('get'), 'down')
+    
+                                adjBrush2D(pRoiPtr);
+                            end
+                        end
+                    end
+                    
+                elseif strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'extend') && ...
+                       strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow')                    
+
+                        adjZoom();          
+                end
+            end
+        else
+            if strcmpi(windowButton('get'), 'down')
+
+                if isMoveImageActivated('get') == false   
+
+                    if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'extend') && ...
+                       ~ismember('shift'  , get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...    
+                       ~ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...
+                       strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow')                    
+
+                        adjZoom();   
+    
+                    elseif ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...
+                           strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow')                    
+
+                        if is2DBrush('get') == true
+
+                            pRoiPtr = brush2Dptr('get');
+                
+                            if ~isempty(pRoiPtr)
+                      
+                                adjBrush2D(pRoiPtr);
+                            end
+                        end           
+                    end  
+                end
             end
 
         end
 
         if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt') && ...
            strcmpi(windowButton('get'), 'down') 
-
+             
             if isMoveImageActivated('get') == false   
 
-                % rightClickMenu('off');
-    
-                pRoiPtr = brush2Dptr('get');
+                rightClickMenu('off');
 
-                if ~isempty(pRoiPtr) 
+                if ~ismember('shift'  , get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...
+                   ~ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...
+                   strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow')       
 
-                    adjBrush2D(pRoiPtr);
+                    adjPan();          
                 end
+
             end
         else
 
             pRoiPtr = brush2Dptr('get');
 
-            if ~isempty(pRoiPtr)    
-
+            if ~isempty(pRoiPtr) 
+    
                 % pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
 
                 pRoiPtr.Position = pRoiPtr.Parent.CurrentPoint(1, 1:2);
         
-                if strcmpi(windowButton('get'), 'down') 
+                if strcmpi(windowButton('get'), 'down')  
                     
-                    if ~isempty(roiTemplate('get', dSeriesOffset))
+                    if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'extend')
 
-                        acPtrList = currentRoiPointer('get');
+                        if ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier'))
 
-                        for jj=1:numel(acPtrList)
-
-                            if isvalid(acPtrList{jj}.Object)
-
-                                brushRoi2D(pRoiPtr, acPtrList{jj}.Object, acPtrList{jj}.xSize, acPtrList{jj}.ySize, acPtrList{jj}.VoiOffset, acPtrList{jj}.LesionType, dSeriesOffset);
-                            end
+                            adjBrush2D(pRoiPtr);
                         end
+                        
                     else
-                        releaseRoiWait();
-
-                        roiSetAxeBorder(false);
-
-                        setCrossVisibility(true);
+                        if ~isempty(roiTemplate('get', dSeriesOffset))
+    
+                            acPtrList = currentRoiPointer('get');
+    
+                            for jj=1:numel(acPtrList)
+    
+                                if isvalid(acPtrList{jj}.Object)
+    
+                                    brushRoi2D(pRoiPtr, acPtrList{jj}.Object, acPtrList{jj}.xSize, acPtrList{jj}.ySize, acPtrList{jj}.VoiOffset, acPtrList{jj}.LesionType, dSeriesOffset);
+                                end
+                            end
+                        else
+                            releaseRoiWait();
+    
+                            roiSetAxeBorder(false);
+    
+                            setCrossVisibility(true);
+                        end
                     end
           %          brushRoi2D(a{3}.Object, a{2}.Object);
                 end

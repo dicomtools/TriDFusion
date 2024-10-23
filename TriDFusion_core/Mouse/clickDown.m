@@ -91,6 +91,7 @@ function clickDown(~, ~)
     %         btnUiMipWindowFullScreenCallback();
     %     end
     % else
+
         set(fiMainWindowPtr('get'), 'UserData', 'down');
       
         pAxe = getAxeFromMousePosition(dSeriesOffset);
@@ -102,7 +103,9 @@ function clickDown(~, ~)
             pRoiPtr = brush2Dptr('get'); % Adjust brush size
 
             if ~isempty(pRoiPtr)    
+
                 if pAxe == pRoiPtr.Parent
+
                     bBrush2DSameAxe = true;
                 end
             end
@@ -115,16 +118,59 @@ function clickDown(~, ~)
             rightClickMenu('off'); 
 
             % pRoiPtr = brush2Dptr('get'); % Adjust brush size
-
-            if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
-    
+            if ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier'))
 
                 if ~isempty(pRoiPtr)    
-                   
-                   adjBrush2D(pRoiPtr, pRoiPtr.Parent.CurrentPoint(1, 1:2));
+
+                    if isMoveImageActivated('get') == false
+               
+                        adjBrush2D(pRoiPtr, pRoiPtr.Parent.CurrentPoint(1, 1:2));
+                    end
+                end                
+            end
+
+            if ismember('shift', get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...
+               strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'bottom')
+
+                if isMoveImageActivated('get') == false
+
+                    pFigure = fiMainWindowPtr('get');
+    
+                    % set(pFigure, 'Pointer', 'bottom');
+    
+                    adjScroll(pFigure.CurrentPoint(1, 1:2));  
+                end
+            end
+            
+            if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
+                
+                if ~ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...
+                   ~ismember('shift'  , get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...                        
+                   strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow')
+
+                    if isMoveImageActivated('get') == false
+
+                        pFigure = fiMainWindowPtr('get');
+                                
+                        adjPan(pFigure.CurrentPoint(1, 1:2)); 
+                    end
+                end
+
+            elseif strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'extend')
+
+                if ~ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...
+                   ~ismember('shift'  , get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...
+                   strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow')
+
+                    if isMoveImageActivated('get') == false
+
+                        pFigure = fiMainWindowPtr('get');
+                                
+                        adjZoom(pFigure.CurrentPoint(1, 1:2)); 
+                    end
                 end            
             else
-    
+ 
                 setCrossVisibility(false);                    
             
                 pAxe = getAxeFromMousePosition(dSeriesOffset);
@@ -304,7 +350,7 @@ function clickDown(~, ~)
             end
             
         else
-    
+
             if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
         
                 % if switchTo3DMode('get')     == false && ...
@@ -319,19 +365,31 @@ function clickDown(~, ~)
                         
                         rotateFusedImage(true);
                     else
-                        if strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow')
-
-                            pFigure = fiMainWindowPtr('get');
-                                
-                            adjWL(pFigure.CurrentPoint(1, 1:2));
+                        % if ismember('shift', get(fiMainWindowPtr('get'), 'CurrentModifier'))
+                        % 
+                        %     if strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'bottom')
+                        % 
+                        %         pFigure = fiMainWindowPtr('get');
+                        % 
+                        %         adjWL(pFigure.CurrentPoint(1, 1:2));
+                        % 
+                        %     end
+                        % else
+                            if strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow')
                             
-                        end
+                                pFigure = fiMainWindowPtr('get');
+                                        
+                                adjPan(pFigure.CurrentPoint(1, 1:2));                            
+                            end
+                        % end
                     end
         
                 % else
                 %     windowButton('set', 'down');                      
                 % end
-        
+%             elseif strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'extend')
+                
+      
             else
                 
                 if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
@@ -349,25 +407,29 @@ function clickDown(~, ~)
                             moveFusedImage(true);
                         else
 
-                            setOverlayPatientInformation(dSeriesOffset);
+                            if ismember('shift', get(fiMainWindowPtr('get'), 'CurrentModifier')) 
 
-                            if ismember('shift', get(fiMainWindowPtr('get'), 'CurrentModifier'))
-
-                                % pRoiPtr = brush2Dptr('get');
-                                % 
-                                % if ~isempty(pRoiPtr) 
-                                %     pRoiPtr.Visible = 'off';
-                                % end
-
-                                pFigure = fiMainWindowPtr('get');
-
-                                % set(pFigure, 'Pointer', 'bottom');
-     
-                                adjScroll(pFigure.CurrentPoint(1, 1:2));
-                                
-                            else
+                                if strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'bottom')
     
-                                triangulateImages();
+                                    pFigure = fiMainWindowPtr('get');
+         
+                                    adjScroll(pFigure.CurrentPoint(1, 1:2));  
+                                end
+
+                            else
+                                if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'extend') && ...
+                                   strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow')
+
+                                    pFigure = fiMainWindowPtr('get');
+     
+                                    adjZoom(pFigure.CurrentPoint(1, 1:2));
+
+                                else
+                                    setOverlayPatientInformation(dSeriesOffset);
+                   
+                                    triangulateImages();
+                                end
+
                             end
                         end
                     % else
@@ -386,9 +448,20 @@ function clickDown(~, ~)
              
                             moveFusedImage(true);
                         else
-                            setOverlayPatientInformation(dSeriesOffset);
 
-                            triangulateImages();
+                            if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'extend') && ...
+                               strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'arrow')
+
+                                pFigure = fiMainWindowPtr('get');
+ 
+                                adjZoom(pFigure.CurrentPoint(1, 1:2));
+
+                            else
+
+                                setOverlayPatientInformation(dSeriesOffset);
+
+                                triangulateImages();
+                            end
                         end
                         
                         pAxe = getAxeFromMousePosition(dSeriesOffset);

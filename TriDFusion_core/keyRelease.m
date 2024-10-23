@@ -27,7 +27,13 @@ function keyRelease(~,evnt)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
+    if is2DBrush('get')== true
+        
+        windowButton('set', 'up');  
+    end
+
     if  strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'bottom')
+
 
         if is2DBrush('get')            == false && ...
            isMoveImageActivated('get') == false && ...
@@ -36,6 +42,7 @@ function keyRelease(~,evnt)
            switchToMIPMode('get')      == false
 
             setCrossVisibility(true);
+
         end
 
         % if is2DBrush('get')== true

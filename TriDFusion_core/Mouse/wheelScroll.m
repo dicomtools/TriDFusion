@@ -27,7 +27,12 @@ function wheelScroll(~, evnt)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
+    if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'extended')
+        return;
+    end
+
     windowButton('set', 'scrool');  
+
     if size(dicomBuffer('get'), 3) ~= 1 && ...
        switchTo3DMode('get')      == false && ...
        switchToIsoSurface('get')  == false && ...

@@ -1399,6 +1399,7 @@ end
                 ptrFusionColorbar.TickLabels = [];         
                 ptrFusionColorbar.Ticks = [];
                 ptrFusionColorbar.TickLength = 0;
+                ptrFusionColorbar.Interruptible = 'off'; % Prevent interruptions
 
                 uiFusionColorbarPtr('set', ptrFusionColorbar);
                 colorbarCallback(ptrFusionColorbar); % Fix for Linux
@@ -1476,7 +1477,8 @@ end
                 ptrFusionColorbar.TickLabels = [];                 
                 ptrFusionColorbar.Ticks = [];
                 ptrFusionColorbar.TickLength = 0;
-              
+                ptrFusionColorbar.Interruptible = 'off';
+   
                 uiFusionColorbarPtr('set', ptrFusionColorbar);
 
 %                 colormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')));    

@@ -148,6 +148,7 @@ function initViewerGlobal()
     mainDir     ('set', '');
     roiTemplate ('reset');
     voiTemplate ('reset');
+    brush2Dptr  ('set', '');
 
     viewerFullScreenIconBlack('set', []);
     viewerFullScreenIconWhite('set', []);

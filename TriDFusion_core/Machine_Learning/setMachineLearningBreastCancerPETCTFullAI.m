@@ -231,10 +231,10 @@ function setMachineLearningBreastCancerPETCTFullAI(sPredictScript, tBreastCancer
 
             if tBreastCancerPETCTFullAI.options.CELossTrainer == true
 
-                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 121 -c 3d_fullres --save_probabilities -tr nnUNetTrainerDiceCELoss_noSmooth', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
+                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 123 -c 3d_fullres --save_probabilities -tr nnUNetTrainerDiceCELoss_noSmooth', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
             else
 
-                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 123 -c 3d_fullres --save_probabilities', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
+                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 121 -c 3d_fullres --save_probabilities', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
             end
 
             [bStatus, sCmdout] = system(sCommandLine);

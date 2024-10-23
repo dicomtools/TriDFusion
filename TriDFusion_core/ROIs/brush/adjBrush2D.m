@@ -73,7 +73,7 @@ function adjBrush2D(pRoiPtr, dInitCoord)
 
     dWLAdjCoe = 1/xPixel;
 
-    dSphereDiameter = pdInitialDiameter+aPosDiff(2) / dWLAdjCoe;
+    dSphereDiameter = pdInitialDiameter-aPosDiff(2) / dWLAdjCoe;
     
     if dSphereDiameter > 0
     %     if dSphereDiameter < 5
@@ -91,7 +91,12 @@ function adjBrush2D(pRoiPtr, dInitCoord)
       %  set(pRoiPtr, 'SemiAxes', [dSemiAxesX dSemiAxesY]);
     
         brush2dDefaultDiameter('set', dSphereDiameter);  
+        
     end
+    % 
+    % windowButton('set', 'down');  
+    % 
+    % rightClickMenu('off');
    % pdInitialCoord = get(0,'PointerLocation');
 
 %    refreshImages();

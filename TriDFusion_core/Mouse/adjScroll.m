@@ -1,6 +1,6 @@
 function adjScroll(dInitCoord)
 %function adjScroll(dInitCoord)
-%Ajust 2D Window Level using mouse right click.
+%Ajust 2D scroll using mouse left click + shift.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -44,7 +44,8 @@ function adjScroll(dInitCoord)
         evnt.VerticalScrollCount = 1;
     end
        
-    wheelScroll(1, evnt) 
+    wheelScroll(1, evnt); 
+
     windowButton('set', 'down');  
 
     pdInitialCoord = pFigure.CurrentPoint(1, 1:2);

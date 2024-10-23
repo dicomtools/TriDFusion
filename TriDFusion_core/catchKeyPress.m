@@ -30,37 +30,379 @@ function catchKeyPress(~,evnt)
     persistent pdToggle;
 
     if isempty(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')))
+        
         return;
     end
 
-    if strcmpi(evnt.Key,'shift')
+
+    if strcmpi(evnt.Key,'b') % Activate th brush
 
         if isMoveImageActivated('get') == false && ...
            switchTo3DMode('get')       == false && ...
            switchToIsoSurface('get')   == false && ...
            switchToMIPMode('get')      == false
 
-            set(fiMainWindowPtr('get'), 'Pointer', 'bottom');
+            atRoiMenu = roiMenuObject('get');
 
-            setCrossVisibility(false);            
+            if ~isempty(atRoiMenu)
 
+                for ii=1:numel(atRoiMenu.Children)
+
+                    toggleTool = atRoiMenu.Children(ii);
+                    
+                    clickedCallback = func2str(toggleTool.ClickedCallback);
+                    % if isempty(toggleTool.OnCallback)
+                    %     onCallback = '';
+                    % else
+                    %     onCallback = func2str(toggleTool.OnCallback);
+                    % end
+
+                    if contains(clickedCallback, 'set2DBrushCallback') 
+
+                        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+                        callbackFunction = get(toggleTool, 'ClickedCallback');  
+
+                        % set(toggleTool, 'State', 'on');
+
+                        windowButton('set', 'down');
+
+                        pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+
+                        if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
+ 
+                            if pAxe ~= axes1Ptr('get', [], dSeriesOffset) && ... % Coronal
+                               pAxe ~= axes2Ptr('get', [], dSeriesOffset) && ... % Sagittal
+                               pAxe ~= axes3Ptr('get', [], dSeriesOffset)        % Axial
+
+                                pAxe = axes3Ptr('get', [], dSeriesOffset);
+    
+                            end
+                        end
+
+                        callbackFunction(toggleTool, pAxe);
+                        
+                        % set(toggleTool, 'State', 'off');
+
+                        windowButton('set', 'up');
+                    end
+    
+                end
+            end
+
+        end
+    end
+
+    if strcmpi(evnt.Key,'shift') % Activate mouse up and down scroll mode
+
+        if isMoveImageActivated('get') == false && ...
+           switchTo3DMode('get')       == false && ...
+           switchToIsoSurface('get')   == false && ...
+           switchToMIPMode('get')      == false
+
+            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
+
+                set(fiMainWindowPtr('get'), 'Pointer', 'bottom');
+    
+                setCrossVisibility(false);            
+            end
+        end
+    end
+
+    if strcmpi(evnt.Key,'d')
+        
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        if isMoveImageActivated('get') == true || ...
+           switchTo3DMode('get')       == true || ...
+           switchToIsoSurface('get')   == true || ...
+           switchToMIPMode('get')      == true
+
+            return;
+        end       
+
+        atRoiMenu = roiMenuObject('get');
+
+        if ~isempty(atRoiMenu)
+
+            for ii=1:numel(atRoiMenu.Children)
+
+                toggleTool = atRoiMenu.Children(ii);
+                
+                clickedCallback = func2str(toggleTool.ClickedCallback);
+
+                if contains(clickedCallback, 'drawfreehandCallback') 
+
+                    if strcmpi(get(toggleTool, 'State'), 'on')
+                        
+                        set(toggleTool, 'State', 'off');
+                    else
+
+                        set(toggleTool, 'State', 'on');
+                    end
+
+                    callbackFunction = get(toggleTool, 'ClickedCallback');  
+
+                    callbackFunction();
+                    
+                end
+
+            end
+        end
+    end
+
+    if strcmpi(evnt.Key,'p')
+        
+        if isMoveImageActivated('get') == true || ...
+           switchTo3DMode('get')       == true || ...
+           switchToIsoSurface('get')   == true || ...
+           switchToMIPMode('get')      == true
+
+            return;
+        end       
+
+        atRoiMenu = roiMenuObject('get');
+
+        if ~isempty(atRoiMenu)
+
+            for ii=1:numel(atRoiMenu.Children)
+
+                toggleTool = atRoiMenu.Children(ii);
+                
+                clickedCallback = func2str(toggleTool.ClickedCallback);
+
+                if contains(clickedCallback, 'drawpolygonCallback') 
+
+                    if strcmpi(get(toggleTool, 'State'), 'on')
+                        
+                        set(toggleTool, 'State', 'off');
+                    else
+
+                        set(toggleTool, 'State', 'on');
+                    end
+
+                    callbackFunction = get(toggleTool, 'ClickedCallback');  
+
+                    callbackFunction();
+                end
+
+            end
+        end
+    end
+
+    if strcmpi(evnt.Key,'v')
+        
+        % dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        if isMoveImageActivated('get') == true || ...
+           switchTo3DMode('get')       == true || ...
+           switchToIsoSurface('get')   == true || ...
+           switchToMIPMode('get')      == true
+
+            return;
+        end       
+        
+        atRoiMenu = roiMenuObject('get');
+
+        if ~isempty(atRoiMenu)
+
+            for ii=1:numel(atRoiMenu.Children)
+
+                toggleTool = atRoiMenu.Children(ii);
+                
+                clickedCallback = func2str(toggleTool.ClickedCallback);
+
+                if contains(clickedCallback, 'drawClickVoiCallback') 
+
+                    callbackFunction = get(toggleTool, 'ClickedCallback');  
+
+                    % windowButton('set', 'down');
+
+                    % pAxe = gca(fiMainWindowPtr('get'));
+                    if strcmpi(get(toggleTool, 'State'), 'on')
+
+                        set(toggleTool, 'State', 'off');
+                    else
+
+                        set(toggleTool, 'State', 'on');
+                    end
+
+                    callbackFunction();
+                    
+                    % set(toggleTool, 'State', 'off');
+
+                    % windowButton('set', 'up');
+                end
+
+            end
+        end
+    end
+
+    if strcmpi(evnt.Key,'m')
+        
+        % dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        if isMoveImageActivated('get') == true || ...
+           switchTo3DMode('get')       == true || ...
+           switchToIsoSurface('get')   == true || ...
+           switchToMIPMode('get')      == true
+
+            return;
+        end       
+        
+        atRoiMenu = roiMenuObject('get');
+
+        if ~isempty(atRoiMenu)
+
+            for ii=1:numel(atRoiMenu.Children)
+
+                toggleTool = atRoiMenu.Children(ii);
+                
+                clickedCallback = func2str(toggleTool.ClickedCallback);
+
+                if contains(clickedCallback, 'drawlineCallback') 
+
+                    callbackFunction = get(toggleTool, 'ClickedCallback');  
+
+                    if strcmpi(get(toggleTool, 'State'), 'on')
+
+                        set(toggleTool, 'State', 'off');
+                    else
+
+                        set(toggleTool, 'State', 'on');
+                    end
+
+                    callbackFunction();
+
+                end
+
+            end
+        end
+    end
+
+    if strcmpi(evnt.Key,'s')
+        
+        % dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        if isMoveImageActivated('get') == true || ...
+           switchTo3DMode('get')       == true || ...
+           switchToIsoSurface('get')   == true || ...
+           switchToMIPMode('get')      == true
+
+            return;
+        end       
+        
+        atRoiMenu = roiMenuObject('get');
+
+        if ~isempty(atRoiMenu)
+
+            for ii=1:numel(atRoiMenu.Children)
+
+                toggleTool = atRoiMenu.Children(ii);
+                
+                clickedCallback = func2str(toggleTool.ClickedCallback);
+
+                if contains(clickedCallback, 'drawsphereCallback') 
+
+                    callbackFunction = get(toggleTool, 'ClickedCallback');  
+
+                    if strcmpi(get(toggleTool, 'State'), 'on')
+
+                        set(toggleTool, 'State', 'off');
+                    else
+
+                        set(toggleTool, 'State', 'on');
+                    end
+
+                    callbackFunction();
+
+                end
+
+            end
+        end
+    end
+
+    if strcmpi(evnt.Key,'k')
+        
+        % dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        if isMoveImageActivated('get') == true || ...
+           switchTo3DMode('get')       == true || ...
+           switchToIsoSurface('get')   == true || ...
+           switchToMIPMode('get')      == true
+
+            return;
+        end       
+        
+        atRoiMenu = roiMenuObject('get');
+
+        if ~isempty(atRoiMenu)
+
+            for ii=1:numel(atRoiMenu.Children)
+
+                toggleTool = atRoiMenu.Children(ii);
+                
+                clickedCallback = func2str(toggleTool.ClickedCallback);
+
+                if contains(clickedCallback, 'set2DScissorCallback') 
+
+                    callbackFunction = get(toggleTool, 'ClickedCallback');  
+
+                    if strcmpi(get(toggleTool, 'State'), 'on')
+
+                        set(toggleTool, 'State', 'off');
+                    else
+
+                        set(toggleTool, 'State', 'on');
+                    end
+
+                    callbackFunction();
+
+                end
+
+            end
         end
     end
 
     if strcmpi(evnt.Key,'tab')
+        
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-        uiAddVoiRoiPanel = uiAddVoiRoiPanelObject('get');
+        if isMoveImageActivated('get') == true || ...
+           switchTo3DMode('get')       == true || ...
+           switchToIsoSurface('get')   == true || ...
+           switchToMIPMode('get')      == true
 
-        if ~isempty(uiAddVoiRoiPanel)
-
-            callbackFunction = get(uiAddVoiRoiPanel, 'Callback');  
-            callbackFunction(uiAddVoiRoiPanel);
+            return;
         end
+        
+        if ~isempty(voiTemplate('get', dSeriesOffset))
 
+            uiAddVoiRoiPanel = uiAddVoiRoiPanelObject('get');
 
+            if ~isempty(uiAddVoiRoiPanel)
+    
+                callbackFunction = get(uiAddVoiRoiPanel, 'Callback');  
+                
+                callbackFunction(uiAddVoiRoiPanel);
+            end
+        end
     end
 
     if strcmpi(evnt.Key,'escape')
+
+        atRoiMenu = roiMenuObject('get');
+
+        if ~isempty(atRoiMenu)
+
+            for ii=1:numel(atRoiMenu.Children)
+
+                set(atRoiMenu.Children(ii), 'State', 'off');
+            end
+        end
+
+        % windowButton('set', 'up');
+        axeClicked('set', true);
 
         uiresume(fiMainWindowPtr('get'));
 
@@ -74,8 +416,30 @@ function catchKeyPress(~,evnt)
             end
         end
 
-    end
+        if is2DBrush('get') == true
 
+            is2DBrush('set', false);
+
+            pRoiPtr = brush2Dptr('get');
+
+            if ~isempty(pRoiPtr)
+                delete(pRoiPtr);
+                brush2Dptr('set', []);
+            end
+
+            roiSetAxeBorder(false);
+
+            setCrossVisibility(true);
+
+            if ~isempty(atRoiMenu)
+    
+                for ii=1:numel(atRoiMenu.Children)
+    
+                    set(atRoiMenu.Children(ii), 'Enable', 'on');
+                end
+            end 
+        end
+    end
 
     if strcmpi(evnt.Key,'add')
 
@@ -158,24 +522,38 @@ function catchKeyPress(~,evnt)
 
             if isempty(getappdata(axesHandle, 'matlab_graphics_resetplotview'))
 
-                zoom(axesHandle, dZFactor);
-            else
-                % Get the current axes limits
-                xLim = get(axesHandle, 'XLim');
-                yLim = get(axesHandle, 'YLim');
-    
-                % Compute the center of the current axes
-                xCenter = mean(xLim);
-                yCenter = mean(yLim);
-    
-                % Calculate the new limits based on the zoom factor
-                newXLim = xCenter + (xLim - xCenter) / dZFactor;  % Zoom in/out
-                newYLim = yCenter + (yLim - yCenter) / dZFactor;
-    
-                % Apply the new limits to the axes
-                set(axesHandle, 'XLim', newXLim, 'YLim', newYLim);
+                initAxePlotView(axesHandle);
             end
 
+            % Get the current axes limits
+            xLim = get(axesHandle, 'XLim');
+            yLim = get(axesHandle, 'YLim');
+
+            % Handle infinite limits by replacing with reasonable defaults
+
+            if any(isinf(xLim))
+               
+                xData = get(axesHandle.Children, 'XData');  % Assuming children are the plotted data
+                xLim = [min(cell2mat(xData),[],"all"), max(cell2mat(xData),[],"all")];      % Set to the range of the data
+            end
+            
+            if any(isinf(yLim))
+           
+                yData = get(axesHandle.Children, 'YData');  % Assuming children are the plotted data
+                yLim = [min(cell2mat(yData),[],"all"), max(cell2mat(yData),[],"all")];      % Set to the range of the data
+            end 
+
+            % Compute the center of the current axes
+            xCenter = mean(xLim);
+            yCenter = mean(yLim);
+
+            % Calculate the new limits based on the zoom factor
+            newXLim = xCenter + (xLim - xCenter) / dZFactor;  % Zoom in/out
+            newYLim = yCenter + (yLim - yCenter) / dZFactor;
+
+            % Apply the new limits to the axes
+            set(axesHandle, 'XLim', newXLim, 'YLim', newYLim);
+                        
             multiFrameZoom('set', 'axe', axesHandle);
 
         end
@@ -206,12 +584,14 @@ function catchKeyPress(~,evnt)
             pAxe = getAxeFromMousePosition(dSeriesOffset);
 
             if multiFrameZoom('get', 'axe') ~= pAxe
+
                 multiFrameZoom('set', 'out', 1);
             end
 
             dZFactor = multiFrameZoom('get', 'out');
 
             if dZFactor > 0.025
+
                 dZFactor = dZFactor-0.025;
                 multiFrameZoom('set', 'out', dZFactor);
             end
@@ -260,25 +640,39 @@ function catchKeyPress(~,evnt)
 
             if isempty(getappdata(axesHandle, 'matlab_graphics_resetplotview'))
                 
-                zoom(axesHandle, dZFactor);
-            else
-
-                % Get the current axes limits
-                xLim = get(axesHandle, 'XLim');
-                yLim = get(axesHandle, 'YLim');
-    
-                % Compute the center of the current axes
-                xCenter = mean(xLim);
-                yCenter = mean(yLim);
-    
-                % Calculate the new limits based on the zoom factor
-                newXLim = xCenter + (xLim - xCenter) / dZFactor;  % Zoom in/out
-                newYLim = yCenter + (yLim - yCenter) / dZFactor;
-    
-                % Apply the new limits to the axes
-                set(axesHandle, 'XLim', newXLim, 'YLim', newYLim);
+                initAxePlotView(axesHandle);
             end
 
+            % Get the current axes limits
+
+            xLim = get(axesHandle, 'XLim');
+            yLim = get(axesHandle, 'YLim');
+
+            % Handle infinite limits by replacing with reasonable defaults
+
+            if any(isinf(xLim))
+               
+                xData = get(axesHandle.Children, 'XData');  % Assuming children are the plotted data
+                xLim = [min(cell2mat(xData),[],"all"), max(cell2mat(xData),[],"all")];      % Set to the range of the data
+            end
+            
+            if any(isinf(yLim))
+           
+                yData = get(axesHandle.Children, 'YData');  % Assuming children are the plotted data
+                yLim = [min(cell2mat(yData),[],"all"), max(cell2mat(yData),[],"all")];      % Set to the range of the data
+            end 
+
+            % Compute the center of the current axes
+            xCenter = mean(xLim);
+            yCenter = mean(yLim);
+
+            % Calculate the new limits based on the zoom factor
+            newXLim = xCenter + (xLim - xCenter) / dZFactor;  % Zoom in/out
+            newYLim = yCenter + (yLim - yCenter) / dZFactor;
+
+            % Apply the new limits to the axes
+            set(axesHandle, 'XLim', newXLim, 'YLim', newYLim);
+                      
             multiFrameZoom('set', 'axe', axesHandle);
 
         end
@@ -567,8 +961,8 @@ function catchKeyPress(~,evnt)
 %            lMin = min(dicomBuffer('get'), [], 'all');
 %            lMax = max(dicomBuffer('get'), [], 'all');
         else
-            lMin = min(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), [], 'all');
-            lMax = max(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), [], 'all');
+            lMin = min(dicomBuffer('get', [], dSeriesOffset), [], 'all');
+            lMax = max(dicomBuffer('get', [], dSeriesOffset), [], 'all');
         end
 
         setWindowMinMax(lMax, lMin);                    
@@ -586,6 +980,9 @@ function catchKeyPress(~,evnt)
             zoomTool('set', false);
             zoom(fiMainWindowPtr('get'), 'off');           
         end  
+
+        multiFrameZoom('set', 'in',  1);
+        multiFrameZoom('set', 'out', 1);
 
         if panTool('get')
                   
@@ -636,7 +1033,9 @@ function catchKeyPress(~,evnt)
         end
 
         if ismember('shift', get(fiMainWindowPtr('get'),'CurrentModifier'))
+
             if crossSize('get') > 30
+
                 crossSize('set', 0);
             else    
                 crossSize('set', crossSize('get')+10);

@@ -545,24 +545,38 @@ function setPlaybackToolbar(sVisible)
 
                     if isempty(getappdata(axesHandle, 'matlab_graphics_resetplotview'))
                         
-                        zoom(axesHandle, dZFactor);
-                    else
-                        % Get the current axes limits
-                        xLim = get(axesHandle, 'XLim');
-                        yLim = get(axesHandle, 'YLim');
-        
-                        % Compute the center of the current axes
-                        xCenter = mean(xLim);
-                        yCenter = mean(yLim);
-        
-                        % Calculate the new limits based on the zoom factor
-                        newXLim = xCenter + (xLim - xCenter) / dZFactor;  % Zoom in/out
-                        newYLim = yCenter + (yLim - yCenter) / dZFactor;
-        
-                        % Apply the new limits to the axes
-                        set(axesHandle, 'XLim', newXLim, 'YLim', newYLim);
+                        initAxePlotView(axesHandle);
                     end
 
+                    % Get the current axes limits
+                    xLim = get(axesHandle, 'XLim');
+                    yLim = get(axesHandle, 'YLim');
+
+                    % Handle infinite limits by replacing with reasonable defaults
+        
+                    if any(isinf(xLim))
+                       
+                        xData = get(axesHandle.Children, 'XData');  % Assuming children are the plotted data
+                        xLim = [min(cell2mat(xData),[],"all"), max(cell2mat(xData),[],"all")];      % Set to the range of the data
+                    end
+                    
+                    if any(isinf(yLim))
+                   
+                        yData = get(axesHandle.Children, 'YData');  % Assuming children are the plotted data
+                        yLim = [min(cell2mat(yData),[],"all"), max(cell2mat(yData),[],"all")];      % Set to the range of the data
+                    end
+
+                    % Compute the center of the current axes
+                    xCenter = mean(xLim);
+                    yCenter = mean(yLim);
+    
+                    % Calculate the new limits based on the zoom factor
+                    newXLim = xCenter + (xLim - xCenter) / dZFactor;  % Zoom in/out
+                    newYLim = yCenter + (yLim - yCenter) / dZFactor;
+    
+                    % Apply the new limits to the axes
+                    set(axesHandle, 'XLim', newXLim, 'YLim', newYLim);
+                    
                     multiFrameZoom('set', 'axe', axesHandle);
 
                     set(mZoomIn, 'Enable', 'on');
@@ -623,24 +637,38 @@ function setPlaybackToolbar(sVisible)
 
                     if isempty(getappdata(axesHandle, 'matlab_graphics_resetplotview')) 
                         
-                        zoom(axesHandle, dZFactor);
-                    else
-                        % Get the current axes limits
-                        xLim = get(axesHandle, 'XLim');
-                        yLim = get(axesHandle, 'YLim');
-        
-                        % Compute the center of the current axes
-                        xCenter = mean(xLim);
-                        yCenter = mean(yLim);
-        
-                        % Calculate the new limits based on the zoom factor
-                        newXLim = xCenter + (xLim - xCenter) / dZFactor;  % Zoom in/out
-                        newYLim = yCenter + (yLim - yCenter) / dZFactor;
-        
-                        % Apply the new limits to the axes
-                        set(axesHandle, 'XLim', newXLim, 'YLim', newYLim);
+                        initAxePlotView(axesHandle);
                     end
 
+                    % Get the current axes limits
+                    xLim = get(axesHandle, 'XLim');
+                    yLim = get(axesHandle, 'YLim');
+                    
+                    % Handle infinite limits by replacing with reasonable defaults
+        
+                    if any(isinf(xLim))
+                       
+                        xData = get(axesHandle.Children, 'XData');  % Assuming children are the plotted data
+                        xLim = [min(cell2mat(xData),[],"all"), max(cell2mat(xData),[],"all")];      % Set to the range of the data
+                    end
+                    
+                    if any(isinf(yLim))
+                   
+                        yData = get(axesHandle.Children, 'YData');  % Assuming children are the plotted data
+                        yLim = [min(cell2mat(yData),[],"all"), max(cell2mat(yData),[],"all")];      % Set to the range of the data
+                    end 
+
+                    % Compute the center of the current axes
+                    xCenter = mean(xLim);
+                    yCenter = mean(yLim);
+    
+                    % Calculate the new limits based on the zoom factor
+                    newXLim = xCenter + (xLim - xCenter) / dZFactor;  % Zoom in/out
+                    newYLim = yCenter + (yLim - yCenter) / dZFactor;
+    
+                    % Apply the new limits to the axes
+                    set(axesHandle, 'XLim', newXLim, 'YLim', newYLim);
+                    
                     multiFrameZoom('set', 'axe', axesHandle);
 
                     set(mZoomOut, 'Enable', 'on');                 
