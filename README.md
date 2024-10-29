@@ -118,6 +118,8 @@ https://github.com/wasserth/TotalSegmentator
 PY-Radiomics 
 https://pyradiomics.readthedocs.io/en/latest/installation.html
 
+After installation, try running where pyradiomics in a command prompt. If it doesn’t return a path, add the pyradiomics path to the environment variables.
+
 ### Monte Carlo particle transport engines 
 PHITS  (Tested version: 330A)
 https://phits.jaea.go.jp/rirekie.html
