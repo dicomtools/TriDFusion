@@ -114,13 +114,13 @@ https://github.com/cerr/CERR
 TotalSegmentator (Tested version: pip install totalsegmentator==1.5.6)
 https://github.com/wasserth/TotalSegmentator
 
-After installation, try running where TotalSegmentator in a command prompt. If it doesn’t return a path, add the TotalSegmentator path to the Windows environment variables.
+After installation, open a command prompt and run `where TotalSegmentator`. If it doesn’t return a path, add the TotalSegmentator installation path to the Windows environment variables.
 
 ### Radiomics
 PY-Radiomics 
 https://pyradiomics.readthedocs.io/en/latest/installation.html
 
-After installation, try running where pyRadiomics in a command prompt. If it doesn’t return a path, add the pyradiomics path to the Windows environment variables.
+After installation, open a command prompt and run `where pyRadiomics`. If it doesn’t return a path, add the pyRadiomics installation path to the Windows environment variables.
 
 ### Monte Carlo particle transport engines 
 PHITS  (Tested version: 330A)
@@ -142,7 +142,7 @@ Required Python Module Installation Instructions
         subprocess: No installation required as it's part of the Python standard library.
         argparse: No installation required as it's part of the Python standard library.
 		
-After installation, try running where phits in a command prompt. If it doesn’t return a path, add the PHITS path (typically C:\phits\bin\) to the Windows environment variables.
+After installation, open a command prompt and run `where phits`. If it doesn’t return a path, add the phits installation path (typically C:\phits\bin\) to the Windows environment variables.
 
 ## References 
 
