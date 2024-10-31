@@ -27,6 +27,8 @@ function btnUiMipWindowFullScreenCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    persistent ptLimit;
+
     uiCorWindow = uiCorWindowPtr('get');
     uiSagWindow = uiSagWindowPtr('get');
     uiTraWindow = uiTraWindowPtr('get');
@@ -49,6 +51,20 @@ function btnUiMipWindowFullScreenCallback(~, ~)
 
             if bIsFullScreen == false
 
+                ptLimit = axesLimitsFromTemplate(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')));
+
+                adjAxeCameraViewAngle(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                
+                if isFusion('get') == true
+
+                    setAxesLimitsFromSource(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+                end
+
+                if isPlotContours('get') == true
+
+                    setAxesLimitsFromSource(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));                    
+                end
+
                 set(btnUiMipWindowFullScreen, 'TooltipString'  , 'Exit Full Screen');
 
                 set(uiTraWindow, 'Visible', 'Off');
@@ -59,6 +75,18 @@ function btnUiMipWindowFullScreenCallback(~, ~)
                 set(uiCorSlider, 'Visible', 'Off');
                 set(uiSagSlider, 'Visible', 'Off');
             else
+                axesLimitsFromTemplate(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ptLimit);
+
+                if isFusion('get') == true
+
+                    setAxesLimitsFromSource(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+                end
+
+                if isPlotContours('get') == true
+                    
+                    setAxesLimitsFromSource(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+                end
+
                 set(btnUiMipWindowFullScreen, 'TooltipString'  , 'Full Screen');
 
                 set(uiTraWindow, 'Visible', 'On');

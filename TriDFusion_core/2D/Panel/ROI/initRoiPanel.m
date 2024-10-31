@@ -860,7 +860,7 @@ function initRoiPanel()
 
             cropMenu(pRoi);
 
-            voiMenu(pRoi);
+            voiDefaultMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics' , 'UserData', pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
@@ -3303,7 +3303,7 @@ function initRoiPanel()
 
                             cropMenu(pRoi);
 
-%                             voiMenu(pRoi);
+%                             voiDefaultMenu(pRoi);
 
                             uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
@@ -3581,7 +3581,7 @@ function initRoiPanel()
 
                                     cropMenu(pRoi);
 
-                                    voiMenu(pRoi);
+                                    voiDefaultMenu(pRoi);
 
                                     uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 

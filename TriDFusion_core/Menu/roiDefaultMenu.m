@@ -26,90 +26,75 @@ function roiDefaultMenu(ptrRoi)
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-        
-    uimenu(ptrRoi.UIContextMenu, ...
-           'Label'    , 'Copy Contour' , ...
-           'UserData' , ptrRoi, ...
-           'Callback' , @copyRoiCallback, ...
-           'Separator', 'on' ...
-           ); 
-
-    uimenu(ptrRoi.UIContextMenu, ...
-           'Label'    , 'Paste Contour' , ...
-           'UserData' , ptrRoi, ...
-           'Callback' , @pasteRoiCallback ...
-           ); 
-
-    uimenu(ptrRoi.UIContextMenu, ...
-           'Label'    , 'Paste Mirror' , ...
-           'UserData' , ptrRoi, ...
-           'Callback' , @pasteMirroirRoiCallback ...
-           ); 
-
-    uimenu(ptrRoi.UIContextMenu, ...
-           'Label'    , 'Edit Label' , ...
-           'UserData' , ptrRoi, ...
-           'Callback' , @editLabelCallback, ...
-           'Separator', 'on' ...
-           ); 
-
-    aList = getRoiLabelList();               
-    mPredefinedLabels = uimenu(ptrRoi.UIContextMenu, 'Label', 'Predefined Label');
-
-    arrayfun(@(x) uimenu(mPredefinedLabels, ...
-                         'Text', aList{x}, ...
-                         'UserData', ptrRoi, ...
-                         'MenuSelectedFcn', @predefinedLabelCallback), ...
-        1:numel(aList));
-
-    uimenu(ptrRoi.UIContextMenu, ...
-           'Label'   , 'Hide/View Label', ...
-           'UserData', ptrRoi, ...
-           'Callback', @hideViewLabelCallback ...
-           ); 
-
-    [~, asLesionList] = getLesionType('');
+      
+    % Main function to set up the default ROI context menu with improved structure
     
+    addMenuItem(ptrRoi, 'Copy Contour'   , @copyRoiCallback, true);
+    addMenuItem(ptrRoi, 'Paste Contour'  , @pasteRoiCallback);
+    addMenuItem(ptrRoi, 'Paste Mirror'   , @pasteMirroirRoiCallback);
+    addMenuItem(ptrRoi, 'Edit Label'     , @editLabelCallback, true);
+    addMenuItem(ptrRoi, 'Hide/View Label', @hideViewLabelCallback);
+    addMenuItem(ptrRoi, 'Edit Color'     , @editColorCallback);
+
+    % Add predefined label submenu
+    addDynamicMenu(ptrRoi, 'Predefined Label', getRoiLabelList(), @predefinedLabelCallback);
+
+    % Add lesion type options if available
+    [~, asLesionList] = getLesionType('');
     if ~isempty(asLesionList)
 
-        mEditLocation = uimenu(ptrRoi.UIContextMenu, ...
-                               'Label', 'Edit Location', ...
-                               'UserData', ptrRoi      , ...
-                               'MenuSelectedFcn'       , @refreshRoiMenuLocationCallback);
-
-        arrayfun(@(x) uimenu(mEditLocation, ...
-                             'Text', asLesionList{x}, ...
-                             'UserData', ptrRoi, ...
-                             'MenuSelectedFcn', @editRoiLesionTypeCallback), ...
-            1:numel(asLesionList));     
-
+        addDynamicMenu(ptrRoi, 'Edit Location', asLesionList, @editRoiLesionTypeCallback, @refreshRoiMenuLocationCallback);
     end
+end
 
-    uimenu(ptrRoi.UIContextMenu, ...
-           'Label'   , 'Edit Color', ...
-           'UserData', ptrRoi, ...
-           'Callback', @editColorCallback ...
-           );     
-       
-    function refreshRoiMenuLocationCallback(hObject, ~) 
+function menuItem = addMenuItem(ptrRoi, label, callback, isSeparator)
 
-        atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    if nargin < 4, isSeparator = false; end  % Default for separator is false
+        menuItem = uimenu(ptrRoi.UIContextMenu, 'Label', label, 'UserData', ptrRoi, 'Callback', callback);
+    if isSeparator
+        menuItem.Separator = 'on';
+    end
+end
 
-        dTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), hObject.UserData.Tag ) );
-
-        if ~isempty(dTagOffset) % Tag is a ROI
-
-            for ch=1:numel(hObject.Children)
+function addDynamicMenu(ptrRoi, label, itemList, callback, mainCallback)
+ 
+    parentMenu = uimenu(ptrRoi.UIContextMenu, 'Label', label, 'UserData', ptrRoi);
     
-                if strcmpi(hObject.Children(ch).Text, atRoiInput{dTagOffset}.LesionType)
+    if nargin > 4 && ~isempty(mainCallback)  % Add main callback if provided
+        
+        parentMenu.MenuSelectedFcn = mainCallback;
+    end
+    
+    numItems = numel(itemList); % Get the number of items
 
-                    set(hObject.Children(ch), 'Checked', 'on');
-                else
-                    set(hObject.Children(ch), 'Checked', 'off');
-                end
-            end
+    for i = 1:numItems
+        uimenu(parentMenu, ...
+            'Text'           , itemList{i}, ...
+            'UserData'       , ptrRoi, ...
+            'MenuSelectedFcn', callback);
+    end
+    
+end
 
+function refreshRoiMenuLocationCallback(hObject, ~)
+
+
+    atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
+    dTagOffset = find(strcmp( cellfun(@(x) x.Tag, atRoiInput, 'uni', false), hObject.UserData.Tag));
+
+    if ~isempty(dTagOffset)  % If the tag corresponds to an ROI
+
+        currentLesionType = atRoiInput{dTagOffset}.LesionType;
+        
+        numChildren = numel(hObject.Children); 
+    
+        % Iterate through each child 
+
+        for childIdx = 1:numChildren
+            
+            child = hObject.Children(childIdx); % Access the child
+            set(child, 'Checked', strcmpi(child.Text, currentLesionType));
         end
-
     end
 end

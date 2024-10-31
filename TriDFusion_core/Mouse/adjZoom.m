@@ -74,6 +74,10 @@ function adjZoom(dInitCoord)
  
     dWLAdjCoe = 0.0050;
 
+    if isempty(pdInitialCoord)
+        pdInitialCoord = pFigure.CurrentPoint;
+    end
+
     aPosDiff = pFigure.CurrentPoint(1, 1:2) - pdInitialCoord;
 
     if aPosDiff(2) > 0
@@ -141,7 +145,7 @@ function adjZoom(dInitCoord)
 
     % windowButton('set', 'down');  
 
-    rightClickMenu('off');
+    % rightClickMenu('off');
 
     pdInitialCoord = pFigure.CurrentPoint(1, 1:2);
       

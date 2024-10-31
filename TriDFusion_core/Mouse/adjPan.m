@@ -27,14 +27,22 @@ function adjPan(dInitCoord)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent pdInitialCoord;
+    persistent pdClickDown;
 
     if exist('dInitCoord', 'var')
 
         multiFrameZoom('set', 'in', 1);
         multiFrameZoom('set', 'out', 1);
 
-        pdInitialCoord = dInitCoord;
+        pdClickDown = dInitCoord;
+
+        if ~isempty(copyRoiPtr('get')) 
+            
+            rightClickMenu('off');
+        end
+
+        showRightClickMenu(true);
+
         return;
     end
 
@@ -99,7 +107,12 @@ function adjPan(dInitCoord)
         yPixel = 1;
     end
 
-    aPosDiff = pFigure.CurrentPoint(1, 1:2) - pdInitialCoord;
+    if isempty(pdClickDown)
+        
+        pdClickDown = pFigure.CurrentPoint;
+    end
+
+    aPosDiff = pFigure.CurrentPoint(1, 1:2) - pdClickDown;
 
     if isempty(getappdata(axesHandle, 'matlab_graphics_resetplotview'))
 
@@ -130,7 +143,7 @@ function adjPan(dInitCoord)
             return;
         end        
     end
-
+   
     % Calculate the pan shift based on the difference
     dxShift = -aPosDiff(1)/xPixel;  
     dyShift =  aPosDiff(2)/yPixel;
@@ -141,11 +154,15 @@ function adjPan(dInitCoord)
 
     % Apply the new limits to the axes
     set(axesHandle, 'XLim', newXLim, 'YLim', newYLim);
+    % 
+    % axesHandle.XLim = newXLim;
+    % axesHandle.YLim = newYLim;
 
     windowButton('set', 'down');  
 
-    rightClickMenu('off');
+    pdClickDown = pFigure.CurrentPoint(1, 1:2);
 
-    pdInitialCoord = pFigure.CurrentPoint(1, 1:2);
+    showRightClickMenu(false);
+
 % drawnow limitrate;
 end

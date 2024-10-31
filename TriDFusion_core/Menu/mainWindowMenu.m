@@ -380,9 +380,10 @@ function mainWindowMenu()
     uimenu(mDosimetry, 'Label','Compute Voxel Dosimetry', 'Callback', @computeVoxelDosimetryCallback);
 
     mHelp = uimenu(fiMainWindowPtr('get'),'Label','Help');
-    uimenu(mHelp,'Label', 'Shortcuts', 'Callback'  , @shortcutsViewerCallback);
-    uimenu(mHelp,'Label', 'User Manual', 'Callback', @helpViewerCallback);
-    uimenu(mHelp,'Label', 'About', 'Callback'      , @aboutViewerCallback, 'Separator','on');
+    uimenu(mHelp,'Label', 'Shortcuts'   , 'Callback', @shortcutsViewerCallback);
+    uimenu(mHelp,'Label', 'User Manual' , 'Callback', @helpViewerCallback);
+    uimenu(mHelp,'Label', 'Terms Of Use', 'Callback', @termsOfUseViewerCallback);
+    uimenu(mHelp,'Label', 'About'       , 'Callback', @aboutViewerCallback);
 
     function copyDisplayCallback(~, ~)
 

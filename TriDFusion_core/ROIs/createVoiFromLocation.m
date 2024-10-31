@@ -489,7 +489,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
             
                                 cropMenu(pRoi);
             
-                                voiMenu(pRoi);
+                                voiDefaultMenu(pRoi);
                             
                                 uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');          
 

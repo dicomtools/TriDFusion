@@ -134,18 +134,29 @@ function clickUp(~, ~)
                 end
                 
                 if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
+
                     set(fiMainWindowPtr('get'), 'selectiontype', 'normal');
                 end
 
             else
                 if strcmpi(get(fiMainWindowPtr('get'), 'selectiontype'),'alt')
                    
+                    if showRightClickMenu() == true
+                        
+                        if ~isempty(copyRoiPtr('get')) 
+            
+                            rightClickMenu('on');
+                        end                     
+                    end
+
                     % pFigure = fiMainWindowPtr('get');
                     % 
                     % adjWL(pFigure.CurrentPoint(1, 1:2));   
-                    % refreshImages();
+
+        % refreshImages();
                     
                 end
+
             end
 
         end

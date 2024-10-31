@@ -1,13 +1,13 @@
-function helpViewerCallback(~, ~)
-%function helpViewerCallback(~, ~)
-%Display Viewer Help.
+function bShowRightClick = showRightClickMenu(bValue)
+%function bShowRightClick = showRightClickMenu(bValue)
+%Get/Set show right click menu.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2024, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -25,15 +25,14 @@ function helpViewerCallback(~, ~)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    % sHelpFile = sprintf('%s/TriDFusionHelp.pdf', viewerRootPath('get'));
-    % 
-    % if ispc
-    %     system(['start "" "' sHelpFile '"']);
-    % elseif ismac
-    %     system(['open "' sHelpFile '"']);
-    % elseif isunix
-    %     system(['xdg-open "' sHelpFile '"']);
-    % end
+    persistent pbShowRightClick; 
+
+    if exist('bValue', 'var')
+        
+        pbShowRightClick = bValue;     
+    end
+    
+    bShowRightClick = pbShowRightClick;
 end

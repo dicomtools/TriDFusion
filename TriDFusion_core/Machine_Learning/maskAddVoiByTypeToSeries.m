@@ -153,7 +153,7 @@ function maskAddVoiByTypeToSeries(aImage, aMask, atMetaData, dSeriesOffset, dSma
 
                 cropMenu(roiPtr);
 
-                voiMenu(roiPtr);
+                voiDefaultMenu(roiPtr);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
                                        

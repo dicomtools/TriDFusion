@@ -32,28 +32,57 @@ function rightClickMenu(sAction, objectPtr)
 
     persistent paContextMenu;
 
-    if     strcmpi('reset', sAction)
+    if strcmpi('reset', sAction)
+        
+        if ~isempty(paContextMenu)
+
+            for ff = 1:numel(paContextMenu)
+
+                % Check if the context menu exists
+
+                if ishandle(paContextMenu{ff}) % Ensure the context menu is a valid handle
+
+                    children = paContextMenu{ff}.Children; % Get children
+
+                    if ~isempty(children) && all(ishandle(children)) % Ensure children exist and are valid handles
+
+                        delete(children); % Delete all valid children in one call
+                    end
+                end
+            end
+        end 
+
         paContextMenu = '';
 
     elseif strcmpi('on', sAction)
+        
         for ff=1:numel(paContextMenu)
+
             for gg=1:numel(paContextMenu{ff}.Children)
-                paContextMenu{ff}.Children(gg).Visible = 'on';
+
+                set(paContextMenu{ff}.Children, 'Visible', 'on'); 
             end
         end
 
     elseif strcmpi('off', sAction)
+
         for ff=1:numel(paContextMenu)
+
             for gg=1:numel(paContextMenu{ff}.Children)
-                paContextMenu{ff}.Children(gg).Visible = 'off';
+
+                set(paContextMenu{ff}.Children, 'Visible', 'off');                
             end
         end
 
     elseif strcmpi('add', sAction)
+
         cm = uicontextmenu(fiMainWindowPtr('get'));
-        uimenu(cm, 'Text', 'Paste Contour', 'Callback', @pasteRoiCallback);
-        uimenu(cm, 'Text', 'Paste Mirror', 'Callback', @pasteMirroirRoiCallback);
-        uimenu(cm, 'Text', 'Hide Menu', 'Separator', 'on', 'Callback', @hideRoiMenuCallback);
+
+        a= uimenu(cm, 'Text', 'Paste Contour', 'Callback', @pasteRoiCallback);
+        b= uimenu(cm, 'Text', 'Paste Mirror' , 'Callback', @pasteMirroirRoiCallback);
+
+        set(a, 'Visible', 'off');
+        set(b, 'Visible', 'off');
 
         if isfield(objectPtr, 'ContextMenu')
             objectPtr.ContextMenu = cm;
@@ -63,9 +92,4 @@ function rightClickMenu(sAction, objectPtr)
             paContextMenu{numel(paContextMenu)+1} = objectPtr.UIContextMenu;
         end
     end
-
-    function hideRoiMenuCallback(~, ~)
-        roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), '');
-    end
-
 end

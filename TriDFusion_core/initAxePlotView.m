@@ -45,10 +45,10 @@ function initAxePlotView(pAxe)
     tOrigInfo.CameraViewAngle       = get(pAxe, 'CameraViewAngle');
     tOrigInfo.CameraViewAngleMode   = get(pAxe, 'CameraViewAngleMode');
     
-    tOrigInfo.View                  = get(pAxe, 'View');
-    tOrigInfo.DataAspectRatio       = get(pAxe, 'DataAspectRatio');
-    tOrigInfo.DataAspectRatioMode   = get(pAxe, 'DataAspectRatioMode');
-    tOrigInfo.PlotBoxAspectRatio    = get(pAxe, 'PlotBoxAspectRatio');
+    tOrigInfo.View                   = get(pAxe, 'View');
+    tOrigInfo.DataAspectRatio        = get(pAxe, 'DataAspectRatio');
+    tOrigInfo.DataAspectRatioMode    = get(pAxe, 'DataAspectRatioMode');
+    tOrigInfo.PlotBoxAspectRatio     = get(pAxe, 'PlotBoxAspectRatio');
     tOrigInfo.PlotBoxAspectRatioMode = get(pAxe, 'PlotBoxAspectRatioMode');
     
     % Store all properties in the app data for later use

@@ -163,7 +163,7 @@ function maskImageToVoi(aMask, dSeriesOffset, aClassificationMask, bLesionClassi
 
                 cropMenu(roiPtr);
 
-                voiMenu(roiPtr);
+                voiDefaultMenu(roiPtr);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
                                    

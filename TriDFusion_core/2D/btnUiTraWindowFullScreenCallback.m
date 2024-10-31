@@ -27,6 +27,8 @@ function btnUiTraWindowFullScreenCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    persistent ptLimit;
+
     uiCorWindow = uiCorWindowPtr('get');
     uiSagWindow = uiSagWindowPtr('get');
     uiTraWindow = uiTraWindowPtr('get');
@@ -49,6 +51,20 @@ function btnUiTraWindowFullScreenCallback(~, ~)
 
             if bIsFullScreen == false
 
+                ptLimit = axesLimitsFromTemplate(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+
+                adjAxeCameraViewAngle(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                
+                if isFusion('get') == true
+
+                    setAxesLimitsFromSource(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+                end
+
+                if isPlotContours('get') == true
+
+                    setAxesLimitsFromSource(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));                    
+                end
+
                 set(btnUiTraWindowFullScreen, 'TooltipString'  , 'Exit Full Screen');
 
                 set(uiCorWindow, 'Visible', 'Off');
@@ -59,6 +75,18 @@ function btnUiTraWindowFullScreenCallback(~, ~)
                 set(uiSagSlider, 'Visible', 'Off');
                 set(uiMipSlider, 'Visible', 'Off');
             else
+                axesLimitsFromTemplate(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ptLimit);
+
+                if isFusion('get') == true
+
+                    setAxesLimitsFromSource(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+                end
+
+                if isPlotContours('get') == true
+
+                    setAxesLimitsFromSource(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));                    
+                end
+
                 set(btnUiTraWindowFullScreen, 'TooltipString'  , 'Full Screen');
 
                 set(uiCorWindow, 'Visible', 'On');

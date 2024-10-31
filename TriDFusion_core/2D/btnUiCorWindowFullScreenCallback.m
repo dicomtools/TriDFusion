@@ -27,6 +27,8 @@ function btnUiCorWindowFullScreenCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    persistent ptLimit;
+
     uiCorWindow = uiCorWindowPtr('get');
     uiSagWindow = uiSagWindowPtr('get');
     uiTraWindow = uiTraWindowPtr('get');
@@ -49,6 +51,25 @@ function btnUiCorWindowFullScreenCallback(~, ~)
 
             if bIsFullScreen == false
 
+                ptLimit = axesLimitsFromTemplate(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+
+                adjAxeCameraViewAngle(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+                
+                if isFusion('get') == true
+
+                    setAxesLimitsFromSource(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+                end
+
+                if isPlotContours('get') == true
+
+                    setAxesLimitsFromSource(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));                    
+                end
+
+                % 
+                % pdCameraViewAngle = get(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CameraViewAngle');
+                % 
+                % set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CameraViewAngle', 1);
+
                 set(btnUiCorWindowFullScreen, 'TooltipString'  , 'Exit Full Screen');
 
                 set(uiTraWindow, 'Visible', 'Off');
@@ -59,6 +80,20 @@ function btnUiCorWindowFullScreenCallback(~, ~)
                 set(uiSagSlider, 'Visible', 'Off');
                 set(uiMipSlider, 'Visible', 'Off');
             else
+                axesLimitsFromTemplate(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ptLimit);
+
+                if isFusion('get') == true
+
+                    setAxesLimitsFromSource(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+                end
+
+                if isPlotContours('get') == true
+                    
+                    setAxesLimitsFromSource(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));                    
+                end
+
+                % set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CameraViewAngle', pdCameraViewAngle);
+
                 set(btnUiCorWindowFullScreen, 'TooltipString'  , 'Full Screen');
 
                 set(uiTraWindow, 'Visible', 'On');

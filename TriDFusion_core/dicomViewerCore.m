@@ -35,6 +35,8 @@ function dicomViewerCore()
 
     isMoveImageActivated('set', false);
 
+    showRightClickMenu(false);
+
     rightClickMenu('reset');
 
 %    im  = gpuArray(dicomBuffer('get'));
@@ -319,6 +321,12 @@ function dicomViewerCore()
             );
         disableDefaultInteractivity(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')));
 
+        set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
+        set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
+        set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+
+        grid(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'off');
+
         if aspectRatio('get') == true
 
             x = atMetaData{1}.PixelSpacing(1);
@@ -363,6 +371,8 @@ function dicomViewerCore()
                                  );
             end
         end
+
+        % adjAxeCameraViewAngle(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')));
 
         rightClickMenu('add', imAxe);
 
@@ -528,7 +538,13 @@ function dicomViewerCore()
             'YLim'    , [0 inf], ...
             'CLim'    , [0 inf] ...
             );
-        % disableDefaultInteractivity(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+        disableDefaultInteractivity(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+
+        set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
+        set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
+        set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+        
+        grid(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'off');
 
         axis(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'tight');
 
@@ -701,10 +717,13 @@ function dicomViewerCore()
 
         end
 
+        % adjAxeCameraViewAngle(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+
         rightClickMenu('add', imCoronal);
 
-        linkaxes([axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
+        % linkaxes([axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
         set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'Visible', 'off');
+
 
 %                set(axes1Ptr('get'), 'CLim', [aCLim(1) aCLim(2)]);
 
@@ -864,6 +883,12 @@ function dicomViewerCore()
             'CLim'    , [0 inf] ...
             );
         disableDefaultInteractivity(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+
+        set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
+        set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
+        set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+
+        grid(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'off');
 
         axis(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'tight');
 
@@ -1037,6 +1062,8 @@ function dicomViewerCore()
             imSagittalPtr ('set', imSagittal , get(uiSeriesPtr('get'), 'Value'));
         end
 
+        % adjAxeCameraViewAngle(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+
         rightClickMenu('add', imSagittal);
 
         set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'Visible', 'off');
@@ -1186,6 +1213,12 @@ function dicomViewerCore()
             );
         disableDefaultInteractivity(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
 
+        set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
+        set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
+        set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off');
+
+        grid(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'off');
+
         axis(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'tight');
 
         if isVsplash('get') == true && ...
@@ -1263,7 +1296,7 @@ function dicomViewerCore()
                                      );
                 end
             end           
-
+            
             imAxialPtr ('set', imAxial , get(uiSeriesPtr('get'), 'Value'));
 
 %             imComputed = computeMontage(im(:,:,end:-1:1), ...
@@ -1343,10 +1376,11 @@ function dicomViewerCore()
                 end
             end
 
-
             imAxialPtr ('set', imAxial , get(uiSeriesPtr('get'), 'Value'));
 
         end
+
+        % adjAxeCameraViewAngle(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
 
         rightClickMenu('add', imAxial );
 
@@ -1509,6 +1543,12 @@ function dicomViewerCore()
             );
         disableDefaultInteractivity(axesMipPtr ('get', [], get(uiSeriesPtr('get'), 'Value')));
 
+        set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
+        set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
+        set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off');
+
+        grid(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'off');
+
         axis(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'tight');
 
         if isVsplash('get') == false
@@ -1546,10 +1586,11 @@ function dicomViewerCore()
                 end
             end
 
+            % adjAxeCameraViewAngle(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')));
  
             imMipPtr ('set', imMip , get(uiSeriesPtr('get'), 'Value'));
 
-            linkaxes([axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
+            % linkaxes([axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
             set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'Visible', 'off');
 
             alAxesMipLine{1} = line(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
@@ -1557,42 +1598,42 @@ function dicomViewerCore()
                  [iAxial+0.5 iAxial-0.5], ...
                  'Color', crossColor('get'));
 
-            rightClickMenu('add', alAxesMipLine{1});
+            % rightClickMenu('add', alAxesMipLine{1});
 
             alAxesMipLine{2} = line(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
                  [iSagittalSize/2+0.5 iSagittalSize/2-0.5], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
 
-            rightClickMenu('add', alAxesMipLine{2});
+            % rightClickMenu('add', alAxesMipLine{2});
 
             alAxesMipLine{3} = line(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
                  [0 iSagittalSize/2-crossSize('get')], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
 
-            rightClickMenu('add', alAxesMipLine{3});
+            % rightClickMenu('add', alAxesMipLine{3});
 
             alAxesMipLine{4} = line(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
                  [iSagittalSize  /2+crossSize('get') iSagittalSize], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
 
-            rightClickMenu('add', alAxesMipLine{4});
+            % rightClickMenu('add', alAxesMipLine{4});
 
             alAxesMipLine{5} = line(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
                  [iSagittal iSagittal], ...
                  [0 iAxialSize/2-crossSize('get')], ...
                  'Color', crossColor('get'));
 
-            rightClickMenu('add', alAxesMipLine{5});
+            % rightClickMenu('add', alAxesMipLine{5});
 
             alAxesMipLine{6} = line(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
                  [iSagittal iSagittal], ...
                  [iAxialSize/2+crossSize('get') iAxialSize], ...
                  'Color', crossColor('get'));
 
-            rightClickMenu('add', alAxesMipLine{6});
+            % rightClickMenu('add', alAxesMipLine{6});
 
             axesLine('set', 'axesMip', alAxesMipLine);
 

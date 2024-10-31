@@ -27,11 +27,14 @@ function copyRoiCallback(hObject, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    tRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-    if isempty(tRoi)
+    if isempty(roiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
         return;
     end
 
     copyRoiPtr('set',  hObject.UserData);
+
+    rightClickMenu('on');
+
+    showRightClickMenu(true);
 
 end

@@ -163,7 +163,7 @@ function mouseMove(~, ~)
 
             if isMoveImageActivated('get') == false   
 
-                rightClickMenu('off');
+                % rightClickMenu('off');
 
                 if ismember('shift', get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...
                    strcmpi(get(fiMainWindowPtr('get'), 'Pointer'), 'bottom')
@@ -227,7 +227,7 @@ function mouseMove(~, ~)
              
             if isMoveImageActivated('get') == false   
 
-                rightClickMenu('off');
+                % rightClickMenu('off');
 
                 if ~ismember('shift'  , get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...
                    ~ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) && ...

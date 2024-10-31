@@ -115,14 +115,14 @@ function clickDown(~, ~)
 
             windowButton('set', 'down');                      
 
-            rightClickMenu('off'); 
-
             % pRoiPtr = brush2Dptr('get'); % Adjust brush size
             if ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier'))
 
                 if ~isempty(pRoiPtr)    
 
                     if isMoveImageActivated('get') == false
+                        
+                        rightClickMenu('off'); 
                
                         adjBrush2D(pRoiPtr, pRoiPtr.Parent.CurrentPoint(1, 1:2));
                     end

@@ -553,7 +553,7 @@ function setRoiToolbar(sVisible)
 
                     cropMenu(a);
 
-                    voiMenu(a);
+                    voiDefaultMenu(a);
 
                     uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
@@ -739,7 +739,7 @@ function setRoiToolbar(sVisible)
 
                     cropMenu(a);
 
-                    voiMenu(a);
+                    voiDefaultMenu(a);
 
                     uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
@@ -943,7 +943,7 @@ function setRoiToolbar(sVisible)
 
                     cropMenu(a);
 
-                    voiMenu(a);
+                    voiDefaultMenu(a);
 
                     uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
@@ -1114,7 +1114,7 @@ function setRoiToolbar(sVisible)
 
                 cropMenu(a);
 
-                voiMenu(a);
+                voiDefaultMenu(a);
 
                 uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
@@ -1287,7 +1287,7 @@ function setRoiToolbar(sVisible)
 
                     cropMenu(a);
 
-                    voiMenu(a);
+                    voiDefaultMenu(a);
 
                     uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
@@ -1543,7 +1543,7 @@ function setRoiToolbar(sVisible)
 
                 cropMenu(a);
 
-                voiMenu(a);
+                voiDefaultMenu(a);
 
                 uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 

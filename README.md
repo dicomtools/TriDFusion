@@ -111,7 +111,7 @@ CERR
 https://github.com/cerr/CERR
 
 ### Machine Learning Segmentation
-TotalSegmentator (Tested version: pip install totalsegmentator==1.5.6)
+TotalSegmentator 
 https://github.com/wasserth/TotalSegmentator
 
 After installation, open a command prompt and run `where TotalSegmentator`. If it doesn’t return a path, add the TotalSegmentator installation path to the Windows environment variables.

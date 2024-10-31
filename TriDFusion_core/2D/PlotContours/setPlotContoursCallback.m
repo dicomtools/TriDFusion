@@ -66,6 +66,13 @@ function setPlotContoursCallback(~, ~)
                         );
                 axeFc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
                 axeFc.Toolbar = [];               
+
+                set(axeFc, 'HitTest', 'off');  % Disable hit testing for axes
+                set(axeFc, 'XLimMode', 'manual', 'YLimMode', 'manual');  
+                set(axeFc, 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+
+                grid(axeFc, 'off');
+
                 axis(axeFc, 'tight');
                 axefcPtr('set', axeFc, get(uiFusedSeriesPtr('get'), 'Value'));
                 disableDefaultInteractivity(axeFc);
@@ -120,6 +127,13 @@ function setPlotContoursCallback(~, ~)
                 'YLim'    , aYLim, ...
                 'CLim'    , [0 inf] ...
                 );
+
+            set(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
+            set(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
+            set(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+
+            grid(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'off');
+                
             axis(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , 'tight');
 
             linkaxes([axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
@@ -201,6 +215,12 @@ function setPlotContoursCallback(~, ~)
                 axes1fc.Toolbar = [];    
                 disableDefaultInteractivity(axes1fc);
 
+                set(axes1fc, 'HitTest', 'off');  % Disable hit testing for axes
+                set(axes1fc, 'XLimMode', 'manual', 'YLimMode', 'manual');  
+                set(axes1fc, 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+
+                grid(axes1fc, 'off');
+
                 axis(axes1fc, 'tight');
                 axes1fcPtr('set', axes1fc, get(uiFusedSeriesPtr('get'), 'Value'));
 
@@ -236,6 +256,12 @@ function setPlotContoursCallback(~, ~)
                 axes2fc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
                 axes2fc.Toolbar = [];   
                 disableDefaultInteractivity(axes2fc);
+
+                set(axes2fc, 'HitTest', 'off');  % Disable hit testing for axes
+                set(axes2fc, 'XLimMode', 'manual', 'YLimMode', 'manual');  
+                set(axes2fc, 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+
+                grid(axes2fc, 'off');
 
                 axis(axes2fc, 'tight');
                 axes2fcPtr('set', axes2fc, get(uiFusedSeriesPtr('get'), 'Value'));
@@ -273,6 +299,12 @@ function setPlotContoursCallback(~, ~)
                 axes3fc.Toolbar = [];   
                 disableDefaultInteractivity(axes3fc);
 
+                set(axes3fc, 'HitTest', 'off');  % Disable hit testing for axes
+                set(axes3fc, 'XLimMode', 'manual', 'YLimMode', 'manual');  
+                set(axes3fc, 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+
+                grid(axes3fc, 'off');
+
                 axis(axes3fc, 'tight');
                 axes3fcPtr('set', axes3fc, get(uiFusedSeriesPtr('get'), 'Value'));
 
@@ -309,6 +341,12 @@ function setPlotContoursCallback(~, ~)
                     axesMipfc.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
                     axesMipfc.Toolbar = []; 
                     disableDefaultInteractivity(axesMipfc);
+
+                    set(axesMipfc, 'HitTest', 'off');  % Disable hit testing for axes
+                    set(axesMipfc, 'XLimMode', 'manual', 'YLimMode', 'manual');  
+                    set(axesMipfc, 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+    
+                    grid(axesMipfc, 'off');
 
                     axis(axesMipfc, 'tight');
                     axesMipfcPtr('set', axesMipfc, get(uiFusedSeriesPtr('get'), 'Value'));
@@ -440,6 +478,12 @@ function setPlotContoursCallback(~, ~)
             axis(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , 'tight');
             disableDefaultInteractivity(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
 
+            set(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
+            set(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
+            set(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+
+            grid(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'off');
+
             linkaxes([axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
 
             set(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , ...
@@ -461,6 +505,12 @@ function setPlotContoursCallback(~, ~)
                 );
             axis(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , 'tight');
             disableDefaultInteractivity(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+
+            set(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
+            set(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
+            set(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+
+            grid(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'off');
 
             linkaxes([axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
 
@@ -484,6 +534,12 @@ function setPlotContoursCallback(~, ~)
             axis(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , 'tight');
             disableDefaultInteractivity(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
 
+            set(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
+            set(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
+            set(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+
+            grid(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'off');
+
             linkaxes([axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
 
             set(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , ...
@@ -506,6 +562,12 @@ function setPlotContoursCallback(~, ~)
                     'CLim'    , [0 inf] ...
                     );
                 disableDefaultInteractivity(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+
+                set(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
+                set(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
+                set(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+    
+                grid(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'off');
 
                 axis(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , 'tight');
 

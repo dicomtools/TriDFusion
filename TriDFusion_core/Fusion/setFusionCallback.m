@@ -27,7 +27,7 @@ function setFusionCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-%     try
+    try
         
     if switchTo3DMode('get')     == false && ...
        switchToIsoSurface('get') == false && ...
@@ -367,6 +367,13 @@ end
                         );
                 axeF.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
                 axeF.Toolbar.Visible = 'off';                
+
+                set(axeF, 'HitTest', 'off');  % Disable hit testing for axes
+                set(axeF, 'XLimMode', 'manual', 'YLimMode', 'manual');  
+                set(axeF, 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+
+                grid(axeF, 'off');
+
                 axis(axeF, 'tight');
                 axefPtr('set', axeF, get(uiFusedSeriesPtr('get'), 'Value'));
                 disableDefaultInteractivity(axeF);
@@ -497,7 +504,9 @@ end
                 
                 set(imAxeF, 'Visible', 'off'); 
                 set(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); % Patch
-                
+
+                % adjAxeCameraViewAngle(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+               
                 imAxeFPtr('set', imAxeF, get(uiFusedSeriesPtr('get'), 'Value'));          
                 rightClickMenu('add', imAxeF);                   
                       
@@ -558,7 +567,14 @@ end
                         'CLim'    , [0 inf] ...
                         );
                 axes1f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axes1f.Toolbar.Visible = 'off';                 
+                axes1f.Toolbar.Visible = 'off';     
+
+                set(axes1f, 'HitTest', 'off');  % Disable hit testing for axes
+                set(axes1f, 'XLimMode', 'manual', 'YLimMode', 'manual');  
+                set(axes1f, 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+
+                grid(axes1f, 'off');
+
                 axis(axes1f, 'tight');
                 axes1fPtr('set', axes1f, get(uiFusedSeriesPtr('get'), 'Value'));
                 disableDefaultInteractivity(axes1f);
@@ -585,7 +601,14 @@ end
                         'CLim'    , [0 inf] ...
                         );
                 axes2f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axes2f.Toolbar.Visible = 'off';                  
+                axes2f.Toolbar.Visible = 'off';       
+
+                set(axes2f, 'HitTest', 'off');  % Disable hit testing for axes
+                set(axes2f, 'XLimMode', 'manual', 'YLimMode', 'manual');  
+                set(axes2f, 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+
+                grid(axes2f, 'off');
+
                 axis(axes2f, 'tight');
                 axes2fPtr('set', axes2f, get(uiFusedSeriesPtr('get'), 'Value'));
                 disableDefaultInteractivity(axes2f);
@@ -612,7 +635,14 @@ end
                         'CLim'    , [0 inf] ...
                         );
                 axes3f.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-                axes3f.Toolbar.Visible = 'off';                 
+                axes3f.Toolbar.Visible = 'off';     
+
+                set(axes3f, 'HitTest', 'off');  % Disable hit testing for axes
+                set(axes3f, 'XLimMode', 'manual', 'YLimMode', 'manual');  
+                set(axes3f, 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+
+                grid(axes3f, 'off');
+
                 axis(axes3f, 'tight');
                 disableDefaultInteractivity(axes3f);
                
@@ -724,9 +754,16 @@ end
                             );
                     axesMipf.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
                     axesMipf.Toolbar.Visible = 'off';  
-                    disableDefaultInteractivity(axesMipf);
+                    set(axesMipf, 'HitTest', 'off');  % Disable hit testing for axes
+
+                    set(axesMipf, 'XLimMode', 'manual', 'YLimMode', 'manual');  
+                    set(axesMipf, 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+   
+                    grid(axesMipf, 'off');
 
                     axis(axesMipf, 'tight');
+                    disableDefaultInteractivity(axesMipf);
+
                     axesMipfPtr('set', axesMipf, get(uiFusedSeriesPtr('get'), 'Value'));
 
                     linkaxes([axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');                
@@ -944,7 +981,9 @@ end
                 
                 set(imCoronalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
                 set(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
- 
+
+                % adjAxeCameraViewAngle(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+
                 % Set Sagittal
 
                 if size(imf, 2) < iSagittal
@@ -1027,7 +1066,9 @@ end
                 
                 set(imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
                 set(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
-                
+
+                % adjAxeCameraViewAngle(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+               
                 % Apply image translation. The translation xMoveOffset and
                 % yMoveOffset is set by resampleImageTransformMatrix
                 
@@ -1120,7 +1161,9 @@ end
                 
                 set(imAxialFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
                 set(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
-                                
+
+                % adjAxeCameraViewAngle(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
+                            
                 % Apply image translation. The translation xMoveOffset and
                 % yMoveOffset is set by resampleImageTransformMatrix
                 
@@ -1167,7 +1210,10 @@ end
                     set(imMipFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
                 end                      
                 
-                set(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); % Patch
+                set(imMipFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
+                set(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'off'); 
+
+                % adjAxeCameraViewAngle(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
 
                 % Init Aspect Ratio
 
@@ -1199,6 +1245,7 @@ end
                     daspect(axes1fPtr  ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
                     daspect(axes2fPtr  ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
                     daspect(axes3fPtr  ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf zf]);
+                    
                     if isVsplash('get') == false
                         daspect(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
                     end
@@ -2058,6 +2105,7 @@ end
         end
 
         if isFusion('get') == true
+
             if isVsplash('get') == true
                 
                 if strcmpi(vSplahView('get'), 'Coronal') || ...
@@ -2077,71 +2125,84 @@ end
             
             % Set fused axes on same field of view
 
-            aFusionSize = size(fusionBuffer('get', [], dFusionSeriesOffset));
+            % aFusionSize = size(fusionBuffer('get', [], dFusionSeriesOffset));
 
              if size(fusionBuffer('get', [], dFusionSeriesOffset), 3) == 1
             % 
-                 axe  = axePtr ('get', [], get(uiSeriesPtr('get'), 'Value')  );
+                 axe  = axePtr ('get', [], get(uiSeriesPtr('get')     , 'Value'));
                  axef = axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+
+                 setAxesLimitsFromSource(axe, axef);
+                
             % 
-            %     set(axef, 'XLim', axe.XLim);
-            %     set(axef, 'YLim', axe.YLim); 
-            % 
-                 set(axef, 'XLim', [0 aFusionSize(2)]);
-                 set(axef, 'YLim', [0 aFusionSize(1)])
+                % set(axef, 'XLim', axe.XLim);
+                % set(axef, 'YLim', axe.YLim); 
+           % 
+                 % set(axef, 'XLim', [0 aFusionSize(2)]);
+                 % set(axef, 'YLim', [0 aFusionSize(1)]);
                  linkaxes([axe axef], 'xy');                     
              else
-                axes1  = axes1Ptr ('get', [], get(uiSeriesPtr('get'), 'Value')  );
+                axes1  = axes1Ptr ('get', [], get(uiSeriesPtr('get')     , 'Value'));
                 axes1f = axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
 
-                if isVsplash('get') == true
-                    set(axes1f, 'XLim', axes1.XLim);
-                    set(axes1f, 'YLim', axes1.YLim); 
-                else
+                setAxesLimitsFromSource(axes1, axes1f);
 
-                    set(axes1f, 'XLim', [0 aFusionSize(2)]);
-                    set(axes1f, 'YLim', [0 aFusionSize(3)]); 
-                end
+                % if isVsplash('get') == true
+                    % set(axes1f, 'XLim', axes1.XLim);
+                    % set(axes1f, 'YLim', axes1.YLim); 
+                % else
+                % 
+                %     set(axes1f, 'XLim', [0 aFusionSize(2)]);
+                %     set(axes1f, 'YLim', [0 aFusionSize(3)]); 
+                % end
 
                 linkaxes([axes1 axes1f], 'xy'); 
 
-                axes2  = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')  );
+                axes2  = axes2Ptr ('get', [], get(uiSeriesPtr('get')     , 'Value'));
                 axes2f = axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
 
-                if isVsplash('get') == true
+                setAxesLimitsFromSource(axes2, axes2f);
 
-                    set(axes2f, 'XLim', axes2.XLim);
-                    set(axes2f, 'YLim', axes2.YLim); 
-                else
-                    set(axes2f, 'XLim', [0 aFusionSize(1)]);
-                    set(axes2f, 'YLim', [0 aFusionSize(3)]); 
-                end
+                % if isVsplash('get') == true
+                    % 
+                    % set(axes2f, 'XLim', axes2.XLim);
+                    % set(axes2f, 'YLim', axes2.YLim); 
+
+                % else
+                %     set(axes2f, 'XLim', [0 aFusionSize(1)]);
+                %     set(axes2f, 'YLim', [0 aFusionSize(3)]); 
+                % end
 
                 linkaxes([axes2 axes2f], 'xy'); 
 
-                axes3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')  );
+                axes3 = axes3Ptr  ('get', [], get(uiSeriesPtr('get')     , 'Value'));
                 axes3f = axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                
+                setAxesLimitsFromSource(axes3, axes3f);
 
-                if isVsplash('get') == true
-                    set(axes3f, 'XLim', axes3.XLim);
-                    set(axes3f, 'YLim', axes3.YLim); 
-                else
-                    set(axes3f, 'XLim', [0 aFusionSize(2)]);
-                    set(axes3f, 'YLim', [0 aFusionSize(1)]); 
-                end
+                % if isVsplash('get') == true
+                    % set(axes3f, 'XLim', axes3.XLim);
+                    % set(axes3f, 'YLim', axes3.YLim); 
+                % else
+                    % set(axes3f, 'XLim', [0 aFusionSize(2)]);
+                    % set(axes3f, 'YLim', [0 aFusionSize(1)]); 
+                % end
 
                 linkaxes([axes3 axes3f], 'xy');                 
 
                 if isVsplash('get') == false         
 
-                    axesMip  = axesMipPtr ('get', [], get(uiSeriesPtr('get'), 'Value'));
+                    axesMip  = axesMipPtr ('get', [], get(uiSeriesPtr('get')     , 'Value'));
                     axesMipf = axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+
+                    setAxesLimitsFromSource(axesMip, axesMipf);
 
                     % set(axesMipf, 'XLim', axesMip.XLim);
                     % set(axesMipf, 'YLim', axesMip.YLim); 
+                    % set(axesMipf, 'CameraViewAngle', axesMip.CameraViewAngle);
 
-                    set(axesMipf, 'XLim', [0 aFusionSize(2)]);
-                    set(axesMipf, 'YLim', [0 aFusionSize(3)]);
+                    % set(axesMipf, 'XLim', [0 aFusionSize(2)]);
+                    % set(axesMipf, 'YLim', [0 aFusionSize(3)]);
 
                     linkaxes([axesMip axesMipf], 'xy');               
                 end                                
@@ -2149,10 +2210,10 @@ end
                         
             if size(dicomBuffer('get'), 3) == 1
 
-                set( imAxeFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , 'Visible', 'on' );
+                set( imAxeFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , 'Visible', 'on');
 
-                alpha( imAxeFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
-                alpha( imAxePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 1-get(uiAlphaSliderPtr('get'), 'Value') );   
+                alpha( imAxeFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),   get(uiAlphaSliderPtr('get'), 'Value'));
+                alpha( imAxePtr ('get', [], get(uiSeriesPtr('get')     , 'Value')), 1-get(uiAlphaSliderPtr('get'), 'Value'));   
 
                 axef = axefPtr('get', [], get(uiSeriesPtr('get'), 'Value'));    
                 axef.Toolbar.Visible = 'off';
@@ -2343,10 +2404,10 @@ end
         refreshImages();            
     end
     
-%     catch   
-%         
-%         progressBar(1, 'Error:setFusionCallback()');
-%     end
+    catch   
+
+        progressBar(1, 'Error:setFusionCallback()');
+    end
     
     if switchTo3DMode('get')     == false && ...
        switchToIsoSurface('get') == false && ...

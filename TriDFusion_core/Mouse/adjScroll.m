@@ -29,13 +29,18 @@ function adjScroll(dInitCoord)
 
     persistent pdInitialCoord;
 
-    if exist('dInitCoord', 'var')
+    if exist('dInitCoord', 'var') 
 
         pdInitialCoord = dInitCoord;
     end
    
     pFigure = fiMainWindowPtr('get');
-    
+
+    if isempty(pdInitialCoord)
+        
+        pdInitialCoord = pFigure.CurrentPoint;
+    end
+
     aPosDiff = pFigure.CurrentPoint(1, 1:2) - pdInitialCoord;
 
     if aPosDiff(2) > 0

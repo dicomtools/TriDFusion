@@ -277,7 +277,7 @@ function splitContour(pAxe, pRoiLinePtr)
             
                             cropMenu(roiPtr);
             
-                            voiMenu(roiPtr);
+                            voiDefaultMenu(roiPtr);
             
                             uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
@@ -512,7 +512,7 @@ function splitContour(pAxe, pRoiLinePtr)
 % 
 %                 cropMenu(roiPtr);
 % 
-%                 voiMenu(roiPtr);
+%                 voiDefaultMenu(roiPtr);
 % 
 %                 uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
@@ -553,7 +553,7 @@ function splitContour(pAxe, pRoiLinePtr)
 
                 cropMenu(roiPtr);
 
-                voiMenu(roiPtr);
+                voiDefaultMenu(roiPtr);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
