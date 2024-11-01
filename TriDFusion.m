@@ -55,7 +55,7 @@ function TriDFusion(varargin)
 
     initViewerGlobal();
     
-    % Set view default color
+    % Set view defbault color
 
     viewerAxesColor      ('set', [0.149 0.149 0.149]);
     viewerBackgroundColor('set', [0.16 0.18 0.20]);
@@ -163,6 +163,7 @@ function TriDFusion(varargin)
             otherwise
                 
                 if k ~= dOutputDirOffset % The output dir is set before
+
                     asMainDirArg{argLoop} = sSwitchAndArgument;
                     if asMainDirArg{argLoop}(end) ~= '/'
                         asMainDirArg{argLoop} = [asMainDirArg{argLoop} '/'];                     
@@ -247,6 +248,12 @@ function TriDFusion(varargin)
     fiMainWindowPtr('set', fiMainWindow);
 
     set(fiMainWindow, 'DefaultUipanelUnits', 'normalized');
+% 
+%     set(fiMainWindow, 'DefaultLineHitTest' , 'off');
+%     set(fiMainWindow, 'DefaultPatchHitTest', 'off');
+%     set(fiMainWindow, 'DefaultTextHitTest' , 'off');
+
+
     % set(fiMainWindow, 'AutoResizeChildren', 'off');
 
     if viewerUIFigure('get') == true
@@ -258,9 +265,20 @@ function TriDFusion(varargin)
     end
 
     iptPointerManager(fiMainWindowPtr('get'));
-    
 
-%     warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');  
+    sRootPath = viewerRootPath('get');
+    
+    if ~isempty(sRootPath)
+
+        javaFrame = get(fiMainWindowPtr('get'), 'JavaFrame');
+
+        if ~isempty(javaFrame)
+            
+            javaFrame.setFigureIcon(javax.swing.ImageIcon(sprintf('%s/logo.png', sRootPath)));       
+        end
+    end
+
+%      
 %     
 %     if argInternal == true
 %         sLogoPath = './TriDFusion/logo.png';
@@ -277,6 +295,7 @@ function TriDFusion(varargin)
     uiSplashWindow = ...
         axes(fiMainWindowPtr('get'),...
              'Units'   , 'pixels',...
+             'HitTest' , 'off', ...
              'position', [0 30 620 300]...
              );   
     uiSplashWindow.Toolbar.Visible = 'off';
@@ -287,6 +306,7 @@ function TriDFusion(varargin)
                 'Units'          , 'pixels',...
                 'position'       , [0 0 620 30],...
                 'title'          , 'Ready',...
+                'HitTest'        , 'off', ...
                 'BackgroundColor', viewerBackgroundColor ('get'), ...
                 'ForegroundColor', viewerForegroundColor('get') ...
                 );       
@@ -300,7 +320,7 @@ function TriDFusion(varargin)
     
     uiBarPtr('set', uiBar);    
         
-    sRootPath = viewerRootPath('get');
+%     sRootPath = viewerRootPath('get');
     if isempty(sRootPath)
         imSplash = zeros([300 620 3]);
     else       
@@ -330,8 +350,10 @@ function TriDFusion(varargin)
 
     
     set(fiMainWindowPtr('get'), 'Position', aScreenSize);   
-    set(uiProgressWindowPtr('get'), 'Position'   , [0, 0, aScreenSize(3), 30]);
-    set(uiBarPtr('get'), 'Position'   , [0, 0,  aScreenSize(3), 1]);
+
+    set(uiProgressWindowPtr('get'), 'Position', [0, 0, aScreenSize(3), 30]);
+
+    set(uiBarPtr('get'), 'Position', [0, 0,  aScreenSize(3), 1]);
 
     drawnow update;
 
@@ -339,7 +361,7 @@ function TriDFusion(varargin)
         
      %   movegui(fiMainWindowPtr('get'), 'center');                                                         
       
-    set(fiMainWindowPtr('get')    , 'Resize'     , 'on');
+    set(fiMainWindowPtr('get'), 'Resize'     , 'on');
     set(fiMainWindowPtr('get'), 'WindowState', 'maximized');
 
     drawnow update;
@@ -347,7 +369,6 @@ function TriDFusion(varargin)
     % set(fiMainWindowPtr('get'), 'WindowState', 'maximized');
     
     resizeViewer = dicomViewer(); 
-
 
     setContours();
     
@@ -382,7 +403,6 @@ function TriDFusion(varargin)
     if ~isempty(sWorkflowName)
 
          processWorkflow(sWorkflowName);
-
     end
 
     function resizeFigureCallback(~,~)

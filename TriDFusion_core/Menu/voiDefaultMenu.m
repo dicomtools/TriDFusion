@@ -301,7 +301,8 @@ function voiDefaultMenu(ptrRoi, sTag)
     function refreshVoiMenuLocationCallback(hObject, ~) 
 
         atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-        dTagOffset = find(strcmp({atVoiInput{:}.Tag}, hObject.UserData), 1);
+        
+        dTagOffset = find(strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), hObject.UserData ), 1 );
 
         if ~isempty(dTagOffset) % Tag is a VOI
 
