@@ -34,8 +34,47 @@ function catchKeyPress(~,evnt)
         return;
     end
 
+    if strcmpi(evnt.Key,'x') % Activate the interpolaion
 
-    if strcmpi(evnt.Key,'b') % Activate th brush
+        if isMoveImageActivated('get') == true || ...
+           switchTo3DMode('get')       == true || ...
+           switchToIsoSurface('get')   == true || ...
+           switchToMIPMode('get')      == true
+
+            return;
+        end       
+
+        atRoiMenu = roiMenuObject('get');
+
+        if ~isempty(atRoiMenu)
+
+            for ii=1:numel(atRoiMenu.Children)
+
+                toggleTool = atRoiMenu.Children(ii);
+                
+                clickedCallback = func2str(toggleTool.ClickedCallback);
+
+                if contains(clickedCallback, 'setInterpolateCallback') 
+
+                    if strcmpi(get(toggleTool, 'State'), 'on')
+                        
+                        set(toggleTool, 'State', 'off');
+                    else
+
+                        set(toggleTool, 'State', 'on');
+                    end
+
+                    callbackFunction = get(toggleTool, 'ClickedCallback');  
+
+                    callbackFunction();
+                    
+                end
+
+            end
+        end
+    end
+
+    if strcmpi(evnt.Key,'b') % Activate the brush
 
         if isMoveImageActivated('get') == false && ...
            switchTo3DMode('get')       == false && ...
@@ -111,7 +150,7 @@ function catchKeyPress(~,evnt)
 
     if strcmpi(evnt.Key,'d')
         
-        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+        % dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
         if isMoveImageActivated('get') == true || ...
            switchTo3DMode('get')       == true || ...

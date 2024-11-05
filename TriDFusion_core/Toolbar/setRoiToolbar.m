@@ -135,6 +135,14 @@ function setRoiToolbar(sVisible)
         tContinuous = uitoggletool(atRoiMenu,'CData',img,'TooltipString','Continuous', 'Separator', 'on');
         tContinuous.ClickedCallback = @setContinuousCallback;
 
+        % Interpolate
+
+        [img,~] = imread(sprintf('%s//interpolate.png', sIconsPath));
+        img = rescaleAndRemoveIconBackground(img);
+
+        tInterpolate = uitoggletool(atRoiMenu,'CData',img,'TooltipString','Interpolate (x)');
+        tInterpolate.ClickedCallback = @setInterpolateCallback;
+
         % Farthest distances
 
         [img,~] = imread(sprintf('%s//farthest.png', sIconsPath));
@@ -265,7 +273,7 @@ function setRoiToolbar(sVisible)
                 contourVisibilityRoiPanelValue('set', true);
                 set(chkContourVisibilityPanelObject('get'), 'Value', true);
 
-                refreshImages();
+                % refreshImages();
 
                 if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
 
@@ -361,7 +369,7 @@ function setRoiToolbar(sVisible)
                     uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
 %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
-                    refreshImages();
+                    % refreshImages();
 
                     if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
 
@@ -438,7 +446,7 @@ function setRoiToolbar(sVisible)
                 contourVisibilityRoiPanelValue('set', true);
                 set(chkContourVisibilityPanelObject('get'), 'Value', true);
 
-                refreshImages();
+                % refreshImages();
 
                 if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
 
@@ -558,16 +566,22 @@ function setRoiToolbar(sVisible)
                     uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
 %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
-                    refreshImages();
+     %               refreshImages();
 
                     if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
                         plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
                     end
 
                     if strcmpi(get(tContinuous, 'State'), 'off')
+
                         doWhileContinuous = false;
                     end
 
+                    if strcmpi(get(tInterpolate, 'State'), 'on')
+
+                        interpolateROIsByTag(a.Tag, lastRoiTag());                       
+                    end
              %   end
                 else
                     delete(a);
@@ -635,7 +649,7 @@ function setRoiToolbar(sVisible)
                 contourVisibilityRoiPanelValue('set', true);
                 set(chkContourVisibilityPanelObject('get'), 'Value', true);
 
-                refreshImages();
+                % refreshImages();
 
                 if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
 
@@ -744,7 +758,7 @@ function setRoiToolbar(sVisible)
                     uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
     %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
-                    refreshImages();
+                    % refreshImages();
 
                     if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
                         plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
@@ -753,6 +767,12 @@ function setRoiToolbar(sVisible)
                     if strcmpi(get(tContinuous, 'State'), 'off')
                         doWhileContinuous = false;
                     end
+
+                    if strcmpi(get(tInterpolate, 'State'), 'on')
+
+                        interpolateROIsByTag(a.Tag, lastRoiTag());                       
+                    end
+
             %    end
                 % else
                 %     delete(a);
@@ -850,7 +870,7 @@ function setRoiToolbar(sVisible)
                 contourVisibilityRoiPanelValue('set', true);
                 set(chkContourVisibilityPanelObject('get'), 'Value', true);
 
-                refreshImages();
+                % refreshImages();
 
                 if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
 
@@ -948,15 +968,22 @@ function setRoiToolbar(sVisible)
                     uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
 %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll  );
-                    refreshImages();
+                    % refreshImages();
 
                     if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
                         plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
                     end
 
                     if strcmpi(get(tContinuous, 'State'), 'off')
+
                         doWhileContinuous = false;
                     end
+
+                    if strcmpi(get(tInterpolate, 'State'), 'on')
+
+                        interpolateROIsByTag(a.Tag, lastRoiTag());                       
+                    end                    
             %    end
 
                 roiSetAxeBorder(false);
@@ -1019,7 +1046,7 @@ function setRoiToolbar(sVisible)
                 contourVisibilityRoiPanelValue('set', true);
                 set(chkContourVisibilityPanelObject('get'), 'Value', true);
 
-                refreshImages();
+                % refreshImages();
 
                 if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
 
@@ -1119,15 +1146,22 @@ function setRoiToolbar(sVisible)
                 uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
 %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
-                refreshImages();
+                % refreshImages();
 
                 if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
                     plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
                 end
 
                 if strcmpi(get(tContinuous, 'State'), 'off')
+
                     doWhileContinuous = false;
                 end
+
+                if strcmpi(get(tInterpolate, 'State'), 'on')
+
+                    interpolateROIsByTag(a.Tag, lastRoiTag());                       
+                end                
           %      end
 
                 roiSetAxeBorder(false);
@@ -1189,7 +1223,7 @@ function setRoiToolbar(sVisible)
                 contourVisibilityRoiPanelValue('set', true);
                 set(chkContourVisibilityPanelObject('get'), 'Value', true);
 
-                refreshImages();
+                % refreshImages();
 
                 if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
 
@@ -1292,15 +1326,23 @@ function setRoiToolbar(sVisible)
                     uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
     %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
-                    refreshImages();
+                    % refreshImages();
 
                     if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
                         plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
                     end
 
                     if strcmpi(get(tContinuous, 'State'), 'off')
+
                         doWhileContinuous = false;
                     end
+
+                    if strcmpi(get(tInterpolate, 'State'), 'on')
+
+                        interpolateROIsByTag(a.Tag, lastRoiTag());                       
+                    end
+
                  %   end
                 else
                     delete(a);
@@ -2422,6 +2464,11 @@ end
         drawnow;
     end
 
+    function setInterpolateCallback(~, ~)
+
+       lastRoiTag('');
+    end
+
     function set2DBrushCallback(hObject, actionData)
 
         if switchTo3DMode('get')     == true || ...
@@ -2714,4 +2761,79 @@ end
     %         set(f, 'WaitStatus', 'inactive');
     %     end
     % end
+
+    function interpolateROIsByTag(sTag1, sTag2)
+
+        lastRoiTag(sTag1);
+
+        if isempty(sTag2)
+            return;
+        end
+
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+            atRoiInput = roiTemplate('get', dSeriesOffset);
+            atVoiInput = voiTemplate('get', dSeriesOffset);
+    
+            dTagOffset1 = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {sTag1} ), 1);
+            dTagOffset2 = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {sTag2} ), 1);
+    
+            if ~isempty(dTagOffset1)&&~isempty(dTagOffset2) 
+    
+                if strcmpi(atRoiInput{dTagOffset2}.ObjectType, 'voi-roi')
+    
+                    for vv=1:numel(atVoiInput)
+    
+                        dVoiTagOffset = find(contains(atVoiInput{vv}.RoisTag, atRoiInput{dTagOffset2}.Tag), 1);
+    
+                        if ~isempty(dVoiTagOffset)
+                            
+                            dNbTags = numel(atVoiInput{vv}.RoisTag);
+    
+                            adSliceNb = cell(2, dNbTags);
+                            for rr=1:numel(atVoiInput{vv}.RoisTag)
+                                
+                                dTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {atVoiInput{vv}.RoisTag{rr}} ), 1);
+    
+                                if ~isempty(dTagOffset)
+    
+                                    adSliceNb{1, rr} = atRoiInput{dTagOffset}.SliceNb;
+                                    adSliceNb{2, rr} = dTagOffset;
+     
+                                end
+                            end
+    
+                            numericValues = cell2mat(adSliceNb);
+    
+                            [minValue, minOffset] = min(numericValues(1,:));
+                            [~, maxOffset]        = max(numericValues(1,:));
+    
+                            if atRoiInput{dTagOffset1}.SliceNb < minValue
+                                dTagOffset2 = numericValues(2,minOffset);
+                            else
+                                dTagOffset2 = numericValues(2,maxOffset);
+                            end
+    
+                            break;
+                        end
+                    end
+                end
+                
+                interpolateBetweenROIs(atRoiInput{dTagOffset1}, atRoiInput{dTagOffset2}, dSeriesOffset, true); 
+            end
+        end
+    end
+
+    function sLastTag = lastRoiTag(sTag)
+
+        persistent psLastTag;
+
+        if exist('sTag', 'var')
+            psLastTag = sTag;
+        end
+
+        sLastTag = psLastTag;
+    end
 end

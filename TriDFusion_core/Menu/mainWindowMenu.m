@@ -187,7 +187,7 @@ function mainWindowMenu()
     mAnalCancer = uimenu(mWorkflows,'Label','Anal Cancer');
 
     uimenu(mAnalCancer, 'Label','Display Statistics ', 'Callback'              , @figVoiSimplifiedDialogCallback);
-    uimenu(mAnalCancer, 'Label','Export Report...', 'Callback'                 , @setAnalCancerReportCallback, 'Separator','on');
+    uimenu(mAnalCancer, 'Label','Export Report...', 'Callback'                 , @setAnalCancerReportCallbackmMetastaticBreastCancer);
     uimenu(mAnalCancer, 'Label','Export Contours to RT-structure...','Callback', @writeRTStructCallback);
     uimenu(mAnalCancer, 'Label','PET/CT Fusion', 'Callback'                    , @setPETCTAnalCancerFusionCallback, 'Separator','on');
 
@@ -195,7 +195,8 @@ function mainWindowMenu()
 
     mMetastaticBreastCancer = uimenu(mWorkflows,'Label','Metastatic Breast Cancer');
 
-    mMetastaticBreastCancerThreshold = uimenu(mMetastaticBreastCancer,'Label','Threshold-based Segmentation');
+    uimenu(mMetastaticBreastCancer, 'Label','Display Statistics ', 'Callback'              , @figVoiSimplifiedDialogCallback);
+    mMetastaticBreastCancerThreshold = uimenu(mMetastaticBreastCancer,'Label','Threshold-based Segmentation', 'Separator','on');
     uimenu(mMetastaticBreastCancerThreshold, 'Label','Metastatic Breast Cancer Segmentation (Threshold)', 'Callback', @setSegmentationMetastaticBreastCancerSegmentationCallback);
 
     mMetastaticBreastCancerThresholdFullAI = uimenu(mMetastaticBreastCancer,'Label','Machine Learning Segmentation');
