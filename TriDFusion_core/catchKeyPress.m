@@ -319,7 +319,7 @@ function catchKeyPress(~,evnt)
         end
     end
 
-    if strcmpi(evnt.Key,'s')
+    if strcmpi(evnt.Key,'e')
         
         % dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
@@ -405,8 +405,6 @@ function catchKeyPress(~,evnt)
 
     if strcmpi(evnt.Key,'tab')
         
-        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-
         if isMoveImageActivated('get') == true || ...
            switchTo3DMode('get')       == true || ...
            switchToIsoSurface('get')   == true || ...
@@ -415,7 +413,7 @@ function catchKeyPress(~,evnt)
             return;
         end
         
-        if ~isempty(voiTemplate('get', dSeriesOffset))
+        if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
 
             uiAddVoiRoiPanel = uiAddVoiRoiPanelObject('get');
 
@@ -424,6 +422,29 @@ function catchKeyPress(~,evnt)
                 callbackFunction = get(uiAddVoiRoiPanel, 'Callback');  
                 
                 callbackFunction(uiAddVoiRoiPanel);
+            end
+        end
+    end
+
+    if strcmpi(evnt.Key,'s')
+        
+        if isMoveImageActivated('get') == true || ...
+           switchTo3DMode('get')       == true || ...
+           switchToIsoSurface('get')   == true || ...
+           switchToMIPMode('get')      == true
+
+            return;
+        end
+
+        if ~isempty(roiTemplate('get', get(uiSeriesPtr('get'), 'Value'))) 
+
+            txtContourVisibilityPanel = txtContourVisibilityPanelObject('get');
+
+            if ~isempty(txtContourVisibilityPanel)
+    
+                buttonDownFcn = get(txtContourVisibilityPanel, 'ButtonDownFcn');  
+                
+                buttonDownFcn(txtContourVisibilityPanel);
             end
         end
     end

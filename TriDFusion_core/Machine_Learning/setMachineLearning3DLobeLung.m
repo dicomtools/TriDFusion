@@ -425,6 +425,8 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
 
                     setImagesAspectRatio();
 
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dNMSerieOffset), dicomBuffer('get', [], dNMSerieOffset), mipAngle('get'));       
+
                     refreshImages();
 
                     drawnow;

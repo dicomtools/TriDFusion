@@ -369,8 +369,11 @@ function writeRoisToNrrdMask(sOutDir, bSubDir, sNrrdName, aInputBuffer, atInputM
                 dMaskValue = 5;                 
             case 'soft tissue' 
                 dMaskValue = 6;
+            case 'abdominal' % For now as we don't have enough segmented case
+                % dMaskValue = 7;               
+                dMaskValue = 6;               
             otherwise
-                dMaskValue = 7;
+                dMaskValue = 8;
         end
     end
 

@@ -287,8 +287,8 @@ function resize = dicomViewer()
 
     % 3D Lung Lobes
 
-    lungLobesLiverVolumeOversized       ('set', 2); % Pixel(s) offset
-    lungLobesLiverTopOfVolumeExtraSlices('set', 1); % Slice cutoff 
+    lungLobesLiverVolumeOversized       ('set', 0); % Pixel(s) offset
+    lungLobesLiverTopOfVolumeExtraSlices('set', 0); % Slice cutoff 
 
     % FDG segmentation
 

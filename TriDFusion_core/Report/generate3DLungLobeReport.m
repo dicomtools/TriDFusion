@@ -799,15 +799,25 @@ function generate3DLungLobeReport(bInitReport)
     setLobeLungRatioReportFigureName();
 
     if bInitReport == false % Reopen the report
+
         refreshReportLesionInformation(suvMenuUnitOption('get'));
+
     else % First run
+
         gtReport = computeLobeLungReportContoursInformation(suvMenuUnitOption('get'), false, false, true);
 
-        proceed3DLobesLiverVolumeOversize();
+        if lungLobesLiverVolumeOversized('get')        == 0 && ... % Pixel(s) offset
+           lungLobesLiverTopOfVolumeExtraSlices('get') == 0 % Slice cutoff 
 
+            bInitReport = false;
+        end
+
+        proceed3DLobesLiverVolumeOversize();
+        
         bInitReport = false;
 
         if isvalid(ui3DWindow)
+
             display3DLobeLung();
         end
     end

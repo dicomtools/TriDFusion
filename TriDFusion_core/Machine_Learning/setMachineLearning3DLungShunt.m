@@ -252,6 +252,8 @@ function setMachineLearning3DLungShunt(sSegmentatorScript, sSegmentatorCombineMa
                     resampleAxes(aResampledNMImage, atResampledNMMeta);
 
                     setImagesAspectRatio();
+                    
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dNMSerieOffset), dicomBuffer('get', [], dNMSerieOffset), mipAngle('get'));       
 
                     refreshImages();
 

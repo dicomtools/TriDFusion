@@ -59,7 +59,7 @@ function setRoiToolbar(sVisible)
         [img,~] = imread(sprintf('%s//line.png', sIconsPath));
         img = double(img)/255;
 
-        t8 = uitoggletool(atRoiMenu,'CData',img,'TooltipString','Line Measurement (m)');
+        t8 = uitoggletool(atRoiMenu,'CData',img,'TooltipString','<html>Line Measurement (m)<br>Draw a line by clicking and dragging; measurement appears, and right-click to view the profile</html>');
         t8.ClickedCallback = @drawlineCallback;
 
         % Draw freehand
@@ -69,7 +69,7 @@ function setRoiToolbar(sVisible)
 
     %    icon = ind2rgb(img,map);
 
-        t = uitoggletool(atRoiMenu,'CData',img,'TooltipString','Draw Freehand (d)');
+        t = uitoggletool(atRoiMenu,'CData',img,'TooltipString','<html>Draw Freehand (d)<br>Draw a freeform shape by clicking and dragging; release to finish</html>');
         t.ClickedCallback = @drawfreehandCallback;
 
 %            img = zeros(16,16,3);
@@ -84,7 +84,7 @@ function setRoiToolbar(sVisible)
         [img,~] = imread(sprintf('%s//polygon.png', sIconsPath));
         img = rescaleAndRemoveIconBackground(img);
 
-        t6 = uitoggletool(atRoiMenu,'CData',img,'TooltipString','Draw Polygon (p)');
+        t6 = uitoggletool(atRoiMenu,'CData',img,'TooltipString','<html>Draw Polygon (p)<br>Draw a polygon by clicking to set each vertex; double-click to complete</html>');
         t6.ClickedCallback = @drawpolygonCallback;
 
         % Draw circle
@@ -116,7 +116,7 @@ function setRoiToolbar(sVisible)
         [img,~] = imread(sprintf('%s//sphere.png', sIconsPath));
         img = rescaleAndRemoveIconBackground(img);
 
-        t11 = uitoggletool(atRoiMenu,'CData',img,'TooltipString','<html>Draw Sphere (s)<br>Activate the View/Contour Panel to modify the diameter</html>', 'Separator', 'on');
+        t11 = uitoggletool(atRoiMenu,'CData',img,'TooltipString','<html>Draw Sphere (e)<br>Click on the image to create a sphere. Modify its diameter from the View/Contour Panel</html>', 'Separator', 'on');
         t11.ClickedCallback = @drawsphereCallback;
 
         % Click VOI
@@ -124,7 +124,7 @@ function setRoiToolbar(sVisible)
         [img,~] = imread(sprintf('%s//voi-click.png', sIconsPath));
         img = rescaleAndRemoveIconBackground(img);
 
-        t12 = uitoggletool(atRoiMenu,'CData',img,'TooltipString','<html>Click-VOI (v)<br>Activate the View/Contour Panel to fine-tune the threshold</html>');
+        t12 = uitoggletool(atRoiMenu,'CData',img,'TooltipString','<html>Click-VOI (v)<br>Create a VOI by clicking on the image. Adjust it relative to the maximum value in the View/Contour Panel</html>');
         t12.ClickedCallback = @drawClickVoiCallback;
 
         % Continuous
@@ -140,7 +140,7 @@ function setRoiToolbar(sVisible)
         [img,~] = imread(sprintf('%s//interpolate.png', sIconsPath));
         img = rescaleAndRemoveIconBackground(img);
 
-        tInterpolate = uitoggletool(atRoiMenu,'CData',img,'TooltipString','Interpolate (x)');
+        tInterpolate = uitoggletool(atRoiMenu,'CData',img,'TooltipString','<html>Interpolate (x)<br>Generate VOI by interpolating between ROIs</html>');
         tInterpolate.ClickedCallback = @setInterpolateCallback;
 
         % Farthest distances
@@ -156,7 +156,7 @@ function setRoiToolbar(sVisible)
         [img,~] = imread(sprintf('%s//brush.png', sIconsPath));
         img = rescaleAndRemoveIconBackground(img);
 
-        t2Dbrush = uitoggletool(atRoiMenu,'CData',img,'TooltipString','2D Brush (b)');
+        t2Dbrush = uitoggletool(atRoiMenu,'CData',img,'TooltipString','<html>2D Brush (b)<br>Click on the image to activate the brush. Hold Ctrl and scroll to adjust brush diameter</html>');
         t2Dbrush.ClickedCallback = @set2DBrushCallback;
 
         % Scissor
@@ -164,7 +164,7 @@ function setRoiToolbar(sVisible)
         [img,~] = imread(sprintf('%s//knife.png', sIconsPath));
         img = rescaleAndRemoveIconBackground(img);
 
-        t2Dscissor = uitoggletool(atRoiMenu,'CData',img,'TooltipString','Knife (k)');
+        t2Dscissor = uitoggletool(atRoiMenu,'CData',img,'TooltipString','<html>Knife (k)<br>Split the contour into two objects by drawing a line across it</html>');
         t2Dscissor.ClickedCallback = @set2DScissorCallback;
 
         % Result
