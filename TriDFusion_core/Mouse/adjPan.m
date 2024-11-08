@@ -153,8 +153,21 @@ function adjPan(dInitCoord)
     newYLim = yLim + dyShift;  % Shift y-axis by dyShift
 
     % Apply the new limits to the axes
+
+% Store parents of drawfreehand objects
+% freehandObjects = findall(axesHandle, 'Type', 'images.roi.Freehand');
+% originalParents = arrayfun(@(obj) obj.Parent, freehandObjects, 'UniformOutput', false);
+% 
+% % Temporarily remove objects from axes
+% set(freehandObjects, 'Parent', []);
+
     set(axesHandle, 'XLim', newXLim, 'YLim', newYLim);
+    % axesHandle.XLim = newXLim;
+    % axesHandle.YLim = newYLim;
     % 
+   % drawnow update;
+
+    % xlim
     % axesHandle.XLim = newXLim;
     % axesHandle.YLim = newYLim;
 
@@ -164,5 +177,9 @@ function adjPan(dInitCoord)
 
     showRightClickMenu(false);
 
-% drawnow limitrate;
+    drawnow limitrate nocallbacks;
+    % Restore objects to their original parent
+% for k = 1:numel(freehandObjects)
+%     freehandObjects(k).Parent = originalParents{k};
+% end
 end

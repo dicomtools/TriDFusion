@@ -48,12 +48,28 @@ function triangulateRoi(sRoiTag)
             origInfo = getappdata(tRoi.Object.Parent, 'matlab_graphics_resetplotview');
 
             if isempty(origInfo)
-                bIsZoomed = false;
-            elseif isequal(get(tRoi.Object.Parent,'XLim'), origInfo.XLim) && ...
-                isequal(get(tRoi.Object.Parent,'YLim'), origInfo.YLim) 
+
                 bIsZoomed = false;
             else
-                bIsZoomed = true;
+                % Get the current X and Y axis limits
+                currXLim = get(tRoi.Object.Parent, 'XLim');
+                currYLim = get(tRoi.Object.Parent, 'YLim');
+                
+                % Get the original X and Y axis limits
+                origXLim = origInfo.XLim;
+                origYLim = origInfo.YLim;
+                
+                % Calculate the zoom level as the ratio of current limits to original limits
+                zoomX = (currXLim(2) - currXLim(1)) / (origXLim(2) - origXLim(1));
+                zoomY = (currYLim(2) - currYLim(1)) / (origYLim(2) - origYLim(1));
+                
+                % If the zoom level is more than 50% (i.e., the zoomed region is smaller than 50% of original)
+                if zoomX < 0.5 || zoomY < 0.5
+                    
+                    bIsZoomed = true;
+                else
+                    bIsZoomed = false;
+                end
             end
             
            if ~isempty(tRoi.MaxDistances)

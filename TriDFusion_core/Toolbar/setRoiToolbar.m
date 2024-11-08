@@ -247,7 +247,7 @@ function setRoiToolbar(sVisible)
  %           robotReleaseKey();
 
             set(t8, 'State', 'off');
-            roiSetAxeBorder(false);
+            % roiSetAxeBorder(false);
 
             windowButton('set', 'up');
             mouseFcn('set');
@@ -323,7 +323,7 @@ function setRoiToolbar(sVisible)
                 mainToolBarEnable('off');
                 mouseFcn('reset');
 
-                roiSetAxeBorder(true, pAxe);
+                % roiSetAxeBorder(true, pAxe);
 
          %       while strcmpi(get(t8, 'State'), 'on')
 
@@ -333,7 +333,7 @@ function setRoiToolbar(sVisible)
                         return;
                     end
                     if strcmpi(get(t8, 'State'), 'off')
-                        roiSetAxeBorder(false);
+                        % roiSetAxeBorder(false);
 
                    %     windowButton('set', 'up');
                    %     mouseFcn('set');
@@ -382,7 +382,7 @@ function setRoiToolbar(sVisible)
 
          %       end
 
-                roiSetAxeBorder(false);
+                % roiSetAxeBorder(false);
 
                 windowButton('set', 'up');
                 mouseFcn('set');
@@ -419,7 +419,7 @@ function setRoiToolbar(sVisible)
 %                   robotReleaseKey();
 
             set(t, 'State', 'off');
-            roiSetAxeBorder(false);
+            % roiSetAxeBorder(false);
 
             windowButton('set', 'up');
             mouseFcn('set');
@@ -510,7 +510,7 @@ function setRoiToolbar(sVisible)
                 mainToolBarEnable('off');
                 mouseFcn('reset');
 
-                roiSetAxeBorder(true, pAxe);
+                % roiSetAxeBorder(true, pAxe);
 
    %              while strcmpi(get(t, 'State'), 'on')
 
@@ -538,7 +538,7 @@ function setRoiToolbar(sVisible)
 
                     if strcmpi(get(t, 'State'), 'off')
 
-                        roiSetAxeBorder(false);
+                        % roiSetAxeBorder(false);
 
                  %       windowButton('set', 'up');
                  %       mouseFcn('set');
@@ -587,7 +587,7 @@ function setRoiToolbar(sVisible)
                     delete(a);
                 end
 
-                roiSetAxeBorder(false);
+                % roiSetAxeBorder(false);
 
                 windowButton('set', 'up');
                 mouseFcn('set');
@@ -623,7 +623,7 @@ function setRoiToolbar(sVisible)
 %                    robotReleaseKey();
 
             set(t2, 'State', 'off');
-            roiSetAxeBorder(false);
+            % roiSetAxeBorder(false);
 
             windowButton('set', 'up');
             mouseFcn('set');
@@ -700,7 +700,7 @@ function setRoiToolbar(sVisible)
                 mainToolBarEnable('off');
                 mouseFcn('reset');
 
-                roiSetAxeBorder(true, pAxe);
+                % roiSetAxeBorder(true, pAxe);
 
           %      while strcmpi(get(t2, 'State'), 'on')
 
@@ -727,7 +727,7 @@ function setRoiToolbar(sVisible)
                     end
 
                     if strcmpi(get(t2, 'State'), 'off')
-                        roiSetAxeBorder(false);
+                        % roiSetAxeBorder(false);
 
     %                            windowButton('set', 'up');
     %                            mouseFcn('set');
@@ -778,7 +778,7 @@ function setRoiToolbar(sVisible)
                 %     delete(a);
                 % end
 
-                roiSetAxeBorder(false);
+                % roiSetAxeBorder(false);
 
                 windowButton('set', 'up');
                 mouseFcn('set');
@@ -844,7 +844,7 @@ function setRoiToolbar(sVisible)
 %                    robotReleaseKey();
 
             set(t5, 'State', 'off');
-            roiSetAxeBorder(false);
+            % roiSetAxeBorder(false);
 
             windowButton('set', 'up');
             mouseFcn('set');
@@ -922,7 +922,7 @@ function setRoiToolbar(sVisible)
                 mainToolBarEnable('off');
                 mouseFcn('reset');
 
-                roiSetAxeBorder(true, pAxe);
+                % roiSetAxeBorder(true, pAxe);
 
          %       while strcmpi(get(t5, 'State'), 'on')
 
@@ -941,7 +941,7 @@ function setRoiToolbar(sVisible)
                         return;
                     end
                     if strcmpi(get(t5, 'State'), 'off')
-                        roiSetAxeBorder(false);
+                        % roiSetAxeBorder(false);
 
 %                            windowButton('set', 'up');
 %                            mouseFcn('set');
@@ -986,7 +986,7 @@ function setRoiToolbar(sVisible)
                     end                    
             %    end
 
-                roiSetAxeBorder(false);
+                % roiSetAxeBorder(false);
 
                 windowButton('set', 'up');
                 mouseFcn('set');
@@ -1020,7 +1020,7 @@ function setRoiToolbar(sVisible)
 %                    robotReleaseKey();
 
             set(t3, 'State', 'off');
-            roiSetAxeBorder(false);
+            % roiSetAxeBorder(false);
 
             windowButton('set', 'up');
             mouseFcn('set');
@@ -1098,7 +1098,7 @@ function setRoiToolbar(sVisible)
                 mainToolBarEnable('off');
                 mouseFcn('reset');
 
-                roiSetAxeBorder(true, pAxe);
+                % roiSetAxeBorder(true, pAxe);
 
             %    while strcmpi(get(t3, 'State'), 'on')
 
@@ -1119,7 +1119,7 @@ function setRoiToolbar(sVisible)
                 end
 
                 if strcmpi(get(t3, 'State'), 'off')
-                    roiSetAxeBorder(false);
+                    % roiSetAxeBorder(false);
 
 %                            windowButton('set', 'up');
 %                            mouseFcn('set');
@@ -1164,7 +1164,7 @@ function setRoiToolbar(sVisible)
                 end                
           %      end
 
-                roiSetAxeBorder(false);
+                % roiSetAxeBorder(false);
 
                 windowButton('set', 'up');
                 mouseFcn('set');
@@ -1197,7 +1197,7 @@ function setRoiToolbar(sVisible)
   %          robotReleaseKey();
 
             set(t6, 'State', 'off');
-            roiSetAxeBorder(false);
+            % roiSetAxeBorder(false);
 
             windowButton('set', 'up');
             mouseFcn('set');
@@ -1276,7 +1276,7 @@ function setRoiToolbar(sVisible)
                 mainToolBarEnable('off');
                 mouseFcn('reset');
 
-                roiSetAxeBorder(true, pAxe);
+                % roiSetAxeBorder(true, pAxe);
 
             %    while strcmpi(get(t6, 'State'), 'on')
 
@@ -1299,7 +1299,7 @@ function setRoiToolbar(sVisible)
                     end
 
                     if strcmpi(get(t6, 'State'), 'off')
-                        roiSetAxeBorder(false);
+                        % roiSetAxeBorder(false);
 
     %                            windowButton('set', 'up');
     %                            mouseFcn('set');
@@ -1348,7 +1348,7 @@ function setRoiToolbar(sVisible)
                     delete(a);
                 end
 
-                roiSetAxeBorder(false);
+                % roiSetAxeBorder(false);
 
                 windowButton('set', 'up');
                 mouseFcn('set');
@@ -1393,7 +1393,7 @@ function setRoiToolbar(sVisible)
             drawnow;
 
             set(t11, 'State', 'off');
-            roiSetAxeBorder(false);
+            % roiSetAxeBorder(false);
 
             windowButton('set', 'up');
             mouseFcn('set');
@@ -1479,7 +1479,7 @@ function setRoiToolbar(sVisible)
                 mainToolBarEnable('off');
                 mouseFcn('reset');
 
-                roiSetAxeBorder(true, pAxe);
+                % roiSetAxeBorder(true, pAxe);
 
             %    while strcmpi(get(t11, 'State'), 'on')
 
@@ -1563,7 +1563,7 @@ function setRoiToolbar(sVisible)
 
                 if strcmpi(get(t11, 'State'), 'off')
 
-                    roiSetAxeBorder(false);
+                    % roiSetAxeBorder(false);
 
     %                            windowButton('set', 'up');
     %                            mouseFcn('set');
@@ -1593,7 +1593,7 @@ function setRoiToolbar(sVisible)
                 refreshImages();
              %   end
 
-                roiSetAxeBorder(false);
+                % roiSetAxeBorder(false);
 
                 windowButton('set', 'up');
                 mouseFcn('set');
@@ -1814,7 +1814,7 @@ function setRoiToolbar(sVisible)
             drawnow;
 
             set(t12, 'State', 'off');
-            roiSetAxeBorder(false);
+            % roiSetAxeBorder(false);
 
             windowButton('set', 'up');
             mouseFcn('set');
@@ -1941,7 +1941,7 @@ function setRoiToolbar(sVisible)
                 mainToolBarEnable('off');
                 mouseFcn('reset');
 
-                roiSetAxeBorder(true, pAxe);
+                % roiSetAxeBorder(true, pAxe);
 
                 dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
@@ -2004,7 +2004,7 @@ function setRoiToolbar(sVisible)
 
                     if strcmpi(get(t12, 'State'), 'off')
 
-                        roiSetAxeBorder(false);
+                        % roiSetAxeBorder(false);
 
                  %       windowButton('set', 'up');
                  %       mouseFcn('set');
@@ -2025,7 +2025,7 @@ function setRoiToolbar(sVisible)
 
              %   end
 
-                roiSetAxeBorder(false);
+                % roiSetAxeBorder(false);
 
                 windowButton('set', 'up');
                 mouseFcn('set');
@@ -2320,7 +2320,7 @@ end
  %           robotReleaseKey();
 
             set(t2Dscissor, 'State', 'off');
-            roiSetAxeBorder(false);
+            % roiSetAxeBorder(false);
 
             windowButton('set', 'up');
             mouseFcn('set');
@@ -2382,7 +2382,7 @@ end
                 mainToolBarEnable('off');
                 mouseFcn('reset');
 
-                roiSetAxeBorder(true, pAxe);
+                % roiSetAxeBorder(true, pAxe);
 
          %       while strcmpi(get(t8, 'State'), 'on')
 
@@ -2397,7 +2397,7 @@ end
 
                     if strcmpi(get(t2Dscissor, 'State'), 'off')
 
-                        roiSetAxeBorder(false);
+                        % roiSetAxeBorder(false);
 
                         return;
                     end
@@ -2415,7 +2415,7 @@ end
                 set(fiMainWindowPtr('get'), 'Pointer', 'watch');
                 drawnow;
 
-                roiSetAxeBorder(false);
+                % roiSetAxeBorder(false);
 
                 windowButton('set', 'up');
                 mouseFcn('set');
@@ -2558,9 +2558,10 @@ end
             atRoiInput = roiTemplate('get', dSeriesOffset);
 
             if ~isempty(atRoiInput)
+
                 for rr=1:numel(atRoiInput)
                     set(atRoiInput{rr}.Object, 'InteractionsAllowed', 'none');
-                end
+                end            
             end
 
             draw2Dbrush(actionData);
@@ -2622,6 +2623,7 @@ end
             atRoiInput = roiTemplate('get', dSeriesOffset);
 
             if ~isempty(atRoiInput)
+
                 for rr=1:numel(atRoiInput)
                     if ~strcmpi(get(atRoiInput{rr}.Object, 'UserData'), 'SphereROI')
 
@@ -2631,6 +2633,7 @@ end
                            strcmpi(atRoiInput{rr}.Object.Type, 'images.roi.assistedfreehand')
 
                             if isempty(find(atRoiInput{rr}.Waypoints, 1))
+                                
                                 atRoiInput{rr}.Object.Waypoints(:) = false;
                                 atRoiInput{rr}.Waypoints = atRoiInput{rr}.Object.Waypoints;
                             end
@@ -2770,6 +2773,11 @@ end
             return;
         end
 
+        % try
+        % 
+        % set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        % drawnow;
+
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
         if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
@@ -2822,8 +2830,16 @@ end
                 end
                 
                 interpolateBetweenROIs(atRoiInput{dTagOffset1}, atRoiInput{dTagOffset2}, dSeriesOffset, true); 
+
             end
         end
+
+        % catch
+        %     progressBar(1, 'Error:interpolateROIsByTag()');
+        % end
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'default');
+        drawnow;
     end
 
     function sLastTag = lastRoiTag(sTag)

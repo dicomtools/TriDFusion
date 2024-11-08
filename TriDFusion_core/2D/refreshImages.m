@@ -877,49 +877,66 @@ function refreshImages(clickedPtX, clickedPtY)
         end
 
         % Contours
-        
+
         if contourVisibilityRoiPanelValue('get') == true
-     
+             
             atRoiInput = roiTemplate('get', dSeriesOffset);
-        
-            if ~isempty(atRoiInput) && isVsplash('get') == false
             
-                numRoiInputs = numel(atRoiInput);
-                viewFarthest = viewFarthestDistances('get');
+            if ~isempty(atRoiInput) && isVsplash('get') == false
                 
-                for bb = 1:numRoiInputs
+                dNumRoiInputs = numel(atRoiInput);
+                bViewFarthest = viewFarthestDistances('get');
+                
+                % Precompute axis and slice conditions 
+
+                axesConditions = {'Axes1', 'Axes2', 'Axes3'};
+
+                for bb = 1:dNumRoiInputs
+                    % try
                     currentRoi = atRoiInput{bb};
                     
-                    if isvalid(currentRoi.Object)
-                        isCoronal  = strcmpi(currentRoi.Axe, 'Axes1') && iCoronal  == currentRoi.SliceNb;
-                        isSagittal = strcmpi(currentRoi.Axe, 'Axes2') && iSagittal == currentRoi.SliceNb;
-                        isAxial    = strcmpi(currentRoi.Axe, 'Axes3') && iAxial    == currentRoi.SliceNb;
-                        
-                        currentRoi.Object.Visible = 'off';
-                        currentDistances = currentRoi.MaxDistances;
+                    % if isvalid(currentRoi.Object)
+
+                        % Check matching axis and slice condition
+                        isCoronal  = strcmpi(currentRoi.Axe, axesConditions{1}) && iCoronal  == currentRoi.SliceNb;
+                        isSagittal = strcmpi(currentRoi.Axe, axesConditions{2}) && iSagittal == currentRoi.SliceNb;
+                        isAxial    = strcmpi(currentRoi.Axe, axesConditions{3}) && iAxial    == currentRoi.SliceNb;                         
         
-                         if ~isempty(currentDistances) && viewFarthest == true
-                            currentDistances.MaxXY.Line.Visible = 'off';
-                            currentDistances.MaxCY.Line.Visible = 'off';
-                            currentDistances.MaxXY.Text.Visible = 'off';
-                            currentDistances.MaxCY.Text.Visible = 'off';                        
-                        end
-        
+                        % If the ROI matches one of the axis/slice conditions, make it visible
+
                         if isCoronal || isSagittal || isAxial
-        
+
                             currentRoi.Object.Visible = 'on';
-    
-                            if viewFarthest == true
+
+                            if bViewFarthest
+                               
+                                currentDistances = currentRoi.MaxDistances;
+          
                                 currentDistances.MaxXY.Line.Visible = 'on';
                                 currentDistances.MaxCY.Line.Visible = 'on';
                                 currentDistances.MaxXY.Text.Visible = 'on';
                                 currentDistances.MaxCY.Text.Visible = 'on';
                             end
+                        else
+
+                            currentRoi.Object.Visible = 'off';
+    
+                            % if ~isempty(currentDistances) && bViewFarthest
+                            if bViewFarthest
+    
+                                currentDistances = currentRoi.MaxDistances;
                             
+                                currentDistances.MaxXY.Line.Visible = 'off';
+                                currentDistances.MaxCY.Line.Visible = 'off';
+                                currentDistances.MaxXY.Text.Visible = 'off';
+                                currentDistances.MaxCY.Text.Visible = 'off';
+                            end                            
                         end
-                    end
+                    % catch
+                    % end
+                    % end
                 end
-            end       
+            end
         end
 
         if crossActivate('get') == true && isVsplash('get') == false
@@ -1657,4 +1674,6 @@ function refreshImages(clickedPtX, clickedPtY)
      % end
 
     % plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), im, iMipAngle);
+     % drawnow nocallbacks;
+    drawnow limitrate nocallbacks;
 end

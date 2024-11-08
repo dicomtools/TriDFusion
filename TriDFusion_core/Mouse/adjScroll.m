@@ -31,7 +31,7 @@ function adjScroll(dInitCoord)
 
     if exist('dInitCoord', 'var') 
 
-        pdInitialCoord = dInitCoord;
+        pdInitialCoord = dInitCoord;       
     end
    
     pFigure = fiMainWindowPtr('get');

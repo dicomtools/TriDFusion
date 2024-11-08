@@ -1585,7 +1585,7 @@ function dicomViewerCore()
                                    );                
                 end
             end
-
+           
             % adjAxeCameraViewAngle(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')));
  
             imMipPtr ('set', imMip , get(uiSeriesPtr('get'), 'Value'));
@@ -1826,6 +1826,7 @@ function dicomViewerCore()
         colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , getColorMap('one', colorMapOffset('get')));
         colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , getColorMap('one', colorMapOffset('get')));
         colormap(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , getColorMap('one', colorMapOffset('get')));
+
         if isVsplash('get') == false
             colormap(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', colorMapOffset('get')));
         end
@@ -1997,6 +1998,8 @@ function dicomViewerCore()
         if ~isempty(axe)
             alpha( axe, 1);
         end
+       
+        initAxePlotView(axe);
     else
 
         axes1 = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
@@ -2006,17 +2009,29 @@ function dicomViewerCore()
         if ~isempty(axes1) && ...
            ~isempty(axes2) && ...
            ~isempty(axes3)
+
             alpha( axes1, 1 );
             alpha( axes2, 1 );
             alpha( axes3, 1 );
+
+            initAxePlotView(axes1);
+            initAxePlotView(axes2);
+            initAxePlotView(axes3); 
         end
 
         if link2DMip('get') == true && isVsplash('get') == false
+
             axesMip = axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+
             if ~isempty(axesMip)
+
                 alpha(axesMip, 1 );
+
+                initAxePlotView(axesMip);
             end
         end
+        
+      
     end
 
     % Deactivate slider
@@ -2219,6 +2234,7 @@ function dicomViewerCore()
     end
 
     if isFusion('get') == true
+        
         isFusion('set', false);
         setFusionCallback();
     end

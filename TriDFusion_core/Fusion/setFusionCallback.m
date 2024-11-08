@@ -2140,12 +2140,16 @@ end
            % 
                  % set(axef, 'XLim', [0 aFusionSize(2)]);
                  % set(axef, 'YLim', [0 aFusionSize(1)]);
-                 linkaxes([axe axef], 'xy');                     
+                 linkaxes([axe axef], 'xy');    
+
+                 initAxePlotView(axe);
+                 initAxePlotView(axef);               
              else
                 axes1  = axes1Ptr ('get', [], get(uiSeriesPtr('get')     , 'Value'));
                 axes1f = axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
 
                 setAxesLimitsFromSource(axes1, axes1f);
+
 
                 % if isVsplash('get') == true
                     % set(axes1f, 'XLim', axes1.XLim);
@@ -2158,10 +2162,14 @@ end
 
                 linkaxes([axes1 axes1f], 'xy'); 
 
+                initAxePlotView(axes1);
+                initAxePlotView(axes1f);
+
                 axes2  = axes2Ptr ('get', [], get(uiSeriesPtr('get')     , 'Value'));
                 axes2f = axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
 
                 setAxesLimitsFromSource(axes2, axes2f);
+
 
                 % if isVsplash('get') == true
                     % 
@@ -2174,11 +2182,15 @@ end
                 % end
 
                 linkaxes([axes2 axes2f], 'xy'); 
+                initAxePlotView(axes2f);
+
+                initAxePlotView(axes2);
 
                 axes3 = axes3Ptr  ('get', [], get(uiSeriesPtr('get')     , 'Value'));
                 axes3f = axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
                 
                 setAxesLimitsFromSource(axes3, axes3f);
+
 
                 % if isVsplash('get') == true
                     % set(axes3f, 'XLim', axes3.XLim);
@@ -2189,6 +2201,9 @@ end
                 % end
 
                 linkaxes([axes3 axes3f], 'xy');                 
+
+                initAxePlotView(axes3);
+                initAxePlotView(axes3f);
 
                 if isVsplash('get') == false         
 
@@ -2204,7 +2219,11 @@ end
                     % set(axesMipf, 'XLim', [0 aFusionSize(2)]);
                     % set(axesMipf, 'YLim', [0 aFusionSize(3)]);
 
-                    linkaxes([axesMip axesMipf], 'xy');               
+                    linkaxes([axesMip axesMipf], 'xy');   
+
+                    initAxePlotView(axesMip);
+                    initAxePlotView(axesMipf);
+                  
                 end                                
             end
                         

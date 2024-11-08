@@ -141,6 +141,15 @@ function catchKeyPress(~,evnt)
 
             if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
 
+                % atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+                % 
+                % if ~isempty(atRoiInput)
+                % 
+                %     for rr=1:numel(atRoiInput)
+                %         set(atRoiInput{rr}.Object, 'InteractionsAllowed', 'none');
+                %     end                         
+                % end 
+
                 set(fiMainWindowPtr('get'), 'Pointer', 'bottom');
     
                 setCrossVisibility(false);            

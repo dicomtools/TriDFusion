@@ -140,7 +140,7 @@ function adjZoom(dInitCoord)
 
     % Apply the new limits to the axes
     set(axesHandle, 'XLim', newXLim, 'YLim', newYLim);
-    
+   
     multiFrameZoom('set', 'axe', axesHandle);
 
     % windowButton('set', 'down');  
@@ -148,5 +148,6 @@ function adjZoom(dInitCoord)
     % rightClickMenu('off');
 
     pdInitialCoord = pFigure.CurrentPoint(1, 1:2);
+    drawnow limitrate nocallbacks;
       
 end

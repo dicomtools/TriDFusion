@@ -26,9 +26,8 @@ function roiDefaultMenu(ptrRoi)
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-      
+  
     % Main function to set up the default ROI context menu with improved structure
-    
     addMenuItem(ptrRoi, 'Copy Contour'   , @copyRoiCallback, true);
     addMenuItem(ptrRoi, 'Paste Contour'  , @pasteRoiCallback);
     addMenuItem(ptrRoi, 'Paste Mirror'   , @pasteMirroirRoiCallback);
@@ -78,7 +77,6 @@ end
 
 function refreshRoiMenuLocationCallback(hObject, ~)
 
-
     atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
     dTagOffset = find(strcmp( cellfun(@(x) x.Tag, atRoiInput, 'uni', false), hObject.UserData.Tag));
@@ -98,3 +96,4 @@ function refreshRoiMenuLocationCallback(hObject, ~)
         end
     end
 end
+

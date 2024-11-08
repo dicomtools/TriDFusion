@@ -46,7 +46,7 @@ function setMachineLearningPSMAGa68ExportToPETNetworkCallback(hObject, ~)
         return;
     end
 
-    dTaskNumber = 112;
+    dTaskNumber = 114;
     
     aListing = dir(sRawFolderPath);
 

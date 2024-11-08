@@ -175,7 +175,9 @@ function TriDFusion(varargin)
     end            
        
     viewerTempDirectory('set', char([tempname '/']));
+    
     if exist(viewerTempDirectory('get'), 'dir')
+
         rmdir(viewerTempDirectory('get'), 's');
     end
     mkdir(viewerTempDirectory('get'));
@@ -256,13 +258,15 @@ function TriDFusion(varargin)
 
     % set(fiMainWindow, 'AutoResizeChildren', 'off');
 
-    if viewerUIFigure('get') == true
-        set(fiMainWindow, 'Renderer', 'opengl'); 
-        set(fiMainWindow, 'GraphicsSmoothing', 'off'); 
-    else
-        set(fiMainWindow, 'Renderer', 'opengl'); 
-        set(fiMainWindow, 'doublebuffer', 'on');   
-    end
+    % if viewerUIFigure('get') == true
+    %     set(fiMainWindow, 'Renderer', 'opengl'); 
+    %     set(fiMainWindow, 'GraphicsSmoothing', 'off'); 
+    % else
+    %     set(fiMainWindow, 'Renderer', 'opengl'); 
+    %     set(fiMainWindow, 'doublebuffer', 'on');   
+    % end
+
+    setFigureDefaults(fiMainWindowPtr('get'));
 
     iptPointerManager(fiMainWindowPtr('get'));
 

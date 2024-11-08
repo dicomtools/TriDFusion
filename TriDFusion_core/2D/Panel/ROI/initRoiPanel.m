@@ -819,7 +819,7 @@ function initRoiPanel()
 
             setCrossVisibility(false);
 
-            roiSetAxeBorder(true, pAxe);
+            % roiSetAxeBorder(true, pAxe);
 
             mainToolBarEnable('off');
         else
@@ -907,7 +907,7 @@ function initRoiPanel()
 
         if is2DBrush('get') == false
 
-            roiSetAxeBorder(false, pAxe);
+            % roiSetAxeBorder(false, pAxe);
 
             setCrossVisibility(true);
         else
@@ -923,7 +923,7 @@ function initRoiPanel()
 
         end
 
-        drawnow;
+        % drawnow;
 
 %        atVoiInput{dVoiOffset}.RoisTag
 

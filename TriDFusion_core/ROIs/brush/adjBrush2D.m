@@ -44,54 +44,59 @@ function adjBrush2D(pRoiPtr, dInitCoord)
         return;
     end
 
-    aPosDiff = pRoiPtr.Parent.CurrentPoint(1, 1:2) - pdInitialCoord;
- 
-    atMetaData = dicomMetaData('get', [], dSeriesOffset);
-    
-    switch(pRoiPtr.Parent)
-        
-        case axes1Ptr('get', [], dSeriesOffset) % Coronal                    
-            xPixel = atMetaData{1}.PixelSpacing(1);
-            yPixel = computeSliceSpacing(atMetaData);                                       
-            
-        case axes2Ptr('get', [], dSeriesOffset) % Sagittal
-            xPixel = atMetaData{1}.PixelSpacing(2);
-            yPixel = computeSliceSpacing(atMetaData);
-            
-        otherwise % Axial
-            xPixel = atMetaData{1}.PixelSpacing(1);
-            yPixel = atMetaData{1}.PixelSpacing(2);
-    end
-    
-    if xPixel == 0
-        xPixel = 1;
-    end
-    
-    if yPixel == 0
-        yPixel = 1;
-    end
+    dCurrentCoord = pRoiPtr.Parent.CurrentPoint(1, 1:2);
 
-    dWLAdjCoe = 1/xPixel;
+    if isequal(size(dCurrentCoord), size(pdInitialCoord))
 
-    dSphereDiameter = pdInitialDiameter-aPosDiff(2) / dWLAdjCoe;
-    
-    if dSphereDiameter > 0
-    %     if dSphereDiameter < 5
-    %         dSphereDiameter = 5;
-    %     end
-    
-        dSemiAxesX = dSphereDiameter/xPixel/2; % In pixel
-        dSemiAxesY = dSphereDiameter/yPixel/2; % In pixel
-    
-        newPosition = pRoiPtr.Parent.CurrentPoint(1, 1:2);
-    
-        pRoiPtr.Position = newPosition;
-        pRoiPtr.SemiAxes = [dSemiAxesX dSemiAxesY];
-    
-      %  set(pRoiPtr, 'SemiAxes', [dSemiAxesX dSemiAxesY]);
-    
-        brush2dDefaultDiameter('set', dSphereDiameter);  
+        aPosDiff = dCurrentCoord - pdInitialCoord;
+     
+        atMetaData = dicomMetaData('get', [], dSeriesOffset);
         
+        switch(pRoiPtr.Parent)
+            
+            case axes1Ptr('get', [], dSeriesOffset) % Coronal                    
+                xPixel = atMetaData{1}.PixelSpacing(1);
+                yPixel = computeSliceSpacing(atMetaData);                                       
+                
+            case axes2Ptr('get', [], dSeriesOffset) % Sagittal
+                xPixel = atMetaData{1}.PixelSpacing(2);
+                yPixel = computeSliceSpacing(atMetaData);
+                
+            otherwise % Axial
+                xPixel = atMetaData{1}.PixelSpacing(1);
+                yPixel = atMetaData{1}.PixelSpacing(2);
+        end
+        
+        if xPixel == 0
+            xPixel = 1;
+        end
+        
+        if yPixel == 0
+            yPixel = 1;
+        end
+    
+        dWLAdjCoe = 1/xPixel;
+    
+        dSphereDiameter = pdInitialDiameter-aPosDiff(2) / dWLAdjCoe;
+        
+        if dSphereDiameter > 0
+        %     if dSphereDiameter < 5
+        %         dSphereDiameter = 5;
+        %     end
+        
+            dSemiAxesX = dSphereDiameter/xPixel/2; % In pixel
+            dSemiAxesY = dSphereDiameter/yPixel/2; % In pixel
+        
+            newPosition = pRoiPtr.Parent.CurrentPoint(1, 1:2);
+        
+            pRoiPtr.Position = newPosition;
+            pRoiPtr.SemiAxes = [dSemiAxesX dSemiAxesY];
+        
+          %  set(pRoiPtr, 'SemiAxes', [dSemiAxesX dSemiAxesY]);
+        
+            brush2dDefaultDiameter('set', dSphereDiameter);  
+            
+        end
     end
     % 
     % windowButton('set', 'down');  
