@@ -435,10 +435,13 @@ function catchKeyPress(~,evnt)
             uiAddVoiRoiPanel = uiAddVoiRoiPanelObject('get');
 
             if ~isempty(uiAddVoiRoiPanel)
-    
-                callbackFunction = get(uiAddVoiRoiPanel, 'Callback');  
                 
-                callbackFunction(uiAddVoiRoiPanel);
+                if strcmpi(get(uiAddVoiRoiPanel, 'Enable'), 'on')
+    
+                    callbackFunction = get(uiAddVoiRoiPanel, 'Callback');  
+                    
+                    callbackFunction(uiAddVoiRoiPanel);
+                end
             end
         end
     end
@@ -458,10 +461,13 @@ function catchKeyPress(~,evnt)
             uiPrevVoiRoiPanel = uiPrevVoiRoiPanelObject('get');
 
             if ~isempty(uiPrevVoiRoiPanel)
-    
-                callbackFunction = get(uiPrevVoiRoiPanel, 'Callback');  
-                
-                callbackFunction(uiPrevVoiRoiPanel);
+               
+                if strcmpi(get(uiPrevVoiRoiPanel, 'Enable'), 'on')
+
+                    callbackFunction = get(uiPrevVoiRoiPanel, 'Callback');  
+                    
+                    callbackFunction(uiPrevVoiRoiPanel);
+                end
             end
         end        
     end
@@ -481,10 +487,12 @@ function catchKeyPress(~,evnt)
             uiDelVoiRoiPanel = uiDelVoiRoiPanelObject('get');
 
             if ~isempty(uiDelVoiRoiPanel)
-    
-                callbackFunction = get(uiDelVoiRoiPanel, 'Callback');  
                 
-                callbackFunction(uiDelVoiRoiPanel);
+                if strcmpi(get(uiDelVoiRoiPanel, 'Enable'), 'on')
+                    callbackFunction = get(uiDelVoiRoiPanel, 'Callback');  
+                    
+                    callbackFunction(uiDelVoiRoiPanel);
+                end
             end
         end         
     end
@@ -503,10 +511,13 @@ function catchKeyPress(~,evnt)
             uiNextVoiRoiPanel = uiNextVoiRoiPanelObject('get');
 
             if ~isempty(uiNextVoiRoiPanel)
+
+                if strcmpi(get(uiNextVoiRoiPanel, 'Enable'), 'on')
     
-                callbackFunction = get(uiNextVoiRoiPanel, 'Callback');  
-                
-                callbackFunction(uiNextVoiRoiPanel);
+                    callbackFunction = get(uiNextVoiRoiPanel, 'Callback');  
+                    
+                    callbackFunction(uiNextVoiRoiPanel);
+                end
             end
         end         
     end
