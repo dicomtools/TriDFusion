@@ -238,6 +238,13 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
+    
+    if isInterpolated('get') == false
+    
+        isInterpolated('set', true);
+    
+        setImageInterpolation(true);
+    end
 
     progressBar(5/11, 'Resampling series, please wait.');
             

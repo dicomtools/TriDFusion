@@ -28,8 +28,8 @@ function roiDefaultMenu(ptrRoi)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
   
     % Main function to set up the default ROI context menu with improved structure
-    addMenuItem(ptrRoi, 'Copy Contour'   , @copyRoiCallback, true);
-    addMenuItem(ptrRoi, 'Paste Contour'  , @pasteRoiCallback);
+    addMenuItem(ptrRoi, 'Copy Contour (Ctrl + C)'   , @copyRoiCallback, true);
+    addMenuItem(ptrRoi, 'Paste Contour (Ctrl + V)'  , @pasteRoiCallback);
     addMenuItem(ptrRoi, 'Paste Mirror'   , @pasteMirroirRoiCallback);
     addMenuItem(ptrRoi, 'Edit Label'     , @editLabelCallback, true);
     addMenuItem(ptrRoi, 'Hide/View Label', @hideViewLabelCallback);
@@ -42,14 +42,18 @@ function roiDefaultMenu(ptrRoi)
     [~, asLesionList] = getLesionType('');
     if ~isempty(asLesionList)
 
-        addDynamicMenu(ptrRoi, 'Edit Location', asLesionList, @editRoiLesionTypeCallback, @refreshRoiMenuLocationCallback);
+        addDynamicMenu(ptrRoi, 'Edit Site', asLesionList, @editRoiLesionTypeCallback, @refreshRoiMenuLocationCallback);
     end
 end
 
 function menuItem = addMenuItem(ptrRoi, label, callback, isSeparator)
 
     if nargin < 4, isSeparator = false; end  % Default for separator is false
-        menuItem = uimenu(ptrRoi.UIContextMenu, 'Label', label, 'UserData', ptrRoi, 'Callback', callback);
+        menuItem = uimenu(ptrRoi.UIContextMenu, ...
+                          'Label'   , label, ...
+                          'UserData', ptrRoi, ...
+                          'HitTest' , 'off', ...
+                          'Callback', callback);
     if isSeparator
         menuItem.Separator = 'on';
     end

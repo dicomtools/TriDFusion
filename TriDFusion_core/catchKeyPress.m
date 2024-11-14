@@ -250,38 +250,45 @@ function catchKeyPress(~,evnt)
             return;
         end       
         
-        atRoiMenu = roiMenuObject('get');
+        if ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) % Paste contour
 
-        if ~isempty(atRoiMenu)
+            pasteRoiCallback();
 
-            for ii=1:numel(atRoiMenu.Children)
+        else % Click VOI
 
-                toggleTool = atRoiMenu.Children(ii);
-                
-                clickedCallback = func2str(toggleTool.ClickedCallback);
-
-                if contains(clickedCallback, 'drawClickVoiCallback') 
-
-                    callbackFunction = get(toggleTool, 'ClickedCallback');  
-
-                    % windowButton('set', 'down');
-
-                    % pAxe = gca(fiMainWindowPtr('get'));
-                    if strcmpi(get(toggleTool, 'State'), 'on')
-
-                        set(toggleTool, 'State', 'off');
-                    else
-
-                        set(toggleTool, 'State', 'on');
-                    end
-
-                    callbackFunction();
+            atRoiMenu = roiMenuObject('get');
+    
+            if ~isempty(atRoiMenu)
+    
+                for ii=1:numel(atRoiMenu.Children)
+    
+                    toggleTool = atRoiMenu.Children(ii);
                     
-                    % set(toggleTool, 'State', 'off');
-
-                    % windowButton('set', 'up');
+                    clickedCallback = func2str(toggleTool.ClickedCallback);
+    
+                    if contains(clickedCallback, 'drawClickVoiCallback') 
+    
+                        callbackFunction = get(toggleTool, 'ClickedCallback');  
+    
+                        % windowButton('set', 'down');
+    
+                        % pAxe = gca(fiMainWindowPtr('get'));
+                        if strcmpi(get(toggleTool, 'State'), 'on')
+    
+                            set(toggleTool, 'State', 'off');
+                        else
+    
+                            set(toggleTool, 'State', 'on');
+                        end
+    
+                        callbackFunction();
+                        
+                        % set(toggleTool, 'State', 'off');
+    
+                        % windowButton('set', 'up');
+                    end
+    
                 end
-
             end
         end
     end
@@ -412,7 +419,8 @@ function catchKeyPress(~,evnt)
         end
     end
 
-    if strcmpi(evnt.Key,'tab')
+
+    if strcmpi(evnt.Key,'tab') % Contour Review Panel Add
         
         if isMoveImageActivated('get') == true || ...
            switchTo3DMode('get')       == true || ...
@@ -435,6 +443,74 @@ function catchKeyPress(~,evnt)
         end
     end
 
+    if strcmpi(evnt.Key,'comma') % Contour Review Panel Previous
+
+        if isMoveImageActivated('get') == true || ...
+           switchTo3DMode('get')       == true || ...
+           switchToIsoSurface('get')   == true || ...
+           switchToMIPMode('get')      == true
+
+            return;
+        end
+        
+        if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
+
+            uiPrevVoiRoiPanel = uiPrevVoiRoiPanelObject('get');
+
+            if ~isempty(uiPrevVoiRoiPanel)
+    
+                callbackFunction = get(uiPrevVoiRoiPanel, 'Callback');  
+                
+                callbackFunction(uiPrevVoiRoiPanel);
+            end
+        end        
+    end
+
+    if strcmpi(evnt.Key,'delete') % Contour Review Panel Delete
+
+        if isMoveImageActivated('get') == true || ...
+           switchTo3DMode('get')       == true || ...
+           switchToIsoSurface('get')   == true || ...
+           switchToMIPMode('get')      == true
+
+            return;
+        end
+        
+        if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
+
+            uiDelVoiRoiPanel = uiDelVoiRoiPanelObject('get');
+
+            if ~isempty(uiDelVoiRoiPanel)
+    
+                callbackFunction = get(uiDelVoiRoiPanel, 'Callback');  
+                
+                callbackFunction(uiDelVoiRoiPanel);
+            end
+        end         
+    end
+
+    if strcmpi(evnt.Key,'period') % Contour Review Panel Next
+        if isMoveImageActivated('get') == true || ...
+           switchTo3DMode('get')       == true || ...
+           switchToIsoSurface('get')   == true || ...
+           switchToMIPMode('get')      == true
+
+            return;
+        end
+        
+        if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
+
+            uiNextVoiRoiPanel = uiNextVoiRoiPanelObject('get');
+
+            if ~isempty(uiNextVoiRoiPanel)
+    
+                callbackFunction = get(uiNextVoiRoiPanel, 'Callback');  
+                
+                callbackFunction(uiNextVoiRoiPanel);
+            end
+        end         
+    end
+
     if strcmpi(evnt.Key,'s')
         
         if isMoveImageActivated('get') == true || ...
@@ -445,15 +521,22 @@ function catchKeyPress(~,evnt)
             return;
         end
 
-        if ~isempty(roiTemplate('get', get(uiSeriesPtr('get'), 'Value'))) 
+        if ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) % Select VOI for contour review
 
-            txtContourVisibilityPanel = txtContourVisibilityPanelObject('get');
+            selectVoiFromMouseOverForContourReview(get(uiSeriesPtr('get'), 'Value'));
 
-            if ~isempty(txtContourVisibilityPanel)
+        else % Show/Hide contours
+
+            if ~isempty(roiTemplate('get', get(uiSeriesPtr('get'), 'Value'))) 
     
-                buttonDownFcn = get(txtContourVisibilityPanel, 'ButtonDownFcn');  
-                
-                buttonDownFcn(txtContourVisibilityPanel);
+                txtContourVisibilityPanel = txtContourVisibilityPanelObject('get');
+    
+                if ~isempty(txtContourVisibilityPanel)
+        
+                    buttonDownFcn = get(txtContourVisibilityPanel, 'ButtonDownFcn');  
+                    
+                    buttonDownFcn(txtContourVisibilityPanel);
+                end
             end
         end
     end
@@ -517,7 +600,7 @@ function catchKeyPress(~,evnt)
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true 
-       
+
             if multiFrame3DZoom('get') > 1.2
                 multiFrame3DZoom('set', multiFrame3DZoom('get')/1.2);
             end
@@ -530,100 +613,114 @@ function catchKeyPress(~,evnt)
             
             initGate3DObject('set', true);
         else
+            if ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) % Increase VOI contours size
 
-            multiFrameZoom('set', 'out', 1);
+                atVoiInput = voiTemplate('get', dSeriesOffset);
+                
+                if ~isempty(atVoiInput)
 
-            pAxe = getAxeFromMousePosition(dSeriesOffset);
+                    dVoiOffset = get(uiDeleteVoiRoiPanelObject('get'), 'Value');
+    
+                    increaseVoiPosition(atVoiInput{dVoiOffset}.Tag, voiIncrementRatio('get'));
+    
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
+                end
 
-            % pAxe = gca(fiMainWindowPtr('get'));
-
-            if multiFrameZoom('get', 'axe') ~= pAxe
-
-                multiFrameZoom('set', 'in', 1);
-            end
-
-            dZFactor = multiFrameZoom('get', 'in');
-            dZFactor = dZFactor+0.025;
-            
-            multiFrameZoom('set', 'in', dZFactor);
-
-            switch pAxe
-
-                case axePtr('get', [], dSeriesOffset)
-
-                    axesHandle = axePtr('get', [], dSeriesOffset);
-
-                case axes1Ptr('get', [], dSeriesOffset)
-
-                    axesHandle = axes1Ptr('get', [], dSeriesOffset);
-
-                    % zoom(axes1Ptr('get', [], dSeriesOffset), dZFactor);
-                    % multiFrameZoom('set', 'axe', axes1Ptr('get', [], dSeriesOffset));
-
-                case axes2Ptr('get', [], dSeriesOffset)
-
-                    axesHandle = axes2Ptr('get', [], dSeriesOffset);
-
-                    % zoom(axes2Ptr('get', [], dSeriesOffset), dZFactor);
-                    % multiFrameZoom('set', 'axe', axes2Ptr('get', [], dSeriesOffset));
-                    
-                case axes3Ptr('get', [], dSeriesOffset)
-
-                    axesHandle = axes3Ptr('get', [], dSeriesOffset);
-
-                    % zoom(axes3Ptr('get', [], dSeriesOffset), dZFactor);
-                    % multiFrameZoom('set', 'axe', axes3Ptr('get', [], dSeriesOffset));
-                    
-                case axesMipPtr('get', [], dSeriesOffset)
-
-                    axesHandle = axesMipPtr('get', [], dSeriesOffset);
-
-                    % zoom(axesMipPtr('get', [], dSeriesOffset), dZFactor);
-                    % multiFrameZoom('set', 'axe', axesMipPtr('get', [], dSeriesOffset));
-                    
-                otherwise
-
-                    axesHandle = axes3Ptr('get', [], dSeriesOffset);
-
-                    % zoom(axes3Ptr('get', [], dSeriesOffset), dZFactor);
-                    % multiFrameZoom('set', 'axe', axes3Ptr('get', [], dSeriesOffset));
-            end  
-
-            if isempty(getappdata(axesHandle, 'matlab_graphics_resetplotview'))
-
-                initAxePlotView(axesHandle);
-            end
-
-            % Get the current axes limits
-            xLim = get(axesHandle, 'XLim');
-            yLim = get(axesHandle, 'YLim');
-
-            % Handle infinite limits by replacing with reasonable defaults
-
-            if any(isinf(xLim))
-               
-                xData = get(axesHandle.Children, 'XData');  % Assuming children are the plotted data
-                xLim = [min(cell2mat(xData),[],"all"), max(cell2mat(xData),[],"all")];      % Set to the range of the data
-            end
-            
-            if any(isinf(yLim))
-           
-                yData = get(axesHandle.Children, 'YData');  % Assuming children are the plotted data
-                yLim = [min(cell2mat(yData),[],"all"), max(cell2mat(yData),[],"all")];      % Set to the range of the data
-            end 
-
-            % Compute the center of the current axes
-            xCenter = mean(xLim);
-            yCenter = mean(yLim);
-
-            % Calculate the new limits based on the zoom factor
-            newXLim = xCenter + (xLim - xCenter) / dZFactor;  % Zoom in/out
-            newYLim = yCenter + (yLim - yCenter) / dZFactor;
-
-            % Apply the new limits to the axes
-            set(axesHandle, 'XLim', newXLim, 'YLim', newYLim);
+            else
+                multiFrameZoom('set', 'out', 1);
+    
+                pAxe = getAxeFromMousePosition(dSeriesOffset);
+    
+                % pAxe = gca(fiMainWindowPtr('get'));
+    
+                if multiFrameZoom('get', 'axe') ~= pAxe
+    
+                    multiFrameZoom('set', 'in', 1);
+                end
+    
+                dZFactor = multiFrameZoom('get', 'in');
+                dZFactor = dZFactor+0.025;
+                
+                multiFrameZoom('set', 'in', dZFactor);
+    
+                switch pAxe
+    
+                    case axePtr('get', [], dSeriesOffset)
+    
+                        axesHandle = axePtr('get', [], dSeriesOffset);
+    
+                    case axes1Ptr('get', [], dSeriesOffset)
+    
+                        axesHandle = axes1Ptr('get', [], dSeriesOffset);
+    
+                        % zoom(axes1Ptr('get', [], dSeriesOffset), dZFactor);
+                        % multiFrameZoom('set', 'axe', axes1Ptr('get', [], dSeriesOffset));
+    
+                    case axes2Ptr('get', [], dSeriesOffset)
+    
+                        axesHandle = axes2Ptr('get', [], dSeriesOffset);
+    
+                        % zoom(axes2Ptr('get', [], dSeriesOffset), dZFactor);
+                        % multiFrameZoom('set', 'axe', axes2Ptr('get', [], dSeriesOffset));
                         
-            multiFrameZoom('set', 'axe', axesHandle);
+                    case axes3Ptr('get', [], dSeriesOffset)
+    
+                        axesHandle = axes3Ptr('get', [], dSeriesOffset);
+    
+                        % zoom(axes3Ptr('get', [], dSeriesOffset), dZFactor);
+                        % multiFrameZoom('set', 'axe', axes3Ptr('get', [], dSeriesOffset));
+                        
+                    case axesMipPtr('get', [], dSeriesOffset)
+    
+                        axesHandle = axesMipPtr('get', [], dSeriesOffset);
+    
+                        % zoom(axesMipPtr('get', [], dSeriesOffset), dZFactor);
+                        % multiFrameZoom('set', 'axe', axesMipPtr('get', [], dSeriesOffset));
+                        
+                    otherwise
+    
+                        axesHandle = axes3Ptr('get', [], dSeriesOffset);
+    
+                        % zoom(axes3Ptr('get', [], dSeriesOffset), dZFactor);
+                        % multiFrameZoom('set', 'axe', axes3Ptr('get', [], dSeriesOffset));
+                end  
+    
+                if isempty(getappdata(axesHandle, 'matlab_graphics_resetplotview'))
+    
+                    initAxePlotView(axesHandle);
+                end
+    
+                % Get the current axes limits
+                xLim = get(axesHandle, 'XLim');
+                yLim = get(axesHandle, 'YLim');
+    
+                % Handle infinite limits by replacing with reasonable defaults
+    
+                if any(isinf(xLim))
+                   
+                    xData = get(axesHandle.Children, 'XData');  % Assuming children are the plotted data
+                    xLim = [min(cell2mat(xData),[],"all"), max(cell2mat(xData),[],"all")];      % Set to the range of the data
+                end
+                
+                if any(isinf(yLim))
+               
+                    yData = get(axesHandle.Children, 'YData');  % Assuming children are the plotted data
+                    yLim = [min(cell2mat(yData),[],"all"), max(cell2mat(yData),[],"all")];      % Set to the range of the data
+                end 
+    
+                % Compute the center of the current axes
+                xCenter = mean(xLim);
+                yCenter = mean(yLim);
+    
+                % Calculate the new limits based on the zoom factor
+                newXLim = xCenter + (xLim - xCenter) / dZFactor;  % Zoom in/out
+                newYLim = yCenter + (yLim - yCenter) / dZFactor;
+    
+                % Apply the new limits to the axes
+                set(axesHandle, 'XLim', newXLim, 'YLim', newYLim);
+                            
+                multiFrameZoom('set', 'axe', axesHandle);
+            end
 
         end
     end
@@ -646,104 +743,116 @@ function catchKeyPress(~,evnt)
 
              initGate3DObject('set', true);     
         else
+            if ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) % Decrese VOI contours size
 
-            multiFrameZoom('set', 'in', 1);
-
-            % pAxe = gca(fiMainWindowPtr('get'));
-            pAxe = getAxeFromMousePosition(dSeriesOffset);
-
-            if multiFrameZoom('get', 'axe') ~= pAxe
-
-                multiFrameZoom('set', 'out', 1);
-            end
-
-            dZFactor = multiFrameZoom('get', 'out');
-
-            if dZFactor > 0.025
-
-                dZFactor = dZFactor-0.025;
-                multiFrameZoom('set', 'out', dZFactor);
-            end
-
-            switch pAxe
-
-                case axePtr('get', [], dSeriesOffset)
-
-                    axesHandle = axePtr('get', [], dSeriesOffset);
-
-                case axes1Ptr('get', [], dSeriesOffset)
-
-                    axesHandle = axes1Ptr('get', [], dSeriesOffset);
-
-                    % zoom(axes1Ptr('get', [], dSeriesOffset), dZFactor);
-                    % multiFrameZoom('set', 'axe', axes1Ptr('get', [], dSeriesOffset));
-
-                case axes2Ptr('get', [], dSeriesOffset)
-
-                    axesHandle = axes2Ptr('get', [], dSeriesOffset);
-
-                    % zoom(axes2Ptr('get', [], dSeriesOffset), dZFactor);
-                    % multiFrameZoom('set', 'axe', axes2Ptr('get', [], dSeriesOffset));
-                    
-                case axes3Ptr('get', [], dSeriesOffset)
-
-                    axesHandle = axes3Ptr('get', [], dSeriesOffset);
-
-                    % zoom(axes3Ptr('get', [], dSeriesOffset), dZFactor);
-                    % multiFrameZoom('set', 'axe', axes3Ptr('get', [], dSeriesOffset));
-                    
-                case axesMipPtr('get', [], dSeriesOffset)
-
-                    axesHandle = axesMipPtr('get', [], dSeriesOffset);
-
-                    % zoom(axesMipPtr('get', [], dSeriesOffset), dZFactor);
-                    % multiFrameZoom('set', 'axe', axesMipPtr('get', [], dSeriesOffset));
-                    
-                otherwise
-
-                    axesHandle = axes3Ptr('get', [], dSeriesOffset);
-
-                    % zoom(axes3Ptr('get', [], dSeriesOffset), dZFactor);
-                    % multiFrameZoom('set', 'axe', axes3Ptr('get', [], dSeriesOffset));
-            end 
-
-            if isempty(getappdata(axesHandle, 'matlab_graphics_resetplotview'))
+                atVoiInput = voiTemplate('get', dSeriesOffset);
                 
-                initAxePlotView(axesHandle);
-            end
+                if ~isempty(atVoiInput)
 
-            % Get the current axes limits
-
-            xLim = get(axesHandle, 'XLim');
-            yLim = get(axesHandle, 'YLim');
-
-            % Handle infinite limits by replacing with reasonable defaults
-
-            if any(isinf(xLim))
+                    dVoiOffset = get(uiDeleteVoiRoiPanelObject('get'), 'Value');
+    
+                    decreaseVoiPosition(atVoiInput{dVoiOffset}.Tag, voiIncrementRatio('get'));
+    
+                    plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
+                end
+            else
+                multiFrameZoom('set', 'in', 1);
+    
+                % pAxe = gca(fiMainWindowPtr('get'));
+                pAxe = getAxeFromMousePosition(dSeriesOffset);
+    
+                if multiFrameZoom('get', 'axe') ~= pAxe
+    
+                    multiFrameZoom('set', 'out', 1);
+                end
+    
+                dZFactor = multiFrameZoom('get', 'out');
+    
+                if dZFactor > 0.025
+    
+                    dZFactor = dZFactor-0.025;
+                    multiFrameZoom('set', 'out', dZFactor);
+                end
+    
+                switch pAxe
+    
+                    case axePtr('get', [], dSeriesOffset)
+    
+                        axesHandle = axePtr('get', [], dSeriesOffset);
+    
+                    case axes1Ptr('get', [], dSeriesOffset)
+    
+                        axesHandle = axes1Ptr('get', [], dSeriesOffset);
+    
+                        % zoom(axes1Ptr('get', [], dSeriesOffset), dZFactor);
+                        % multiFrameZoom('set', 'axe', axes1Ptr('get', [], dSeriesOffset));
+    
+                    case axes2Ptr('get', [], dSeriesOffset)
+    
+                        axesHandle = axes2Ptr('get', [], dSeriesOffset);
+    
+                        % zoom(axes2Ptr('get', [], dSeriesOffset), dZFactor);
+                        % multiFrameZoom('set', 'axe', axes2Ptr('get', [], dSeriesOffset));
+                        
+                    case axes3Ptr('get', [], dSeriesOffset)
+    
+                        axesHandle = axes3Ptr('get', [], dSeriesOffset);
+    
+                        % zoom(axes3Ptr('get', [], dSeriesOffset), dZFactor);
+                        % multiFrameZoom('set', 'axe', axes3Ptr('get', [], dSeriesOffset));
+                        
+                    case axesMipPtr('get', [], dSeriesOffset)
+    
+                        axesHandle = axesMipPtr('get', [], dSeriesOffset);
+    
+                        % zoom(axesMipPtr('get', [], dSeriesOffset), dZFactor);
+                        % multiFrameZoom('set', 'axe', axesMipPtr('get', [], dSeriesOffset));
+                        
+                    otherwise
+    
+                        axesHandle = axes3Ptr('get', [], dSeriesOffset);
+    
+                        % zoom(axes3Ptr('get', [], dSeriesOffset), dZFactor);
+                        % multiFrameZoom('set', 'axe', axes3Ptr('get', [], dSeriesOffset));
+                end 
+    
+                if isempty(getappdata(axesHandle, 'matlab_graphics_resetplotview'))
+                    
+                    initAxePlotView(axesHandle);
+                end
+    
+                % Get the current axes limits
+    
+                xLim = get(axesHandle, 'XLim');
+                yLim = get(axesHandle, 'YLim');
+    
+                % Handle infinite limits by replacing with reasonable defaults
+    
+                if any(isinf(xLim))
+                   
+                    xData = get(axesHandle.Children, 'XData');  % Assuming children are the plotted data
+                    xLim = [min(cell2mat(xData),[],"all"), max(cell2mat(xData),[],"all")];      % Set to the range of the data
+                end
+                
+                if any(isinf(yLim))
                
-                xData = get(axesHandle.Children, 'XData');  % Assuming children are the plotted data
-                xLim = [min(cell2mat(xData),[],"all"), max(cell2mat(xData),[],"all")];      % Set to the range of the data
+                    yData = get(axesHandle.Children, 'YData');  % Assuming children are the plotted data
+                    yLim = [min(cell2mat(yData),[],"all"), max(cell2mat(yData),[],"all")];      % Set to the range of the data
+                end 
+    
+                % Compute the center of the current axes
+                xCenter = mean(xLim);
+                yCenter = mean(yLim);
+    
+                % Calculate the new limits based on the zoom factor
+                newXLim = xCenter + (xLim - xCenter) / dZFactor;  % Zoom in/out
+                newYLim = yCenter + (yLim - yCenter) / dZFactor;
+    
+                % Apply the new limits to the axes
+                set(axesHandle, 'XLim', newXLim, 'YLim', newYLim);
+                          
+                multiFrameZoom('set', 'axe', axesHandle);
             end
-            
-            if any(isinf(yLim))
-           
-                yData = get(axesHandle.Children, 'YData');  % Assuming children are the plotted data
-                yLim = [min(cell2mat(yData),[],"all"), max(cell2mat(yData),[],"all")];      % Set to the range of the data
-            end 
-
-            % Compute the center of the current axes
-            xCenter = mean(xLim);
-            yCenter = mean(yLim);
-
-            % Calculate the new limits based on the zoom factor
-            newXLim = xCenter + (xLim - xCenter) / dZFactor;  % Zoom in/out
-            newYLim = yCenter + (yLim - yCenter) / dZFactor;
-
-            % Apply the new limits to the axes
-            set(axesHandle, 'XLim', newXLim, 'YLim', newYLim);
-                      
-            multiFrameZoom('set', 'axe', axesHandle);
-
         end
     end    
     
@@ -1092,16 +1201,41 @@ function catchKeyPress(~,evnt)
     end
 
     if strcmpi(evnt.Key,'c')
-        
+
+       dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
        if switchTo3DMode('get')     == true || ...
           switchToIsoSurface('get') == true || ...
           switchToMIPMode('get')    == true || ...
           isVsplash('get')          == true        
 
             return;
-        end
+       end
 
-        if ismember('shift', get(fiMainWindowPtr('get'),'CurrentModifier'))
+        if ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) % Copy contour
+
+            atRoiInput = roiTemplate('get', dSeriesOffset);
+
+            if ~isempty(atRoiInput) 
+        
+                dNbRois = numel(atRoiInput);
+                
+                for rr=1:dNbRois
+        
+                    if strcmpi(atRoiInput{rr}.Object.Visible, 'on')
+        
+                        if isMouseOverROI(atRoiInput{rr}.Object, dSeriesOffset)
+
+                            hObject.UserData = atRoiInput{rr}.Object;
+
+                            copyRoiCallback(hObject);
+                            break;
+                        end
+                    end
+                end
+            end
+
+        elseif ismember('shift', get(fiMainWindowPtr('get'),'CurrentModifier')) % Cross size
 
             if crossSize('get') > 30
 
@@ -1112,6 +1246,7 @@ function catchKeyPress(~,evnt)
             % redrawCross('all');
         else
             if crossActivate('get')
+
                 crossActivate('set', false);
             else
                 crossActivate('set', true);                       
@@ -1119,9 +1254,8 @@ function catchKeyPress(~,evnt)
 
         end 
 
-        if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
-        %    delete(findobj(axe, 'Type', 'line'))
-        else
+        if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
             alAxes1Line   = axesLine('get', 'axes1');
             alAxes2Line   = axesLine('get', 'axes2');
             alAxes3Line   = axesLine('get', 'axes3');
@@ -1161,259 +1295,314 @@ function catchKeyPress(~,evnt)
     persistent pdBackgroundColor;
     persistent pdOverlayColor;
     persistent pdAlphaSlider;
+    
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
     if strcmpi(evnt.Key,'f')
- 
+
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true
             return;
         end
         
-        dNbFusedSeries = 0;
-        
-        if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
-            dNbSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
-            for rr=1:dNbSeries
-                imAxeF = imAxeFPtr('get', [], rr);
-                if ~isempty(imAxeF)               
-                    dNbFusedSeries = dNbFusedSeries+1; % Multiple fusion
-                end
-            end
-        else
-            dNbSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
-            for rr=1:dNbSeries
-                    
-                imCoronalF  = imCoronalFPtr ('get', [], rr);
-                imSagittalF = imSagittalFPtr('get', [], rr);
-                imAxialF    = imAxialFPtr   ('get', [], rr);
+        if ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) % Full screen
 
-                if ~isempty(imCoronalF) && ...
-                   ~isempty(imSagittalF) && ...
-                   ~isempty(imAxialF)
-                    dNbFusedSeries = dNbFusedSeries+1;  % Multiple fusion
-                end
-            end
-        end             
-        
-        if isFusion('get')== true
-                                
-            if keyPressFusionStatus('get') ~= 0 && ...
-               keyPressFusionStatus('get') ~= 1     
+            pAxe = getAxeFromMousePosition(dSeriesOffset);
 
-                pdColorOffset       = colorMapOffset('get');
-                pdFusionColorOffset = fusionColorMapOffset('get');
+            if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
 
-                pdInvertColor     = invertColor    ('get');
-                pdBackgroundColor = backgroundColor('get');
-                pdOverlayColor    = overlayColor   ('get');
+                switch pAxe
+                    case axes1Ptr('get', [], dSeriesOffset)  % Coronal
 
-                pdAlphaSlider = sliderAlphaValue('get');   
-                
-                keyPressFusionStatus('set', 1);
+                        btnUiCorWindowFullScreenCallback();
 
-%                set(uiAlphaSliderPtr('get') , 'Value', 1);
-%                sliderAlphaValue('set', 1);   
-
-                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
-
-                    alpha( imAxePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
-                    if dNbFusedSeries == 1
-                        alpha( imAxeFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
-                    end                    
-                else
-                    alpha( imCoronalPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
-                    alpha( imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
-                    alpha( imAxialPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
-
-                    if link2DMip('get') == true  && isVsplash('get') == false                                        
-                        set( imMipPtr ('get', [], get(uiSeriesPtr('get'), 'Value')), 'Visible', 'on' );
-                        alpha( imMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 0 );
-                    end  
-                    
-                    if dNbFusedSeries == 1
-
-                        alpha( imCoronalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
-                        alpha( imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
-                        alpha( imAxialFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
-
-                        if link2DMip('get') == true  && isVsplash('get') == false                                        
-                           set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
-                           alpha( imMipFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 1 );
-                        end                        
-                    end
-                end
-
-                iFuseOffset = get(uiFusedSeriesPtr('get'), 'Value');
-
-                tFuseInput  = inputTemplate('get');
-                atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
-
-                % Deactivate colobar
-
-                setColorbarVisible('off');
-
-                ptrFusionColorbar = uiFusionColorbarPtr('get');
-                if ~isempty(ptrFusionColorbar) 
-        
-                    setFusionColorbarPosition(ptrFusionColorbar);
-                end
-
-
-                asSeriesString = seriesDescription('get');
-
-                if ~isempty(asSeriesString) && dNbFusedSeries == 1
-
-                    if numel(asSeriesString) >= get(uiFusedSeriesPtr('get'), 'Value')
+                    case axes2Ptr('get', [], dSeriesOffset)  % Sagittal
                         
-                        ptrFusionColorbar = uiFusionColorbarPtr('get');
-                        
-                        ptrFusionColorbar.Label.String = asSeriesString{get(uiFusedSeriesPtr('get'), 'Value')};         
-                        uiFusionColorbarPtr('set', ptrFusionColorbar);
-                    end
+                        btnUiSagWindowFullScreenCallback();
+
+                    case axes3Ptr('get', [], dSeriesOffset)  % Axial
+
+                        btnUiTraWindowFullScreenCallback();
+
+                    case axesMipPtr('get', [], dSeriesOffset)  % MIP
+
+                        btnUiMipWindowFullScreenCallback();
                 end
+            end            
 
-                setFusionColorbarVisible('on');
+        else    % Toggle fusion
 
-                set(uiAlphaSliderPtr('get'), 'Enable', 'off');
+            dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
 
-                setViewerDefaultColor(true, dicomMetaData('get'), atFuseMetaData);                        
-
-            else
-                if keyPressFusionStatus('get') == 1
-
-                    keyPressFusionStatus('set', 0);
-                
-%                    set(uiAlphaSliderPtr('get') , 'Value', 0);
-%                    sliderAlphaValue('set', 0);   
-
-                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
-
-                        alpha( imAxePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
-                    else
-                        alpha( imCoronalPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
-                        alpha( imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
-                        alpha( imAxialPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
-
-                        if link2DMip('get') == true  && isVsplash('get') == false                                        
-                            set( imMipPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
-                            alpha( imMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1 );
-                        end 
-                                                
-                    end
-
-                    % Deactivate fusion colobar
-
-                    asSeriesString = seriesDescription('get');
-
-                    if ~isempty(asSeriesString) && dNbFusedSeries == 1
-
-                        if numel(asSeriesString) >= get(uiSeriesPtr('get'), 'Value')
-        
-                            ptrColorbar = uiColorbarPtr('get');
-        
-                            ptrColorbar.Label.String = asSeriesString{get(uiSeriesPtr('get'), 'Value')};         
-                            uiColorbarPtr('set', ptrColorbar);
-                        end
-                    end
-
-                    setColorbarVisible('on');
-
-                    setFusionColorbarVisible('off');
-               
-                    ptrColorbar = uiColorbarPtr('get');
-                    if ~isempty(ptrColorbar) 
+            dNbFusedSeries = 0;
             
-                        setColorbarPosition(ptrColorbar);
+            if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
+                dNbSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+                for rr=1:dNbSeries
+                    imAxeF = imAxeFPtr('get', [], rr);
+                    if ~isempty(imAxeF)               
+                        dNbFusedSeries = dNbFusedSeries+1; % Multiple fusion
                     end
-
-                    set(uiAlphaSliderPtr('get'), 'Enable', 'off');
-
-                    setViewerDefaultColor(true, dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value')));                           
-                else
-                    keyPressFusionStatus('set', 2);
-
-%                    set(uiAlphaSliderPtr('get') , 'Value', pdAlphaSlider);     
-%                    sliderAlphaValue('set', pdAlphaSlider);
-
-                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
-                        alpha( imAxePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
+                end
+            else
+                dNbSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+                for rr=1:dNbSeries
+                        
+                    imCoronalF  = imCoronalFPtr ('get', [], rr);
+                    imSagittalF = imSagittalFPtr('get', [], rr);
+                    imAxialF    = imAxialFPtr   ('get', [], rr);
+    
+                    if ~isempty(imCoronalF) && ...
+                       ~isempty(imSagittalF) && ...
+                       ~isempty(imAxialF)
+                        dNbFusedSeries = dNbFusedSeries+1;  % Multiple fusion
+                    end
+                end
+            end             
+            
+            if isFusion('get')== true
+                                    
+                if keyPressFusionStatus('get') ~= 0 && ...
+                   keyPressFusionStatus('get') ~= 1     
+    
+                    pdColorOffset       = colorMapOffset('get');
+                    pdFusionColorOffset = fusionColorMapOffset('get');
+    
+                    pdInvertColor     = invertColor    ('get');
+                    pdBackgroundColor = backgroundColor('get');
+                    pdOverlayColor    = overlayColor   ('get');
+    
+                    pdAlphaSlider = sliderAlphaValue('get');   
+                    
+                    keyPressFusionStatus('set', 1);
+    
+    %                set(uiAlphaSliderPtr('get') , 'Value', 1);
+    %                sliderAlphaValue('set', 1);   
+    
+                    if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
+    
+                        alpha( imAxePtr('get', [], dSeriesOffset), 0 );
+                        if dNbFusedSeries == 1
+                            alpha( imAxeFPtr('get', [], dFusionSeriesOffset), 1 );
+                        end                    
                     else
-                        alpha( imCoronalPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
-                        alpha( imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
-                        alpha( imAxialPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
-
-                        if link2DMip('get') == true && isVsplash('get') == false                       
-                            alpha( imMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-pdAlphaSlider );
-                        end
+                        alpha( imCoronalPtr ('get', [], dSeriesOffset), 0 );
+                        alpha( imSagittalPtr('get', [], dSeriesOffset), 0 );
+                        alpha( imAxialPtr   ('get', [], dSeriesOffset), 0 );
+    
+                        if link2DMip('get') == true  && isVsplash('get') == false                                        
+                            set( imMipPtr ('get', [], dSeriesOffset), 'Visible', 'on' );
+                            alpha( imMipPtr('get', [], dSeriesOffset), 0 );
+                        end  
                         
                         if dNbFusedSeries == 1
-
-                            alpha( imCoronalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
-                            alpha( imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
-                            alpha( imAxialFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
-
+    
+                            alpha( imCoronalFPtr ('get', [], dFusionSeriesOffset), 1 );
+                            alpha( imSagittalFPtr('get', [], dFusionSeriesOffset), 1 );
+                            alpha( imAxialFPtr   ('get', [], dFusionSeriesOffset), 1 );
+    
                             if link2DMip('get') == true  && isVsplash('get') == false                                        
-                                set( imMipFPtr ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'Visible', 'on' );
-                                alpha( imMipFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), pdAlphaSlider );
+                               set( imMipFPtr ('get', [], dFusionSeriesOffset), 'Visible', 'on' );
+                               alpha( imMipFPtr('get', [], dFusionSeriesOffset), 1 );
                             end                        
-                        end                        
-                   end   
-
-                    colorMapOffset('set', pdColorOffset);
-                    fusionColorMapOffset('set', pdFusionColorOffset);
-
-                    invertColor('set', pdInvertColor);
-
-                    backgroundColor ('set', pdBackgroundColor);
-                    overlayColor    ('set', pdOverlayColor);
-
-                    % Reactivate all colobars
-
-                    ptrColorbar = uiColorbarPtr('get');
-                    if ~isempty(ptrColorbar) 
-            
-                        setColorbarPosition(ptrColorbar);
+                        end
                     end
-
+    
+                    iFuseOffset = dFusionSeriesOffset;
+    
+                    tFuseInput  = inputTemplate('get');
+                    atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
+    
+                    % Deactivate colobar
+    
+                    setColorbarVisible('off');
+    
                     ptrFusionColorbar = uiFusionColorbarPtr('get');
                     if ~isempty(ptrFusionColorbar) 
             
                         setFusionColorbarPosition(ptrFusionColorbar);
                     end
-
-                    setColorbarLabel();                  
-
-                    setColorbarVisible('on');
-
-                    setFusionColorbarLabel();
-
+    
+    
+                    asSeriesString = seriesDescription('get');
+    
+                    if ~isempty(asSeriesString) && dNbFusedSeries == 1
+    
+                        if numel(asSeriesString) >= dFusionSeriesOffset
+                            
+                            ptrFusionColorbar = uiFusionColorbarPtr('get');
+                            
+                            ptrFusionColorbar.Label.String = asSeriesString{dFusionSeriesOffset};         
+                            uiFusionColorbarPtr('set', ptrFusionColorbar);
+                        end
+                    end
+    
                     setFusionColorbarVisible('on');
-
-                    set(uiAlphaSliderPtr('get'), 'Enable', 'on');
-
-                    setViewerDefaultColor(false, dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value')));
-                 
-                end
-            end
+    
+                    set(uiAlphaSliderPtr('get'), 'Enable', 'off');
+    
+                    setViewerDefaultColor(true, dicomMetaData('get'), atFuseMetaData);                        
+    
+                else
+                    if keyPressFusionStatus('get') == 1
+    
+                        keyPressFusionStatus('set', 0);
+                    
+    %                    set(uiAlphaSliderPtr('get') , 'Value', 0);
+    %                    sliderAlphaValue('set', 0);   
+    
+                        if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
+    
+                            alpha( imAxePtr('get', [], dSeriesOffset), 1 );
+                        else
+                            alpha( imCoronalPtr ('get', [], dSeriesOffset), 1 );
+                            alpha( imSagittalPtr('get', [], dSeriesOffset), 1 );
+                            alpha( imAxialPtr   ('get', [], dSeriesOffset), 1 );
+    
+                            if link2DMip('get') == true  && isVsplash('get') == false                                        
+                                set( imMipPtr ('get', [], dFusionSeriesOffset), 'Visible', 'on' );
+                                alpha( imMipPtr('get', [], dSeriesOffset), 1 );
+                            end 
+                                                    
+                        end
+    
+                        % Deactivate fusion colobar
+    
+                        asSeriesString = seriesDescription('get');
+    
+                        if ~isempty(asSeriesString) && dNbFusedSeries == 1
+    
+                            if numel(asSeriesString) >= dSeriesOffset
             
-%            sliderAlphaCallback();
-
-%             setFusionColorbarLabel();
-
+                                ptrColorbar = uiColorbarPtr('get');
+            
+                                ptrColorbar.Label.String = asSeriesString{dSeriesOffset};         
+                                uiColorbarPtr('set', ptrColorbar);
+                            end
+                        end
+    
+                        setColorbarVisible('on');
+    
+                        setFusionColorbarVisible('off');
+                   
+                        ptrColorbar = uiColorbarPtr('get');
+                        if ~isempty(ptrColorbar) 
+                
+                            setColorbarPosition(ptrColorbar);
+                        end
+    
+                        set(uiAlphaSliderPtr('get'), 'Enable', 'off');
+    
+                        setViewerDefaultColor(true, dicomMetaData('get', [], dSeriesOffset));                           
+                    else
+                        keyPressFusionStatus('set', 2);
+    
+    %                    set(uiAlphaSliderPtr('get') , 'Value', pdAlphaSlider);     
+    %                    sliderAlphaValue('set', pdAlphaSlider);
+    
+                        if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
+                            alpha( imAxePtr('get', [], dSeriesOffset), 1-pdAlphaSlider );
+                        else
+                            alpha( imCoronalPtr ('get', [], dSeriesOffset), 1-pdAlphaSlider );
+                            alpha( imSagittalPtr('get', [], dSeriesOffset), 1-pdAlphaSlider );
+                            alpha( imAxialPtr   ('get', [], dSeriesOffset), 1-pdAlphaSlider );
+    
+                            if link2DMip('get') == true && isVsplash('get') == false                       
+                                alpha( imMipPtr('get', [], dSeriesOffset), 1-pdAlphaSlider );
+                            end
+                            
+                            if dNbFusedSeries == 1
+    
+                                alpha( imCoronalFPtr ('get', [], dFusionSeriesOffset), pdAlphaSlider );
+                                alpha( imSagittalFPtr('get', [], dFusionSeriesOffset), pdAlphaSlider );
+                                alpha( imAxialFPtr   ('get', [], dFusionSeriesOffset), pdAlphaSlider );
+    
+                                if link2DMip('get') == true  && isVsplash('get') == false                                        
+                                    set( imMipFPtr ('get', [], dFusionSeriesOffset), 'Visible', 'on' );
+                                    alpha( imMipFPtr('get', [], dFusionSeriesOffset), pdAlphaSlider );
+                                end                        
+                            end                        
+                       end   
+    
+                        colorMapOffset('set', pdColorOffset);
+                        fusionColorMapOffset('set', pdFusionColorOffset);
+    
+                        invertColor('set', pdInvertColor);
+    
+                        backgroundColor ('set', pdBackgroundColor);
+                        overlayColor    ('set', pdOverlayColor);
+    
+                        % Reactivate all colobars
+    
+                        ptrColorbar = uiColorbarPtr('get');
+                        if ~isempty(ptrColorbar) 
+                
+                            setColorbarPosition(ptrColorbar);
+                        end
+    
+                        ptrFusionColorbar = uiFusionColorbarPtr('get');
+                        if ~isempty(ptrFusionColorbar) 
+                
+                            setFusionColorbarPosition(ptrFusionColorbar);
+                        end
+    
+                        setColorbarLabel();                  
+    
+                        setColorbarVisible('on');
+    
+                        setFusionColorbarLabel();
+    
+                        setFusionColorbarVisible('on');
+    
+                        set(uiAlphaSliderPtr('get'), 'Enable', 'on');
+    
+                        setViewerDefaultColor(false, dicomMetaData('get', [], dSeriesOffset));
+                     
+                    end
+                end
+                
+    %            sliderAlphaCallback();
+    
+    %             setFusionColorbarLabel();
+    
+            end
+           
+            refreshImages();   
         end
-       
-        refreshImages();   
+
+    end
+    
+    if strcmpi(evnt.Key,'i') % Interpolation
   
+        if switchTo3DMode('get')     == true || ...
+           switchToIsoSurface('get') == true || ...
+           switchToMIPMode('get')    == true
+            return;
+        end
+        
+
+        if isInterpolated('get') == true
+
+            isInterpolated('set', false);
+        else
+            isInterpolated('set', true);
+        end
+
+        setImageInterpolation(isInterpolated('get'));
+
     end
 
-    if strcmpi(evnt.Key,'i')
+    if strcmpi(evnt.Key,'u') % Invert Color
         
         if switchTo3DMode('get')     == true || ...
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true
             return;
         end
+
+        dSeriesOffset       = get(uiSeriesPtr('get'), 'Value');
+        dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
 
         uiLogo = logoObject('get');
 
@@ -1421,12 +1610,12 @@ function catchKeyPress(~,evnt)
             
             invertColor('set', false);
 
-            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
+            if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
                 
                 set(uiOneWindowPtr('get'), 'BackgroundColor', 'black');
                 
-               cmap = flipud(colormap(axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))));
-               colormap(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), cmap);
+               cmap = flipud(colormap(axePtr('get', [], dSeriesOffset)));
+               colormap(axePtr('get', [], dSeriesOffset), cmap);
                 
                 if isFusion('get') == true 
                 
@@ -1441,8 +1630,8 @@ function catchKeyPress(~,evnt)
                 end
                 
                 if isPlotContours('get') == true 
-                   cmapfc = flipud(colormap(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
-                   colormap(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmapfc);
+                   cmapfc = flipud(colormap(axefcPtr('get', [], dFusionSeriesOffset)));
+                   colormap(axefcPtr('get', [], dFusionSeriesOffset), cmapfc);
                 end
                 
             else
@@ -1459,17 +1648,17 @@ function catchKeyPress(~,evnt)
                         set(uiMipWindowPtr('get'), 'BackgroundColor', 'black');
                     end
                     
-                    cmap1 = flipud(colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))));
-                    cmap2 = flipud(colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))));
-                    cmap3 = flipud(colormap(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))));
+                    cmap1 = flipud(colormap(axes1Ptr('get', [], dSeriesOffset)));
+                    cmap2 = flipud(colormap(axes2Ptr('get', [], dSeriesOffset)));
+                    cmap3 = flipud(colormap(axes3Ptr('get', [], dSeriesOffset)));
                 
-                    colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), cmap1);
-                    colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), cmap2);
-                    colormap(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), cmap3); 
+                    colormap(axes1Ptr('get', [], dSeriesOffset), cmap1);
+                    colormap(axes2Ptr('get', [], dSeriesOffset), cmap2);
+                    colormap(axes3Ptr('get', [], dSeriesOffset), cmap3); 
                 
                     if link2DMip('get') == true && isVsplash('get') == false
-                        cmapMip = flipud(colormap(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))));
-                        colormap(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), cmapMip); 
+                        cmapMip = flipud(colormap(axesMipPtr('get', [], dSeriesOffset)));
+                        colormap(axesMipPtr('get', [], dSeriesOffset), cmapMip); 
                     end
 
                     if isFusion('get') == true 
@@ -1507,17 +1696,17 @@ function catchKeyPress(~,evnt)
                     
                     if isPlotContours('get') == true && isVsplash('get') == false
                         
-                        cmap1fc = flipud(colormap(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
-                        cmap2fc = flipud(colormap(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
-                        cmap3fc = flipud(colormap(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
+                        cmap1fc = flipud(colormap(axes1fcPtr('get', [], dFusionSeriesOffset)));
+                        cmap2fc = flipud(colormap(axes1fcPtr('get', [], dFusionSeriesOffset)));
+                        cmap3fc = flipud(colormap(axes1fcPtr('get', [], dFusionSeriesOffset)));
                     
-                        colormap(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmap1fc);
-                        colormap(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmap2fc);
-                        colormap(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmap3fc);   
+                        colormap(axes1fcPtr('get', [], dFusionSeriesOffset), cmap1fc);
+                        colormap(axes2fcPtr('get', [], dFusionSeriesOffset), cmap2fc);
+                        colormap(axes3fcPtr('get', [], dFusionSeriesOffset), cmap3fc);   
                         
                         if link2DMip('get') == true && isVsplash('get') == false
-                            cmapMipfc = flipud(colormap(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
-                            colormap(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmapMipfc);                                                       
+                            cmapMipfc = flipud(colormap(axesMipfcPtr('get', [], dFusionSeriesOffset)));
+                            colormap(axesMipfcPtr('get', [], dFusionSeriesOffset), cmapMipfc);                                                       
                         end
                     end
                 end
@@ -1547,12 +1736,12 @@ function catchKeyPress(~,evnt)
              
             invertColor('set', true);
 
-            if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1 
+            if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1 
                 
                 set(uiOneWindowPtr('get'), 'BackgroundColor', 'white');
                 
-                cmap = flipud(colormap(axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))));
-                colormap(axePtr('get' , [], get(uiSeriesPtr('get'), 'Value')), cmap);
+                cmap = flipud(colormap(axePtr('get', [], dSeriesOffset)));
+                colormap(axePtr('get' , [], dSeriesOffset), cmap);
                 
                 if isFusion('get') == true 
                 
@@ -1567,8 +1756,8 @@ function catchKeyPress(~,evnt)
                 end
                 
                 if isPlotContours('get') == true 
-                    cmapfc = flipud(colormap(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
-                    colormap(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmapfc);
+                    cmapfc = flipud(colormap(axefcPtr('get', [], dFusionSeriesOffset)));
+                    colormap(axefcPtr('get', [], dFusionSeriesOffset), cmapfc);
                 end
                 
             else
@@ -1581,17 +1770,17 @@ function catchKeyPress(~,evnt)
                     set(uiMipWindowPtr('get'), 'BackgroundColor', 'white');
                 end         
                 
-                cmap1 = flipud(colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))));
-                cmap2 = flipud(colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))));
-                cmap3 = flipud(colormap(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))));
+                cmap1 = flipud(colormap(axes1Ptr('get', [], dSeriesOffset)));
+                cmap2 = flipud(colormap(axes2Ptr('get', [], dSeriesOffset)));
+                cmap3 = flipud(colormap(axes3Ptr('get', [], dSeriesOffset)));
                             
-                colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), cmap1);
-                colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), cmap2);
-                colormap(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), cmap3);        
+                colormap(axes1Ptr('get', [], dSeriesOffset), cmap1);
+                colormap(axes2Ptr('get', [], dSeriesOffset), cmap2);
+                colormap(axes3Ptr('get', [], dSeriesOffset), cmap3);        
                 
                 if link2DMip('get') == true && isVsplash('get') == false             
-                   cmapMip = flipud(colormap(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'))));
-                   colormap(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')),cmapMip);        
+                   cmapMip = flipud(colormap(axesMipPtr('get', [], dSeriesOffset)));
+                   colormap(axesMipPtr('get', [], dSeriesOffset),cmapMip);        
                 end
                 
                 if isFusion('get') == true 
@@ -1629,17 +1818,17 @@ function catchKeyPress(~,evnt)
                 
                 if isPlotContours('get') == true && isVsplash('get') == false
                     
-                    cmap1fc = flipud(colormap(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
-                    cmap2fc = flipud(colormap(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
-                    cmap3fc = flipud(colormap(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
+                    cmap1fc = flipud(colormap(axes1fcPtr('get', [], dFusionSeriesOffset)));
+                    cmap2fc = flipud(colormap(axes1fcPtr('get', [], dFusionSeriesOffset)));
+                    cmap3fc = flipud(colormap(axes1fcPtr('get', [], dFusionSeriesOffset)));
                         
-                    colormap(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmap1fc);
-                    colormap(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmap2fc);
-                    colormap(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmap3fc);    
+                    colormap(axes1fcPtr('get', [], dFusionSeriesOffset), cmap1fc);
+                    colormap(axes2fcPtr('get', [], dFusionSeriesOffset), cmap2fc);
+                    colormap(axes3fcPtr('get', [], dFusionSeriesOffset), cmap3fc);    
                     
                     if link2DMip('get') == true && isVsplash('get') == false
-                        cmapMipfc = flipud(colormap(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))));
-                        colormap(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), cmapMipfc);                               
+                        cmapMipfc = flipud(colormap(axesMipfcPtr('get', [], dFusionSeriesOffset)));
+                        colormap(axesMipfcPtr('get', [], dFusionSeriesOffset), cmapMipfc);                               
                     end                    
                 end
 
@@ -1667,7 +1856,7 @@ function catchKeyPress(~,evnt)
             end
         end
 
-        if size(dicomBuffer('get', [],  get(uiSeriesPtr('get'), 'Value')), 3) ~= 1 && ...
+        if size(dicomBuffer('get', [],  dSeriesOffset), 3) ~= 1 && ...
            switchTo3DMode('get')     == false && ...
            switchToIsoSurface('get') == false && ...
            switchToMIPMode('get')    == false && ...

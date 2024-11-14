@@ -111,92 +111,92 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
 
                 if bUpdateColorMap == true
                     if strcmpi(sModality, 'mr')&&strcmpi(sFuseModality, 'mr')
-                        colorMapOffset('set', 10);
-                        fusionColorMapOffset('set', 10);
+                        colorMapOffset('set', 9);
+                        fusionColorMapOffset('set', 9);
                     elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'mr')
                         if isFusion('get')
-                            colorMapOffset('set', 20);
-                            fusionColorMapOffset('set', 10);
+                            colorMapOffset('set', 19);
+                            fusionColorMapOffset('set', 9);
                         else
-                            colorMapOffset('set', 10);
-                            fusionColorMapOffset('set', 20);
+                            colorMapOffset('set', 9);
+                            fusionColorMapOffset('set', 19);
                         end
                     elseif strcmpi(sModality, 'nm')&&strcmpi(sFuseModality, 'mr')
                         if isFusion('get')
-                            colorMapOffset('set', 20);
-                            fusionColorMapOffset('set', 10);
+                            colorMapOffset('set', 19);
+                            fusionColorMapOffset('set', 9);
                         else
-                            colorMapOffset('set', 10);
-                            fusionColorMapOffset('set', 20);
+                            colorMapOffset('set', 9);
+                            fusionColorMapOffset('set', 19);
                         end
                     elseif strcmpi(sModality, 'mr')&&strcmpi(sFuseModality, 'nm')
-                        colorMapOffset('set', 10);
-                        fusionColorMapOffset('set', 20);
+                        colorMapOffset('set', 9);
+                        fusionColorMapOffset('set', 19);
                     elseif strcmpi(sModality, 'mr')&&strcmpi(sFuseModality, 'ct')
-                        colorMapOffset('set', 10);
-                        fusionColorMapOffset('set', 20);
+                        colorMapOffset('set', 9);
+                        fusionColorMapOffset('set', 19);
                     elseif strcmpi(sModality, 'ct')&&strcmpi(sFuseModality, 'mr')
-                        colorMapOffset('set', 10);
-                        fusionColorMapOffset('set', 10);
+                        colorMapOffset('set', 9);
+                        fusionColorMapOffset('set', 9);
                     elseif strcmpi(sModality, 'mr')&&strcmpi(sFuseModality, 'pt')
-                        colorMapOffset('set', 10);
-                        fusionColorMapOffset('set', 20);
+                        colorMapOffset('set', 9);
+                        fusionColorMapOffset('set', 19);
                     elseif strcmpi(sModality, 'nm')&&strcmpi(sFuseModality, 'nm')
-                        colorMapOffset('set', 10);
-                        fusionColorMapOffset('set', 20);
+                        colorMapOffset('set', 9);
+                        fusionColorMapOffset('set', 19);
                     elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'pt')
-                        colorMapOffset('set', 10);
-                        fusionColorMapOffset('set', 20);
+                        colorMapOffset('set', 9);
+                        fusionColorMapOffset('set', 19);
                     elseif strcmpi(sModality, 'nm')&&strcmpi(sFuseModality, 'pt')
-                        colorMapOffset('set', 10);
-                        fusionColorMapOffset('set', 20);
+                        colorMapOffset('set', 9);
+                        fusionColorMapOffset('set', 19);
                     elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'nm')
-                        colorMapOffset('set', 10);
-                        fusionColorMapOffset('set', 20);
+                        colorMapOffset('set', 9);
+                        fusionColorMapOffset('set', 19);
 %                     elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'pt')
-%                         colorMapOffset('set', 10);
-%                         fusionColorMapOffset('set', 20);
+%                         colorMapOffset('set', 9);
+%                         fusionColorMapOffset('set', 19);
                     elseif strcmpi(sModality, 'ct')&&strcmpi(sFuseModality, 'ct')
-                        colorMapOffset('set', 10);
-                        fusionColorMapOffset('set', 20);
+                        colorMapOffset('set', 9);
+                        fusionColorMapOffset('set', 19);
                     elseif strcmpi(sModality, 'nm')&&strcmpi(sFuseModality, 'ct')
                         if isFusion('get')
-                            colorMapOffset('set', 20);
-                            fusionColorMapOffset('set', 10);
+                            colorMapOffset('set', 19);
+                            fusionColorMapOffset('set', 9);
                         else
-                            colorMapOffset('set', 10);
-                            fusionColorMapOffset('set', 20);
+                            colorMapOffset('set', 9);
+                            fusionColorMapOffset('set', 19);
                         end
                     elseif strcmpi(sModality, 'ct')&&strcmpi(sFuseModality, 'nm')
 
                         if isFusion('get') && keyPressFusionStatus('get') == 1
-                            colorMapOffset('set', 20);
-                            fusionColorMapOffset('set', 10);
+                            colorMapOffset('set', 19);
+                            fusionColorMapOffset('set', 9);
                         else
-                            colorMapOffset('set', 10);
-                            fusionColorMapOffset('set', 20);
+                            colorMapOffset('set', 9);
+                            fusionColorMapOffset('set', 19);
                         end
                     elseif strcmpi(sModality, 'pt')&&strcmpi(sFuseModality, 'ct')
                         if isFusion('get')
-                            colorMapOffset('set', 20);
-                            fusionColorMapOffset('set', 10);
+                            colorMapOffset('set', 19);
+                            fusionColorMapOffset('set', 9);
                         else
-                            colorMapOffset('set', 10);
-                            fusionColorMapOffset('set', 20);
+                            colorMapOffset('set', 9);
+                            fusionColorMapOffset('set', 19);
                         end
                     elseif strcmpi(sModality, 'ct')&&strcmpi(sFuseModality, 'pt')
 
                         if isFusion('get') && keyPressFusionStatus('get') == 1
-                            colorMapOffset('set', 20);
-                            fusionColorMapOffset('set', 10);
+                            colorMapOffset('set', 19);
+                            fusionColorMapOffset('set', 9);
                         else
-                            colorMapOffset('set', 10);
-                            fusionColorMapOffset('set', 20);
+                            colorMapOffset('set', 9);
+                            fusionColorMapOffset('set', 19);
                         end
                     else
-                        colorMapOffset('set', 10);
+                        colorMapOffset('set', 9);
                         if bUpdateColorMap == true
-                            fusionColorMapOffset('set', 20);
+                            fusionColorMapOffset('set', 19);
                         end
                     end
                 end

@@ -58,7 +58,6 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177, bUseDefault)
         return;
     end
 
-
     atNMMetaData = dicomMetaData('get', [], dNMSerieOffset);
     atCTMetaData = dicomMetaData('get', [], dCTSerieOffset);
 
@@ -179,6 +178,13 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177, bUseDefault)
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
+    
+    if isInterpolated('get') == false
+    
+        isInterpolated('set', true);
+    
+        setImageInterpolation(true);
+    end
 
     % Get DICOM directory directory
 

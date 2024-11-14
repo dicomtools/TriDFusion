@@ -108,6 +108,13 @@ function setMachineLearningFDGBrownFatPETCTFullAI(sPredictScript, tBrownFatFullA
 
     try
 
+    if isInterpolated('get') == false
+    
+        isInterpolated('set', true);
+    
+        setImageInterpolation(true);
+    end
+
 %     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
 %     drawnow;
 

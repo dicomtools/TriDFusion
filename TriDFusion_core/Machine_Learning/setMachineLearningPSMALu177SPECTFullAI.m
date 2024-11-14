@@ -94,6 +94,13 @@ function setMachineLearningPSMALu177SPECTFullAI(sPredictScript, tPSMALu177SPECTF
 
     if ~isempty(aCTImage)
 
+        if isInterpolated('get') == false
+        
+            isInterpolated('set', true);
+        
+            setImageInterpolation(true);
+        end
+
         progressBar(5/10, 'Resampling series, please wait.');
 
         [aNMImage, atNMMetaData] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);

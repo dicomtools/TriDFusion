@@ -27,40 +27,48 @@ function sliderAlphaCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    if size(dicomBuffer('get'), 3) == 1
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+    dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
+
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
         
-        alpha( imAxeFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
-        alpha( imAxePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+        alpha( imAxeFPtr('get', [], dFusionSeriesOffset),   get(uiAlphaSliderPtr('get'), 'Value') );
+        alpha( imAxePtr ('get', [], dSeriesOffset      ), 1-get(uiAlphaSliderPtr('get'), 'Value') );
     else
         
-        alpha( imCoronalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
-        alpha( imSagittalFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
-        alpha( imAxialFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), get(uiAlphaSliderPtr('get'), 'Value') );
+        alpha( imCoronalFPtr ('get', [], dFusionSeriesOffset), get(uiAlphaSliderPtr('get'), 'Value') );
+        alpha( imSagittalFPtr('get', [], dFusionSeriesOffset), get(uiAlphaSliderPtr('get'), 'Value') );
+        alpha( imAxialFPtr   ('get', [], dFusionSeriesOffset), get(uiAlphaSliderPtr('get'), 'Value') );
         
         if link2DMip('get') == true && isVsplash('get') == false  
+
             
-            axesMipf = imMipFPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+            axesMipf = imMipFPtr('get', [], dFusionSeriesOffset);
             if ~isempty(axesMipf)
+
                 alpha( axesMipf, get(uiAlphaSliderPtr('get'), 'Value') );                                
             end
         end 
+
+        alpha( imCoronalPtr ('get', [], dSeriesOffset), 1-get(uiAlphaSliderPtr('get'), 'Value') );
+        alpha( imSagittalPtr('get', [], dSeriesOffset), 1-get(uiAlphaSliderPtr('get'), 'Value') );
+        alpha( imAxialPtr   ('get', [], dSeriesOffset), 1-get(uiAlphaSliderPtr('get'), 'Value') );
         
-        alpha( imCoronalPtr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
-        alpha( imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
-        alpha( imAxialPtr('get', [], get(uiSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
-        
-        if link2DMip('get') == true && isVsplash('get') == false  
-            alpha( imMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-get(uiAlphaSliderPtr('get'), 'Value') );                                
+        if link2DMip('get') == true && ...
+           isVsplash('get') == false  
+
+            alpha( imMipPtr('get', [], dSeriesOffset), 1-get(uiAlphaSliderPtr('get'), 'Value') );                                
         end 
-        
+    
 %         if isPlotContours('get') == true && isVsplash('get') == false 
             
-%             alpha( imCoronalFcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
-%             alpha( imSagittalFcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
-%             alpha( imAxialFcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+%             alpha( imCoronalFcPtr('get', [], dFusionSeriesOffset)  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+%             alpha( imSagittalFcPtr('get', [], dFusionSeriesOffset)  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
+%             alpha( imAxialFcPtr('get', [], dFusionSeriesOffset)  , 1-get(uiAlphaSliderPtr('get'), 'Value') );
 %             
 %             if link2DMip('get') == true && isVsplash('get') == false  
-%                 axesMipfc = imMipFcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+%                 axesMipfc = imMipFcPtr('get', [], dFusionSeriesOffset);
 %                 if ~isempty(axesMipfc)
 %                     alpha( axesMipfc, 1-get(uiAlphaSliderPtr('get'), 'Value') );                                
 %                 end

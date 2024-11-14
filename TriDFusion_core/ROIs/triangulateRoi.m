@@ -86,9 +86,11 @@ function triangulateRoi(sRoiTag)
                 midY = round(tRoi.Position(1,2));                        
             end
 
-            iCoronalSize  = size(im,1);
-            iSagittalSize = size(im,2);
-            iAxialSize    = size(im,3);
+            aImageSize = size(im);
+
+            iCoronalSize  = aImageSize(1);
+            iSagittalSize = aImageSize(2);
+            iAxialSize    = aImageSize(3);
 
             dSliceNb = tRoi.SliceNb;            
 

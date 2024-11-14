@@ -58,7 +58,6 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
         return;
     end
 
-
     atSerie1MetaData = dicomMetaData('get', [], dSeries1Offset);
     atSerie2MetaData = dicomMetaData('get', [], dSeries2Offset);
 
@@ -90,11 +89,18 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
         setSeriesCallback();
     end
-
+    
     try
-
+    
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
+
+    if isInterpolated('get') == false
+
+        isInterpolated('set', true);
+    
+        setImageInterpolation(true);
+    end
 
     progressBar(1/4, 'Resampling series, please wait.');
 
@@ -144,21 +150,45 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
         roiTemplate('set', dSeries1Offset, atResampledRois);
 
-         % Triangulate og 1st VOI
-
-        atVoiInput = voiTemplate('get', dSeries1Offset);
-
-        if ~isempty(atVoiInput)
-
-            dRoiOffset = round(numel(atVoiInput{1}.RoisTag)/2);
-
-            triangulateRoi(atVoiInput{1}.RoisTag{dRoiOffset});
-        end
-
         if size(dicomBuffer('get', [], dSeries1Offset), 3) ~= 1
-            
+
+             % Triangulate on 1st VOI
+    
+            atVoiInput = voiTemplate('get', dSeries1Offset);
+    
+            if ~isempty(atVoiInput)
+    
+                dRoiOffset = round(numel(atVoiInput{1}.RoisTag)/2);
+    
+                triangulateRoi(atVoiInput{1}.RoisTag{dRoiOffset});
+            else
+    
+                aImageSize = size(aResampledImage);
+    
+                set(uiSliderSagPtr('get'), 'Value', 0.5);
+                set(uiSliderCorPtr('get'), 'Value', 0.5);
+                set(uiSliderTraPtr('get'), 'Value', 0.5);
+    
+                sliceNumber('set', 'coronal' , round(aImageSize(1)/2));
+                sliceNumber('set', 'sagittal', round(aImageSize(2)/2));
+                sliceNumber('set', 'axial'   , round(aImageSize(3)/2)); 
+            end
+           
             plotRotatedRoiOnMip(axesMipPtr('get', [], dSeries1Offset), dicomBuffer('get', [], dSeries1Offset), mipAngle('get'));       
         end  
+    else
+        if size(dicomBuffer('get', [], dSeries1Offset), 3) ~= 1
+
+            aImageSize = size(aResampledImage);
+
+            set(uiSliderSagPtr('get'), 'Value', 0.5);
+            set(uiSliderCorPtr('get'), 'Value', 0.5);
+            set(uiSliderTraPtr('get'), 'Value', 0.5);
+
+            sliceNumber('set', 'coronal' , round(aImageSize(1)/2));
+            sliceNumber('set', 'sagittal', round(aImageSize(2)/2));
+            sliceNumber('set', 'axial'   , round(aImageSize(3)/2));  
+        end
     end
 
     clear aResampledImage;
@@ -169,6 +199,7 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
         if viewRoiPanel('get') == false
 
             if ~isempty(voiTemplate('get', dSeries1Offset))
+                
                 setViewRoiPanel();
             end
         end
@@ -349,13 +380,14 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 %     end
 
     refreshImages();
+    %triangulateImages();
 
     clear aSerie1Image;
     clear aSerie2Image;
 
 
     progressBar(1, 'Ready');
-
+    
     catch
         resetSeries(dSeries2Offset, true);
         progressBar( 1 , 'Error: setModalitiesFusion()' );

@@ -92,6 +92,13 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorScript, sOnnxPath, dMo
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
 
+    if isInterpolated('get') == false
+    
+        isInterpolated('set', true);
+    
+        setImageInterpolation(true);
+    end
+    
     % Get DICOM directory directory    
     
     [sCTFilePath, ~, ~] = fileparts(char(atInput(dCTSerieOffset).asFilesList{1}));

@@ -44,7 +44,9 @@ function dicomViewerCore()
 %    imf  = gpuArray(fusionBuffer('get'));
 %    dicomBuffer('set', imf);
 
-    im  = dicomBuffer('get');
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+    im = dicomBuffer('get', [], dSeriesOffset);
 
     atMetaData = dicomMetaData('get');
 
@@ -77,7 +79,7 @@ function dicomViewerCore()
 
     atInput = inputTemplate('get');
 
-    dOffset = get(uiSeriesPtr('get'), 'Value');
+    dOffset = dSeriesOffset;
     if dOffset > numel(atInput)
         return;
     end
@@ -308,9 +310,9 @@ function dicomViewerCore()
         im = squeeze(im);
         axesText('set', 'axe', '');
 
-        cla(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')),'reset');
+        cla(axePtr('get', [], dSeriesOffset),'reset');
 
-        set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , ...
+        set(axePtr('get', [], dSeriesOffset) , ...
             'Units'   , 'normalized', ...
             'Position', [0 0 1 1]   , ...
             'Visible' , 'off'       , ...
@@ -319,13 +321,13 @@ function dicomViewerCore()
             'YLim'    , [0 inf]     , ...
             'CLim'    , [lMin lMax] ...
             );
-        disableDefaultInteractivity(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')));
+        disableDefaultInteractivity(axePtr('get', [], dSeriesOffset));
 
-        set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
-        set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
-        set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+        set(axePtr('get', [], dSeriesOffset), 'HitTest', 'off');  % Disable hit testing for axes
+        set(axePtr('get', [], dSeriesOffset), 'XLimMode', 'manual', 'YLimMode', 'manual');  
+        set(axePtr('get', [], dSeriesOffset), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
 
-        grid(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'off');
+        grid(axePtr('get', [], dSeriesOffset), 'off');
 
         if aspectRatio('get') == true
 
@@ -340,56 +342,56 @@ function dicomViewerCore()
                 y=1;
             end
             
-            daspect(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , [x y 1]);
+            daspect(axePtr('get', [], dSeriesOffset) , [x y 1]);
         end
 
         if gaussFilter('get') == true
 
-            if isShading('get')
+            if isInterpolated('get')
 
                 imAxe = imshow(imgaussfilt(im)    , ...
-                               'Parent'   , axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                               'Parent'   , axePtr('get', [], dSeriesOffset), ...
                                'Interpolation', 'bilinear'...
                                );               
             else
                 imAxe = imshow(imgaussfilt(im)    , ...
-                               'Parent'   , axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                               'Parent'   , axePtr('get', [], dSeriesOffset), ...
                                'Interpolation', 'nearest'...
                                );
             end
         else
-            if isShading('get')
+            if isInterpolated('get')
 
                 imAxe  = imshow(im , ...
-                                'Parent'   , axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                'Parent'   , axePtr('get', [], dSeriesOffset), ...
                                 'Interpolation', 'bilinear'...
                                 );
             else
                 imAxe  = imshow(im , ...
-                                'Parent'   , axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                'Parent'   , axePtr('get', [], dSeriesOffset), ...
                                 'Interpolation', 'nearest'...
                                  );
             end
         end
 
-        % adjAxeCameraViewAngle(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')));
+        % adjAxeCameraViewAngle(axePtr('get', [], dSeriesOffset));
 
         rightClickMenu('add', imAxe);
 
-        imAxePtr ('set', imAxe , get(uiSeriesPtr('get'), 'Value'));
+        imAxePtr ('set', imAxe , dSeriesOffset);
 
-        set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'Visible', 'off');
+        set(axePtr('get', [], dSeriesOffset) , 'Visible', 'off');
 
 %               set(axe, 'CLim', [aCLim(1) aCLim(2)]);
 
  %       getColorMap('init');
 
-        colormap(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+        colormap(axePtr('get', [], dSeriesOffset), ...
                  getColorMap('one', colorMapOffset('get')) ...
                 );
 
         ptrColorbar = ...
-            colorbar(axePtr('get', [], get(uiSeriesPtr('get'), 'Value'))  , ...
+            colorbar(axePtr('get', [], dSeriesOffset)  , ...
                     'AxisLocation' , 'in', ...
                     'Tag'          , 'Colorbar', ...
                     'EdgeColor'    , overlayColor('get'), ...
@@ -482,15 +484,15 @@ function dicomViewerCore()
                 y =1;
             end
             
-            daspect(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , [x y z]);
+            daspect(axePtr('get', [], dSeriesOffset) , [x y z]);
         else
             x =1;
             y =1;
             z =1;
 
-            daspect(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , [x y z]);
+            daspect(axePtr('get', [], dSeriesOffset) , [x y z]);
 
-            axis(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'normal');
+            axis(axePtr('get', [], dSeriesOffset) , 'normal');
         end
 
         aspectRatioValue('set', 'x', x);
@@ -498,10 +500,10 @@ function dicomViewerCore()
         aspectRatioValue('set', 'z', z);
 
         if isFusion('get') == true
-            alpha(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 1-sliderAlphaValue('get'));
+            alpha(axePtr('get', [], dSeriesOffset), 1-sliderAlphaValue('get'));
         end
 
-        set(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+        set(axePtr('get', [], dSeriesOffset), 'CLim', [lMin lMax]);
 
     else
 
@@ -526,9 +528,9 @@ function dicomViewerCore()
         axesText('set', 'axes1', '');
         axesText('set', 'axes1View', '');
 
-        cla(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ,'reset');
+        cla(axes1Ptr('get', [], dSeriesOffset) ,'reset');
 
-        set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , ...
+        set(axes1Ptr('get', [], dSeriesOffset) , ...
             'Units'   , 'normalized', ...
             'Position', [0 0 1 1], ...
             'Visible' , 'off', ...
@@ -538,15 +540,15 @@ function dicomViewerCore()
             'YLim'    , [0 inf], ...
             'CLim'    , [0 inf] ...
             );
-        disableDefaultInteractivity(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+        disableDefaultInteractivity(axes1Ptr('get', [], dSeriesOffset));
 
-        set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
-        set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
-        set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+        set(axes1Ptr('get', [], dSeriesOffset), 'HitTest', 'off');  % Disable hit testing for axes
+        set(axes1Ptr('get', [], dSeriesOffset), 'XLimMode', 'manual', 'YLimMode', 'manual');  
+        set(axes1Ptr('get', [], dSeriesOffset), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
         
-        grid(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'off');
+        grid(axes1Ptr('get', [], dSeriesOffset), 'off');
 
-        axis(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'tight');
+        axis(axes1Ptr('get', [], dSeriesOffset) , 'tight');
 
         if isVsplash('get') == true && ...
            (strcmpi(vSplahView('get'), 'coronal') || ...
@@ -596,34 +598,34 @@ function dicomViewerCore()
 
             if gaussFilter('get') == true
 
-                if isShading('get')
+                if isInterpolated('get')
 
                     imCoronal = imshow(imgaussfilt(permute(im (iCoronal,:,:), [3 2 1])), ...
-                                       'Parent'       , axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                       'Parent'       , axes1Ptr('get', [], dSeriesOffset), ...
                                        'Interpolation', 'bilinear' ...
                                        );                    
                 else
                     imCoronal = imshow(imgaussfilt(permute(im (iCoronal,:,:), [3 2 1])), ...
-                                       'Parent'       , axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                       'Parent'       , axes1Ptr('get', [], dSeriesOffset), ...
                                        'Interpolation', 'nearest' ...
                                        );
                 end
             else
-                if isShading('get')
+                if isInterpolated('get')
 
                     imCoronal = imshow(permute(im (iCoronal,:,:), [3 2 1]), ...
-                                       'Parent'      , axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                       'Parent'      , axes1Ptr('get', [], dSeriesOffset), ...
                                        'Interpolation', 'bilinear' ...
                                        );                    
                 else
                     imCoronal = imshow(permute(im (iCoronal,:,:), [3 2 1]), ...
-                                       'Parent'       , axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                       'Parent'       , axes1Ptr('get', [], dSeriesOffset), ...
                                        'Interpolation', 'nearest' ...
                                        );
                 end
             end
 
-            imCoronalPtr ('set', imCoronal , get(uiSeriesPtr('get'), 'Value'));
+            imCoronalPtr ('set', imCoronal , dSeriesOffset);
 
 %             imComputed = computeMontage(im, 'coronal', iCoronal);
 
@@ -649,7 +651,7 @@ function dicomViewerCore()
                 for jj=1:dVsplashLayoutX
 
                     ptMontageAxes1{iPointerOffset} = ...
-                        text(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                        text(axes1Ptr('get', [], dSeriesOffset), ...
                              ((jj-1)*xOffset)+1, ...
                              ((hh-1)*yOffset)+1, ...
                              sprintf('\n%s', num2str(lFirst+iPointerOffset-1)), ...
@@ -683,28 +685,28 @@ function dicomViewerCore()
 
             if gaussFilter('get') == true
 
-                if isShading('get')
+                if isInterpolated('get')
 
                     imCoronal = imshow(imgaussfilt(permute(im (iCoronal,:,:), [3 2 1])), ...
-                                       'Parent'       , axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                       'Parent'       , axes1Ptr('get', [], dSeriesOffset), ...
                                        'Interpolation', 'bilinear'...
                                       );                    
                 else
                     imCoronal = imshow(imgaussfilt(permute(im (iCoronal,:,:), [3 2 1])), ...
-                                       'Parent'       , axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                       'Parent'       , axes1Ptr('get', [], dSeriesOffset), ...
                                        'Interpolation', 'nearest'...
                                       );
                 end
             else
-                if isShading('get')
+                if isInterpolated('get')
 
                     imCoronal = imshow(permute(im (iCoronal,:,:), [3 2 1]), ...
-                                       'Parent'       , axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                       'Parent'       , axes1Ptr('get', [], dSeriesOffset), ...
                                        'Interpolation', 'bilinear'...
                                        );                    
                 else
                     imCoronal = imshow(permute(im (iCoronal,:,:), [3 2 1]), ...
-                                       'Parent'       , axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                       'Parent'       , axes1Ptr('get', [], dSeriesOffset), ...
                                        'Interpolation', 'nearest'...
                                        );
                 end
@@ -713,16 +715,16 @@ function dicomViewerCore()
 %            imCoronal.EraseMode = 'none';
 %            imCoronalF.EraseMode = 'none';
 
-            imCoronalPtr ('set', imCoronal , get(uiSeriesPtr('get'), 'Value'));
+            imCoronalPtr ('set', imCoronal , dSeriesOffset);
 
         end
 
-        % adjAxeCameraViewAngle(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+        % adjAxeCameraViewAngle(axes1Ptr('get', [], dSeriesOffset));
 
         rightClickMenu('add', imCoronal);
 
-        % linkaxes([axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
-        set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'Visible', 'off');
+        % linkaxes([axes1Ptr('get', [], dSeriesOffset) axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
+        set(axes1Ptr('get', [], dSeriesOffset) , 'Visible', 'off');
 
 
 %                set(axes1Ptr('get'), 'CLim', [aCLim(1) aCLim(2)]);
@@ -731,42 +733,42 @@ function dicomViewerCore()
 %                    hold on
         if isVsplash('get') == false
 
-            alAxes1Line{1} = line(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxes1Line{1} = line(axes1Ptr('get', [], dSeriesOffset), ...
                  [iSagittalSize/2 iSagittalSize/2], ...
                  [iAxial+0.5 iAxial-0.5], ...
                  'Color', crossColor('get'));
 
             rightClickMenu('add', alAxes1Line{1});
 
-            alAxes1Line{2} = line(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxes1Line{2} = line(axes1Ptr('get', [], dSeriesOffset), ...
                  [iSagittalSize/2+0.5 iSagittalSize/2-0.5], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
 
             rightClickMenu('add', alAxes1Line{2});
 
-            alAxes1Line{3} = line(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxes1Line{3} = line(axes1Ptr('get', [], dSeriesOffset), ...
                  [0 iSagittalSize/2-crossSize('get')], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
 
             rightClickMenu('add', alAxes1Line{3});
 
-            alAxes1Line{4} = line(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxes1Line{4} = line(axes1Ptr('get', [], dSeriesOffset), ...
                  [iSagittalSize  /2+crossSize('get') iSagittalSize], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
 
             rightClickMenu('add', alAxes1Line{4});
 
-            alAxes1Line{5} = line(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxes1Line{5} = line(axes1Ptr('get', [], dSeriesOffset), ...
                  [iSagittal iSagittal], ...
                  [0 iAxialSize/2-crossSize('get')], ...
                  'Color', crossColor('get'));
 
             rightClickMenu('add', alAxes1Line{5});
 
-            alAxes1Line{6} = line(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxes1Line{6} = line(axes1Ptr('get', [], dSeriesOffset), ...
                  [iSagittal iSagittal], ...
                  [iAxialSize/2+crossSize('get') iAxialSize], ...
                  'Color', crossColor('get'));
@@ -870,9 +872,9 @@ function dicomViewerCore()
         axesText('set', 'axes2', '');
         axesText('set', 'axes2View', '');
 
-        cla(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ,'reset');
+        cla(axes2Ptr('get', [], dSeriesOffset) ,'reset');
 
-        set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , ...
+        set(axes2Ptr('get', [], dSeriesOffset) , ...
             'Units'   , 'normalized', ...
             'Position', [0 0 1 1], ...
             'Visible' , 'off', ...
@@ -882,15 +884,15 @@ function dicomViewerCore()
             'YLim'    , [0 inf], ...
             'CLim'    , [0 inf] ...
             );
-        disableDefaultInteractivity(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+        disableDefaultInteractivity(axes2Ptr('get', [], dSeriesOffset));
 
-        set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
-        set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
-        set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
+        set(axes2Ptr('get', [], dSeriesOffset), 'HitTest', 'off');  % Disable hit testing for axes
+        set(axes2Ptr('get', [], dSeriesOffset), 'XLimMode', 'manual', 'YLimMode', 'manual');  
+        set(axes2Ptr('get', [], dSeriesOffset), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
 
-        grid(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'off');
+        grid(axes2Ptr('get', [], dSeriesOffset), 'off');
 
-        axis(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'tight');
+        axis(axes2Ptr('get', [], dSeriesOffset) , 'tight');
 
         if isVsplash('get') == true && ...
            (strcmpi(vSplahView('get'), 'sagittal') || ...
@@ -940,35 +942,35 @@ function dicomViewerCore()
 
             if gaussFilter('get') == true
 
-                if isShading('get')
+                if isInterpolated('get')
 
                     imSagittal = imshow(imgaussfilt(permute(im (:,iSagittal,:), [3 1 2])), ...
-                                        'Parent'       , axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                        'Parent'       , axes2Ptr('get', [], dSeriesOffset), ...
                                         'Interpolation', 'bilinear'... 
                                        );                    
                 else
                     imSagittal = imshow(imgaussfilt(permute(im (:,iSagittal,:), [3 1 2])), ...
-                                        'Parent'       , axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                        'Parent'       , axes2Ptr('get', [], dSeriesOffset), ...
                                         'Interpolation', 'nearest'... 
                                         );
                 end
             else
-                if isShading('get')
+                if isInterpolated('get')
 
                     imSagittal = imshow(permute(im (:,iSagittal,:), [3 1 2]), ...
-                                        'Parent'       , axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                        'Parent'       , axes2Ptr('get', [], dSeriesOffset), ...
                                         'Interpolation', 'bilinear'... 
                                        );
                 else
                     imSagittal = imshow(permute(im (:,iSagittal,:), [3 1 2]), ...
-                                        'Parent'       , axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                        'Parent'       , axes2Ptr('get', [], dSeriesOffset), ...
                                         'Interpolation', 'nearest'... 
                                         );
                 end
             end
 
 
-            imSagittalPtr ('set', imSagittal , get(uiSeriesPtr('get'), 'Value'));
+            imSagittalPtr ('set', imSagittal , dSeriesOffset);
 
 %             imComputed = computeMontage(im, 'sagittal', iSagittal);
 
@@ -995,7 +997,7 @@ function dicomViewerCore()
                 for jj=1:dVsplashLayoutX
 
                     ptMontageAxes2{iPointerOffset} = ...
-                        text(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                        text(axes2Ptr('get', [], dSeriesOffset), ...
                              ((jj-1)*xOffset)+1 , ...
                              ((hh-1)*yOffset)+1 , ...
                              sprintf('\n%s' , ...
@@ -1032,81 +1034,81 @@ function dicomViewerCore()
 
             if gaussFilter('get') == true
 
-                if isShading('get')
+                if isInterpolated('get')
 
                     imSagittal = imshow(imgaussfilt(permute(im (:,iSagittal,:), [3 1 2]),1), ...
-                                        'Parent'       , axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                        'Parent'       , axes2Ptr('get', [], dSeriesOffset), ...
                                         'Interpolation', 'bilinear'... 
                                         );                    
                 else
                     imSagittal = imshow(imgaussfilt(permute(im (:,iSagittal,:), [3 1 2]),1), ...
-                                        'Parent'       , axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                        'Parent'       , axes2Ptr('get', [], dSeriesOffset), ...
                                         'Interpolation', 'nearest'... 
                                         );
                 end
             else
-                if isShading('get')
+                if isInterpolated('get')
 
                     imSagittal = imshow(permute(im (:,iSagittal,:), [3 1 2]), ...
-                                        'Parent'       , axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                        'Parent'       , axes2Ptr('get', [], dSeriesOffset), ...
                                         'Interpolation', 'bilinear'... 
                                         );                    
                 else
                     imSagittal = imshow(permute(im (:,iSagittal,:), [3 1 2]), ...
-                                        'Parent'       , axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                        'Parent'       , axes2Ptr('get', [], dSeriesOffset), ...
                                         'Interpolation', 'nearest'... 
                                         );
                 end
             end
 
-            imSagittalPtr ('set', imSagittal , get(uiSeriesPtr('get'), 'Value'));
+            imSagittalPtr ('set', imSagittal , dSeriesOffset);
         end
 
-        % adjAxeCameraViewAngle(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+        % adjAxeCameraViewAngle(axes2Ptr('get', [], dSeriesOffset));
 
         rightClickMenu('add', imSagittal);
 
-        set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'Visible', 'off');
+        set(axes2Ptr('get', [], dSeriesOffset) , 'Visible', 'off');
 %              if crossActivate('get')
 %                    hold on
         if isVsplash('get') == false
 
-            alAxes2Line{1} = line(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxes2Line{1} = line(axes2Ptr('get', [], dSeriesOffset), ...
                  [iCoronalSize/2 iCoronalSize/2], ...
                  [iAxial+0.5 iAxial-0.5], ...
                  'Color', crossColor('get'));
 
             rightClickMenu('add', alAxes2Line{1});
 
-            alAxes2Line{2} = line(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxes2Line{2} = line(axes2Ptr('get', [], dSeriesOffset), ...
                  [iCoronalSize/2+0.5 iCoronalSize/2-0.5], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
 
             rightClickMenu('add', alAxes2Line{2});
 
-            alAxes2Line{3} = line(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxes2Line{3} = line(axes2Ptr('get', [], dSeriesOffset), ...
                  [0 iCoronalSize/2-crossSize('get')], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
 
             rightClickMenu('add', alAxes2Line{3});
 
-            alAxes2Line{4} = line(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxes2Line{4} = line(axes2Ptr('get', [], dSeriesOffset), ...
                  [iCoronalSize/2+crossSize('get') iCoronalSize], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
 
             rightClickMenu('add', alAxes2Line{4});
 
-            alAxes2Line{5} = line(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxes2Line{5} = line(axes2Ptr('get', [], dSeriesOffset), ...
                  [iCoronal iCoronal], ...
                  [0 iAxialSize/2-crossSize('get')], ...
                  'Color', crossColor('get'));
 
             rightClickMenu('add', alAxes2Line{5});
 
-            alAxes2Line{6} = line(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxes2Line{6} = line(axes2Ptr('get', [], dSeriesOffset), ...
                  [iCoronal iCoronal], ...
                  [iAxialSize/2+crossSize('get') iAxialSize], ...
                  'Color', crossColor('get'));
@@ -1199,9 +1201,9 @@ function dicomViewerCore()
         axesText('set', 'axes3', '');
         axesText('set', 'axes3View', '');
 
-        cla(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) ,'reset');
+        cla(axes3Ptr('get', [], dSeriesOffset) ,'reset');
 
-        set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , ...
+        set(axes3Ptr('get', [], dSeriesOffset) , ...
             'Units'   , 'normalized', ...
             'Position', [0 0 1 1], ...
             'Visible' , 'off', ...
@@ -1211,15 +1213,15 @@ function dicomViewerCore()
             'YLim'    , [0 inf], ...
             'CLim'    , [0 inf] ...
             );
-        disableDefaultInteractivity(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+        disableDefaultInteractivity(axes3Ptr('get', [], dSeriesOffset));
 
-        set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
-        set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
-        set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off');
+        set(axes3Ptr('get', [], dSeriesOffset), 'HitTest', 'off');  % Disable hit testing for axes
+        set(axes3Ptr('get', [], dSeriesOffset), 'XLimMode', 'manual', 'YLimMode', 'manual');  
+        set(axes3Ptr('get', [], dSeriesOffset), 'XMinorTick', 'off', 'YMinorTick', 'off');
 
-        grid(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'off');
+        grid(axes3Ptr('get', [], dSeriesOffset), 'off');
 
-        axis(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'tight');
+        axis(axes3Ptr('get', [], dSeriesOffset) , 'tight');
 
         if isVsplash('get') == true && ...
            (strcmpi(vSplahView('get'), 'axial') || ...
@@ -1270,34 +1272,34 @@ function dicomViewerCore()
 
             if gaussFilter('get') == true
 
-                if isShading('get')
+                if isInterpolated('get')
 
                     imAxial = imshow(imgaussfilt(im (:,:,iAxial), 1),  ...
-                                     'Parent'       , axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                     'Parent'       , axes3Ptr('get', [], dSeriesOffset), ...
                                      'Interpolation', 'bilinear'... 
                                      );
                 else
                     imAxial = imshow(imgaussfilt(im (:,:,iAxial), 1),  ...
-                                     'Parent'       , axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                     'Parent'       , axes3Ptr('get', [], dSeriesOffset), ...
                                      'Interpolation', 'nearest'... 
                                      );                  
                 end
 
             else
-                if isShading('get')
+                if isInterpolated('get')
                     imAxial = imshow(im (:,:,iAxial),  ...
-                                     'Parent'      , axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                     'Parent'      , axes3Ptr('get', [], dSeriesOffset), ...
                                      'Interpolation', 'bilinear'... 
                                      );                    
                 else
                     imAxial = imshow(im (:,:,iAxial),  ...
-                                     'Parent'       , axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                     'Parent'       , axes3Ptr('get', [], dSeriesOffset), ...
                                      'Interpolation', 'nearest'... 
                                      );
                 end
             end           
             
-            imAxialPtr ('set', imAxial , get(uiSeriesPtr('get'), 'Value'));
+            imAxialPtr ('set', imAxial , dSeriesOffset);
 
 %             imComputed = computeMontage(im(:,:,end:-1:1), ...
 %                                         'axial', ...
@@ -1329,7 +1331,7 @@ function dicomViewerCore()
             for hh=1:dVsplashLayoutY
                 for jj=1:dVsplashLayoutX
                     ptMontageAxes3{iPointerOffset} = ...
-                        text(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                        text(axes3Ptr('get', [], dSeriesOffset), ...
                              ((jj-1)*xOffset)+1 , ...
                              ((hh-1)*yOffset)+1 , ...
                              sprintf('\n%s', num2str(lFirst+iPointerOffset-1)), ...
@@ -1349,82 +1351,82 @@ function dicomViewerCore()
 
             if gaussFilter('get') == true
 
-                if isShading('get')
+                if isInterpolated('get')
 
                     imAxial = imshow(imgaussfilt(im(:,:,iAxial)), ...
-                                     'Parent'       , axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                     'Parent'       , axes3Ptr('get', [], dSeriesOffset), ...
                                      'Interpolation', 'bilinear'... 
                                     );
                 else
                     imAxial = imshow(imgaussfilt(im(:,:,iAxial)), ...
-                                     'Parent'       , axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                     'Parent'       , axes3Ptr('get', [], dSeriesOffset), ...
                                      'Interpolation', 'nearest'... 
                                     );                
                 end
             else
-                if isShading('get')
+                if isInterpolated('get')
 
                     imAxial = imshow(im (:,:,iAxial), ...
-                                     'Parent'       , axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                     'Parent'       , axes3Ptr('get', [], dSeriesOffset), ...
                                      'Interpolation', 'bilinear'... 
                                      );
                 else
                     imAxial = imshow(im (:,:,iAxial), ...
-                                     'Parent'       , axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                     'Parent'       , axes3Ptr('get', [], dSeriesOffset), ...
                                      'Interpolation', 'nearest'... 
                                      );                    
                 end
             end
 
-            imAxialPtr ('set', imAxial , get(uiSeriesPtr('get'), 'Value'));
+            imAxialPtr ('set', imAxial , dSeriesOffset);
 
         end
 
-        % adjAxeCameraViewAngle(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
+        % adjAxeCameraViewAngle(axes3Ptr('get', [], dSeriesOffset));
 
         rightClickMenu('add', imAxial );
 
-        set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'Visible', 'off');
+        set(axes3Ptr('get', [], dSeriesOffset), 'Visible', 'off');
 
         if isVsplash('get') == false
 %                if crossActivate('get')
 %                    hold on
-            alAxes3Line{1} = line(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxes3Line{1} = line(axes3Ptr('get', [], dSeriesOffset), ...
                  [iSagittalSize/2 iSagittalSize/2], ...
                  [iCoronal+0.5 iCoronal-0.5], ...
                  'Color', crossColor('get'));
 
             rightClickMenu('add', alAxes3Line{1});
 
-            alAxes3Line{2} = line(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxes3Line{2} = line(axes3Ptr('get', [], dSeriesOffset), ...
                  [iSagittalSize/2+0.5 iSagittalSize/2-0.5], ...
                  [iCoronal iCoronal], ...
                  'Color', crossColor('get'));
 
             rightClickMenu('add', alAxes3Line{2});
 
-            alAxes3Line{3} = line(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxes3Line{3} = line(axes3Ptr('get', [], dSeriesOffset), ...
                  [0 iSagittalSize/2-crossSize('get')], ...
                  [iCoronal iCoronal], ...
                  'Color', crossColor('get'));
 
             rightClickMenu('add', alAxes3Line{3});
 
-            alAxes3Line{4} = line(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxes3Line{4} = line(axes3Ptr('get', [], dSeriesOffset), ...
                  [iSagittalSize/2+crossSize('get') iSagittalSize], ...
                  [iCoronal iCoronal], ...
                  'Color', crossColor('get'));
 
             rightClickMenu('add', alAxes3Line{4});
 
-            alAxes3Line{5} = line(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxes3Line{5} = line(axes3Ptr('get', [], dSeriesOffset), ...
                  [iSagittal iSagittal], ...
                  [0 iCoronalSize/2-crossSize('get')], ...
                  'Color', crossColor('get'));
 
             rightClickMenu('add', alAxes3Line{5});
 
-            alAxes3Line{6} = line(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxes3Line{6} = line(axes3Ptr('get', [], dSeriesOffset), ...
                  [iSagittal iSagittal], ...
                  [iCoronalSize/2+crossSize('get') iCoronalSize], ...
                  'Color', crossColor('get'));
@@ -1529,9 +1531,9 @@ function dicomViewerCore()
 
         axesText('set', 'axesMip', ''); % Set 2D MIP
 
-        cla(axesMipPtr ('get', [], get(uiSeriesPtr('get'), 'Value')),'reset');
+        cla(axesMipPtr ('get', [], dSeriesOffset),'reset');
 
-        set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) , ...
+        set(axesMipPtr('get', [], dSeriesOffset) , ...
             'Units'   , 'normalized', ...
             'Position', [0 0 1 1], ...
             'Visible' , 'off', ...
@@ -1541,94 +1543,94 @@ function dicomViewerCore()
             'YLim'    , [0 inf], ...
             'CLim'    , [0 inf] ...
             );
-        disableDefaultInteractivity(axesMipPtr ('get', [], get(uiSeriesPtr('get'), 'Value')));
+        disableDefaultInteractivity(axesMipPtr ('get', [], dSeriesOffset));
 
-        set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'HitTest', 'off');  % Disable hit testing for axes
-        set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLimMode', 'manual', 'YLimMode', 'manual');  
-        set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XMinorTick', 'off', 'YMinorTick', 'off');
+        set(axesMipPtr('get', [], dSeriesOffset), 'HitTest', 'off');  % Disable hit testing for axes
+        set(axesMipPtr('get', [], dSeriesOffset), 'XLimMode', 'manual', 'YLimMode', 'manual');  
+        set(axesMipPtr('get', [], dSeriesOffset), 'XMinorTick', 'off', 'YMinorTick', 'off');
 
-        grid(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'off');
+        grid(axesMipPtr('get', [], dSeriesOffset), 'off');
 
-        axis(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'tight');
+        axis(axesMipPtr('get', [], dSeriesOffset) , 'tight');
 
         if isVsplash('get') == false
 
             iMipAngle = mipAngle('get');
 
-            imComputedMip  = mipBuffer('get', [], get(uiSeriesPtr('get'), 'Value'));
+            imComputedMip  = mipBuffer('get', [], dSeriesOffset);
 
             if gaussFilter('get') == true
 
-                if isShading('get')
+                if isInterpolated('get')
 
                     imMip = imshow(imgaussfilt(permute(imComputedMip (iMipAngle,:,:), [3 2 1])), ...
-                                   'Parent'       , axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                   'Parent'       , axesMipPtr('get', [], dSeriesOffset), ...
                                    'Interpolation', 'bilinear'... 
                                    );
                 else
                     imMip = imshow(imgaussfilt(permute(imComputedMip (iMipAngle,:,:), [3 2 1])), ...
-                                   'Parent'       , axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                   'Parent'       , axesMipPtr('get', [], dSeriesOffset), ...
                                    'Interpolation', 'nearest'... 
                                    );                
                 end
             else
-                if isShading('get')
+                if isInterpolated('get')
                 
                     imMip = imshow(permute(imComputedMip (iMipAngle,:,:), [3 2 1]), ...
-                                   'Parent'       , axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                   'Parent'       , axesMipPtr('get', [], dSeriesOffset), ...
                                    'Interpolation', 'bilinear'... 
                                    );
                 else
                     imMip = imshow(permute(imComputedMip (iMipAngle,:,:), [3 2 1]), ...
-                                   'Parent'       , axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                                   'Parent'       , axesMipPtr('get', [], dSeriesOffset), ...
                                    'Interpolation', 'nearest'... 
                                    );                
                 end
             end
            
-            % adjAxeCameraViewAngle(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')));
+            % adjAxeCameraViewAngle(axesMipPtr('get', [], dSeriesOffset));
  
-            imMipPtr ('set', imMip , get(uiSeriesPtr('get'), 'Value'));
+            imMipPtr ('set', imMip , dSeriesOffset);
 
-            % linkaxes([axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
-            set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'Visible', 'off');
+            % linkaxes([axesMipPtr('get', [], dSeriesOffset) axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))],'xy');
+            set(axesMipPtr('get', [], dSeriesOffset) , 'Visible', 'off');
 
-            alAxesMipLine{1} = line(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxesMipLine{1} = line(axesMipPtr('get', [], dSeriesOffset), ...
                  [iSagittalSize/2 iSagittalSize/2], ...
                  [iAxial+0.5 iAxial-0.5], ...
                  'Color', crossColor('get'));
 
             % rightClickMenu('add', alAxesMipLine{1});
 
-            alAxesMipLine{2} = line(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxesMipLine{2} = line(axesMipPtr('get', [], dSeriesOffset), ...
                  [iSagittalSize/2+0.5 iSagittalSize/2-0.5], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
 
             % rightClickMenu('add', alAxesMipLine{2});
 
-            alAxesMipLine{3} = line(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxesMipLine{3} = line(axesMipPtr('get', [], dSeriesOffset), ...
                  [0 iSagittalSize/2-crossSize('get')], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
 
             % rightClickMenu('add', alAxesMipLine{3});
 
-            alAxesMipLine{4} = line(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxesMipLine{4} = line(axesMipPtr('get', [], dSeriesOffset), ...
                  [iSagittalSize  /2+crossSize('get') iSagittalSize], ...
                  [iAxial iAxial], ...
                  'Color', crossColor('get'));
 
             % rightClickMenu('add', alAxesMipLine{4});
 
-            alAxesMipLine{5} = line(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxesMipLine{5} = line(axesMipPtr('get', [], dSeriesOffset), ...
                  [iSagittal iSagittal], ...
                  [0 iAxialSize/2-crossSize('get')], ...
                  'Color', crossColor('get'));
 
             % rightClickMenu('add', alAxesMipLine{5});
 
-            alAxesMipLine{6} = line(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            alAxesMipLine{6} = line(axesMipPtr('get', [], dSeriesOffset), ...
                  [iSagittal iSagittal], ...
                  [iAxialSize/2+crossSize('get') iAxialSize], ...
                  'Color', crossColor('get'));
@@ -1710,20 +1712,20 @@ function dicomViewerCore()
 
             if is3DEngine('get') == false
 
-                aAxeXLim = get(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim');
-                aAxeYLim = get(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim');
-                set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim', [aAxeXLim(1) aAxeXLim(2)*dVsplashLayoutX]);
-                set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim', [aAxeYLim(1) aAxeYLim(2)*dVsplashLayoutY]);
+                aAxeXLim = get(axes1Ptr('get', [], dSeriesOffset), 'XLim');
+                aAxeYLim = get(axes1Ptr('get', [], dSeriesOffset), 'YLim');
+                set(axes1Ptr('get', [], dSeriesOffset), 'XLim', [aAxeXLim(1) aAxeXLim(2)*dVsplashLayoutX]);
+                set(axes1Ptr('get', [], dSeriesOffset), 'YLim', [aAxeYLim(1) aAxeYLim(2)*dVsplashLayoutY]);
 
-                aAxeXLim = get(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim');
-                aAxeYLim = get(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim');
-                set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim', [aAxeXLim(1) aAxeXLim(2)*dVsplashLayoutX]);
-                set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim', [aAxeYLim(1) aAxeYLim(2)*dVsplashLayoutY]);
+                aAxeXLim = get(axes2Ptr('get', [], dSeriesOffset), 'XLim');
+                aAxeYLim = get(axes2Ptr('get', [], dSeriesOffset), 'YLim');
+                set(axes2Ptr('get', [], dSeriesOffset), 'XLim', [aAxeXLim(1) aAxeXLim(2)*dVsplashLayoutX]);
+                set(axes2Ptr('get', [], dSeriesOffset), 'YLim', [aAxeYLim(1) aAxeYLim(2)*dVsplashLayoutY]);
     
-                aAxeXLim = get(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim');
-                aAxeYLim = get(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim');
-                set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'XLim', [aAxeXLim(1) aAxeXLim(2)*dVsplashLayoutX]);
-                set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'YLim', [aAxeYLim(1) aAxeYLim(2)*dVsplashLayoutY]);
+                aAxeXLim = get(axes3Ptr('get', [], dSeriesOffset), 'XLim');
+                aAxeYLim = get(axes3Ptr('get', [], dSeriesOffset), 'YLim');
+                set(axes3Ptr('get', [], dSeriesOffset), 'XLim', [aAxeXLim(1) aAxeXLim(2)*dVsplashLayoutX]);
+                set(axes3Ptr('get', [], dSeriesOffset), 'YLim', [aAxeYLim(1) aAxeYLim(2)*dVsplashLayoutY]);
             end
         end
 
@@ -1757,45 +1759,45 @@ function dicomViewerCore()
 
  %          if strcmp(imageOrientation('get'), 'axial')
 
-            daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
-            daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-            daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
+            daspect(axes1Ptr('get', [], dSeriesOffset), [z y x]);
+            daspect(axes2Ptr('get', [], dSeriesOffset), [z x y]);
+            daspect(axes3Ptr('get', [], dSeriesOffset), [x y z]);
             
             if isVsplash('get') == false
-                daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
+                daspect(axesMipPtr('get', [], dSeriesOffset), [z y x]);
             end
 
 %            elseif strcmp(imageOrientation('get'), 'coronal')
 
-%                daspect(axes1Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
-%                daspect(axes2Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [y z x]);
-%                daspect(axes3Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-%                daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
+%                daspect(axes1Ptr  ('get', [], dSeriesOffset), [x y z]);
+%                daspect(axes2Ptr  ('get', [], dSeriesOffset), [y z x]);
+%                daspect(axes3Ptr  ('get', [], dSeriesOffset), [z x y]);
+%                daspect(axesMipPtr('get', [], dSeriesOffset), [x y z]);
 
 %            elseif strcmp(imageOrientation('get'), 'sagittal')
 
-%                daspect(axes1Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [y x z]);
-%                daspect(axes2Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [x z y]);
-%                daspect(axes3Ptr  ('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-%                daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [x z y]);
+%                daspect(axes1Ptr  ('get', [], dSeriesOffset), [y x z]);
+%                daspect(axes2Ptr  ('get', [], dSeriesOffset), [x z y]);
+%                daspect(axes3Ptr  ('get', [], dSeriesOffset), [z x y]);
+%                daspect(axesMipPtr('get', [], dSeriesOffset), [x z y]);
 %           end
         else
             x =1;
             y =1;
             z =1;
 
-            daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-            daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
-            daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
+            daspect(axes1Ptr('get', [], dSeriesOffset), [z x y]);
+            daspect(axes2Ptr('get', [], dSeriesOffset), [z y x]);
+            daspect(axes3Ptr('get', [], dSeriesOffset), [x y z]);
             if isVsplash('get') == false
-                daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
+                daspect(axesMipPtr('get', [], dSeriesOffset), [z y x]);
             end
 
-            axis(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
-            axis(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
-            axis(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
+            axis(axes1Ptr('get', [], dSeriesOffset), 'normal');
+            axis(axes2Ptr('get', [], dSeriesOffset), 'normal');
+            axis(axes3Ptr('get', [], dSeriesOffset), 'normal');
             if isVsplash('get') == false
-                axis(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
+                axis(axesMipPtr('get', [], dSeriesOffset), 'normal');
             end
         end
 
@@ -1808,14 +1810,14 @@ function dicomViewerCore()
            ~strcmpi(vSplahView('get'), 'all')
 
             if strcmpi(vSplahView('get'), 'coronal')
-                set(axes1Ptr( 'get', [], get(uiSeriesPtr('get'), 'Value'))     , 'Position', [0 0 0.9000 1]);
+                set(axes1Ptr( 'get', [], dSeriesOffset)     , 'Position', [0 0 0.9000 1]);
             elseif strcmpi(vSplahView('get'), 'sagittal')
-                set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))     , 'Position', [0 0 0.9000 1]);
+                set(axes2Ptr('get', [], dSeriesOffset)     , 'Position', [0 0 0.9000 1]);
             else
-                set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))     , 'Position', [0 0 0.9000 1]);
+                set(axes3Ptr('get', [], dSeriesOffset)     , 'Position', [0 0 0.9000 1]);
             end
         else
-            set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))      , 'Position', [0 0 0.9000 1]);
+            set(axes3Ptr('get', [], dSeriesOffset)      , 'Position', [0 0 0.9000 1]);
         end
 
 %        set(axes3Ptr('get') , 'XLim', [(axes3.XLim(2)*0.15) inf]);
@@ -1823,19 +1825,19 @@ function dicomViewerCore()
 
    %     getColorMap('init');
 
-        colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , getColorMap('one', colorMapOffset('get')));
-        colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , getColorMap('one', colorMapOffset('get')));
-        colormap(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))  , getColorMap('one', colorMapOffset('get')));
+        colormap(axes1Ptr('get', [], dSeriesOffset)  , getColorMap('one', colorMapOffset('get')));
+        colormap(axes2Ptr('get', [], dSeriesOffset)  , getColorMap('one', colorMapOffset('get')));
+        colormap(axes3Ptr('get', [], dSeriesOffset)  , getColorMap('one', colorMapOffset('get')));
 
         if isVsplash('get') == false
-            colormap(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', colorMapOffset('get')));
+            colormap(axesMipPtr('get', [], dSeriesOffset), getColorMap('one', colorMapOffset('get')));
         end
 
          if isVsplash('get') == true && ...
             ~strcmpi(vSplahView('get'), 'all')
             if strcmpi(vSplahView('get'), 'coronal')
                 ptrColorbar = ...
-                    colorbar(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                    colorbar(axes1Ptr('get', [], dSeriesOffset), ...
                              'AxisLocation' , 'in', ...
                              'Tag'          , 'Colorbar', ...
                              'EdgeColor'    , overlayColor('get'), ...
@@ -1846,7 +1848,7 @@ function dicomViewerCore()
                              );
             elseif strcmpi(vSplahView('get'), 'sagittal')
                 ptrColorbar = ...
-                    colorbar(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                    colorbar(axes2Ptr('get', [], dSeriesOffset), ...
                              'AxisLocation' , 'in', ...
                              'Tag'          , 'Colorbar', ...
                              'EdgeColor'    , overlayColor('get'), ...
@@ -1857,7 +1859,7 @@ function dicomViewerCore()
                              );
             else
                 ptrColorbar = ...
-                    colorbar(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                    colorbar(axes3Ptr('get', [], dSeriesOffset), ...
                              'AxisLocation' , 'in', ...
                              'Tag'          , 'Colorbar', ...
                              'EdgeColor'    , overlayColor('get'), ...
@@ -1869,7 +1871,7 @@ function dicomViewerCore()
             end
          else
             ptrColorbar = ...
-                colorbar(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+                colorbar(axes3Ptr('get', [], dSeriesOffset), ...
                          'AxisLocation' , 'in', ...
                          'Tag'          , 'Colorbar', ...
                          'EdgeColor'    , overlayColor('get'), ...
@@ -1908,9 +1910,9 @@ function dicomViewerCore()
          end
 
 % 
-%          set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-%          set(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
-%          set(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+%          set(axes1Ptr('get', [], dSeriesOffset), 'CLim', [lMin lMax]);
+%          set(axes2Ptr('get', [], dSeriesOffset), 'CLim', [lMin lMax]);
+%          set(axes3Ptr('get', [], dSeriesOffset), 'CLim', [lMin lMax]);
 
          if strcmpi(atMetaData{1}.Modality, 'ct')
             [lMax, lMin] = computeWindowLevel(500, 50);
@@ -1922,7 +1924,7 @@ function dicomViewerCore()
            % lMax = max(im, [], 'all');
          end
 
-%          set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [lMin lMax]);
+%          set(axesMipPtr('get', [], dSeriesOffset), 'CLim', [lMin lMax]);
 
 
         %// add the listener to the "Colormap" property
@@ -1966,7 +1968,7 @@ function dicomViewerCore()
 
         initRoi();
 
-        tRefreshRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        tRefreshRoi = roiTemplate('get', dSeriesOffset);
         if ~isempty(tRefreshRoi)
             for bb=1:numel(tRefreshRoi)
                if isvalid(tRefreshRoi{bb}.Object)
@@ -1994,7 +1996,7 @@ function dicomViewerCore()
 
     if size(dicomBuffer('get'), 3) == 1
 
-        axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+        axe = axePtr('get', [], dSeriesOffset);
         if ~isempty(axe)
             alpha( axe, 1);
         end
@@ -2002,9 +2004,9 @@ function dicomViewerCore()
         initAxePlotView(axe);
     else
 
-        axes1 = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-        axes2 = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-        axes3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+        axes1 = axes1Ptr('get', [], dSeriesOffset);
+        axes2 = axes2Ptr('get', [], dSeriesOffset);
+        axes3 = axes3Ptr('get', [], dSeriesOffset);
 
         if ~isempty(axes1) && ...
            ~isempty(axes2) && ...
@@ -2021,7 +2023,7 @@ function dicomViewerCore()
 
         if link2DMip('get') == true && isVsplash('get') == false
 
-            axesMip = axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+            axesMip = axesMipPtr('get', [], dSeriesOffset);
 
             if ~isempty(axesMip)
 
@@ -2154,7 +2156,7 @@ function dicomViewerCore()
     if size(dicomBuffer('get'), 3) == 1
         set(uiOneWindowPtr('get'), 'Visible', 'on');
 
-        axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+        axe = axePtr('get', [], dSeriesOffset);
         axe.Toolbar.Visible = 'off';        
     else
 
@@ -2196,9 +2198,9 @@ function dicomViewerCore()
                 set(uiSliderMipPtr('get'), 'Visible', 'off');
             end
 
-            axe1 = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-            axe2 = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-            axe3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+            axe1 = axes1Ptr('get', [], dSeriesOffset);
+            axe2 = axes2Ptr('get', [], dSeriesOffset);
+            axe3 = axes3Ptr('get', [], dSeriesOffset);
 
             axe1.Toolbar.Visible = 'off';
             axe2.Toolbar.Visible = 'off';
@@ -2211,7 +2213,7 @@ function dicomViewerCore()
                 set(uiMipWindowPtr('get'), 'Visible', 'on');
                 set(uiSliderMipPtr('get'), 'Visible', 'on');
 
-                axeMip = axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
+                axeMip = axesMipPtr('get', [], dSeriesOffset);
                 axeMip.Toolbar.Visible = 'off';                
             end
 
@@ -2219,9 +2221,9 @@ function dicomViewerCore()
             set(uiSagWindowPtr('get'), 'Visible', 'on');
             set(uiTraWindowPtr('get'), 'Visible', 'on');
 
-            axe1 = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-            axe2 = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-            axe3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
+            axe1 = axes1Ptr('get', [], dSeriesOffset);
+            axe2 = axes2Ptr('get', [], dSeriesOffset);
+            axe3 = axes3Ptr('get', [], dSeriesOffset);
 
             axe1.Toolbar.Visible = 'off';
             axe2.Toolbar.Visible = 'off';
@@ -2251,8 +2253,10 @@ function dicomViewerCore()
        setViewRoiPanel();
     end
 
-    setOverlayPatientInformation(get(uiSeriesPtr('get'), 'Value'));  
-
+    setOverlayPatientInformation(dSeriesOffset);  
+    
+    clear im;
+    
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
-
+    
 end

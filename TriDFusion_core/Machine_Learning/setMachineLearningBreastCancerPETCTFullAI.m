@@ -108,7 +108,13 @@ function setMachineLearningBreastCancerPETCTFullAI(sPredictScript, tBreastCancer
 
     try
 
-
+    if isInterpolated('get') == false
+    
+        isInterpolated('set', true);
+    
+        setImageInterpolation(true);
+    end
+    
     % PT
     
     % Resample series

@@ -479,6 +479,8 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
                                 pRoi.Waypoints(:) = false;
             
                                 addRoi(pRoi, dSeriesOffset, sLesionType);                  
+
+                                voiDefaultMenu(pRoi);
             
                                 roiDefaultMenu(pRoi);
             
@@ -489,8 +491,6 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
             
                                 cropMenu(pRoi);
             
-                                voiDefaultMenu(pRoi);
-                            
                                 uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');          
 
 %                                 asTag{numel(asTag)+1} = sTag;

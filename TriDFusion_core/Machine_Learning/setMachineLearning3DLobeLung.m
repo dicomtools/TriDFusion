@@ -389,6 +389,13 @@ function setMachineLearning3DLobeLung(sSegmentatorScript, sSegmentatorCombineMas
                 end
 
                 if bResampleSeries == true
+                    
+                    if isInterpolated('get') == false
+                
+                        isInterpolated('set', true);
+                    
+                        setImageInterpolation(true);
+                    end
 
                     progressBar(12/14, 'Resamplig series, please wait.');
 

@@ -178,6 +178,13 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
+    
+    if isInterpolated('get') == false
+    
+        isInterpolated('set', true);
+    
+        setImageInterpolation(true);
+    end
 
     progressBar(5/10, 'Resampling series, please wait.');
 

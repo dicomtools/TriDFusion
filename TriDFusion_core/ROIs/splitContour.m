@@ -267,6 +267,8 @@ function splitContour(pAxe, pRoiLinePtr)
                             roiPtr.Waypoints(:) = false;
                                                        
                             addRoi(roiPtr, dSeriesOffset, atRoiInput{dRoiOffset}.LesionType);
+
+                            voiDefaultMenu(roiPtr);
             
                             roiDefaultMenu(roiPtr);
             
@@ -276,9 +278,7 @@ function splitContour(pAxe, pRoiLinePtr)
                             constraintMenu(roiPtr);
             
                             cropMenu(roiPtr);
-            
-                            voiDefaultMenu(roiPtr);
-            
+                      
                             uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
                             asRoiTags{numel(asRoiTags)+1} = sTag;
@@ -544,6 +544,8 @@ function splitContour(pAxe, pRoiLinePtr)
                                            
                 addRoi(roiPtr, dSeriesOffset, atRoiInput{dClosestRoiIndex}.LesionType);
 
+                voiDefaultMenu(roiPtr);
+
                 roiDefaultMenu(roiPtr);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',roiPtr, 'Callback', @hideViewFaceAlhaCallback);
@@ -552,8 +554,6 @@ function splitContour(pAxe, pRoiLinePtr)
                 constraintMenu(roiPtr);
 
                 cropMenu(roiPtr);
-
-                voiDefaultMenu(roiPtr);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 

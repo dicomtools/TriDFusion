@@ -206,6 +206,13 @@ function setMachineLearningFDGBrownFatFullAI(sPredictScript, sDatasetId, bProces
     sNrrdCTFullFileName = '';
 
     if bProcessCt == true
+        
+        if isInterpolated('get') == false
+        
+            isInterpolated('set', true);
+        
+            setImageInterpolation(true);
+        end
 
         [aResampledCTImage, ~] = resampleImage(aCTImage, atCTMetaData, aPTImage, atPTMetaData, 'Linear', true, false);
 

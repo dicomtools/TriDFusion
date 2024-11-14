@@ -129,6 +129,8 @@ function initRoi()
                         catch
                         end
                     end
+
+                    voiDefaultMenu(roiPtr);
                                     
                     roiDefaultMenu(roiPtr);
     
@@ -138,8 +140,6 @@ function initRoi()
                     constraintMenu(roiPtr);
     
                     cropMenu(roiPtr);
-                    
-                    voiDefaultMenu(roiPtr);
     
                     uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
     
@@ -171,7 +171,9 @@ function initRoi()
                         catch
                         end
                     end
-    
+
+                    voiDefaultMenu(roiPtr);
+  
                     roiDefaultMenu(roiPtr);
     
                     uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
@@ -179,9 +181,7 @@ function initRoi()
     
                     constraintMenu(roiPtr);
     
-                    cropMenu(roiPtr);
-                    
-                    voiDefaultMenu(roiPtr);
+                    cropMenu(roiPtr);  
     
                     uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
     
@@ -205,6 +205,8 @@ function initRoi()
                                                 'UserData'           , atRoi{bb}.UserData, ...   
                                                 'Visible'            , 'off' ...
                                                 );                                                        
+                    voiDefaultMenu(roiPtr);
+
                     roiDefaultMenu(roiPtr);
     
                     uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
@@ -212,9 +214,7 @@ function initRoi()
                     constraintMenu(roiPtr);
     
                     cropMenu(roiPtr);
-                    
-                    voiDefaultMenu(roiPtr);
-    
+                        
                     uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
     
                 case lower('images.roi.circle')
@@ -237,6 +237,8 @@ function initRoi()
                                                );
     
                     atRoi{bb}.Vertices = roiPtr.Vertices;
+
+                    voiDefaultMenu(roiPtr);
                     
                     roiDefaultMenu(roiPtr);
     
@@ -244,8 +246,6 @@ function initRoi()
     
                     cropMenu(roiPtr);
                     
-                    voiDefaultMenu(roiPtr);
-    
                     uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
     
                 case lower('images.roi.ellipse')
@@ -271,6 +271,8 @@ function initRoi()
                                      
                     atRoi{bb}.Vertices = roiPtr.Vertices;
     
+                    voiDefaultMenu(roiPtr);
+
                     roiDefaultMenu(roiPtr);
     
                     uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
@@ -279,7 +281,6 @@ function initRoi()
     
                     cropMenu(roiPtr);
                     
-                    voiDefaultMenu(roiPtr);
     
                     uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
     
@@ -304,6 +305,8 @@ function initRoi()
                                           );
                                       
                     atRoi{bb}.Vertices = roiPtr.Vertices;
+
+                    voiDefaultMenu(roiPtr);
                     
                     roiDefaultMenu(roiPtr);
     
@@ -313,8 +316,6 @@ function initRoi()
     
                     cropMenu(roiPtr);
                     
-                    voiDefaultMenu(roiPtr);
-    
                     uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
     
             end

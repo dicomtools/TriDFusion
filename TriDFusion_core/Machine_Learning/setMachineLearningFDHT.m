@@ -168,6 +168,13 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
 
+    if isInterpolated('get') == false
+    
+        isInterpolated('set', true);
+    
+        setImageInterpolation(true);
+    end
+
     % Get DICOM directory directory
 
     [sFilePath, ~, ~] = fileparts(char(atInput(dCTSerieOffset).asFilesList{1}));

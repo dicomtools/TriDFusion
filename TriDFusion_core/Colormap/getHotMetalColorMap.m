@@ -1,6 +1,6 @@
 function aColorMapHotMetal = getHotMetalColorMap()    
 %function aColorMapHotMetal = getHotMetalColorMap()
-%Get MIP Hot Metal Color Map.
+%Get Hot Metal Colormap.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Note: option settings must fit on one line and can contain one semicolon at most.

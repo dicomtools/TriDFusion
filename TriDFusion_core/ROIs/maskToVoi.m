@@ -167,6 +167,8 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
                     pRoi.Waypoints(:) = false;
 
                     addRoi(pRoi, dSeriesOffset, sLesionType);                  
+                    
+                    voiDefaultMenu(pRoi);
 
                     roiDefaultMenu(pRoi);
 
@@ -176,8 +178,6 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
                     constraintMenu(pRoi);
 
                     cropMenu(pRoi);
-
-                    voiDefaultMenu(pRoi);
                 
                     uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on'); 
 

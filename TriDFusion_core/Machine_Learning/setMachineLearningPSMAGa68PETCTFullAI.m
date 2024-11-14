@@ -142,6 +142,13 @@ function setMachineLearningPSMAGa68PETCTFullAI(sPredictScript, tPSMAGa68PETCTFul
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
+    
+    if isInterpolated('get') == false
+    
+        isInterpolated('set', true);
+    
+        setImageInterpolation(true);
+    end
 
     % Create an empty directory
 

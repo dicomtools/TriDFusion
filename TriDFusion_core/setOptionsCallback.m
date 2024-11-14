@@ -477,11 +477,11 @@ function setOptionsCallback(~, ~)
 %         sShadEnable = 'off';
 %     end
 
-    chkShading = ...
+    chkInterpolate = ...
         uicontrol(dlgOptions,...
                   'style'   , 'checkbox',...
                   'enable'  , 'on',...
-                  'value'   , isShading('get'),...
+                  'value'   , isInterpolated('get'),...
                   'position', [20 50 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
@@ -490,9 +490,9 @@ function setOptionsCallback(~, ~)
 
         uicontrol(dlgOptions,...
                   'style'   , 'text',...
-                  'string'  , 'Bilinear Interpolation',...
+                  'string'  , 'Press (I) to Toggle Image Bilinear Interpolation',...
                   'horizontalalignment', 'left',...
-                  'position', [40 50 200 20],...
+                  'position', [40 50 300 20],...
                   'Enable', 'Inactive',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
@@ -674,294 +674,31 @@ function setOptionsCallback(~, ~)
         end
 
         if get(chk3DEngine, 'Value') == 1
-            set(chkShading, 'Enable', 'on');
+            set(chkInterpolate, 'Enable', 'on');
         else
-            set(chkShading, 'Enable', 'off');
+            set(chkInterpolate, 'Enable', 'off');
         end
 
      end
 
     function shadingCallback(hObject, ~)
 
-        if get(chkShading, 'Value') == 1
+        if get(chkInterpolate, 'Value') == 1
             if strcmpi(hObject.Style, 'checkbox')
-                set(chkShading, 'Value', 1);
+                set(chkInterpolate, 'Value', 1);
             else
-                set(chkShading, 'Value', 0);
+                set(chkInterpolate, 'Value', 0);
             end
         else
             if strcmpi(hObject.Style, 'checkbox')
-                set(chkShading, 'Value', 0);
+                set(chkInterpolate, 'Value', 0);
             else
-                set(chkShading, 'Value', 1);
+                set(chkInterpolate, 'Value', 1);
             end
         end
 
-        if get(chkShading, 'Value') == 0
+        setImageInterpolation(get(chkInterpolate, 'Value'));
 
-            if numel(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')))
-
-                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
-
-                    if switchTo3DMode('get')     == false && ...
-                       switchToIsoSurface('get') == false && ...
-                       switchToMIPMode('get')    == false
-
-%                         shading(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
-                        set(imAxePtr('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'nearest');
-
-                        axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                        axe.Toolbar.Visible = 'off';                 
-
-                        if isFusion('get') == true
-
-                            dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
-
-                            for rr=1:dNbFusedSeries
-
-%                                 axef = axefPtr('get', [], rr);
-                                imAxe = imAxeFPtr('get', [] , rr);
-
-                                if ~isempty(imAxe)
-%                                     shading(axef, 'flat');
-                                    set(imAxe,  'Interpolation', 'nearest');
-                                end
-
-                                axef = axefPtr('get', [], rr);
-
-                                if ~isempty(axef)
-                                    axef.Toolbar.Visible = 'off';                 
-                                end
-                                
-                            end
-                        end
-
-                    end
-                else
-                    if switchTo3DMode('get')     == false && ...
-                       switchToIsoSurface('get') == false && ...
-                       switchToMIPMode('get')    == false
-
-%                         shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
-%                         shading(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
-%                         shading(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
-%
-%                         if link2DMip('get') == true && isVsplash('get') == false
-%                             shading(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'flat');
-%                         end
-
-                        set(imCoronalPtr ('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'nearest');
-                        set(imSagittalPtr('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'nearest');
-                        set(imAxialPtr   ('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'nearest');
-
-                        axes1 = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                        axes2 = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                        axes3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-
-                        axes1.Toolbar.Visible = 'off';                 
-                        axes2.Toolbar.Visible = 'off';                 
-                        axes3.Toolbar.Visible = 'off';                 
-
-                        if link2DMip('get') == true && isVsplash('get') == false
-
-                            set(imMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'nearest');
-
-                            axesMip = axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                            axesMip.Toolbar.Visible = 'off';                 
-                        end
-
-                        if isFusion('get') == true
-
-                            dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
-                            for rr=1:dNbFusedSeries
-
-%                                 axes1f = axes1fPtr('get', [], rr);
-%                                 axes2f = axes2fPtr('get', [], rr);
-%                                 axes3f = axes3fPtr('get', [], rr);
-
-
-%                                 if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
-%                                     shading(axes1f, 'flat');
-%                                     shading(axes2f, 'flat');
-%                                     shading(axes3f, 'flat');
-%                                 end
-
-                                imCoronalF  = imCoronalFPtr ('get', [] , rr);
-                                imSagittalF = imSagittalFPtr('get', [] , rr);
-                                imAxialF    = imAxialFPtr   ('get', [] , rr);
-
-                                if ~isempty(imCoronalF) && ~isempty(imSagittalF) && ~isempty(imAxialF)
-
-                                    set(imCoronalF ,  'Interpolation', 'nearest');
-                                    set(imSagittalF,  'Interpolation', 'nearest');
-                                    set(imAxialF   ,  'Interpolation', 'nearest');
-                                end
-
-                                axes1f = axes1fPtr('get', [], rr);
-                                axes2f = axes2fPtr('get', [], rr);
-                                axes3f = axes3fPtr('get', [], rr);
-
-                                if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
-
-                                    axes1f.Toolbar.Visible = 'off';                 
-                                    axes2f.Toolbar.Visible = 'off';                 
-                                    axes3f.Toolbar.Visible = 'off';                                      
-                                end
-
-                                if link2DMip('get') == true && isVsplash('get') == false
-
-                                    imMipF = imMipFPtr('get', [], rr);
-                                    if ~isempty(imMipF)
-                                        set(imMipF,  'Interpolation', 'nearest');
-                                    end
-
-                                    axesMipf = axesMipfPtr('get', [], rr);
-                                    if ~isempty(axesMipf)
-                                        axesMipf.Toolbar.Visible = 'off';                                      
-                                    end
-                        
-                                end
-
-%                                 if link2DMip('get') == true && isVsplash('get') == false
-%                                     axesMipf = axesMipfPtr('get', [], rr);
-%                                     if ~isempty(axesMipf)
-%                                         shading(axesMipf, 'flat');
-%                                     end
-%                                 end
-                            end
-                        end
-
-                    end
-                end
-            end
-        else
-            if numel(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')))
-
-                if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) == 1
-
-                    if switchTo3DMode('get')     == false && ...
-                       switchToIsoSurface('get') == false && ...
-                       switchToMIPMode('get')    == false
-
-%                         shading(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
-
-                        set(imAxePtr('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'bilinear');
-
-                        axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                        axe.Toolbar.Visible = 'off';    
-
-                        if isFusion('get') == true
-
-                            dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
-
-                            for rr=1:dNbFusedSeries
-
-%                                 axef = axefPtr('get', [], rr);
-%
-%                                 if ~isempty(axef)
-%                                     shading(axef, 'interp');
-%                                 end
-                                imAxef = imAxeFPtr('get', [] , rr);
-
-                                if ~isempty(imAxef)
-%                                     shading(axef, 'flat');
-                                    set(imAxef,  'Interpolation', 'bilinear');
-                                end
-
-                                axef = axefPtr('get', [], rr);
-
-                                if ~isempty(axef)
-                                    axef.Toolbar.Visible = 'off';                 
-                                end
-                            end
-                        end
-                   end
-                else
-                    if switchTo3DMode('get')     == false && ...
-                       switchToIsoSurface('get') == false && ...
-                       switchToMIPMode('get')    == false
-%
-%                         shading(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
-%                         shading(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
-%                         shading(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
-%
-%                         if link2DMip('get') == true && isVsplash('get') == false
-%                             shading(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'interp');
-%                         end
-
-                        set(imCoronalPtr ('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'bilinear');
-                        set(imSagittalPtr('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'bilinear');
-                        set(imAxialPtr   ('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'bilinear');
-
-                        axes1 = axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                        axes2 = axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                        axes3 = axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'));
-
-                        axes1.Toolbar.Visible = 'off';                 
-                        axes2.Toolbar.Visible = 'off';                 
-                        axes3.Toolbar.Visible = 'off'; 
-
-                        if link2DMip('get') == true && isVsplash('get') == false
-
-                            set(imMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'bilinear');
-
-                            axesMip = axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value'));
-                            axesMip.Toolbar.Visible = 'off';                             
-                        end
-
-                        if isFusion('get') == true
-
-                            dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
-                            for rr=1:dNbFusedSeries
-%
-%                                 axes1f = axes1fPtr('get', [], rr);
-%                                 axes2f = axes2fPtr('get', [], rr);
-%                                 axes3f = axes3fPtr('get', [], rr);
-%
-%                                 if ~isempty(axes1f) && ~isempty(axes2f) && ~isempty(axes3f)
-%                                     shading(axes1f, 'interp');
-%                                     shading(axes2f, 'interp');
-%                                     shading(axes3f, 'interp');
-%                                 end
-%
-%                                 if link2DMip('get') == true && isVsplash('get') == false
-%
-%                                     axesMipf = axesMipfPtr('get', [], rr);
-%                                     if ~isempty(axesMipf)
-%                                         shading(axesMipf, 'interp');
-%                                     end
-%                                 end
-
-                                imCoronalF  = imCoronalFPtr ('get', [] , rr);
-                                imSagittalF = imSagittalFPtr('get', [] , rr);
-                                imAxialF    = imAxialFPtr   ('get', [] , rr);
-
-                                if ~isempty(imCoronalF) && ~isempty(imSagittalF) && ~isempty(imAxialF)
-
-                                    set(imCoronalF ,  'Interpolation', 'bilinear');
-                                    set(imSagittalF,  'Interpolation', 'bilinear');
-                                    set(imAxialF   ,  'Interpolation', 'bilinear');
-                                end
-
-                                if link2DMip('get') == true && isVsplash('get') == false
-
-                                    imMipF = imMipFPtr('get', [], rr);
-                                    if ~isempty(imMipF)
-                                        set(imMipF,  'Interpolation', 'bilinear');
-                                    end
-
-                                    axesMipf = axesMipfPtr('get', [], rr);
-                                    if ~isempty(axesMipf)
-                                        axesMipf.Toolbar.Visible = 'off';                                      
-                                    end                                    
-                                end
-
-                            end
-                        end
-                    end
-                end
-            end
-        end
     end
 
     function aspectRatioCallback(hObject, ~)
@@ -1657,7 +1394,7 @@ function setOptionsCallback(~, ~)
                    switchToIsoSurface('get') == false && ...
                    switchToMIPMode('get')    == false
 
-                    if isShading('get')
+                    if isInterpolated('get')
 
                         axe = axePtr('get', [], get(uiSeriesPtr('get'), 'Value'));
                        
@@ -2025,7 +1762,7 @@ function setOptionsCallback(~, ~)
 
                 end
 
-                if isShading('get')
+                if isInterpolated('get')
 
                     set(imCoronalPtr ('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'bilinear');
                     set(imSagittalPtr('get', [] , get(uiSeriesPtr('get'), 'Value')),  'Interpolation', 'bilinear');
@@ -2228,7 +1965,7 @@ function setOptionsCallback(~, ~)
             showBorder('set', false);
         end
 
-%         if get(chkShading , 'Value') ~= isShading('get' ) || ...
+%         if get(chkInterpolate , 'Value') ~= isInterpolated('get' ) || ...
 %            get(chk3DEngine, 'Value') ~= is3DEngine('get')
 %             bRefresh = true;
 %         end
@@ -2250,10 +1987,10 @@ function setOptionsCallback(~, ~)
 
         gateLookupType('set', asLookUpValue{dLookUpValue});
 
-        if get(chkShading, 'Value') == true
-            isShading('set', true);
+        if get(chkInterpolate, 'Value') == true
+            isInterpolated('set', true);
         else
-            isShading('set', false);
+            isInterpolated('set', false);
         end
 
         if get(chkAspect, 'Value') == true

@@ -107,6 +107,13 @@ function setMachineLearningFDGBrownFatPETFullAI(sPredictScript, tBrownFatFullAI)
     % Resample series
 
     if ~isempty(aCTImage)
+        
+        if isInterpolated('get') == false
+        
+            isInterpolated('set', true);
+        
+            setImageInterpolation(true);
+        end
 
         progressBar(1/10, 'Resampling series, please wait.');
 

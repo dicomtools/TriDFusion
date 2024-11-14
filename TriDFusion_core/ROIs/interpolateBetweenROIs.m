@@ -204,7 +204,8 @@ function interpolateBetweenROIs(tRoi1, tRoi2, dSeriesOffset, bCreateVoi)
     asTag{1} = tRoi1.Tag;   
     asTag{2} = tRoi2.Tag;   
     dTagOffset = 3;
-    
+    bAddLastDrawnROI = true;
+
     % Linear interpolation between the two masks
     for i = 1:dNbSlices
 %                 if strcmpi(sPlane, 'Axial')
@@ -254,6 +255,8 @@ function interpolateBetweenROIs(tRoi1, tRoi2, dSeriesOffset, bCreateVoi)
 
             addRoi(pRoi, dSeriesOffset, sLesionType);
 
+            voiDefaultMenu(pRoi);
+
             roiDefaultMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
@@ -262,8 +265,6 @@ function interpolateBetweenROIs(tRoi1, tRoi2, dSeriesOffset, bCreateVoi)
             constraintMenu(pRoi);
 
             cropMenu(pRoi);
-
-            voiDefaultMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics' , 'UserData', pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
@@ -349,12 +350,19 @@ function interpolateBetweenROIs(tRoi1, tRoi2, dSeriesOffset, bCreateVoi)
                 if ~isempty(dVoiOffset1) || ~isempty(dVoiOffset2)
 
                     if ~isempty(dVoiOffset1)
-                        
-                        atVoiInput{dVoiOffset1}.RoisTag{end+1} = sRoi2Tag;
+
+                        if bAddLastDrawnROI == true
+
+                            atVoiInput{dVoiOffset1}.RoisTag{end+1} = sRoi2Tag;
+                            bAddLastDrawnROI = false;
+                        end
 
                     else
+                        if bAddLastDrawnROI == true
 
-                        atVoiInput{dVoiOffset2}.RoisTag{end+1} = sRoi1Tag;
+                            atVoiInput{dVoiOffset2}.RoisTag{end+1} = sRoi1Tag;
+                            bAddLastDrawnROI = false;
+                        end
 
                         dVoiOffset1 = dVoiOffset2;
                     end

@@ -77,7 +77,10 @@ function maskImageToVoi(aMask, dSeriesOffset, aClassificationMask, bLesionClassi
 
         BW(CC.PixelIdxList{bb}) = aMask(CC.PixelIdxList{bb});
 
-        asTag = []; % Reset ROIs tag
+        % asTag = []; % Reset ROIs tag
+        asTag = cell(5000, 1);
+        
+        dTagOffset=1;
 
         xmin=0.5;
         xmax=1;
@@ -154,6 +157,8 @@ function maskImageToVoi(aMask, dSeriesOffset, aClassificationMask, bLesionClassi
 
                 addRoi(roiPtr, get(uiSeriesPtr('get'), 'Value'), sLesionType);
 
+                voiDefaultMenu(roiPtr);
+
                 roiDefaultMenu(roiPtr);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',roiPtr, 'Callback', @hideViewFaceAlhaCallback);
@@ -163,15 +168,18 @@ function maskImageToVoi(aMask, dSeriesOffset, aClassificationMask, bLesionClassi
 
                 cropMenu(roiPtr);
 
-                voiDefaultMenu(roiPtr);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
                                    
 %                        addContourToTemplate(dSeriesOffset, 'Axes3', dCurrentSlice, 'images.roi.freehand', aPosition, '', 'off', aColor, 1, roiFaceAlphaValue('get'), 0, 1, sTag, sLesionType);
+                asTag{dTagOffset} = sTag;
+                dTagOffset = dTagOffset+1;
 
-                asTag{numel(asTag)+1} = sTag;
+                % asTag{numel(asTag)+1} = sTag;
             end              
         end
+        
+        asTag = asTag(~cellfun(@isempty, asTag));
         
         if ~isempty(asTag)
 

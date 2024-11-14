@@ -103,14 +103,57 @@ function pasteRoiCallback(~, ~)
 
         case lower('images.roi.freehand')
             
-%             xOffset = ptrRoi.Position(1,1)-clickedPtX;
-%             yOffset = ptrRoi.Position(1,2)-clickedPtY;
-%             
-%             aFreehandPosition = zeros(numel(ptrRoi.Position(:,1)),2);
-%             aFreehandPosition(:,1) = ptrRoi.Position(:,1) - xOffset;
-%             aFreehandPosition(:,2) = ptrRoi.Position(:,2) - yOffset;
+            atRoiInput = roiTemplate('get', dSeriesOffset);
+
+            dRoiTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), ptrRoi.Tag ), 1);
+
+            dSliceNb = 0;
+
+            if ~isempty(dRoiTagOffset) % Found the Tag
+                dSliceNb = atRoiInput{dRoiTagOffset}.SliceNb;
+            end
+
+            bUseMousePosition = false;
             
-            aFreehandPosition = ptrRoi.Position;
+            switch ptrRoi.Parent
+
+                case axePtr('get', [], dSeriesOffset)
+
+                    bUseMousePosition = true;
+
+                case axes1Ptr('get', [], dSeriesOffset)
+
+                    if sliceNumber('get', 'coronal') == dSliceNb
+
+                        bUseMousePosition = true;
+                    end
+
+                case axes2Ptr('get', [], dSeriesOffset)
+
+                    if sliceNumber('get', 'sagittal') == dSliceNb
+
+                        bUseMousePosition = true;
+                    end
+
+                case axes3Ptr('get', [], dSeriesOffset)
+
+                    if sliceNumber('get', 'axial') == dSliceNb
+
+                        bUseMousePosition = true;
+                    end
+            end
+
+            if bUseMousePosition == true
+
+                xOffset = ptrRoi.Position(1,1)-clickedPtX;
+                yOffset = ptrRoi.Position(1,2)-clickedPtY;
+    
+                aFreehandPosition = zeros(numel(ptrRoi.Position(:,1)),2);
+                aFreehandPosition(:,1) = ptrRoi.Position(:,1) - xOffset;
+                aFreehandPosition(:,2) = ptrRoi.Position(:,2) - yOffset;
+            else
+                aFreehandPosition = ptrRoi.Position;
+            end
 
             pRoi = images.roi.Freehand(ptrRoi.Parent, ...
                                        'Position'           , aFreehandPosition, ...
@@ -130,6 +173,10 @@ function pasteRoiCallback(~, ~)
                                    
             pRoi.Waypoints(:) = ptrRoi.Waypoints(:);
 
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
+
+            voiDefaultMenu(pRoi);
+
             roiDefaultMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
@@ -139,23 +186,61 @@ function pasteRoiCallback(~, ~)
 
             cropMenu(pRoi);
             
-            voiDefaultMenu(pRoi);
-
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
-            addRoi(pRoi, dSeriesOffset, 'Unspecified');
-
-
         case lower('images.roi.polygon')
             
-%             xOffset = ptrRoi.Position(1,1)-clickedPtX;
-%             yOffset = ptrRoi.Position(1,2)-clickedPtY;
-%             
-%             aPolygonPosition = zeros(numel(ptrRoi.Position(:,1)),2);
-%             aPolygonPosition(:,1) = ptrRoi.Position(:,1) - xOffset;
-%             aPolygonPosition(:,2) = ptrRoi.Position(:,2) - yOffset;
+            atRoiInput = roiTemplate('get', dSeriesOffset);
 
-            aPolygonPosition = ptrRoi.Position;
+            dRoiTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), ptrRoi.Tag ), 1);
+
+            dSliceNb = 0;
+
+            if ~isempty(dRoiTagOffset) % Found the Tag
+                dSliceNb = atRoiInput{dRoiTagOffset}.SliceNb;
+            end
+
+            bUseMousePosition = false;
+            
+            switch ptrRoi.Parent
+
+                case axePtr('get', [], dSeriesOffset)
+
+                    bUseMousePosition = true;
+
+                case axes1Ptr('get', [], dSeriesOffset)
+
+                    if sliceNumber('get', 'coronal') == dSliceNb
+
+                        bUseMousePosition = true;
+                    end
+
+                case axes2Ptr('get', [], dSeriesOffset)
+
+                    if sliceNumber('get', 'sagittal') == dSliceNb
+
+                        bUseMousePosition = true;
+                    end
+
+                case axes3Ptr('get', [], dSeriesOffset)
+
+                    if sliceNumber('get', 'axial') == dSliceNb
+
+                        bUseMousePosition = true;
+                    end
+            end
+
+            if bUseMousePosition == true
+
+                xOffset = ptrRoi.Position(1,1)-clickedPtX;
+                yOffset = ptrRoi.Position(1,2)-clickedPtY;
+    
+                aPolygonPosition = zeros(numel(ptrRoi.Position(:,1)),2);
+                aPolygonPosition(:,1) = ptrRoi.Position(:,1) - xOffset;
+                aPolygonPosition(:,2) = ptrRoi.Position(:,2) - yOffset;
+            else
+                aPolygonPosition = ptrRoi.Position;
+            end
 
             pRoi = images.roi.Polygon(ptrRoi.Parent, ...
                                       'Position'           , aPolygonPosition, ...
@@ -173,6 +258,10 @@ function pasteRoiCallback(~, ~)
                                       'Visible'            , 'on' ...
                                       );
                                   
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
+
+            voiDefaultMenu(pRoi);
+         
             roiDefaultMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
@@ -181,13 +270,9 @@ function pasteRoiCallback(~, ~)
 
             cropMenu(pRoi);
             
-            voiDefaultMenu(pRoi);
-
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
 
-            addRoi(pRoi, dSeriesOffset, 'Unspecified');
-            
-
+           
         case lower('images.roi.circle')
 
             pRoi = images.roi.Circle(ptrRoi.Parent, ...
@@ -207,18 +292,18 @@ function pasteRoiCallback(~, ~)
                                      'Visible'            , 'on' ...
                                      );
 
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
+
+            voiDefaultMenu(pRoi);
+
             roiDefaultMenu(pRoi);
 
             constraintMenu(pRoi);
 
             cropMenu(pRoi);
             
-            voiDefaultMenu(pRoi);
-
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
-            addRoi(pRoi, dSeriesOffset, 'Unspecified');
-
             
         case lower('images.roi.ellipse')
 
@@ -241,6 +326,10 @@ function pasteRoiCallback(~, ~)
                                       'Visible'            , 'on' ...
                                       );
 
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
+
+            voiDefaultMenu(pRoi);
+
             roiDefaultMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
@@ -248,29 +337,25 @@ function pasteRoiCallback(~, ~)
             constraintMenu(pRoi);
 
             cropMenu(pRoi);
-            
-            voiDefaultMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
-            addRoi(pRoi, dSeriesOffset, 'Unspecified');
             
             if strcmpi(pRoi.UserData, 'Sphere')
 
                 atRoi = roiTemplate('get', dSeriesOffset);
                 atVoi = voiTemplate('get', dSeriesOffset);
                 
-                aRoiTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {ptrRoi.Tag} );
-                dFirstRoiOffset = find(aRoiTagOffset, 1); 
+                dFirstRoiOffset = find(strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {ptrRoi.Tag} ), 1);
                 
                 if ~isempty(dFirstRoiOffset)
                     
                     for vv=1:numel(atVoi)
 
                         pRoisTag   = atVoi{vv}.RoisTag;
-                        aTagOffset = strcmp( cellfun( @(pRoisTag) pRoisTag, pRoisTag, 'uni', false ), {ptrRoi.Tag} );
+                        dTagOffset = find(strcmp( cellfun( @(pRoisTag) pRoisTag, pRoisTag, 'uni', false ), ptrRoi.Tag ), 1);
 
-                        if find(aTagOffset, 1) % Found sphere
+                        if ~isempty(dTagOffset) % Found sphere
 
                             asTag{1} = sTag;
                             
@@ -297,8 +382,7 @@ function pasteRoiCallback(~, ~)
                                     continue;
                                 end
 
-                                aTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), pRoisTag(rr) );
-                                dVoiRoiTagOffset = find(aTagOffset, 1);      
+                                dVoiRoiTagOffset = find(strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), pRoisTag(rr) ), 1);
 
                                 if ~isempty(dVoiRoiTagOffset)
 
@@ -382,6 +466,10 @@ function pasteRoiCallback(~, ~)
                                         'Visible'            , 'on' ...
                                         );
 
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
+
+            voiDefaultMenu(pRoi);
+
             roiDefaultMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
@@ -390,12 +478,8 @@ function pasteRoiCallback(~, ~)
 
             cropMenu(pRoi);
             
-            voiDefaultMenu(pRoi);
-
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
-            addRoi(pRoi, dSeriesOffset, 'Unspecified');
-
         otherwise
             return;
     end

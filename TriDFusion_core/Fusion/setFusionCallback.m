@@ -475,7 +475,7 @@ end
                 
                 if gaussFilter('get') == true
 
-                    if isShading('get')
+                    if isInterpolated('get')
 
                         imAxeF = imshow(imgaussfilt(imf)   , ...
                                         'Parent'       , axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
@@ -488,7 +488,7 @@ end
                                         );                        
                     end
                 else    
-                    if isShading('get')
+                    if isInterpolated('get')
                         imAxeF = imshow(imf, ...
                                         'Parent'   , axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                         'Interpolation', 'bilinear'... 
@@ -909,7 +909,7 @@ end
 
                     if gaussFilter('get') == true
 
-                        if isShading('get')
+                        if isInterpolated('get')
 
                             imCoronalF = imshow(imgaussfilt(imComputed), ...
                                                 'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
@@ -922,7 +922,7 @@ end
                                                 );                                      
                         end
                     else      
-                        if isShading('get')
+                        if isInterpolated('get')
 
                             imCoronalF = imshow(imComputed, ...
                                                 'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
@@ -946,7 +946,7 @@ end
                
                     if gaussFilter('get') == true
 
-                        if isShading('get')
+                        if isInterpolated('get')
              
                             imCoronalF = imshow(imgaussfilt(permute(imf(iCoronal,:,:), [3 2 1])), ...
                                                 'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
@@ -959,7 +959,7 @@ end
                                                  );                                      
                         end
                     else      
-                        if isShading('get')
+                        if isInterpolated('get')
 
                             imCoronalF = imshow(permute(imf(iCoronal,:,:), [3 2 1]), ...
                                                 'Parent'       , axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
@@ -998,7 +998,7 @@ end
 
                     if gaussFilter('get') == true
 
-                        if isShading('get')
+                        if isInterpolated('get')
 
                             imSagittalF = imshow(imgaussfilt(imComputed), ...
                                                  'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
@@ -1011,7 +1011,7 @@ end
                                                  );                                                                                                  
                         end
                     else                    
-                        if isShading('get')
+                        if isInterpolated('get')
 
                             imSagittalF = imshow(imComputed, ...
                                                  'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
@@ -1033,7 +1033,7 @@ end
                   
                      if gaussFilter('get') == true
 
-                        if isShading('get')
+                        if isInterpolated('get')
 
                             imSagittalF = imshow(imgaussfilt(permute(imf(:,iSagittal,:), [3 1 2])), ...
                                                  'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
@@ -1046,7 +1046,7 @@ end
                                                  );                                 
                         end
                     else
-                        if isShading('get')
+                        if isInterpolated('get')
                             imSagittalF = imshow(permute(imf(:,iSagittal,:), [3 1 2]), ...
                                                  'Parent'       , axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                                  'Interpolation', 'bilinear'... 
@@ -1092,7 +1092,7 @@ end
 
                     if gaussFilter('get') == true    
 
-                        if isShading('get')
+                        if isInterpolated('get')
                             
                             imAxialF = imshow(imgaussfilt(imComputed),  ...
                                               'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
@@ -1105,7 +1105,7 @@ end
                                               );                                                                                                                    
                         end
                     else     
-                        if isShading('get')
+                        if isInterpolated('get')
 
                             imAxialF = imshow(imComputed,  ...
                                               'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
@@ -1127,7 +1127,7 @@ end
 
                     if gaussFilter('get') == true
 
-                        if isShading('get')
+                        if isInterpolated('get')
                        
                             imAxialF = imshow(imgaussfilt(imf(:,:,iAxial)), ...
                                               'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
@@ -1140,7 +1140,7 @@ end
                                               );                                
                         end
                     else
-                        if isShading('get')
+                        if isInterpolated('get')
 
                             imAxialF = imshow(imf(:,:,iAxial),  ...
                                               'Parent'       , axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
@@ -1178,7 +1178,7 @@ end
 
                     if gaussFilter('get') == true
 
-                        if isShading('get')
+                        if isInterpolated('get')
 
                             imMipF = imshow(imgaussfilt(permute(imComputedMipF(iMipAngle,:,:), [3 2 1])), ...
                                             'Parent', axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
@@ -1193,7 +1193,7 @@ end
                         end
 
                     else
-                        if isShading('get')
+                        if isInterpolated('get')
                             imMipF = imshow(permute(imComputedMipF(iMipAngle,:,:), [3 2 1]),  ...
                                             'Parent', axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), ...
                                             'Interpolation', 'bilinear'... 
@@ -2424,7 +2424,7 @@ end
     end
     
     catch   
-
+    
         progressBar(1, 'Error:setFusionCallback()');
     end
     

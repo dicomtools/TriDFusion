@@ -703,7 +703,7 @@ function figRoiDialogCallback(hObject, ~)
 
                     if ~isempty(asLesionList)
 
-                        mEditLocation = uimenu(c,'Label', 'Edit Location');
+                        mEditLocation = uimenu(c,'Label', 'Edit Site');
 
                         for ll = 1: numel(asLesionList)
 
@@ -903,7 +903,7 @@ function figRoiDialogCallback(hObject, ~)
 
                     if ~isempty(asLesionList)
 
-                        mEditLocation = uimenu(c,'Label', 'Edit Location', 'Separator', 'on');
+                        mEditLocation = uimenu(c,'Label', 'Edit Site', 'Separator', 'on');
 
                         for ll = 1: numel(asLesionList)
 
@@ -1299,15 +1299,14 @@ function figRoiDialogCallback(hObject, ~)
             asTag = asTag(get(lbVoiRoiWindow, 'Value'));
 
             dNbTags = numel(asTag);
+
             for jj=1:dNbTags
 
-                aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), asTag(jj) );
-                dRoiTagOffset = find(aTagOffset, 1);
+                dRoiTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), asTag(jj) ), 1);
 
                 if isempty(dRoiTagOffset) % Tag is a VOI
 
-                    aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), asTag(jj) );
-                    dVoiTagOffset = find(aTagOffset, 1);
+                    dVoiTagOffset = find(strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), asTag(jj) ), 1);
 
                     if ~isempty(dVoiTagOffset) % Tag is a VOI
 
@@ -1336,8 +1335,7 @@ function figRoiDialogCallback(hObject, ~)
 
                         for vv=1: dNbRois
 
-                            aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), atVoiInput{dVoiTagOffset}.RoisTag{vv} );
-                            dRoiTagOffset = find(aTagOffset, 1);
+                            dRoiTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), atVoiInput{dVoiTagOffset}.RoisTag{vv} ), 1);
 
                             if ~isempty(dRoiTagOffset) % Found the Tag
 
@@ -1375,8 +1373,7 @@ function figRoiDialogCallback(hObject, ~)
 
                     if isempty(find(ismember(asRoiTags, asTag{jj}), 1)) % The tag is not already added
 
-                        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), asTag{jj} );
-                        dRoiTagOffset = find(aTagOffset, 1);
+                        dRoiTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), asTag{jj} ), 1);
 
                         if ~isempty(dRoiTagOffset) % Found the Tag
 

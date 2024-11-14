@@ -78,7 +78,7 @@ function rightClickMenu(sAction, objectPtr)
 
         cm = uicontextmenu(fiMainWindowPtr('get'));
 
-        a= uimenu(cm, 'Text', 'Paste Contour', 'Callback', @pasteRoiCallback);
+        a= uimenu(cm, 'Text', 'Paste Contour (Ctrl + V)', 'Callback', @pasteRoiCallback);
         b= uimenu(cm, 'Text', 'Paste Mirror' , 'Callback', @pasteMirroirRoiCallback);
 
         set(a, 'Visible', 'off');

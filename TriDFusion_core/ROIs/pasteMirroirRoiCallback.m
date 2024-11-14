@@ -141,6 +141,10 @@ function pasteMirroirRoiCallback(~, ~)
                                    
             pRoi.Waypoints(:) = ptrRoi.Waypoints(:);
 
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
+
+            voiDefaultMenu(pRoi);
+
             roiDefaultMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
@@ -150,12 +154,8 @@ function pasteMirroirRoiCallback(~, ~)
 
             cropMenu(pRoi);
             
-            voiDefaultMenu(pRoi);
-
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
-            addRoi(pRoi, dSeriesOffset, 'Unspecified');
-
 
         case lower('images.roi.polygon')
             
@@ -188,6 +188,10 @@ function pasteMirroirRoiCallback(~, ~)
                                       'Visible'            , 'on' ...
                                       );
                                   
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
+
+            voiDefaultMenu(pRoi);
+
             roiDefaultMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
@@ -195,13 +199,8 @@ function pasteMirroirRoiCallback(~, ~)
             constraintMenu(pRoi);
 
             cropMenu(pRoi);
-            
-            voiDefaultMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
-
-            addRoi(pRoi, dSeriesOffset, 'Unspecified');
-            
 
         case lower('images.roi.circle')
 
@@ -228,18 +227,18 @@ function pasteMirroirRoiCallback(~, ~)
                                      'Visible'            , 'on' ...
                                      );
 
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
+            
+            voiDefaultMenu(pRoi);
+       
             roiDefaultMenu(pRoi);
 
             constraintMenu(pRoi);
 
             cropMenu(pRoi);
             
-            voiDefaultMenu(pRoi);
-
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
-            addRoi(pRoi, dSeriesOffset, 'Unspecified');
-
             
         case lower('images.roi.ellipse')
 
@@ -269,6 +268,10 @@ function pasteMirroirRoiCallback(~, ~)
                                       'Visible'            , 'on' ...
                                       );
 
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
+          
+            voiDefaultMenu(pRoi);
+
             roiDefaultMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
@@ -277,11 +280,8 @@ function pasteMirroirRoiCallback(~, ~)
 
             cropMenu(pRoi);
             
-            voiDefaultMenu(pRoi);
-
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
-            addRoi(pRoi, dSeriesOffset, 'Unspecified');
             
             if strcmpi(pRoi.UserData, 'Sphere')
 
@@ -421,6 +421,10 @@ function pasteMirroirRoiCallback(~, ~)
                                         'Visible'            , 'on' ...
                                         );
 
+            addRoi(pRoi, dSeriesOffset, 'Unspecified');
+
+            voiDefaultMenu(pRoi);
+
             roiDefaultMenu(pRoi);
 
             uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
@@ -429,11 +433,8 @@ function pasteMirroirRoiCallback(~, ~)
 
             cropMenu(pRoi);
             
-            voiDefaultMenu(pRoi);
-
             uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
-            addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
         otherwise
             return;

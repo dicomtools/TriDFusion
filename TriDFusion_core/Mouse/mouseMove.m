@@ -113,7 +113,7 @@ function mouseMove(~, ~)
 
                              adjPan();
                          end
-                    end
+                    end                 
                 else
                     if isMoveImageActivated('get') == true
                         

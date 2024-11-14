@@ -217,6 +217,13 @@ function setMachineLearning3DLungShunt(sSegmentatorScript, sSegmentatorCombineMa
                 end
 
                 if bResampleSeries == true
+                    
+                    if isInterpolated('get') == false
+                
+                        isInterpolated('set', true);
+                    
+                        setImageInterpolation(true);
+                    end
 
                     progressBar(5/7, 'Resamplig series, please wait.');
 

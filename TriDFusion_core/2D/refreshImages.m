@@ -28,7 +28,8 @@ function refreshImages(clickedPtX, clickedPtY)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     if exist('clickedPtX', 'var') && ...
-       exist('clickedPtY', 'var')     
+       exist('clickedPtY', 'var')    
+        
         bAxeClicked = true;
     else
         bAxeClicked = false;       
@@ -36,7 +37,7 @@ function refreshImages(clickedPtX, clickedPtY)
 
     atInputTemplate = inputTemplate('get');
 
-    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+    dSeriesOffset       = get(uiSeriesPtr('get'), 'Value');
     dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
 %     if dSeriesOffset > numel(atInputTemplate)
 %         return;
@@ -324,6 +325,7 @@ function refreshImages(clickedPtX, clickedPtY)
         imCoronal  = imCoronalPtr ('get', [], dSeriesOffset);
         imSagittal = imSagittalPtr('get', [], dSeriesOffset);
         imAxial    = imAxialPtr   ('get', [], dSeriesOffset);
+
         if isVsplash('get') == false && bAxeClicked == false
             imMip = imMipPtr('get', [], dSeriesOffset);
         end
@@ -331,6 +333,7 @@ function refreshImages(clickedPtX, clickedPtY)
         imCoronalFc  = imCoronalFcPtr ('get', [], dFusionSeriesOffset);
         imSagittalFc = imSagittalFcPtr('get', [], dFusionSeriesOffset);
         imAxialFc    = imAxialFcPtr   ('get', [], dFusionSeriesOffset);
+        
         if isVsplash('get') == false && bAxeClicked == false
             imMipFc = imMipFcPtr('get', [], dFusionSeriesOffset);
         end

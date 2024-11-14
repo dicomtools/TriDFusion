@@ -177,6 +177,8 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
 
         addRoi(pRoi, dSerieOffset, sLesionType);
 
+        voiDefaultMenu(pRoi);
+
         roiDefaultMenu(pRoi);
 
         uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
@@ -185,8 +187,6 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
         constraintMenu(pRoi);
 
         cropMenu(pRoi);
-
-        voiDefaultMenu(pRoi);
 
         uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 

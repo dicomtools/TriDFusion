@@ -494,7 +494,11 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
             end
         end
         
-         asTag = [];
+         % asTag = [];
+         asTag = cell(5000, 1);
+        
+         dTagOffset=1;
+
 %         dTagOffset = 1;
 %         asTag = cell(1000, 1); % Reset ROIs tag
 
@@ -567,6 +571,8 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 
                 addRoi(roiPtr, get(uiSeriesPtr('get'), 'Value'), sLesionType);
 
+                voiDefaultMenu(roiPtr);
+
                 roiDefaultMenu(roiPtr);
 
                 uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',roiPtr, 'Callback', @hideViewFaceAlhaCallback);
@@ -576,13 +582,15 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 
                 cropMenu(roiPtr);
 
-                voiDefaultMenu(roiPtr);
-
                 uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
                                    
 %                        addContourToTemplate(dSeriesOffset, 'Axes3', dCurrentSlice, 'images.roi.freehand', aPosition, '', 'off', aColor, 1, roiFaceAlphaValue('get'), 0, 1, sTag, sLesionType);
 
-                asTag{numel(asTag)+1} = sTag;
+                % asTag{numel(asTag)+1} = sTag;
+
+                asTag{dTagOffset} = sTag;
+                dTagOffset = dTagOffset+1;
+
 %                 asTag{dTagOffset} = sTag;
 %                 dTagOffset=dTagOffset+1;
                 if viewRoiPanel('get') == true
@@ -593,6 +601,8 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
         end
         
 %         asTag(cellfun(@isempty, asTag)) = [];
+        
+        asTag = asTag(~cellfun(@isempty, asTag));
 
         if ~isempty(asTag)
 
@@ -640,6 +650,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
     if viewRoiPanel('get') == true
 
         if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
+            
             set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on'); 
             set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'on');   
             set(uiAddVoiRoiPanelObject       ('get'), 'Enable', 'on'); 

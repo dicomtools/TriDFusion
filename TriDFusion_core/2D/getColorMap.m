@@ -31,10 +31,12 @@ function aColorMap = getColorMap(sAction, lOffset, aAxeColorMap)
     persistent paColorMap;
 
     if isempty(pasColorMap)
+        
         pasColorMap = getColorMapsName();                     
     end
 
     if isempty(paColorMap)
+
         paColorMap = getColorMapsValue();             
     end
 

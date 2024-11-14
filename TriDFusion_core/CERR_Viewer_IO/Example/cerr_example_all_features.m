@@ -16,6 +16,13 @@ TriDFusion();
 
 loadCerrDoseVolume(cerrPlanC, cerrStructNamC);
 
+if isInterpolated('get') == false
+
+    isInterpolated('set', true);
+
+    setImageInterpolation(true);
+end
+
 % Set 3D Voi Enable list. *Optional
 voi3DEnableList('set', cerrStructEnaC);
 

@@ -254,6 +254,13 @@ function resetSeries(dOffset, bInitDisplay)
             clearDisplay();
             initDisplay(3);
 
+            if isInterpolated('get') == true
+
+                isInterpolated('set', false);
+
+                setImageInterpolation(false);
+            end
+
             dicomViewerCore();
 
             setViewerDefaultColor(true, dicomMetaData('get', [], dInitOffset));

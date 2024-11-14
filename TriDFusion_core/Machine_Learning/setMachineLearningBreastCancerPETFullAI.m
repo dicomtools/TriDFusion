@@ -114,6 +114,13 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
 
     if ~isempty(aCTImage)
 
+        if isInterpolated('get') == false
+        
+            isInterpolated('set', true);
+        
+            setImageInterpolation(true);
+        end
+
         progressBar(1/10, 'Resampling series, please wait.');
 
         [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);

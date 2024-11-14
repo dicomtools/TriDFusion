@@ -1,17 +1,20 @@
-function lOffset = colorMapOffset(sAction, lValue)
-%function lOffset = colorMapOffset(sAction, lValue)
-%Get/Set 2D Color Map Offset.
+function uiObject = uiSelectVoiRoiPanelObject(sAction, aValue)
+%function  uiObject = uiSelectVoiRoiPanelObject(sAction, aValue)
+%Get\Set Select Voi Roi Panel Object.
 %See TriDFuison.doc (or pdf) for more information about options.
+%
+%Note: option settings must fit on one line and can contain one semicolon at most.
+%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2024, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
-% TriDFusion development has been led by: Daniel Lafontaine
+% TriDFusion development has been led by:  Daniel Lafontaine
 % 
 % TriDFusion is distributed under the terms of the Lesser GNU Public License. 
 % 
@@ -25,14 +28,13 @@ function lOffset = colorMapOffset(sAction, lValue)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent plColorMapOffset; 
+    persistent paObject; 
 
     if strcmpi('set', sAction)
-        
-        plColorMapOffset = lValue;            
-    end
+        paObject = aValue;            
+    end      
     
-    lOffset = plColorMapOffset;
+    uiObject = paObject;
 end
