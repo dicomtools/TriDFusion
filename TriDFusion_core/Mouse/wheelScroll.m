@@ -50,6 +50,7 @@ function wheelScroll(~, evnt)
 
         else
             dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
             aImageSize = size(dicomBuffer('get', [], dSeriesOffset));
 
             pAxe = getAxeFromMousePosition(dSeriesOffset);
@@ -138,7 +139,9 @@ function wheelScroll(~, evnt)
                     end
                     
                     set(uiSliderMipPtr('get'), 'Value', dMipSliderValue);
+
                     sliderMipCallback();
+                    
                 otherwise
 
             end

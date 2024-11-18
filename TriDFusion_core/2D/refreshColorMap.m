@@ -31,6 +31,9 @@ function refreshColorMap()
        switchToIsoSurface('get') == false && ...
        switchToMIPMode('get')    == false
 
+        ptrColorbar = uiColorbarPtr('get');
+        colormap(ptrColorbar, getColorMap('one', colorMapOffset('get')));
+
         if size(dicomBuffer('get'), 3) == 1
             colormap(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', colorMapOffset('get')));
             if isFusion('get')
@@ -48,13 +51,14 @@ function refreshColorMap()
             if isFusion('get')  == true
                 
                 ptrFusionColorbar = uiFusionColorbarPtr('get');
-                colormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')))
+                colormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')));
 
                 colormap(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
                 colormap(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
                 colormap(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
                 
                 if link2DMip('get') == true && isVsplash('get') == false               
+                    
                     colormap(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));                        
                 end
                 
@@ -64,6 +68,7 @@ function refreshColorMap()
                     colormap(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));  
                     
                     if link2DMip('get') == true && isVsplash('get') == false
+
                         colormap(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));                        
                     end                    
                 end                 

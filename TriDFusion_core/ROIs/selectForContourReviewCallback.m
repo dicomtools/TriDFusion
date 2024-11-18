@@ -41,20 +41,20 @@ function selectForContourReviewCallback(hObject, ~)
             seletVoiRoiPanelCallback = uiSelectVoiRoiPanelObject('get');
 
             if ~isempty(seletVoiRoiPanelCallback)
-             
+
                 try
-            
+
                 set(fiMainWindowPtr('get'), 'Pointer', 'watch');
                 drawnow;
-                
-                callbackFunction = get(seletVoiRoiPanelCallback, 'Callback');  
-                
-                callbackFunction([], dVoiTagOffset);
+
+                callbackFunction = get(seletVoiRoiPanelCallback, 'Callback');                  
+
+                callbackFunction(hObject.Parent.UserData, dVoiTagOffset);
 
                 catch
                     progressBar(1, 'Error:selectForContourReviewCallback()');
                 end
-            
+
                 set(fiMainWindowPtr('get'), 'Pointer', 'default');
                 drawnow;
 
@@ -64,5 +64,11 @@ function selectForContourReviewCallback(hObject, ~)
         end
     end
 
+    % dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+    % 
+    % if ~isempty(voiTemplate('get', dSeriesOffset))
+    % 
+    %     selectVoiFromMouseOverForContourReview(dSeriesOffset);
+    % end
 
 end

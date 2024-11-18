@@ -60,7 +60,7 @@ function selectVoiFromMouseOverForContourReview(dSeriesOffset)
                     
                                 callbackFunction = get(seletVoiRoiPanelCallback, 'Callback');  
                                 
-                                callbackFunction([], vo);
+                                callbackFunction(atRoiInput{rr}.Object, vo);
 
                                 bFoundRoi = true;
                                 break;

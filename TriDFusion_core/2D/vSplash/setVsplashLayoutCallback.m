@@ -112,13 +112,19 @@ function setVsplashLayoutCallback(hObject, ~)
         end
     
         set(fiMainWindowPtr('get'), 'Color', dBackgroundColor);
-    
+
+        ptrColorbar = uiColorbarPtr('get');
+        colormap(ptrColorbar, getColorMap('one', colorMapOffset('get')));
+
         colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', dColorMapOffset));
         colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', dColorMapOffset));
         colormap(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', dColorMapOffset));          
     
         if isFusion('get') == true
-    
+
+            ptrFusionColorbar = uiFusionColorbarPtr('get');
+            colormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')));
+
             colormap(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),  getColorMap('one', dFusionColorMapOffset));
             colormap(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),  getColorMap('one', dFusionColorMapOffset));
             colormap(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),  getColorMap('one', dFusionColorMapOffset));

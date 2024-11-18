@@ -532,13 +532,18 @@ function catchKeyPress(~,evnt)
             return;
         end
 
-        if ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) % Select VOI for contour review
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-            selectVoiFromMouseOverForContourReview(get(uiSeriesPtr('get'), 'Value'));
+        if ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) % Select VOI for contour review
+            
+            if ~isempty(voiTemplate('get', dSeriesOffset))
+
+                selectVoiFromMouseOverForContourReview(dSeriesOffset);
+            end
 
         else % Show/Hide contours
 
-            if ~isempty(roiTemplate('get', get(uiSeriesPtr('get'), 'Value'))) 
+            if ~isempty(roiTemplate('get', dSeriesOffset)) 
     
                 txtContourVisibilityPanel = txtContourVisibilityPanelObject('get');
     
@@ -1132,29 +1137,99 @@ function catchKeyPress(~,evnt)
             return;
         end
 
+        atInputTemplate = inputTemplate('get');
+
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
         set(fiMainWindowPtr('get'), 'Pointer', 'default');            
 
         releaseRoiWait();
 
-%        atMetaData = dicomMetaData('get');                
-        sUnitDisplay = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));                        
-        if strcmpi(sUnitDisplay, 'SUV')
+%         sUnitDisplay = getSerieUnitValue(get(uiSeriesPtr('get'), 'Value'));                        
+%         if strcmpi(sUnitDisplay, 'SUV')
+% 
+%             tQuant = quantificationTemplate('get');   
+% 
+%             lMin = suvWindowLevel('get', 'min')/tQuant.tSUV.dScale;  
+%             lMax = suvWindowLevel('get', 'max')/tQuant.tSUV.dScale;   
+% 
+% %            lMin = min(dicomBuffer('get'), [], 'all');
+% %            lMax = max(dicomBuffer('get'), [], 'all');
+%         else
+%             lMin = min(dicomBuffer('get', [], dSeriesOffset), [], 'all');
+%             lMax = max(dicomBuffer('get', [], dSeriesOffset), [], 'all');
+%         end
 
-            tQuant = quantificationTemplate('get');   
+        % setWindowMinMax(lMax, lMin);  
 
-            lMin = suvWindowLevel('get', 'min')/tQuant.tSUV.dScale;  
-            lMax = suvWindowLevel('get', 'max')/tQuant.tSUV.dScale;   
+        initWindowLevel('set', false);
 
-%            lMin = min(dicomBuffer('get'), [], 'all');
-%            lMax = max(dicomBuffer('get'), [], 'all');
+        if strcmpi(atInputTemplate(dSeriesOffset).atDicomInfo, 'ct')
+
+            if min(dicomBuffer('get', [], dSeriesOffset), [], 'all') >= 0
+                dMax = max(dicomBuffer('get', [], dSeriesOffset), [], 'all');
+                dMin = min(dicomBuffer('get', [], dSeriesOffset), [], 'all');
+            else
+                [dMax, dMin] = computeWindowLevel(500, 50);
+            end
         else
-            lMin = min(dicomBuffer('get', [], dSeriesOffset), [], 'all');
-            lMax = max(dicomBuffer('get', [], dSeriesOffset), [], 'all');
+            sUnitDisplay = getSerieUnitValue(dSeriesOffset);
+
+            if strcmpi(sUnitDisplay, 'SUV')
+
+                if isfield(atInputTemplate(dSeriesOffset).tQuant, 'tSUV')
+                    
+                    dMin = suvWindowLevel('get', 'min')/atInputTemplate(dSeriesOffset).tQuant.tSUV.dScale;
+                    dMax = suvWindowLevel('get', 'max')/atInputTemplate(dSeriesOffset).tQuant.tSUV.dScale;
+                else
+                    dMin = min(dicomBuffer('get', [], dSeriesOffset), [], 'all');
+                    dMax = max(dicomBuffer('get', [], dSeriesOffset), [], 'all');
+                end
+            else
+                dMin = min(dicomBuffer('get', [], dSeriesOffset), [], 'all');
+                dMax = max(dicomBuffer('get', [], dSeriesOffset), [], 'all');
+            end
         end
 
-        setWindowMinMax(lMax, lMin);                    
+        windowLevel('set', 'max', dMax);
+        windowLevel('set', 'min', dMin);
+
+        if isFusion('get') == true            
+            
+            dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
+
+            initFusionWindowLevel('set', false);
+    
+            if strcmpi(atInputTemplate(dFusionSeriesOffset).atDicomInfo, 'ct')
+
+                if min(fusionBuffer('get', [], dFusionSeriesOffset), [], 'all') >= 0
+                    dMax = max(fusionBuffer('get', [], dFusionSeriesOffset), [], 'all');
+                    dMin = min(fusionBuffer('get', [], dFusionSeriesOffset), [], 'all');
+                else
+                    [dMax, dMin] = computeWindowLevel(500, 50);
+                end
+            else
+                sUnitDisplay = getSerieUnitValue(dFusionSeriesOffset);
+    
+                if strcmpi(sUnitDisplay, 'SUV')
+    
+                    if isfield(atInputTemplate(dFusionSeriesOffset).tQuant, 'tSUV')
+                        
+                        dMin = suvWindowLevel('get', 'min')/atInputTemplate(dFusionSeriesOffset).tQuant.tSUV.dScale;
+                        dMax = suvWindowLevel('get', 'max')/atInputTemplate(dFusionSeriesOffset).tQuant.tSUV.dScale;
+                    else
+                        dMin = min(fusionBuffer('get', [], dFusionSeriesOffset), [], 'all');
+                        dMax = max(fusionBuffer('get', [], dFusionSeriesOffset), [], 'all');
+                    end
+                else
+                    dMin = min(fusionBuffer('get', [], dFusionSeriesOffset), [], 'all');
+                    dMax = max(fusionBuffer('get', [], dFusionSeriesOffset), [], 'all');
+                end
+            end
+    
+            fusionWindowLevel('set', 'max', dMax);
+            fusionWindowLevel('set', 'min', dMin);
+        end
 
 %    isMoveImageActivated('set', false);
     
@@ -1197,18 +1272,161 @@ function catchKeyPress(~,evnt)
 
         if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1   
 
-             resetAxePlotView(axePtr('get', [], dSeriesOffset));          
+             resetAxePlotView(axePtr('get', [], dSeriesOffset));  
+
+             if isFusion('get') == true
+
+                resetAxePlotView(axefPtr('get', [], dSeriesOffset));  
+             end
+
+             if isPlotContours('get') == true
+
+                  resetAxePlotView(axefcPtr('get', [], dSeriesOffset));           
+             end
+
         else
             resetAxePlotView(axes1Ptr('get', [], dSeriesOffset));
             resetAxePlotView(axes2Ptr('get', [], dSeriesOffset));
             resetAxePlotView(axes3Ptr('get', [], dSeriesOffset));
 
+            btnUiCorWindowFullScreen = btnUiCorWindowFullScreenPtr('get');
+
+            bCorFullScreen = false;
+
+            if ~isempty(btnUiCorWindowFullScreen)
+
+                if isPanelFullScreen(btnUiCorWindowFullScreen) == true
+                    bCorFullScreen = true;
+                end
+            end
+
+            if bCorFullScreen == true
+
+                adjAxeCameraViewAngle(axes1Ptr('get', [], dSeriesOffset));
+            end
+
+            btnUiSagWindowFullScreen = btnUiSagWindowFullScreenPtr('get');
+
+            bSagFullScreen = false;
+
+            if ~isempty(btnUiSagWindowFullScreen)
+
+                if isPanelFullScreen(btnUiSagWindowFullScreen) == true
+                    bSagFullScreen = true;
+                end
+            end
+
+            if bSagFullScreen == true
+
+                adjAxeCameraViewAngle(axes2Ptr('get', [], dSeriesOffset));
+            end
+
+            btnUiTraWindowFullScreen = btnUiTraWindowFullScreenPtr('get');
+
+            bTraFullScreen = false;
+
+            if ~isempty(btnUiTraWindowFullScreen)
+
+                if isPanelFullScreen(btnUiTraWindowFullScreen) == true
+
+                    bTraFullScreen = true;
+                end
+            end
+
+            if bTraFullScreen == true
+
+                adjAxeCameraViewAngle(axes3Ptr('get', [], dSeriesOffset));
+            end
+
             if link2DMip('get') == true && isVsplash('get') == false
 
                 resetAxePlotView(axesMipPtr('get', [], dSeriesOffset));
-            end            
-        end
+              
+                btnUiMipWindowFullScreen = btnUiMipWindowFullScreenPtr('get');
 
+                bMipFullScreen = false;
+
+                if ~isempty(btnUiMipWindowFullScreen)
+
+                    if isPanelFullScreen(btnUiMipWindowFullScreen) == true
+
+                        bMipFullScreen = true;
+                    end
+                end
+
+                if bMipFullScreen == true
+
+                    adjAxeCameraViewAngle(axesMipPtr('get', [], dSeriesOffset));
+                end
+            end
+
+            if isFusion('get') == true
+
+                resetAxePlotView(axes1fPtr('get', [], dFusionSeriesOffset));
+                resetAxePlotView(axes2fPtr('get', [], dFusionSeriesOffset));
+                resetAxePlotView(axes3fPtr('get', [], dFusionSeriesOffset));  
+
+                if bCorFullScreen == true
+
+                    setAxesLimitsFromSource(axes1Ptr('get', [], dSeriesOffset), axes1fPtr('get', [], dFusionSeriesOffset));
+                end
+
+                if bSagFullScreen == true
+
+                    setAxesLimitsFromSource(axes2Ptr('get', [], dSeriesOffset), axes2fPtr('get', [], dFusionSeriesOffset));
+                end
+
+                if bTraFullScreen == true
+
+                    setAxesLimitsFromSource(axes3Ptr('get', [], dSeriesOffset), axes3fPtr('get', [], dFusionSeriesOffset));
+                end
+
+                if link2DMip('get') == true && isVsplash('get') == false
+    
+                    resetAxePlotView(axesMipfPtr('get', [], dFusionSeriesOffset));
+                    
+                    if bMipFullScreen == true
+
+                        setAxesLimitsFromSource(axesMipPtr('get', [], dSeriesOffset), axesMipfPtr('get', [], dFusionSeriesOffset));
+                    end
+                end   
+            end
+           
+            if isPlotContours('get') == true
+
+                resetAxePlotView(axes1fcPtr('get', [], dFusionSeriesOffset));
+                resetAxePlotView(axes2fcPtr('get', [], dFusionSeriesOffset));
+                resetAxePlotView(axes3fcPtr('get', [], dFusionSeriesOffset));
+
+                if bCorFullScreen == true
+
+                    setAxesLimitsFromSource(axes1Ptr('get', [], dSeriesOffset), axes1fcPtr('get', [], dFusionSeriesOffset));
+                end
+
+                if bSagFullScreen == true
+
+                    setAxesLimitsFromSource(axes2Ptr('get', [], dSeriesOffset), axes2fcPtr('get', [], dFusionSeriesOffset));
+                end
+
+                if bTraFullScreen == true
+
+                    setAxesLimitsFromSource(axes3Ptr('get', [], dSeriesOffset), axes3cfPtr('get', [], dFusionSeriesOffset));
+                end
+
+                if link2DMip('get') == true && isVsplash('get') == false
+    
+                    resetAxePlotView(axesMipfcPtr('get', [], dFusionSeriesOffset));
+
+                    if bMipFullScreen == true
+
+                        setAxesLimitsFromSource(axesMipPtr('get', [], dSeriesOffset), axesMipfcPtr('get', [], dFusionSeriesOffset));
+                    end                 
+                end 
+
+            end
+
+        end
+        
     end
 
     if strcmpi(evnt.Key,'c')
@@ -1624,18 +1842,25 @@ function catchKeyPress(~,evnt)
             if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
                 
                 set(uiOneWindowPtr('get'), 'BackgroundColor', 'black');
-                
-               cmap = flipud(colormap(axePtr('get', [], dSeriesOffset)));
-               colormap(axePtr('get', [], dSeriesOffset), cmap);
-                
+
+                ptrColorbar = uiColorbarPtr('get');
+                colormap(ptrColorbar, flipud(colormap(ptrColorbar)) );
+
+                colormap(axePtr('get', [], dSeriesOffset), flipud(colormap(axePtr('get', [], dSeriesOffset))));
+               
                 if isFusion('get') == true 
-                
+
+                    ptrFusionColorbar = uiFusionColorbarPtr('get');
+                    colormap(ptrFusionColorbar, flipud(colormap(ptrFusionColorbar)) );
+
                     dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                     for rr=1:dNbFusedSeries   
+
                         axef = axefPtr('get', [], rr);
+
                         if ~isempty(axef)     
-                           cmapf = flipud(colormap(axef));
-                           colormap(axef, cmapf);                        
+
+                           colormap(axef, flipud(colormap(axef)));                        
                         end
                     end
                 end
@@ -1658,11 +1883,14 @@ function catchKeyPress(~,evnt)
                     if link2DMip('get') == true && isVsplash('get') == false
                         set(uiMipWindowPtr('get'), 'BackgroundColor', 'black');
                     end
-                    
+
+                    ptrColorbar = uiColorbarPtr('get');
+                    colormap(ptrColorbar, flipud(colormap(ptrColorbar)) );
+
                     cmap1 = flipud(colormap(axes1Ptr('get', [], dSeriesOffset)));
                     cmap2 = flipud(colormap(axes2Ptr('get', [], dSeriesOffset)));
                     cmap3 = flipud(colormap(axes3Ptr('get', [], dSeriesOffset)));
-                
+
                     colormap(axes1Ptr('get', [], dSeriesOffset), cmap1);
                     colormap(axes2Ptr('get', [], dSeriesOffset), cmap2);
                     colormap(axes3Ptr('get', [], dSeriesOffset), cmap3); 
@@ -1672,8 +1900,11 @@ function catchKeyPress(~,evnt)
                         colormap(axesMipPtr('get', [], dSeriesOffset), cmapMip); 
                     end
 
-                    if isFusion('get') == true 
-                        
+                    if isFusion('get') == true                            
+
+                        ptrFusionColorbar = uiFusionColorbarPtr('get');
+                        colormap(ptrFusionColorbar, flipud(colormap(ptrFusionColorbar)) );
+
                         dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                         for rr=1:dNbFusedSeries
                             
@@ -1750,25 +1981,32 @@ function catchKeyPress(~,evnt)
             if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1 
                 
                 set(uiOneWindowPtr('get'), 'BackgroundColor', 'white');
-                
-                cmap = flipud(colormap(axePtr('get', [], dSeriesOffset)));
-                colormap(axePtr('get' , [], dSeriesOffset), cmap);
+
+                ptrColorbar = uiColorbarPtr('get');
+                colormap(ptrColorbar, flipud(colormap(axesColorbarPtr('get', [], dSeriesOffset))));   
+
+                colormap(axePtr('get' , [], dSeriesOffset), flipud(colormap(axePtr('get', [], dSeriesOffset))));
                 
                 if isFusion('get') == true 
-                
+
+                    ptrFusionColorbar = uiFusionColorbarPtr('get');
+                    colormap(ptrFusionColorbar, flipud(colormap(ptrFusionColorbar)) );
+                    
                     dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                     for rr=1:dNbFusedSeries    
+
                         axef = axefPtr('get', [], rr);
+
                         if ~isempty(axef)
-                            cmapf = flipud(colormap(axef));
-                            colormap(axef, cmapf);                                                
+
+                            colormap(axef, flipud(colormap(axef)));                                                
                         end
                     end
                 end
                 
                 if isPlotContours('get') == true 
-                    cmapfc = flipud(colormap(axefcPtr('get', [], dFusionSeriesOffset)));
-                    colormap(axefcPtr('get', [], dFusionSeriesOffset), cmapfc);
+
+                    colormap(axefcPtr('get', [], dFusionSeriesOffset), flipud(colormap(axefcPtr('get', [], dFusionSeriesOffset))));
                 end
                 
             else
@@ -1779,12 +2017,15 @@ function catchKeyPress(~,evnt)
                 
                 if link2DMip('get') == true && isVsplash('get') == false
                     set(uiMipWindowPtr('get'), 'BackgroundColor', 'white');
-                end         
-                
+                end 
+
+                ptrColorbar = uiColorbarPtr('get');
+                colormap(ptrColorbar, flipud(colormap(ptrColorbar)) );
+
                 cmap1 = flipud(colormap(axes1Ptr('get', [], dSeriesOffset)));
                 cmap2 = flipud(colormap(axes2Ptr('get', [], dSeriesOffset)));
                 cmap3 = flipud(colormap(axes3Ptr('get', [], dSeriesOffset)));
-                            
+
                 colormap(axes1Ptr('get', [], dSeriesOffset), cmap1);
                 colormap(axes2Ptr('get', [], dSeriesOffset), cmap2);
                 colormap(axes3Ptr('get', [], dSeriesOffset), cmap3);        
@@ -1796,6 +2037,9 @@ function catchKeyPress(~,evnt)
                 
                 if isFusion('get') == true 
                     
+                    ptrFusionColorbar = uiFusionColorbarPtr('get');
+                    colormap(ptrFusionColorbar, flipud(colormap(ptrFusionColorbar)) );
+
                     dNbFusedSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
                     for rr=1:dNbFusedSeries
 

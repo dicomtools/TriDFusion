@@ -70,7 +70,7 @@ function btnUiCorWindowFullScreenCallback(~, ~)
                 % 
                 % set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CameraViewAngle', 1);
 
-                set(btnUiCorWindowFullScreen, 'TooltipString'  , 'Exit Full Screen');
+                set(btnUiCorWindowFullScreen, 'TooltipString'  , 'Exit Full Screen (Ctrl + F)');
 
                 set(uiTraWindow, 'Visible', 'Off');
                 set(uiSagWindow, 'Visible', 'Off');
@@ -94,7 +94,7 @@ function btnUiCorWindowFullScreenCallback(~, ~)
 
                 % set(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CameraViewAngle', pdCameraViewAngle);
 
-                set(btnUiCorWindowFullScreen, 'TooltipString'  , 'Full Screen');
+                set(btnUiCorWindowFullScreen, 'TooltipString'  , 'Full Screen (Ctrl + F)');
 
                 set(uiTraWindow, 'Visible', 'On');
                 set(uiSagWindow, 'Visible', 'On');

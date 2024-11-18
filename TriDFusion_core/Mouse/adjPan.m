@@ -177,7 +177,7 @@ function adjPan(dInitCoord)
 
     showRightClickMenu(false);
 
-    drawnow limitrate nocallbacks;
+    % drawnow limitrate nocallbacks;
     % Restore objects to their original parent
 % for k = 1:numel(freehandObjects)
 %     freehandObjects(k).Parent = originalParents{k};

@@ -65,7 +65,7 @@ function btnUiMipWindowFullScreenCallback(~, ~)
                     setAxesLimitsFromSource(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));                    
                 end
 
-                set(btnUiMipWindowFullScreen, 'TooltipString'  , 'Exit Full Screen');
+                set(btnUiMipWindowFullScreen, 'TooltipString'  , 'Exit Full Screen (Ctrl + F)');
 
                 set(uiTraWindow, 'Visible', 'Off');
                 set(uiCorWindow, 'Visible', 'Off');
@@ -87,7 +87,7 @@ function btnUiMipWindowFullScreenCallback(~, ~)
                     setAxesLimitsFromSource(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));
                 end
 
-                set(btnUiMipWindowFullScreen, 'TooltipString'  , 'Full Screen');
+                set(btnUiMipWindowFullScreen, 'TooltipString'  , 'Full Screen (Ctrl + F)');
 
                 set(uiTraWindow, 'Visible', 'On');
                 set(uiCorWindow, 'Visible', 'On');

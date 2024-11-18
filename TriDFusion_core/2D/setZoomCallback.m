@@ -77,14 +77,17 @@ function setZoomCallback(~, ~)
         set(zoomMenu('get'), 'Checked', 'on');
 
         if panTool('get')
+            
             setPanCallback();
         end                
 
         if rotate3DTool('get')
+
             setRotate3DCallback();
         end  
 
         if dataCursorTool('get')
+
             setDataCursorCallback();
         end  
 
@@ -108,8 +111,8 @@ function setZoomCallback(~, ~)
         set(hZoom, 'UIContextMenu', hCMZ);
         % set(hZoom, 'ActionPostCallback', @(obj, evd) adjustAxesToPanel(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), uiMipWindowPtr('get')));
 
-        zoom(fiMainWindowPtr('get'), 'on');           
-    end
+        zoom(fiMainWindowPtr('get'), 'on');                     
+   end
 
     % % Custom function to adjust axes size based on panel and aspect ratio
     % function adjustAxesToPanel(hAxes, hPanel)

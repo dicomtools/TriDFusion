@@ -128,8 +128,39 @@ function resampleAxes(refImage, atRefMetaData)
                     set(axesMipF, 'YLim', Rdcm.ZIntrinsicLimits);
                 end
             end
-        end       
-        
+        end   
+
+        if isPlotContours('get')
+            
+            axes1Fc = axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+            axes2Fc = axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+            axes3Fc = axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+
+            if ~isempty(axes1Fc)    
+                set(axes1Fc, 'XLim', Rdcm.XIntrinsicLimits);
+                set(axes1Fc, 'YLim', Rdcm.ZIntrinsicLimits);
+            end
+
+            if ~isempty(axes2Fc)    
+                set(axes2Fc, 'XLim', Rdcm.YIntrinsicLimits);
+                set(axes2Fc, 'YLim', Rdcm.ZIntrinsicLimits);
+            end
+
+            if ~isempty(axes3Fc)    
+                set(axes3Fc, 'XLim', Rdcm.XIntrinsicLimits);
+                set(axes3Fc, 'YLim', Rdcm.YIntrinsicLimits);
+            end
+            
+            if isVsplash('get') == false                    
+            
+                axesMipFc = axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'));
+                if ~isempty(axesMipFc)    
+                    set(axesMipFc, 'XLim', Rdcm.XIntrinsicLimits);
+                    set(axesMipFc, 'YLim', Rdcm.ZIntrinsicLimits);
+                end
+            end
+         end       
+
     end 
 end  
 

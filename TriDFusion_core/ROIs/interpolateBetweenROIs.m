@@ -428,6 +428,23 @@ function interpolateBetweenROIs(tRoi1, tRoi2, dSeriesOffset, bCreateVoi)
                 createVoiFromRois(dSeriesOffset, asTag, [], tRoi2.Color, tRoi2.LesionType);
 
                 setVoiRoiSegPopup();
+
+                uiDeleteVoiRoiPanel = uiDeleteVoiRoiPanelObject('get');
+                uiLesionTypeVoiRoiPanel = uiLesionTypeVoiRoiPanelObject('get');
+
+                if ~isempty(uiDeleteVoiRoiPanel) && ...
+                   ~isempty(uiLesionTypeVoiRoiPanel)
+
+                    atVoiInput = voiTemplate('get', dSeriesOffset);
+                    dVoiOffset = numel(atVoiInput);
+
+                    set(uiDeleteVoiRoiPanel, 'Value', dVoiOffset);
+
+                    sLesionType = atVoiInput{dVoiOffset}.LesionType;
+                    [bLesionOffset, ~, ~] = getLesionType(sLesionType);
+                    set(uiLesionTypeVoiRoiPanel, 'Value', bLesionOffset);
+                end
+
             end
 
         end

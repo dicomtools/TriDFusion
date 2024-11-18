@@ -322,6 +322,9 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                 set(fiMainWindowPtr('get'), 'Color', backgroundColor('get'));
             end
 
+            ptrColorbar = uiColorbarPtr('get');
+            colormap(ptrColorbar, getColorMap('one', colorMapOffset('get')));
+
             if size(dicomBuffer('get'), 3) == 1
 
                 colormap(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , getColorMap('one', colorMapOffset('get')));
@@ -329,6 +332,10 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                 if isFusion('get') == true
 
                     if dNbFusedAxes < 2
+
+                        ptrFusionColorbar = uiFusionColorbarPtr('get');
+                        colormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')));
+
                         colormap(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
                     end
                 end
@@ -344,6 +351,9 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
                 if isFusion('get') == true
 
                     if dNbFusedAxes < 2
+                        
+                        ptrFusionColorbar = uiFusionColorbarPtr('get');
+                        colormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')));
 
                         colormap(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));
                         colormap(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), getColorMap('one', fusionColorMapOffset('get')));

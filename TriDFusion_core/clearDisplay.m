@@ -331,6 +331,9 @@ function clearDisplay()
 %    axes3rPtr ('reset');            
     axes3Ptr  ('reset');            
     
+    axesColorbarPtr('reset');        
+    axesFusionColorbarPtr('reset');    
+
     uiTraWindow = uiTraWindowPtr('get');
     if ~isempty(uiTraWindow)
         delete(uiTraWindow); 

@@ -824,12 +824,12 @@ function mainWindowMenu()
 
             if bChangeActiveView == true && ...
                isVsplash('get') == true
+                
+                aImageSize = size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')));
 
-                im = dicomBuffer('get');
-
-                iCoronalSize  = size(im,1);
-                iSagittalSize = size(im,2);
-                iAxialSize    = size(im,3);
+                iCoronalSize  = aImageSize(1);
+                iSagittalSize = aImageSize(2);
+                iAxialSize    = aImageSize(3);
 
                 iCoronal  = sliceNumber('get', 'coronal');
                 iSagittal = sliceNumber('get', 'sagittal');
@@ -883,11 +883,17 @@ function mainWindowMenu()
 
                 set(fiMainWindowPtr('get'), 'Color', dBackgroundColor);
 
+                ptrColorbar = uiColorbarPtr('get');
+                colormap(ptrColorbar, getColorMap('one', colorMapOffset('get')));
+
                 colormap(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', dColorMapOffset));
                 colormap(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', dColorMapOffset));
                 colormap(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', dColorMapOffset));
 
                 if isFusion('get') == true
+
+                    ptrFusionColorbar = uiFusionColorbarPtr('get');
+                    colormap(ptrFusionColorbar, getColorMap('one', fusionColorMapOffset('get')));
 
                     colormap(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),  getColorMap('one', dFusionColorMapOffset));
                     colormap(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')),  getColorMap('one', dFusionColorMapOffset));

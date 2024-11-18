@@ -1039,7 +1039,7 @@ function initRoiPanel()
             set(uiNextVoiRoiPanel, 'Enable', 'off');
             set(uiDelVoiRoiPanel , 'Enable', 'off');
 
-            setCrossVisibility(false);
+            % setCrossVisibility(false);
 
             set(uiDeleteVoiRoiPanel, 'Value', dVoiOffset);
 
@@ -1047,7 +1047,7 @@ function initRoiPanel()
             [bLesionOffset, ~, ~] = getLesionType(sLesionType);
             set(uiLesionTypeVoiRoiPanel, 'Value', bLesionOffset);
             
-            if ~isempty(hObject)
+            if isa(hObject, 'matlab.ui.control.UIControl')
 
                 sRoiTag = getLargestArea(atVoiInput{dVoiOffset}.RoisTag);
     %            dRodSeriesOffset = round(numel(atVoiInput{dVoiOffset}.RoisTag)/2);
@@ -1096,10 +1096,10 @@ function initRoiPanel()
                 end
             else
                 
-                createGreenCheckMark(getAxeFromMousePosition(dSeriesOffset), 0.5);
+                createGreenCheckMark(hObject, 0.5);
             end
 
-            setCrossVisibility(true);
+            % setCrossVisibility(true);
 
             set(uiDeleteVoiRoiPanel     , 'Enable', 'on');
             set(uiLesionTypeVoiRoiPanel , 'Enable', 'on');
@@ -1123,7 +1123,7 @@ function initRoiPanel()
 
         if ~isempty(atVoiInput)
 
-            % try
+            try
 
             set(uiDeleteVoiRoiPanel     , 'Enable', 'off');
             set(uiLesionTypeVoiRoiPanel , 'Enable', 'off');
@@ -1281,9 +1281,9 @@ function initRoiPanel()
 
             plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
 
-            % catch
-            %     progressBar(1, 'Error:deleteVoiRoiPanelCallback()');
-            % end
+            catch
+                progressBar(1, 'Error:deleteVoiRoiPanelCallback()');
+            end
 
             if numel(atVoiInput)
 

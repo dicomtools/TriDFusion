@@ -540,8 +540,27 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
             if size(aBuffer, 3) ~= 1 %3D
 
                 createVoiFromRois(dSeriesOffset, asTag, sLabel, aColor, sLesionType);
+
                 setVoiRoiSegPopup();
+
+                uiDeleteVoiRoiPanel = uiDeleteVoiRoiPanelObject('get');
+                uiLesionTypeVoiRoiPanel = uiLesionTypeVoiRoiPanelObject('get');
+
+                if ~isempty(uiDeleteVoiRoiPanel) && ...
+                   ~isempty(uiLesionTypeVoiRoiPanel)
+
+                    atVoiInput = voiTemplate('get', dSeriesOffset);
+                    dVoiOffset = numel(atVoiInput);
+
+                    set(uiDeleteVoiRoiPanel, 'Value', dVoiOffset);
+
+                    sLesionType = atVoiInput{dVoiOffset}.LesionType;
+                    [bLesionOffset, ~, ~] = getLesionType(sLesionType);
+                    set(uiLesionTypeVoiRoiPanel, 'Value', bLesionOffset);
+                end
+
                 plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));       
+
             end
         end
 

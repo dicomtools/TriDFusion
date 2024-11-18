@@ -65,7 +65,7 @@ function btnUiTraWindowFullScreenCallback(~, ~)
                     setAxesLimitsFromSource(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));                    
                 end
 
-                set(btnUiTraWindowFullScreen, 'TooltipString'  , 'Exit Full Screen');
+                set(btnUiTraWindowFullScreen, 'TooltipString'  , 'Exit Full Screen (Ctrl + F)');
 
                 set(uiCorWindow, 'Visible', 'Off');
                 set(uiSagWindow, 'Visible', 'Off');
@@ -87,7 +87,7 @@ function btnUiTraWindowFullScreenCallback(~, ~)
                     setAxesLimitsFromSource(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')));                    
                 end
 
-                set(btnUiTraWindowFullScreen, 'TooltipString'  , 'Full Screen');
+                set(btnUiTraWindowFullScreen, 'TooltipString'  , 'Full Screen (Ctrl + F)');
 
                 set(uiCorWindow, 'Visible', 'On');
                 set(uiSagWindow, 'Visible', 'On');
