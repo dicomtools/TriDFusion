@@ -273,7 +273,7 @@ function setMachineLearningBreastCancerPETCTFullAI(sPredictScript, tBreastCancer
                     aBoneMask = imfill(aBoneMask, 4, 'holes'); 
                     aBoneMask = imbinarize(aBoneMask);
 
-                    aClassificationMask = ones(size(aPTImage)); % Soft Tissue
+                    aClassificationMask = ones(size(aResampledPTImage)); % Soft Tissue
                     aClassificationMask(aBoneMask) = 2; % Bone
 
                     maskImageToVoi(aMask, dPTSerieOffset, aClassificationMask, bClassifySegmentation, bPixelEdge, dSmallestValue);
