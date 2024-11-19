@@ -1,5 +1,5 @@
-function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = registerImage(imToRegister, atImToRegisterMetaData, imReference, atReferenceMetaData, aLogicalMask, sType, sModality, tOptimizer, tMetric, bRefOutputView, bUpdateDescription, dMovingSeriesOffset, registratedGeomtform)
-%function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = registerImage(imToRegister, atImToRegisterMetaData, imReference, atReferenceMetaData, aLogicalMask, sType, sModality, tOptimizer, tMetric, bRefOutputView, bUpdateDescription, dMovingSeriesOffset, registratedGeomtform)
+function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = registerImage(imToRegister, atImToRegisterMetaData, imReference, atReferenceMetaData, aLogicalMask, sType, sInterpolation, sModality, tOptimizer, tMetric, bRefOutputView, bUpdateDescription, dMovingSeriesOffset, registratedGeomtform)
+%function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = registerImage(imToRegister, atImToRegisterMetaData, imReference, atReferenceMetaData, aLogicalMask, sType, sInterpolation, sModality, tOptimizer, tMetric, bRefOutputView, bUpdateDescription, dMovingSeriesOffset, registratedGeomtform)
 %Register any modalities.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -133,7 +133,7 @@ function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = regi
     
     if exist('registratedGeomtform', 'var')        
                        
-            imRegistered = imwarp(imToRegister, Rmoving, registratedGeomtform, 'bicubic', 'OutputView', Routput, 'FillValues', dMovingMin);  
+            imRegistered = imwarp(imToRegister, Rmoving, registratedGeomtform, 'bicubic', 'OutputView', Routput, 'FillValues', dMovingMin, 'Interp', sInterpolation);  
             geomtform = registratedGeomtform;
     else
 
@@ -159,7 +159,17 @@ function [imRegistered, atRegisteredMetaData, Rmoving, Rfixed, geomtform] = regi
             geomtform = imregtform(imToRegister, Rmoving, imReference, Rfixed, sType, optimizer, metric);
         end
         
-        imRegistered = imwarp(imToRegister, Rmoving, geomtform, 'OutputView', Routput, 'FillValues', dMovingMin); 
+        imRegistered = imwarp(imToRegister, Rmoving, geomtform, 'OutputView', Routput, 'FillValues', dMovingMin,'Interp', sInterpolation); 
+
+        bPreserveCounts = false;
+        if bPreserveCounts == true
+
+            dImToRegisterTotal = sum(imToRegister, 'all');
+            dImRegisteredTotal = sum(imRegistered, 'all');
+
+            imRegistered = imRegistered / (dImRegisteredTotal / dImToRegisterTotal);
+        end
+        
     end
                
     if bRefOutputView == true 

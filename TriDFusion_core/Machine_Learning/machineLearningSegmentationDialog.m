@@ -5504,9 +5504,6 @@ function [nestedLoad, nestedProceed, nestedDelete, nestedCancel] = machineLearni
             return;
         end
 
-        % Get DICOM directory directory
-
-        [sFilePath, ~, ~] = fileparts(char(tInput(dSerieOffset).asFilesList{1}));
 
         % Create an empty directory
 
@@ -5520,7 +5517,95 @@ function [nestedLoad, nestedProceed, nestedDelete, nestedCancel] = machineLearni
 
         progressBar(1/4, 'Convertion dicom to nii, please wait.');
 
-        dicm2nii(sFilePath, sNiiTmpDir, 1);
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+        bUseDisplayImage = false;
+
+        if isfield(tInput(dSeriesOffset), 'tMovement')
+            
+            if tInput(dSeriesOffset).tMovement.bMovementApplied == true
+
+                bUseDisplayImage = true;
+            end
+        end
+
+        if isempty(tInput(dSerieOffset).asFilesList{1})
+
+            bUseDisplayImage = true;
+        end
+
+        if bUseDisplayImage == true
+
+            atMetaData  = dicomMetaData('get', [], dSeriesOffset);
+        
+            aBuffer = dicomBuffer('get', [], dSeriesOffset);
+        
+            atDcmDicomMeta{1}.Modality                = atMetaData{1}.Modality;
+            atDcmDicomMeta{1}.Units                   = atMetaData{1}.Units;
+            atDcmDicomMeta{1}.PixelSpacing            = atMetaData{1}.PixelSpacing;
+        
+            if numel(aBuffer) > 2
+                dSliceSPacing = computeSliceSpacing(atMetaData);
+                if  dSliceSPacing == 0
+                    dSliceSPacing = 1;
+                end
+                atDcmDicomMeta{1}.SpacingBetweenSlices = dSliceSPacing;
+                atDcmDicomMeta{1}.SliceThickness       = dSliceSPacing;
+            end
+
+            % Axial
+            aImageOrientationPatient = zeros(6,1);
+
+            aImageOrientationPatient(1) = 1;
+            aImageOrientationPatient(5) = 1;
+
+            atDcmDicomMeta{1}.Rows                    = atMetaData{1}.Rows;
+            atDcmDicomMeta{1}.Columns                 = atMetaData{1}.Columns;
+            atDcmDicomMeta{1}.PatientName             = atMetaData{1}.PatientName;
+            atDcmDicomMeta{1}.PatientID               = atMetaData{1}.PatientID;
+            atDcmDicomMeta{1}.PatientWeight           = atMetaData{1}.PatientWeight;
+            atDcmDicomMeta{1}.PatientSize             = atMetaData{1}.PatientSize;
+            atDcmDicomMeta{1}.PatientSex              = atMetaData{1}.PatientSex;
+            atDcmDicomMeta{1}.PatientAge              = atMetaData{1}.PatientAge;
+            atDcmDicomMeta{1}.PatientBirthDate        = atMetaData{1}.PatientBirthDate;
+            atDcmDicomMeta{1}.SeriesDescription       = cleanString(atMetaData{1}.SeriesDescription);
+            atDcmDicomMeta{1}.PatientPosition         = atMetaData{1}.PatientPosition;
+            atDcmDicomMeta{1}.ImagePositionPatient    = atMetaData{end}.ImagePositionPatient;
+        %     atDcmDicomMeta{1}.ImageOrientationPatient = atMetaData{1}.ImageOrientationPatient;
+            atDcmDicomMeta{1}.ImageOrientationPatient = aImageOrientationPatient;
+        %     atDcmDicomMeta{1}.MediaStorageSOPClassUID     = atMetaData{1}.MediaStorageSOPClassUID;
+        %     atDcmDicomMeta{1}.MediaStorageSOPInstanceUID  = atMetaData{1}.MediaStorageSOPInstanceUID;      
+            atDcmDicomMeta{1}.SOPClassUID             = atMetaData{1}.SOPClassUID;
+            atDcmDicomMeta{1}.SOPInstanceUID          = atMetaData{1}.SOPInstanceUID;
+            atDcmDicomMeta{1}.SeriesInstanceUID       = dicomuid;
+            atDcmDicomMeta{1}.StudyInstanceUID        = atMetaData{1}.StudyInstanceUID;
+            atDcmDicomMeta{1}.AccessionNumber         = atMetaData{1}.AccessionNumber;
+            atDcmDicomMeta{1}.SeriesTime              = char(datetime('now','TimeZone','local','Format','HHmmss'));
+            atDcmDicomMeta{1}.SeriesDate              = char(datetime('now','TimeZone','local','Format','yyyyMMddHHmmss'));
+            atDcmDicomMeta{1}.AcquisitionTime         = atMetaData{1}.AcquisitionTime;
+            atDcmDicomMeta{1}.AcquisitionDate         = atMetaData{1}.AcquisitionDate;
+        
+            sTmpDir = sprintf('%stemp_dicom_%s//', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss-MS'));
+            if exist(char(sTmpDir), 'dir')
+                rmdir(char(sTmpDir), 's');
+            end
+            mkdir(char(sTmpDir));
+
+            writeOtherFormatToDICOM(aBuffer, atDcmDicomMeta, sTmpDir, dSeriesOffset, false);
+        
+            clear aBuffer;
+        
+            dicm2nii(sTmpDir, sNiiTmpDir, 1);
+
+            rmdir(char(sTmpDir), 's');
+             
+        else
+            % Get DICOM directory directory
+
+            [sFilePath, ~, ~] = fileparts(char(tInput(dSerieOffset).asFilesList{1}));
+
+            dicm2nii(sFilePath, sNiiTmpDir, 1);
+        end
 
         sNiiFullFileName = '';
 
@@ -7172,7 +7257,7 @@ function [nestedLoad, nestedProceed, nestedDelete, nestedCancel] = machineLearni
 
             progressBar(3.94/4, 'Scanning liver vessels masks');
     
-            adOffset = cellfun( @(chkMachineSegmentationBrainStructures) chkMachineSegmentationBrainStructures.Value, chkMachineSegmentationBrainStructures, 'uni', true );
+            adOffset = cellfun( @(chkMachineSegmentationLiverVessels) chkMachineSegmentationLiverVessels.Value, chkMachineSegmentationLiverVessels, 'uni', true );
     
             if ~isempty(find(adOffset, true))
     
@@ -7182,7 +7267,7 @@ function [nestedLoad, nestedProceed, nestedDelete, nestedCancel] = machineLearni
     
                         progressBar(ee/(numel(adOffset)-0.009), sprintf('Importing liver vessels mask %d/%d', ee, numel(adOffset) ));
     
-                        sObjectName = lower(asBrainStructuresName{ee});
+                        sObjectName = lower(asLiverVesselsName{ee});
     
                         xmin=0.5;
                         xmax=1;
@@ -7197,8 +7282,12 @@ function [nestedLoad, nestedProceed, nestedDelete, nestedCancel] = machineLearni
                             aMask = imrotate3(nii.img, 90, [0 0 1],'nearest');
                             aMask = aMask(:,:,end:-1:1);
     
-                            maskToVoi(aMask, asBrainStructuresName{ee}, 'Liver', aColor, 'axial', dSerieOffset, pixelEdge('get'), 'noholes');  
-    
+                            if strcmpi(sObjectName, 'Liver Tumor')
+                                aMask(aMask~=0)=3;
+                                maskImageToVoi(aMask, dSerieOffset, aMask, true, pixelEdge('get'), 0);                      
+                            else
+                               maskToVoi(aMask, asLiverVesselsName{ee}, 'Liver', aColor, 'axial', dSerieOffset, pixelEdge('get'), 'noholes');  
+                            end
                         end
     
                     end

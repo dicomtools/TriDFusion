@@ -34,20 +34,20 @@ function setMachineLearningPSMALu177ExportToSPECTCTNetworkCallback(hObject, ~)
     sEnvironment = 'nnUNet_raw_data_base';
 
     sRawFolderPath = getenv(sEnvironment);
-    
+
     if isempty(sRawFolderPath)
-      
+
         progressBar( 1, sprintf('Error: %s environment variable not detected!', sEnvironment));
 
-        if exist('hObject', 'var')   
-            errordlg(sprintf('%s environment variable not detected!\n Please define an environment variable', sEnvironment), sprintf('%s Validation', sEnvironment));  
-        end   
+        if exist('hObject', 'var')
+            errordlg(sprintf('%s environment variable not detected!\n Please define an environment variable', sEnvironment), sprintf('%s Validation', sEnvironment));
+        end
 
         return;
     end
 
     dTaskNumber = 111;
-    
+
     aListing = dir(sRawFolderPath);
 
     bFoundTask = false;
@@ -65,11 +65,11 @@ function setMachineLearningPSMALu177ExportToSPECTCTNetworkCallback(hObject, ~)
 
         progressBar( 1, sprintf('Error: Task %s environment variable not detected!', num2str(dTaskNumber)));
 
-        if exist('hObject', 'var')   
-            errordlg(sprintf('Task %s not detected!\n Please create a task under %s', num2str(dTaskNumber), sEnvironment), sprintf('Task %s Validation', num2str(dTaskNumber)));  
-        end   
+        if exist('hObject', 'var')
+            errordlg(sprintf('Task %s not detected!\n Please create a task under %s', num2str(dTaskNumber), sEnvironment), sprintf('Task %s Validation', num2str(dTaskNumber)));
+        end
 
-        return;        
+        return;
     end
 
     aListing = dir(sTaskFolderPath);
@@ -93,7 +93,7 @@ function setMachineLearningPSMALu177ExportToSPECTCTNetworkCallback(hObject, ~)
     sTrainingFoder = sprintf('%s/data0/training', sTaskFolderPath);
 
     aListing = dir(sTrainingFoder);
-    
+
     dNewEntryNumber = 1;
     for dd=1:numel(aListing)
         if strcmpi(aListing(dd).name, '.') || strcmpi(aListing(dd).name, '..')
@@ -125,36 +125,36 @@ function setMachineLearningPSMALu177ExportToSPECTCTNetworkCallback(hObject, ~)
         end
     end
 
-    if isempty(dNMSerieOffset)  
+    if isempty(dNMSerieOffset)
 
         progressBar(1, 'Error: PSMA Lu177 export to AI network require a SPECT image!');
 
         if exist('hObject', 'var')
-            errordlg('PSMA Lu177 export to AI network require a SPECT image!', 'Modality Validation');  
+            errordlg('PSMA Lu177 export to AI network require a SPECT image!', 'Modality Validation');
         end
         delete(sDFolder);
-        return;               
+        return;
     end
 
     dCTSerieOffset = [];
     for tt=1:numel(atInput)
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'ct') && ...
-           strcmpi(atInput(tt).atDicomInfo{1}.StudyInstanceUID, atInput(dNMSerieOffset).atDicomInfo{1}.StudyInstanceUID)  
+           strcmpi(atInput(tt).atDicomInfo{1}.StudyInstanceUID, atInput(dNMSerieOffset).atDicomInfo{1}.StudyInstanceUID)
 
             dCTSerieOffset = tt;
             break;
         end
     end
 
-    if isempty(dCTSerieOffset)  
+    if isempty(dCTSerieOffset)
 
         progressBar(1, 'Error: PSMA Lu177 SPECT/CT export to AI network require a CT image!');
 
         if exist('hObject', 'var')
-            errordlg('PSMA Lu177 SPECT/CT export to AI network require a CT image!', 'Modality Validation');  
+            errordlg('PSMA Lu177 SPECT/CT export to AI network require a CT image!', 'Modality Validation');
         end
         delete(sDFolder);
-        return;               
+        return;
     end
 
 
@@ -167,11 +167,11 @@ function setMachineLearningPSMALu177ExportToSPECTCTNetworkCallback(hObject, ~)
     atVoi = voiTemplate('get', dNMSerieOffset);
 
     if isempty(atVoi)
-        
+
         progressBar(1, 'Error: PSMA Lu177 export to AI network require contours!');
 
         if exist('hObject', 'var')
-            errordlg('PSMA Lu177 export to AI network require contours!', 'Contours Validation');  
+            errordlg('PSMA Lu177 export to AI network require contours!', 'Contours Validation');
         end
         delete(sDFolder);
         return;
@@ -181,9 +181,9 @@ function setMachineLearningPSMALu177ExportToSPECTCTNetworkCallback(hObject, ~)
     if isempty(atNMMetaData)
         atNMMetaData = atInput(dNMSerieOffset).atDicomInfo;
     end
-                 
+
     origin = atNMMetaData{end}.ImagePositionPatient;
-    
+
     pixelspacing = zeros(3,1);
 
     pixelspacing(1) = atNMMetaData{1}.PixelSpacing(1);
@@ -198,14 +198,14 @@ function setMachineLearningPSMALu177ExportToSPECTCTNetworkCallback(hObject, ~)
 
         aNMImage = aNMImage(:,:,end:-1:1);
     end
-    
+
     dSUVconv = computeSUV(atNMMetaData, 'BW');
 
     if dSUVconv == 0
         dSUVconv = 1;
     end
 
-    nrrdWriter(sNrrdImagesName, squeeze(aNMImage*dSUVconv), pixelspacing, origin, 'raw'); % Write .nrrd images     
+    nrrdWriter(sNrrdImagesName, squeeze(aNMImage*dSUVconv), pixelspacing, origin, 'raw'); % Write .nrrd images
 
     atCTMetaData  = dicomMetaData('get', [], dCTSerieOffset);
     if isempty(atCTMetaData)
@@ -219,11 +219,11 @@ function setMachineLearningPSMALu177ExportToSPECTCTNetworkCallback(hObject, ~)
     end
 
     if size(aCTImage, 3) ~=1
-    
+
         aCTImage = aCTImage(:,:,end:-1:1);
     end
 
-%     [aResampledCTImage, ~] = resampleImage(aCTImage, atCTMetaData, aNMImage, atNMMetaData, 'Linear', false, false);    
+%     [aResampledCTImage, ~] = resampleImage(aCTImage, atCTMetaData, aNMImage, atNMMetaData, 'Linear', false, false);
 
     tRegistration = registrationTemplate('get');
 
@@ -234,6 +234,7 @@ function setMachineLearningPSMALu177ExportToSPECTCTNetworkCallback(hObject, ~)
                       atNMMetaData , ...
                       []           , ...
                       'rigid'      , ...
+                      'linear'   , ...
                       'automatic'  , ...
                       tRegistration.Optimizer, ...
                       tRegistration.Metric   , ...
@@ -243,7 +244,7 @@ function setMachineLearningPSMALu177ExportToSPECTCTNetworkCallback(hObject, ~)
 
     sNrrdImagesName = sprintf('%sD%d_ct.nrrd', sDFolder, dNewEntryNumber);
 
-    nrrdWriter(sNrrdImagesName, squeeze(aResampledCTImage), pixelspacing, origin, 'raw'); % Write .nrrd images 
+    nrrdWriter(sNrrdImagesName, squeeze(aResampledCTImage), pixelspacing, origin, 'raw'); % Write .nrrd images
 
 
     clear aNMImage;
@@ -262,7 +263,7 @@ function setMachineLearningPSMALu177ExportToSPECTCTNetworkCallback(hObject, ~)
     progressBar(1, sprintf('Export to %s completed', sDFolder));
 
     if ~exist('hObject', 'var')
-        close(fiMainWindowPtr('get'));     
+        close(fiMainWindowPtr('get'));
     end
 
 end

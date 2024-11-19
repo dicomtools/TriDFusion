@@ -2170,6 +2170,7 @@ function dicomViewerCore()
 %     end
 
     if size(dicomBuffer('get'), 3) == 1
+
         set(uiOneWindowPtr('get'), 'Visible', 'on');
 
         axe = axePtr('get', [], dSeriesOffset);
@@ -2248,7 +2249,7 @@ function dicomViewerCore()
             set(uiSliderCorPtr('get'), 'Visible', 'on');
             set(uiSliderSagPtr('get'), 'Visible', 'on');
             set(uiSliderTraPtr('get'), 'Visible', 'on');        
-            
+
             % adjAxeCameraViewAngle(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
             % adjAxeCameraViewAngle(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')));
             % adjAxeCameraViewAngle(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value'))); 

@@ -95,9 +95,9 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
     if ~isempty(aCTImage)
 
         if isInterpolated('get') == false
-        
+
             isInterpolated('set', true);
-        
+
             setImageInterpolation(true);
         end
 
@@ -112,9 +112,9 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
 
 %         refMip = mipBuffer('get', [], dCTSerieOffset);
 %         aMip   = mipBuffer('get', [], dNMSerieOffset);
-% 
+%
 %         aMip = resampleMip(aMip, atNMMetaData, refMip, atCTMetaData, 'Linear', false);
-        
+
         mipBuffer('set', computeMIP(gather(aNMImage)), dNMSerieOffset);
 
         setQuantification(dNMSerieOffset);
@@ -123,11 +123,11 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
 
 
 %         atRoi = roiTemplate('get', dNMSerieOffset);
-% 
+%
 %         if ~isempty(atRoi)
-% 
+%
 %             atResampledRoi = resampleROIs(aNMImage, atNMMetaData, aResampledNMImage, atResampledNMMetaData, atRoi, true);
-% 
+%
 %             roiTemplate('set', dNMSerieOffset, atResampledRoi);
 %         end
 
@@ -142,11 +142,11 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
 
 %     % Apply ROI constraint
 %     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dNMSerieOffset);
-% 
+%
 %     bInvertMask = invertConstraint('get');
-% 
+%
 %     tRoiInput = roiTemplate('get', dNMSerieOffset);
-% 
+%
 %     aNMImageTemp = aNMImage;
 %     aLogicalMask = roiConstraintToMask(aNMImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
 %     aNMImageTemp(aLogicalMask==0) = 0;  % Set constraint
@@ -194,7 +194,7 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
 
         nrrdWriter(sNrrdNMImagesName, squeeze(aNMImage(:,:,end:-1:1)*dSUVconv), pixelspacing, origin, 'raw'); % Write .nrrd images
 %     else
-% 
+%
 %         nrrdWriter(sNrrdNMImagesName, squeeze(aNMImage(:,:,end:-1:1)), pixelspacing, origin, 'raw'); % Write .nrrd images
 %     end
 
@@ -224,6 +224,7 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
                       atNMMetaData , ...
                       []           , ...
                       'rigid'      , ...
+                      'linear'     , ...
                       'automatic'  , ...
                       tRegistration.Optimizer, ...
                       tRegistration.Metric   , ...
@@ -269,7 +270,7 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
             else
 
                 sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s -d 111 -c 3d_fullres --save_probabilities', sPredictScript, sNrrdTmpDir, sSegmentationFolderName);
- 
+
             end
 
             [bStatus, sCmdout] = system(sCommandLine);
@@ -294,7 +295,7 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
                 progressBar(4/10, 'Segmenting prediction mask, please wait.');
 
                 maskAddVoiByTypeToSeries(aNMImage, aMask, atNMMetaData, dNMSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, bClassifySegmentation, 2);
-                
+
 
 %                 clear aNMImageTemp;
 
@@ -377,7 +378,7 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
             set(uiFusedSeriesPtr('get'), 'Value', dCTSerieOffset);
 
             setFusionCallback();
-            
+
             computeMIPCallback();
         end
 %     end
@@ -401,7 +402,7 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
 
     refreshImages();
 
-    plotRotatedRoiOnMip(axesMipPtr('get', [], dNMSerieOffset), dicomBuffer('get', [], dNMSerieOffset), mipAngle('get'));       
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dNMSerieOffset), dicomBuffer('get', [], dNMSerieOffset), mipAngle('get'));
 
     clear aNMImage;
     clear aCTImage;
