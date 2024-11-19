@@ -239,6 +239,7 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
 
                 aMask = aMask(:,:,end:-1:1);
 
+                bCELossTrainer        = tBreastCancerPETFullAI.options.CELossTrainer;
                 bClassifySegmentation = tBreastCancerPETFullAI.options.classifySegmentation;
                 bSmoothMask           = tBreastCancerPETFullAI.options.smoothMask;
                 dSmallestValue        = tBreastCancerPETFullAI.options.smallestVoiValue;
@@ -246,7 +247,25 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
 
                 progressBar(6/10, 'Segmenting prediction mask, please wait.');
 
-                maskAddVoiByTypeToSeries(aPTImage, aMask, atPTMetaData, dPTSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, bClassifySegmentation, 3);
+                if bCELossTrainer == false && bClassifySegmentation == true && ~isempty(aCTImage)
+
+                    aBoneMask = aCTImage;
+                    aBoneMask(aBoneMask < 200) = 0;                                    
+                    aBoneMask(aBoneMask ~=0) = 1;
+                    aBoneMask = imfill(aBoneMask, 4, 'holes'); 
+                    aBoneMask = imbinarize(aBoneMask);
+
+                    aClassificationMask = ones(size(aPTImage)); % Soft Tissue
+                    aClassificationMask(aBoneMask) = 2; % Bone
+
+                    maskImageToVoi(aMask, dPTSerieOffset, aClassificationMask, bClassifySegmentation, bPixelEdge, dSmallestValue);
+
+                    clear aClassificationMask;
+                    clear aBoneMask;
+                else
+
+                    maskAddVoiByTypeToSeries(aPTImage, aMask, atPTMetaData, dPTSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, bClassifySegmentation, 3);
+                end
                 
 %                 clear aPTImageTemp;
 
@@ -254,6 +273,8 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
 
                     rmdir(char(sSegmentationFolderName), 's');
                 end
+
+
 % 
 %                 if ~isempty(aCTImage)
 % 

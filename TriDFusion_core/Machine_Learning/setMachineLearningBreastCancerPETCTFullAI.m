@@ -257,6 +257,7 @@ function setMachineLearningBreastCancerPETCTFullAI(sPredictScript, tBreastCancer
 
                 aMask = aMask(:,:,end:-1:1);
 
+                bCELossTrainer        = tBreastCancerPETCTFullAI.options.CELossTrainer;
                 bClassifySegmentation = tBreastCancerPETCTFullAI.options.classifySegmentation;
                 bSmoothMask           = tBreastCancerPETCTFullAI.options.smoothMask;
                 dSmallestValue        = tBreastCancerPETCTFullAI.options.smallestVoiValue;
@@ -264,7 +265,24 @@ function setMachineLearningBreastCancerPETCTFullAI(sPredictScript, tBreastCancer
 
                 progressBar(6/10, 'Segmenting prediction mask, please wait.');
 
-                maskAddVoiByTypeToSeries(aResampledPTImage, aMask, atResampledPTMetaData, dPTSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, bClassifySegmentation, 3);
+                if bCELossTrainer == false && bClassifySegmentation == true 
+
+                    aBoneMask = aCTImage;
+                    aBoneMask(aBoneMask < 200) = 0;                                    
+                    aBoneMask(aBoneMask ~=0) = 1;
+                    aBoneMask = imfill(aBoneMask, 4, 'holes'); 
+                    aBoneMask = imbinarize(aBoneMask);
+
+                    aClassificationMask = ones(size(aPTImage)); % Soft Tissue
+                    aClassificationMask(aBoneMask) = 2; % Bone
+
+                    maskImageToVoi(aMask, dPTSerieOffset, aClassificationMask, bClassifySegmentation, bPixelEdge, dSmallestValue);
+
+                    clear aClassificationMask;
+                    clear aBoneMask;
+                else
+                    maskAddVoiByTypeToSeries(aResampledPTImage, aMask, atResampledPTMetaData, dPTSerieOffset, dSmallestValue, bPixelEdge, bSmoothMask, bClassifySegmentation, 3);
+                end
                 
 
 %                 clear aPTImageTemp;

@@ -321,12 +321,13 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
 
                 set(fiMainWindowPtr('get'), 'Color', backgroundColor('get'));
             end
+            
+            ptrColorbar = uiColorbarPtr('get');
+            colormap(ptrColorbar, getColorMap('one', colorMapOffset('get')));
 
             if size(dicomBuffer('get'), 3) == 1
 
                 colormap(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , getColorMap('one', colorMapOffset('get')));
-
-                colormap(uiColorbarPtr('get'), getColorMap('one', colorMapOffset('get')));
 
                 if isFusion('get') == true
 
@@ -346,8 +347,6 @@ function setViewerDefaultColor(bUpdateColorMap, atMetaData, atFuseMetaData)
 
                     colormap(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), getColorMap('one', colorMapOffset('get')));
                 end
-
-                colormap(uiColorbarPtr('get'), flipud(colormap(getColorMap('one', colorMapOffset('get')))) );
 
                 if isFusion('get') == true
 
