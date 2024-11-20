@@ -2141,8 +2141,6 @@ function setRegistrationCallback(~, ~)
 
 %        dicomViewerCore();
 
-        setViewerDefaultColor(true, dicomMetaData('get', [], dInitOffset));
-
         if bResampleAxe == true
 
 %            if ~isempty(refImage)
@@ -2164,6 +2162,8 @@ function setRegistrationCallback(~, ~)
                 dicomViewerCore();
  %           end
         end
+
+        setViewerDefaultColor(true, dicomMetaData('get', [], dInitOffset));
 
 %        sliderCorCallback();
 %        sliderSagCallback();

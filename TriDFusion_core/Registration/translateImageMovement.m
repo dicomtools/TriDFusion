@@ -56,6 +56,8 @@ function aTranslatedImage = translateImageMovement(aImage, aPosition)
 %                return;
 %        end
                 
-    end    
+    end 
+
+    
     
 end

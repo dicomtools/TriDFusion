@@ -112,7 +112,16 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
            aOffset(3) ~= 0 
         
             if bMoveFusion == true
+
                 aMovedFusionBuffer = translateImageMovement(aMovedFusionBuffer, aOffset);
+    
+                atRoiInput = roiTemplate('get', dFusionOffset);
+                
+                if ~isempty(atRoiInput)
+
+                    atRoiInput = translateRoisMovement(roiTemplate('get', dFusionOffset), aMovedFusionBuffer, atDcmMetaData, aOffset, true);
+                    roiTemplate('set', dFusionOffset, atRoiInput);      
+                end
             end
             
             dcmSliceThickness = computeSliceSpacing(atDcmMetaData);
@@ -191,10 +200,13 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
                 dNewMovementOffset = numel(atInput(dFusionOffset).tMovement.atSeq)+1;
                 atInput(dFusionOffset).tMovement.atSeq{dNewMovementOffset}.sAxe = 'Axes';
                 atInput(dFusionOffset).tMovement.atSeq{dNewMovementOffset}.aTranslation = transM;              
-            end             
+            end      
+
+
         end         
     end
     
+
     inputTemplate('set', atInput);
     
     progressBar(1, 'Ready');

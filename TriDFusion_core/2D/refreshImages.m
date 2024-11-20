@@ -671,7 +671,7 @@ function refreshImages(clickedPtX, clickedPtY)
                 imAxial.CData  = im(:,:,iAxial);
              end
             
-             if bAxeClicked == false
+             if bAxeClicked == false || isCombineMultipleFusion('get') == true
             
                  imM = mipBuffer('get', [], dSeriesOffset);
                 
@@ -712,7 +712,7 @@ function refreshImages(clickedPtX, clickedPtY)
                             
                             if aFusionBufferSize(1) > iCoronal
 
-                                if pAxe ~= axes1Ptr('get', [], dSeriesOffset) || bAxeClicked == false            
+                                if pAxe ~= axes1Ptr('get', [], dSeriesOffset) || bAxeClicked == false || isCombineMultipleFusion('get') == true          
                                     % imCoronalF.CData  = permute(imf(iCoronal,:,:) , [3 2 1]);
                                     imCoronalF.CData  = reshape(imf(iCoronal,:,:), aFusionBufferSize(2), aFusionBufferSize(3))';     
                                 end
@@ -720,14 +720,14 @@ function refreshImages(clickedPtX, clickedPtY)
 
                             if aFusionBufferSize(2) > iSagittal                         
 
-                                if pAxe ~= axes2Ptr('get', [], dSeriesOffset) || bAxeClicked == false             
+                                if pAxe ~= axes2Ptr('get', [], dSeriesOffset) || bAxeClicked == false || isCombineMultipleFusion('get') == true            
                                     % imSagittalF.CData = permute(imf(:,iSagittal,:), [3 1 2]) ;
                                     imSagittalF.CData = reshape(imf(:,iSagittal,:), aFusionBufferSize(1), aFusionBufferSize(3))';     
                                 end
                             end
 
                             if aFusionBufferSize(3) > iAxial                         
-                                if pAxe ~= axes3Ptr('get', [], dSeriesOffset) || bAxeClicked == false             
+                                if pAxe ~= axes3Ptr('get', [], dSeriesOffset) || bAxeClicked == false || isCombineMultipleFusion('get') == true            
                                     imAxialF.CData = imf(:,:,iAxial);
                                 end
                             end
@@ -764,7 +764,7 @@ function refreshImages(clickedPtX, clickedPtY)
                             end
                         end
 
-                        if bAxeClicked == false
+                        % if bAxeClicked == false
     
                            imMf = mipFusionBuffer('get', [], rr);
     
@@ -790,7 +790,7 @@ function refreshImages(clickedPtX, clickedPtY)
                                     end
                                 end
                             end
-                        end
+                        % end
                     end
                 end
 
