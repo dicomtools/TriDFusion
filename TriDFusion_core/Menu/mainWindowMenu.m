@@ -312,7 +312,7 @@ function mainWindowMenu()
     mModules = uimenu(fiMainWindowPtr('get'),'Label','Modules');
     mMachineLearning = uimenu(mModules, 'Label','Machine Learning');
     uimenu(mMachineLearning, 'Label','Machine Learning Organ Segmentation', 'Callback', @setMachineLearningSegmentationCallback);
-    mMachineLearningToolkit = uimenu(mMachineLearning, 'Label','Toolkit');
+    mMachineLearningToolkit = uimenu(mMachineLearning, 'Label','Machine Learning Toolkit');
     uimenu(mMachineLearningToolkit, 'Label','Activate Total Sgmentator License', 'Callback', @saveTotalSegmentatorLicenseCallback);
 
     mMachineAnonymization = uimenu(mMachineLearning,'Label','Machine Learning Anonymization', 'Separator','on');
