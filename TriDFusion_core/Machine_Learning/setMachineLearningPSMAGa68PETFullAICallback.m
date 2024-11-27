@@ -305,6 +305,7 @@ function setMachineLearningPSMAGa68PETFullAICallback(hObject, ~)
         tPSMAGa68PETFullAI.options.classifySegmentation =            get(chkPSMAGa68PETFullAIClassifySegmentation, 'Value');
         tPSMAGa68PETFullAI.options.smoothMask           =            get(chkPSMAGa68PETFullAISmoothMask, 'Value');
         tPSMAGa68PETFullAI.options.smallestVoiValue     = str2double(get(edtPSMAGa68PETFullAISmallestVoiValue , 'String'));
+        tPSMAGa68PETFullAI.options.pixelEdge            =            get(chkPSMAGa68PETFullAIPixelEdge, 'Value');
 
         delete(dlgPSMAGa68PETFullAISegmentation);
 
