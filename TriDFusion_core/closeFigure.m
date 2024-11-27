@@ -34,5 +34,11 @@ function closeFigure(~, ~)
         rmdir(tempDir, 's');
     end
 
-    closereq;
+    if isdeployed
+        % If in compiled mode, use 'exit' to close the application
+        exit;
+    else
+        % Otherwise, call closereq to close figure in non-compiled MATLAB
+        closereq;
+    end
 end
