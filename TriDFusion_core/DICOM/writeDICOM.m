@@ -260,7 +260,11 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale)
         end
         
         if isfield(atWriteMetaData{ww}, 'SOPClassUID')
-            atWriteMetaData{ww}.SOPClassUID = atMetaData{ww}.SOPClassUID; 
+
+            if isempty(atWriteMetaData{ww}.SOPClassUID)
+                
+                atWriteMetaData{ww}.SOPClassUID = atMetaData{ww}.SOPClassUID; 
+            end
         else
             % if isfield(atMetaData{ww}, 'SOPClassUID')
             %     if ~isempty(atMetaData{ww}.SOPClassUID)
@@ -271,7 +275,11 @@ function writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale)
         end  
         
         if isfield(atWriteMetaData{ww}, 'MediaStorageSOPClassUID')
-            atWriteMetaData{ww}.SOPClassUID = atMetaData{ww}.MediaStorageSOPClassUID;         
+
+            if isempty(atWriteMetaData{ww}.MediaStorageSOPClassUID)
+
+                atWriteMetaData{ww}.MediaStorageSOPClassUID = atMetaData{ww}.MediaStorageSOPClassUID;         
+            end
         else
             % if isfield(atMetaData{ww}, 'MediaStorageSOPClassUID')
             %     if ~isempty(atMetaData{ww}.MediaStorageSOPClassUID)

@@ -1494,20 +1494,23 @@ function setRoiToolbar(sVisible)
                 switch(pAxe)
 
                     case axes1Ptr('get', [], dSeriesOffset) % Coronal
-                        xPixel = atMetaData{1}.PixelSpacing(1);
+                        xPixel = atMetaData{1}.PixelSpacing(2);
                         yPixel = dSliceThickness;
+                        zPixel = atMetaData{1}.PixelSpacing(1);
 
                         dBufferSize = size(aDicomBuffer, 1);
 
                     case axes2Ptr('get', [], dSeriesOffset) % Sagittal
-                        xPixel = atMetaData{1}.PixelSpacing(2);
+                        xPixel = atMetaData{1}.PixelSpacing(1);
                         yPixel = dSliceThickness;
+                        zPixel = atMetaData{1}.PixelSpacing(2);
 
                         dBufferSize = size(aDicomBuffer, 2);
 
                     otherwise % Axial
                         xPixel = atMetaData{1}.PixelSpacing(1);
                         yPixel = atMetaData{1}.PixelSpacing(2);
+                        zPixel = dSliceThickness;
 
                         dBufferSize = size(aDicomBuffer, 3);
                 end
@@ -1646,7 +1649,7 @@ function setRoiToolbar(sVisible)
                 end
 
 
-                aSphereMask = getSphereMask(aDicomBuffer, xPixelOffset, yPixelOffset, zPixelOffset, dRadius);
+                aSphereMask = getSphereMask(aDicomBuffer, xPixelOffset, yPixelOffset, zPixelOffset, dRadius, xPixel, yPixel, zPixel);
 
 
                 for zz=1:dBufferSize

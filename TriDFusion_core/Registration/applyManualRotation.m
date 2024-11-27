@@ -1,5 +1,5 @@
 function [aRotatedDicomBuffer, aRotatedFusionBuffer, bRotationApplied] = applyManualRotation(aDicomBuffer, aFusionBuffer, bRotateFusion)
-%function  [aRotatedDicomBuffer, aRotatedFusionBuffer, bRotationApplied] = applyManualRotation(aDicomBuffer, aFusionBuffer)
+%function  [aRotatedDicomBuffer, aRotatedFusionBuffer, bRotationApplied] = applyManualRotation(aDicomBuffer, aFusionBuffer, bRotateFusion)
 %Apply manual rotation to both, dicom and fusion buffer. 
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -29,11 +29,17 @@ function [aRotatedDicomBuffer, aRotatedFusionBuffer, bRotationApplied] = applyMa
 
     tInput = inputTemplate('get');
     
-    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+    dSeriesOffset      = get(uiSeriesPtr('get'), 'Value');
     dFusedSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
     
     aRotatedDicomBuffer  = aDicomBuffer;
     aRotatedFusionBuffer = aFusionBuffer;
+
+    atRefMetaData = dicomMetaData('get', [], dSeriesOffset);
+    atDcmMetaData = dicomMetaData('get', [], dFusedSeriesOffset);
+    if isempty(atDcmMetaData)
+        atDcmMetaData = atInput(dFusionOffset).atDicomInfo;
+    end
 
     bRotationApplied = false;
     
@@ -44,6 +50,25 @@ function [aRotatedDicomBuffer, aRotatedFusionBuffer, bRotationApplied] = applyMa
                 
                 progressBar(0.999, 'Processing Axe Image Rotation, please wait');
                 
+                if bRotateFusion == true
+
+                    atRoiInput = roiTemplate('get', dFusedSeriesOffset);
+                    
+                    if ~isempty(atRoiInput)
+    
+                        atRoiInput = rotateRoisFromAngle(atRoiInput, aRotatedDicomBuffer, atDcmMetaData, dRotation, 'axe', true);
+                        roiTemplate('set', dFusedSeriesOffset, atRoiInput);      
+                    end                    
+                else
+                    atRoiInput = roiTemplate('get', dSeriesOffset);
+                    
+                    if ~isempty(atRoiInput)
+    
+                        atRoiInput = rotateRoisFromAngle(atRoiInput, aRotatedDicomBuffer, atRefMetaData, dRotation, 'axe', true);
+                        roiTemplate('set', dSeriesOffset, atRoiInput);      
+                    end
+                end
+
                 aRotatedDicomBuffer  = rotateImageFromAngle(aRotatedDicomBuffer , aAxe, dRotation);
                 if bRotateFusion == true
                     aRotatedFusionBuffer = rotateImageFromAngle(aRotatedFusionBuffer, aAxe, dRotation);
@@ -67,9 +92,29 @@ function [aRotatedDicomBuffer, aRotatedFusionBuffer, bRotationApplied] = applyMa
 
         [bApplyRotation, aAxe, dRotation] = fusedImageRotationValues('get', false, axes1Ptr('get', [], dSeriesOffset) );                  
         if bApplyRotation == true % 3D images Coronal
-            if ~isempty(aAxe)                    
+            if ~isempty(aAxe)  
+
                 progressBar(1/3, 'Processing Coronal Image Rotation, please wait');
                 
+                if bRotateFusion == true
+
+                    atRoiInput = roiTemplate('get', dFusedSeriesOffset);
+                    
+                    if ~isempty(atRoiInput)
+    
+                        atRoiInput = rotateRoisFromAngle(atRoiInput, aRotatedDicomBuffer, atDcmMetaData, dRotation, 'axes1', true);
+                        roiTemplate('set', dFusedSeriesOffset, atRoiInput);      
+                    end                    
+                else
+                    atRoiInput = roiTemplate('get', dSeriesOffset);
+                    
+                    if ~isempty(atRoiInput)
+    
+                        atRoiInput = rotateRoisFromAngle(atRoiInput, aRotatedDicomBuffer, atRefMetaData, dRotation, 'axes1', true);
+                        roiTemplate('set', dSeriesOffset, atRoiInput);      
+                    end
+                end
+
                 aRotatedDicomBuffer  = rotateImageFromAngle(aRotatedDicomBuffer , aAxe, dRotation);
                 if bRotateFusion == true
                     aRotatedFusionBuffer = rotateImageFromAngle(aRotatedFusionBuffer, aAxe, dRotation);
@@ -89,12 +134,33 @@ function [aRotatedDicomBuffer, aRotatedFusionBuffer, bRotationApplied] = applyMa
             end
         end
 
-        [bApplyRotation, aAxe, dRotation] = fusedImageRotationValues('get', false, axes2Ptr('get', [], dSeriesOffset) );                  
+        [bApplyRotation, aAxe, dRotation] = fusedImageRotationValues('get', false, axes2Ptr('get', [], dSeriesOffset) );    
+
         if bApplyRotation == true % 3D images Sagittal
 
-            if ~isempty(aAxe)                    
+            if ~isempty(aAxe)       
+
                 progressBar(2/3, 'Processing Sagittal Image Rotation, please wait');
-                
+ 
+                if bRotateFusion == true
+
+                    atRoiInput = roiTemplate('get', dFusedSeriesOffset);
+                    
+                    if ~isempty(atRoiInput)
+    
+                        atRoiInput = rotateRoisFromAngle(atRoiInput, aRotatedDicomBuffer, atDcmMetaData, dRotation, 'axes2', true);
+                        roiTemplate('set', dFusedSeriesOffset, atRoiInput);      
+                    end                    
+                else
+                    atRoiInput = roiTemplate('get', dSeriesOffset);
+                    
+                    if ~isempty(atRoiInput)
+    
+                        atRoiInput = rotateRoisFromAngle(atRoiInput, aRotatedDicomBuffer, atRefMetaData, dRotation, 'axes2', true);
+                        roiTemplate('set', dSeriesOffset, atRoiInput);      
+                    end
+                end
+
                 aRotatedDicomBuffer  = rotateImageFromAngle(aRotatedDicomBuffer , aAxe, dRotation);
                 if bRotateFusion == true
                     aRotatedFusionBuffer = rotateImageFromAngle(aRotatedFusionBuffer, aAxe, dRotation);
@@ -115,12 +181,34 @@ function [aRotatedDicomBuffer, aRotatedFusionBuffer, bRotationApplied] = applyMa
         end
 
         [bApplyRotation, aAxe, dRotation] = fusedImageRotationValues('get', false, axes3Ptr('get', [], dSeriesOffset) );                  
-         if bApplyRotation == true % 3D images Axial
+
+        if bApplyRotation == true % 3D images Axial
+
             if ~isempty(aAxe)
                 progressBar(0.999, 'Processing Axial Image Rotation, please wait');
-                
+
+                if bRotateFusion == true
+
+                    atRoiInput = roiTemplate('get', dFusedSeriesOffset);
+                    
+                    if ~isempty(atRoiInput)
+    
+                        atRoiInput = rotateRoisFromAngle(atRoiInput, aRotatedDicomBuffer, atDcmMetaData, dRotation, 'axes3', true);
+                        roiTemplate('set', dFusedSeriesOffset, atRoiInput);      
+                    end                    
+                else
+                    atRoiInput = roiTemplate('get', dSeriesOffset);
+                    
+                    if ~isempty(atRoiInput)
+    
+                        atRoiInput = rotateRoisFromAngle(atRoiInput, aRotatedDicomBuffer, atRefMetaData, dRotation, 'axes3', true);
+                        roiTemplate('set', dSeriesOffset, atRoiInput);      
+                    end
+                end
+
                 aRotatedDicomBuffer  = rotateImageFromAngle(aRotatedDicomBuffer , aAxe, dRotation);
                 if bRotateFusion == true
+
                     aRotatedFusionBuffer = rotateImageFromAngle(aRotatedFusionBuffer, aAxe, dRotation);
                 end
                 

@@ -40,40 +40,40 @@ function setMoveImageCallback(~, ~)
     atTemplate   = inputTemplate('get');
     aInputBuffer = inputBuffer('get');
 
-    iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-    iFusionOffset = get(uiFusedSeriesPtr('get'), 'Value');
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+    dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
 
-    set(uiSeriesPtr('get'), 'Value', iFusionOffset);            
+    set(uiSeriesPtr('get'), 'Value', dFusionSeriesOffset);            
 
     aDicomBuffer = dicomBuffer('get');
 
-    set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
+    set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
 
     if isempty(aDicomBuffer)
-        aDicomBuffer = aInputBuffer{iFusionOffset};
+        aDicomBuffer = aInputBuffer{dFusionSeriesOffset};
     end
 
     if size(aDicomBuffer, 3) == 1
-        if iSeriesOffset ~= iFusionOffset
-            if atTemplate(iSeriesOffset).bFlipLeftRight == true
+        if dSeriesOffset ~= dFusionSeriesOffset
+            if atTemplate(dSeriesOffset).bFlipLeftRight == true
                 aDicomBuffer=aDicomBuffer(:,end:-1:1);
             end
 
-            if atTemplate(iSeriesOffset).bFlipAntPost == true
+            if atTemplate(dSeriesOffset).bFlipAntPost == true
                 aDicomBuffer=aDicomBuffer(end:-1:1,:);
             end
         end                
     else
-        if iSeriesOffset ~= iFusionOffset                
-            if atTemplate(iSeriesOffset).bFlipLeftRight == true
+        if dSeriesOffset ~= dFusionSeriesOffset                
+            if atTemplate(dSeriesOffset).bFlipLeftRight == true
                 aDicomBuffer=aDicomBuffer(:,end:-1:1,:);
             end
 
-            if atTemplate(iSeriesOffset).bFlipAntPost == true
+            if atTemplate(dSeriesOffset).bFlipAntPost == true
                 aDicomBuffer=aDicomBuffer(end:-1:1,:,:);
             end
 
-            if atTemplate(iSeriesOffset).bFlipHeadFeet == true
+            if atTemplate(dSeriesOffset).bFlipHeadFeet == true
                 aDicomBuffer=aDicomBuffer(:,:,end:-1:1);
             end
         end
@@ -127,8 +127,9 @@ function setMoveImageCallback(~, ~)
     
         isMoveImageActivated('set', false);            
 
-        iSeriesOffset = get(uiSeriesPtr('get'), 'Value');
-        iFusionOffset = get(uiFusedSeriesPtr('get'), 'Value');  
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+        
+        dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');  
 
         if size(aDicomBuffer, 3) == 1
 
@@ -184,14 +185,15 @@ function setMoveImageCallback(~, ~)
 
             % Set DICOM Buffer 
 
-            set(uiSeriesPtr('get'), 'Value', iFusionOffset);
+            set(uiSeriesPtr('get'), 'Value', dFusionSeriesOffset);
             
             dicomBuffer('set', aMovedDicomBuffer);
 
-            set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
+            set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
 
-            if size(aMovedDicomBuffer, 3) ~= 1           
-                mipBuffer('set', computeMIP(aMovedDicomBuffer), iFusionOffset);    
+            if size(aMovedDicomBuffer, 3) ~= 1 
+         
+                mipBuffer('set', computeMIP(aMovedDicomBuffer), dFusionSeriesOffset);    
             end
 
             % Set Fusion Buffer 
@@ -202,7 +204,7 @@ function setMoveImageCallback(~, ~)
                 if link2DMip('get') == true && ...
                    isVsplash('get') == false    
 
-                    mipFusionBuffer('set', computeMIP(aMovedFusionBuffer), iFusionOffset);                                     
+                    mipFusionBuffer('set', computeMIP(aMovedFusionBuffer), dFusionSeriesOffset);                                     
                 end            
             end
 
@@ -210,15 +212,15 @@ function setMoveImageCallback(~, ~)
 
             if bMovementApplied == true 
                 if size(aMovedFusionBuffer, 3) == 1 % 2d Images        
-                    imAxeF = imAxeFPtr('get', [], iFusionOffset);
+                    imAxeF = imAxeFPtr('get', [], dFusionSeriesOffset);
 
                     imAxeF.XData = pInitImAxeFXData;
                     imAxeF.YData = pInitImAxeFYData;
 
                 else  % 3d Images      
-                    imCoronalF  = imCoronalFPtr ('get', [], iFusionOffset); 
-                    imSagittalF = imSagittalFPtr('get', [], iFusionOffset); 
-                    imAxialF    = imAxialFPtr   ('get', [], iFusionOffset);  
+                    imCoronalF  = imCoronalFPtr ('get', [], dFusionSeriesOffset); 
+                    imSagittalF = imSagittalFPtr('get', [], dFusionSeriesOffset); 
+                    imAxialF    = imAxialFPtr   ('get', [], dFusionSeriesOffset);  
 
                     imCoronalF.XData  = pInitImCoronalFXData;
                     imCoronalF.YData  = pInitImCoronalFYData;
@@ -237,8 +239,8 @@ function setMoveImageCallback(~, ~)
                 
                 asDescription = seriesDescription('get');
                 
-                asDescription{iFusionOffset} = sprintf('MOV-MAN %s', asDescription{iFusionOffset});
-                asDescription{iSeriesOffset} = sprintf('REF-MAN %s', asDescription{iSeriesOffset});                
+                asDescription{dFusionSeriesOffset} = sprintf('MOV-MAN %s', asDescription{dFusionSeriesOffset});
+                asDescription{dSeriesOffset} = sprintf('REF-MAN %s', asDescription{dSeriesOffset});                
                 
                 seriesDescription('set', asDescription);
             
@@ -252,9 +254,9 @@ function setMoveImageCallback(~, ~)
                 
                 adAssociatedSeries = [];
             
-                sStudyInstanceUID    = atTemplate(iFusionOffset).atDicomInfo{1}.StudyInstanceUID;
-                sSeriesInstanceUID   = atTemplate(iFusionOffset).atDicomInfo{1}.SeriesInstanceUID;
-                sFrameOfReferenceUID = atTemplate(iFusionOffset).atDicomInfo{1}.FrameOfReferenceUID;
+                sStudyInstanceUID    = atTemplate(dFusionSeriesOffset).atDicomInfo{1}.StudyInstanceUID;
+                sSeriesInstanceUID   = atTemplate(dFusionSeriesOffset).atDicomInfo{1}.SeriesInstanceUID;
+                sFrameOfReferenceUID = atTemplate(dFusionSeriesOffset).atDicomInfo{1}.FrameOfReferenceUID;
                         
                 for mm=1:numel(atTemplate) % Find associated series
 
@@ -272,7 +274,7 @@ function setMoveImageCallback(~, ~)
                        strcmpi(sFrameOfReferenceUID, sCurrentFrameOfReferenceUID) 
 
                         if ~strcmpi(sSeriesInstanceUID, sCurrentSeriesInstanceUID) % We don't want to register the series twice   
-                            if mm ~= iSeriesOffset % We don't move the reference
+                            if mm ~= dSeriesOffset % We don't move the reference
                                 adAssociatedSeries{numel(adAssociatedSeries)+1} = mm;                                     
                             end
                         end
@@ -283,39 +285,38 @@ function setMoveImageCallback(~, ~)
                     
                     for aa=1:numel(adAssociatedSeries)
                         
-                        iAssociatedOffset = adAssociatedSeries{aa};
+                        dAssociatedSeriesOffset = adAssociatedSeries{aa};
                         
-                        set(uiSeriesPtr('get'), 'Value', iAssociatedOffset);            
+                        set(uiSeriesPtr('get'), 'Value', dAssociatedSeriesOffset);            
 
-                        aDicomBuffer = dicomBuffer('get');
-
-                        set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
+                        aDicomBuffer = dicomBuffer('get', [], dAssociatedSeriesOffset);
 
                         if isempty(aDicomBuffer)
-                            aDicomBuffer = aInputBuffer{iAssociatedOffset};
+
+                            aDicomBuffer = aInputBuffer{dAssociatedSeriesOffset};
                         end
 
                         if size(aDicomBuffer, 3) == 1
-                            if iSeriesOffset ~= iAssociatedOffset
-                                if atTemplate(iSeriesOffset).bFlipLeftRight == true
+                            if dSeriesOffset ~= dAssociatedSeriesOffset
+                                if atTemplate(dSeriesOffset).bFlipLeftRight == true
                                     aDicomBuffer=aDicomBuffer(:,end:-1:1);
                                 end
 
-                                if atTemplate(iSeriesOffset).bFlipAntPost == true
+                                if atTemplate(dSeriesOffset).bFlipAntPost == true
                                     aDicomBuffer=aDicomBuffer(end:-1:1,:);
                                 end
                             end                
                         else
-                            if iSeriesOffset ~= iAssociatedOffset                
-                                if atTemplate(iSeriesOffset).bFlipLeftRight == true
+                            if dSeriesOffset ~= dAssociatedSeriesOffset                
+                                if atTemplate(dSeriesOffset).bFlipLeftRight == true
                                     aDicomBuffer=aDicomBuffer(:,end:-1:1,:);
                                 end
 
-                                if atTemplate(iSeriesOffset).bFlipAntPost == true
+                                if atTemplate(dSeriesOffset).bFlipAntPost == true
                                     aDicomBuffer=aDicomBuffer(end:-1:1,:,:);
                                 end
 
-                                if atTemplate(iSeriesOffset).bFlipHeadFeet == true
+                                if atTemplate(dSeriesOffset).bFlipHeadFeet == true
                                     aDicomBuffer=aDicomBuffer(:,:,end:-1:1);
                                 end
                             end
@@ -337,14 +338,11 @@ function setMoveImageCallback(~, ~)
                        
                             % Set DICOM Buffer 
 
-                            set(uiSeriesPtr('get'), 'Value', iAssociatedOffset);
+                            dicomBuffer('set', aMovedDicomBuffer, dAssociatedSeriesOffset);
 
-                            dicomBuffer('set', aMovedDicomBuffer);
+                            if size(aMovedDicomBuffer, 3) ~= 1      
 
-                            set(uiSeriesPtr('get'), 'Value', iSeriesOffset);
-
-                            if size(aMovedDicomBuffer, 3) ~= 1           
-                                mipBuffer('set', computeMIP(aMovedDicomBuffer), iAssociatedOffset);    
+                                mipBuffer('set', computeMIP(aMovedDicomBuffer), dAssociatedSeriesOffset);    
                             end
                             
                             % Update Series Description
@@ -353,13 +351,16 @@ function setMoveImageCallback(~, ~)
 
                                 asDescription = seriesDescription('get');
 
-                                asDescription{iAssociatedOffset} = sprintf('MOV-MAN %s', asDescription{iAssociatedOffset});
+                                asDescription{dAssociatedSeriesOffset} = sprintf('MOV-MAN %s', asDescription{dAssociatedSeriesOffset});
 
                                 seriesDescription('set', asDescription);
 
                             end             
                         end                        
-    
+                        
+
+                        set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
+
                     end
                 end
       

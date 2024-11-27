@@ -1,5 +1,5 @@
 function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManualMovment(aDicomBuffer, aFusionBuffer, aOffset, bMoveFusion)
-%function  [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManualMovment(aDicomBuffer, aFusionBuffer, aOffset)
+%function  [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManualMovment(aDicomBuffer, aFusionBuffer, aOffset, bMoveFusion)
 %Apply manual translation to both, dicom and fusion buffer. 
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -52,6 +52,7 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
            aOffset(2) ~= 0 
           
             if bMoveFusion == true
+
                 aMovedFusionBuffer = translateImageMovement(aMovedFusionBuffer, aOffset);
             end
 
@@ -79,6 +80,24 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
 
             aScaledOffset(1) = outX; % X
             aScaledOffset(2) = outY; % Y
+            
+            if bMoveFusion == true
+                atRoiInput = roiTemplate('get', dFusionOffset);
+                
+                if ~isempty(atRoiInput)
+    
+                    atRoiInput = translateRoisMovement(atRoiInput, aMovedDicomBuffer, atDcmMetaData, aScaledOffset, true);
+                    roiTemplate('set', dFusionOffset, atRoiInput);      
+                end
+            else
+                atRoiInput = roiTemplate('get', dSeriesOffset);
+                
+                if ~isempty(atRoiInput)
+    
+                    atRoiInput = translateRoisMovement(atRoiInput, aMovedDicomBuffer, atRefMetaData, aScaledOffset, true);
+                    roiTemplate('set', dSeriesOffset, atRoiInput);      
+                end                
+            end
 
             aMovedDicomBuffer = translateImageMovement(aMovedDicomBuffer, aScaledOffset);
 
@@ -114,14 +133,6 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
             if bMoveFusion == true
 
                 aMovedFusionBuffer = translateImageMovement(aMovedFusionBuffer, aOffset);
-    
-                atRoiInput = roiTemplate('get', dFusionOffset);
-                
-                if ~isempty(atRoiInput)
-
-                    atRoiInput = translateRoisMovement(roiTemplate('get', dFusionOffset), aMovedFusionBuffer, atDcmMetaData, aOffset, true);
-                    roiTemplate('set', dFusionOffset, atRoiInput);      
-                end
             end
             
             dcmSliceThickness = computeSliceSpacing(atDcmMetaData);
@@ -162,7 +173,8 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
             
             transM = inv(Mdti) * Mtf;
             [outX, outY, outZ]  = applyTransMatrix(transM, aOffset(:,1), aOffset(:,2), aOffset(:,3)); 
-                        
+     
+
             
 %            yScale = size(aDicomBuffer,1)/size(aFusionBuffer,1);
 %            xScale = size(aDicomBuffer,2)/size(aFusionBuffer,2);
@@ -188,8 +200,28 @@ function [aMovedDicomBuffer, aMovedFusionBuffer, bMovementApplied] = applyManual
             aScaledOffset(2) = outY; % Y
             aScaledOffset(3) = outZ; % Z     
 
+            if bMoveFusion == true
+                
+                atRoiInput = roiTemplate('get', dFusionOffset);
+                
+                if ~isempty(atRoiInput)
+    
+                    atRoiInput = translateRoisMovement(atRoiInput, aMovedDicomBuffer, atDcmMetaData, aScaledOffset, true);
+                    roiTemplate('set', dFusionOffset, atRoiInput);      
+                end
+            else
+                atRoiInput = roiTemplate('get', dSeriesOffset);
+                
+                if ~isempty(atRoiInput)
+    
+                    atRoiInput = translateRoisMovement(atRoiInput, aMovedDicomBuffer, atRefMetaData, aScaledOffset, true);
+                    roiTemplate('set', dSeriesOffset, atRoiInput);      
+                end                
+            end
+
             aMovedDicomBuffer = translateImageMovement(aMovedDicomBuffer, aScaledOffset);
-            
+
+
             bMovementApplied = true;
             
             atInput(dFusionOffset).tMovement.bMovementApplied = true;

@@ -95,7 +95,35 @@ function setSourceCallback(~, ~)
 
       %  aDirlist = dir(sMainDir{1});
 
+        if useLocalTempFolder('get') == true
+
+            if isPathNetwork(sMainDir{1})
+
+                progressBar((1/1)-0.00001, 'Parsing folder, please wait');
+                
+                sTmpDir = sprintf('%stemp_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
+                mkdir(sTmpDir);         
+
+                if ispc
+
+                    cmd = sprintf('robocopy "%s" "%s" /MIR /R:0 /W:0 /MT:32 /Z /NFL /NDL /NC /NS /NP',sMainDir{1}, sTmpDir);
+                    system(cmd);
+                                        
+                elseif isunix
+
+                    rsyncCmd = sprintf('rsync -a "%s/" "%s/"', sMainDir{1}, sTmpDir);
+                    system(rsyncCmd); % Execute the rsync command                  
+                else
+                    copyfile(sMainDir{1}, sTmpDir, 'f'); % Fallback for non-Unix systems                   
+                end
+
+                sMainDir{1} = sTmpDir;
+                
+            end
+        end
+
         f = java.io.File(char(sMainDir{1}));
+
         aDirlist = f.listFiles();
 
         j=1;

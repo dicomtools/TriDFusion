@@ -7747,21 +7747,36 @@ function [nestedLoad, nestedProceed, nestedDelete, nestedCancel] = machineLearni
     nestedCancel  = @cancelMachineSegmentationCallback;
     nestedProceed = @proceedMachineSegmentationCallback;
 
-
     function addSeriesMask(aMask, sSeriesDescription, dSerieOffset)
 
         atInput = inputTemplate('get');
-
-        atMetaData = dicomMetaData('get', [], dSerieOffset);
 
         aImage = dicomBuffer('get');
 
         sCurrentDate = datestr(now, 'yyyymmdd');  % Format: 'yyyyMMdd'
         sCurrentTime = datestr(now, 'HHMMSS');    % Format: 'HHmmss'
-        
+
+        if isempty(atInput(dSerieOffset).asFilesList)
+            atMetaData = dicomMetaData('get', [], dSerieOffset);
+        else
+            dNbFiles = numel(atInput(dSerieOffset).asFilesList);
+            atMetaData = cell(dNbFiles, 1);
+
+            for jj=1:numel(atInput(dSerieOffset).asFilesList)
+
+                atMetaData{jj} = dicominfo(atInput(dSerieOffset).asFilesList{jj});
+            end
+
+            atMetaData = flip(atMetaData);
+
+        end
+
+        dSOPInstanceUID = dicomuid;
+
+
         for jj=1:numel(atMetaData)
 
-            atMetaData{jj}.Modality = 'ot';
+            atMetaData{jj}.Modality = 'OT';
 
             atMetaData{jj}.SeriesDescription = sSeriesDescription;
 
@@ -7770,6 +7785,82 @@ function [nestedLoad, nestedProceed, nestedDelete, nestedCancel] = machineLearni
 
             atMetaData{jj}.ContentTime = sCurrentTime;
             atMetaData{jj}.ContentDate = sCurrentDate;
+
+            % Series MediaStorageSOPClassUID             
+    
+            if isfield(atMetaData{jj}, 'MediaStorageSOPClassUID')
+    
+                if isempty(atMetaData{jj}.MediaStorageSOPClassUID)
+    
+                    if isfield(atMetaData{jj}, 'Modality')
+    
+                        switch lower(atMetaData{jj}.Modality)
+                            case 'ct'
+                                atMetaData{jj}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.2'; % CT
+                            case 'mr'
+                                atMetaData{jj}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.4'; % MR
+                            case 'pt'
+                                atMetaData{jj}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.128'; % PT
+                            case 'nm'
+                                atMetaData{jj}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.20'; % NM
+                            otherwise
+                                atMetaData{jj}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.7'; % Secondary Capture
+                              
+                        end        
+                    else
+                        atMetaData{jj}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.7'; % Secondary Capture
+                    end
+                end
+            else
+                if isfield(atMetaData{jj}, 'Modality')
+                    
+                    switch lower(atMetaData{jj}.Modality)
+                        case 'ct'
+                            atMetaData{jj}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.2'; % CT
+                        case 'mr'
+                            atMetaData{jj}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.4'; % MR
+                        case 'pt'
+                            atMetaData{jj}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.128'; % PT
+                        case 'nm'
+                            atMetaData{jj}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.20'; % NM
+                        otherwise
+                            atMetaData{jj}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.7'; % Secondary Capture
+                          
+                    end        
+                else
+                    atMetaData{jj}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.7'; % Secondary Capture
+                end
+            end
+    
+            % MediaStorageSOPInstanceUID
+    
+            if isfield(atMetaData{jj}, 'MediaStorageSOPInstanceUID')
+    
+                if isempty(atMetaData{jj}.MediaStorageSOPInstanceUID)
+    
+                    atMetaData{jj}.MediaStorageSOPInstanceUID = dSOPInstanceUID;
+                end
+            else
+                atMetaData{jj}.MediaStorageSOPInstanceUID = dSOPInstanceUID;
+            end
+           
+            % SOPClassUID
+             
+            if isfield(atMetaData{jj}, 'SOPClassUID')
+    
+                if isempty(atMetaData{jj}.SOPClassUID)
+        
+                    atMetaData{jj}.SOPClassUID  = atMetaData{jj}.MediaStorageSOPClassUID;
+                end
+            else
+                atMetaData{jj}.SOPClassUID  = atMetaData{jj}.MediaStorageSOPClassUID;
+            end
+
+            if ~isfield(atMetaData{jj}, 'Units')
+
+                atMetaData{jj}.Units = [];
+            end
+
         end
 
         dNewSeriesOffset = numel(atInput)+1;

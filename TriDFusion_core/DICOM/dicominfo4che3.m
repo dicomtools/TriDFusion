@@ -25,13 +25,17 @@ function info = dicominfo4che3(fileInput)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.    
-  
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
+
+USE_DCM4CHEE = true;
+
+if USE_DCM4CHEE == true
     try 
         din = org.dcm4che3.io.DicomInputStream(...
                 java.io.BufferedInputStream(java.io.FileInputStream(char(fileInput))));    
 
         dataset = din.readDataset(-1, -1);                  
+        % pixelDataBytes = dataset.getBytes(org.dcm4che3.data.Tag.PixelData);
     catch 
         try 
             
@@ -44,7 +48,17 @@ function info = dicominfo4che3(fileInput)
         
         return;
     end  
-
+else
+        try 
+            
+        info = dicominfo(char(fileInput)); 
+ 
+        catch
+            info = [];
+        end
+  
+        return;    
+end
     % Image information
         
     asImageType{1} = char(dataset.getString(org.dcm4che3.data.Tag.ImageType, 0));

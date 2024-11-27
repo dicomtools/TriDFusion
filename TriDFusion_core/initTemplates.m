@@ -28,7 +28,7 @@ function initTemplates()
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     asMainDirectory = mainDir('get');
-
+        
     try
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
@@ -36,6 +36,8 @@ function initTemplates()
 
     if(numel(asMainDirectory))                     
             
+        % asMainDirectory
+
         [asFilesList, atDicomInfo, aDicomBuffer] = readDicomFolder(asMainDirectory);
 
         if ~isempty(asFilesList) && ...

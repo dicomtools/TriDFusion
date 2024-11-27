@@ -108,10 +108,15 @@ function sUnit = getSerieUnitValue(dSeriesOffset)
                 sUnit = 'HU';   
 
         otherwise
-            if isempty(tInput(dSeriesOffset).atDicomInfo{1}.Units)
+            if isfield(tInput(dSeriesOffset).atDicomInfo{1}, 'Units')
+
+                if isempty(tInput(dSeriesOffset).atDicomInfo{1}.Units)
+                    sUnit = 'Counts';                            
+                else                    
+                    sUnit = tInput(dSeriesOffset).atDicomInfo{1}.Units;
+                end
+            else
                 sUnit = 'Counts';                            
-            else                    
-                sUnit = tInput(dSeriesOffset).atDicomInfo{1}.Units;
             end
     end
 end

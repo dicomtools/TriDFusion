@@ -39,7 +39,28 @@ function setOverlayPatientInformation(dSeriesOffset)
     if isfield(atMetaData{1}, 'PatientName')
 
         if  isstruct(atMetaData{1}.PatientName)
-            sPatientName = sprintf('%s %s %s', atMetaData{1}.PatientName.GivenName, atMetaData{1}.PatientName.MiddleName, atMetaData{1}.PatientName.FamilyName);
+            
+            if isfield(atMetaData{1}.PatientName, 'GivenName')
+
+                sGivenName = atMetaData{1}.PatientName.GivenName;
+            else
+                sGivenName = '';
+            end
+
+            if isfield(atMetaData{1}.PatientName, 'MiddleName')
+
+                sMiddleName = atMetaData{1}.PatientName.MiddleName;
+            else
+                sMiddleName = '';
+            end
+
+            if isfield(atMetaData{1}.PatientName, 'FamilyName')
+                sFamilyName = atMetaData{1}.PatientName.FamilyName;
+            else
+                sFamilyName = '';
+            end            
+
+            sPatientName = sprintf('%s %s %s', sGivenName, sMiddleName, sFamilyName);
             sPatientName = strrep(sPatientName,'^',' ');
             sPatientName = strtrim(sPatientName);
         else

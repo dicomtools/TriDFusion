@@ -136,6 +136,7 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, 
     end
 
     dSeriesInstanceUID = dicomuid;
+    dSOPInstanceUID = dicomuid;
 
     atWriteMetaData = cell(1, dWriteEndLoop);
 
@@ -152,17 +153,95 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, 
         atWriteMetaData{ww} = atMetaData{ww};
         atWriteMetaData{ww}.SourceApplicationEntityTitle = 'TRIDFUSION';
         
-        % Series SOP
-       
+        % Series MediaStorageSOPClassUID             
+
+        if isfield(atWriteMetaData{ww}, 'MediaStorageSOPClassUID')
+
+            if isempty(atWriteMetaData{ww}.MediaStorageSOPClassUID)
+
+                if isfield(atWriteMetaData{ww}, 'Modality')
+
+                    switch lower(atWriteMetaData{ww}.Modality)
+                        case 'ct'
+                            atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.2'; % CT
+                        case 'mr'
+                            atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.4'; % MR
+                        case 'pt'
+                            atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.128'; % PT
+                        case 'nm'
+                            atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.20'; % NM
+                        otherwise
+                            atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.7'; % Secondary Capture
+                          
+                    end        
+                else
+                    atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.7'; % Secondary Capture
+                end
+            end
+        else
+            if isfield(atWriteMetaData{ww}, 'Modality')
+                
+                switch lower(atWriteMetaData{ww}.Modality)
+                    case 'ct'
+                        atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.2'; % CT
+                    case 'mr'
+                        atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.4'; % MR
+                    case 'pt'
+                        atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.128'; % PT
+                    case 'nm'
+                        atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.20'; % NM
+                    otherwise
+                        atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.7'; % Secondary Capture
+                      
+                end        
+            else
+                atWriteMetaData{ww}.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.7'; % Secondary Capture
+            end
+        end
+
+        % MediaStorageSOPInstanceUID
+
+        if isfield(atWriteMetaData{ww}, 'MediaStorageSOPInstanceUID')
+
+            if isempty(atWriteMetaData{ww}.MediaStorageSOPInstanceUID)
+
+                atWriteMetaData{ww}.MediaStorageSOPInstanceUID = dSOPInstanceUID;
+            end
+        else
+            atWriteMetaData{ww}.MediaStorageSOPInstanceUID = dSOPInstanceUID;
+        end
+
+
 %        atWriteMetaData{ww}.MediaStorageSOPClassUID    = '1.2.840.10008.5.1.4.1.1.7.3';
 %        atWriteMetaData{ww}.MediaStorageSOPInstanceUID = '1.3.6.1.4.1.9590.100.1.2.193378027812447806612603416531187163249';
+
+
 %        atWriteMetaData{ww}.TransferSyntaxUID          = '1.2.840.10008.1.2';
 %        atWriteMetaData{ww}.ImplementationClassUID     = '1.3.6.1.4.1.9590.100.1.3.100.9.4';
 %        atWriteMetaData{ww}.ImplementationVersionName  = 'MATLAB IPT 9.4';
+       
+        % SOPClassUID
+         
+        if isfield(atWriteMetaData{ww}, 'SOPClassUID')
 
-        if isempty(atWriteMetaData{ww}.SOPClassUID)
+            if isempty(atWriteMetaData{ww}.SOPClassUID)
+    
+                atWriteMetaData{ww}.SOPClassUID  = atWriteMetaData{ww}.MediaStorageSOPClassUID;
+            end
+        else
+            atWriteMetaData{ww}.SOPClassUID  = atWriteMetaData{ww}.MediaStorageSOPClassUID;
+        end
 
-            atWriteMetaData{ww}.SOPClassUID  = '1.2.840.10008.5.1.4.1.1.128';
+        % SOPInstanceUID
+
+        if isfield(atWriteMetaData{ww}, 'SOPInstanceUID')
+
+            if isempty(atWriteMetaData{ww}.SOPInstanceUID)
+    
+                atWriteMetaData{ww}.SOPInstanceUID  = atWriteMetaData{ww}.MediaStorageSOPInstanceUID;
+            end
+        else
+            atWriteMetaData{ww}.SOPInstanceUID  = atWriteMetaData{ww}.MediaStorageSOPInstanceUID;
         end
 
         % if isempty(atWriteMetaData{ww}.SOPInstanceUID)       
@@ -189,13 +268,13 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, 
 
         % Date Time
    
-        if numel(atMetaData) == 1
+        if isscalar(atMetaData)
             dicomwrite(uint16(array4d)    , ...
                        sOutFile           , ...
                        atWriteMetaData{ww}, ...
                        'CreateMode'       , ...
                        'Copy'           , ...
-                       'WritePrivate'     , true ...
+                       'WritePrivate'     , false ...
                       ); 
         else
             dicomwrite(uint16(array4d(:,:,:,ww)), ...
@@ -203,7 +282,7 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, 
                        atWriteMetaData{ww}, ...
                        'CreateMode'       , ...
                        'Copy'           , ...
-                       'WritePrivate'     , true ...
+                       'WritePrivate'     , false ...
                       );             
         end
 

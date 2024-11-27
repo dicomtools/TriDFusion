@@ -49,6 +49,8 @@ function TriDFusion(varargin)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    useLocalTempFolder('set', true); % For opening speed improvment
+
     viewerUIFigure('set', false); % Tested wih Matlab 2023b
 
     viewerSUVtype('set', 'BW'); % Body Weight
@@ -340,7 +342,62 @@ function TriDFusion(varargin)
 %     image(imSplash, 'Parent', uiSplashWindow);
     imshow(imSplash,'border','tight','Parent', uiSplashWindow);
     uiSplashWindow.Toolbar.Visible = 'off';
+       
+    if useLocalTempFolder('get') == true
+
+        try
+
+        sMousePointer = get(fiMainWindowPtr('get'), 'Pointer');
+
+        set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+        drawnow;
+
+        asMainDir = mainDir('get');
+        if ~isempty(asMainDir)
+
+            dNbDir = numel(asMainDir);
+
+            for jj=1:dNbDir
+
+                if isPathNetwork(asMainDir{jj})
+
+                    progressBar((jj/dNbDir)-0.00001, sprintf('Parsing folder %d/%d, please wait', jj, dNbDir));
+                  
+                    sTmpDir = sprintf('%stemp_%s_%d/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'), jj);
+                    mkdir(sTmpDir);
+
+                    if ispc
+
+                        cmd = sprintf('robocopy "%s" "%s" /MIR /R:0 /W:0 /MT:32 /Z /NFL /NDL /NC /NS /NP',asMainDir{jj}, sTmpDir);
+                        system(cmd);
+                                               
+                    elseif isunix
+
+                        rsyncCmd = sprintf('rsync -a "%s/" "%s/"', asMainDir{jj}, sTmpDir);
+                        system(rsyncCmd); % Execute the rsync command 
                     
+                    else
+                        copyfile(asMainDir{jj}, sTmpDir, 'f'); % Fallback for non-Unix systems                   
+                    end
+                   
+                    asMainDir{jj} = sTmpDir;
+                  
+                end
+    
+            end
+
+            mainDir('set', asMainDir);
+        end
+        catch
+        end
+
+        progressBar(1, 'Ready');
+
+        set(fiMainWindowPtr('get'), 'Pointer', sMousePointer);
+        drawnow;
+
+    end
+    
     initTemplates();
       
     delete(uiSplashWindow);

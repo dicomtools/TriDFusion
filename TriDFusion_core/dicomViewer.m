@@ -256,7 +256,7 @@ function resize = dicomViewer()
     updateDicomWriteSeriesInstanceUID('set', true);
     modifiedImagesContourMatrix('set', false);
        
-    sphereDefaultDiameter ('set', 50); % in mm
+    sphereDefaultDiameter ('set', 25); % in mm
     brush2dDefaultDiameter('set', 30); % in mm  
     clickVoiPreSegmentationValue('set', 0); % In Perent
     clickVoiPercentOfMaxValue('set', 41); % In Perent

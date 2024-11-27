@@ -29,7 +29,11 @@ function imComputed = computeMIP(im)
  
     if canUseGPU()
 %         aImage = gpuArray(uint16(im));
-        aImage = gpuArray(single(im));
+        try    
+            aImage = gpuArray(single(im));
+        catch
+            aImage = single(im);            
+        end
     else
         aImage = single(im);
     end

@@ -39,7 +39,9 @@ function [atRoi, transM] = resampleROIs(dcmImage, atDcmMetaData, refImage, atRef
         [aNewPosition, aRadius, aSemiAxes, transM] = computeRoiScaledPosition(refImage, atRefMetaData, dcmImage, atDcmMetaData, atRoi{jj});
         
         if aRefImageSize(3) ~= 1       
+
             if round(aNewPosition(1,3)) > aRefImageSize(3)
+                
                 aNewPosition(:,3) = aRefImageSize(3);
             end
         end
@@ -47,11 +49,13 @@ function [atRoi, transM] = resampleROIs(dcmImage, atDcmMetaData, refImage, atRef
         if ~isempty(atRoi{jj}.MaxDistances) 
             
             if isvalid(atRoi{jj}.MaxDistances.MaxXY.Line)
+
                 atRoi{jj}.MaxDistances.MaxXY.Line.Visible = 'off';
                 atRoi{jj}.MaxDistances.MaxCY.Line.Visible = 'off';
             end
 
             if isvalid(atRoi{jj}.MaxDistances.MaxXY.Text)
+
                 atRoi{jj}.MaxDistances.MaxXY.Text.Visible = 'off';
                 atRoi{jj}.MaxDistances.MaxCY.Text.Visible = 'off';                        
             end
@@ -78,13 +82,16 @@ function [atRoi, transM] = resampleROIs(dcmImage, atDcmMetaData, refImage, atRef
 %                        msgbox('Error: copyRoiVoiToSerie(): Copy of a circle from a sagitttal plane is not yet supported!', 'Error');
 
                     otherwise
+
                          atRoi{jj}.Position(:,1) = aNewPosition(:, 1);
                          atRoi{jj}.Position(:,2) = aNewPosition(:, 2);
                          atRoi{jj}.SliceNb       = round(aNewPosition(1,3));
                          atRoi{jj}.Radius        = aRadius;
                          
                          if ~isstruct(atRoi{jj}.Object)
+
                              if isvalid(atRoi{jj}.Object) && bUpdateObject == true
+
                                  atRoi{jj}.Object.Position = atRoi{jj}.Position;
                                  atRoi{jj}.Object.Radius   = atRoi{jj}.Radius;
                                  atRoi{jj}.Vertices        = atRoi{jj}.Object.Vertices;
@@ -123,11 +130,12 @@ function [atRoi, transM] = resampleROIs(dcmImage, atDcmMetaData, refImage, atRef
                          atRoi{jj}.SemiAxes      = aSemiAxes;
                                           
                          if ~isstruct(atRoi{jj}.Object)
+
                              if isvalid(atRoi{jj}.Object) && bUpdateObject == true                
+
                                 atRoi{jj}.Object.Position = atRoi{jj}.Position;
                                 atRoi{jj}.Object.SemiAxes = atRoi{jj}.SemiAxes;
                                 atRoi{jj}.Vertices        = atRoi{jj}.Object.Vertices;
-
                              end
                          end
 
@@ -149,7 +157,9 @@ function [atRoi, transM] = resampleROIs(dcmImage, atDcmMetaData, refImage, atRef
                  atRoi{jj}.Vertices    = [xs' ys'];
                  
                  if ~isstruct(atRoi{jj}.Object)
+
                      if isvalid(atRoi{jj}.Object) && bUpdateObject == true                                 
+
                         atRoi{jj}.Object.Position = atRoi{jj}.Position;
                         atRoi{jj}.Vertices        = atRoi{jj}.Object.Vertices;
                      end
@@ -167,7 +177,9 @@ function [atRoi, transM] = resampleROIs(dcmImage, atDcmMetaData, refImage, atRef
                  atRoi{jj}.MaxDistances = tMaxDistances;
                 
                  if ~isstruct(atRoi{jj}.Object)
+
                      if isvalid(atRoi{jj}.Object) && bUpdateObject == true                                  
+
                         atRoi{jj}.Object.Position = atRoi{jj}.Position;
                      end                
                  end

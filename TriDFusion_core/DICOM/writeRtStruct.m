@@ -27,6 +27,8 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.cIf not, see <http://www.gnu.org/licenses/>.
 
+    USE_VERTICES = false;
+
 %    PIXEL_EDGE_RATIO = 3;
 
     atInput = inputTemplate('get');
@@ -249,7 +251,9 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
         for rr=1:nbRois
 
             sROIitemName = sprintf('Item_%d', rr);
+
             for tt=1:numel(atRoiInput)
+
                 if strcmpi(atVoiInput{cc}.RoisTag{rr}, atRoiInput{tt}.Tag)
 
                     if strcmpi(atRoiInput{tt}.Axe, 'Axes3') % Only axial plane is supported
@@ -271,8 +275,109 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
 %                             if ~isempty(aBoundaries)
 %                                aBoundaries = aBoundaries{:};
 %                                aBoundaries = aBoundaries/PIXEL_EDGE_RATIO;
+                            if USE_VERTICES == true
+                     
+                                xy = atRoiInput{tt}.Vertices-1;
+                            else
+                                if strcmpi(atRoiInput{tt}.Type, 'images.roi.rectangle')
+                                    
+                                    dRotation = atRoiInput{tt}.RotationAngle;  % Rotation angle in degrees
 
-                            xy = atRoiInput{tt}.Vertices-1;
+                                    % Step 1: Apply rotation (if any)
+
+                                    if dRotation ~= 0
+
+                                        aImageSize = size(aInputBuffer);
+                                    
+                                        switch lower(sAxe)
+                                    
+                                            case 'axe' % 2D
+                                    
+                                                xSize = aImageSize(1);
+                                                ySize = aImageSize(2);
+                                    
+                                            case 'axes1' % Coronal
+                                    
+                                                xSize = aImageSize(2);
+                                                ySize = aImageSize(3);
+                                    
+                                            case 'axes2' % Sagittal
+                                    
+                                                xSize = aImageSize(1);
+                                                ySize = aImageSize(3);
+                                    
+                                            case 'axes3' % Axial
+                                    
+                                                xSize = aImageSize(1);
+                                                ySize = aImageSize(2);
+                                    
+                                            otherwise
+                                                return;
+                                        end
+                                    
+                                        theta = deg2rad(dRotation); % Rotation in degrees
+                                        
+                                        % Rotation matrices 
+                                        R = [cos(theta), -sin(theta);
+                                             sin(theta),  cos(theta)];
+                                        
+                                        aCoords = atRoiInput{tt}.Position(:, 1:2); % Extract X, Y coordinates
+                                        
+                                        aCenter = [xSize/2, ySize/2];     
+                                
+                                        aTranslatedCoords = aCoords - aCenter; % Translate points to align image center with origin
+                                        
+                                        aRotatedCoords = (R * aTranslatedCoords')'; % Apply the rotation matrix
+                                        
+                                        atRoiInput{tt}.Position(:, 1:2) = aRotatedCoords + aCenter; % Translate points back to original position                                       
+                                    end
+
+                                    aCorner1 = [atRoiInput{tt}.Position(1), atRoiInput{tt}.Position(2)];  
+                                    dWidth   = atRoiInput{tt}.Position(3);
+                                    dHeight  = atRoiInput{tt}.Position(4);
+
+                                    % Generate the coordinates of the four corners
+
+                                    aCorner2 = [aCorner1(1), aCorner1(2) + dHeight];           % [x1, y2]
+                                    aCorner3 = [aCorner1(1) + dWidth, aCorner1(2) + dHeight];  % [x2, y2]
+                                    aCorner4 = [aCorner1(1) + dWidth, aCorner1(2)];            % [x2, y1]
+                                    
+                                    % Combine all corners into one variable
+                                    xy = [aCorner1; aCorner2; aCorner3; aCorner4];
+                                                                     
+                                elseif strcmpi(atRoiInput{tt}.Type, 'images.roi.circle')
+
+                                    aCenter = atRoiInput{tt}.Position;        % [x, y]
+                                    dRadius = atRoiInput{tt}.Radius;          % Radius of the circle
+                                                                        
+                                    theta = linspace(0, 2*pi, 360); % 360 points around the circle
+                                    xCircle = dRadius * cos(theta) + aCenter(1); % X-coordinates of the circle
+                                    yCircle = dRadius * sin(theta) + aCenter(2); % Y-coordinates of the circle
+                                    
+                                    xy = [xCircle; yCircle]';
+
+                                elseif strcmpi(atRoiInput{tt}.Type, 'images.roi.ellipse')  
+
+                                    aCenter  = atRoiInput{tt}.Position;      % [x, y]
+                                    semiAxes = atRoiInput{tt}.SemiAxes;      % [a, b]
+                                    rotation = atRoiInput{tt}.RotationAngle; % Angle in degrees
+                                                                        
+                                    theta = linspace(0, 2*pi, 360); % 360 points around the ellipse
+                                    x = semiAxes(1) * cos(theta);   % Semi-major axis scaling
+                                    y = semiAxes(2) * sin(theta);   % Semi-minor axis scaling
+                                    
+                                    dRotationRad = deg2rad(-rotation); % Convert degrees to radians
+                                    R = [cos(dRotationRad), -sin(dRotationRad); sin(dRotationRad), cos(dRotationRad)];
+                                    aRotatedPoints = R * [x; y];      % Rotate points
+                                    
+                                    % Translate to the center position
+                                    xEllipse = aRotatedPoints(1, :) + aCenter(1); % X-coordinates of the ellipse
+                                    yEllipse = aRotatedPoints(2, :) + aCenter(2); % Y-coordinates of the ellipse  
+
+                                    xy = [xEllipse; yEllipse]';
+
+                                end
+                            end
 
                             aBoundaries = zeros(size(xy, 1),2);
 
@@ -285,14 +390,17 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                 
                             a3DOffset(:,1)=xy(:,1)-1;
                             a3DOffset(:,2)=xy(:,2)-1;
+
                             if numel(atDicomMeta) ~= 1
-                                a3DOffset(:,3)=atRoiInput{tt}.SliceNb-1;
+
+                                a3DOffset(:,3) = atRoiInput{tt}.SliceNb-1;
                             else
-                                a3DOffset(:,3)=atRoiInput{tt}.SliceNb;
+                                a3DOffset(:,3) = atRoiInput{tt}.SliceNb;
                             end
 %                            a3DOffset(:,3)=atDicomMeta{atRoiInput{tt}.SliceNb}.SliceLocation;
 
                             if bFlip == true
+
                                 a3DOffset(:,3) = dZsize-a3DOffset(:,3);
                             end
                                 
@@ -310,6 +418,7 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                             
 %                            aZ = out.Location(:,3);
                             aZ = zeros(dNBoundaries, 1);
+
                             if numel(atDicomMeta) == 1
 %                                aZ(:) = a3DOffset(:,3);                                
                                 aZ = outZ(:);                                
@@ -361,8 +470,8 @@ function writeRtStruct(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomBuffer
                          else
                             aBoundaries = zeros(size(atRoiInput{tt}.Position, 1),2);
 
-                            aBoundaries(:,1)=atRoiInput{tt}.Position(:,2);
-                            aBoundaries(:,2)=atRoiInput{tt}.Position(:,1);
+                            aBoundaries(:,1) = atRoiInput{tt}.Position(:,2);
+                            aBoundaries(:,2) = atRoiInput{tt}.Position(:,1);
 
                             dNBoundaries = size(aBoundaries,1);
 

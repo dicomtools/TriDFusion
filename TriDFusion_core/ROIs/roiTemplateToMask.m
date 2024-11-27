@@ -26,6 +26,8 @@ function aLogicalMask = roiTemplateToMask(tRoi, aSlice)
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+    
+    USE_VERTICES = false;
 
     aPosition = tRoi.Position;
     sType     = tRoi.Type;
@@ -60,8 +62,53 @@ function aLogicalMask = roiTemplateToMask(tRoi, aSlice)
 %            rectMask(top:bottom,left:right) = 1; % rectMask( Y values, X values)
             
 %            aLogicalMask = logical(rectMask);
+
+
+
+        if USE_VERTICES == true
+
             xy = tRoi.Vertices;
             aLogicalMask = poly2mask(xy(:, 1), xy(:, 2), size(aSlice,1), size(aSlice,2));
+        else
+            dRotation = tRoi.RotationAngle;  % Rotation angle in degrees
+            
+            % Step 1: Apply rotation (if any)
+            
+            if dRotation ~= 0 
+
+                theta = deg2rad(dRotation); % Rotation in degrees
+                
+                % Rotation matrices 
+                R = [cos(theta), -sin(theta);
+                     sin(theta),  cos(theta)];
+                
+                aCoords = tRoi.Position(:, 1:2); % Extract X, Y coordinates
+                
+                aCenter = [size(aSlice, 1)/2, size(aSlice, 2)/2];     
+        
+                aTranslatedCoords = aCoords - aCenter; % Translate points to align image center with origin
+                
+                aRotatedCoords = (R * aTranslatedCoords')'; % Apply the rotation matrix
+                
+                atRoiInput{tt}.Position(:, 1:2) = aRotatedCoords + aCenter; % Translate points back to original position     
+            end
+
+            aCorner1 = [tRoi.Position(1), tRoi.Position(2)];  
+            dWidth   = tRoi.Position(3);
+            dHeight  = tRoi.Position(4);
+
+            % Generate the coordinates of the four corners
+
+            aCorner2 = [aCorner1(1), aCorner1(2) + dHeight];           % [x1, y2]
+            aCorner3 = [aCorner1(1) + dWidth, aCorner1(2) + dHeight];  % [x2, y2]
+            aCorner4 = [aCorner1(1) + dWidth, aCorner1(2)];            % [x2, y1]
+            
+            % Combine all corners into one variable
+            xy = [aCorner1; aCorner2; aCorner3; aCorner4];
+            
+            aLogicalMask = poly2mask(xy(:,1), xy(:,2), size(aSlice, 1), size(aSlice, 2));    
+
+        end
 
         case 'images.roi.ellipse'
             
@@ -83,9 +130,34 @@ function aLogicalMask = roiTemplateToMask(tRoi, aSlice)
 %            Xr = R*X + X_cen;
 %            x = Xr(1,:);
 %            y = Xr(2,:);
-            
+
+        if USE_VERTICES == true
+
             xy = tRoi.Vertices;
             aLogicalMask = poly2mask(xy(:, 1), xy(:, 2), size(aSlice,1), size(aSlice,2));
+        else
+
+            aCenter  = tRoi.Position;      % [x, y]
+            semiAxes = tRoi.SemiAxes;      % [a, b]
+            rotation = tRoi.RotationAngle; % Angle in degrees
+            
+            aImgSize = [size(aSlice, 1), size(aSlice, 2)]; % [rows, cols]
+            
+            theta = linspace(0, 2*pi, 360); % 360 points around the ellipse
+            x = semiAxes(1) * cos(theta);   % Semi-major axis scaling
+            y = semiAxes(2) * sin(theta);   % Semi-minor axis scaling
+            
+            dRotationRad = deg2rad(-rotation); % Convert degrees to radians
+            R = [cos(dRotationRad), -sin(dRotationRad); sin(dRotationRad), cos(dRotationRad)];
+            aRotatedPoints = R * [x; y];      % Rotate points
+            
+            % Translate to the center position
+            xEllipse = aRotatedPoints(1, :) + aCenter(1); % X-coordinates of the ellipse
+            yEllipse = aRotatedPoints(2, :) + aCenter(2); % Y-coordinates of the ellipse
+            
+            % Generate the logical mask
+            aLogicalMask = poly2mask(xEllipse, yEllipse, aImgSize(1), aImgSize(2));    
+        end
 %            aLogicalMask = poly2mask(x(:),y(:), size(aSlice,1), size(aSlice,2));
      
                        
@@ -101,10 +173,26 @@ function aLogicalMask = roiTemplateToMask(tRoi, aSlice)
 %            x = radius * cos(theta) + xCenter;
 %            y = radius * sin(theta) + yCenter;
 
-%            aLogicalMask = poly2mask(x(:),y(:), size(aSlice,1), size(aSlice,2));            
+%            aLogicalMask = poly2mask(x(:),y(:), size(aSlice,1), size(aSlice,2));   
+
+
+
+        if USE_VERTICES == true
 
             xy = tRoi.Vertices;
             aLogicalMask = poly2mask(xy(:, 1), xy(:, 2), size(aSlice,1), size(aSlice,2));
+        else
+            aCenter = tRoi.Position;        % [x, y]
+            dRadius = tRoi.Radius;          % Radius of the circle
+            
+            aImgSize = [size(aSlice, 1), size(aSlice, 2)]; % [rows, cols]
+            
+            theta = linspace(0, 2*pi, 360); % 360 points around the circle
+            xCircle = dRadius * cos(theta) + aCenter(1); % X-coordinates of the circle
+            yCircle = dRadius * sin(theta) + aCenter(2); % Y-coordinates of the circle
+            
+            aLogicalMask = poly2mask(xCircle, yCircle, aImgSize(1), aImgSize(2));    
+        end
                                                 
         otherwise
 

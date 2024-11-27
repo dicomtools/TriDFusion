@@ -1,5 +1,5 @@
-function aSphereMask = getSphereMask(aDicomBuffer, xPixelOffset, yPixelOffset, zPixelOffset, dRadius)
-%function aSphereMask = getSphereMask(aDicomBuffer, xPixelOffset, yPixelOffset, zPixelOffset, dRadius)
+function aSphereMask = getSphereMask(aDicomBuffer, xPixelOffset, yPixelOffset, zPixelOffset, dRadius,xPixel, yPixel, zPixel)
+%function aSphereMask = getSphereMask(aDicomBuffer, xPixelOffset, yPixelOffset, zPixelOffset, dRadius,xPixel, yPixel, zPixel)
 %Create a 3D shere mask.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -26,8 +26,22 @@ function aSphereMask = getSphereMask(aDicomBuffer, xPixelOffset, yPixelOffset, z
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
- 
-    [px,py,pz] = meshgrid(1:size(aDicomBuffer,2), 1:size(aDicomBuffer,1), 1:size(aDicomBuffer,3));
-    xc = xPixelOffset; yc = yPixelOffset; zc = zPixelOffset; % Center of sphere
-    aSphereMask = (px-xc).^2 + (py-yc).^2 + (pz-zc).^2 <=dRadius*dRadius;  
+
+    % Generate the meshgrid 
+
+    [px, py, pz] = meshgrid(1:size(aDicomBuffer,2), 1:size(aDicomBuffer,1), 1:size(aDicomBuffer,3));
+    
+    px = px * xPixel; % Scale by x pixel size
+    py = py * yPixel; % Scale by y pixel size
+    pz = pz * zPixel; % Scale by z pixel size
+    
+    % Define the center of the sphere 
+
+    xc = xPixelOffset * xPixel; 
+    yc = yPixelOffset * yPixel; 
+    zc = zPixelOffset * zPixel;
+    
+    % Create the sphere mask
+    
+    aSphereMask = (px - xc).^2 + (py - yc).^2 + (pz - zc).^2 <= (dRadius)^2;
 end
