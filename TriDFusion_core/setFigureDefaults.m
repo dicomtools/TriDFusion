@@ -55,5 +55,5 @@ function setFigureDefaults(fiWindow)
     set(fiWindow, 'Colormap', parula);  
     
     % Set CloseRequestFcn to 'closereq' (standard behavior)
-    set(fiWindow, 'CloseRequestFcn', 'closereq');
+    set(fiWindow, 'CloseRequestFcn', 'closeFigure');
 end
