@@ -367,8 +367,7 @@ function TriDFusion(varargin)
                     mkdir(sTmpDir);
 
                     if ispc
-
-                        cmd = sprintf('robocopy "%s" "%s" /MIR /R:0 /W:0 /MT:32 /Z /NFL /NDL /NC /NS /NP',asMainDir{jj}, sTmpDir);
+                        cmd = sprintf('robocopy "%s" "%s" /MIR /R:0 /W:0 /MT:32 /Z /NFL /NDL /NC /NS /NP > nul 2>&1', asMainDir{jj}, sTmpDir);
                         system(cmd);
                                                
                     elseif isunix

@@ -106,7 +106,7 @@ function setSourceCallback(~, ~)
 
                 if ispc
 
-                    cmd = sprintf('robocopy "%s" "%s" /MIR /R:0 /W:0 /MT:32 /Z /NFL /NDL /NC /NS /NP',sMainDir{1}, sTmpDir);
+                    cmd = sprintf('robocopy "%s" "%s" /MIR /R:0 /W:0 /MT:32 /Z /NFL /NDL /NC /NS /NP > nul 2>&1',sMainDir{1}, sTmpDir);
                     system(cmd);
                                         
                 elseif isunix
