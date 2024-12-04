@@ -262,7 +262,8 @@ function [asFilesList, atDicomInfo, aDicomBuffer] = readDicomFolder(asMainDirect
 
                             for sc=1:dNbSc
                                 
-                                if numel(size(tDatasets.DicomBuffers{sc})) == size(tDatasets.DicomBuffers{sc}, 1) * size(tDatasets.DicomBuffers{sc}, 2) * 1 * 3
+                                if numel(tDatasets.DicomBuffers{sc}) == ... % RGB
+                                   size(tDatasets.DicomBuffers{sc}, 1) * size(tDatasets.DicomBuffers{sc}, 2) * 1 * 3
                         
 
                                     if dNbSc > 1
@@ -272,7 +273,7 @@ function [asFilesList, atDicomInfo, aDicomBuffer] = readDicomFolder(asMainDirect
                                     asFilesList{dNbEntry}  = tDatasets.FileNames;
                                     atDicomInfo{dNbEntry}  = tDatasets.DicomInfos;
                                     aDicomBuffer{dNbEntry}{1} = reshape(tDatasets.DicomBuffers{sc}, [size(tDatasets.DicomBuffers{sc}, 1), size(tDatasets.DicomBuffers{sc}, 2), 1, 3]);
-                                else                             
+                                else % Gray                            
                                     aTemp{1} = tDatasets.DicomBuffers{sc}(:,:);
 
                                     aDicomBuffer{dNbEntry} = aTemp;
