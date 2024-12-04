@@ -76,60 +76,63 @@ function catchKeyPress(~,evnt)
 
     if strcmpi(evnt.Key,'b') % Activate the brush
 
-        if isMoveImageActivated('get') == false && ...
-           switchTo3DMode('get')       == false && ...
-           switchToIsoSurface('get')   == false && ...
-           switchToMIPMode('get')      == false
+        if isMoveImageActivated('get') == true || ...
+           switchTo3DMode('get')       == true || ...
+           switchToIsoSurface('get')   == true || ...
+           switchToMIPMode('get')      == true || ...
+           is2DScissor('get')          == true
+            
+            return;
+        end 
 
-            atRoiMenu = roiMenuObject('get');
+        atRoiMenu = roiMenuObject('get');
 
-            if ~isempty(atRoiMenu)
+        if ~isempty(atRoiMenu)
 
-                for ii=1:numel(atRoiMenu.Children)
+            for ii=1:numel(atRoiMenu.Children)
 
-                    toggleTool = atRoiMenu.Children(ii);
-                    
-                    clickedCallback = func2str(toggleTool.ClickedCallback);
-                    % if isempty(toggleTool.OnCallback)
-                    %     onCallback = '';
-                    % else
-                    %     onCallback = func2str(toggleTool.OnCallback);
-                    % end
+                toggleTool = atRoiMenu.Children(ii);
+                
+                clickedCallback = func2str(toggleTool.ClickedCallback);
+                % if isempty(toggleTool.OnCallback)
+                %     onCallback = '';
+                % else
+                %     onCallback = func2str(toggleTool.OnCallback);
+                % end
 
-                    if contains(clickedCallback, 'set2DBrushCallback') 
+                if contains(clickedCallback, 'set2DBrushCallback') 
 
-                        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+                    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-                        callbackFunction = get(toggleTool, 'ClickedCallback');  
+                    callbackFunction = get(toggleTool, 'ClickedCallback');  
 
-                        % set(toggleTool, 'State', 'on');
+                    % set(toggleTool, 'State', 'on');
 
-                        windowButton('set', 'down');
+                    windowButton('set', 'down');
 
-                        pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
+                    pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
 
-                        if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
- 
-                            if pAxe ~= axes1Ptr('get', [], dSeriesOffset) && ... % Coronal
-                               pAxe ~= axes2Ptr('get', [], dSeriesOffset) && ... % Sagittal
-                               pAxe ~= axes3Ptr('get', [], dSeriesOffset)        % Axial
+                    if size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3) ~= 1
 
-                                pAxe = axes3Ptr('get', [], dSeriesOffset);
-    
-                            end
+                        if pAxe ~= axes1Ptr('get', [], dSeriesOffset) && ... % Coronal
+                           pAxe ~= axes2Ptr('get', [], dSeriesOffset) && ... % Sagittal
+                           pAxe ~= axes3Ptr('get', [], dSeriesOffset)        % Axial
+
+                            pAxe = axes3Ptr('get', [], dSeriesOffset);
+
                         end
-
-                        callbackFunction(toggleTool, pAxe);
-                        
-                        % set(toggleTool, 'State', 'off');
-
-                        windowButton('set', 'up');
                     end
-    
-                end
-            end
 
+                    callbackFunction(toggleTool, pAxe);
+                    
+                    % set(toggleTool, 'State', 'off');
+
+                    windowButton('set', 'up');
+                end
+
+            end
         end
+
     end
 
     if strcmpi(evnt.Key,'shift') % Activate mouse up and down scroll mode
@@ -164,7 +167,9 @@ function catchKeyPress(~,evnt)
         if isMoveImageActivated('get') == true || ...
            switchTo3DMode('get')       == true || ...
            switchToIsoSurface('get')   == true || ...
-           switchToMIPMode('get')      == true
+           switchToMIPMode('get')      == true || ...
+           is2DBrush('get')            == true || ...
+           is2DScissor('get')          == true
 
             return;
         end       
@@ -204,10 +209,12 @@ function catchKeyPress(~,evnt)
         if isMoveImageActivated('get') == true || ...
            switchTo3DMode('get')       == true || ...
            switchToIsoSurface('get')   == true || ...
-           switchToMIPMode('get')      == true
-
+           switchToMIPMode('get')      == true || ...
+           is2DBrush('get')            == true || ...
+           is2DScissor('get')          == true
+            
             return;
-        end       
+        end    
 
         atRoiMenu = roiMenuObject('get');
 
@@ -245,8 +252,10 @@ function catchKeyPress(~,evnt)
         if isMoveImageActivated('get') == true || ...
            switchTo3DMode('get')       == true || ...
            switchToIsoSurface('get')   == true || ...
-           switchToMIPMode('get')      == true
-
+           switchToMIPMode('get')      == true || ...
+           is2DBrush('get')            == true || ...
+           is2DScissor('get')          == true
+            
             return;
         end       
         
@@ -300,7 +309,9 @@ function catchKeyPress(~,evnt)
         if isMoveImageActivated('get') == true || ...
            switchTo3DMode('get')       == true || ...
            switchToIsoSurface('get')   == true || ...
-           switchToMIPMode('get')      == true
+           switchToMIPMode('get')      == true || ...
+           is2DBrush('get')            == true || ...
+           is2DScissor('get')          == true
 
             return;
         end       
@@ -342,10 +353,12 @@ function catchKeyPress(~,evnt)
         if isMoveImageActivated('get') == true || ...
            switchTo3DMode('get')       == true || ...
            switchToIsoSurface('get')   == true || ...
-           switchToMIPMode('get')      == true
-
+           switchToMIPMode('get')      == true || ...
+           is2DBrush('get')            == true || ...
+           is2DScissor('get')          == true
+            
             return;
-        end       
+        end      
         
         atRoiMenu = roiMenuObject('get');
 
@@ -384,8 +397,8 @@ function catchKeyPress(~,evnt)
         if isMoveImageActivated('get') == true || ...
            switchTo3DMode('get')       == true || ...
            switchToIsoSurface('get')   == true || ...
-           switchToMIPMode('get')      == true
-
+           switchToMIPMode('get')      == true || ...
+           is2DBrush('get')            == true
             return;
         end       
         
@@ -1513,10 +1526,10 @@ function catchKeyPress(~,evnt)
         refreshImages();
     end
 
-    if strcmpi(evnt.Key,'d')  
-
- %       setDataCursorCallback();   
-    end
+ %    if strcmpi(evnt.Key,'d')  
+ % 
+ % %       setDataCursorCallback();   
+ %    end
 
     persistent pdColorOffset;
     persistent pdFusionColorOffset;

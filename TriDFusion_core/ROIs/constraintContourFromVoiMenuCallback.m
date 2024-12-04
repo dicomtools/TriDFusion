@@ -1,13 +1,13 @@
-function selectForContourReviewCallback(hObject, ~)
-%function selectForContourReviewCallback(hObject, ~)
-%Edit VOI and assiciated ROIs Label.
+function constraintContourFromVoiMenuCallback(hObject, ~)
+%function predefinedVoiLabelCallback(hObject,~)
+%Set VOIs constraint.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2024, Daniel Lafontaine, on behalf of the TriDFusion development team.
 %
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 %
@@ -27,44 +27,26 @@ function selectForContourReviewCallback(hObject, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if isMoveImageActivated('get') == true || ...
-       switchTo3DMode('get')       == true || ...
-       switchToIsoSurface('get')   == true || ...
-       switchToMIPMode('get')      == true
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-        return;
-    end
+    sConstraintType = get(hObject, 'Label');
 
-    atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value')); 
+    atVoiInput = voiTemplate('get', dSeriesOffset);
         
-    % Find the index where the Tag matches
-
     dVoiTagOffset = find(cellfun(@(c) any(strcmp(c.RoisTag, hObject.UserData.Tag)), atVoiInput), 1);
     
     if ~isempty(dVoiTagOffset)
 
-        seletVoiRoiPanelCallback = uiSelectVoiRoiPanelObject('get');
+        sConstraintTag  = atVoiInput{dVoiTagOffset}.Tag;
 
-        if ~isempty(seletVoiRoiPanelCallback)
-
-            try
-
-            set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-            drawnow update;
-
-            callbackFunction = get(seletVoiRoiPanelCallback, 'Callback');                  
-
-            callbackFunction(hObject.Parent.UserData, dVoiTagOffset);
-
-            catch
-                progressBar(1, 'Error:selectForContourReviewCallback()');
-            end
-
-            set(fiMainWindowPtr('get'), 'Pointer', 'default');
-            drawnow update;
-
-        end
-      
+        roiConstraintList('set', dSeriesOffset, sConstraintTag, sConstraintType);
+           
+        for tt=1:numel(atVoiInput{dVoiTagOffset}.RoisTag)
+    
+            sConstraintTag = atVoiInput{dVoiTagOffset}.RoisTag{tt};
+            
+            roiConstraintList('set', dSeriesOffset, sConstraintTag, sConstraintType, true);
+        end            
+                          
     end
-
 end

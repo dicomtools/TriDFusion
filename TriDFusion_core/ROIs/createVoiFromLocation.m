@@ -476,22 +476,30 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
                                                            'Visible'       , 'off', ...
                                                            'FaceSelectable', 0, ...
                                                            'FaceAlpha'     , roiFaceAlphaValue('get')); 
-                                pRoi.Waypoints(:) = false;
+
+                                if ~isempty(pRoi.Waypoints(:))
+                                    
+                                    pRoi.Waypoints(:) = false;
+                                end
             
                                 addRoi(pRoi, dSeriesOffset, sLesionType);                  
-
-                                voiDefaultMenu(pRoi);
-            
-                                roiDefaultMenu(pRoi);
-            
-                                uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback); 
-                                uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', pRoi, 'Callback', @clearWaypointsCallback); 
                                 
-                                constraintMenu(pRoi);
-            
-                                cropMenu(pRoi);
-            
-                                uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');          
+                                addRoiMenu(pRoi);
+
+                                addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+                                addlistener(pRoi, 'WaypointRemoved', @waypointEvents);                              
+                                % voiDefaultMenu(pRoi);
+                                % 
+                                % roiDefaultMenu(pRoi);
+                                % 
+                                % uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback); 
+                                % uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', pRoi, 'Callback', @clearWaypointsCallback); 
+                                % 
+                                % constraintMenu(pRoi);
+                                % 
+                                % cropMenu(pRoi);
+                                % 
+                                % uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');          
 
 %                                 asTag{numel(asTag)+1} = sTag;
                                 asTag{dTagOffset} = sTag;

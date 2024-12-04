@@ -161,25 +161,34 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
                                                'FaceAlpha'     , roiFaceAlphaValue('get'));  
 
                     if bPixelEdge == true
+                        
                         reduce(pRoi);
                     end   
 
-                    pRoi.Waypoints(:) = false;
+                    if ~isempty(pRoi.Waypoints(:))
+
+                        pRoi.Waypoints(:) = false;
+                    end
 
                     addRoi(pRoi, dSeriesOffset, sLesionType);                  
-                    
-                    voiDefaultMenu(pRoi);
 
-                    roiDefaultMenu(pRoi);
+                    addRoiMenu(pRoi);
+    
+                    addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+                    addlistener(pRoi, 'WaypointRemoved', @waypointEvents); 
 
-                    uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback); 
-                    uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', pRoi, 'Callback', @clearWaypointsCallback); 
-                    
-                    constraintMenu(pRoi);
-
-                    cropMenu(pRoi);
-                
-                    uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on'); 
+                    % voiDefaultMenu(pRoi);
+                    % 
+                    % roiDefaultMenu(pRoi);
+                    % 
+                    % uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback); 
+                    % uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', pRoi, 'Callback', @clearWaypointsCallback); 
+                    % 
+                    % constraintMenu(pRoi);
+                    % 
+                    % cropMenu(pRoi);
+                    % 
+                    % uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on'); 
 
                %     set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
 

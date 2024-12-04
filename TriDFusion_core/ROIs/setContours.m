@@ -54,7 +54,7 @@ function setContours(tContours, bInitDisplay)
 %    try
             
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-    drawnow; 
+    drawnow update; 
     
     for bb=1:numel(atInput)
 
@@ -257,7 +257,7 @@ function setContours(tContours, bInitDisplay)
 %    end  
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
-    drawnow; 
+    drawnow update; 
     
 %    % From Use DICOM RT for 3D Semantic Segmentation of Medical images
 %    % by Takuji Fukumoto

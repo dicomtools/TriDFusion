@@ -105,7 +105,8 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
                 end
 
                  if size(B2{dSecondBoundaryOffset}, 1) > 10
-                      addFreehandRoi([B2{dSecondBoundaryOffset}(:, 2), B2{dSecondBoundaryOffset}(:, 1)], dVoiOffset, hf.Color, sLesionType, dSerieOffset);
+
+                      addFreehandRoi(he.Parent, [B2{dSecondBoundaryOffset}(:, 2), B2{dSecondBoundaryOffset}(:, 1)], dVoiOffset, hf.Color, sLesionType, dSerieOffset);
                  end
             else
                 dBoundaryOffset = 1;
@@ -155,9 +156,9 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
         % end
     end
 
-    function addFreehandRoi(aPosition, dVoiOffset, aColor, sLesionType, dSerieOffset)
+    function addFreehandRoi(pAxe, aPosition, dVoiOffset, aColor, sLesionType, dSerieOffset)
 
-        pAxe = gca(fiMainWindowPtr('get'));
+        % pAxe = gca(fiMainWindowPtr('get'));
 
         % pAxe = getAxeFromMousePosition(get(uiSeriesPtr('get'), 'Value'));
         %
@@ -167,28 +168,37 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
 
         sRoiTag = num2str(randi([-(2^52/2),(2^52/2)],1));
 
-        pRoi = drawfreehand(pAxe, 'Color', aColor,'Position', aPosition, 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', sRoiTag, 'FaceSelectable', 1, 'FaceAlpha', 0);
-        pRoi.FaceAlpha = roiFaceAlphaValue('get');
+        pRoi = images.roi.Freehand(pAxe, 'Color', aColor,'Position', aPosition, 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', sRoiTag, 'FaceSelectable', 1, 'FaceAlpha', roiFaceAlphaValue('get'));
 
-        pRoi.Waypoints(:) = false;
-        pRoi.InteractionsAllowed = 'none';
+        if ~isempty(pRoi.Waypoints(:))
 
+            pRoi.Waypoints(:) = false;
+        end
+        
         % Add ROI right click menu
 
         addRoi(pRoi, dSerieOffset, sLesionType);
+        
+        addRoiMenu(pRoi);
 
-        voiDefaultMenu(pRoi);
+        addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+        addlistener(pRoi, 'WaypointRemoved', @waypointEvents);  
 
-        roiDefaultMenu(pRoi);
+        pRoi.InteractionsAllowed = 'none';
 
-        uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
-        uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
-
-        constraintMenu(pRoi);
-
-        cropMenu(pRoi);
-
-        uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+        % 
+        % voiDefaultMenu(pRoi);
+        % 
+        % roiDefaultMenu(pRoi);
+        % 
+        % uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
+        % uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
+        % 
+        % constraintMenu(pRoi);
+        % 
+        % cropMenu(pRoi);
+        % 
+        % uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
         if ~isempty(dVoiOffset)
 
@@ -198,13 +208,13 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
 
             atRoiInput = roiTemplate('get', dSerieOffset);
 
-            if ~isempty(atRoiInput)
+            % if ~isempty(atRoiInput)
+            % 
+            %     dTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), sRoiTag ), 1);
+            % 
+            %     if ~isempty(dTagOffset)
 
-                dTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), sRoiTag ), 1);
-
-                if ~isempty(dTagOffset)
-
-                    voiDefaultMenu(atRoiInput{dTagOffset}.Object, atVoiInput{dVoiOffset}.Tag);
+                    % voiDefaultMenu(atRoiInput{dTagOffset}.Object, atVoiInput{dVoiOffset}.Tag);
 
                     dNbTags = numel(atVoiInput{dVoiOffset}.RoisTag);
 
@@ -223,12 +233,13 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
                             atRoiInput{dTagOffset}.Label = sLabel;
                             atRoiInput{dTagOffset}.Object.Label = sLabel;
                             atRoiInput{dTagOffset}.ObjectType  = 'voi-roi';
+                            atRoiInput{dTagOffset}.Object.UserData = 'voi-roi';
                         end
                     end
 
-                end
-
-            end
+            %     end
+            % 
+            % end
 
             roiTemplate('set', dSerieOffset, atRoiInput);
             voiTemplate('set', dSerieOffset, atVoiInput);

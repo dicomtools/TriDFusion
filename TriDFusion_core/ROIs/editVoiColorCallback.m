@@ -33,24 +33,24 @@ function editVoiColorCallback(hObject,~)
     atRoiInput = roiTemplate('get', dSeriesOffset);                
 
     if isempty(atVoiInput) 
+        
         return;
     end
 
-    dVoiTagOffset = find(strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), hObject.UserData ) );       
-    if ~isempty(dVoiTagOffset)
-        aColor = atVoiInput{dVoiTagOffset}.Color;
-    else
-        aColor = '';
-    end
-
-    aColor = uisetcolor(aColor,'Select a color');
-    if aColor == 0
-        return;
-    end            
+    dVoiTagOffset = find(cellfun(@(c) any(strcmp(c.RoisTag, hObject.UserData.Tag)), atVoiInput), 1);         
    
-    dVoiTagOffset = find(strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), hObject.UserData ) );
-
     if ~isempty(dVoiTagOffset)
+
+        if ~isempty(dVoiTagOffset)
+            aColor = atVoiInput{dVoiTagOffset}.Color;
+        else
+            aColor = '';
+        end
+    
+        aColor = uisetcolor(aColor,'Select a color');
+        if aColor == 0
+            return;
+        end   
 
         atVoiInput{dVoiTagOffset}.Color = aColor;
 

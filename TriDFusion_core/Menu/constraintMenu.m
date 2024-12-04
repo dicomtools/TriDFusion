@@ -1,5 +1,5 @@
-function constraintMenu(ptrRoi)
-%function constraintMenu(ptrRoi)
+function constraintMenu(ptrObject)
+%function constraintMenu(ptrObject)
 %Add Constraint to ROI.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -26,9 +26,17 @@ function constraintMenu(ptrRoi)
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-            
+
+    if strcmpi(ptrObject.Type, 'uimenu')
+        mUIContextMenu = ptrObject;
+        ptrRoi = ptrObject.UserData;
+    else
+        mUIContextMenu = ptrObject.UIContextMenu;
+        ptrRoi = ptrObject;
+    end
+
     mConstraint = ...
-        uimenu(ptrRoi.UIContextMenu, ...
+        uimenu(mUIContextMenu, ...
                'Label'    , 'Constraint' , ...
                'UserData' , ptrRoi, ...
                'Callback' , @setRoiConstraintCheckedCallback, ...

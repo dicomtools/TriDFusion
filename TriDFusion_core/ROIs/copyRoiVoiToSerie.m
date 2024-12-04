@@ -885,19 +885,21 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
                                              'Visible'            , 'off' ...
                                              );
                 roiPtr.Waypoints(:) = tRoi.Waypoints(:);
+                
+                addRoiMenu(roiPtr);
 
-                voiDefaultMenu(roiPtr);
-
-                roiDefaultMenu(roiPtr);
-
-                uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
-                uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', roiPtr, 'Callback', @clearWaypointsCallback);
-
-                constraintMenu(roiPtr);
-
-                cropMenu(roiPtr);
-
-                uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                % voiDefaultMenu(roiPtr);
+                % 
+                % roiDefaultMenu(roiPtr);
+                % 
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', roiPtr, 'Callback', @clearWaypointsCallback);
+                % 
+                % constraintMenu(roiPtr);
+                % 
+                % cropMenu(roiPtr);
+                % 
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
                 addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
                 addlistener(roiPtr, 'WaypointRemoved', @waypointEvents);
@@ -919,20 +921,23 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
                                                      'UserData'           , tRoi.UserData, ...
                                                      'Visible'            , 'off' ...
                                                      );
+
                 roiPtr.Waypoints(:) = tRoi.Waypoints(:);
 
-                voiDefaultMenu(roiPtr);
+                addRoiMenu(roiPtr);
 
-                roiDefaultMenu(roiPtr);
-
-                uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
-                uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', roiPtr, 'Callback', @clearWaypointsCallback);
-
-                constraintMenu(roiPtr);
-
-                cropMenu(roiPtr);
-
-                uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                % voiDefaultMenu(roiPtr);
+                % 
+                % roiDefaultMenu(roiPtr);
+                % 
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', roiPtr, 'Callback', @clearWaypointsCallback);
+                % 
+                % constraintMenu(roiPtr);
+                % 
+                % cropMenu(roiPtr);
+                % 
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
                 addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
                 addlistener(roiPtr, 'WaypointRemoved', @waypointEvents);
@@ -953,18 +958,19 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
                                             'UserData'           , tRoi.UserData, ...
                                             'Visible'            , 'off' ...
                                             );
+                addRoiMenu(roiPtr);
 
-                voiDefaultMenu(roiPtr);
-
-                roiDefaultMenu(roiPtr);
-
-                uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
-
-                constraintMenu(roiPtr);
-
-                cropMenu(roiPtr);
-
-                uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                % voiDefaultMenu(roiPtr);
+                % 
+                % roiDefaultMenu(roiPtr);
+                % 
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
+                % 
+                % constraintMenu(roiPtr);
+                % 
+                % cropMenu(roiPtr);
+                % 
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
             case lower('images.roi.circle')
 
@@ -983,16 +989,17 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
                                            'UserData'           , tRoi.UserData, ...
                                            'Visible'            , 'off' ...
                                            );
+                addRoiMenu(roiPtr);
 
-                voiDefaultMenu(roiPtr);
-
-                roiDefaultMenu(roiPtr);
-
-                constraintMenu(roiPtr);
-
-                cropMenu(roiPtr);
-
-                uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                % voiDefaultMenu(roiPtr);
+                % 
+                % roiDefaultMenu(roiPtr);
+                % 
+                % constraintMenu(roiPtr);
+                % 
+                % cropMenu(roiPtr);
+                % 
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
             case lower('images.roi.ellipse')
 
@@ -1013,18 +1020,19 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
                                             'UserData'           , tRoi.UserData, ...
                                             'Visible'            , 'off' ...
                                             );
+                addRoiMenu(roiPtr);
 
-                voiDefaultMenu(roiPtr);
-
-                roiDefaultMenu(roiPtr);
-
-                uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
-
-                constraintMenu(roiPtr);
-
-                cropMenu(roiPtr);
-
-                uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                % voiDefaultMenu(roiPtr);
+                % 
+                % roiDefaultMenu(roiPtr);
+                % 
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
+                % 
+                % constraintMenu(roiPtr);
+                % 
+                % cropMenu(roiPtr);
+                % 
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
             case lower('images.roi.rectangle')
 
@@ -1045,18 +1053,19 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
                                               'UserData'           , tRoi.UserData, ...
                                               'Visible'            , 'off' ...
                                               );
+                addRoiMenu(roiPtr);
 
-                voiDefaultMenu(roiPtr);
-
-                roiDefaultMenu(roiPtr);
-
-                uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
-
-                constraintMenu(roiPtr);
-
-                cropMenu(roiPtr);
-
-                uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics' , 'UserData', roiPtr, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
+                % voiDefaultMenu(roiPtr);
+                % 
+                % roiDefaultMenu(roiPtr);
+                % 
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', roiPtr, 'Callback', @hideViewFaceAlhaCallback);
+                % 
+                % constraintMenu(roiPtr);
+                % 
+                % cropMenu(roiPtr);
+                % 
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics' , 'UserData', roiPtr, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
 
         end
 

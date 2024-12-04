@@ -27,38 +27,40 @@ function constraintContourFromMenuCallback(hObject, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
     sConstraintType = get(hObject, 'Label');
     sConstraintTag  = get(hObject, 'UserData');
 
-%    aVoiRoiTag = voiRoiTag('get');
+    atVoiInput = voiTemplate('get', dSeriesOffset);
 
-    atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-
-    roiConstraintList('set', get(uiSeriesPtr('get'), 'Value'), sConstraintTag, sConstraintType);
+    roiConstraintList('set', dSeriesOffset, sConstraintTag, sConstraintType);
     
     if ~isempty(atVoiInput)
         
-        aTagOffset = strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), sConstraintTag);
-        dRoiVoiTagOffset = find(aTagOffset, 1);   
+        dRoiVoiTagOffset = find(strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), sConstraintTag), 1);
     
         if ~isempty(dRoiVoiTagOffset) % tag is a voi
 
-            [asConstraintTagList, ~] = roiConstraintList('get', get(uiSeriesPtr('get'), 'Value') );
+            [asConstraintTagList, ~] = roiConstraintList('get', dSeriesOffset);
 
             bIsVoiActive = false;
 
             if ~isempty(asConstraintTagList)
-                aTagOffset = strcmp( cellfun( @(asConstraintTagList) asConstraintTagList, asConstraintTagList, 'uni', false ), sConstraintTag);
-                dVoiTagOffset = find(aTagOffset, 1);   
+
+                dVoiTagOffset = find(strcmp( cellfun( @(asConstraintTagList) asConstraintTagList, asConstraintTagList, 'uni', false ), sConstraintTag), 1);
 
                 if ~isempty(dVoiTagOffset) % tag is active
+
                     bIsVoiActive = true;
                 end        
             end
 
             for tt=1:numel(atVoiInput{dRoiVoiTagOffset}.RoisTag)
+
                 sConstraintTag = atVoiInput{dRoiVoiTagOffset}.RoisTag{tt};
-                roiConstraintList('set', get(uiSeriesPtr('get'), 'Value'), sConstraintTag, sConstraintType, bIsVoiActive);
+
+                roiConstraintList('set', dSeriesOffset, sConstraintTag, sConstraintType, bIsVoiActive);
             end            
         end         
     end

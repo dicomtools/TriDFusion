@@ -1,5 +1,5 @@
 TriDFusion 
-Version 1.29
+Version 1.30
 
 This software is provided "as is" and "with all faults." We make no representations or warranties of any kind regarding the safety, suitability, absence of viruses, accuracy, or freedom from typographical errors or other harmful components. The use of any software involves inherent risks, and you are solely responsible for determining its compatibility with your equipment and any other software installed on it. You are also solely responsible for protecting your equipment and backing up your data. We disclaim all liability for any damages you may incur in connection with the use, modification, or distribution of this software.
 

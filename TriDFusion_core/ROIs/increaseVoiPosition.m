@@ -1,5 +1,5 @@
-function increaseVoiPosition(sRoiTag, dNbPixels)
-%function increaseVoiPosition(sRoiTag, dNbPixels)
+function increaseVoiPosition(sVoiTag, dNbPixels)
+%function increaseVoiPosition(sVoiTag, dNbPixels)
 %Increase a VOI position by an number of pixels.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -35,7 +35,7 @@ function increaseVoiPosition(sRoiTag, dNbPixels)
         if isempty(atVoi)
             aTagOffset = 0;
         else
-            aTagOffset = strcmp( cellfun( @(atVoi) atVoi.Tag, atVoi, 'uni', false ), {sRoiTag} );
+            aTagOffset = strcmp( cellfun( @(atVoi) atVoi.Tag, atVoi, 'uni', false ), {sVoiTag} );
         end
         
         if aTagOffset(aTagOffset==1) % tag is a voi

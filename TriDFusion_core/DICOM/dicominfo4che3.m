@@ -35,7 +35,7 @@ if USE_DCM4CHEE == true
                 java.io.BufferedInputStream(java.io.FileInputStream(char(fileInput))));    
 
         dataset = din.readDataset(-1, -1);                  
-        % pixelDataBytes = dataset.getBytes(org.dcm4che3.data.Tag.PixelData);
+        % info.din.pixelData = dataset.getInts(org.dcm4che3.data.Tag.PixelData);
     catch 
         try 
             
@@ -91,11 +91,11 @@ end
     info.SeriesDescription  = char(dataset.getString(org.dcm4che3.data.Tag.SeriesDescription, 0));
     info.StudyDescription   = char(dataset.getString(org.dcm4che3.data.Tag.StudyDescription, 0));
 
-    info.Modality  = char(dataset.getStrings(org.dcm4che3.data.Tag.Modality));        
+    info.Modality  = char(dataset.getString(org.dcm4che3.data.Tag.Modality, 0));        
 
     info.InstanceNumber  = dataset.getInt(org.dcm4che3.data.Tag.InstanceNumber, 0);
 
-    info.PatientPosition         = char(dataset.getStrings(org.dcm4che3.data.Tag.PatientPosition));      
+    info.PatientPosition         = char(dataset.getString(org.dcm4che3.data.Tag.PatientPosition, 0));      
     info.ImagePositionPatient    = dataset.getDoubles(org.dcm4che3.data.Tag.ImagePositionPatient);
     info.ImageOrientationPatient = dataset.getDoubles(org.dcm4che3.data.Tag.ImageOrientationPatient);
     

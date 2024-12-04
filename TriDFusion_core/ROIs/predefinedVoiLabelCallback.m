@@ -36,7 +36,7 @@ function predefinedVoiLabelCallback(hObject,~)
    
     if ~isempty(atVoiInput) 
 
-        dVoiTagOffset = find(strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), hObject.UserData ) );
+        dVoiTagOffset = find(cellfun(@(c) any(strcmp(c.RoisTag, hObject.UserData.Tag)), atVoiInput), 1);
     
         if ~isempty(dVoiTagOffset)
 

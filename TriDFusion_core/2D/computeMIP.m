@@ -30,37 +30,49 @@ function imComputed = computeMIP(im)
     if canUseGPU()
 %         aImage = gpuArray(uint16(im));
         try    
+            bGPUArray = true;
+            
             aImage = gpuArray(single(im));
         catch
+            bGPUArray = false;
+            
             aImage = single(im);            
         end
     else
+        bGPUArray = false;
+
         aImage = single(im);
     end
 
     aSize = size(im);
-    imComputed = zeros(32, aSize(2), aSize(3));
+
+    if bGPUArray == true
+        imComputed = gpuArray.zeros(32, aSize(2), aSize(3), 'single'); % Preallocate on GPU if possible
+    else
+        imComputed = zeros(32, aSize(2), aSize(3), 'single');
+    end
+
+    angles = 11:11:351;
 
     imComputed(1,:,:) = max(im, [], 1);
-    cc = 2;
-    for rr=11:11:351
+
+    for  cc = 2:32
         
+        angle = angles(cc-1); % Corresponding angle 
+
         if mod(cc,4)==1 || cc == 32 || cc==2         
 
             progressBar(cc/32-0.00001, sprintf('Computing MIP angle %d/32', cc));               
         end
         
-
 %        aRotatedImage = imrotate3(im, rr, [0 0 1], 'linear','crop', 'FillValues', min(im, [], 'all'));
-        aRotatedImage = imrotate(aImage, rr, 'bilinear','crop');
-       
-        imComputed(cc,:,:) = squeeze(max(aRotatedImage, [], 1));
-        
-        cc = cc+1;
-        
+        aRotatedImage = imrotate(aImage, angle, 'bilinear', 'crop');
+
+        imComputed(cc,:,:) = max(aRotatedImage, [], 1);
+               
     end    
 
-    imComputed = gather(imComputed);
+    imComputed = gather(squeeze(imComputed));
 
     clear aImage;
     clear aRotatedImage;

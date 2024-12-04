@@ -114,6 +114,7 @@ function splitContour(pAxe, pRoiLinePtr)
                     atRoiInput = roiTemplate('get', dSeriesOffset);
 
                     dRoiOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ),  atVoiInput{dVoiOffset}.RoisTag(vo)), 1);
+
                     if ~isempty(dRoiOffset)
 
                         aRoiPos = atRoiInput{dRoiOffset}.Position;
@@ -259,27 +260,34 @@ function splitContour(pAxe, pRoiLinePtr)
                                          'Tag'                , sTag, ...
                                          'StripeColor'        , atRoiInput{dRoiOffset}.StripeColor, ...
                                          'InteractionsAllowed', atRoiInput{dRoiOffset}.InteractionsAllowed, ...                                                      
-                                         'UserData'           , atRoiInput{dRoiOffset}.UserData, ...   
+                                         'UserData'           , 'voi-roi', ...   
                                          'Visible'            , 'on' ...
                                          );  
                                      
-                        
-                            roiPtr.Waypoints(:) = false;
+                            if ~isempty(roiPtr.Waypoints(:))
+                                
+                                roiPtr.Waypoints(:) = false;
+                            end
                                                        
                             addRoi(roiPtr, dSeriesOffset, atRoiInput{dRoiOffset}.LesionType);
 
-                            voiDefaultMenu(roiPtr);
-            
-                            roiDefaultMenu(roiPtr);
-            
-                            uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',roiPtr, 'Callback', @hideViewFaceAlhaCallback);
-                            uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData',roiPtr, 'Callback', @clearWaypointsCallback);
-            
-                            constraintMenu(roiPtr);
-            
-                            cropMenu(roiPtr);
-                      
-                            uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                            addRoiMenu(roiPtr);
+                
+                            addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
+                            addlistener(roiPtr, 'WaypointRemoved', @waypointEvents); 
+
+                            % voiDefaultMenu(roiPtr);
+                            % 
+                            % roiDefaultMenu(roiPtr);
+                            % 
+                            % uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',roiPtr, 'Callback', @hideViewFaceAlhaCallback);
+                            % uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData',roiPtr, 'Callback', @clearWaypointsCallback);
+                            % 
+                            % constraintMenu(roiPtr);
+                            % 
+                            % cropMenu(roiPtr);
+                            % 
+                            % uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
                             asRoiTags{numel(asRoiTags)+1} = sTag;
 
@@ -334,6 +342,7 @@ function splitContour(pAxe, pRoiLinePtr)
                     end
                     
                     if bRemoveTagFromVoi == true
+
                         atVoiInput{dVoiOffset}.RoisTag(cellfun(@isempty, atVoiInput{dVoiOffset}.RoisTag)) = [];
                         voiTemplate('set', dSeriesOffset, atVoiInput);
                     end
@@ -540,22 +549,30 @@ function splitContour(pAxe, pRoiLinePtr)
                              );  
                          
             
-                roiPtr.Waypoints(:) = false;
+                if ~isempty(roiPtr.Waypoints(:))
+
+                    roiPtr.Waypoints(:) = false;
+                end
                                            
                 addRoi(roiPtr, dSeriesOffset, atRoiInput{dClosestRoiIndex}.LesionType);
 
-                voiDefaultMenu(roiPtr);
+                addRoiMenu(roiPtr);
+    
+                addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
+                addlistener(roiPtr, 'WaypointRemoved', @waypointEvents); 
 
-                roiDefaultMenu(roiPtr);
-
-                uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',roiPtr, 'Callback', @hideViewFaceAlhaCallback);
-                uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData',roiPtr, 'Callback', @clearWaypointsCallback);
-
-                constraintMenu(roiPtr);
-
-                cropMenu(roiPtr);
-
-                uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                % voiDefaultMenu(roiPtr);
+                % 
+                % roiDefaultMenu(roiPtr);
+                % 
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',roiPtr, 'Callback', @hideViewFaceAlhaCallback);
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData',roiPtr, 'Callback', @clearWaypointsCallback);
+                % 
+                % constraintMenu(roiPtr);
+                % 
+                % cropMenu(roiPtr);
+                % 
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
 
 %                 % Delete original ROI

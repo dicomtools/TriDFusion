@@ -854,34 +854,51 @@ function initRoiPanel()
 
         sRoiTag = num2str(randi([-(2^52/2),(2^52/2)],1));
 
-        pRoi = drawfreehand(pAxe, 'Color', atVoiInput{dVoiOffset}.Color, 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', sRoiTag, 'FaceSelectable', 1, 'FaceAlpha', 0);
+        pRoi = drawfreehand(pAxe, ...
+                           'Color'         , atVoiInput{dVoiOffset}.Color, ...
+                           'lineWidth'     , 1, ...
+                           'Label'         , roiLabelName(), ...
+                           'LabelVisible'  , 'off', ...
+                           'Tag'           , sRoiTag, ...
+                           'FaceSelectable', 0, ...
+                           'FaceAlpha'     , 0 ...
+                           );
 
         if numel(pRoi.Position) >2
+            
+            if ~isempty(pRoi.Waypoints(:))
+                
+                pRoi.Waypoints(:) = false;
+            end
 
-            pRoi.Waypoints(:) = false;
             pRoi.FaceAlpha = roiFaceAlphaValue('get');
+
+            % Add ROI right click menu
+
+            addRoi(pRoi, dSeriesOffset, atVoiInput{dVoiOffset}.LesionType);
+         
+            addRoiMenu(pRoi);
+
+            addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+            addlistener(pRoi, 'WaypointRemoved', @waypointEvents);
 
             if is2DBrush('get') == true
 
                 pRoi.InteractionsAllowed = 'none';
             end
 
-            % Add ROI right click menu
-
-            addRoi(pRoi, dSeriesOffset, atVoiInput{dVoiOffset}.LesionType);
-
-            voiDefaultMenu(pRoi);
-
-            roiDefaultMenu(pRoi);
-
-            uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
-            uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
-
-            constraintMenu(pRoi);
-
-            cropMenu(pRoi);
-
-            uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics' , 'UserData', pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+            % voiDefaultMenu(pRoi);
+            % 
+            % roiDefaultMenu(pRoi);
+            % 
+            % uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
+            % uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
+            % 
+            % constraintMenu(pRoi);
+            % 
+            % cropMenu(pRoi);
+            % 
+            % uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics' , 'UserData', pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
             % Add ROI to VOI
 
@@ -895,16 +912,17 @@ function initRoiPanel()
             if ~isempty(atRoi)
 
                 dTagOffset = find(strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {sRoiTag} ), 1);
-                if ~isempty(dTagOffset)
 
-                    atRoi{dTagOffset}.ObjectType  = 'voi-roi';
+                if ~isempty(dTagOffset)
 
                     sLabel = sprintf('%s (roi %d/%d)', atVoiInput{dVoiOffset}.Label, dRoiNb, dNbTags);
 
                     atRoi{dTagOffset}.Label = sLabel;
                     atRoi{dTagOffset}.Object.Label = sLabel;
+                    atRoi{dTagOffset}.ObjectType  = 'voi-roi';
+                    atRoi{dTagOffset}.Object.UserData = 'voi-roi';
 
-                    voiDefaultMenu(atRoi{dTagOffset}.Object, atVoiInput{dVoiOffset}.Tag);
+                    % voiDefaultMenu(atRoi{dTagOffset}.Object, atVoiInput{dVoiOffset}.Tag);
 
                 end
             end
@@ -3265,23 +3283,31 @@ function initRoiPanel()
 
                                 pRoi.Label = sLabel;
                             end
+                            
+                            if ~isempty(pRoi.Waypoints(:))
 
-                            pRoi.Waypoints(:) = false;
+                                pRoi.Waypoints(:) = false;
+                            end
 
                             addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
-                            roiDefaultMenu(pRoi);
+                            addRoiMenu(pRoi);
+                
+                            addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+                            addlistener(pRoi, 'WaypointRemoved', @waypointEvents);
 
-                            uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
-                            uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
-
-                            constraintMenu(pRoi);
-
-                            cropMenu(pRoi);
-
-%                             voiDefaultMenu(pRoi);
-
-                            uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+%                             roiDefaultMenu(pRoi);
+% 
+%                             uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
+%                             uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
+% 
+%                             constraintMenu(pRoi);
+% 
+%                             cropMenu(pRoi);
+% 
+% %                             voiDefaultMenu(pRoi);
+% 
+%                             uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
 %                             asTag{numel(asTag)+1} = sTag;
 %                             asTag{jj} = sTag;
@@ -3545,22 +3571,30 @@ function initRoiPanel()
 
 %                                if bAddRoi == true
 
-                                    pRoi.Waypoints(:) = false;
+                                    if ~isempty(pRoi.Waypoints(:))
+
+                                        pRoi.Waypoints(:) = false;
+                                    end
 
                                     addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
-                                    voiDefaultMenu(pRoi);
+                                    addRoiMenu(pRoi);
 
-                                    roiDefaultMenu(pRoi);
+                                    addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+                                    addlistener(pRoi, 'WaypointRemoved', @waypointEvents);
 
-                                    uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
-                                    uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
-
-                                    constraintMenu(pRoi);
-
-                                    cropMenu(pRoi);
-
-                                    uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                                    % voiDefaultMenu(pRoi);
+                                    % 
+                                    % roiDefaultMenu(pRoi);
+                                    % 
+                                    % uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
+                                    % uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
+                                    % 
+                                    % constraintMenu(pRoi);
+                                    % 
+                                    % cropMenu(pRoi);
+                                    % 
+                                    % uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
 %                                     asTag{numel(asTag)+1} = sTag;
                                     asTag{dTagOffset} = sTag;

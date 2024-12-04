@@ -104,7 +104,7 @@ function interpolateBetweenROIs(tRoi1, tRoi2, dSeriesOffset, bCreateVoi)
                         dTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {sRoi1Tag}), 1);
 
                         if ~isempty(dTagOffset)
-                            voiDefaultMenu(atRoiInput{dTagOffset}.Object, atVoiInput{dVoiOffset2}.Tag);
+                            % voiDefaultMenu(atRoiInput{dTagOffset}.Object, atVoiInput{dVoiOffset2}.Tag);
                             bEditRoisLabel = true;
                         end
 
@@ -117,7 +117,7 @@ function interpolateBetweenROIs(tRoi1, tRoi2, dSeriesOffset, bCreateVoi)
                         dTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {sRoi2Tag}), 1);
                         
                         if ~isempty(dTagOffset)
-                            voiDefaultMenu(atRoiInput{dTagOffset}.Object, atVoiInput{dVoiOffset1}.Tag);
+                            % voiDefaultMenu(atRoiInput{dTagOffset}.Object, atVoiInput{dVoiOffset1}.Tag);
                             bEditRoisLabel = true;
                         end
 
@@ -245,28 +245,44 @@ function interpolateBetweenROIs(tRoi1, tRoi2, dSeriesOffset, bCreateVoi)
             aColor = tRoi1.Color;
             sLesionType = tRoi1.LesionType;
 
-            pRoi = drawfreehand(pAxe, 'Color', aColor,'Position', aPosition, 'lineWidth', 1, 'Label', roiLabelName(), 'LabelVisible', 'off', 'Tag', sRoiTag, 'FaceSelectable', 1, 'FaceAlpha', 0);
-            pRoi.FaceAlpha = roiFaceAlphaValue('get');
+            pRoi = images.roi.Freehand(pAxe, ...
+                                       'Color'         , aColor, ...
+                                       'Position'      , aPosition, ...
+                                       'lineWidth'     , 1, ...
+                                       'Label'         , roiLabelName(), ...
+                                       'LabelVisible'  , 'off', ...
+                                       'Tag'           , sRoiTag, ...
+                                       'FaceSelectable', 0, ...
+                                       'FaceAlpha'     , roiFaceAlphaValue('get') ...
+                                       );
 
-            pRoi.Waypoints(:) = false;
+            if ~isempty(pRoi.Waypoints(:))
+                
+                pRoi.Waypoints(:) = false;
+            end
 %                     pRoi.InteractionsAllowed = 'none';
 
             % Add ROI right click menu
 
             addRoi(pRoi, dSeriesOffset, sLesionType);
 
-            voiDefaultMenu(pRoi);
+            addRoiMenu(pRoi);
 
-            roiDefaultMenu(pRoi);
+            addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+            addlistener(pRoi, 'WaypointRemoved', @waypointEvents); 
 
-            uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
-            uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
+            % voiDefaultMenu(pRoi);
+            % 
+            % roiDefaultMenu(pRoi);
+            % 
+            % uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
+            % uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
+            % 
+            % constraintMenu(pRoi);
+            % 
+            % cropMenu(pRoi);
 
-            constraintMenu(pRoi);
-
-            cropMenu(pRoi);
-
-            uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics' , 'UserData', pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+            % uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics' , 'UserData', pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
             if strcmpi(tRoi1.ObjectType, 'voi-roi') && ...
                strcmpi(tRoi2.ObjectType, 'voi-roi')
@@ -312,7 +328,7 @@ function interpolateBetweenROIs(tRoi1, tRoi2, dSeriesOffset, bCreateVoi)
 
                                 atVoiInput{dVoiOffset1}.RoisTag{end+1} = sRoiTag;
 
-                                voiDefaultMenu(atRoiInput{dNewRoiOffset}.Object, atVoiInput{dVoiOffset1}.Tag);
+                                % voiDefaultMenu(atRoiInput{dNewRoiOffset}.Object, atVoiInput{dVoiOffset1}.Tag);
                                 bEditRoisLabel = true;
                             end
                         end
@@ -378,7 +394,7 @@ function interpolateBetweenROIs(tRoi1, tRoi2, dSeriesOffset, bCreateVoi)
 
                             atVoiInput{dVoiOffset1}.RoisTag{end+1} = sRoiTag;
 
-                            voiDefaultMenu(atRoiInput{dNewRoiOffset}.Object, atVoiInput{dVoiOffset1}.Tag);
+                            % voiDefaultMenu(atRoiInput{dNewRoiOffset}.Object, atVoiInput{dVoiOffset1}.Tag);
                             bEditRoisLabel = true;
                         end
                     end
@@ -412,6 +428,7 @@ function interpolateBetweenROIs(tRoi1, tRoi2, dSeriesOffset, bCreateVoi)
                     atRoiInput{dTagOffset}.Label = sLabel;
                     atRoiInput{dTagOffset}.Object.Label = sLabel;
                     atRoiInput{dTagOffset}.ObjectType  = 'voi-roi';
+                    atRoiInput{dTagOffset}.Object.UserData = 'voi-roi';
                end
             end
         end

@@ -35,9 +35,14 @@ function setColorbarLabel()
     end
     
     sLabel = '';
-    
+
+    bSetLabel = false;
+
     if tInput(dSeriesOffset).bDoseKernel == true
+
         sLabel = sprintf('Dose');
+
+        bSetLabel = true;
     end
     
     if tInput(dSeriesOffset).bEdgeDetection == true
@@ -47,10 +52,15 @@ function setColorbarLabel()
         else
             sLabel = sprintf('Edge');
         end
-    end    
-                    
-    ptrColorbar = uiColorbarPtr('get');
 
-    ptrColorbar.Label.String = sLabel;         
-    uiColorbarPtr('set', ptrColorbar);
+        bSetLabel = true;
+    end    
+       
+    if bSetLabel == true
+        
+        ptrColorbar = uiColorbarPtr('get');
+    
+        ptrColorbar.Label.String = sLabel;         
+        uiColorbarPtr('set', ptrColorbar);
+    end
 end

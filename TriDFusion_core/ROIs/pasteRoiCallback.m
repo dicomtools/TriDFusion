@@ -175,18 +175,23 @@ function pasteRoiCallback(~, ~)
 
             addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
-            voiDefaultMenu(pRoi);
+            addRoiMenu(pRoi);
 
-            roiDefaultMenu(pRoi);
+            addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+            addlistener(pRoi, 'WaypointRemoved', @waypointEvents); 
 
-            uimenu(pRoi.UIContextMenu, 'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
-            uimenu(pRoi.UIContextMenu, 'Label', 'Clear Waypoints', 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
-
-            constraintMenu(pRoi);
-
-            cropMenu(pRoi);
-            
-            uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
+            % voiDefaultMenu(pRoi);
+            % 
+            % roiDefaultMenu(pRoi);
+            % 
+            % uimenu(pRoi.UIContextMenu, 'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
+            % uimenu(pRoi.UIContextMenu, 'Label', 'Clear Waypoints', 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
+            % 
+            % constraintMenu(pRoi);
+            % 
+            % cropMenu(pRoi);
+            % 
+            % uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
             
         case lower('images.roi.polygon')
             
@@ -260,17 +265,19 @@ function pasteRoiCallback(~, ~)
                                   
             addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
-            voiDefaultMenu(pRoi);
-         
-            roiDefaultMenu(pRoi);
+            addRoiMenu(pRoi);
 
-            uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
-
-            constraintMenu(pRoi);
-
-            cropMenu(pRoi);
-            
-            uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
+            % voiDefaultMenu(pRoi);
+            % 
+            % roiDefaultMenu(pRoi);
+            % 
+            % uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
+            % 
+            % constraintMenu(pRoi);
+            % 
+            % cropMenu(pRoi);
+            % 
+            % uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
 
            
         case lower('images.roi.circle')
@@ -294,16 +301,18 @@ function pasteRoiCallback(~, ~)
 
             addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
-            voiDefaultMenu(pRoi);
+            addRoiMenu(pRoi);
 
-            roiDefaultMenu(pRoi);
-
-            constraintMenu(pRoi);
-
-            cropMenu(pRoi);
-            
-            uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
-            
+            % voiDefaultMenu(pRoi);
+            % 
+            % roiDefaultMenu(pRoi);
+            % 
+            % constraintMenu(pRoi);
+            % 
+            % cropMenu(pRoi);
+            % 
+            % uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
+            % 
             
         case lower('images.roi.ellipse')
 
@@ -328,18 +337,20 @@ function pasteRoiCallback(~, ~)
 
             addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
-            voiDefaultMenu(pRoi);
+            addRoiMenu(pRoi);
 
-            roiDefaultMenu(pRoi);
-
-            uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
-
-            constraintMenu(pRoi);
-
-            cropMenu(pRoi);
-
-            uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
-            
+            % voiDefaultMenu(pRoi);
+            % 
+            % roiDefaultMenu(pRoi);
+            % 
+            % uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
+            % 
+            % constraintMenu(pRoi);
+            % 
+            % cropMenu(pRoi);
+            % 
+            % uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
+            % 
             
             if strcmpi(pRoi.UserData, 'Sphere')
 
@@ -467,19 +478,21 @@ function pasteRoiCallback(~, ~)
                                         );
 
             addRoi(pRoi, dSeriesOffset, 'Unspecified');
-
-            voiDefaultMenu(pRoi);
-
-            roiDefaultMenu(pRoi);
-
-            uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
-
-            constraintMenu(pRoi);
-
-            cropMenu(pRoi);
             
-            uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
-            
+            addRoiMenu(pRoi);
+
+            % voiDefaultMenu(pRoi);
+            % 
+            % roiDefaultMenu(pRoi);
+            % 
+            % uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
+            % 
+            % constraintMenu(pRoi);
+            % 
+            % cropMenu(pRoi);
+            % 
+            % uimenu(pRoi.UIContextMenu, 'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
+            % 
         otherwise
             return;
     end

@@ -28,26 +28,31 @@ function clearWaypointsCallback(hObject,~)
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));                
-    
+
+    if isempty(atRoiInput)
+
+        return;
+    end
+
     if ~strcmpi(hObject.UserData.Type, 'images.roi.line')
         
-        if ~isempty(atRoiInput)
+        dTagOffset = find(strcmp(cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} ), 1);            
 
-            aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {hObject.UserData.Tag} );            
-            dTagOffset = find(aTagOffset, 1);
-
-            if ~isempty(dTagOffset)
+        if ~isempty(dTagOffset)
+            
+            if ~isempty(hObject.UserData.Waypoints)
 
                 hObject.UserData.Waypoints(:) = false;
 
                 atRoiInput{dTagOffset}.Waypoints(:) = false;
-                if isvalid(atRoiInput{dTagOffset}.Object)
-                    atRoiInput{dTagOffset}.Object.Waypoints(:) = false;
-                end
+
+                % if isvalid(atRoiInput{dTagOffset}.Object)
+                %     atRoiInput{dTagOffset}.Object.Waypoints(:) = false;
+                % end
 
                 roiTemplate('set', get(uiSeriesPtr('get'), 'Value'), atRoiInput);
-            end                       
-        end
+            end
+        end                       
     end 
     
 end

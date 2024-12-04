@@ -522,7 +522,7 @@ function setRoiToolbar(sVisible)
                                 'Label'         , roiLabelName(), ...
                                 'LabelVisible'  , 'off', ...
                                 'Tag'           , num2str(randi([-(2^52/2),(2^52/2)],1)), ...
-                                'FaceSelectable', 1, ...
+                                'FaceSelectable', 0, ...
                                 'FaceAlpha'     , 0 ...
                                 );
 
@@ -551,20 +551,26 @@ function setRoiToolbar(sVisible)
 
                     addRoi(a, dSeriesOffset, 'Unspecified');
 
-                    voiDefaultMenu(a);
+                    addRoiMenu(a);
 
-%                    setVoiRoiSegPopup();
+                    addlistener(a, 'WaypointAdded'  , @waypointEvents);
+                    addlistener(a, 'WaypointRemoved', @waypointEvents);
 
-                    roiDefaultMenu(a);
 
-                    uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
-                    uimenu(a.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData',a, 'Callback', @clearWaypointsCallback);
-
-                    constraintMenu(a);
-
-                    cropMenu(a);
-
-                    uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+% %                     voiDefaultMenu(a);
+% % 
+% % %                    setVoiRoiSegPopup();
+% % 
+% %                     roiDefaultMenu(a);
+% % 
+% %                     uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
+% %                     uimenu(a.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData',a, 'Callback', @clearWaypointsCallback);
+% % 
+% %                     constraintMenu(a);
+% % 
+% %                     cropMenu(a);
+% % 
+% %                     uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
 %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
      %               refreshImages();
@@ -744,23 +750,26 @@ function setRoiToolbar(sVisible)
 
                     addRoi(a, dSeriesOffset, 'Unspecified');
 
+                    addRoiMenu(a);
+
     %                    setVoiRoiSegPopup();
-                    voiDefaultMenu(a);
-
-                    roiDefaultMenu(a);
-
-                    uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
-
-                    constraintMenu(a);
-
-                    cropMenu(a);
-
-                    uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                    % voiDefaultMenu(a);
+                    % 
+                    % roiDefaultMenu(a);
+                    % 
+                    % uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
+                    % 
+                    % constraintMenu(a);
+                    % 
+                    % cropMenu(a);
+                    % 
+                    % uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
     %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
                     % refreshImages();
 
                     if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
                         plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), dicomBuffer('get', [], dSeriesOffset), mipAngle('get'));
                     end
 
@@ -953,18 +962,20 @@ function setRoiToolbar(sVisible)
 
                     addRoi(a, dSeriesOffset, 'Unspecified');
 
+                    addRoiMenu(a);
+
 %                    setVoiRoiSegPopup();
-                    voiDefaultMenu(a);
-
-                    roiDefaultMenu(a);
-
-                    uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
-
-                    constraintMenu(a);
-
-                    cropMenu(a);
-
-                    uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                    % voiDefaultMenu(a);
+                    % 
+                    % roiDefaultMenu(a);
+                    % 
+                    % uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
+                    % 
+                    % constraintMenu(a);
+                    % 
+                    % cropMenu(a);
+                    % 
+                    % uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
 %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll  );
                     % refreshImages();
@@ -1130,18 +1141,20 @@ function setRoiToolbar(sVisible)
 
                 addRoi(a, dSeriesOffset, 'Unspecified');
 
+                addRoiMenu(a);
+
 %                    setVoiRoiSegPopup();
-                voiDefaultMenu(a);
-
-                roiDefaultMenu(a);
-
-                uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
-
-                constraintMenu(a);
-
-                cropMenu(a);
-
-                uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                % voiDefaultMenu(a);
+                % 
+                % roiDefaultMenu(a);
+                % 
+                % uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
+                % 
+                % constraintMenu(a);
+                % 
+                % cropMenu(a);
+                % 
+                % uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
 %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
                 % refreshImages();
@@ -1181,6 +1194,7 @@ function setRoiToolbar(sVisible)
            switchToIsoSurface('get') == true || ...
            switchToMIPMode('get')    == true || ...
            isVsplash('get')          == true
+            
             set(t6, 'State', 'off');
             return;
         end
@@ -1284,7 +1298,7 @@ function setRoiToolbar(sVisible)
                                 'Label'         , roiLabelName(), ...
                                 'LabelVisible'  , 'off', ...
                                 'Tag'           , num2str(randi([-(2^52/2),(2^52/2)],1)), ...
-                                'FaceSelectable', 1, ...
+                                'FaceSelectable', 0, ...
                                 'FaceAlpha'     , 0 ...
                                 );
 
@@ -1309,19 +1323,21 @@ function setRoiToolbar(sVisible)
 
                     addRoi(a, dSeriesOffset, 'Unspecified');
 
+                    addRoiMenu(a);
+
     %                    setVoiRoiSegPopup();
-                    voiDefaultMenu(a);
-
-                    roiDefaultMenu(a);
-
-                    uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
-
-                    constraintMenu(a);
-
-                    cropMenu(a);
-
-
-                    uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                    % voiDefaultMenu(a);
+                    % 
+                    % roiDefaultMenu(a);
+                    % 
+                    % uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
+                    % 
+                    % constraintMenu(a);
+                    % 
+                    % cropMenu(a);
+                    % 
+                    % 
+                    % uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
     %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
                     % refreshImages();
@@ -1576,20 +1592,22 @@ function setRoiToolbar(sVisible)
 
                 addRoi(a, dSeriesOffset, 'Unspecified');
 
+                addRoiMenu(a);
+
     %                    setVoiRoiSegPopup();
 
 
-                voiDefaultMenu(a);
-
-                roiDefaultMenu(a);
-            
-                uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
-
-                constraintMenu(a);
-
-                cropMenu(a);
-
-                uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                % voiDefaultMenu(a);
+                % 
+                % roiDefaultMenu(a);
+                % 
+                % uimenu(a.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',a, 'Callback', @hideViewFaceAlhaCallback);
+                % 
+                % constraintMenu(a);
+                % 
+                % cropMenu(a);
+                % 
+                % uimenu(a.UIContextMenu,'Label', 'Display Statistics' , 'UserData',a, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
     %                    set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
                 refreshImages();

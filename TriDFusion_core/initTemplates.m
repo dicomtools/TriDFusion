@@ -32,7 +32,7 @@ function initTemplates()
     try
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-    drawnow;  
+    drawnow update; 
 
     if(numel(asMainDirectory))                     
             
@@ -86,7 +86,7 @@ function initTemplates()
           
         else
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
-            drawnow;              
+            drawnow update; 
             
             progressBar(1 , 'Error: TriDFusion: no volumes detected!');
             h = msgbox('Error: TriDFusion(): no volumes detected!', 'Error');
@@ -108,6 +108,6 @@ function initTemplates()
     end  
     
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
-    drawnow; 
+    drawnow update; 
 
 end

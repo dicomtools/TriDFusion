@@ -45,26 +45,32 @@ function tDataSets = sortDicomFileList(tFileList, iNbFiles)
         end
 
         h = h(ind);
-        
-        tDataSets(iLoop).FileNames    = cell(length(h),1);
-        tDataSets(iLoop).DicomInfos   = cell(length(h),1);
-        tDataSets(iLoop).DicomBuffers = cell(length(h),1);
+         
+        dNumberOfFiles = length(h);
 
-        endJloop = length(h);
-        for jLoop=1:endJloop
+        % tDataSets(iLoop).FileNames    = cell(dNumberOfFiles,1);
+        % tDataSets(iLoop).DicomInfos   = cell(dNumberOfFiles,1);
+        tDataSets(iLoop).DicomBuffers = cell(1, dNumberOfFiles);
+
+        tDataSets(iLoop).FileNames = tFileList.FileName(h);  % Indexing entire cell array slice
+        tDataSets(iLoop).DicomInfos = tFileList.DicomInfo(h);  % Indexing entire cell array slice
+
+        for jLoop=1:dNumberOfFiles
             
-            if mod(jLoop,15)==1 || jLoop == endJloop         
-                progressBar(jLoop / endJloop, sprintf('Sorting file list %d/%d', jLoop, endJloop) );
+            if mod(jLoop,15)==1 || jLoop == dNumberOfFiles  
+
+                progressBar(jLoop / dNumberOfFiles, sprintf('Sorting file list %d/%d', jLoop, dNumberOfFiles) );
             end
 
-            tDataSets(iLoop).FileNames{jLoop}    = tFileList.FileName{h(jLoop)} ;
-            tDataSets(iLoop).DicomInfos{jLoop}   = tFileList.DicomInfo{h(jLoop)} ;
+            % tDataSets(iLoop).FileNames{jLoop}    = tFileList.FileName{h(jLoop)} ;
+            % tDataSets(iLoop).DicomInfos{jLoop}   = tFileList.DicomInfo{h(jLoop)} ;
             tDataSets(iLoop).DicomBuffers{jLoop} = readDcm4che3(tFileList.FileName{h(jLoop)}, tFileList.DicomInfo{h(jLoop)});                    
 
 %            tFileList.DicomInfo{h(jLoop)}.din.pixeldata = []; % Clear data
         end
         
         if isfield(tFileList, 'Contours') 
+            
             tDataSets(iLoop).Contours = tFileList.Contours;
         end
                 

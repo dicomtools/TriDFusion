@@ -152,25 +152,34 @@ function maskImageToVoi(aMask, dSeriesOffset, aClassificationMask, bLesionClassi
 
                 sliceNumber('set', 'axial', dCurrentSlice);
                 
-                roiPtr = images.roi.Freehand(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'Smoothing', 1, 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', roiFaceAlphaValue('get'), 'Visible', 'off');
-                roiPtr.Waypoints(:) = false;                    
+                roiPtr = images.roi.Freehand(axes3Ptr('get', [], dSeriesOffset), 'Smoothing', 1, 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', roiFaceAlphaValue('get'), 'Visible', 'off');
+                
+                if ~isempty(roiPtr.Waypoints(:))
+                    
+                    roiPtr.Waypoints(:) = false;      
+                end
 
-                addRoi(roiPtr, get(uiSeriesPtr('get'), 'Value'), sLesionType);
+                addRoi(roiPtr, dSeriesOffset, sLesionType);
 
-                voiDefaultMenu(roiPtr);
+                addRoiMenu(roiPtr);
 
-                roiDefaultMenu(roiPtr);
+                addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
+                addlistener(roiPtr, 'WaypointRemoved', @waypointEvents); 
 
-                uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',roiPtr, 'Callback', @hideViewFaceAlhaCallback);
-                uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData',roiPtr, 'Callback', @clearWaypointsCallback);
-
-                constraintMenu(roiPtr);
-
-                cropMenu(roiPtr);
-
-
-                uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
-                                   
+                % voiDefaultMenu(roiPtr);
+                % 
+                % roiDefaultMenu(roiPtr);
+                % 
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',roiPtr, 'Callback', @hideViewFaceAlhaCallback);
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData',roiPtr, 'Callback', @clearWaypointsCallback);
+                % 
+                % constraintMenu(roiPtr);
+                % 
+                % cropMenu(roiPtr);
+                % 
+                % 
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                % 
 %                        addContourToTemplate(dSeriesOffset, 'Axes3', dCurrentSlice, 'images.roi.freehand', aPosition, '', 'off', aColor, 1, roiFaceAlphaValue('get'), 0, 1, sTag, sLesionType);
                 asTag{dTagOffset} = sTag;
                 dTagOffset = dTagOffset+1;

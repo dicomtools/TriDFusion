@@ -219,22 +219,30 @@ function set2DWholobodySegmentationLu177Callback(~, ~)
                                        'FaceSelectable', 0, ...
                                        'FaceAlpha'     , roiFaceAlphaValue('get') ...
                                        );
-        
-            pRoi.Waypoints(:) = false;
+            
+            if ~isempty(pRoi.Waypoints(:))
+     
+                pRoi.Waypoints(:) = false;
+            end
         
             addRoi(pRoi, dSerieOffset, 'Unspecified');
-        
-            roiDefaultMenu(pRoi);
-        
-            uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
-            uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
-        
-            constraintMenu(pRoi);
-        
-            cropMenu(pRoi);
-                    
-            uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
-    
+
+            addRoiMenu(pRoi);
+
+            addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+            addlistener(pRoi, 'WaypointRemoved', @waypointEvents); 
+
+            % roiDefaultMenu(pRoi);
+            % 
+            % uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
+            % uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
+            % 
+            % constraintMenu(pRoi);
+            % 
+            % cropMenu(pRoi);
+            % 
+            % uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+            % 
             clear aArms;
         end
     end
@@ -305,21 +313,29 @@ function set2DWholobodySegmentationLu177Callback(~, ~)
                                    'FaceSelectable', 0, ...
                                    'FaceAlpha'     , roiFaceAlphaValue('get') ...
                                    );
-    
-        pRoi.Waypoints(:) = false;
+        
+        if ~isempty(pRoi.Waypoints(:))
+
+            pRoi.Waypoints(:) = false;
+        end
     
         addRoi(pRoi, dSerieOffset, 'Unspecified');
-    
-        roiDefaultMenu(pRoi);
-    
-        uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
-        uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
-    
-        constraintMenu(pRoi);
-    
-        cropMenu(pRoi);
-            
-        uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+
+        addRoiMenu(pRoi);
+
+        addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+        addlistener(pRoi, 'WaypointRemoved', @waypointEvents); 
+
+        % roiDefaultMenu(pRoi);
+        % 
+        % uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
+        % uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
+        % 
+        % constraintMenu(pRoi);
+        % 
+        % cropMenu(pRoi);
+        % 
+        % uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
     end
 
     atRoiInput = roiTemplate('get', dSerieOffset);

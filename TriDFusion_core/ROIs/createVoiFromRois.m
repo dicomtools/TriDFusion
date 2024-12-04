@@ -60,8 +60,7 @@ function createVoiFromRois(dSeriesOffset, asTag, sVoiName, sColor, sLesionType)
 
     for bb=1:dNbTags
 
-        aTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), asTag(bb) );
-        dRoiTagOffset = find(aTagOffset, 1);  
+        dRoiTagOffset = find(strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), asTag(bb) ), 1);
         
         if ~isempty(dRoiTagOffset)
 
@@ -72,9 +71,17 @@ function createVoiFromRois(dSeriesOffset, asTag, sVoiName, sColor, sLesionType)
             sLabel = sprintf('%s (roi %d/%d)', atVoi{dVoiOffset}.Label, dRoiNb, dNbTags);
 
             atRoi{dRoiTagOffset}.Label = sLabel;
-            atRoi{dRoiTagOffset}.Object.Label = sLabel;
-            
-            voiDefaultMenu(atRoi{dRoiTagOffset}.Object, sVoiTag);
+
+            if isfield(atRoi{dRoiTagOffset}, 'Object')
+                
+                if ~isstruct(atRoi{dRoiTagOffset}.Object)
+    
+                    atRoi{dRoiTagOffset}.Object.Label = sLabel;
+                    atRoi{dRoiTagOffset}.Object.UserData = 'voi-roi';
+                end
+            end
+
+            % voiDefaultMenu(atRoi{dRoiTagOffset}.Object, sVoiTag);
         end
     end
 

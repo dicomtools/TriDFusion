@@ -1,5 +1,5 @@
-function decreaseVoiPosition(sRoiTag, dNbPixels)
-%function decreaseVoiPosition(sRoiTag, dNbPixels)
+function decreaseVoiPosition(sVoiTag, dNbPixels)
+%function decreaseVoiPosition(sVoiTag, dNbPixels)
 %Decrease a VOI position by an number of pixels.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -33,9 +33,10 @@ function decreaseVoiPosition(sRoiTag, dNbPixels)
     if ~isempty(atRoi)        
 
         if isempty(atVoi)
+            
             aTagOffset = 0;
         else
-            aTagOffset = strcmp( cellfun( @(atVoi) atVoi.Tag, atVoi, 'uni', false ), {sRoiTag} );
+            aTagOffset = strcmp( cellfun( @(atVoi) atVoi.Tag, atVoi, 'uni', false ), {sVoiTag} );
         end
         
         if aTagOffset(aTagOffset==1) % tag is a voi

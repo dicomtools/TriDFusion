@@ -350,7 +350,7 @@ function TriDFusion(varargin)
         sMousePointer = get(fiMainWindowPtr('get'), 'Pointer');
 
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-        drawnow;
+        drawnow update; 
 
         asMainDir = mainDir('get');
         if ~isempty(asMainDir)
@@ -367,6 +367,7 @@ function TriDFusion(varargin)
                     mkdir(sTmpDir);
 
                     if ispc
+
                         cmd = sprintf('robocopy "%s" "%s" /MIR /R:0 /W:0 /MT:32 /Z /NFL /NDL /NC /NS /NP > nul 2>&1', asMainDir{jj}, sTmpDir);
                         system(cmd);
                                                
@@ -393,7 +394,7 @@ function TriDFusion(varargin)
         progressBar(1, 'Ready');
 
         set(fiMainWindowPtr('get'), 'Pointer', sMousePointer);
-        drawnow;
+        drawnow update; 
 
     end
     

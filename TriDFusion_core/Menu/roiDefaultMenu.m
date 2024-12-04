@@ -1,5 +1,5 @@
-function roiDefaultMenu(ptrRoi)
-%function roiDefaultMenu(ptrRoi)
+function roiDefaultMenu(ptrObject)
+%function roiDefaultMenu(ptrObject)
 %Add ROI Default Right Click menu.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -26,30 +26,38 @@ function roiDefaultMenu(ptrRoi)
 % 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-  
+
+    if strcmpi(ptrObject.Type, 'uimenu')
+        mUIContextMenu = ptrObject;
+        ptrRoi = ptrObject.UserData;
+    else
+        mUIContextMenu = ptrObject.UIContextMenu;
+        ptrRoi = ptrObject;
+    end
+
     % Main function to set up the default ROI context menu with improved structure
-    addMenuItem(ptrRoi, 'Copy Contour (Ctrl + C)'   , @copyRoiCallback, true);
-    addMenuItem(ptrRoi, 'Paste Contour (Ctrl + V)'  , @pasteRoiCallback);
-    addMenuItem(ptrRoi, 'Paste Mirror'   , @pasteMirroirRoiCallback);
-    addMenuItem(ptrRoi, 'Edit Label'     , @editLabelCallback, true);
-    addMenuItem(ptrRoi, 'Hide/View Label', @hideViewLabelCallback);
-    addMenuItem(ptrRoi, 'Edit Color'     , @editColorCallback);
+    addMenuItem(mUIContextMenu, ptrRoi, 'Copy Contour (Ctrl + C)'   , @copyRoiCallback, false);
+    addMenuItem(mUIContextMenu, ptrRoi, 'Paste Contour (Ctrl + V)'  , @pasteRoiCallback, false);
+    addMenuItem(mUIContextMenu, ptrRoi, 'Paste Mirror'   , @pasteMirroirRoiCallback, false);
+    addMenuItem(mUIContextMenu, ptrRoi, 'Edit Label'     , @editLabelCallback, true);
+    addMenuItem(mUIContextMenu, ptrRoi, 'Hide/View Label', @hideViewLabelCallback, false);
+    addMenuItem(mUIContextMenu, ptrRoi, 'Edit Color'     , @editColorCallback, false);
 
     % Add predefined label submenu
-    addDynamicMenu(ptrRoi, 'Predefined Label', getRoiLabelList(), @predefinedLabelCallback);
+    addDynamicMenu(mUIContextMenu, ptrRoi, 'Predefined Label', getRoiLabelList(), @predefinedLabelCallback, []);
 
     % Add lesion type options if available
     [~, asLesionList] = getLesionType('');
     if ~isempty(asLesionList)
 
-        addDynamicMenu(ptrRoi, 'Edit Site', asLesionList, @editRoiLesionTypeCallback, @refreshRoiMenuLocationCallback);
+        addDynamicMenu(mUIContextMenu, ptrRoi, 'Edit Site', asLesionList, @editRoiLesionTypeCallback, @refreshRoiMenuLocationCallback);
     end
 end
 
-function menuItem = addMenuItem(ptrRoi, label, callback, isSeparator)
+function menuItem = addMenuItem(mUIContextMenu, ptrRoi, label, callback, isSeparator)
 
     if nargin < 4, isSeparator = false; end  % Default for separator is false
-        menuItem = uimenu(ptrRoi.UIContextMenu, ...
+        menuItem = uimenu(mUIContextMenu, ...
                           'Label'   , label, ...
                           'UserData', ptrRoi, ...
                           'HitTest' , 'off', ...
@@ -59,9 +67,9 @@ function menuItem = addMenuItem(ptrRoi, label, callback, isSeparator)
     end
 end
 
-function addDynamicMenu(ptrRoi, label, itemList, callback, mainCallback)
+function addDynamicMenu(mUIContextMenu, ptrRoi, label, itemList, callback, mainCallback)
  
-    parentMenu = uimenu(ptrRoi.UIContextMenu, 'Label', label, 'UserData', ptrRoi);
+    parentMenu = uimenu(mUIContextMenu, 'Label', label, 'UserData', ptrRoi);
     
     if nargin > 4 && ~isempty(mainCallback)  % Add main callback if provided
         

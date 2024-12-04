@@ -50,8 +50,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
 
-    uiSeries = uiSeriesPtr('get');
-    dSeriesOffset = get(uiSeries, 'Value');
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
     
     atMetaData = dicomMetaData('get');
           
@@ -539,6 +538,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
             for jj=1:dNbSlicesElements
 
                 if cancelCreateVoiRoiPanel('get') == true
+
                     break;
                 end
 
@@ -566,24 +566,33 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 
                 sliceNumber('set', 'axial', dCurrentSlice);
                 
-                roiPtr = images.roi.Freehand(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'Smoothing', 1, 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', roiFaceAlphaValue('get'), 'Visible', 'off');
-                roiPtr.Waypoints(:) = false;                    
+                roiPtr = images.roi.Freehand(axes3Ptr('get', [], dSeriesOffset), 'Smoothing', 1, 'Position', aPosition, 'Color', aColor, 'LineWidth', 1, 'Label', '', 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'on', 'FaceSelectable', 0, 'FaceAlpha', roiFaceAlphaValue('get'), 'Visible', 'off');
 
-                addRoi(roiPtr, get(uiSeriesPtr('get'), 'Value'), sLesionType);
+                if ~isempty(roiPtr.Waypoints(:))
+                    
+                    roiPtr.Waypoints(:) = false;    
+                end
 
-                voiDefaultMenu(roiPtr);
+                addRoi(roiPtr, dSeriesOffset, sLesionType);
 
-                roiDefaultMenu(roiPtr);
+                addRoiMenu(roiPtr);
 
-                uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',roiPtr, 'Callback', @hideViewFaceAlhaCallback);
-                uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData',roiPtr, 'Callback', @clearWaypointsCallback);
+                addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
+                addlistener(roiPtr, 'WaypointRemoved', @waypointEvents);  
 
-                constraintMenu(roiPtr);
-
-                cropMenu(roiPtr);
-
-                uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
-                                   
+                % voiDefaultMenu(roiPtr);
+                % 
+                % roiDefaultMenu(roiPtr);
+                % 
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData',roiPtr, 'Callback', @hideViewFaceAlhaCallback);
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData',roiPtr, 'Callback', @clearWaypointsCallback);
+                % 
+                % constraintMenu(roiPtr);
+                % 
+                % cropMenu(roiPtr);
+                % 
+                % uimenu(roiPtr.UIContextMenu,'Label', 'Display Statistics ' , 'UserData',roiPtr, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
+                % 
 %                        addContourToTemplate(dSeriesOffset, 'Axes3', dCurrentSlice, 'images.roi.freehand', aPosition, '', 'off', aColor, 1, roiFaceAlphaValue('get'), 0, 1, sTag, sLesionType);
 
                 % asTag{numel(asTag)+1} = sTag;
@@ -594,6 +603,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 %                 asTag{dTagOffset} = sTag;
 %                 dTagOffset=dTagOffset+1;
                 if viewRoiPanel('get') == true
+
                     drawnow limitrate;
                 end
 
@@ -649,7 +659,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
     
     if viewRoiPanel('get') == true
 
-        if ~isempty(voiTemplate('get', get(uiSeriesPtr('get'), 'Value')))
+        if ~isempty(voiTemplate('get', dSeriesOffset))
             
             set(uiLesionTypeVoiRoiPanelObject('get'), 'Enable', 'on'); 
             set(uiDeleteVoiRoiPanelObject    ('get'), 'Enable', 'on');   

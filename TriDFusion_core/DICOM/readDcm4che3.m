@@ -33,25 +33,43 @@ function aImage = readDcm4che3(fileInput, ~)
 % 
 %     try
 % 
-%      aReshaped = reshape(info.din.pixeldata, info.Columns, info.Rows);
-%      aImage    = cast(zeros(info.Rows, info.Columns), class(info.din.pixeldata));
+%         rows = info.Rows;
+%         cols = info.Columns;
+%         pixeldata = info.PixelData;
 % 
-%      for i =1 :info.Rows-1
-%         for j=1 :info.Columns-1
-%             aImage(i, j)= aReshaped(info.Columns-j,i);
-%         end
-%      end
 % 
-%     aImage = aImage(1:dinfo.in.rows, info.Columns:-1:1);
-%     clear aReshaped;
+%         pixeldata2 = unir_numeros(pixeldata,rows,cols);
+% 
+%         img= reshape(pixeldata2 , cols,rows);
+% 
+%          image = zeros(rows,cols);
+%          for i =1 :rows-1
+%              for j=1 :cols-1
+%           image(i, j)= img(cols-j,i);
+%              end
+%          end
+% 
+%         aImage=image(1:rows,cols:-1:1);
+% 
+% 
 % 
 %     catch
 %         aImage = dicomread(char(fileInput));
 %     end
 % else
     aImage = dicomread(char(fileInput));
-%     aImage = rgb2gray(aImage);
 % end
-
+% 
+%     function pixeldata2 = unir_numeros(pixeldata, rows, cols)
+%         pixeldata2 = zeros(rows*cols, 1);
+%         fin = rows*cols*2;
+%         cont = 0;
+%         for ii = 1:2:fin
+%             A = pixeldata(ii);
+%             B = pixeldata(ii+1);
+%             cont = cont + 1;
+%             pixeldata2(cont,1) = A + B*65535;
+%         end
+%     end
 
 end

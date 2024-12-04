@@ -1,5 +1,5 @@
 function hideViewVoiFaceAlhaCallback(hObject, ~)
-%function hideViewVoiFaceAlhaCallback(hObject.UserData,~)
+%function hideViewVoiFaceAlhaCallback(hObject, ~)
 %Hide\View VOI ROIs FaceAlpha.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -33,10 +33,11 @@ function hideViewVoiFaceAlhaCallback(hObject, ~)
     atRoiInput = roiTemplate('get', dSeriesOffset);                
 
     if isempty(atVoiInput) 
+        
         return;
     end
-
-    dVoiTagOffset = find(strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), hObject.UserData ) );
+  
+    dVoiTagOffset = find(cellfun(@(c) any(strcmp(c.RoisTag, hObject.UserData.Tag)), atVoiInput), 1);
 
     if ~isempty(dVoiTagOffset)
 

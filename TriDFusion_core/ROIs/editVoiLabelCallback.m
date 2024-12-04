@@ -48,15 +48,18 @@ function editVoiLabelCallback(hObject, ~)
               'ForegroundColor', viewerForegroundColor('get'), ...   
               'position', [20 52 80 25]...
               );
-    
+
     atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value')); 
 
-    dVoiTagOffset = find(strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), hObject.UserData ) );       
-    if ~isempty(dVoiTagOffset)
-        sVoiLabel = atVoiInput{dVoiTagOffset}.Label;
+    gdVoiTagOffset = find(cellfun(@(c) any(strcmp(c.RoisTag, hObject.UserData.Tag)), atVoiInput), 1);
+    
+    if ~isempty(gdVoiTagOffset)
+
+        sVoiLabel = atVoiInput{gdVoiTagOffset}.Label;
+
     else
         sVoiLabel = '';
-    end
+    end    
 
     edtLabelName = ...
         uicontrol(editLabelWindow,...
@@ -108,18 +111,16 @@ function editVoiLabelCallback(hObject, ~)
         atRoiInput = roiTemplate('get', dSeriesOffset);                
        
         if ~isempty(atVoiInput) 
+            
+            if ~isempty(gdVoiTagOffset)
     
-            dVoiTagOffset = find(strcmp( cellfun( @(atVoiInput) atVoiInput.Tag, atVoiInput, 'uni', false ), hObject.UserData ) );
-        
-            if ~isempty(dVoiTagOffset)
+                atVoiInput{gdVoiTagOffset}.Label = sLabel;
     
-                atVoiInput{dVoiTagOffset}.Label = sLabel;
-    
-                dNbRois = numel(atVoiInput{dVoiTagOffset}.RoisTag);
+                dNbRois = numel(atVoiInput{gdVoiTagOffset}.RoisTag);
     
                 for vv=1: dNbRois
     
-                    dRoiTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), atVoiInput{dVoiTagOffset}.RoisTag{vv} ) );
+                    dRoiTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), atVoiInput{gdVoiTagOffset}.RoisTag{vv} ) );
     
                     if ~isempty(dRoiTagOffset) % Found the Tag 
     
