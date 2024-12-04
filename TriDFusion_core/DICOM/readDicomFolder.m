@@ -200,7 +200,7 @@ function [asFilesList, atDicomInfo, aDicomBuffer] = readDicomFolder(asMainDirect
                             
                         if bStatic    == true || ...
                            bWholeBody == true 
-    
+
                             sSeriesDescription = tDatasets.DicomInfos{1}.SeriesDescription;
                            
                             if numel(tDatasets.DicomBuffers) > 1
@@ -259,16 +259,31 @@ function [asFilesList, atDicomInfo, aDicomBuffer] = readDicomFolder(asMainDirect
                             sSeriesDescription = tDatasets.DicomInfos{1}.SeriesDescription;
     
                             dNbSc = numel(tDatasets.DicomBuffers);
+
                             for sc=1:dNbSc
-    
-                                if dNbSc > 1
-                                    tDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Frame %d)', sSeriesDescription,sc);
+                                
+                                if numel(size(tDatasets.DicomBuffers{sc})) == size(tDatasets.DicomBuffers{sc}, 1) * size(tDatasets.DicomBuffers{sc}, 2) * 1 * 3
+                        
+
+                                    if dNbSc > 1
+                                        tDatasets.DicomInfos{1}.SeriesDescription = sprintf('%s (Frame %d)', sSeriesDescription,sc);
+                                    end
+        
+                                    asFilesList{dNbEntry}  = tDatasets.FileNames;
+                                    atDicomInfo{dNbEntry}  = tDatasets.DicomInfos;
+                                    aDicomBuffer{dNbEntry}{1} = reshape(tDatasets.DicomBuffers{sc}, [size(tDatasets.DicomBuffers{sc}, 1), size(tDatasets.DicomBuffers{sc}, 2), 1, 3]);
+                                else                             
+                                    aTemp{1} = tDatasets.DicomBuffers{sc}(:,:);
+
+                                    aDicomBuffer{dNbEntry} = aTemp;
+                                
+                                    tDatasets.DicomInfos{sc}.SeriesDescription = sprintf('%s (Save Screen %d)', sSeriesDescription, sc);
+               
+                                    
+                                    asFilesList{dNbEntry}  = tDatasets.FileNames(sc);
+                                    atDicomInfo{dNbEntry}  = tDatasets.DicomInfos(sc);
                                 end
-    
-                                asFilesList{dNbEntry}  = tDatasets.FileNames;
-                                atDicomInfo{dNbEntry}  = tDatasets.DicomInfos;
-                                aDicomBuffer{dNbEntry}{1} = reshape(tDatasets.DicomBuffers{sc}, [size(tDatasets.DicomBuffers{sc}, 1), size(tDatasets.DicomBuffers{sc}, 2), 1, 3]);
-    
+
                                 dNbEntry = dNbEntry+1;  
                             end
     
