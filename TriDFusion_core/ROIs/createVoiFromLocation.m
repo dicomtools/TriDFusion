@@ -40,13 +40,16 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
 
     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dSeriesOffset);
 
-    bInvertMask = invertConstraint('get');
-
-    atRoiInput = roiTemplate('get', dSeriesOffset);
-
-    aLogicalMask = roiConstraintToMask(aBuffer, atRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask); 
-
-    aBuffer(aLogicalMask==0) = min(aBuffer, [], 'all'); % Apply constraint
+    if ~isempty(asConstraintTagList)
+        
+        bInvertMask = invertConstraint('get');
+    
+        atRoiInput = roiTemplate('get', dSeriesOffset);
+    
+        aLogicalMask = roiConstraintToMask(aBuffer, atRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask); 
+    
+        aBuffer(aLogicalMask==0) = min(aBuffer, [], 'all'); % Apply constraint
+    end
 
     % Given:
     switch (pAxe)

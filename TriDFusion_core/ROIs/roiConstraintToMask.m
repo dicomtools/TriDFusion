@@ -27,11 +27,13 @@ function aLogicalMaskOut = roiConstraintToMask(aImage, atRoiInput, asConstraintT
 % You should have received a copy of the GNU General Public License
 % along with TdRoiTagOffsetDFusion. If not, see <http://www.gnu.org/licenses/>. 
 
-    if canUseGPU()        
-        aLogicalMask = gpuArray(zeros(size(aImage)));
-    else
-        aLogicalMask = zeros(size(aImage));
-    end
+    % if canUseGPU()        
+    %     aLogicalMask = gpuArray(zeros(size(aImage)));
+    % else
+    %     aLogicalMask = zeros(size(aImage));
+    % end
+    
+    aLogicalMask = false(size(aImage));
 
     if size(aImage, 3) == 1 % 2D image
         
@@ -90,6 +92,7 @@ function aLogicalMaskOut = roiConstraintToMask(aImage, atRoiInput, asConstraintT
                             for dd=1:size(aImage, 1)
 
                                 aSlice  = permute(aImage(dd,:,:), [3 2 1]);
+                                
                                 aSlice( roiMask) = 1;
                                 aSlice(~roiMask) = 0;
 

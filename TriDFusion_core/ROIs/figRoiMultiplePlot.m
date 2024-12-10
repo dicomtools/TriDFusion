@@ -614,9 +614,13 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
             bExpendedDisplay = true;
         else
             bExpendedDisplay = false;
-    
-            if any(cellfun(@(roi) strcmpi(roi.ObjectType, 'roi'), atRoiInput))
-                bExpendedDisplay = true;
+
+            if ~isempty(atRoiInput)
+
+                if any(cellfun(@(roi) strcmpi(roi.ObjectType, 'roi'), atRoiInput))
+
+                    bExpendedDisplay = true;
+                end
             end
         end
 
@@ -660,7 +664,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
         try
             matlab.io.internal.getExcelInstance;
             bExcelInstance = true;
-        catch exception 
+        catch exception
 %            warning(message('MATLAB:xlswrite:NoCOMServer'));
             bExcelInstance = false;
         end
@@ -983,34 +987,34 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                     asCell{dLineOffset,9}  = 'Deviation';
                     asCell{dLineOffset,10} = 'Peak';
                     asCell{dLineOffset,11} = 'Volume (cm3)';
-                    
+
                     for tt=12:21
                         asCell{dLineOffset,tt}  = (' ');
-                    end                    
+                    end
                 end
 
                 bMovementApplied = tInput(dSeriesOffset).tMovement.bMovementApplied;
 
                 dLineOffset = dLineOffset+1;
-            
+
                 if bExpendedDisplay == true
 
-                    dNbRois = numel(atRoiInput); 
-    
+                    dNbRois = numel(atRoiInput);
+
                     for ro=1:dNbRois
-    
+
                         if strcmpi(atRoiInput{ro}.ObjectType, 'voi-roi')
-                            
+
                             if ~isfield(atRoiInput{ro}, 'MaxDistances')
-                                
+
                                 tMaxDistances = computeRoiFarthestPoint(aDisplayBuffer, atMetaData, atRoiInput{ro}, false, false);
-                
-                                atRoiInput{ro}.MaxDistances = tMaxDistances;        
-    
+
+                                atRoiInput{ro}.MaxDistances = tMaxDistances;
+
                                 roiTemplate('set', dSeriesOffset, atRoiInput);
-                           end 
+                           end
                         end
-                    end 
+                    end
                 end
 
                 for rt=1:numel(atVoiRoiTag)
@@ -1048,7 +1052,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                     if ~isempty(tVoiComputed)
 
                                         sVoiName = atVoiInput{vv}.Label;
-                                        
+
                                         if bExpendedDisplay == true
 
                                             asCell{dLineOffset,1}  = (sVoiName);
@@ -1085,7 +1089,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
                                             for tt=12:21
                                                 asCell{dLineOffset,tt}  = (' ');
-                                            end                                            
+                                            end
                                         end
 
                                         dLineOffset = dLineOffset+1;
@@ -1094,15 +1098,15 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
 
                                             dNbTags = numel(atRoiComputed);
                                             for bb=1:dNbTags
-    
+
                                                 if ~isempty(atRoiComputed{bb})
-    
+
                                                     if dNbTags > 100
                                                          if mod(bb, 10)==1 || bb == dNbTags
                                                              progressBar( bb/dNbTags-0.0001, sprintf('Computing ROI %d/%d, please wait', bb, dNbTags) );
                                                          end
                                                     end
-    
+
                                                     if strcmpi(atRoiComputed{bb}.Axe, 'Axe')
                                                         sSliceNb = num2str(atRoiComputed{bb}.SliceNb);
                                                     elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes1')
@@ -1112,7 +1116,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                                     elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes3')
                                                         sSliceNb = ['A:' num2str(size(aDisplayBuffer, 3)-atRoiComputed{bb}.SliceNb+1)];
                                                     end
-    
+
                                                     asCell{dLineOffset,1}  = (' ');
                                                     asCell{dLineOffset,2}  = (sSliceNb);
                                                     asCell{dLineOffset,3}  = [atRoiComputed{bb}.cells];
@@ -1124,14 +1128,14 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                                     asCell{dLineOffset,9}  = [atRoiComputed{bb}.median];
                                                     asCell{dLineOffset,10}  = [atRoiComputed{bb}.std];
                                                     asCell{dLineOffset,11} = [atRoiComputed{bb}.peak];
-    
+
                                                     if ~isempty(atRoiComputed{bb}.MaxDistances)
                                                         if atRoiComputed{bb}.MaxDistances.MaxXY.Length == 0
                                                             asCell{dLineOffset, 12} = ('NaN');
                                                         else
                                                             asCell{dLineOffset, 12} = [atRoiComputed{bb}.MaxDistances.MaxXY.Length];
                                                         end
-    
+
                                                         if atRoiComputed{bb}.MaxDistances.MaxCY.Length == 0
                                                             asCell{dLineOffset, 13} = ('NaN');
                                                         else
@@ -1141,14 +1145,14 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                                         asCell{dLineOffset,12} = (' ');
                                                         asCell{dLineOffset,13} = (' ');
                                                     end
-    
+
                                                     asCell{dLineOffset,14} = [atRoiComputed{bb}.area];
                                                     asCell{dLineOffset,15} = (' ');
-    
+
                                                     for tt=16:21
                                                         asCell{dLineOffset,tt}  = (' ');
                                                     end
-    
+
                                                     dLineOffset = dLineOffset+1;
                                                 end
                                             end
@@ -1164,33 +1168,33 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                     if bExpendedDisplay == true
 
                         dNbRois = numel(atRoiInput);
-    
+
                         for bb=1:dNbRois
-    
+
                             if strcmp(atVoiRoiTag{rt}.Tag, atRoiInput{bb}.Tag)  % Found a ROI
-    
+
                                 if ~strcmpi(atRoiInput{bb}.ObjectType, 'voi')
-    
+
                                     if dNbRois > 100
                                         if mod(bb, 10)==1 || bb == dNbRois
                                             progressBar( bb/dNbRois-0.0001, sprintf('Computing ROI %d/%d, please wait', bb, dNbRois) );
                                         end
                                     end
-    
+
                                     if isvalid(atRoiInput{bb}.Object)
-    
+
                                        if strcmpi(atRoiInput{bb}.ObjectType, 'roi')
-                                            
+
                                             if ~isfield(atRoiInput{bb}, 'MaxDistances')
-                                                
+
                                                 tMaxDistances = computeRoiFarthestPoint(aDisplayBuffer, atMetaData, atRoiInput{bb}, false, false);
-                                
-                                                atRoiInput{bb}.MaxDistances = tMaxDistances;        
-            
+
+                                                atRoiInput{bb}.MaxDistances = tMaxDistances;
+
                                                 roiTemplate('set', dSeriesOffset, atRoiInput);
-                                           end 
-                                       end                              
-                                       
+                                           end
+                                       end
+
                                        tRoiComputed = ...
                                             computeRoi(aInputBuffer, ...
                                                        atInputMetaData, ...
@@ -1203,9 +1207,9 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                                        bSegmented, ...
                                                        bDoseKernel, ...
                                                        bMovementApplied);
-    
+
                                         sRoiName = atRoiInput{bb}.Label;
-    
+
                                         if strcmpi(atRoiInput{bb}.Axe, 'Axe')
                                             sSliceNb = num2str(atRoiInput{bb}.SliceNb);
                                         elseif strcmpi(atRoiInput{bb}.Axe, 'Axes1')
@@ -1215,7 +1219,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                         elseif strcmpi(atRoiInput{bb}.Axe, 'Axes3')
                                             sSliceNb = ['A:' num2str(size(dicomBuffer('get', [], dSeriesOffset), 3)-atRoiInput{bb}.SliceNb+1)];
                                         end
-    
+
                                         asCell{dLineOffset, 1}  = (sRoiName);
                                         asCell{dLineOffset, 2}  = (sSliceNb);
                                         asCell{dLineOffset, 3}  = [tRoiComputed.cells];
@@ -1233,7 +1237,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                             else
                                                 asCell{dLineOffset, 12} = [tRoiComputed.MaxDistances.MaxXY.Length];
                                             end
-    
+
                                             if tRoiComputed.MaxDistances.MaxCY.Length == 0
                                                 asCell{dLineOffset, 13} = ('NaN');
                                             else
@@ -1245,17 +1249,17 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
                                         end
                                         asCell{dLineOffset, 14} = tRoiComputed.area;
                                         asCell{dLineOffset, 15} = (' ');
-    
+
                                         for tt=16:21
                                             asCell{dLineOffset,tt}  = (' ');
                                         end
-    
+
                                         dLineOffset = dLineOffset+1;
                                     end
                                 end
                             end
                         end
-                    end                    
+                    end
                 end
             end
 

@@ -448,9 +448,12 @@ function figRoiDialogCallback(hObject, ~)
             else
                 bExpendedDisplay = false;
         
-                if any(cellfun(@(roi) strcmpi(roi.ObjectType, 'roi'), atRoiInput))
+                if ~isempty(atRoiInput)
 
-                    bExpendedDisplay = true;
+                    if any(cellfun(@(roi) strcmpi(roi.ObjectType, 'roi'), atRoiInput))
+    
+                        bExpendedDisplay = true;
+                    end
                 end
             end
 
@@ -2732,9 +2735,12 @@ function figRoiDialogCallback(hObject, ~)
         else
             bExpendedDisplay = false;
     
-            if any(cellfun(@(roi) strcmpi(roi.ObjectType, 'roi'), atRoiInput))
+            if ~isempty(atRoiInput)
+                
+                if any(cellfun(@(roi) strcmpi(roi.ObjectType, 'roi'), atRoiInput))
 
-                bExpendedDisplay = true;
+                    bExpendedDisplay = true;
+                end
             end
         end
 

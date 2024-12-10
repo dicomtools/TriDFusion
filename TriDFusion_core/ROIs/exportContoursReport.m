@@ -33,7 +33,7 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
     try
         matlab.io.internal.getExcelInstance;
         bExcelInstance = true;
-    catch exception 
+    catch exception
 %            warning(message('MATLAB:xlswrite:NoCOMServer'));
         bExcelInstance = false;
     end
@@ -49,8 +49,12 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
     else
         bExpendedDisplay = false;
 
-        if any(cellfun(@(roi) strcmpi(roi.ObjectType, 'roi'), atRoiInput))
-            bExpendedDisplay = true;
+        if ~isempty(atRoiInput)
+
+            if any(cellfun(@(roi) strcmpi(roi.ObjectType, 'roi'), atRoiInput))
+
+                bExpendedDisplay = true;
+            end
         end
     end
 
@@ -66,14 +70,14 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
     end
 
     if size(aDisplayBuffer, 3) ==1
-        
+
         if atInput(dSeriesOffset).bFlipLeftRight == true
             aInputBuffer=aInputBuffer(:,end:-1:1);
         end
 
         if atInput(dSeriesOffset).bFlipAntPost == true
             aInputBuffer=aInputBuffer(end:-1:1,:);
-        end            
+        end
     else
         if atInput(dSeriesOffset).bFlipLeftRight == true
             aInputBuffer=aInputBuffer(:,end:-1:1,:);
@@ -85,9 +89,9 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
 
         if atInput(dSeriesOffset).bFlipHeadFeet == true
             aInputBuffer=aInputBuffer(:,:,end:-1:1);
-        end 
+        end
     end
-    
+
     atInputMetaData = atInput(dSeriesOffset).atDicomInfo;
 
     if ~isempty(atRoiInput) || ...
@@ -110,11 +114,11 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
                 sCurrentDir = pwd;
             end
         end
-        
+
 %            sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
 
         sSeriesDate = atMetaData{1}.SeriesDate;
-        
+
         if isempty(sSeriesDate)
             sSeriesDate = '-';
         else
@@ -126,7 +130,7 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
         if file ~= 0
 
 %                 try
-% 
+%
 %                 set(figRoiWindow, 'Pointer', 'watch');
 %                 drawnow;
 
@@ -157,7 +161,7 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
             else
                 dSUVScale = 0;
             end
-        
+
             % Count number of elements
 
             dNumberOfLines = 1;
@@ -195,21 +199,21 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
 
             bDoseKernel      = atInput(dSeriesOffset).bDoseKernel;
             bMovementApplied = atInput(dSeriesOffset).tMovement.bMovementApplied;
-            
+
             if bDoseKernel == true
 
                 if isfield(atMetaData{1}, 'DoseUnits')
-    
+
                     if ~isempty(atMetaData{1}.DoseUnits)
-                        
+
                         sUnits = char(atMetaData{1}.DoseUnits);
                     else
                         sUnits = 'dose';
                     end
                 else
                     sUnits = 'dose';
-                end  
-                
+                end
+
             else
 
                 if bSUVUnit == true
@@ -284,7 +288,7 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
                 asCell{dLineOffset,13} = 'Max SAD (mm)';
                 asCell{dLineOffset,14} = 'Area (cm2)';
                 asCell{dLineOffset,15} = 'Volume (cm3)';
-                
+
                 for tt=16:21
                     asCell{dLineOffset,tt}  = (' ');
                 end
@@ -303,29 +307,29 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
 
                 for tt=12:21
                     asCell{dLineOffset,tt}  = (' ');
-                end                
+                end
             end
 
             dLineOffset = dLineOffset+1;
 
             if bExpendedDisplay == true
 
-                dNbRois = numel(atRoiInput); 
-    
+                dNbRois = numel(atRoiInput);
+
                 for ro=1:dNbRois
-    
+
                     if strcmpi(atRoiInput{ro}.ObjectType, 'voi-roi')
-                        
+
                         if ~isfield(atRoiInput{ro}, 'MaxDistances')
-                        
+
                             tMaxDistances = computeRoiFarthestPoint(aDisplayBuffer, atMetaData, atRoiInput{ro}, false, false);
-            
-                            atRoiInput{ro}.MaxDistances = tMaxDistances;        
-    
+
+                            atRoiInput{ro}.MaxDistances = tMaxDistances;
+
                             roiTemplate('set', dSeriesOffset, atRoiInput);
-                       end 
+                       end
                     end
-                end   
+                end
             end
 
             dNbVois = numel(atVoiInput);
@@ -340,7 +344,7 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
                             if mod(aa, 5)==1 || aa == dNbVois
                                 progressBar(aa/dNbVois-0.0001, sprintf('Computing voi %d/%d', aa, dNbVois ) );
                             end
-                        end     
+                        end
 
                         [tVoiComputed, atRoiComputed] = ...
                             computeVoi(aInputBuffer, ...
@@ -355,7 +359,7 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
                                        bSegmented, ...
                                        bDoseKernel, ...
                                        bMovementApplied);
-                        
+
                         if ~isempty(tVoiComputed)
 
                             sVoiName = atVoiInput{aa}.Label;
@@ -396,25 +400,25 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
 
                                 for tt=12:21
                                     asCell{dLineOffset,tt}  = (' ');
-                                end                                
+                                end
                             end
 
                             dLineOffset = dLineOffset+1;
 
-                            if bExpendedDisplay == true 
-                                    
+                            if bExpendedDisplay == true
+
                                 dNbTags = numel(atRoiComputed);
 
                                 for bb=1:dNbTags % Scan VOI/ROIs
-                                    
+
                                     if ~isempty(atRoiComputed{bb})
-    
+
                                         if dNbTags > 100
                                              if mod(bb, 10)==1 || bb == dNbTags
                                                 progressBar( bb/dNbTags-0.0001, sprintf('Computing roi %d/%d, please wait.', bb, dNbTags) );
                                              end
                                         end
-    
+
                                         if strcmpi(atRoiComputed{bb}.Axe, 'Axe')
                                             sSliceNb = num2str(atRoiComputed{bb}.SliceNb);
                                         elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes1')
@@ -424,7 +428,7 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
                                         elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes3')
                                             sSliceNb = ['A:' num2str(size(aDisplayBuffer, 3)-atRoiComputed{bb}.SliceNb+1)];
                                         end
-    
+
                                         asCell{dLineOffset,1}  = (' ');
                                         asCell{dLineOffset,2}  = (sSliceNb);
                                         asCell{dLineOffset,3}  = [atRoiComputed{bb}.cells];
@@ -444,7 +448,7 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
                                             else
                                                 asCell{dLineOffset, 12} = [atRoiComputed{bb}.MaxDistances.MaxXY.Length];
                                             end
-            
+
                                             if atRoiComputed{bb}.MaxDistances.MaxCY.Length == 0
                                                 asCell{dLineOffset, 13} = ('NaN');
                                             else
@@ -456,11 +460,11 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
                                         end
                                         asCell{dLineOffset,14} = [atRoiComputed{bb}.area];
                                         asCell{dLineOffset,15} = (' ');
-                                        
+
                                         for tt=16:21
                                             asCell{dLineOffset,tt}  = (' ');
                                         end
-    
+
                                         dLineOffset = dLineOffset+1;
                                     end
                                 end
@@ -479,22 +483,22 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
                     if isvalid(atRoiInput{bb}.Object)
 
                         if strcmpi(atRoiInput{bb}.ObjectType, 'roi')
-    
+
                             if dNbRois > 100
                                 if mod(bb, 10)==1 || bb == dNbRois
                                     progressBar( bb/dNbRois-0.0001, sprintf('Computing roi %d/%d, please wait.', bb, dNbRois) );
                                 end
                             end
-                                      
+
                             if ~isfield(atRoiInput{bb}, 'MaxDistances')
-                                
+
                                 tMaxDistances = computeRoiFarthestPoint(aDisplayBuffer, atMetaData, atRoiInput{bb}, false, false);
-                
-                                atRoiInput{bb}.MaxDistances = tMaxDistances;        
-    
+
+                                atRoiInput{bb}.MaxDistances = tMaxDistances;
+
                                 roiTemplate('set', dSeriesOffset, atRoiInput);
-                           end                             
-    
+                           end
+
                             tRoiComputed = ...
                                 computeRoi(aInputBuffer, ...
                                            atInputMetaData, ...
@@ -507,9 +511,9 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
                                            bSegmented, ...
                                            bDoseKernel, ...
                                            bMovementApplied);
-    
+
                             sRoiName = atRoiInput{bb}.Label;
-    
+
                             if strcmpi(atRoiInput{bb}.Axe, 'Axe')
                                 sSliceNb = num2str(atRoiInput{bb}.SliceNb);
                             elseif strcmpi(atRoiInput{bb}.Axe, 'Axes1')
@@ -519,7 +523,7 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
                             elseif strcmpi(atRoiInput{bb}.Axe, 'Axes3')
                                 sSliceNb = ['A:' num2str(size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3)-atRoiInput{bb}.SliceNb+1)];
                             end
-    
+
                             asCell{dLineOffset, 1}  = (sRoiName);
                             asCell{dLineOffset, 2}  = (sSliceNb);
                             asCell{dLineOffset, 3}  = [tRoiComputed.cells];
@@ -537,7 +541,7 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
                                 else
                                     asCell{dLineOffset, 12} = [tRoiComputed.MaxDistances.MaxXY.Length];
                                 end
-    
+
                                 if tRoiComputed.MaxDistances.MaxCY.Length == 0
                                     asCell{dLineOffset, 13} = ('NaN');
                                 else
@@ -549,13 +553,13 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
                             end
                             asCell{dLineOffset, 14} = tRoiComputed.area;
                             asCell{dLineOffset, 15} = (' ');
-                            
+
                             for tt=16:21
                                 asCell{dLineOffset,tt}  = (' ');
                             end
-    
+
                             dLineOffset = dLineOffset+1;
-    
+
                         end
                     end
                 end
@@ -586,11 +590,11 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
             end
 
             progressBar(1, sprintf('Write %s%s completed', path, file));
-% 
+%
 %                 catch
 %                     progressBar(1, 'Error: exportCurrentSeriesResultCallback()');
 %                 end
-% 
+%
 %                 set(figRoiWindow, 'Pointer', 'default');
 %                 drawnow;
         end

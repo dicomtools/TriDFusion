@@ -974,9 +974,13 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                 bExpendedDisplay = true;
             else
                 bExpendedDisplay = false;
-        
-                if any(cellfun(@(roi) strcmpi(roi.ObjectType, 'roi'), atRoiInput))
-                    bExpendedDisplay = true;
+
+                if ~isempty(atRoiInput)
+
+                    if any(cellfun(@(roi) strcmpi(roi.ObjectType, 'roi'), atRoiInput))
+
+                        bExpendedDisplay = true;
+                    end
                 end
             end
 
@@ -1339,7 +1343,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                         asCell{dLineOffset,13} = 'Max CY (mm)';
                         asCell{dLineOffset,14} = 'Area cm2';
                         asCell{dLineOffset,15} = 'Volume (cm3)';
-    
+
                         for tt=16:21
                             asCell{dLineOffset,tt}  = (' ');
                         end
@@ -1355,10 +1359,10 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                         asCell{dLineOffset,9} = 'Deviation';
                         asCell{dLineOffset,10} = 'Peak';
                         asCell{dLineOffset,11} = 'Volume (cm3)';
-    
+
                         for tt=12:21
                             asCell{dLineOffset,tt}  = (' ');
-                        end                        
+                        end
                     end
 
                     dLineOffset = dLineOffset+1;
@@ -1371,22 +1375,22 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
                         if bExpendedDisplay == true
 
-                            dNbRois = numel(atRoiInput); 
-    
+                            dNbRois = numel(atRoiInput);
+
                             for ro=1:dNbRois
-    
+
                                 if strcmpi(atRoiInput{ro}.ObjectType, 'voi-roi')
-                                    
+
                                     if ~isfield(atRoiInput{ro}, 'MaxDistances')
-                                        
+
                                         tMaxDistances = computeRoiFarthestPoint(aDisplayBuffer, atMetaData, atRoiInput{ro}, false, false);
-                        
-                                        atRoiInput{ro}.MaxDistances = tMaxDistances;        
-    
+
+                                        atRoiInput{ro}.MaxDistances = tMaxDistances;
+
                                         roiTemplate('set', dSeriesOffset, atRoiInput);
-                                   end 
+                                   end
                                 end
-                            end 
+                            end
                         end
 
                         for aa=1:dNbVois
@@ -1455,25 +1459,25 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
                                             for tt=12:21
                                                 asCell{dLineOffset,tt}  = (' ');
-                                            end                                            
+                                            end
                                         end
 
                                         dLineOffset = dLineOffset+1;
-                                        
+
                                         if bExpendedDisplay == true
 
                                             dNbTags = numel(atRoiComputed);
 
                                             for bb=1:dNbTags % Scan VOI/ROIs
-    
+
                                                 if ~isempty(atRoiComputed{bb})
-    
+
                                                     if dNbTags > 100
                                                         if mod(bb, 10)==1 || bb == dNbTags
                                                             progressBar( bb/dNbTags-0.0001, sprintf('Computing ROI %d/%d, please wait', bb, dNbTags) );
                                                         end
                                                     end
-    
+
                                                     if strcmpi(atRoiComputed{bb}.Axe, 'Axe')
                                                         sSliceNb = num2str(atRoiComputed{bb}.SliceNb);
                                                     elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes1')
@@ -1483,7 +1487,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                                     elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes3')
                                                         sSliceNb = ['A:' num2str(size(aDisplayBuffer, 3)-atRoiComputed{bb}.SliceNb+1)];
                                                     end
-    
+
                                                     asCell{dLineOffset,1}  = (' ');
                                                     asCell{dLineOffset,2}  = (sSliceNb);
                                                     asCell{dLineOffset,3}  = [atRoiComputed{bb}.cells];
@@ -1501,7 +1505,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                                         else
                                                             asCell{dLineOffset, 12} = [atRoiComputed{bb}.MaxDistances.MaxXY.Length];
                                                         end
-    
+
                                                         if atRoiComputed{bb}.MaxDistances.MaxCY.Length == 0
                                                             asCell{dLineOffset, 13} = ('NaN');
                                                         else
@@ -1513,15 +1517,15 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                                     end
                                                     asCell{dLineOffset,14} = [atRoiComputed{bb}.area];
                                                     asCell{dLineOffset,15} = (' ');
-    
+
                                                     for tt=16:21
                                                         asCell{dLineOffset,tt}  = (' ');
                                                     end
-    
+
                                                     dLineOffset = dLineOffset+1;
-    
+
                                                 end
-    
+
     %                                             break;
                                             end
                                         end
@@ -1532,33 +1536,33 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
 
                     else
                         if bExpendedDisplay == true
-    
+
                             dNbRois = numel(atRoiInput);
-    
+
                             for bb=1:dNbRois
-    
+
                                 if strcmp(ptrObject.Tag, atRoiInput{bb}.Tag)
-    
+
                                     if dNbRois > 100
                                         if mod(bb, 10)==1 || bb == dNbRois
                                             progressBar( bb/dNbRois-0.0001, sprintf('Computing ROI %d/%d, please wait', bb, dNbRois) );
                                         end
                                     end
-    
-                                    if isvalid(atRoiInput{bb}.Object)         
-                
+
+                                    if isvalid(atRoiInput{bb}.Object)
+
                                         if strcmpi(atRoiInput{bb}.ObjectType, 'roi')
-                                            
+
                                             if ~isfield(atRoiInput{bb}, 'MaxDistances')
-                                                
+
                                                 tMaxDistances = computeRoiFarthestPoint(aDisplayBuffer, atMetaData, atRoiInput{bb}, false, false);
-                                
-                                                atRoiInput{bb}.MaxDistances = tMaxDistances;        
-            
+
+                                                atRoiInput{bb}.MaxDistances = tMaxDistances;
+
                                                 roiTemplate('set', dSeriesOffset, atRoiInput);
-                                           end 
+                                           end
                                         end
-                                         
+
                                         tRoiComputed = ...
                                             computeRoi(aInputBuffer, ...
                                                        atInputMetaData, ...
@@ -1571,9 +1575,9 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                                        bSegmented, ...
                                                        bDoseKernel, ...
                                                        bMovementApplied);
-    
+
                                         sRoiName = atRoiInput{bb}.Label;
-    
+
                                         if strcmpi(atRoiInput{bb}.Axe, 'Axe')
                                             sSliceNb = num2str(atRoiInput{bb}.SliceNb);
                                         elseif strcmpi(atRoiInput{bb}.Axe, 'Axes1')
@@ -1583,7 +1587,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                         elseif strcmpi(atRoiInput{bb}.Axe, 'Axes3')
                                             sSliceNb = ['A:' num2str(size(dicomBuffer('get', [], get(uiSeriesPtr('get'), 'Value')), 3)-atRoiInput{bb}.SliceNb+1)];
                                         end
-    
+
                                         asCell{dLineOffset, 1}  = (sRoiName);
                                         asCell{dLineOffset, 2}  = (sSliceNb);
                                         asCell{dLineOffset, 3}  = [tRoiComputed.cells];
@@ -1602,7 +1606,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                             else
                                                 asCell{dLineOffset, 12} = [tRoiComputed.MaxDistances.MaxXY.Length];
                                             end
-    
+
                                             if tRoiComputed.MaxDistances.MaxCY.Length == 0
                                                 asCell{dLineOffset, 13} = ('NaN');
                                             else
@@ -1614,13 +1618,13 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
                                         end
                                         asCell{dLineOffset, 14} = tRoiComputed.area;
                                         asCell{dLineOffset, 15} = (' ');
-    
+
                                         for tt=16:21
                                             asCell{dLineOffset,tt}  = (' ');
                                         end
-    
+
                                         dLineOffset = dLineOffset+1;
-    
+
                                         break;
                                     end
                                 end
