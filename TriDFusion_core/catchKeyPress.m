@@ -128,6 +128,7 @@ function catchKeyPress(~,evnt)
                     % set(toggleTool, 'State', 'off');
 
                     windowButton('set', 'up');
+
                 end
 
             end

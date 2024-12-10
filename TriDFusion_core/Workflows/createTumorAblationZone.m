@@ -1,13 +1,13 @@
-function sOrientation = getImageOrientation(aOrientation)
-%function sOrientation = getImageOrientation(aOrientation)
-%Return plane view orientation as a string.
+function createTumorAblationZone(dMarginSize, sJointType)
+%function createTumorAblationZone(dMarginSize, sJointType)
+%Add a Marginal VOI Around an Existing VOI.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2021, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2024, Daniel Lafontaine, on behalf of the TriDFusion development team.
 %
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 %
@@ -27,22 +27,18 @@ function sOrientation = getImageOrientation(aOrientation)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    aOrientation = round(aOrientation);    
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-    if numel(aOrientation) == 6
-        
-        absOrientation = abs(aOrientation);
-        
-        if absOrientation(2) == 1 && absOrientation(6) == 1
-            sOrientation = 'Sagittal';  % Sagittal plane view
-        elseif absOrientation(1) == 1 && absOrientation(6) == 1
-            sOrientation = 'Coronal';   % Coronal plane view
-        elseif absOrientation(1) == 1 && absOrientation(5) == 1
-            sOrientation = 'Axial';     % Axial plane view
-        else
-            sOrientation = 'Unknown';   % Unknown orientation
-        end
-    else
-        sOrientation = 'Unknown';
-    end      
+    atRoiInput = roiTemplate('get', dSeriesOffset);
+    atVoiInput = voiTemplate('get', dSeriesOffset);
+
+    if ~isempty(atVoiInput) % VOI
+
+        createVoiMarginContours(dMarginSize, sJointType, atVoiInput);
+    end
+
+    if ~isempty(atRoiInput) % ROI
+
+        createRoiMarginContour(dMarginSize, sJointType, atRoiInput);
+    end
 end

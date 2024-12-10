@@ -186,10 +186,15 @@ function mainWindowMenu()
     
     mAnalCancer = uimenu(mWorkflows,'Label','Anal Cancer');
 
-    uimenu(mAnalCancer, 'Label','Display Statistics ', 'Callback'              , @figVoiSimplifiedDialogCallback);
+    uimenu(mAnalCancer, 'Label','Display Statistics', 'Callback'               , @figVoiSimplifiedDialogCallback);
     uimenu(mAnalCancer, 'Label','Export Report...', 'Callback'                 , @setAnalCancerReportCallbackmMetastaticBreastCancer);
     uimenu(mAnalCancer, 'Label','Export Contours to RT-structure...','Callback', @writeRTStructCallback);
     uimenu(mAnalCancer, 'Label','PET/CT Fusion', 'Callback'                    , @setPETCTAnalCancerFusionCallback, 'Separator','on');
+
+    % Liver Ablation
+
+    mLiverAblation = uimenu(mWorkflows,'Label','Liver Ablation');
+    uimenu(mLiverAblation, 'Label','Create Tumor Ablation Zone', 'Callback', @createTumorAblationZoneCallback);
 
     % Metastatic Breast Cancer
 

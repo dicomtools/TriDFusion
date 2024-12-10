@@ -72,19 +72,21 @@ function triangulateRoi(sRoiTag)
                 end
             end
             
-           if ~isempty(tRoi.MaxDistances)
-
-                p1x = tRoi.MaxDistances.MaxXY.Line.XData(1);
-                p2x = tRoi.MaxDistances.MaxXY.Line.XData(2);
-                p1y = tRoi.MaxDistances.MaxXY.Line.YData(1);
-                p2y = tRoi.MaxDistances.MaxXY.Line.YData(2);
-
-                midX = round(mean([p1x, p2x]));
-                midY = round(mean([p1y, p2y]));
-            else 
-                midX = round(tRoi.Position(1,1));
-                midY = round(tRoi.Position(1,2));                        
-            end
+           % if ~isempty(tRoi.MaxDistances)
+           % 
+           %      p1x = tRoi.MaxDistances.MaxXY.Line.XData(1);
+           %      p2x = tRoi.MaxDistances.MaxXY.Line.XData(2);
+           %      p1y = tRoi.MaxDistances.MaxXY.Line.YData(1);
+           %      p2y = tRoi.MaxDistances.MaxXY.Line.YData(2);
+           % 
+           %      midX = round(mean([p1x, p2x]));
+           %      midY = round(mean([p1y, p2y]));
+           %  else 
+                
+                % Compute the middle of the positions
+                midX = round(mean(tRoi.Position(:, 1)));
+                midY = round(mean(tRoi.Position(:, 2)));                       
+            % end
 
             aImageSize = size(im);
 
@@ -153,8 +155,6 @@ function triangulateRoi(sRoiTag)
                             Xlimit = [midX-xOffset midX+xOffset];
                             tRoi.Object.Parent.XLim = Xlimit;
 
-
-
                             Ylimit = [midY-yOffset midY+yOffset];
                             tRoi.Object.Parent.YLim = Ylimit;
 
@@ -196,8 +196,6 @@ function triangulateRoi(sRoiTag)
                 otherwise
             end
        end
-
-    else % 2D
     end
 
 end

@@ -268,8 +268,8 @@ function interpolateBetweenROIs(tRoi1, tRoi2, dSeriesOffset, bCreateVoi)
 
             addRoiMenu(pRoi);
 
-            addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
-            addlistener(pRoi, 'WaypointRemoved', @waypointEvents); 
+            % addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+            % addlistener(pRoi, 'WaypointRemoved', @waypointEvents); 
 
             % voiDefaultMenu(pRoi);
             % 

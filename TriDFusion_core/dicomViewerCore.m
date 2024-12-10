@@ -1235,11 +1235,9 @@ function dicomViewerCore()
             'YLim'    , [0 inf], ...
             'CLim'    , [0 inf] ...
             );
-        disableDefaultInteractivity(axes3Ptr('get', [], dSeriesOffset));
-
         set(axes3Ptr('get', [], dSeriesOffset), 'HitTest', 'off');  % Disable hit testing for axes
         set(axes3Ptr('get', [], dSeriesOffset), 'XLimMode', 'manual', 'YLimMode', 'manual');  
-        set(axes3Ptr('get', [], dSeriesOffset), 'XMinorTick', 'off', 'YMinorTick', 'off');
+        set(axes3Ptr('get', [], dSeriesOffset), 'XMinorTick', 'off', 'YMinorTick', 'off'); 
 
         grid(axes3Ptr('get', [], dSeriesOffset), 'off');
 
@@ -2111,9 +2109,9 @@ function dicomViewerCore()
         axeColorbar.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
         axeColorbar.Toolbar.Visible = 'off';          
     end
-
+    
     axeColorbarPtr('set', axeColorbar);
-
+    
     % Compute colorbar line y offset
 
     dYOffsetMax = computeLineColorbarIntensityMaxYOffset(dOffset);

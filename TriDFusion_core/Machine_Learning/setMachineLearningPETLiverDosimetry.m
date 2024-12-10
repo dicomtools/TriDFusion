@@ -140,8 +140,8 @@ function setMachineLearningPETLiverDosimetry(sSegmentatorScript, bResampleSeries
 
     if isempty(sNiiFullFileName)
 
-        progressBar(1, 'Error: nii file mot found!');
-        errordlg('nii file mot found!!', '.nii file Validation');
+        progressBar(1, 'Error: nii file not found!');
+        errordlg('nii file not found!!', '.nii file Validation');
     else
         progressBar(3/7, 'Segmentation in progress, this might take several minutes, please be patient.');
 

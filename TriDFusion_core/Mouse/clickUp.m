@@ -115,10 +115,13 @@ function clickUp(~, ~)
                         if ~isempty(dTagOffset)
 
                             atRoiInput{dTagOffset}.Position = acPtrList{jj}.Object.Position;
+                            
+                            if roiHasMaxDistances(atRoiInput{dTagOffset}) == true
 
-                            tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [],  dSeriesOffset), dicomMetaData('get', [],  dSeriesOffset), atRoiInput{dTagOffset}, false, false);
-
-                            atRoiInput{dTagOffset}.MaxDistances = tMaxDistances;   
+                                tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [],  dSeriesOffset), dicomMetaData('get', [],  dSeriesOffset), atRoiInput{dTagOffset}, false, false);
+    
+                                atRoiInput{dTagOffset}.MaxDistances = tMaxDistances;   
+                            end
                         end
              %           editorRoiMoving(pRoiPtr, acPtrList{jj}.Object);
                     end

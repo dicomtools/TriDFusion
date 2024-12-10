@@ -27,7 +27,7 @@ function set2DWholobodySegmentationLu177Callback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    atInput = inputTemplate('get');
+    % atInput = inputTemplate('get');
 
     dSerieOffset = get(uiSeriesPtr('get'), 'Value');
 
@@ -207,7 +207,7 @@ function set2DWholobodySegmentationLu177Callback(~, ~)
         
             aPosition = flip(curentMask, 2);
         
-            pRoi = images.roi.Freehand(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+            pRoi = images.roi.Freehand(axePtr('get', [], dSerieOffset), ...
                                        'Smoothing'     , 1, ...
                                        'Position'      , aPosition, ...
                                        'Color'         , aColor, ...
@@ -229,8 +229,8 @@ function set2DWholobodySegmentationLu177Callback(~, ~)
 
             addRoiMenu(pRoi);
 
-            addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
-            addlistener(pRoi, 'WaypointRemoved', @waypointEvents); 
+            % addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+            % addlistener(pRoi, 'WaypointRemoved', @waypointEvents); 
 
             % roiDefaultMenu(pRoi);
             % 
@@ -301,7 +301,7 @@ function set2DWholobodySegmentationLu177Callback(~, ~)
     
         aPosition = flip(curentMask, 2);
     
-        pRoi = images.roi.Freehand(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')), ...
+        pRoi = images.roi.Freehand(axePtr('get', [], dSerieOffset), ...
                                    'Smoothing'     , 1, ...
                                    'Position'      , aPosition, ...
                                    'Color'         , aColor, ...
@@ -323,8 +323,8 @@ function set2DWholobodySegmentationLu177Callback(~, ~)
 
         addRoiMenu(pRoi);
 
-        addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
-        addlistener(pRoi, 'WaypointRemoved', @waypointEvents); 
+        % addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+        % addlistener(pRoi, 'WaypointRemoved', @waypointEvents); 
 
         % roiDefaultMenu(pRoi);
         % 

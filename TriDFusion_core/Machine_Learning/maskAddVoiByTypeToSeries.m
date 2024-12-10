@@ -59,7 +59,7 @@ function maskAddVoiByTypeToSeries(aImage, aMask, atMetaData, dSeriesOffset, dSma
 
     for bb=1:dNbElements  % Nb VOI
 
-        if mod(bb,5)==1 || bb == 1 || bb == dNbElements
+        if mod(bb,10)==1 || bb == 1 || bb == dNbElements
 
             progressBar( bb/dNbElements-0.0001, sprintf('Computing contour %d/%d, please wait.', bb, dNbElements) );
         end   
@@ -150,8 +150,8 @@ function maskAddVoiByTypeToSeries(aImage, aMask, atMetaData, dSeriesOffset, dSma
 
                 addRoiMenu(roiPtr);
                 
-                addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
-                addlistener(roiPtr, 'WaypointRemoved', @waypointEvents); 
+                % addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
+                % addlistener(roiPtr, 'WaypointRemoved', @waypointEvents); 
 
                 % roiDefaultMenu(roiPtr);
                 % 
@@ -174,9 +174,9 @@ function maskAddVoiByTypeToSeries(aImage, aMask, atMetaData, dSeriesOffset, dSma
                     break;
                 end
 
-                if viewRoiPanel('get') == true
-                    drawnow limitrate;
-                end
+                % if viewRoiPanel('get') == true
+                %     drawnow limitrate;
+                % end
             end
 
             if bBreak == true

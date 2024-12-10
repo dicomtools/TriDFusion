@@ -1,13 +1,13 @@
-function sOrientation = getImageOrientation(aOrientation)
-%function sOrientation = getImageOrientation(aOrientation)
-%Return plane view orientation as a string.
+function bHasMaxDistances = roiHasMaxDistances(ptRoi)
+%function  bHasMaxDistances = roiHasMaxDistances(ptRoi)
+%Return true if the ROI structures contains line and text.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2021, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2024, Daniel Lafontaine, on behalf of the TriDFusion development team.
 %
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 %
@@ -27,22 +27,21 @@ function sOrientation = getImageOrientation(aOrientation)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    aOrientation = round(aOrientation);    
+    bHasMaxDistances = false;
 
-    if numel(aOrientation) == 6
+    if isfield(ptRoi, 'MaxDistances') 
         
-        absOrientation = abs(aOrientation);
-        
-        if absOrientation(2) == 1 && absOrientation(6) == 1
-            sOrientation = 'Sagittal';  % Sagittal plane view
-        elseif absOrientation(1) == 1 && absOrientation(6) == 1
-            sOrientation = 'Coronal';   % Coronal plane view
-        elseif absOrientation(1) == 1 && absOrientation(5) == 1
-            sOrientation = 'Axial';     % Axial plane view
-        else
-            sOrientation = 'Unknown';   % Unknown orientation
+        if ~isempty(ptRoi.MaxDistances)
+
+            if isfield(ptRoi.MaxDistances.MaxXY, 'Line') && ...
+               isfield(ptRoi.MaxDistances.MaxXY, 'Text') 
+    
+                if isvalid(ptRoi.MaxDistances.MaxXY.Line)
+                    
+                    bHasMaxDistances = true;
+                end
+            end
         end
-    else
-        sOrientation = 'Unknown';
-    end      
+    end
+
 end

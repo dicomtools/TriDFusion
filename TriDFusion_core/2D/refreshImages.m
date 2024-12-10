@@ -45,6 +45,9 @@ function refreshImages(clickedPtX, clickedPtY)
 
     im = dicomBuffer('get', [], dSeriesOffset);
 
+    tQuantification = quantificationTemplate('get', [], dSeriesOffset);
+    atMetaData = dicomMetaData('get', [], dSeriesOffset);
+
     aBufferSize = size(im);
 
     if overlayActivate('get') == true
@@ -147,23 +150,41 @@ function refreshImages(clickedPtX, clickedPtY)
         if contourVisibilityRoiPanelValue('get') == true
 
             atRoiInput = roiTemplate('get', dSeriesOffset);
+            
             if ~isempty(atRoiInput)
+
                 for bb=1:numel(atRoiInput)
+
                     if isvalid(atRoiInput{bb}.Object)
+
                         atRoiInput{bb}.Object.Visible = 'on';
+
+                        bRoiHasMaxDistances = roiHasMaxDistances(atRoiInput{bb}); 
+
                         if viewFarthestDistances('get') == true
-                            if ~isempty(atRoiInput{bb}.MaxDistances)
+
+                            if bRoiHasMaxDistances == true 
+                                          
                                 atRoiInput{bb}.MaxDistances.MaxXY.Line.Visible = 'on';
                                 atRoiInput{bb}.MaxDistances.MaxCY.Line.Visible = 'on';
                                 atRoiInput{bb}.MaxDistances.MaxXY.Text.Visible = 'on';
                                 atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'on';
+
+                            else % Object need to be initialize
+
+                                tMaxDistances = computeRoiFarthestPoint(im, atMetaData, atRoiInput{bb}, true, true);
+                                atRoiInput{bb}.MaxDistances = tMaxDistances;
+
+                                roiTemplate('set', dSeriesOffset, atRoiInput);
                             end
+                         
                         else
-                            if ~isempty(atRoiInput{bb}.MaxDistances)
+                            if bRoiHasMaxDistances == true
+
                                 atRoiInput{bb}.MaxDistances.MaxXY.Line.Visible = 'off';
                                 atRoiInput{bb}.MaxDistances.MaxCY.Line.Visible = 'off';
                                 atRoiInput{bb}.MaxDistances.MaxXY.Text.Visible = 'off';
-                                atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'off';
+                                atRoiInput{bb}.MaxDistances.MaxCY.Text.Visible = 'off';                                
                             end
                         end
                    end
@@ -912,13 +933,21 @@ function refreshImages(clickedPtX, clickedPtY)
                             currentRoi.Object.Visible = 'on';
 
                             if bViewFarthest
-                               
-                                currentDistances = currentRoi.MaxDistances;
-          
-                                currentDistances.MaxXY.Line.Visible = 'on';
-                                currentDistances.MaxCY.Line.Visible = 'on';
-                                currentDistances.MaxXY.Text.Visible = 'on';
-                                currentDistances.MaxCY.Text.Visible = 'on';
+                            
+                                if roiHasMaxDistances(currentRoi) == true
+                                                  
+                                    currentRoi.MaxDistances.MaxXY.Line.Visible = 'on';
+                                    currentRoi.MaxDistances.MaxCY.Line.Visible = 'on';
+                                    currentRoi.MaxDistances.MaxXY.Text.Visible = 'on';
+                                    currentRoi.MaxDistances.MaxCY.Text.Visible = 'on';
+
+                                else %Object need to be initialize
+
+                                    tMaxDistances = computeRoiFarthestPoint(im, atMetaData, currentRoi, true, true);
+                                    atRoiInput{bb}.MaxDistances = tMaxDistances;
+
+                                    roiTemplate('set', dSeriesOffset, atRoiInput);
+                                end
                             end
                         else
 
@@ -927,12 +956,14 @@ function refreshImages(clickedPtX, clickedPtY)
                             % if ~isempty(currentDistances) && bViewFarthest
                             if bViewFarthest
     
-                                currentDistances = currentRoi.MaxDistances;
-                            
-                                currentDistances.MaxXY.Line.Visible = 'off';
-                                currentDistances.MaxCY.Line.Visible = 'off';
-                                currentDistances.MaxXY.Text.Visible = 'off';
-                                currentDistances.MaxCY.Text.Visible = 'off';
+                                if roiHasMaxDistances(currentRoi) == true
+                                                  
+                                    currentRoi.MaxDistances.MaxXY.Line.Visible = 'off';
+                                    currentRoi.MaxDistances.MaxCY.Line.Visible = 'off';
+                                    currentRoi.MaxDistances.MaxXY.Text.Visible = 'off';
+                                    currentRoi.MaxDistances.MaxCY.Text.Visible = 'off';
+
+                                end
                             end                            
                         end
                     % catch
@@ -1239,9 +1270,6 @@ function refreshImages(clickedPtX, clickedPtY)
                 tAxes2ViewText = axesText('get', 'axes2View');
                 tAxes2ViewText.Color  = overlayColor('get');
             end
-
-            tQuantification = quantificationTemplate('get', [], dSeriesOffset);
-            atMetaData = dicomMetaData('get', [], dSeriesOffset);
 
             bDisplayAxe3 = true;
             mGate = gateIconMenuObject('get');

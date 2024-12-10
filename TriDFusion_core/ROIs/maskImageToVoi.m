@@ -71,8 +71,11 @@ function maskImageToVoi(aMask, dSeriesOffset, aClassificationMask, bLesionClassi
             continue;
         end
 
-        progressBar( bb/dNbElements-0.0001, sprintf('Computing contour %d/%d, please wait', bb, dNbElements) );
-    
+        if mod(bb,5)==1 || bb == 1 || bb == dNbElements
+
+            progressBar( bb/dNbElements-0.0001, sprintf('Computing contour %d/%d, please wait', bb, dNbElements) );
+        end
+
         BW(BW~=0) = 0; % Reset BW buffer
 
         BW(CC.PixelIdxList{bb}) = aMask(CC.PixelIdxList{bb});
@@ -163,8 +166,8 @@ function maskImageToVoi(aMask, dSeriesOffset, aClassificationMask, bLesionClassi
 
                 addRoiMenu(roiPtr);
 
-                addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
-                addlistener(roiPtr, 'WaypointRemoved', @waypointEvents); 
+                % addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
+                % addlistener(roiPtr, 'WaypointRemoved', @waypointEvents); 
 
                 % voiDefaultMenu(roiPtr);
                 % 

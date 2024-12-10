@@ -129,7 +129,10 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
                     sliceNumber('set', 'axial', mm);
                 end    
 
-                progressBar(mm/dMaskSize, sprintf('Processing mask slice %d/%d', mm, dMaskSize ) );      
+                if mod(mm,5)==1 || mm == 1 || mm == dMaskSize
+
+                    progressBar(mm/dMaskSize, sprintf('Processing mask slice %d/%d', mm, dMaskSize ) ); 
+                end
 
                 for jj=1:numel(maskSlice)
                     
@@ -174,8 +177,8 @@ function maskToVoi(aMask, sLabel, sLesionType, aColor, sPlane, dSeriesOffset, bP
 
                     addRoiMenu(pRoi);
     
-                    addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
-                    addlistener(pRoi, 'WaypointRemoved', @waypointEvents); 
+                    % addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+                    % addlistener(pRoi, 'WaypointRemoved', @waypointEvents); 
 
                     % voiDefaultMenu(pRoi);
                     % 

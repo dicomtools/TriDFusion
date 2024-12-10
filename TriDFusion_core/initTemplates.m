@@ -28,14 +28,14 @@ function initTemplates()
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
     asMainDirectory = mainDir('get');
-        
+
     try
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-    drawnow update; 
+    drawnow limitrate;
 
-    if(numel(asMainDirectory))                     
-            
+    if(numel(asMainDirectory))
+
         % asMainDirectory
 
         [asFilesList, atDicomInfo, aDicomBuffer] = readDicomFolder(asMainDirectory);
@@ -45,9 +45,9 @@ function initTemplates()
            ~isempty(aDicomBuffer)
 
             % Preallocate atInput structure array
-            
+
             [atInput, asSeriesDescription] = initInputTemplate(asFilesList, atDicomInfo, aDicomBuffer);
-                    
+
             inputTemplate('set', atInput);
 
             seriesDescription('set', asSeriesDescription);
@@ -58,22 +58,22 @@ function initTemplates()
 
             if numel(inputTemplate('get')) ~= 0
 
-                for dTemplateLoop = 1 : numel(inputTemplate('get'))       
-                    
+                for dTemplateLoop = 1 : numel(inputTemplate('get'))
+
                     setQuantification(dTemplateLoop);
                 end
             end
 
             atInput = inputTemplate('get');
- 
+
             dicomMetaData('set', atInput(1).atDicomInfo);
 
             aInputBuffer = inputBuffer('get');
 
-            dicomBuffer('set', aInputBuffer{1});    
+            dicomBuffer('set', aInputBuffer{1});
 
             for mm=1:numel(aInputBuffer)
-                
+
                 if size(aInputBuffer{mm}, 3) ~= 1
 
                     mipBuffer('set', atInput(mm).aMip, mm);
@@ -83,11 +83,11 @@ function initTemplates()
             clear aInputBuffer;
 
             cropValue('set', min(dicomBuffer('get'), [], 'all'));
-          
+
         else
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
-            drawnow update; 
-            
+            drawnow limitrate;
+
             progressBar(1 , 'Error: TriDFusion: no volumes detected!');
             h = msgbox('Error: TriDFusion(): no volumes detected!', 'Error');
 %            if integrateToBrowser('get') == true
@@ -100,14 +100,14 @@ function initTemplates()
 %            javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
             return;
         end
-                 
+
     end
 
     catch
-        progressBar(1, 'Error:initTemplates()');          
-    end  
-    
+        progressBar(1, 'Error:initTemplates()');
+    end
+
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
-    drawnow update; 
+    drawnow limitrate;
 
 end

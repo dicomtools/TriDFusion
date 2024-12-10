@@ -1,5 +1,5 @@
-function increaseVoiPosition(sVoiTag, dNbPixels)
-%function increaseVoiPosition(sVoiTag, dNbPixels)
+function increaseVoiPosition(sVoiTag, dIncreaseBySize)
+%function increaseVoiPosition(sVoiTag, dIncreaseBySize)
 %Increase a VOI position by an number of pixels.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,8 +27,12 @@ function increaseVoiPosition(sVoiTag, dNbPixels)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    atRoi = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-    atVoi = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+    dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+
+    atMetaData = dicomMetaData('get', [], dSeriesOffset);
+
+    atRoi = roiTemplate('get', dSeriesOffset);
+    atVoi = voiTemplate('get', dSeriesOffset);
 
     if ~isempty(atRoi)        
 
@@ -61,7 +65,42 @@ function increaseVoiPosition(sVoiTag, dNbPixels)
                             
                                                                 
                         otherwise
-                    
+
+                        switch lower(atRoi{dRoiTagOffset}.Axe)
+            
+                            case 'axe'
+    
+                                xPixelSize = atMetaData{1}.PixelSpacing(1);
+                                yPixelSize = atMetaData{1}.PixelSpacing(2);
+    
+                            case 'axes1'
+    
+                                xPixelSize = atMetaData{1}.PixelSpacing(2);
+                                yPixelSize = computeSliceSpacing(atMetaData);
+    
+                            case 'axes2'
+    
+                                xPixelSize = atMetaData{1}.PixelSpacing(1);
+                                yPixelSize = computeSliceSpacing(atMetaData);
+           
+                            case 'axes3'
+    
+                                xPixelSize = atMetaData{1}.PixelSpacing(1);
+                                yPixelSize = atMetaData{1}.PixelSpacing(2);
+    
+                            otherwise
+                                continue;
+                               
+                        end
+    
+                        if xPixelSize == 0
+                            xPixelSize = 1;
+                        end
+    
+                        if yPixelSize == 0
+                            yPixelSize = 1;
+                        end
+
                         % Calculate the center of the ROI
 
                         centerX = mean(atRoi{dRoiTagOffset}.Position(:, 1));
@@ -76,11 +115,11 @@ function increaseVoiPosition(sVoiTag, dNbPixels)
                             
                             % Calculate the new position for the vertex
 
-                            new_x = x + (dNbPixels * sign(x - centerX)); 
-                            new_y = y + (dNbPixels * sign(y - centerY)); 
+                            new_x = x + (dIncreaseBySize/xPixelSize * sign(x - centerX)); 
+                            new_y = y + (dIncreaseBySize/yPixelSize * sign(y - centerY)); 
 
-%                             new_x = centerX + (x - centerX) * (1 + dNbPixels / 100); % Adjust the factor as needed
-%                             new_y = centerY + (y - centerY) * (1 + dNbPixels / 100); % Adjust the factor as needed
+%                             new_x = centerX + (x - centerX) * (1 + dIncreaseBySize / 100); % Adjust the factor as needed
+%                             new_y = centerY + (y - centerY) * (1 + dIncreaseBySize / 100); % Adjust the factor as needed
 
                             atRoi{dRoiTagOffset}.Position(i, 1) = new_x;
                             atRoi{dRoiTagOffset}.Position(i, 2) = new_y;

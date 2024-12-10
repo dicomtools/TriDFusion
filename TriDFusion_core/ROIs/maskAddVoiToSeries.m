@@ -46,13 +46,19 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
     
         cancelCreateVoiRoiPanel('set', false);
     end
+    
+    bMATLABReleaseOlderThan2023b = true;
+    if isMATLABReleaseOlderThan('R2023b')
+
+        bMATLABReleaseOlderThan2023b = true;
+    end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-    drawnow;
+    drawnow limitrate;
 
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
     
-    atMetaData = dicomMetaData('get');
+    atMetaData = dicomMetaData('get', [], dSeriesOffset);
           
     dPixelSizeX = atMetaData{1}.PixelSpacing(1);
     if dPixelSizeX == 0 
@@ -100,9 +106,9 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 
     for bb=1:dNbElements  % Nb VOI
 
-        if mod(bb,5)==1 || bb == 1 || bb == dNbElements
+        if mod(bb,10)==1 || bb == 1 || bb == dNbElements
 
-            progressBar( bb/dNbElements-0.0001, sprintf('Computing contour %d/%d, please wait.', bb, dNbElements) );
+            progressBar( bb/dNbElements-0.0001, sprintf('Processing contour %d/%d, please wait.', bb, dNbElements) );
         end
 %                if numel(CC.PixelIdxList{bb}) 
 
@@ -527,11 +533,19 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 
             aAxial = gather(BW2(:,:,dCurrentSlice));
 
-            if bPixelEdge == true
-                aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+            if bPixelEdge == true 
+
+                if bMATLABReleaseOlderThan2023b == true
+
+                    aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); 
+                    [maskAxial, ~, dNbSlicesElements]  = bwboundaries(aAxial, 8, 'noholes');                    
+                else
+                    [maskAxial, ~, dNbSlicesElements]  = bwboundaries(aAxial, 8, 'noholes', 'TraceStyle', 'pixeledge');                    
+                end
+            else
+                [maskAxial, ~, dNbSlicesElements]  = bwboundaries(aAxial, 8, 'noholes');                    
             end
             
-            [maskAxial, ~, dNbSlicesElements]  = bwboundaries(aAxial, 8, 'noholes');                    
              
 %             dSlicesNbElements = numel(maskAxial);
             
@@ -542,12 +556,14 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                     break;
                 end
 
-                if bPixelEdge == true
-                    maskAxial{jj} = (maskAxial{jj} +1)/PIXEL_EDGE_RATIO;
+                if bPixelEdge == true && bMATLABReleaseOlderThan2023b == true
+
+                    maskAxial{jj} = (maskAxial{jj} +1)/PIXEL_EDGE_RATIO;    
                     maskAxial{jj} = reducepoly(maskAxial{jj});
                 end   
 
                 curentMask = maskAxial(jj);
+
 
 %                                    sliceNumber('set', 'axial', aa);
 
@@ -577,8 +593,8 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 
                 addRoiMenu(roiPtr);
 
-                addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
-                addlistener(roiPtr, 'WaypointRemoved', @waypointEvents);  
+                % addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
+                % addlistener(roiPtr, 'WaypointRemoved', @waypointEvents);  
 
                 % voiDefaultMenu(roiPtr);
                 % 
@@ -602,10 +618,10 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
 
 %                 asTag{dTagOffset} = sTag;
 %                 dTagOffset=dTagOffset+1;
-                if viewRoiPanel('get') == true
-
-                    drawnow limitrate;
-                end
+                % if viewRoiPanel('get') == true
+                % 
+                %     drawnow limitrate;
+                % end
 
             end              
         end
@@ -681,5 +697,5 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
     clear BWANDBWCT; 
     
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
-    drawnow;
+    drawnow limitrate;
 end

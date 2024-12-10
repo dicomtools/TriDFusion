@@ -5622,8 +5622,8 @@ function [nestedLoad, nestedProceed, nestedDelete, nestedCancel] = machineLearni
 
         if isempty(sNiiFullFileName)
 
-            progressBar(1, 'Error: nii file mot found!');
-            errordlg('nii file mot found!!', '.nii file Validation');
+            progressBar(1, 'Error: nii file not found!');
+            errordlg('nii file not found!!', '.nii file Validation');
         else
             progressBar(2/4, 'Segmentation in progress, this might take several minutes, please be patient.');
 

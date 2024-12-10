@@ -85,8 +85,8 @@ function addContourToTemplate(dSeriesOffset, sAxe, dSliceNb, sType, aPosition, s
     tRoi.Deletable           = 1;
     tRoi.UserData            = [];
     
-    tMaxDistances     = computeRoiFarthestPoint(imRoi, atDicomInfo, tRoi, false, false);
-    tRoi.MaxDistances = tMaxDistances;
+    % tMaxDistances     = computeRoiFarthestPoint(imRoi, atDicomInfo, tRoi, false, false);
+    % tRoi.MaxDistances = tMaxDistances;
 
     if isempty(atRoiInput)
         atRoiInput{1} = tRoi;

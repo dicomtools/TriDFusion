@@ -3216,36 +3216,27 @@ function generate3DLungShuntReport(bInitReport)
                                     end
                                 end
 
+                                % Delete farthest distance object
+
+                                if roiHasMaxDistances(atRoiInput{aRoisTagOffset(ro)}) == true
+                    
+                                    maxDistances = atRoiInput{aRoisTagOffset(ro)}.MaxDistances; % Cache the field to avoid repeated lookups
+                    
+                                    objectsToDelete = [maxDistances.MaxXY.Line, ...
+                                                       maxDistances.MaxCY.Line, ...
+                                                       maxDistances.MaxXY.Text, ...
+                                                       maxDistances.MaxCY.Text];
+                                    % Delete only valid objects
+                                    delete(objectsToDelete(isvalid(objectsToDelete)));  
+
+                                    atRoiInput{aRoisTagOffset(ro)} = rmfield(atRoiInput{aRoisTagOffset(ro)}, 'MaxDistances');                                   
+                                end
+
                                 % Delete ROI object
 
                                 if isvalid(atRoiInput{aRoisTagOffset(ro)}.Object)
 
                                     delete(atRoiInput{aRoisTagOffset(ro)}.Object);
-                                end
-
-                                % Delete farthest distance object
-
-                                if ~isempty(atRoiInput{aRoisTagOffset(ro)}.MaxDistances)
-
-                                    if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Line)
-
-                                        delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Line);
-                                    end
-
-                                    if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Line)
-
-                                        delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Line);
-                                    end
-
-                                    if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Text)
-
-                                        delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxXY.Text);
-                                    end
-
-                                    if isvalid(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Text)
-
-                                        delete(atRoiInput{aRoisTagOffset(ro)}.MaxDistances.MaxCY.Text);
-                                    end
                                 end
 
                                 atRoiInput{aRoisTagOffset(ro)} = [];

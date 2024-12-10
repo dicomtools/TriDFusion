@@ -486,8 +486,8 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
                                 
                                 addRoiMenu(pRoi);
 
-                                addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
-                                addlistener(pRoi, 'WaypointRemoved', @waypointEvents);                              
+                                % addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+                                % addlistener(pRoi, 'WaypointRemoved', @waypointEvents);                              
                                 % voiDefaultMenu(pRoi);
                                 % 
                                 % roiDefaultMenu(pRoi);

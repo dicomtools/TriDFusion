@@ -44,8 +44,9 @@ function initRoi()
     endLoop = numel(atRoi);
     for bb=1:numel(atRoi)
 
-        if mod(bb,5)==1 || bb == endLoop
-            progressBar(bb/endLoop, sprintf('Processing ROI %d/%d', bb, endLoop));
+        if mod(bb,25)==1 || bb == endLoop
+
+            progressBar(bb/endLoop, sprintf('Processing contour %d/%d', bb, endLoop));
         end
 
         if ~isempty(atRoi{bb})
@@ -364,8 +365,8 @@ function initRoi()
     
             atRoi{bb}.Object = roiPtr;
     
-            tMaxDistances = computeRoiFarthestPoint(imRoi, atDicomInfo, atRoi{bb}, false, false);
-            atRoi{bb}.MaxDistances = tMaxDistances;
+            %DL tMaxDistances = computeRoiFarthestPoint(imRoi, atDicomInfo, atRoi{bb}, false, false);
+            %DL atRoi{bb}.MaxDistances = tMaxDistances;
         end
     end
 

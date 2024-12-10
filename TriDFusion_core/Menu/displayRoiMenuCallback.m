@@ -11,8 +11,10 @@ function displayRoiMenuCallback(src)
 
         constraintMenu(src);
 
-        cropMenu(src);
+        marginMenu(src);
 
+        cropMenu(src);
+        
         uimenu(src,'Label', 'Display Statistics' , 'UserData', src.UserData, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
     else
 

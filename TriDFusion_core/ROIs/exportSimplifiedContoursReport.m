@@ -34,7 +34,7 @@ function exportSimplifiedContoursReport(bSUVUnit, bSegmented, bModifiedMatrix)
     try
         matlab.io.internal.getExcelInstance;
         bExcelInstance = true;
-    catch exception %#ok<NASGU>
+    catch exception 
 %            warning(message('MATLAB:xlswrite:NoCOMServer'));
         bExcelInstance = false;
     end

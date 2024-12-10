@@ -879,8 +879,8 @@ function initRoiPanel()
          
             addRoiMenu(pRoi);
 
-            addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
-            addlistener(pRoi, 'WaypointRemoved', @waypointEvents);
+            % addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+            % addlistener(pRoi, 'WaypointRemoved', @waypointEvents);
 
             if is2DBrush('get') == true
 
@@ -1212,17 +1212,22 @@ function initRoiPanel()
 
                      % Delete farthest distance objects
 
-                    if ~isempty(atRoiInput{aRoisTagOffset(rr)}.MaxDistances)
-                        objectsToDelete = [atRoiInput{aRoisTagOffset(rr)}.MaxDistances.MaxXY.Line, ...
-                                           atRoiInput{aRoisTagOffset(rr)}.MaxDistances.MaxCY.Line, ...
-                                           atRoiInput{aRoisTagOffset(rr)}.MaxDistances.MaxXY.Text, ...
-                                           atRoiInput{aRoisTagOffset(rr)}.MaxDistances.MaxCY.Text];
-                        delete(objectsToDelete(isvalid(objectsToDelete)));
+                    if roiHasMaxDistances(atRoiInput{aRoisTagOffset(rr)}) == true
+        
+                        maxDistances = atRoiInput{aRoisTagOffset(rr)}.MaxDistances; % Cache the field to avoid repeated lookups
+        
+                        objectsToDelete = [maxDistances.MaxXY.Line, ...
+                                           maxDistances.MaxCY.Line, ...
+                                           maxDistances.MaxXY.Text, ...
+                                           maxDistances.MaxCY.Text];
+                        % Delete only valid objects
+                        delete(objectsToDelete(isvalid(objectsToDelete)));     
+                     
+                        atRoiInput{aRoisTagOffset(rr)} = rmfield(atRoiInput{aRoisTagOffset(rr)}, 'MaxDistances');                                                       
                     end
-
-                    % Delete ROI object
-
+        
                     if isvalid(atRoiInput{aRoisTagOffset(rr)}.Object)
+        
                         delete(atRoiInput{aRoisTagOffset(rr)}.Object)
                     end
 
@@ -1362,7 +1367,8 @@ function initRoiPanel()
 
                         set(atRoiInput{rr}.Object, 'Visible', 'off');
 
-                        if ~isempty(atRoiInput{rr}.MaxDistances)
+                        if roiHasMaxDistances(atRoiInput{rr}) == true
+
                             atRoiInput{rr}.MaxDistances.MaxXY.Line.Visible = 'off';
                             atRoiInput{rr}.MaxDistances.MaxCY.Line.Visible = 'off';
                             atRoiInput{rr}.MaxDistances.MaxXY.Text.Visible = 'off';
@@ -3293,8 +3299,8 @@ function initRoiPanel()
 
                             addRoiMenu(pRoi);
                 
-                            addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
-                            addlistener(pRoi, 'WaypointRemoved', @waypointEvents);
+                            % addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+                            % addlistener(pRoi, 'WaypointRemoved', @waypointEvents);
 
 %                             roiDefaultMenu(pRoi);
 % 
@@ -3464,8 +3470,10 @@ function initRoiPanel()
                     BW(CC.PixelIdxList{bb}) = true;
                 end
 
+                if mod(bb, 5)==1 || bb == dNbElements
 
-                progressBar( bb/dNbElements-0.0001, sprintf('Computing Volume %d/%d, please wait', bb, dNbElements) );
+                    progressBar( bb/dNbElements-0.0001, sprintf('Computing Volume %d/%d, please wait', bb, dNbElements) );
+                end
 
                 xmin=0.5;
                 xmax=1;
@@ -3482,11 +3490,12 @@ function initRoiPanel()
                 %                asTag = cell(aBufferSize, 1);
                 for aa=1:aBufferSize % Find ROI
 
-                    if bMultipleObjects == false
-                        if mod(aa, 5)==1 || aa == aBufferSize
-                            progressBar( aa/aBufferSize-0.0001, sprintf('Computing slice %d/%d, please wait', aa, aBufferSize) );
-                        end
-                    end
+                    % if bMultipleObjects == false
+                    %     if mod(aa, 10)==1 || aa == aBufferSize
+                    % 
+                    %         progressBar( aa/aBufferSize-0.0001, sprintf('Computing slice %d/%d, please wait', aa, aBufferSize) );
+                    %     end
+                    % end
 
                     if cancelCreateVoiRoiPanel('get') == true
                         break;
@@ -3496,31 +3505,40 @@ function initRoiPanel()
 
                     if aAxial(aAxial==1)
 
-                        if bHoles == true
-                            [originalMaskAxial,~,~,~] = bwboundaries(aAxial, 8, 'holes');
-                        else
-                            [originalMaskAxial,~,~,~] = bwboundaries(aAxial, 8, 'noholes');
+                        boundaryType = 'noholes';
+                        if bHoles
+                            boundaryType = 'holes';
                         end
+                        
+                        % Extract original boundaries (before resizing)
 
-                        if bPixelEdge == true
-                            aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); % do not go directly through pixel centers
+                        [originalMaskAxial, ~, ~, ~] = bwboundaries(aAxial, 8, boundaryType);
+                        
+                        % Resize image once if `bPixelEdge` is true
+
+                        if bPixelEdge
+
+                            aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); % Avoid pixel center adjustment
                         end
+                        
+                        % Extract boundaries after optional resizing
 
-                        if bHoles == true
-                            [maskAxial,~,~,~] = bwboundaries(aAxial, 8, 'holes');
-                        else
-                            [maskAxial,~,~,~] = bwboundaries(aAxial, 8, 'noholes');
-                        end
-
+                        [maskAxial, ~, ~, ~] = bwboundaries(aAxial, 8, boundaryType);
+                        
                         if ~isempty(maskAxial)
 
                             if bPixelEdge == true
-                                for ii=1:numel(maskAxial)
-                                    maskAxial{ii} = (maskAxial{ii} +1)/PIXEL_EDGE_RATIO;
-                                    maskAxial{ii} = reducepoly(maskAxial{ii});
-                               end
-                            end
+                                
+                                scaleFactor = 1 / PIXEL_EDGE_RATIO; % Precompute scale factor
 
+                                for ii = 1:numel(maskAxial)
+                                    
+                                    maskAxial{ii} = reducepoly((maskAxial{ii} + 1) * scaleFactor);
+                                end
+                            end
+                        
+                            % Delete small elements after all processing
+                            
                             maskAxial = deleteSmallElements(originalMaskAxial, maskAxial, dSmalestRoiSize);
                         end
 
@@ -3580,8 +3598,8 @@ function initRoiPanel()
 
                                     addRoiMenu(pRoi);
 
-                                    addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
-                                    addlistener(pRoi, 'WaypointRemoved', @waypointEvents);
+                                    % addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+                                    % addlistener(pRoi, 'WaypointRemoved', @waypointEvents);
 
                                     % voiDefaultMenu(pRoi);
                                     % 
@@ -3606,7 +3624,7 @@ function initRoiPanel()
                                     end
 
 %                                end
-                                drawnow limitrate;
+                                % drawnow update;
                             end
                         end
                     end

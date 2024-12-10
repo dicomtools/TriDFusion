@@ -552,9 +552,9 @@ function setRoiToolbar(sVisible)
                     addRoi(a, dSeriesOffset, 'Unspecified');
 
                     addRoiMenu(a);
-
-                    addlistener(a, 'WaypointAdded'  , @waypointEvents);
-                    addlistener(a, 'WaypointRemoved', @waypointEvents);
+                    
+                    % addlistener(a, 'WaypointAdded'  , @waypointEvents);
+                    % addlistener(a, 'WaypointRemoved', @waypointEvents);
 
 
 % %                     voiDefaultMenu(a);
@@ -1666,9 +1666,7 @@ function setRoiToolbar(sVisible)
                         dPixelRatio = xPixel/yPixel;
                 end
 
-
                 aSphereMask = getSphereMask(aDicomBuffer, xPixelOffset, yPixelOffset, zPixelOffset, dRadius, xPixel, yPixel, zPixel);
-
 
                 for zz=1:dBufferSize
 
@@ -1688,7 +1686,7 @@ function setRoiToolbar(sVisible)
                             aSlice = aSphereMask(:,:,zz);
                     end
 
-                    if aSlice(aSlice==1)
+                    if any(aSlice(:) == 1)
 
                         isRoiValid = false;
 
@@ -1712,7 +1710,6 @@ function setRoiToolbar(sVisible)
                                     maxDistance = thisMaxDistance;
                                 end
                             end
-
                         end
 
                         dSemiAxesX = maxDistance/2;
@@ -2112,18 +2109,13 @@ function setRoiToolbar(sVisible)
 
                     currentRoi = atRoiInput{bb};
 
-                    if isvalid(currentRoi.Object)
+                    if roiHasMaxDistances(currentRoi) == true
 
-                        currentDistances = currentRoi.MaxDistances;
-
-                         if ~isempty(currentDistances)
-                            currentDistances.MaxXY.Line.Visible = 'off';
-                            currentDistances.MaxCY.Line.Visible = 'off';
-                            currentDistances.MaxXY.Text.Visible = 'off';
-                            currentDistances.MaxCY.Text.Visible = 'off';
-                        end
-
-                    end
+                        currentRoi.MaxDistances.MaxXY.Line.Visible = 'off';
+                        currentRoi.MaxDistances.MaxCY.Line.Visible = 'off';
+                        currentRoi.MaxDistances.MaxXY.Text.Visible = 'off';
+                        currentRoi.MaxDistances.MaxCY.Text.Visible = 'off';                           
+                    end                   
                 end
             end
         end
@@ -2543,32 +2535,33 @@ end
         set(t12, 'State', 'off');
         set(t2Dscissor, 'State', 'off');
 
-        if strcmpi(get(hObject, 'State'), 'on')
+        % if strcmpi(get(hObject, 'State'), 'on')
+        if viewFarthestDistances('get') == true
+
+            set(tFarthest, 'State', 'off');
+
+            viewFarthestDistances('set', false);
 
             atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
 
-            if ~isempty(atRoiInput) && isVsplash('get') == false
+            if ~isempty(atRoiInput)
 
                 numRoiInputs = numel(atRoiInput);
 
                 for bb = 1:numRoiInputs
 
                     currentRoi = atRoiInput{bb};
+                       
+                    if roiHasMaxDistances(currentRoi) == true
 
-                    if isvalid(currentRoi.Object)
+                        currentRoi.MaxDistances.MaxXY.Line.Visible = 'off';
+                        currentRoi.MaxDistances.MaxCY.Line.Visible = 'off';
+                        currentRoi.MaxDistances.MaxXY.Text.Visible = 'off';
+                        currentRoi.MaxDistances.MaxCY.Text.Visible = 'off';                           
+                     end
 
-                        currentDistances = currentRoi.MaxDistances;
-
-                         if ~isempty(currentDistances)
-                            currentDistances.MaxXY.Line.Visible = 'off';
-                            currentDistances.MaxCY.Line.Visible = 'off';
-                            currentDistances.MaxXY.Text.Visible = 'off';
-                            currentDistances.MaxCY.Text.Visible = 'off';
-                         end
-                    end
                 end
 
-                set(tFarthest, 'State', 'off');
             end
         end
 

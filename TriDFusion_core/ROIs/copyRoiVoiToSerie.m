@@ -213,8 +213,8 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
 
                         tRoi = addRoiFromTemplate(tRoi, dSeriesOffset);
 
-                        tMaxDistances = computeRoiFarthestPoint(imRoi, atDicomInfo, tRoi, false, false);
-                        tRoi.MaxDistances = tMaxDistances;
+                        %DL tMaxDistances = computeRoiFarthestPoint(imRoi, atDicomInfo, tRoi, false, false);
+                        %DL tRoi.MaxDistances = tMaxDistances;
 
                     else
                         tRoi     = atRefRoiInput{ll};
@@ -530,8 +530,8 @@ function copyRoiVoiToSerie(dSeriesOffset, dSeriesToOffset, tRoiVoiObject, bMirro
 
             tRoi = addRoiFromTemplate(tRoi, dSeriesOffset);
 
-            tMaxDistances = computeRoiFarthestPoint(imRoi, atDicomInfo, tRoi, false, false);
-            tRoi.MaxDistances = tMaxDistances;
+            % tMaxDistances = computeRoiFarthestPoint(imRoi, atDicomInfo, tRoi, false, false);
+            % tRoi.MaxDistances = tMaxDistances;
 
         else
             tRoi     = tRoiVoiObject;

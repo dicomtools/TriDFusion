@@ -36,21 +36,14 @@ function atRoiInput = rotateRoisFromAngle(atRoiInput, refImage, atRefMetaData, d
 
     for jj=1:numel(atRoiInput)
                                 
-        if ~isempty(atRoiInput{jj}.MaxDistances) 
-            
-            if isvalid(atRoiInput{jj}.MaxDistances.MaxXY.Line)
-
-                atRoiInput{jj}.MaxDistances.MaxXY.Line.Visible = 'off';
-                atRoiInput{jj}.MaxDistances.MaxCY.Line.Visible = 'off';
-            end
-
-            if isvalid(atRoiInput{jj}.MaxDistances.MaxXY.Text)
-
-                atRoiInput{jj}.MaxDistances.MaxXY.Text.Visible = 'off';
-                atRoiInput{jj}.MaxDistances.MaxCY.Text.Visible = 'off';                        
-            end
-        end 
-
+        if roiHasMaxDistances(atRoiInput{jj}) == true
+        
+            atRoiInput{jj}.MaxDistances.MaxXY.Line.Visible = 'off';
+            atRoiInput{jj}.MaxDistances.MaxCY.Line.Visible = 'off';
+            atRoiInput{jj}.MaxDistances.MaxXY.Text.Visible = 'off';
+            atRoiInput{jj}.MaxDistances.MaxCY.Text.Visible = 'off';                        
+        end
+     
         aCoords = atRoiInput{jj}.Position(:, 1:2); % Extract X, Y coordinates
         
         aCenter = [xSize/2, ySize/2];     
@@ -71,9 +64,12 @@ function atRoiInput = rotateRoisFromAngle(atRoiInput, refImage, atRefMetaData, d
 
                     atRoiInput{jj}.Rotatable = true;
                     atRoiInput{jj}.RotationAngle = atRoiInput{jj}.RotationAngle + dRotation;
-   
-                    tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoiInput{jj}, false, false);
-                    atRoiInput{jj}.MaxDistances = tMaxDistances;
+
+                    if roiHasMaxDistances(atRoiInput{jj}) == true
+     
+                        tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoiInput{jj}, false, false);
+                        atRoiInput{jj}.MaxDistances = tMaxDistances;
+                    end
     
                     if ~isstruct(atRoiInput{jj}.Object)
     
@@ -98,10 +94,13 @@ function atRoiInput = rotateRoisFromAngle(atRoiInput, refImage, atRefMetaData, d
                     atRoiInput{jj}.Position(:, 1:2) = aFinalCoords; % Update ROI positions
 
                     atRoiInput{jj}.RotationAngle = atRoiInput{jj}.RotationAngle + dRotation;
-    
-                    tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoiInput{jj}, false, false);
-                    atRoiInput{jj}.MaxDistances = tMaxDistances;
-    
+
+                    if roiHasMaxDistances(atRoiInput{jj}) == true
+  
+                        tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoiInput{jj}, false, false);
+                        atRoiInput{jj}.MaxDistances = tMaxDistances;
+                    end
+
                     if ~isstruct(atRoiInput{jj}.Object)
     
                         if isvalid(atRoiInput{jj}.Object) && bUpdateObject == true                                  
@@ -123,10 +122,13 @@ function atRoiInput = rotateRoisFromAngle(atRoiInput, refImage, atRefMetaData, d
                 if strcmpi(atRoiInput{jj}.Axe, sAxe)
                     
                     atRoiInput{jj}.Position(:, 1:2) = aFinalCoords; % Update ROI positions
+
+                    if roiHasMaxDistances(atRoiInput{jj}) == true
     
-                    tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoiInput{jj}, false, false);
-                    atRoiInput{jj}.MaxDistances = tMaxDistances;
-                    
+                        tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoiInput{jj}, false, false);
+                        atRoiInput{jj}.MaxDistances = tMaxDistances;
+                    end
+
                     if ~isstruct(atRoiInput{jj}.Object)
                     
                         if isvalid(atRoiInput{jj}.Object) && bUpdateObject == true                                  

@@ -2,19 +2,12 @@ function atRoiInput = translateRoisMovement(atRoiInput, refImage, atRefMetaData,
 
     for jj=1:numel(atRoiInput)
                         
-        if ~isempty(atRoiInput{jj}.MaxDistances) 
+        if roiHasMaxDistances(atRoiInput{jj}) == true
             
-            if isvalid(atRoiInput{jj}.MaxDistances.MaxXY.Line)
-
-                atRoiInput{jj}.MaxDistances.MaxXY.Line.Visible = 'off';
-                atRoiInput{jj}.MaxDistances.MaxCY.Line.Visible = 'off';
-            end
-
-            if isvalid(atRoiInput{jj}.MaxDistances.MaxXY.Text)
-
-                atRoiInput{jj}.MaxDistances.MaxXY.Text.Visible = 'off';
-                atRoiInput{jj}.MaxDistances.MaxCY.Text.Visible = 'off';                        
-            end
+            atRoiInput{jj}.MaxDistances.MaxXY.Line.Visible = 'off';
+            atRoiInput{jj}.MaxDistances.MaxCY.Line.Visible = 'off';
+            atRoiInput{jj}.MaxDistances.MaxXY.Text.Visible = 'off';
+            atRoiInput{jj}.MaxDistances.MaxCY.Text.Visible = 'off';                                    
         end 
 
         switch lower( atRoiInput{jj}.Axe)
@@ -42,10 +35,13 @@ function atRoiInput = translateRoisMovement(atRoiInput, refImage, atRefMetaData,
                 atRoiInput{jj}.Position(:,2) = atRoiInput{jj}.Position(:,2) + aOffset(2);
                 atRoiInput{jj}.SliceNb       = atRoiInput{jj}.SliceNb + round(aOffset(3));
         end
+       
+        if roiHasMaxDistances(atRoiInput{jj}) == true
+            
+            tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoiInput{jj}, false, false);
+            atRoiInput{jj}.MaxDistances = tMaxDistances;
+        end
 
-        tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoiInput{jj}, false, false);
-        atRoiInput{jj}.MaxDistances = tMaxDistances;
-        
         if ~isstruct(atRoiInput{jj}.Object)
         
             if isvalid(atRoiInput{jj}.Object) && bUpdateObject == true                                  

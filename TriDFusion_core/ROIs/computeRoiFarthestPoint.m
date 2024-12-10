@@ -179,41 +179,40 @@ function tMaxDistances = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlot
 %                                 y2XY = y(longestIndex2);
 
                                 if bPlotLine == true 
-                                    sLineVisible = 'on';
-                                else
-                                    sLineVisible = 'off';
-                                end
     
-                                lXY = line(atRoi.Object.Parent, [x1XY, x2XY], [y1XY, y2XY], 'Color', 'r', 'LineWidth', 1, 'Visible', sLineVisible);	
-                                lCY = line(atRoi.Object.Parent, [x1CY, x2CY], [y1CY, y2CY], 'Color', 'm', 'LineWidth', 1, 'Visible', sLineVisible);
-    
-                                tMaxDistances.MaxXY.Line = lXY;
-                                tMaxDistances.MaxCY.Line = lCY;
-    
-                                if is3DEngine('get') == true && ...
-                                   viewerUIFigure('get') == false
-    
-                                    if size(imRoi, 3) == 1 
-                                        if strcmpi(atRoi.Axe, 'Axe')
-                                            imPtr = imAxePtr ('get', [], get(uiSeriesPtr('get'), 'Value') );
-                                       end
-                                    else
-                                        switch(lower(atRoi.Axe))
-                                            case lower( 'Axes1')                        
-                                                imPtr = imCoronalPtr ('get', [], get(uiSeriesPtr('get'), 'Value') );
-    
-                                            case lower( 'Axes2')                   
-                                                imPtr = imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value') );
-    
-                                            case lower( 'Axes3')                   
-                                                imPtr = imAxialPtr   ('get', [], get(uiSeriesPtr('get'), 'Value') ); 
+                                    lXY = line(atRoi.Object.Parent, [x1XY, x2XY], [y1XY, y2XY], 'Color', 'r', 'LineWidth', 1, 'Visible', 'on');	
+                                    lCY = line(atRoi.Object.Parent, [x1CY, x2CY], [y1CY, y2CY], 'Color', 'm', 'LineWidth', 1, 'Visible', 'on');
+        
+                                    tMaxDistances.MaxXY.Line = lXY;
+                                    tMaxDistances.MaxCY.Line = lCY;
+        
+                                    if is3DEngine('get') == true && ...
+                                       viewerUIFigure('get') == false
+        
+                                        if size(imRoi, 3) == 1 
+                                            
+                                            if strcmpi(atRoi.Axe, 'Axe')
+                                                imPtr = imAxePtr ('get', [], get(uiSeriesPtr('get'), 'Value') );
+                                           end
+                                        else
+                                            switch(lower(atRoi.Axe))
+
+                                                case lower( 'Axes1')                        
+                                                    imPtr = imCoronalPtr ('get', [], get(uiSeriesPtr('get'), 'Value') );
+        
+                                                case lower( 'Axes2')                   
+                                                    imPtr = imSagittalPtr('get', [], get(uiSeriesPtr('get'), 'Value') );
+        
+                                                case lower( 'Axes3')                   
+                                                    imPtr = imAxialPtr   ('get', [], get(uiSeriesPtr('get'), 'Value') ); 
+                                            end
                                         end
-                                    end
-    
-                                    lXY.ZData = [max(max(get(imPtr,'Zdata'))) max(max(get(imPtr,'Zdata')))];
-                                    lCY.ZData = [max(max(get(imPtr,'Zdata'))) max(max(get(imPtr,'Zdata')))];
-                                end    
-    
+        
+                                        lXY.ZData = [max(max(get(imPtr,'Zdata'))) max(max(get(imPtr,'Zdata')))];
+                                        lCY.ZData = [max(max(get(imPtr,'Zdata'))) max(max(get(imPtr,'Zdata')))];
+                                    end    
+                                end
+
                                 % Compute XY distance in mm
     
                                 roiObject.Position(1,1) = x1XY;
@@ -237,16 +236,13 @@ function tMaxDistances = computeRoiFarthestPoint(imRoi, atMetaData, atRoi, bPlot
                                 tMaxDistances.MaxCY.Length = dCYLength;                    
     
                                 if bPlotText == true  
-                                    sTextVisible = 'on';
-                                else
-                                    sTextVisible = 'off';
+    
+                                    tXY = text(atRoi.Object.Parent, x1XY, y1XY, sprintf('%s mm', num2str(dXYLength)), 'Color', 'r', 'Visible', 'on');
+                                    tCY = text(atRoi.Object.Parent, x2CY, y2CY, sprintf('%s mm', num2str(dCYLength)), 'Color', 'm', 'Visible', 'on');
+        
+                                    tMaxDistances.MaxXY.Text = tXY;
+                                    tMaxDistances.MaxCY.Text = tCY;                    
                                 end
-    
-                                tXY = text(atRoi.Object.Parent, x1XY, y1XY, sprintf('%s mm', num2str(dXYLength)), 'Color', 'r', 'Visible', sTextVisible);
-                                tCY = text(atRoi.Object.Parent, x2CY, y2CY, sprintf('%s mm', num2str(dCYLength)), 'Color', 'm', 'Visible', sTextVisible);
-    
-                                tMaxDistances.MaxXY.Text = tXY;
-                                tMaxDistances.MaxCY.Text = tCY;                    
                             end
                         end
                     end

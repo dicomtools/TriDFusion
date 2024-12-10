@@ -105,16 +105,22 @@ function resetSeries(dOffset, bInitDisplay)
         roiConstraintList('reset', dOffset); % Delete all masks
 
         for rr=1:numel(atRoi)
-            if ~isempty(atRoi{rr}.MaxDistances)
-                delete(atRoi{rr}.MaxDistances.MaxXY.Line);
-                delete(atRoi{rr}.MaxDistances.MaxCY.Line);
-                delete(atRoi{rr}.MaxDistances.MaxXY.Text);
-                delete(atRoi{rr}.MaxDistances.MaxCY.Text);
+
+            if roiHasMaxDistances(atRoi{rr}) == true
+
+                maxDistances = atRoi{rr}.MaxDistances; % Cache the field to avoid repeated lookups
+
+                objectsToDelete = [maxDistances.MaxXY.Line, ...
+                                   maxDistances.MaxCY.Line, ...
+                                   maxDistances.MaxXY.Text, ...
+                                   maxDistances.MaxCY.Text];
+                % Delete only valid objects
+                delete(objectsToDelete(isvalid(objectsToDelete)));     
             end
-            try
-                delete(atRoi{rr}.Object);
-            catch
-                atRoi{rr}.Object = [];
+
+            if isvalid(atRoi{rr}.Object)
+
+                delete(atRoi{rr}.Object)
             end
         end
 

@@ -35,12 +35,12 @@ function selectForContourReviewCallback(hObject, ~)
         return;
     end
 
-    atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value')); 
-        
+    atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+
     % Find the index where the Tag matches
 
     dVoiTagOffset = find(cellfun(@(c) any(strcmp(c.RoisTag, hObject.UserData.Tag)), atVoiInput), 1);
-    
+
     if ~isempty(dVoiTagOffset)
 
         seletVoiRoiPanelCallback = uiSelectVoiRoiPanelObject('get');
@@ -50,9 +50,9 @@ function selectForContourReviewCallback(hObject, ~)
             try
 
             set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-            drawnow update;
+            drawnow limitrate;
 
-            callbackFunction = get(seletVoiRoiPanelCallback, 'Callback');                  
+            callbackFunction = get(seletVoiRoiPanelCallback, 'Callback');
 
             callbackFunction(hObject.Parent.UserData, dVoiTagOffset);
 
@@ -61,10 +61,10 @@ function selectForContourReviewCallback(hObject, ~)
             end
 
             set(fiMainWindowPtr('get'), 'Pointer', 'default');
-            drawnow update;
+            drawnow limitrate;
 
         end
-      
+
     end
 
 end

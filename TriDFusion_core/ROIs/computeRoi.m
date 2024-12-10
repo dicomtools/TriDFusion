@@ -56,7 +56,10 @@ function [tRoiComputed, mask] = computeRoi(imInput, atInputMetaData, imRoi, atRo
         atRoiMetaData = atInputMetaData;    
     end
     
-    tRoiComputed.MaxDistances = ptrRoi.MaxDistances;
+    if isfield(ptrRoi, 'MaxDistances')
+        
+        tRoiComputed.MaxDistances = ptrRoi.MaxDistances;
+    end
    
     if ptrRoi.SliceNb <= numel(atRoiMetaData)
         tSliceMeta = atRoiMetaData{ptrRoi.SliceNb};

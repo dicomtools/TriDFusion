@@ -250,8 +250,8 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
 
     if isempty(sNrrdPTFullFileName) || isempty(sNrrdCTFullFileName)
 
-        progressBar(1, 'Error: nrrd files mot found!');
-        errordlg('nrrd files mot found!!', '.nrrd file Validation');
+        progressBar(1, 'Error: nrrd files not found!');
+        errordlg('nrrd files not found!!', '.nrrd file Validation');
     else
 
         progressBar(2/10, 'Machine learning in progress, this might take several minutes, please be patient.');

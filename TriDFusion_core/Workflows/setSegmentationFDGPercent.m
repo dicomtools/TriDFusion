@@ -26,11 +26,11 @@ function setSegmentationFDGPercent(dBoneMaskThreshold, dBoundaryPercent, dSmales
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-            
+
     atInput = inputTemplate('get');
-    
-    % Modality validation    
-       
+
+    % Modality validation
+
     dCTSerieOffset = [];
     for tt=1:numel(atInput)
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'ct')
@@ -48,10 +48,10 @@ function setSegmentationFDGPercent(dBoneMaskThreshold, dBoundaryPercent, dSmales
     end
 
     if isempty(dCTSerieOffset) || ...
-       isempty(dPTSerieOffset)  
+       isempty(dPTSerieOffset)
         progressBar(1, 'Error: FDG percent tumor segmentation require a CT and PT image!');
-        errordlg('FDG percent tumor segmentation require a CT and PT image!', 'Modality Validation');  
-        return;               
+        errordlg('FDG percent tumor segmentation require a CT and PT image!', 'Modality Validation');
+        return;
     end
 
     atPTMetaData = dicomMetaData('get', [], dPTSerieOffset);
@@ -83,37 +83,37 @@ function setSegmentationFDGPercent(dBoneMaskThreshold, dBoundaryPercent, dSmales
         setSeriesCallback();
     end
 
-    % Apply ROI constraint 
+    % Apply ROI constraint
 
     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dPTSerieOffset);
 
     bInvertMask = invertConstraint('get');
 
     tRoiInput = roiTemplate('get', dPTSerieOffset);
-    
+
     aPTImageTemp = aPTImage;
-    aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask); 
-    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint 
+    aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
+    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
 
-    resetSeries(dPTSerieOffset, true);       
+    resetSeries(dPTSerieOffset, true);
 
-    try 
+    try
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
-    
+
     if isInterpolated('get') == false
-    
+
         isInterpolated('set', true);
-    
+
         setImageInterpolation(true);
     end
 
     progressBar(5/10, 'Resampling series, please wait.');
-            
-    [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
-    [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
-   
+
+    [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
+    [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
+
     dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
     dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
 
@@ -123,15 +123,15 @@ function setSegmentationFDGPercent(dBoneMaskThreshold, dBoundaryPercent, dSmales
     clear aResampledPTImageTemp;
 
     progressBar(6/10, 'Resampling mip, please wait.');
-            
-    refMip = mipBuffer('get', [], dCTSerieOffset);                        
+
+    refMip = mipBuffer('get', [], dCTSerieOffset);
     aMip   = mipBuffer('get', [], dPTSerieOffset);
-  
+
     aMip = resampleMip(aMip, atPTMetaData, refMip, atCTMetaData, 'Linear', true);
-                   
+
     mipBuffer('set', aMip, dPTSerieOffset);
 
-    setQuantification(dPTSerieOffset);    
+    setQuantification(dPTSerieOffset);
 
 
     progressBar(7/10, 'Computing mask, please wait.');
@@ -148,18 +148,16 @@ function setSegmentationFDGPercent(dBoneMaskThreshold, dBoundaryPercent, dSmales
 
     progressBar(8/10, 'Computing ct map, please wait.');
 
-    BWCT = aCTImage;
+    BWCT = aCTImage >= dBoneMaskThreshold;   % Logical mask creation
+    BWCT = imfill(single(BWCT), 4, 'holes'); % Fill holes in the binary mask                   
 
-    BWCT(BWCT < dBoneMaskThreshold) = 0;                                    
-    BWCT = imfill(BWCT, 4, 'holes');                       
-
-    if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+    if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view
 
          BWCT = resample3DImage(BWCT, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
          BWCT = imbinarize(BWCT);
 
-        if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view     
-            BWCT = resizeMaskToImageSize(BWCT, aResampledPTImage); 
+        if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view
+            BWCT = resizeMaskToImageSize(BWCT, aResampledPTImage);
         end
     else
         BWCT = imbinarize(BWCT);
@@ -170,14 +168,14 @@ function setSegmentationFDGPercent(dBoneMaskThreshold, dBoundaryPercent, dSmales
     imMask = aResampledPTImage;
     imMask(aBWMask == 0) = dMin;
 
-    setSeriesCallback();            
+    setSeriesCallback();
 
     sFormula = 'Lymph Nodes';
-    maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, true, dPercentOfPeak, true, multiPeaksValue, false, sFormula, BWCT, dSmalestVoiValue);                    
+    maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, true, dPercentOfPeak, true, multiPeaksValue, false, sFormula, BWCT, dSmalestVoiValue);
 
     clear aResampledPTImage;
     clear aBWMask;
-    clear refMip;                        
+    clear refMip;
     clear aMip;
     clear BWCT;
     clear imMask;
@@ -190,9 +188,9 @@ function setSegmentationFDGPercent(dBoneMaskThreshold, dBoundaryPercent, dSmales
     link2DMip('set', false);
 
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
+    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
     set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
-   
+
     % Set fusion
 
     if isFusion('get') == false
@@ -221,16 +219,16 @@ function setSegmentationFDGPercent(dBoneMaskThreshold, dBoundaryPercent, dSmales
 
     refreshImages();
 
-    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));
 
     clear aPTImage;
     clear aCTImage;
-     
+
 
     progressBar(1, 'Ready');
 
-    catch 
-        resetSeries(dPTSerieOffset, true);       
+    catch
+        resetSeries(dPTSerieOffset, true);
         progressBar( 1 , 'Error: setSegmentationFDG()' );
     end
 

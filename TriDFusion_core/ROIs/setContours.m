@@ -11,22 +11,22 @@ function setContours(tContours, bInitDisplay)
 %Last specifications modified:
 %
 % Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
-% 
+%
 % This file is part of The Triple Dimention Fusion (TriDFusion).
-% 
+%
 % TriDFusion development has been led by:  Daniel Lafontaine
-% 
-% TriDFusion is distributed under the terms of the Lesser GNU Public License. 
-% 
+%
+% TriDFusion is distributed under the terms of the Lesser GNU Public License.
+%
 %     This version of TriDFusion is free software: you can redistribute it and/or modify
 %     it under the terms of the GNU General Public License as published by
 %     the Free Software Foundation, either version 3 of the License, or
 %     (at your option) any later version.
-% 
+%
 % TriDFusion is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 % without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 % See the GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -42,20 +42,20 @@ function setContours(tContours, bInitDisplay)
         end
         atContours = inputContours('get');
     end
-     
+
     bNbContours = 0;
-    
+
     dSeriesValue = get(uiSeriesPtr('get'), 'Value');
-   
+
     if isempty(atContours)
         return;
     end
-    
+
 %    try
-            
+
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-    drawnow update; 
-    
+    drawnow limitrate;
+
     for bb=1:numel(atInput)
 
         if isempty(dicomBuffer('get', [], bb))
@@ -64,23 +64,23 @@ function setContours(tContours, bInitDisplay)
             aImageSize = size(aInputBuffer{bb});
 
             clear aInputBuffer;
-        else                                            
+        else
             aImageSize = size(dicomBuffer('get', [], bb));
         end
 
         for cc=1:numel(atContours)
-            
+
             for dd=1:numel(atContours{cc})
-                
+
                 if ~isempty(atContours{cc}(dd).Referenced)
-                    
+
                     if strcmpi(atInput(bb).atDicomInfo{1}.FrameOfReferenceUID, ... % Find matching series
                                atContours{cc}(dd).Referenced.FrameOfReferenceUID)
-                           
+
                         if strcmpi(atInput(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Find matching series
                                    atContours{cc}(dd).Referenced.SeriesInstanceUID)
 
-         %                   hold on;                        
+         %                   hold on;
 
                             bNbContours = bNbContours+1;
 
@@ -100,21 +100,21 @@ function setContours(tContours, bInitDisplay)
 
                             set(lineColorbarIntensityMaxPtr('get'), 'Visible', 'off');
                             set(lineColorbarIntensityMinPtr('get'), 'Visible', 'off');
-                    
+
                             set(textColorbarIntensityMaxPtr('get'), 'Visible', 'off');
                             set(textColorbarIntensityMinPtr('get'), 'Visible', 'off');
 
                             set(uiSliderCorPtr('get'), 'Visible', 'off');
-                            set(uiSliderSagPtr('get'), 'Visible', 'off');   
-                            set(uiSliderTraPtr('get'), 'Visible', 'off'); 
-                            set(uiSliderMipPtr('get'), 'Visible', 'off'); 
+                            set(uiSliderSagPtr('get'), 'Visible', 'off');
+                            set(uiSliderTraPtr('get'), 'Visible', 'off');
+                            set(uiSliderMipPtr('get'), 'Visible', 'off');
 
-                            segments = atContours{cc}(dd).ContourData;   
+                            segments = atContours{cc}(dd).ContourData;
                             if ~cellfun(@isempty,segments)
 
                     %            xfm = getAffineXfm(atInput(bb).atDicomInfo);
 
-                                sliceThikness = computeSliceSpacing(atInput(bb).atDicomInfo);  
+                                sliceThikness = computeSliceSpacing(atInput(bb).atDicomInfo);
                                 if sliceThikness == 0 % We can't determine the z size of a pixel, we will presume the pixel is square.
                                     if atInput(bb).atDicomInfo{1}.PixelSpacing(1) ~= 0
                                         sliceThikness = atInput(bb).atDicomInfo{1}.PixelSpacing(1);
@@ -131,20 +131,20 @@ function setContours(tContours, bInitDisplay)
 
                                 drawnow;
 
-                                progressBar( bNbContours/numel(atContours{cc})-0.0001, sprintf('Volume %d: Processing contour %d/%d', bb, bNbContours, numel(atContours{cc}) ));  
+                                progressBar( bNbContours/numel(atContours{cc})-0.0001, sprintf('Volume %d: Processing contour %d/%d', bb, bNbContours, numel(atContours{cc}) ));
 
                                 points = cell(numel(segments), 1);
                                 for j=1:numel(segments)
-                                    
+
                                     a3DOffset = segments{j};
-                                    [outX, outY, outZ] = transformPointsForward(invert(affine3d(xfm')), a3DOffset(:,1), a3DOffset(:,2), a3DOffset(:,3)); 
+                                    [outX, outY, outZ] = transformPointsForward(invert(affine3d(xfm')), a3DOffset(:,1), a3DOffset(:,2), a3DOffset(:,3));
                                     points{j} = [abs(outX(:)) abs(outY(:))] ;
-                                    z = round(abs(outZ(:)));   % Axial  
+                                    z = round(abs(outZ(:)));   % Axial
 
 %                                    out = pctransform(pointCloud(segments{j}),invert(affine3d(xfm')));
 
 %                                    points{j} = [abs(out.Location(:,1)) abs(out.Location(:,2))] ;
-%                                    z = round(abs(out.Location(:,3)));   % Axial                    
+%                                    z = round(abs(out.Location(:,3)));   % Axial
 
                                     ROI.Position = [points{j}(:,1)+1, points{j}(:,2)+1];
 
@@ -168,12 +168,12 @@ function setContours(tContours, bInitDisplay)
                                     aColor = [atContours{cc}(dd).Color(1)/255 atContours{cc}(dd).Color(2)/255 atContours{cc}(dd).Color(3)/255];
                                     sLabel = atContours{cc}(dd).ROIName;
 
-    %                                pRoi = drawfreehand(axRoi, 'Smoothing', 1, 'Position', ROI.Position, 'Color', aColor, 'LineWidth', 1, 'Label', sLabel, 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'off', 'FaceSelectable', 0, 'FaceAlpha', 0);  
+    %                                pRoi = drawfreehand(axRoi, 'Smoothing', 1, 'Position', ROI.Position, 'Color', aColor, 'LineWidth', 1, 'Label', sLabel, 'LabelVisible', 'off', 'Tag', sTag, 'Visible', 'off', 'FaceSelectable', 0, 'FaceAlpha', 0);
     %                                pRoi.Waypoints(:) = false;
 
                                     sLesionType = 'Unspecified';
 
-                                    [~, asLesionType, asLesionShortName] = getLesionType('');   
+                                    [~, asLesionType, asLesionShortName] = getLesionType('');
                                     for jj=1:numel(asLesionShortName)
                                         if contains(sLabel, asLesionShortName{jj})
                                             sLesionType = asLesionType{jj};
@@ -183,30 +183,30 @@ function setContours(tContours, bInitDisplay)
 
                                     addContourToTemplate(bb, 'Axes3', dSliceNb, 'images.roi.freehand', ROI.Position, sLabel, 'off', aColor, 1, roiFaceAlphaValue('get'), 0, 1, sTag, sLesionType);
 
-    %                                addRoi(pRoi, bb);                  
+    %                                addRoi(pRoi, bb);
 
     %                                roiDefaultMenu(pRoi);
 
-    %                                uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback); 
-    %                                uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', pRoi, 'Callback', @clearWaypointsCallback); 
+    %                                uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
+    %                                uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints' , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
 
     %                                constraintMenu(pRoi);
 
     %                                cropMenu(pRoi);
 
-    %                                uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on'); 
+    %                                uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics ' , 'UserData', pRoi, 'Callback', @figRoiDialogCallback, 'Separator', 'on');
 
              %                       set(fiMainWindowPtr('get'), 'WindowScrollWheelFcn' , @wheelScroll);
 
-%                                     asTag{numel(asTag)+1} = sTag;                        
-                                     asTag{j} = sTag;                        
+%                                     asTag{numel(asTag)+1} = sTag;
+                                     asTag{j} = sTag;
 
                                 end
 
                                 if ~isempty(asTag)
 
-                                    createVoiFromRois(bb, asTag, sLabel, aColor, sLesionType);                        
-                                end 
+                                    createVoiFromRois(bb, asTag, sLabel, aColor, sLesionType);
+                                end
                             end
                         end
                     end
@@ -214,9 +214,9 @@ function setContours(tContours, bInitDisplay)
             end
         end
     end
-      
+
     if bInitDisplay == true
-        
+
         set(uiSeriesPtr('get'), 'Value', dSeriesValue);
 
         setSeriesCallback();
@@ -233,32 +233,32 @@ function setContours(tContours, bInitDisplay)
 
             set(lineColorbarIntensityMaxPtr('get'), 'Visible', 'on');
             set(lineColorbarIntensityMinPtr('get'), 'Visible', 'on');
-    
+
             set(textColorbarIntensityMaxPtr('get'), 'Visible', 'on');
             set(textColorbarIntensityMinPtr('get'), 'Visible', 'on');
 
             set(uiSliderCorPtr('get'), 'Visible', 'on');
-            set(uiSliderSagPtr('get'), 'Visible', 'on');   
-            set(uiSliderTraPtr('get'), 'Visible', 'on');      
-            set(uiSliderMipPtr('get'), 'Visible', 'on');      
+            set(uiSliderSagPtr('get'), 'Visible', 'on');
+            set(uiSliderTraPtr('get'), 'Visible', 'on');
+            set(uiSliderMipPtr('get'), 'Visible', 'on');
 
     %        hold off;
-            setVoiRoiSegPopup();                        
+            setVoiRoiSegPopup();
 
             refreshImages();
 
-            progressBar( 1, 'Ready');      
+            progressBar( 1, 'Ready');
 
         end
     end
-    
+
 %    catch
-%        progressBar(1, 'Error:setContours()');          
-%    end  
+%        progressBar(1, 'Error:setContours()');
+%    end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
-    drawnow update; 
-    
+    drawnow limitrate;
+
 %    % From Use DICOM RT for 3D Semantic Segmentation of Medical images
 %    % by Takuji Fukumoto
 %    function A = getAffineXfm(headers)
@@ -280,6 +280,6 @@ function setContours(tContours, bInitDisplay)
 %            [F(2,1)*dr F(2,2)*dc k(2) T1(2)]; ...
 %            [F(3,1)*dr F(3,2)*dc k(3) T1(3)]; ...
 %            [0         0         0    1    ]];
-%    end    
+%    end
 
-end 
+end

@@ -33,9 +33,9 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
     gaLiverMask = [];
 
     atInput = inputTemplate('get');
-    
-    % Modality validation    
-       
+
+    % Modality validation
+
     dCTSerieOffset = [];
     for tt=1:numel(atInput)
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'ct')
@@ -53,10 +53,10 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
     end
 
     if isempty(dCTSerieOffset) || ...
-       isempty(dPTSerieOffset)  
+       isempty(dPTSerieOffset)
         progressBar(1, 'Error: FDG tumor segmentation require a CT and PT image!');
-        errordlg('FDG tumor segmentation require a CT and PT image!', 'Modality Validation');  
-        return;               
+        errordlg('FDG tumor segmentation require a CT and PT image!', 'Modality Validation');
+        return;
     end
 
 
@@ -95,74 +95,74 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
         dSUVScale = tQuant.tSUV.dScale;
     else
         dSUVScale = 0;
-    end 
+    end
 
     atRoiInput = roiTemplate('get', dPTSerieOffset);
-   
+
     if ~isempty(atRoiInput)
 
-        aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Label, atRoiInput, 'uni', false ), {'Normal Liver'} );            
+        aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Label, atRoiInput, 'uni', false ), {'Normal Liver'} );
         dTagOffset = find(aTagOffset, 1);
-        
+
         aSlice = [];
-        
+
         if ~isempty(dTagOffset)
-            
+
             switch lower(atRoiInput{dTagOffset}.Axe)
 
-                case 'axes1'                            
+                case 'axes1'
                     aSlice = permute(aPTImage(atRoiInput{dTagOffset}.SliceNb,:,:), [3 2 1]);
 
                 case 'axes2'
                     aSlice = permute(aPTImage(:,atRoiInput{dTagOffset}.SliceNb,:), [3 1 2]);
 
                 case 'axes3'
-                    aSlice = aPTImage(:,:,atRoiInput{dTagOffset}.SliceNb);       
+                    aSlice = aPTImage(:,:,atRoiInput{dTagOffset}.SliceNb);
             end
-            
+
             aLogicalMask = roiTemplateToMask(atRoiInput{dTagOffset}, aSlice);
-                     
+
             gdNormalLiverMean = mean(aSlice(aLogicalMask), 'all')   * dSUVScale;
 
 
-   %         H = fspecial('average',5); 
-   %         blurred = imfilter(aSlice(aLogicalMask),H,'replicate'); 
+   %         H = fspecial('average',5);
+   %         blurred = imfilter(aSlice(aLogicalMask),H,'replicate');
 
-            gdNormalLiverSTD = std(aSlice(aLogicalMask), [],'all') * dSUVScale;     
-            
+            gdNormalLiverSTD = std(aSlice(aLogicalMask), [],'all') * dSUVScale;
+
             clear aSlice;
         else
             if bUseDefault == false
 
-                waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
-    
+                waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));
+
                 Ga68DOTATATENormalLiverMeanSDDialog();
-    
+
                 if gbProceedWithSegmentation == false
                     return;
-                end    
+                end
             else
-                gdNormalLiverMean = Ga68DOTATATENormalLiverMeanValue('get');        
+                gdNormalLiverMean = Ga68DOTATATENormalLiverMeanValue('get');
                 gdNormalLiverSTD  = Ga68DOTATATENormalLiverSDValue('get');
 
-            end  
-        end   
+            end
+        end
     else
         if bUseDefault == false
-        
-            waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
-    
+
+            waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));
+
             Ga68DOTATATENormalLiverMeanSDDialog();
-    
+
             if gbProceedWithSegmentation == false
                 return;
             end
-    
+
         else
-            gdNormalLiverMean = Ga68DOTATATENormalLiverMeanValue('get');        
+            gdNormalLiverMean = Ga68DOTATATENormalLiverMeanValue('get');
             gdNormalLiverSTD  = Ga68DOTATATENormalLiverSDValue('get');
 
-        end 
+        end
     end
 
     if ~isempty(atRoiInput)
@@ -220,37 +220,37 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
     end
 
 
-    % Apply ROI constraint 
+    % Apply ROI constraint
 
     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dPTSerieOffset);
 
     bInvertMask = invertConstraint('get');
 
     tRoiInput = roiTemplate('get', dPTSerieOffset);
-    
+
     aPTImageTemp = aPTImage;
-    aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask); 
-    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint 
+    aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
+    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
 
-    resetSeries(dPTSerieOffset, true);       
+    resetSeries(dPTSerieOffset, true);
 
-    try 
+    try
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
-    
+
     if isInterpolated('get') == false
-    
+
         isInterpolated('set', true);
-    
+
         setImageInterpolation(true);
     end
 
     progressBar(5/11, 'Resampling series, please wait.');
-            
-    [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
-    [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
-   
+
+    [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
+    [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
+
     dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
     dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
 
@@ -261,15 +261,15 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
 
 
     progressBar(6/11, 'Resampling mip, please wait.');
-            
-    refMip = mipBuffer('get', [], dCTSerieOffset);                        
+
+    refMip = mipBuffer('get', [], dCTSerieOffset);
     aMip   = mipBuffer('get', [], dPTSerieOffset);
-  
+
     aMip = resampleMip(aMip, atPTMetaData, refMip, atCTMetaData, 'Linear', true);
-                   
+
     mipBuffer('set', aMip, dPTSerieOffset);
 
-    setQuantification(dPTSerieOffset);    
+    setQuantification(dPTSerieOffset);
 
     tQuant = quantificationTemplate('get');
 
@@ -277,11 +277,11 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
         dSUVScale = tQuant.tSUV.dScale;
     else
         dSUVScale = 1;
-    end 
+    end
 
     if ~isempty(gaLiverMask)
 
-        [gaLiverMask, ~] = resampleImage(gaLiverMask, atPTMetaData, aCTImage, atCTMetaData, 'Nearest', true, false);   
+        [gaLiverMask, ~] = resampleImage(gaLiverMask, atPTMetaData, aCTImage, atCTMetaData, 'Nearest', true, false);
 
         progressBar(7/11, 'Computing liver mask, please wait.');
 
@@ -295,7 +295,7 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
 
         aLiverBWMask = imbinarize(aLiverBWMask);
 
-        aLiverBWMask(gaLiverMask==0)=0; 
+        aLiverBWMask(gaLiverMask==0)=0;
     end
 
     progressBar(8/11, 'Computing mask, please wait.');
@@ -318,38 +318,38 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
 
     BWCT = aCTImage;
 
-    BWCT(BWCT < dBoneMaskThreshold) = 0;                                    
-    BWCT = imfill(BWCT, 4, 'holes'); 
+    BWCT = aCTImage >= dBoneMaskThreshold;   % Logical mask creation
+    BWCT = imfill(single(BWCT), 4, 'holes'); % Fill holes in the binary mask
 
 %     BWCT = aCTImage;
-% 
+%
 %     % Thresholding to create a binary mask
 %     BWCT = BWCT >= dBoneMaskThreshold;
-%     
+%
 %     % Perform morphological closing to smooth contours and fill small gaps
 %     se = strel('disk', 3); % Adjust the size as needed
 %     BWCT = imclose(BWCT, se);
-%     
+%
 %     % Fill holes in the binary image
 %     BWCT = imfill(BWCT, 'holes');
-%     
+%
 %     % Optional: Remove small objects that are not part of the bone
 %     BWCT = bwareaopen(BWCT, 100); % Adjust the size threshold as needed
-%     
+%
 %     % Perform another round of morphological closing if necessary
 %     BWCT = imclose(BWCT, se);
-%     
+%
 %     % Optional: Perform morphological opening to remove small spurious regions
 %     BWCT = imopen(BWCT, se);
 
-    if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+    if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view
 
         BWCT = resample3DImage(BWCT, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
-        
+
         BWCT = imbinarize(BWCT);
 
-        if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view     
-            BWCT = resizeMaskToImageSize(BWCT, aResampledPTImage); 
+        if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view
+            BWCT = resizeMaskToImageSize(BWCT, aResampledPTImage);
         end
     else
         BWCT = imbinarize(BWCT);
@@ -366,42 +366,42 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
         imMask (gaLiverMask) = dMin;
     end
 
-    setSeriesCallback();            
+    setSeriesCallback();
 
     sFormula = '(4.44/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map';
-    maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, 0, false, 0, true, sFormula, BWCT, dSmalestVoiValue,  gdNormalLiverMean, gdNormalLiverSTD);                
+    maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, 0, false, 0, true, sFormula, BWCT, dSmalestVoiValue,  gdNormalLiverMean, gdNormalLiverSTD);
 
     if ~isempty(gaLiverMask)
 
         sFormula = 'Liver';
-    
+
         imMaskLiver = aResampledPTImage;
         imMaskLiver(gaLiverMask == 0) = dMin;
-    
-        maskAddVoiToSeries(imMaskLiver, aLiverBWMask, dPixelEdge, false, dLiverTreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue);  
 
-        clear imMaskLiver;       
+        maskAddVoiToSeries(imMaskLiver, aLiverBWMask, dPixelEdge, false, dLiverTreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue);
+
+        clear imMaskLiver;
         clear aLiverBWMask;
-        clear gaLiverMask;    
+        clear gaLiverMask;
    end
 
     clear aResampledPTImage;
     clear aBWMask;
-    clear refMip;                        
+    clear refMip;
     clear aMip;
     clear BWCT;
     clear imMask;
 
 
     setVoiRoiSegPopup();
-    
+
     tQuant = quantificationTemplate('get');
 
     if isfield(tQuant, 'tSUV')
         dSUVScale = tQuant.tSUV.dScale;
     else
         dSUVScale = 1;
-    end 
+    end
 
     % Set TCS Axes intensity
 
@@ -411,23 +411,23 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
     windowLevel('set', 'max', dMax);
     windowLevel('set', 'min' ,dMin);
 
-    setWindowMinMax(dMax, dMin);                    
+    setWindowMinMax(dMax, dMin);
 
     dMin = 0/dSUVScale;
     dMax = 20/dSUVScale;
 
     % Set MIP Axe intensity
 
-    set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);     
+    set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);
 
     % Deactivate MIP Fusion
 
     link2DMip('set', false);
 
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
+    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
     set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
-   
+
     % Set fusion
 
     if isFusion('get') == false
@@ -442,7 +442,7 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
     fusionWindowLevel('set', 'max', dMax);
     fusionWindowLevel('set', 'min' ,dMin);
 
-    setFusionWindowMinMax(dMax, dMin);  
+    setFusionWindowMinMax(dMax, dMin);
 
     % Triangulate og 1st VOI
 
@@ -462,30 +462,30 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
     end
 
     refreshImages();
-    
-    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
+
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));
 
     clear aPTImage;
     clear aCTImage;
-     
+
 
     progressBar(1, 'Ready');
 
-    catch 
-        resetSeries(dPTSerieOffset, true);       
+    catch
+        resetSeries(dPTSerieOffset, true);
         progressBar( 1 , 'Error: setSegmentationGa68DOTATATE()' );
     end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;
-    
+
     function Ga68DOTATATENormalLiverMeanSDDialog()
 
         DLG_Ga68DOTATATE_MEAN_SD_X = 380;
         DLG_Ga68DOTATATE_MEAN_SD_Y = 150;
 
         if viewerUIFigure('get') == true
-    
+
             dlgGa68DOTATATEmeanSD = ...
                 uifigure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_Ga68DOTATATE_MEAN_SD_X/2) ...
                                     (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_Ga68DOTATATE_MEAN_SD_Y/2) ...
@@ -497,7 +497,7 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
                        'WindowStyle', 'modal', ...
                        'Name' , 'Ga68DOTATATE Segmentation Mean and SD'...
                        );
-        else      
+        else
             dlgGa68DOTATATEmeanSD = ...
                 dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_Ga68DOTATATE_MEAN_SD_X/2) ...
                                     (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_Ga68DOTATATE_MEAN_SD_Y/2) ...
@@ -505,27 +505,27 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
                                     DLG_Ga68DOTATATE_MEAN_SD_Y ...
                                     ],...
                        'MenuBar', 'none',...
-                       'Resize', 'off', ...    
+                       'Resize', 'off', ...
                        'NumberTitle','off',...
                        'MenuBar', 'none',...
                        'Color', viewerBackgroundColor('get'), ...
                        'Name', 'Ga68DOTATATE Segmentation Mean and SD',...
-                       'Toolbar','none'...               
-                       ); 
+                       'Toolbar','none'...
+                       );
         end
 
         % Normal Liver Mean
-    
+
             uicontrol(dlgGa68DOTATATEmeanSD,...
                       'style'   , 'text',...
                       'Enable'  , 'On',...
                       'string'  , 'Normal Liver Mean',...
                       'horizontalalignment', 'left',...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
-                      'ForegroundColor', viewerForegroundColor('get'), ...                   
+                      'ForegroundColor', viewerForegroundColor('get'), ...
                       'position', [20 90 250 20]...
                       );
-    
+
         edtGa68DOTATATENormalLiverMeanValue = ...
             uicontrol(dlgGa68DOTATATEmeanSD, ...
                       'Style'   , 'Edit', ...
@@ -538,17 +538,17 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
                       );
 
         % Normal Liver Standard Deviation
-    
+
             uicontrol(dlgGa68DOTATATEmeanSD,...
                       'style'   , 'text',...
                       'Enable'  , 'On',...
                       'string'  , 'Normal Liver Standard Deviation',...
                       'horizontalalignment', 'left',...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
-                      'ForegroundColor', viewerForegroundColor('get'), ...                   
+                      'ForegroundColor', viewerForegroundColor('get'), ...
                       'position', [20 65 250 20]...
                       );
-    
+
         edtGa68DOTATATENormalLiverSDValue = ...
             uicontrol(dlgGa68DOTATATEmeanSD, ...
                       'Style'   , 'Edit', ...
@@ -558,63 +558,63 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
                       'BackgroundColor', viewerBackgroundColor('get'), ...
                       'ForegroundColor', viewerForegroundColor('get'), ...
                       'CallBack', @edtGa68DOTATATENormalLiverSDValueCallback ...
-                      ); 
+                      );
 
          % Cancel or Proceed
-    
+
          uicontrol(dlgGa68DOTATATEmeanSD,...
                    'String','Cancel',...
                    'Position',[285 7 75 25],...
                    'BackgroundColor', viewerBackgroundColor('get'), ...
-                   'ForegroundColor', viewerForegroundColor('get'), ...                
+                   'ForegroundColor', viewerForegroundColor('get'), ...
                    'Callback', @cancelGa68DOTATATEmeanSDCallback...
                    );
-    
+
          uicontrol(dlgGa68DOTATATEmeanSD,...
                   'String','Continue',...
                   'Position',[200 7 75 25],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...               
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @proceedGa68DOTATATEmeanSDCallback...
                   );
 
         waitfor(dlgGa68DOTATATEmeanSD);
 
         function edtGa68DOTATATENormalLiverMeanValueCallback(~, ~)
-    
+
             dMeanValue = str2double(get(edtGa68DOTATATENormalLiverMeanValue, 'Value'));
-    
-            if dMeanValue < 0 
+
+            if dMeanValue < 0
                 dMeanValue = 0.1;
                 set(edtGa68DOTATATENormalLiverMeanValue, 'Value', num2str(dMeanValue));
             end
-    
+
             Ga68DOTATATENormalLiverMeanValue('set', dMeanValue);
         end
-    
+
         function edtGa68DOTATATENormalLiverSDValueCallback(~, ~)
-    
+
             dSDValue = str2double(get(edtGa68DOTATATENormalLiverSDValue, 'Value'));
-    
-            if dSDValue < 0 
+
+            if dSDValue < 0
                 dSDValue = 0.1;
                 set(edtGa68DOTATATENormalLiverSDValue, 'Value', num2str(dSDValue));
             end
-    
+
             Ga68DOTATATENormalLiverSDValue('set', dSDValue);
         end
-    
+
         function proceedGa68DOTATATEmeanSDCallback(~, ~)
-    
-            gdNormalLiverMean = str2double(get(edtGa68DOTATATENormalLiverMeanValue, 'String'));        
+
+            gdNormalLiverMean = str2double(get(edtGa68DOTATATENormalLiverMeanValue, 'String'));
             gdNormalLiverSTD  = str2double(get(edtGa68DOTATATENormalLiverSDValue, 'String'));
-    
+
             delete(dlgGa68DOTATATEmeanSD);
-            gbProceedWithSegmentation = true;      
+            gbProceedWithSegmentation = true;
         end
-    
+
         function cancelGa68DOTATATEmeanSDCallback(~, ~)
-         
+
             delete(dlgGa68DOTATATEmeanSD);
             gbProceedWithSegmentation = false;
         end

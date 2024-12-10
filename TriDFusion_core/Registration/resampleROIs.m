@@ -46,20 +46,14 @@ function [atRoi, transM] = resampleROIs(dcmImage, atDcmMetaData, refImage, atRef
             end
         end
         
-        if ~isempty(atRoi{jj}.MaxDistances) 
+        if roiHasMaxDistances(atRoi{jj}) == true
             
-            if isvalid(atRoi{jj}.MaxDistances.MaxXY.Line)
-
-                atRoi{jj}.MaxDistances.MaxXY.Line.Visible = 'off';
-                atRoi{jj}.MaxDistances.MaxCY.Line.Visible = 'off';
-            end
-
-            if isvalid(atRoi{jj}.MaxDistances.MaxXY.Text)
-
-                atRoi{jj}.MaxDistances.MaxXY.Text.Visible = 'off';
-                atRoi{jj}.MaxDistances.MaxCY.Text.Visible = 'off';                        
-            end
+            atRoi{jj}.MaxDistances.MaxXY.Line.Visible = 'off';
+            atRoi{jj}.MaxDistances.MaxCY.Line.Visible = 'off';
+            atRoi{jj}.MaxDistances.MaxXY.Text.Visible = 'off';
+            atRoi{jj}.MaxDistances.MaxCY.Text.Visible = 'off';                                      
         end 
+        
 
         switch lower( atRoi{jj}.Type)
 
@@ -97,9 +91,12 @@ function [atRoi, transM] = resampleROIs(dcmImage, atDcmMetaData, refImage, atRef
                                  atRoi{jj}.Vertices        = atRoi{jj}.Object.Vertices;
                             end
                          end
-                         
-                         tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
-                         atRoi{jj}.MaxDistances = tMaxDistances;                       
+
+                         if roiHasMaxDistances(atRoi{jj}) == true
+
+                             tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
+                             atRoi{jj}.MaxDistances = tMaxDistances;                       
+                         end
                 end
 
 
@@ -139,9 +136,11 @@ function [atRoi, transM] = resampleROIs(dcmImage, atDcmMetaData, refImage, atRef
                              end
                          end
 
-                         tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
-                         atRoi{jj}.MaxDistances = tMaxDistances;
-
+                         if roiHasMaxDistances(atRoi{jj}) == true
+    
+                             tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
+                             atRoi{jj}.MaxDistances = tMaxDistances;
+                         end
                 end
 
             case lower('images.roi.rectangle')
@@ -164,21 +163,28 @@ function [atRoi, transM] = resampleROIs(dcmImage, atDcmMetaData, refImage, atRef
                         atRoi{jj}.Vertices        = atRoi{jj}.Object.Vertices;
                      end
                  end
+                 
+                 if roiHasMaxDistances(atRoi{jj}) == true
 
-                 tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
-                 atRoi{jj}.MaxDistances = tMaxDistances;
+                     tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
+                     atRoi{jj}.MaxDistances = tMaxDistances;
+                 end
 
             otherwise
                  atRoi{jj}.Position(:,1) = aNewPosition(:, 1);
                  atRoi{jj}.Position(:,2) = aNewPosition(:, 2);
                  atRoi{jj}.SliceNb       = round(aNewPosition(1,3));
-                 
-                 tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
-                 atRoi{jj}.MaxDistances = tMaxDistances;
-                
+
+                 if roiHasMaxDistances(atRoi{jj}) == true
+               
+                     tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
+                     atRoi{jj}.MaxDistances = tMaxDistances;
+                 end
+
                  if ~isstruct(atRoi{jj}.Object)
 
-                     if isvalid(atRoi{jj}.Object) && bUpdateObject == true                                  
+                     if isvalid(atRoi{jj}.Object) && ...
+                        bUpdateObject == true                                  
 
                         atRoi{jj}.Object.Position = atRoi{jj}.Position;
                      end                

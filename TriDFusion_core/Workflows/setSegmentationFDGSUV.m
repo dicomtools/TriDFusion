@@ -157,9 +157,8 @@ function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge,
 
     progressBar(8/10, 'Computing ct map, please wait.');
 
-    BWCT = aCTImage;
-    BWCT(BWCT < dBoneMaskThreshold) = 0;                                    
-    BWCT = imfill(BWCT, 4, 'holes'); 
+    BWCT = aCTImage >= dBoneMaskThreshold;   % Logical mask creation
+    BWCT = imfill(single(BWCT), 4, 'holes'); % Fill holes in the binary mask
 
 %     % Thresholding to create a binary mask
 %     BWCT = BWCT >= dBoneMaskThreshold;
@@ -199,6 +198,7 @@ function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge,
 %     imMask(aBWMask == 0) = dMin;
 
     if dBoneThreshold ~= dThreshold
+        
         aBWMask2 = aResampledPTImage;
     
         dMin = min(aBWMask2, [], 'all');

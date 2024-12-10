@@ -62,9 +62,12 @@ function atRoi = registerROIs(dcmImage, atDcmMetaData, refImage, atRefMetaData, 
                          atRoi{jj}.SliceNb       = round(aNewPosition(1,3));
                          atRoi{jj}.Radius        = aRadius;
                          
-                         tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
-                         atRoi{jj}.MaxDistances = tMaxDistances;
-                         
+                         if roiHasMaxDistances(atRoi{jj}) == true
+
+                             tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
+                             atRoi{jj}.MaxDistances = tMaxDistances;
+                         end
+
                          if isvalid(atRoi{jj}.Object)
                              atRoi{jj}.Object.Position = atRoi{jj}.Position;
                              atRoi{jj}.Object.Radius   = atRoi{jj}.Radius;
@@ -97,10 +100,13 @@ function atRoi = registerROIs(dcmImage, atDcmMetaData, refImage, atRefMetaData, 
                          atRoi{jj}.Position(:,2) = aNewPosition(:, 2);
                          atRoi{jj}.SliceNb       = round(aNewPosition(1,3));
                          atRoi{jj}.SemiAxes      = aSemiAxes;
+
+                         if roiHasMaxDistances(atRoi{jj}) == true
                          
-                         tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
-                         atRoi{jj}.MaxDistances = tMaxDistances;
-                         
+                             tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
+                             atRoi{jj}.MaxDistances = tMaxDistances;
+                         end
+
                          if isvalid(atRoi{jj}.Object)                 
                             atRoi{jj}.Object.Position = atRoi{jj}.Position;
                             atRoi{jj}.Object.SemiAxes = atRoi{jj}.SemiAxes;
@@ -114,10 +120,13 @@ function atRoi = registerROIs(dcmImage, atDcmMetaData, refImage, atRefMetaData, 
                  atRoi{jj}.Position(3) = aNewPosition(3);
                  atRoi{jj}.Position(4) = aNewPosition(4);
                  atRoi{jj}.SliceNb     = round(aNewPosition(5));
+
+                 if roiHasMaxDistances(atRoi{jj}) == true
                  
-                 tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
-                 atRoi{jj}.MaxDistances = tMaxDistances;
-                 
+                     tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
+                     atRoi{jj}.MaxDistances = tMaxDistances;
+                 end
+
                  if isvalid(atRoi{jj}.Object)                                  
                     atRoi{jj}.Object.Position = atRoi{jj}.Position;
                  end
@@ -126,10 +135,13 @@ function atRoi = registerROIs(dcmImage, atDcmMetaData, refImage, atRefMetaData, 
                  atRoi{jj}.Position(:,1) = aNewPosition(:, 1);
                  atRoi{jj}.Position(:,2) = aNewPosition(:, 2);
                  atRoi{jj}.SliceNb       = round(aNewPosition(1,3));
-                 
-                 tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
-                 atRoi{jj}.MaxDistances = tMaxDistances;
-                
+
+                 if roiHasMaxDistances(atRoi{jj}) == true
+      
+                     tMaxDistances = computeRoiFarthestPoint(refImage, atRefMetaData, atRoi{jj}, false, false);
+                     atRoi{jj}.MaxDistances = tMaxDistances;
+                 end
+
                  if isvalid(atRoi{jj}.Object)                                  
                     atRoi{jj}.Object.Position = atRoi{jj}.Position;
                  end

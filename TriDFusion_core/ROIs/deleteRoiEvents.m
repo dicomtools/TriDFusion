@@ -61,14 +61,22 @@ function deleteRoiEvents(hObject, ~)
 
             % Delete farthest distance objects
 
-            if ~isempty(atRoiInput{dTagOffset}.MaxDistances)
-                objectsToDelete = [atRoiInput{dTagOffset}.MaxDistances.MaxXY.Line, ...
-                                   atRoiInput{dTagOffset}.MaxDistances.MaxCY.Line, ...
-                                   atRoiInput{dTagOffset}.MaxDistances.MaxXY.Text, ...
-                                   atRoiInput{dTagOffset}.MaxDistances.MaxCY.Text];
-                delete(objectsToDelete(isvalid(objectsToDelete)));
-            end                   
-            
+            % Farthest distance are dynamically computed as needed.
+
+            if roiHasMaxDistances(atRoiInput{dTagOffset}) == true
+
+                maxDistances = atRoiInput{dTagOffset}.MaxDistances; % Cache field to avoid repeated lookup
+
+                objectsToDelete = [maxDistances.MaxXY.Line, ...
+                                   maxDistances.MaxCY.Line, ...
+                                   maxDistances.MaxXY.Text, ...
+                                   maxDistances.MaxCY.Text];
+                
+                delete(objectsToDelete(isvalid(objectsToDelete))); % Perform deletion on the filtered list
+              
+                atRoiInput{dTagOffset} = rmfield(atRoiInput{dTagOffset}, 'MaxDistances');                                                       
+            end
+
             % Delete ROI object 
             
             if isvalid(atRoiInput{dTagOffset}.Object)
@@ -96,6 +104,7 @@ function deleteRoiEvents(hObject, ~)
                         atVoiInput{vo}.RoisTag(dTagOffset) = [];
                      %   atVoiInput{vo}.RoisTag(cellfun(@isempty, atVoiInput{vo}.RoisTag)) = [];     
                         if isempty(atVoiInput{vo}.RoisTag)
+
                             atVoiInput(vo) = [];
                             break;
                         else

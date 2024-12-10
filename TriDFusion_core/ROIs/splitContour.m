@@ -203,28 +203,24 @@ function splitContour(pAxe, pRoiLinePtr)
                                 atRoiInput{dRoiOffset}.Waypoints = atRoiInput{dRoiOffset}.Object.Waypoints;
                             end
             
-                            if ~isempty(atRoiInput{dRoiOffset}.MaxDistances)
-                
-                                if isvalid(atRoiInput{dRoiOffset}.MaxDistances.MaxXY.Line)
-                                    delete(atRoiInput{dRoiOffset}.MaxDistances.MaxXY.Line);
+                            if roiHasMaxDistances(atRoiInput{dRoiOffset}) == true
+            
+                                maxDistances = atRoiInput{dRoiOffset}.MaxDistances; % Cache the field to avoid repeated lookups
+                                if ~isempty(maxDistances)
+            
+                                    objectsToDelete = [maxDistances.MaxXY.Line, ...
+                                                       maxDistances.MaxCY.Line, ...
+                                                       maxDistances.MaxXY.Text, ...
+                                                       maxDistances.MaxCY.Text];
+                                    % Delete only valid objects
+                                    delete(objectsToDelete(isvalid(objectsToDelete)));                                  
                                 end
-                                
-                                if isvalid(atRoiInput{dRoiOffset}.MaxDistances.MaxCY.Line)
-                                    delete(atRoiInput{dRoiOffset}.MaxDistances.MaxCY.Line);
-                                end
-                                
-                                if isvalid(atRoiInput{dRoiOffset}.MaxDistances.MaxXY.Text)
-                                    delete(atRoiInput{dRoiOffset}.MaxDistances.MaxXY.Text);
-                                end
-                                
-                                if isvalid(atRoiInput{dRoiOffset}.MaxDistances.MaxCY.Text)
-                                    delete(atRoiInput{dRoiOffset}.MaxDistances.MaxCY.Text);
-                                end
+
+                                atRoiInput{dRoiOffset} = rmfield(atRoiInput{dRoiOffset}, 'MaxDistances');                                
                             end
             
-                            tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), atRoiInput{dRoiOffset}, false, false);
-            
-                            atRoiInput{dRoiOffset}.MaxDistances = tMaxDistances;    
+                            %DL tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), atRoiInput{dRoiOffset}, false, false);         
+                            %DL atRoiInput{dRoiOffset}.MaxDistances = tMaxDistances;    
             
                             roiTemplate('set', dSeriesOffset, atRoiInput);
 
@@ -273,8 +269,8 @@ function splitContour(pAxe, pRoiLinePtr)
 
                             addRoiMenu(roiPtr);
                 
-                            addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
-                            addlistener(roiPtr, 'WaypointRemoved', @waypointEvents); 
+                            % addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
+                            % addlistener(roiPtr, 'WaypointRemoved', @waypointEvents); 
 
                             % voiDefaultMenu(roiPtr);
                             % 
@@ -464,28 +460,24 @@ function splitContour(pAxe, pRoiLinePtr)
                     atRoiInput{dClosestRoiIndex}.Waypoints = atRoiInput{dClosestRoiIndex}.Object.Waypoints;
                 end
 
-                if ~isempty(atRoiInput{dClosestRoiIndex}.MaxDistances)
-    
-                    if isvalid(atRoiInput{dClosestRoiIndex}.MaxDistances.MaxXY.Line)
-                        delete(atRoiInput{dClosestRoiIndex}.MaxDistances.MaxXY.Line);
+                if roiHasMaxDistances(atRoiInput{dClosestRoiIndex}) == true
+
+                    maxDistances = atRoiInput{dClosestRoiIndex}.MaxDistances; % Cache the field to avoid repeated lookups
+                    if ~isempty(maxDistances)
+
+                        objectsToDelete = [maxDistances.MaxXY.Line, ...
+                                           maxDistances.MaxCY.Line, ...
+                                           maxDistances.MaxXY.Text, ...
+                                           maxDistances.MaxCY.Text];
+                        % Delete only valid objects
+                        delete(objectsToDelete(isvalid(objectsToDelete)));                                  
                     end
                     
-                    if isvalid(atRoiInput{dClosestRoiIndex}.MaxDistances.MaxCY.Line)
-                        delete(atRoiInput{dClosestRoiIndex}.MaxDistances.MaxCY.Line);
-                    end
-                    
-                    if isvalid(atRoiInput{dClosestRoiIndex}.MaxDistances.MaxXY.Text)
-                        delete(atRoiInput{dClosestRoiIndex}.MaxDistances.MaxXY.Text);
-                    end
-                    
-                    if isvalid(atRoiInput{dClosestRoiIndex}.MaxDistances.MaxCY.Text)
-                        delete(atRoiInput{dClosestRoiIndex}.MaxDistances.MaxCY.Text);
-                    end
+                    atRoiInput{dClosestRoiIndex} = rmfield(atRoiInput{dClosestRoiIndex}, 'MaxDistances');                                
                 end
-
-                tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), atRoiInput{dClosestRoiIndex}, false, false);
-
-                atRoiInput{dClosestRoiIndex}.MaxDistances = tMaxDistances;    
+                
+                %DL tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), atRoiInput{dClosestRoiIndex}, false, false);
+                %DL atRoiInput{dClosestRoiIndex}.MaxDistances = tMaxDistances;    
 
                 roiTemplate('set', dSeriesOffset, atRoiInput);
 
@@ -558,8 +550,8 @@ function splitContour(pAxe, pRoiLinePtr)
 
                 addRoiMenu(roiPtr);
     
-                addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
-                addlistener(roiPtr, 'WaypointRemoved', @waypointEvents); 
+                % addlistener(roiPtr, 'WaypointAdded'  , @waypointEvents);
+                % addlistener(roiPtr, 'WaypointRemoved', @waypointEvents); 
 
                 % voiDefaultMenu(roiPtr);
                 % 

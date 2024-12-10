@@ -32,9 +32,9 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
     gdNormalLiverSTD = [];
 
     atInput = inputTemplate('get');
-    
-    % Modality validation    
-       
+
+    % Modality validation
+
     dCTSerieOffset = [];
     for tt=1:numel(atInput)
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'ct')
@@ -51,11 +51,11 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
         end
     end
 
-    if isempty(dCTSerieOffset) || isempty(dPTSerieOffset) 
-        
+    if isempty(dCTSerieOffset) || isempty(dPTSerieOffset)
+
         progressBar(1, 'Error: FDHT tumor segmentation require a CT and PT image!');
-        errordlg('FDHT tumor segmentation require a CT and PT image!', 'Modality Validation');  
-        return;               
+        errordlg('FDHT tumor segmentation require a CT and PT image!', 'Modality Validation');
+        return;
     end
 
 
@@ -94,104 +94,104 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
         dSUVScale = tQuant.tSUV.dScale;
     else
         dSUVScale = 0;
-    end 
+    end
 
     atRoiInput = roiTemplate('get', dPTSerieOffset);
-   
+
     if ~isempty(atRoiInput)
-        
-        aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Label, atRoiInput, 'uni', false ), {'Normal Liver'} );            
+
+        aTagOffset = strcmpi( cellfun( @(atRoiInput) atRoiInput.Label, atRoiInput, 'uni', false ), {'Normal Liver'} );
         dTagOffset = find(aTagOffset, 1);
-        
+
         aSlice = [];
-        
+
         if ~isempty(dTagOffset)
-            
+
             switch lower(atRoiInput{dTagOffset}.Axe)
 
-                case 'axes1'                            
+                case 'axes1'
                     aSlice = permute(aPTImage(atRoiInput{dTagOffset}.SliceNb,:,:), [3 2 1]);
 
                 case 'axes2'
                     aSlice = permute(aPTImage(:,atRoiInput{dTagOffset}.SliceNb,:), [3 1 2]);
 
                 case 'axes3'
-                    aSlice = aPTImage(:,:,atRoiInput{dTagOffset}.SliceNb);       
+                    aSlice = aPTImage(:,:,atRoiInput{dTagOffset}.SliceNb);
             end
-            
+
             aLogicalMask = roiTemplateToMask(atRoiInput{dTagOffset}, aSlice);
-                     
+
             gdNormalLiverMean = mean(aSlice(aLogicalMask), 'all')   * dSUVScale;
 
 
-   %         H = fspecial('average',5); 
-   %         blurred = imfilter(aSlice(aLogicalMask),H,'replicate'); 
+   %         H = fspecial('average',5);
+   %         blurred = imfilter(aSlice(aLogicalMask),H,'replicate');
 
-            gdNormalLiverSTD = std(aSlice(aLogicalMask), [],'all') * dSUVScale;     
-            
+            gdNormalLiverSTD = std(aSlice(aLogicalMask), [],'all') * dSUVScale;
+
             clear aSlice;
         else
             if bUseDefault == false
 
-                waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
-    
+                waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));
+
                 FDHTNormalLiverMeanSDDialog();
-    
+
                 if gbProceedWithSegmentation == false
                     return;
-                end           
+                end
             else
-                gdNormalLiverMean = FDHTNormalLiverMeanValue('get');        
+                gdNormalLiverMean = FDHTNormalLiverMeanValue('get');
                 gdNormalLiverSTD  = FDHTNormalLiverSDValue('get');
             end
-        end   
+        end
     else
         if bUseDefault == false
 
-            waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));   
-    
+            waitfor(msgbox('Warning: Please define a Normal Liver ROI. Draw an ROI on the normal liver, right-click on the ROI, and select Predefined Label ''Normal Liver,'' or manually input a normal liver mean and SD into the following dialog.', 'Warning'));
+
             FDHTNormalLiverMeanSDDialog();
-    
+
             if gbProceedWithSegmentation == false
                 return;
             end
         else
-            gdNormalLiverMean = FDHTNormalLiverMeanValue('get');        
+            gdNormalLiverMean = FDHTNormalLiverMeanValue('get');
             gdNormalLiverSTD  = FDHTNormalLiverSDValue('get');
         end
     end
 
-    % Apply ROI constraint 
+    % Apply ROI constraint
 
     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dPTSerieOffset);
 
     bInvertMask = invertConstraint('get');
 
     tRoiInput = roiTemplate('get', dPTSerieOffset);
-    
+
     aPTImageTemp = aPTImage;
-    aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask); 
-    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint 
+    aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
+    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
 
-    resetSeries(dPTSerieOffset, true);       
+    resetSeries(dPTSerieOffset, true);
 
-    try 
+    try
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
-    
+
     if isInterpolated('get') == false
-    
+
         isInterpolated('set', true);
-    
+
         setImageInterpolation(true);
     end
 
     progressBar(5/10, 'Resampling series, please wait.');
-            
-    [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
-    [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
-   
+
+    [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
+    [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
+
     dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
     dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
 
@@ -202,15 +202,15 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
 
 
     progressBar(6/10, 'Resampling mip, please wait.');
-            
-    refMip = mipBuffer('get', [], dCTSerieOffset);                        
+
+    refMip = mipBuffer('get', [], dCTSerieOffset);
     aMip   = mipBuffer('get', [], dPTSerieOffset);
-  
+
     aMip = resampleMip(aMip, atPTMetaData, refMip, atCTMetaData, 'Linear', true);
-                   
+
     mipBuffer('set', aMip, dPTSerieOffset);
 
-    setQuantification(dPTSerieOffset);    
+    setQuantification(dPTSerieOffset);
 
     tQuant = quantificationTemplate('get');
 
@@ -218,7 +218,7 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
         dSUVScale = tQuant.tSUV.dScale;
     else
         dSUVScale = 1;
-    end 
+    end
 
     progressBar(7/10, 'Computing mask, please wait.');
 
@@ -241,38 +241,38 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
 
     BWCT = aCTImage;
 
-    BWCT(BWCT < dBoneMaskThreshold) = 0;                                    
-    BWCT = imfill(BWCT, 4, 'holes');   
+    BWCT = aCTImage >= dBoneMaskThreshold;   % Logical mask creation
+    BWCT = imfill(single(BWCT), 4, 'holes'); % Fill holes in the binary mask
 
 %     BWCT = aCTImage;
-% 
+%
 %     % Thresholding to create a binary mask
 %     BWCT = BWCT >= dBoneMaskThreshold;
-%     
+%
 %     % Perform morphological closing to smooth contours and fill small gaps
 %     se = strel('disk', 3); % Adjust the size as needed
 %     BWCT = imclose(BWCT, se);
-%     
+%
 %     % Fill holes in the binary image
 %     BWCT = imfill(BWCT, 'holes');
-%     
+%
 %     % Optional: Remove small objects that are not part of the bone
 %     BWCT = bwareaopen(BWCT, 100); % Adjust the size threshold as needed
-%     
+%
 %     % Perform another round of morphological closing if necessary
 %     BWCT = imclose(BWCT, se);
-%     
+%
 %     % Optional: Perform morphological opening to remove small spurious regions
 %     BWCT = imopen(BWCT, se);
 
-    if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+    if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view
 
         BWCT = resample3DImage(BWCT, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
 
         BWCT = imbinarize(BWCT);
 
-        if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view     
-            BWCT = resizeMaskToImageSize(BWCT, aResampledPTImage); 
+        if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view
+            BWCT = resizeMaskToImageSize(BWCT, aResampledPTImage);
         end
     else
         BWCT = imbinarize(BWCT);
@@ -283,16 +283,16 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
     imMask = aResampledPTImage;
 %     imMask(aBWMask == 0) = dMin;
 
-    setSeriesCallback();            
+    setSeriesCallback();
 
  %   sFormula = '(4.44/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map';
     sFormula = '(1.5 x Normal Liver SUVmean)+(2 x Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map';
 
-    maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, 0, false, 0, true, sFormula, BWCT, dSmalestVoiValue,  gdNormalLiverMean, gdNormalLiverSTD);                
+    maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, 0, false, 0, true, sFormula, BWCT, dSmalestVoiValue,  gdNormalLiverMean, gdNormalLiverSTD);
 
     clear aResampledPTImage;
     clear aBWMask;
-    clear refMip;                        
+    clear refMip;
     clear aMip;
     clear BWCT;
     clear imMask;
@@ -307,23 +307,23 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
     windowLevel('set', 'max', dMax);
     windowLevel('set', 'min' ,dMin);
 
-    setWindowMinMax(dMax, dMin);                    
+    setWindowMinMax(dMax, dMin);
 
     dMin = 0/dSUVScale;
     dMax = 10/dSUVScale;
 
     % Set MIP Axe intensity
 
-    set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);   
+    set(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'CLim', [dMin dMax]);
 
     % Deactivate MIP Fusion
 
     link2DMip('set', false);
 
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
+    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
     set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
-   
+
     % Set fusion
 
     if isFusion('get') == false
@@ -338,7 +338,7 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
     fusionWindowLevel('set', 'max', dMax);
     fusionWindowLevel('set', 'min' ,dMin);
 
-    setFusionWindowMinMax(dMax, dMin);  
+    setFusionWindowMinMax(dMax, dMin);
 
     % Triangulate og 1st VOI
 
@@ -358,30 +358,30 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
     end
 
     refreshImages();
-    
-    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
+
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));
 
     clear aPTImage;
     clear aCTImage;
-     
+
 
     progressBar(1, 'Ready');
 
-    catch 
-        resetSeries(dPTSerieOffset, true);       
+    catch
+        resetSeries(dPTSerieOffset, true);
         progressBar( 1 , 'Error: setSegmentationFDHT()' );
     end
 
     set(fiMainWindowPtr('get'), 'Pointer', 'default');
     drawnow;
-    
+
     function FDHTNormalLiverMeanSDDialog()
 
         DLG_FDHT_MEAN_SD_X = 380;
         DLG_FDHT_MEAN_SD_Y = 150;
 
         if viewerUIFigure('get') == true
-    
+
             dlgFDHTmeanSD = ...
                 uifigure('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_FDHT_MEAN_SD_X/2) ...
                                     (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_FDHT_MEAN_SD_Y/2) ...
@@ -393,7 +393,7 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
                        'WindowStyle', 'modal', ...
                        'Name' , 'FDHT Segmentation Mean and SD'...
                        );
-        else    
+        else
             dlgFDHTmeanSD = ...
                 dialog('Position', [(getMainWindowPosition('xpos')+(getMainWindowSize('xsize')/2)-DLG_FDHT_MEAN_SD_X/2) ...
                                     (getMainWindowPosition('ypos')+(getMainWindowSize('ysize')/2)-DLG_FDHT_MEAN_SD_Y/2) ...
@@ -401,27 +401,27 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
                                     DLG_FDHT_MEAN_SD_Y ...
                                     ],...
                        'MenuBar', 'none',...
-                       'Resize', 'off', ...    
+                       'Resize', 'off', ...
                        'NumberTitle','off',...
                        'MenuBar', 'none',...
                        'Color', viewerBackgroundColor('get'), ...
                        'Name', 'FDHT Segmentation Mean and SD',...
-                       'Toolbar','none'...               
-                       ); 
+                       'Toolbar','none'...
+                       );
         end
 
         % Normal Liver Mean
-    
+
             uicontrol(dlgFDHTmeanSD,...
                       'style'   , 'text',...
                       'Enable'  , 'On',...
                       'string'  , 'Normal Liver Mean',...
                       'horizontalalignment', 'left',...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
-                      'ForegroundColor', viewerForegroundColor('get'), ...                   
+                      'ForegroundColor', viewerForegroundColor('get'), ...
                       'position', [20 90 250 20]...
                       );
-    
+
         edtFDHTNormalLiverMeanValue = ...
             uicontrol(dlgFDHTmeanSD, ...
                       'Style'   , 'Edit', ...
@@ -434,17 +434,17 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
                       );
 
         % Normal Liver Standard Deviation
-    
+
             uicontrol(dlgFDHTmeanSD,...
                       'style'   , 'text',...
                       'Enable'  , 'On',...
                       'string'  , 'Normal Liver Standard Deviation',...
                       'horizontalalignment', 'left',...
                       'BackgroundColor', viewerBackgroundColor('get'), ...
-                      'ForegroundColor', viewerForegroundColor('get'), ...                   
+                      'ForegroundColor', viewerForegroundColor('get'), ...
                       'position', [20 65 250 20]...
                       );
-    
+
         edtFDHTNormalLiverSDValue = ...
             uicontrol(dlgFDHTmeanSD, ...
                       'Style'   , 'Edit', ...
@@ -454,63 +454,63 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
                       'BackgroundColor', viewerBackgroundColor('get'), ...
                       'ForegroundColor', viewerForegroundColor('get'), ...
                       'CallBack', @edtFDHTNormalLiverSDValueCallback ...
-                      ); 
+                      );
 
          % Cancel or Proceed
-    
+
          uicontrol(dlgFDHTmeanSD,...
                    'String','Cancel',...
                    'Position',[285 7 75 25],...
                    'BackgroundColor', viewerBackgroundColor('get'), ...
-                   'ForegroundColor', viewerForegroundColor('get'), ...                
+                   'ForegroundColor', viewerForegroundColor('get'), ...
                    'Callback', @cancelFDHTmeanSDCallback...
                    );
-    
+
          uicontrol(dlgFDHTmeanSD,...
                   'String','Continue',...
                   'Position',[200 7 75 25],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
-                  'ForegroundColor', viewerForegroundColor('get'), ...               
+                  'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @proceedFDHTmeanSDCallback...
                   );
 
         waitfor(dlgFDHTmeanSD);
 
         function edtFDHTNormalLiverMeanValueCallback(~, ~)
-    
+
             dMeanValue = str2double(get(edtFDHTNormalLiverMeanValue, 'Value'));
-    
-            if dMeanValue < 0 
+
+            if dMeanValue < 0
                 dMeanValue = 0.1;
                 set(edtFDHTNormalLiverMeanValue, 'Value', num2str(dMeanValue));
             end
-    
+
             FDHTNormalLiverMeanValue('set', dMeanValue);
         end
-    
+
         function edtFDHTNormalLiverSDValueCallback(~, ~)
-    
+
             dSDValue = str2double(get(edtFDHTNormalLiverSDValue, 'Value'));
-    
-            if dSDValue < 0 
+
+            if dSDValue < 0
                 dSDValue = 0.1;
                 set(edtFDHTNormalLiverSDValue, 'Value', num2str(dSDValue));
             end
-    
+
             FDHTNormalLiverSDValue('set', dSDValue);
         end
-    
+
         function proceedFDHTmeanSDCallback(~, ~)
-    
-            gdNormalLiverMean = str2double(get(edtFDHTNormalLiverMeanValue, 'String'));        
+
+            gdNormalLiverMean = str2double(get(edtFDHTNormalLiverMeanValue, 'String'));
             gdNormalLiverSTD  = str2double(get(edtFDHTNormalLiverSDValue, 'String'));
-    
+
             delete(dlgFDHTmeanSD);
-            gbProceedWithSegmentation = true;      
+            gbProceedWithSegmentation = true;
         end
-    
+
         function cancelFDHTmeanSDCallback(~, ~)
-         
+
             delete(dlgFDHTmeanSD);
             gbProceedWithSegmentation = false;
         end

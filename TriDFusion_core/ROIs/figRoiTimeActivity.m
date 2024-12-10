@@ -1000,63 +1000,74 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
     function exportCurrentTimeActivityCallback(~, ~)
 
         atInputTemplate = inputTemplate('get');
-        iOffset = get(uiSeriesPtr('get'), 'Value');
-        if iOffset > numel(atInputTemplate)
+        dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
+        if dSeriesOffset > numel(atInputTemplate)
             return;
         end
 
-        atMetaData = dicomMetaData('get', [], iOffset);
+        atMetaData = dicomMetaData('get', [], dSeriesOffset);
 
-        atVoiInput = voiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
-        atRoiInput = roiTemplate('get', get(uiSeriesPtr('get'), 'Value'));
+        atVoiInput = voiTemplate('get', dSeriesOffset);
+        atRoiInput = roiTemplate('get', dSeriesOffset);
 
-        aDisplayBuffer = dicomBuffer('get', [], iOffset);
+        if isfigVoiExpendVoi('get') == true
+
+            bExpendedDisplay = true;
+        else
+            bExpendedDisplay = false;
+    
+            if any(cellfun(@(roi) strcmpi(roi.ObjectType, 'roi'), atRoiInput))
+                bExpendedDisplay = true;
+            end
+        end
+
+        aDisplayBuffer = dicomBuffer('get', [], dSeriesOffset);
 
         aInput = inputBuffer('get');
 
         if     strcmpi(imageOrientation('get'), 'axial')
-            aInputBuffer = aInput{iOffset};
+            aInputBuffer = aInput{dSeriesOffset};
         elseif strcmpi(imageOrientation('get'), 'coronal')
-            aInputBuffer = reorientBuffer(aInput{iOffset}, 'coronal');
+            aInputBuffer = reorientBuffer(aInput{dSeriesOffset}, 'coronal');
         elseif strcmpi(imageOrientation('get'), 'sagittal')
-            aInputBuffer = reorientBuffer(aInput{iOffset}, 'sagittal');
+            aInputBuffer = reorientBuffer(aInput{dSeriesOffset}, 'sagittal');
         end
 
         if size(aInputBuffer, 3) ==1
 
-            if atInputTemplate(iOffset).bFlipLeftRight == true
+            if atInputTemplate(dSeriesOffset).bFlipLeftRight == true
                 aInputBuffer=aInputBuffer(:,end:-1:1);
             end
 
-            if atInputTemplate(iOffset).bFlipAntPost == true
+            if atInputTemplate(dSeriesOffset).bFlipAntPost == true
                 aInputBuffer=aInputBuffer(end:-1:1,:);
             end
         else
-            if atInputTemplate(iOffset).bFlipLeftRight == true
+            if atInputTemplate(dSeriesOffset).bFlipLeftRight == true
                 aInputBuffer=aInputBuffer(:,end:-1:1,:);
             end
 
-            if atInputTemplate(iOffset).bFlipAntPost == true
+            if atInputTemplate(dSeriesOffset).bFlipAntPost == true
                 aInputBuffer=aInputBuffer(end:-1:1,:,:);
             end
 
-            if atInputTemplate(iOffset).bFlipHeadFeet == true
+            if atInputTemplate(dSeriesOffset).bFlipHeadFeet == true
                 aInputBuffer=aInputBuffer(:,:,end:-1:1);
             end
         end
 
-        atInputMetaData = atInputTemplate(iOffset).atDicomInfo;
+        atInputMetaData = atInputTemplate(dSeriesOffset).atDicomInfo;
 
         try
             matlab.io.internal.getExcelInstance;
             bExcelInstance = true;
-        catch exception %#ok<NASGU>
+        catch exception
 %            warning(message('MATLAB:xlswrite:NoCOMServer'));
             bExcelInstance = false;
         end
 
         filter = {'*.csv'};
-        info = dicomMetaData('get', [], iOffset);
+        info = dicomMetaData('get', [], dSeriesOffset);
 
         sCurrentDir  = viewerRootPath('get');
 
@@ -1245,7 +1256,7 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
 
                 dLineOffset = dLineOffset+1;
 
-                bMovementApplied = atInputTemplate(iOffset).tMovement.bMovementApplied;
+                bMovementApplied = atInputTemplate(dSeriesOffset).tMovement.bMovementApplied;
 
                 for rt=1:numel(atVoiRoiTag)
 
@@ -1341,28 +1352,68 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
                     dLineOffset = dLineOffset+1;
                 end
 
-                asCell{dLineOffset,1}  = 'Name';
-                asCell{dLineOffset,2}  = 'Image number';
-                asCell{dLineOffset,3}  = 'Nb Cells';
-                asCell{dLineOffset,4}  = 'Total';
-                asCell{dLineOffset,5}  = 'Sum';
-                asCell{dLineOffset,6}  = 'Mean';
-                asCell{dLineOffset,7}  = 'Min';
-                asCell{dLineOffset,8}  = 'Max';
-                asCell{dLineOffset,9}  = 'Median';
-                asCell{dLineOffset,10} = 'Deviation';
-                asCell{dLineOffset,11} = 'Peak';
-                asCell{dLineOffset,12} = 'Max XY (mm)';
-                asCell{dLineOffset,13} = 'Max CY (mm)';
-                asCell{dLineOffset,14} = 'Area (cm2)';
-                asCell{dLineOffset,15} = 'Volume (cm3)';
-                for tt=16:21
-                    asCell{dLineOffset,tt}  = (' ');
+                if bExpendedDisplay == true
+
+                    asCell{dLineOffset,1}  = 'Name';
+                    asCell{dLineOffset,2}  = 'Image number';
+                    asCell{dLineOffset,3}  = 'Nb Cells';
+                    asCell{dLineOffset,4}  = 'Total';
+                    asCell{dLineOffset,5}  = 'Sum';
+                    asCell{dLineOffset,6}  = 'Mean';
+                    asCell{dLineOffset,7}  = 'Min';
+                    asCell{dLineOffset,8}  = 'Max';
+                    asCell{dLineOffset,9}  = 'Median';
+                    asCell{dLineOffset,10} = 'Deviation';
+                    asCell{dLineOffset,11} = 'Peak';
+                    asCell{dLineOffset,12} = 'Max XY (mm)';
+                    asCell{dLineOffset,13} = 'Max CY (mm)';
+                    asCell{dLineOffset,14} = 'Area (cm2)';
+                    asCell{dLineOffset,15} = 'Volume (cm3)';
+
+                    for tt=16:21
+                        asCell{dLineOffset,tt}  = (' ');
+                    end
+                else
+                    asCell{dLineOffset,1}  = 'Name';
+                    asCell{dLineOffset,2}  = 'Nb Cells';
+                    asCell{dLineOffset,3}  = 'Total';
+                    asCell{dLineOffset,4}  = 'Sum';
+                    asCell{dLineOffset,5}  = 'Mean';
+                    asCell{dLineOffset,6}  = 'Min';
+                    asCell{dLineOffset,7}  = 'Max';
+                    asCell{dLineOffset,8}  = 'Median';
+                    asCell{dLineOffset,9}  = 'Deviation';
+                    asCell{dLineOffset,10} = 'Peak';
+                    asCell{dLineOffset,11} = 'Volume (cm3)';
+
+                    for tt=12:21
+                        asCell{dLineOffset,tt}  = (' ');
+                    end
                 end
 
-                bMovementApplied = atInputTemplate(iOffset).tMovement.bMovementApplied;
+                bMovementApplied = atInputTemplate(dSeriesOffset).tMovement.bMovementApplied;
 
                 dLineOffset = dLineOffset+1;
+
+                if bExpendedDisplay == true
+
+                    dNbRois = numel(atRoiInput); 
+    
+                    for ro=1:dNbRois
+    
+                        if strcmpi(atRoiInput{ro}.ObjectType, 'voi-roi')
+                            
+                            if ~isfield(atRoiInput{ro}, 'MaxDistances')
+                                
+                                tMaxDistances = computeRoiFarthestPoint(aDisplayBuffer, atMetaData, atRoiInput{ro}, false, false);
+                
+                                atRoiInput{ro}.MaxDistances = tMaxDistances;        
+    
+                                roiTemplate('set', dSeriesOffset, atRoiInput);
+                           end 
+                        end
+                    end 
+                end
 
                 for rt=1:numel(atVoiRoiTag)
 
@@ -1400,85 +1451,111 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
 
                                         sVoiName = atVoiInput{vv}.Label;
 
-                                        asCell{dLineOffset,1}  = (sVoiName);
-                                        asCell{dLineOffset,2}  = (' ');
-                                        asCell{dLineOffset,3}  = [tVoiComputed.cells];
-                                        asCell{dLineOffset,4}  = [tVoiComputed.total];
-                                        asCell{dLineOffset,5}  = [tVoiComputed.sum];
-                                        asCell{dLineOffset,6}  = [tVoiComputed.mean];
-                                        asCell{dLineOffset,7}  = [tVoiComputed.min];
-                                        asCell{dLineOffset,8}  = [tVoiComputed.max];
-                                        asCell{dLineOffset,9}  = [tVoiComputed.median];
-                                        asCell{dLineOffset,10} = [tVoiComputed.std];
-                                        asCell{dLineOffset,11} = [tVoiComputed.peak];
-                                        asCell{dLineOffset,12} = (' ');
-                                        asCell{dLineOffset,13} = (' ');
-                                        asCell{dLineOffset,14} = (' ');
-                                        asCell{dLineOffset,15} = [tVoiComputed.volume];
-                                        for tt=16:21
-                                            asCell{dLineOffset,tt}  = (' ');
+                                        if bExpendedDisplay == true
+
+                                            asCell{dLineOffset,1}  = (sVoiName);
+                                            asCell{dLineOffset,2}  = (' ');
+                                            asCell{dLineOffset,3}  = [tVoiComputed.cells];
+                                            asCell{dLineOffset,4}  = [tVoiComputed.total];
+                                            asCell{dLineOffset,5}  = [tVoiComputed.sum];
+                                            asCell{dLineOffset,6}  = [tVoiComputed.mean];
+                                            asCell{dLineOffset,7}  = [tVoiComputed.min];
+                                            asCell{dLineOffset,8}  = [tVoiComputed.max];
+                                            asCell{dLineOffset,9}  = [tVoiComputed.median];
+                                            asCell{dLineOffset,10} = [tVoiComputed.std];
+                                            asCell{dLineOffset,11} = [tVoiComputed.peak];
+                                            asCell{dLineOffset,12} = (' ');
+                                            asCell{dLineOffset,13} = (' ');
+                                            asCell{dLineOffset,14} = (' ');
+                                            asCell{dLineOffset,15} = [tVoiComputed.volume];
+
+                                            for tt=16:21
+                                                asCell{dLineOffset,tt}  = (' ');
+                                            end
+                                        else
+                                            asCell{dLineOffset,1}  = (sVoiName);
+                                            asCell{dLineOffset,2}  = [tVoiComputed.cells];
+                                            asCell{dLineOffset,3}  = [tVoiComputed.total];
+                                            asCell{dLineOffset,4}  = [tVoiComputed.sum];
+                                            asCell{dLineOffset,5}  = [tVoiComputed.mean];
+                                            asCell{dLineOffset,6}  = [tVoiComputed.min];
+                                            asCell{dLineOffset,7}  = [tVoiComputed.max];
+                                            asCell{dLineOffset,8}  = [tVoiComputed.median];
+                                            asCell{dLineOffset,9}  = [tVoiComputed.std];
+                                            asCell{dLineOffset,10} = [tVoiComputed.peak];
+                                            asCell{dLineOffset,11} = [tVoiComputed.volume];
+
+                                            for tt=12:21
+                                                asCell{dLineOffset,tt}  = (' ');
+                                            end                                            
                                         end
 
                                         dLineOffset = dLineOffset+1;
 
-                                        dNbTags = numel(atRoiComputed);
-                                        for bb=1:dNbTags
+                                        if bExpendedDisplay == true
 
-                                            if ~isempty(atRoiComputed{bb})
-
-                                                if dNbTags > 100
-                                                     if mod(bb, 10)==1 || bb == dNbTags
-                                                         progressBar( bb/dNbTags-0.0001, sprintf('Computing ROI %d/%d, please wait', bb, dNbTags) );
-                                                     end
-                                                end
-
-                                                if strcmpi(atRoiComputed{bb}.Axe, 'Axe')
-                                                    sSliceNb = num2str(atRoiComputed{bb}.SliceNb);
-                                                elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes1')
-                                                    sSliceNb = ['C:' num2str(atRoiComputed{bb}.SliceNb)];
-                                                elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes2')
-                                                    sSliceNb = ['S:' num2str(atRoiComputed{bb}.SliceNb)];
-                                                elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes3')
-                                                    sSliceNb = ['A:' num2str(size(aDisplayBuffer, 3)-atRoiComputed{bb}.SliceNb+1)];
-                                                end
-
-                                                asCell{dLineOffset,1}  = (' ');
-                                                asCell{dLineOffset,2}  = (sSliceNb);
-                                                asCell{dLineOffset,3}  = [atRoiComputed{bb}.cells];
-                                                asCell{dLineOffset,4}  = [atRoiComputed{bb}.total];
-                                                asCell{dLineOffset,5}  = [atRoiComputed{bb}.sum];
-                                                asCell{dLineOffset,6}  = [atRoiComputed{bb}.mean];
-                                                asCell{dLineOffset,7}  = [atRoiComputed{bb}.min];
-                                                asCell{dLineOffset,8}  = [atRoiComputed{bb}.max];
-                                                asCell{dLineOffset,9}  = [atRoiComputed{bb}.median];
-                                                asCell{dLineOffset,10}  = [atRoiComputed{bb}.std];
-                                                asCell{dLineOffset,11} = [atRoiComputed{bb}.peak];
-
-                                                if ~isempty(atRoiComputed{bb}.MaxDistances)
-                                                    if atRoiComputed{bb}.MaxDistances.MaxXY.Length == 0
-                                                        asCell{dLineOffset, 12} = ('NaN');
-                                                    else
-                                                        asCell{dLineOffset, 12} = [atRoiComputed{bb}.MaxDistances.MaxXY.Length];
+                                            dNbTags = numel(atRoiComputed);
+    
+                                            for bb=1:dNbTags
+    
+                                                if ~isempty(atRoiComputed{bb})
+    
+                                                    if dNbTags > 100
+    
+                                                        if mod(bb, 10)==1 || bb == dNbTags
+    
+                                                            progressBar( bb/dNbTags-0.0001, sprintf('Computing ROI %d/%d, please wait', bb, dNbTags) );
+                                                        end
                                                     end
-
-                                                    if atRoiComputed{bb}.MaxDistances.MaxCY.Length == 0
-                                                        asCell{dLineOffset, 13} = ('NaN');
-                                                    else
-                                                        asCell{dLineOffset, 13} = [atRoiComputed{bb}.MaxDistances.MaxCY.Length];
+    
+                                                    if strcmpi(atRoiComputed{bb}.Axe, 'Axe')
+                                                        sSliceNb = num2str(atRoiComputed{bb}.SliceNb);
+                                                    elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes1')
+                                                        sSliceNb = ['C:' num2str(atRoiComputed{bb}.SliceNb)];
+                                                    elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes2')
+                                                        sSliceNb = ['S:' num2str(atRoiComputed{bb}.SliceNb)];
+                                                    elseif strcmpi(atRoiComputed{bb}.Axe, 'Axes3')
+                                                        sSliceNb = ['A:' num2str(size(aDisplayBuffer, 3)-atRoiComputed{bb}.SliceNb+1)];
                                                     end
-                                                else
-                                                    asCell{dLineOffset,12} = (' ');
-                                                    asCell{dLineOffset,13} = (' ');
+    
+                                                    asCell{dLineOffset,1}  = (' ');
+                                                    asCell{dLineOffset,2}  = (sSliceNb);
+                                                    asCell{dLineOffset,3}  = [atRoiComputed{bb}.cells];
+                                                    asCell{dLineOffset,4}  = [atRoiComputed{bb}.total];
+                                                    asCell{dLineOffset,5}  = [atRoiComputed{bb}.sum];
+                                                    asCell{dLineOffset,6}  = [atRoiComputed{bb}.mean];
+                                                    asCell{dLineOffset,7}  = [atRoiComputed{bb}.min];
+                                                    asCell{dLineOffset,8}  = [atRoiComputed{bb}.max];
+                                                    asCell{dLineOffset,9}  = [atRoiComputed{bb}.median];
+                                                    asCell{dLineOffset,10}  = [atRoiComputed{bb}.std];
+                                                    asCell{dLineOffset,11} = [atRoiComputed{bb}.peak];
+    
+                                                    if ~isempty(atRoiComputed{bb}.MaxDistances)
+                                                        if atRoiComputed{bb}.MaxDistances.MaxXY.Length == 0
+                                                            asCell{dLineOffset, 12} = ('NaN');
+                                                        else
+                                                            asCell{dLineOffset, 12} = [atRoiComputed{bb}.MaxDistances.MaxXY.Length];
+                                                        end
+    
+                                                        if atRoiComputed{bb}.MaxDistances.MaxCY.Length == 0
+                                                            asCell{dLineOffset, 13} = ('NaN');
+                                                        else
+                                                            asCell{dLineOffset, 13} = [atRoiComputed{bb}.MaxDistances.MaxCY.Length];
+                                                        end
+                                                    else
+                                                        asCell{dLineOffset,12} = (' ');
+                                                        asCell{dLineOffset,13} = (' ');
+                                                    end
+    
+                                                    asCell{dLineOffset,14} = [atRoiComputed{bb}.area];
+                                                    asCell{dLineOffset,15} = (' ');
+    
+                                                    for tt=16:21
+                                                        asCell{dLineOffset,tt}  = (' ');
+                                                    end
+    
+                                                    dLineOffset = dLineOffset+1;
                                                 end
-
-                                                asCell{dLineOffset,14} = [atRoiComputed{bb}.area];
-                                                asCell{dLineOffset,15} = (' ');
-
-                                                for tt=16:21
-                                                    asCell{dLineOffset,tt}  = (' ');
-                                                end
-
-                                                dLineOffset = dLineOffset+1;
                                             end
                                         end
                                     end
@@ -1486,85 +1563,104 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
 
                                 break;
                            end
+
                         end
                     end
+                    
+                    if bExpendedDisplay == true
+    
+                        dNbRois = numel(atRoiInput);
+    
+                        for bb=1:dNbRois
+    
+                            if strcmp(atVoiRoiTag{rt}.Tag, atRoiInput{bb}.Tag)  % Found a ROI
+    
+                                if ~strcmpi(atRoiInput{bb}.ObjectType, 'voi')
+    
+                                    if dNbRois > 100
 
-                    dNbRois = numel(atRoiInput);
-
-                    for bb=1:dNbRois
-
-                        if strcmp(atVoiRoiTag{rt}.Tag, atRoiInput{bb}.Tag)  % Found a ROI
-
-                            if ~strcmpi(atRoiInput{bb}.ObjectType, 'voi')
-
-                                if dNbRois > 100
-                                    if mod(bb, 10)==1 || bb == dNbRois
-                                        progressBar( bb/dNbRois-0.0001, sprintf('Computing ROI %d/%d, please wait', bb, dNbRois) );
-                                    end
-                                end
-
-                                if isvalid(atRoiInput{bb}.Object)
-
-                                    tRoiComputed = ...
-                                        computeRoi(aInputBuffer, ...
-                                                   atInputMetaData, ...
-                                                   aDisplayBuffer, ...
-                                                   atMetaData, ...
-                                                   atRoiInput{bb}, ...
-                                                   dSUVScale, ...
-                                                   bModifiedMatrix, ...
-                                                   bSUVUnit, ...
-                                                   bSegmented, ...
-                                                   bDoseKernel, ...
-                                                   bMovementApplied);
-
-                                    sRoiName = atRoiInput{bb}.Label;
-
-                                    if strcmpi(atRoiInput{bb}.Axe, 'Axe')
-                                        sSliceNb = num2str(atRoiInput{bb}.SliceNb);
-                                    elseif strcmpi(atRoiInput{bb}.Axe, 'Axes1')
-                                        sSliceNb = ['C:' num2str(atRoiInput{bb}.SliceNb)];
-                                    elseif strcmpi(atRoiInput{bb}.Axe, 'Axes2')
-                                        sSliceNb = ['S:' num2str(atRoiInput{bb}.SliceNb)];
-                                    elseif strcmpi(atRoiInput{bb}.Axe, 'Axes3')
-                                        sSliceNb = ['A:' num2str(size(dicomBuffer('get', [], iOffset), 3)-atRoiInput{bb}.SliceNb+1)];
-                                    end
-
-                                    asCell{dLineOffset, 1}  = (sRoiName);
-                                    asCell{dLineOffset, 2}  = (sSliceNb);
-                                    asCell{dLineOffset, 3}  = [tRoiComputed.cells];
-                                    asCell{dLineOffset, 4}  = [tRoiComputed.total];
-                                    asCell{dLineOffset, 5}  = [tRoiComputed.sum];
-                                    asCell{dLineOffset, 6}  = [tRoiComputed.mean];
-                                    asCell{dLineOffset, 7}  = [tRoiComputed.min];
-                                    asCell{dLineOffset, 8}  = [tRoiComputed.max];
-                                    asCell{dLineOffset, 9}  = [tRoiComputed.median];
-                                    asCell{dLineOffset, 10} = [tRoiComputed.std];
-                                    asCell{dLineOffset, 11} = [tRoiComputed.peak];
-                                    if ~isempty(tRoiComputed.MaxDistances)
-                                        if tRoiComputed.MaxDistances.MaxXY.Length == 0
-                                            asCell{dLineOffset, 12} = ('NaN');
-                                        else
-                                            asCell{dLineOffset, 12} = [tRoiComputed.MaxDistances.MaxXY.Length];
+                                        if mod(bb, 10)==1 || bb == dNbRois
+                                            progressBar( bb/dNbRois-0.0001, sprintf('Computing ROI %d/%d, please wait', bb, dNbRois) );
                                         end
-
-                                        if tRoiComputed.MaxDistances.MaxCY.Length == 0
-                                            asCell{dLineOffset, 13} = ('NaN');
-                                        else
-                                            asCell{dLineOffset, 13} = [tRoiComputed.MaxDistances.MaxCY.Length];
+                                    end
+    
+                                    if isvalid(atRoiInput{bb}.Object)
+    
+                                        if strcmpi(atRoiInput{bb}.ObjectType, 'roi')
+                                            
+                                            if ~isfield(atRoiInput{bb}, 'MaxDistances')
+                                                
+                                                tMaxDistances = computeRoiFarthestPoint(aDisplayBuffer, atMetaData, atRoiInput{bb}, false, false);
+                                
+                                                atRoiInput{bb}.MaxDistances = tMaxDistances;        
+            
+                                                roiTemplate('set', dSeriesOffset, atRoiInput);
+                                            end 
+                                        end   
+    
+                                        tRoiComputed = ...
+                                            computeRoi(aInputBuffer, ...
+                                                       atInputMetaData, ...
+                                                       aDisplayBuffer, ...
+                                                       atMetaData, ...
+                                                       atRoiInput{bb}, ...
+                                                       dSUVScale, ...
+                                                       bModifiedMatrix, ...
+                                                       bSUVUnit, ...
+                                                       bSegmented, ...
+                                                       bDoseKernel, ...
+                                                       bMovementApplied);
+    
+                                        sRoiName = atRoiInput{bb}.Label;
+    
+                                        if strcmpi(atRoiInput{bb}.Axe, 'Axe')
+                                            sSliceNb = num2str(atRoiInput{bb}.SliceNb);
+                                        elseif strcmpi(atRoiInput{bb}.Axe, 'Axes1')
+                                            sSliceNb = ['C:' num2str(atRoiInput{bb}.SliceNb)];
+                                        elseif strcmpi(atRoiInput{bb}.Axe, 'Axes2')
+                                            sSliceNb = ['S:' num2str(atRoiInput{bb}.SliceNb)];
+                                        elseif strcmpi(atRoiInput{bb}.Axe, 'Axes3')
+                                            sSliceNb = ['A:' num2str(size(dicomBuffer('get', [], dSeriesOffset), 3)-atRoiInput{bb}.SliceNb+1)];
                                         end
-                                    else
-                                        asCell{dLineOffset, 12} = (' ');
-                                        asCell{dLineOffset, 13} = (' ');
-                                    end
-                                    asCell{dLineOffset, 14} = tRoiComputed.area;
-                                    asCell{dLineOffset, 15} = (' ');
+    
+                                        asCell{dLineOffset, 1}  = (sRoiName);
+                                        asCell{dLineOffset, 2}  = (sSliceNb);
+                                        asCell{dLineOffset, 3}  = [tRoiComputed.cells];
+                                        asCell{dLineOffset, 4}  = [tRoiComputed.total];
+                                        asCell{dLineOffset, 5}  = [tRoiComputed.sum];
+                                        asCell{dLineOffset, 6}  = [tRoiComputed.mean];
+                                        asCell{dLineOffset, 7}  = [tRoiComputed.min];
+                                        asCell{dLineOffset, 8}  = [tRoiComputed.max];
+                                        asCell{dLineOffset, 9}  = [tRoiComputed.median];
+                                        asCell{dLineOffset, 10} = [tRoiComputed.std];
+                                        asCell{dLineOffset, 11} = [tRoiComputed.peak];
 
-                                    for tt=16:21
-                                        asCell{dLineOffset,tt}  = (' ');
-                                    end
+                                        if ~isempty(tRoiComputed.MaxDistances)
 
-                                    dLineOffset = dLineOffset+1;
+                                            if tRoiComputed.MaxDistances.MaxXY.Length == 0
+                                                asCell{dLineOffset, 12} = ('NaN');
+                                            else
+                                                asCell{dLineOffset, 12} = [tRoiComputed.MaxDistances.MaxXY.Length];
+                                            end
+    
+                                            if tRoiComputed.MaxDistances.MaxCY.Length == 0
+                                                asCell{dLineOffset, 13} = ('NaN');
+                                            else
+                                                asCell{dLineOffset, 13} = [tRoiComputed.MaxDistances.MaxCY.Length];
+                                            end
+                                        else
+                                            asCell{dLineOffset, 12} = (' ');
+                                            asCell{dLineOffset, 13} = (' ');
+                                        end
+                                        asCell{dLineOffset, 14} = tRoiComputed.area;
+                                        asCell{dLineOffset, 15} = (' ');
+    
+                                        for tt=16:21
+                                            asCell{dLineOffset,tt}  = (' ');
+                                        end
+    
+                                        dLineOffset = dLineOffset+1;
+                                    end
                                 end
                             end
                         end

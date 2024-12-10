@@ -29,6 +29,12 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
 
     try
 
+    bMATLABReleaseOlderThan2023b = true;
+    if isMATLABReleaseOlderThan('R2023b')
+        
+        bMATLABReleaseOlderThan2023b = true;
+    end
+
     xSize = xSize+1;
     ySize = ySize+1;
 
@@ -50,13 +56,18 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
 
     if any(hfMask(:) ~= newMask(:))
 
-        if pixelEdge('get')
+        if pixelEdge('get') == true
 
-             % newMask = kron(newMask, ones(3));
-            newMask = imresize(newMask, 3, 'nearest');
+           if bMATLABReleaseOlderThan2023b == true 
+
+                newMask = imresize(newMask, 3, 'nearest');
+                [B,~,n,~] = bwboundaries(newMask, 4, 'noholes');
+           else
+                [B,~,n,~] = bwboundaries(newMask, 4, 'noholes','TraceStyle', 'pixeledge');
+           end
+        else
+            [B,~,n,~] = bwboundaries(newMask, 4, 'noholes');  
         end
-
-        [B,~,n,~] = bwboundaries(newMask, 4, 'noholes');
 
         clear hfMask;
         clear heMask;
@@ -97,9 +108,12 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
                 dSecondBoundaryOffset = getLargestboundary(B2);
 
                 if pixelEdge('get')
+                    
+                    if bMATLABReleaseOlderThan2023b == true
 
-                    B2{dSecondBoundaryOffset} = (B2{dSecondBoundaryOffset} + 1) / 3;
-                    B2{dSecondBoundaryOffset} = reducepoly(B2{dSecondBoundaryOffset});
+                        B2{dSecondBoundaryOffset} = (B2{dSecondBoundaryOffset} + 1) / 3;
+                        % B2{dSecondBoundaryOffset} = reducepoly(B2{dSecondBoundaryOffset});
+                    end
                 else
                     B2{dSecondBoundaryOffset} = smoothRoi(B2{dSecondBoundaryOffset}, [xSize, ySize]);
                 end
@@ -112,9 +126,17 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
                 dBoundaryOffset = 1;
             end
 
-            if pixelEdge('get')
-                B{dBoundaryOffset} = (B{dBoundaryOffset} + 1) / 3;
-                B{dBoundaryOffset} = reducepoly(B{dBoundaryOffset});
+            if pixelEdge('get') == true
+                
+                if bMATLABReleaseOlderThan2023b == true
+
+                    B{dBoundaryOffset} = (B{dBoundaryOffset} + 1) / 3;
+                    % B{dBoundaryOffset} = reducepoly(B{dBoundaryOffset});
+                else
+                    % boundaryMatrix = B{dBoundaryOffset};
+                    % boundaryMatrix(:, 1) = boundaryMatrix(:, 1) - 0.1;
+                    % B{dBoundaryOffset} = boundaryMatrix;    
+                end
             else
                 B{dBoundaryOffset} = smoothRoi(B{dBoundaryOffset}, [xSize, ySize]);
             end
@@ -181,8 +203,8 @@ function brushRoi2D(he, hf, xSize, ySize, dVoiOffset, sLesionType, dSerieOffset)
         
         addRoiMenu(pRoi);
 
-        addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
-        addlistener(pRoi, 'WaypointRemoved', @waypointEvents);  
+        % addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
+        % addlistener(pRoi, 'WaypointRemoved', @waypointEvents);  
 
         pRoi.InteractionsAllowed = 'none';
 

@@ -34,9 +34,8 @@ function movedRoiEvents(hObject, ~)
     if isempty(atRoi)
         return;
     end
-    
-    aTagOffset = strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {hObject.Tag} );
-    dTagOffset = find(aTagOffset, 1);          
+       
+    dTagOffset = find(strcmp( cellfun( @(atRoi) atRoi.Tag, atRoi, 'uni', false ), {hObject.Tag} ), 1);
 
     if ~isempty(dTagOffset)
            
@@ -77,23 +76,16 @@ function movedRoiEvents(hObject, ~)
                                     atRoi{dTagOffset}.RotationAngle = hObject.RotationAngle;
                                     atRoi{dTagOffset}.Vertices      = hObject.Vertices;
 
-                                    if ~isempty(atRoi{dTagOffset}.MaxDistances)
-                        
-                                        if isvalid(atRoi{dTagOffset}.MaxDistances.MaxXY.Line)
-                                            delete(atRoi{dTagOffset}.MaxDistances.MaxXY.Line);
-                                        end
-                                        
-                                        if isvalid(atRoi{dTagOffset}.MaxDistances.MaxCY.Line)
-                                            delete(atRoi{dTagOffset}.MaxDistances.MaxCY.Line);
-                                        end
-                                        
-                                        if isvalid(atRoi{dTagOffset}.MaxDistances.MaxXY.Text)
-                                            delete(atRoi{dTagOffset}.MaxDistances.MaxXY.Text);
-                                        end
-                                        
-                                        if isvalid(atRoi{dTagOffset}.MaxDistances.MaxCY.Text)
-                                            delete(atRoi{dTagOffset}.MaxDistances.MaxCY.Text);
-                                        end
+                                    if roiHasMaxDistances(atRoi{dTagOffset}) == true
+
+                                        maxDistances = atRoi{dTagOffset}.MaxDistances; % Cache field to reduce repeated lookup
+                                        objectsToDelete = [maxDistances.MaxXY.Line, ...
+                                                           maxDistances.MaxCY.Line, ...
+                                                           maxDistances.MaxXY.Text, ...
+                                                           maxDistances.MaxCY.Text];
+                            
+                                        % Delete only valid objects
+                                        delete(objectsToDelete(isvalid(objectsToDelete)));                                      
                                     end
 
                                     tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), atRoi{dTagOffset}, false, false);
@@ -126,10 +118,11 @@ function movedRoiEvents(hObject, ~)
 %                                    if aSemiAxesRatio(1) ~= 1 && ...
 %                                       aSemiAxesRatio(2) ~= 1  
                                    
-                                     if ~isempty(sVoiLable)
+                                    if ~isempty(sVoiLable)
+
                                         atRoi{dVoiRoiTagOffset}.Object.Label = sprintf('%s (roi %d/%d)', sVoiLable, rr, numel(pRoisTag));
                                         atRoi{dVoiRoiTagOffset}.Label = sprintf('%s (roi %d/%d)', sVoiLable, rr, numel(pRoisTag));
-                                     end
+                                    end
 
                                     atRoi{dVoiRoiTagOffset}.Object.SemiAxes      = atRoi{dVoiRoiTagOffset}.Object.SemiAxes ./ aSemiAxesRatio;
                                     atRoi{dVoiRoiTagOffset}.Object.RotationAngle = hObject.RotationAngle;
@@ -141,11 +134,12 @@ function movedRoiEvents(hObject, ~)
                                     
                                     atRoi{dVoiRoiTagOffset}.Vertices = atRoi{dVoiRoiTagOffset}.Object.Vertices;     
 
-                                    tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), atRoi{dVoiRoiTagOffset}, false, false);
-                                    atRoi{dVoiRoiTagOffset}.MaxDistances = tMaxDistances;                                       
-                                    
-                                end   
-                                                            
+                                    if roiHasMaxDistances(atRoi{dVoiRoiTagOffset}) == true
+
+                                        tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), atRoi{dVoiRoiTagOffset}, false, false);
+                                        atRoi{dVoiRoiTagOffset}.MaxDistances = tMaxDistances;                                       
+                                    end
+                                end                                 
                             end
                             
                             break;
@@ -159,40 +153,36 @@ function movedRoiEvents(hObject, ~)
                 atRoi{dTagOffset}.Vertices      = hObject.Vertices;
                                
              case lower('images.roi.rectangle')
+
                 atRoi{dTagOffset}.Vertices = hObject.Vertices;
                 
              case lower('images.roi.line')
+
                 dLength = computeRoiLineLength(hObject);
                 
-                atRoi{dTagOffset}.Label          = [num2str(dLength) ' mm'];
-                atRoi{dTagOffset}.Object.Label   = [num2str(dLength) ' mm'];
+                atRoi{dTagOffset}.Label        = [num2str(dLength) ' mm'];
+                atRoi{dTagOffset}.Object.Label = [num2str(dLength) ' mm'];
         end
 
-        if ~isempty(atRoi{dTagOffset}.MaxDistances)
-            
-            if isvalid(atRoi{dTagOffset}.MaxDistances.MaxXY.Line)
-                delete(atRoi{dTagOffset}.MaxDistances.MaxXY.Line);
-            end
-            
-            if isvalid(atRoi{dTagOffset}.MaxDistances.MaxCY.Line)
-                delete(atRoi{dTagOffset}.MaxDistances.MaxCY.Line);
-            end
-            
-            if isvalid(atRoi{dTagOffset}.MaxDistances.MaxXY.Text)
-                delete(atRoi{dTagOffset}.MaxDistances.MaxXY.Text);
-            end
-            
-            if isvalid(atRoi{dTagOffset}.MaxDistances.MaxCY.Text)
-                delete(atRoi{dTagOffset}.MaxDistances.MaxCY.Text);
-            end
-        end
+        if roiHasMaxDistances(atRoi{dTagOffset}) == true
+           
+            maxDistances = atRoi{dTagOffset}.MaxDistances; % Cache field to reduce repeated lookup
+            objectsToDelete = [maxDistances.MaxXY.Line, ...
+                               maxDistances.MaxCY.Line, ...
+                               maxDistances.MaxXY.Text, ...
+                               maxDistances.MaxCY.Text];
 
-        tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), atRoi{dTagOffset}, false, false);
-        atRoi{dTagOffset}.MaxDistances = tMaxDistances;
+            % Delete only valid objects
+            delete(objectsToDelete(isvalid(objectsToDelete)));
+
+            tMaxDistances = computeRoiFarthestPoint(dicomBuffer('get', [], dSeriesOffset), dicomMetaData('get', [], dSeriesOffset), atRoi{dTagOffset}, false, false);
+            atRoi{dTagOffset}.MaxDistances = tMaxDistances;
+        end
 
         roiTemplate('set', dSeriesOffset, atRoi);
 
         if viewFarthestDistances('get') == true
+
             refreshImages();
         end
 

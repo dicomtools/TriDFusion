@@ -178,11 +178,11 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
-    
+
     if isInterpolated('get') == false
-    
+
         isInterpolated('set', true);
-    
+
         setImageInterpolation(true);
     end
 
@@ -253,36 +253,35 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
 %                       metric               , ...
 %                       true                 , ...
 %                       false                );
-    BWCT = aCTImage;
 
-    BWCT(BWCT < dBoneMaskThreshold) = 0;
-    BWCT = imfill(BWCT, 4, 'holes');
+    BWCT = aCTImage >= dBoneMaskThreshold;   % Logical mask creation
+    BWCT = imfill(single(BWCT), 4, 'holes'); % Fill holes in the binary mask
 
 %     BWCT = aCTImage;
-% 
+%
 %     % Thresholding to create a binary mask
 %     BWCT = BWCT >= dBoneMaskThreshold;
-%     
+%
 %     % Perform morphological closing to smooth contours and fill small gaps
 %     se = strel('disk', 3); % Adjust the size as needed
 %     BWCT = imclose(BWCT, se);
-%     
+%
 %     % Fill holes in the binary image
 %     BWCT = imfill(BWCT, 'holes');
-%     
+%
 %     % Optional: Remove small objects that are not part of the bone
 %     BWCT = bwareaopen(BWCT, 100); % Adjust the size threshold as needed
-%     
+%
 %     % Perform another round of morphological closing if necessary
 %     BWCT = imclose(BWCT, se);
-%     
+%
 %     % Optional: Perform morphological opening to remove small spurious regions
 %     BWCT = imopen(BWCT, se);
 
     if ~isequal(size(BWCT), size(aResampledNMImage)) % Verify if both images are in the same field of view
 
         BWCT = resample3DImage(BWCT, atCTMetaData, aResampledNMImage, atResampledNMMetaData, 'Cubic');
-        
+
         BWCT = imbinarize(BWCT);
 
         if ~isequal(size(BWCT), size(aResampledNMImage)) % Verify if both images are in the same field of view
@@ -372,7 +371,7 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
 
     refreshImages();
 
-    plotRotatedRoiOnMip(axesMipPtr('get', [], dNMSerieOffset), dicomBuffer('get', [], dNMSerieOffset), mipAngle('get'));       
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dNMSerieOffset), dicomBuffer('get', [], dNMSerieOffset), mipAngle('get'));
 
     clear aNMImage;
     clear aCTImage;

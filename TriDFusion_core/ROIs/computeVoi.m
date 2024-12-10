@@ -1,5 +1,5 @@
-function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMetaData, imVoi, atVoiMetaData, ptrVoiInput, atRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied)
-%function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMetaData, imVoi, atVoiMetaData, ptrVoiInput, atRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied)
+function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMetaData, imVoi, atVoiMetaData, ptrVoiInput, atRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied, bExpendVoi)
+%function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMetaData, imVoi, atVoiMetaData, ptrVoiInput, atRoiInput, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied, bExpendVoi)
 %Compute VOI values from ROIs object.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -33,11 +33,11 @@ function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMet
     if bModifiedMatrix  == false && ... 
        bMovementApplied == false        % Can't use input buffer if movement have been applied
         imCDataVoi = imInput;
-        atMetaData = atInputMetaData;
+        % atMetaData = atInputMetaData;
         imMask = false(size(imInput));
     else
         imCDataVoi = imVoi;        
-        atMetaData = atVoiMetaData;
+        % atMetaData = atVoiMetaData;
         imMask = false(size(imVoi));
     end
     
@@ -52,12 +52,17 @@ function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMet
 
     for uu=1:numel(ptrVoiInput.RoisTag)
 
-        aTagOffset = strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[ptrVoiInput.RoisTag{uu}]} );
+        dTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {[ptrVoiInput.RoisTag{uu}]} ), 1);
 
-        tRoi = atRoiInput{find(aTagOffset, 1)};
+        if isempty(dTagOffset)
+            continue;
+        end
+    
+        tRoi = atRoiInput{dTagOffset};
         
         try
-            [atRoiComputed{uu}, imCMask{uu}] = computeRoi(imInput, atInputMetaData, imVoi, atVoiMetaData, tRoi, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);                                      
+            [atRoiComputed{uu}, imCMask{uu}] = ...
+                computeRoi(imInput, atInputMetaData, imVoi, atVoiMetaData, tRoi, dSUVScale, bSUVUnit, bModifiedMatrix, bSegmented, bDoseKernel, bMovementApplied);                                      
         catch
             tVoiComputed = [];
             atRoiComputed = [];
@@ -88,13 +93,16 @@ function [tVoiComputed, atRoiComputed, imCData] = computeVoi(imInput, atInputMet
             imMask(:, :) = imMask(:, :)| imCMask{uu};
 
             case 'axes1'
-            imMask(atRoiComputed{uu}.SliceNb, :, :) = imMask(atRoiComputed{uu}.SliceNb, :, :)|permuteBuffer(imCMask{uu}, 'coronal');
+            imMask(atRoiComputed{uu}.SliceNb, :, :) = ...
+                imMask(atRoiComputed{uu}.SliceNb, :, :)|permuteBuffer(imCMask{uu}, 'coronal');
             
             case 'axes2'
-            imMask(:, atRoiComputed{uu}.SliceNb, :) = imMask(:, atRoiComputed{uu}.SliceNb, :)|permuteBuffer(imCMask{uu}, 'sagittal');
+            imMask(:, atRoiComputed{uu}.SliceNb, :) = ...
+                imMask(:, atRoiComputed{uu}.SliceNb, :)|permuteBuffer(imCMask{uu}, 'sagittal');
             
             case 'axes3'
-            imMask(:, :, atRoiComputed{uu}.SliceNb) = imMask(:, :, atRoiComputed{uu}.SliceNb)|imCMask{uu};
+            imMask(:, :, atRoiComputed{uu}.SliceNb) = ...
+            imMask(:, :, atRoiComputed{uu}.SliceNb)|imCMask{uu};
         end 
 
         if bSegmented      == true && ...

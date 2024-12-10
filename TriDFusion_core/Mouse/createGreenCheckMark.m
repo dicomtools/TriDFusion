@@ -17,7 +17,7 @@ function createGreenCheckMark(pRoi, dDuration)
     axisDimension = min(axisWidth, axisHeight);
     
     % Define a scaling factor
-    scaleFactor = axisDimension / 512;  % 512 is the base axis size
+    scaleFactor = axisDimension / 512 / (8/pAxe.CameraViewAngle);  % 512 is the base axis size, 8 for the camera angle
     
     % Calculate the scaled checkmark size
     dCheckmarkLength = 12 * scaleFactor;
