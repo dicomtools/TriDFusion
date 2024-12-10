@@ -36,7 +36,7 @@ function init3DfusionBuffer()
 
     aInput = inputBuffer('get');
     
-    if ~verLessThan('matlab','9.13') && ...
+    if ~isMATLABReleaseOlderThan('R2022b') && ...
        viewerUIFigure('get') == true
 
         % A = dicomBuffer('get', [], dFuseOffset);

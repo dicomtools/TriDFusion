@@ -241,7 +241,7 @@ function voiObj = initVoiIsoSurface(uiWindow, bSmoothVoi)
                     end
 
 
-                    if verLessThan('matlab','9.13')
+                    if isMATLABReleaseOlderThan('R2022b')
                         voiObj{aa} = volshow(squeeze(aBuffer), aInputArguments{:});
                     else
                         voiObj{aa} = images.compatibility.volshow.R2022a.volshow(squeeze(aBuffer), aInputArguments{:});

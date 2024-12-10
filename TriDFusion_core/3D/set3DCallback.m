@@ -42,7 +42,7 @@ function set3DCallback(~, ~)
         drawnow;
 
         bLightingIsSupported = true;
-        if verLessThan('matlab','9.8')
+        if isMATLABReleaseOlderThan('R2020a')
             bLightingIsSupported = false;                    
         end
 

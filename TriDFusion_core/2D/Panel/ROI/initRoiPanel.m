@@ -865,9 +865,9 @@ function initRoiPanel()
                            );
 
         if numel(pRoi.Position) >2
-            
+
             if ~isempty(pRoi.Waypoints(:))
-                
+
                 pRoi.Waypoints(:) = false;
             end
 
@@ -876,7 +876,7 @@ function initRoiPanel()
             % Add ROI right click menu
 
             addRoi(pRoi, dSeriesOffset, atVoiInput{dVoiOffset}.LesionType);
-         
+
             addRoiMenu(pRoi);
 
             % addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
@@ -888,16 +888,16 @@ function initRoiPanel()
             end
 
             % voiDefaultMenu(pRoi);
-            % 
+            %
             % roiDefaultMenu(pRoi);
-            % 
+            %
             % uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
             % uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
-            % 
+            %
             % constraintMenu(pRoi);
-            % 
+            %
             % cropMenu(pRoi);
-            % 
+            %
             % uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics' , 'UserData', pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
             % Add ROI to VOI
@@ -990,7 +990,7 @@ function initRoiPanel()
             seletVoiRoiPanelCallback(hObject, dVoiOffset);
 
         end
-        
+
         catch
             progressBar(1, 'Error:previousVoiRoiPanelCallback()');
         end
@@ -1005,7 +1005,7 @@ function initRoiPanel()
         dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
         sCurrentPointer = get(fiMainWindowPtr('get'), 'Pointer');
-     
+
         try
 
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
@@ -1016,14 +1016,14 @@ function initRoiPanel()
         if ~isempty(atVoiInput)
 
             dNbVOIs = numel(atVoiInput);
-    
+
             dVoiOffset = get(uiDeleteVoiRoiPanel, 'Value')+1;
-    
+
             if dVoiOffset > dNbVOIs
 
                 dVoiOffset = 1;
             end
-    
+
             seletVoiRoiPanelCallback(hObject, dVoiOffset);
         end
 
@@ -1035,7 +1035,7 @@ function initRoiPanel()
         drawnow;
     end
 
-    function seletVoiRoiPanelCallback(hObject, dVoiOffset) 
+    function seletVoiRoiPanelCallback(hObject, dVoiOffset)
 
         % if get(uiDeleteVoiRoiPanel, 'Value') == dVoiOffset
         %     return;
@@ -1064,7 +1064,7 @@ function initRoiPanel()
             sLesionType = atVoiInput{dVoiOffset}.LesionType;
             [bLesionOffset, ~, ~] = getLesionType(sLesionType);
             set(uiLesionTypeVoiRoiPanel, 'Value', bLesionOffset);
-            
+
             if isa(hObject, 'matlab.ui.control.UIControl')
 
                 sRoiTag = getLargestArea(atVoiInput{dVoiOffset}.RoisTag);
@@ -1073,20 +1073,20 @@ function initRoiPanel()
                 triangulateRoi(sRoiTag);
 
                 if is2DBrush('get') == false
-    
+
     %                 bViewAxeBorder = false;
                     sBorderType= 'none';
                     if dVoiOffset == 1 && dNbVOIs > 1
     %                     bViewAxeBorder = true;
                         sBorderType= 'line';
                     end
-    
+
                     if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
-    
+
                         set(uiOneWindowPtr('get'), 'HighlightColor', [0 1 0]);
     %                     set(uiOneWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
                         set(uiOneWindowPtr('get'), 'BorderType', sBorderType);
-    
+
                     else
                         set(uiTraWindowPtr('get'), 'HighlightColor', [0 1 0]);
     %                     set(uiTraWindowPtr('get'), 'BorderWidth'   , bViewAxeBorder);
@@ -1110,10 +1110,10 @@ function initRoiPanel()
                             set(uiTraWindowPtr('get'), 'BorderType', 'line');
                         end
                     end
-    
+
                 end
             else
-                
+
                 createGreenCheckMark(hObject, 0.5);
             end
 
@@ -1213,21 +1213,21 @@ function initRoiPanel()
                      % Delete farthest distance objects
 
                     if roiHasMaxDistances(atRoiInput{aRoisTagOffset(rr)}) == true
-        
+
                         maxDistances = atRoiInput{aRoisTagOffset(rr)}.MaxDistances; % Cache the field to avoid repeated lookups
-        
+
                         objectsToDelete = [maxDistances.MaxXY.Line, ...
                                            maxDistances.MaxCY.Line, ...
                                            maxDistances.MaxXY.Text, ...
                                            maxDistances.MaxCY.Text];
                         % Delete only valid objects
-                        delete(objectsToDelete(isvalid(objectsToDelete)));     
-                     
-                        atRoiInput{aRoisTagOffset(rr)} = rmfield(atRoiInput{aRoisTagOffset(rr)}, 'MaxDistances');                                                       
+                        delete(objectsToDelete(isvalid(objectsToDelete)));
+
+                        atRoiInput{aRoisTagOffset(rr)} = rmfield(atRoiInput{aRoisTagOffset(rr)}, 'MaxDistances');
                     end
-        
+
                     if isvalid(atRoiInput{aRoisTagOffset(rr)}.Object)
-        
+
                         delete(atRoiInput{aRoisTagOffset(rr)}.Object)
                     end
 
@@ -1247,7 +1247,7 @@ function initRoiPanel()
 
                 dVoiOffset = 1;
 
-                if dNbVOIs ~= 0 
+                if dNbVOIs ~= 0
 
 %                    if is2DBrush('get') == false
 
@@ -1270,10 +1270,10 @@ function initRoiPanel()
             else
                 if showBorder('get') == false
                     if ~strcmpi(get(uiTraWindowPtr('get'), 'BorderType'), 'none')
-                    
-                        set(uiTraWindowPtr('get'), 'BorderType', 'none');          
+
+                        set(uiTraWindowPtr('get'), 'BorderType', 'none');
                     end
-                end         
+                end
             end
 
             set(uiDeleteVoiRoiPanel, 'Value', dVoiOffset);
@@ -1654,7 +1654,7 @@ function initRoiPanel()
 
         ptrViewer3d = [];
 
-        if ~verLessThan('matlab','9.13')
+        if ~isMATLABReleaseOlderThan('R2022b')
 
             if viewerUIFigure('get') == true
 
@@ -1710,7 +1710,7 @@ function initRoiPanel()
 
             aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
 
-            if verLessThan('matlab','9.13')
+            if isMATLABReleaseOlderThan('R2022b')
 
                 gp3DObject = volshow(squeeze(aBuffer),  aInputArguments{:});
             else
@@ -1736,7 +1736,7 @@ function initRoiPanel()
             aInputArguments = {'Parent', ui3DWindow, 'Renderer', 'Isosurface', 'Isovalue', uiSlider3Dsensibility.Value, 'IsosurfaceColor', 'Red', 'BackgroundColor', 'white', 'ScaleFactors', aScaleFactor};
 
 
-            if verLessThan('matlab','9.13')
+            if isMATLABReleaseOlderThan('R2022b')
 
                 gpIsoObject = volshow(squeeze(aBuffer),  aInputArguments{:});
             else
@@ -3289,7 +3289,7 @@ function initRoiPanel()
 
                                 pRoi.Label = sLabel;
                             end
-                            
+
                             if ~isempty(pRoi.Waypoints(:))
 
                                 pRoi.Waypoints(:) = false;
@@ -3298,21 +3298,21 @@ function initRoiPanel()
                             addRoi(pRoi, dSeriesOffset, 'Unspecified');
 
                             addRoiMenu(pRoi);
-                
+
                             % addlistener(pRoi, 'WaypointAdded'  , @waypointEvents);
                             % addlistener(pRoi, 'WaypointRemoved', @waypointEvents);
 
 %                             roiDefaultMenu(pRoi);
-% 
+%
 %                             uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
 %                             uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
-% 
+%
 %                             constraintMenu(pRoi);
-% 
+%
 %                             cropMenu(pRoi);
-% 
+%
 % %                             voiDefaultMenu(pRoi);
-% 
+%
 %                             uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
 %                             asTag{numel(asTag)+1} = sTag;
@@ -3492,7 +3492,7 @@ function initRoiPanel()
 
                     % if bMultipleObjects == false
                     %     if mod(aa, 10)==1 || aa == aBufferSize
-                    % 
+                    %
                     %         progressBar( aa/aBufferSize-0.0001, sprintf('Computing slice %d/%d, please wait', aa, aBufferSize) );
                     %     end
                     % end
@@ -3509,36 +3509,36 @@ function initRoiPanel()
                         if bHoles
                             boundaryType = 'holes';
                         end
-                        
+
                         % Extract original boundaries (before resizing)
 
                         [originalMaskAxial, ~, ~, ~] = bwboundaries(aAxial, 8, boundaryType);
-                        
+
                         % Resize image once if `bPixelEdge` is true
 
                         if bPixelEdge
 
                             aAxial = imresize(aAxial, PIXEL_EDGE_RATIO, 'nearest'); % Avoid pixel center adjustment
                         end
-                        
+
                         % Extract boundaries after optional resizing
 
                         [maskAxial, ~, ~, ~] = bwboundaries(aAxial, 8, boundaryType);
-                        
+
                         if ~isempty(maskAxial)
 
                             if bPixelEdge == true
-                                
+
                                 scaleFactor = 1 / PIXEL_EDGE_RATIO; % Precompute scale factor
 
                                 for ii = 1:numel(maskAxial)
-                                    
+
                                     maskAxial{ii} = reducepoly((maskAxial{ii} + 1) * scaleFactor);
                                 end
                             end
-                        
+
                             % Delete small elements after all processing
-                            
+
                             maskAxial = deleteSmallElements(originalMaskAxial, maskAxial, dSmalestRoiSize);
                         end
 
@@ -3602,16 +3602,16 @@ function initRoiPanel()
                                     % addlistener(pRoi, 'WaypointRemoved', @waypointEvents);
 
                                     % voiDefaultMenu(pRoi);
-                                    % 
+                                    %
                                     % roiDefaultMenu(pRoi);
-                                    % 
+                                    %
                                     % uimenu(pRoi.UIContextMenu,'Label', 'Hide/View Face Alpha', 'UserData', pRoi, 'Callback', @hideViewFaceAlhaCallback);
                                     % uimenu(pRoi.UIContextMenu,'Label', 'Clear Waypoints'     , 'UserData', pRoi, 'Callback', @clearWaypointsCallback);
-                                    % 
+                                    %
                                     % constraintMenu(pRoi);
-                                    % 
+                                    %
                                     % cropMenu(pRoi);
-                                    % 
+                                    %
                                     % uimenu(pRoi.UIContextMenu,'Label', 'Display Statistics' , 'UserData',pRoi, 'Callback',@figRoiDialogCallback, 'Separator', 'on');
 
 %                                     asTag{numel(asTag)+1} = sTag;

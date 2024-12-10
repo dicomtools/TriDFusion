@@ -194,7 +194,7 @@ function init3DuicontrolPanel()
      ui3DBackgroundPtr('set', ui3DBackground);
 
      bGradiantEnable = false;
-     if ~verLessThan('matlab','9.13')
+     if ~isMATLABReleaseOlderThan('R2022b')
 
         if viewerUIFigure('get') == true
             bGradiantEnable = true;
@@ -314,7 +314,7 @@ function init3DuicontrolPanel()
     % Volume Lighting
 
     bLightingIsSupported = true;
-    if verLessThan('matlab','9.8')
+    if isMATLABReleaseOlderThan('R2020a')
         bLightingIsSupported = false;
     end
 
@@ -357,7 +357,7 @@ function init3DuicontrolPanel()
      % Volume Colormap
 
     bVolColormapEnable = true;
-    if ~verLessThan('matlab','9.13')
+    if ~isMATLABReleaseOlderThan('R2022b')
 
         if viewerUIFigure('get') == true
             bVolColormapEnable = false;
@@ -887,7 +887,7 @@ function init3DuicontrolPanel()
     % MIP Colormap
 
     bMipColormapEnable = true;
-    if ~verLessThan('matlab','9.13')
+    if ~isMATLABReleaseOlderThan('R2022b')
 
         if viewerUIFigure('get') == true
             bMipColormapEnable = false;

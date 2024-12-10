@@ -199,7 +199,7 @@ function setOptionsCallback(~, ~)
                   );
 
      bVoiViewer3d = false;
-     if ~verLessThan('matlab','9.13')
+     if ~isMATLABReleaseOlderThan('R2022b')
 
         if viewerUIFigure('get') == true
             bVoiViewer3d = true;

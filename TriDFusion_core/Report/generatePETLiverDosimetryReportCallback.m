@@ -1827,7 +1827,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 
         ptrViewer3d = [];
 
-        if ~verLessThan('matlab','9.13')
+        if ~isMATLABReleaseOlderThan('R2022b')
 
             if viewerUIFigure('get') == true
 
@@ -1887,7 +1887,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 
             aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
 
-            if verLessThan('matlab','9.13')
+            if isMATLABReleaseOlderThan('R2022b')
 
                 pObject = volshow(squeeze(aCTBuffer),  aInputArguments{:});
             else
@@ -1992,7 +1992,7 @@ function generatePETLiverDosimetryReportCallback(~, ~)
 
                 aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
 
-                if verLessThan('matlab','9.13')
+                if isMATLABReleaseOlderThan('R2022b')
 
                     gp3DObject{1} = volshow(squeeze(aMask), aInputArguments{:});
 

@@ -480,8 +480,8 @@ function setMIPCallback(~, ~)
 %                if (strcmpi(atMetaData{1}.Modality, 'nm') || ...
 %                    strcmpi(atMetaData{1}.Modality, 'pt')) 
 %                else        
-                if  colorMapOffset('get') == 10 % Gray
-                    colorMapMipOffset('set', 11); % Invert Linear
+                if  colorMapOffset('get') == 9 % Gray
+                    colorMapMipOffset('set', 10); % Invert Linear
                 else
                     colorMapMipOffset('set', colorMapOffset('get')); % Set 3D Mip from 2D
                 end

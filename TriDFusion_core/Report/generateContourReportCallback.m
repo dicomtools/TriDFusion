@@ -4948,7 +4948,7 @@ function generateContourReportCallback(~, ~)
 
         ptrViewer3d = [];
 
-        if ~verLessThan('matlab','9.13')
+        if ~isMATLABReleaseOlderThan('R2022b')
 
             if viewerUIFigure('get') == true
 
@@ -5004,7 +5004,7 @@ function generateContourReportCallback(~, ~)
 
             aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
 
-            if verLessThan('matlab','9.13')
+            if isMATLABReleaseOlderThan('R2022b')
 
                 gp3DObject = volshow(squeeze(aBuffer),  aInputArguments{:});
             else
@@ -5057,7 +5057,7 @@ function generateContourReportCallback(~, ~)
 
             aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
 
-            if verLessThan('matlab','9.13')
+            if isMATLABReleaseOlderThan('R2022b')
 
                 gp3DContours = volshow(squeeze(glVoiAllContoursMask),  aInputArguments{:});
             else
@@ -5102,7 +5102,7 @@ function generateContourReportCallback(~, ~)
 
                 aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
 
-                if verLessThan('matlab','9.13')
+                if isMATLABReleaseOlderThan('R2022b')
 
                     gp3DLine = volshow(squeeze(aLineBuffer),  aInputArguments{:});
                 else

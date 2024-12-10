@@ -3846,7 +3846,7 @@ function generate3DLungLobeReport(bInitReport)
 
         ptrViewer3d = [];
 
-        if ~verLessThan('matlab','9.13')
+        if ~isMATLABReleaseOlderThan('R2022b')
 
             if viewerUIFigure('get') == true
 
@@ -3904,7 +3904,7 @@ function generate3DLungLobeReport(bInitReport)
 
 %            aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
 
-%            if verLessThan('matlab','9.13')
+%            if isMATLABReleaseOlderThan('R2022b')
 %                pObject = volshow(squeeze(aCTBuffer),  aInputArguments{:});
 %            else
 %                pObject = images.compatibility.volshow.R2022a.volshow(squeeze(aCTBuffer), aInputArguments{:});
@@ -3921,7 +3921,7 @@ function generate3DLungLobeReport(bInitReport)
 
             aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
 
-            if verLessThan('matlab','9.13')
+            if isMATLABReleaseOlderThan('R2022b')
 
                 pObject = volshow(squeeze(aCTBuffer),  aInputArguments{:});
             else
@@ -4023,7 +4023,7 @@ function generate3DLungLobeReport(bInitReport)
 
                 aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
 
-                if verLessThan('matlab','9.13')
+                if isMATLABReleaseOlderThan('R2022b')
 
                     gp3DObject{1} = volshow(squeeze(aMask), aInputArguments{:});
 

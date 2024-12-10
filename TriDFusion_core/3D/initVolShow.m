@@ -272,7 +272,7 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
 
             viewer3dObject('set', []);
 
-            if ~verLessThan('matlab','9.13')
+            if ~isMATLABReleaseOlderThan('R2022b')
 
                 if viewerUIFigure('get') == true
 
@@ -363,7 +363,7 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
                 if isempty(viewer3dObject('get'))
 
                     bLightingIsSupported = true;
-                    if verLessThan('matlab','9.8')
+                    if isMATLABReleaseOlderThan('R2020a')
 
                         bLightingIsSupported = false;                    
                     end
@@ -376,7 +376,7 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
                         aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
                     end
 
-                    if verLessThan('matlab','9.13')
+                    if isMATLABReleaseOlderThan('R2022b')
                         pObject = volshow(squeeze(im), aInputArguments{:});
                     else
                          pObject = images.compatibility.volshow.R2022a.volshow(squeeze(im), aInputArguments{:});                   
@@ -425,7 +425,7 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
 
                     aInputArguments = [aInputArguments(:)', {'Isovalue'}, {aIsovalue}, {'IsosurfaceColor'}, {aIsosurfaceColor}];
 
-                    if verLessThan('matlab','9.13')
+                    if isMATLABReleaseOlderThan('R2022b')
     
                         pObject = volshow(squeeze(im), aInputArguments{:});
                     else
@@ -463,7 +463,7 @@ function pObject = initVolShow(im, uiWindow, sRenderer, atMetaData)
 
                     aInputArguments = [aInputArguments(:)', {'Alphamap'}, {aAlphamap}, {'Colormap'}, {aColormap}];
     
-                    if verLessThan('matlab','9.13')
+                    if isMATLABReleaseOlderThan('R2022b')
     
                         pObject = volshow(squeeze(im), aInputArguments{:});
                     else
