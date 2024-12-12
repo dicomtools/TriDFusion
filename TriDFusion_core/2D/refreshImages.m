@@ -421,8 +421,8 @@ function refreshImages(clickedPtX, clickedPtY)
 
             if isFusion('get') == true
 
-                set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-                drawnow;
+                % set(fiMainWindowPtr('get'), 'Pointer', 'watch');
+                % drawnow;
 
                 if isCombineMultipleFusion('get') == true
 
@@ -1706,5 +1706,5 @@ function refreshImages(clickedPtX, clickedPtY)
 
     % plotRotatedRoiOnMip(axesMipPtr('get', [], dSeriesOffset), im, iMipAngle);
      % drawnow nocallbacks;
-    drawnow limitrate nocallbacks;
+    % drawnow limitrate nocallbacks;
 end

@@ -57,7 +57,7 @@ function TriDFusion(varargin)
 
     initViewerGlobal();
     
-    % Set view defbault color
+    % Set view default color
 
     viewerAxesColor      ('set', [0.149 0.149 0.149]);
     viewerBackgroundColor('set', [0.16 0.18 0.20]);

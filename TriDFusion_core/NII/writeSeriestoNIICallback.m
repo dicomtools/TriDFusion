@@ -125,7 +125,7 @@ function writeSeriestoNIICallback(~, ~)
 %     atDcmDicomMeta{1}.ImageOrientationPatient = atMetaData{1}.ImageOrientationPatient;
     atDcmDicomMeta{1}.ImageOrientationPatient = aImageOrientationPatient;
 %     atDcmDicomMeta{1}.MediaStorageSOPClassUID     = atMetaData{1}.MediaStorageSOPClassUID;
-%     atDcmDicomMeta{1}.MediaStorageSOPInstanceUID  = atMetaData{1}.MediaStorageSOPInstanceUID;      
+%     atDcmDicomMeta{1}.MediaStorageSOPInstanceUID  = atMetaData{1}.MediaStorageSOPInstanceUID;
     atDcmDicomMeta{1}.SOPClassUID             = atMetaData{1}.SOPClassUID;
     atDcmDicomMeta{1}.SOPInstanceUID          = atMetaData{1}.SOPInstanceUID;
     atDcmDicomMeta{1}.SeriesInstanceUID       = dicomuid;
@@ -157,7 +157,7 @@ function writeSeriestoNIICallback(~, ~)
 %         aBuffer = aBuffer(end:-1:1,:,:);
 %     end
 
-    writeOtherFormatToDICOM(aBuffer, atDcmDicomMeta, sTmpDir, dSeriesOffset, false);
+    writeOtherFormatToDICOM(aBuffer, atDcmDicomMeta, sTmpDir, false);
 
     clear aBuffer;
 

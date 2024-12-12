@@ -33,10 +33,10 @@ function writeDICOMCallback(~, ~)
     if dSeriesOffset > numel(atInputTemplate)
         return;
     end
-    
+
     sWriteDir = outputDir('get');
     if isempty(sWriteDir)
-        
+
         sCurrentDir  = viewerRootPath('get');
 
         sMatFile = [sCurrentDir '/' 'exportDicomLastUsedDir.mat'];
@@ -58,12 +58,12 @@ function writeDICOMCallback(~, ~)
         end
         sOutDir = [sOutDir '/'];
 
-        sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));                
-        sWriteDir = char(sOutDir) + "TriDFusion_DCM_" + char(sDate) + '/';              
+        sDate = sprintf('%s', datetime('now','Format','MMMM-d-y-hhmmss'));
+        sWriteDir = char(sOutDir) + "TriDFusion_DCM_" + char(sDate) + '/';
         if ~(exist(char(sWriteDir), 'dir'))
             mkdir(char(sWriteDir));
         end
-        
+
         try
             exportDicomLastUsedDir = sOutDir;
             save(sMatFile, 'exportDicomLastUsedDir');
@@ -78,33 +78,33 @@ function writeDICOMCallback(~, ~)
 
     %        javaFrame = get(h, 'JavaFrame');
     %        javaFrame.setFigureIcon(javax.swing.ImageIcon(sLogo));
-        end        
+        end
     end
-    
+
     atMetaData = dicomMetaData('get', [], dSeriesOffset);
     if isempty(atMetaData)
         atMetaData = atInputTemplate(dSeriesOffset).atDicomInfo;
-    end    
-    
+    end
+
     % Set series label
-    
+
     sSeriesDescription = getViewerSeriesDescriptionDialog(sprintf('%s', atMetaData{1}.SeriesDescription));
     if isempty(sSeriesDescription)
         return;
     end
-    
+
     for sd=1:numel(atMetaData)
         atMetaData{sd}.SeriesDescription = sSeriesDescription;
     end
-    
+
     % Set series buffer
-    
+
     aBuffer = dicomBuffer('get', [], dSeriesOffset);
     if isempty(aBuffer)
-        
-        aInput  = inputBuffer('get');      
+
+        aInput  = inputBuffer('get');
         aBuffer = aInput{dSeriesOffset};
-        
+
 %        if strcmp(imageOrientation('get'), 'coronal')
 %            aBuffer = permute(aBuffer, [3 2 1]);
 %        elseif strcmp(imageOrientation('get'), 'sagittal')
@@ -125,9 +125,9 @@ function writeDICOMCallback(~, ~)
 %            aBuffer=aBuffer(:,:,end:-1:1);
 %        end
     end
-    
+
     % Write DICOM
-    
+
     bInputIsDicom = false;
 
     try
@@ -141,8 +141,8 @@ function writeDICOMCallback(~, ~)
 
     if bInputIsDicom == true % Input series is dicom
         writeDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, true);
-    else % Input series is another format 
-        writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, true);
+    else % Input series is another format
+        writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, true);
     end
 
 end

@@ -29,7 +29,8 @@ function maskContourFromVoiMenuCallback(hObject, ~)
 
     dSeriesOffset = get(uiSeriesPtr('get'), 'Value');
 
-    imBuffer = dicomBuffer('get', [], dSeriesOffset);  
+    imBuffer = dicomBuffer('get', [], dSeriesOffset); 
+
     if isempty(imBuffer)   
 
         return;
@@ -40,7 +41,9 @@ function maskContourFromVoiMenuCallback(hObject, ~)
     atRoiTemplate = roiTemplate('get', dSeriesOffset);
     atVoiTemplate = voiTemplate('get', dSeriesOffset);
 
-    if ~isempty(atRoiTemplate)        
+    imMask = false(size(imBuffer));
+
+    if ~isempty(atVoiTemplate)        
 
         dVoiTagOffset = find(cellfun(@(c) any(strcmp(c.RoisTag, hObject.UserData.Tag)), atVoiTemplate), 1);
         
@@ -54,59 +57,65 @@ function maskContourFromVoiMenuCallback(hObject, ~)
            
                 if ~isempty(dRoiTagOffset)
                     
-                    switch lower(atRoiTemplate{dRoiTagOffset}.Axe)
+                    sAxe = atRoiTemplate{dRoiTagOffset}.Axe;
+                    dSliceNumber = atRoiTemplate{dRoiTagOffset}.SliceNb;
+
+                    switch lower(sAxe)
                         
                         case 'axe'
-                        aMask = createMask(atRoiTemplate{dRoiTagOffset}.Object, imBuffer(:,:));
 
-                        case 'axes1'
-                 %       aMask = createMask(atRoiTemplate{dRoiTagOffset}.Object, permute(imBuffer(atRoiTemplate{dRoiTagOffset}.SliceNb,:,:), [3 2 1]));
-                        aMask = roiTemplateToMask(atRoiTemplate{dRoiTagOffset}, permute(imBuffer(atRoiTemplate{dRoiTagOffset}.SliceNb,:,:), [3 2 1]));
-                        
-                        case 'axes2'
-                 %       aMask = createMask(atRoiTemplate{dRoiTagOffset}.Object, permute(imBuffer(:,atRoiTemplate{dRoiTagOffset}.SliceNb,:), [3 1 2]));
-                        aMask = roiTemplateToMask(atRoiTemplate{dRoiTagOffset}, permute(imBuffer(:,atRoiTemplate{dRoiTagOffset}.SliceNb,:), [3 1 2]));
+                        aMask = roiTemplateToMask(atRoiTemplate{dRoiTagOffset}.Object, imBuffer(:,:));
+
+                        imMask(:,:) = imMask(:,:) | aMask;
+
+                       case 'axes1'
+
+                        aMask = roiTemplateToMask(atRoiTemplate{dRoiTagOffset}, permute(imBuffer(dSliceNumber,:,:), [3 2 1]));
+
+                        imMask(dSliceNumber,:,:) = imMask(dSliceNumber,:,:) | permute(aMask, [3 2 1]);
+                     
+                        case 'axes2'     
+
+                        aMask = roiTemplateToMask(atRoiTemplate{dRoiTagOffset}, permute(imBuffer(:,dSliceNumber,:), [3 1 2]));
+
+                        imMask(:,dSliceNumber,:) = imMask(:,dSliceNumber,:) | permute(aMask, [2 3 1]);
+
 
                         case 'axes3'
-                  %      aMask = createMask(atRoiTemplate{dRoiTagOffset}.Object, imBuffer(:,:,atRoiTemplate{dRoiTagOffset}.SliceNb));
-                        aMask = roiTemplateToMask(atRoiTemplate{dRoiTagOffset}, imBuffer(:,:,atRoiTemplate{dRoiTagOffset}.SliceNb));
-                        
-                    end
-                       
-                    if strcmpi(sMaskType, 'Inside This Contour')
 
-                        
-                       imBuffer = cropInside(aMask, ...
-                                              imBuffer, ...
-                                              atRoiTemplate{dRoiTagOffset}.SliceNb, ...
-                                              atRoiTemplate{dRoiTagOffset}.Axe ...
-                                              );    
-                    end
+                        aMask = roiTemplateToMask(atRoiTemplate{dRoiTagOffset}, imBuffer(:,:,dSliceNumber));
+                            
+                        imMask(:,:,dSliceNumber) = imMask(:,:,dSliceNumber) | aMask;
 
-                    if strcmpi(sMaskType, 'Outside This Contour')
-                                                
-                        imBuffer = cropOutside(aMask, ...
-                                               imBuffer, ...
-                                               atRoiTemplate{dRoiTagOffset}.SliceNb, ...
-                                               atRoiTemplate{dRoiTagOffset}.Axe ...
-                                               );    
-                    end                                                        
+                    end
                 end
+            end
+        
+            if any(imMask(:))
+
+                if strcmpi(sMaskType, 'Inside This Contour')
+        
+                    imBuffer(imMask) = cropValue('get');
+
+                else % 'Outside This Contour'
+                    imMask = ~imMask;
+                    imBuffer(imMask) = cropValue('get');                                           
+                end                                                        
+                
+                modifiedMatrixValueMenuOption('set', true);
+        
+                dicomBuffer('set', imBuffer, dSeriesOffset); 
+        
+                setQuantification(dSeriesOffset);
+        
+                refreshImages();
             end
 
         end
-        
-        modifiedMatrixValueMenuOption('set', true);
+    end 
+    
+    clear imMask;
+    clear imBuffer;
 
-        dicomBuffer('set', imBuffer); 
-
-        setQuantification(dSeriesOffset);
-
-        refreshImages();
-
-        clear imBuffer;
-%        progressBar(1, 'Ready');
-
-    end               
 end
    

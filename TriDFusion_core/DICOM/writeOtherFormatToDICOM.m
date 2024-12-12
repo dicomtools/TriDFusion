@@ -1,5 +1,5 @@
-function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale)            
-%function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, bRescale) 
+function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, bRescale)            
+%function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, bRescale) 
 %Write a DICOM Series.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -27,11 +27,6 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, 
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>. 
 
-    atInputTemplate = inputTemplate('get');
-    if dSeriesOffset > numel(atInputTemplate)  
-        return;
-    end      
-    
     try
                 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
@@ -142,7 +137,7 @@ function writeOtherFormatToDICOM(aBuffer, atMetaData, sWriteDir, dSeriesOffset, 
 
     for ww=1:dWriteEndLoop
 
-        if mod(ww,5)==1 || ww == dWriteEndLoop       
+        if mod(ww,10)==1 || ww == dWriteEndLoop       
             progressBar(ww / dWriteEndLoop, ...
                 sprintf('Processing header %d/%d, please wait', ww, dWriteEndLoop));
         end

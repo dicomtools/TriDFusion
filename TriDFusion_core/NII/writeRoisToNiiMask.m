@@ -281,13 +281,13 @@ function writeRoisToNiiMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomB
         atNiiDicomMeta{1}.ImagePositionPatient    = atDicomMeta{end}.ImagePositionPatient;
         atNiiDicomMeta{1}.ImageOrientationPatient = atDicomMeta{1}.ImageOrientationPatient;
 %         atNiiDicomMeta{1}.MediaStorageSOPClassUID     = atDicomMeta{1}.MediaStorageSOPClassUID;
-%         atNiiDicomMeta{1}.MediaStorageSOPInstanceUID  = atDicomMeta{1}.MediaStorageSOPInstanceUID;            
+%         atNiiDicomMeta{1}.MediaStorageSOPInstanceUID  = atDicomMeta{1}.MediaStorageSOPInstanceUID;
         atNiiDicomMeta{1}.StudyInstanceUID        = atDicomMeta{1}.StudyInstanceUID;
-        atNiiDicomMeta{1}.AccessionNumber         = atDicomMeta{1}.AccessionNumber;        
+        atNiiDicomMeta{1}.AccessionNumber         = atDicomMeta{1}.AccessionNumber;
         % atNiiDicomMeta{1}.SOPClassUID             = '1.2.840.10008.5.1.4.1.1.20';
         % atNiiDicomMeta{1}.SOPInstanceUID          = '1.2.752.37.54.2572.122881719510441496582642976905549489909';
         atNiiDicomMeta{1}.SOPClassUID             = atDicomMeta{1}.SOPClassUID;
-        atNiiDicomMeta{1}.SOPInstanceUID          = atDicomMeta{1}.SOPInstanceUID;        
+        atNiiDicomMeta{1}.SOPInstanceUID          = atDicomMeta{1}.SOPInstanceUID;
         atNiiDicomMeta{1}.SeriesInstanceUID       = dicomuid;
         atNiiDicomMeta{1}.StudyInstanceUID        = atDicomMeta{1}.StudyInstanceUID;
         atNiiDicomMeta{1}.AccessionNumber         = atDicomMeta{1}.AccessionNumber;
@@ -302,7 +302,7 @@ function writeRoisToNiiMask(sOutDir, bSubDir, aInputBuffer, atInputMeta, aDicomB
 %    if bInputIsDicom == true % Input series is dicom
 %        writeDICOM(aMaskBuffer, atDicomMeta, sDICOMPath, dOffset, false);
 %    else % Input series is another format
-        writeOtherFormatToDICOM(aMaskBuffer, atNiiDicomMeta, sDICOMPath, dOffset, false);
+        writeOtherFormatToDICOM(aMaskBuffer, atNiiDicomMeta, sDICOMPath, false);
 %    end
 
 %     [sFilePath, ~, ~] = fileparts(char(atInputTemplate(dSeriesOffset).asFilesList{1}));
