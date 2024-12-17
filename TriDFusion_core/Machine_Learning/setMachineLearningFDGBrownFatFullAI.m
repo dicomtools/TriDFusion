@@ -130,7 +130,11 @@ function setMachineLearningFDGBrownFatFullAI(sPredictScript, sDatasetId, bProces
 
     aPTImageTemp = aPTImage;
     aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
-    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
+
+    if any(aLogicalMask(:) ~= 0)
+
+      aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
+    end
 
     resetSeries(dPTSerieOffset, true);
 
@@ -206,11 +210,11 @@ function setMachineLearningFDGBrownFatFullAI(sPredictScript, sDatasetId, bProces
     sNrrdCTFullFileName = '';
 
     if bProcessCt == true
-        
+
         if isInterpolated('get') == false
-        
+
             isInterpolated('set', true);
-        
+
             setImageInterpolation(true);
         end
 
@@ -290,14 +294,14 @@ function setMachineLearningFDGBrownFatFullAI(sPredictScript, sDatasetId, bProces
                 if ~isempty(aCTImage)
 
 
-                    progressBar(5/10, 'Resampling series, please wait.');
+                    progressBar(5/10, 'Resampling data series, please wait...');
 
                     [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
 
                     dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
                     dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
 
-                    progressBar(6/10, 'Resampling mip, please wait.');
+                    progressBar(6/10, 'Resampling MIP, please wait...');
 
                     refMip = mipBuffer('get', [], dCTSerieOffset);
                     aMip   = mipBuffer('get', [], dPTSerieOffset);
@@ -317,7 +321,7 @@ function setMachineLearningFDGBrownFatFullAI(sPredictScript, sDatasetId, bProces
 
                     roiTemplate('set', dPTSerieOffset, atResampledRoi);
 
-                    progressBar(8/10, 'Resampling axes, please wait.');
+                    progressBar(8/10, 'Resampling axes, please wait...');
 
                     resampleAxes(aResampledPTImage, atResampledPTMetaData);
 
@@ -382,8 +386,8 @@ function setMachineLearningFDGBrownFatFullAI(sPredictScript, sDatasetId, bProces
     end
 
     refreshImages();
-    
-    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
+
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));
 
     clear aPTImage;
     clear aCTImage;

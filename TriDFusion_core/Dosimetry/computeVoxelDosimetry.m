@@ -130,7 +130,7 @@ function computeVoxelDosimetry(sDosimetryScriptPath, sSegmentatorScript, stDosim
         
         % Convert dicom to .nii     
         
-        progressBar(1/12, 'DICOM to NII conversion, please wait.');
+        progressBar(1/12, 'Converting DICOM to NII, please wait...');
     
         dicm2nii(sFilePath, sNiiTmpDir, 1);
         

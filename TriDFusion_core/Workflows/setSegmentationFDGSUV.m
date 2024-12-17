@@ -1,6 +1,6 @@
-function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, dThreshold , dBoneThreshold)
-%function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, dThreshold , dBoneThreshold)
-%Run FDG Segmentation base on a SUV Threshold .
+function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, dThreshold, dBoneThreshold)
+%function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, dThreshold, dBoneThreshold)
+%Run FDG Segmentation base on a SUV Threshold.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -26,11 +26,11 @@ function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge,
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-            
+
     atInput = inputTemplate('get');
-    
-    % Modality validation    
-       
+
+    % Modality validation
+
     dCTSerieOffset = [];
     for tt=1:numel(atInput)
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'ct')
@@ -48,10 +48,10 @@ function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge,
     end
 
     if isempty(dCTSerieOffset) || ...
-       isempty(dPTSerieOffset)  
+       isempty(dPTSerieOffset)
         progressBar(1, 'Error: FDG SUV tumor segmentation require a CT and PT image!');
-        errordlg('FDG SUV tumor segmentation require a CT and PT image!', 'Modality Validation');  
-        return;               
+        errordlg('FDG SUV tumor segmentation require a CT and PT image!', 'Modality Validation');
+        return;
     end
 
 
@@ -89,40 +89,44 @@ function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge,
     if isfield(tQuant, 'tSUV')
         dSUVScale = tQuant.tSUV.dScale;
     else
-        dSUVScale = 0;
-    end 
+        dSUVScale = 1;
+    end
 
-    % Apply ROI constraint 
+    % Apply ROI constraint
 
     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dPTSerieOffset);
 
     bInvertMask = invertConstraint('get');
 
     tRoiInput = roiTemplate('get', dPTSerieOffset);
-    
+
     aPTImageTemp = aPTImage;
-    aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask); 
-    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint 
+    aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
 
-    resetSeries(dPTSerieOffset, true);       
+    if any(aLogicalMask(:) ~= 0)
 
-    try 
+        aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
+    end
+
+    resetSeries(dPTSerieOffset, true);
+
+    try
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
-    
+
     if isInterpolated('get') == false
-    
+
         isInterpolated('set', true);
-    
+
         setImageInterpolation(true);
     end
 
-    progressBar(5/10, 'Resampling series, please wait.');
-            
-    [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
-    [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
-   
+    progressBar(5/10, 'Resampling data series, please wait...');
+
+    [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
+    [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
+
     dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
     dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
 
@@ -132,86 +136,86 @@ function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge,
     clear aResampledPTImageTemp;
 
 
-    progressBar(6/10, 'Resampling mip, please wait.');
-            
-    refMip = mipBuffer('get', [], dCTSerieOffset);                        
+    progressBar(6/10, 'Resampling MIP, please wait...');
+
+    refMip = mipBuffer('get', [], dCTSerieOffset);
     aMip   = mipBuffer('get', [], dPTSerieOffset);
-  
+
     aMip = resampleMip(aMip, atPTMetaData, refMip, atCTMetaData, 'Linear', true);
-                   
+
     mipBuffer('set', aMip, dPTSerieOffset);
 
-    setQuantification(dPTSerieOffset);    
+    setQuantification(dPTSerieOffset);
 
 
-    progressBar(7/10, 'Computing mask, please wait.');
+    progressBar(7/10, 'Computing mask, please wait...');
 
 
     aBWMask = aResampledPTImage;
 
     dMin = min(aBWMask, [], 'all');
 
-    aBWMask(aBWMask*dSUVScale<dThreshold )=dMin;
+    aBWMask(aBWMask*dSUVScale<dThreshold)=dMin;
 
     aBWMask = imbinarize(aBWMask);
 
-    progressBar(8/10, 'Computing ct map, please wait.');
+    progressBar(8/10, 'Computing CT map, please wait...');
 
     BWCT = aCTImage >= dBoneMaskThreshold;   % Logical mask creation
     BWCT = imfill(single(BWCT), 4, 'holes'); % Fill holes in the binary mask
 
 %     % Thresholding to create a binary mask
 %     BWCT = BWCT >= dBoneMaskThreshold;
-%     
+%
 %     % Perform morphological closing to smooth contours and fill small gaps
 %     se = strel('disk', 3); % Adjust the size as needed
 %     BWCT = imclose(BWCT, se);
-%     
+%
 %     % Fill holes in the binary image
 %     BWCT = imfill(BWCT, 'holes');
-%     
+%
 %     % Optional: Remove small objects that are not part of the bone
 %     BWCT = bwareaopen(BWCT, 100); % Adjust the size threshold as needed
-%     
+%
 %     % Perform another round of morphological closing if necessary
 %     BWCT = imclose(BWCT, se);
-%     
+%
 %     % Optional: Perform morphological opening to remove small spurious regions
 %     BWCT = imopen(BWCT, se);
 
-    if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view 
+    if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view
 
         BWCT = resample3DImage(BWCT, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
-        
+
         BWCT = imbinarize(BWCT);
 
-        if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view     
-            BWCT = resizeMaskToImageSize(BWCT, aResampledPTImage); 
+        if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view
+            BWCT = resizeMaskToImageSize(BWCT, aResampledPTImage);
         end
     else
         BWCT = imbinarize(BWCT);
     end
 
-    progressBar(9/10, 'Creating contours, please wait.');
+    progressBar(9/10, 'Generating contours, please wait...');
 
     imMask = aResampledPTImage;
 %     imMask(aBWMask == 0) = dMin;
 
     if dBoneThreshold ~= dThreshold
-        
+
         aBWMask2 = aResampledPTImage;
-    
+
         dMin = min(aBWMask2, [], 'all');
-    
+
         aBWMask2(aBWMask2*dSUVScale<dBoneThreshold)=dMin;
 %         aBWMask2(BWCT==0)=dMin;
-    
+
 %         aBWMask2 = imbinarize(aBWMask2);
-%     
+%
 %         imMask(aBWMask2) = aResampledPTImage(aBWMask2);
-    
+
         aBWMask = aBWMask|aBWMask2;
-    
+
         clear aBWMask2;
     end
 
@@ -219,11 +223,11 @@ function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge,
 
     sFormula = 'Lymph Nodes & Bone SUV, CT Bone Map';
 
-    maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, dThreshold , false, 0, true, sFormula, BWCT, dSmalestVoiValue, [],[],[], dBoneThreshold);                    
+    maskAddVoiToSeries(imMask, aBWMask, dPixelEdge, false, dThreshold, false, 0, true, sFormula, BWCT, dSmalestVoiValue, [],[],[], dBoneThreshold);
 
     clear aResampledPTImage;
     clear aBWMask;
-    clear refMip;                        
+    clear refMip;
     clear aMip;
     clear BWCT;
     clear imMask;
@@ -236,9 +240,9 @@ function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge,
     link2DMip('set', false);
 
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
+    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
     set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
-   
+
     % Set fusion
 
     if isFusion('get') == false
@@ -266,17 +270,17 @@ function setSegmentationFDGSUV(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge,
     end
 
     refreshImages();
-    
-    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
+
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));
 
     clear aPTImage;
     clear aCTImage;
-     
+
 
     progressBar(1, 'Ready');
 
-    catch 
-        resetSeries(dPTSerieOffset, true);       
+    catch
+        resetSeries(dPTSerieOffset, true);
         progressBar( 1 , 'Error: setSegmentationFDG()' );
     end
 

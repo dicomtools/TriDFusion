@@ -101,14 +101,14 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
             setImageInterpolation(true);
         end
 
-        progressBar(5/10, 'Resampling series, please wait.');
+        progressBar(5/10, 'Resampling data series, please wait...');
 
         [aNMImage, atNMMetaData] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);
 
         dicomMetaData('set', atNMMetaData, dNMSerieOffset);
         dicomBuffer  ('set', aNMImage, dNMSerieOffset);
 
-        progressBar(6/10, 'Resampling mip, please wait.');
+        progressBar(6/10, 'Resampling MIP, please wait...');
 
 %         refMip = mipBuffer('get', [], dCTSerieOffset);
 %         aMip   = mipBuffer('get', [], dNMSerieOffset);
@@ -131,7 +131,7 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
 %             roiTemplate('set', dNMSerieOffset, atResampledRoi);
 %         end
 
-        progressBar(8/10, 'Resampling axes, please wait.');
+        progressBar(8/10, 'Resampling axes, please wait...');
 
         resampleAxes(aNMImage, atNMMetaData);
 
@@ -304,14 +304,14 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
                     rmdir(char(sSegmentationFolderName), 's');
                 end
 
-                progressBar(5/10, 'Resampling series, please wait.');
+                progressBar(5/10, 'Resampling data series, please wait...');
 
                 [aResampledPTImage, atResampledPTMetaData] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);
 
                 dicomMetaData('set', atResampledPTMetaData, dNMSerieOffset);
                 dicomBuffer  ('set', aResampledPTImage, dNMSerieOffset);
 
-                progressBar(6/10, 'Resampling mip, please wait.');
+                progressBar(6/10, 'Resampling MIP, please wait...');
 
                 refMip = mipBuffer('get', [], dCTSerieOffset);
                 aMip   = mipBuffer('get', [], dNMSerieOffset);
@@ -334,7 +334,7 @@ function setMachineLearningPSMALu177SPECTCTFullAI(sPredictScript, tPSMALu177SPEC
                     roiTemplate('set', dNMSerieOffset, atResampledRoi);
                 end
 
-                progressBar(8/10, 'Resampling axes, please wait.');
+                progressBar(8/10, 'Resampling axes, please wait...');
 
                 resampleAxes(aResampledPTImage, atResampledPTMetaData);
 

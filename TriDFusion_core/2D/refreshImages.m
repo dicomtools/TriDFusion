@@ -905,7 +905,9 @@ function refreshImages(clickedPtX, clickedPtY)
         if contourVisibilityRoiPanelValue('get') == true
              
             atRoiInput = roiTemplate('get', dSeriesOffset);
-            
+
+            % cellfun(@(x) set(x.Object, 'Visible', 'off'), atRoiInput(1:end)); % Set all object at off
+
             if ~isempty(atRoiInput) && isVsplash('get') == false
                 
                 dNumRoiInputs = numel(atRoiInput);
@@ -950,9 +952,9 @@ function refreshImages(clickedPtX, clickedPtY)
                                 end
                             end
                         else
-
+                                
                             currentRoi.Object.Visible = 'off';
-    
+                            
                             % if ~isempty(currentDistances) && bViewFarthest
                             if bViewFarthest
     

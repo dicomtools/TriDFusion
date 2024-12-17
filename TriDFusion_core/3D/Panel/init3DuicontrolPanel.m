@@ -156,7 +156,7 @@ function init3DuicontrolPanel()
 %                     'ForegroundColor', viewerForegroundColor('get'), ...
 %                     'Enable', 'On'...
 %                     );
-% 
+%
 %     uislider3DVoiTransparency = ...
 %          uicontrol(ui3DPanelPtr('get'), ...
 %                   'Style'   , 'Slider', ...
@@ -2810,7 +2810,7 @@ function init3DuicontrolPanel()
             end
         end
 
-        if strcmpi(sFormula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ... % Use CT HU treshold value
+        if strcmpi(sFormula, '(4.30/SUVmean)x(SUVmean + SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ... % Use CT HU Threshold value
            strcmpi(sFormula, '(4.30/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map') || ...
            strcmpi(sFormula, 'Liver 42%, Soft Tissue & Bone 42% peaks at 65%, CT Bone Map')
 
@@ -2883,7 +2883,7 @@ function init3DuicontrolPanel()
 %        if isfield(tQuant, 'tSUV')
 %            dSUVScale = tQuant.tSUV.dScale;
 %        else
-%            dSUVScale = 0;
+%            dSUVScale = 1;
 %        end
 
 %        dMean = mean(dicomBuffer('get'), 'all') * dSUVScale;
@@ -2973,7 +2973,7 @@ function init3DuicontrolPanel()
                         if isfield(tQuant, 'tSUV')
                             dSUVScale = tQuant.tSUV.dScale;
                         else
-                            dSUVScale = 0;
+                            dSUVScale = 1;
                         end
 
                         dLiverMean = mean(aSlice(aLogicalMask), 'all')   * dSUVScale;
@@ -3137,7 +3137,7 @@ function init3DuicontrolPanel()
 
                                 for kk=1:size(im, 1)
 
-                                    aSlice = permute(aVolume(kk,:,:), [3 2 1]); % 10% of treshold Liver
+                                    aSlice = permute(aVolume(kk,:,:), [3 2 1]); % 10% of Threshold Liver
                                     aSlice(aLogicalMask2==0)=0;
                                     aVolume(kk,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
 
@@ -3149,7 +3149,7 @@ function init3DuicontrolPanel()
                             case 'axes2'
 
                                 for kk=1:size(aVolume, 2)
-                                    aSlice = permute(aVolume(:,kk,:), [3 1 2]); % 10% of treshold Liver
+                                    aSlice = permute(aVolume(:,kk,:), [3 1 2]); % 10% of Threshold Liver
                                     aSlice(aLogicalMask2==0)=0;
                                     aVolume(:,kk,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
 
@@ -3161,7 +3161,7 @@ function init3DuicontrolPanel()
                             case 'axes3'
 
                                 for kk=1:size(aVolume, 3)
-                                    aSlice = aVolume(:,:,kk); % 10% of treshold Liver
+                                    aSlice = aVolume(:,:,kk); % 10% of Threshold Liver
                                     aSlice(aLogicalMask2==0)=0;
                                     aVolume(:,:,kk) = aSlice;
 

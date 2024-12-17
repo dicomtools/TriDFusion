@@ -1,6 +1,6 @@
 function setSegmentationFDGPercent(dBoneMaskThreshold, dBoundaryPercent, dSmalestVoiValue, dPixelEdge, dPercentOfPeak, multiPeaksValue)
 %function setSegmentationFDGPercent(dBoneMaskThreshold, dBoundaryPercent, dSmalestVoiValue, dPixelEdge, dPercentOfPeak, multiPeaksValue)
-%Run FDG Segmentation base on a percent of peak treshold.
+%Run FDG Segmentation base on a percent of peak Threshold .
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -93,7 +93,11 @@ function setSegmentationFDGPercent(dBoneMaskThreshold, dBoundaryPercent, dSmales
 
     aPTImageTemp = aPTImage;
     aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
-    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
+    
+    if any(aLogicalMask(:) ~= 0)
+
+        aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
+    end
 
     resetSeries(dPTSerieOffset, true);
 
@@ -109,7 +113,7 @@ function setSegmentationFDGPercent(dBoneMaskThreshold, dBoundaryPercent, dSmales
         setImageInterpolation(true);
     end
 
-    progressBar(5/10, 'Resampling series, please wait.');
+    progressBar(5/10, 'Resampling data series, please wait...');
 
     [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
     [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
@@ -122,7 +126,7 @@ function setSegmentationFDGPercent(dBoneMaskThreshold, dBoundaryPercent, dSmales
     clear aPTImageTemp;
     clear aResampledPTImageTemp;
 
-    progressBar(6/10, 'Resampling mip, please wait.');
+    progressBar(6/10, 'Resampling MIP, please wait...');
 
     refMip = mipBuffer('get', [], dCTSerieOffset);
     aMip   = mipBuffer('get', [], dPTSerieOffset);
@@ -134,22 +138,22 @@ function setSegmentationFDGPercent(dBoneMaskThreshold, dBoundaryPercent, dSmales
     setQuantification(dPTSerieOffset);
 
 
-    progressBar(7/10, 'Computing mask, please wait.');
+    progressBar(7/10, 'Computing mask, please wait...');
 
     aBWMask = aResampledPTImage;
 
     dMin = min(aBWMask, [], 'all');
 
-    dTreshold = max(aResampledPTImage, [], 'all')*dBoundaryPercent;
+    dThreshold = max(aResampledPTImage, [], 'all')*dBoundaryPercent;
 
-    aBWMask(aBWMask<dTreshold)=dMin;
+    aBWMask(aBWMask<dThreshold )=dMin;
 
     aBWMask = imbinarize(aBWMask);
 
-    progressBar(8/10, 'Computing ct map, please wait.');
+    progressBar(8/10, 'Computing CT map, please wait...');
 
     BWCT = aCTImage >= dBoneMaskThreshold;   % Logical mask creation
-    BWCT = imfill(single(BWCT), 4, 'holes'); % Fill holes in the binary mask                   
+    BWCT = imfill(single(BWCT), 4, 'holes'); % Fill holes in the binary mask
 
     if ~isequal(size(BWCT), size(aResampledPTImage)) % Verify if both images are in the same field of view
 
@@ -163,7 +167,7 @@ function setSegmentationFDGPercent(dBoneMaskThreshold, dBoundaryPercent, dSmales
         BWCT = imbinarize(BWCT);
     end
 
-    progressBar(9/10, 'Creating contours, please wait.');
+    progressBar(9/10, 'Generating contours, please wait...');
 
     imMask = aResampledPTImage;
     imMask(aBWMask == 0) = dMin;

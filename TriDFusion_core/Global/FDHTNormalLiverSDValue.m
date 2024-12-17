@@ -1,6 +1,6 @@
 function dSDValue = FDHTNormalLiverSDValue(sAction, dValue)
 %function dSDValue = FDHTNormalLiverSDValue(sAction, dValue)
-%Get/Set FDHT Normal LiverTreshold MultiplierValue.
+%Get/Set FDHT Normal LiverThreshold MultiplierValue.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org

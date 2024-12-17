@@ -27,6 +27,9 @@ function setPETCTBrownFatFusionCallback(~, ~)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    setModalitiesFusion('pt', 0, 5, 0, 5, 'ct', 50, 500, 50, 500, false, true);
+    setModalitiesFusion('pt', 0, 5, 0, 5, 'ct', 50, 500, 50, 500, false, true); % Hot Iron Enhanced 
 
+    colorMapOffset('set', 20);
+
+    refreshColorMap();
 end

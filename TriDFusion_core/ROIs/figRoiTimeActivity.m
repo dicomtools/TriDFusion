@@ -38,7 +38,7 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
     if isfield(tQuant, 'tSUV')
         dSUVScale = tQuant.tSUV.dScale;
     else
-        dSUVScale = 0;
+        dSUVScale = 1;
     end
 
     dScreenSize  = get(groot, 'Screensize');
@@ -401,7 +401,7 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
         if isfield(tQuant, 'tSUV')
             dSUVScale = tQuant.tSUV.dScale;
         else
-            dSUVScale = 0;
+            dSUVScale = 1;
         end
 
         aRoiListPosition = get(uiRoiListPanel, 'Position');
@@ -495,7 +495,7 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
                             if isfield(tQuant, 'tSUV')
                                 dSUVScale = tQuant.tSUV.dScale;
                             else
-                                dSUVScale = 0;
+                                dSUVScale = 1;
                             end
 
                             tVoiComputed = computeVoi(aInputBuffer, ...
@@ -757,7 +757,7 @@ function figRoiTimeActivity(sType, atVoiRoiTag, bSUVUnit, bModifiedMatrix, bSegm
                                 if isfield(tQuant, 'tSUV')
                                     dSUVScale = tQuant.tSUV.dScale;
                                 else
-                                    dSUVScale = 0;
+                                    dSUVScale = 1;
                                 end
 
                                 tRoiComputed = computeRoi(aInputBuffer, ...

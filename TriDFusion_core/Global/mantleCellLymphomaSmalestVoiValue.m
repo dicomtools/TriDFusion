@@ -1,13 +1,13 @@
-function dPercentValue = maxTresholdSliderRoiPanelValue(sAction, dValue)
-%function dPercentValue = maxTresholdSliderRoiPanelValue(sAction, dValue)
-%Get/Set Roi/Voi Segmentation Treshold Value.
+function dSmallestSize = mantleCellLymphomaSmalestVoiValue(sAction, dValue)
+%function dSmallestSize = mantleCellLymphomaSmalestVoiValue(sAction, dValue)
+%Get/Set Mantle Cell Lymphoma segmentation smallest voi value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2024, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -25,13 +25,13 @@ function dPercentValue = maxTresholdSliderRoiPanelValue(sAction, dValue)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    persistent pdPercentValue; 
+    persistent pdSmallestSize; 
 
     if strcmpi('set', sAction)
-        pdPercentValue = dValue;            
+        pdSmallestSize = dValue;            
     end
     
-    dPercentValue = pdPercentValue;
+    dSmallestSize = pdSmallestSize;
 end

@@ -145,7 +145,7 @@ function exportSimplifiedContoursReport(bSUVUnit, bSegmented, bModifiedMatrix)
             if isfield(tRoiQuant, 'tSUV')
                 dSUVScale = tRoiQuant.tSUV.dScale;
             else
-                dSUVScale = 0;
+                dSUVScale = 1;
             end
 
       

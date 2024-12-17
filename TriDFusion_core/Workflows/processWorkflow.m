@@ -234,9 +234,9 @@ function processWorkflow(sWorkflowName)
 
         % Metastatic Breast Cancer
 
-        case  'setsegmentationmetastaticbreastcancersegmentationcallback' % setSegmentationMetastaticBreastCancerSegmentationCallback.m
+        case  'setmetastaticbreastcancersegmentationcallback' % setMetastaticBreastCancerSegmentationCallback.m
 
-            setSegmentationMetastaticBreastCancerSegmentationCallback();
+            setMetastaticBreastCancerSegmentationCallback();
 
         case 'setmachinelearningbreastcancerpetfullaicallback' % setMachineLearningBreastCancerPETFullAICallback.m
 
@@ -317,6 +317,19 @@ function processWorkflow(sWorkflowName)
         case 'machinelearningctanonymizationcallback' % machineLearningCTAnonymizationCallback.m
 
             machineLearningCTAnonymizationCallback();
+        
+        case 'runpsmalu177spectfullaicallback'% runPSMALu177SPECTFullAICallback.m
+
+            runPSMALu177SPECTFullAICallback();
+
+        case 'runpsmaga68petctfullaicallback'% runPSMAGa68PETCTFullAICallback.m
+            
+            runPSMAGa68PETCTFullAICallback();  
+
+        case 'runfdgbrownfatpetctfullaicallback'% runFDGBrownFatPETCTFullAICallback.m
+            
+            runFDGBrownFatPETCTFullAICallback();  
+
     end
 
 end

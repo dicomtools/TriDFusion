@@ -50,7 +50,7 @@ function movedRoiEvents(hObject, ~)
                 
              case lower('images.roi.ellipse')
                 
-                if strcmpi(hObject.UserData, 'Sphere')
+                if strcmpi(atRoi{dTagOffset}.UserData, 'Sphere')
                     
                     atVoi = voiTemplate('get', dSeriesOffset);
                                           

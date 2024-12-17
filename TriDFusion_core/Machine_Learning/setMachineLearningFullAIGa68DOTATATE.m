@@ -115,7 +115,7 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorScript, sOnnxPath, dMo
         
         % Convert CT dicom to .nii     
         
-        progressBar(1/13, 'CT DICOM to NII conversion, please wait.');
+        progressBar(1/13, 'CT Converting DICOM to NII, please wait...');
     
         dicm2nii(sCTFilePath, sCTNiiTmpDir, 1);
         
@@ -150,7 +150,7 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorScript, sOnnxPath, dMo
     
     % Convert PT dicom to .nii     
     
-    progressBar(2/13, 'PT DICOM to NII conversion, please wait.');
+    progressBar(2/13, 'PT Converting DICOM to NII, please wait...');
 
     dicm2nii(sPTFilePath, sPTNiiTmpDir, 1);
     
@@ -249,7 +249,7 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorScript, sOnnxPath, dMo
                         end      
 
 
-                        progressBar(7/13, 'Resampling series, please wait.');
+                        progressBar(7/13, 'Resampling data series, please wait...');
                                 
                         [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
                        
@@ -266,7 +266,7 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorScript, sOnnxPath, dMo
 %                         roiTemplate('set', dPTSerieOffset, atResampledRoi);  
         
         
-                        progressBar(9/13, 'Resampling mip, please wait.');
+                        progressBar(9/13, 'Resampling MIP, please wait...');
                                 
                         refMip = mipBuffer('get', [], dCTSerieOffset);                        
                         aMip   = mipBuffer('get', [], dPTSerieOffset);
@@ -316,7 +316,7 @@ function setMachineLearningFullAIGa68DOTATATE(sSegmentatorScript, sOnnxPath, dMo
                                 aLiverMask = imbinarize(aLiverMask);
                             end
 
-                            progressBar(11/13, 'Importing exclusion masks, please wait.');
+                            progressBar(11/13, 'Importing exclusion masks, please wait...');
             
                             aExcludeMask = getGa68DOTATATEExcludeMask(tGa68DOTATATE, sSegmentationFolderName, zeros(size(aCTImage)));
 

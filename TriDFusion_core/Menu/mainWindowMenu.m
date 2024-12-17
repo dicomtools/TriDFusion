@@ -196,6 +196,10 @@ function mainWindowMenu()
     mLiverAblation = uimenu(mWorkflows,'Label','Liver Ablation');
     uimenu(mLiverAblation, 'Label','Create Tumor Ablation Zone', 'Callback', @createTumorAblationZoneCallback);
 
+    % Mantle Cell Lymphoma
+    mMantleCellLymphoma = uimenu(mWorkflows,'Label','Mantle Cell Lymphoma');
+    uimenu(mMantleCellLymphoma, 'Label','Mantle Cell Lymphoma Segmentation (Threshold + AI)', 'Callback', @setMantleCellLymphomaSegmentationCallack);
+
     % Metastatic Breast Cancer
 
     mMetastaticBreastCancer = uimenu(mWorkflows,'Label','Metastatic Breast Cancer');
@@ -377,7 +381,7 @@ function mainWindowMenu()
     if Ga68_DOTATATE
         mGa68DOTATATE = uimenu(mMachineSegmentation,'Label','DOTATATE - Ga68');
 
-        uimenu(mGa68DOTATATE, 'Label','DOTATATE Ga68 Tumor Segmentation (Treshold + AI)', 'Callback', @setMachineLearningGa68DOTATATECallback);
+        uimenu(mGa68DOTATATE, 'Label','DOTATATE Ga68 Tumor Segmentation (Threshold + AI)', 'Callback', @setMachineLearningGa68DOTATATECallback);
         uimenu(mGa68DOTATATE, 'Label','DOTATATE Ga68 Tumor Segmentation using ONNX Network(Full AI)'      , 'Callback', @setMachineLearningFullAIGa68DOTATATECallback);
     end
 
@@ -1747,7 +1751,7 @@ function mainWindowMenu()
 %                if isfield(tQuant, 'tSUV')
 %                    dSUVScale = tQuant.tSUV.dScale;
 %                else
-%                    dSUVScale = 0;
+%                    dSUVScale = 1;
 %                end
 
  %               atMetaData = dicomMetaData('get', [], get(uiSeriesPtr('get'), 'Value'));

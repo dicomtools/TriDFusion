@@ -36,7 +36,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
     if isfield(tQuant, 'tSUV')
         dSUVScale = tQuant.tSUV.dScale;
     else
-        dSUVScale = 0;
+        dSUVScale = 1;
     end
 
     dScreenSize  = get(groot, 'Screensize');
@@ -370,7 +370,7 @@ function figRoiMultiplePlot(sType, aInputBuffer, atInputMetaData, atVoiRoiTag, b
         if isfield(tQuant, 'tSUV')
             dSUVScale = tQuant.tSUV.dScale;
         else
-            dSUVScale = 0;
+            dSUVScale = 1;
         end
 
         aRoiListPosition = get(uiRoiListPanel, 'Position');

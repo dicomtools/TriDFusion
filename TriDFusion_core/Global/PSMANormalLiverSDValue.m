@@ -1,6 +1,6 @@
 function dSDValue = PSMANormalLiverSDValue(sAction, dValue)
 %function dSDValue = PSMANormalLiverSDValue(sAction, dValue)
-%Get/Set PSMA Normal LiverTreshold MultiplierValue.
+%Get/Set PSMA Normal LiverThreshold MultiplierValue.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org

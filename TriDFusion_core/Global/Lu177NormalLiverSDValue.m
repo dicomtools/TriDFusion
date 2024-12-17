@@ -1,6 +1,6 @@
 function dSDValue = Lu177NormalLiverSDValue(sAction, dValue)
 %function dSDValue = Lu177NormalLiverSDValue(sAction, dValue)
-%Get/Set Lu177 Normal LiverTreshold MultiplierValue.
+%Get/Set Lu177 Normal LiverThreshold MultiplierValue.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org

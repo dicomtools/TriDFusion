@@ -93,7 +93,7 @@ function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE, bUseD
     if isfield(tQuant, 'tSUV')
         dSUVScale = tQuant.tSUV.dScale;
     else
-        dSUVScale = 0;
+        dSUVScale = 1;
     end
 
     atRoiInput = roiTemplate('get', dPTSerieOffset);
@@ -171,7 +171,11 @@ function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE, bUseD
 
     aPTImageTemp = aPTImage;
     aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
-    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
+
+    if any(aLogicalMask(:) ~= 0)
+
+        aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
+    end
 
     resetSeries(dPTSerieOffset, true);
 
@@ -181,9 +185,9 @@ function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE, bUseD
     drawnow;
 
     if isInterpolated('get') == false
-    
+
         isInterpolated('set', true);
-    
+
         setImageInterpolation(true);
     end
 
@@ -201,7 +205,7 @@ function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE, bUseD
 
     % Convert dicom to .nii
 
-    progressBar(1/12, 'DICOM to NII conversion, please wait.');
+    progressBar(1/12, 'Converting DICOM to NII, please wait...');
 
     dicm2nii(sFilePath, sNiiTmpDir, 1);
 
@@ -247,7 +251,7 @@ function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE, bUseD
                 errordlg(sprintf('An error occur during machine learning segmentation: %s', sCmdout), 'Segmentation Error');
             else % Process succeed
 
-                progressBar(3/12, 'Importing exclusion masks, please wait.');
+                progressBar(3/12, 'Importing exclusion masks, please wait...');
 
                 aExcludeMask = getGa68DOTATATEExcludeMask(tGa68DOTATATE, sSegmentationFolderName, zeros(size(aCTImage)));
 
@@ -259,7 +263,7 @@ function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE, bUseD
                 aLiverMask = imdilate(aLiverMask, strel('sphere', 4)); % Increse Liver mask by 3 pixels
                 aExcludeMasksLiver = imdilate(aExcludeMask, strel('sphere', 1)); % Increse mask by 1 pixels
 
-                progressBar(5/12, 'Resampling series, please wait.');
+                progressBar(5/12, 'Resampling data series, please wait...');
 
                 [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
                 [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
@@ -305,7 +309,7 @@ function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE, bUseD
 %                 roiTemplate('set', dPTSerieOffset, atResampledRoi);
 
 
-                progressBar(7/12, 'Resampling mip, please wait.');
+                progressBar(7/12, 'Resampling MIP, please wait...');
 
                 refMip = mipBuffer('get', [], dCTSerieOffset);
                 aMip   = mipBuffer('get', [], dPTSerieOffset);
@@ -319,17 +323,17 @@ function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE, bUseD
 
                 progressBar(8/12, 'Computing liver mask, please wait.');
 
-%                dLiverTreshold = (1.5*gdNormalLiverMean) + (2*gdNormalLiverSTD);
-                dLiverTreshold = (tGa68DOTATATE.options.normalLiverTresholdMultiplier*gdNormalLiverMean) + (2*gdNormalLiverSTD);
-%                dLiverTreshold = (tGa68DOTATATE.options.normalLiverTresholdMultiplier*gdNormalLiverMean);
+%                dLiverThreshold = (1.5*gdNormalLiverMean) + (2*gdNormalLiverSTD);
+                dLiverThreshold = (tGa68DOTATATE.options.normalLiverThresholdMultiplier*gdNormalLiverMean) + (2*gdNormalLiverSTD);
+%                dLiverThreshold = (tGa68DOTATATE.options.normalLiverThresholdMultiplier*gdNormalLiverMean);
 
-%                dLiverTreshold = (2*dLiverMean)
+%                dLiverThreshold = (2*dLiverMean)
 
                 aLiverBWMask = aResampledPTImage;
 
                 dMin = min(aLiverBWMask, [], 'all');
 
-                aLiverBWMask(aLiverBWMask*dSUVScale<dLiverTreshold)=dMin;
+                aLiverBWMask(aLiverBWMask*dSUVScale<dLiverThreshold)=dMin;
 
                 aLiverBWMask(aLiverMask==0)=0;
                 aLiverBWMask(aExcludeMasksLiver~=0)=0;
@@ -337,7 +341,7 @@ function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE, bUseD
 
                 progressBar(9/12, 'Computing wholebody mask, please wait.');
 
-                dWholebodyTreshold = 3;
+                dWholebodyThreshold = 3;
 
                 aExcludeMasksWholebody = imdilate(aExcludeMask, strel('sphere', 3)); % Increse mask by 3 pixels
 
@@ -358,9 +362,9 @@ function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE, bUseD
                 dMin = min(aWholebodyBWMask, [], 'all');
 
 
-                aWholebodyBWMask(aWholebodyBWMask*dSUVScale<dWholebodyTreshold) = dMin;
-%                if gdNormalLiverMean > dWholebodyTreshold
-%                    aWholebodyBWMask(aWholebodyBWMask*dSUVScale<dWholebodyTreshold) = dMin;
+                aWholebodyBWMask(aWholebodyBWMask*dSUVScale<dWholebodyThreshold) = dMin;
+%                if gdNormalLiverMean > dWholebodyThreshold
+%                    aWholebodyBWMask(aWholebodyBWMask*dSUVScale<dWholebodyThreshold) = dMin;
 %                else
 %                    aWholebodyBWMask(aWholebodyBWMask*dSUVScale<gdNormalLiverMean) = dMin;
 %                end
@@ -392,7 +396,7 @@ function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE, bUseD
                 end
 
 
-                progressBar(11/12, 'Creating contours, please wait.');
+                progressBar(11/12, 'Generating contours, please wait...');
 
                 imMask = aResampledPTImage;
                 imMask(aWholebodyBWMask == 0) = dMin;
@@ -405,14 +409,14 @@ function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE, bUseD
 
                 sFormula = '(4.44/Normal Liver SUVmean)x(Normal Liver SUVmean + Normal Liver SD), Soft Tissue & Bone SUV 3, CT Bone Map';
 
-                maskAddVoiToSeries(imMask, aWholebodyBWMask, dPixelEdge, false, dWholebodyTreshold, false, 0, true, sFormula, BWCT, dSmalestVoiValue, gdNormalLiverMean, gdNormalLiverSTD);
+                maskAddVoiToSeries(imMask, aWholebodyBWMask, dPixelEdge, false, dWholebodyThreshold, false, 0, true, sFormula, BWCT, dSmalestVoiValue, gdNormalLiverMean, gdNormalLiverSTD);
 
                 sFormula = 'Liver';
 
                 imMaskLiver = aResampledPTImage;
                 imMaskLiver(aLiverBWMask == 0) = dMin;
 
-                maskAddVoiToSeries(imMaskLiver, aLiverBWMask, dPixelEdge, false, dLiverTreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue);
+                maskAddVoiToSeries(imMaskLiver, aLiverBWMask, dPixelEdge, false, dLiverThreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue);
 
                 clear aExcludeMask;
                 clear aExcludeMasksLiver;
@@ -527,8 +531,8 @@ function setMachineLearningGa68DOTATATE(sSegmentatorScript, tGa68DOTATATE, bUseD
     end
 
     refreshImages();
-    
-    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
+
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));
 
     clear aPTImage;
     clear aCTImage;

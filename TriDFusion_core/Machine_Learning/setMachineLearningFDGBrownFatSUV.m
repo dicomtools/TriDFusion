@@ -1,6 +1,6 @@
 function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombineMasks, tBrownFatSUV)
 %function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombineMasks, tBrownFatSUV)
-%Run FDG brown Fat Segmentation base on a SUV treshold.
+%Run FDG brown Fat Segmentation base on a SUV Threshold.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -26,11 +26,11 @@ function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombin
 %
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
-            
+
     atInput = inputTemplate('get');
-    
-    % Modality validation    
-       
+
+    % Modality validation
+
     dCTSerieOffset = [];
     for tt=1:numel(atInput)
         if strcmpi(atInput(tt).atDicomInfo{1}.Modality, 'ct')
@@ -48,10 +48,10 @@ function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombin
     end
 
     if isempty(dCTSerieOffset) || ...
-       isempty(dPTSerieOffset)  
+       isempty(dPTSerieOffset)
         progressBar(1, 'Error: FDG brown fat segmentation require a CT and PT image!');
-        errordlg('FDG brown fat segmentation require a CT and PT image!', 'Modality Validation');  
-        return;               
+        errordlg('FDG brown fat segmentation require a CT and PT image!', 'Modality Validation');
+        return;
     end
 
 
@@ -89,57 +89,61 @@ function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombin
     if isfield(tQuant, 'tSUV')
         dSUVScale = tQuant.tSUV.dScale;
     else
-        dSUVScale = 0;
-    end 
+        dSUVScale = 1;
+    end
 
-    % Apply ROI constraint 
+    % Apply ROI constraint
 
     [asConstraintTagList, asConstraintTypeList] = roiConstraintList('get', dPTSerieOffset);
 
     bInvertMask = invertConstraint('get');
 
     tRoiInput = roiTemplate('get', dPTSerieOffset);
-    
+
     aPTImageTemp = aPTImage;
-    aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask); 
-    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint 
+    aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
 
-    resetSeries(dPTSerieOffset, true);       
+    if any(aLogicalMask(:) ~= 0)
 
-    try 
+      aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
+    end
+
+    resetSeries(dPTSerieOffset, true);
+
+    try
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-    drawnow;    
+    drawnow;
 
     if isInterpolated('get') == false
-    
+
         isInterpolated('set', true);
-    
+
         setImageInterpolation(true);
     end
 
-    % Get DICOM directory directory    
-    
+    % Get DICOM directory directory
+
     [sFilePath, ~, ~] = fileparts(char(atInput(dCTSerieOffset).asFilesList{1}));
-    
-    % Create an empty directory    
+
+    % Create an empty directory
 
     sNiiTmpDir = sprintf('%stemp_nii_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
     if exist(char(sNiiTmpDir), 'dir')
         rmdir(char(sNiiTmpDir), 's');
     end
-    mkdir(char(sNiiTmpDir));    
-    
-    % Convert dicom to .nii     
-    
-    progressBar(1/12, 'DICOM to NII conversion, please wait.');
+    mkdir(char(sNiiTmpDir));
+
+    % Convert dicom to .nii
+
+    progressBar(1/12, 'Converting DICOM to NII, please wait...');
 
     dicm2nii(sFilePath, sNiiTmpDir, 1);
-    
+
     sNiiFullFileName = '';
-    
+
     f = java.io.File(char(sNiiTmpDir)); % Get .nii file name
-    dinfo = f.listFiles();                   
+    dinfo = f.listFiles();
     for K = 1 : 1 : numel(dinfo)
         if ~(dinfo(K).isDirectory)
             if contains(sprintf('%s%s', sNiiTmpDir, dinfo(K).getName()), '.nii.gz')
@@ -147,35 +151,35 @@ function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombin
                 break;
             end
         end
-    end 
+    end
 
     if isempty(sNiiFullFileName)
-        
+
         progressBar(1, 'Error: nii file not found!');
-        errordlg('nii file not found!!', '.nii file Validation'); 
+        errordlg('nii file not found!!', '.nii file Validation');
     else
 
         progressBar(2/12, 'Machine learning in progress, this might take several minutes, please be patient.');
-       
+
         sSegmentationFolderName = sprintf('%stemp_seg_%s/', viewerTempDirectory('get'), datetime('now','Format','MMMM-d-y-hhmmss'));
         if exist(char(sSegmentationFolderName), 'dir')
             rmdir(char(sSegmentationFolderName), 's');
         end
-        mkdir(char(sSegmentationFolderName)); 
-    
+        mkdir(char(sSegmentationFolderName));
+
         if ispc % Windows
-      
+
 %            if fastMachineLearningDialog('get') == true
-%                sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s --fast', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName);    
+%                sCommandLine = sprintf('cmd.exe /c python.exe %sTotalSegmentator -i %s -o %s --fast', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName);
 %            else
-                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s --fast --force_split --body_seg', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName);    
+                sCommandLine = sprintf('cmd.exe /c python.exe %s -i %s -o %s --fast --force_split --body_seg', sSegmentatorScript, sNiiFullFileName, sSegmentationFolderName);
 %            end
-        
+
             [bStatus, sCmdout] = system(sCommandLine);
-            
-            if bStatus 
+
+            if bStatus
                 progressBar( 1, 'Error: An error occur during machine learning segmentation!');
-                errordlg(sprintf('An error occur during machine learning segmentation: %s', sCmdout), 'Segmentation Error');  
+                errordlg(sprintf('An error occur during machine learning segmentation: %s', sCmdout), 'Segmentation Error');
             else % Process succeed
 
                 progressBar(3/12, 'Importing organ exclusion mask, please wait.');
@@ -187,7 +191,7 @@ function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombin
                     progressBar(4/12, 'Importing bone exclusion mask, please wait.');
 
                     aBoneExcludeMask = getTotalSegmentorWholeBodyMask(sSegmentationFolderName, zeros(size(aCTImage)));
-                    aBoneExcludeMask = imfill(aBoneExcludeMask, 4, 'holes');   
+                    aBoneExcludeMask = imfill(aBoneExcludeMask, 4, 'holes');
 
 %                     aBoneExcludeMask = imdilate(aBoneExcludeMask, strel('sphere', 2)); % Increse mask by 2 pixels
 
@@ -213,50 +217,50 @@ function setMachineLearningFDGBrownFatSUV(sSegmentatorScript, sSegmentatorCombin
 
                 if ~isempty(dUpperSlice)
                     if dUpperSlice > 1 && dUpperSlice < size(aExcludeMask, 3)
-    
+
                         aExcludeMask(:,:,1:dUpperSlice) = 1;
                     end
                 end
-if 0
-
-                % Left right image constraint
-
-                 dLeftColumn  = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'humerus_left' , 'left' )+25;
-                 dRightColumn = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'humerus_right', 'right')-25;
-%                 dLeftColumn = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'spleen', 'right');
-%                 dRightColumn = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'liver', 'left');
-                if ~isempty(dLeftColumn)
-
-                    if dLeftColumn > 1 && dLeftColumn < size(aExcludeMask, 2)
-                        aExcludeMask(:,dLeftColumn:end,:) = 1;
-                    end
-%                 else
-%                     dLeftColumn  = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'humerus_left' , 'left' );
-%                     
-%                     if ~isempty(dLeftColumn)
-%     
-%                         if dLeftColumn > 1 && dLeftColumn < size(aExcludeMask, 2)
-%                             aExcludeMask(:,dLeftColumn:end,:) = 1;
-%                         end
-%                     end
-                end
-
-                if ~isempty(dRightColumn)
-
-                    if dRightColumn > 1 && dRightColumn < size(aExcludeMask, 2)
-                        aExcludeMask(:,1:dRightColumn,:) = 1;   
-                    end
-%                 else
-%                     dRightColumn = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'humerus_right', 'right');
+% if 0
 % 
-%                     if ~isempty(dRightColumn)
-%     
-%                         if dRightColumn > 1 && dRightColumn < size(aExcludeMask, 2)
-%                             aExcludeMask(:,1:dRightColumn,:) = 1;   
-%                         end
+%                 % Left right image constraint
+% 
+%                  dLeftColumn  = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'humerus_left' , 'left' )+25;
+%                  dRightColumn = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'humerus_right', 'right')-25;
+% %                 dLeftColumn = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'spleen', 'right');
+% %                 dRightColumn = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'liver', 'left');
+%                 if ~isempty(dLeftColumn)
+% 
+%                     if dLeftColumn > 1 && dLeftColumn < size(aExcludeMask, 2)
+%                         aExcludeMask(:,dLeftColumn:end,:) = 1;
 %                     end
-                end                
-end
+% %                 else
+% %                     dLeftColumn  = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'humerus_left' , 'left' );
+% %
+% %                     if ~isempty(dLeftColumn)
+% %
+% %                         if dLeftColumn > 1 && dLeftColumn < size(aExcludeMask, 2)
+% %                             aExcludeMask(:,dLeftColumn:end,:) = 1;
+% %                         end
+% %                     end
+%                 end
+% 
+%                 if ~isempty(dRightColumn)
+% 
+%                     if dRightColumn > 1 && dRightColumn < size(aExcludeMask, 2)
+%                         aExcludeMask(:,1:dRightColumn,:) = 1;
+%                     end
+% %                 else
+% %                     dRightColumn = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'humerus_right', 'right');
+% %
+% %                     if ~isempty(dRightColumn)
+% %
+% %                         if dRightColumn > 1 && dRightColumn < size(aExcludeMask, 2)
+% %                             aExcludeMask(:,1:dRightColumn,:) = 1;
+% %                         end
+% %                     end
+%                 end
+% end
                 % C Vertebrae constraint
 
                 dC4LeftColumn  = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'vertebrae_C4', 'right');
@@ -265,11 +269,11 @@ end
                 dLowerSliceC7 = getTotalSegmentorObjectSliceNumber(sSegmentationFolderName, 'vertebrae_C7' , 'lower');
 
                 if ~isempty(dC4LeftColumn)  && ...
-                   ~isempty(dC4RightColumn) && ...    
+                   ~isempty(dC4RightColumn) && ...
                    ~isempty(dLowerSliceC7)
-     
+
                     for ll=1:dLowerSliceC7
-                        
+
                         aExcludeMask(:,dC4RightColumn:dC4LeftColumn,ll) = 1;
                     end
                 end
@@ -282,11 +286,11 @@ end
                 dHeartSlice = getTotalSegmentorObjectSliceNumber(sSegmentationFolderName, 'heart' , 'lower');
 
                 if ~isempty(dHeartLeftColumn) && ...
-                   ~isempty(dHeartRightColumn)  && ...    
+                   ~isempty(dHeartRightColumn)  && ...
                    ~isempty(dHeartSlice)
-     
-                    aMaskSize = size(aExcludeMask);         
-                    
+
+                    aMaskSize = size(aExcludeMask);
+
                     if dHeartLeftColumn  < aMaskSize(2) && ...
                        dHeartRightColumn < aMaskSize(2)
 
@@ -295,14 +299,14 @@ end
                         if dHeartSlice + 15 < aMaskSize(3)
 
                             for ll=1:15
-                                
+
                                 aExcludeMask(:,dHeartRightColumn:dHeartLeftColumn , dHeartSlice+ll) = 1;
-    
+
                             end
                         end
                     end
                 end
-                
+
                 % Under the liver, kidneys constraint
 
                 dKidneyRight = getTotalSegmentorObjectColumnNumber(sSegmentationFolderName, 'kidney_right', 'left');
@@ -311,17 +315,17 @@ end
                 dLiverSlice = getTotalSegmentorObjectSliceNumber(sSegmentationFolderName, 'liver' , 'lower');
 
                 if ~isempty(dKidneyRight) && ...
-                   ~isempty(dKidneyLeft)  && ...    
+                   ~isempty(dKidneyLeft)  && ...
                    ~isempty(dLiverSlice)
-     
-                    aMaskSize = size(aExcludeMask);         
-                    
+
+                    aMaskSize = size(aExcludeMask);
+
                     if dKidneyRight < aMaskSize(2) && ...
                        dKidneyLeft  < aMaskSize(2)
 
                         if dLiverSlice < aMaskSize(3)
                             for ll=1:dLiverSlice
-                                
+
         %                         aExcludeMask(:,dKidneyRight:dKidneyLeft,aMaskZsize-ll) = 1;
                                 aExcludeMask(:,1:dKidneyRight ,aMaskSize(3)-ll) = 1;
                                 aExcludeMask(:,dKidneyLeft:end,aMaskSize(3)-ll) = 1;
@@ -331,16 +335,16 @@ end
                 end
 % if 0
 %                 progressBar(5/12, 'Computing fuzzy c-means clustering, please wait.');
-% 
+%
 %                 aFuzzImage = fuzzy3DSegmentation(aPTImage);
 % %                 aFuzzImage = aFuzzImage >= tBrownFatSUV.options.fuzzyClusterSelection;
 %                 aFuzzImage = aFuzzImage >= 2;
-% 
+%
 % %                 aFuzzImage(aFuzzImage<4)= min(aFuzzImage, [], 'all');
 % %                 aFuzzImage = imbinarize(aFuzzImage);
-% 
-%                 aPTImageTemp(aFuzzImage==0) = min(aPTImageTemp, [], 'all');   
-% 
+%
+%                 aPTImageTemp(aFuzzImage==0) = min(aPTImageTemp, [], 'all');
+%
 %                 clear aFuzzImage;
 % end
                 progressBar(6/12, 'Processing CT HU constraint, please wait.');
@@ -349,24 +353,24 @@ end
                 aExcludeMask(aCTImage > tBrownFatSUV.options.HUThreshold.max) = 1;
 
 
-                progressBar(7/12, 'Resampling series, please wait.');
+                progressBar(7/12, 'Resampling data series, please wait...');
 
-                [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
-                [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);   
+                [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
+                [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
 
                 dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
                 dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
-    
+
                 aResampledPTImage = aResampledPTImageTemp;
 
-                if ~isequal(size(aExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view 
-            
+                if ~isequal(size(aExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view
+
                      aExcludeMask = resample3DImage(aExcludeMask, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
                      aExcludeMask = imbinarize(aExcludeMask);
-            
-                    if ~isequal(size(aExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view     
-                        
-                        aExcludeMask = resizeMaskToImageSize(aExcludeMask, aResampledPTImage); 
+
+                    if ~isequal(size(aExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view
+
+                        aExcludeMask = resizeMaskToImageSize(aExcludeMask, aResampledPTImage);
                     end
                 else
                     aExcludeMask = imbinarize(aExcludeMask);
@@ -374,105 +378,105 @@ end
 
                 aResampledPTImage(aExcludeMask) = min(aResampledPTImage, [], 'all');
 
-% if 1                    
+% if 1
 %                 progressBar(7/12, 'Computing CT HU exclusion mask, please wait.');
-% 
+%
 %                 aHUExcludeMask = zeros(size(aCTImage));
-% 
+%
 %                 aHUExcludeMask(aCTImage < tBrownFatSUV.options.HUThreshold.min) = 1;
 %                 aHUExcludeMask(aCTImage > tBrownFatSUV.options.HUThreshold.max) = 1;
-% 
+%
 % %                 aHUExcludeMask = imdilate(aHUExcludeMask, strel('sphere', 4)); % Increse mask by 4 pixels
-% 
-%                 if ~isequal(size(aHUExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view 
-%             
+%
+%                 if ~isequal(size(aHUExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view
+%
 %                      aHUExcludeMask = resample3DImage(aHUExcludeMask, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
 %                      aHUExcludeMask = imbinarize(aHUExcludeMask);
-%             
-%                     if ~isequal(size(aHUExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view 
-% 
-%                         aHUExcludeMask = resizeMaskToImageSize(aHUExcludeMask, aResampledPTImage); 
+%
+%                     if ~isequal(size(aHUExcludeMask), size(aResampledPTImage)) % Verify if both images are in the same field of view
+%
+%                         aHUExcludeMask = resizeMaskToImageSize(aHUExcludeMask, aResampledPTImage);
 %                     end
 %                 else
 %                     aHUExcludeMask = imbinarize(aHUExcludeMask);
 %                 end
-% 
+%
 %                 aResampledPTImage(aHUExcludeMask) = min(aResampledPTImage, [], 'all');
-% 
+%
 %                 clear aHUExcludeMask;
-% 
+%
 % end
                 progressBar(8/12, 'Computing CT BW mask, please wait.');
 
                 BWCT = imbinarize(aCTImage);
 
 %                 dCTMin = min(aCTImage, [], 'all');
-% 
+%
 %                 aCTImage(aCTImage < tBrownFatSUV.options.HUThreshold.min) = dCTMin;
 %                 aCTImage(aCTImage > tBrownFatSUV.options.HUThreshold.max) = dCTMin;
-%                  
+%
 %                 aResampledPTImage(aCTImage==dCTMin) = min(aResampledPTImage, [], 'all');
 
                 clear aPTImageTemp;
                 clear aResampledPTImageTemp;
                 clear aExcludeMask;
-            
-                progressBar(9/12, 'Resampling mip, please wait.');
-                        
-                refMip = mipBuffer('get', [], dCTSerieOffset);                        
+
+                progressBar(9/12, 'Resampling MIP, please wait...');
+
+                refMip = mipBuffer('get', [], dCTSerieOffset);
                 aMip   = mipBuffer('get', [], dPTSerieOffset);
-              
+
                 aMip = resampleMip(aMip, atPTMetaData, refMip, atCTMetaData, 'Linear', true);
-                               
+
                 mipBuffer('set', aMip, dPTSerieOffset);
-            
-                setQuantification(dPTSerieOffset);    
-            
-            
+
+                setQuantification(dPTSerieOffset);
+
+
                 progressBar(10/12, 'Computing SUV mask, please wait.');
-            
-% 
+
+%
 %                 aBWMask = aResampledPTImage;
-%             
+%
 %                 dMin = min(aResampledPTImage, [], 'all');
-% 
-%                 aBWMask(aBWMask*dSUVScale<dTreshold) = dMin;
-%      
+%
+%                 aBWMask(aBWMask*dSUVScale<dThreshold) = dMin;
+%
 %                 aBWMask = imbinarize(aBWMask);
-         
+
                 dMin = min(aResampledPTImage, [], 'all');
-                dTreshold = tBrownFatSUV.options.SUVThreshold;
+                dThreshold = tBrownFatSUV.options.SUVThreshold;
 
                 imMask = aResampledPTImage;
-                imMask(imMask*dSUVScale<dTreshold) = dMin;
+                imMask(imMask*dSUVScale<dThreshold) = dMin;
 
                 aBWMask = imbinarize(imMask);
 
-                progressBar(11/12, 'Creating contours, please wait.');
+                progressBar(11/12, 'Generating contours, please wait...');
 
                 setSeriesCallback();
-            
+
                 sFormula = [];
 
                 dSmalestVoiValue = tBrownFatSUV.options.smalestVoiValue;
                 bPixelEdge = tBrownFatSUV.options.pixelEdge;
 
-                maskAddVoiToSeries(imMask, aBWMask, bPixelEdge, false, dTreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue); 
+                maskAddVoiToSeries(imMask, aBWMask, bPixelEdge, false, dThreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue);
 
                 set(fiMainWindowPtr('get'), 'Pointer', 'watch');
-                drawnow;    
+                drawnow;
 
                 aBrownFatMask = getBrownFatTotalSegmentorAnnotationMask(sSegmentationFolderName, zeros(size(aCTImage)));
 
                 atVoiInput = voiTemplate('get', dPTSerieOffset);
                 atRoiInput = roiTemplate('get', dPTSerieOffset);
 
-                if ~isequal(size(aBrownFatMask), size(aResampledPTImage)) % Verify if both images are in the same field of view 
-            
+                if ~isequal(size(aBrownFatMask), size(aResampledPTImage)) % Verify if both images are in the same field of view
+
                      aBrownFatMask = resample3DImage(aBrownFatMask, atCTMetaData, aResampledPTImage, atResampledPTMetaData, 'Cubic');
-            
-                    if ~isequal(size(aBrownFatMask), size(aResampledPTImage)) % Verify if both images are in the same field of view     
-                        aBrownFatMask = resizeMaskToImageSize(aBrownFatMask, aResampledPTImage); 
+
+                    if ~isequal(size(aBrownFatMask), size(aResampledPTImage)) % Verify if both images are in the same field of view
+                        aBrownFatMask = resizeMaskToImageSize(aBrownFatMask, aResampledPTImage);
                     end
 
                 end
@@ -484,7 +488,7 @@ end
 
                 clear aResampledPTImage;
                 clear aBWMask;
-                clear refMip;                        
+                clear refMip;
                 clear aMip;
                 clear BWCT;
                 clear imMask;
@@ -504,7 +508,7 @@ end
 
         if exist(char(sSegmentationFolderName), 'dir')
             rmdir(char(sSegmentationFolderName), 's');
-        end         
+        end
     end
 
     setVoiRoiSegPopup();
@@ -514,7 +518,7 @@ end
     link2DMip('set', false);
 
     set(btnLinkMipPtr('get'), 'BackgroundColor', viewerBackgroundColor('get'));
-    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get')); 
+    set(btnLinkMipPtr('get'), 'ForegroundColor', viewerForegroundColor('get'));
     set(btnLinkMipPtr('get'), 'FontWeight', 'normal');
 
     % Set intensity
@@ -523,14 +527,14 @@ end
 
     if isfield(tQuant, 'tSUV')
         dSUVScale = tQuant.tSUV.dScale;
-        
+
         dSeriesMin = 0/dSUVScale;
         dSeriesMax = 5/dSUVScale;
     else
         dSeriesMin = min(aPTImage, [], 'all');
         dSeriesMax = max(aPTImage, [], 'all');
     end
-    
+
     windowLevel('set', 'max', dSeriesMax);
     windowLevel('set', 'min', dSeriesMin);
 
@@ -559,28 +563,28 @@ end
     % Activate ROI Panel
 
     if viewRoiPanel('get') == false
-        
+
         setViewRoiPanel();
     end
 
 %     refreshImages();
-%     
-%     plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
+%
+%     plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));
 
     clear aPTImage;
     clear aCTImage;
 
-    % Delete .nii folder    
-    
+    % Delete .nii folder
+
     if exist(char(sNiiTmpDir), 'dir')
 
         rmdir(char(sNiiTmpDir), 's');
-    end       
-    
+    end
+
     progressBar(1, 'Ready');
 
-    catch 
-        resetSeries(dPTSerieOffset, true);       
+    catch
+        resetSeries(dPTSerieOffset, true);
         progressBar( 1 , 'Error: setSegmentationFDGBrownFatSUV()' );
     end
 

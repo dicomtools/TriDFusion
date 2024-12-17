@@ -1,13 +1,13 @@
-function dMinValue = minTresholdSliderRoiPanelValue(sAction, dValue)
-%function dMinValue = minTresholdSliderRoiPanelValue(sAction, dValue)
-%Get/Set Roi/Voi Segmentation Min Value.
+function dMultiplier = Ga68DOTATATENormalLiverThresholdMultiplierValue(sAction, dValue)
+%function dMultiplier = Ga68DOTATATENormalLiverThresholdMultiplierValue(sAction, dValue)
+%Get/Set Ga68DOTATATE Normal LiverThreshold MultiplierValue.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2023, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -25,13 +25,13 @@ function dMinValue = minTresholdSliderRoiPanelValue(sAction, dValue)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-    persistent pdMinValue; 
+    persistent pdMultiplier; 
 
     if strcmpi('set', sAction)
-        pdMinValue = dValue;            
+        pdMultiplier = dValue;            
     end
     
-    dMinValue = pdMinValue;
+    dMultiplier = pdMultiplier;
 end

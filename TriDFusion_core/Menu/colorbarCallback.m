@@ -192,7 +192,7 @@ function colorbarCallback(hObject, ~)
     end
 
     if strcmpi(get(hObject, 'Tag'), 'Fusion Colorbar')
-        if numel(atInput) == 1
+        if isscalar(atInput)
             if atInput(dFuseOffset).bFusedEdgeDetection == true
                 set(findall(d, 'Label', 'Edge Detection'), 'Checked', 'on');
             end
@@ -390,7 +390,7 @@ function colorbarCallback(hObject, ~)
                 return;
             end
 
-            if numel(atInput) == 1
+            if isscalar(atInput)
                 bEdge = atInput(iFusionOffset).bFusedEdgeDetection;
             else
                 bEdge = atInput(iFusionOffset).bEdgeDetection;
@@ -405,7 +405,7 @@ function colorbarCallback(hObject, ~)
                     tMetaData = atInput(iSeriesOffset).atDicomInfo;
                 end
 
-                if numel(atInput) == 1
+                if isscalar(atInput)
                     atInput(iFusionOffset).bFusedEdgeDetection = false;
                 else
                     atInput(iFusionOffset).bEdgeDetection = false;
@@ -504,7 +504,7 @@ function colorbarCallback(hObject, ~)
 
             else
 
-                if numel(atInput) == 1
+                if isscalar(atInput)
                     atInput(iFusionOffset).bFusedEdgeDetection = true;
                 else
                     atInput(iFusionOffset).bEdgeDetection = true;
@@ -1192,7 +1192,7 @@ function colorbarCallback(hObject, ~)
                 return;
             end
 
-            if numel(atInput) == 1
+            if isscalar(atInput)
                 bEdge = atInput(iFusionOffset).bFusedEdgeDetection;
             else
                 bEdge = atInput(iFusionOffset).bEdgeDetection;

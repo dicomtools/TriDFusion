@@ -109,7 +109,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
             % if bRelativeToMax == true
             %     dValue = aBuffer(ptX,ptY) * dPercentOfMax;
             % else
-            %     dValue = aBuffer(ptX,ptY) * dMinTreshold;
+            %     dValue = aBuffer(ptX,ptY) * dMinThreshold;
             % end
 
             aSlice = aBuffer(:,:);
@@ -121,7 +121,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
 %             if bRelativeToMax == true
 %                 dValue = aBuffer(iCoronal,ptX,ptY) * dPercentOfMax;
 %             else
-%                 dValue = aBuffer(iCoronal,ptX,ptY) * dMinTreshold;
+%                 dValue = aBuffer(iCoronal,ptX,ptY) * dMinThreshold;
 %             end
 % 
 %             aSlice = permute(aBuffer(iCoronal,:,:), [3 2 1]) ;
@@ -155,7 +155,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
 %             if bRelativeToMax == true
 %                 dValue = aBuffer(ptX,iSagittal,ptY) * dPercentOfMax;
 %             else
-%                 dValue = aBuffer(ptX,iSagittal,ptY) * dMinTreshold;
+%                 dValue = aBuffer(ptX,iSagittal,ptY) * dMinThreshold;
 %             end
 % 
 %             aSlice = permute(aBuffer(:,iSagittal,:), [3 1 2]) ;
@@ -191,7 +191,7 @@ function createVoiFromLocation(pAxe, ptX, ptY, aBuffer, dPercentOfMax, dSeriesOf
 %             if bRelativeToMax == true
 %                 dValue = aBuffer(ptY,ptX,iAxial) * dPercentOfMax;
 %             else
-%                 dValue = aBuffer(ptY,ptX,iAxial) * dMinTreshold;
+%                 dValue = aBuffer(ptY,ptX,iAxial) * dMinThreshold;
 %             end
 %             
 %             aSlice = aBuffer(:, :, iAxial);

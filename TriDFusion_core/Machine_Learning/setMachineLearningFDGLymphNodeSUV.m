@@ -1,6 +1,6 @@
 function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
 %function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
-%Run FDG Lymph Node Segmentation base on a SUV treshold.
+%Run FDG Lymph Node Segmentation base on a SUV Threshold.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -89,7 +89,7 @@ function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
     if isfield(tQuant, 'tSUV')
         dSUVScale = tQuant.tSUV.dScale;
     else
-        dSUVScale = 0;
+        dSUVScale = 1;
     end
 
     % Apply ROI constraint
@@ -102,7 +102,11 @@ function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
 
     aPTImageTemp = aPTImage;
     aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
-    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
+
+    if any(aLogicalMask(:) ~= 0)
+
+        aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
+    end
 
     resetSeries(dPTSerieOffset, true);
 
@@ -112,12 +116,12 @@ function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
     drawnow;
 
     if isInterpolated('get') == false
-    
+
         isInterpolated('set', true);
-    
+
         setImageInterpolation(true);
     end
-    
+
     % Get DICOM directory directory
 
     [sFilePath, ~, ~] = fileparts(char(atInput(dCTSerieOffset).asFilesList{1}));
@@ -132,7 +136,7 @@ function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
 
     % Convert dicom to .nii
 
-    progressBar(1/10, 'DICOM to NII conversion, please wait.');
+    progressBar(1/10, 'Converting DICOM to NII, please wait...');
 
     dicm2nii(sFilePath, sNiiTmpDir, 1);
 
@@ -178,12 +182,12 @@ function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
                 errordlg(sprintf('An error occur during machine learning segmentation: %s', sCmdout), 'Segmentation Error');
             else % Process succeed
 
-                progressBar(3/10, 'Importing exclusion masks, please wait.');
+                progressBar(3/10, 'Importing exclusion masks, please wait...');
 
                 aExcludeMask = getLymphNodeSUVExcludeMask(tLymphNodeSUV, sSegmentationFolderName, zeros(size(aCTImage)));
                 aExcludeMask = imdilate(aExcludeMask, strel('sphere', 2)); % Increse mask by 2 pixels
 
-                progressBar(4/10, 'Resampling series, please wait.');
+                progressBar(4/10, 'Resampling data series, please wait...');
 
                 [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
                 [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
@@ -211,7 +215,7 @@ function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
                 clear aResampledPTImageTemp;
                 clear aExcludeMask;
 
-                progressBar(5/10, 'Resampling mip, please wait.');
+                progressBar(5/10, 'Resampling MIP, please wait...');
 
                 refMip = mipBuffer('get', [], dCTSerieOffset);
                 aMip   = mipBuffer('get', [], dPTSerieOffset);
@@ -223,20 +227,20 @@ function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
                 setQuantification(dPTSerieOffset);
 
 
-                progressBar(6/10, 'Computing mask, please wait.');
+                progressBar(6/10, 'Computing mask, please wait...');
 
 
                 aBWMask = aResampledPTImage;
 
                 dMin = min(aBWMask, [], 'all');
 
-                dTreshold = tLymphNodeSUV.options.SUVThreshold;
+                dThreshold = tLymphNodeSUV.options.SUVThreshold;
 
-                aBWMask(aBWMask*dSUVScale<dTreshold)=dMin;
+                aBWMask(aBWMask*dSUVScale<dThreshold)=dMin;
 
                 aBWMask = imbinarize(aBWMask);
 
-                progressBar(7/10, 'Computing ct map, please wait.');
+                progressBar(7/10, 'Computing CT map, please wait...');
 
                 BWCT = getTotalSegmentorWholeBodyMask(sSegmentationFolderName, zeros(size(aCTImage)));
                 BWCT = imfill(BWCT, 4, 'holes');
@@ -253,7 +257,7 @@ function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
                     BWCT = imbinarize(BWCT);
                 end
 
-                progressBar(9/10, 'Creating contours, please wait.');
+                progressBar(9/10, 'Generating contours, please wait...');
 
                 imMask = aResampledPTImage;
                 imMask(aBWMask == 0) = dMin;
@@ -265,7 +269,7 @@ function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
                 dSmalestVoiValue = tLymphNodeSUV.options.smalestVoiValue;
                 bPixelEdge = tLymphNodeSUV.options.pixelEdge;
 
-                maskAddVoiToSeries(imMask, aBWMask, bPixelEdge, false, dTreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue);
+                maskAddVoiToSeries(imMask, aBWMask, bPixelEdge, false, dThreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue);
 
                 % Segment
 
@@ -356,8 +360,8 @@ function setMachineLearningFDGLymphNodeSUV(sSegmentatorScript, tLymphNodeSUV)
     end
 
     refreshImages();
-    
-    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));       
+
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dPTSerieOffset), dicomBuffer('get', [], dPTSerieOffset), mipAngle('get'));
 
     clear aPTImage;
     clear aCTImage;

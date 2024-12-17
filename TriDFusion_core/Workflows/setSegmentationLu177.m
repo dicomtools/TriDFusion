@@ -1,6 +1,6 @@
 function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, bUseDefault)
 %function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, bUseDefault)
-%Run Lu177 Segmentation base on normal liver treshold.
+%Run Lu177 Segmentation base on normal liver Threshold.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -93,7 +93,7 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
     if isfield(tQuant, 'tSUV')
         dSUVScale = tQuant.tSUV.dScale;
     else
-        dSUVScale = 0;
+        dSUVScale = 1;
     end
 
     atRoiInput = roiTemplate('get', dNMSerieOffset);
@@ -186,7 +186,7 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
         setImageInterpolation(true);
     end
 
-    progressBar(5/10, 'Resampling series, please wait.');
+    progressBar(5/10, 'Resampling data series, please wait...');
 
     [aResampledNMImageTemp, ~] = resampleImage(aNMImageTemp, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);
     [aResampledNMImage, atResampledNMMetaData] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, true);
@@ -199,7 +199,7 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
     clear aNMImageTemp;
     clear aResampledNMImageTemp;
 
-    progressBar(6/10, 'Resampling mip, please wait.');
+    progressBar(6/10, 'Resampling MIP, please wait...');
 
     refMip = mipBuffer('get', [], dCTSerieOffset);
     aMip   = mipBuffer('get', [], dNMSerieOffset);
@@ -218,24 +218,24 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
         dSUVScale = 1;
     end
 
-    progressBar(7/10, 'Computing mask, please wait.');
+    progressBar(7/10, 'Computing mask, please wait...');
 
     aBWMask = aResampledNMImage;
 
     dMin = min(aBWMask, [], 'all');
 
-%    dTreshold = (4.44/gdNormalLiverMean)*(gdNormalLiverMean+gdNormalLiverSTD);
-    dTreshold = (1.5*gdNormalLiverMean) + (2*gdNormalLiverSTD);
+%    dThreshold = (4.44/gdNormalLiverMean)*(gdNormalLiverMean+gdNormalLiverSTD);
+    dThreshold = (1.5*gdNormalLiverMean) + (2*gdNormalLiverSTD);
 
-    if dTreshold < 2.5
-        dTreshold = 2.5;
+    if dThreshold < 2.5
+        dThreshold = 2.5;
     end
 
-    aBWMask(aBWMask*dSUVScale<dTreshold)=dMin;
+    aBWMask(aBWMask*dSUVScale<dThreshold)=dMin;
 
     aBWMask = imbinarize(aBWMask);
 
-    progressBar(8/10, 'Computing ct map, please wait.');
+    progressBar(8/10, 'Computing CT map, please wait...');
 
 %     tRegistration = registrationTemplate('get');
 %
@@ -291,7 +291,7 @@ function setSegmentationLu177(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, 
         BWCT = imbinarize(BWCT);
     end
 
-    progressBar(9/10, 'Creating contours, please wait.');
+    progressBar(9/10, 'Generating contours, please wait...');
 
     imMask = aResampledNMImage;
 %     imMask(aBWMask == 0) = dMin;

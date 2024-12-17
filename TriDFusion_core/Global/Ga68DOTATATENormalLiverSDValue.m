@@ -1,6 +1,6 @@
 function dSDValue = Ga68DOTATATENormalLiverSDValue(sAction, dValue)
 %function dSDValue = Ga68DOTATATENormalLiverSDValue(sAction, dValue)
-%Get/Set Ga68DOTATATE Normal LiverTreshold MultiplierValue.
+%Get/Set Ga68DOTATATE Normal LiverThreshold MultiplierValue.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org

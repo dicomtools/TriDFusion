@@ -1,6 +1,6 @@
-function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, dNormalLiverTresholdMultiplier, bUseDefault)
-%function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, dNormalLiverTresholdMultiplier, bUseDefault)
-%Run Ga68DOTATATE Segmentation base on normal liver treshold.
+function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, dNormalLiverThresholdMultiplier, bUseDefault)
+%function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, dNormalLiverThresholdMultiplier, bUseDefault)
+%Run Ga68DOTATATE Segmentation base on normal liver Threshold.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -94,7 +94,7 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
     if isfield(tQuant, 'tSUV')
         dSUVScale = tQuant.tSUV.dScale;
     else
-        dSUVScale = 0;
+        dSUVScale = 1;
     end
 
     atRoiInput = roiTemplate('get', dPTSerieOffset);
@@ -194,7 +194,7 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
 
                     for kk=1:size(aPTImage, 1)
 
-                        aSlice = permute(gaLiverMask(kk,:,:), [3 2 1]); % 10% of treshold Liver
+                        aSlice = permute(gaLiverMask(kk,:,:), [3 2 1]); % 10% of Threshold Liver
                         aSlice(aLogicalMask)=true;
                         gaLiverMask(kk,:,:) = permute(reshape(aSlice, [1 size(aSlice)]), [1 3 2]);
                     end
@@ -202,7 +202,7 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
                 case 'axes2'
 
                     for kk=1:size(gaLiverMask, 2)
-                        aSlice = permute(gaLiverMask(:,kk,:), [3 1 2]); % 10% of treshold Liver
+                        aSlice = permute(gaLiverMask(:,kk,:), [3 1 2]); % 10% of Threshold Liver
                         aSlice(aLogicalMask)=true;
                         gaLiverMask(:,kk,:) = permute(reshape(aSlice, [1 size(aSlice)]), [3 1 2]);
                     end
@@ -210,7 +210,7 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
                 case 'axes3'
 
                     for kk=1:size(gaLiverMask, 3)
-                        aSlice = gaLiverMask(:,:,kk); % 10% of treshold Liver
+                        aSlice = gaLiverMask(:,:,kk); % 10% of Threshold Liver
                         aSlice(aLogicalMask)=true;
                         gaLiverMask(:,:,kk) = aSlice;
                     end
@@ -230,7 +230,11 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
 
     aPTImageTemp = aPTImage;
     aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
-    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
+
+    if any(aLogicalMask(:) ~= 0)
+
+        aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
+    end
 
     resetSeries(dPTSerieOffset, true);
 
@@ -246,7 +250,7 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
         setImageInterpolation(true);
     end
 
-    progressBar(5/11, 'Resampling series, please wait.');
+    progressBar(5/11, 'Resampling data series, please wait...');
 
     [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
     [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
@@ -260,7 +264,7 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
     clear aResampledPTImageTemp;
 
 
-    progressBar(6/11, 'Resampling mip, please wait.');
+    progressBar(6/11, 'Resampling MIP, please wait...');
 
     refMip = mipBuffer('get', [], dCTSerieOffset);
     aMip   = mipBuffer('get', [], dPTSerieOffset);
@@ -285,38 +289,38 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
 
         progressBar(7/11, 'Computing liver mask, please wait.');
 
-        dLiverTreshold = (dNormalLiverTresholdMultiplier*gdNormalLiverMean) + (2*gdNormalLiverSTD);
+        dLiverThreshold = (dNormalLiverThresholdMultiplier*gdNormalLiverMean) + (2*gdNormalLiverSTD);
 
         aLiverBWMask = aResampledPTImage;
 
         dMin = min(aLiverBWMask, [], 'all');
 
-        aLiverBWMask(aLiverBWMask*dSUVScale<dLiverTreshold)=dMin;
+        aLiverBWMask(aLiverBWMask*dSUVScale<dLiverThreshold)=dMin;
 
         aLiverBWMask = imbinarize(aLiverBWMask);
 
         aLiverBWMask(gaLiverMask==0)=0;
     end
 
-    progressBar(8/11, 'Computing mask, please wait.');
+    progressBar(8/11, 'Computing mask, please wait...');
 
     aBWMask = aResampledPTImage;
 
     dMin = min(aBWMask, [], 'all');
 
-%     dTreshold = max(aResampledPTImage, [], 'all')*dBoundaryPercent;
-    dTreshold = (4.44/gdNormalLiverMean)*(gdNormalLiverMean+gdNormalLiverSTD);
-    if dTreshold < 3
-        dTreshold = 3;
+%     dThreshold = max(aResampledPTImage, [], 'all')*dBoundaryPercent;
+    dThreshold = (4.44/gdNormalLiverMean)*(gdNormalLiverMean+gdNormalLiverSTD);
+    if dThreshold < 3
+        dThreshold = 3;
     end
 
-    aBWMask(aBWMask*dSUVScale<dTreshold)=dMin;
+    aBWMask(aBWMask*dSUVScale<dThreshold)=dMin;
 
     aBWMask = imbinarize(aBWMask);
 
-    progressBar(9/11, 'Computing ct map, please wait.');
+    progressBar(9/11, 'Computing CT map, please wait...');
 
-    BWCT = aCTImage;
+    % BWCT = aCTImage;
 
     BWCT = aCTImage >= dBoneMaskThreshold;   % Logical mask creation
     BWCT = imfill(single(BWCT), 4, 'holes'); % Fill holes in the binary mask
@@ -355,7 +359,7 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
         BWCT = imbinarize(BWCT);
     end
 
-    progressBar(10/11, 'Creating contours, please wait.');
+    progressBar(10/11, 'Generating contours, please wait...');
 
     imMask = aResampledPTImage;
 %     imMask(aBWMask == 0) = dMin;
@@ -378,7 +382,7 @@ function setSegmentationGa68DOTATATE(dBoneMaskThreshold, dSmalestVoiValue, dPixe
         imMaskLiver = aResampledPTImage;
         imMaskLiver(gaLiverMask == 0) = dMin;
 
-        maskAddVoiToSeries(imMaskLiver, aLiverBWMask, dPixelEdge, false, dLiverTreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue);
+        maskAddVoiToSeries(imMaskLiver, aLiverBWMask, dPixelEdge, false, dLiverThreshold, false, 0, false, sFormula, BWCT, dSmalestVoiValue);
 
         clear imMaskLiver;
         clear aLiverBWMask;

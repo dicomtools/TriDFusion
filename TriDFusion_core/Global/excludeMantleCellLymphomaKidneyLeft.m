@@ -1,16 +1,13 @@
-function uiObject = editKernelVoiRoiUpperTresholdObject(sAction, aValue)
-%function uiObject = editKernelVoiRoiUpperTresholdObject(sAction, aValue)
-%Get\Set Edit Kernel ROI VOI Upper Treshold Object.
+function bRemove = excludeMantleCellLymphomaKidneyLeft(sAction, bValue)
+%function bRemove = excludeMantleCellLymphomaKidneyLeft(sAction, bValue)
+%Get/Set Mantle Cell Lymphoma segmentation exclude kidney left.
 %See TriDFuison.doc (or pdf) for more information about options.
-%
-%Note: option settings must fit on one line and can contain one semicolon at most.
-%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2024, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -28,12 +25,13 @@ function uiObject = editKernelVoiRoiUpperTresholdObject(sAction, aValue)
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
 
-     persistent paObject; 
+    persistent pbRemove; 
 
-     if strcmpi('set', sAction)
-        paObject = aValue;            
-     end      
-    uiObject = paObject;
+    if strcmpi('set', sAction)
+        pbRemove = bValue;            
+    end
+    
+    bRemove = pbRemove;
 end

@@ -424,7 +424,7 @@ function initRoiPanel()
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'text',...
                   'enable'  , 'Inactive',...
-                  'string'  , 'Upper Treshold Relative Max',...
+                  'string'  , 'Upper Threshold Relative Max',...
                   'horizontalalignment', 'left',...
                   'position', [15 237 225 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -448,7 +448,7 @@ function initRoiPanel()
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'text',...
                   'enable'  , 'Inactive',...
-                  'string'  , 'Treshold in Percent',...
+                  'string'  , 'Threshold in Percent',...
                   'horizontalalignment', 'left',...
                   'position', [15 212 225 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
@@ -458,68 +458,68 @@ function initRoiPanel()
 
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'text',...
-                  'string'  , 'Upper Treshold',...
+                  'string'  , 'Upper Threshold ',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [15 185 200 20]...
                   );
 
-    uiSliderMaxTresholdRoiPanel = ...
+    uiSliderMaxThresholdRoiPanel = ...
         uicontrol(uiRoiPanelPtr('get'), ...
                   'Style'   , 'Slider', ...
                   'Position', [15 165 175 20], ...
-                  'Value'   , maxTresholdSliderRoiPanelValue('get'), ...
+                  'Value'   , maxThresholdSliderRoiPanelValue('get'), ...
                   'Enable'  , 'on', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'CallBack', @sliderMaxTresholdRoiPanelCallback ...
+                  'CallBack', @sliderMaxThresholdRoiPanelCallback ...
                   );
-%    uiSliderMaxTresholdRoiListener = addlistener(uiSliderMaxTresholdRoiPanel, 'Value', 'PreSet', @sliderMaxTresholdRoiPanelCallback);
+%    uiSliderMaxThresholdRoiListener = addlistener(uiSliderMaxThresholdRoiPanel, 'Value', 'PreSet', @sliderMaxThresholdRoiPanelCallback);
 
-    uiEditMaxTresholdRoiPanel = ...
+    uiEditMaxThresholdRoiPanel = ...
         uicontrol(uiRoiPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
                   'Position', [195 165 65 20], ...
-                  'String'  , num2str(maxTresholdSliderRoiPanelValue('get')*100), ...
+                  'String'  , num2str(maxThresholdSliderRoiPanelValue('get')*100), ...
                   'Enable'  , 'On', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'UserData'       , 'uiEditMaxTresholdRoiPanel', ...
-                  'CallBack', @editMaxTresholdRoiPanelCallback ...
+                  'UserData'       , 'uiEditMaxThresholdRoiPanel', ...
+                  'CallBack', @editMaxThresholdRoiPanelCallback ...
                   );
 
         uicontrol(uiRoiPanelPtr('get'),...
                   'style'   , 'text',...
-                  'string'  , 'Lower Treshold',...
+                  'string'  , 'Lower Threshold',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [15 135 200 20]...
                   );
 
-    uiSliderMinTresholdRoiPanel = ...
+    uiSliderMinThresholdRoiPanel = ...
         uicontrol(uiRoiPanelPtr('get'), ...
                   'Style'   , 'Slider', ...
                   'Position', [15 115 175 20], ...
-                  'Value'   , minTresholdSliderRoiPanelValue('get'), ...
+                  'Value'   , minThresholdSliderRoiPanelValue('get'), ...
                   'Enable'  , 'Off', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'CallBack', {@sliderMinTresholdRoiPanelCallback} ...
+                  'CallBack', {@sliderMinThresholdRoiPanelCallback} ...
                   );
-%    uiSliderMinTresholdRoiListener = addlistener(uiSliderMinTresholdRoiPanel, 'Value', 'PreSet', @sliderMinTresholdRoiPanelCallback);
+%    uiSliderMinThresholdRoiListener = addlistener(uiSliderMinThresholdRoiPanel, 'Value', 'PreSet', @sliderMinThresholdRoiPanelCallback);
 
-    uiEditMinTresholdRoiPanel = ...
+    uiEditMinThresholdRoiPanel = ...
         uicontrol(uiRoiPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
                   'Position', [195 115 65 20], ...
-                  'String'  , num2str(minTresholdSliderRoiPanelValue('get')*100), ...
+                  'String'  , num2str(minThresholdSliderRoiPanelValue('get')*100), ...
                   'Enable'  , 'Off', ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'UserData'       , 'uiEditMinTresholdRoiPanel', ...
-                  'CallBack', @editMinTresholdRoiPanelCallback ...
+                  'UserData'       , 'uiEditMinThresholdRoiPanel', ...
+                  'CallBack', @editMinThresholdRoiPanelCallback ...
                   );
 
     if holesRoiPanel('get') == true
@@ -617,8 +617,8 @@ function initRoiPanel()
                   );
     uiCreateVoiRoiPanelObject('set', uiCreateVoiRoiPanel);
 
-    minTresholdRoiPanelValue('set', true, 'Percent', minTresholdSliderRoiPanelValue('get'));
-    maxTresholdRoiPanelValue('set', true, 'Percent', maxTresholdSliderRoiPanelValue('get'));
+    minThresholdRoiPanelValue('set', true, 'Percent', minThresholdSliderRoiPanelValue('get'));
+    maxThresholdRoiPanelValue('set', true, 'Percent', maxThresholdSliderRoiPanelValue('get'));
 
     function setLesionTypeRoiPanelCallback(hObject, ~)
 
@@ -1803,50 +1803,50 @@ function initRoiPanel()
 
             sSUVtype = viewerSUVtype('get');
 
-            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in BQML')
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Threshold in BQML')
 
-                set(txtInPercentRoiPanel, 'String', sprintf('Treshold in SUV/%s', sSUVtype));
+                set(txtInPercentRoiPanel, 'String', sprintf('Threshold in SUV/%s', sSUVtype));
             else
-                set(txtInPercentRoiPanel, 'String', 'Treshold in BQML');
+                set(txtInPercentRoiPanel, 'String', 'Threshold in BQML');
             end
         end
 
         if strcmpi(sUnitDisplay, 'HU') || ...
            get(chkUseCTRoiPanel, 'Value') == true
 
-            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in HU')
-                set(txtInPercentRoiPanel, 'String', 'Treshold in Window Level');
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Threshold in HU')
+                set(txtInPercentRoiPanel, 'String', 'Threshold in Window Level');
             else
-                set(txtInPercentRoiPanel, 'String', 'Treshold in HU');
+                set(txtInPercentRoiPanel, 'String', 'Threshold in HU');
             end
         end
 
-        [dMin, dMax] = getTresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
+        [dMin, dMax] = getThresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
 
-        dMaxTresholdValue = get(uiSliderMaxTresholdRoiPanel, 'Value');
-        dMinTresholdValue = get(uiSliderMinTresholdRoiPanel, 'Value');
+        dMaxThresholdValue = get(uiSliderMaxThresholdRoiPanel, 'Value');
+        dMinThresholdValue = get(uiSliderMinThresholdRoiPanel, 'Value');
 
         dDiff = dMax - dMin;
 
-        dMaxValue = (dMaxTresholdValue*dDiff)+dMin;
-        dMinValue = (dMinTresholdValue*dDiff)+dMin;
+        dMaxValue = (dMaxThresholdValue*dDiff)+dMin;
+        dMinValue = (dMinThresholdValue*dDiff)+dMin;
 
         sSUVtype = viewerSUVtype('get');
 
-        if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Treshold in SUV/%s', sSUVtype))
+        if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Threshold in SUV/%s', sSUVtype))
             tQuant = quantificationTemplate('get');
             dMinValue = dMinValue*tQuant.tSUV.dScale;
             dMaxValue = dMaxValue*tQuant.tSUV.dScale;
         end
 
-        if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in Window Level')
+        if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Threshold in Window Level')
             [dCTWindow, dCTLevel] = computeWindowMinMax(dMaxValue, dMinValue);
             dMaxValue = dCTWindow;
             dMinValue = dCTLevel;
         end
 
-        set(uiEditMinTresholdRoiPanel, 'String', num2str(dMinValue));
-        set(uiEditMaxTresholdRoiPanel, 'String', num2str(dMaxValue));
+        set(uiEditMinThresholdRoiPanel, 'String', num2str(dMinValue));
+        set(uiEditMaxThresholdRoiPanel, 'String', num2str(dMaxValue));
 
         catch
             progressBar(1, 'Error:btnUnitTypeRoiPanelCallback()');
@@ -1896,14 +1896,14 @@ function initRoiPanel()
         end
 
         if get(chkInPercentRoiPanel, 'Value') == true % Use percentage of max
-            set(txtInPercentRoiPanel, 'String', 'Treshold in Percent');
+            set(txtInPercentRoiPanel, 'String', 'Threshold in Percent');
 
             dOffset = get(uiSeriesPtr('get'), 'Value');
             sUnitDisplay = getSerieUnitValue(dOffset);
         else
             if get(chkUseCTRoiPanel, 'Value') == true % Use CT MAP
 
-                set(txtInPercentRoiPanel, 'String', 'Treshold in HU');
+                set(txtInPercentRoiPanel, 'String', 'Threshold in HU');
             else
 
                 dOffset = get(uiSeriesPtr('get'), 'Value');
@@ -1912,48 +1912,48 @@ function initRoiPanel()
 
                 if strcmpi(sUnitDisplay, 'SUV')
 
-                    set(txtInPercentRoiPanel, 'String', 'Treshold in BQML');
+                    set(txtInPercentRoiPanel, 'String', 'Threshold in BQML');
 
                 elseif strcmpi(sUnitDisplay, 'HU')
 
-                    set(txtInPercentRoiPanel, 'String', 'Treshold in HU');
+                    set(txtInPercentRoiPanel, 'String', 'Threshold in HU');
 
                 else
-                    set(txtInPercentRoiPanel, 'String', sprintf('Treshold in %s', sUnitDisplay) );
+                    set(txtInPercentRoiPanel, 'String', sprintf('Threshold in %s', sUnitDisplay) );
                 end
 
             end
 
         end
 
-        if ~strcmpi(get(txtInPercentRoiPanel , 'String'), 'Treshold in Percent')
+        if ~strcmpi(get(txtInPercentRoiPanel , 'String'), 'Threshold in Percent')
 
-            [dMin, dMax] = getTresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
+            [dMin, dMax] = getThresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
 
-            dMaxTresholdValue = get(uiSliderMaxTresholdRoiPanel, 'Value');
-            dMinTresholdValue = get(uiSliderMinTresholdRoiPanel, 'Value');
+            dMaxThresholdValue = get(uiSliderMaxThresholdRoiPanel, 'Value');
+            dMinThresholdValue = get(uiSliderMinThresholdRoiPanel, 'Value');
 
             dDiff = dMax - dMin;
 
-            dMaxValue = (dMaxTresholdValue*dDiff)+dMin;
-            dMinValue = (dMinTresholdValue*dDiff)+dMin;
+            dMaxValue = (dMaxThresholdValue*dDiff)+dMin;
+            dMinValue = (dMinThresholdValue*dDiff)+dMin;
 
             sSUVtype = viewerSUVtype('get');
 
-            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Treshold in SUV/%s', sSUVtype))
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Threshold in SUV/%s', sSUVtype))
                 tQuant = quantificationTemplate('get');
                 dMinValue = dMinValue*tQuant.tSUV.dScale;
                 dMaxValue = dMaxValue*tQuant.tSUV.dScale;
             end
 
-            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in Window Level')
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Threshold in Window Level')
                 [dCTWindow, dCTLevel] = computeWindowMinMax(dMaxValue, dMinValue);
                 dMaxValue = dCTWindow;
                 dMinValue = dCTLevel;
             end
 
-            set(uiEditMinTresholdRoiPanel, 'String', num2str(dMinValue));
-            set(uiEditMaxTresholdRoiPanel, 'String', num2str(dMaxValue));
+            set(uiEditMinThresholdRoiPanel, 'String', num2str(dMinValue));
+            set(uiEditMaxThresholdRoiPanel, 'String', num2str(dMaxValue));
         end
 
         catch
@@ -2096,7 +2096,7 @@ function initRoiPanel()
     end
 
 
-    function sliderMaxTresholdRoiPanelCallback(~, hEvent)
+    function sliderMaxThresholdRoiPanelCallback(~, hEvent)
 
         try
 
@@ -2110,54 +2110,54 @@ function initRoiPanel()
             return;
         end
 
-        dMaxTresholdValue = get(uiSliderMaxTresholdRoiPanel, 'Value');
-        dMinTresholdValue = get(uiSliderMinTresholdRoiPanel, 'Value');
+        dMaxThresholdValue = get(uiSliderMaxThresholdRoiPanel, 'Value');
+        dMinThresholdValue = get(uiSliderMinThresholdRoiPanel, 'Value');
 
         if get(chkRelativeToMaxRoiPanel, 'Value') == false
 
-            if dMaxTresholdValue < dMinTresholdValue
-                dMaxTresholdValue = dMinTresholdValue;
+            if dMaxThresholdValue < dMinThresholdValue
+                dMaxThresholdValue = dMinThresholdValue;
             end
         end
 
         if get(chkInPercentRoiPanel, 'Value') == true
 
-            set(uiEditMaxTresholdRoiPanel  , 'String', num2str(dMaxTresholdValue*100));
+            set(uiEditMaxThresholdRoiPanel  , 'String', num2str(dMaxThresholdValue*100));
 
-            maxTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), 'Percent', dMaxTresholdValue);
+            maxThresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), 'Percent', dMaxThresholdValue);
 
         else
 
-            [dMin, dMax] = getTresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
+            [dMin, dMax] = getThresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
 
             dDiff = dMax - dMin;
 
-            dMaxValue = (dMaxTresholdValue*dDiff)+dMin;
-            dMinValue = (dMinTresholdValue*dDiff)+dMin;
+            dMaxValue = (dMaxThresholdValue*dDiff)+dMin;
+            dMinValue = (dMinThresholdValue*dDiff)+dMin;
 
             sSUVtype = viewerSUVtype('get');
 
-            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Treshold in SUV/%s', sSUVtype))
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Threshold in SUV/%s', sSUVtype))
                 tQuant = quantificationTemplate('get');
                 dMinValue = dMinValue*tQuant.tSUV.dScale;
                 dMaxValue = dMaxValue*tQuant.tSUV.dScale;
             end
 
-            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in Window Level')
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Threshold in Window Level')
                 [dCTWindow, ~] = computeWindowMinMax(dMaxValue, dMinValue);
                 dMaxValue = dCTWindow;
             end
 
-            maxTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), sUnitDisplay, dMaxValue);
+            maxThresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), sUnitDisplay, dMaxValue);
 
-            set(uiEditMaxTresholdRoiPanel  , 'String', num2str(dMaxValue));
+            set(uiEditMaxThresholdRoiPanel  , 'String', num2str(dMaxValue));
 
         end
 
-        maxTresholdSliderRoiPanelValue('set', dMaxTresholdValue);
+        maxThresholdSliderRoiPanelValue('set', dMaxThresholdValue);
 
         if strcmpi(hEvent.EventName, 'Action')
-            set(uiSliderMaxTresholdRoiPanel, 'Value',  maxTresholdSliderRoiPanelValue('get'));
+            set(uiSliderMaxThresholdRoiPanel, 'Value',  maxThresholdSliderRoiPanelValue('get'));
         end
 
         previewRoiSegmentation(str2double(get(edtSmalestRegion, 'String')), ...
@@ -2168,14 +2168,14 @@ function initRoiPanel()
                                );
 
         catch
-            progressBar(1, 'Error:sliderMaxTresholdRoiPanelCallback()');
+            progressBar(1, 'Error:sliderMaxThresholdRoiPanelCallback()');
         end
 
         set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
         drawnow;
     end
 
-    function editMaxTresholdRoiPanelCallback(hObject, ~)
+    function editMaxThresholdRoiPanelCallback(hObject, ~)
 
         try
 
@@ -2189,20 +2189,20 @@ function initRoiPanel()
             return;
         end
 
-%        delete(uiSliderMaxTresholdRoiListener);
+%        delete(uiSliderMaxThresholdRoiListener);
 
         sMaxValue = get(hObject, 'String');
         dMaxValue = str2double(sMaxValue);
         if isnan(dMaxValue)
             if get(chkInPercentRoiPanel, 'Value') == true
-                dMaxValue = maxTresholdRoiPanelValue('get')*100;
+                dMaxValue = maxThresholdRoiPanelValue('get')*100;
             else
                 dMaxValue = roiPanelMaxValue('get');
             end
         end
 
         if get(chkRelativeToMaxRoiPanel, 'Value') == false
-            sMinValue = get(uiEditMinTresholdRoiPanel, 'String');
+            sMinValue = get(uiEditMinThresholdRoiPanel, 'String');
             dMinValue = str2double(sMinValue);
             if dMaxValue < dMinValue
                 dMaxValue = dMinValue;
@@ -2219,27 +2219,27 @@ function initRoiPanel()
                 dMaxValue = 100;
             end
 
-            maxTresholdSliderRoiPanelValue('set', dMaxValue/100);
+            maxThresholdSliderRoiPanelValue('set', dMaxValue/100);
 
-            set(uiEditMaxTresholdRoiPanel  , 'String', num2str(dMaxValue));
-            set(uiSliderMaxTresholdRoiPanel, 'Value' , dMaxValue/100);
+            set(uiEditMaxThresholdRoiPanel  , 'String', num2str(dMaxValue));
+            set(uiSliderMaxThresholdRoiPanel, 'Value' , dMaxValue/100);
 
-            maxTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), 'Percent', dMaxValue/100);
+            maxThresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), 'Percent', dMaxValue/100);
 
         else
 
-            [dMin, dMax] = getTresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
+            [dMin, dMax] = getThresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
 
             sSUVtype = viewerSUVtype('get');
 
-            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Treshold in SUV/%s', sSUVtype))
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Threshold in SUV/%s', sSUVtype))
                 tQuant = quantificationTemplate('get');
 
                 dMin = dMin*tQuant.tSUV.dScale;
                 dMax = dMax*tQuant.tSUV.dScale;
             end
 
-            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in Window Level')
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Threshold in Window Level')
                 [dCTWindow, dCTLevel] = computeWindowMinMax(dMax, dMin);
                 dMax = dCTWindow;
                 dMin = dCTLevel;
@@ -2257,16 +2257,16 @@ function initRoiPanel()
 
             dRatio = (dMaxValue-dMin)/dDiff;
 
-            maxTresholdSliderRoiPanelValue('set', dRatio);
+            maxThresholdSliderRoiPanelValue('set', dRatio);
 
-            set(uiEditMaxTresholdRoiPanel  , 'String', num2str(dMaxValue));
-            set(uiSliderMaxTresholdRoiPanel, 'Value' , dRatio);
+            set(uiEditMaxThresholdRoiPanel  , 'String', num2str(dMaxValue));
+            set(uiSliderMaxThresholdRoiPanel, 'Value' , dRatio);
 
-            maxTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), sUnitDisplay, dMaxValue);
+            maxThresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), sUnitDisplay, dMaxValue);
 
         end
 
-%        uiSliderMaxTresholdRoiListener = addlistener(uiSliderMaxTresholdRoiPanel, 'Value', 'PreSet', @sliderMaxTresholdRoiPanelCallback);
+%        uiSliderMaxThresholdRoiListener = addlistener(uiSliderMaxThresholdRoiPanel, 'Value', 'PreSet', @sliderMaxThresholdRoiPanelCallback);
 
         previewRoiSegmentation(str2double(get(edtSmalestRegion, 'String')), ...
                                get(chkPixelEdge, 'Value'), ...
@@ -2275,14 +2275,14 @@ function initRoiPanel()
                                get(uiSeriesCTRoiPanel  , 'Value') ...
                                );
         catch
-            progressBar(1, 'Error:editMaxTresholdRoiPanelCallback()');
+            progressBar(1, 'Error:editMaxThresholdRoiPanelCallback()');
         end
 
         set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
         drawnow;
     end
 
-    function sliderMinTresholdRoiPanelCallback(~, hEvent)
+    function sliderMinThresholdRoiPanelCallback(~, hEvent)
 
         try
 
@@ -2296,40 +2296,40 @@ function initRoiPanel()
             return;
         end
 
-        dMaxTresholdValue = get(uiSliderMaxTresholdRoiPanel, 'Value');
-        dMinTresholdValue = get(uiSliderMinTresholdRoiPanel, 'Value');
+        dMaxThresholdValue = get(uiSliderMaxThresholdRoiPanel, 'Value');
+        dMinThresholdValue = get(uiSliderMinThresholdRoiPanel, 'Value');
 
         if get(chkRelativeToMaxRoiPanel, 'Value') == false
-            dMaxTresholdValue = get(uiSliderMaxTresholdRoiPanel, 'Value');
+            dMaxThresholdValue = get(uiSliderMaxThresholdRoiPanel, 'Value');
 
-            if dMaxTresholdValue < dMinTresholdValue
-                dMinTresholdValue = dMaxTresholdValue;
+            if dMaxThresholdValue < dMinThresholdValue
+                dMinThresholdValue = dMaxThresholdValue;
             end
         end
 
         if get(chkInPercentRoiPanel, 'Value') == true
 
-            set(uiEditMinTresholdRoiPanel  , 'String', num2str(dMinTresholdValue*100));
+            set(uiEditMinThresholdRoiPanel  , 'String', num2str(dMinThresholdValue*100));
 
-            minTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), 'Percent', dMinTresholdValue);
+            minThresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), 'Percent', dMinThresholdValue);
 
         else
-            [dMin, dMax] = getTresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
+            [dMin, dMax] = getThresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
 
             dDiff = dMax - dMin;
 
-            dMaxValue = (dMaxTresholdValue*dDiff)+dMin;
-            dMinValue = (dMinTresholdValue*dDiff)+dMin;
+            dMaxValue = (dMaxThresholdValue*dDiff)+dMin;
+            dMinValue = (dMinThresholdValue*dDiff)+dMin;
 
             sSUVtype = viewerSUVtype('get');
 
-            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Treshold in SUV/%s', sSUVtype))
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Threshold in SUV/%s', sSUVtype))
                 tQuant = quantificationTemplate('get');
                 dMinValue = dMinValue*tQuant.tSUV.dScale;
                 dMaxValue = dMaxValue*tQuant.tSUV.dScale;
             end
 
-            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in Window Level')
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Threshold in Window Level')
                 [~, dCTLevel] = computeWindowMinMax(dMaxValue, dMinValue);
                 dMinValue = dCTLevel;
             end
@@ -2342,16 +2342,16 @@ function initRoiPanel()
                 dMinValue = dMax;
             end
 
-            minTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), sUnitDisplay, dMinValue);
+            minThresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), sUnitDisplay, dMinValue);
 
-            set(uiEditMinTresholdRoiPanel  , 'String', num2str(dMinValue));
+            set(uiEditMinThresholdRoiPanel  , 'String', num2str(dMinValue));
 
         end
 
-        minTresholdSliderRoiPanelValue('set', dMinTresholdValue);
+        minThresholdSliderRoiPanelValue('set', dMinThresholdValue);
 
         if strcmpi(hEvent.EventName, 'Action')
-            set(uiSliderMinTresholdRoiPanel, 'Value',  minTresholdSliderRoiPanelValue('get'));
+            set(uiSliderMinThresholdRoiPanel, 'Value',  minThresholdSliderRoiPanelValue('get'));
         end
 
         previewRoiSegmentation(str2double(get(edtSmalestRegion, 'String')), ...
@@ -2362,14 +2362,14 @@ function initRoiPanel()
                                );
 
         catch
-            progressBar(1, 'Error:sliderMinTresholdRoiPanelCallback()');
+            progressBar(1, 'Error:sliderMinThresholdRoiPanelCallback()');
         end
 
         set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
         drawnow;
     end
 
-    function editMinTresholdRoiPanelCallback(hObject, ~)
+    function editMinThresholdRoiPanelCallback(hObject, ~)
 
         try
 
@@ -2383,20 +2383,20 @@ function initRoiPanel()
             return;
         end
 
-%        delete(uiSliderMinTresholdRoiListener);
+%        delete(uiSliderMinThresholdRoiListener);
 
         sMinValue = get(hObject, 'String');
         dMinValue = str2double(sMinValue);
         if isnan(dMinValue)
             if get(chkInPercentRoiPanel, 'Value') == true
-                dMinValue = minTresholdRoiPanelValue('get')*100;
+                dMinValue = minThresholdRoiPanelValue('get')*100;
             else
-                [dMinValue, ~] = getTresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), false);
+                [dMinValue, ~] = getThresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), false);
             end
         end
 
         if get(chkRelativeToMaxRoiPanel, 'Value') == false
-            sMaxValue = get(uiEditMaxTresholdRoiPanel, 'String');
+            sMaxValue = get(uiEditMaxThresholdRoiPanel, 'String');
             dMaxValue = str2double(sMaxValue);
             if dMaxValue < dMinValue
                 dMinValue = dMaxValue;
@@ -2413,27 +2413,27 @@ function initRoiPanel()
                 dMinValue = 100;
             end
 
-            minTresholdSliderRoiPanelValue('set', dMinValue/100);
+            minThresholdSliderRoiPanelValue('set', dMinValue/100);
 
-            set(uiEditMinTresholdRoiPanel  , 'String', num2str(dMinValue));
-            set(uiSliderMinTresholdRoiPanel, 'Value' , dMinValue/100);
+            set(uiEditMinThresholdRoiPanel  , 'String', num2str(dMinValue));
+            set(uiSliderMinThresholdRoiPanel, 'Value' , dMinValue/100);
 
-            minTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), 'Percent', dMinValue/100);
+            minThresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), 'Percent', dMinValue/100);
 
         else
-            [dMin, dMax] = getTresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
+            [dMin, dMax] = getThresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
 
             dOffset = get(uiSeriesPtr('get'), 'Value');
 
             sSUVtype = viewerSUVtype('get');
 
-            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Treshold in SUV/%s', sSUVtype))
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Threshold in SUV/%s', sSUVtype))
                 tQuant = quantificationTemplate('get');
                 dMin = dMin*tQuant.tSUV.dScale;
                 dMax = dMax*tQuant.tSUV.dScale;
             end
 
-            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in Window Level')
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Threshold in Window Level')
                 [dCTWindow, dCTLevel] = computeWindowMinMax(dMax, dMin);
                 dMax = dCTWindow;
                 dMin = dCTLevel;
@@ -2451,16 +2451,16 @@ function initRoiPanel()
 
             dRatio = (dMinValue-dMin)/dDiff;
 
-            minTresholdSliderRoiPanelValue('set', dRatio);
+            minThresholdSliderRoiPanelValue('set', dRatio);
 
-            set(uiEditMinTresholdRoiPanel  , 'String', num2str(dMinValue));
-            set(uiSliderMinTresholdRoiPanel, 'Value' , dRatio);
+            set(uiEditMinThresholdRoiPanel  , 'String', num2str(dMinValue));
+            set(uiSliderMinThresholdRoiPanel, 'Value' , dRatio);
 
-            minTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), sUnitDisplay, dMinValue);
+            minThresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), sUnitDisplay, dMinValue);
 
         end
 
-%        uiSliderMinTresholdRoiListener = addlistener(uiSliderMinTresholdRoiPanel, 'Value', 'PreSet', @sliderMinTresholdRoiPanelCallback);
+%        uiSliderMinThresholdRoiListener = addlistener(uiSliderMinThresholdRoiPanel, 'Value', 'PreSet', @sliderMinThresholdRoiPanelCallback);
 
         previewRoiSegmentation(str2double(get(edtSmalestRegion, 'String')), ...
                                get(chkPixelEdge, 'Value'), ...
@@ -2469,7 +2469,7 @@ function initRoiPanel()
                                get(uiSeriesCTRoiPanel  , 'Value') ...
                                );
         catch
-            progressBar(1, 'Error:editMinTresholdRoiPanelCallback()');
+            progressBar(1, 'Error:editMinThresholdRoiPanelCallback()');
         end
 
         set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
@@ -2503,74 +2503,74 @@ function initRoiPanel()
 
         if get(chkRelativeToMaxRoiPanel, 'Value') == true
 
-            set(uiSliderMinTresholdRoiPanel, 'Enable', 'off');
-            set(uiEditMinTresholdRoiPanel  , 'Enable', 'off');
+            set(uiSliderMinThresholdRoiPanel, 'Enable', 'off');
+            set(uiEditMinThresholdRoiPanel  , 'Enable', 'off');
 
-            set(txtRelativeToMaxRoiPanel, 'String', 'Upper Treshold relative Max');
+            set(txtRelativeToMaxRoiPanel, 'String', 'Upper Threshold relative Max');
         else
-%            delete(uiSliderMinTresholdRoiListener);
+%            delete(uiSliderMinThresholdRoiListener);
 
-            set(uiSliderMinTresholdRoiPanel, 'Enable', 'on');
-            set(uiEditMinTresholdRoiPanel  , 'Enable', 'on');
+            set(uiSliderMinThresholdRoiPanel, 'Enable', 'on');
+            set(uiEditMinThresholdRoiPanel  , 'Enable', 'on');
 
-            set(txtRelativeToMaxRoiPanel, 'String', 'Lower to Upper Treshold');
+            set(txtRelativeToMaxRoiPanel, 'String', 'Lower to Upper Threshold ');
 
             if get(chkInPercentRoiPanel, 'Value') == true
 
-                dMinPercentValue = minTresholdSliderRoiPanelValue('get');
-                dMaxPercentValue = maxTresholdSliderRoiPanelValue('get');
+                dMinPercentValue = minThresholdSliderRoiPanelValue('get');
+                dMaxPercentValue = maxThresholdSliderRoiPanelValue('get');
 
                 if dMinPercentValue > dMaxPercentValue
                     dMinPercentValue = dMaxPercentValue;
                 end
 
-                set(uiSliderMinTresholdRoiPanel, 'Value' , dMinPercentValue);
-                set(uiEditMinTresholdRoiPanel, 'String', num2str(dMinPercentValue*100));
+                set(uiSliderMinThresholdRoiPanel, 'Value' , dMinPercentValue);
+                set(uiEditMinThresholdRoiPanel, 'String', num2str(dMinPercentValue*100));
 
-                minTresholdSliderRoiPanelValue('set', dMinPercentValue);
-                minTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), 'Persent', dMinPercentValue);
+                minThresholdSliderRoiPanelValue('set', dMinPercentValue);
+                minThresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), 'Persent', dMinPercentValue);
 
             else
 
-                dMinTresholdValue = get(uiSliderMinTresholdRoiPanel, 'Value');
-                dMaxTresholdValue = maxTresholdSliderRoiPanelValue('get');
+                dMinThresholdValue = get(uiSliderMinThresholdRoiPanel, 'Value');
+                dMaxThresholdValue = maxThresholdSliderRoiPanelValue('get');
 
                 dOffset = get(uiSeriesPtr('get'), 'Value');
 
                 sUnitDisplay = getSerieUnitValue(dOffset);
 
-                [dMin, dMax] = getTresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
+                [dMin, dMax] = getThresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
 
                 dDiff = dMax - dMin;
 
-                if dMinTresholdValue > dMaxTresholdValue
-                    dMinTresholdValue = dMaxTresholdValue;
+                if dMinThresholdValue > dMaxThresholdValue
+                    dMinThresholdValue = dMaxThresholdValue;
                 end
 
-                dMaxValue = (dMaxTresholdValue*dDiff)+dMin;
-                dMinValue = (dMinTresholdValue*dDiff)+dMin;
+                dMaxValue = (dMaxThresholdValue*dDiff)+dMin;
+                dMinValue = (dMinThresholdValue*dDiff)+dMin;
 
                 sSUVtype = viewerSUVtype('get');
 
-                if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Treshold in SUV/%s', sSUVtype))
+                if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Threshold in SUV/%s', sSUVtype))
                     tQuant = quantificationTemplate('get');
                     dMinValue = dMaxValue*tQuant.tSUV.dScale;
                 end
 
-                 if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in Window Level')
+                 if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Threshold in Window Level')
                     [~, dCTLevel] = computeWindowMinMax(dMaxValue, dMinValue);
                     dMinValue = dCTLevel;
                 end
 
-                set(uiEditMinTresholdRoiPanel  , 'String', num2str(dMinValue));
-                set(uiSliderMinTresholdRoiPanel, 'Value' , dMinTresholdValue);
+                set(uiEditMinThresholdRoiPanel  , 'String', num2str(dMinValue));
+                set(uiSliderMinThresholdRoiPanel, 'Value' , dMinThresholdValue);
 
-                minTresholdSliderRoiPanelValue('set', dMinTresholdValue);
-                minTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), sUnitDisplay, dMinValue);
+                minThresholdSliderRoiPanelValue('set', dMinThresholdValue);
+                minThresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), sUnitDisplay, dMinValue);
 
             end
 
-%            uiSliderMinTresholdRoiListener = addlistener(uiSliderMinTresholdRoiPanel, 'Value', 'PreSet', @sliderMinTresholdRoiPanelCallback);
+%            uiSliderMinThresholdRoiListener = addlistener(uiSliderMinThresholdRoiPanel, 'Value', 'PreSet', @sliderMinThresholdRoiPanelCallback);
 
         end
 
@@ -2608,30 +2608,30 @@ function initRoiPanel()
 
        inPercentRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'));
 
-%        delete(uiSliderMaxTresholdRoiListener);
+%        delete(uiSliderMaxThresholdRoiListener);
 %        if relativeToMaxRoiPanelValue('get') == false
-%            delete(uiSliderMinTresholdRoiListener);
+%            delete(uiSliderMinThresholdRoiListener);
 %        end
 
         if get(chkInPercentRoiPanel, 'Value') == true
 
             set(btnUnitTypeRoiPanel, 'Enable', 'off');
 
-            set(txtInPercentRoiPanel, 'String', 'Treshold in Percent');
+            set(txtInPercentRoiPanel, 'String', 'Threshold in Percent');
 
-            dMaxPercentValue = maxTresholdSliderRoiPanelValue('get');
+            dMaxPercentValue = maxThresholdSliderRoiPanelValue('get');
 
-            set(uiEditMaxTresholdRoiPanel  , 'String', num2str(dMaxPercentValue*100));
+            set(uiEditMaxThresholdRoiPanel  , 'String', num2str(dMaxPercentValue*100));
 
-            maxTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), 'Persent', dMaxPercentValue);
+            maxThresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), 'Persent', dMaxPercentValue);
 
-            dMinPercentValue = minTresholdSliderRoiPanelValue('get');
+            dMinPercentValue = minThresholdSliderRoiPanelValue('get');
             if relativeToMaxRoiPanelValue('get') == false
 
-                set(uiEditMinTresholdRoiPanel  , 'String', num2str(dMinPercentValue*100));
-                minTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), 'Persent', dMinPercentValue);
+                set(uiEditMinThresholdRoiPanel  , 'String', num2str(dMinPercentValue*100));
+                minThresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), 'Persent', dMinPercentValue);
             else
-                set(uiEditMinTresholdRoiPanel  , 'String', num2str(dMinPercentValue*100));
+                set(uiEditMinThresholdRoiPanel  , 'String', num2str(dMinPercentValue*100));
             end
 
 
@@ -2645,73 +2645,73 @@ function initRoiPanel()
             if strcmpi(sUnitDisplay, 'SUV')
                 if get(chkUseCTRoiPanel, 'Value') == true
                     if get(btnUnitTypeRoiPanel, 'Value') == true
-                        set(txtInPercentRoiPanel, 'String', 'Treshold in Window Level');
+                        set(txtInPercentRoiPanel, 'String', 'Threshold in Window Level');
                     else
-                        set(txtInPercentRoiPanel, 'String', 'Treshold in HU');
+                        set(txtInPercentRoiPanel, 'String', 'Threshold in HU');
                     end
                 else
                     if get(btnUnitTypeRoiPanel, 'Value') == true
 
                         sSUVtype = viewerSUVtype('get');
 
-                        set(txtInPercentRoiPanel, 'String', sprintf('Treshold in SUV/%s', sSUVtype));
+                        set(txtInPercentRoiPanel, 'String', sprintf('Threshold in SUV/%s', sSUVtype));
                     else
-                        set(txtInPercentRoiPanel, 'String', 'Treshold in BQML');
+                        set(txtInPercentRoiPanel, 'String', 'Threshold in BQML');
                     end
                 end
             elseif strcmpi(sUnitDisplay, 'HU')
                 if get(btnUnitTypeRoiPanel, 'Value') == true
-                    set(txtInPercentRoiPanel, 'String', 'Treshold in Window Level');
+                    set(txtInPercentRoiPanel, 'String', 'Threshold in Window Level');
                 else
-                    set(txtInPercentRoiPanel, 'String', 'Treshold in HU');
+                    set(txtInPercentRoiPanel, 'String', 'Threshold in HU');
                 end
             else
-                set(txtInPercentRoiPanel, 'String', sprintf('Treshold in %s', sUnitDisplay));
+                set(txtInPercentRoiPanel, 'String', sprintf('Threshold in %s', sUnitDisplay));
             end
 
-            dMaxTresholdValue = maxTresholdSliderRoiPanelValue('get');
+            dMaxThresholdValue = maxThresholdSliderRoiPanelValue('get');
 
-            [dMin, dMax] = getTresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
+            [dMin, dMax] = getThresholdMinMax(aBuffer, get(uiSeriesPtr('get'), 'Value'), get(chkUseCTRoiPanel, 'Value'));
 
             dDiff = dMax - dMin;
 
-            dMaxValue = (dMaxTresholdValue*dDiff)+dMin;
+            dMaxValue = (dMaxThresholdValue*dDiff)+dMin;
 
             sSUVtype = viewerSUVtype('get');
 
-            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Treshold in SUV/%s', sSUVtype))
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Threshold in SUV/%s', sSUVtype))
                 tQuant = quantificationTemplate('get');
                 dMaxValue = dMaxValue*tQuant.tSUV.dScale;
             end
 
-            dMinTresholdValue = minTresholdSliderRoiPanelValue('get');
+            dMinThresholdValue = minThresholdSliderRoiPanelValue('get');
 
-            dMinValue = (dMinTresholdValue*dDiff)+dMin;
+            dMinValue = (dMinThresholdValue*dDiff)+dMin;
 
-            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Treshold in Window Level')
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), 'Threshold in Window Level')
                 [dCTWindow, dCTLevel] = computeWindowMinMax(dMaxValue, dMinValue);
                 dMaxValue = dCTWindow;
                 dMinValue = dCTLevel;
             end
 
-            set(uiEditMaxTresholdRoiPanel, 'String', num2str(dMaxValue));
+            set(uiEditMaxThresholdRoiPanel, 'String', num2str(dMaxValue));
 
-            maxTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), sUnitDisplay, dMaxValue);
+            maxThresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), sUnitDisplay, dMaxValue);
 
             sSUVtype = viewerSUVtype('get');
 
-            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Treshold in SUV/%s', sSUVtype))
+            if strcmpi(get(txtInPercentRoiPanel, 'String'), sprintf('Threshold in SUV/%s', sSUVtype))
                 tQuant = quantificationTemplate('get');
                 dMinValue = dMinValue*tQuant.tSUV.dScale;
             end
 
             if relativeToMaxRoiPanelValue('get') == false
 
-                set(uiEditMinTresholdRoiPanel, 'String', num2str(dMinValue));
+                set(uiEditMinThresholdRoiPanel, 'String', num2str(dMinValue));
 
-                minTresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), sUnitDisplay, dMinValue);
+                minThresholdRoiPanelValue('set', get(chkInPercentRoiPanel, 'Value'), sUnitDisplay, dMinValue);
             else
-                set(uiEditMinTresholdRoiPanel, 'String', num2str(dMinValue));
+                set(uiEditMinThresholdRoiPanel, 'String', num2str(dMinValue));
             end
 
         end
@@ -2723,9 +2723,9 @@ function initRoiPanel()
         set(fiMainWindowPtr('get'), 'Pointer', sCurrentPointer);
         drawnow;
 
-%        uiSliderMaxTresholdRoiListener = addlistener(uiSliderMaxTresholdRoiPanel, 'Value', 'PreSet', @sliderMaxTresholdRoiPanelCallback);
+%        uiSliderMaxThresholdRoiListener = addlistener(uiSliderMaxThresholdRoiPanel, 'Value', 'PreSet', @sliderMaxThresholdRoiPanelCallback);
 %        if relativeToMaxRoiPanelValue('get') == false
-%            uiSliderMinTresholdRoiListener = addlistener(uiSliderMinTresholdRoiPanel, 'Value', 'PreSet', @sliderMinTresholdRoiPanelCallback);
+%            uiSliderMinThresholdRoiListener = addlistener(uiSliderMinThresholdRoiPanel, 'Value', 'PreSet', @sliderMinThresholdRoiPanelCallback);
 %        end
     end
 
@@ -2758,8 +2758,8 @@ function initRoiPanel()
 
         bRelativeToMax = relativeToMaxRoiPanelValue('get');
 
-        dSliderMin = minTresholdSliderRoiPanelValue('get');
-        dSliderMax = maxTresholdSliderRoiPanelValue('get');
+        dSliderMin = minThresholdSliderRoiPanelValue('get');
+        dSliderMax = maxThresholdSliderRoiPanelValue('get');
 
         % Get constraint
 
@@ -2781,17 +2781,17 @@ function initRoiPanel()
             end
 
             if bUseCtMap == true
-                dTresholdMin = roiPanelCTMinValue('get');
-                dTresholdMax = roiPanelCTMaxValue('get');
+                dThresholdMin = roiPanelCTMinValue('get');
+                dThresholdMax = roiPanelCTMaxValue('get');
             else
-                dTresholdMin = min(aBuffer,[], 'all');
-                dTresholdMax = max(aBuffer,[], 'all');
+                dThresholdMin = min(aBuffer,[], 'all');
+                dThresholdMax = max(aBuffer,[], 'all');
             end
 
-            dBufferDiff = dTresholdMax - dTresholdMin;
+            dBufferDiff = dThresholdMax - dThresholdMin;
 
-            dMinTreshold = (dSliderMin * dBufferDiff)+dTresholdMin;
-            dMaxTreshold = (dSliderMax * dBufferDiff)+dTresholdMin;
+            dMinThreshold= (dSliderMin * dBufferDiff)+dThresholdMin;
+            dMaxThreshold= (dSliderMax * dBufferDiff)+dThresholdMin;
 
             vBoundAxePtr = visBoundAxePtr('get');
             if ~isempty(vBoundAxePtr)
@@ -2799,10 +2799,10 @@ function initRoiPanel()
             end
 
             if bRelativeToMax == true
-                aBuffer(aBuffer<=dMaxTreshold) = dImageMin;
+                aBuffer(aBuffer<=dMaxThreshold) = dImageMin;
             else
-                aBuffer(aBuffer<=dMinTreshold) = dImageMin;
-                aBuffer(aBuffer>=dMaxTreshold) = dImageMin;
+                aBuffer(aBuffer<=dMinThreshold) = dImageMin;
+                aBuffer(aBuffer>=dMaxThreshold) = dImageMin;
             end
 
             if bHoles == true
@@ -2896,16 +2896,16 @@ function initRoiPanel()
             end
 
             if bUseCtMap == true
-                dTresholdMin = roiPanelCTMinValue('get');
-                dTresholdMax = roiPanelCTMaxValue('get');
+                dThresholdMin = roiPanelCTMinValue('get');
+                dThresholdMax = roiPanelCTMaxValue('get');
             else
-                dTresholdMin = min(aBuffer, [], 'all');
-                dTresholdMax = max(aBuffer, [], 'all');
+                dThresholdMin = min(aBuffer, [], 'all');
+                dThresholdMax = max(aBuffer, [], 'all');
             end
 
-            dBufferDiff = dTresholdMax - dTresholdMin;
-            dMinTreshold = (dSliderMin * dBufferDiff) + dTresholdMin;
-            dMaxTreshold = (dSliderMax * dBufferDiff) + dTresholdMin;
+            dBufferDiff = dThresholdMax - dThresholdMin;
+            dMinThreshold= (dSliderMin * dBufferDiff) + dThresholdMin;
+            dMaxThreshold= (dSliderMax * dBufferDiff) + dThresholdMin;
 
             iCoronal  = sliceNumber('get', 'coronal');
             iSagittal = sliceNumber('get', 'sagittal');
@@ -2916,13 +2916,13 @@ function initRoiPanel()
             aAxial    = aBuffer(:, :, iAxial);
 
             if bRelativeToMax == true
-                aCoronal(aCoronal <= dMaxTreshold) = dImageMin;
-                aSagittal(aSagittal <= dMaxTreshold) = dImageMin;
-                aAxial(aAxial <= dMaxTreshold) = dImageMin;
+                aCoronal(aCoronal <= dMaxThreshold) = dImageMin;
+                aSagittal(aSagittal <= dMaxThreshold) = dImageMin;
+                aAxial(aAxial <= dMaxThreshold) = dImageMin;
             else
-                aCoronal(aCoronal <= dMinTreshold | aCoronal >= dMaxTreshold) = dImageMin;
-                aSagittal(aSagittal <= dMinTreshold | aSagittal >= dMaxTreshold) = dImageMin;
-                aAxial(aAxial <= dMinTreshold | aAxial >= dMaxTreshold) = dImageMin;
+                aCoronal(aCoronal <= dMinThreshold| aCoronal >= dMaxThreshold) = dImageMin;
+                aSagittal(aSagittal <= dMinThreshold| aSagittal >= dMaxThreshold) = dImageMin;
+                aAxial(aAxial <= dMinThreshold| aAxial >= dMaxThreshold) = dImageMin;
             end
 
             vBoundAxes1Ptr = visBoundAxes1Ptr('get');
@@ -3137,8 +3137,8 @@ function initRoiPanel()
         bRelativeToMax = relativeToMaxRoiPanelValue('get');
         bInPercent     = inPercentRoiPanelValue('get');
 
-        dSliderMin = minTresholdSliderRoiPanelValue('get');
-        dSliderMax = maxTresholdSliderRoiPanelValue('get');
+        dSliderMin = minThresholdSliderRoiPanelValue('get');
+        dSliderMax = maxThresholdSliderRoiPanelValue('get');
 
         % Roi constraint
 
@@ -3155,17 +3155,17 @@ function initRoiPanel()
         aBuffer(aLogicalMask==0) = dImageMin; % Apply constraint
 
         if bUseCtMap == true
-            dTresholdMin = roiPanelCTMinValue('get');
-            dTresholdMax = roiPanelCTMaxValue('get');
+            dThresholdMin = roiPanelCTMinValue('get');
+            dThresholdMax = roiPanelCTMaxValue('get');
         else
-            dTresholdMin = min(aBuffer,[], 'all');
-            dTresholdMax = max(aBuffer,[], 'all');
+            dThresholdMin = min(aBuffer,[], 'all');
+            dThresholdMax = max(aBuffer,[], 'all');
         end
 
-        dBufferDiff = dTresholdMax - dTresholdMin;
+        dBufferDiff = dThresholdMax - dThresholdMin;
 
-        dMinTreshold = (dSliderMin * dBufferDiff)+dTresholdMin;
-        dMaxTreshold = (dSliderMax * dBufferDiff)+dTresholdMin;
+        dMinThreshold= (dSliderMin * dBufferDiff)+dThresholdMin;
+        dMaxThreshold= (dSliderMax * dBufferDiff)+dThresholdMin;
 
         if size(aBuffer, 3) == 1
 
@@ -3175,10 +3175,10 @@ function initRoiPanel()
             end
 
             if bRelativeToMax == true
-                aBuffer(aBuffer<=dMaxTreshold) = dImageMin;
+                aBuffer(aBuffer<=dMaxThreshold) = dImageMin;
             else
-                aBuffer(aBuffer<=dMinTreshold) = dImageMin;
-                aBuffer(aBuffer>=dMaxTreshold) = dImageMin;
+                aBuffer(aBuffer<=dMinThreshold) = dImageMin;
+                aBuffer(aBuffer>=dMaxThreshold) = dImageMin;
             end
 
             if bHoles == true
@@ -3277,8 +3277,8 @@ function initRoiPanel()
                                     dMinValue = dSliderMin*100;
                                     dMaxValue = dSliderMax*100;
                                 else
-                                    dMinValue = dMinTreshold;
-                                    dMaxValue = dMaxTreshold;
+                                    dMinValue = dMinThreshold;
+                                    dMaxValue = dMaxThreshold;
                                 end
 
                                 if bRelativeToMax == true
@@ -3330,8 +3330,8 @@ function initRoiPanel()
 %                             dMinValue = dSliderMin*100;
 %                             dMaxValue = dSliderMax*100;
 %                         else
-%                             dMinValue = dMinTreshold;
-%                             dMaxValue = dMaxTreshold;
+%                             dMinValue = dMinThreshold;
+%                             dMaxValue = dMaxThreshold;
 %                         end
 %
 %                         if bRelativeToMax == true
@@ -3441,10 +3441,10 @@ function initRoiPanel()
             end
 
             if bRelativeToMax == true
-                aBuffer(aBuffer<=dMaxTreshold) = dImageMin;
+                aBuffer(aBuffer<=dMaxThreshold) = dImageMin;
             else
-                aBuffer(aBuffer<=dMinTreshold) = dImageMin;
-                aBuffer(aBuffer>=dMaxTreshold) = dImageMin;
+                aBuffer(aBuffer<=dMinThreshold) = dImageMin;
+                aBuffer(aBuffer>=dMaxThreshold) = dImageMin;
             end
 
             BW = bwimage(aBuffer, dImageMin);
@@ -3644,8 +3644,8 @@ function initRoiPanel()
                         dMinValue = dSliderMin*100;
                         dMaxValue = dSliderMax*100;
                     else
-                        dMinValue = dMinTreshold;
-                        dMaxValue = dMaxTreshold;
+                        dMinValue = dMinThreshold;
+                        dMaxValue = dMaxThreshold;
                     end
 
                     if bRelativeToMax == true
@@ -3714,7 +3714,7 @@ function initRoiPanel()
         end
     end
 
-    function [dMin, dMax] = getTresholdMinMax(aBuffer, dOffset, dUseCT)
+    function [dMin, dMax] = getThresholdMinMax(aBuffer, dOffset, dUseCT)
 
         if dUseCT == true
             dMin = roiPanelCTMinValue('get');

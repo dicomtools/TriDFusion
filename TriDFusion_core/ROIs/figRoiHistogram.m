@@ -34,7 +34,7 @@ function figRoiHistogram(aInputBuffer, atInputMetaData, ptrObject, bSUVUnit, bMo
     if isfield(tQuant, 'tSUV')
         dSUVScale = tQuant.tSUV.dScale;
     else
-        dSUVScale = 0;
+        dSUVScale = 1;
     end
 
     paAxeBackgroundColor = viewerAxesColor('get');

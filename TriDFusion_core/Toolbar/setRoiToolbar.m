@@ -1996,8 +1996,8 @@ function setRoiToolbar(sVisible)
                 % bRelativeToMax = relativeToMaxRoiPanelValue('get');
                 % bInPercent     = inPercentRoiPanelValue('get');
                 %
-                % dSliderMin = minTresholdSliderRoiPanelValue('get');
-                % dSliderMax = maxTresholdSliderRoiPanelValue('get');
+                % dSliderMin = minThresholdSliderRoiPanelValue('get');
+                % dSliderMax = maxThresholdSliderRoiPanelValue('get');
 
                 % Patch for when the user don't press enter on the edit box
 
@@ -2007,13 +2007,13 @@ function setRoiToolbar(sVisible)
 
                     apChildren = pUiRoiPanelPtr.Children;
 
-                    % uiEditMaxTresholdRoiPanel
+                    % uiEditMaxThresholdRoiPanel
 
-                    uiEditMaxTresholdRoiPanel = apChildren(strcmp({apChildren.UserData}, 'edtClickVoiPercentOfMax'));
+                    uiEditMaxThresholdRoiPanel = apChildren(strcmp({apChildren.UserData}, 'edtClickVoiPercentOfMax'));
 
-                    if ~isempty(uiEditMaxTresholdRoiPanel)
+                    if ~isempty(uiEditMaxThresholdRoiPanel)
 
-                        dPercentOfMax = str2double(get(uiEditMaxTresholdRoiPanel, 'String'));
+                        dPercentOfMax = str2double(get(uiEditMaxThresholdRoiPanel, 'String'));
                     else
 
                         dPercentOfMax = clickVoiPercentOfMaxValue('get');
@@ -2248,12 +2248,12 @@ function setRoiToolbar(sVisible)
             if yPixel == 0
                 yPixel = 1;
             end
-if 1
+% if 1
             dSphereDiameter = brush2dDefaultDiameter('get'); % in mm
-else
-            dSphereDiameter = (xImageSize/10)*xPixel;
-            brush2dDefaultDiameter('set', dSphereDiameter);
-end
+% else
+%             dSphereDiameter = (xImageSize/10)*xPixel;
+%             brush2dDefaultDiameter('set', dSphereDiameter);
+% end
 
             if dSphereDiameter > 0
                 dSemiAxesX = dSphereDiameter/xPixel/2; % In pixel
@@ -2832,7 +2832,7 @@ end
                             adSliceNb = cell(2, dNbTags);
                             for rr=1:numel(atVoiInput{vv}.RoisTag)
                                 
-                                dTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), {atVoiInput{vv}.RoisTag{rr}} ), 1);
+                                dTagOffset = find(strcmp( cellfun( @(atRoiInput) atRoiInput.Tag, atRoiInput, 'uni', false ), atVoiInput{vv}.RoisTag{rr} ), 1);
     
                                 if ~isempty(dTagOffset)
     

@@ -1,10 +1,7 @@
-function uiObject = sliderKernelVoiRoiUpperTresholdObject(sAction, aValue)
-%function uiObject = sliderKernelVoiRoiUpperTresholdObject(sAction, aValue)
-%Get\Set Slider VOI ROI UpperTreshold Object.
+function [bIsPurcentValue, sUnitValue, dValue] = maxThresholdRoiPanelValue(sAction, bIsPurcent, sUnit, dSetValue)
+%function [bIsPurcentValue, sUnitValue, dValue] = maxThresholdRoiPanelValue(sAction, bIsPurcent, sUnit, dSetValue)
+%Get/Set Segmenation Max Roi Panel Value.
 %See TriDFuison.doc (or pdf) for more information about options.
-%
-%Note: option settings must fit on one line and can contain one semicolon at most.
-%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
@@ -30,11 +27,18 @@ function uiObject = sliderKernelVoiRoiUpperTresholdObject(sAction, aValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-     persistent paObject; 
+    persistent pbIsPurcentValue; 
+    persistent psUnitValue; 
+    persistent pdValue; 
 
-     if strcmpi('set', sAction)
-        paObject = aValue;            
-     end      
-     
-     uiObject = paObject;
+    if strcmpi('set', sAction)
+        pbIsPurcentValue = bIsPurcent; 
+        psUnitValue = sUnit;
+        pdValue = dSetValue;
+    end
+    
+    bIsPurcentValue = pbIsPurcentValue;
+    sUnitValue     = psUnitValue;
+    dValue         = pdValue;
+    
 end

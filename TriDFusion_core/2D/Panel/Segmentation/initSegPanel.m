@@ -31,13 +31,13 @@ function initSegPanel()
          return;
     else
         if size(dicomBuffer('get'), 3) == 1
-            sLungTresholdEnable = 'off';
+            sLungThresholdEnable = 'off';
         else
             atMetaData = dicomMetaData('get');
             if strcmpi(atMetaData{1}.Modality, 'ct')
-                sLungTresholdEnable = 'on';
+                sLungThresholdEnable = 'on';
             else
-                sLungTresholdEnable = 'off';
+                sLungThresholdEnable = 'off';
             end
         end
     end
@@ -86,7 +86,7 @@ function initSegPanel()
                   'CallBack', @sliderFudgeFactorCallback ...
                   );
 %    addlistener(uiSliderFudgeFactor,'Value','PreSet',@sliderImageUpperTreshCallback);
-%    sliderImageVoiRoiUpperTresholdObject('set', uiSliderImageUpperTreshold);
+%    sliderImageVoiRoiUpperThresholdObject('set', uiSliderImageUpperThreshold);
 
     uiFudgeFactorValue = ...
         uicontrol(uiSegPanelPtr('get'), ...
@@ -234,18 +234,18 @@ function initSegPanel()
                   'ButtonDownFcn', @chkUnitTypeVoiRoiCallback...
                   );
 
-    uiTxtUpperTreshold = ...
+    uiTxtUpperThreshold = ...
          uicontrol(uiSegPanelPtr('get'),...
                   'style'   , 'text',...
-                  'string'  , 'Upper Treshold Preview',...
+                  'string'  , 'Upper Threshold Preview',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [15 305 200 20]...
                   );
-    txtImageVoiRoiUpperTresholdObject('set', uiTxtUpperTreshold);
+    txtImageVoiRoiUpperThresholdObject('set', uiTxtUpperThreshold);
 
-    uiSliderImageUpperTreshold = ...
+    uiSliderImageUpperThreshold = ...
         uicontrol(uiSegPanelPtr('get'), ...
                   'Style'   , 'Slider', ...
                   'Position', [15 285 175 20], ...
@@ -255,8 +255,8 @@ function initSegPanel()
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @sliderImageUpperTreshCallback ...
                   );
-%    lstSliderImageUpperTresh = addlistener(uiSliderImageUpperTreshold,'Value','PreSet',@sliderImageUpperTreshCallback);
-    sliderImageVoiRoiUpperTresholdObject('set', uiSliderImageUpperTreshold);
+%    lstSliderImageUpperTresh = addlistener(uiSliderImageUpperThreshold,'Value','PreSet',@sliderImageUpperTreshCallback);
+    sliderImageVoiRoiUpperThresholdObject('set', uiSliderImageUpperThreshold);
 
     tQuant = quantificationTemplate('get');
 
@@ -286,7 +286,7 @@ function initSegPanel()
     dInitUpperValue = imageSegEditValue('get', 'upper');
     dInitLowerValue = imageSegEditValue('get', 'lower');
 
-    uiEditImageUpperTreshold = ...
+    uiEditImageUpperThreshold = ...
         uicontrol(uiSegPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
                   'Position', [195 285 65 20], ...
@@ -296,7 +296,7 @@ function initSegPanel()
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @editImageUpperTreshCallback ...
                   );
-    editImageVoiRoiUpperTresholdObject('set', uiEditImageUpperTreshold);
+    editImageVoiRoiUpperThresholdObject('set', uiEditImageUpperThreshold);
 
     if useCropEditValue('get', 'upper') == true
         sCropEditUpperEnable = 'on';
@@ -340,14 +340,14 @@ function initSegPanel()
         uicontrol(uiSegPanelPtr('get'),...
                   'style'   , 'text',...
                   'Enable'  , 'on', ...
-                  'string'  , 'Lower Treshold Preview',...
+                  'string'  , 'Lower Threshold Preview',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [15 225 200 20]...
                   );
 
-    uiSliderImageLowerTreshold = ...
+    uiSliderImageLowerThreshold = ...
         uicontrol(uiSegPanelPtr('get'), ...
                   'Style'   , 'Slider', ...
                   'Position', [15 205 175 20], ...
@@ -357,9 +357,9 @@ function initSegPanel()
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @sliderImageLowerTreshCallback ...
                   );
-%    lstSliderImageLowerTresh = addlistener(uiSliderImageLowerTreshold,'Value','PreSet',@sliderImageLowerTreshCallback);
+%    lstSliderImageLowerTresh = addlistener(uiSliderImageLowerThreshold,'Value','PreSet',@sliderImageLowerTreshCallback);
 
-    uiEditImageLowerTreshold = ...
+    uiEditImageLowerThreshold = ...
         uicontrol(uiSegPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
                   'Position', [195 205 65 20], ...
@@ -432,31 +432,31 @@ function initSegPanel()
 
         uicontrol(uiSegPanelPtr('get'),...
                   'style'   , 'text',...
-                  'string'  , 'Treshold Preview',...
+                  'string'  , 'Threshold Preview',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [15 85 200 20]...
                   );
 
-    uiSliderLungTreshold = ...
+    uiSliderLungThreshold = ...
         uicontrol(uiSegPanelPtr('get'), ...
                   'Style'   , 'Slider', ...
                   'Position', [15 65 175 20], ...
                   'Value'   , lungSegTreshValue('get'), ...
-                  'Enable'  , sLungTresholdEnable, ...
+                  'Enable'  , sLungThresholdEnable, ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @sliderLungTreshCallback ...
                   );
-%      addlistener(uiSliderLungTreshold,'Value','PreSet',@sliderLungTreshCallback);
+%      addlistener(uiSliderLungThreshold,'Value','PreSet',@sliderLungTreshCallback);
 
-    uiEditLungTreshold = ...
+    uiEditLungThreshold = ...
         uicontrol(uiSegPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
                   'Position', [195 65 65 20], ...
                   'String'  , num2str(lungSegTreshValue('get')), ...
-                  'Enable'  , sLungTresholdEnable, ...
+                  'Enable'  , sLungThresholdEnable, ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @editLungTreshCallback ...
@@ -465,7 +465,7 @@ function initSegPanel()
         uicontrol(uiSegPanelPtr('get'),...
                   'String'  ,'Segment',...
                   'Position',[160 30 100 25],...
-                  'Enable'  , sLungTresholdEnable, ...
+                  'Enable'  , sLungThresholdEnable, ...
                   'FontWeight', 'bold',...
                   'BackgroundColor', [0.6300 0.6300 0.4000], ...
                   'ForegroundColor', [0.1 0.1 0.1], ...
@@ -479,7 +479,7 @@ function initSegPanel()
                   'String'    ,  num2str(lungSegRadiusValue('get')), ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'Enable'  , sLungTresholdEnable, ...
+                  'Enable'  , sLungThresholdEnable, ...
                   'CallBack', @editLungSegRadiusValueCallback ...
                   );
 
@@ -571,8 +571,8 @@ function initSegPanel()
                     dInitUpperValue = dInitUpperValue/tQuant.tSUV.dScale;
             end
 
-            set(uiEditImageLowerTreshold, 'String', num2str(dLowerValue));
-            set(uiEditImageUpperTreshold, 'String', num2str(dUpperValue));
+            set(uiEditImageLowerThreshold, 'String', num2str(dLowerValue));
+            set(uiEditImageUpperThreshold, 'String', num2str(dUpperValue));
 
             imageSegEditValue('set', 'lower', dLowerValue);
             imageSegEditValue('set', 'upper', dUpperValue);
@@ -648,29 +648,29 @@ function initSegPanel()
         dMax = dInitUpperValue;
         dMin = dInitLowerValue;
 
-        dMaxTresholdValue = get(uiSliderImageUpperTreshold, 'Value');
-        dMinTresholdValue = get(uiSliderImageLowerTreshold, 'Value');
+        dMaxThresholdValue = get(uiSliderImageUpperThreshold, 'Value');
+        dMinThresholdValue = get(uiSliderImageLowerThreshold, 'Value');
 
-        if dMaxTresholdValue < dMinTresholdValue
-            dMaxTresholdValue = dMinTresholdValue;
+        if dMaxThresholdValue < dMinThresholdValue
+            dMaxThresholdValue = dMinThresholdValue;
 
 %            delete(lstSliderImageUpperTresh);
 
-            set(uiSliderImageUpperTreshold, 'Value', dMinTresholdValue);
+            set(uiSliderImageUpperThreshold, 'Value', dMinThresholdValue);
 
-%            lstSliderImageUpperTresh = addlistener(uiSliderImageUpperTreshold,'Value','PreSet',@sliderImageUpperTreshCallback);
+%            lstSliderImageUpperTresh = addlistener(uiSliderImageUpperThreshold,'Value','PreSet',@sliderImageUpperTreshCallback);
 
         end
 
         dDiff = dMax - dMin;
 
-        dMaxValue = (dMaxTresholdValue*dDiff)+dMin;
+        dMaxValue = (dMaxThresholdValue*dDiff)+dMin;
 
         imageSegEditValue('set', 'upper', dMaxValue);
 
-        set(uiEditImageUpperTreshold, 'String', num2str(dMaxValue));
+        set(uiEditImageUpperThreshold, 'String', num2str(dMaxValue));
 
-        editImageTreshold();
+        editImageThreshold();
 
     end
 
@@ -679,29 +679,29 @@ function initSegPanel()
         dMax = dInitUpperValue;
         dMin = dInitLowerValue;
 
-        dMaxTresholdValue = get(uiSliderImageUpperTreshold, 'Value');
-        dMinTresholdValue = get(uiSliderImageLowerTreshold, 'Value');
+        dMaxThresholdValue = get(uiSliderImageUpperThreshold, 'Value');
+        dMinThresholdValue = get(uiSliderImageLowerThreshold, 'Value');
 
-        if dMinTresholdValue > dMaxTresholdValue
-            dMinTresholdValue = dMaxTresholdValue;
+        if dMinThresholdValue > dMaxThresholdValue
+            dMinThresholdValue = dMaxThresholdValue;
 
 %            delete(lstSliderImageLowerTresh);
 
-            set(uiSliderImageLowerTreshold, 'Value', dMaxTresholdValue);
+            set(uiSliderImageLowerThreshold, 'Value', dMaxThresholdValue);
 
-%            lstSliderImageLowerTresh = addlistener(uiSliderImageLowerTreshold,'Value','PreSet',@sliderImageLowerTreshCallback);
+%            lstSliderImageLowerTresh = addlistener(uiSliderImageLowerThreshold,'Value','PreSet',@sliderImageLowerTreshCallback);
 
         end
 
         dDiff = dMax - dMin;
 
-        dMinValue = (dMinTresholdValue*dDiff)+dMin;
+        dMinValue = (dMinThresholdValue*dDiff)+dMin;
 
         imageSegEditValue('set', 'lower', dMinValue);
 
-        set(uiEditImageLowerTreshold, 'String', num2str(dMinValue));
+        set(uiEditImageLowerThreshold, 'String', num2str(dMinValue));
 
-        editImageTreshold();
+        editImageThreshold();
 
     end
 
@@ -709,7 +709,7 @@ function initSegPanel()
 
 %        delete(lstSliderImageUpperTresh);
 
-        set(uiSliderImageUpperTreshold, 'Value', 1);
+        set(uiSliderImageUpperThreshold, 'Value', 1);
 
         dInitUpperValue = str2double(get(hObject, 'String'));
         if isnan(dInitUpperValue)
@@ -719,9 +719,9 @@ function initSegPanel()
 
         imageSegEditValue('set', 'upper', dInitUpperValue);
 
-        editImageTreshold();
+        editImageThreshold();
 
-%        lstSliderImageUpperTresh = addlistener(uiSliderImageUpperTreshold,'Value','PreSet',@sliderImageUpperTreshCallback);
+%        lstSliderImageUpperTresh = addlistener(uiSliderImageUpperThreshold,'Value','PreSet',@sliderImageUpperTreshCallback);
 
     end
 
@@ -729,7 +729,7 @@ function initSegPanel()
 
 %        delete(lstSliderImageLowerTresh);
 
-        set(uiSliderImageLowerTreshold, 'Value', 0);
+        set(uiSliderImageLowerThreshold, 'Value', 0);
 
         dInitLowerValue = str2double(get(hObject, 'String'));
         if isnan(dInitLowerValue)
@@ -739,13 +739,13 @@ function initSegPanel()
 
         imageSegEditValue('set', 'lower', dInitLowerValue);
 
-        editImageTreshold();
+        editImageThreshold();
 
-%        lstSliderImageLowerTresh = addlistener(uiSliderImageLowerTreshold,'Value','PreSet',@sliderImageLowerTreshCallback);
+%        lstSliderImageLowerTresh = addlistener(uiSliderImageLowerThreshold,'Value','PreSet',@sliderImageLowerTreshCallback);
 
     end
 
-    function editImageTreshold()
+    function editImageThreshold()
         
         aBuffer = dicomBuffer('get');
         if isempty(aBuffer)
@@ -764,21 +764,21 @@ function initSegPanel()
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
 
-        dLowerTreshold = imageSegEditValue('get', 'lower');
-        dUpperTreshold = imageSegEditValue('get', 'upper');
+        dLowerThreshold = imageSegEditValue('get', 'lower');
+        dUpperThreshold = imageSegEditValue('get', 'upper');
 
         switch (sUnitDisplay)
             case 'Window Level'
 
-                [dUpperTreshold, dLowerTreshold] = computeWindowLevel(dUpperTreshold, dLowerTreshold);
+                [dUpperThreshold, dLowerThreshold] = computeWindowLevel(dUpperThreshold, dLowerThreshold);
 
             case 'HU'
 
             case 'SUV'
                 tQuant = quantificationTemplate('get');
 
-                dLowerTreshold = dLowerTreshold/tQuant.tSUV.dScale;
-                dUpperTreshold = dUpperTreshold/tQuant.tSUV.dScale;
+                dLowerThreshold = dLowerThreshold/tQuant.tSUV.dScale;
+                dUpperThreshold = dUpperThreshold/tQuant.tSUV.dScale;
 
             case 'BQML'
         end
@@ -786,15 +786,15 @@ function initSegPanel()
         aBufferInit = aBuffer;
 
         if useCropEditValue('get', 'upper') == true
-            aBuffer(aBuffer >= dUpperTreshold) = imageCropEditValue('get', 'upper');
+            aBuffer(aBuffer >= dUpperThreshold) = imageCropEditValue('get', 'upper');
         else
-            aBuffer(aBuffer >= dUpperTreshold) = cropValue('get');
+            aBuffer(aBuffer >= dUpperThreshold) = cropValue('get');
         end
 
         if useCropEditValue('get', 'lower') == true
-            aBuffer(aBuffer <= dLowerTreshold) = imageCropEditValue('get', 'lower');
+            aBuffer(aBuffer <= dLowerThreshold) = imageCropEditValue('get', 'lower');
         else
-            aBuffer(aBuffer <= dLowerTreshold) = cropValue('get');
+            aBuffer(aBuffer <= dLowerThreshold) = cropValue('get');
         end
 
         % Get constraint 
@@ -834,7 +834,7 @@ function initSegPanel()
         end
 
         catch
-            progressBar(1, 'Error:editImageTreshold()');
+            progressBar(1, 'Error:editImageThreshold()');
         end
 
         set(fiMainWindowPtr('get'), 'Pointer', 'default');
@@ -862,21 +862,21 @@ function initSegPanel()
         set(fiMainWindowPtr('get'), 'Pointer', 'watch');
         drawnow;
 
-        dLowerTreshold = imageSegEditValue('get', 'lower');
-        dUpperTreshold = imageSegEditValue('get', 'upper');
+        dLowerThreshold = imageSegEditValue('get', 'lower');
+        dUpperThreshold = imageSegEditValue('get', 'upper');
 
         switch (sUnitDisplay)
             case 'Window Level'
 
-                [dUpperTreshold, dLowerTreshold] = computeWindowLevel(dUpperTreshold, dLowerTreshold);
+                [dUpperThreshold, dLowerThreshold] = computeWindowLevel(dUpperThreshold, dLowerThreshold);
 
             case 'HU'
 
             case 'SUV'
                 tQuant = quantificationTemplate('get');
 
-                dLowerTreshold = dLowerTreshold/tQuant.tSUV.dScale;
-                dUpperTreshold = dUpperTreshold/tQuant.tSUV.dScale;
+                dLowerThreshold = dLowerThreshold/tQuant.tSUV.dScale;
+                dUpperThreshold = dUpperThreshold/tQuant.tSUV.dScale;
 
             case 'BQML'
         end
@@ -884,15 +884,15 @@ function initSegPanel()
         aBufferInit = aBuffer;
 
         if useCropEditValue('get', 'upper') == true
-            aBuffer(aBuffer >= dUpperTreshold) = imageCropEditValue('get', 'upper');
+            aBuffer(aBuffer >= dUpperThreshold) = imageCropEditValue('get', 'upper');
         else
-            aBuffer(aBuffer >= dUpperTreshold) = cropValue('get');
+            aBuffer(aBuffer >= dUpperThreshold) = cropValue('get');
         end
 
         if useCropEditValue('get', 'lower') == true
-            aBuffer(aBuffer <= dLowerTreshold) = imageCropEditValue('get', 'lower');
+            aBuffer(aBuffer <= dLowerThreshold) = imageCropEditValue('get', 'lower');
         else
-            aBuffer(aBuffer <= dLowerTreshold) = cropValue('get');
+            aBuffer(aBuffer <= dLowerThreshold) = cropValue('get');
         end
 
         % Get constraint 
@@ -937,7 +937,7 @@ function initSegPanel()
 
         dLungSegRadiusValue = str2double(get(uiLungRadius, 'String'));
 
-        set(uiEditLungTreshold, 'String', num2str(dLungSegTreshValue) );
+        set(uiEditLungThreshold, 'String', num2str(dLungSegTreshValue) );
 
         lungSegmentationPreview(dLungSegTreshValue, dLungSegRadiusValue);
 
@@ -954,7 +954,7 @@ function initSegPanel()
 
         lungSegRadiusValue('set', dLungSegRadiusValue);
 
-        dLungSegTreshValue = str2double(get(uiEditLungTreshold, 'String'));
+        dLungSegTreshValue = str2double(get(uiEditLungThreshold, 'String'));
 
         lungSegmentationPreview(dLungSegTreshValue, dLungSegRadiusValue);
 
@@ -983,7 +983,7 @@ function initSegPanel()
 
         dLungSegRadiusValue = str2double(get(uiLungRadius, 'String'));
 
-        set(uiSliderLungTreshold, 'Value', dValue);
+        set(uiSliderLungThreshold, 'Value', dValue);
 
         lungSegmentationPreview(dLungSegTreshValue, dLungSegRadiusValue);
 
@@ -1019,12 +1019,12 @@ function initSegPanel()
 
     function proceedLungSegCallback(~, ~)
 
-        dLungSegTreshValue  = str2double(get(uiEditLungTreshold, 'String'));
+        dLungSegTreshValue  = str2double(get(uiEditLungThreshold, 'String'));
         dLungSegRadiusValue = str2double(get(uiLungRadius, 'String'));
 
         lungSegmentation(dLungSegTreshValue, dLungSegRadiusValue);
 
-        lungSegTreshValue('set', str2double(get(uiEditLungTreshold, 'String')));
+        lungSegTreshValue('set', str2double(get(uiEditLungThreshold, 'String')));
         
         setColorbarLabel();
 
@@ -1216,7 +1216,7 @@ function initSegPanel()
         aBuffer = getEdgeDetection(aBuffer, aMethod{dValue}, dFudgeFactor);
 
         tInput(dSerieOffset).bEdgeDetection = true;
-        if numel(tInput) == 1 && isFusion('get') == false
+        if isscalar(tInput) && isFusion('get') == false
             tInput(dSerieOffset).bFusedEdgeDetection = true;
         end
 

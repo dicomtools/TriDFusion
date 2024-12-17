@@ -92,7 +92,7 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177, bUseDefault)
     if isfield(tQuant, 'tSUV')
         dSUVScale = tQuant.tSUV.dScale;
     else
-        dSUVScale = 0;
+        dSUVScale = 1;
     end
 
     atRoiInput = roiTemplate('get', dNMSerieOffset);
@@ -178,11 +178,11 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177, bUseDefault)
 
     set(fiMainWindowPtr('get'), 'Pointer', 'watch');
     drawnow;
-    
+
     if isInterpolated('get') == false
-    
+
         isInterpolated('set', true);
-    
+
         setImageInterpolation(true);
     end
 
@@ -200,7 +200,7 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177, bUseDefault)
 
     % Convert dicom to .nii
 
-    progressBar(1/8, 'DICOM to NII conversion, please wait.');
+    progressBar(1/8, 'Converting DICOM to NII, please wait...');
 
     dicm2nii(sFilePath, sNiiTmpDir, 1);
 
@@ -246,7 +246,7 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177, bUseDefault)
                 errordlg(sprintf('An error occur during machine learning segmentation: %s', sCmdout), 'Segmentation Error');
             else % Process succeed
 
-                progressBar(4/8, 'Resampling series, please wait.');
+                progressBar(4/8, 'Resampling data series, please wait...');
 
                 [aResampledNMImageTemp, ~] = resampleImage(aNMImageTemp, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);
                 [aResampledNMImage, atResampledNMMetaData] = resampleImage(aNMImage, atNMMetaData, aCTImage, atCTMetaData, 'Linear', false, false);
@@ -259,7 +259,7 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177, bUseDefault)
                 clear aNMImageTemp;
                 clear aResampledNMImageTemp;
 
-                progressBar(5/8, 'Resampling mip, please wait.');
+                progressBar(5/8, 'Resampling MIP, please wait...');
 
                 refMip = mipBuffer('get', [], dCTSerieOffset);
                 aMip   = mipBuffer('get', [], dNMSerieOffset);
@@ -278,7 +278,7 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177, bUseDefault)
 
                 drawnow;
 
-                progressBar(5/8, 'Computing ct map, please wait.');
+                progressBar(5/8, 'Computing CT map, please wait...');
 
                 BWCT = getTotalSegmentorWholeBodyMask(sSegmentationFolderName, zeros(size(aCTImage)));
                 BWCT = imfill(BWCT, 4, 'holes');
@@ -299,7 +299,7 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177, bUseDefault)
 %                 BWCT = imageFieldOfView(BWCT, aResampledNMImage, atResampledNMMetaData);
 
 
-                progressBar(6/8, 'Importing exclusion masks, please wait.');
+                progressBar(6/8, 'Importing exclusion masks, please wait...');
 
                 aExcludeMask = getLu177ExcludeMask(tLu177, sSegmentationFolderName, zeros(size(aCTImage)));
                 aExcludeMask = imdilate(aExcludeMask, strel('sphere', 2)); % Increse mask by 2 pixels
@@ -323,23 +323,23 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177, bUseDefault)
                 clear aExcludeMask;
 
 
-                progressBar(7/8, 'Computing mask, please wait.');
+                progressBar(7/8, 'Computing mask, please wait...');
 
                 aBWMask = aResampledNMImage;
 
                 dMin = min(aBWMask, [], 'all');
 
-                dTreshold = (1.5*gdNormalLiverMean) + (2*gdNormalLiverSTD);
+                dThreshold = (1.5*gdNormalLiverMean) + (2*gdNormalLiverSTD);
 
-                if dTreshold < 2.5
-                    dTreshold = 2.5;
+                if dThreshold < 2.5
+                    dThreshold = 2.5;
                 end
 
-                aBWMask(aBWMask*dSUVScale<dTreshold)=dMin;
+                aBWMask(aBWMask*dSUVScale<dThreshold)=dMin;
 
                 aBWMask = imbinarize(aBWMask);
 
-                progressBar(8/10, 'Creating contours, please wait.');
+                progressBar(8/10, 'Generating contours, please wait...');
 
                 imMask = aResampledNMImage;
                 imMask(aBWMask == 0) = dMin;
@@ -416,7 +416,7 @@ function setMachineLearningLu177(sSegmentatorScript, tLu177, bUseDefault)
 
     refreshImages();
 
-    plotRotatedRoiOnMip(axesMipPtr('get', [], dNMSerieOffset), dicomBuffer('get', [], dNMSerieOffset), mipAngle('get'));       
+    plotRotatedRoiOnMip(axesMipPtr('get', [], dNMSerieOffset), dicomBuffer('get', [], dNMSerieOffset), mipAngle('get'));
 
     clear aNMImage;
     clear aCTImage;

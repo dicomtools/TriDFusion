@@ -1,6 +1,6 @@
 function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, bUseDefault)
 %function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, bUseDefault)
-%Run FDHT Segmentation base on normal liver treshold.
+%Run FDHT Segmentation base on normal liver Threshold.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -93,7 +93,7 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
     if isfield(tQuant, 'tSUV')
         dSUVScale = tQuant.tSUV.dScale;
     else
-        dSUVScale = 0;
+        dSUVScale = 1;
     end
 
     atRoiInput = roiTemplate('get', dPTSerieOffset);
@@ -171,7 +171,11 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
 
     aPTImageTemp = aPTImage;
     aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
-    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
+
+    if any(aLogicalMask(:) ~= 0)
+
+        aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
+    end
 
     resetSeries(dPTSerieOffset, true);
 
@@ -187,7 +191,7 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
         setImageInterpolation(true);
     end
 
-    progressBar(5/10, 'Resampling series, please wait.');
+    progressBar(5/10, 'Resampling data series, please wait...');
 
     [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
     [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
@@ -201,7 +205,7 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
     clear aResampledPTImageTemp;
 
 
-    progressBar(6/10, 'Resampling mip, please wait.');
+    progressBar(6/10, 'Resampling MIP, please wait...');
 
     refMip = mipBuffer('get', [], dCTSerieOffset);
     aMip   = mipBuffer('get', [], dPTSerieOffset);
@@ -220,24 +224,24 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
         dSUVScale = 1;
     end
 
-    progressBar(7/10, 'Computing mask, please wait.');
+    progressBar(7/10, 'Computing mask, please wait...');
 
     aBWMask = aResampledPTImage;
 
     dMin = min(aBWMask, [], 'all');
 
-%     dTreshold = max(aResampledPTImage, [], 'all')*dBoundaryPercent;
-%    dTreshold = (4.44/gdNormalLiverMean)*(gdNormalLiverMean+gdNormalLiverSTD);
-    dTreshold = (1.5*gdNormalLiverMean)+(2*gdNormalLiverSTD);
-    if dTreshold < 3
-        dTreshold = 3;
+%     dThreshold = max(aResampledPTImage, [], 'all')*dBoundaryPercent;
+%    dThreshold = (4.44/gdNormalLiverMean)*(gdNormalLiverMean+gdNormalLiverSTD);
+    dThreshold = (1.5*gdNormalLiverMean)+(2*gdNormalLiverSTD);
+    if dThreshold < 3
+        dThreshold = 3;
     end
 
-    aBWMask(aBWMask*dSUVScale<dTreshold)=dMin;
+    aBWMask(aBWMask*dSUVScale<dThreshold)=dMin;
 
     aBWMask = imbinarize(aBWMask);
 
-    progressBar(8/10, 'Computing ct map, please wait.');
+    progressBar(8/10, 'Computing CT map, please wait...');
 
     BWCT = aCTImage;
 
@@ -278,7 +282,7 @@ function setSegmentationFDHT(dBoneMaskThreshold, dSmalestVoiValue, dPixelEdge, b
         BWCT = imbinarize(BWCT);
     end
 
-    progressBar(9/10, 'Creating contours, please wait.');
+    progressBar(9/10, 'Generating contours, please wait...');
 
     imMask = aResampledPTImage;
 %     imMask(aBWMask == 0) = dMin;

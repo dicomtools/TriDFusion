@@ -98,12 +98,18 @@ function importContoursCallback(~, ~)
             
             aContourImported = zeros(size(atContours));            
             
-            for bb=1:numel(atInput)
-                for dd=1:numel(atContours)
+            dNbInputs = numel(atInput);
+
+            for bb=1:dNbInputs
+
+                dNbContours = numel(atContours);
+
+                for dd=1:dNbContours
                     
-                    progressBar(bb+dd/(numel(atInput)+numel(atContours)), sprintf('Volume %d: Scanning contour ROI %d/%d', bb, dd, numel(atContours)) );      
+                    progressBar((bb*dd)/(dNbInputs*dNbContours), sprintf('Volume %d: Scanning contour ROI %d/%d', bb, dd, dNbContours) );      
 
                     if ~isempty(atContours(dd).Referenced)
+                        
                         if strcmpi(atInput(bb).atDicomInfo{1}.SeriesInstanceUID, ... % Find matching series
                                    atContours(dd).Referenced.SeriesInstanceUID)
     

@@ -1685,9 +1685,12 @@ function catchKeyPress(~,evnt)
     
                     set(uiAlphaSliderPtr('get'), 'Enable', 'off');
     
-                    setViewerDefaultColor(true, dicomMetaData('get'), atFuseMetaData);                        
-    
+                    setViewerDefaultColor(true, dicomMetaData('get'), atFuseMetaData);       
+
+                    keyPressFusionStatus('set', 0); %% REMOVE THIS LINE TO ALSO TOGGLE TO THE NM
+
                 else
+                   
                     if keyPressFusionStatus('get') == 1
     
                         keyPressFusionStatus('set', 0);
@@ -1815,7 +1818,282 @@ function catchKeyPress(~,evnt)
         end
 
     end
+    if strcmpi(evnt.Key,'g')
+
+        if switchTo3DMode('get')     == true || ...
+           switchToIsoSurface('get') == true || ...
+           switchToMIPMode('get')    == true
+            return;
+        end
+        
+        if ismember('control', get(fiMainWindowPtr('get'), 'CurrentModifier')) % Full screen
+
+            pAxe = getAxeFromMousePosition(dSeriesOffset);
+
+            if size(dicomBuffer('get', [], dSeriesOffset), 3) ~= 1
+
+                switch pAxe
+                    case axes1Ptr('get', [], dSeriesOffset)  % Coronal
+
+                        btnUiCorWindowFullScreenCallback();
+
+                    case axes2Ptr('get', [], dSeriesOffset)  % Sagittal
+                        
+                        btnUiSagWindowFullScreenCallback();
+
+                    case axes3Ptr('get', [], dSeriesOffset)  % Axial
+
+                        btnUiTraWindowFullScreenCallback();
+
+                    case axesMipPtr('get', [], dSeriesOffset)  % MIP
+
+                        btnUiMipWindowFullScreenCallback();
+                end
+            end            
+
+        else    % Toggle fusion
+
+            dFusionSeriesOffset = get(uiFusedSeriesPtr('get'), 'Value');
+
+            dNbFusedSeries = 0;
+            
+            if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
+                dNbSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+                for rr=1:dNbSeries
+                    imAxeF = imAxeFPtr('get', [], rr);
+                    if ~isempty(imAxeF)               
+                        dNbFusedSeries = dNbFusedSeries+1; % Multiple fusion
+                    end
+                end
+            else
+                dNbSeries = numel(get(uiFusedSeriesPtr('get'), 'String'));
+                for rr=1:dNbSeries
+                        
+                    imCoronalF  = imCoronalFPtr ('get', [], rr);
+                    imSagittalF = imSagittalFPtr('get', [], rr);
+                    imAxialF    = imAxialFPtr   ('get', [], rr);
     
+                    if ~isempty(imCoronalF) && ...
+                       ~isempty(imSagittalF) && ...
+                       ~isempty(imAxialF)
+                        dNbFusedSeries = dNbFusedSeries+1;  % Multiple fusion
+                    end
+                end
+            end             
+            
+            if isFusion('get')== true
+                                    
+                if keyPressFusionStatus('get') ~= 0 && ...
+                   keyPressFusionStatus('get') ~= 1     
+    
+                    pdColorOffset       = colorMapOffset('get');
+                    pdFusionColorOffset = fusionColorMapOffset('get');
+    
+                    pdInvertColor     = invertColor    ('get');
+                    pdBackgroundColor = backgroundColor('get');
+                    pdOverlayColor    = overlayColor   ('get');
+    
+                    pdAlphaSlider = sliderAlphaValue('get');   
+                    
+                    keyPressFusionStatus('set', 1);
+    
+    %                set(uiAlphaSliderPtr('get') , 'Value', 1);
+    %                sliderAlphaValue('set', 1);   
+    
+                    if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
+    
+                        alpha( imAxePtr('get', [], dSeriesOffset), 0 );
+                        if dNbFusedSeries == 1
+                            alpha( imAxeFPtr('get', [], dFusionSeriesOffset), 1 );
+                        end                    
+                    else
+                        alpha( imCoronalPtr ('get', [], dSeriesOffset), 0 );
+                        alpha( imSagittalPtr('get', [], dSeriesOffset), 0 );
+                        alpha( imAxialPtr   ('get', [], dSeriesOffset), 0 );
+    
+                        if link2DMip('get') == true  && isVsplash('get') == false                                        
+                            set( imMipPtr ('get', [], dSeriesOffset), 'Visible', 'on' );
+                            alpha( imMipPtr('get', [], dSeriesOffset), 0 );
+                        end  
+                        
+                        if dNbFusedSeries == 1
+    
+                            alpha( imCoronalFPtr ('get', [], dFusionSeriesOffset), 1 );
+                            alpha( imSagittalFPtr('get', [], dFusionSeriesOffset), 1 );
+                            alpha( imAxialFPtr   ('get', [], dFusionSeriesOffset), 1 );
+    
+                            if link2DMip('get') == true  && isVsplash('get') == false                                        
+                               set( imMipFPtr ('get', [], dFusionSeriesOffset), 'Visible', 'on' );
+                               alpha( imMipFPtr('get', [], dFusionSeriesOffset), 1 );
+                            end                        
+                        end
+                    end
+    
+                    iFuseOffset = dFusionSeriesOffset;
+    
+                    tFuseInput  = inputTemplate('get');
+                    atFuseMetaData = tFuseInput(iFuseOffset).atDicomInfo;
+    
+                    % Deactivate colobar
+    
+                    setColorbarVisible('off');
+    
+                    ptrFusionColorbar = uiFusionColorbarPtr('get');
+                    if ~isempty(ptrFusionColorbar) 
+            
+                        setFusionColorbarPosition(ptrFusionColorbar);
+                    end
+    
+    
+                    asSeriesString = seriesDescription('get');
+    
+                    if ~isempty(asSeriesString) && dNbFusedSeries == 1
+    
+                        if numel(asSeriesString) >= dFusionSeriesOffset
+                            
+                            ptrFusionColorbar = uiFusionColorbarPtr('get');
+                            
+                            ptrFusionColorbar.Label.String = asSeriesString{dFusionSeriesOffset};         
+                            uiFusionColorbarPtr('set', ptrFusionColorbar);
+                        end
+                    end
+    
+                    setFusionColorbarVisible('on');
+    
+                    set(uiAlphaSliderPtr('get'), 'Enable', 'off');
+    
+                    setViewerDefaultColor(true, dicomMetaData('get'), atFuseMetaData);                        
+    
+                else
+                   
+                    if keyPressFusionStatus('get') == 1
+    
+                        keyPressFusionStatus('set', 0);
+                    
+    %                    set(uiAlphaSliderPtr('get') , 'Value', 0);
+    %                    sliderAlphaValue('set', 0);   
+    
+                        if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
+    
+                            alpha( imAxePtr('get', [], dSeriesOffset), 1 );
+                        else
+                            alpha( imCoronalPtr ('get', [], dSeriesOffset), 1 );
+                            alpha( imSagittalPtr('get', [], dSeriesOffset), 1 );
+                            alpha( imAxialPtr   ('get', [], dSeriesOffset), 1 );
+    
+                            if link2DMip('get') == true  && isVsplash('get') == false                                        
+                                set( imMipPtr ('get', [], dFusionSeriesOffset), 'Visible', 'on' );
+                                alpha( imMipPtr('get', [], dSeriesOffset), 1 );
+                            end 
+                                                    
+                        end
+    
+                        % Deactivate fusion colobar
+    
+                        asSeriesString = seriesDescription('get');
+    
+                        if ~isempty(asSeriesString) && dNbFusedSeries == 1
+    
+                            if numel(asSeriesString) >= dSeriesOffset
+            
+                                ptrColorbar = uiColorbarPtr('get');
+            
+                                ptrColorbar.Label.String = asSeriesString{dSeriesOffset};         
+                                uiColorbarPtr('set', ptrColorbar);
+                            end
+                        end
+    
+                        setColorbarVisible('on');
+    
+                        setFusionColorbarVisible('off');
+                   
+                        ptrColorbar = uiColorbarPtr('get');
+                        if ~isempty(ptrColorbar) 
+                
+                            setColorbarPosition(ptrColorbar);
+                        end
+    
+                        set(uiAlphaSliderPtr('get'), 'Enable', 'off');
+    
+                        setViewerDefaultColor(true, dicomMetaData('get', [], dSeriesOffset));                           
+                    else
+                        keyPressFusionStatus('set', 2);
+    
+    %                    set(uiAlphaSliderPtr('get') , 'Value', pdAlphaSlider);     
+    %                    sliderAlphaValue('set', pdAlphaSlider);
+    
+                        if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1
+                            alpha( imAxePtr('get', [], dSeriesOffset), 1-pdAlphaSlider );
+                        else
+                            alpha( imCoronalPtr ('get', [], dSeriesOffset), 1-pdAlphaSlider );
+                            alpha( imSagittalPtr('get', [], dSeriesOffset), 1-pdAlphaSlider );
+                            alpha( imAxialPtr   ('get', [], dSeriesOffset), 1-pdAlphaSlider );
+    
+                            if link2DMip('get') == true && isVsplash('get') == false                       
+                                alpha( imMipPtr('get', [], dSeriesOffset), 1-pdAlphaSlider );
+                            end
+                            
+                            if dNbFusedSeries == 1
+    
+                                alpha( imCoronalFPtr ('get', [], dFusionSeriesOffset), pdAlphaSlider );
+                                alpha( imSagittalFPtr('get', [], dFusionSeriesOffset), pdAlphaSlider );
+                                alpha( imAxialFPtr   ('get', [], dFusionSeriesOffset), pdAlphaSlider );
+    
+                                if link2DMip('get') == true  && isVsplash('get') == false                                        
+                                    set( imMipFPtr ('get', [], dFusionSeriesOffset), 'Visible', 'on' );
+                                    alpha( imMipFPtr('get', [], dFusionSeriesOffset), pdAlphaSlider );
+                                end                        
+                            end                        
+                       end   
+    
+                        colorMapOffset('set', pdColorOffset);
+                        fusionColorMapOffset('set', pdFusionColorOffset);
+    
+                        invertColor('set', pdInvertColor);
+    
+                        backgroundColor ('set', pdBackgroundColor);
+                        overlayColor    ('set', pdOverlayColor);
+    
+                        % Reactivate all colobars
+    
+                        ptrColorbar = uiColorbarPtr('get');
+                        if ~isempty(ptrColorbar) 
+                
+                            setColorbarPosition(ptrColorbar);
+                        end
+    
+                        ptrFusionColorbar = uiFusionColorbarPtr('get');
+                        if ~isempty(ptrFusionColorbar) 
+                
+                            setFusionColorbarPosition(ptrFusionColorbar);
+                        end
+    
+                        setColorbarLabel();                  
+    
+                        setColorbarVisible('on');
+    
+                        setFusionColorbarLabel();
+    
+                        setFusionColorbarVisible('on');
+    
+                        set(uiAlphaSliderPtr('get'), 'Enable', 'on');
+    
+                        setViewerDefaultColor(false, dicomMetaData('get', [], dSeriesOffset));
+                     
+                    end
+                end
+                
+    %            sliderAlphaCallback();
+    
+    %             setFusionColorbarLabel();
+    
+            end
+           
+            refreshImages();   
+        end
+
+    end
+
     if strcmpi(evnt.Key,'i') % Interpolation
   
         if switchTo3DMode('get')     == true || ...
@@ -2579,47 +2857,47 @@ function catchKeyPress(~,evnt)
         setPanCallback();
     end                
 
-    if strcmpi(evnt.Key,'f1')
+    if strcmpi(evnt.Key,'1')
         [dMax, dMin] = computeWindowLevel(1200, -500);
         setFkeyWindowMinMax(dMax, dMin);
     end
 
-    if strcmpi(evnt.Key,'f2')
+    if strcmpi(evnt.Key,'2')
         [dMax, dMin] = computeWindowLevel(500, 50);
         setFkeyWindowMinMax(dMax, dMin);
     end
 
-    if strcmpi(evnt.Key,'f3')
+    if strcmpi(evnt.Key,'3')
         [dMax, dMin] = computeWindowLevel(500, 200);
         setFkeyWindowMinMax(dMax, dMin);
     end
 
-    if strcmpi(evnt.Key,'f4')
+    if strcmpi(evnt.Key,'4')
         [dMax, dMin] = computeWindowLevel(240, 40);
         setFkeyWindowMinMax(dMax, dMin);
     end
 
-    if strcmpi(evnt.Key,'f5')
+    if strcmpi(evnt.Key,'5')
         [dMax, dMin] = computeWindowLevel(80, 40);
         setFkeyWindowMinMax(dMax, dMin);
     end
 
-    if strcmpi(evnt.Key,'f6')
+    if strcmpi(evnt.Key,'6')
         [dMax, dMin] = computeWindowLevel(350, 90);
         setFkeyWindowMinMax(dMax, dMin);
     end
 
-    if strcmpi(evnt.Key,'f7')
+    if strcmpi(evnt.Key,'7')
         [dMax, dMin] = computeWindowLevel(2000, -600);
         setFkeyWindowMinMax(dMax, dMin);
     end
 
-    if strcmpi(evnt.Key,'f8')
+    if strcmpi(evnt.Key,'8')
         [dMax, dMin] = computeWindowLevel(350, 50);
         setFkeyWindowMinMax(dMax, dMin);
     end
 
-    if strcmpi(evnt.Key,'f9')
+    if strcmpi(evnt.Key,'9')
 
          if  pdToggle == 0
 

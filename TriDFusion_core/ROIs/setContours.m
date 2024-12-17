@@ -129,7 +129,7 @@ function setContours(tContours, bInitDisplay)
 
                                 set(uiSeriesPtr('get'), 'Value', bb);
 
-                                drawnow;
+                                % drawnow;
 
                                 progressBar( bNbContours/numel(atContours{cc})-0.0001, sprintf('Volume %d: Processing contour %d/%d', bb, bNbContours, numel(atContours{cc}) ));
 

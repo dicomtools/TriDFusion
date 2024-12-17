@@ -102,7 +102,7 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
         setImageInterpolation(true);
     end
 
-    progressBar(1/4, 'Resampling series, please wait.');
+    progressBar(1/4, 'Resampling data series, please wait...');
 
     if strcmpi(sModality1, 'nm')
         [aResampledImage, atResampledMetaData] = resampleImage(aSerie1Image, atSerie1MetaData, aSerie2Image, atSerie2MetaData, 'Linear', false, true);
@@ -115,7 +115,7 @@ function setModalitiesFusion(sModality1, dModality1IntensityMin, dModality1Inten
 
     if size(aSerie1Image, 3) ~= 1
 
-        progressBar(6/10, 'Resampling mip, please wait.');
+        progressBar(6/10, 'Resampling MIP, please wait...');
 
         refMip = mipBuffer('get', [], dSeries2Offset);
         aMip   = mipBuffer('get', [], dSeries1Offset);

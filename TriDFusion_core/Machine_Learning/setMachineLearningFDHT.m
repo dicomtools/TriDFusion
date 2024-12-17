@@ -93,7 +93,7 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
     if isfield(tQuant, 'tSUV')
         dSUVScale = tQuant.tSUV.dScale;
     else
-        dSUVScale = 0;
+        dSUVScale = 1;
     end
 
     atRoiInput = roiTemplate('get', dPTSerieOffset);
@@ -159,8 +159,12 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
 
     aPTImageTemp = aPTImage;
     aLogicalMask = roiConstraintToMask(aPTImageTemp, tRoiInput, asConstraintTagList, asConstraintTypeList, bInvertMask);
-    aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
 
+    if any(aLogicalMask(:) ~= 0)
+
+        aPTImageTemp(aLogicalMask==0) = 0;  % Set constraint
+    end
+    
     resetSeries(dPTSerieOffset, true);
 
 %     try
@@ -169,9 +173,9 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
     drawnow;
 
     if isInterpolated('get') == false
-    
+
         isInterpolated('set', true);
-    
+
         setImageInterpolation(true);
     end
 
@@ -189,7 +193,7 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
 
     % Convert dicom to .nii
 
-    progressBar(1/8, 'DICOM to NII conversion, please wait.');
+    progressBar(1/8, 'Converting DICOM to NII, please wait...');
 
     dicm2nii(sFilePath, sNiiTmpDir, 1);
 
@@ -235,7 +239,7 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
                 errordlg(sprintf('An error occur during machine learning segmentation: %s', sCmdout), 'Segmentation Error');
             else % Process succeed
 
-                progressBar(4/8, 'Resampling series, please wait.');
+                progressBar(4/8, 'Resampling data series, please wait...');
 
                 [aResampledPTImageTemp, ~] = resampleImage(aPTImageTemp, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
                 [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
@@ -248,7 +252,7 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
                 clear aPTImageTemp;
                 clear aResampledPTImageTemp;
 
-                progressBar(5/8, 'Resampling mip, please wait.');
+                progressBar(5/8, 'Resampling MIP, please wait...');
 
                 refMip = mipBuffer('get', [], dCTSerieOffset);
                 aMip   = mipBuffer('get', [], dPTSerieOffset);
@@ -267,7 +271,7 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
                 sliderMipCallback();
                 drawnow;
 
-                progressBar(5/8, 'Computing ct map, please wait.');
+                progressBar(5/8, 'Computing CT map, please wait...');
 
                 BWCT = getTotalSegmentorWholeBodyMask(sSegmentationFolderName, zeros(size(aCTImage)));
                 BWCT = imfill(BWCT, 4, 'holes');
@@ -288,7 +292,7 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
 %                 BWCT = imageFieldOfView(BWCT, aResampledPTImage, atResampledPTMetaData);
 
 
-                progressBar(6/8, 'Importing exclusion masks, please wait.');
+                progressBar(6/8, 'Importing exclusion masks, please wait...');
 
                 aExcludeMask = getFDHTExcludeMask(tFDHT, sSegmentationFolderName, zeros(size(aCTImage)));
                 aExcludeMask = imdilate(aExcludeMask, strel('sphere', 2)); % Increse mask by 2 pixels
@@ -312,22 +316,22 @@ function setMachineLearningFDHT(sSegmentatorScript, tFDHT)
                 clear aExcludeMask;
 
 
-                progressBar(7/8, 'Computing mask, please wait.');
+                progressBar(7/8, 'Computing mask, please wait...');
 
                 aBWMask = aResampledPTImage;
 
                 dMin = min(aBWMask, [], 'all');
 
-                dTreshold = (1.5*gdNormalLiverMean) + (2*gdNormalLiverSTD);
-                if dTreshold < 3
-                    dTreshold = 3;
+                dThreshold = (1.5*gdNormalLiverMean) + (2*gdNormalLiverSTD);
+                if dThreshold < 3
+                    dThreshold = 3;
                 end
 
-                aBWMask(aBWMask*dSUVScale<dTreshold)=dMin;
+                aBWMask(aBWMask*dSUVScale<dThreshold)=dMin;
 
                 aBWMask = imbinarize(aBWMask);
 
-                progressBar(8/10, 'Creating contours, please wait.');
+                progressBar(8/10, 'Generating contours, please wait...');
 
                 imMask = aResampledPTImage;
                 imMask(aBWMask == 0) = dMin;

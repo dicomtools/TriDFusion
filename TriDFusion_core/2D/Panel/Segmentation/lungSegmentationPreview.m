@@ -1,6 +1,6 @@
-function lungSegmentationPreview(dTreshold, dRadius) 
-%function lungSegmentationPreview(dTreshold, dRadius) 
-%Create a Lung Segmentation preview to find the Treshold Value.
+function lungSegmentationPreview(dThreshold, dRadius) 
+%function lungSegmentationPreview(dThreshold, dRadius) 
+%Create a Lung Segmentation preview to find the Threshold Value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -84,9 +84,9 @@ function lungSegmentationPreview(dTreshold, dRadius)
 
     XY = imSingle(:,:,iAxial);
     if dNbMeta >= iAxial
-        BW = XY > dTreshold * tSegmentMetaData{iAxial}.RescaleIntercept; % treshold
+        BW = XY > dThreshold * tSegmentMetaData{iAxial}.RescaleIntercept; % Threshold 
     else
-        BW = XY > dTreshold * tSegmentMetaData{1}.RescaleIntercept; % treshold
+        BW = XY > dThreshold * tSegmentMetaData{1}.RescaleIntercept; % Threshold 
     end
 
     BW = imcomplement(BW);
@@ -122,9 +122,9 @@ function lungSegmentationPreview(dTreshold, dRadius)
 
     XY = permute(imSingle(iCoronal,:,:), [3 2 1]);
     if dNbMeta >= iAxial
-        BW = XY > dTreshold * tSegmentMetaData{iAxial}.RescaleIntercept; % treshold
+        BW = XY > dThreshold * tSegmentMetaData{iAxial}.RescaleIntercept; % Threshold 
     else
-        BW = XY > dTreshold * tSegmentMetaData{1}.RescaleIntercept; % treshold
+        BW = XY > dThreshold * tSegmentMetaData{1}.RescaleIntercept; % Threshold 
     end
     
     BW = imcomplement(BW);
@@ -160,9 +160,9 @@ function lungSegmentationPreview(dTreshold, dRadius)
 
     XY = permute(imSingle(:,iSagittal,:), [3 1 2]);
     if dNbMeta >= iAxial
-        BW = XY > dTreshold * tSegmentMetaData{iAxial}.RescaleIntercept; % treshold
+        BW = XY > dThreshold * tSegmentMetaData{iAxial}.RescaleIntercept; % Threshold 
     else
-        BW = XY > dTreshold * tSegmentMetaData{1}.RescaleIntercept; % treshold
+        BW = XY > dThreshold * tSegmentMetaData{1}.RescaleIntercept; % Threshold 
     end
     
     BW = imcomplement(BW);

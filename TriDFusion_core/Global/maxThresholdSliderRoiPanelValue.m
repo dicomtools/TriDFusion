@@ -1,6 +1,6 @@
-function [bIsPurcentValue, sUnitValue, dValue] = maxTresholdRoiPanelValue(sAction, bIsPurcent, sUnit, dSetValue)
-%function [bIsPurcentValue, sUnitValue, dValue] = maxTresholdRoiPanelValue(sAction, bIsPurcent, sUnit, dSetValue)
-%Get/Set Segmenation Max Roi Panel Value.
+function dPercentValue = maxThresholdSliderRoiPanelValue(sAction, dValue)
+%function dPercentValue = maxThresholdSliderRoiPanelValue(sAction, dValue)
+%Get/Set Roi/Voi Segmentation Threshold Value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
@@ -27,18 +27,11 @@ function [bIsPurcentValue, sUnitValue, dValue] = maxTresholdRoiPanelValue(sActio
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent pbIsPurcentValue; 
-    persistent psUnitValue; 
-    persistent pdValue; 
+    persistent pdPercentValue; 
 
     if strcmpi('set', sAction)
-        pbIsPurcentValue = bIsPurcent; 
-        psUnitValue = sUnit;
-        pdValue = dSetValue;
+        pdPercentValue = dValue;            
     end
     
-    bIsPurcentValue = pbIsPurcentValue;
-    sUnitValue     = psUnitValue;
-    dValue         = pdValue;
-    
+    dPercentValue = pdPercentValue;
 end

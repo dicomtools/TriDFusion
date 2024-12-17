@@ -1,6 +1,6 @@
 function setSegmentationMRTOrgansCallback(~, ~)
 %function setSegmentationMRTOrgansCallback()
-%Run PSMA Tumor Segmentation, The tool is called from the main menu.
+%Run MRT organs segemntation, The tool is called from the command line.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org

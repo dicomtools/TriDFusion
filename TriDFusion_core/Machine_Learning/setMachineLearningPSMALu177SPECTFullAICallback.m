@@ -214,6 +214,7 @@ function setMachineLearningPSMALu177SPECTFullAICallback(hObject, ~)
             tPSMALu177SPECTFullAI.options.pixelEdge            = pixelEdge('get');
     
             setMachineLearningPSMALu177SPECTFullAI(sPredictScript, tPSMALu177SPECTFullAI); 
+            
         end
     end
 

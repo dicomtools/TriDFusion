@@ -1,13 +1,16 @@
-function dMultiplier = Ga68DOTATATENormalLiverTresholdMultiplierValue(sAction, dValue)
-%function dMultiplier = Ga68DOTATATENormalLiverTresholdMultiplierValue(sAction, dValue)
-%Get/Set Ga68DOTATATE Normal LiverTreshold MultiplierValue.
+function uiObject = sliderImageVoiRoiUpperThresholdObject(sAction, aValue)
+%function uiObject = sliderImageVoiRoiUpperThresholdObject(sAction, aValue)
+%Get\Set Slider VOI ROI Upper Threshold Object.
 %See TriDFuison.doc (or pdf) for more information about options.
+%
+%Note: option settings must fit on one line and can contain one semicolon at most.
+%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2023, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -25,13 +28,12 @@ function dMultiplier = Ga68DOTATATENormalLiverTresholdMultiplierValue(sAction, d
 % See the GNU General Public License for more details.
 % 
 % You should have received a copy of the GNU General Public License
-% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.  
+% along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    persistent pdMultiplier; 
+     persistent paObject; 
 
-    if strcmpi('set', sAction)
-        pdMultiplier = dValue;            
-    end
-    
-    dMultiplier = pdMultiplier;
+     if strcmpi('set', sAction)
+        paObject = aValue;            
+     end      
+    uiObject = paObject;
 end

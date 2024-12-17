@@ -121,14 +121,14 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
             setImageInterpolation(true);
         end
 
-        progressBar(1/10, 'Resampling series, please wait.');
+        progressBar(1/10, 'Resampling data series, please wait...');
 
         [aResampledPTImage, atResampledPTMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
 
         dicomMetaData('set', atResampledPTMetaData, dPTSerieOffset);
         dicomBuffer  ('set', aResampledPTImage, dPTSerieOffset);
 
-        progressBar(2/10, 'Resampling mip, please wait.');
+        progressBar(2/10, 'Resampling MIP, please wait...');
 
         refMip = mipBuffer('get', [], dCTSerieOffset);
         aMip   = mipBuffer('get', [], dPTSerieOffset);
@@ -278,14 +278,14 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
 % 
 %                 if ~isempty(aCTImage)
 % 
-%                     progressBar(5/10, 'Resampling series, please wait.');
+%                     progressBar(5/10, 'Resampling data series, please wait...');
 % 
 %                     [aResampledNMImage, atResampledNMMetaData] = resampleImage(aPTImage, atPTMetaData, aCTImage, atCTMetaData, 'Linear', true, false);
 % 
 %                     dicomMetaData('set', atResampledNMMetaData, dPTSerieOffset);
 %                     dicomBuffer  ('set', aResampledNMImage, dPTSerieOffset);
 % 
-%                     progressBar(6/10, 'Resampling mip, please wait.');
+%                     progressBar(6/10, 'Resampling MIP, please wait...');
 % 
 %                     refMip = mipBuffer('get', [], dCTSerieOffset);
 %                     aMip   = mipBuffer('get', [], dPTSerieOffset);
@@ -308,7 +308,7 @@ function setMachineLearningBreastCancerPETFullAI(sPredictScript, tBreastCancerPE
 %                         roiTemplate('set', dPTSerieOffset, atResampledRoi);
 %                     end
 % 
-%                     progressBar(8/10, 'Resampling axes, please wait.');
+%                     progressBar(8/10, 'Resampling axes, please wait...');
 % 
 %                     resampleAxes(aResampledNMImage, atResampledNMMetaData);
 % 

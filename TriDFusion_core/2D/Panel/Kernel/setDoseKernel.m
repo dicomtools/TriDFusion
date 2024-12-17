@@ -541,8 +541,8 @@ function setDoseKernel(sMethod, dModel, sTissue, sIsotope, dKernelKernelCutoffDi
     
       %      set(uiSeriesPtr('get'), 'Value', dSeriesOffset);
     
-            dUpperValue = str2double( get(uiEditKernelUpperTreshold, 'String') );
-            dLowerValue = str2double( get(uiEditKernelLowerTreshold, 'String') );
+            dUpperValue = str2double( get(uiEditKernelUpperThreshold, 'String') );
+            dLowerValue = str2double( get(uiEditKernelLowerThreshold, 'String') );
             if get(chkUnitTypeKernel, 'Value') == true
                 [dUpperValue, dLowerValue] = computeWindowLevel(dUpperValue, dLowerValue);
             end

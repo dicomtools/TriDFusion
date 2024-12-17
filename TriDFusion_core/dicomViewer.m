@@ -91,11 +91,11 @@ function resize = dicomViewer()
 
     contourVisibilityRoiPanelValue('set', true);
 
-    minTresholdRoiPanelValue('set', true, '', 0);
-    maxTresholdRoiPanelValue('set', true, '', 0);
+    minThresholdRoiPanelValue('set', true, '', 0);
+    maxThresholdRoiPanelValue('set', true, '', 0);
 
-    minTresholdSliderRoiPanelValue('set', 0   );
-    maxTresholdSliderRoiPanelValue('set', 0.41);
+    minThresholdSliderRoiPanelValue('set', 0   );
+    maxThresholdSliderRoiPanelValue('set', 0.41);
 
     roiFaceAlphaValue('set', 0.7);
     
@@ -234,7 +234,7 @@ function resize = dicomViewer()
     pixelEdge                 ('set', true);
     holesRoiPanel             ('set', false);
 
-    voiIncrementRatio('set', 5); % in mm
+    voiIncrementRatio('set', 2.5); % in mm
 
     % Machine Learning
 
@@ -320,6 +320,24 @@ function resize = dicomViewer()
     excludeLymphNodeSUVKidneyRight   ('set', false);
     excludeLymphNodeSUVSmallBowel    ('set', false);
     segmentLymphNodeSUVSpleen        ('set', true);
+
+    % Mantle Cell Lymphoma
+
+    excludeMantleCellLymphomaSkeleton('set', true);
+    excludeMantleCellLymphomaCardiovascular('set', true);
+    excludeMantleCellLymphomaBrain('set', true);
+    excludeMantleCellLymphomaSpinalCord('set', true);
+    excludeMantleCellLymphomaAdrenalGlandLeft('set', true);
+    excludeMantleCellLymphomaAdrenalGlandRight('set', true);
+    excludeMantleCellLymphomaSpleen('set', true);
+    excludeMantleCellLymphomaGallbladder('set', true);
+    excludeMantleCellLymphomaKidneyLeft('set', true);
+    excludeMantleCellLymphomaKidneyRight('set', true);
+    excludeMantleCellLymphomaProstate('set', true);
+    excludeMantleCellLymphomaGastrointestalTract('set', true);
+
+    mantleCellLymphomaSmalestVoiValue('set', 0.3);
+    mantleCellLymphomaPercentOfLiverMax('set', 10);
 
     % Breast Cancer
 
@@ -463,7 +481,7 @@ function resize = dicomViewer()
 
     Ga68DOTATATESmalestVoiValue('set', 0.3);
 
-    Ga68DOTATATENormalLiverTresholdMultiplierValue('set', 1.5);
+    Ga68DOTATATENormalLiverThresholdMultiplierValue('set', 1.5);
 
 
     % Machine Learning Full AI Ga68 DOTATATE Options

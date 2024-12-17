@@ -45,7 +45,7 @@ function initKernelPanel()
 
         uicontrol(uiKernelPanelPtr('get'),...
                   'String'  ,'Reset',...
-                  'Position',[15 620 100 25],...
+                  'Position',[15 625 100 25],...
                   'FontWeight', 'bold',...
                   'BackgroundColor', [0.2 0.039 0.027], ...
                   'ForegroundColor', [0.94 0.94 0.94], ...
@@ -64,7 +64,7 @@ function initKernelPanel()
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [15 575 200 20]...
+                  'position', [15 580 200 20]...
                   );
 
     tKernelCtDoseMap = kernelCtDoseMapUiValues('get');
@@ -109,7 +109,7 @@ function initKernelPanel()
                   'style'   , 'checkbox',...
                   'enable'  , sChkUseCTdoseMapEnable,...
                   'value'   , kernelUseCtDoseMap('get'),...
-                  'position', [15 550 20 20],...
+                  'position', [15 555 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @chkUseCTdoseMapKernelCallback...
@@ -119,7 +119,7 @@ function initKernelPanel()
                   'style'   , 'text',...
                   'string'  , 'Use CT Map',...
                   'horizontalalignment', 'left',...
-                  'position', [35 550 200 20],...
+                  'position', [35 555 200 20],...
                   'Enable', sTxtUseCTdoseMapEnable,...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
@@ -129,7 +129,7 @@ function initKernelPanel()
     uiKernelSeries = ...
          uicontrol(uiKernelPanelPtr('get'), ...
                   'Style'   , 'popup', ...
-                  'Position', [15 520 245 25], ...
+                  'Position', [15 525 245 25], ...
                   'String'  , asKernelSeries, ...
                   'Value'   , kernelCtSerieOffset('get'),...
                   'Enable'  , sUseCtDoseMapEnable, ...
@@ -144,7 +144,7 @@ function initKernelPanel()
                   'style'   , 'checkbox',...
                   'enable'  , sUseCtDoseMapEnable,...
                   'value'   , kernelUnitTypeWindow('get'),...
-                  'position', [15 495 20 20],...
+                  'position', [15 500 20 20],...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'Callback', @chkUnitTypeKernelCallback...
@@ -156,60 +156,60 @@ function initKernelPanel()
                   'style'   , 'text',...
                   'string'  , 'Unit in HU',...
                   'horizontalalignment', 'left',...
-                  'position', [35 495 200 20],...
+                  'position', [35 500 200 20],...
                   'Enable', 'On',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'ButtonDownFcn', @chkUnitTypeKernelCallback...
                   );
 
-    uiTxtUpperTreshold = ...
+    uiTxtUpperThreshold = ...
          uicontrol(uiKernelPanelPtr('get'),...
                   'style'   , 'text',...
-                  'string'  , 'Upper Treshold Preview',...
+                  'string'  , 'Upper Threshold Preview',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
-                  'position', [15 470 200 20]...
+                  'position', [15 475 200 20]...
                   );
-    txtKernelVoiRoiUpperTresholdObject('set', uiTxtUpperTreshold);
+    txtKernelVoiRoiUpperThresholdObject('set', uiTxtUpperThreshold);
 
-    uiSliderKernelUpperTreshold = ...
+    uiSliderKernelUpperThreshold = ...
         uicontrol(uiKernelPanelPtr('get'), ...
                   'Style'   , 'Slider', ...
-                  'Position', [15 450 175 20], ...
+                  'Position', [15 455 175 20], ...
                   'Value'   , kernelSegTreshValue('get', 'upper'), ...
                   'Enable'  , sUseCtDoseMapEnable, ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @sliderKernelUpperTreshCallback ...
                   );
-%    addlistener(uiSliderKernelUpperTreshold,'Value','PreSet',@sliderKernelUpperTreshCallback);
-    sliderKernelVoiRoiUpperTresholdObject('set', uiSliderKernelUpperTreshold);
+%    addlistener(uiSliderKernelUpperThreshold,'Value','PreSet',@sliderKernelUpperTreshCallback);
+    sliderKernelVoiRoiUpperThresholdObject('set', uiSliderKernelUpperThreshold);
 
-    uiEditKernelUpperTreshold = ...
+    uiEditKernelUpperThreshold = ...
         uicontrol(uiKernelPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
-                  'Position', [195 450 65 20], ...
+                  'Position', [195 455 65 20], ...
                   'String'  , num2str(dUpperValue), ...
                   'Enable'  , sUseCtDoseMapEnable, ...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @editKernelUpperTreshCallback ...
                   );
-    editKernelVoiRoiUpperTresholdObject('set', uiEditKernelUpperTreshold);
+    editKernelVoiRoiUpperThresholdObject('set', uiEditKernelUpperThreshold);
 
         uicontrol(uiKernelPanelPtr('get'),...
                   'style'   , 'text',...
                   'Enable'  , 'on', ...
-                  'string'  , 'Lower Treshold Preview',...
+                  'string'  , 'Lower Threshold Preview',...
                   'horizontalalignment', 'left',...
                   'BackgroundColor', viewerBackgroundColor('get'), ...
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'position', [15 430 200 20]...
                   );
 
-    uiSliderKernelLowerTreshold = ...
+    uiSliderKernelLowerThreshold = ...
         uicontrol(uiKernelPanelPtr('get'), ...
                   'Style'   , 'Slider', ...
                   'Position', [15 410 175 20], ...
@@ -219,9 +219,9 @@ function initKernelPanel()
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @sliderKernelLowerTreshCallback ...
                   );
-%    lstSliderKernelLowerTresh = addlistener(uiSliderKernelLowerTreshold,'Value','PreSet',@sliderKernelLowerTreshCallback);
+%    lstSliderKernelLowerTresh = addlistener(uiSliderKernelLowerThreshold,'Value','PreSet',@sliderKernelLowerTreshCallback);
 
-    uiEditKernelLowerTreshold = ...
+    uiEditKernelLowerThreshold = ...
         uicontrol(uiKernelPanelPtr('get'), ...
                   'Style'   , 'Edit', ...
                   'Position', [195 410 65 20], ...
@@ -231,7 +231,7 @@ function initKernelPanel()
                   'ForegroundColor', viewerForegroundColor('get'), ...
                   'CallBack', @editKernelLowerTreshCallback ...
                   );
-    editKernelVoiRoiLowerTresholdObject('set', uiEditKernelLowerTreshold);
+    editKernelVoiRoiLowerThresholdObject('set', uiEditKernelLowerThreshold);
 
 
 
@@ -523,14 +523,14 @@ function initKernelPanel()
         kernelSegEditValue('set', 'upper', dUpperValue);
         kernelSegEditValue('set', 'lower', dLowerValue);
 
-        set(uiEditKernelUpperTreshold, 'String', num2str(dUpperValue));
-        set(uiEditKernelLowerTreshold, 'String', num2str(dLowerValue));
+        set(uiEditKernelUpperThreshold, 'String', num2str(dUpperValue));
+        set(uiEditKernelLowerThreshold, 'String', num2str(dLowerValue));
 
         kernelSegTreshValue('get', 'upper', 1);
         kernelSegTreshValue('get', 'lower', 0);
 
-        set(uiSliderKernelUpperTreshold, 'Value', 1);
-        set(uiSliderKernelLowerTreshold, 'Value', 0);
+        set(uiSliderKernelUpperThreshold, 'Value', 1);
+        set(uiSliderKernelLowerThreshold, 'Value', 0);
 
     end
 
@@ -550,18 +550,18 @@ function initKernelPanel()
             set(txtUnitTypeKernel          , 'Enable', 'Inactive');
             set(chkUnitTypeKernel          , 'Enable', 'On');
             set(uiKernelSeries             , 'Enable', 'On');
-            set(uiSliderKernelUpperTreshold, 'Enable', 'On');
-            set(uiEditKernelUpperTreshold  , 'Enable', 'On');
-            set(uiSliderKernelLowerTreshold, 'Enable', 'On');
-            set(uiEditKernelLowerTreshold  , 'Enable', 'On');
+            set(uiSliderKernelUpperThreshold, 'Enable', 'On');
+            set(uiEditKernelUpperThreshold, 'Enable', 'On');
+            set(uiSliderKernelLowerThreshold, 'Enable', 'On');
+            set(uiEditKernelLowerThreshold, 'Enable', 'On');
         else
             set(txtUnitTypeKernel          , 'Enable', 'On');
             set(chkUnitTypeKernel          , 'Enable', 'Off');
             set(uiKernelSeries             , 'Enable', 'Off');
-            set(uiSliderKernelUpperTreshold, 'Enable', 'Off');
-            set(uiEditKernelUpperTreshold  , 'Enable', 'Off');
-            set(uiSliderKernelLowerTreshold, 'Enable', 'Off');
-            set(uiEditKernelLowerTreshold  , 'Enable', 'Off');
+            set(uiSliderKernelUpperThreshold, 'Enable', 'Off');
+            set(uiEditKernelUpperThreshold, 'Enable', 'Off');
+            set(uiSliderKernelLowerThreshold, 'Enable', 'Off');
+            set(uiEditKernelLowerThreshold, 'Enable', 'Off');
         end
 
         kernelUseCtDoseMap('set', get(chkUseCTdoseMapKernel, 'Value'));
@@ -599,8 +599,8 @@ function initKernelPanel()
         kernelSegEditValue('set', 'upper', dUpperValue);
         kernelSegEditValue('set', 'lower', dLowerValue);
 
-        set(uiEditKernelUpperTreshold, 'String', num2str(dUpperValue));
-        set(uiEditKernelLowerTreshold, 'String', num2str(dLowerValue));
+        set(uiEditKernelUpperThreshold, 'String', num2str(dUpperValue));
+        set(uiEditKernelLowerThreshold, 'String', num2str(dLowerValue));
 
     end
 
@@ -714,8 +714,8 @@ function initKernelPanel()
 
             dCtMIn = min(double(aResamCt),[], 'all');
 
-            dUpperValue = str2double( get(uiEditKernelUpperTreshold, 'String') );
-            dLowerValue = str2double( get(uiEditKernelLowerTreshold, 'String') );
+            dUpperValue = str2double( get(uiEditKernelUpperThreshold, 'String') );
+            dLowerValue = str2double( get(uiEditKernelLowerThreshold, 'String') );
             if get(chkUnitTypeKernel, 'Value') == true
                 [dUpperValue, dLowerValue] = computeWindowLevel(dUpperValue, dLowerValue);
             end
@@ -767,21 +767,21 @@ function initKernelPanel()
 
     function editKernelLowerTreshCallback(~, ~)
 
-        dUpperTreshold = str2double(get(uiEditKernelUpperTreshold, 'String'));
+        dUpperThreshold = str2double(get(uiEditKernelUpperThreshold, 'String'));
 
-        dLowerTreshold = str2double(get(uiEditKernelLowerTreshold, 'String'));
-        if isnan(dLowerTreshold)
-            dLowerTreshold = kernelSegEditValue('get', 'lower');
-            set(uiEditKernelLowerTreshold, 'String', num2str(dLowerTreshold));
+        dLowerThreshold = str2double(get(uiEditKernelLowerThreshold, 'String'));
+        if isnan(dLowerThreshold)
+            dLowerThreshold = kernelSegEditValue('get', 'lower');
+            set(uiEditKernelLowerThreshold, 'String', num2str(dLowerThreshold));
         end
 
-        if dLowerTreshold > dUpperTreshold
-            dLowerTreshold = dUpperTreshold;
-            set(uiEditKernelLowerTreshold, 'String', num2str(dLowerTreshold));
+        if dLowerThreshold > dUpperThreshold
+            dLowerThreshold = dUpperThreshold;
+            set(uiEditKernelLowerThreshold, 'String', num2str(dLowerThreshold));
         end
 
         if get(chkUnitTypeKernel, 'Value') == true
-            [~, dLowerTreshold] = computeWindowLevel(dUpperTreshold, dLowerTreshold);
+            [~, dLowerThreshold] = computeWindowLevel(dUpperThreshold, dLowerThreshold);
         end
 
         dSerieOffset = get(uiKernelSeries, 'Value');
@@ -791,23 +791,23 @@ function initKernelPanel()
         dMaxValue = tKernelCtDoseMap{dSerieOffset}.dMax;
         dMinValue = tKernelCtDoseMap{dSerieOffset}.dMin;
 
-        if dLowerTreshold < dMinValue
-            dLowerTreshold = dMinValue;
-            set(uiEditKernelLowerTreshold, 'String', num2str(dLowerTreshold));
+        if dLowerThreshold < dMinValue
+            dLowerThreshold = dMinValue;
+            set(uiEditKernelLowerThreshold, 'String', num2str(dLowerThreshold));
         end
 
         dDiff = dMaxValue - dMinValue;
-        dLowerSliderValue = (dLowerTreshold-dMinValue)/dDiff;
+        dLowerSliderValue = (dLowerThreshold-dMinValue)/dDiff;
 
-        set(uiSliderKernelLowerTreshold, 'Value', dLowerSliderValue);
+        set(uiSliderKernelLowerThreshold, 'Value', dLowerSliderValue);
 
         if get(chkUnitTypeKernel, 'Value') == true
-            [~, dCTLevel] = computeWindowMinMax(dUpperTreshold, dLowerTreshold);
-            dLowerTreshold = dCTLevel;
+            [~, dCTLevel] = computeWindowMinMax(dUpperThreshold, dLowerThreshold);
+            dLowerThreshold = dCTLevel;
         end
 
         kernelSegTreshValue('set', 'lower', dLowerSliderValue);
-        kernelSegEditValue('set', 'lower', dLowerTreshold);
+        kernelSegEditValue('set', 'lower', dLowerThreshold);
 
         previewCTdoseMapKernel();
 
@@ -815,21 +815,21 @@ function initKernelPanel()
 
     function editKernelUpperTreshCallback(~, ~)
 
-        dLowerTreshold = str2double(get(uiEditKernelLowerTreshold, 'String'));
+        dLowerThreshold = str2double(get(uiEditKernelLowerThreshold, 'String'));
 
-        dUpperTreshold = str2double(get(uiEditKernelUpperTreshold, 'String'));
-        if isnan(dUpperTreshold)
-            dUpperTreshold = kernelSegEditValue('get', 'upper');
-            set(uiEditKernelUpperTreshold, 'String', num2str(dUpperTreshold));
+        dUpperThreshold = str2double(get(uiEditKernelUpperThreshold, 'String'));
+        if isnan(dUpperThreshold)
+            dUpperThreshold = kernelSegEditValue('get', 'upper');
+            set(uiEditKernelUpperThreshold, 'String', num2str(dUpperThreshold));
         end
 
-        if dUpperTreshold < dLowerTreshold
-            dUpperTreshold = dLowerTreshold;
-            set(uiEditKernelUpperTreshold, 'String', num2str(dUpperTreshold));
+        if dUpperThreshold < dLowerThreshold
+            dUpperThreshold = dLowerThreshold;
+            set(uiEditKernelUpperThreshold, 'String', num2str(dUpperThreshold));
         end
 
         if get(chkUnitTypeKernel, 'Value') == true
-            [dUpperTreshold, ~] = computeWindowLevel(dUpperTreshold, dLowerTreshold);
+            [dUpperThreshold, ~] = computeWindowLevel(dUpperThreshold, dLowerThreshold);
         end
 
         dSerieOffset = get(uiKernelSeries, 'Value');
@@ -839,34 +839,34 @@ function initKernelPanel()
         dMaxValue = tKernelCtDoseMap{dSerieOffset}.dMax;
         dMinValue = tKernelCtDoseMap{dSerieOffset}.dMin;
 
-        if dUpperTreshold > dMaxValue
-            dUpperTreshold = dMaxValue;
-            set(uiEditKernelUpperTreshold, 'String', num2str(dUpperTreshold));
+        if dUpperThreshold > dMaxValue
+            dUpperThreshold = dMaxValue;
+            set(uiEditKernelUpperThreshold, 'String', num2str(dUpperThreshold));
         end
 
         dDiff = dMaxValue - dMinValue;
-        dUpperSliderValue = (dUpperTreshold-dMinValue)/dDiff;
+        dUpperSliderValue = (dUpperThreshold-dMinValue)/dDiff;
 
-        set(uiSliderKernelUpperTreshold, 'Value', dUpperSliderValue);
+        set(uiSliderKernelUpperThreshold, 'Value', dUpperSliderValue);
 
         if get(chkUnitTypeKernel, 'Value') == true
-            [dCTWindow, ~] = computeWindowMinMax(dUpperTreshold, dLowerTreshold);
-            dUpperTreshold = dCTWindow;
+            [dCTWindow, ~] = computeWindowMinMax(dUpperThreshold, dLowerThreshold);
+            dUpperThreshold = dCTWindow;
         end
 
         kernelSegTreshValue('set', 'upper', dUpperSliderValue);
-        kernelSegEditValue('set', 'upper', dUpperTreshold);
+        kernelSegEditValue('set', 'upper', dUpperThreshold);
 
         previewCTdoseMapKernel();
     end
 
     function sliderKernelUpperTreshCallback(~, ~)
 
-        dUpperSliderValue = get(uiSliderKernelUpperTreshold, 'Value');
-        dLowerSliderValue = get(uiSliderKernelLowerTreshold, 'Value');
+        dUpperSliderValue = get(uiSliderKernelUpperThreshold, 'Value');
+        dLowerSliderValue = get(uiSliderKernelLowerThreshold, 'Value');
 
         if dUpperSliderValue < dLowerSliderValue
-            set(uiSliderKernelUpperTreshold, 'Value', dLowerSliderValue);
+            set(uiSliderKernelUpperThreshold, 'Value', dLowerSliderValue);
             dUpperSliderValue = dLowerSliderValue;
         end
 
@@ -890,7 +890,7 @@ function initKernelPanel()
         kernelSegTreshValue('set', 'upper', dUpperSliderValue);
         kernelSegEditValue('set', 'upper', dUpperValue);
 
-        set(uiEditKernelUpperTreshold, 'String', num2str(dUpperValue));
+        set(uiEditKernelUpperThreshold, 'String', num2str(dUpperValue));
 
         previewCTdoseMapKernel();
 
@@ -898,11 +898,11 @@ function initKernelPanel()
 
     function sliderKernelLowerTreshCallback(~, ~)
 
-        dUpperSliderValue = get(uiSliderKernelUpperTreshold, 'Value');
-        dLowerSliderValue = get(uiSliderKernelLowerTreshold, 'Value');
+        dUpperSliderValue = get(uiSliderKernelUpperThreshold, 'Value');
+        dLowerSliderValue = get(uiSliderKernelLowerThreshold, 'Value');
 
         if dLowerSliderValue > dUpperSliderValue
-            set(uiSliderKernelLowerTreshold, 'Value', dUpperSliderValue);
+            set(uiSliderKernelLowerThreshold, 'Value', dUpperSliderValue);
             dLowerSliderValue = dUpperSliderValue;
         end
 
@@ -926,7 +926,7 @@ function initKernelPanel()
         kernelSegTreshValue('set', 'lower', dLowerSliderValue);
         kernelSegEditValue('set', 'lower', dLowerValue);
 
-        set(uiEditKernelLowerTreshold, 'String', num2str(dLowerValue));
+        set(uiEditKernelLowerThreshold, 'String', num2str(dLowerValue));
 
         previewCTdoseMapKernel();
 
@@ -1198,7 +1198,7 @@ function initKernelPanel()
 
         catch
             progressBar(1, 'Error: An error occur during kernel processing!');
-            h = msgbox('Error: doseKernelCallback(): An error occur during kernel processing!', 'Error');
+            msgbox('Error: doseKernelCallback(): An error occur during kernel processing!', 'Error');
 %            if integrateToBrowser('get') == true
 %                sLogo = './TriDFusion/logo.png';
 %            else

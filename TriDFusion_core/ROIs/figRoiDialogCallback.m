@@ -2749,7 +2749,7 @@ function figRoiDialogCallback(hObject, ~)
         if isfield(tQuant, 'tSUV')
             dSUVScale = tQuant.tSUV.dScale;
         else
-            dSUVScale = 0;
+            dSUVScale = 1;
         end
 
         aInput = inputBuffer('get');
@@ -3160,7 +3160,7 @@ function figRoiDialogCallback(hObject, ~)
         if isfield(tQuant, 'tSUV')
             dSUVScale = tQuant.tSUV.dScale;
         else
-            dSUVScale = 0;
+            dSUVScale = 1;
         end
 
         aInput = inputBuffer('get');

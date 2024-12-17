@@ -52,12 +52,18 @@ function extractRadiomicsFromContours(sRadiomicsScript, tReadiomics, bSUVUnit, d
 
     % Validate images
 
-    aInputImages = inputBuffer('get');
-    aImages = aInputImages{dSeriesOffset};
+    aImages = dicomBuffer('get', [], dSeriesOffset);
+
     if isempty(aImages)
-        progressBar(1, 'Error: No images detected!');
-        errordlg('No images detected!', 'Image Validation');  
-        return;
+
+        aInputImages = inputBuffer('get');
+        aImages = aInputImages{dSeriesOffset};
+
+        if isempty(aImages)
+            progressBar(1, 'Error: No images detected!');
+            errordlg('No images detected!', 'Image Validation');
+            return;
+        end
     end
 
     asPatientInfoHeader{1,1} = sprintf('Patient Name');

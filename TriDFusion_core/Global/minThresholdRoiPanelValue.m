@@ -1,16 +1,13 @@
-function uiObject = editKernelVoiRoiLowerTresholdObject(sAction, aValue)
-%function uiObject = editKernelVoiRoiLowerTresholdObject(sAction, aValue)
-%Get\Set Edit Kernel ROI VOI Lower Treshold Object.
+function [bIsPurcentValue, sUnitValue, dValue] = minThresholdRoiPanelValue(sAction, bIsPurcent, sUnit, dSetValue)
+%function [bIsPurcentValue, sUnitValue, dValue] = minThresholdRoiPanelValue(sAction, bIsPurcent, sUnit, dSetValue)
+%Get/Set Segmenation Min Roi Panel Value.
 %See TriDFuison.doc (or pdf) for more information about options.
-%
-%Note: option settings must fit on one line and can contain one semicolon at most.
-%Options can be strings, cell arrays of strings, or numerical arrays.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org
 %
 %Last specifications modified:
 %
-% Copyright 2020, Daniel Lafontaine, on behalf of the TriDFusion development team.
+% Copyright 2021, Daniel Lafontaine, on behalf of the TriDFusion development team.
 % 
 % This file is part of The Triple Dimention Fusion (TriDFusion).
 % 
@@ -30,11 +27,18 @@ function uiObject = editKernelVoiRoiLowerTresholdObject(sAction, aValue)
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-     persistent paObject; 
+    persistent pbIsPurcentValue; 
+    persistent psUnitValue; 
+    persistent pdValue; 
 
-     if strcmpi('set', sAction)
-        paObject = aValue;            
-     end      
-     
-     uiObject = paObject;
+    if strcmpi('set', sAction)
+        pbIsPurcentValue = bIsPurcent; 
+        psUnitValue = sUnit;
+        pdValue = dSetValue;
+    end
+    
+    bIsPurcentValue = pbIsPurcentValue;
+    sUnitValue     = psUnitValue;
+    dValue         = pdValue;
+    
 end

@@ -1,6 +1,6 @@
 function dTreshValue = lungSegTreshValue(sAction, dValue)
 %function dTreshValue = lungSegTreshValue(sAction, dValue)
-%Get/Set Image Segmentation Lung Treshold Value.
+%Get/Set Image Segmentation Lung Threshold Value.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
 %Author: Daniel Lafontaine, lafontad@mskcc.org

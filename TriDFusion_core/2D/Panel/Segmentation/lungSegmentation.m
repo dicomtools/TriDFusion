@@ -1,5 +1,5 @@
-function lungSegmentation(dTreshold, dRadius)    
-%function lungSegmentation(dTreshold, dRadius)  
+function lungSegmentation(dThreshold , dRadius)    
+%function lungSegmentation(dThreshold , dRadius)  
 %Extract the Lung of CT Images.
 %See TriDFuison.doc (or pdf) for more information about options.
 %
@@ -77,9 +77,9 @@ function lungSegmentation(dTreshold, dRadius)
         XY = imSingle(:,:,iAxial);
 
         if dNbMeta == sizeOf(3)
-            BW = XY > dTreshold * tSegmentMetaData{iAxial}.RescaleIntercept; % treshold
+            BW = XY > dThreshold * tSegmentMetaData{iAxial}.RescaleIntercept; % Threshold 
         else
-            BW = XY > dTreshold * tSegmentMetaData{1}.RescaleIntercept; % treshold
+            BW = XY > dThreshold * tSegmentMetaData{1}.RescaleIntercept; % Threshold 
         end
 
         BW = imcomplement(BW);

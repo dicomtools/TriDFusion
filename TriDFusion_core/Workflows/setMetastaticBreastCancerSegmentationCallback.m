@@ -1,5 +1,5 @@
-function setSegmentationMetastaticBreastCancerSegmentationCallback(hObject, ~)
-%function setSegmentationMetastaticBreastCancerSegmentationCallback(hObject)
+function setMetastaticBreastCancerSegmentationCallback(hObject, ~)
+%function setMetastaticBreastCancerSegmentationCallback(hObject)
 %Run Metastatic Breast Cancer Tumor Segmentation, The tool is called from the main menu.
 %See TriDFuison.doc (or pdf) for more information about options.
 %

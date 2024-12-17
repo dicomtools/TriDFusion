@@ -177,7 +177,7 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
             if isfield(tQuant, 'tSUV')
                 dSUVScale = tQuant.tSUV.dScale;
             else
-                dSUVScale = 0;
+                dSUVScale = 1;
             end
 
             if bUseFormula == false
@@ -637,16 +637,16 @@ function maskAddVoiToSeries(imMask, BW, bPixelEdge, bPercentOfPeak, dPercentMaxO
                 if ~isempty(sVOIName)
                     sLabel = sprintf('%s %d', sVOIName, bb);
                 else
-                    bUseBoneTreshold = false;
+                    bUseBoneThreshold = false;
                     if strcmpi(sLesionType, 'Bone') 
                         if exist('dBoneThreshold', 'var')
                             if ~isempty(dBoneThreshold)
-                                bUseBoneTreshold = true;
+                                bUseBoneThreshold = true;
                             end
                         end
                     end
 
-                    if bUseBoneTreshold == true
+                    if bUseBoneThreshold == true
                         sLabel = sprintf('RMAX-%.2f-VOI%d', dBoneThreshold, bb);
                     else
                         sLabel = sprintf('RMAX-%.2f-VOI%d', dPercentMaxOrMaxSUVValue, bb);

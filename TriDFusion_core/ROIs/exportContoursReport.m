@@ -159,7 +159,7 @@ function exportContoursReport(bSUVUnit, bSegmented, bModifiedMatrix, bExpendVoi)
             if isfield(tRoiQuant, 'tSUV')
                 dSUVScale = tRoiQuant.tSUV.dScale;
             else
-                dSUVScale = 0;
+                dSUVScale = 1;
             end
 
             % Count number of elements

@@ -27,9 +27,12 @@ function setImagesAspectRatio()
 % You should have received a copy of the GNU General Public License
 % along with TriDFusion.  If not, see <http://www.gnu.org/licenses/>.
 
-    if size(dicomBuffer('get'), 3) == 1 
+    dSeriesOffset      =  get(uiSeriesPtr('get'), 'Value');
+    dFusedSeriesOffset =  get(uiFusedSeriesPtr('get'), 'Value');
 
-        atMetaData = dicomMetaData('get');         
+    if size(dicomBuffer('get', [], dSeriesOffset), 3) == 1 
+
+        atMetaData = dicomMetaData('get', [], dSeriesOffset);         
 
         if aspectRatio('get') == true      
 
@@ -37,7 +40,7 @@ function setImagesAspectRatio()
             y = computeAspectRatio('y', atMetaData);
             z = 1;
 
-            daspect(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , [x y z]); 
+            daspect(axePtr('get', [], dSeriesOffset) , [x y z]); 
 
             if isFusion('get') == true
 
@@ -45,7 +48,7 @@ function setImagesAspectRatio()
                 yf = fusionAspectRatioValue('get', 'y');
                 zf = fusionAspectRatioValue('get', 'z');
 
-                daspect(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
+                daspect(axefPtr('get', [], dFusedSeriesOffset), [zf yf xf]);
             end
 
             if isPlotContours('get') == true
@@ -54,7 +57,7 @@ function setImagesAspectRatio()
                yf = fusionAspectRatioValue('get', 'y');
                zf = fusionAspectRatioValue('get', 'z');
                
-               daspect(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
+               daspect(axefcPtr('get', [], dFusedSeriesOffset), [zf yf xf]);
             end            
 
         else
@@ -62,8 +65,8 @@ function setImagesAspectRatio()
             y =1;
             z =1;
 
-            daspect(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , [x y z]);  
-            axis(axePtr('get', [], get(uiSeriesPtr('get'), 'Value')) , 'normal');                    
+            daspect(axePtr('get', [], dSeriesOffset) , [x y z]);  
+            axis(axePtr('get', [], dSeriesOffset) , 'normal');                    
 
             if isFusion('get') == true
 
@@ -71,8 +74,8 @@ function setImagesAspectRatio()
                 yf = 1;
                 zf = 1;
 
-                daspect(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
-                axis(axefPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , 'normal');                    
+                daspect(axefPtr('get', [], dFusedSeriesOffset), [zf yf xf]);
+                axis(axefPtr('get', [], dFusedSeriesOffset) , 'normal');                    
             end
 
             if isPlotContours('get') == true
@@ -81,8 +84,8 @@ function setImagesAspectRatio()
                yf = 1;
                zf = 1;
                
-               daspect(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
-               axis(axefcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')) , 'normal');                    
+               daspect(axefcPtr('get', [], dFusedSeriesOffset), [zf yf xf]);
+               axis(axefcPtr('get', [], dFusedSeriesOffset) , 'normal');                    
            end              
         end
 
@@ -119,42 +122,42 @@ function setImagesAspectRatio()
                 z = 1;                      
             end
             
-            daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
-            daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
-            daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);
+            daspect(axes1Ptr('get', [], dSeriesOffset), [z y x]);
+            daspect(axes2Ptr('get', [], dSeriesOffset), [z x y]);
+            daspect(axes3Ptr('get', [], dSeriesOffset), [x y z]);
 
             if isVsplash('get') == false                                    
-                daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);
+                daspect(axesMipPtr('get', [], dSeriesOffset), [z y x]);
             end
                 
 %           if strcmpi(imageOrientation('get'), 'axial') 
 
-%                daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]); 
-%                daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]); 
-%                daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]); 
+%                daspect(axes1Ptr('get', [], dSeriesOffset), [z x y]); 
+%                daspect(axes2Ptr('get', [], dSeriesOffset), [z y x]); 
+%                daspect(axes3Ptr('get', [], dSeriesOffset), [x y z]); 
                 
 %                if isVsplash('get') == false                    
-%                    daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]); 
+%                    daspect(axesMipPtr('get', [], dSeriesOffset), [z x y]); 
 %                end
                
 %            elseif strcmpi(imageOrientation('get'), 'coronal') 
 
-%                daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]); 
-%                daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [y z x]); 
-%                daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);       
+%                daspect(axes1Ptr('get', [], dSeriesOffset), [x y z]); 
+%                daspect(axes2Ptr('get', [], dSeriesOffset), [y z x]); 
+%                daspect(axes3Ptr('get', [], dSeriesOffset), [z x y]);       
                 
 %                if isVsplash('get') == false                                    
-%                    daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);  
+%                    daspect(axesMipPtr('get', [], dSeriesOffset), [x y z]);  
 %                end
                 
 %            elseif strcmpi(imageOrientation('get'), 'sagittal')  
   
-%                daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [y x z]); 
-%                daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x z y]); 
-%                daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]);
+%                daspect(axes1Ptr('get', [], dSeriesOffset), [y x z]); 
+%                daspect(axes2Ptr('get', [], dSeriesOffset), [x z y]); 
+%                daspect(axes3Ptr('get', [], dSeriesOffset), [z x y]);
                 
 %                if isVsplash('get') == false                                    
-%                    daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [x z y]);  
+%                    daspect(axesMipPtr('get', [], dSeriesOffset), [x z y]);  
 %                end
 %           end
 
@@ -164,42 +167,42 @@ function setImagesAspectRatio()
                yf = fusionAspectRatioValue('get', 'y');
                zf = fusionAspectRatioValue('get', 'z');
                
-                daspect(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
-                daspect(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
-                daspect(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf zf]);
+                daspect(axes1fPtr('get', [], dFusedSeriesOffset), [zf yf xf]);
+                daspect(axes2fPtr('get', [], dFusedSeriesOffset), [zf xf yf]);
+                daspect(axes3fPtr('get', [], dFusedSeriesOffset), [xf yf zf]);
 
                 if isVsplash('get') == false                                    
-                    daspect(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
+                    daspect(axesMipfPtr('get', [], dFusedSeriesOffset), [zf yf xf]);
                 end
             
 %               if strcmpi(imageOrientation('get'), 'axial')                    
 
-%                    daspect(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , [zf xf yf]); 
-%                    daspect(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , [zf yf xf]);                         
-%                    daspect(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , [xf yf zf]); 
+%                    daspect(axes1fPtr('get', [], dFusedSeriesOffset)  , [zf xf yf]); 
+%                    daspect(axes2fPtr('get', [], dFusedSeriesOffset)  , [zf yf xf]);                         
+%                    daspect(axes3fPtr('get', [], dFusedSeriesOffset)  , [xf yf zf]); 
                     
 %                    if isVsplash('get') == false                    
-%                        daspect(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]); 
+%                        daspect(axesMipfPtr('get', [], dFusedSeriesOffset), [zf yf xf]); 
 %                    end
                     
 %               elseif strcmpi(imageOrientation('get'), 'coronal') 
 %
-%                    daspect(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf zf]); 
-%                    daspect(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [yf zf xf]); 
-%                    daspect(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]); 
+%                    daspect(axes1fPtr('get', [], dFusedSeriesOffset), [xf yf zf]); 
+%                    daspect(axes2fPtr('get', [], dFusedSeriesOffset), [yf zf xf]); 
+%                    daspect(axes3fPtr('get', [], dFusedSeriesOffset), [zf xf yf]); 
                     
 %                    if isVsplash('get') == false                    
-%                        daspect(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [yf zf xf]);                          
+%                        daspect(axesMipfPtr('get', [], dFusedSeriesOffset), [yf zf xf]);                          
 %                    end
 
 %                elseif strcmpi(imageOrientation('get'), 'sagittal')  
 
-%                    daspect(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [yf xf zf]);                     
-%                    daspect(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf zf yf]); 
-%                    daspect(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);  
+%                    daspect(axes1fPtr('get', [], dFusedSeriesOffset), [yf xf zf]);                     
+%                    daspect(axes2fPtr('get', [], dFusedSeriesOffset), [xf zf yf]); 
+%                    daspect(axes3fPtr('get', [], dFusedSeriesOffset), [zf xf yf]);  
                     
 %                    if isVsplash('get') == false                    
-%                        daspect(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf zf yf]);                                                                                            
+%                        daspect(axesMipfPtr('get', [], dFusedSeriesOffset), [xf zf yf]);                                                                                            
 %                    end
 %               end 
            end
@@ -210,42 +213,42 @@ function setImagesAspectRatio()
                yf = fusionAspectRatioValue('get', 'y');
                zf = fusionAspectRatioValue('get', 'z');
                
-               daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
-               daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);
-               daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf zf]);
+               daspect(axes1fcPtr('get', [], dFusedSeriesOffset), [zf yf xf]);
+               daspect(axes2fcPtr('get', [], dFusedSeriesOffset), [zf xf yf]);
+               daspect(axes3fcPtr('get', [], dFusedSeriesOffset), [xf yf zf]);
 
                if isVsplash('get') == false                                    
-                   daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]);
+                   daspect(axesMipfcPtr('get', [], dFusedSeriesOffset), [zf yf xf]);
                end
                 
 %               if strcmpi(imageOrientation('get'), 'axial')                    
 
-%                    daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , [zf xf yf]); 
-%                    daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , [zf yf xf]);                         
-%                    daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value'))  , [xf yf zf]); 
+%                    daspect(axes1fcPtr('get', [], dFusedSeriesOffset)  , [zf xf yf]); 
+%                    daspect(axes2fcPtr('get', [], dFusedSeriesOffset)  , [zf yf xf]);                         
+%                    daspect(axes3fcPtr('get', [], dFusedSeriesOffset)  , [xf yf zf]); 
                     
 %                    if isVsplash('get') == false                    
-%                        daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf yf xf]); 
+%                        daspect(axesMipfcPtr('get', [], dFusedSeriesOffset), [zf yf xf]); 
 %                    end
                     
 %               elseif strcmpi(imageOrientation('get'), 'coronal') 
 
-%                    daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf yf zf]); 
-%                    daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [yf zf xf]); 
-%                    daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);       
+%                    daspect(axes1fcPtr('get', [], dFusedSeriesOffset), [xf yf zf]); 
+%                    daspect(axes2fcPtr('get', [], dFusedSeriesOffset), [yf zf xf]); 
+%                    daspect(axes3fcPtr('get', [], dFusedSeriesOffset), [zf xf yf]);       
                     
 %                    if isVsplash('get') == false                                        
-%                        daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [yf zf xf]);                          
+%                        daspect(axesMipfcPtr('get', [], dFusedSeriesOffset), [yf zf xf]);                          
 %                    end
 
 %                elseif strcmpi(imageOrientation('get'), 'sagittal')  
 
-%                    daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [yf xf zf]);                     
-%                    daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf zf yf]); 
-%                    daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [zf xf yf]);                                                                        
+%                    daspect(axes1fcPtr('get', [], dFusedSeriesOffset), [yf xf zf]);                     
+%                    daspect(axes2fcPtr('get', [], dFusedSeriesOffset), [xf zf yf]); 
+%                    daspect(axes3fcPtr('get', [], dFusedSeriesOffset), [zf xf yf]);                                                                        
                     
 %                    if isVsplash('get') == false                    
-%                        daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [xf zf yf]);                                                                                            
+%                        daspect(axesMipfcPtr('get', [], dFusedSeriesOffset), [xf zf yf]);                                                                                            
 %                    end
 %               end 
             end           
@@ -255,57 +258,57 @@ function setImagesAspectRatio()
             y =1;
             z =1;            
             
-            daspect(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z x y]); 
-            daspect(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]); 
-            daspect(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), [x y z]);                    
+            daspect(axes1Ptr('get', [], dSeriesOffset), [z x y]); 
+            daspect(axes2Ptr('get', [], dSeriesOffset), [z y x]); 
+            daspect(axes3Ptr('get', [], dSeriesOffset), [x y z]);                    
             
             if isVsplash('get') == false                    
-                daspect(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), [z y x]);                    
+                daspect(axesMipPtr('get', [], dSeriesOffset), [z y x]);                    
             end
 
-            axis(axes1Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');
-            axis(axes2Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');                    
-            axis(axes3Ptr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');   
+            axis(axes1Ptr('get', [], dSeriesOffset), 'normal');
+            axis(axes2Ptr('get', [], dSeriesOffset), 'normal');                    
+            axis(axes3Ptr('get', [], dSeriesOffset), 'normal');   
             
             if isVsplash('get') == false                    
-                axis(axesMipPtr('get', [], get(uiSeriesPtr('get'), 'Value')), 'normal');   
+                axis(axesMipPtr('get', [], dSeriesOffset), 'normal');   
             end
 
             if isFusion('get') ==true
                 
-                daspect(axes1fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z x y]); 
-                daspect(axes2fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z y x]); 
-                daspect(axes3fPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [x y z]);                    
+                daspect(axes1fPtr('get', [], dFusedSeriesOffset), [z x y]); 
+                daspect(axes2fPtr('get', [], dFusedSeriesOffset), [z y x]); 
+                daspect(axes3fPtr('get', [], dFusedSeriesOffset), [x y z]);                    
                 
                 if isVsplash('get') == false                    
-                    daspect(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z y x]);                    
+                    daspect(axesMipfPtr('get', [], dFusedSeriesOffset), [z y x]);                    
                 end
 
-                axis(axes1fPtr  ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');
-                axis(axes2fPtr  ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');                    
-                axis(axes3fPtr  ('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');                        
+                axis(axes1fPtr  ('get', [], dFusedSeriesOffset), 'normal');
+                axis(axes2fPtr  ('get', [], dFusedSeriesOffset), 'normal');                    
+                axis(axes3fPtr  ('get', [], dFusedSeriesOffset), 'normal');                        
                 
                 if isVsplash('get') == false                    
-                    axis(axesMipfPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');                        
+                    axis(axesMipfPtr('get', [], dFusedSeriesOffset), 'normal');                        
                 end
             end
             
             if isPlotContours('get') == true
                 
-                daspect(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z x y]); 
-                daspect(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z y x]); 
-                daspect(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [x y z]); 
+                daspect(axes1fcPtr('get', [], dFusedSeriesOffset), [z x y]); 
+                daspect(axes2fcPtr('get', [], dFusedSeriesOffset), [z y x]); 
+                daspect(axes3fcPtr('get', [], dFusedSeriesOffset), [x y z]); 
                 
                 if isVsplash('get') == false                    
-                    daspect(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), [z y x]);                    
+                    daspect(axesMipfcPtr('get', [], dFusedSeriesOffset), [z y x]);                    
                 end
 
-                axis(axes1fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');
-                axis(axes2fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');                    
-                axis(axes3fcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');                        
+                axis(axes1fcPtr('get', [], dFusedSeriesOffset), 'normal');
+                axis(axes2fcPtr('get', [], dFusedSeriesOffset), 'normal');                    
+                axis(axes3fcPtr('get', [], dFusedSeriesOffset), 'normal');                        
                 
                 if isVsplash('get') == false                    
-                    axis(axesMipfcPtr('get', [], get(uiFusedSeriesPtr('get'), 'Value')), 'normal');                        
+                    axis(axesMipfcPtr('get', [], dFusedSeriesOffset), 'normal');                        
                 end
             end            
             
